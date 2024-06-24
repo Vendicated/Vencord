@@ -17,7 +17,6 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { User } from "discord-types/general";
 import { ComponentType, HTMLProps } from "react";
 
 import Plugins from "~plugins";
@@ -36,7 +35,7 @@ export interface ProfileBadge {
     image?: string;
     link?: string;
     /** Action to perform when you click the badge */
-    onClick?(): void;
+    onClick?(event: React.MouseEvent<HTMLButtonElement, MouseEvent>, props: BadgeUserArgs): void;
     /** Should the user display this badge? */
     shouldShow?(userInfo: BadgeUserArgs): boolean;
     /** Optional props (e.g. style) for the badge, ignored for component badges */
@@ -79,17 +78,15 @@ export function _getBadges(args: BadgeUserArgs) {
                 : badges.push({ ...badge, ...args });
         }
     }
-    const donorBadges = (Plugins.BadgeAPI as unknown as typeof import("../plugins/_api/badges").default).getDonorBadges(args.user.id);
+    const donorBadges = (Plugins.BadgeAPI as unknown as typeof import("../plugins/_api/badges").default).getDonorBadges(args.userId);
     if (donorBadges) badges.unshift(...donorBadges);
 
     return badges;
 }
 
 export interface BadgeUserArgs {
-    user: User;
-    profile: Profile;
-    premiumSince: Date;
-    premiumGuildSince?: Date;
+    userId: string;
+    guildId: string;
 }
 
 interface ConnectedAccount {

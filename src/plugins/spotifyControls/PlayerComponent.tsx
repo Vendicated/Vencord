@@ -18,7 +18,6 @@
 
 import "./spotifyStyles.css";
 
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { debounce } from "@shared/debounce";
@@ -376,17 +375,10 @@ export function Player() {
     } as React.CSSProperties;
 
     return (
-        <ErrorBoundary fallback={() => (
-            <div className="vc-spotify-fallback">
-                <p>Failed to render Spotify Modal :(</p>
-                <p >Check the console for errors</p>
-            </div>
-        )}>
-            <div id={cl("player")} style={exportTrackImageStyle}>
-                <Info track={track} />
-                <SeekBar />
-                <Controls />
-            </div>
-        </ErrorBoundary>
+        <div id={cl("player")} style={exportTrackImageStyle}>
+            <Info track={track} />
+            <SeekBar />
+            <Controls />
+        </div>
     );
 }

@@ -19,8 +19,8 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { FluxDispatcher, i18n } from "@webpack/common";
+import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
+import { FluxDispatcher, i18n, useMemo } from "@webpack/common";
 
 import FolderSideBar from "./FolderSideBar";
 
@@ -30,7 +30,7 @@ enum FolderIconDisplay {
     MoreThanOneFolderExpanded
 }
 
-const { GuildsTree } = findByPropsLazy("GuildsTree");
+const GuildsTree = findLazy(m => m.prototype?.moveNextTo);
 const SortedGuildStore = findStoreLazy("SortedGuildStore");
 export const ExpandedGuildFolderStore = findStoreLazy("ExpandedGuildFolderStore");
 const FolderUtils = findByPropsLazy("move", "toggleGuildFolderExpand");
@@ -112,13 +112,13 @@ export default definePlugin({
             replacement: [
                 // Create the isBetterFolders variable in the GuildsBar component
                 {
-                    match: /(?<=let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?)(?=}=\i,)/,
-                    replace: ",isBetterFolders"
+                    match: /let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i,)/,
+                    replace: "$&,isBetterFolders"
                 },
                 // If we are rendering the Better Folders sidebar, we filter out guilds that are not in folders and unexpanded folders
                 {
-                    match: /(useStateFromStoresArray\).{0,25}let \i)=(\i\.\i.getGuildsTree\(\))/,
-                    replace: (_, rest, guildsTree) => `${rest}=$self.getGuildTree(!!arguments[0].isBetterFolders,${guildsTree},arguments[0].betterFoldersExpandedIds)`
+                    match: /\[(\i)\]=(\(0,\i\.\i\).{0,40}getGuildsTree\(\).+?}\))(?=,)/,
+                    replace: (_, originalTreeVar, rest) => `[betterFoldersOriginalTree]=${rest},${originalTreeVar}=$self.getGuildTree(!!arguments[0].isBetterFolders,betterFoldersOriginalTree,arguments[0].betterFoldersExpandedIds)`
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the servers and folders from the GuildsBar Guild List children
                 {
@@ -127,7 +127,7 @@ export default definePlugin({
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the scroller for the guild list from the GuildsBar Tree children
                 {
-                    match: /unreadMentionsIndicatorBottom,barClassName.+?}\)\]/,
+                    match: /unreadMentionsIndicatorBottom,.+?}\)\]/,
                     replace: "$&.filter($self.makeGuildsBarTreeFilter(!!arguments[0].isBetterFolders))"
                 },
                 // Export the isBetterFolders variable to the folders component
@@ -139,13 +139,13 @@ export default definePlugin({
         },
         {
             // This is the parent folder component
-            find: ".MAX_GUILD_FOLDER_NAME_LENGTH,",
+            find: ".toggleGuildFolderExpand(",
             predicate: () => settings.store.sidebar && settings.store.showFolderIcon !== FolderIconDisplay.Always,
             replacement: [
                 {
                     // Modify the expanded state to instead return the list of expanded folders
-                    match: /(useStateFromStores\).{0,20}=>)(\i\.\i)\.isFolderExpanded\(\i\)/,
-                    replace: (_, rest, ExpandedGuildFolderStore) => `${rest}${ExpandedGuildFolderStore}.getExpandedFolders()`,
+                    match: /(\],\(\)=>)(\i\.\i)\.isFolderExpanded\(\i\)\)/,
+                    replace: (_, rest, ExpandedGuildFolderStore) => `${rest}${ExpandedGuildFolderStore}.getExpandedFolders())`,
                 },
                 {
                     // Modify the expanded prop to use the boolean if the above patch fails, or check if the folder is expanded from the list if it succeeds
@@ -196,7 +196,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "APPLICATION_LIBRARY,render",
+            find: "APPLICATION_LIBRARY,render:",
             predicate: () => settings.store.sidebar,
             replacement: {
                 // Render the Better Folders sidebar
@@ -209,7 +209,7 @@ export default definePlugin({
             predicate: () => settings.store.closeAllHomeButton,
             replacement: {
                 // Close all folders when clicking the home button
-                match: /(?<=onClick:\(\)=>{)(?=.{0,200}"discodo")/,
+                match: /(?<=onClick:\(\)=>{)(?=.{0,300}"discodo")/,
                 replace: "$self.closeFolders();"
             }
         }
@@ -252,19 +252,21 @@ export default definePlugin({
         }
     },
 
-    getGuildTree(isBetterFolders: boolean, oldTree: any, expandedFolderIds?: Set<any>) {
-        if (!isBetterFolders || expandedFolderIds == null) return oldTree;
+    getGuildTree(isBetterFolders: boolean, originalTree: any, expandedFolderIds?: Set<any>) {
+        return useMemo(() => {
+            if (!isBetterFolders || expandedFolderIds == null) return originalTree;
 
-        const newTree = new GuildsTree();
-        // Children is every folder and guild which is not in a folder, this filters out only the expanded folders
-        newTree.root.children = oldTree.root.children.filter(guildOrFolder => expandedFolderIds.has(guildOrFolder.id));
-        // Nodes is every folder and guild, even if it's in a folder, this filters out only the expanded folders and guilds inside them
-        newTree.nodes = Object.fromEntries(
-            Object.entries(oldTree.nodes)
-                .filter(([_, guildOrFolder]: any[]) => expandedFolderIds.has(guildOrFolder.id) || expandedFolderIds.has(guildOrFolder.parentId))
-        );
+            const newTree = new GuildsTree();
+            // Children is every folder and guild which is not in a folder, this filters out only the expanded folders
+            newTree.root.children = originalTree.root.children.filter(guildOrFolder => expandedFolderIds.has(guildOrFolder.id));
+            // Nodes is every folder and guild, even if it's in a folder, this filters out only the expanded folders and guilds inside them
+            newTree.nodes = Object.fromEntries(
+                Object.entries(originalTree.nodes)
+                    .filter(([_, guildOrFolder]: any[]) => expandedFolderIds.has(guildOrFolder.id) || expandedFolderIds.has(guildOrFolder.parentId))
+            );
 
-        return newTree;
+            return newTree;
+        }, [isBetterFolders, originalTree, expandedFolderIds]);
     },
 
     makeGuildsBarGuildListFilter(isBetterFolders: boolean) {
@@ -279,7 +281,7 @@ export default definePlugin({
     makeGuildsBarTreeFilter(isBetterFolders: boolean) {
         return child => {
             if (isBetterFolders) {
-                return "onScroll" in child.props;
+                return child?.props?.onScroll != null;
             }
             return true;
         };
