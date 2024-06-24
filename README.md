@@ -21,7 +21,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 -   Request for plugins from Discord.
 
 <details>
-<summary>Extra included plugins (58 additional plugins)</summary>
+<summary>Extra included plugins (61 additional plugins)</summary>
 
 - AllCallTimers by MaxHerbold and D3SOX
 - AltKrispSwitch by newwares
@@ -33,10 +33,12 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - CleanChannelName by AutumnVN
 - CopyUserMention by Cortex and castdrian
 - CustomAppIcons by Happy Enderman and SerStars
+- DiscordColorways by DaBluLite
 - DNDWhilePlaying by thororen
 - DoNotLeak by Perny
 - DoubleCounterBypass by nyx
 - EmojiDumper by Cortex, Samwich, Woosh
+- Encryptcord by Inbestigator
 - EquicordCSS by FoxStorm1 and thororen (and all respective css developers)
 - ExportContacts by dat_insanity
 - FindReply by newwares
@@ -68,6 +70,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - Search by JacobTm and thororen
 - SearchFix by Jaxx
 - Sekai Stickers by MaiKokain
+- ServerSearch by camila314
 - ShowBadgesInChat by Inbestigator and KrystalSkull
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo, thororen
