@@ -6,6 +6,7 @@
 
 import { DataStore } from "@api/index";
 import { insertTextIntoChatInputBox } from "@utils/discord";
+import { useAwaiter } from "@utils/react";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher } from "@webpack/common";
 import { Message } from "discord-types/general";
@@ -20,8 +21,8 @@ export interface Author {
     messageIds: string[];
     member: Member;
     system: System;
-    guildSettings?: Map<string, MemberGuildSettings>;
-    systemSettings?: Map<string, SystemGuildSettings>;
+    guildSettings: Map<string, MemberGuildSettings>;
+    systemSettings: Map<string, SystemGuildSettings>;
 }
 
 export function isPk(msg: Message) {
@@ -51,14 +52,13 @@ export function replyToMessage(msg: Message, mention: boolean, hideMention: bool
 }
 
 export function deleteMessage(msg: Message) {
-    ReactionManager.addReaction(
-        msg.channel_id,
-        msg.id,
+    msg.addReaction(
         {
             id: undefined,
             name: "❌",
             animated: false
-        }
+        },
+        true
     );
 }
 
@@ -67,30 +67,30 @@ export function generateAuthorData(message: Message) {
 }
 
 export function getAuthorOfMessage(message: Message, pk: PKAPI) {
-    if (authors[generateAuthorData(message)]) {
-        authors[generateAuthorData(message)].messageIds.push(message.id);
-        return authors[generateAuthorData(message)];
+    const authorData = generateAuthorData(message);
+    let author: Author = authors[authorData]??undefined;
+
+    if (author) {
+        author.messageIds.push(message.id);
+        authors[authorData] = author;
+        DataStore.set(DATASTORE_KEY, authors);
+        return author;
     }
 
     pk.getMessage({ message: message.id }).then(msg => {
-        if (!(msg.member instanceof Member)) {
-            pk.getMember({ member: msg.member??"n/a" }).then(m => {
-                authors[generateAuthorData(message)] = ({ messageIds: [msg.id], member: m, system: msg.system as System });
-                authors[generateAuthorData(message)].member.getGuildSettings(ChannelStore.getChannel(msg.channel).guild_id).then(guildSettings => {
-                    authors[generateAuthorData(message)].guildSettings?.set(ChannelStore.getChannel(msg.channel).guild_id, guildSettings);
-                });
-            });
-            if (msg.system instanceof System) {
-                msg.system.getGuildSettings(ChannelStore.getChannel(msg.channel).guild_id).then(guildSettings => {
-                    authors[generateAuthorData(message)].systemSettings?.set(ChannelStore.getChannel(msg.channel).guild_id, guildSettings);
-                });
-            }
-        }
-        const mem = msg.member as Member;
-        // @ts-ignore
-        authors[generateAuthorData(message)] = ({ messageIds: [msg.id], member: mem, system: msg.system as System });
+        author = ({ messageIds: [msg.id], member: msg.member as Member, system: msg.system as System, systemSettings: new Map(), guildSettings: new Map() });
+        author.member.getGuildSettings(ChannelStore.getChannel(msg.channel).guild_id).then(guildSettings => {
+            author.guildSettings?.set(ChannelStore.getChannel(msg.channel).guild_id, guildSettings);
+        });
+
+        author.system.getGuildSettings(ChannelStore.getChannel(msg.channel).guild_id).then(guildSettings => {
+            author.systemSettings?.set(ChannelStore.getChannel(msg.channel).guild_id, guildSettings);
+        });
+
+        authors[authorData] = author;
+        DataStore.set(DATASTORE_KEY, authors);
     });
 
-    DataStore.set(DATASTORE_KEY, authors);
-    return authors[generateAuthorData(message)];
+    return authors[authorData];
 }
+

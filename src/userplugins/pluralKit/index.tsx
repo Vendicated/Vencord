@@ -62,7 +62,9 @@ const settings = definePluginSettings({
                     localSystem.push({
                         messageIds: [],
                         member,
-                        system
+                        system,
+                        guildSettings: new Map(),
+                        systemSettings: new Map()
                     });
                 });
 
@@ -149,35 +151,38 @@ export default definePlugin({
         const prefix = isRepliedMessage && withMentionPrefix ? "@" : "";
         try {
             const discordUsername = author.nick??author.displayName??author.username;
-            if (!isPk(message))
+            if (!isPk(message)) {
+                console.log("not pk", message.id);
                 return <>{prefix}{discordUsername}</>;
-
-            const authorOfMessage = getAuthorOfMessage(message, pluralKit.api);
-            let color: string = "666666";
-
-            if (authorOfMessage?.member && settings.store.colorNames) {
-                color = authorOfMessage.member.color??color;
             }
-            const member: Member = authorOfMessage?.member as Member;
-            const memberSettings = authorOfMessage?.guildSettings?.get(ChannelStore.getChannel(message.channel_id).guild_id);
-            const systemSettings = authorOfMessage?.systemSettings?.get(ChannelStore.getChannel(message.channel_id).guild_id);
+
+
+            let color: string = "666666";
+            const pkAuthor = getAuthorOfMessage(message, pluralKit.api);
+
+            if (pkAuthor.member && settings.store.colorNames) {
+                color = pkAuthor.member.color??color;
+            }
+            const member: Member = pkAuthor.member as Member;
+            const memberSettings = pkAuthor.guildSettings?.get(ChannelStore.getChannel(message.channel_id).guild_id);
+            const systemSettings = pkAuthor.systemSettings?.get(ChannelStore.getChannel(message.channel_id).guild_id);
 
             const name = memberSettings?.display_name??member.display_name??member.name;
             const { pronouns } = member;
-            const tag = (systemSettings&&systemSettings.tag)?systemSettings.tag:authorOfMessage.system.tag;
+            const tag = (systemSettings&&systemSettings.tag)?systemSettings.tag:pkAuthor.system.tag;
 
-            const result = settings.store.display
+            const resultText = settings.store.display
                 .replace("{name}", name)
                 .replace("{pronouns}", pronouns??"")
                 .replace("{tag}", tag??"")
                 .replace("{memberid}", member.id)
-                .replace("{systemid}", authorOfMessage.system.id)
-                .replace("{systemname}", authorOfMessage.system.name??"");
+                .replace("{systemid}", pkAuthor.system.id)
+                .replace("{systemname}", pkAuthor.system.name??"");
 
 
             return <span style={{
                 color: `#${color}`,
-            }}>{result}</span>;
+            }}>{resultText}</span>;
         } catch {
             return <>{prefix}{author?.nick}</>;
         }
@@ -189,6 +194,8 @@ export default definePlugin({
 
     async start() {
         await loadAuthors();
+
+        console.log("wasd", settings.store.data);
 
         addButton("pk-edit", msg => {
             if (!msg) return null;
