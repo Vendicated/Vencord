@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
@@ -45,22 +46,22 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".Messages.USER_PROFILE_MODAL", // Note: the module is lazy-loaded
+            find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Note: the module is lazy-loaded
             replacement: {
                 match: /(?<=\.tabBarItem.{0,50}MUTUAL_GUILDS.+?}\),)(?=.+?(\(0,\i\.jsxs?\)\(.{0,100}id:))/,
                 replace: '(arguments[0].user.bot||arguments[0].isCurrentUser)?null:$1"MUTUAL_GDMS",children:"Mutual Groups"}),'
             }
         },
         {
-            find: ".UserProfileSections.USER_INFO_CONNECTIONS:",
+            find: ".USER_INFO_CONNECTIONS:case",
             replacement: {
                 match: /(?<={user:(\i),onClose:(\i)}\);)(?=case \i\.\i\.MUTUAL_FRIENDS)/,
-                replace: "case \"MUTUAL_GDMS\":return $self.renderMutualGDMs($1,$2);"
+                replace: "case \"MUTUAL_GDMS\":return $self.renderMutualGDMs({user: $1, onClose: $2});"
             }
         }
     ],
 
-    renderMutualGDMs(user: User, onClose: () => void) {
+    renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: User, onClose: () => void; }) => {
         const entries = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).map(c => (
             <Clickable
                 className={ProfileListClasses.listRow}
@@ -99,5 +100,5 @@ export default definePlugin({
                 }
             </ScrollerThin>
         );
-    }
+    })
 });

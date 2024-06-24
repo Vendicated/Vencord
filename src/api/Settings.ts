@@ -20,7 +20,7 @@ import { debounce } from "@shared/debounce";
 import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
 import { localStorage } from "@utils/localStorage";
 import { Logger } from "@utils/Logger";
-import { mergeDefaults } from "@utils/misc";
+import { mergeDefaults } from "@utils/mergeDefaults";
 import { putCloudSettings } from "@utils/settingsSync";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React } from "@webpack/common";
@@ -29,7 +29,6 @@ import plugins from "~plugins";
 
 const logger = new Logger("Settings");
 export interface Settings {
-    notifyAboutUpdates: boolean;
     autoUpdate: boolean;
     autoUpdateNotification: boolean,
     useQuickCss: boolean;
@@ -78,8 +77,7 @@ export interface Settings {
 }
 
 const DefaultSettings: Settings = {
-    notifyAboutUpdates: true,
-    autoUpdate: false,
+    autoUpdate: true,
     autoUpdateNotification: true,
     useQuickCss: true,
     themeLinks: [],
@@ -108,7 +106,7 @@ const DefaultSettings: Settings = {
     }
 };
 
-const settings = VencordNative.settings.get();
+const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;
 mergeDefaults(settings, DefaultSettings);
 
 const saveSettingsOnFrequentAction = debounce(async () => {
@@ -131,7 +129,7 @@ export const SettingsStore = new SettingsStoreClass(settings, {
 
         if (path === "plugins" && key in plugins)
             return target[key] = {
-                enabled: plugins[key].required ?? plugins[key].enabledByDefault ?? false
+                enabled: IS_REPORTER ?? plugins[key].required ?? plugins[key].enabledByDefault ?? false
             };
 
         // Since the property is not set, check if this is a plugin's setting and if so, try to resolve
@@ -158,12 +156,14 @@ export const SettingsStore = new SettingsStoreClass(settings, {
     }
 });
 
-SettingsStore.addGlobalChangeListener((_, path) => {
-    SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
-    localStorage.Vencord_settingsDirty = true;
-    saveSettingsOnFrequentAction();
-    VencordNative.settings.set(SettingsStore.plain, path);
-});
+if (!IS_REPORTER) {
+    SettingsStore.addGlobalChangeListener((_, path) => {
+        SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
+        localStorage.Vencord_settingsDirty = true;
+        saveSettingsOnFrequentAction();
+        VencordNative.settings.set(SettingsStore.plain, path);
+    });
+}
 
 /**
  * Same as {@link Settings} but unproxied. You should treat this as readonly,
