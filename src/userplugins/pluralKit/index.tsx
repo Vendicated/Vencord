@@ -21,6 +21,7 @@ import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { DeleteIcon } from "@components/Icons";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
+import { findByCode } from "@webpack";
 import {
     Button,
     ChannelStore,
@@ -32,16 +33,7 @@ import { Message, User } from "discord-types/general";
 import { Member, PKAPI } from "pkapi.js";
 
 import pluralKit from "./index";
-import {
-    Author,
-    deleteMessage,
-    getAuthorOfMessage,
-    isOwnPkMessage,
-    isPk,
-    loadAuthors
-} from "./utils";
-
-
+import { Author, deleteMessage, getAuthorOfMessage, isOwnPkMessage, isPk, loadAuthors } from "./utils";
 
 const EditIcon = () => {
     return <svg role={"img"} width={"16"} height={"16"} fill={"none"} viewBox={"0 0 24 24"}>
