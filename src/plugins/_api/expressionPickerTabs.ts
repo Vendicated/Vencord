@@ -22,7 +22,7 @@ export default definePlugin({
                 },
                 {
                     match: /null,(\i)===\i\.\i\.EMOJI\?.{0,55}channel:(\i),.+?\):null/,
-                    replace: "$&,...Vencord.Api.Tablist.RenderButtons($1, $2, $3)"
+                    replace: "$&,...Vencord.Api.ExpressionPickerTabs.TabPanels($1, $2)"
                 }
             ]
         }
