@@ -40,9 +40,8 @@ export default definePlugin({
             },
         })),
         {
-            find: "\"Message Username\"",
+            find: '"Message Username"',
             replacement: {
-                // thanks https://github.com/Syncxv/vc-timezones/pull/4
                 match: /(?<=isVisibleOnlyOnHover.+?)id:.{1,11},timestamp.{1,50}}\),/,
                 replace: "$&,$self.renderMessageTimezone(arguments[0]),",
             },
@@ -60,7 +59,7 @@ export default definePlugin({
 
     renderMessageTimezone: (props?: { message?: Message; }) => {
         if (!settings.store.displayInChat || !props?.message) return null;
-        if (UserStore.getCurrentUser().id === props?.message?.id) return null;
+        if (UserStore.getCurrentUser().id === props.message.author.id) return null;
 
         return <LocalTimestamp
             userId={props.message.author.id}
