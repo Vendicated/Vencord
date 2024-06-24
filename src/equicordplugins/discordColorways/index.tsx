@@ -165,7 +165,7 @@ export default definePlugin({
         {
             find: "this.renderArtisanalHack()",
             replacement: {
-                match: /createPromise:\(\)=>([^:}]*?),webpackId:"\d+",name:(?!="CollectiblesShop")"[^"]+"/g,
+                match: /createPromise:\(\)=>([^:}]*?),webpackId:"?\d+"?,name:(?!="CollectiblesShop")"[^"]+"/g,
                 replace: "$&,_:$1",
                 predicate: () => true
             }
@@ -174,8 +174,8 @@ export default definePlugin({
         {
             find: "Messages.USER_SETTINGS_WITH_BUILD_OVERRIDE.format",
             replacement: {
-                match: /(?<=(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?openContextMenuLazy.{0,100}?(await Promise\.all[^};]*?\)\)).*?,)(?=\1\(this)/,
-                replace: "(async ()=>$2)(),"
+                match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?null!=\i&&.{0,100}?(await Promise\.all[^};]*?\)\)).*?,(?=\1\(this)/,
+                replace: "$&(async ()=>$2)(),"
             },
             predicate: () => true
         },
@@ -196,8 +196,8 @@ export default definePlugin({
         {
             find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
             replacement: {
-                match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.UserSettingsSections\).*?(\i)\.default\.open\()/,
-                replace: "$2.default.open($1);return;"
+                match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.\i\).*?(\i\.\i)\.open\()/,
+                replace: "$2.open($1);return;"
             }
         }
     ],
