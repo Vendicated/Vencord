@@ -2,7 +2,7 @@
 
 Makes username colors in chat unique, like in IRC clients
 
-<!-- ![Chat with IrcColors and Compact++ enabled]() -->
+![Chat with IrcColors and Compact++ enabled](https://github.com/Vendicated/Vencord/assets/33988779/88e05c0b-a60a-4d10-949e-8b46e1d7226c)
 
 Improves chat readability by assigning every user an unique nickname color,
 making distinguishing between different users easier. Inspired by the feature
