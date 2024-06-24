@@ -13,9 +13,11 @@ import { Flex, Menu } from "@webpack/common";
 const DefaultEngines = {
     Google: "https://www.google.com/search?q=",
     DuckDuckGo: "https://duckduckgo.com/",
+    Brave: "https://search.brave.com/search?q=",
     Bing: "https://www.bing.com/search?q=",
     Yahoo: "https://search.yahoo.com/search?p=",
     GitHub: "https://github.com/search?q=",
+    Reddit: "https://www.reddit.com/search?q=",
     Kagi: "https://kagi.com/search?q=",
     Yandex: "https://yandex.com/search/?text=",
     AOL: "https://search.aol.com/aol/search?q=",
