@@ -6,6 +6,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 import { LocalTimestamp } from "./components";
@@ -30,23 +31,6 @@ export default definePlugin({
     ],
 
     patches: [
-        // {
-        //     find: "copyMetaData:\"User Tag\"",
-        //     replacement: {
-        //         match: /return(\(0.+?}\)}\)]}\))}/,
-        //         replace: "return [$1, $self.getProfileTimezonesComponent(arguments[0])] }",
-        //     },
-        // },
-        // {
-        //     // TODO: fix this
-        //     // thank you https://github.com/Syncxv/vc-timezones/blob/master/index.tsx for saving me from painful work
-        //     find: ".badgesContainer,{",
-        //     replacement: {
-        //         match: /id:\(0,\i\.getMessageTimestampId\)\(\i\),timestamp.{1,50}}\),/,
-        //         replace: "$&,$self.getTimezonesComponent(arguments[0]),",
-        //     },
-        // },
-
         // Based on Syncxv's vc-timezones user plugin //
         ...[".NITRO_BANNER,", "=!1,canUsePremiumCustomization:"].map(find => ({
             find,
@@ -76,6 +60,7 @@ export default definePlugin({
 
     renderMessageTimezone: (props?: { message?: Message; }) => {
         if (!settings.store.displayInChat || !props?.message) return null;
+        if (UserStore.getCurrentUser().id === props?.message?.id) return null;
 
         return <LocalTimestamp
             userId={props.message.author.id}

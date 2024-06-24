@@ -58,14 +58,16 @@ function LocalTimestampInner(props: LocalTimestampProps): JSX.Element | null {
 
     const longTime = formatTimestamp(timezone, timestamp, true);
     const shortTime = formatTimestamp(timezone, timestamp, false);
+
+    if (props.type === "message" && !shortTime)
+        return null;
+
     const shortTimeFormatted = props.type === "message"
         ? `• ${shortTime}`
-        : shortTime;
-
+        : shortTime ?? "Error";
     const classes = props.type === "message"
         ? `timezone-message-item ${messageClasses.timestamp}`
         : "timezone-profile-item";
-
 
     return <>
         <Tooltip
@@ -76,6 +78,7 @@ function LocalTimestampInner(props: LocalTimestampProps): JSX.Element | null {
             spacing={8}
             hideOnClick={true}
             tooltipClassName="timezone-tooltip"
+            hide={!longTime}
             text={longTime}
         >
             {toolTipProps => <>
