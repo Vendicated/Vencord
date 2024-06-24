@@ -17,7 +17,17 @@
 */
 
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { definePluginSettings } from "@api/Settings";
+import definePlugin, { OptionType } from "@utils/types";
+
+const settings = definePluginSettings({
+    lightness: {
+        description: "Lightness, in %. Change if the colors are too light or too dark.",
+        restartNeeded: true,
+        type: OptionType.NUMBER,
+        default: 70,
+    },
+});
 
 export default definePlugin({
     name: "IrcColors",
@@ -32,6 +42,7 @@ export default definePlugin({
             },
         },
     ],
+    settings,
     // Calculate a CSS color string based on the user ID
     calculateNameColorForContext(context: any) {
         return this.calculateNameColorForUser(BigInt(context.message.author.id));
@@ -58,6 +69,6 @@ export default definePlugin({
         }
         const idHash = hash(idBuffer);
 
-        return `hsl(${idHash % 360n}, 100%, 70%)`;
+        return `hsl(${idHash % 360n}, 100%, ${settings.store.lightness}%)`;
     },
 });
