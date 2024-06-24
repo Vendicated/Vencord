@@ -46,6 +46,11 @@ export const enum TabItem {
     SUBMIT_THEMES,
 }
 
+export interface LikesComponentProps {
+    theme: Theme;
+    userId: User["id"];
+}
+
 export const enum SearchStatus {
     ALL,
     ENABLED,
@@ -54,4 +59,14 @@ export const enum SearchStatus {
     SNIPPET,
     DARK,
     LIGHT,
+    LIKED,
 }
+
+export type ThemeLikeProps = {
+    status: number;
+    likes: [{
+        _id?: string;
+        themeId: number;
+        userIds: User["id"][];
+    }];
+};

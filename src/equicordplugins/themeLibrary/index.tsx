@@ -10,11 +10,17 @@ import definePlugin, { OptionType } from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
 const settings = definePluginSettings({
+    hideWarningCard: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Hide the warning card displayed at the top of the theme library tab",
+        restartNeeded: false,
+    },
     domain: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Use Github instead of the default domain for themes",
-        restartNeeded: false
+        restartNeeded: false,
     },
 });
 
@@ -26,19 +32,21 @@ export default definePlugin({
     toolboxActions: {
         "Open Theme Library": () => {
             SettingsRouter.open("ThemeLibrary");
-        }
+        },
     },
 
     start() {
         const customSettingsSections = (
-            Vencord.Plugins.plugins.Settings as any as { customSections: ((ID: Record<string, unknown>) => any)[]; }
+            Vencord.Plugins.plugins.Settings as any as {
+                customSections: ((ID: Record<string, unknown>) => any)[];
+            }
         ).customSections;
 
         const ThemeSection = () => ({
             section: "ThemeLibrary",
             label: "Theme Library",
             element: require("./components/ThemeTab").default,
-            id: "ThemeSection"
+            id: "ThemeSection",
         });
 
         customSettingsSections.push(ThemeSection);
@@ -46,10 +54,14 @@ export default definePlugin({
 
     stop() {
         const customSettingsSections = (
-            Vencord.Plugins.plugins.Settings as any as { customSections: ((ID: Record<string, unknown>) => any)[]; }
+            Vencord.Plugins.plugins.Settings as any as {
+                customSections: ((ID: Record<string, unknown>) => any)[];
+            }
         ).customSections;
 
-        const i = customSettingsSections.findIndex(section => section({}).id === "ThemeSection");
+        const i = customSettingsSections.findIndex(
+            section => section({}).id === "ThemeSection"
+        );
 
         if (i !== -1) customSettingsSections.splice(i, 1);
     },

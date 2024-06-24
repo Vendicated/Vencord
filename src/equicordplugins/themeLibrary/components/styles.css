@@ -1,5 +1,10 @@
-/* stylelint-disable property-no-vendor-prefix */
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
 [data-tab-id="ThemeLibrary"]::before {
+    /* stylelint-disable-next-line property-no-vendor-prefix */
     -webkit-mask: var(--si-widget) center/contain no-repeat !important;
     mask: var(--si-widget) center/contain no-repeat !important;
 }
@@ -51,4 +56,10 @@
     padding: 0.5em;
     border: 2px solid var(--background-tertiary);
     max-height: unset;
+}
+
+.vce-likes-icon {
+    overflow: visible;
+    margin-right: 0.5rem;
+    transition: fill 0.3s ease;
 }
