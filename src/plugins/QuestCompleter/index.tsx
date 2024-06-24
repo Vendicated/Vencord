@@ -92,17 +92,14 @@ export default definePlugin({
         {
             find: "\"invite-button\"",
             replacement: {
-                match: /Fragment,{children:(\w{2})}/,
-                replace: "Fragment,{children:$self.toolbarPatch($1)}"
+                match: /\(0,(\w{1})\.(\w{3})\)\((\w{1})\.Fragment,{children:(\w{2})}/,
+                replace: "$4.unshift($self.getComp()),(0,$1.$2)($3.Fragment,{children:$4}"
             }
         }
     ],
-
-    toolbarPatch(array) {
-        if (!array.length) return array;
+    getComp() {
         shouldDisable = !this.renderQuestButton();
-        array = [<IconWithTooltip text="Complete Quest" isDisabled={shouldDisable} icon={<QuestIcon />} onClick={this.openCompleteQuest} />, ...array];
-        return array;
+        return <IconWithTooltip text="Complete Quest" isDisabled={shouldDisable} icon={<QuestIcon />} onClick={this.openCompleteQuest} />;
     },
     settingsAboutComponent() {
         const isDesktop = navigator.userAgent.includes("discord/");
