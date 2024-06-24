@@ -44,9 +44,9 @@ async function removeKeywordEntry(idx: number, forceUpdate: () => void) {
     forceUpdate();
 }
 
-function safeMatchesRegex(s: string, r: string) {
+function safeMatchesRegex(str: string, regex: string) {
     try {
-        return s.match(new RegExp(r));
+        return str.match(new RegExp(regex));
     } catch {
         return false;
     }
@@ -57,24 +57,24 @@ enum ListType {
     Whitelist = "Whitelist"
 }
 
-function highlightKeywords(s: string, r: Array<string>) {
+function highlightKeywords(str: string, regexes: Array<string>) {
     let regex: RegExp;
     try {
-        regex = new RegExp(r.join("|"), "g");
+        regex = new RegExp(regexes.join("|"), "g");
     } catch {
-        return [s];
+        return [str];
     }
 
-    const matches = s.match(regex);
+    const matches = str.match(regex);
     if (!matches)
-        return [s];
+        return [str];
 
     const parts = [...matches.map(e => {
-        const idx = s.indexOf(e);
-        const before = s.substring(0, idx);
-        s = s.substring(idx + e.length);
+        const idx = str.indexOf(e);
+        const before = str.substring(0, idx);
+        str = str.substring(idx + e.length);
         return before;
-    }, s), s];
+    }, str), str];
 
     return parts.map(e => [
         (<span>{e}</span>),
@@ -318,17 +318,15 @@ export default definePlugin({
             }
 
             const whitelistMode = entry.listType === ListType.Whitelist;
+
             if (!whitelistMode && listed) {
                 return;
             }
             if (whitelistMode && !listed) {
                 return;
             }
-
-            if (settings.store.ignoreBots && m.author.bot) {
-                if (!whitelistMode || !entry.listIds.includes(m.author.id)) {
-                    return;
-                }
+            if (settings.store.ignoreBots && m.author.bot && (!whitelistMode || !entry.listIds.includes(m.author.id))) {
+                return;
             }
 
             if (safeMatchesRegex(m.content, entry.regex)) {
