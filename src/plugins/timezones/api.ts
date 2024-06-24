@@ -1,5 +1,12 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { Logger } from "@utils/Logger";
+
 import settings from "./settings";
 
 export type Snowflake = string;
@@ -22,10 +29,10 @@ export async function fetchTimezonesBulk(ids: Snowflake[]): Promise<Record<Snowf
         const json: BulkFetchResponse = await req.json();
         if ("error" in json) throw "API Error: " + json.error;
 
-        let parsed: Record<Snowflake, string | null> = {};
+        const parsed: Record<Snowflake, string | null> = {};
 
         for (const userId of Object.keys(json)) {
-            parsed[userId] = json[userId].timezoneId;
+            parsed[userId] = json[userId]?.timezoneId ?? null;
         }
 
         return parsed;
@@ -48,7 +55,7 @@ export async function fetchTimezone(userId: Snowflake): Promise<string | null | 
         const json: UserFetchResponse = await req.json();
 
         if ("error" in json) {
-            if (json.error == "not_found") return null;
+            if (json.error === "not_found") return null;
 
             throw "API Error: " + json.error;
         }

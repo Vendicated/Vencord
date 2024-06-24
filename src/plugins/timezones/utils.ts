@@ -4,19 +4,33 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findStoreLazy } from "@webpack";
-import { Logger } from "@utils/Logger";
 import { makeLazy } from "@utils/lazy";
+import { Logger } from "@utils/Logger";
+import { findStoreLazy } from "@webpack";
 
 const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
 const TIMEZONE_LIST = "https://gist.githubusercontent.com/ArjixWasTaken/e321f856f98676505efb90aad82feff1/raw/91034ee32eff93a7cb62d10702f6b1d01e0309e6/timezones.json";
 
-export function formatTimestamp(timezone: string, timestamp: Date = new Date()): string | undefined {
+export function formatTimestamp(
+    timezone: string,
+    timestamp: number | Date | undefined,
+    long: boolean,
+): string | undefined {
     try {
         const locale = UserSettingsProtoStore.settings.localization.locale.value;
+        const options: Intl.DateTimeFormatOptions = !long
+            ? { hour: "numeric", minute: "numeric" }
+            : {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "numeric",
+                minute: "numeric",
+            };
+
         const formatter = new Intl.DateTimeFormat(locale, {
-            hour: "numeric",
-            minute: "numeric",
+            ...options,
             timeZone: timezone,
         });
 

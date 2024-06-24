@@ -17,9 +17,10 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { OptionType } from "@utils/types";
-import { Text } from "@webpack/common";
 import { Link } from "@components/Link";
+import { IPluginOptionComponentProps, OptionType } from "@utils/types";
+import { Text } from "@webpack/common";
+
 import { Snowflake } from "./api";
 
 export type TimezoneOverwrites = Record<Snowflake, string>;
@@ -48,8 +49,13 @@ const settings = definePluginSettings({
     timezoneOverwrites: {
         type: OptionType.COMPONENT,
         description: "Local overwrites for users' timezones",
-        component: () => <></> // TODO: settings component to manage local overwrites,
-    }
+        component: props => <>
+            <TimezoneOverwritesSetting
+                setValue={props.setValue}
+                setError={props.setError}
+                option={props.option} />
+        </>,
+    },
 });
 
 export default settings;
@@ -68,4 +74,8 @@ export function SettingsComponent(): JSX.Element {
             You can override other users' timezones locally if they haven't set their own.
         </Text>
     </>;
+}
+
+function TimezoneOverwritesSetting(props: IPluginOptionComponentProps): JSX.Element {
+    return <></>;
 }
