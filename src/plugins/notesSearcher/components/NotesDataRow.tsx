@@ -7,58 +7,48 @@
 import { classNameFactory } from "@api/Styles";
 import { openPrivateChannel, openUserProfile } from "@utils/discord";
 import { copyWithToast } from "@utils/misc";
-import { LazyComponent, useAwaiter } from "@utils/react";
-import { Alerts, Avatar, Button, ContextMenuApi, Menu, React, Text, TextArea, Tooltip, UserStore, UserUtils, useState } from "@webpack/common";
+import { Alerts, Avatar, Button, ContextMenuApi, Menu, React, Text, TextArea, Tooltip, useState } from "@webpack/common";
 
-import { updateNote, usersCache } from "../data";
+import { updateNote } from "../data";
+import { UsersCache } from "../types";
 import { DeleteIcon, PopupIcon, RefreshIcon, SaveIcon } from "./Icons";
 import { LoadingSpinner } from "./LoadingSpinner";
 
 const cl = classNameFactory("vc-notes-searcher-modal-");
 
-type UserInfo = {
-    id: string;
-    globalName: string;
-    username: string;
-    avatar: string;
-};
-
-export default LazyComponent(() => React.memo(({ userId, userNotes: userNotesArg, refreshNotesData }: {
+export default ({ userId, userNotes: userNotesArg, refreshNotesData, usersCache }: {
     userId: string;
     userNotes: string;
     refreshNotesData(): void;
+    usersCache: UsersCache;
 }) => {
-    const awaitedResult = useAwaiter(async () => {
-        const user = UserStore.getUser(userId) || await UserUtils.getUser(userId);
+    let userCache = usersCache.get(userId);
 
-        usersCache.set(userId, {
-            globalName: (user as any).globalName ?? user.username,
-            username: user.username,
-        });
+    const pending = !userCache;
 
-        return {
-            id: userId,
-            globalName: (user as any).globalName ?? user.username,
-            username: user.username,
-            avatar: user.getAvatarURL(void 0, void 0, false),
-        } as UserInfo;
-    });
-
-    let userInfo = awaitedResult[0];
-    const pending = awaitedResult[2];
-
-    userInfo ??= {
+    userCache ??= {
         id: userId,
-        globalName: pending ? "Loading..." : "Unable to load",
-        username: pending ? "Loading..." : "No mutual guilds",
+        globalName: "Loading...",
+        username: "Loading...",
         avatar: "https://discord.com/assets/0048cbfdd0b3ef186d22.png",
-    } as const;
+    };
 
     const [userNotes, setUserNotes] = useState(userNotesArg);
 
     return (
         <div
             className={cl("user")}
+            style={{
+                width: "100%",
+                height: "80px",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "flex-start",
+                alignItems: "center",
+                backgroundColor: "var(--background-secondary)",
+                borderRadius: "12px",
+                boxSizing: "border-box",
+            }}
             onContextMenu={event => {
                 ContextMenuApi.openContextMenu(event, () =>
                     <Menu.Menu
@@ -79,7 +69,7 @@ export default LazyComponent(() => React.memo(({ userId, userNotes: userNotesArg
                         <Menu.MenuItem
                             id={cl("copy-user-id")}
                             label="Copy ID"
-                            action={() => copyWithToast(userInfo!.id)}
+                            action={() => copyWithToast(userCache!.id)}
                         />
                         {
                             !pending &&
@@ -88,17 +78,17 @@ export default LazyComponent(() => React.memo(({ userId, userNotes: userNotesArg
                                     <Menu.MenuItem
                                         id={cl("copy-user-globalname")}
                                         label="Copy Global Name"
-                                        action={() => copyWithToast(userInfo!.globalName)}
+                                        action={() => copyWithToast(userCache!.globalName ?? userCache!.username)}
                                     />
                                     <Menu.MenuItem
                                         id={cl("copy-user-username")}
                                         label="Copy Username"
-                                        action={() => copyWithToast(userInfo!.username)}
+                                        action={() => copyWithToast(userCache!.username)}
                                     />
                                     <Menu.MenuItem
                                         id={cl("copy-user-avatar")}
                                         label="Copy Avatar URL"
-                                        action={() => copyWithToast(userInfo!.avatar)}
+                                        action={() => copyWithToast(userCache!.avatar)}
                                     />
                                 </>
                             )
@@ -117,29 +107,70 @@ export default LazyComponent(() => React.memo(({ userId, userNotes: userNotesArg
                     <Avatar
                         className={cl("user-avatar")}
                         size="SIZE_56"
-                        src={userInfo.avatar}
+                        src={userCache.avatar}
                     />
             }
-            <div className={cl("user-info")}>
-                <Text className={cl("user-info-globalname")} variant="text-lg/bold">{userInfo.globalName}</Text>
-                <Text className={cl("user-info-username")} variant="text-md/normal">{userInfo.username}</Text>
-                <Text className={cl("user-info-id")} variant="text-md/normal">{userInfo.id}</Text>
+            <div className={cl("user-info")} style={{
+                minWidth: "50px",
+                maxWidth: "275px",
+                width: "100%",
+            }}>
+                <Text className={cl("user-info-globalname")} variant="text-lg/bold" style={{
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                    color: "#fff"
+                }}>{userCache.globalName}</Text>
+                <Text className={cl("user-info-username")} variant="text-md/normal" style={{
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                    color: "#d3d3d3"
+                }}>{userCache.username}</Text>
+                <Text className={cl("user-info-id")} variant="text-md/normal" style={{
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                    color: "#989898"
+                }}>{userCache.id}</Text>
             </div>
-            <div className={cl("user-notes-container")}>
+            <div className={cl("user-notes-container")} style={{
+                display: "grid",
+                gridTemplateColumns: "calc(100% - 86px) min-content",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                flexGrow: "1",
+                paddingRight: "8px",
+                gap: "8px",
+            }}>
                 <TextArea
                     className={cl("user-text-area")}
+                    style={{
+                        width: "100%",
+                        height: "100%",
+                    }}
                     placeholder="Click to add a note"
                     value={userNotes}
                     onChange={setUserNotes}
                     spellCheck={false}
                 />
-                <div className={cl("user-actions")}>
+                <div className={cl("user-actions")} style={{
+                    display: "grid",
+                    gridTemplateColumns: "auto auto",
+                    gridTemplateRows: "auto auto",
+                    gap: "3px",
+                    aspectRatio: "1 / 1",
+                    height: "auto",
+                    boxSizing: "border-box",
+                    overflow: "visible !important",
+                }}>
                     <Tooltip text={"Save"}>
                         {({ onMouseLeave, onMouseEnter }) => (
                             <Button
                                 className={cl("user-actions-save")}
                                 size={Button.Sizes.NONE}
                                 color={Button.Colors.GREEN}
+                                style={{ width: "32px", height: "32px" }}
                                 onClick={() => {
                                     updateNote(userId, userNotes);
                                     refreshNotesData();
@@ -157,10 +188,11 @@ export default LazyComponent(() => React.memo(({ userId, userNotes: userNotesArg
                                 className={cl("user-actions-delete")}
                                 size={Button.Sizes.NONE}
                                 color={Button.Colors.RED}
+                                style={{ width: "32px", height: "32px" }}
                                 onClick={() => {
                                     Alerts.show({
                                         title: "Delete Notes",
-                                        body: `Are you sure you want to delete notes for ${pending ? userId : `${userInfo!.globalName} (${userId})`}?`,
+                                        body: `Are you sure you want to delete notes for ${pending ? userId : `${userCache!.globalName} (${userId})`}?`,
                                         confirmColor: Button.Colors.RED,
                                         confirmText: "Delete",
                                         cancelText: "Cancel",
@@ -183,6 +215,7 @@ export default LazyComponent(() => React.memo(({ userId, userNotes: userNotesArg
                                 className={cl("user-actions-refresh")}
                                 size={Button.Sizes.NONE}
                                 color={Button.Colors.LINK}
+                                style={{ width: "32px", height: "32px" }}
                                 onClick={() => setUserNotes(userNotesArg)}
                                 onMouseLeave={onMouseLeave}
                                 onMouseEnter={onMouseEnter}
@@ -197,6 +230,7 @@ export default LazyComponent(() => React.memo(({ userId, userNotes: userNotesArg
                                 className={cl("user-actions-popup")}
                                 size={Button.Sizes.NONE}
                                 color={Button.Colors.PRIMARY}
+                                style={{ width: "32px", height: "32px" }}
                                 onClick={async () => {
                                     openUserProfile(userId);
                                 }}
@@ -211,4 +245,4 @@ export default LazyComponent(() => React.memo(({ userId, userNotes: userNotesArg
             </div>
         </div>
     );
-}));
+};

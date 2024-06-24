@@ -12,9 +12,9 @@ import definePlugin from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
 import { OpenNotesDataButton } from "./components/NotesDataButton";
-import { getNotes, onNoteUpdate } from "./data";
-import { Notes } from "./noteStore";
+import { getNotes, onNoteUpdate, onUserUpdate } from "./data";
 import settings from "./settings";
+import { Notes } from "./types";
 
 export default definePlugin({
     name: "NotesSearcher",
@@ -83,9 +83,11 @@ export default definePlugin({
 
     start: async () => {
         FluxDispatcher.subscribe("USER_NOTE_UPDATE", onNoteUpdate);
+        FluxDispatcher.subscribe("USER_UPDATE", onUserUpdate);
     },
     stop: () => {
         FluxDispatcher.unsubscribe("USER_NOTE_UPDATE", onNoteUpdate);
+        FluxDispatcher.unsubscribe("USER_UPDATE", onUserUpdate);
     },
 
     ready: ({ notes }: { notes: { [userId: string]: string; }; }) => {

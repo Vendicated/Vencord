@@ -1,18 +1,7 @@
-/* Part of Cache Popout Data. css linter is awesome */
-.vc-notes-searcher-modal-cache-status svg,
-.vc-notes-searcher-modal-cache-status div,
-.vc-notes-searcher-modal-cache-status div span,
-.vc-notes-searcher-modal-cache-status div span::after {
-    width: 40px;
-    height: 40px;
-}
-
-/* Open "Notes Data" toolbox button */
 .vc-notes-searcher-toolbox-button svg {
     color: var(--interactive-normal);
 }
 
-/* Part of Notes Modal Data. css linter is awesome */
 .vc-notes-searcher-modal-user-actions * svg {
     width: 32px !important;
     height: 32px !important;
@@ -23,7 +12,6 @@
     color: var(--interactive-active);
 }
 
-/* Notes Data Modal */
 .vc-notes-searcher-modal-root {
     min-height: 75vh;
     max-height: 75vh;
@@ -31,31 +19,9 @@
     max-width: 70vw;
 }
 
-.vc-notes-searcher-modal-header-text {
-    white-space: nowrap;
-    width: fit-content;
-    margin-right: 16px;
-}
-
 .vc-notes-searcher-modal-header-input {
     width: 100%;
     margin-right: 16px;
-}
-
-.vc-notes-searcher-modal-header-user-type {
-    min-width: 160px;
-    margin-right: 16px;
-}
-
-.vc-notes-searcher-modal-header-cache {
-    width: fit-content;
-    height: 100%;
-    margin-right: 16px;
-}
-
-.vc-notes-searcher-modal-content-container {
-    overflow: hidden;
-    height: 100%;
 }
 
 .vc-notes-searcher-modal-content {
@@ -67,42 +33,8 @@
     display: none;
 }
 
-.vc-notes-searcher-modal-content-inner {
-    padding-top: 16px;
-    height: fit-content;
-}
-
-.vc-notes-searcher-modal-user-actions * {
-    width: 32px;
-    height: 32px;
-}
-
 .vc-notes-searcher-modal-content-inner > *:not(:last-child) {
     margin-bottom: 8px;
-}
-
-.vc-notes-searcher-modal-load-more {
-    margin-top: 16px;
-    width: 100%;
-    height: 32px;
-}
-
-.vc-notes-searcher-modal-no-notes {
-    display: grid;
-    place-content: center;
-    height: 100%;
-}
-
-.vc-notes-searcher-modal-user {
-    width: 100%;
-    height: 80px;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    background-color: var(--background-secondary);
-    border-radius: 12px;
-    box-sizing: border-box;
 }
 
 .vc-notes-searcher-modal-user:hover:not(
@@ -117,40 +49,6 @@
 .vc-notes-searcher-modal-user-avatar {
     aspect-ratio: 1 / 1;
     margin: 12px;
-}
-
-.vc-notes-searcher-modal-user-info {
-    min-width: 50px;
-    max-width: 275px;
-    width: 100%;
-}
-
-.vc-notes-searcher-modal-user-info > div {
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-}
-
-.vc-notes-searcher-modal-user-info-globalname {
-    color: #fff;
-}
-
-.vc-notes-searcher-modal-user-info-username {
-    color: #d3d3d3;
-}
-
-.vc-notes-searcher-modal-user-info-id {
-    color: #989898;
-}
-
-.vc-notes-searcher-modal-user-notes-container {
-    display: grid;
-    grid-template-columns: calc(100% - 86px) min-content;
-    align-items: center;
-    justify-content: flex-end;
-    flex-grow: 1;
-    padding-right: 8px;
-    gap: 8px;
 }
 
 .vc-notes-searcher-modal-user-actions * div:has(svg) {
@@ -168,35 +66,6 @@ div:has(.vc-notes-searcher-modal-user-text-area) {
 .vc-notes-searcher-modal-user-text-area {
     width: 100%;
     height: 100%;
-}
-
-.vc-notes-searcher-modal-user-actions {
-    display: grid;
-    grid-template-columns: auto auto;
-    grid-template-rows: auto auto;
-    gap: 3px;
-    aspect-ratio: 1 / 1;
-    height: auto;
-    box-sizing: border-box;
-    overflow: visible !important;
-}
-
-/* Loading Spinner */
-.vc-notes-searcher-modal-spinner-container {
-    width: 56px;
-    height: 56px;
-    margin: 12px;
-}
-
-.vc-notes-searcher-modal-spinner {
-    width: 56px;
-    height: 56px;
-    border: 5px solid #fff;
-    border-radius: 50%;
-    display: inline-block;
-    box-sizing: border-box;
-    position: relative;
-    animation: vc-notes-searcher-pulse 1s linear infinite;
 }
 
 .vc-notes-searcher-modal-spinner::after {
@@ -235,52 +104,4 @@ div:has(.vc-notes-searcher-modal-user-text-area) {
     80% {
         transform: scale(1.1);
     }
-}
-
-.vc-notes-searcher-modal-cache-container {
-    width: 25vw;
-    background-color: var(--modal-background);
-    border-radius: 4px;
-    padding: 12px;
-    box-shadow: var(--legacy-elevation-border), var(--legacy-elevation-high);
-}
-
-.vc-notes-searcher-modal-cache-header {
-    margin-bottom: 12px;
-}
-
-.vc-notes-searcher-modal-cache-footer {
-    margin-top: 12px;
-    border-radius: 4px;
-    background-color: #00ff404a;
-    border: 1px solid #2fd334;
-    padding: 8px;
-}
-
-.vc-notes-searcher-modal-cache-container > div:nth-child(2) {
-    display: grid;
-    grid-template-columns: min-content auto;
-}
-
-.vc-notes-searcher-modal-cache-buttons {
-    width: fit-content;
-    display: grid;
-    row-gap: 6px;
-}
-
-.vc-notes-searcher-modal-cache-buttons > button {
-    height: 32px;
-}
-
-.vc-notes-searcher-modal-cache-status {
-    display: grid;
-    align-items: center;
-    color: var(--text-normal);
-    font-size: 16px;
-    text-align: center;
-    padding: 0 12px;
-}
-
-.vc-notes-searcher-modal-cache-status :nth-child(1) {
-    margin: 0 auto;
 }

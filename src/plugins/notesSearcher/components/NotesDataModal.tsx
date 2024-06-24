@@ -11,8 +11,7 @@ import {
 import { LazyComponent } from "@utils/react";
 import { Button, React, RelationshipStore, Select, Text, TextInput, useCallback, useMemo, useReducer, useState } from "@webpack/common";
 
-import { getNotes, usersCache } from "../data";
-import CachePopout from "./CachePopout";
+import { cacheUsers, getNotes, usersCache as usersCache$1 } from "../data";
 import NotesDataRow from "./NotesDataRow";
 
 const cl = classNameFactory("vc-notes-searcher-modal-");
@@ -28,14 +27,15 @@ const filterUser = (query: string, userId: string, userNotes: string) => {
 
     query = query.toLowerCase();
 
-    const user = usersCache.get(userId);
+    const user = usersCache$1.get(userId);
 
     return user && (
         user.globalName?.toLowerCase().includes(query) || user.username.toLowerCase().includes(query)
     ) || userNotes.toLowerCase().includes(query);
 };
 
-// looks like a shit but I didn't know better way to do it
+// looks like a shit but I don't know better way to do it
+// P.S. using `getNotes()` as deps for useMemo won't work due to object init outside of component
 let RefreshNotesDataEx: () => void | undefined;
 
 export const refreshNotesData = () => {
@@ -54,8 +54,14 @@ export function NotesDataModal({ modalProps, close }: {
     const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
 
     const [usersNotesData, refreshNotesData] = useReducer(() => {
-        return Object.entries(getNotes()).map(([userId, { note }]) => [userId, note]) as [string, string][];
-    }, Object.entries(getNotes()).map(([userId, { note }]) => [userId, note]) as [string, string][]);
+        return Object.entries(getNotes())
+            .map<[string, string]>(([userId, { note }]) => [userId, note])
+            .filter((([_, note]) => note !== ""));
+    },
+    Object.entries(getNotes())
+        .map<[string, string]>(([userId, { note }]) => [userId, note])
+        .filter((([_, note]) => note !== ""))
+    );
 
     RefreshNotesDataEx = refreshNotesData;
 
@@ -92,9 +98,9 @@ export function NotesDataModal({ modalProps, close }: {
     return (
         <ModalRoot className={cl("root")} {...modalProps}>
             <ModalHeader className={cl("header")}>
-                <Text className={cl("header-text")} variant="heading-lg/semibold">Notes Data</Text>
-                <TextInput className={cl("header-input")} value={searchValue.query} onChange={onSearch} placeholder="Filter Notes (ID/Notes and Global/Username if cached)" />
-                <div className={cl("header-user-type")}>
+                <Text className={cl("header-text")} variant="heading-lg/semibold" style={{ whiteSpace: "nowrap", width: "fit-content", marginRight: "16px" }}>Notes Data</Text>
+                <TextInput className={cl("header-input")} value={searchValue.query} onChange={onSearch} placeholder="Filter Notes (ID/Global Name/Username/Notes text)" style={{ width: "100% !important", marginRight: "16px" }} />
+                <div className={cl("header-user-type")} style={{ minWidth: "160px", marginRight: "16px" }}>
                     <Select
                         options={[
                             { label: "Show All", value: SearchStatus.ALL, default: true },
@@ -107,10 +113,9 @@ export function NotesDataModal({ modalProps, close }: {
                         closeOnSelect={true}
                     />
                 </div>
-                <CachePopout />
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
-            <div style={{ opacity: modalProps.transitionState === 1 ? "1" : "0" }} className={cl("content-container")}>
+            <div style={{ opacity: modalProps.transitionState === 1 ? "1" : "0", overflow: "hidden", height: "100%" }} className={cl("content-container")}>
                 {
                     modalProps.transitionState === 1 &&
                     <ModalContent className={cl("content")}>
@@ -131,7 +136,17 @@ export function NotesDataModal({ modalProps, close }: {
     );
 }
 
-const NotesDataContent = LazyComponent(() => React.memo(({ visibleNotes, canLoadMore, loadMore, refreshNotesData }: {
+// looks like a shit but I don't know better way to do it
+// P.S. using `usersCache` as deps for useMemo won't work due to object init outside of component
+let RefreshUsersCacheEx: () => void | undefined;
+
+export const refreshUsersCache = () => {
+    if (!RefreshUsersCacheEx) return;
+
+    RefreshUsersCacheEx();
+};
+
+const NotesDataContent = ({ visibleNotes, canLoadMore, loadMore, refreshNotesData }: {
     visibleNotes: [string, string][];
     canLoadMore: boolean;
     loadMore(): void;
@@ -140,24 +155,34 @@ const NotesDataContent = LazyComponent(() => React.memo(({ visibleNotes, canLoad
     if (!visibleNotes.length)
         return <NoNotes />;
 
+    const [usersCache, refreshUsersCache] = useReducer(() => {
+        return new Map(usersCache$1);
+    }, usersCache$1);
+
+    RefreshUsersCacheEx = refreshUsersCache;
+
     return (
-        <div className={cl("content-inner")}>
+        <div className={cl("content-inner")} style={{ paddingTop: "16px", height: "fit-content" }}>
             {
                 visibleNotes
-                    .map(([userId, userNotes]) => (
-                        <NotesDataRow
-                            key={userId}
-                            userId={userId}
-                            userNotes={userNotes}
-                            refreshNotesData={refreshNotesData}
-                        />
-                    ))
+                    .map(([userId, userNotes]) => {
+                        return (
+                            <NotesDataRow
+                                key={userId}
+                                userId={userId}
+                                userNotes={userNotes}
+                                usersCache={usersCache}
+                                refreshNotesData={refreshNotesData}
+                            />
+                        );
+                    })
             }
             {
                 canLoadMore &&
                 <Button
                     className={cl("load-more")}
                     size={Button.Sizes.NONE}
+                    style={{ marginTop: "16px", width: "100%", height: "32px" }}
                     onClick={() => loadMore()}
                 >
                     Load More
@@ -165,17 +190,24 @@ const NotesDataContent = LazyComponent(() => React.memo(({ visibleNotes, canLoad
             }
         </div>
     );
-}));
+};
 
 const NoNotes = LazyComponent(() => React.memo(() => (
-    <div className={cl("no-notes")} style={{ textAlign: "center" }}>
+    <div className={cl("no-notes")} style={{ textAlign: "center", display: "grid", placeContent: "center", height: "100%" }}>
         <Text variant="text-lg/normal">
             No Notes.
         </Text>
     </div>
 )));
 
+let fistTimeOpen = true;
+
 export const openNotesDataModal = async () => {
+    if (fistTimeOpen) {
+        cacheUsers();
+        fistTimeOpen = false;
+    }
+
     const key = openModal(modalProps => (
         <NotesDataModal
             modalProps={modalProps}

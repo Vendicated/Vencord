@@ -4,5 +4,4 @@ Allows you to open a modal with all of your notes and search through them by use
 
 ## Preview
 
-![preview](https://i.imgur.com/FJl4W13.png)
-![preview](https://i.imgur.com/nCyP8Uf.png)
+![preview](https://i.imgur.com/yBwhcx6.png)

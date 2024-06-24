@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Constants, FluxDispatcher, GuildStore, RestAPI, SnowflakeUtils, UserStore, useState } from "@webpack/common";
+import { Constants, FluxDispatcher, GuildStore, RestAPI, SnowflakeUtils, UserStore, UserUtils } from "@webpack/common";
 import { waitForStore } from "webpack/common/internal";
 
-import { refreshNotesData } from "./components/NotesDataModal";
-import * as t from "./noteStore";
+import { refreshNotesData, refreshUsersCache } from "./components/NotesDataModal";
+import * as t from "./types";
 
 let NoteStore: t.NoteStore;
 
@@ -25,71 +25,55 @@ export const onNoteUpdate = () => {
 export const updateNote = (userId: string, note: string | null) => {
     RestAPI.put({
         url: Constants.Endpoints.NOTE(userId),
-        body: { note },
+        body: { note: note !== "" ? note : null },
         oldFormErrors: true
     });
 };
 
-export const usersCache = new Map<string, {
-    globalName?: string,
-    username: string;
-}>();
+export const usersCache: t.UsersCache = new Map();
 
-type Dispatch = ReturnType<typeof useState<any>>[1];
+export const onUserUpdate = ({ user }: { user: t.User; }) => {
+    if (!getNotes()[user.id]) return;
 
-const states: {
-    setRunning?: Dispatch;
-    setCacheStatus?: Dispatch,
-} = {};
+    // doesn't have .getAvatarURL
+    const userFromStore = UserStore.getUser(user.id);
 
-export const setupStates = ({
-    setRunning,
-    setCacheStatus,
-}: {
-    setRunning: Dispatch,
-    setCacheStatus: Dispatch,
-}) => {
-    states.setRunning = setRunning;
-    states.setCacheStatus = setCacheStatus;
+    if (!userFromStore) return;
+
+    cacheUser(userFromStore);
 };
 
-let isRunning = false;
+const fetchUser = async (userId: string) => {
+    for (let _ = 0; _ < 5; _++) {
+        try {
+            return await UserUtils.getUser(userId);
+        } catch (error: any) {
+            const wait = error?.body?.retry_after;
 
-export const getRunning = () => {
-    return isRunning;
+            if (!wait) return;
+
+            await new Promise(resolve => setTimeout(resolve, wait * 1000 + 100));
+        }
+    }
 };
 
-let cacheProcessNeedStop = false;
-
-export const stopCacheProcess = () => {
-    cacheProcessNeedStop = true;
+const cacheUser = (user: t.User) => {
+    usersCache.set(user.id, {
+        id: user.id,
+        globalName: user.globalName ?? user.username,
+        username: user.username,
+        avatar: user.getAvatarURL(void 0, void 0, false),
+    });
 };
 
-const stop = () => {
-    cacheProcessNeedStop = false;
-    isRunning = false;
-    states.setRunning?.(false);
-    states.setCacheStatus?.(usersCache.size);
-};
-
-export let allChunksCached = false;
-
-export const cacheUsers = async (onlyMissing = false) => {
-    isRunning = true;
-    states.setRunning?.(true);
-
-    onlyMissing || usersCache.clear();
-
+export const cacheUsers = async () => {
     const toRequest: string[] = [];
 
     for (const userId of Object.keys(getNotes())) {
         const user = UserStore.getUser(userId);
 
         if (user) {
-            usersCache.set(user.id, {
-                globalName: (user as any).globalName,
-                username: user.username,
-            });
+            cacheUser(user);
             continue;
         }
 
@@ -97,11 +81,8 @@ export const cacheUsers = async (onlyMissing = false) => {
     }
 
     if (usersCache.size >= Object.keys(getNotes()).length) {
-        stop();
         return;
     }
-
-    states.setCacheStatus?.(usersCache.size);
 
     const sentNonce = SnowflakeUtils.fromTimestamp(Date.now());
 
@@ -112,35 +93,49 @@ export const cacheUsers = async (onlyMissing = false) => {
 
     const callback = async ({ chunks }) => {
         for (const chunk of chunks) {
-            if (cacheProcessNeedStop) {
-                stop();
-                FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
-                break;
-            }
-
-            const { nonce, members } = chunk;
+            const { nonce, members }: {
+                nonce: string;
+                members: {
+                    user: t.User;
+                }[];
+            } = chunk;
 
             if (nonce !== sentNonce) {
                 return;
             }
 
-            members.forEach(member => {
-                if (processed.has(member.user.id)) return;
+            members.forEach(({ user }) => {
+                if (processed.has(user.id)) return;
 
-                processed.add(member.user.id);
+                processed.add(user.id);
 
-                usersCache.set(member.user.id, {
-                    globalName: (member as any).globalName,
-                    username: member.username,
-                });
+                cacheUser(UserStore.getUser(user.id));
             });
 
-            states.setCacheStatus?.(usersCache.size);
+            refreshUsersCache();
 
             if (--count === 0) {
-                allChunksCached = true;
-                stop();
                 FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);
+
+                const userIds = Object.keys(getNotes());
+
+                if (usersCache.size !== userIds.length) {
+
+                    for (const userId of userIds) {
+                        if (usersCache.has(userId)) continue;
+
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+
+                        const user = await fetchUser(userId);
+
+                        if (user) {
+                            cacheUser(user);
+                            refreshUsersCache();
+                        }
+                    }
+
+                } else
+                    refreshUsersCache();
             }
         }
     };
