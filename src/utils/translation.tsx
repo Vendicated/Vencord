@@ -108,17 +108,15 @@ export function t(key: string, variables?: Record<string, any>): string {
             if (!variables || !variables.count)
                 throw new Error(`translation key ${key} is an object (is it a plural?)`);
 
-            if (variables.count) {
-                const pluralTag: Intl.LDMLPluralRule = variables.count === 0 ? "zero" :
-                    new Intl.PluralRules(bestLocale).select(variables.count);
+            const pluralTag: Intl.LDMLPluralRule = variables.count === 0 ? "zero" :
+                new Intl.PluralRules(bestLocale).select(variables.count);
 
-                if (translation[pluralTag]) {
-                    return format(translation[pluralTag]!, variables);
-                } else if (translation.other) {
-                    return format(translation.other, variables);
-                } else {
-                    throw new Error(`translation key ${key} is an object and doesn't seem to be plural`);
-                }
+            if (translation[pluralTag]) {
+                return format(translation[pluralTag]!, variables);
+            } else if (translation.other) {
+                return format(translation.other, variables);
+            } else {
+                throw new Error(`translation key ${key} is an object and doesn't seem to be plural`);
             }
         }
 
