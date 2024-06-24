@@ -21,7 +21,6 @@ import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { DeleteIcon } from "@components/Icons";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { findByCode } from "@webpack";
 import {
     Button,
     ChannelStore,
