@@ -20,3 +20,6 @@ lerna-debug.log*
 
 ExtensionCache/
 settings/
+
+*-ignore/
+*-ignore.*
