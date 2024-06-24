@@ -124,7 +124,6 @@ export default definePlugin({
 	],
 
 	beforeSave() {
-		console.log(triggerWords);
 		DataStore.set(WORDS_KEY, triggerWords);
 		return true;
 	},
@@ -139,6 +138,5 @@ export default definePlugin({
 
 	async start() {
 		triggerWords = await DataStore.get(WORDS_KEY) ?? [""];
-		console.log(triggerWords);
 	}
 });
