@@ -5,7 +5,7 @@
  */
 
 import { classes } from "@utils/misc";
-import { Button, ButtonLooks, Tooltip, useEffect, useState } from "@webpack/common";
+import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip, useEffect, useState } from "@webpack/common";
 
 
 export function QuestIcon({ height = 24, width = 24 }: { height?: number; width?: number; }) {
@@ -24,7 +24,7 @@ export function IconWithTooltip({ text, icon, onClick, isDisabled }) {
 
     return <Tooltip text={text}>
         {({ onMouseEnter, onMouseLeave }) => (
-            <div>
+            <div style={{ display: "flex" }}>
                 <Button
                     aria-label={text}
                     look={ButtonLooks.BLANK}
@@ -33,6 +33,7 @@ export function IconWithTooltip({ text, icon, onClick, isDisabled }) {
                     className={classes("button_ae6b8e")}
                     onClick={onClick}
                     size=""
+                    innerClassName={ButtonWrapperClasses.button}
                     disabled={disabled}
                 >
                     {icon}
