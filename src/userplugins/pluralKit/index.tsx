@@ -152,7 +152,6 @@ export default definePlugin({
         try {
             const discordUsername = author.nick??author.displayName??author.username;
             if (!isPk(message)) {
-                console.log("not pk", message.id);
                 return <>{prefix}{discordUsername}</>;
             }
 
@@ -194,8 +193,6 @@ export default definePlugin({
 
     async start() {
         await loadAuthors();
-
-        console.log("wasd", settings.store.data);
 
         addButton("pk-edit", msg => {
             if (!msg) return null;
