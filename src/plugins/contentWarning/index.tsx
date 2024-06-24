@@ -60,6 +60,9 @@ function FlaggedInput({ index, forceUpdate }) {
 	};
 
 	const removeSelf = () => {
+		if (triggerWords.length == 1) {
+			return;
+		}
 		triggerWords = triggerWords.slice(0, index).concat(triggerWords.slice(index + 1));
 		forceUpdate();
 	};
@@ -117,7 +120,7 @@ const settings = definePluginSettings({
 export default definePlugin({
 	name: "ContentWarning",
 	authors: [Devs.camila314],
-	description: "Allows you to specify certain trigger words that will be blurred by default. Clicking on the blurred content will reveal it.",
+	description: "Allows you to specify certain trigger words",
 	settings,
 	patches: [
 		{
@@ -130,6 +133,7 @@ export default definePlugin({
 	],
 
 	beforeSave() {
+		console.log(triggerWords);
 		DataStore.set(WORDS_KEY, triggerWords);
 		return true;
 	},
@@ -144,5 +148,6 @@ export default definePlugin({
 
 	async start() {
 		triggerWords = await DataStore.get(WORDS_KEY) ?? [""];
+		console.log(triggerWords);
 	}
 });
