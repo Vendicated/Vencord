@@ -105,7 +105,7 @@ export function t(key: string, variables?: Record<string, any>): string {
         const translation = _t(key, loadedLocale);
 
         if (typeof translation !== "string") {
-            if (!variables || !variables.count)
+            if (!variables?.count)
                 throw new Error(`translation key ${key} is an object (is it a plural?)`);
 
             const pluralTag: Intl.LDMLPluralRule = variables.count === 0 ? "zero" :
