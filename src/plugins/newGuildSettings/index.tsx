@@ -16,20 +16,35 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings,migratePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 
 const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
-const { toggleShowAllChannels } = findByPropsLazy("toggleShowAllChannels");
-const { isOptInEnabledForGuild } = findByPropsLazy("isOptInEnabledForGuild");
+const { toggleShowAllChannels } = mapMangledModuleLazy(".onboardExistingMember(", {
+    toggleShowAllChannels: m => {
+        const s = String(m);
+        return s.length < 100 && !s.includes("onboardExistingMember") && !s.includes("getOptedInChannels");
+    }
+});
+const isOptInEnabledForGuild = findByCodeLazy(".COMMUNITY)||", ".isOptInEnabled(");
 
 const settings = definePluginSettings({
     guild: {
         description: "Mute Guild automatically",
         type: OptionType.BOOLEAN,
         default: true
+    },
+    messages: {
+        description: "Server Notification Settings",
+        type: OptionType.SELECT,
+        options: [
+            { label: "All messages", value: 0 },
+            { label: "Only @mentions", value: 1 },
+            { label: "Nothing", value: 2 },
+            { label: "Server default", value: 3, default: true }
+        ],
     },
     everyone: {
         description: "Suppress @everyone and @here",
@@ -38,6 +53,16 @@ const settings = definePluginSettings({
     },
     role: {
         description: "Suppress All Role @mentions",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    highlights: {
+        description: "Suppress Highlights automatically",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    events: {
+        description: "Mute New Events automatically",
         type: OptionType.BOOLEAN,
         default: true
     },
@@ -53,7 +78,7 @@ export default definePlugin({
     name: "NewGuildSettings",
     description: "Automatically mute new servers and change various other settings upon joining",
     tags: ["MuteNewGuild", "mute", "server"],
-    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Mopi],
+    authors: [Devs.Glitch, Devs.Nuckyz, Devs.carince, Devs.Mopi, Devs.GabiRP],
     patches: [
         {
             find: ",acceptInvite(",
@@ -78,8 +103,16 @@ export default definePlugin({
             {
                 muted: settings.store.guild,
                 suppress_everyone: settings.store.everyone,
-                suppress_roles: settings.store.role
+                suppress_roles: settings.store.role,
+                mute_scheduled_events: settings.store.events,
+                notify_highlights: settings.store.highlights ? 1 : 0
             });
+        if (settings.store.messages !== 3) {
+            updateGuildNotificationSettings(guildId,
+                {
+                    message_notifications: settings.store.messages,
+                });
+        }
         if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId)) {
             toggleShowAllChannels(guildId);
         }

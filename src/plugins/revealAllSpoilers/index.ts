@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
 const SpoilerClasses = findByPropsLazy("spoilerContent");
-const MessagesClasses = findByPropsLazy("messagesWrapper", "messages");
+const MessagesClasses = findByPropsLazy("messagesWrapper");
 
 export default definePlugin({
     name: "RevealAllSpoilers",
@@ -30,9 +30,9 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".removeObscurity=",
+            find: ".removeObscurity,",
             replacement: {
-                match: /(?<=\.removeObscurity=(\i)=>{)/,
+                match: /(?<="removeObscurity",(\i)=>{)/,
                 replace: (_, event) => `$self.reveal(${event});`
             }
         }
