@@ -18,20 +18,17 @@
 
 import { showNotification } from "@api/Notifications";
 import { Devs } from "@utils/constants";
-import { localStorage } from "@utils/localStorage";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findByProps } from "@webpack";
-import { Text } from "@webpack/common";
+import { findByCode, findByProps, findStoreLazy } from "@webpack";
+import { Text, UserStore } from "@webpack/common";
 
-const ToolTipButton = findByCodeLazy(".CHANNEL_CALL_CONTROL_BUTTON");
+import { IconWithTooltip, QuestIcon } from "./components/Icons";
 
-interface Stream {
-    streamType: string;
-    state: string;
-    ownerId: string;
-    guildId: string;
-    channelId: string;
-}
+
+
+const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
+const questAssetsBaseUrl = "https://cdn.discordapp.com/assets/quests/";
+
 
 function getLeftQuests() {
     const QuestsStore = findByProps("getQuest");
@@ -82,129 +79,119 @@ function decodeStreamKey(e: string): any {
 }
 
 
-let interval;
-let quest;
+let quest, interval, applicationId, applicationName, secondsNeeded, secondsDone, canPlay;
+let shouldDisable = true;
+let questRunning = false;
 let ImagesConfig = {};
 
 export default definePlugin({
     name: "QuestCompleter",
     description: "A plugin to complete quests without having the game.",
-    authors: [Devs.HAPPY_ENDERMAN, Devs.SerStars],
+    authors: [Devs.Loukios],
     patches: [
         {
             find: "\"invite-button\"",
             replacement: {
-                match: /(function .+?\(.+?\){let{inPopout:.+allowIdle.+?}=.+?\..?\)\("popup"\),(.+?)=\[\];if\(.+?\){.+"chat-spacer"\)\)\),\(\d,.+?\.jsx\)\(.+?,{children:).+?}}/,
-                replace: "$1[$self.renderQuestButton(),...$2]})}}"
+                match: /Fragment,{children:(\w{2})}/,
+                replace: "Fragment,{children:$self.toolbarPatch($1)}"
             }
         }
     ],
+
+    toolbarPatch(array) {
+        if (!array.length) return array;
+        shouldDisable = !this.renderQuestButton();
+        array = [<IconWithTooltip text="Complete Quest" isDisabled={shouldDisable} icon={<QuestIcon />} onClick={this.openCompleteQuest} />, ...array];
+        return array;
+    },
     settingsAboutComponent() {
         const isDesktop = navigator.userAgent.includes("discord/");
-        const hasQuestsExtensionEnabled = localStorage.getItem("QUESTS_EXT_ENABLED");
 
         return (<>
             {
-                isDesktop || hasQuestsExtensionEnabled ?
+                isDesktop ?
                     <Text variant="text-lg/bold">
-                        The plugin should work properly because you {isDesktop ? "are on the Desktop Client." : "installed our extension."}
+                        The plugin should work properly because you are on the Desktop Client.
                     </Text>
                     :
-                    <Text variant="text-lg/bold">
-                        This plugin won't work right now. Please download
-                        <a href="" target="_blank">our extension</a>
-                        to make the plugin work on web.
+                    <Text variant="text-lg/bold" style={{ color: "red" }}>
+                        Error: This plugin only works on the Desktop Client.
                     </Text>
             }
+
         </>);
     },
     start() {
-        const currentUserId: string = findByProps("getCurrentUser").getCurrentUser().id;
+        const currentUserId: string = UserStore.getCurrentUser().id;
         window.currentUserId = currentUserId; // this is here because discord will lag if we get the current user id every time
     },
     renderQuestButton() {
-        const currentStream: Stream | null = findByProps("getCurrentUserActiveStream").getCurrentUserActiveStream();
-        let shouldDisable = !!interval;
-        const { Divider } = findByProps("Divider", "Icon");
+        const currentStream = ApplicationStreamingStore.getCurrentUserActiveStream();
 
         if (!currentStream) {
-            shouldDisable = true;
+            return false;
         }
-        if (currentStream) {
-            const participants = findByProps("getParticipants").getParticipants(currentStream.channelId);
-            const validParticipants = participants.filter(participent =>
-                participent.user &&
-                participent.user.id &&
-                participent.user.id !== window.currentUserId
-            );
 
-            if (!validParticipants.length) {
-                shouldDisable = true;
-            }
-            if (currentStream.ownerId !== window.currentUserId) {
-                shouldDisable = true;
-            }
+        const userIds = ApplicationStreamingStore.getViewerIds(encodeStreamKey(currentStream));
+        if (!userIds.length) {
+            return false;
         }
+
         if (!getLeftQuests()) {
-            shouldDisable = true;
+            return false;
         }
 
-
-        const QuestsIcon = () => props => (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                viewBox="0 0 828 893"
-            >
-                <path
-                    fill="#C4C9CE"
-                    d="M395 732c-56.667 0-109.333-9-158-27-48-18-89.667-43.333-125-76-35.333-33.333-63-72.333-83-117C9.667 467.333 0 418.667 0 366c0-53.333 9.667-102 29-146 20-44.667 47.667-83.333 83-116 35.333-33.333 77-59 125-77C285.667 9 338.333 0 395 0c57.333 0 110 9 158 27s89.667 43.667 125 77c35.333 32.667 62.667 71.333 82 116 20 44 30 92.667 30 146 0 52.667-10 101.333-30 146-19.333 44.667-46.667 83.667-82 117-35.333 32.667-77 58-125 76s-100.667 27-158 27zm229 161c-32.667 0-63-3.333-91-10-28-6-55.333-16.333-82-31-26-14.667-53.333-35-82-61-28.667-25.333-60.667-57-96-95l244-60c16 24.667 29.667 43.667 41 57 11.333 13.333 22.333 22.667 33 28 11.333 5.333 24 8 38 8 34.667 0 67-15 97-45l102 120c-50 59.333-118 89-204 89zM395 541c22 0 42.333-4 61-12 19.333-8 36-19.333 50-34 14.667-15.333 26-33.667 34-55 8-22 12-46.667 12-74s-4-51.667-12-73c-8-22-19.333-40.333-34-55-14-15.333-30.667-27-50-35-18.667-8-39-12-61-12s-42.667 4-62 12c-18.667 8-35.333 19.667-50 35-14 14.667-25 33-33 55-8 21.333-12 45.667-12 73s4 52 12 74c8 21.333 19 39.667 33 55 14.667 14.667 31.333 26 50 34 19.333 8 40 12 62 12z"
-                ></path>
-            </svg>
-
-        );
-
-        return (
-            <>
-                <ToolTipButton
-                    disabled={shouldDisable}
-                    label="Complete Quest"
-                    tooltipPosition="bottom"
-                    iconComponent={QuestsIcon()}
-                    onClick={this.openCompleteQuestUI}
-                >
-                </ToolTipButton>
-                <Divider></Divider>
-
-            </>
-        );
+        return true;
     },
-    openCompleteQuestUI() {
-        // check if user is sharing screen and there is someone that is watching the stream
 
-        const currentStream: Stream | null = findByProps("getCurrentUserActiveStream").getCurrentUserActiveStream();
+    openCompleteQuest() {
+        // check if user is sharing screen and there is someone that is watching the stream
+        if (questRunning) {
+            showNotification({
+                title: "Quest Completer",
+                body: "Stopping the current quest completion.",
+                ...ImagesConfig
+            });
+            clearInterval(interval);
+            interval = null;
+            questRunning = false;
+            return;
+        }
+        const currentStream = ApplicationStreamingStore.getCurrentUserActiveStream();
         const encodedStreamKey = encodeStreamKey(currentStream);
         quest = getLeftQuests();
         ImagesConfig = {
-            icon: findByProps("getQuestBarHeroAssetUrl").getQuestBarHeroAssetUrl(quest),
-            image: findByProps("getHeroAssetUrl").getHeroAssetUrl(quest)
+            icon: `${questAssetsBaseUrl}${quest.id}/reward.jpg`,
+            image: `${questAssetsBaseUrl}${quest.id}/hero.jpg`
         };
 
         const heartBeat = async () => {
-            findByProps("HTTP", "getAPIBaseURL"); // rest api module
-            findByProps("sendHeartbeat").sendHeartbeat({ questId: quest.id, streamKey: encodedStreamKey });
+            const sendHeartbeat = findByCode("QUESTS_HEARTBEAT");
+            sendHeartbeat({ questId: quest.id, streamKey: encodedStreamKey });
         };
 
         heartBeat();
-        interval = setInterval(heartBeat, 60500); // send the heartbeat each minute
-
+        interval = setInterval(heartBeat, 60000); // send the heartbeat each minute
+        questRunning = true;
+        if (quest.config.configVersion === 1) {
+            applicationId = quest.config.applicationId;
+            applicationName = quest.config.applicationName;
+            secondsNeeded = quest.config.streamDurationRequirementMinutes * 60;
+            secondsDone = quest.userStatus?.streamProgressSeconds ?? 0;
+            canPlay = quest.config.variants.includes(2);
+        } else if (quest.config.configVersion === 2) {
+            applicationId = quest.config.application.id;
+            applicationName = quest.config.application.name;
+            canPlay = quest.config.taskConfig.tasks.PLAY_ON_DESKTOP;
+            const taskName = canPlay ? "PLAY_ON_DESKTOP" : "STREAM_ON_DESKTOP";
+            secondsNeeded = quest.config.taskConfig.tasks[taskName].target;
+            secondsDone = quest.userStatus?.progress?.[taskName]?.value ?? 0;
+        }
         return;
     },
     flux: {
         STREAM_STOP: event => {
-            const stream: Stream = decodeStreamKey(event.streamKey);
+            const stream = decodeStreamKey(event.streamKey);
             // we check if the stream is by the current user id so we do not clear the interval without any reason.
             if (stream.ownerId === window.currentUserId && interval) {
                 clearInterval(interval);
@@ -223,23 +210,28 @@ export default definePlugin({
             interval = null;
         },
         QUESTS_SEND_HEARTBEAT_SUCCESS: event => {
-
-            const a = event.userStatus.streamProgressSeconds * 100;
-            const b = quest.config.streamDurationRequirementMinutes * 60;
-            showNotification({
-                title: `${quest.config.applicationName} - Quests Completer`,
-                body: `Current progress: ${Math.floor(a / b)}% (${Math.floor(event.userStatus.streamProgressSeconds / 60)} minutes.)`,
-                ...ImagesConfig
-            });
-
-            if (event.userStatus.streamProgressSeconds >= quest.config.streamDurationRequirementMinutes * 60) {
+            let progress = 0;
+            if (canPlay) {
+                progress = quest.config.configVersion === 1 ? event.userStatus.streamProgressSeconds : Math.floor(event.userStatus.progress.PLAY_ON_DESKTOP.value);
+                // WIP - Need to add game emulation
+            } else {
+                progress = quest.config.configVersion === 1 ? event.userStatus.streamProgressSeconds : Math.floor(event.userStatus.progress.STREAM_ON_DESKTOP.value);
+            }
+            if (progress >= secondsNeeded) {
                 showNotification({
-                    title: `${quest.config.applicationName} - Quests Completer`,
+                    title: `${applicationName} - Quests Completer`,
                     body: "Quest Completed",
                     ...ImagesConfig
                 });
                 clearInterval(interval);
                 interval = null;
+                return;
+            } else {
+                showNotification({
+                    title: `${applicationName} - Quests Completer`,
+                    body: `Current progress: ${Math.floor(progress / secondsNeeded * 100)}% (${Math.ceil((secondsNeeded - secondsDone) / 60)} minutes left.)`,
+                    ...ImagesConfig
+                });
             }
         }
     }
