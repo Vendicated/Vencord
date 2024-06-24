@@ -9,8 +9,9 @@ making distinguishing between different users easier. Inspired by the feature
 in many IRC clients, such as HexChat or WeeChat.
 
 Keep in mind this overrides role colors in chat, so if you wish to know
-someone's role color without checking their profile, enable the role dot feature
-in accessibility settings.
+someone's role color without checking their profile, enable the role dot: go to
+**User Settings**, **Accessibility** and switch **Role Colors** to **Show role
+colors next to names**.
 
 Created for use with the [Compact++](https://gitlab.com/Grzesiek11/compactplusplus-discord-theme)
 theme.
