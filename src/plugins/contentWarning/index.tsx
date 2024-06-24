@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2023 Vendicated, camila314, and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, useState, TextInput } from "@webpack/common";
 import { DataStore } from "@api/index";
