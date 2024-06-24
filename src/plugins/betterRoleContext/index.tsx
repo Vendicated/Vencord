@@ -66,8 +66,9 @@ export default definePlugin({
     description: "Adds options to copy role color / edit role / view role icon when right clicking roles in the user profile",
     authors: [Devs.Ven, Devs.goodbee],
     dependencies: ["UserSettingsAPI"],
+
     settings,
-  
+
     start() {
         // DeveloperMode needs to be enabled for the context menu to be shown
         DeveloperMode.updateSetting(true);

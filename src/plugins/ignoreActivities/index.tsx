@@ -209,6 +209,7 @@ export default definePlugin({
     authors: [Devs.Nuckyz],
     description: "Ignore activities from showing up on your status ONLY. You can configure which ones are specifically ignored from the Registered Games and Activities tabs, or use the general settings below.",
     dependencies: ["UserSettingsAPI"],
+
     settings,
 
     patches: [
