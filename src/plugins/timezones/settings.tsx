@@ -18,42 +18,54 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
+import { Text } from "@webpack/common";
+import { Link } from "@components/Link";
+import { Snowflake } from "./api";
 
-export enum CustomTimezonePreference {
-    Never,
-    Secondary,
-    Always
-}
+export type TimezoneOverwrites = Record<Snowflake, string>;
 
-export default definePluginSettings({
-    preference: {
-        type: OptionType.SELECT,
-        description: "When to use custom timezones over TimezoneDB.",
-        options: [
-            {
-                label: "Never use custom timezones.",
-                value: CustomTimezonePreference.Never,
-            },
-            {
-                label: "Prefer custom timezones over TimezoneDB",
-                value: CustomTimezonePreference.Secondary,
-                default: true,
-            },
-            {
-                label: "Always use custom timezones.",
-                value: CustomTimezonePreference.Always,
-            },
-        ],
-        default: CustomTimezonePreference.Secondary,
-    },
-    showInChat: {
+const settings = definePluginSettings({
+    enableApi: {
         type: OptionType.BOOLEAN,
-        description: "Show local time on messages in chat",
+        description: "Fetch user timezones from TimezoneDB when a local override does not exist",
         default: true,
     },
-    showInProfile: {
+    apiUrl: {
+        type: OptionType.STRING,
+        description: "The TimezoneDB API instance to fetch from",
+        default: "https://timezonedb.catvibers.me/api",
+    },
+    displayInChat: {
         type: OptionType.BOOLEAN,
-        description: "Show timezones in user profiles",
+        description: "Show local timestamp of messages",
         default: true,
     },
+    displayInProfile: {
+        type: OptionType.BOOLEAN,
+        description: "Show local time in user profiles",
+        default: true,
+    },
+    timezoneOverwrites: {
+        type: OptionType.COMPONENT,
+        description: "Local overwrites for users' timezones",
+        component: () => <></> // TODO: settings component to manage local overwrites,
+    }
 });
+
+export default settings;
+
+export function SettingsComponent(): JSX.Element {
+    // const { apiUrl } = settings.use(["apiUrl"]);
+    // const url = `${apiUrl}/../?client_mod=${encodeURIComponent(VENCORD_USER_AGENT)}`;
+
+    // TODO: show button to authorize tzdb and manage public tz
+
+    return <>
+        <Text variant="text-md/normal">
+            <br />
+            This plugin supports setting your own Timezone publicly for others to
+            fetch and display via <Link href="https://github.com/rushiimachine/timezonedb">TimezoneDB</Link>.
+            You can override other users' timezones locally if they haven't set their own.
+        </Text>
+    </>;
+}

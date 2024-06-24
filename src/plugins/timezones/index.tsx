@@ -4,54 +4,37 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import * as DataStore from "@api/DataStore";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { SearchableSelect, Text, Toasts, useEffect, UserStore, useState } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
-import settings from "./settings";
+import settings, { SettingsComponent } from "./settings";
 import { CogWheel, DeleteIcon } from "@components/Icons";
-import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
-import { makeLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
 
-import { API_URL, DATASTORE_KEY, getAllTimezones, getTimeString, getUserTimezone, TimezoneDB } from "./utils";
-
 const classNames = findByPropsLazy("customStatusSection");
-
 const styles = findByPropsLazy("timestampInline");
 
-const useTimezones = makeLazy(getAllTimezones);
-
 export default definePlugin({
-    settings,
-
     name: "Timezones",
     description: "Set and display the local times of you and other users via TimezoneDB",
     authors: [Devs.rushii, Devs.mantikafasi, Devs.Aria, Devs.Arjix],
+
+    settings,
+    settingsAboutComponent: SettingsComponent,
 
     commands: [
         {
             name: "timezone",
             description: "Sends a link to a utility website that shows your current timezone identifier",
-            execute: () => ({ content: "https://gh.lewisakura.moe/timezone/" }),
+            execute: () => ({
+                content: "[IANA Timezone ID](https://gh.lewisakura.moe/timezone/)",
+            }),
         },
     ],
-
-    // TODO: show button to authorize tzdb and manage public tz
-    settingsAboutComponent: () => {
-        const href = `${API_URL}?client_mod=${encodeURIComponent(VENCORD_USER_AGENT)}`;
-        return (
-            <Text variant="text-md/normal">
-                <br/>
-                This plugin supports setting your own Timezone publicly for others to fetch and display via <a href={href}>TimezoneDB</a>.
-                You can override other users' timezones locally if they haven't set their own.
-            </Text>
-        );
-    },
 
     patches: [
         // {
@@ -74,7 +57,7 @@ export default definePlugin({
 
     // TODO: make this not ugly (port vc-timezones plugin)
     getProfileTimezonesComponent: ({ user }: { user: User; }) => {
-        const { preference, showInProfile } = settings.use(["preference", "showInProfile"]);
+        const { displayInProfile } = settings.use(["displayInProfile"]);
 
         const [timezone, setTimezone] = useState<string | undefined>();
         const [isInEditMode, setIsInEditMode] = useState(false);

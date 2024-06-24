@@ -4,122 +4,39 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import * as DataStore from "@api/DataStore";
 import { findStoreLazy } from "@webpack";
-import { debounce } from "@shared/debounce";
-import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
-
-import { CustomTimezonePreference } from "./settings";
-
-export const DATASTORE_KEY = "plugins.timezones.savedTimezones";
-
-export interface TimezoneDB {
-    [userId: string]: string;
-}
-
-export const API_URL = "https://timezonedb.catvibers.me";
-const Cache: Record<string, string> = {};
+import { Logger } from "@utils/Logger";
+import { makeLazy } from "@utils/lazy";
 
 const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
+const TIMEZONE_LIST = "https://gist.githubusercontent.com/ArjixWasTaken/e321f856f98676505efb90aad82feff1/raw/91034ee32eff93a7cb62d10702f6b1d01e0309e6/timezones.json";
 
-export function getTimeString(timezone: string, timestamp = new Date()): string {
+export function formatTimestamp(timezone: string, timestamp: Date = new Date()): string | undefined {
     try {
         const locale = UserSettingsProtoStore.settings.localization.locale.value;
-        return new Intl.DateTimeFormat(locale, {
+        const formatter = new Intl.DateTimeFormat(locale, {
             hour: "numeric",
             minute: "numeric",
             timeZone: timezone,
-        }).format(timestamp); // we hate javascript
-    } catch (e) {
-        // TODO: log error
-        return "Error"; // incase it gets invalid timezone from api, probably not gonna happen but if it does this will prevent discord from crashing
-    }
-}
-
-
-// A map of ids and callbacks that should be triggered on fetch
-const requestQueue: Record<string, ((timezone: string) => void)[]> = {};
-
-
-async function bulkFetchTimezones(ids: string[]): Promise<TimezoneDB | undefined> {
-    try {
-        const req = await fetch(`${API_URL}/api/user/bulk`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-User-Agent": VENCORD_USER_AGENT,
-            },
-            body: JSON.stringify(ids),
         });
 
-        return await req.json()
-            .then((res: { [userId: string]: { timezoneId: string; } | null; }) => {
-                const tzs = (Object.keys(res).map(userId => {
-                    return res[userId] && { [userId]: res[userId]!.timezoneId };
-                }).filter(Boolean) as TimezoneDB[]).reduce((acc, cur) => ({ ...acc, ...cur }), {});
-
-                Object.assign(Cache, tzs);
-                return tzs;
-            });
+        return formatter.format(timestamp);
     } catch (e) {
-        console.error("Timezone fetching failed: ", e);
+        // Probably never going to happen
+        new Logger("Timezones").error(`Failed to format timestamp with timezone ${timezone}`, e);
     }
 }
 
-
-// Executes all queued requests and calls their callbacks
-const bulkFetch = debounce(async () => {
-    const ids = Object.keys(requestQueue);
-    const timezones = await bulkFetchTimezones(ids);
-    if (!timezones) {
-        // retry after 15 seconds
-        setTimeout(bulkFetch, 15000);
-        return;
-    }
-
-    for (const id of ids) {
-        // Call all callbacks for the id
-        requestQueue[id].forEach(c => c(timezones[id]));
-        delete requestQueue[id];
-    }
-});
-
-export function getUserTimezone(discordID: string, strategy: CustomTimezonePreference):
-    Promise<string | undefined> {
-
-    return new Promise(res => {
-        const timezone = (DataStore.get(DATASTORE_KEY) as Promise<TimezoneDB | undefined>).then(tzs => tzs?.[discordID]);
-        timezone.then(tz => {
-            if (strategy === CustomTimezonePreference.Always) {
-                if (tz) res(tz);
-                else res(undefined);
-                return;
-            }
-
-            if (tz && strategy === CustomTimezonePreference.Secondary)
-                res(tz);
-            else {
-                if (discordID in Cache) res(Cache[discordID]);
-                else if (discordID in requestQueue) requestQueue[discordID].push(res);
-                // If not already added, then add it and call the debounced function to make sure the request gets executed
-                else {
-                    requestQueue[discordID] = [res];
-                    bulkFetch();
-                }
-            }
-        });
-    });
-}
-
-const timezonesLink = "https://gist.githubusercontent.com/ArjixWasTaken/e321f856f98676505efb90aad82feff1/raw/91034ee32eff93a7cb62d10702f6b1d01e0309e6/timezones.json";
-
-export const getAllTimezones = async (): Promise<string[]> => {
+async function getTimezones(): Promise<string[]> {
     if (typeof Intl !== "undefined" && "supportedValuesOf" in Intl) {
         try {
             return Intl.supportedValuesOf("timeZone");
         } catch {
+            // Fallthrough to fetching external timezone list
         }
     }
 
-    return await fetch(timezonesLink).then(tzs => tzs.json());
-};
+    return await fetch(TIMEZONE_LIST).then(res => res.json());
+}
+
+export const getTimezonesLazy = makeLazy(getTimezones, 2);
