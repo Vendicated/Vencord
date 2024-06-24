@@ -6,7 +6,7 @@
 
 import type { SnakeCasedProperties } from "type-fest";
 
-import type { Nullish } from "../../internal";
+import type { Nullish, Optional } from "../../internal";
 import type { PermissionOverwriteMap } from "../Permissions";
 import type { AvatarDecorationData, UserClanData, UserFlags } from "../UserRecord";
 import type { ForumChannelRecord, GuildForumChannelRecord, GuildMediaChannelRecord } from "./ForumChannelRecord";
@@ -25,9 +25,10 @@ type ChannelRecordOwnPropertyKeys = "application_id" | "appliedTags" | "availabl
 
 export type ChannelRecordOwnProperties<Channel extends ChannelRecordBase> = Pick<Channel, ChannelRecordOwnPropertyKeys>;
 
+export type ChannelBaseProperties = Optional<Pick<ChannelRecordOwnProperties<ChannelRecordBase>, "guild_id" | "id" | "name" | "type">, Nullish, "id", true>;
+
 export declare abstract class ChannelRecordBase {
-    /** @todo */
-    constructor(channelProperties: Record<string, any>);
+    constructor(channelProperties: ChannelBaseProperties);
 
     get accessPermissions(): /* Permissions */ bigint;
     get bitrate(): number;
@@ -88,7 +89,7 @@ export declare abstract class ChannelRecordBase {
     defaultReactionEmoji?: ForumDefaultReactionEmoji | undefined;
     defaultSortOrder?: ThreadSortOrder | Nullish;
     defaultThreadRateLimitPerUser?: number | undefined;
-    flags_: ChannelFlags;
+    flags_: ChannelFlags | undefined;
     guild_id: string | null;
     icon?: string | Nullish;
     iconEmoji?: {

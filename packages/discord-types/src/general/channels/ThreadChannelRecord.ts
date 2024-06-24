@@ -4,17 +4,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { Defined, Nullish } from "../../internal";
-import type { ChannelRecordBase, ChannelType } from "./ChannelRecord";
+import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
+import type { ChannelBaseProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
+
+export type ThreadChannelProperties = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<ThreadChannelRecord>>>, Nullish, "appliedTags">;
 
 type ThreadChannelType = ChannelType.ANNOUNCEMENT_THREAD | ChannelType.PUBLIC_THREAD | ChannelType.PRIVATE_THREAD;
 
 export declare class ThreadChannelRecord<ChannelType extends ThreadChannelType = ThreadChannelType> extends ChannelRecordBase {
-    /** @todo */
-    constructor(channelProperties: Record<string, any>);
+    constructor(channelProperties: ThreadChannelProperties);
 
-    /** @todo */
-    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): ThreadChannelRecord;
+    static fromServer<Type extends ThreadChannelType | Nullish = undefined>(
+        /** @todo */
+        channelFromServer: { type?: Type; } & Record<string, any>,
+        guildId?: string | Nullish
+    ): ThreadChannelRecord<Type extends ThreadChannelType ? Type : ChannelType.PUBLIC_THREAD>;
 
     application_id?: undefined;
     appliedTags: Defined<ChannelRecordBase["appliedTags"]>;
@@ -25,6 +29,7 @@ export declare class ThreadChannelRecord<ChannelType extends ThreadChannelType =
     defaultReactionEmoji?: undefined;
     defaultSortOrder?: undefined;
     defaultThreadRateLimitPerUser?: undefined;
+    flags_: Defined<ChannelRecordBase["flags_"]>;
     icon?: undefined;
     iconEmoji?: undefined;
     isMessageRequest?: undefined;

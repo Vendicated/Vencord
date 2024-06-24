@@ -8,7 +8,7 @@ import type { Duration, Moment } from "moment";
 import type { ReactNode } from "react";
 import type { SnakeCasedProperties } from "type-fest";
 
-import type { Nullish, Optional } from "../../internal";
+import type { Nullish, Optional, PartialOnUndefined } from "../../internal";
 import type { ApplicationCommand, ApplicationCommandType } from "../ApplicationCommand";
 import type { ApplicationIntegrationType } from "../ApplicationRecord";
 import type { ChannelRecord, ChannelType } from "../channels/ChannelRecord";
@@ -19,9 +19,8 @@ import type { MessageFlags, MinimalMessageRecord, MinimalMessageRecordOwnPropert
 
 export type MessageRecordOwnProperties = MinimalMessageRecordOwnProperties & Pick<MessageRecord, "activity" | "activityInstance" | "application" | "applicationId" | "author" | "blocked" | "bot" | "call" | "changelogId" | "codedLinks" | "colorString" | "customRenderedContent" | "giftCodes" | "giftInfo" | "id" | "interaction" | "interactionData" | "interactionError" | "interactionMetadata" | "isSearchHit" | "isUnsupported" | "loggingName" | "mentionChannels" | "mentionEveryone" | "mentionRoles" | "mentioned" | "mentions" | "messageReference" | "messageSnapshots" | "nick" | "nonce" | "pinned" | "poll" | "purchaseNotification" | "reactions" | "referralTrialOfferId" | "roleSubscriptionData" | "state" | "stickerItems" | "stickers" | "tts" | "webhookId">;
 
-export type MessageProperties = Optional<MessageRecordOwnProperties, Nullish, "author" | "channel_id" | "id" | "customRenderedContent" | "colorString" | "giftInfo" | "nick" | "roleSubscriptionData" | "purchaseNotification" | "poll", true>
-    & SnakeCasedProperties<Optional<Pick<MessageRecordOwnProperties, "applicationId" | "activityInstance" | "giftInfo" | "stickerItems" | "changelogId">, Nullish>>
-    & Partial<Pick<MessageRecordOwnProperties, "giftInfo">>;
+export type MessageProperties = Optional<PartialOnUndefined<MessageRecordOwnProperties>, Nullish, "author" | "channel_id" | "id" | "customRenderedContent" | "colorString" | "giftInfo" | "nick" | "roleSubscriptionData" | "purchaseNotification" | "poll", true>
+    & SnakeCasedProperties<Optional<Pick<MessageRecordOwnProperties, "applicationId" | "activityInstance" | "giftInfo" | "stickerItems" | "changelogId">, Nullish>>;
 
 export declare class MessageRecord<
     OwnProperties extends MessageRecordOwnProperties = MessageRecordOwnProperties

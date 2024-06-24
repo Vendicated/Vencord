@@ -97,7 +97,7 @@ const profilePanelComponent = ErrorBoundary.wrap(
 
 function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: string, simplified?: boolean; }) {
     const profile = UserProfileStore.getUserProfile(id);
-    if (!profile || profile.profileFetchFailed)
+    if (!profile)
         return null;
 
     const connections = profile.connectedAccounts;

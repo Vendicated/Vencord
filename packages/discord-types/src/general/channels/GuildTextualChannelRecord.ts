@@ -4,17 +4,30 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { Defined, Nullish } from "../../internal";
-import type { ChannelRecordBase, ChannelType } from "./ChannelRecord";
+import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
+import type { ChannelBaseProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
 export type GuildTextualChannelRecord = GuildTextChannelRecord | GuildCategoryChannelRecord | GuildAnnouncementChannelRecord | GuildStoreChannelRecord | GuildDirectoryChannelRecord;
 
-export declare abstract class GuildTextualChannelRecordBase extends ChannelRecordBase {
-    /** @todo */
-    constructor(channelProperties: Record<string, any>);
+// @ts-expect-error: TS bug
+export type GuildTextualChannelProperties<Channel extends GuildTextualChannelRecordBase> = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "permissionOverwrites_">;
 
-    /** @todo */
-    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): GuildTextualChannelRecord;
+type GuildTextualChannelType = ChannelType.GUILD_TEXT | ChannelType.GUILD_CATEGORY | ChannelType.GUILD_ANNOUNCEMENT | ChannelType.GUILD_STORE | ChannelType.GUILD_DIRECTORY;
+
+export declare abstract class GuildTextualChannelRecordBase extends ChannelRecordBase {
+    constructor(channelProperties: GuildTextualChannelProperties<GuildTextualChannelRecordBase>);
+
+    static fromServer<Type extends GuildTextualChannelType | Nullish = undefined>(
+        /** @todo */
+        channelFromServer: { type?: Type; } & Record<string, any>,
+        guildId?: string | Nullish
+    ): {
+        [ChannelType.GUILD_ANNOUNCEMENT]: GuildAnnouncementChannelRecord;
+        [ChannelType.GUILD_CATEGORY]: GuildCategoryChannelRecord;
+        [ChannelType.GUILD_DIRECTORY]: GuildDirectoryChannelRecord;
+        [ChannelType.GUILD_STORE]: GuildStoreChannelRecord;
+        [ChannelType.GUILD_TEXT]: GuildTextChannelRecord;
+    }[Type extends GuildTextualChannelType ? Type : ChannelType.GUILD_TEXT];
 
     application_id: undefined;
     appliedTags?: undefined;
@@ -25,6 +38,7 @@ export declare abstract class GuildTextualChannelRecordBase extends ChannelRecor
     defaultReactionEmoji?: undefined;
     defaultSortOrder?: undefined;
     defaultThreadRateLimitPerUser: ChannelRecordBase["defaultThreadRateLimitPerUser"];
+    flags_: Defined<ChannelRecordBase["flags_"]>;
     icon?: undefined;
     iconEmoji: ChannelRecordBase["iconEmoji"];
     isMessageRequest?: undefined;
@@ -56,7 +70,7 @@ export declare abstract class GuildTextualChannelRecordBase extends ChannelRecor
     threadMetadata?: undefined;
     topic_: ChannelRecordBase["topic_"];
     totalMessageSent?: undefined;
-    type: ChannelType.GUILD_TEXT | ChannelType.GUILD_CATEGORY | ChannelType.GUILD_ANNOUNCEMENT | ChannelType.GUILD_STORE | ChannelType.GUILD_DIRECTORY;
+    type: GuildTextualChannelType;
     userLimit_?: undefined;
     version: ChannelRecordBase["version"];
     videoQualityMode?: undefined;
@@ -64,10 +78,14 @@ export declare abstract class GuildTextualChannelRecordBase extends ChannelRecor
 }
 
 export declare class GuildTextChannelRecord extends GuildTextualChannelRecordBase {
+    constructor(channelProperties: GuildTextualChannelProperties<GuildTextChannelRecord>);
+
     type: ChannelType.GUILD_TEXT;
 }
 
 export declare class GuildCategoryChannelRecord extends GuildTextualChannelRecordBase {
+    constructor(channelProperties: GuildTextualChannelProperties<GuildCategoryChannelRecord>);
+
     defaultAutoArchiveDuration: undefined;
     defaultThreadRateLimitPerUser: undefined;
     lastMessageId: undefined;
@@ -80,13 +98,19 @@ export declare class GuildCategoryChannelRecord extends GuildTextualChannelRecor
 }
 
 export declare class GuildAnnouncementChannelRecord extends GuildTextualChannelRecordBase {
+    constructor(channelProperties: GuildTextualChannelProperties<GuildAnnouncementChannelRecord>);
+
     type: ChannelType.GUILD_ANNOUNCEMENT;
 }
 
 export declare class GuildStoreChannelRecord extends GuildTextualChannelRecordBase {
+    constructor(channelProperties: GuildTextualChannelProperties<GuildAnnouncementChannelRecord>);
+
     type: ChannelType.GUILD_STORE;
 }
 
 export declare class GuildDirectoryChannelRecord extends GuildTextualChannelRecordBase {
+    constructor(channelProperties: GuildTextualChannelProperties<GuildDirectoryChannelRecord>);
+
     type: ChannelType.GUILD_DIRECTORY;
 }

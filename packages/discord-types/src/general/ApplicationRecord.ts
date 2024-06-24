@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { Nullish } from "../internal";
+import type { SnakeCasedProperties } from "type-fest";
+
+import type { Nullish, Optional, PartialOnUndefined } from "../internal";
 import type { CompanyRecord } from "./CompanyRecord";
 import type { ImmutableRecord } from "./ImmutableRecord";
 import type { IconSource } from "./misc";
@@ -12,11 +14,13 @@ import type { UserRecord } from "./UserRecord";
 
 export type ApplicationRecordOwnProperties = Pick<ApplicationRecord, "aliases" | "bot" | "coverImage" | "description" | "developers" | "embeddedActivityConfig" | "eulaId" | "executables" | "flags" | "guild" | "guildId" | "hashes" | "hook" | "icon" | "id" | "integrationTypesConfig" | "isMonetized" | "maxParticipants" | "name" | "overlay" | "overlayCompatibilityHook" | "overlayMethods" | "overlayWarn" | "primarySkuId" | "privacyPolicyUrl" | "publishers" | "roleConnectionsVerificationUrl" | "slug" | "splash" | "storefront_available" | "storeListingSkuId" | "tags" | "team" | "termsOfServiceUrl" | "thirdPartySkus" | "type">;
 
+export type ApplicationProperties = Optional<PartialOnUndefined<Omit<ApplicationRecordOwnProperties, "embeddedActivityConfig" | "isMonetized">>, Nullish, "id" | "integrationTypesConfig" | "maxParticipants" | "name" | "primarySkuId" | "privacyPolicyUrl" | "roleConnectionsVerificationUrl" | "storefront_available" | "storeListingSkuId" | "team" | "termsOfServiceUrl" | "type", true>
+    & SnakeCasedProperties<PartialOnUndefined<Pick<ApplicationRecordOwnProperties, "embeddedActivityConfig" | "isMonetized">>>;
+
 export declare class ApplicationRecord<
     OwnProperties extends ApplicationRecordOwnProperties = ApplicationRecordOwnProperties
 > extends ImmutableRecord<OwnProperties> {
-    /** @todo */
-    constructor(applicationProperties: Record<string, any>);
+    constructor(applicationProperties: ApplicationProperties);
 
     /** @todo */
     static createFromServer(applicationFromServer: Record<string, any>): ApplicationRecord;

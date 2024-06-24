@@ -4,17 +4,26 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { Defined, Nullish } from "../../internal";
-import type { ChannelRecipient, ChannelRecordBase, ChannelType } from "./ChannelRecord";
+import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
+import type { ChannelBaseProperties, ChannelRecipient, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
 export type PrivateChannelRecord = DMChannelRecord | GroupDMChannelRecord;
 
-export declare abstract class PrivateChannelRecordBase extends ChannelRecordBase {
-    /** @todo */
-    constructor(channelProperties: Record<string, any>);
+// @ts-expect-error: TS bug
+export type PrivateChannelProperties<Channel extends PrivateChannelRecordBase> = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "rawRecipients" | "recipients" | "safetyWarnings">;
 
-    /** @todo */
-    static fromServer(channelFromServer: Record<string, any>): PrivateChannelRecord;
+type PrivateChannelType = ChannelType.DM | ChannelType.GROUP_DM;
+
+export declare abstract class PrivateChannelRecordBase extends ChannelRecordBase {
+    constructor(channelProperties: PrivateChannelProperties<PrivateChannelRecordBase>);
+
+    static fromServer<Type extends PrivateChannelType | Nullish = undefined>(
+        /** @todo */
+        channelFromServer: { type?: Type; } & Record<string, any>
+    ): {
+        [ChannelType.DM]: DMChannelRecord;
+        [ChannelType.GROUP_DM]: GroupDMChannelRecord;
+    }[Type extends PrivateChannelType ? Type : ChannelType.DM];
     static sortRecipients(recipients: ChannelRecipient[] | Nullish, channelId: string): string[];
 
     addRecipient(recipientUserId: string, nickname: string | undefined, currentUserId: string): this;
@@ -30,6 +39,7 @@ export declare abstract class PrivateChannelRecordBase extends ChannelRecordBase
     defaultReactionEmoji?: undefined;
     defaultSortOrder?: undefined;
     defaultThreadRateLimitPerUser?: undefined;
+    flags_: Defined<ChannelRecordBase["flags_"]>;
     guild_id: null;
     icon: ChannelRecordBase["icon"];
     iconEmoji?: undefined;
@@ -61,7 +71,7 @@ export declare abstract class PrivateChannelRecordBase extends ChannelRecordBase
     threadMetadata?: undefined;
     topic_?: undefined;
     totalMessageSent?: undefined;
-    type: ChannelType.DM | ChannelType.GROUP_DM;
+    type: PrivateChannelType;
     userLimit_?: undefined;
     version?: undefined;
     videoQualityMode?: undefined;
@@ -69,6 +79,8 @@ export declare abstract class PrivateChannelRecordBase extends ChannelRecordBase
 }
 
 export declare class DMChannelRecord extends PrivateChannelRecordBase {
+    constructor(channelProperties: PrivateChannelProperties<DMChannelRecord>);
+
     application_id: undefined;
     icon: undefined;
     name: "";
@@ -77,6 +89,8 @@ export declare class DMChannelRecord extends PrivateChannelRecordBase {
 }
 
 export declare class GroupDMChannelRecord extends PrivateChannelRecordBase {
+    constructor(channelProperties: PrivateChannelProperties<GroupDMChannelRecord>);
+
     isMessageRequest: undefined;
     isMessageRequestTimestamp: undefined;
     ownerId: PrivateChannelRecordBase["ownerId"];

@@ -5,14 +5,18 @@
  */
 
 import type { Defined, Nullish } from "../../internal";
-import type { ChannelRecordBase, ChannelType } from "./ChannelRecord";
+import type { ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
+
+export type UnknownChannelProperties = ChannelRecordOwnProperties<UnknownChannelRecord>;
 
 export declare class UnknownChannelRecord extends ChannelRecordBase {
-    /** @todo */
-    constructor(channelProperties: Record<string, any>);
+    constructor(channelProperties: UnknownChannelProperties);
 
-    /** @todo */
-    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): UnknownChannelRecord;
+    static fromServer(
+        /** @todo */
+        channelFromServer: { type?: ChannelType.UNKNOWN | Nullish; } & Record<string, any>,
+        guildId?: string | Nullish
+    ): UnknownChannelRecord;
 
     application_id: ChannelRecordBase["application_id"];
     appliedTags: ChannelRecordBase["appliedTags"];
@@ -23,6 +27,7 @@ export declare class UnknownChannelRecord extends ChannelRecordBase {
     defaultReactionEmoji: ChannelRecordBase["defaultReactionEmoji"];
     defaultSortOrder: ChannelRecordBase["defaultSortOrder"];
     defaultThreadRateLimitPerUser: ChannelRecordBase["defaultThreadRateLimitPerUser"];
+    flags_: Defined<ChannelRecordBase["flags_"]>;
     icon: ChannelRecordBase["icon"];
     iconEmoji: ChannelRecordBase["iconEmoji"];
     isMessageRequest: ChannelRecordBase["isMessageRequest"];

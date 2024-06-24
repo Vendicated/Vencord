@@ -4,17 +4,24 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { Nullish } from "../internal";
+import type { SnakeCasedProperties } from "type-fest";
+
+import type { Nullish, Optional } from "../internal";
 import type { ImmutableRecord } from "./ImmutableRecord";
 import type { IconSource } from "./misc";
 
-export type UserRecordOwnProperties = Pick<UserRecord, "avatar" | "avatarDecorationData" | "bot" | "clan" | "desktop" | "discriminator" | "email" | "flags" | "globalName" | "guildMemberAvatars" | "hasAnyStaffLevel" | "hasBouncedEmail" | "hasFlag" | "id" | "isStaff" | "isStaffPersonal" | "mfaEnabled" | "mobile" | "nsfwAllowed" | "personalConnectionId" | "phone" | "premiumType" | "premiumUsageFlags" | "publicFlags" | "purchasedFlags" | "system" | "username" | "verified">;
+export type UserRecordOwnProperties = Pick<UserRecord, "avatar" | "avatarDecorationData" | "banner" | "bot" | "clan" | "desktop" | "discriminator" | "email" | "flags" | "globalName" | "guildMemberAvatars" | "hasAnyStaffLevel" | "hasBouncedEmail" | "hasFlag" | "id" | "isStaff" | "isStaffPersonal" | "mfaEnabled" | "mobile" | "nsfwAllowed" | "personalConnectionId" | "phone" | "premiumType" | "premiumUsageFlags" | "publicFlags" | "purchasedFlags" | "system" | "username" | "verified">;
+
+export type UserProperties = Optional<Omit<UserRecordOwnProperties, "avatarDecorationData" | "clan" | "premiumType" | "hasAnyStaffLevel" | "hasFlag" | "isStaff" | "isStaffPersonal" | "nsfwAllowed">, Nullish, "id", true>
+    & SnakeCasedProperties<Optional<Pick<UserRecordOwnProperties, "globalName" | "hasBouncedEmail" | "mfaEnabled" | "personalConnectionId" | "publicFlags" | "purchasedFlags" | "premiumUsageFlags">, Nullish>>
+    & Partial<Record<"avatar_decoration_data" | "avatarDecorationData", unknown>>
+    & Partial<Record<"premium_type" | "premiumType", UserRecord["premiumType"] | 0>>
+    & { clan?: SnakeCasedProperties<UserClanData> | UserClanData | Nullish; };
 
 export declare class UserRecord<
     OwnProperties extends UserRecordOwnProperties = UserRecordOwnProperties
 > extends ImmutableRecord<OwnProperties> {
-    /** @todo */
-    constructor(userPropertiesOrUserFromServer: Record<string, any>);
+    constructor(userProperties: UserProperties);
 
     addGuildAvatarHash(guildId: string, avatarHash: string): this;
     get avatarDecoration(): AvatarDecorationData | null;

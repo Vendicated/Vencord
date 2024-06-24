@@ -4,17 +4,27 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { Defined, Nullish } from "../../internal";
-import type { ChannelRecordBase, ChannelType } from "./ChannelRecord";
+import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
+import type { ChannelBaseProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
 export type GuildVocalChannelRecord = GuildVoiceChannelRecord | GuildStageVoiceChannelRecord;
 
-export declare abstract class GuildVocalChannelRecordBase extends ChannelRecordBase {
-    /** @todo */
-    constructor(channelProperties: Record<string, any>);
+// @ts-expect-error: TS bug
+export type GuildVocalChannelProperties<Channel extends GuildVocalChannelRecordBase> = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "permissionOverwrites_">;
 
-    /** @todo */
-    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): GuildVocalChannelRecord;
+type GuildVocalChannelType = ChannelType.GUILD_VOICE | ChannelType.GUILD_STAGE_VOICE;
+
+export declare abstract class GuildVocalChannelRecordBase extends ChannelRecordBase {
+    constructor(channelProperties: GuildVocalChannelProperties<GuildVocalChannelRecordBase>);
+
+    static fromServer<Type extends GuildVocalChannelType | Nullish = undefined>(
+        /** @todo */
+        channelFromServer: { type?: Type; } & Record<string, any>,
+        guildId?: string | Nullish
+    ): {
+        [ChannelType.GUILD_STAGE_VOICE]: GuildStageVoiceChannelRecord;
+        [ChannelType.GUILD_VOICE]: GuildVoiceChannelRecord;
+    }[Type extends GuildVocalChannelType ? Type : ChannelType.GUILD_VOICE];
 
     application_id: undefined;
     appliedTags?: undefined;
@@ -25,6 +35,7 @@ export declare abstract class GuildVocalChannelRecordBase extends ChannelRecordB
     defaultReactionEmoji?: undefined;
     defaultSortOrder?: undefined;
     defaultThreadRateLimitPerUser?: undefined;
+    flags_: Defined<ChannelRecordBase["flags_"]>;
     icon?: undefined;
     iconEmoji: ChannelRecordBase["iconEmoji"];
     isMessageRequest?: undefined;
@@ -57,7 +68,7 @@ export declare abstract class GuildVocalChannelRecordBase extends ChannelRecordB
     threadMetadata?: undefined;
     topic_: Nullish;
     totalMessageSent?: undefined;
-    type: ChannelType.GUILD_VOICE | ChannelType.GUILD_STAGE_VOICE;
+    type: GuildVocalChannelType;
     userLimit_: Defined<ChannelRecordBase["userLimit_"]>;
     version: ChannelRecordBase["version"];
     videoQualityMode: ChannelRecordBase["videoQualityMode"];
@@ -65,9 +76,13 @@ export declare abstract class GuildVocalChannelRecordBase extends ChannelRecordB
 }
 
 export declare class GuildVoiceChannelRecord extends GuildVocalChannelRecordBase {
+    constructor(channelProperties: GuildVocalChannelProperties<GuildVoiceChannelRecord>);
+
     type: ChannelType.GUILD_VOICE;
 }
 
 export declare class GuildStageVoiceChannelRecord extends GuildVocalChannelRecordBase {
+    constructor(channelProperties: GuildVocalChannelProperties<GuildStageVoiceChannelRecord>);
+
     type: ChannelType.GUILD_STAGE_VOICE;
 }

@@ -4,17 +4,27 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { Defined, Nullish } from "../../internal";
-import type { ChannelRecordBase, ChannelType } from "./ChannelRecord";
+import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
+import type { ChannelBaseProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
 export type ForumChannelRecord = GuildForumChannelRecord | GuildMediaChannelRecord;
 
-export declare abstract class ForumChannelRecordBase extends ChannelRecordBase {
-    /** @todo */
-    constructor(channelProperties: Record<string, any>);
+// @ts-expect-error: TS bug
+export type ForumChannelProperties<Channel extends ForumChannelRecordBase> = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "availableTags" | "permissionOverwrites_">;
 
-    /** @todo */
-    static fromServer(channelFromServer: Record<string, any>, guildId?: string | Nullish): ForumChannelRecord;
+type ForumChannelType = ChannelType.GUILD_FORUM | ChannelType.GUILD_MEDIA;
+
+export declare abstract class ForumChannelRecordBase extends ChannelRecordBase {
+    constructor(channelProperties: ForumChannelProperties<ForumChannelRecordBase>);
+
+    static fromServer<Type extends ForumChannelType>(
+        /** @todo */
+        channelFromServer: { type: Type; } & Record<string, any>,
+        guildId?: string | Nullish
+    ): {
+        [ChannelType.GUILD_FORUM]: GuildForumChannelRecord;
+        [ChannelType.GUILD_MEDIA]: GuildMediaChannelRecord;
+    }[Type];
 
     application_id?: undefined;
     appliedTags?: undefined;
@@ -25,6 +35,7 @@ export declare abstract class ForumChannelRecordBase extends ChannelRecordBase {
     defaultReactionEmoji: ChannelRecordBase["defaultReactionEmoji"];
     defaultSortOrder: ChannelRecordBase["defaultSortOrder"];
     defaultThreadRateLimitPerUser: ChannelRecordBase["defaultThreadRateLimitPerUser"];
+    flags_: Defined<ChannelRecordBase["flags_"]>;
     icon?: undefined;
     iconEmoji: ChannelRecordBase["iconEmoji"];
     isMessageRequest?: undefined;
@@ -56,7 +67,7 @@ export declare abstract class ForumChannelRecordBase extends ChannelRecordBase {
     threadMetadata?: undefined;
     topic_: ChannelRecordBase["topic_"];
     totalMessageSent?: undefined;
-    type: ChannelType.GUILD_FORUM | ChannelType.GUILD_MEDIA;
+    type: ForumChannelType;
     userLimit_?: undefined;
     version: ChannelRecordBase["version"];
     videoQualityMode?: undefined;
@@ -64,9 +75,13 @@ export declare abstract class ForumChannelRecordBase extends ChannelRecordBase {
 }
 
 export declare class GuildForumChannelRecord extends ForumChannelRecordBase {
+    constructor(channelProperties: ForumChannelProperties<GuildForumChannelRecord>);
+
     type: ChannelType.GUILD_FORUM;
 }
 
 export declare class GuildMediaChannelRecord extends ForumChannelRecordBase {
+    constructor(channelProperties: ForumChannelProperties<GuildMediaChannelRecord>);
+
     type: ChannelType.GUILD_MEDIA;
 }
