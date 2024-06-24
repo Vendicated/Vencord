@@ -25,10 +25,10 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ".iconBadge}):null",
+            find: "\"invite-button\"",
             replacement: {
-                match: /className:(\i).toolbar,children:(\i)/,
-                replace: "className:$1.toolbar,children:$self.toolbarPatch($2)"
+                match: /\(0,(\w{1})\.(\w{3})\)\((\w{1})\.Fragment,{children:(\w{2})}/,
+                replace: "$4.unshift($self.getComp()),(0,$1.$2)($3.Fragment,{children:$4}"
             }
         }
     ],
@@ -44,9 +44,7 @@ export default definePlugin({
     stop() {
         disableStyle(styles);
     },
-    toolbarPatch: obj => {
-        if (!obj?.props?.children) return obj;
-        obj.props.children = [<IconWithTooltip text="Open SoundBoard Log" icon={<LogIcon className="chatBarLogIcon" />} onClick={openSoundBoardLog} />, ...obj.props.children];
-        return obj;
+    getComp() {
+        return <IconWithTooltip text="Open SoundBoard Log" icon={<LogIcon />} onClick={openSoundBoardLog} />;
     }
 });
