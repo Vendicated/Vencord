@@ -128,7 +128,7 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
-    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux],
+    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Zuxi],
     dependencies: ["MessageUpdaterAPI"],
 
     contextMenus: {
@@ -221,6 +221,11 @@ export default definePlugin({
             description: "Comma-separated list of guild IDs to ignore",
             default: ""
         },
+        ignoreWords: {
+            type: OptionType.STRING,
+            description: "Comma-separated list of words that should be ignored if found (case insensitive)",
+            default: ""
+        },
     },
 
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
@@ -257,7 +262,7 @@ export default definePlugin({
     },
 
     shouldIgnore(message: any, isEdit = false) {
-        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
+        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes, ignoreWords } = Settings.plugins.MessageLogger;
         const myId = UserStore.getCurrentUser().id;
 
         return ignoreBots && message.author?.bot ||
@@ -267,6 +272,7 @@ export default definePlugin({
             ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
             (isEdit ? !logEdits : !logDeletes) ||
             ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+            ignoreWords.split(",").some(word => message.content.toLowerCase().includes(word.trim().toLowerCase())) ||
             // Ignore Venbot in the support channel
             (message.channel_id === "1026515880080842772" && message.author?.id === "1017176847865352332");
     },
