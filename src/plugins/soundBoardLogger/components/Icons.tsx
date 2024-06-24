@@ -43,6 +43,7 @@ export function IconWithTooltip({ text, icon, onClick }) {
                     onMouseLeave={onMouseLeave}
                     innerClassName={ButtonWrapperClasses.button}
                     onClick={onClick}
+                    style={{ paddingRight: "13px" }}
                 >
                     {icon}
                 </Button>

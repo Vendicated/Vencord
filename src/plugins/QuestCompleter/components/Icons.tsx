@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classes } from "@utils/misc";
 import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip, useEffect, useState } from "@webpack/common";
 
 
@@ -30,11 +29,11 @@ export function IconWithTooltip({ text, icon, onClick, isDisabled }) {
                     look={ButtonLooks.BLANK}
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
-                    className={classes("button_ae6b8e")}
                     onClick={onClick}
                     size=""
                     innerClassName={ButtonWrapperClasses.button}
                     disabled={disabled}
+                    style={{ paddingRight: "13px" }}
                 >
                     {icon}
                 </Button>
