@@ -9,7 +9,7 @@ import type { ChannelBaseProperties, ChannelRecordBase, ChannelRecordOwnProperti
 
 export type GuildTextualChannelRecord = GuildTextChannelRecord | GuildCategoryChannelRecord | GuildAnnouncementChannelRecord | GuildStoreChannelRecord | GuildDirectoryChannelRecord;
 
-// @ts-expect-error: TS bug
+// @ts-expect-error: https://github.com/microsoft/TypeScript/issues/59000
 export type GuildTextualChannelProperties<Channel extends GuildTextualChannelRecordBase> = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "permissionOverwrites_">;
 
 type GuildTextualChannelType = ChannelType.GUILD_TEXT | ChannelType.GUILD_CATEGORY | ChannelType.GUILD_ANNOUNCEMENT | ChannelType.GUILD_STORE | ChannelType.GUILD_DIRECTORY;

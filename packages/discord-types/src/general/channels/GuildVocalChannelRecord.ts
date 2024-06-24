@@ -9,7 +9,7 @@ import type { ChannelBaseProperties, ChannelRecordBase, ChannelRecordOwnProperti
 
 export type GuildVocalChannelRecord = GuildVoiceChannelRecord | GuildStageVoiceChannelRecord;
 
-// @ts-expect-error: TS bug
+// @ts-expect-error: https://github.com/microsoft/TypeScript/issues/59000
 export type GuildVocalChannelProperties<Channel extends GuildVocalChannelRecordBase> = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "permissionOverwrites_">;
 
 type GuildVocalChannelType = ChannelType.GUILD_VOICE | ChannelType.GUILD_STAGE_VOICE;

@@ -25,11 +25,12 @@ import { join } from "path";
 import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 
+// eslint-disable-next-line path-alias/no-relative
 import { get } from "../utils/simpleGet";
 import { serializeErrors, VENCORD_FILES } from "./common";
 
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
-let PendingUpdates = [] as [string, string][];
+let PendingUpdates: [string, string][] = [];
 
 async function githubGet(endpoint: string) {
     return get(API_BASE + endpoint, {

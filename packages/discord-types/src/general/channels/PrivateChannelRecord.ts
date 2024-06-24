@@ -9,7 +9,7 @@ import type { ChannelBaseProperties, ChannelRecipient, ChannelRecordBase, Channe
 
 export type PrivateChannelRecord = DMChannelRecord | GroupDMChannelRecord;
 
-// @ts-expect-error: TS bug
+// @ts-expect-error: https://github.com/microsoft/TypeScript/issues/59000
 export type PrivateChannelProperties<Channel extends PrivateChannelRecordBase> = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "rawRecipients" | "recipients" | "safetyWarnings">;
 
 type PrivateChannelType = ChannelType.DM | ChannelType.GROUP_DM;

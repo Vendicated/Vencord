@@ -44,7 +44,7 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
                     deviceId: MediaEngineStore.getInputDeviceId()
                 }
             }).then(stream => {
-                const chunks = [] as Blob[];
+                const chunks: Blob[] = [];
                 setChunks(chunks);
 
                 const recorder = new MediaRecorder(stream);

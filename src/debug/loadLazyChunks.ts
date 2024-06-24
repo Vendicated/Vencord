@@ -131,7 +131,7 @@ export async function loadLazyChunks() {
         }
 
         // All chunks Discord has mapped to asset files, even if they are not used anymore
-        const allChunks = [] as string[];
+        const allChunks: string[] = [];
 
         // Matches "id" or id:
         for (const currentMatch of wreq.u.toString().matchAll(/(?:"(\d+?)")|(?:(\d+?):)/g)) {

@@ -9,7 +9,7 @@ import type { ChannelBaseProperties, ChannelRecordBase, ChannelRecordOwnProperti
 
 export type ForumChannelRecord = GuildForumChannelRecord | GuildMediaChannelRecord;
 
-// @ts-expect-error: TS bug
+// @ts-expect-error: https://github.com/microsoft/TypeScript/issues/59000
 export type ForumChannelProperties<Channel extends ForumChannelRecordBase> = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "availableTags" | "permissionOverwrites_">;
 
 type ForumChannelType = ChannelType.GUILD_FORUM | ChannelType.GUILD_MEDIA;
