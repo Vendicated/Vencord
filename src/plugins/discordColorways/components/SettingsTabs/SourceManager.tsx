@@ -180,9 +180,9 @@ export default function () {
             </Button>
         </Flex>
         <ScrollerThin orientation="vertical" style={{ maxHeight: "50%" }} className="colorwaysSettings-sourceScroller">
-            {!colorwaySourceFiles.length && <div className={`${radioBarItem} ${radioBarItemFilled} colorwaysSettings-colorwaySource`} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }} onClick={() => {
-                DataStore.set("colorwaySourceFiles", [{ name: "Project Colorway", url: defaultColorwaySource }]);
-                setColorwaySourceFiles([{ name: "Project Colorway", url: defaultColorwaySource }]);
+            {!colorwaySourceFiles.length && <div className={`${radioBarItem} ${radioBarItemFilled} colorwaysSettings-colorwaySource`} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }} onClick={async () => {
+                DataStore.set("colorwaySourceFiles", [{ name: "Project Colorway", url: defaultColorwaySource }, ...(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).filter(i => i.name !== "Project Colorway")]);
+                setColorwaySourceFiles([{ name: "Project Colorway", url: defaultColorwaySource }, ...(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).filter(i => i.name !== "Project Colorway")]);
             }}>
                 <PlusIcon width={24} height={24} />
                 <Text className="colorwaysSettings-colorwaySourceLabel">
@@ -192,7 +192,7 @@ export default function () {
             {colorwaySourceFiles.map((colorwaySourceFile: { name: string, url: string; }, i: number) => <div className={`${radioBarItem} ${radioBarItemFilled} colorwaysSettings-colorwaySource`} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }}>
                 <div className="hoverRoll">
                     <Text className="colorwaysSettings-colorwaySourceLabel hoverRoll_normal">
-                        {colorwaySourceFile.name} {colorwaySourceFile.url === defaultColorwaySource && <div className="colorways-badge">Built-In</div>}
+                        {colorwaySourceFile.name} {colorwaySourceFile.url === defaultColorwaySource && <div className="colorways-badge">Built-In</div>} {colorwaySourceFile.url === "https://raw.githubusercontent.com/DaBluLite/ProjectColorway/master/index.json" && <div className="colorways-badge">Built-In | Outdated</div>}
                     </Text>
                     <Text className="colorwaysSettings-colorwaySourceLabel hoverRoll_hovered">
                         {colorwaySourceFile.url}
@@ -208,7 +208,40 @@ export default function () {
                     >
                         <CopyIcon width={14} height={14} /> Copy URL
                     </Button>
-                    {colorwaySourceFile.url !== defaultColorwaySource
+                    {colorwaySourceFile.url === "https://raw.githubusercontent.com/DaBluLite/ProjectColorway/master/index.json" && <Button
+                        innerClassName="colorwaysSettings-iconButtonInner"
+                        size={Button.Sizes.SMALL}
+                        color={Button.Colors.PRIMARY}
+                        look={Button.Looks.OUTLINED}
+                        onClick={async () => {
+                            DataStore.set("colorwaySourceFiles", [{ name: "Project Colorway", url: defaultColorwaySource }, ...(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).filter(i => i.name !== "Project Colorway")]);
+                            setColorwaySourceFiles([{ name: "Project Colorway", url: defaultColorwaySource }, ...(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).filter(i => i.name !== "Project Colorway")]);
+                        }}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            x="0px"
+                            y="0px"
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <rect
+                                y="0"
+                                fill="none"
+                                width="24"
+                                height="24"
+                            />
+                            <path
+                                d="M6.351,6.351C7.824,4.871,9.828,4,12,4c4.411,0,8,3.589,8,8h2c0-5.515-4.486-10-10-10 C9.285,2,6.779,3.089,4.938,4.938L3,3v6h6L6.351,6.351z"
+                            />
+                            <path
+                                d="M17.649,17.649C16.176,19.129,14.173,20,12,20c-4.411,0-8-3.589-8-8H2c0,5.515,4.486,10,10,10 c2.716,0,5.221-1.089,7.062-2.938L21,21v-6h-6L17.649,17.649z"
+                            />
+                        </svg> Update source...
+                    </Button>}
+                    {(colorwaySourceFile.url !== defaultColorwaySource && colorwaySourceFile.url !== "https://raw.githubusercontent.com/DaBluLite/ProjectColorway/master/index.json")
                         && <>
                             <Button
                                 innerClassName="colorwaysSettings-iconButtonInner"

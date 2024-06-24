@@ -19,6 +19,7 @@ import {
     Text,
     TextInput,
     useEffect,
+    useReducer,
     UserStore,
     useState,
 } from "@webpack/common";
@@ -43,54 +44,83 @@ export default function ({
     loadUIProps?: () => Promise<void>;
     colorwayID?: string;
 }) {
-    const [accentColor, setAccentColor] = useState<string>("5865f2");
-    const [primaryColor, setPrimaryColor] = useState<string>("313338");
-    const [secondaryColor, setSecondaryColor] = useState<string>("2b2d31");
-    const [tertiaryColor, setTertiaryColor] = useState<string>("1e1f22");
+    const [colors, updateColors] = useReducer((colors: {
+        accent: string,
+        primary: string,
+        secondary: string,
+        tertiary: string;
+    }, action: {
+        task: "accent" | "primary" | "secondary" | "tertiary" | "all",
+        color?: string;
+        colorObj?: {
+            accent: string,
+            primary: string,
+            secondary: string,
+            tertiary: string;
+        };
+    }) => {
+        if (action.task === "all") {
+            return { ...action.colorObj } as {
+                accent: string,
+                primary: string,
+                secondary: string,
+                tertiary: string;
+            };
+        } else {
+            return { ...colors, [action.task as "accent" | "primary" | "secondary" | "tertiary"]: action.color } as {
+                accent: string,
+                primary: string,
+                secondary: string,
+                tertiary: string;
+            };
+        }
+    }, {
+        accent: "5865f2",
+        primary: "313338",
+        secondary: "2b2d31",
+        tertiary: "1e1f22"
+    });
     const [colorwayName, setColorwayName] = useState<string>("");
     const [tintedText, setTintedText] = useState<boolean>(true);
     const [discordSaturation, setDiscordSaturation] = useState<boolean>(true);
     const [preset, setPreset] = useState<string>("default");
     const [presetColorArray, setPresetColorArray] = useState<string[]>(["accent", "primary", "secondary", "tertiary"]);
-    const [mutedTextBrightness, setMutedTextBrightness] = useState<number>(Math.min(HexToHSL("#" + primaryColor)[2] + (3.6 * 3), 100));
+    const [mutedTextBrightness, setMutedTextBrightness] = useState<number>(Math.min(HexToHSL("#" + colors.primary)[2] + (3.6 * 3), 100));
 
-    const colorProps = {
-        accent: {
-            get: accentColor,
-            set: setAccentColor,
-            name: "Accent"
+    const setColor = [
+        "accent",
+        "primary",
+        "secondary",
+        "tertiary"
+    ] as ("accent" | "primary" | "secondary" | "tertiary")[];
+
+    const colorProps = [
+        {
+            name: "Accent",
+            id: "accent"
         },
-        primary: {
-            get: primaryColor,
-            set: setPrimaryColor,
-            name: "Primary"
+        {
+            name: "Primary",
+            id: "primary"
         },
-        secondary: {
-            get: secondaryColor,
-            set: setSecondaryColor,
-            name: "Secondary"
+        {
+            name: "Secondary",
+            id: "secondary"
         },
-        tertiary: {
-            get: tertiaryColor,
-            set: setTertiaryColor,
-            name: "Tertiary"
+        {
+            name: "Tertiary",
+            id: "tertiary"
         }
-    };
+    ];
 
     useEffect(() => {
         if (colorwayID) {
             if (!colorwayID.includes(",")) {
                 throw new Error("Invalid Colorway ID");
             } else {
-                const setColor = [
-                    setAccentColor,
-                    setPrimaryColor,
-                    setSecondaryColor,
-                    setTertiaryColor
-                ];
                 colorwayID.split("|").forEach((prop: string) => {
                     if (prop.includes(",#")) {
-                        prop.split(/,#/).forEach((color: string, i: number) => setColor[i](colorToHex(color)));
+                        prop.split(/,#/).forEach((color: string, i: number) => updateColors({ task: setColor[i], color: colorToHex(color) }));
                     }
                     if (prop.includes("n:")) {
                         setColorwayName(prop.split("n:")[1]);
@@ -136,16 +166,33 @@ export default function ({
                         Colors & Values:
                     </Forms.FormTitle>
                     <div className="colorwayCreator-colorPreviews">
-                        {presetColorArray.map(presetColor => {
+                        {colorProps.filter(color => presetColorArray.includes(color.id) || Object.keys(getPreset()[preset].calculated! || {}).includes(color.id)).map(presetColor => {
                             return <ColorPicker
-                                label={<Text className="colorwaysPicker-colorLabel">{colorProps[presetColor].name}</Text>}
-                                color={parseInt(colorProps[presetColor].get, 16)}
+                                label={<Text className="colorwaysPicker-colorLabel">{Object.keys(getPreset()[preset].calculated! || {}).includes(presetColor.id) ? (presetColor.name + " (Calculated)") : presetColor.name}</Text>}
+                                color={!Object.keys(
+                                    getPreset()[preset].calculated! || {}
+                                ).includes(presetColor.id) ?
+                                    parseInt(colors[presetColor.id], 16) :
+                                    parseInt(
+                                        colorToHex(
+                                            getPreset(
+                                                colors.primary,
+                                                colors.secondary,
+                                                colors.tertiary,
+                                                colors.accent
+                                            )[preset].calculated![presetColor.id]
+                                        ),
+                                        16
+                                    )
+                                }
                                 onChange={(color: number) => {
-                                    let hexColor = color.toString(16);
-                                    while (hexColor.length < 6) {
-                                        hexColor = "0" + hexColor;
+                                    if (!Object.keys(getPreset()[preset].calculated! || {}).includes(presetColor.id)) {
+                                        let hexColor = color.toString(16);
+                                        while (hexColor.length < 6) {
+                                            hexColor = "0" + hexColor;
+                                        }
+                                        updateColors({ task: presetColor.id as "accent" | "primary" | "secondary" | "tertiary", color: hexColor });
                                     }
-                                    colorProps[presetColor].set(hexColor);
                                 }}
                                 {...colorPickerProps}
                             />;
@@ -179,18 +226,18 @@ export default function ({
                     </svg>
                 </div>
                 <ThemePreviewCategory
-                    accent={"#" + accentColor}
-                    primary={"#" + primaryColor}
-                    secondary={"#" + secondaryColor}
-                    tertiary={"#" + tertiaryColor}
+                    accent={"#" + colors.accent}
+                    primary={"#" + colors.primary}
+                    secondary={"#" + colors.secondary}
+                    tertiary={"#" + colors.tertiary}
                     previewCSS={gradientPresetIds.includes(getPreset()[preset].id) ? pureGradientBase + `.colorwaysPreview-modal,.colorwaysPreview-wrapper {--gradient-theme-bg: linear-gradient(${(getPreset(
-                        primaryColor,
-                        secondaryColor,
-                        tertiaryColor,
-                        accentColor
+                        colors.primary,
+                        colors.secondary,
+                        colors.tertiary,
+                        colors.accent
                     )[preset].preset(discordSaturation) as { full: string, base: string; }).base})}` : (tintedText ? `.colorwaysPreview-modal,.colorwaysPreview-wrapper {
-                        --primary-500: hsl(${HexToHSL("#" + primaryColor)[0]} calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + primaryColor)[1] / 100) * (100 + PrimarySatDiffs[500])) * 10) / 10 : HexToHSL("#" + primaryColor)[1]}%) ${mutedTextBrightness || Math.min(HexToHSL("#" + primaryColor)[2] + (3.6 * 3), 100)}%);
-                        --primary-360: hsl(${HexToHSL("#" + secondaryColor)[0]} calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + primaryColor)[1] / 100) * (100 + PrimarySatDiffs[360])) * 10) / 10 : HexToHSL("#" + primaryColor)[1]}%) 90%);
+                        --primary-500: hsl(${HexToHSL("#" + colors.primary)[0]} calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + colors.primary)[1] / 100) * (100 + PrimarySatDiffs[500])) * 10) / 10 : HexToHSL("#" + colors.primary)[1]}%) ${mutedTextBrightness || Math.min(HexToHSL("#" + colors.primary)[2] + (3.6 * 3), 100)}%);
+                        --primary-360: hsl(${HexToHSL("#" + colors.secondary)[0]} calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + colors.primary)[1] / 100) * (100 + PrimarySatDiffs[360])) * 10) / 10 : HexToHSL("#" + colors.primary)[1]}%) 90%);
                 }` : "")}
                 />
             </ModalContent>
@@ -204,10 +251,10 @@ export default function ({
                         var customColorwayCSS: string = "";
                         if (preset === "default") {
                             customColorwayCSS = generateCss(
-                                primaryColor,
-                                secondaryColor,
-                                tertiaryColor,
-                                accentColor,
+                                colors.primary,
+                                colors.secondary,
+                                colors.tertiary,
+                                colors.accent,
                                 tintedText,
                                 discordSaturation,
                                 mutedTextBrightness,
@@ -223,7 +270,7 @@ export default function ({
                                 * @authorId ${UserStore.getCurrentUser().id}
                                 * @preset Gradient
                                 */
-                               ${(getPreset(primaryColor, secondaryColor, tertiaryColor, accentColor)[preset].preset(discordSaturation) as { full: string; }).full}` : customColorwayCSS = `/**
+                               ${(getPreset(colors.primary, colors.secondary, colors.tertiary, colors.accent)[preset].preset(discordSaturation) as { full: string; }).full}` : customColorwayCSS = `/**
                                * @name ${colorwayName || "Colorway"}
                                * @version ${(Plugins.plugins.DiscordColorways as any).creatorVersion}
                                * @description Automatically generated Colorway.
@@ -231,24 +278,24 @@ export default function ({
                                * @authorId ${UserStore.getCurrentUser().id}
                                * @preset ${getPreset()[preset].name}
                                */
-                               ${(getPreset(primaryColor, secondaryColor, tertiaryColor, accentColor)[preset].preset(discordSaturation) as string)}`;
+                               ${(getPreset(colors.primary, colors.secondary, colors.tertiary, colors.accent)[preset].preset(discordSaturation) as string)}`;
                         }
                         const customColorway: Colorway = {
                             name: (colorwayName || "Colorway"),
                             "dc-import": customColorwayCSS,
-                            accent: "#" + accentColor,
-                            primary: "#" + primaryColor,
-                            secondary: "#" + secondaryColor,
-                            tertiary: "#" + tertiaryColor,
+                            accent: "#" + colors.accent,
+                            primary: "#" + colors.primary,
+                            secondary: "#" + colors.secondary,
+                            tertiary: "#" + colors.tertiary,
                             colors: presetColorArray,
                             author: UserStore.getCurrentUser().username,
                             authorID: UserStore.getCurrentUser().id,
                             isGradient: gradientPresetIds.includes(getPreset()[preset].id),
                             linearGradient: gradientPresetIds.includes(getPreset()[preset].id) ? (getPreset(
-                                primaryColor,
-                                secondaryColor,
-                                tertiaryColor,
-                                accentColor
+                                colors.primary,
+                                colors.secondary,
+                                colors.tertiary,
+                                colors.accent
                             )[preset].preset(discordSaturation) as { base: string; }).base : "",
                             preset: getPreset()[preset].id,
                             creatorVersion: (Plugins.plugins.DiscordColorways as any).creatorVersion
@@ -268,10 +315,15 @@ export default function ({
                     look={Button.Looks.OUTLINED}
                     onClick={() => {
                         function setAllColors({ accent, primary, secondary, tertiary }: { accent: string, primary: string, secondary: string, tertiary: string; }) {
-                            setAccentColor(accent.split("#")[1]);
-                            setPrimaryColor(primary.split("#")[1]);
-                            setSecondaryColor(secondary.split("#")[1]);
-                            setTertiaryColor(tertiary.split("#")[1]);
+                            updateColors({
+                                task: "all",
+                                colorObj: {
+                                    accent: accent.split("#")[1],
+                                    primary: primary.split("#")[1],
+                                    secondary: secondary.split("#")[1],
+                                    tertiary: tertiary.split("#")[1]
+                                }
+                            });
                         }
                         var copiedThemes = ["Discord"];
                         Object.values(knownThemeVars).map((theme: { variable: string; variableType?: string; }, i: number) => {
@@ -282,34 +334,30 @@ export default function ({
                         if (copiedThemes.length > 1) {
                             openModal(props => <ConflictingColorsModal modalProps={props} onFinished={setAllColors} />);
                         } else {
-                            setPrimaryColor(
-                                getHex(
-                                    getComputedStyle(
-                                        document.body
-                                    ).getPropertyValue("--primary-600")
-                                ).split("#")[1]
-                            );
-                            setSecondaryColor(
-                                getHex(
-                                    getComputedStyle(
-                                        document.body
-                                    ).getPropertyValue("--primary-630")
-                                ).split("#")[1]
-                            );
-                            setTertiaryColor(
-                                getHex(
-                                    getComputedStyle(
-                                        document.body
-                                    ).getPropertyValue("--primary-700")
-                                ).split("#")[1]
-                            );
-                            setAccentColor(
-                                getHex(
-                                    getComputedStyle(
-                                        document.body
-                                    ).getPropertyValue("--brand-experiment")
-                                ).split("#")[1]
-                            );
+                            updateColors({
+                                task: "all", colorObj: {
+                                    primary: getHex(
+                                        getComputedStyle(
+                                            document.body
+                                        ).getPropertyValue("--primary-600")
+                                    ).split("#")[1],
+                                    secondary: getHex(
+                                        getComputedStyle(
+                                            document.body
+                                        ).getPropertyValue("--primary-630")
+                                    ).split("#")[1],
+                                    tertiary: getHex(
+                                        getComputedStyle(
+                                            document.body
+                                        ).getPropertyValue("--primary-700")
+                                    ).split("#")[1],
+                                    accent: getHex(
+                                        getComputedStyle(
+                                            document.body
+                                        ).getPropertyValue("--brand-experiment")
+                                    ).split("#")[1]
+                                }
+                            });
                         }
                     }}
                 >
@@ -321,13 +369,7 @@ export default function ({
                     size={Button.Sizes.MEDIUM}
                     look={Button.Looks.OUTLINED}
                     onClick={() => openModal((props: any) => <InputColorwayIdModal modalProps={props} onColorwayId={colorwayID => {
-                        const setColor = [
-                            setAccentColor,
-                            setPrimaryColor,
-                            setSecondaryColor,
-                            setTertiaryColor
-                        ];
-                        hexToString(colorwayID).split(/,#/).forEach((color: string, i: number) => setColor[i](colorToHex(color)));
+                        hexToString(colorwayID).split(/,#/).forEach((color: string, i: number) => updateColors({ task: setColor[i], color: colorToHex(color) }));
                     }} />)}
                 >
                     Enter Colorway ID

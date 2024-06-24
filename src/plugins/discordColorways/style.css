@@ -18,7 +18,7 @@
 }
 
 .ColorwaySelectorBtn:hover {
-    background-color: var(--brand-experiment);
+    background-color: var(--brand-500);
     border-radius: 16px;
 }
 
@@ -1143,7 +1143,7 @@
 
 .hoverRoll:hover .hoverRoll_normal,
 .colorwaysSettings-colorwaySource:hover .hoverRoll_normal {
-    transform: translate3d(0,-107%,0);
+    transform: translate3d(0, -107%, 0);
     opacity: 0;
     user-select: none;
 }

@@ -148,3 +148,42 @@ export function colorToHex(color: string) {
     }
     return color.replace("#", "");
 }
+
+export const parseClr = (clr: number) => (clr & 0x00ffffff).toString(16).padStart(6, "0");
+
+export async function getRepainterTheme(link: string): Promise<{ status: "success" | "fail", id?: string, colors?: string[], errorCode?: number, errorMsg?: string; }> {
+    const linkCheck: string | undefined = link.match(/https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&\/\/=]*)/g)!.filter(x => x.startsWith("https://repainter.app/themes/"))[0];
+
+    if (!linkCheck) return { status: "fail", errorCode: 0, errorMsg: "Invalid URL" };
+
+    // const res = await (
+    //     await fetch(
+    //         `https://repainter.app/_next/data/Z0BCpVYZyrdkss0k0zqLC/themes/${link.match(/themes\/([a-z0-9]+)/i)?.[1] ?? ""
+    //         }.json`,
+    //         {
+    //             "headers": {
+    //                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    //                 "accept-language": "en-US,en;q=0.9",
+    //                 "if-none-match": "W/\"4b2-Wsw1gFTK1l04ijqMn5s6ZUnH6hM\"",
+    //                 "priority": "u=0, i",
+    //                 "sec-ch-ua": "\"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"",
+    //                 "sec-ch-ua-mobile": "?0",
+    //                 "sec-ch-ua-platform": "\"Linux\"",
+    //                 "sec-fetch-dest": "document",
+    //                 "sec-fetch-mode": "navigate",
+    //                 "sec-fetch-site": "none",
+    //                 "sec-fetch-user": "?1",
+    //                 "upgrade-insecure-requests": "1"
+    //             },
+    //             "referrerPolicy": "strict-origin-when-cross-origin",
+    //             "body": null,
+    //             "method": "GET",
+    //             "mode": "cors",
+    //             "credentials": "omit",
+    //             "cache": "no-store"
+    //         },
+    //     )
+    // );
+    const { pageProps: { fallback: { a: { name, colors } } } } = { "pageProps": { "initialId": "01G5PMR5G9H76H1R2RET4A0ZHY", "fallback": { a: { "id": "01G5PMR5G9H76H1R2RET4A0ZHY", "name": "Midwinter Fire", "description": "Very red", "createdAt": "2022-06-16T16:15:11.881Z", "updatedAt": "2022-07-12T08:37:13.141Z", "settingsLines": ["Colorful", "Bright", "Vibrant style"], "voteCount": 309, "colors": [-1426063361, 4294901760, 4294901760, -1426071591, -1426080078, -1426089335, 4294901760, -1426119398, -1428615936, -1431629312, -1434644480, 4294901760, 4294901760, 4294901760, 4294901760, -1426067223, -1426071086, -1426079070, -1426088082, 4294901760, -1428201216, -1430761216, -1433255936, 4294901760, 4294901760, 4294901760, 4294901760, 4294901760, 4294901760, -1426070330, 4294901760, -1426086346, 4294901760, -1430030080, 4294901760, -1434431744, 4294901760, 4294901760, 4294901760, 4294901760, -1426064133, 4294901760, -1426071591, 4294901760, -1426874223, 4294901760, -1430359452, 4294901760, -1433845194, 4294901760, -1437922816, 4294901760, 4294901760, 4294901760, 4294901760, -1426071591, -1426080078, -1426089335, -1427799438, -1429640356, 4294901760, -1433191891, 4294901760, 4294901760, 4294901760] } } }, "__N_SSP": true } as any;
+    return { status: "success", id: name, colors: colors.filter(c => c !== 4294901760).map(c => "#" + parseClr(c)) };
+}

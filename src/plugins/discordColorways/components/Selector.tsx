@@ -11,7 +11,7 @@ import { Flex } from "@components/Flex";
 import { CodeIcon, DeleteIcon, IDIcon, MoreIcon, PalleteIcon, PlusIcon } from "@components/Icons";
 import { SettingsTab } from "@components/VencordSettings/shared";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import { findByProps, findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import {
     Button,
     ButtonLooks,
@@ -32,15 +32,63 @@ import {
 import { ReactNode } from "react";
 
 import { ColorwayCSS } from "..";
+import { nullColorwayObj } from "../constants";
 import { generateCss, getAutoPresets, gradientBase } from "../css";
 import { Colorway, ColorwayObject, SortOptions, SourceObject } from "../types";
-import { colorToHex, getHex, stringToHex } from "../utils";
+import { colorToHex, getHex, getRepainterTheme, stringToHex } from "../utils";
 import AutoColorwaySelector from "./AutoColorwaySelector";
-import ColorPickerModal from "./ColorPicker";
 import CreatorModal from "./CreatorModal";
 import ColorwayInfoModal from "./InfoModal";
+import SelectionCircle from "./SelectionCircle";
 
-const { SelectionCircle } = findByPropsLazy("SelectionCircle");
+function UseRepainterThemeModal({ modalProps, onFinish }: { modalProps: ModalProps, onFinish: ({ id, colors }: { id: string, colors: string[]; }) => void; }) {
+    const [colorwaySourceURL, setColorwaySourceURL] = useState<string>("");
+    const [URLError, setURLError] = useState<string>("");
+    return <ModalRoot {...modalProps}>
+        <ModalHeader separator={false}>
+            <Text variant="heading-lg/semibold" tag="h1">
+                Use theme from Repainter:
+            </Text>
+        </ModalHeader>
+        <ModalContent>
+            <Forms.FormTitle style={{ marginTop: "8px" }}>URL:</Forms.FormTitle>
+            <TextInput
+                placeholder="Enter a valid URL..."
+                onChange={value => {
+                    setColorwaySourceURL(value);
+                }}
+                value={colorwaySourceURL}
+                error={URLError}
+                style={{ marginBottom: "16px" }}
+            />
+        </ModalContent>
+        <ModalFooter>
+            <Button
+                style={{ marginLeft: 8 }}
+                color={Button.Colors.BRAND}
+                size={Button.Sizes.MEDIUM}
+                look={Button.Looks.FILLED}
+                onClick={async () => {
+                    getRepainterTheme(colorwaySourceURL).then(data => {
+                        onFinish({ id: data.id as any, colors: data.colors as any });
+                        modalProps.onClose();
+                    }).catch(e => setURLError("Error: " + e));
+                }}
+            >
+                Finish
+            </Button>
+            <Button
+                style={{ marginLeft: 8 }}
+                color={Button.Colors.PRIMARY}
+                size={Button.Sizes.MEDIUM}
+                look={Button.Looks.OUTLINED}
+                onClick={() => modalProps.onClose()}
+            >
+                Cancel
+            </Button>
+        </ModalFooter>
+    </ModalRoot>;
+}
 
 function SelectorContainer({ children, isSettings, modalProps }: { children: ReactNode, isSettings?: boolean, modalProps: ModalProps; }) {
     if (!isSettings) {
@@ -88,7 +136,7 @@ export default function ({
     const [colorwayData, setColorwayData] = useState<SourceObject[]>([]);
     const [searchValue, setSearchValue] = useState<string>("");
     const [sortBy, setSortBy] = useState<SortOptions>(SortOptions.NAME_AZ);
-    const [activeColorwayObject, setActiveColorwayObject] = useState<ColorwayObject>({ id: null, css: null, sourceType: null, source: null });
+    const [activeColorwayObject, setActiveColorwayObject] = useState<ColorwayObject>(nullColorwayObj);
     const [customColorwayData, setCustomColorwayData] = useState<SourceObject[]>([]);
     const [loaderHeight, setLoaderHeight] = useState<"2px" | "0px">("2px");
     const [visibleSources, setVisibleSources] = useState<string>("all");
@@ -340,17 +388,34 @@ export default function ({
                             </Button>}
                         </Popout>}
                     </Tooltip>
-                    <Tooltip text="Open Color Stealer">
+                    <Tooltip text="Use Repainter theme...">
                         {({ onMouseEnter, onMouseLeave }) => <Button
                             innerClassName="colorwaysSettings-iconButtonInner"
                             size={Button.Sizes.ICON}
                             color={Button.Colors.PRIMARY}
                             look={Button.Looks.OUTLINED}
                             style={{ marginLeft: "8px" }}
-                            id="colorway-opencolorstealer"
+                            id="colorway-userepaintertheme"
                             onMouseEnter={onMouseEnter}
                             onMouseLeave={onMouseLeave}
-                            onClick={() => openModal((props) => <ColorPickerModal modalProps={props} />)}
+                            onClick={() => openModal((props) => <UseRepainterThemeModal modalProps={props} onFinish={async ({ id, colors }) => {
+                                const demandedColorway = generateCss(colors[7].replace("#", ""), colors[11].replace("#", ""), colors[14].replace("#", ""), colors[16].replace("#", ""));
+                                ColorwayCSS.set(demandedColorway);
+                                const newObj: ColorwayObject = {
+                                    id: id!,
+                                    css: demandedColorway,
+                                    sourceType: "temporary",
+                                    source: "Repainter",
+                                    colors: {
+                                        accent: colors![16],
+                                        primary: colors![2],
+                                        secondary: colors![5],
+                                        tertiary: colors![8]
+                                    }
+                                };
+                                DataStore.set("activeColorwayObject", newObj);
+                                setActiveColorwayObject(newObj);
+                            }} />)}
                         >
                             <PalleteIcon width={20} height={20} style={{ padding: "6px", boxSizing: "content-box" }} />
                         </Button>}
@@ -380,8 +445,8 @@ export default function ({
                             onMouseEnter={viewMode === "grid" ? onMouseEnter : () => { }}
                             onMouseLeave={viewMode === "grid" ? onMouseLeave : () => { }}
                             onClick={async () => {
-                                DataStore.set("activeColorwayObject", { id: null, css: null, sourceType: null, source: null });
-                                setActiveColorwayObject({ id: null, css: null, sourceType: null, source: null });
+                                DataStore.set("activeColorwayObject", nullColorwayObj);
+                                setActiveColorwayObject(nullColorwayObj);
                                 ColorwayCSS.remove();
                             }}
                         >
@@ -437,21 +502,39 @@ export default function ({
                             onClick={async () => {
                                 const activeAutoPreset = await DataStore.get("activeAutoPreset");
                                 if (activeColorwayObject.id === "Auto") {
-                                    DataStore.set("activeColorwayObject", { id: null, css: null, sourceType: null, source: null });
-                                    setActiveColorwayObject({ id: null, css: null, sourceType: null, source: null });
+                                    DataStore.set("activeColorwayObject", nullColorwayObj);
+                                    setActiveColorwayObject(nullColorwayObj);
                                     ColorwayCSS.remove();
                                 } else {
                                     if (!activeAutoPreset) {
                                         openModal((props: ModalProps) => <AutoColorwaySelector autoColorwayId="" modalProps={props} onChange={autoPresetId => {
                                             const demandedColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6))[autoPresetId].preset();
                                             ColorwayCSS.set(demandedColorway);
-                                            DataStore.set("activeColorwayObject", { id: "Auto", css: demandedColorway, sourceType: "online", source: null });
-                                            setActiveColorwayObject({ id: "Auto", css: demandedColorway, sourceType: "online", source: null });
+                                            const newObj: ColorwayObject = {
+                                                id: "Auto",
+                                                css: demandedColorway,
+                                                sourceType: "online",
+                                                source: null,
+                                                colors: {
+                                                    accent: colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6)
+                                                }
+                                            };
+                                            DataStore.set("activeColorwayObject", newObj);
+                                            setActiveColorwayObject(newObj);
                                         }} />);
                                     } else {
                                         const autoColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6))[activeAutoPreset].preset();
-                                        DataStore.set("activeColorwayObject", { id: "Auto", css: autoColorway, sourceType: "online", source: null });
-                                        setActiveColorwayObject({ id: "Auto", css: autoColorway, sourceType: "online", source: null });
+                                        const newObj: ColorwayObject = {
+                                            id: "Auto",
+                                            css: autoColorway,
+                                            sourceType: "online",
+                                            source: null,
+                                            colors: {
+                                                accent: colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6)
+                                            }
+                                        };
+                                        DataStore.set("activeColorwayObject", newObj);
+                                        setActiveColorwayObject(newObj);
                                         ColorwayCSS.set(autoColorway);
                                     }
                                 }
@@ -474,8 +557,17 @@ export default function ({
                                     openModal((props: ModalProps) => <AutoColorwaySelector autoColorwayId={activeAutoPreset} modalProps={props} onChange={autoPresetId => {
                                         if (activeColorwayObject.id === "Auto") {
                                             const demandedColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6))[autoPresetId].preset();
-                                            DataStore.set("activeColorwayObject", { id: "Auto", css: demandedColorway, sourceType: "online", source: null });
-                                            setActiveColorwayObject({ id: "Auto", css: demandedColorway, sourceType: "online", source: null });
+                                            const newObj: ColorwayObject = {
+                                                id: "Auto",
+                                                css: demandedColorway,
+                                                sourceType: "online",
+                                                source: null,
+                                                colors: {
+                                                    accent: colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6)
+                                                }
+                                            };
+                                            DataStore.set("activeColorwayObject", newObj);
+                                            setActiveColorwayObject(newObj);
                                             ColorwayCSS.set(demandedColorway);
                                         }
                                     }} />);
@@ -525,12 +617,13 @@ export default function ({
                                 }
                             })
                             .map((color: Colorway) => {
-                                const colors: string[] = color.colors || [
+                                const colors: { accent?: string, primary?: string, secondary?: string, tertiary?: string; } = {};
+                                (color.colors || [
                                     "accent",
                                     "primary",
                                     "secondary",
                                     "tertiary",
-                                ];
+                                ]).forEach(colorStr => colors[colorStr] = colorToHex(color[colorStr]));
                                 return (color.name.toLowerCase().includes(searchValue.toLowerCase()) ?
                                     <Tooltip text={color.name}>
                                         {({ onMouseEnter, onMouseLeave }) => {
@@ -555,8 +648,8 @@ export default function ({
                                                                 "onDemandWaysOsAccentColor"
                                                             ]);
                                                             if (activeColorwayObject.id === color.name && activeColorwayObject.source === color.source) {
-                                                                DataStore.set("activeColorwayObject", { id: null, css: null, sourceType: null, source: null });
-                                                                setActiveColorwayObject({ id: null, css: null, sourceType: null, source: null });
+                                                                DataStore.set("activeColorwayObject", nullColorwayObj);
+                                                                setActiveColorwayObject(nullColorwayObj);
                                                                 ColorwayCSS.remove();
                                                             } else {
                                                                 if (onDemandWays) {
@@ -571,12 +664,26 @@ export default function ({
                                                                         color.name
                                                                     ) : gradientBase(colorToHex(onDemandWaysOsAccentColor ? getComputedStyle(document.body).getPropertyValue("--os-accent-color") : color.accent), onDemandWaysDiscordSaturation) + `:root:root {--custom-theme-background: linear-gradient(${color.linearGradient})}`;
                                                                     ColorwayCSS.set(demandedColorway);
-                                                                    setActiveColorwayObject({ id: color.name, css: demandedColorway, sourceType: color.type, source: color.source });
-                                                                    DataStore.set("activeColorwayObject", { id: color.name, css: demandedColorway, sourceType: color.type, source: color.source });
+                                                                    const newObj: ColorwayObject = {
+                                                                        id: color.name,
+                                                                        css: demandedColorway,
+                                                                        sourceType: color.type,
+                                                                        source: color.source,
+                                                                        colors: { ...colors, accent: colorToHex(onDemandWaysOsAccentColor ? getComputedStyle(document.body).getPropertyValue("--os-accent-color") : color.accent).slice(0, 6) }
+                                                                    };
+                                                                    setActiveColorwayObject(newObj);
+                                                                    DataStore.set("activeColorwayObject", newObj);
                                                                 } else {
                                                                     ColorwayCSS.set(color["dc-import"]);
-                                                                    setActiveColorwayObject({ id: color.name, css: color["dc-import"], sourceType: color.type, source: color.source });
-                                                                    DataStore.set("activeColorwayObject", { id: color.name, css: color["dc-import"], sourceType: color.type, source: color.source });
+                                                                    const newObj: ColorwayObject = {
+                                                                        id: color.name,
+                                                                        css: color["dc-import"],
+                                                                        sourceType: color.type,
+                                                                        source: color.source,
+                                                                        colors: colors
+                                                                    };
+                                                                    setActiveColorwayObject(newObj);
+                                                                    DataStore.set("activeColorwayObject", newObj);
                                                                 }
                                                             }
                                                         }
@@ -590,10 +697,10 @@ export default function ({
                                                         {activeColorwayObject.id === color.name && activeColorwayObject.source === color.source && <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" />}
                                                     </svg>}
                                                     <div className="discordColorwayPreviewColorContainer">
-                                                        {!color.isGradient ? colors.map((colorItm) => <div
+                                                        {!color.isGradient ? Object.values(colors).map((colorStr) => <div
                                                             className="discordColorwayPreviewColor"
                                                             style={{
-                                                                backgroundColor: color[colorItm],
+                                                                backgroundColor: `#${colorToHex(colorStr)}`,
                                                             }}
                                                         />) : <div
                                                             className="discordColorwayPreviewColor"
@@ -688,8 +795,8 @@ export default function ({
                                                                     setCustomColorwayData([...oldStores, newStore].map((colorSrc: { name: string, colorways: Colorway[], id?: string; }) =>
                                                                         ({ type: "offline", source: colorSrc.name, colorways: colorSrc.colorways })));
                                                                     if ((await DataStore.get("activeColorwayObject")).id === color.name) {
-                                                                        DataStore.set("activeColorwayObject", { id: null, css: null, sourceType: null, source: null });
-                                                                        setActiveColorwayObject({ id: null, css: null, sourceType: null, source: null });
+                                                                        DataStore.set("activeColorwayObject", nullColorwayObj);
+                                                                        setActiveColorwayObject(nullColorwayObj);
                                                                         ColorwayCSS.remove();
                                                                     }
                                                                 }}

@@ -470,7 +470,7 @@ export function gradientBase(accentColor?: string, discordSaturation = false) {
 }`;
 }
 
-export function generateCss(primaryColor: string, secondaryColor: string, tertiaryColor: string, accentColor: string, tintedText: boolean, discordSaturation: boolean, mutedTextBrightness?: number, name?: string) {
+export function generateCss(primaryColor: string, secondaryColor: string, tertiaryColor: string, accentColor: string, tintedText: boolean = true, discordSaturation: boolean = true, mutedTextBrightness?: number, name?: string) {
     return `/**
  * @name ${name}
  * @version ${(Plugins.plugins.DiscordColorways as any).creatorVersion}
@@ -816,7 +816,25 @@ export function getAutoPresets(accentColor?: string) {
     } as { [key: string]: { name: string, id: string, preset: () => string; }; };
 }
 
-export function getPreset(primaryColor?: string, secondaryColor?: string, tertiaryColor?: string, accentColor?: string): { [preset: string]: { name: string, preset: (...args: any) => string | { full: string, base: string; }, id: string, colors: string[]; }; } {
+export function getPreset(
+    primaryColor?: string,
+    secondaryColor?: string,
+    tertiaryColor?: string,
+    accentColor?: string
+): {
+    [preset: string]: {
+        name: string,
+        preset: (...args: any) => string | { full: string, base: string; },
+        id: string,
+        colors: string[],
+        calculated?: {
+            accent?: string,
+            primary?: string,
+            secondary?: string,
+            tertiary?: string;
+        };
+    };
+} {
     function cyanLegacy(discordSaturation = false) {
         return `:root:root {
     --cyan-accent-color: #${accentColor};
@@ -979,7 +997,12 @@ export function getPreset(primaryColor?: string, secondaryColor?: string, tertia
             name: "Hue Rotation",
             preset: getAutoPresets(accentColor).hueRotation.preset,
             id: "hueRotation",
-            colors: ["accent"]
+            colors: ["accent"],
+            calculated: {
+                primary: `hsl(${HexToHSL("#" + accentColor)[0]} 11% 21%)`,
+                secondary: `hsl(${HexToHSL("#" + accentColor)[0]} 11% 18%)`,
+                tertiary: `hsl(${HexToHSL("#" + accentColor)[0]} 10% 13%)`
+            }
         },
         accentSwap: {
             name: "Accent Swap",
@@ -991,7 +1014,12 @@ export function getPreset(primaryColor?: string, secondaryColor?: string, tertia
             name: "Material You",
             preset: getAutoPresets(accentColor).materialYou.preset,
             id: "materialYou",
-            colors: ["accent"]
+            colors: ["accent"],
+            calculated: {
+                primary: `hsl(${HexToHSL("#" + accentColor)[0]} 12% 12%)`,
+                secondary: `hsl(${HexToHSL("#" + accentColor)[0]} 12% 16%)`,
+                tertiary: `hsl(${HexToHSL("#" + accentColor)[0]} 16% 18%)`
+            }
         }
     };
 }

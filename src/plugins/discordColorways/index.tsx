@@ -9,8 +9,9 @@ import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Flex } from "@components/Flex";
+import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
-import { ModalProps, openModal } from "@utils/modal";
+import { ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByProps } from "@webpack";
 import {
@@ -20,7 +21,8 @@ import {
     Heading,
     i18n,
     SettingsRouter,
-    Toasts,
+    Text,
+    Toasts
 } from "@webpack/common";
 import { CSSProperties } from "react";
 import { Plugins } from "Vencord";
@@ -73,15 +75,60 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
     ]);
 
     const defaults = [
-        { name: "showColorwaysButton", value: showColorwaysButton, default: false },
-        { name: "onDemandWays", value: onDemandWays, default: false },
-        { name: "onDemandWaysTintedText", value: onDemandWaysTintedText, default: true },
-        { name: "useThinMenuButton", value: useThinMenuButton, default: false },
-        { name: "onDemandWaysDiscordSaturation", value: onDemandWaysDiscordSaturation, default: false },
-        { name: "onDemandWaysOsAccentColor", value: onDemandWaysOsAccentColor, default: false },
-        { name: "activeColorwayObject", value: activeColorwayObject, default: { id: null, css: null, sourceType: null, source: null } },
-        { name: "selectorViewMode", value: selectorViewMode, default: "grid" },
-        { name: "showLabelsInSelectorGridView", value: showLabelsInSelectorGridView, default: false }
+        {
+            name: "showColorwaysButton",
+            value: showColorwaysButton,
+            default: false
+        },
+        {
+            name: "onDemandWays",
+            value: onDemandWays,
+            default: false
+        },
+        {
+            name: "onDemandWaysTintedText",
+            value: onDemandWaysTintedText,
+            default: true
+        },
+        {
+            name: "useThinMenuButton",
+            value: useThinMenuButton,
+            default: false
+        },
+        {
+            name: "onDemandWaysDiscordSaturation",
+            value: onDemandWaysDiscordSaturation,
+            default: false
+        },
+        {
+            name: "onDemandWaysOsAccentColor",
+            value: onDemandWaysOsAccentColor,
+            default: false
+        },
+        {
+            name: "activeColorwayObject", value: activeColorwayObject, default: {
+                id: null,
+                css: null,
+                sourceType: null,
+                source: null,
+                colors: {
+                    accent: null,
+                    primary: null,
+                    secondary: null,
+                    tertiary: null
+                }
+            }
+        },
+        {
+            name: "selectorViewMode",
+            value: selectorViewMode,
+            default: "grid"
+        },
+        {
+            name: "showLabelsInSelectorGridView",
+            value: showLabelsInSelectorGridView,
+            default: false
+        }
     ];
 
     defaults.forEach(({ name, value, default: def }) => {
@@ -99,7 +146,7 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
     if (colorwaySourceFiles) {
         if (typeof colorwaySourceFiles[0] === "string") {
             DataStore.set("colorwaySourceFiles", colorwaySourceFiles.map((sourceURL: string, i: number) => {
-                return { name: sourceURL === defaultColorwaySource ? "Project Colorway" : `Source #${i}`, url: sourceURL };
+                return { name: sourceURL === defaultColorwaySource ? "Project Colorway" : `Source #${i}`, url: sourceURL === "https://raw.githubusercontent.com/DaBluLite/ProjectColorway/master/index.json" ? defaultColorwaySource : sourceURL };
             }));
         }
     } else {
@@ -130,7 +177,7 @@ export default definePlugin({
         "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
     authors: [Devs.DaBluLite, Devs.ImLvna],
     dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
-    pluginVersion: "5.7.0",
+    pluginVersion: "5.7.1",
     creatorVersion: "1.20",
     toolboxActions: {
         "Change Colorway": () => openModal(props => <Selector modalProps={props} />),
@@ -314,6 +361,28 @@ export default definePlugin({
 
         enableStyle(style);
         ColorwayCSS.set((await DataStore.get("activeColorwayObject") as ColorwayObject).css || "");
+
+        if ((await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).map(i => i.url).includes("https://raw.githubusercontent.com/DaBluLite/ProjectColorway/master/index.json") || (!(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).map(i => i.url).includes("https://raw.githubusercontent.com/DaBluLite/ProjectColorway/master/index.json") && !(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).map(i => i.url).includes("https://raw.githubusercontent.com/ProjectColorway/ProjectColorway/master/index.json"))) {
+            DataStore.set("colorwaySourceFiles", [{ name: "Project Colorway", url: defaultColorwaySource }, ...(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).filter(i => i.name !== "Project Colorway")]);
+            openModal(props => <ModalRoot {...props} size={ModalSize.DYNAMIC}>
+                <ModalHeader separator={false}>
+                    <Text variant="heading-lg/semibold" tag="h1">
+                        Project Colorway has moved
+                    </Text>
+                </ModalHeader>
+                <ModalContent>
+                    <Text variant="text-md/normal" style={{ maxWidth: "600px" }}>
+                        In the process of creating a more solid foundation
+                        for Project Colorway, the main Project Colorway repository has been
+                        moved from <Link href="https://github.com/DaBluLite/ProjectColorway">https://github.com/DaBluLite/ProjectColorway</Link> to{" "}
+                        <Link href="https://github.com/ProjectColorway/ProjectColorway">https://github.com/ProjectColorway/ProjectColorway</Link>
+                    </Text>
+                    <br />
+                    <Text variant="text-md/semibold" style={{ textAlign: "center" }}>The default Project Colorway source has been automatically updated/re-added.</Text>
+                    <br />
+                </ModalContent>
+            </ModalRoot>);
+        }
 
         addAccessory("colorways-btn", props => {
             if (String(props.message.content).match(/colorway:[0-9a-f]{0,100}/)) {

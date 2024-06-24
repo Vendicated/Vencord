@@ -36,7 +36,13 @@ export interface ColorwayObject {
     id: string | null,
     css: string | null,
     sourceType: "online" | "offline" | "temporary" | null,
-    source: string | null | undefined;
+    source: string | null | undefined,
+    colors?: {
+        accent?: string | undefined,
+        primary?: string | undefined,
+        secondary?: string | undefined,
+        tertiary?: string | undefined;
+    } | undefined;
 }
 
 export interface SourceObject {
