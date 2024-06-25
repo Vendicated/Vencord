@@ -7,12 +7,8 @@
 import "./styles.css";
 
 import { ErrorBoundary, Link } from "@components/index";
-import { findByPropsLazy } from "@webpack";
-import { Button, Forms, React, SearchableSelect, Text, Tooltip, useEffect, useState } from "@webpack/common";
-
-import { Snowflake } from "./api";
-import { getUserTimezone } from "./cache";
-import { formatTimestamp, getTimezonesLazy } from "./utils";
+import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import {
     ModalCloseButton,
     ModalContent,
@@ -22,10 +18,14 @@ import {
     ModalRoot,
     openModal,
 } from "@utils/modal";
-import { Margins } from "@utils/margins";
+import { findByPropsLazy } from "@webpack";
+import { Button, Forms, React, SearchableSelect, Text, Tooltip, useEffect, useState } from "@webpack/common";
 import { SelectOption } from "@webpack/types";
+
+import { Snowflake } from "./api";
+import { getUserTimezone } from "./cache";
 import settings, { TimezoneOverwrites } from "./settings";
-import { classes } from "@utils/misc";
+import { formatTimestamp, getTimezonesLazy } from "./utils";
 
 // Based on Syncxv's vc-timezones user plugin //
 
@@ -96,11 +96,11 @@ function LocalTimestampInner(props: LocalTimestampProps): JSX.Element | null {
         >
             {toolTipProps => <>
                 <span {...toolTipProps}
-                      className={classes}
-                      onClick={() => {
-                          toolTipProps.onClick();
-                          openTimezoneOverwriteModal(props.userId);
-                      }}>
+                    className={classes}
+                    onClick={() => {
+                        toolTipProps.onClick();
+                        openTimezoneOverwriteModal(props.userId);
+                    }}>
                     {shortTimeFormatted}
                 </span>
             </>}
