@@ -34,24 +34,12 @@ export interface MarkDownRules {
     NATIVE_SEARCH_RESULT_LINK_RULES: Rules;
 }
 
-export interface PluginMarkDownRules {
-    RULES?: Rules;
-    CHANNEL_TOPIC_RULES?: Rules;
-    VOICE_CHANNEL_STATUS_RULES?: Rules;
-    EMBED_TITLE_RULES?: Rules;
-    INLINE_REPLY_RULES?: Rules;
-    GUILD_VERIFICATION_FORM_RULES?: Rules;
-    GUILD_EVENT_RULES?: Rules;
-    PROFILE_BIO_RULES?: Rules;
-    AUTO_MODERATION_SYSTEM_MESSAGE_RULES?: Rules;
-    NATIVE_SEARCH_RESULT_LINK_RULES?: Rules;
-}
+export type PluginMarkDownRules = Partial<MarkDownRules>;
 
 export const Rules: MarkDownRules = {} as MarkDownRules;
 export const PendingRules: Array<(r: MarkDownRules) => MarkDownRules | PluginMarkDownRules> = [];
 
 export function AddAPendingRule(rules: (r: MarkDownRules) => MarkDownRules | PluginMarkDownRules) {
-    logger.debug("Adding pending rule", rules);
     PendingRules.push(rules);
 }
 
@@ -70,12 +58,7 @@ export function patchMarkdownRules(originalRules: MarkDownRules) {
         const rules = rule(originalRules);
         assignEntries(Rules, rules);
         delete PendingRules[key];
-        console.log("adding rules:", rules);
     }
     assignEntries(originalRules, Rules);
-    // console.log("Added markdown rules", Ruler);
-    // Ruler.PROFILE_BIO_RULES.codeBlock = Ruler.RULES.codeBlock;
-    // Ruler.PROFILE_BIO_RULES.codeBlock = Ruler.RULES.codeBlock;
-    console.log("Added markdown rules", Rules);
     return originalRules;
 }
