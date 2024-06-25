@@ -42,16 +42,6 @@
 
 .vc-author-modal-links {
     margin-left: auto;
-    display: flex;
-    gap: 0.2em;
-}
-
-.vc-author-modal-links img {
-    height: 32px;
-    width: 32px;
-    border-radius: 50%;
-    border: 4px solid var(--background-tertiary);
-    box-sizing: border-box
 }
 
 .vc-author-modal-plugins {

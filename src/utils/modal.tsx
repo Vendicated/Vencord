@@ -38,7 +38,7 @@ const enum ModalTransitionState {
 
 export interface ModalProps {
     transitionState: ModalTransitionState;
-    onClose(): Promise<void>;
+    onClose(): void;
 }
 
 export interface ModalOptions {

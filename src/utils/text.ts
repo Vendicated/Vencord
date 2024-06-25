@@ -131,3 +131,18 @@ export function makeCodeblock(text: string, language?: string) {
     const chars = "```";
     return `${chars}${language || ""}\n${text.replaceAll("```", "\\`\\`\\`")}\n${chars}`;
 }
+
+export function stripIndent(strings: TemplateStringsArray, ...values: any[]) {
+    const string = String.raw({ raw: strings }, ...values);
+
+    const match = string.match(/^[ \t]*(?=\S)/gm);
+    if (!match) return string.trim();
+
+    const minIndent = match.reduce((r, a) => Math.min(r, a.length), Infinity);
+    return string.replace(new RegExp(`^[ \\t]{${minIndent}}`, "gm"), "").trim();
+}
+
+export const ZWSP = "\u200b";
+export function toInlineCode(s: string) {
+    return "``" + ZWSP + s.replaceAll("`", ZWSP + "`" + ZWSP) + ZWSP + "``";
+}

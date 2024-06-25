@@ -56,33 +56,18 @@ export default definePlugin({
                 }
             ]
         },
-        // Discord Stable
-        // FIXME: remove once change merged to stable
         {
             find: "Messages.ACTIVITY_SETTINGS",
-            noWarn: true,
-            replacement: {
-                get match() {
-                    switch (Settings.plugins.Settings.settingsLocation) {
-                        case "top": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.USER_SETTINGS/;
-                        case "aboveNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.BILLING_SETTINGS/;
-                        case "belowNitro": return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS/;
-                        case "belowActivity": return /(?<=\{section:(\i\.\i)\.DIVIDER},)\{section:"changelog"/;
-                        case "bottom": return /\{section:(\i\.\i)\.CUSTOM,\s*element:.+?}/;
-                        case "aboveActivity":
-                        default:
-                            return /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.ACTIVITY_SETTINGS/;
-                    }
+            replacement: [
+                {
+                    match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
+                    replace: (_, sectionTypes, commaOrSemi, elements, element) => `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`
                 },
-                replace: "...$self.makeSettingsCategories($1),$&"
-            }
-        },
-        {
-            find: "Messages.ACTIVITY_SETTINGS",
-            replacement: {
-                match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
-                replace: (_, sectionTypes, commaOrSemi, elements, element) => `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`
-            }
+                {
+                    match: /({(?=.+?function (\i).{0,120}(\i)=\i\.useMemo.{0,30}return \i\.useMemo\(\(\)=>\i\(\3).+?function\(\){return )\2(?=})/,
+                    replace: (_, rest, settingsHook) => `${rest}$self.wrapSettingsHook(${settingsHook})`
+                }
+            ]
         },
         {
             find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",

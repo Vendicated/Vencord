@@ -53,6 +53,32 @@ export const banner = {
 `.trim()
 };
 
+const PluginDefinitionNameMatcher = /definePlugin\(\{\s*(["'])?name\1:\s*(["'`])(.+?)\2/;
+/**
+ * @param {string} base
+ * @param {import("fs").Dirent} dirent
+ */
+export async function resolvePluginName(base, dirent) {
+    const fullPath = join(base, dirent.name);
+    const content = dirent.isFile()
+        ? await readFile(fullPath, "utf-8")
+        : await (async () => {
+            for (const file of ["index.ts", "index.tsx"]) {
+                try {
+                    return await readFile(join(fullPath, file), "utf-8");
+                } catch {
+                    continue;
+                }
+            }
+            throw new Error(`Invalid plugin ${fullPath}: could not resolve entry point`);
+        })();
+
+    return PluginDefinitionNameMatcher.exec(content)?.[3]
+        ?? (() => {
+            throw new Error(`Invalid plugin ${fullPath}: must contain definePlugin call with simple string name property as first property`);
+        })();
+}
+
 export async function exists(path) {
     return await access(path, FsConstants.F_OK)
         .then(() => true)
@@ -88,31 +114,48 @@ export const globPlugins = kind => ({
         build.onLoad({ filter, namespace: "import-plugins" }, async () => {
             const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "userplugins"];
             let code = "";
-            let plugins = "\n";
+            let pluginsCode = "\n";
+            let metaCode = "\n";
+            let excludedCode = "\n";
             let i = 0;
             for (const dir of pluginDirs) {
-                if (!await exists(`./src/${dir}`)) continue;
-                const files = await readdir(`./src/${dir}`);
-                for (const file of files) {
-                    if (file.startsWith("_") || file.startsWith(".")) continue;
-                    if (file === "index.ts") continue;
+                const userPlugin = dir === "userplugins";
 
-                    const target = getPluginTarget(file);
+                const fullDir = `./src/${dir}`;
+                if (!await exists(fullDir)) continue;
+                const files = await readdir(fullDir, { withFileTypes: true });
+                for (const file of files) {
+                    const fileName = file.name;
+                    if (fileName.startsWith("_") || fileName.startsWith(".")) continue;
+                    if (fileName === "index.ts") continue;
+
+                    const target = getPluginTarget(fileName);
+
                     if (target && !IS_REPORTER) {
-                        if (target === "dev" && !watch) continue;
-                        if (target === "web" && kind === "discordDesktop") continue;
-                        if (target === "desktop" && kind === "web") continue;
-                        if (target === "discordDesktop" && kind !== "discordDesktop") continue;
-                        if (target === "vencordDesktop" && kind !== "vencordDesktop") continue;
+                        const excluded =
+                            (target === "dev" && !IS_DEV) ||
+                            (target === "web" && kind === "discordDesktop") ||
+                            (target === "desktop" && kind === "web") ||
+                            (target === "discordDesktop" && kind !== "discordDesktop") ||
+                            (target === "vencordDesktop" && kind !== "vencordDesktop");
+
+                        if (excluded) {
+                            const name = await resolvePluginName(fullDir, file);
+                            excludedCode += `${JSON.stringify(name)}:${JSON.stringify(target)},\n`;
+                            continue;
+                        }
                     }
 
+                    const folderName = `src/${dir}/${fileName}`.replace(/^src\/plugins\//, "");
+
                     const mod = `p${i}`;
-                    code += `import ${mod} from "./${dir}/${file.replace(/\.tsx?$/, "")}";\n`;
-                    plugins += `[${mod}.name]:${mod},\n`;
+                    code += `import ${mod} from "./${dir}/${fileName.replace(/\.tsx?$/, "")}";\n`;
+                    pluginsCode += `[${mod}.name]:${mod},\n`;
+                    metaCode += `[${mod}.name]:${JSON.stringify({ folderName, userPlugin })},\n`; // TODO: add excluded plugins to display in the UI?
                     i++;
                 }
             }
-            code += `export default {${plugins}};`;
+            code += `export default {${pluginsCode}};export const PluginMeta={${metaCode}};export const ExcludedPlugins={${excludedCode}};`;
             return {
                 contents: code,
                 resolveDir: "./src"

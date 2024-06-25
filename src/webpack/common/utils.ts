@@ -160,9 +160,15 @@ export const InviteActions = findByPropsLazy("resolveInvite");
 
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
 
-const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i/);
+const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i,activeViewType:/);
 // TODO: type
-export const ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
+export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
     closeExpressionPicker: filters.byCode("setState({activeView:null"),
     openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(m.toString()),
+});
+
+export const PopoutActions: t.PopoutActions = mapMangledModuleLazy('type:"POPOUT_WINDOW_OPEN"', {
+    open: filters.byCode('type:"POPOUT_WINDOW_OPEN"'),
+    close: filters.byCode('type:"POPOUT_WINDOW_CLOSE"'),
+    setAlwaysOnTop: filters.byCode('type:"POPOUT_WINDOW_SET_ALWAYS_ON_TOP"'),
 });
