@@ -29,7 +29,7 @@
         "generateTypes": "tspc --emitDeclarationOnly --declaration --outDir packages/vencord-types",
         "inject": "node scripts/runInstaller.mjs",
         "uninject": "node scripts/runInstaller.mjs",
-        "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-pattern src/userplugins",
+        "lint": "eslint",
         "lint-styles": "stylelint \"src/**/*.css\" --ignore-pattern src/userplugins",
         "lint:fix": "pnpm lint --fix",
         "test": "pnpm buildStandalone && pnpm lint && pnpm lint-styles && pnpm testTsc && pnpm generatePluginJson",
@@ -40,7 +40,6 @@
         "@sapphi-red/web-noise-suppressor": "0.3.3",
         "@vap/core": "0.0.12",
         "@vap/shiki": "0.10.5",
-        "eslint-plugin-simple-header": "^1.0.2",
         "fflate": "^0.7.4",
         "gifenc": "github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3",
         "monaco-editor": "^0.50.0",
@@ -48,6 +47,8 @@
         "virtual-merge": "^1.0.1"
     },
     "devDependencies": {
+        "@eslint/js": "^9.5.0",
+        "@stylistic/eslint-plugin": "^2.3.0",
         "@types/chrome": "^0.0.246",
         "@types/diff": "^5.0.3",
         "@types/lodash": "^4.14.194",
@@ -55,16 +56,15 @@
         "@types/react": "^18.2.0",
         "@types/react-dom": "^18.2.1",
         "@types/yazl": "^2.4.2",
-        "@typescript-eslint/eslint-plugin": "^5.59.1",
-        "@typescript-eslint/parser": "^5.59.1",
         "diff": "^5.1.0",
         "discord-types": "^1.3.26",
         "esbuild": "^0.15.18",
-        "eslint": "^8.46.0",
+        "eslint": "^9.5.0",
         "eslint-import-resolver-alias": "^1.1.2",
-        "eslint-plugin-path-alias": "^1.0.0",
-        "eslint-plugin-simple-import-sort": "^10.0.0",
-        "eslint-plugin-unused-imports": "^2.0.0",
+        "eslint-plugin-path-alias": "1.0.0",
+        "eslint-plugin-simple-header": "^1.0.2",
+        "eslint-plugin-simple-import-sort": "^12.1.0",
+        "eslint-plugin-unused-imports": "^4.0.0",
         "highlight.js": "10.6.0",
         "html-minifier-terser": "^7.2.0",
         "moment": "^2.29.4",
@@ -76,6 +76,7 @@
         "tsx": "^3.12.7",
         "type-fest": "^3.9.0",
         "typescript": "^5.4.5",
+        "typescript-eslint": "^7.14.1",
         "typescript-transform-paths": "^3.4.7",
         "zip-local": "^0.3.5"
     },
@@ -83,7 +84,7 @@
     "pnpm": {
         "patchedDependencies": {
             "eslint-plugin-path-alias@1.0.0": "patches/eslint-plugin-path-alias@1.0.0.patch",
-            "eslint@8.46.0": "patches/eslint@8.46.0.patch"
+            "eslint@9.5.0": "patches/eslint@9.5.0.patch"
         },
         "peerDependencyRules": {
             "ignoreMissing": [

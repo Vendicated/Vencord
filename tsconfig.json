@@ -39,5 +39,5 @@
             }
         ]
     },
-    "include": ["src/**/*", "browser/**/*", "scripts/**/*"]
+    "include": ["src/**/*", "browser/**/*", "scripts/**/*", "eslint.config.mjs"]
 }
