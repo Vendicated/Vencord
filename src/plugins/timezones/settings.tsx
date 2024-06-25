@@ -24,6 +24,8 @@ import { Text } from "@webpack/common";
 
 import { Snowflake } from "./api";
 import { TimezoneCache } from "./cache";
+import { classes } from "@utils/misc";
+import { Margins } from "@utils/margins";
 
 export type TimezoneOverrides = Record<Snowflake, string | null>;
 
@@ -35,14 +37,15 @@ const settings = definePluginSettings({
         description: "Fetch user timezones from TimezoneDB when a local override does not exist",
         default: true,
     },
+    // TODO: disable this if enableApi is disabled
     apiUrl: {
         type: OptionType.STRING,
-        description: "The TimezoneDB API instance to fetch from",
+        description: "The TimezoneDB API instance",
         default: DEFAULT_API,
         placeholder: DEFAULT_API,
         onChange(_: any) {
             DataStore.clear(TimezoneCache).catch(_ => _);
-        }
+        },
     },
     displayInChat: {
         type: OptionType.BOOLEAN,
@@ -72,14 +75,11 @@ export function SettingsComponent(): JSX.Element {
     // const { apiUrl } = settings.use(["apiUrl"]);
     // const url = `${apiUrl}/../?client_mod=${encodeURIComponent(VENCORD_USER_AGENT)}`;
 
-    // TODO: show button to authorize tzdb and manage public tz
-
     return <>
-        <Text variant="text-md/normal">
-            <br />
-            This plugin supports setting your own Timezone publicly for others to
-            fetch and display via <Link href="https://github.com/rushiimachine/timezonedb">TimezoneDB</Link>.
-            You can override other users' timezones locally if they haven't set their own.
+        <Text variant="text-md/normal" className={classes(Margins.top16, Margins.bottom20)}>
+            This plugin supports setting your own timezone publicly for others to
+            display via the <Link href="https://github.com/rushiimachine/timezonedb">TimezoneDB</Link> API.
+            You can set a local override for other users if they haven't publicized their own timezone.
         </Text>
     </>;
 }
