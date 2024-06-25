@@ -10,7 +10,7 @@ import { debounce } from "@shared/debounce";
 import { Logger } from "@utils/Logger";
 
 import { fetchTimezone, fetchTimezonesBulk, Snowflake } from "./api";
-import settings, { TimezoneOverwrites } from "./settings";
+import settings, { TimezoneOverrides } from "./settings";
 
 // TODO: cache invalidation
 export const TimezoneCache = createStore("TimezoneCache", "TimezoneCache");
@@ -54,9 +54,9 @@ export async function getUserTimezone(
     immediate: boolean = false,
     force: boolean = false,
 ): Promise<string | null> {
-    const overwrites: TimezoneOverwrites = settings.store.timezoneOverwrites ?? {};
-    const overwrite = overwrites[userId];
-    if (overwrite !== undefined) return overwrite;
+    const overrides: TimezoneOverrides = settings.store.timezoneOverrides ?? {};
+    const override = overrides[userId];
+    if (override !== undefined) return override;
     if (!settings.store.enableApi) return null;
 
     if (!force) {

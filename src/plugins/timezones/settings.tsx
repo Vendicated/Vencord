@@ -25,7 +25,7 @@ import { Text } from "@webpack/common";
 import { Snowflake } from "./api";
 import { TimezoneCache } from "./cache";
 
-export type TimezoneOverwrites = Record<Snowflake, string | null>;
+export type TimezoneOverrides = Record<Snowflake, string | null>;
 
 const DEFAULT_API = "https://timezonedb.catvibers.me/api";
 
@@ -54,11 +54,11 @@ const settings = definePluginSettings({
         description: "Show local time in user profiles",
         default: true,
     },
-    timezoneOverwrites: {
+    timezoneOverrides: {
         type: OptionType.COMPONENT,
-        description: "Local overwrites for users' timezones",
+        description: "Local overrides for users' timezones",
         component: props => <>
-            <TimezoneOverwritesSetting
+            <TimezoneOverridesSetting
                 setValue={props.setValue}
                 setError={props.setError}
                 option={props.option} />
@@ -84,6 +84,6 @@ export function SettingsComponent(): JSX.Element {
     </>;
 }
 
-function TimezoneOverwritesSetting(props: IPluginOptionComponentProps): JSX.Element {
+function TimezoneOverridesSetting(props: IPluginOptionComponentProps): JSX.Element {
     return <></>;
 }

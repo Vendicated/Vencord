@@ -24,7 +24,7 @@ import { SelectOption } from "@webpack/types";
 
 import { Snowflake } from "./api";
 import { getUserTimezone } from "./cache";
-import settings, { TimezoneOverwrites } from "./settings";
+import settings, { TimezoneOverrides } from "./settings";
 import { formatTimestamp, getTimezonesLazy } from "./utils";
 
 // Based on Syncxv's vc-timezones user plugin //
@@ -99,7 +99,7 @@ function LocalTimestampInner(props: LocalTimestampProps): JSX.Element | null {
                     className={classes}
                     onClick={() => {
                         toolTipProps.onClick();
-                        openTimezoneOverwriteModal(props.userId);
+                        openTimezoneOverrideModal(props.userId);
                     }}>
                     {shortTimeFormatted}
                 </span>
@@ -113,7 +113,7 @@ interface TimezoneOverrideModalProps {
     modalProps: ModalProps,
 }
 
-function TimezoneOverrideModal(props: TimezoneOverrideModalProps) {
+function SetTimezoneOverrideModal(props: TimezoneOverrideModalProps) {
     const [availableTimezones, setAvailableTimezones] = useState<SelectOption[]>();
     const [timezone, setTimezone] = useState<string | "NONE" | undefined>();
 
@@ -140,22 +140,22 @@ function TimezoneOverrideModal(props: TimezoneOverrideModalProps) {
             setAvailableTimezones(options);
         });
 
-        const overwrites: TimezoneOverwrites = settings.store.timezoneOverwrites ?? {};
-        const overwrite = overwrites[props.userId];
-        setTimezone(overwrite === null ? "NONE" : overwrite);
+        const overrides: TimezoneOverrides = settings.store.timezoneOverrides ?? {};
+        const override = overrides[props.userId];
+        setTimezone(override === null ? "NONE" : override);
     }, []);
 
-    function saveOverwrite() {
+    function saveOverride() {
         if (availableTimezones === undefined) return;
 
-        const overwrites: TimezoneOverwrites = {
+        const overrides: TimezoneOverrides = {
             [props.userId]: timezone === "NONE" ? null : timezone,
-            ...settings.store.timezoneOverwrites,
+            ...settings.store.timezoneOverrides,
         };
         if (timezone === undefined)
-            delete overwrites[props.userId];
+            delete overrides[props.userId];
 
-        settings.store.timezoneOverwrites = overwrites;
+        settings.store.timezoneOverrides = overrides;
 
         props.modalProps.onClose();
     }
@@ -198,7 +198,7 @@ function TimezoneOverrideModal(props: TimezoneOverrideModalProps) {
             <Button
                 color={Button.Colors.BRAND}
                 disabled={availableTimezones === undefined}
-                onClick={saveOverwrite}>
+                onClick={saveOverride}>
                 Save
             </Button>
             <Button color={Button.Colors.RED} onClick={props.modalProps.onClose}>
@@ -208,10 +208,10 @@ function TimezoneOverrideModal(props: TimezoneOverrideModalProps) {
     </ModalRoot>;
 }
 
-export function openTimezoneOverwriteModal(userId: string) {
+export function openTimezoneOverrideModal(userId: string) {
     openModal(modalProps => <>
         <ErrorBoundary>
-            <TimezoneOverrideModal userId={userId} modalProps={modalProps} />
+            <SetTimezoneOverrideModal userId={userId} modalProps={modalProps} />
         </ErrorBoundary>
     </>);
 }
