@@ -11,7 +11,7 @@ import definePlugin, { StartAt } from "@utils/types";
 export default definePlugin({
     name: "MarkDownRulesAPI",
     description: "API to add/mod markdown rules",
-    authors: [Devs.Ven],
+    authors: [Devs.iamme],
     patches: [
         {
             find: "{RULES:",

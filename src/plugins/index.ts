@@ -121,9 +121,8 @@ for (const p of pluginsValues) {
             }
         }
     }
-    if (p.Rules && isPluginEnabled(p.name)) {
-        AddAPendingRule(p.Rules);
-        logger.debug("added a pending rule: ", p.Rules);
+    if (p.rules && isPluginEnabled(p.name)) {
+        AddAPendingRule(p.rules);
     }
 }
 

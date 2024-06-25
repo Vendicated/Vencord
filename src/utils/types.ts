@@ -143,7 +143,7 @@ export interface PluginDef {
     /**
      * Allows you to add custom Rules to markdown
      */
-    Rules?(r: PluginMarkDownRules): PluginMarkDownRules;
+    rules?(r: PluginMarkDownRules): PluginMarkDownRules;
 
     tags?: string[];
 }
