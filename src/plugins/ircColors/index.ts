@@ -53,6 +53,12 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         default: 70,
     },
+    memberListColors: {
+        description: "Replace role colors in the member list",
+        restartNeeded: true,
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
 });
 
 export default definePlugin({
@@ -64,12 +70,23 @@ export default definePlugin({
             find: "=\"SYSTEM_TAG\"",
             replacement: {
                 match: /(?<=className:\i\.username,style:.{0,50}:void 0,)/,
-                replace: "style:{color:$self.calculateNameColorForContext(arguments[0])},"
+                replace: "style:{color:$self.calculateNameColorForMessageContext(arguments[0])},",
             },
+        },
+        {
+            find: ".NameWithRole,{roleName:",
+            replacement: {
+                match: /(?<=color:)null!=.{0,50}?(?=,)/,
+                replace: "$self.calculateNameColorForListContext(arguments[0])",
+            },
+            predicate: () => settings.store.memberListColors,
         },
     ],
     settings,
-    calculateNameColorForContext(context: any) {
+    calculateNameColorForMessageContext(context: any) {
         return calculateNameColorForUser(BigInt(context.message.author.id));
+    },
+    calculateNameColorForListContext(context: any) {
+        return calculateNameColorForUser(BigInt(context.user.id));
     },
 });
