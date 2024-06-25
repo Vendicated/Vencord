@@ -18,6 +18,7 @@
 
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import { AddAPendingRule } from "@api/MarkdownRules";
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind } from "@utils/patches";
@@ -119,6 +120,10 @@ for (const p of pluginsValues) {
                 addPatch(patch, p.name);
             }
         }
+    }
+    if (p.Rules && isPluginEnabled(p.name)) {
+        AddAPendingRule(p.Rules);
+        logger.debug("added a pending rule: ", p.Rules);
     }
 }
 
