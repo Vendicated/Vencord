@@ -4,7 +4,7 @@ import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, i18n, Menu, MessageStore, Parser, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
 function pizzalleify(str: string): string {
-    let result = str.toUpperCase();
+    let result = str[0].toUpperCase() + str.substr(1).toLowerCase();
 
     if (!result.endsWith(".")) {
         result += ".";
@@ -20,6 +20,8 @@ export default definePlugin({
         name: "doeimos.png",
         id: 1105436709669314600n
     }],
+
+    patches: [],
 
     start() {
 
