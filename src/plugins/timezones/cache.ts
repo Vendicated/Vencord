@@ -13,7 +13,7 @@ import { fetchTimezone, fetchTimezonesBulk, Snowflake } from "./api";
 import settings, { TimezoneOverwrites } from "./settings";
 
 // TODO: cache invalidation
-const TimezoneCache = createStore("TimezoneCache", "TimezoneCache");
+export const TimezoneCache = createStore("TimezoneCache", "TimezoneCache");
 
 // A list of callbacks that will trigger on a completed debounced bulk fetch
 type BulkFetchCallback = (timezone: string | null) => void;

@@ -22,8 +22,12 @@ import { IPluginOptionComponentProps, OptionType } from "@utils/types";
 import { Text } from "@webpack/common";
 
 import { Snowflake } from "./api";
+import { DataStore } from "@api/index";
+import { TimezoneCache } from "./cache";
 
 export type TimezoneOverwrites = Record<Snowflake, string | null>;
+
+const DEFAULT_API = "https://timezonedb.catvibers.me/api";
 
 const settings = definePluginSettings({
     enableApi: {
@@ -34,7 +38,11 @@ const settings = definePluginSettings({
     apiUrl: {
         type: OptionType.STRING,
         description: "The TimezoneDB API instance to fetch from",
-        default: "https://timezonedb.catvibers.me/api",
+        default: DEFAULT_API,
+        placeholder: DEFAULT_API,
+        onChange(_: any) {
+            DataStore.clear(TimezoneCache).catch(_ => _)
+        }
     },
     displayInChat: {
         type: OptionType.BOOLEAN,

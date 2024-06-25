@@ -153,14 +153,13 @@ export function TimezoneOverrideModal(props: TimezoneOverrideModalProps) {
     function saveOverwrite() {
         if (availableTimezones === undefined) return;
 
-        const overwrites: TimezoneOverwrites = settings.store.timezoneOverwrites ?? {};
-        if (timezone === undefined) {
+        const overwrites: TimezoneOverwrites = {
+            [props.userId]: timezone === "NONE" ? null : timezone,
+            ...settings.store.timezoneOverwrites,
+        };
+        if (timezone === undefined)
             delete overwrites[props.userId];
-        } else if (timezone === "NONE") {
-            overwrites[props.userId] = null;
-        } else {
-            overwrites[props.userId] = timezone;
-        }
+
         settings.store.timezoneOverwrites = overwrites;
 
         props.modalProps.onClose();
@@ -176,14 +175,19 @@ export function TimezoneOverrideModal(props: TimezoneOverrideModalProps) {
 
         <ModalContent className="vc-timezone-modal-content">
             <Text variant="text-md/normal">
-                This override will only be visible locally.
+                This override will only be visible locally and to any synchronized clients via Vencord Cloud.
+                <br />
                 <br />
                 To set your own Timezone for other users to see,
                 click <Link onClick={/* TODO */ _ => _}>here</Link> to
-                authorize TimezoneDB.
+                authorize the public TimezoneDB API.
             </Text>
 
-            <section className={classes(Margins.bottom16, Margins.top16)}>
+            <Forms.FormTitle tag="h3" className={Margins.top16}>
+                Set Timezone
+            </Forms.FormTitle>
+
+            <section className={classes(Margins.bottom8, Margins.top8)}>
                 <SearchableSelect
                     options={availableTimezones ?? []}
                     value={availableTimezones?.find(opt => opt.value === timezone)}
