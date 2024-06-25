@@ -22,7 +22,7 @@ import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
 import { Link } from "@components/Link";
 import PluginModal from "@components/PluginSettings/PluginModal";
-import type { UserThemeHeader } from "@main/themes";
+import { getThemeInfo, UserThemeHeader } from "@main/themes";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
@@ -30,7 +30,19 @@ import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findByPropsLazy, findLazy } from "@webpack";
-import { Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
+import {
+    Button,
+    Card,
+    Forms,
+    React,
+    showToast,
+    TabBar,
+    TextArea,
+    TextInput,
+    useEffect,
+    useRef,
+    useState
+} from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { AddonCard } from "./AddonCard";
@@ -49,13 +61,16 @@ const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
 const cl = classNameFactory("vc-settings-theme-");
 
-function Validator({ link }: { link: string; }) {
-    const [res, err, pending] = useAwaiter(() => fetch(link).then(res => {
+function Validator({ link, onValidate }: { link: string; onValidate: (valid: boolean) => void; }) {
+    const [, err, pending] = useAwaiter(() => fetch(link).then(res => {
         if (res.status > 300) throw `${res.status} ${res.statusText}`;
         const contentType = res.headers.get("Content-Type");
-        if (!contentType?.startsWith("text/css") && !contentType?.startsWith("text/plain"))
+        if (!contentType?.startsWith("text/css") && !contentType?.startsWith("text/plain")) {
+            onValidate(false);
             throw "Not a CSS file. Remember to use the raw link!";
+        }
 
+        onValidate(true);
         return "Okay!";
     }));
 
@@ -70,33 +85,6 @@ function Validator({ link }: { link: string; }) {
     }}>{text}</Forms.FormText>;
 }
 
-function Validators({ themeLinks }: { themeLinks: string[]; }) {
-    if (!themeLinks.length) return null;
-
-    return (
-        <>
-            <Forms.FormTitle className={Margins.top20} tag="h5">Validator</Forms.FormTitle>
-            <Forms.FormText>This section will tell you whether your themes can successfully be loaded</Forms.FormText>
-            <div>
-                {themeLinks.map(link => (
-                    <Card style={{
-                        padding: ".5em",
-                        marginBottom: ".5em",
-                        marginTop: ".5em"
-                    }} key={link}>
-                        <Forms.FormTitle tag="h5" style={{
-                            overflowWrap: "break-word"
-                        }}>
-                            {link}
-                        </Forms.FormTitle>
-                        <Validator link={link} />
-                    </Card>
-                ))}
-            </div>
-        </>
-    );
-}
-
 interface ThemeCardProps {
     theme: UserThemeHeader;
     enabled: boolean;
@@ -104,7 +92,7 @@ interface ThemeCardProps {
     onDelete: () => void;
 }
 
-function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
+function ThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton }: ThemeCardProps) {
     return (
         <AddonCard
             name={theme.name}
@@ -113,7 +101,7 @@ function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps) {
             enabled={enabled}
             setEnabled={onChange}
             infoButton={
-                IS_WEB && (
+                (IS_WEB||showDeleteButton) && (
                     <div style={{ cursor: "pointer", color: "var(--status-danger" }} onClick={onDelete}>
                         <DeleteIcon />
                     </div>
@@ -146,16 +134,19 @@ enum ThemeTab {
 }
 
 function ThemesTab() {
-    const settings = useSettings(["themeLinks", "enabledThemes"]);
+    const settings = useSettings(["themeLinks", "enabledThemeLinks", "enabledThemes"]);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [currentTab, setCurrentTab] = useState(ThemeTab.LOCAL);
-    const [themeText, setThemeText] = useState(settings.themeLinks.join("\n"));
+    const [currentThemeLink, setCurrentThemeLink] = useState("");
+    const [themeLinkValid, setThemeLinkValid] = useState(false);
     const [userThemes, setUserThemes] = useState<UserThemeHeader[] | null>(null);
+    const [onlineThemes, setOnlineThemes] = useState<(UserThemeHeader & { link: string; })[] | null>(null);
     const [themeDir, , themeDirPending] = useAwaiter(VencordNative.themes.getThemesDir);
 
     useEffect(() => {
         refreshLocalThemes();
+        refreshOnlineThemes();
     }, []);
 
     async function refreshLocalThemes() {
@@ -198,7 +189,7 @@ function ThemesTab() {
         refreshLocalThemes();
     }
 
-    function renderLocalThemes() {
+    function LocalThemes() {
         return (
             <>
                 <Card className="vc-settings-card">
@@ -289,36 +280,63 @@ function ThemesTab() {
     }
 
     // When the user leaves the online theme textbox, update the settings
-    function onBlur() {
-        settings.themeLinks = [...new Set(
-            themeText
-                .trim()
-                .split(/\n+/)
-                .map(s => s.trim())
-                .filter(Boolean)
-        )];
+    function addThemeLink(link: string) {
+        if (!themeLinkValid) return;
+        if (settings.themeLinks.includes(link)) return;
+
+        settings.themeLinks = [...settings.themeLinks, link];
+        setCurrentThemeLink("");
+        refreshOnlineThemes();
     }
 
-    function renderOnlineThemes() {
+    async function refreshOnlineThemes() {
+        const themes = await Promise.all(settings.themeLinks.map(async link => {
+            const css = await fetch(link).then(res => res.text());
+            return { ...getThemeInfo(css, link), link };
+        }));
+        setOnlineThemes(themes);
+    }
+
+    function onThemeLinkEnabledChange(link: string, enabled: boolean) {
+        if (enabled) {
+            if (settings.enabledThemeLinks.includes(link)) return;
+            settings.enabledThemeLinks = [...settings.enabledThemeLinks, link];
+        } else {
+            settings.enabledThemeLinks = settings.enabledThemeLinks.filter(f => f !== link);
+        }
+    }
+
+    function deleteThemeLink(link: string) {
+        settings.themeLinks = settings.themeLinks.filter(f => f !== link);
+
+        refreshOnlineThemes();
+    }
+
+    function OnlineThemes() {
         return (
             <>
-                <Card className="vc-settings-card vc-text-selectable">
-                    <Forms.FormTitle tag="h5">Paste links to css files here</Forms.FormTitle>
-                    <Forms.FormText>One link per line</Forms.FormText>
-                    <Forms.FormText>Make sure to use direct links to files (raw or github.io)!</Forms.FormText>
-                </Card>
-
                 <Forms.FormSection title="Online Themes" tag="h5">
-                    <TextArea
-                        value={themeText}
-                        onChange={setThemeText}
-                        className={classes(TextAreaProps.textarea, "vc-settings-theme-links")}
-                        placeholder="Theme Links"
-                        spellCheck={false}
-                        onBlur={onBlur}
-                        rows={10}
-                    />
-                    <Validators themeLinks={settings.themeLinks} />
+                    <Card className="vc-settings-theme-add-card">
+                        <Forms.FormText>Make sure to use direct links to files (raw or github.io)!</Forms.FormText>
+                        <Flex flexDirection="row">
+                            <TextInput placeholder="Theme Link" className="vc-settings-theme-link-input" value={currentThemeLink} onChange={setCurrentThemeLink} />
+                            <Button onClick={() => addThemeLink(currentThemeLink)} disabled={!themeLinkValid}>Add</Button>
+                        </Flex>
+                        {currentThemeLink && <Validator link={currentThemeLink} onValidate={setThemeLinkValid} />}
+                    </Card>
+
+                    <div className={cl("grid")}>
+                        {onlineThemes?.map(theme => {
+                            return <ThemeCard
+                                key={theme.fileName}
+                                enabled={settings.enabledThemeLinks.includes(theme.link)}
+                                onChange={enabled => onThemeLinkEnabledChange(theme.link, enabled)}
+                                onDelete={() => deleteThemeLink(theme.link)}
+                                showDeleteButton
+                                theme={theme}
+                            />;
+                        })}
+                    </div>
                 </Forms.FormSection>
             </>
         );
@@ -347,8 +365,8 @@ function ThemesTab() {
                 </TabBar.Item>
             </TabBar>
 
-            {currentTab === ThemeTab.LOCAL && renderLocalThemes()}
-            {currentTab === ThemeTab.ONLINE && renderOnlineThemes()}
+            {currentTab === ThemeTab.LOCAL && <LocalThemes />}
+            {currentTab === ThemeTab.ONLINE && <OnlineThemes />}
         </SettingsTab>
     );
 }
