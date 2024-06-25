@@ -4,13 +4,27 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { CogWheel } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { UserStore } from "@webpack/common";
+import { Menu, UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
-import { LocalTimestamp } from "./components";
+import { LocalTimestamp, openTimezoneOverrideModal } from "./components";
 import settings, { SettingsComponent } from "./settings";
+
+const contextMenuPatch: NavContextMenuPatchCallback = (children, { user }: { user: User }) => {
+    if (!user) return;
+    children.push(
+        <Menu.MenuItem
+            label="Set Timezone Override"
+            id="vc-timezones-context-btn"
+            icon={CogWheel}
+            action={() => openTimezoneOverrideModal(user.id)}
+        />,
+    );
+};
 
 export default definePlugin({
     name: "Timezones",
@@ -47,6 +61,11 @@ export default definePlugin({
             },
         },
     ],
+
+    contextMenus: {
+        "user-profile-actions": contextMenuPatch,
+        "user-profile-overflow-menu": contextMenuPatch,
+    },
 
     renderProfileTimezone: (props?: { user?: User; }) => {
         if (!settings.store.displayInProfile || !props?.user?.id) return null;
