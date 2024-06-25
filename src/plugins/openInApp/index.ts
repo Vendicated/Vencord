@@ -63,8 +63,8 @@ export default definePlugin({
         {
             find: "trackAnnouncementMessageLinkClicked({",
             replacement: {
-                match: /(?<=handleClick:function\(\)\{return (\i)\}.+?)function \1\(.+?\)\{/,
-                replace: "async $& if(await $self.handleLink(...arguments)) return;"
+                match: /function (\i\(\i,\i\)\{)(?=.{0,100}trusted:)/,
+                replace: "async function $1 if(await $self.handleLink(...arguments)) return;"
             }
         },
         // Make Spotify profile activity links open in app on web

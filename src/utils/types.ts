@@ -86,6 +86,10 @@ export interface PluginDef {
      */
     required?: boolean;
     /**
+     * Whether this plugin should be hidden from the user
+     */
+    hidden?: boolean;
+    /**
      * Whether this plugin should be enabled by default, but can be disabled
      */
     enabledByDefault?: boolean;
@@ -124,7 +128,7 @@ export interface PluginDef {
      * Allows you to subscribe to Flux events
      */
     flux?: {
-        [E in FluxEvents]?: (event: any) => void;
+        [E in FluxEvents]?: (event: any) => void | Promise<void>;
     };
     /**
      * Allows you to manipulate context menus

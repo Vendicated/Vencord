@@ -19,9 +19,7 @@
 import { Devs } from "@utils/constants";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-
-const { closeExpressionPicker } = findByPropsLazy("closeExpressionPicker");
+import { ExpressionPickerStore } from "@webpack/common";
 
 export default definePlugin({
     name: "GifPaste",
@@ -39,7 +37,7 @@ export default definePlugin({
     handleSelect(gif?: { url: string; }) {
         if (gif) {
             insertTextIntoChatInputBox(gif.url + " ");
-            closeExpressionPicker();
+            ExpressionPickerStore.closeExpressionPicker();
         }
     }
 });
