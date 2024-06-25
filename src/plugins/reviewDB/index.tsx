@@ -110,14 +110,15 @@ export default definePlugin({
                 const props = user.notification.type === NotificationType.Ban ? {
                     cancelText: "Appeal",
                     confirmText: "Ok",
-                    onCancel: async () =>
+                    onCancel: () => {
                         VencordNative.native.openExternal(
                             "https://reviewdb.mantikafasi.dev/api/redirect?"
                             + new URLSearchParams({
                                 token: Auth.token!,
                                 page: "dashboard/appeal"
                             })
-                        )
+                        );
+                    }
                 } : {};
 
                 AlertActionCreators.show({

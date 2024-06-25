@@ -34,7 +34,10 @@ function createPinMenuItem(channelId: string) {
                         <Menu.MenuItem
                             id={`pin-category-${category.name}`}
                             label={category.name}
-                            action={() => { addChannelToCategory(channelId, category.id).then(() => { forceUpdate; }); }}
+                            action={async () => {
+                                await addChannelToCategory(channelId, category.id);
+                                forceUpdate();
+                            }}
                         />
                     ))}
                 </>
@@ -46,14 +49,20 @@ function createPinMenuItem(channelId: string) {
                         id="unpin-dm"
                         label="Unpin DM"
                         color="danger"
-                        action={() => { removeChannelFromCategory(channelId).then(() => { forceUpdate; }); }}
+                        action={async () => {
+                            await removeChannelFromCategory(channelId);
+                            forceUpdate();
+                        }}
                     />
 
                     {settings.store.pinOrder === PinOrder.Custom && canMoveChannelInDirection(channelId, -1) && (
                         <Menu.MenuItem
                             id="move-up"
                             label="Move Up"
-                            action={() => { moveChannel(channelId, -1).then(() => { forceUpdate; }); }}
+                            action={async () => {
+                                await moveChannel(channelId, -1);
+                                forceUpdate();
+                            }}
                         />
                     )}
 
@@ -61,7 +70,10 @@ function createPinMenuItem(channelId: string) {
                         <Menu.MenuItem
                             id="move-down"
                             label="Move Down"
-                            action={() => { moveChannel(channelId, 1).then(() => { forceUpdate; }); }}
+                            action={async () => {
+                                await moveChannel(channelId, 1);
+                                forceUpdate();
+                            }}
                         />
                     )}
                 </>

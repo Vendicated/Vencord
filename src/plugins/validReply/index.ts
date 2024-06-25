@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { MessageJSON } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import type { ChannelRecord, MessageRecord, UserRecord } from "@vencord/discord-types";
@@ -29,7 +30,8 @@ const fetching = new Map<string, string>();
 
 let ReferencedMessageCache: any;
 
-const createMessageRecord = findByCodeLazy(".createFromServer(", ".isBlockedForMessage", "messageReference:");
+const createMessageRecord: (apiMessage: MessageJSON) => MessageRecord
+    = findByCodeLazy(".createFromServer(", ".isBlockedForMessage", "messageReference:");
 
 export default definePlugin({
     name: "ValidReply",
@@ -56,50 +58,49 @@ export default definePlugin({
         ReferencedMessageCache = obj;
     },
 
-    fetchReply(reply: Reply) {
+    async fetchReply(reply: Reply) {
         const { channel_id: channelId, message_id: messageId } = reply.baseMessage.messageReference!;
 
         if (fetching.has(messageId!)) return;
 
         fetching.set(messageId!, channelId);
 
-        RestAPI.get({
-            url: `/channels/${channelId}/messages`,
-            query: {
-                limit: 1,
-                around: messageId
-            },
-            retries: 2
-        })
-            .then(res => {
-                const reply: MessageRecord | undefined = res?.body?.[0];
-                if (!reply) return;
-
-                if (reply.id !== messageId) {
-                    ReferencedMessageCache.set(channelId, messageId, {
-                        state: ReferencedMessageState.DELETED
-                    });
-
-                    FluxDispatcher.dispatch({
-                        type: "MESSAGE_DELETE",
-                        channelId: channelId,
-                        message: messageId
-                    });
-                } else {
-                    ReferencedMessageCache.set(reply.channel_id, reply.id, {
-                        state: ReferencedMessageState.LOADED,
-                        message: createMessageRecord(reply)
-                    });
-
-                    FluxDispatcher.dispatch({
-                        type: "MESSAGE_UPDATE",
-                        message: reply
-                    });
-                }
-            })
-            .catch(() => { })
-            .finally(() => {
-                fetching.delete(messageId!);
+        try {
+            const res = await RestAPI.get({
+                url: `/channels/${channelId}/messages`,
+                query: {
+                    limit: 1,
+                    around: messageId
+                },
+                retries: 2
             });
+            const reply: MessageJSON | undefined = res?.body?.[0];
+            if (!reply) return;
+
+            if (reply.id !== messageId) {
+                ReferencedMessageCache.set(channelId, messageId, {
+                    state: ReferencedMessageState.DELETED
+                });
+
+                FluxDispatcher.dispatch({
+                    type: "MESSAGE_DELETE",
+                    channelId: channelId,
+                    message: messageId
+                });
+            } else {
+                ReferencedMessageCache.set(reply.channel_id, reply.id, {
+                    state: ReferencedMessageState.LOADED,
+                    message: createMessageRecord(reply)
+                });
+
+                FluxDispatcher.dispatch({
+                    type: "MESSAGE_UPDATE",
+                    message: reply
+                });
+            }
+        } catch {
+        } finally {
+            fetching.delete(messageId!);
+        }
     }
 });

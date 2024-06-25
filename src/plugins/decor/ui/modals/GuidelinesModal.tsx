@@ -61,5 +61,7 @@ const GuidelinesModal = (props: ModalProps) => (
     </ModalRoot>
 );
 
-export const openGuidelinesModal = () =>
-    requireAvatarDecorationModal().then(() => openModal(props => <GuidelinesModal {...props} />));
+export async function openGuidelinesModal() {
+    await requireAvatarDecorationModal();
+    return openModal(props => <GuidelinesModal {...props} />);
+}

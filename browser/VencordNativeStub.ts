@@ -46,9 +46,8 @@ window.VencordNative = {
         uploadTheme: (fileName: string, fileData: string) => DataStore.set(fileName, fileData, themeStore),
         deleteTheme: (fileName: string) => DataStore.del(fileName, themeStore),
         getThemesDir: async () => "",
-        getThemesList: () => DataStore.entries(themeStore).then(entries =>
-            entries.map(([name, css]) => getThemeInfo(css, name.toString()))
-        ),
+        getThemesList: async () => (await DataStore.entries(themeStore))
+            .map(([name, css]) => getThemeInfo(css, name.toString())),
         getThemeData: (fileName: string) => DataStore.get(fileName, themeStore),
         getSystemValues: async () => ({}),
     },
@@ -66,7 +65,7 @@ window.VencordNative = {
     },
 
     quickCss: {
-        get: () => DataStore.get("VencordQuickCss").then(s => s ?? ""),
+        get: async () => await DataStore.get("VencordQuickCss") ?? "",
         set: async (css: string) => {
             await DataStore.set("VencordQuickCss", css);
             cssListeners.forEach(l => { l(css); });

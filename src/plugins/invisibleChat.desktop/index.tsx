@@ -118,8 +118,8 @@ export default definePlugin({
         /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/,
     ),
     async start() {
-        addButton("InvisibleChat", message => {
-            return this.INV_REGEX.test(message.content)
+        addButton("InvisibleChat", message =>
+            this.INV_REGEX.test(message.content)
                 ? {
                     label: "Decrypt Message",
                     icon: this.popOverIcon,
@@ -133,8 +133,8 @@ export default definePlugin({
                             buildDecModal({ message });
                     }
                 }
-                : null;
-        });
+                : null
+        );
 
         addChatBarButton("InvisibleChat", ChatBarIcon);
 
@@ -155,7 +155,7 @@ export default definePlugin({
                 urls: [url]
             }
         });
-        return await body.embeds[0];
+        return body.embeds[0];
     },
 
     async buildEmbed(message: any, revealed: string) {

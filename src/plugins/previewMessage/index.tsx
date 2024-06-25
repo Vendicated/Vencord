@@ -21,10 +21,10 @@ import { generateId, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
 import { DraftType, type FluxStore, type MessageAttachment } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import { findStoreLazy } from "@webpack";
 import { DraftStore, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
 
-const UploadStore: FluxStore & Record<string, any> = findByPropsLazy("getUploads");
+const UploadAttachmentStore: FluxStore & Record<string, any> = findStoreLazy("UploadAttachmentStore");
 
 const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.CHANNEL_MESSAGE);
 
@@ -42,35 +42,34 @@ const getImageBox = (url: string): Promise<{ width: number, height: number; } | 
         img.src = url;
     });
 
-const getAttachments = async (channelId: string) =>
-    await Promise.all(
-        UploadStore.getUploads(channelId, DraftType.CHANNEL_MESSAGE)
-            .map(async (upload: any) => {
-                const { isImage, filename, spoiler, item: { file } } = upload;
-                const url = URL.createObjectURL(file);
-                const attachment: MessageAttachment = {
-                    id: generateId(),
-                    filename: spoiler ? "SPOILER_" + filename : filename,
-                    // weird eh? if i give it the normal content type the preview doenst work
-                    content_type: undefined,
-                    size: await upload.getSize(),
-                    spoiler,
-                    // discord adds query params to the url, so we need to add a hash to prevent that
-                    url: url + "#",
-                    proxy_url: url + "#",
-                };
+const getAttachments = (channelId: string) => Promise.all(
+    UploadAttachmentStore.getUploads(channelId, DraftType.CHANNEL_MESSAGE)
+        .map(async (upload: any) => {
+            const { isImage, filename, spoiler, item: { file } } = upload;
+            const url = URL.createObjectURL(file);
+            const attachment: MessageAttachment = {
+                id: generateId(),
+                filename: spoiler ? "SPOILER_" + filename : filename,
+                // weird eh? if i give it the normal content type the preview doenst work
+                content_type: undefined,
+                size: await upload.getSize(),
+                spoiler,
+                // discord adds query params to the url, so we need to add a hash to prevent that
+                url: url + "#",
+                proxy_url: url + "#",
+            };
 
-                if (isImage) {
-                    const box = await getImageBox(url);
-                    if (!box) return attachment;
+            if (isImage) {
+                const box = await getImageBox(url);
+                if (!box) return attachment;
 
-                    attachment.width = box.width;
-                    attachment.height = box.height;
-                }
+                attachment.width = box.width;
+                attachment.height = box.height;
+            }
 
-                return attachment;
-            })
-    );
+            return attachment;
+        })
+);
 
 const PreviewButton: ChatBarButton = ({ isMainChat, isEmpty, type: { attachments } }) => {
     const channelId = SelectedChannelStore.getChannelId()!;
@@ -78,7 +77,7 @@ const PreviewButton: ChatBarButton = ({ isMainChat, isEmpty, type: { attachments
 
     if (!isMainChat) return null;
 
-    const hasAttachments = attachments && UploadStore.getUploads(channelId, DraftType.CHANNEL_MESSAGE).length > 0;
+    const hasAttachments = attachments && UploadAttachmentStore.getUploads(channelId, DraftType.CHANNEL_MESSAGE).length > 0;
     const hasContent = !isEmpty && draft.length > 0;
 
     if (!hasContent && !hasAttachments) return null;

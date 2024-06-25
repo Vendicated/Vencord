@@ -32,7 +32,7 @@ import { serializeErrors, VENCORD_FILES } from "./common";
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
 let PendingUpdates: [string, string][] = [];
 
-async function githubGet(endpoint: string) {
+function githubGet(endpoint: string) {
     return get(API_BASE + endpoint, {
         headers: {
             Accept: "application/vnd.github+json",

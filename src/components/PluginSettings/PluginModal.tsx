@@ -52,7 +52,7 @@ const cl = classNameFactory("vc-plugin-modal-");
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles: Record<string, string> = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
-const UserRecord: typeof $UserRecord = proxyLazy(() => UserStore.getCurrentUser()!.constructor) as any;
+const UserRecord: typeof $UserRecord = proxyLazy<any>(() => UserStore.getCurrentUser()!.constructor);
 
 interface PluginModalProps extends ModalProps {
     plugin: Plugin;
@@ -118,7 +118,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         }
 
         if (plugin.beforeSave) {
-            const result = await Promise.resolve(plugin.beforeSave(tempSettings));
+            const result = await plugin.beforeSave(tempSettings);
             if (result !== true) {
                 setSaveError(result);
                 return;
@@ -278,35 +278,41 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     {renderSettings()}
                 </Forms.FormSection>
             </ModalContent>
-            {hasSettings && <ModalFooter>
-                <Flex flexDirection="column" style={{ width: "100%" }}>
-                    <Flex style={{ marginLeft: "auto" }}>
-                        <Button
-                            onClick={onClose}
-                            size={Button.Sizes.SMALL}
-                            color={Button.Colors.PRIMARY}
-                            look={Button.Looks.LINK}
-                        >
-                            Cancel
-                        </Button>
-                        <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
-                            {({ onMouseEnter, onMouseLeave }) => (
-                                <Button
-                                    size={Button.Sizes.SMALL}
-                                    color={Button.Colors.BRAND}
-                                    onClick={saveAndClose}
-                                    onMouseEnter={onMouseEnter}
-                                    onMouseLeave={onMouseLeave}
-                                    disabled={!canSubmit()}
-                                >
-                                    Save & Close
-                                </Button>
-                            )}
-                        </Tooltip>
+            {hasSettings && (
+                <ModalFooter>
+                    <Flex flexDirection="column" style={{ width: "100%" }}>
+                        <Flex style={{ marginLeft: "auto" }}>
+                            <Button
+                                onClick={onClose}
+                                size={Button.Sizes.SMALL}
+                                color={Button.Colors.PRIMARY}
+                                look={Button.Looks.LINK}
+                            >
+                                Cancel
+                            </Button>
+                            <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
+                                {({ onMouseEnter, onMouseLeave }) => (
+                                    <Button
+                                        size={Button.Sizes.SMALL}
+                                        color={Button.Colors.BRAND}
+                                        onClick={saveAndClose}
+                                        onMouseEnter={onMouseEnter}
+                                        onMouseLeave={onMouseLeave}
+                                        disabled={!canSubmit()}
+                                    >
+                                        Save & Close
+                                    </Button>
+                                )}
+                            </Tooltip>
+                        </Flex>
+                        {saveError && (
+                            <Text variant="text-md/semibold" style={{ color: "var(--text-danger)" }}>
+                                Error while saving: {saveError}
+                            </Text>
+                        )}
                     </Flex>
-                    {saveError && <Text variant="text-md/semibold" style={{ color: "var(--text-danger)" }}>Error while saving: {saveError}</Text>}
-                </Flex>
-            </ModalFooter>}
+                </ModalFooter>
+            )}
         </ModalRoot>
     );
 }

@@ -42,7 +42,7 @@ export const shiki = {
 
     init: async (initThemeUrl: string | undefined) => {
         /** https://stackoverflow.com/q/58098143 */
-        const workerBlob = await fetch(shikiWorkerSrc).then(res => res.blob());
+        const workerBlob = await (await fetch(shikiWorkerSrc)).blob();
 
         const client = shiki.client = new WorkerClient<ShikiSpec>(
             "shiki-client",
@@ -105,7 +105,7 @@ export const shiki = {
         if (!shiki.loadedLangs.has(lang.id))
             await shiki.loadLang(lang.id);
 
-        return await client.run("codeToThemedTokens", {
+        return client.run("codeToThemedTokens", {
             code,
             lang: langId,
             theme: shiki.currentThemeUrl ?? themeUrls[0],

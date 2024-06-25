@@ -44,13 +44,11 @@ const page = await browser.newPage();
 await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36");
 await page.setBypassCSP(true);
 
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-async function maybeGetError(handle: JSHandle): Promise<string | undefined> {
-    return await (handle as JSHandle<Error>)?.getProperty("message")
-        .then(m => m?.jsonValue())
+async function maybeGetError(handle: JSHandle) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    return (await (handle as JSHandle<Error>)?.getProperty("message"))?.jsonValue()
         .catch(() => undefined);
 }
-/* eslint-enable @typescript-eslint/no-unnecessary-condition */
 
 const report = {
     badPatches: [] as {
@@ -130,7 +128,7 @@ async function printReport() {
     console.log();
 
     if (process.env.DISCORD_WEBHOOK) {
-        await fetch(process.env.DISCORD_WEBHOOK, {
+        const res = await fetch(process.env.DISCORD_WEBHOOK, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -177,10 +175,11 @@ async function printReport() {
                     }
                 ]
             })
-        }).then(res => {
-            if (!res.ok) console.error(`Webhook failed with status ${res.status}`);
-            else console.error("Posted to Discord Webhook successfully");
         });
+        if (res.ok)
+            console.error("Posted to Discord Webhook successfully");
+        else
+            console.error(`Webhook failed with status ${res.status}`);
     }
 }
 
@@ -190,11 +189,9 @@ page.on("console", async e => {
 
     async function getText() {
         try {
-            return await Promise.all(
-                e.args().map(async a => {
-                    return await maybeGetError(a) || await a.jsonValue();
-                })
-            ).then(a => a.join(" ").trim());
+            return (await Promise.all(
+                e.args().map(async a => await maybeGetError(a) || await a.jsonValue())
+            )).join(" ").trim();
         } catch {
             return e.text();
         }
@@ -207,13 +204,14 @@ page.on("console", async e => {
 
     outer:
     if (isVencord) {
+        let args: string[];
         try {
-            var args = await Promise.all(e.args().map(a => a.jsonValue()));
+            args = await Promise.all<any[]>(e.args().map(a => a.jsonValue()));
         } catch {
             break outer;
         }
 
-        const [, tag, message, otherMessage] = args as string[];
+        const [, tag, message, otherMessage] = args;
 
         switch (tag) {
             case "WebpackInterceptor:":

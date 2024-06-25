@@ -29,7 +29,7 @@ async function fetchImage(url: string) {
     const res = await fetch(url);
     if (res.status !== 200) return;
 
-    return await res.blob();
+    return res.blob();
 }
 
 const settings = definePluginSettings({
@@ -205,7 +205,7 @@ export default definePlugin({
     async copyImage(url: string) {
         url = fixImageUrl(url);
 
-        let imageData = await fetch(url).then(r => r.blob());
+        let imageData = await (await fetch(url)).blob();
         if (imageData.type !== "image/png") {
             const bitmap = await createImageBitmap(imageData);
 

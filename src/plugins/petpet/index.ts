@@ -21,7 +21,7 @@ import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
 import { ApplicationCommandOptionType, DraftType, type FluxStore } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
+import { findStoreLazy } from "@webpack";
 import { promptToUpload, UploadAttachmentActionCreators, UserActionCreators } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
@@ -36,7 +36,7 @@ const getFrames = makeLazy(() => Promise.all(
     ))
 );
 
-const UploadStore: FluxStore & Record<string, any> = findByPropsLazy("getUploads");
+const UploadAttachmentStore: FluxStore & Record<string, any> = findStoreLazy("UploadAttachmentStore");
 
 function loadImage(source: File | string) {
     const isFile = source instanceof File;
@@ -59,7 +59,7 @@ async function resolveImage(options: Argument[], ctx: CommandContext, noServerPf
     for (const opt of options) {
         switch (opt.name) {
             case "image":
-                const upload = UploadStore.getUpload(ctx.channel.id, opt.name, DraftType.SLASH_COMMAND);
+                const upload = UploadAttachmentStore.getUpload(ctx.channel.id, opt.name, DraftType.SLASH_COMMAND);
                 if (upload) {
                     if (!upload.isImage) {
                         UploadAttachmentActionCreators.clearAll(ctx.channel.id, DraftType.SLASH_COMMAND);

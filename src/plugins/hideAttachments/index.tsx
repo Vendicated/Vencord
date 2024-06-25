@@ -28,10 +28,11 @@ let style: HTMLStyleElement;
 const KEY = "HideAttachments_HiddenIds";
 
 let hiddenMessages = new Set<string>();
-const getHiddenMessages = () => get(KEY).then(set => {
+async function getHiddenMessages() {
+    const set = await get(KEY);
     hiddenMessages = set ?? new Set<string>();
     return hiddenMessages;
-});
+}
 const saveHiddenMessages = (ids: Set<string>) => set(KEY, ids);
 
 export default definePlugin({

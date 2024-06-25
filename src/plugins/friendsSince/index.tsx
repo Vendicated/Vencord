@@ -8,7 +8,6 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
-import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
@@ -51,16 +50,9 @@ export default definePlugin({
         }
     ],
 
-    getFriendSince(userId: string) {
-        try {
-            if (!RelationshipStore.isFriend(userId)) return null;
-
-            return RelationshipStore.getSince(userId);
-        } catch (err) {
-            new Logger("FriendsSince").error(err);
-            return null;
-        }
-    },
+    getFriendSince: (userId: string) => RelationshipStore.isFriend(userId)
+        ? RelationshipStore.getSince(userId)
+        : null,
 
     friendsSince: ErrorBoundary.wrap(({ userId, textClassName }: { userId: string; textClassName?: string; }) => {
         if (!RelationshipStore.isFriend(userId)) return null;

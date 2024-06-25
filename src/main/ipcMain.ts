@@ -41,8 +41,12 @@ export function ensureSafePath(basePath: string, path: string) {
     return normalizedPath.startsWith(normalizedBasePath) ? normalizedPath : null;
 }
 
-function readCss() {
-    return readFile(QUICKCSS_PATH, "utf-8").catch(() => "");
+async function readCss() {
+    try {
+        return await readFile(QUICKCSS_PATH, "utf-8");
+    } catch {
+        return "";
+    }
 }
 
 async function listThemes(): Promise<UserThemeHeader[]> {

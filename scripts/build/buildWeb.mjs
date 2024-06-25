@@ -129,6 +129,7 @@ else
  * @returns {Promise<string[]>}
  */
 async function globDir(dir) {
+    /** @type {string[]} */
     const files = [];
 
     for (const child of await readdir(dir, { withFileTypes: true })) {

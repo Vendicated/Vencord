@@ -145,10 +145,15 @@ function CreateDecorationModal(props: ModalProps) {
             </ModalContent>
             <ModalFooter className={cl("modal-footer")}>
                 <Button
-                    onClick={() => {
+                    onClick={async () => {
                         setSubmitting(true);
-                        createDecoration({ alt: name, file: file! })
-                            .then(props.onClose).catch(e => { setSubmitting(false); setError(e); });
+                        try {
+                            await createDecoration({ alt: name, file: file! });
+                            props.onClose();
+                        } catch (e: any) {
+                            setSubmitting(false);
+                            setError(e);
+                        }
                     }}
                     disabled={!file || !name}
                     submitting={submitting}
@@ -167,6 +172,7 @@ function CreateDecorationModal(props: ModalProps) {
     );
 }
 
-export const openCreateDecorationModal = () =>
-    Promise.all([requireAvatarDecorationModal(), requireCreateStickerModal()])
-        .then(() => openModal(props => <CreateDecorationModal {...props} />));
+export async function openCreateDecorationModal() {
+    await Promise.all([requireAvatarDecorationModal(), requireCreateStickerModal()]);
+    return openModal(props => <CreateDecorationModal {...props} />);
+}

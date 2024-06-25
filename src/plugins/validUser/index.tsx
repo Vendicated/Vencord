@@ -68,22 +68,17 @@ async function getUser(id: string) {
     let user = UserStore.getUser(id);
     if (user) return user;
 
-    const apiUser: UserJSON = await RestAPI.get({ url: Constants.Endpoints.USER(id) }).then(response => {
-        FluxDispatcher.dispatch({
-            type: "USER_UPDATE",
-            user: response.body,
-        });
-
-        return response.body;
+    const apiUser: UserJSON = (await RestAPI.get({ url: Constants.Endpoints.USER(id) })).body;
+    FluxDispatcher.dispatch({
+        type: "USER_UPDATE",
+        user: apiUser,
     });
 
     // Populate the profile
-    await FluxDispatcher.dispatch(
-        {
-            type: "USER_PROFILE_FETCH_FAILURE",
-            userId: id,
-        }
-    );
+    await FluxDispatcher.dispatch({
+        type: "USER_PROFILE_FETCH_FAILURE",
+        userId: id,
+    });
 
     user = UserStore.getUser(id)!;
     const fakeBadges = Object.entries(UserFlags)
@@ -147,20 +142,23 @@ function MentionWrapper({ data, UserMention, RoleMention, parse, props }: Mentio
                     const fetch = () => {
                         fetching.add(id);
 
-                        queue.unshift(() =>
-                            getUser(id)
-                                .then(() => {
-                                    setUserId(id);
+                        queue.unshift(async () => {
+                            try {
+                                await getUser(id);
+                                setUserId(id);
+                                fetching.delete(id);
+                            } catch (e: any) {
+                                if (e?.status === 429) {
+                                    queue.unshift(async () => {
+                                        await sleep(e?.body?.retry_after ?? 1000);
+                                        fetch();
+                                    });
                                     fetching.delete(id);
-                                })
-                                .catch(e => {
-                                    if (e?.status === 429) {
-                                        queue.unshift(() => sleep(e?.body?.retry_after ?? 1000).then(fetch));
-                                        fetching.delete(id);
-                                    }
-                                })
-                                .finally(() => sleep(300))
-                        );
+                                }
+                            } finally {
+                                await sleep(300);
+                            }
+                        });
                     };
 
                     fetch();

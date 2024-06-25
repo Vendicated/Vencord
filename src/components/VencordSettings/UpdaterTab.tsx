@@ -66,8 +66,7 @@ function withDispatcher(dispatcher: Dispatch<SetStateAction<boolean>>, action: (
                     </ErrorCard>
                 )
             });
-        }
-        finally {
+        } finally {
             dispatcher(false);
         }
     };
@@ -128,30 +127,32 @@ function Updatable(props: CommonProps) {
             {isOutdated && <Changes updates={updates} {...props} />}
 
             <Flex className={classes(Margins.bottom8, Margins.top8)}>
-                {isOutdated && <Button
-                    size={Button.Sizes.SMALL}
-                    disabled={isUpdating || isChecking}
-                    onClick={withDispatcher(setIsUpdating, async () => {
-                        if (await update()) {
-                            setUpdates([]);
-                            await new Promise<void>(r => {
-                                AlertActionCreators.show({
-                                    title: "Update Success!",
-                                    body: "Successfully updated. Restart now to apply the changes?",
-                                    confirmText: "Restart",
-                                    cancelText: "Not now!",
-                                    onConfirm() {
-                                        relaunch();
-                                        r();
-                                    },
-                                    onCancel: r
+                {isOutdated && (
+                    <Button
+                        size={Button.Sizes.SMALL}
+                        disabled={isUpdating || isChecking}
+                        onClick={withDispatcher(setIsUpdating, async () => {
+                            if (await update()) {
+                                setUpdates([]);
+                                await new Promise<void>(r => {
+                                    AlertActionCreators.show({
+                                        title: "Update Success!",
+                                        body: "Successfully updated. Restart now to apply the changes?",
+                                        confirmText: "Restart",
+                                        cancelText: "Not now!",
+                                        onConfirm() {
+                                            relaunch();
+                                            r();
+                                        },
+                                        onCancel: r
+                                    });
                                 });
-                            });
-                        }
-                    })}
-                >
-                    Update Now
-                </Button>}
+                            }
+                        })}
+                    >
+                        Update Now
+                    </Button>
+                )}
                 <Button
                     size={Button.Sizes.SMALL}
                     disabled={isUpdating || isChecking}

@@ -11,6 +11,7 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
+import type { FluxPersistedStore } from "@vencord/discord-types";
 import { findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, Forms, useStateFromStores } from "@webpack/common";
 
@@ -36,15 +37,18 @@ function setTheme(theme: string) {
     saveClientTheme({ theme });
 }
 
-const ThemeStore = findStoreLazy("ThemeStore");
-const NitroThemeStore = findStoreLazy("ClientThemesBackgroundStore");
+const ThemeStore: FluxPersistedStore & Record<string, any> = findStoreLazy("ThemeStore");
+const ClientThemesBackgroundStore: FluxPersistedStore & Record<string, any> = findStoreLazy("ClientThemesBackgroundStore");
 
 function ThemeSettings() {
     const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme);
     const isLightTheme = theme === "light";
     const oppositeTheme = isLightTheme ? "dark" : "light";
 
-    const nitroTheme = useStateFromStores([NitroThemeStore], () => NitroThemeStore.gradientPreset);
+    const nitroTheme = useStateFromStores(
+        [ClientThemesBackgroundStore],
+        () => ClientThemesBackgroundStore.gradientPreset
+    );
     const nitroThemeEnabled = nitroTheme !== undefined;
 
     const selectedLuminance = relativeLuminance(settings.store.color);

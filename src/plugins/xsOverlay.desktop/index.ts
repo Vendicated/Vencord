@@ -21,8 +21,6 @@ interface Call {
     ringing?: string[];
 }
 
-const notificationsShouldNotify = findByCodeLazy(".SUPPRESS_NOTIFICATIONS))return!1");
-
 const settings = definePluginSettings({
     botNotifications: {
         type: OptionType.BOOLEAN,
@@ -212,32 +210,29 @@ function shouldIgnoreForChannelType(channel: ChannelRecord) {
     else return !settings.store.serverNotifications;
 }
 
-function sendMsgNotif(titleString: string, content: string, message: MessageJSON) {
-    fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`)
-        .then(response => response.arrayBuffer())
-        .then(result => {
-            const msgData = {
-                messageType: 1,
-                index: 0,
-                timeout: settings.store.lengthBasedTimeout
-                    ? calculateTimeout(content)
-                    : settings.store.timeout,
-                height: calculateHeight(content),
-                opacity: settings.store.opacity,
-                volume: settings.store.volume,
-                audioPath: settings.store.soundPath,
-                title: titleString,
-                content: content,
-                useBase64Icon: true,
-                icon: result,
-                sourceApp: "Vencord"
-            };
-            Native.sendToOverlay(msgData);
-        });
+async function sendMsgNotif(titleString: string, content: string, message: MessageJSON) {
+    Native.sendToOverlay({
+        messageType: 1,
+        index: 0,
+        timeout: settings.store.lengthBasedTimeout
+            ? calculateTimeout(content)
+            : settings.store.timeout,
+        height: calculateHeight(content),
+        opacity: settings.store.opacity,
+        volume: settings.store.volume,
+        audioPath: settings.store.soundPath,
+        title: titleString,
+        content: content,
+        useBase64Icon: true,
+        icon: await (await fetch(
+            `https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`
+        )).arrayBuffer(),
+        sourceApp: "Vencord"
+    });
 }
 
 function sendOtherNotif(content: string, titleString: string) {
-    const msgData = {
+    Native.sendToOverlay({
         messageType: 1,
         index: 0,
         timeout: settings.store.lengthBasedTimeout ? calculateTimeout(content) : settings.store.timeout,
@@ -250,15 +245,17 @@ function sendOtherNotif(content: string, titleString: string) {
         useBase64Icon: false,
         icon: null,
         sourceApp: "Vencord"
-    };
-    Native.sendToOverlay(msgData);
+    });
 }
+
+// NotificationTextUtils
+const $shouldNotify = findByCodeLazy(".SUPPRESS_NOTIFICATIONS))return!1");
 
 function shouldNotify(message: MessageJSON, channel: string) {
     const currentUser = UserStore.getCurrentUser()!;
     if (message.author.id === currentUser.id) return false;
     if (message.author.bot && !settings.store.botNotifications) return false;
-    return notificationsShouldNotify(message, channel);
+    return $shouldNotify(message, channel);
 }
 
 function calculateHeight(content: string) {

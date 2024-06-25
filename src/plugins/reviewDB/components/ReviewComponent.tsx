@@ -64,14 +64,13 @@ export default LazyComponent(() => {
                 confirmText: "Delete",
                 cancelText: "Nevermind",
                 onConfirm: async () => {
-                    if (!(await getToken())) {
+                    if (!await getToken()) {
                         showToast("You must be logged in to delete reviews.");
                         return;
-                    } else {
-                        deleteReview(review.id).then(res => {
-                            if (res) refetch();
-                        });
                     }
+                    if (await deleteReview(review.id))
+                        refetch();
+
                 }
             });
         }
@@ -84,12 +83,11 @@ export default LazyComponent(() => {
                 cancelText: "Nevermind",
                 // confirmColor: "red", this just adds a class name and breaks the submit button guh
                 onConfirm: async () => {
-                    if (!(await getToken())) {
+                    if (!await getToken()) {
                         showToast("You must be logged in to report reviews.");
                         return;
-                    } else {
-                        reportReview(review.id);
                     }
+                    reportReview(review.id);
                 }
             });
         }
@@ -107,12 +105,11 @@ export default LazyComponent(() => {
                 cancelText: "Nevermind",
                 // confirmColor: "red", this just adds a class name and breaks the submit button guh
                 onConfirm: async () => {
-                    if (!(await getToken())) {
+                    if (!await getToken()) {
                         showToast("You must be logged in to block users.");
                         return;
-                    } else {
-                        blockUser(review.sender.discordID);
                     }
+                    blockUser(review.sender.discordID);
                 }
             });
         }

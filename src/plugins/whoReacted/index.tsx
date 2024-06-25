@@ -33,26 +33,30 @@ let Scroll: any = null;
 const queue = new Queue();
 let reactions: Record<string, ReactionCacheEntry>;
 
-function fetchReactions(message: MessageRecord, emoji: MessageReactionEmoji, type: ReactionType) {
+async function fetchReactions(message: MessageRecord, emoji: MessageReactionEmoji, type: ReactionType) {
     const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
-    return RestAPI.get({
-        url: Constants.Endpoints.REACTIONS(message.channel_id, message.id, key),
-        query: {
-            limit: 100,
-            type
-        },
-        oldFormErrors: true
-    })
-        .then(res => FluxDispatcher.dispatch({
+    try {
+        const res = await RestAPI.get({
+            url: Constants.Endpoints.REACTIONS(message.channel_id, message.id, key),
+            query: {
+                limit: 100,
+                type
+            },
+            oldFormErrors: true
+        });
+        FluxDispatcher.dispatch({
             type: "MESSAGE_REACTION_ADD_USERS",
             channelId: message.channel_id,
             messageId: message.id,
             users: res.body,
             emoji,
             reactionType: type
-        }))
-        .catch(console.error)
-        .finally(() => sleep(250));
+        });
+    } catch (e) {
+        console.error(e);
+    } finally {
+        await sleep(250);
+    }
 }
 
 function getReactionsWithQueue(message: MessageRecord, emoji: MessageReactionEmoji, type: ReactionType) {
@@ -181,7 +185,7 @@ export default definePlugin({
 
 interface ReactionCacheEntry {
     fetched: boolean;
-    users: Record<string, UserRecord>;
+    users: { [userId: string]: UserRecord; };
 }
 
 interface RootObject {

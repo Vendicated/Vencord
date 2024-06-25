@@ -56,7 +56,7 @@ interface Track {
 const SpotifyStore: FluxStore & Record<string, any> = findStoreLazy("SpotifyStore");
 const PendingReplyStore: FluxStore & Record<string, any> = findStoreLazy("PendingReplyStore");
 
-function sendMessage(channelId: string, message: { content: string; }) {
+async function sendMessage(channelId: string, message: { content: string; }) {
     const messageToSend = {
         // The following are required to prevent Discord from throwing an error
         invalidEmojis: [],
@@ -65,12 +65,14 @@ function sendMessage(channelId: string, message: { content: string; }) {
         ...message
     };
     const reply = PendingReplyStore.getPendingReply(channelId);
-    MessageActionCreators.sendMessage(channelId, messageToSend, undefined, MessageActionCreators.getSendMessageOptionsForReply(reply))
-        .then(() => {
-            if (reply) {
-                FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId });
-            }
-        });
+    await MessageActionCreators.sendMessage(
+        channelId,
+        messageToSend,
+        undefined,
+        MessageActionCreators.getSendMessageOptionsForReply(reply)
+    );
+    if (reply)
+        FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId });
 }
 
 export default definePlugin({

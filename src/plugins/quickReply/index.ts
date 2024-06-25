@@ -19,11 +19,8 @@
 import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import type { MessageRecord } from "@vencord/discord-types";
-import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, MessageStore, Permissions, PermissionStore, RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
-
-const Kangaroo = findByPropsLazy("jumpToMessage");
+import { JumpType, type MessageRecord } from "@vencord/discord-types";
+import { ChannelStore, FluxDispatcher, MessageActionCreators, MessageStore, Permissions, PermissionStore, RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
 
 const isMac = navigator.platform.includes("Mac"); // bruh
 let replyIdx = -1;
@@ -122,11 +119,11 @@ function jumpIfOffScreen(channelId: string, messageId: string) {
     const isOffscreen = rect.bottom < 200 || rect.top - vh >= -200;
 
     if (isOffscreen) {
-        Kangaroo.jumpToMessage({
+        MessageActionCreators.jumpToMessage({
             channelId,
             messageId,
             flash: false,
-            jumpType: "INSTANT"
+            jumpType: JumpType.INSTANT
         });
     }
 }

@@ -52,8 +52,7 @@ async function loadBadges(noCache = false) {
     if (noCache)
         init.cache = "no-cache";
 
-    DonorBadges = await fetch("https://badges.vencord.dev/badges.json", init)
-        .then(r => r.json());
+    DonorBadges = await (await fetch("https://badges.vencord.dev/badges.json", init)).json();
 }
 
 export default definePlugin({

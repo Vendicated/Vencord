@@ -84,7 +84,7 @@ const globNativesPlugin = {
                     const nativePath = join(dirPath, fileName, "native.ts");
                     const indexNativePath = join(dirPath, fileName, "native/index.ts");
 
-                    if (!(await exists(nativePath)) && !(await exists(indexNativePath)))
+                    if (!await exists(nativePath) && !await exists(indexNativePath))
                         continue;
 
                     const pluginName = await resolvePluginName(dirPath, file);

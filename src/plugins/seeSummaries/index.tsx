@@ -89,8 +89,8 @@ export default definePlugin({
         }
     },
 
-    async start() {
-        await DataStore.update("summaries-data", summaries => {
+    start() {
+        DataStore.update("summaries-data", summaries => {
             summaries ??= {};
             for (const key of Object.keys(summaries)) {
                 for (let i = summaries[key].length - 1; i >= 0; i--) {

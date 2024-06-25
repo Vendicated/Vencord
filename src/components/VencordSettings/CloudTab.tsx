@@ -169,7 +169,9 @@ function CloudTab() {
                             cancelText: "Nevermind"
                         });
                     }}
-                >Erase All Data</Button>
+                >
+                    Erase All Data
+                </Button>
                 <Forms.FormDivider className={Margins.top16} />
             </Forms.FormSection >
             <SettingsSyncSection />

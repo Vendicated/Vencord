@@ -63,9 +63,8 @@ if (IS_VESKTOP || !IS_VANILLA) {
         } catch { }
 
 
-        const findHeader = (headers: Record<string, string[]>, headerName: Lowercase<string>) => {
-            return Object.keys(headers).find(h => h.toLowerCase() === headerName);
-        };
+        const findHeader = (headers: Record<string, string[]>, headerName: Lowercase<string>) =>
+            Object.keys(headers).find(h => h.toLowerCase() === headerName);
 
         // Remove CSP
         type PolicyResult = Record<string, string[]>;

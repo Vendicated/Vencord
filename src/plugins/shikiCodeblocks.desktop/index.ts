@@ -53,11 +53,11 @@ export default definePlugin({
             }
         }
     ],
-    async start() {
+    start() {
         if (settings.store.useDevIcon !== DeviconSetting.Disabled)
             enableStyle(deviconStyle);
 
-        await shiki.init(settings.store.customTheme || settings.store.theme);
+        shiki.init(settings.store.customTheme || settings.store.theme);
     },
     stop() {
         shiki.destroy();

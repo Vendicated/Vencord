@@ -59,7 +59,7 @@ export const _handleCommand = function (cmd: Command, args: Argument[], ctx: Com
     if (!cmd.isVencordCommand)
         return cmd.execute(args, ctx);
 
-    const handleError = (err: any) => {
+    function handleError(err: any) {
         // TODO: cancel send if cmd.inputType === BUILT_IN_TEXT
         const msg = `An Error occurred while executing command "${cmd.name}"`;
         const reason = err instanceof Error ? err.stack || err.message : String(err);
@@ -71,7 +71,7 @@ export const _handleCommand = function (cmd: Command, args: Argument[], ctx: Com
                 username: "Vencord"
             }
         });
-    };
+    }
 
     try {
         const res = cmd.execute(args, ctx);

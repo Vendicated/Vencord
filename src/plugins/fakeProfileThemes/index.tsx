@@ -236,19 +236,17 @@ export default definePlugin({
         }
         return profile;
     },
-    addCopy3y3Button: ErrorBoundary.wrap(function ({ primary, accent }: Colors) {
-        return (
-            <Button
-                onClick={() => {
-                    const colorString = encode(primary, accent);
-                    copyWithToast(colorString);
-                }}
-                color={Button.Colors.PRIMARY}
-                size={Button.Sizes.XLARGE}
-                className={Margins.left16}
-            >
-                Copy 3y3
-            </Button >
-        );
-    }, { noop: true }),
+    addCopy3y3Button: ErrorBoundary.wrap(({ primary, accent }: Colors) => (
+        <Button
+            onClick={() => {
+                const colorString = encode(primary, accent);
+                copyWithToast(colorString);
+            }}
+            color={Button.Colors.PRIMARY}
+            size={Button.Sizes.XLARGE}
+            className={Margins.left16}
+        >
+            Copy 3y3
+        </Button>
+    ), { noop: true }),
 });

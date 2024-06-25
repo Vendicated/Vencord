@@ -81,9 +81,12 @@ export async function resolvePluginName(base, dirent) {
 
 /** @param {string} path */
 export async function exists(path) {
-    return await access(path, FsConstants.F_OK)
-        .then(() => true)
-        .catch(() => false);
+    try {
+        await access(path, FsConstants.F_OK);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
@@ -104,12 +107,10 @@ export const globPlugins = kind => ({
     name: "glob-plugins",
     setup: build => {
         const filter = /^~plugins$/;
-        build.onResolve({ filter }, args => {
-            return {
-                namespace: "import-plugins",
-                path: args.path
-            };
-        });
+        build.onResolve({ filter }, args => ({
+            namespace: "import-plugins",
+            path: args.path
+        }));
 
         build.onLoad({ filter, namespace: "import-plugins" }, async () => {
             const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "userplugins"];

@@ -309,5 +309,7 @@ function ChangeDecorationModal(props: ModalProps) {
     );
 }
 
-export const openChangeDecorationModal = () =>
-    requireAvatarDecorationModal().then(() => openModal(props => <ChangeDecorationModal {...props} />));
+export async function openChangeDecorationModal() {
+    await requireAvatarDecorationModal();
+    return openModal(props => <ChangeDecorationModal {...props} />);
+}

@@ -289,14 +289,20 @@ export default definePlugin({
                                         <Menu.MenuItem
                                             id={cl("move-category-up")}
                                             label="Move Up"
-                                            action={() => { moveCategory(category.id, -1).then(() => { forceUpdate(); }); }}
+                                            action={async () => {
+                                                await moveCategory(category.id, -1);
+                                                forceUpdate();
+                                            }}
                                         />
                                     )}
                                     {canMoveCategoryInDirection(category.id, 1) && (
                                         <Menu.MenuItem
                                             id={cl("move-category-down")}
                                             label="Move Down"
-                                            action={() => { moveCategory(category.id, 1).then(() => { forceUpdate(); }); }}
+                                            action={async () => {
+                                                await moveCategory(category.id, 1);
+                                                forceUpdate();
+                                            }}
                                         />
                                     )}
                                 </>
@@ -307,7 +313,10 @@ export default definePlugin({
                                 id={cl("delete-category")}
                                 color="danger"
                                 label="Delete Category"
-                                action={() => { removeCategory(category.id).then(() => { forceUpdate(); }); }}
+                                action={async () => {
+                                    await removeCategory(category.id);
+                                    forceUpdate();
+                                }}
                             />
 
                         </Menu.Menu>

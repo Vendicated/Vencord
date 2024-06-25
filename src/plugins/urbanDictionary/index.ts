@@ -53,8 +53,7 @@ export default definePlugin({
             execute: async (args, ctx) => {
                 try {
                     const query = encodeURIComponent(args[0]!.value);
-                    const { list } = await fetch(`https://api.urbandictionary.com/v0/define?term=${query}&per_page=${settings.store.resultsAmount}`)
-                        .then(response => response.json());
+                    const { list } = await (await fetch(`https://api.urbandictionary.com/v0/define?term=${query}&per_page=${settings.store.resultsAmount}`)).json();
 
                     if (!list.length) {
                         sendBotMessage(ctx.channel.id, { content: "No results found." });

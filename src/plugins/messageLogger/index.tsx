@@ -41,7 +41,7 @@ interface MLMessageRecord extends MessageRecord<MLMessageRecordOwnProperties> {
     editHistory?: { timestamp: Date; content: string; }[];
 }
 
-const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
+const styles: Record<string, string> = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger!.deleteStyle === "text") {

@@ -129,18 +129,15 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
     params.append("ids", ids.join(","));
 
     try {
-        const req = await fetch("https://pronoundb.org/api/v2/lookup?" + params.toString(), {
+        const res: PronounsResponse = await (await fetch("https://pronoundb.org/api/v2/lookup?" + params.toString(), {
             method: "GET",
             headers: {
                 "Accept": "application/json",
                 "X-PronounDB-Source": VENCORD_USER_AGENT
             }
-        });
-        return await req.json()
-            .then((res: PronounsResponse) => {
-                Object.assign(cache, res);
-                return res;
-            });
+        })).json();
+        Object.assign(cache, res);
+        return res;
     } catch (e) {
         // If the request errors, treat it as if no pronouns were found for all ids, and log it
         console.error("PronounDB fetching failed: ", e);

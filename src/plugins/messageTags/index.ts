@@ -33,7 +33,7 @@ interface Tag {
     enabled: boolean;
 }
 
-const getTags = async () => (await DataStore.get<Tag[]>(DATA_KEY)) ?? [];
+const getTags = async () => await DataStore.get<Tag[]>(DATA_KEY) ?? [];
 const getTag = async (name: string) => (await DataStore.get<Tag[]>(DATA_KEY))?.find(t => t.name === name);
 
 async function addTag(tag: Tag) {

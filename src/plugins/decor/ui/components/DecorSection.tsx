@@ -40,10 +40,13 @@ export default function DecorSection({ hideTitle = false, hideDivider = false, n
         >
             <Flex>
                 <Button
-                    onClick={() => {
-                        if (!authorization.isAuthorized())
-                            authorization.authorize().then(openChangeDecorationModal).catch(() => { });
-                        else
+                    onClick={async () => {
+                        if (!authorization.isAuthorized()) {
+                            try {
+                                await authorization.authorize();
+                                openChangeDecorationModal();
+                            } catch {}
+                        } else
                             openChangeDecorationModal();
                     }}
                     size={Button.Sizes.SMALL}

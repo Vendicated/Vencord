@@ -96,13 +96,9 @@ export async function collapseCategory(id: string, value = true) {
 }
 
 // utils
-export function isPinned(id: string) {
-    return categories.some(c => c.channels.includes(id));
-}
+export const isPinned = (id: string) => categories.some(c => c.channels.includes(id));
 
-export function categoryLen() {
-    return categories.length;
-}
+export const categoryLen = () => categories.length;
 
 export function getAllUncollapsedChannels() {
     if (settings.store.pinOrder === PinOrder.LastMessage) {

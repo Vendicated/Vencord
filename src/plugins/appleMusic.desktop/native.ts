@@ -59,8 +59,8 @@ async function fetchRemoteData({ id, name, artist, album }: { id: string, name: 
 
     try {
         const [songData, artistData] = await Promise.all([
-            fetch(makeSearchUrl("songs", artist + " " + album + " " + name), requestOptions).then(r => r.json()),
-            fetch(makeSearchUrl("artists", artist.split(/ *[,&] */)[0]!), requestOptions).then(r => r.json())
+            (await fetch(makeSearchUrl("songs", artist + " " + album + " " + name), requestOptions)).json(),
+            (await fetch(makeSearchUrl("artists", artist.split(/ *[,&] */)[0]!), requestOptions)).json()
         ]);
 
         const appleMusicLink = songData?.songs?.data[0]?.attributes.url;
@@ -91,12 +91,12 @@ export async function fetchTrackData(): Promise<TrackData | null> {
         return null;
     }
 
-    const playerState = await applescript(['tell application "Music"', "get player state", "end tell"])
-        .then(out => out.trim());
+    const playerState = (await applescript(['tell application "Music"', "get player state", "end tell"])).trim();
     if (playerState !== "playing") return null;
 
-    const playerPosition = await applescript(['tell application "Music"', "get player position", "end tell"])
-        .then(text => Number.parseFloat(text.trim()));
+    const playerPosition = Number.parseFloat(
+        (await applescript(['tell application "Music"', "get player position", "end tell"])).trim()
+    );
 
     const stdout = await applescript([
         'set output to ""',

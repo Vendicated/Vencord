@@ -72,7 +72,7 @@ export function Highlighter({
 
     const [tokens] = useAwaiter(async () => {
         if (!shikiLang || useHljs || !isIntersecting) return null;
-        return await shiki.tokenizeCode(content, lang!);
+        return shiki.tokenizeCode(content, lang!);
     }, {
         fallbackValue: null,
         deps: [lang, content, currentThemeId, isIntersecting],

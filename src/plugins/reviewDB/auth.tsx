@@ -33,7 +33,7 @@ export async function getToken() {
     return auth?.token;
 }
 
-export async function updateAuth(newAuth: ReviewDBAuth) {
+export function updateAuth(newAuth: ReviewDBAuth) {
     return DataStore.update(DATA_STORE_KEY, auth => {
         auth ??= {};
         Auth = auth[UserStore.getCurrentUser()!.id] ??= {};

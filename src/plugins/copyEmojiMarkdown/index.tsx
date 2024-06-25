@@ -13,13 +13,13 @@ import { Menu } from "@webpack/common";
 
 const { convertNameToSurrogate } = findByPropsLazy("convertNameToSurrogate");
 
-interface Emoji {
+interface Emoji extends DOMStringMap {
     type: string;
     id: string;
     name: string;
 }
 
-interface Target {
+interface Target extends HTMLButtonElement {
     dataset: Emoji;
     firstChild: HTMLImageElement;
 }

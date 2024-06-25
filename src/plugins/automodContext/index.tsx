@@ -7,7 +7,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import type { MessageRecord } from "@vencord/discord-types";
+import { JumpType, type MessageRecord } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, Text } from "@webpack/common";
 
@@ -21,7 +21,7 @@ function jumpToMessage(channelId: string, messageId: string) {
         guildId,
         channelId,
         messageId,
-        jumpType: "INSTANT"
+        jumpType: JumpType.INSTANT
     });
 }
 

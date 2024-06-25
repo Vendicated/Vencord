@@ -47,7 +47,7 @@ export interface LanguageJson {
 export const languages: Record<string, Language> = {};
 
 export async function loadLanguages() {
-    const langsJson: LanguageJson[] = await fetch(vpcRepoLanguages).then(res => res.json());
+    const langsJson: LanguageJson[] = await (await fetch(vpcRepoLanguages)).json();
     const loadedLanguages = Object.fromEntries(
         langsJson.map(lang => [lang.id, {
             ...lang,
@@ -57,10 +57,10 @@ export async function loadLanguages() {
     Object.assign(languages, loadedLanguages);
 }
 
-export function getGrammar(lang: Language): Promise<NonNullable<ILanguageRegistration["grammar"]>> {
+export async function getGrammar(lang: Language): Promise<NonNullable<ILanguageRegistration["grammar"]>> {
     if (lang.grammar)
         return Promise.resolve(lang.grammar);
-    return fetch(lang.grammarUrl).then(res => res.json());
+    return (await fetch(lang.grammarUrl)).json();
 }
 
 const aliasCache = new Map<string, Language>();

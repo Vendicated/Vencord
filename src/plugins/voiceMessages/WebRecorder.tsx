@@ -33,38 +33,35 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
         onRecordingChange?.(recording);
     };
 
-    function toggleRecording() {
+    async function toggleRecording() {
         const nowRecording = !recording;
 
         if (nowRecording) {
-            navigator.mediaDevices.getUserMedia({
+            const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     echoCancellation: settings.store.echoCancellation,
                     noiseSuppression: settings.store.noiseSuppression,
                     deviceId: MediaEngineStore.getInputDeviceId()
                 }
-            }).then(stream => {
-                const chunks: Blob[] = [];
-                setChunks(chunks);
-
-                const recorder = new MediaRecorder(stream);
-                setRecorder(recorder);
-                recorder.addEventListener("dataavailable", e => {
-                    chunks.push(e.data);
-                });
-                recorder.start();
-
-                changeRecording(true);
             });
-        } else {
-            if (recorder) {
-                recorder.addEventListener("stop", () => {
-                    setAudioBlob(new Blob(chunks, { type: "audio/ogg; codecs=opus" }));
+            const chunks: Blob[] = [];
+            setChunks(chunks);
 
-                    changeRecording(false);
-                });
-                recorder.stop();
-            }
+            const recorder = new MediaRecorder(stream);
+            setRecorder(recorder);
+            recorder.addEventListener("dataavailable", e => {
+                chunks.push(e.data);
+            });
+            recorder.start();
+
+            changeRecording(true);
+        } else if (recorder) {
+            recorder.addEventListener("stop", () => {
+                setAudioBlob(new Blob(chunks, { type: "audio/ogg; codecs=opus" }));
+
+                changeRecording(false);
+            });
+            recorder.stop();
         }
     }
 

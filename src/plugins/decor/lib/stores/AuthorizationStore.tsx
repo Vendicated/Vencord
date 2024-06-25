@@ -23,13 +23,13 @@ interface AuthorizationState {
 }
 
 const indexedDBStorage = {
-    async getItem(name: string): Promise<string | null> {
-        return DataStore.get(name).then(v => v ?? null);
+    async getItem(name: string) {
+        return await DataStore.get<string>(name) ?? null;
     },
-    async setItem(name: string, value: string): Promise<void> {
+    async setItem(name: string, value: string) {
         await DataStore.set(name, value);
     },
-    async removeItem(name: string): Promise<void> {
+    async removeItem(name: string) {
         await DataStore.del(name);
     },
 };
@@ -99,7 +99,7 @@ export const useAuthorizationStore: {
             name: "decor-auth",
             getStorage: () => indexedDBStorage,
             partialize: (state: AuthorizationState) => ({ tokens: state.tokens }),
-            onRehydrateStorage: () => (state?: AuthorizationState) => state?.init()
+            onRehydrateStorage: () => (state?: AuthorizationState) => { state?.init(); }
         }
     )
 ));

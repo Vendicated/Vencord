@@ -42,22 +42,22 @@ export async function fetchApi(url: RequestInfo, options?: RequestInit) {
     else throw new Error(await res.text());
 }
 
-export const getUsersDecorations = async (ids?: string[]): Promise<Record<string, string | null>> => {
+export async function getUsersDecorations(ids?: string[]): Promise<Record<string, string | null>> {
     if (ids?.length === 0) return {};
 
     const url = new URL(API_URL + "/users");
     if (ids && ids.length !== 0) url.searchParams.set("ids", JSON.stringify(ids));
 
-    return await fetch(url).then(c => c.json());
-};
+    return (await fetch(url)).json();
+}
 
 export const getUserDecorations = async (id: string = "@me"): Promise<Decoration[]> =>
-    fetchApi(API_URL + `/users/${id}/decorations`).then(c => c.json());
+    (await fetchApi(API_URL + `/users/${id}/decorations`)).json();
 
 export const getUserDecoration = async (id: string = "@me"): Promise<Decoration | null> =>
-    fetchApi(API_URL + `/users/${id}/decoration`).then(c => c.json());
+    (await fetchApi(API_URL + `/users/${id}/decoration`)).json();
 
-export const setUserDecoration = async (decoration: Decoration | NewDecoration | null, id: string = "@me"): Promise<string | Decoration> => {
+export async function setUserDecoration(decoration: Decoration | NewDecoration | null, id: string = "@me"): Promise<string | Decoration> {
     const formData = new FormData();
 
     if (!decoration) {
@@ -69,15 +69,18 @@ export const setUserDecoration = async (decoration: Decoration | NewDecoration |
         formData.append("alt", decoration.alt ?? "null");
     }
 
-    return fetchApi(API_URL + `/users/${id}/decoration`, { method: "PUT", body: formData }).then(c =>
-        decoration && "file" in decoration ? c.json() : c.text()
-    );
-};
+    const res = await fetchApi(API_URL + `/users/${id}/decoration`, { method: "PUT", body: formData });
+    return decoration && "file" in decoration
+        ? res.json()
+        : res.text();
+}
 
-export const getDecoration = async (hash: string): Promise<Decoration> => fetch(API_URL + `/decorations/${hash}`).then(c => c.json());
+export const getDecoration = async (hash: string): Promise<Decoration> =>
+    (await fetch(API_URL + `/decorations/${hash}`)).json();
 
-export const deleteDecoration = async (hash: string): Promise<void> => {
+export async function deleteDecoration(hash: string) {
     await fetchApi(API_URL + `/decorations/${hash}`, { method: "DELETE" });
-};
+}
 
-export const getPresets = async (): Promise<Preset[]> => fetch(API_URL + "/decorations/presets").then(c => c.json());
+export const getPresets = async (): Promise<Preset[]> =>
+    (await fetch(API_URL + "/decorations/presets")).json();

@@ -94,7 +94,6 @@ export async function getReviews(id: string, offset = 0): Promise<Response> {
 }
 
 export async function addReview(review: any): Promise<Response | null> {
-
     const token = await getToken();
     if (!token) {
         showToast("Please authorize to add a review.");
@@ -102,21 +101,20 @@ export async function addReview(review: any): Promise<Response | null> {
         return null;
     }
 
-    return await rdbRequest(`/users/${review.userid}/reviews`, {
+    const res = await rdbRequest(`/users/${review.userid}/reviews`, {
         method: "PUT",
         body: JSON.stringify(review),
         headers: {
             "Content-Type": "application/json",
         }
-    }).then(async res => {
-        const data = await res.json() as Response;
-        showToast(data.message);
-        return res.ok ? data : null;
     });
+    const data = await res.json() as Response;
+    showToast(data.message);
+    return res.ok ? data : null;
 }
 
 export async function deleteReview(id: number): Promise<Response | null> {
-    return await rdbRequest(`/users/${id}/reviews`, {
+    const res = await rdbRequest(`/users/${id}/reviews`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json",
@@ -125,15 +123,14 @@ export async function deleteReview(id: number): Promise<Response | null> {
         body: JSON.stringify({
             reviewid: id
         })
-    }).then(async res => {
-        const data = await res.json() as Response;
-        showToast(data.message);
-        return res.ok ? data : null;
     });
+    const data = await res.json() as Response;
+    showToast(data.message);
+    return res.ok ? data : null;
 }
 
 export async function reportReview(id: number) {
-    const res = await rdbRequest("/reports", {
+    const res = await (await rdbRequest("/reports", {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
@@ -142,7 +139,7 @@ export async function reportReview(id: number) {
         body: JSON.stringify({
             reviewid: id,
         })
-    }).then(r => r.json()) as Response;
+    })).json() as Response;
 
     showToast(res.message);
 }
@@ -189,13 +186,13 @@ export async function fetchBlocks(): Promise<ReviewDBUser[]> {
     return res.json();
 }
 
-export function getCurrentUserInfo(token: string): Promise<ReviewDBCurrentUser> {
-    return rdbRequest("/users", {
+export async function getCurrentUserInfo(token: string): Promise<ReviewDBCurrentUser> {
+    return (await rdbRequest("/users", {
         method: "POST",
-    }).then(r => r.json());
+    })).json();
 }
 
-export async function readNotification(id: number) {
+export function readNotification(id: number) {
     return rdbRequest(`/notifications?id=${id}`, {
         method: "PATCH"
     });

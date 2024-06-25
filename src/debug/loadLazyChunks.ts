@@ -47,9 +47,8 @@ export async function loadLazyChunks() {
                 for (const id of chunkIds) {
                     if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
 
-                    const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
-                        .then(r => r.text())
-                        .then(t => t.includes("importScripts("));
+                    const isWorkerAsset = (await (await fetch(wreq.p + wreq.u(id))).text())
+                        .includes("importScripts(");
 
                     if (isWorkerAsset) {
                         invalidChunks.add(id);
@@ -144,14 +143,11 @@ export async function loadLazyChunks() {
         if (allChunks.length === 0) throw new Error("Failed to get all chunks");
 
         // Chunks that are not loaded (not used) by Discord code anymore
-        const chunksLeft = allChunks.filter(id => {
-            return !(validChunks.has(id) || invalidChunks.has(id));
-        });
+        const chunksLeft = allChunks.filter(id => !(validChunks.has(id) || invalidChunks.has(id)));
 
         await Promise.all(chunksLeft.map(async id => {
-            const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
-                .then(r => r.text())
-                .then(t => t.includes("importScripts("));
+            const isWorkerAsset = (await (await fetch(wreq.p + wreq.u(id))).text())
+                .includes("importScripts(");
 
             // Loads and requires a chunk
             if (!isWorkerAsset) {

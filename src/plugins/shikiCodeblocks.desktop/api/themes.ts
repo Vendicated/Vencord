@@ -61,7 +61,7 @@ export const themes = {
 
 export const themeCache = new Map<string, IShikiTheme>();
 
-export const getTheme = (url: string): Promise<IShikiTheme> => {
-    if (themeCache.has(url)) return Promise.resolve(themeCache.get(url)!);
-    return fetch(url).then(res => res.json());
-};
+export async function getTheme(url: string): Promise<IShikiTheme> {
+    if (themeCache.has(url)) return themeCache.get(url)!;
+    return (await fetch(url)).json();
+}

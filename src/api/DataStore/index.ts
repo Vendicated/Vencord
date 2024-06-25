@@ -34,10 +34,10 @@ export function createStore(dbName: string, storeName: string): UseStore {
     request.onupgradeneeded = () => request.result.createObjectStore(storeName);
     const dbp = promisifyRequest(request);
 
-    return (txMode, callback) =>
-        dbp.then(db =>
-            callback(db.transaction(storeName, txMode).objectStore(storeName)),
-        );
+    return async (txMode, callback) => {
+        const db = await dbp;
+        return callback(db.transaction(storeName, txMode).objectStore(storeName));
+    };
 }
 
 export type UseStore = <T>(
@@ -212,7 +212,7 @@ function eachCursor(
 export function keys<KeyType extends IDBValidKey>(
     customStore = defaultGetStore(),
 ): Promise<KeyType[]> {
-    return customStore("readonly", store => {
+    return customStore("readonly", async store => {
         // Fast path for modern browsers
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (store.getAllKeys) {
@@ -223,9 +223,8 @@ export function keys<KeyType extends IDBValidKey>(
 
         const items: KeyType[] = [];
 
-        return eachCursor(store, cursor =>
-            items.push(cursor.key as KeyType),
-        ).then(() => items);
+        await eachCursor(store, cursor => items.push(cursor.key as KeyType));
+        return items;
     });
 }
 
@@ -235,7 +234,7 @@ export function keys<KeyType extends IDBValidKey>(
  * @param customStore Method to get a custom store. Use with caution (see the docs).
  */
 export function values<T = any>(customStore = defaultGetStore()): Promise<T[]> {
-    return customStore("readonly", store => {
+    return customStore("readonly", async store => {
         // Fast path for modern browsers
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (store.getAll) {
@@ -244,9 +243,8 @@ export function values<T = any>(customStore = defaultGetStore()): Promise<T[]> {
 
         const items: T[] = [];
 
-        return eachCursor(store, cursor => items.push(cursor.value as T)).then(
-            () => items,
-        );
+        await eachCursor(store, cursor => items.push(cursor.value as T));
+        return items;
     });
 }
 
@@ -259,25 +257,27 @@ export function entries<KeyType extends IDBValidKey, ValueType = any>(
     customStore = defaultGetStore(),
 ): Promise<[KeyType, ValueType][]> {
     // @ts-expect-error
-    return customStore("readonly", store => {
+    return customStore("readonly", async store => {
         // Fast path for modern browsers
         // (although, hopefully we'll get a simpler path some day)
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (store.getAll && store.getAllKeys) {
-            return Promise.all([
+            const [keys, values] = await Promise.all([
                 promisifyRequest(
                     store.getAllKeys() as unknown as IDBRequest<KeyType[]>,
                 ),
                 promisifyRequest(store.getAll() as IDBRequest<ValueType[]>),
-            ]).then(([keys, values]) => keys.map((key, i) => [key, values[i]]));
+            ]);
+            return keys.map((key, i) => [key, values[i]]);
         }
 
         const items: [KeyType, ValueType][] = [];
 
-        return customStore("readonly", store =>
-            eachCursor(store, cursor =>
-                items.push([cursor.key as KeyType, cursor.value]),
-            ).then(() => items),
-        );
+        return customStore("readonly", async store => {
+            await eachCursor(store, cursor =>
+                items.push([cursor.key as KeyType, cursor.value])
+            );
+            return items;
+        });
     });
 }

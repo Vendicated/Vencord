@@ -11,7 +11,7 @@ import type { JSX } from "react";
 import { cl } from "../";
 import Grid, { type GridProps } from "./Grid";
 
-const ScrollerClasses = findByPropsLazy("managedReactiveScroller");
+const ScrollerClasses: Record<string, string> = findByPropsLazy("managedReactiveScroller");
 
 type Section<SectionT, ItemT> = SectionT & {
     items: ItemT[];

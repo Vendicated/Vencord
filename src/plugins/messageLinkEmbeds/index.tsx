@@ -253,9 +253,10 @@ function MessageEmbedAccessory({ message }: { message: MessageRecord & { vencord
             if (linkedMessage) {
                 messageCache.set(messageId!, { message: linkedMessage, fetched: true });
             } else {
-                messageFetchQueue.unshift(() => fetchMessage(channelId!, messageId!).then(m => {
-                    if (m) updateMessage(message.channel_id, message.id);
-                }));
+                messageFetchQueue.unshift(async () => {
+                    const msg = await fetchMessage(channelId!, messageId!);
+                    if (msg) updateMessage(message.channel_id, message.id);
+                });
                 continue;
             }
         }

@@ -23,7 +23,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import type { FluxStore } from "@vencord/discord-types";
 import { findByPropsLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
-import { Constants, RestAPI, Tooltip, useState } from "@webpack/common";
+import { Constants, RestAPI, Tooltip, UserSettingsModalActionCreators, useState } from "@webpack/common";
 import type { ComponentType } from "react";
 
 import { RenameButton } from "./components/RenameButton";
@@ -31,7 +31,6 @@ import type { Session, SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOSColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
 
 const AuthSessionsStore: FluxStore & Record<string, any> = findStoreLazy("AuthSessionsStore");
-const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
 
 const TimestampClasses: Record<string, string> = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses: Record<string, string> = findByPropsLazy("sessionIcon");
@@ -108,17 +107,18 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    renderTimestamp: ErrorBoundary.wrap(({ session, timeLabel }: { session: Session, timeLabel: string; }) => {
-        return (
-            <Tooltip text={session.approx_last_used_time.toLocaleString()} tooltipClassName={TimestampClasses.timestampTooltip}>
-                {props => (
-                    <span {...props} className={TimestampClasses.timestamp}>
-                        {timeLabel}
-                    </span>
-                )}
-            </Tooltip>
-        );
-    }, { noop: true }),
+    renderTimestamp: ErrorBoundary.wrap(({ session, timeLabel }: { session: Session, timeLabel: string; }) => (
+        <Tooltip
+            text={session.approx_last_used_time.toLocaleString()}
+            tooltipClassName={TimestampClasses.timestampTooltip}
+        >
+            {props => (
+                <span {...props} className={TimestampClasses.timestamp}>
+                    {timeLabel}
+                </span>
+            )}
+        </Tooltip>
+    ), { noop: true }),
 
     renderIcon: ErrorBoundary.wrap(({ session, DeviceIcon }: { session: Session, DeviceIcon: ComponentType<any>; }) => {
         const PlatformIcon = GetPlatformIcon(session.client_info.platform);
@@ -174,7 +174,7 @@ export default definePlugin({
                 title: "BetterSessions",
                 body: `New session:\n${session.client_info.os} · ${session.client_info.platform} · ${session.client_info.location}`,
                 permanent: true,
-                onClick: () => UserSettingsModal.open("Sessions")
+                onClick: () => { UserSettingsModalActionCreators.open("Sessions"); }
             });
         }
 

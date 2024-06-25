@@ -130,14 +130,14 @@ function customFormat(formatStr: string, data: TrackData) {
         .replaceAll("{artist}", data.artist);
 }
 
-function getImageAsset(type: AssetImageType, data: TrackData) {
+async function getImageAsset(type: AssetImageType, data: TrackData) {
     const source = type === AssetImageType.Album
         ? data.albumArtwork
         : data.artistArtwork;
 
     if (!source) return undefined;
 
-    return ApplicationAssetUtils.fetchAssetIds(applicationId, [source]).then(ids => ids[0]);
+    return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [source]))[0];
 }
 
 export default definePlugin({
@@ -171,8 +171,8 @@ export default definePlugin({
         FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null });
     },
 
-    updatePresence() {
-        this.getActivity().then(activity => { setActivity(activity); });
+    async updatePresence() {
+        setActivity(await this.getActivity());
     },
 
     async getActivity(): Promise<Activity | null> {
