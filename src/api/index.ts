@@ -21,7 +21,7 @@ import * as $ChatButtons from "./ChatButtons";
 import * as $Commands from "./Commands";
 import * as $ContextMenu from "./ContextMenu";
 import * as $DataStore from "./DataStore";
-import * as $MarkdownRules from "./MarkdownRules";
+import * as $MarkdownRules from "./MarkDownRules";
 import * as $MemberListDecorators from "./MemberListDecorators";
 import * as $MessageAccessories from "./MessageAccessories";
 import * as $MessageDecorations from "./MessageDecorations";
