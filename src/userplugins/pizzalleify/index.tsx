@@ -24,7 +24,7 @@ export default definePlugin({
     patches: [],
 
     start() {
-        console.log("ok");
+        console.log("fisheye lens");
         this.preSend = addPreSendListener((channelId, msg) => {
             msg.content = pizzalleify(msg.content);
         });
