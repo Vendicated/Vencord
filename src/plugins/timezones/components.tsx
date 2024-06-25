@@ -99,13 +99,8 @@ function LocalTimestampInner(props: LocalTimestampProps): JSX.Element | null {
                       className={classes}
                       onClick={() => {
                           toolTipProps.onClick();
-                          openModal(modalProps =>
-                              <TimezoneOverrideModal
-                                  userId={props.userId}
-                                  modalProps={modalProps} />,
-                          );
-                      }}
-                >
+                          openTimezoneOverwriteModal(props.userId);
+                      }}>
                     {shortTimeFormatted}
                 </span>
             </>}
@@ -118,7 +113,7 @@ interface TimezoneOverrideModalProps {
     modalProps: ModalProps,
 }
 
-export function TimezoneOverrideModal(props: TimezoneOverrideModalProps) {
+function TimezoneOverrideModal(props: TimezoneOverrideModalProps) {
     const [availableTimezones, setAvailableTimezones] = useState<SelectOption[]>();
     const [timezone, setTimezone] = useState<string | "NONE" | undefined>();
 
@@ -211,4 +206,12 @@ export function TimezoneOverrideModal(props: TimezoneOverrideModalProps) {
             </Button>
         </ModalFooter>
     </ModalRoot>;
+}
+
+export function openTimezoneOverwriteModal(userId: string) {
+    openModal(modalProps => <>
+        <ErrorBoundary>
+            <TimezoneOverrideModal userId={userId} modalProps={modalProps} />
+        </ErrorBoundary>
+    </>);
 }
