@@ -20,7 +20,12 @@ import type { ChannelRecord } from "@vencord/discord-types";
 
 export interface ChannelDeleteAction {
     type: "CHANNEL_DELETE";
-    channel: ChannelRecord;
+    channel: ChannelRecord | {
+        guild_id: string | undefined;
+        id: string;
+        parent_id: string | undefined;
+    };
+    silent?: boolean;
 }
 
 export interface GuildDeleteAction {

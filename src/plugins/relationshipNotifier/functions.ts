@@ -18,7 +18,7 @@
 
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
 import { RelationshipType } from "@vencord/discord-types";
-import { UserActionCreators } from "@webpack/common";
+import { ChannelStore, UserActionCreators } from "@webpack/common";
 
 import settings from "./settings";
 import type { ChannelDeleteAction, GuildDeleteAction, RelationshipRemoveAction } from "./types";
@@ -80,7 +80,10 @@ export function onGuildDelete({ guild: { id, unavailable } }: GuildDeleteAction)
 
 export function onChannelDelete({ channel, channel: { id } }: ChannelDeleteAction) {
     if (!settings.store.groups) return;
-    if (!channel.isGroupDM()) return;
+    if ("isGroupDM" in channel) {
+        if (!channel.isGroupDM()) return;
+    } else
+        if (!ChannelStore.getChannel(id)?.isGroupDM()) return;
 
     if (manuallyRemovedGroupDM === id) {
         deleteGroupDM(id);
