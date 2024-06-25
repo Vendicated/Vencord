@@ -20,6 +20,7 @@ import { Button, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
+import { MediaEngineStore } from "./utils";
 
 export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);
@@ -40,6 +41,7 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
                 audio: {
                     echoCancellation: settings.store.echoCancellation,
                     noiseSuppression: settings.store.noiseSuppression,
+                    deviceId: MediaEngineStore.getInputDeviceId()
                 }
             }).then(stream => {
                 const chunks = [] as Blob[];
