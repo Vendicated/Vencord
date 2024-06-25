@@ -19,17 +19,15 @@
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Link } from "@components/Link";
+import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import { IPluginOptionComponentProps, OptionType } from "@utils/types";
 import { Text } from "@webpack/common";
 
-import { Snowflake } from "./api";
+import { DEFAULT_API, Snowflake } from "./api";
 import { TimezoneCache } from "./cache";
-import { classes } from "@utils/misc";
-import { Margins } from "@utils/margins";
 
 export type TimezoneOverrides = Record<Snowflake, string | null>;
-
-const DEFAULT_API = "https://timezonedb.catvibers.me/api";
 
 const settings = definePluginSettings({
     enableApi: {
@@ -37,13 +35,12 @@ const settings = definePluginSettings({
         description: "Fetch user timezones from TimezoneDB when a local override does not exist",
         default: true,
     },
-    // TODO: disable this if enableApi is disabled
     apiUrl: {
         type: OptionType.STRING,
         description: "The TimezoneDB API instance",
         default: DEFAULT_API,
         placeholder: DEFAULT_API,
-        onChange(_: any) {
+        onChange(_: string) {
             DataStore.clear(TimezoneCache).catch(_ => _);
         },
     },

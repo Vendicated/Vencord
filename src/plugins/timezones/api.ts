@@ -9,10 +9,25 @@ import { Logger } from "@utils/Logger";
 
 import settings from "./settings";
 
+export const DEFAULT_API = "https://timezonedb.catvibers.me/api";
+
 export type Snowflake = string;
 type ApiError = { error: string; };
 type UserFetchResponse = ApiError | { timezoneId: string }
 type BulkFetchResponse = ApiError | Record<Snowflake, { timezoneId: string | null }>;
+
+export async function verifyApi(url: string): Promise<boolean> {
+    if (url === DEFAULT_API) return true;
+
+    const res = await fetch(url, {
+        method: "GET",
+        headers: {
+            "User-Agent": VENCORD_USER_AGENT,
+        },
+    });
+
+    return "logged_in" in await res.json();
+}
 
 export async function fetchTimezonesBulk(ids: Snowflake[]): Promise<Record<Snowflake, string | null> | undefined> {
     try {
@@ -21,7 +36,7 @@ export async function fetchTimezonesBulk(ids: Snowflake[]): Promise<Record<Snowf
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-User-Agent": VENCORD_USER_AGENT,
+                "User-Agent": VENCORD_USER_AGENT,
             },
             body: JSON.stringify(ids),
         });
@@ -47,8 +62,7 @@ export async function fetchTimezone(userId: Snowflake): Promise<string | null | 
         const req = await fetch(`${apiUrl}/user/${userId}`, {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "X-User-Agent": VENCORD_USER_AGENT,
+                "User-Agent": VENCORD_USER_AGENT,
             },
         });
 
