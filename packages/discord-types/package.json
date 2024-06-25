@@ -30,7 +30,7 @@
     },
     "devDependencies": {
         "@eslint-types/unicorn": "^52.0.0",
-        "@stylistic/eslint-plugin": "^2.2.2",
+        "@stylistic/eslint-plugin": "^2.3.0",
         "eslint": "^9.5.0",
         "eslint-plugin-check-file": "^2.8.0",
         "eslint-plugin-headers": "^1.1.2",
@@ -39,6 +39,6 @@
         "eslint-plugin-unicorn": "^54.0.0",
         "eslint-plugin-unused-imports": "^4.0.0",
         "typescript": "^5.5.2",
-        "typescript-eslint": "^8.0.0-alpha.30"
+        "typescript-eslint": "^8.0.0-alpha.33"
     }
 }
