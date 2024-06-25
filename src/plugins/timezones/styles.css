@@ -1,6 +1,11 @@
 /** Based on Syncxv's vc-timezones user plugin **/
 
-.timezone-profile-item {
+.vc-timezones-tooltip {
+    max-width: none !important;
+    white-space: nowrap
+}
+
+.vc-timezones-profile-display {
     display: flex;
     position: absolute;
     right: 0;
@@ -19,33 +24,24 @@
     }
 }
 
-[class*="topSection"] .timezone-profile-item {
-    margin: 16px;
-}
-
-.timezone-message-item {
+.vc-timezones-message-display {
     margin-left: 4px;
     cursor: pointer;
 }
 
-.vc-timezone-modal-header {
+.vc-timezones-modal-header {
     justify-content: space-between;
     align-content: center;
 }
 
-.vc-timezone-modal-header h1 {
-    margin: 0;
+.vc-timezones-modal-header h1 {
+    margin-bottom: 0;
 }
 
-.vc-timezone-modal-content {
+.vc-timezones-modal-content {
     padding: 1em;
 }
 
-.vc-timezone-modal-footer {
+.vc-timezones-modal-footer {
     gap: 16px;
-}
-
-.timezone-tooltip {
-    max-width: none !important;
-    white-space: nowrap
 }

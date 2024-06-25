@@ -79,8 +79,8 @@ function LocalTimestampInner(props: LocalTimestampProps): JSX.Element | null {
         ? `• ${shortTime}`
         : shortTime ?? "Error";
     const classes = props.type === "message"
-        ? `timezone-message-item ${messageClasses.timestamp}`
-        : "timezone-profile-item";
+        ? `vc-timezones-message-display ${messageClasses.timestamp}`
+        : "vc-timezones-profile-display";
 
     return <>
         <Tooltip
@@ -90,7 +90,7 @@ function LocalTimestampInner(props: LocalTimestampProps): JSX.Element | null {
             allowOverflow={false}
             spacing={8}
             hideOnClick={true}
-            tooltipClassName="timezone-tooltip"
+            tooltipClassName="vc-timezones-tooltip"
             hide={!longTime}
             text={longTime}
         >
@@ -161,14 +161,14 @@ function SetTimezoneOverrideModal(props: TimezoneOverrideModalProps) {
     }
 
     return <ModalRoot {...props.modalProps}>
-        <ModalHeader className="vc-timezone-modal-header">
+        <ModalHeader className="vc-timezones-modal-header">
             <Forms.FormTitle tag="h2">
                 Set Timezone Override for User
             </Forms.FormTitle>
             <ModalCloseButton onClick={props.modalProps.onClose} />
         </ModalHeader>
 
-        <ModalContent className="vc-timezone-modal-content">
+        <ModalContent className="vc-timezones-modal-content">
             <Text variant="text-md/normal">
                 This override will only be visible locally and to any synchronized clients via Vencord Cloud.
                 <br />
@@ -194,7 +194,7 @@ function SetTimezoneOverrideModal(props: TimezoneOverrideModalProps) {
             </section>
         </ModalContent>
 
-        <ModalFooter className="vc-timezone-modal-footer">
+        <ModalFooter className="vc-timezones-modal-footer">
             <Button
                 color={Button.Colors.BRAND}
                 disabled={availableTimezones === undefined}
