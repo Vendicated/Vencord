@@ -21,7 +21,7 @@ export default definePlugin({
         id: 1105436709669314600n
     }],
 
-    async start() {
+    start() {
 
         this.preSend = addPreSendListener((channelId, msg) => {
             msg.content = pizzalleify(msg.content);
