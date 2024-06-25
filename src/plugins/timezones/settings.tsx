@@ -23,7 +23,7 @@ import { Text } from "@webpack/common";
 
 import { Snowflake } from "./api";
 
-export type TimezoneOverwrites = Record<Snowflake, string>;
+export type TimezoneOverwrites = Record<Snowflake, string | null>;
 
 const settings = definePluginSettings({
     enableApi: {

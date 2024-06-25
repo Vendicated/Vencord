@@ -6,13 +6,26 @@
 
 import "./styles.css";
 
-import { ErrorBoundary } from "@components/index";
+import { ErrorBoundary, Link } from "@components/index";
 import { findByPropsLazy } from "@webpack";
-import { React, Tooltip, useEffect, useState } from "@webpack/common";
+import { Button, Forms, React, SearchableSelect, Text, Tooltip, useEffect, useState } from "@webpack/common";
 
 import { Snowflake } from "./api";
 import { getUserTimezone } from "./cache";
-import { formatTimestamp } from "./utils";
+import { formatTimestamp, getTimezonesLazy } from "./utils";
+import {
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalProps,
+    ModalRoot,
+    openModal,
+} from "@utils/modal";
+import { Margins } from "@utils/margins";
+import { SelectOption } from "@webpack/types";
+import settings, { TimezoneOverwrites } from "./settings";
+import { classes } from "@utils/misc";
 
 // Based on Syncxv's vc-timezones user plugin //
 
@@ -82,10 +95,116 @@ function LocalTimestampInner(props: LocalTimestampProps): JSX.Element | null {
             text={longTime}
         >
             {toolTipProps => <>
-                <span className={classes} {...toolTipProps}>
+                <span {...toolTipProps}
+                      className={classes}
+                      onClick={() => {
+                          toolTipProps.onClick();
+                          openModal(modalProps =>
+                              <TimezoneOverrideModal
+                                  userId={props.userId}
+                                  modalProps={modalProps} />,
+                          );
+                      }}
+                >
                     {shortTimeFormatted}
                 </span>
             </>}
         </Tooltip>
     </>;
+}
+
+interface TimezoneOverrideModalProps {
+    userId: string,
+    modalProps: ModalProps,
+}
+
+export function TimezoneOverrideModal(props: TimezoneOverrideModalProps) {
+    const [availableTimezones, setAvailableTimezones] = useState<SelectOption[]>();
+    const [timezone, setTimezone] = useState<string | "NONE" | undefined>();
+
+    useEffect(() => {
+        getTimezonesLazy().then(timezones => {
+            const options: SelectOption[] = timezones.map(tz => {
+                const offset = new Intl.DateTimeFormat(undefined, { timeZone: tz, timeZoneName: "shortOffset" })
+                    .formatToParts(Date.now())
+                    .find(part => part.type === "timeZoneName")!.value;
+
+                return { label: `${tz} (${offset})`, value: tz };
+            });
+
+            options.unshift({
+                label: "None (Ignore TimezoneDB)",
+                value: "NONE", // I would use null but SearchableSelect is bugged in that null values get converted into undefined
+            });
+
+            options.unshift({
+                label: "Auto (Retrieved from TimezoneDB)",
+                value: undefined,
+            });
+
+            setAvailableTimezones(options);
+        });
+
+        const overwrites: TimezoneOverwrites = settings.store.timezoneOverwrites ?? {};
+        const overwrite = overwrites[props.userId];
+        setTimezone(overwrite === null ? "NONE" : overwrite);
+    }, []);
+
+    function saveOverwrite() {
+        if (availableTimezones === undefined) return;
+
+        const overwrites: TimezoneOverwrites = settings.store.timezoneOverwrites ?? {};
+        if (timezone === undefined) {
+            delete overwrites[props.userId];
+        } else if (timezone === "NONE") {
+            overwrites[props.userId] = null;
+        } else {
+            overwrites[props.userId] = timezone;
+        }
+        settings.store.timezoneOverwrites = overwrites;
+
+        props.modalProps.onClose();
+    }
+
+    return <ModalRoot {...props.modalProps}>
+        <ModalHeader className="vc-timezone-modal-header">
+            <Forms.FormTitle tag="h2">
+                Set Timezone Override for User
+            </Forms.FormTitle>
+            <ModalCloseButton onClick={props.modalProps.onClose} />
+        </ModalHeader>
+
+        <ModalContent className="vc-timezone-modal-content">
+            <Text variant="text-md/normal">
+                This override will only be visible locally.
+                <br />
+                To set your own Timezone for other users to see,
+                click <Link onClick={/* TODO */ _ => _}>here</Link> to
+                authorize TimezoneDB.
+            </Text>
+
+            <section className={classes(Margins.bottom16, Margins.top16)}>
+                <SearchableSelect
+                    options={availableTimezones ?? []}
+                    value={availableTimezones?.find(opt => opt.value === timezone)}
+                    placeholder="Select a Timezone"
+                    maxVisibleItems={7}
+                    closeOnSelect={true}
+                    onChange={setTimezone}
+                />
+            </section>
+        </ModalContent>
+
+        <ModalFooter className="vc-timezone-modal-footer">
+            <Button
+                color={Button.Colors.BRAND}
+                disabled={availableTimezones === undefined}
+                onClick={saveOverwrite}>
+                Save
+            </Button>
+            <Button color={Button.Colors.RED} onClick={props.modalProps.onClose}>
+                Cancel
+            </Button>
+        </ModalFooter>
+    </ModalRoot>;
 }

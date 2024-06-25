@@ -27,6 +27,7 @@ export function formatTimestamp(
                 day: "numeric",
                 hour: "numeric",
                 minute: "numeric",
+                timeZoneName: "shortOffset",
             };
 
         const formatter = new Intl.DateTimeFormat(locale, {
@@ -50,7 +51,12 @@ async function getTimezones(): Promise<string[]> {
         }
     }
 
-    return await fetch(TIMEZONE_LIST).then(res => res.json());
+    try {
+        return await fetch(TIMEZONE_LIST).then(res => res.json());
+    } catch (e) {
+        new Logger("Timezones").error("Failed to fetch external timezones list", e);
+        return [];
+    }
 }
 
 export const getTimezonesLazy = makeLazy(getTimezones, 2);

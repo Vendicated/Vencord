@@ -25,6 +25,7 @@
 
 .timezone-message-item {
     margin-left: 4px;
+    cursor: pointer;
 }
 
 .vc-timezone-modal-header {

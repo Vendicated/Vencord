@@ -13,7 +13,7 @@ import { fetchTimezone, fetchTimezonesBulk, Snowflake } from "./api";
 import settings, { TimezoneOverwrites } from "./settings";
 
 // TODO: cache invalidation
-const TimezoneCache = createStore("UsersTimezoneCache", "TimezoneCache");
+const TimezoneCache = createStore("TimezoneCache", "TimezoneCache");
 
 // A list of callbacks that will trigger on a completed debounced bulk fetch
 type BulkFetchCallback = (timezone: string | null) => void;
@@ -54,10 +54,10 @@ export async function getUserTimezone(
     immediate: boolean = false,
     force: boolean = false,
 ): Promise<string | null> {
-    const overwrites = settings.store.timezoneOverwrites ?? {} as TimezoneOverwrites;
-    const useApi = settings.store.enableApi;
+    const overwrites: TimezoneOverwrites = settings.store.timezoneOverwrites ?? {};
     const overwrite = overwrites[userId];
-    if (overwrite || !useApi) return overwrite ?? null;
+    if (overwrite !== undefined) return overwrite;
+    if (!settings.store.enableApi) return null;
 
     if (!force) {
         const cachedTimezone = await DataStore.get<string | null>(userId, TimezoneCache);
