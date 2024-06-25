@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { patchMarkdownRules } from "@api/MarkdownRules";
+import { patchMarkdownRules } from "@api/MarkDownRules";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
 
