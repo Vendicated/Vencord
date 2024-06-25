@@ -32,7 +32,7 @@ import { Message, User } from "discord-types/general";
 import { Member, PKAPI } from "pkapi.js";
 
 import pluralKit from "./index";
-import { Author, deleteMessage, getAuthorOfMessage, isOwnPkMessage, isPk, loadAuthors } from "./utils";
+import { Author, deleteMessage, getAuthorOfMessage, isOwnPkMessage, isPk, loadAuthors, replaceTags } from "./utils";
 
 const EditIcon = () => {
     return <svg role={"img"} width={"16"} height={"16"} fill={"none"} viewBox={"0 0 24 24"}>
@@ -46,10 +46,17 @@ const settings = definePluginSettings({
         description: "Display member colors in their names in chat",
         default: false
     },
-    display: {
+    displayOther: {
         type: OptionType.STRING,
-        description: "How to display proxied users in chat\n{tag}, {name}, {memberId}, {pronouns}, {systemId}, {systemName} are valid variables (All lowercase)",
+        description: "How to display proxied users (from other systems) in chat\n" +
+            "{tag}, {name}, {memberId}, {pronouns}, {systemId}, {systemName}, {color}, {avatar}, {messageCount}, {systemMessageCount} are valid variables (All lowercase)",
         default: "{name}{tag}",
+    },
+    displayLocal: {
+        type: OptionType.STRING,
+        description: "How to display proxied users (from your system, defaults to displayOther if blank) in chat\n" +
+            "{tag}, {name}, {memberId}, {pronouns}, {systemId}, {systemName}, {color}, {avatar}, {messageCount}, {systemMessageCount} are valid variables (All lowercase)",
+        default: "",
     },
     load: {
         type: OptionType.COMPONENT,
@@ -73,11 +80,6 @@ const settings = definePluginSettings({
         },
         description: "Load local system into memory"
     },
-    showDebug: {
-        type: OptionType.BOOLEAN,
-        description: "Show debug options",
-        default: false
-    },
     printData: {
         type: OptionType.COMPONENT,
         component: () => {
@@ -86,13 +88,13 @@ const settings = definePluginSettings({
             }}>Print Data</Button>;
         },
         description: "Print stored data to console",
-        hidden: false // showDebug
+        hidden: true // showDebug
     },
     data: {
         type: OptionType.STRING,
         description: "Datastore",
         default: "{}",
-        hidden: false // showDebug
+        hidden: true // showDebug
     }
 });
 
@@ -162,22 +164,9 @@ export default definePlugin({
             if (pkAuthor.member && settings.store.colorNames) {
                 color = pkAuthor.member.color??color;
             }
-            const member: Member = pkAuthor.member as Member;
-            const memberSettings = pkAuthor.guildSettings?.get(ChannelStore.getChannel(message.channel_id).guild_id);
-            const systemSettings = pkAuthor.systemSettings?.get(ChannelStore.getChannel(message.channel_id).guild_id);
 
-            const name = memberSettings?.display_name??member.display_name??member.name;
-            const { pronouns } = member;
-            const tag = (systemSettings&&systemSettings.tag)?systemSettings.tag:pkAuthor.system.tag;
-
-            const resultText = settings.store.display
-                .replace("{name}", name)
-                .replace("{pronouns}", pronouns??"")
-                .replace("{tag}", tag??"")
-                .replace("{memberid}", member.id)
-                .replace("{systemid}", pkAuthor.system.id)
-                .replace("{systemname}", pkAuthor.system.name??"");
-
+            const display = isOwnPkMessage(message, settings.store.data) && settings.store.displayLocal !== "" ? settings.store.displayLocal : settings.store.displayOther;
+            const resultText = replaceTags(display, message, settings.store.data);
 
             return <span style={{
                 color: `#${color}`,

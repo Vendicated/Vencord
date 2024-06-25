@@ -9,9 +9,12 @@ import { insertTextIntoChatInputBox } from "@utils/discord";
 import { ChannelStore, FluxDispatcher, Toasts } from "@webpack/common";
 import { Message } from "discord-types/general";
 import { Member, MemberGuildSettings, PKAPI, System, SystemGuildSettings } from "pkapi.js";
+import { findComponentByCodeLazy } from "@webpack";
 
 // I dont fully understand how to use datastores, if I used anything incorrectly please let me know
 export const DATASTORE_KEY = "pk";
+export const UserPopoutComponent = findComponentByCodeLazy("customStatusActivity:", "isApplicationStreaming:", "disableUserProfileLink:");
+
 export let authors: Record<string, Author> = {};
 
 export interface Author {
@@ -30,6 +33,23 @@ export function isOwnPkMessage(message: Message, localSystemData: string): boole
     if (!isPk(message)) return false;
     const localSystem: Author[] = JSON.parse(localSystemData);
     return localSystem.map(author => author.member.id).some(id => id === getAuthorOfMessage(message, new PKAPI()).member.id);
+}
+
+export function replaceTags(content: string, message: Message, localSystemData: string) {
+    const author = getAuthorOfMessage(message, new PKAPI());
+    const localSystem: Author[] = JSON.parse(localSystemData);
+
+    return content
+        .replace(/{tag}/g, author.member.tag)
+        .replace(/{name}/g, author.member.name)
+        .replace(/{memberId}/g, author.member.id)
+        .replace(/{pronouns}/g, author.member.pronouns??"")
+        .replace(/{systemId}/g, author.system.id)
+        .replace(/{systemName}/g, author.system.name??"")
+        .replace(/{color}/g, author.member.color??"ffffff")
+        .replace(/{avatar}/g, author.member.avatar)
+        .replace(/{messageCount}/g, author.messageIds.length.toString())
+        .replace(/{systemMessageCount}/g, localSystem.map(author => author.messageIds.length).reduce((acc, val) => acc + val).toString());
 }
 
 export async function loadAuthors() {
