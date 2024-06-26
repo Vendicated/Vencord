@@ -9,7 +9,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "ShowAllRoles",
-    description: "Show all members' roles on the pop-out again.",
+    description: "Show all roles in new profiles",
     authors: [Devs.Luna],
     patches: [
         {
