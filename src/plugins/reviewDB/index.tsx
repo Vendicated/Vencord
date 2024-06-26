@@ -69,7 +69,8 @@ export default definePlugin({
         "guild-header-popout": guildPopoutPatch,
         "guild-context": guildPopoutPatch,
         "user-context": userContextPatch,
-        "user-profile-actions": userContextPatch
+        "user-profile-actions": userContextPatch,
+        "user-profile-overflow-menu": userContextPatch
     },
 
     patches: [
