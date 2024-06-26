@@ -19,10 +19,9 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
-import { pluralise } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, UserStore, useStateFromStores } from "@webpack/common";
+import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, UserStore } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
@@ -40,21 +39,17 @@ function getGroupDMName(channel: Channel) {
             .join(", ");
 }
 
-function useGroupDMs(userId: string) {
-    return useStateFromStores([ChannelStore], () => ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(userId)));
-}
-
 export default definePlugin({
     name: "MutualGroupDMs",
     description: "Shows mutual group dms in profiles",
-    authors: [Devs.amia, Devs.Sqaaakoi],
+    authors: [Devs.amia],
 
     patches: [
         {
             find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Note: the module is lazy-loaded
             replacement: {
                 match: /(?<=\.tabBarItem.{0,50}MUTUAL_GUILDS.+?}\),)(?=.+?(\(0,\i\.jsxs?\)\(.{0,100}id:))/,
-                replace: '(arguments[0].user.bot||arguments[0].isCurrentUser)?null:$1"MUTUAL_GDMS",children:"Mutual Groups"}),'
+                replace: '$self.isBotOrSelf(arguments[0].user)?null:$1"MUTUAL_GDMS",children:"Mutual Groups"}),'
             }
         },
         {
@@ -63,16 +58,26 @@ export default definePlugin({
                 match: /(?<={user:(\i),onClose:(\i)}\);)(?=case \i\.\i\.MUTUAL_FRIENDS)/,
                 replace: "case \"MUTUAL_GDMS\":return $self.renderMutualGDMs({user: $1, onClose: $2});"
             }
+        },
+        {
+            find: ".MUTUAL_FRIENDS?(",
+            replacement: [
+                {
+                    match: /(?<=onItemSelect:\i,children:)(\i)\.map/,
+                    replace: "[...$1, ...($self.isBotOrSelf(arguments[0].user) ? [] : [{section:'MUTUAL_GDMS',text:'Mutual Groups'}])].map"
+                },
+                {
+                    match: /\(0,\i\.jsx\)\(\i,\{items:\i,section:(\i)/,
+                    replace: "$1==='MUTUAL_GDMS'?$self.renderMutualGDMs(arguments[0]):$&"
+                }
+            ]
         }
     ],
 
-    useGDMCount(userId: string) {
-        const state = useGroupDMs(userId).length;
-        const label = "Mutual Group";
-        return state > 0 ? pluralise(state, label) : `No ${label}s`;
-    },
+    isBotOrSelf: (user: User) => user.bot || user.id === UserStore.getCurrentUser().id,
+
     renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: User, onClose: () => void; }) => {
-        const entries = useGroupDMs(user.id).map(c => (
+        const entries = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).map(c => (
             <Clickable
                 className={ProfileListClasses.listRow}
                 onClick={() => {

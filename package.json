@@ -18,9 +18,6 @@
         "Thororen1234",
         "Yeetov"
     ],
-    "directories": {
-        "doc": "docs"
-    },
     "scripts": {
         "build": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs",
         "buildStandalone": "pnpm build --standalone",
