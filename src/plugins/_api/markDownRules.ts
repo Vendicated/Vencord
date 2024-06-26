@@ -28,5 +28,5 @@ export default definePlugin({
             }
         }
     ],
-    startAt: StartAt.Init,
+    startAt: StartAt.Init
 });
