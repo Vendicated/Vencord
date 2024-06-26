@@ -13,9 +13,6 @@
     },
     "license": "GPL-3.0-or-later",
     "author": "Vendicated",
-    "directories": {
-        "doc": "docs"
-    },
     "scripts": {
         "build": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs",
         "buildStandalone": "pnpm build --standalone",
