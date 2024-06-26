@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { patchMarkdownRules } from "@api/MarkdownRules";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
+
 
 export default definePlugin({
     name: "MarkDownRulesAPI",
@@ -17,10 +17,16 @@ export default definePlugin({
             find: "{RULES:",
             replacement: {
                 match: /{RULES:[^}]+}/,
-                replace: "Vencord.Api.MarkdownRules.patchMarkdownRules($&)"
+                replace: "Vencord.Api.MarkDownRules.patchMarkdownRules($&)"
+            }
+        },
+        {
+            find: "type:\"verbatim\"",
+            replacement: {
+                match: /let (\i)=({link:.*,after:""}})/,
+                replace: "let $1=Vencord.Api.MarkDownRules.insertSlateRules($2)"
             }
         }
     ],
     startAt: StartAt.Init,
-    patchMarkdownRules
 });

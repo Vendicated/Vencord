@@ -6,7 +6,6 @@
 
 import { Logger } from "@utils/Logger";
 
-
 const logger = new Logger("MarkDownRules");
 
 export interface Rule {
@@ -61,4 +60,14 @@ export function patchMarkdownRules(originalRules: MarkDownRules) {
     }
     assignEntries(originalRules, Rules);
     return originalRules;
+}
+
+export function insertSlateRules(slate: any) {
+    return Object.assign(
+        slate,
+        Object.fromEntries(
+            Array.from(
+                Object.entries(Rules), ([_, rules]: [string, Rules]) => Object.entries(rules).map(([name, rule]: [string, Rule]) => [name, (rule.Slate ?? slate[name]) ?? { type: "skip" }])).flat()
+        )
+    );
 }

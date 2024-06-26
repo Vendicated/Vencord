@@ -21,7 +21,7 @@ import * as $ChatButtons from "./ChatButtons";
 import * as $Commands from "./Commands";
 import * as $ContextMenu from "./ContextMenu";
 import * as $DataStore from "./DataStore";
-import * as $MarkdownRules from "./MarkdownRules";
+import * as $MarkDownRules from "./MarkDownRules";
 import * as $MemberListDecorators from "./MemberListDecorators";
 import * as $MessageAccessories from "./MessageAccessories";
 import * as $MessageDecorations from "./MessageDecorations";
@@ -127,4 +127,4 @@ export const UserSettings = $UserSettings;
 /**
  * An API allowing you to modify discord default Markdown rules
  */
-export const MarkdownRules = $MarkdownRules;
+export const MarkDownRules = $MarkDownRules;
