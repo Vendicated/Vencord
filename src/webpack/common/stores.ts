@@ -39,8 +39,6 @@ export let PermissionStore: GenericStore;
 export let GuildChannelStore: GenericStore;
 export let ReadStateStore: GenericStore;
 export let PresenceStore: GenericStore;
-export let TypingStore: GenericStore;
-export let PoggerModeSettingsStore: GenericStore;
 
 export let GuildStore: t.GuildStore;
 export let UserStore: Stores.UserStore & t.FluxStore;
@@ -48,6 +46,7 @@ export let UserProfileStore: GenericStore;
 export let SelectedChannelStore: Stores.SelectedChannelStore & t.FluxStore;
 export let SelectedGuildStore: t.FluxStore & Record<string, any>;
 export let ChannelStore: Stores.ChannelStore & t.FluxStore;
+export let TypingStore: GenericStore;
 export let GuildMemberStore: Stores.GuildMemberStore & t.FluxStore;
 export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
     /** Get the date (as a string) that the relationship was created */
@@ -83,8 +82,8 @@ waitForStore("RelationshipStore", m => RelationshipStore = m);
 waitForStore("PermissionStore", m => PermissionStore = m);
 waitForStore("PresenceStore", m => PresenceStore = m);
 waitForStore("ReadStateStore", m => ReadStateStore = m);
-waitForStore("TypingStore", m => TypingStore = m);
 waitForStore("GuildChannelStore", m => GuildChannelStore = m);
 waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
+waitForStore("TypingStore", m => TypingStore = m);

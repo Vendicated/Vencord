@@ -46,6 +46,7 @@ export async function loadLazyChunks() {
 
                 for (const id of chunkIds) {
                     if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
+
                     const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
                         .then(r => r.text())
                         .then(t => t.includes("importScripts("));

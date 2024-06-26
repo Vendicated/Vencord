@@ -20,8 +20,6 @@ import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { findModuleId, proxyLazyWebpack, wreq } from "@webpack";
 
-import { Settings } from "./Settings";
-
 interface UserSettingDefinition<T> {
     /**
      * Get the setting value
@@ -41,31 +39,31 @@ interface UserSettingDefinition<T> {
      * Stateful React hook for this setting value
      */
     useSetting(): T;
-    userSettingDefinitionsAPIGroup: string;
-    userSettingDefinitionsAPIName: string;
+    userSettingsAPIGroup: string;
+    userSettingsAPIName: string;
 }
 
-export const UserSettingsDefinitions: Record<PropertyKey, UserSettingDefinition<any>> | undefined = proxyLazyWebpack(() => {
+export const UserSettings: Record<PropertyKey, UserSettingDefinition<any>> | undefined = proxyLazyWebpack(() => {
     const modId = findModuleId('"textAndImages","renderSpoilers"');
-    if (modId == null) return new Logger("UserSettingDefinitionsAPI").error("Didn't find settings definitions module.");
+    if (modId == null) return new Logger("UserSettingsAPI ").error("Didn't find settings module.");
 
     return wreq(modId as any);
 });
 
 /**
- * Get the definition for a setting.
+ * Get the setting with the given setting group and name.
  *
  * @param group The setting group
  * @param name The name of the setting
  */
-export function getUserSettingDefinition<T = any>(group: string, name: string): UserSettingDefinition<T> | undefined {
-    if (!Settings.plugins.UserSettingDefinitionsAPI.enabled) throw new Error("Cannot use UserSettingDefinitionsAPI without setting as dependency.");
+export function getUserSetting<T = any>(group: string, name: string): UserSettingDefinition<T> | undefined {
+    if (!Vencord.Plugins.isPluginEnabled("UserSettingsAPI")) throw new Error("Cannot use UserSettingsAPI without setting as dependency.");
 
-    for (const key in UserSettingsDefinitions) {
-        const userSettingDefinition = UserSettingsDefinitions[key];
+    for (const key in UserSettings) {
+        const userSetting = UserSettings[key];
 
-        if (userSettingDefinition.userSettingDefinitionsAPIGroup === group && userSettingDefinition.userSettingDefinitionsAPIName === name) {
-            return userSettingDefinition;
+        if (userSetting.userSettingsAPIGroup === group && userSetting.userSettingsAPIName === name) {
+            return userSetting;
         }
     }
 }
@@ -73,11 +71,11 @@ export function getUserSettingDefinition<T = any>(group: string, name: string): 
 /**
  * {@link getUserSettingDefinition}, lazy.
  *
- * Get the definition for a setting.
+ * Get the setting with the given setting group and name.
  *
  * @param group The setting group
  * @param name The name of the setting
  */
-export function getUserSettingDefinitionLazy<T = any>(group: string, name: string) {
-    return proxyLazy(() => getUserSettingDefinition<T>(group, name));
+export function getUserSettingLazy<T = any>(group: string, name: string) {
+    return proxyLazy(() => getUserSetting<T>(group, name));
 }
