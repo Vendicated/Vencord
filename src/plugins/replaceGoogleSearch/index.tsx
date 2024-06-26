@@ -54,7 +54,7 @@ function makeSearchItem(src: string) {
             key="search-text"
             id="vc-search-text"
         >
-            {Object.keys(Engines).map((engine, i) => {
+            {Object.keys(Engines).map(engine => {
                 const key = "vc-search-content-" + engine;
                 return (
                     <Menu.MenuItem
@@ -69,7 +69,7 @@ function makeSearchItem(src: string) {
                                     aria-hidden="true"
                                     height={16}
                                     width={16}
-                                    src={`https://www.google.com/s2/favicons?domain=${Engines[engine]}`}
+                                    src={`https://www.google.com/s2/favicons?domain=${Engines[engine]}&sz=64`}
                                 />
                                 {engine}
                             </Flex>
