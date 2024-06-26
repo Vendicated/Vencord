@@ -211,7 +211,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".BITE_SIZE,onOpenProfile",
+            find: '"BiteSizeProfileBody"',
             replacement: {
                 match: /currentUser:\i,guild:\i,onOpenProfile:.+?}\)(?=])(?<=user:(\i),bio:null==(\i)\?.+?)/,
                 replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, simplified: true })"
