@@ -1,7 +1,6 @@
 import definePlugin from "@utils/types";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
-import "./styles.css";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, i18n, Menu, MessageStore, Parser, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
@@ -23,7 +22,7 @@ export default definePlugin({
     patches: [],
 
     start() {
-        console.log("mreowww blehhh i kill people");
+        const css = require('./styles.css');
         this.preSend = addPreSendListener((channelId, msg) => {
             msg.content = pizzalleify(msg.content);
         });
