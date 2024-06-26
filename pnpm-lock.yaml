@@ -41,9 +41,6 @@ importers:
         specifier: ^1.0.1
         version: 1.0.1
     devDependencies:
-      '@eslint/js':
-        specifier: ^9.5.0
-        version: 9.5.0
       '@stylistic/eslint-plugin':
         specifier: ^2.3.0
         version: 2.3.0(eslint@9.5.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))(typescript@5.4.5)
