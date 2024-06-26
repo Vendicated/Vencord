@@ -58,7 +58,7 @@
         "esbuild": "^0.15.18",
         "eslint": "^9.5.0",
         "eslint-import-resolver-alias": "^1.1.2",
-        "eslint-plugin-path-alias": "1.0.0",
+        "eslint-plugin-path-alias": "2.1.0",
         "eslint-plugin-simple-header": "^1.0.2",
         "eslint-plugin-simple-import-sort": "^12.1.0",
         "eslint-plugin-unused-imports": "^4.0.0",
@@ -80,8 +80,8 @@
     "packageManager": "pnpm@9.1.0",
     "pnpm": {
         "patchedDependencies": {
-            "eslint-plugin-path-alias@1.0.0": "patches/eslint-plugin-path-alias@1.0.0.patch",
-            "eslint@9.5.0": "patches/eslint@9.5.0.patch"
+            "eslint@9.5.0": "patches/eslint@9.5.0.patch",
+            "eslint-plugin-path-alias@2.1.0": "patches/eslint-plugin-path-alias@2.1.0.patch"
         },
         "peerDependencyRules": {
             "ignoreMissing": [
