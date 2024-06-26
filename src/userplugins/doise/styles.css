@@ -1,0 +1,21 @@
+img { 
+    content: url(https://static.miraheze.org/pizzatowerwiki/1/14/PT-spr_playerN_idle-DOISE.gif);
+    background-image: url(https://static.miraheze.org/pizzatowerwiki/1/14/PT-spr_playerN_idle-DOISE.gif);
+    display: flex;
+}
+
+span {
+  display: none
+}
+
+span::after {
+  content: " doise"
+}
+
+.markup_d6076c span {
+  opacity: 0
+}
+
+.markup_d6076c::before {
+  content: "doise";
+}

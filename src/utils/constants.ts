@@ -547,6 +547,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     iamme: {
         name: "i am me",
         id: 984392761929256980n
+    },
+    deimos: {
+        name: "doeimos.png",
+        id: 1105436709669314600n
     }
 } satisfies Record<string, Dev>);
 

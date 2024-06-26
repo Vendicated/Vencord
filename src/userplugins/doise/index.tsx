@@ -1,6 +1,7 @@
 import definePlugin from "@utils/types";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
+import "./styles.css";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, i18n, Menu, MessageStore, Parser, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
@@ -15,8 +16,8 @@ function pizzalleify(str: string): string {
 }
 
 export default definePlugin({
-    name: "Pizzalleify",
-    description: "Makes all of your messages Pizzalle-like",
+    name: "Doise.",
+    description: "Doise.",
     authors: [Devs.deimos],
 
     patches: [],
