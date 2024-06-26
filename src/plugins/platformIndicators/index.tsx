@@ -119,7 +119,6 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, sma
                 verticalAlign: "top",
                 position: "relative",
                 top: wantTopMargin ? 2 : 0,
-                padding: !wantMargin ? 1 : 0,
                 gap: 2
             }}
 
