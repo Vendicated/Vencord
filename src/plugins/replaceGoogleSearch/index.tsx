@@ -16,12 +16,9 @@ const DefaultEngines = {
     Brave: "https://search.brave.com/search?q=",
     Bing: "https://www.bing.com/search?q=",
     Yahoo: "https://search.yahoo.com/search?p=",
+    Yandex: "https://yandex.com/search/?text=",
     GitHub: "https://github.com/search?q=",
     Reddit: "https://www.reddit.com/search?q=",
-    Kagi: "https://kagi.com/search?q=",
-    Yandex: "https://yandex.com/search/?text=",
-    AOL: "https://search.aol.com/aol/search?q=",
-    Baidu: "https://www.baidu.com/s?wd=",
     Wikipedia: "https://wikipedia.org/w/index.php?search=",
 } as const;
 
