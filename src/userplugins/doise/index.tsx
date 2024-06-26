@@ -1,18 +1,31 @@
-import definePlugin from "@utils/types";
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
+// Import additional modules and components
 import { Devs } from "@utils/constants";
-import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, i18n, Menu, MessageStore, Parser, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
+import definePlugin from "@utils/types";
+import { enableStyle, disableStyle } from "@api/Styles";
 
-function pizzalleify(str: string): string {
-    let result = str[0].toUpperCase() + str.substr(1).toLowerCase();
+// Import the CSS file
+import style from "./index.css?managed";
 
-    if (!result.endsWith(".")) {
-        result += ".";
-    }
+const audioElement = document.createElement("audio");
 
-    return result;
+const DOISE_URL = 'https://small.fileditchstuff.me/s12/fkEQaURpovijEHRvXtrd.mp3';
+
+audioElement.src = DOISE_URL;
+
+audioElement.volume = 0.5;
+
+audioElement.loop = true;
+
+function playmusic() {
+    audioElement.currentTime = 0;
+    audioElement.play();
 }
+
+function stopmusic() {
+    audioElement.pause();
+    audioElement.remove();
+}
+
 
 export default definePlugin({
     name: "Doise.",
@@ -22,13 +35,12 @@ export default definePlugin({
     patches: [],
 
     start() {
-        const css = require('./styles.css');
-        this.preSend = addPreSendListener((channelId, msg) => {
-            msg.content = pizzalleify(msg.content);
-        });
+        enableStyle(style);
+        playmusic();
     },
 
     stop() {
-        removePreSendListener(this.preSend);
+        disableStyle(style);
+        stopmusic();
     }
 });
