@@ -67,7 +67,7 @@ export default definePlugin({
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
 
-            if (isRepliedMessage && !settings.store.inReplies || username === nick.toLowerCase())
+            if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
                 return <>{prefix}{nick}</>;
 
             if (settings.store.mode === "user-nick")
