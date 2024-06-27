@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Logger } from "@utils/Logger";
 import { Output, ParserRule, State } from "simple-markdown";
+
+const logger = new Logger("Markdown");
 
 export interface Rule extends ParserRule {
     requiredFirstCharacters: Array<string>;
@@ -12,9 +15,11 @@ export interface Rule extends ParserRule {
     Slate?: object;
     [k: string]: any;
 }
+
 export interface Rules {
     [k: string]: Rule;
 }
+
 export interface MarkDownRules {
     RULES: Rules;
     CHANNEL_TOPIC_RULES: Rules;
@@ -30,7 +35,6 @@ export interface MarkDownRules {
 
 export type PluginMarkDownRules = Partial<MarkDownRules>;
 
-
 export const Rules: MarkDownRules = {} as MarkDownRules;
 
 export type PluginRulesFunction = (r: MarkDownRules) => MarkDownRules | PluginMarkDownRules;
@@ -38,7 +42,6 @@ export type PluginRulesFunction = (r: MarkDownRules) => MarkDownRules | PluginMa
 const PendingRulesMap = new Map<string, PluginRulesFunction>();
 
 export const AddAPendingRule = (name: string, rules: PluginRulesFunction) => PendingRulesMap.set(name, rules);
-
 export const RemoveAPendingRule = (name: string) => PendingRulesMap.delete(name);
 
 export function patchMarkdownRules(originalRules: MarkDownRules) {
@@ -53,9 +56,13 @@ export function patchMarkdownRules(originalRules: MarkDownRules) {
         }
     }
     for (const [name, rule] of PendingRulesMap) {
-        const rules = rule(originalRules);
-        assignEntries(Rules, rules);
-        delete PendingRulesMap[name];
+        try {
+            const rules = rule(originalRules);
+            assignEntries(Rules, rules);
+            delete PendingRulesMap[name];
+        } catch (e) {
+            logger.error("Failed to patch markdown rules for ", name, e);
+        }
     }
     assignEntries(originalRules, Rules);
     return originalRules;

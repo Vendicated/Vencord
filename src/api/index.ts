@@ -125,6 +125,6 @@ export const MessageUpdater = $MessageUpdater;
 export const UserSettings = $UserSettings;
 
 /**
- * An API allowing you to modify discord default Markdown rules
+ * An API allowing you to add/modify the discord Markdown rules
  */
 export const Markdown = $Markdown;

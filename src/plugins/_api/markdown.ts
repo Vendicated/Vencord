@@ -10,7 +10,7 @@ import definePlugin, { StartAt } from "@utils/types";
 
 export default definePlugin({
     name: "MarkdownAPI",
-    description: "API to add/mod markdown rules",
+    description: "API to add/mod discord markdown rules",
     authors: [Devs.iamme],
     patches: [
         {
