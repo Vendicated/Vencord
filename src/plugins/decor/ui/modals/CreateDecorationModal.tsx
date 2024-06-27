@@ -9,7 +9,7 @@ import { Link } from "@components/Link";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { filters, findComponentByCode, mapMangledModule } from "@webpack";
+import { findByProps, findComponentByCode } from "@webpack";
 import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
 import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
@@ -18,11 +18,8 @@ import { cl, DecorationModalStyles, requireAvatarDecorationModal, requireCreateS
 import { AvatarDecorationModalPreview } from "../components";
 
 const FileUpload = findComponentByCode("fileUploadInput,");
-
-const { HelpMessage, HelpMessageTypes } = mapMangledModule('POSITIVE=3]="POSITIVE', {
-    HelpMessageTypes: filters.byProps("POSITIVE", "WARNING"),
-    HelpMessage: filters.byCode(".iconDiv")
-});
+const HelpMessage = findComponentByCode(".iconDiv,", "messageType");
+const HelpMessageTypes = findByProps("POSITIVE", "WARNING");
 
 function useObjectURL(object: Blob | MediaSource | null) {
     const [url, setUrl] = useState<string | null>(null);

@@ -24,12 +24,12 @@ import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { CogWheel } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCode, findByProps, mapMangledModule } from "@webpack";
+import { findByCode, findByPropsAndExtract, mapMangledModule } from "@webpack";
 import { Menu } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
-const { updateGuildNotificationSettings } = findByProps("updateGuildNotificationSettings");
-const { toggleShowAllChannels } = mapMangledModule(".onboardExistingMember(", {
+const updateGuildNotificationSettings = findByPropsAndExtract("updateGuildNotificationSettings");
+const OnboardingChannelUtils = mapMangledModule(".onboardExistingMember(", {
     toggleShowAllChannels: m => {
         const s = String(m);
         return s.length < 100 && !s.includes("onboardExistingMember") && !s.includes("getOptedInChannels");
@@ -111,7 +111,7 @@ function applyDefaultSettings(guildId: string | null) {
             });
     }
     if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId)) {
-        toggleShowAllChannels(guildId);
+        OnboardingChannelUtils.toggleShowAllChannels(guildId);
     }
 }
 
