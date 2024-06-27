@@ -80,7 +80,7 @@ export default definePlugin({
             },
             {
                 match: /useState\(0\)(?=.{0,100}targetUserId:)/,
-                replace: "useState($self.isOtherDefault())$2"
+                replace: "useState($self.isOtherDefault())"
             }]
         }
     ],
