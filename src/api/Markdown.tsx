@@ -5,12 +5,13 @@
  */
 
 import { Logger } from "@utils/Logger";
-import { ParserRule } from "simple-markdown";
+import { Output, ParserRule, State } from "simple-markdown";
 
 const logger = new Logger("MarkdownRules");
 
 export interface Rule extends ParserRule {
     requiredFirstCharacters: Array<string>;
+    react: (node: any, recurseOutput: Output<JSX.Element | null>, state: State) => JSX.Element;
     Slate?: object;
     [k: string]: any;
 }
@@ -49,6 +50,11 @@ export function RemoveAPendingRule(rules: (r: MarkDownRules) => MarkDownRules | 
 }
 
 export function patchMarkdownRules(originalRules: MarkDownRules) {
+    /**
+     * patchs the markdown rules
+     * @param originalRles the original discord markdown rules
+     * @returns The patched rules
+     */
     function assignEntries(target: any, source: any) {
         for (const [k, v] of Object.entries(source)) {
             target[k] = Object.assign(target[k] ?? {}, v);
@@ -64,11 +70,13 @@ export function patchMarkdownRules(originalRules: MarkDownRules) {
 }
 
 export function insertSlateRules(slate: any) {
-    return Object.assign(
+    const S = Object.assign(
         slate,
         Object.fromEntries(
             Array.from(
                 Object.entries(Rules), ([_, rules]: [string, Rules]) => Object.entries(rules).map(([name, rule]: [string, Rule]) => [name, (rule.Slate ?? slate[name]) ?? { type: "skip" }])).flat()
         )
     );
+    console.log("Slate", S);
+    return S;
 }
