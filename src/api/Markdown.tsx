@@ -61,7 +61,7 @@ export function patchMarkdownRules(originalRules: MarkDownRules) {
             assignEntries(Rules, rules);
             delete PendingRulesMap[name];
         } catch (e) {
-            logger.error("Failed to patch markdown rules for ", name, e);
+            logger.error("Failed to add markdown rules for ", name, e);
         }
     }
     assignEntries(originalRules, Rules);
