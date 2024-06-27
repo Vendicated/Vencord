@@ -19,7 +19,7 @@
 import { addPreEditListener } from "@api/MessageEvents";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
-import { DeleteIcon } from "@components/Icons";
+import { DeleteIcon, PlusIcon } from "@components/Icons";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import {
     Button,
@@ -32,7 +32,17 @@ import { Message, User } from "discord-types/general";
 import { Member, PKAPI } from "pkapi.js";
 
 import pluralKit from "./index";
-import { Author, deleteMessage, getAuthorOfMessage, isOwnPkMessage, isPk, loadAuthors, replaceTags } from "./utils";
+import {
+    Author,
+    deleteMessage,
+    getAuthorOfMessage,
+    isOwnPkMessage,
+    isPk,
+    loadAuthors, ProfilePopout,
+    replaceTags,
+    UserPopoutComponent
+} from "./utils";
+import { openModal } from "@utils/modal";
 
 const EditIcon = () => {
     return <svg role={"img"} width={"16"} height={"16"} fill={"none"} viewBox={"0 0 24 24"}>
@@ -211,6 +221,26 @@ export default definePlugin({
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
                 onClick: () => deleteMessage(msg),
+                onContextMenu: _ => {}
+            };
+        });
+
+        addButton("pk-profile", msg => {
+            if (!msg) return null;
+            if (!isPk(msg)) return null;
+
+            return {
+                label: "View Profile",
+                icon: () => {
+                    return <PlusIcon/>;
+                },
+                message: msg,
+                channel: ChannelStore.getChannel(msg.channel_id),
+                onClick: () => {
+                    openModal((props) => {
+                        return <ProfilePopout  {...props} msg={msg}/>
+                    })
+                },
                 onContextMenu: _ => {}
             };
         });

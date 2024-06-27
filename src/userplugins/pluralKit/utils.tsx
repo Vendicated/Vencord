@@ -6,14 +6,17 @@
 
 import { DataStore } from "@api/index";
 import { insertTextIntoChatInputBox } from "@utils/discord";
-import { ChannelStore, FluxDispatcher, Toasts } from "@webpack/common";
-import { Message } from "discord-types/general";
+import { ChannelStore, FluxDispatcher, Toasts, React, UserStore } from "@webpack/common";
+import { Message, User } from "discord-types/general";
 import { Member, MemberGuildSettings, PKAPI, System, SystemGuildSettings } from "pkapi.js";
-import { findComponentByCodeLazy } from "@webpack";
+import { findComponentByCodeLazy, LazyComponentWebpack } from "@webpack";
+import { openModal } from "@utils/modal";
+import pluralKit from "./index";
 
 // I dont fully understand how to use datastores, if I used anything incorrectly please let me know
 export const DATASTORE_KEY = "pk";
 export const UserPopoutComponent = findComponentByCodeLazy("customStatusActivity:", "isApplicationStreaming:", "disableUserProfileLink:");
+const VerifiedIconComponent = findComponentByCodeLazy(".CONNECTIONS_ROLE_OFFICIAL_ICON_TOOLTIP");
 
 export let authors: Record<string, Author> = {};
 
@@ -23,6 +26,15 @@ export interface Author {
     system: System;
     guildSettings: Map<string, MemberGuildSettings>;
     systemSettings: Map<string, SystemGuildSettings>;
+}
+
+interface MyUser {
+    id: string;
+    username: string;
+    avatar: string;
+    discriminator: string;
+    bot: boolean;
+    bio: string
 }
 
 export function isPk(msg: Message) {
@@ -35,21 +47,63 @@ export function isOwnPkMessage(message: Message, localSystemData: string): boole
     return localSystem.map(author => author.member.id).some(id => id === getAuthorOfMessage(message, new PKAPI()).member.id);
 }
 
+export function ProfilePopout({msg}:{msg: Message}) {
+    const author = getAuthorOfMessage(msg, new PKAPI());
+    const user: User = {
+        bot: false,
+        id: author.member.id,
+        avatar: author.member.avatar,
+        username: author.member.name,
+        globalName: author.member.name,
+        discriminator: author.member.id,
+        bio: author.member.description??"",
+        verified: true,
+        system: false,
+        banner: author.member.banner??"",
+        desktop: true,
+        mobile: true,
+        email: "",
+        accentColor: 5,
+        flags: 0,
+        mfaEnabled: true,
+        nsfwAllowed: true,
+        phone: "",
+        premiumType: 0,
+        premiumUsageFlags: 0,
+        publicFlags: 0,
+        purchasedFlags: 0,
+    }
+    return (
+        <UserPopoutComponent
+            user={UserStore.getCurrentUser()}
+        />
+    )
+}
+
 export function replaceTags(content: string, message: Message, localSystemData: string) {
     const author = getAuthorOfMessage(message, new PKAPI());
     const localSystem: Author[] = JSON.parse(localSystemData);
 
+    const systemSettings: SystemGuildSettings = author.systemSettings[ChannelStore.getChannel(message.channel_id).guild_id];
+    const memberSettings: MemberGuildSettings = author.guildSettings[ChannelStore.getChannel(message.channel_id).guild_id]
+    const system = author.system;
+
+    // prioritize guild settings, then system/member settings
+    const tag = systemSettings ? systemSettings.tag : system.tag;
+    const name = memberSettings ? memberSettings.display_name : author.member.display_name??author.member.name;
+    const avatar = memberSettings ? memberSettings.avatar_url : author.member.avatar;
+
     return content
-        .replace(/{tag}/g, author.member.tag)
-        .replace(/{name}/g, author.member.name)
-        .replace(/{memberId}/g, author.member.id)
+        .replace(/{tag}/g, tag??"")
+        .replace(/{name}/g, name??"")
+        .replace(/{memberid}/g, author.member.id??"")
         .replace(/{pronouns}/g, author.member.pronouns??"")
-        .replace(/{systemId}/g, author.system.id)
-        .replace(/{systemName}/g, author.system.name??"")
+        .replace(/{systemid}/g, author.system.id??"")
+        .replace(/{systemname}/g, author.system.name??"")
         .replace(/{color}/g, author.member.color??"ffffff")
-        .replace(/{avatar}/g, author.member.avatar)
-        .replace(/{messageCount}/g, author.messageIds.length.toString())
-        .replace(/{systemMessageCount}/g, localSystem.map(author => author.messageIds.length).reduce((acc, val) => acc + val).toString());
+        .replace(/{avatar}/g, avatar??"")
+        .replace(/{messagecount}/g, author.messageIds.length.toString()??"")
+        .replace(/{systemmessagecount}/g, localSystem.map(author => author.messageIds.length).reduce((acc, val) => acc + val).toString());
 }
 
 export async function loadAuthors() {
