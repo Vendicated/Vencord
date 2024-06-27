@@ -11,7 +11,7 @@ const logger = new Logger("MarkdownRules");
 
 export interface Rule extends ParserRule {
     requiredFirstCharacters: Array<string>;
-    react: (node: any, recurseOutput: Output<JSX.Element | null>, state: State) => JSX.Element;
+    react: (node: any, recurseOutput: Output<any>, state: State) => JSX.Element;
     Slate?: object;
     [k: string]: any;
 }
