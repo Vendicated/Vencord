@@ -6,17 +6,21 @@
 
 import "./styles.css";
 
-import { addChatBarButton } from "@api/ChatButtons";
-import { DataStore } from "@api/index";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { React } from "@webpack/common";
 
-import { ColorPickerChatButton } from "./ColorPicker";
-import { CHAT_BUTTON_ID, COLOR_PICKER_DATA_KEY, ColorType, regex, RenderType, savedColors, settings } from "./constants";
+import { ColorType, regex, RenderType, settings } from "./constants";
 
 const source = regex.map(r => r.reg.source).join("|");
-const matchAllRegExp = new RegExp(`^\\s*?(${source})`);
+const matchAllRegExp = new RegExp(`^(${source})`);
+
+interface ParsedColorInfo {
+    type: "color";
+    color: string;
+    colorType: ColorType;
+    text: string;
+}
 
 export default definePlugin({
     authors: [Devs.hen],
@@ -63,7 +67,8 @@ export default definePlugin({
             match(content: string) {
                 return matchAllRegExp.exec(content);
             },
-            parse(matchedContent: RegExpExecArray, _, parseProps: Record<string, any>) {
+            parse(matchedContent: RegExpExecArray, _, parseProps: Record<string, any>):
+                ParsedColorInfo | ({ type: "text", content: string; }) {
                 // This check makes sure that it doesn't try to parse color
                 // When typing/editing message
                 //
@@ -92,7 +97,7 @@ export default definePlugin({
                 }
             },
             // react(args: ReturnType<typeof this.parse>)
-            react({ text, colorType, color }) {
+            react({ text, colorType, color }: ParsedColorInfo) {
                 if (settings.store.renderType === RenderType.FOREGROUND) {
                     return <><span style={{ color: color }}>{text}</span></>;
                 }
@@ -109,25 +114,8 @@ export default definePlugin({
                 return <>{text}<span className="vc-color-block" style={styles}></span></>;
             }
         };
-    },
-    async start() {
-        if (settings.store.colorPicker) {
-            addChatBarButton(CHAT_BUTTON_ID, ColorPickerChatButton);
-        }
-
-        let colors = await DataStore.get(COLOR_PICKER_DATA_KEY);
-        colors ||= [
-            1752220, 3066993, 3447003, 10181046, 15277667,
-            15844367, 15105570, 15158332, 9807270, 6323595,
-
-            1146986, 2067276, 2123412, 7419530, 11342935,
-            12745742, 11027200, 10038562, 9936031, 5533306
-        ];
-
-        savedColors.push(...colors);
-    },
+    }
 });
-
 
 // https://en.wikipedia.org/wiki/Relative_luminance
 const calcRGBLightness = (r: number, g: number, b: number) => {
