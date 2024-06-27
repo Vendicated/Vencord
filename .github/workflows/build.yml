@@ -59,7 +59,7 @@ jobs:
                   RELEASE_TAG: ${{ env.release_tag }}
 
             - name: Upload DevBuild to builds repo
-              if: github.repository == 'Piripe/VencordPlusPlus'
+              if: github.repository == 'Vendicated/Vencord'
               run: |
                   git config --global user.name "$USERNAME"
                   git config --global user.email actions@github.com
