@@ -20,7 +20,7 @@ import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
 import { closeModal, openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
-import { ackChannel, Avatar, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, i18n, Menu, ReactDnd, ReadStateStore, Text, Tooltip, useEffect, useRef, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, i18n, Menu, ReadStateStore, ReadStateUtils, Text, Tooltip, useDrag, useDrop, useEffect, useRef, UserStore } from "@webpack/common";
 
 import { BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, CircleQuestionIcon, isBookmarkFolder, settings, switchChannel, useBookmarks } from "../util";
 import { NotificationDot } from "./ChannelTab";
@@ -122,7 +122,7 @@ function BookmarkFolderOpenMenu(props: BookmarkProps) {
                                 id="mark-as-read"
                                 label={i18n.Messages.MARK_AS_READ}
                                 disabled={!ReadStateStore.hasUnread(b.channelId)}
-                                action={() => ackChannel(ChannelStore.getChannel(b.channelId))}
+                                action={() => ReadStateUtils.ackChannel(ChannelStore.getChannel(b.channelId))}
                             />
                         </Menu.MenuGroup>
                     ),
@@ -178,7 +178,6 @@ function Bookmark(props: BookmarkProps) {
     const bookmark = bookmarks[index];
     const { bookmarkNotificationDot } = settings.use(["bookmarkNotificationDot"]);
 
-    const { useDrag, useDrop } = ReactDnd;
     const ref = useRef<HTMLDivElement>(null);
 
     const [, drag] = useDrag(() => ({

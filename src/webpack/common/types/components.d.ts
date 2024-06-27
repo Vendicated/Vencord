@@ -498,12 +498,12 @@ export type Avatar = ComponentType<PropsWithChildren<{
     "aria-label"?: string;
 }>>;
 
+type FocusLock = ComponentType<PropsWithChildren<{
+    containerRef: RefObject<HTMLElement>;
+}>>;
+
 export type Dots = ComponentType<PropsWithChildren<{
     dotRadius: number;
     themed?: boolean;
     className?: string;
-}>>;
-
-type FocusLock = ComponentType<PropsWithChildren<{
-    containerRef: RefObject<HTMLElement>;
 }>>;

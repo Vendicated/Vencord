@@ -53,7 +53,7 @@ export default definePlugin({
     patches: [
         // add the channel tab container at the top
         {
-            find: ".Routes.COLLECTIBLES_SHOP_FULLSCREEN))",
+            find: ".COLLECTIBLES_SHOP_FULLSCREEN))",
             replacement: {
                 match: /(\?void 0:(\i)\.channelId.{0,120})\i\.Fragment,{/,
                 replace: "$1$self.render,{currentChannel:$2,"
@@ -71,15 +71,15 @@ export default definePlugin({
         {
             find: ".deleteRecentMention(",
             replacement: {
-                match: /.jumpButton,onJump:(\i)(?=.{0,40}message:(\i))/,
-                replace: ".jumpButton,onJump: event => { if (event.ctrlKey) $self.open($2); else $1(event) }"
+                match: /(?<=.jumpMessageButton,onJump:)(\i)(?=.{0,20}message:(\i))/,
+                replace: "event => { if (event.ctrlKey) $self.open($2); else $1(event) }"
             }
         },
         // ctrl click to open in new tab in search results
         {
-            find: ".searchResultFocusRing",
+            find: "(this,\"handleMessageClick\"",
             replacement: {
-                match: /(?<=(\i)\.stopPropagation\(\)\);.{0,100});(?=null!=(\i)&&\i\(\i\))/,
+                match: /(?<=(\i)\.isSearchHit\));(?=null!=(\i))/,
                 replace: ";if ($1.ctrlKey) return $self.open($2);"
             }
         },
