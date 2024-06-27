@@ -21,10 +21,12 @@ import "./style.css";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ExpandableHeader } from "@components/ExpandableHeader";
-import { OpenExternalIcon } from "@components/Icons";
+import { NotesIcon, OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { Alerts, Menu, Parser, useState } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { Alerts, Button, Menu, Parser, TooltipContainer, useState } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
 import { Auth, initAuth, updateAuth } from "./auth";
@@ -34,6 +36,9 @@ import { NotificationType } from "./entities";
 import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
 import { showToast } from "./utils";
+
+const PopoutClasses = findByPropsLazy("container", "scroller", "list");
+const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "text");
 
 const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild, onClose(): void; }) => {
     if (!guild) return;
@@ -69,7 +74,8 @@ export default definePlugin({
         "guild-header-popout": guildPopoutPatch,
         "guild-context": guildPopoutPatch,
         "user-context": userContextPatch,
-        "user-profile-actions": userContextPatch
+        "user-profile-actions": userContextPatch,
+        "user-profile-overflow-menu": userContextPatch
     },
 
     patches: [
@@ -78,6 +84,13 @@ export default definePlugin({
             replacement: {
                 match: /user:(\i),setNote:\i,canDM.+?\}\)/,
                 replace: "$&,$self.getReviewsComponent($1)"
+            }
+        },
+        {
+            find: ".VIEW_FULL_PROFILE,",
+            replacement: {
+                match: /(?<=\.BITE_SIZE,children:\[)\(0,\i\.jsx\)\(\i\.\i,\{user:(\i),/,
+                replace: "$self.BiteSizeReviewsButton({user:$1}),$&"
             }
         }
     ],
@@ -159,5 +172,22 @@ export default definePlugin({
                 />
             </ExpandableHeader>
         );
-    }, { message: "Failed to render Reviews" })
+    }, { message: "Failed to render Reviews" }),
+
+    BiteSizeReviewsButton: ErrorBoundary.wrap(({ user }: { user: User; }) => {
+        return (
+            <TooltipContainer text="View Reviews">
+                <Button
+                    onClick={() => openReviewsModal(user.id, user.username)}
+                    look={Button.Looks.FILLED}
+                    size={Button.Sizes.NONE}
+                    color={RoleButtonClasses.color}
+                    className={classes(RoleButtonClasses.button, RoleButtonClasses.banner)}
+                    innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.banner)}
+                >
+                    <NotesIcon height={16} width={16} />
+                </Button>
+            </TooltipContainer>
+        );
+    }, { noop: true })
 });
