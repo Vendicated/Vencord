@@ -24,7 +24,7 @@ function ReasonsComponent() {
                         type="text"
                         key={index}
                         value={reason}
-                        onChange={(v: string) => {
+                        onChange={v => {
                             reasons[index] = v;
                             settings.store.reasons = [...reasons];
                         }}
