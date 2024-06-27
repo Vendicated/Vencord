@@ -85,13 +85,13 @@ export default definePlugin({
     ],
     getReasons() {
         const reasons = settings.store.reasons.length
-        	? settings.store.reasons
-        	: [
-              	  i18n.Messages.BAN_REASON_OPTION_SPAM_ACCOUNT,
-            	  i18n.Messages.BAN_REASON_OPTION_HACKED_ACCOUNT,
-            	  i18n.Messages.BAN_REASON_OPTION_BREAKING_RULES
-      		  ];
-      	return reasons.map(s => ({ name: s, value: s });
+            ? settings.store.reasons
+            : [
+                i18n.Messages.BAN_REASON_OPTION_SPAM_ACCOUNT,
+                i18n.Messages.BAN_REASON_OPTION_HACKED_ACCOUNT,
+                i18n.Messages.BAN_REASON_OPTION_BREAKING_RULES
+            ];
+        return reasons.map(s => ({ name: s, value: s }));
     },
     getDefaultState() {
         return settings.store.textInputDefault ? 1 : 0;
