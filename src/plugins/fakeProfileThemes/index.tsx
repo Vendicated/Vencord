@@ -109,9 +109,9 @@ interface ProfileModalProps {
 }
 
 const ColorPicker = findComponentByCode<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
-const ProfileModal = findComponentByCode<ProfileModalProps>('"ProfileCustomizationPreview"');
+const ProfileModal = findComponentByCode<ProfileModalProps>("isTryItOutFlow:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
 
-const requireColorPicker = extractAndLoadChunksLazy("USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format", /createPromise:\(\)=>\i\.\i\("?(.+?)"?\).then\(\i\.bind\(\i,"?(.+?)"?\)\)/);
+const requireColorPicker = extractAndLoadChunksLazy("USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format", /createPromise:\(\)=>\i\.\i(\("?.+?"?\)).then\(\i\.bind\(\i,"?(.+?)"?\)\)/);
 
 export default definePlugin({
     name: "FakeProfileThemes",

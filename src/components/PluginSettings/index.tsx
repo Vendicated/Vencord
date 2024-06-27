@@ -40,7 +40,7 @@ import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextI
 import Plugins, { ExcludedPlugins } from "~plugins";
 
 // Avoid circular dependency
-const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("../../plugins")) as typeof import("../../plugins");
+const PluginManager = proxyLazy(() => require("../../plugins")) as typeof import("../../plugins");
 
 const cl = classNameFactory("vc-plugins-");
 const logger = new Logger("PluginSettings", "#a6d189");
@@ -109,7 +109,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
 
         // If we're enabling a plugin, make sure all deps are enabled recursively.
         if (!wasEnabled) {
-            const { restartNeeded, failures } = startDependenciesRecursive(plugin);
+            const { restartNeeded, failures } = PluginManager.startDependenciesRecursive(plugin);
             if (failures.length) {
                 logger.error(`Failed to start dependencies for ${plugin.name}: ${failures.join(", ")}`);
                 showNotice("Failed to start dependencies: " + failures.join(", "), "Close", () => null);
@@ -135,7 +135,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             return;
         }
 
-        const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
+        const result = wasEnabled ? PluginManager.stopPlugin(plugin) : PluginManager.startPlugin(plugin);
 
         if (!result) {
             settings.enabled = false;

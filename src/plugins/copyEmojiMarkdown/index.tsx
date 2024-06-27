@@ -8,10 +8,10 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps } from "@webpack";
+import { findByPropsAndExtract } from "@webpack";
 import { Menu } from "@webpack/common";
 
-const { convertNameToSurrogate } = findByProps("convertNameToSurrogate");
+const convertNameToSurrogate = findByPropsAndExtract("convertNameToSurrogate");
 
 interface Emoji {
     type: string;

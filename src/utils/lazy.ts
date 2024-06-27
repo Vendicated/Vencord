@@ -70,15 +70,15 @@ const handler: ProxyHandler<any> = {
  * Wraps the result of factory in a Proxy you can consume as if it wasn't lazy.
  * On first property access, the factory is evaluated.
  *
+ * IMPORTANT:
+ * Destructuring at top level is not supported for proxyLazy.
+ *
  * @param factory Factory returning the result
  * @param attempts How many times to try to evaluate the factory before giving up
  * @returns Result of factory function
  */
-export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild = false): ProxyLazy<T> {
+export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5): ProxyLazy<T> {
     const get = makeLazy(factory, attempts, { isIndirect: true });
-
-    let isSameTick = true;
-    if (!isChild) setTimeout(() => isSameTick = false, 0);
 
     const proxyDummy = Object.assign(function () { }, {
         [SYM_LAZY_GET]() {
@@ -108,27 +108,12 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5, isChild
                 return Reflect.get(target, p, receiver);
             }
 
-            // If we're still in the same tick, it means the lazy was immediately used.
-            // thus, we lazy proxy the get access to make things like destructuring work as expected
-            // meow here will also be a lazy
-            // `const { meow } = proxyLazy(() => ({ meow: [] }));`
-            if (!isChild && isSameTick) {
-                return proxyLazy(
-                    () => {
-                        const lazyTarget = target[SYM_LAZY_GET]();
-                        return Reflect.get(lazyTarget, p, lazyTarget);
-                    },
-                    attempts,
-                    true
-                );
-            }
-
             const lazyTarget = target[SYM_LAZY_GET]();
             if (typeof lazyTarget === "object" || typeof lazyTarget === "function") {
                 return Reflect.get(lazyTarget, p, lazyTarget);
             }
 
-            throw new Error("proxyLazy called on a primitive value. This can happen if you try to destructure a primitive at the same tick as the proxy was created.");
+            throw new Error("proxyLazy called on a primitive value.");
         }
     });
 

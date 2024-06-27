@@ -5,7 +5,7 @@
  */
 
 import { NoopComponent } from "@utils/react";
-import { filters, findComponent } from "@webpack";
+import { findComponentByCode } from "@webpack";
 import { React } from "@webpack/common";
 import type { ComponentType, HTMLProps, PropsWithChildren } from "react";
 
@@ -19,7 +19,7 @@ type DecorationGridItemComponent = ComponentType<PropsWithChildren<HTMLProps<HTM
 export let DecorationGridItem: DecorationGridItemComponent = NoopComponent;
 export const setDecorationGridItem = v => DecorationGridItem = v;
 
-export const AvatarDecorationModalPreview = findComponent(filters.byComponentCode(".shopPreviewBanner"), component => {
+export const AvatarDecorationModalPreview = findComponentByCode(".shopPreviewBanner", component => {
     return React.memo(component);
 });
 

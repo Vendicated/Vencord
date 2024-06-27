@@ -26,6 +26,7 @@ export let Card: t.Card = NoopComponent as any;
 export let Button: t.Button = NoopComponent as any;
 export let Switch: t.Switch = NoopComponent;
 export let Tooltip: t.Tooltip = NoopComponent as any;
+export let TooltipContainer: t.TooltipContainer = NoopComponent as any;
 export let TextInput: t.TextInput = NoopComponent as any;
 export let TextArea: t.TextArea = NoopComponent;
 export let Text: t.Text = NoopComponent;
@@ -57,6 +58,7 @@ export const Forms = find<t.Forms>(filters.byProps("FormItem", "Button"), m => {
         Button,
         FormSwitch: Switch,
         Tooltip,
+        TooltipContainer,
         TextInput,
         TextArea,
         Text,
