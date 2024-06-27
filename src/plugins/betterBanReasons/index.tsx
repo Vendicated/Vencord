@@ -44,8 +44,7 @@ function ReasonsComponent() {
             ))}
             <Button
                 onClick={() => {
-                    reasons.push("");
-                    settings.store.reasons = [...reasons];
+                    settings.store.reasons = [...reasons, ""];
                 }}
             >
                 Add new
