@@ -18,7 +18,7 @@
 
 import { Command } from "@api/Commands";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { PluginMarkDownRules } from "@api/MarkdownRules";
+import { PluginMarkDownRules } from "@api/Markdown";
 import { FluxEvents } from "@webpack/types";
 import { Promisable } from "type-fest";
 
