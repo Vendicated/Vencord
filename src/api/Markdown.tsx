@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Logger } from "@utils/Logger";
 import { Output, ParserRule, State } from "simple-markdown";
-
-const logger = new Logger("MarkdownRules");
 
 export interface Rule extends ParserRule {
     requiredFirstCharacters: Array<string>;
@@ -15,11 +12,9 @@ export interface Rule extends ParserRule {
     Slate?: object;
     [k: string]: any;
 }
-
 export interface Rules {
     [k: string]: Rule;
 }
-
 export interface MarkDownRules {
     RULES: Rules;
     CHANNEL_TOPIC_RULES: Rules;
@@ -38,16 +33,13 @@ export type PluginMarkDownRules = Partial<MarkDownRules>;
 
 export const Rules: MarkDownRules = {} as MarkDownRules;
 
-export const PendingRules: Array<(r: MarkDownRules) => MarkDownRules | PluginMarkDownRules> = [];
+export type PluginRulesFunction = (r: MarkDownRules) => MarkDownRules | PluginMarkDownRules;
 
-export function AddAPendingRule(rules: (r: MarkDownRules) => MarkDownRules | PluginMarkDownRules) {
-    PendingRules.push(rules);
-}
+const PendingRulesMap = new Map<string, PluginRulesFunction>();
 
-export function RemoveAPendingRule(rules: (r: MarkDownRules) => MarkDownRules | PluginMarkDownRules) {
-    if (PendingRules.indexOf(rules) === -1) return;
-    delete PendingRules[PendingRules.indexOf(rules)];
-}
+export const AddAPendingRule = (name: string, rules: PluginRulesFunction) => PendingRulesMap.set(name, rules);
+
+export const RemoveAPendingRule = (name: string) => PendingRulesMap.delete(name);
 
 export function patchMarkdownRules(originalRules: MarkDownRules) {
     /**
@@ -60,23 +52,21 @@ export function patchMarkdownRules(originalRules: MarkDownRules) {
             target[k] = Object.assign(target[k] ?? {}, v);
         }
     }
-    for (const [key, rule] of Object.entries(PendingRules)) {
+    for (const [name, rule] of PendingRulesMap) {
         const rules = rule(originalRules);
         assignEntries(Rules, rules);
-        delete PendingRules[key];
+        delete PendingRulesMap[name];
     }
     assignEntries(originalRules, Rules);
     return originalRules;
 }
 
 export function insertSlateRules(slate: any) {
-    const S = Object.assign(
+    return Object.assign(
         slate,
         Object.fromEntries(
             Array.from(
                 Object.entries(Rules), ([_, rules]: [string, Rules]) => Object.entries(rules).map(([name, rule]: [string, Rule]) => [name, (rule.Slate ?? slate[name]) ?? { type: "skip" }])).flat()
         )
     );
-    console.log("Slate", S);
-    return S;
 }

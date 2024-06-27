@@ -122,7 +122,7 @@ for (const p of pluginsValues) {
         }
     }
     if (p.rules && isPluginEnabled(p.name)) {
-        AddAPendingRule(p.rules);
+        AddAPendingRule(p.name, p.rules);
     }
 }
 
