@@ -71,7 +71,7 @@ export default definePlugin({
         {
             find: ".deleteRecentMention(",
             replacement: {
-                match: /(?<=.jumpMessageButton,onJump:)(\i)/,
+                match: /(?<=.jumpMessageButton,onJump:)(\i)(?=.{0,20}message:(\i))/,
                 replace: "event => { if (event.ctrlKey) $self.open($2); else $1(event) }"
             }
         },
