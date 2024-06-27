@@ -8,8 +8,7 @@ import { lazyString, makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent, LazyComponentType, SYM_LAZY_COMPONENT_INNER } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
-import { ProxyInner, proxyInner, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
-import { AnyObject } from "@utils/types";
+import { proxyInner, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
@@ -194,7 +193,7 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
  * @param parse A function that takes the find result as its first argument and returns something to use as the proxy inner value. Useful if you want to use a value from the find result, instead of all of it. Defaults to the find result itself
  * @returns A proxy that has the parse function return value as its true value, or the plain parse function return value if it was called immediately.
  */
-export function find<T = AnyObject>(filter: FilterFn, parse: (mod: any) => any = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+export function find<T = any>(filter: FilterFn, parse: (mod: any) => any = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
     if (typeof parse !== "function")
@@ -207,7 +206,7 @@ export function find<T = AnyObject>(filter: FilterFn, parse: (mod: any) => any =
         webpackSearchHistory.push(["find", [proxy, filter]]);
     }
 
-    if (proxy[SYM_PROXY_INNER_VALUE] != null) return proxy[SYM_PROXY_INNER_VALUE] as ProxyInner<T>;
+    if (proxy[SYM_PROXY_INNER_VALUE] != null) return proxy[SYM_PROXY_INNER_VALUE] as T;
 
     return proxy;
 }
@@ -328,7 +327,7 @@ export function findComponentByCode<T extends object = any>(...code: string[] | 
  * @param props A list of props to search the module or exports for
  * @param parse A function that takes the find result as its first argument and returns something. Useful if you want to use a value from the find result, instead of all of it. Defaults to the find result itself
  */
-export function findByProps<T = AnyObject>(...props: string[] | [...string[], (mod: any) => T]) {
+export function findByProps<T = any>(...props: string[] | [...string[], (mod: any) => T]) {
     const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (mod: any) => T;
     const newProps = props as string[];
 
@@ -349,7 +348,7 @@ export function findByProps<T = AnyObject>(...props: string[] | [...string[], (m
  * @param props A list of props to search the module or exports for
  * @param parse A function that takes the find result as its first argument and returns something. Useful if you want to use a value from the find result, instead of all of it. Defaults to the find result itself
  */
-export function findByPropsAndExtract<T = AnyObject>(...props: string[] | [...string[], (mod: any) => T]) {
+export function findByPropsAndExtract<T = any>(...props: string[] | [...string[], (mod: any) => T]) {
     const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (mod: any) => T;
     const newProps = props as string[];
 
@@ -368,7 +367,7 @@ export function findByPropsAndExtract<T = AnyObject>(...props: string[] | [...st
  * @param code A list of code to search each export for
  * @param parse A function that takes the find result as its first argument and returns something. Useful if you want to use a value from the find result, instead of all of it. Defaults to the find result itself
  */
-export function findByCode<T = AnyObject>(...code: string[] | [...string[], (mod: any) => T]) {
+export function findByCode<T = any>(...code: string[] | [...string[], (mod: any) => T]) {
     const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (mod: any) => T;
     const newCode = code as string[];
 
@@ -402,7 +401,7 @@ export function findStore<T = GenericStore>(name: string) {
  * @param code A list of code to search each factory for
  * @param parse A function that takes the find result as its first argument and returns something. Useful if you want to use a value from the find result, instead of all of it. Defaults to the find result itself
  */
-export function findByFactoryCode<T = AnyObject>(...code: string[] | [...string[], (mod: any) => T]) {
+export function findByFactoryCode<T = any>(...code: string[] | [...string[], (mod: any) => T]) {
     const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (mod: any) => T;
     const newCode = code as string[];
 
@@ -430,7 +429,7 @@ export function findByFactoryCode<T = AnyObject>(...code: string[] | [...string[
  * @returns Unmangled exports as specified in mappers
  */
 export function mapMangledModule<S extends PropertyKey>(code: string | string[], mappers: Record<S, FilterFn>) {
-    const mapping = {} as Record<S, ProxyInner<AnyObject>>;
+    const mapping = {} as Record<S, any>;
     const setters = {} as Record<S, (innerValue: any) => void>;
 
     for (const newName in mappers) {
@@ -488,7 +487,7 @@ export function findModuleFactory(...code: string[]) {
     const [proxy, setInnerValue] = proxyInner<ModuleFactory>(`Webpack module factory find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value.");
     waitFor(filter, (_, { factory }) => setInnerValue(factory));
 
-    if (proxy[SYM_PROXY_INNER_VALUE] != null) return proxy[SYM_PROXY_INNER_VALUE] as ProxyInner<ModuleFactory>;
+    if (proxy[SYM_PROXY_INNER_VALUE] != null) return proxy[SYM_PROXY_INNER_VALUE] as ModuleFactory;
 
     return proxy;
 }
@@ -503,7 +502,7 @@ export function findModuleFactory(...code: string[]) {
  * @param attempts How many times to try to evaluate the factory before giving up
  * @returns Result of factory function
  */
-export function webpackDependantLazy<T = AnyObject>(factory: () => T, attempts?: number) {
+export function webpackDependantLazy<T = any>(factory: () => T, attempts?: number) {
     if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazy", [factory]]);
 
     return proxyLazy<T>(factory, attempts);

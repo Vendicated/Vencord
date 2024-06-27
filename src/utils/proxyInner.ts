@@ -4,13 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { AnyObject } from "./types";
-
-export type ProxyInner<T = AnyObject> = T & {
-    [SYM_PROXY_INNER_GET]?: () => T;
-    [SYM_PROXY_INNER_VALUE]?: T | undefined;
-};
-
 export const SYM_PROXY_INNER_GET = Symbol.for("vencord.proxyInner.get");
 export const SYM_PROXY_INNER_VALUE = Symbol.for("vencord.proxyInner.innerValue");
 
@@ -55,10 +48,10 @@ const handler: ProxyHandler<any> = {
  * @param primitiveErr The error message to throw when the inner value is a primitive
  * @returns A proxy which will act like the inner value when accessed
  */
-export function proxyInner<T = AnyObject>(
+export function proxyInner<T = any>(
     errMsg = "Proxy inner value is undefined, setInnerValue was never called.",
     primitiveErrMsg = "proxyInner called on a primitive value."
-): [proxy: ProxyInner<T>, setInnerValue: (innerValue: T) => void] {
+): [proxy: T, setInnerValue: (innerValue: T) => void] {
     const proxyDummy = Object.assign(function () { }, {
         [SYM_PROXY_INNER_GET]: function () {
             if (proxyDummy[SYM_PROXY_INNER_VALUE] == null) {
