@@ -27,7 +27,7 @@ import { cl } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 import ReviewsView, { ReviewsInputComponent } from "./ReviewsView";
 
-function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: string; name: string; }) {
+function Modal({ modalProps, modalKey, discordId, name }: { modalProps: any; modalKey: string, discordId: string; name: string; }) {
     const [data, setData] = useState<Response>();
     const [signal, refetch] = useForceUpdater(true);
     const [page, setPage] = useState(1);
@@ -76,6 +76,7 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
                             discordId={discordId}
                             name={name}
                             refetch={refetch}
+                            modalKey={modalKey}
                         />
 
                         {!!reviewCount && (
@@ -95,11 +96,14 @@ function Modal({ modalProps, discordId, name }: { modalProps: any; discordId: st
 }
 
 export function openReviewsModal(discordId: string, name: string) {
+    const modalKey = "vc-rdb-modal-" + Date.now();
+
     openModal(props => (
         <Modal
+            modalKey={modalKey}
             modalProps={props}
             discordId={discordId}
             name={name}
         />
-    ));
+    ), { modalKey });
 }

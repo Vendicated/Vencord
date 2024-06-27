@@ -136,7 +136,7 @@ const settings = definePluginSettings({
     },
 });
 
-const Native = VencordNative.pluginHelpers.XsOverlay as PluginNative<typeof import("./native")>;
+const Native = VencordNative.pluginHelpers.XSOverlay as PluginNative<typeof import("./native")>;
 
 export default definePlugin({
     name: "XSOverlay",
@@ -154,104 +154,99 @@ export default definePlugin({
             }
         },
         MESSAGE_CREATE({ message, optimistic }: { message: Message; optimistic: boolean; }) {
-            // Apparently without this try/catch, discord's socket connection dies if any part of this errors
-            try {
-                if (optimistic) return;
-                const channel = ChannelStore.getChannel(message.channel_id);
-                if (!shouldNotify(message, message.channel_id)) return;
+            if (optimistic) return;
+            const channel = ChannelStore.getChannel(message.channel_id);
+            if (!shouldNotify(message, message.channel_id)) return;
 
-                const pingColor = settings.store.pingColor.replaceAll("#", "").trim();
-                const channelPingColor = settings.store.channelPingColor.replaceAll("#", "").trim();
-                let finalMsg = message.content;
-                let titleString = "";
+            const pingColor = settings.store.pingColor.replaceAll("#", "").trim();
+            const channelPingColor = settings.store.channelPingColor.replaceAll("#", "").trim();
+            let finalMsg = message.content;
+            let titleString = "";
 
-                if (channel.guild_id) {
-                    const guild = GuildStore.getGuild(channel.guild_id);
-                    titleString = `${message.author.username} (${guild.name}, #${channel.name})`;
-                }
-
-
-                switch (channel.type) {
-                    case ChannelTypes.DM:
-                        titleString = message.author.username.trim();
-                        break;
-                    case ChannelTypes.GROUP_DM:
-                        const channelName = channel.name.trim() ?? channel.rawRecipients.map(e => e.username).join(", ");
-                        titleString = `${message.author.username} (${channelName})`;
-                        break;
-                }
-
-                if (message.referenced_message) {
-                    titleString += " (reply)";
-                }
-
-                if (message.embeds.length > 0) {
-                    finalMsg += " [embed] ";
-                    if (message.content === "") {
-                        finalMsg = "sent message embed(s)";
-                    }
-                }
-
-                if (message.sticker_items) {
-                    finalMsg += " [sticker] ";
-                    if (message.content === "") {
-                        finalMsg = "sent a sticker";
-                    }
-                }
-
-                const images = message.attachments.filter(e =>
-                    typeof e?.content_type === "string"
-                    && e?.content_type.startsWith("image")
-                );
-
-
-                images.forEach(img => {
-                    finalMsg += ` [image: ${img.filename}] `;
-                });
-
-                message.attachments.filter(a => a && !a.content_type?.startsWith("image")).forEach(a => {
-                    finalMsg += ` [attachment: ${a.filename}] `;
-                });
-
-                // make mentions readable
-                if (message.mentions.length > 0) {
-                    finalMsg = finalMsg.replace(/<@!?(\d{17,20})>/g, (_, id) => `<color=#${pingColor}><b>@${UserStore.getUser(id)?.username || "unknown-user"}</color></b>`);
-                }
-
-                // color role mentions (unity styling btw lol)
-                if (message.mention_roles.length > 0) {
-                    for (const roleId of message.mention_roles) {
-                        const role = GuildStore.getRole(channel.guild_id, roleId);
-                        if (!role) continue;
-                        const roleColor = role.colorString ?? `#${pingColor}`;
-                        finalMsg = finalMsg.replace(`<@&${roleId}>`, `<b><color=${roleColor}>@${role.name}</color></b>`);
-                    }
-                }
-
-                // make emotes and channel mentions readable
-                const emoteMatches = finalMsg.match(new RegExp("(<a?:\\w+:\\d+>)", "g"));
-                const channelMatches = finalMsg.match(new RegExp("<(#\\d+)>", "g"));
-
-                if (emoteMatches) {
-                    for (const eMatch of emoteMatches) {
-                        finalMsg = finalMsg.replace(new RegExp(`${eMatch}`, "g"), `:${eMatch.split(":")[1]}:`);
-                    }
-                }
-
-                // color channel mentions
-                if (channelMatches) {
-                    for (const cMatch of channelMatches) {
-                        let channelId = cMatch.split("<#")[1];
-                        channelId = channelId.substring(0, channelId.length - 1);
-                        finalMsg = finalMsg.replace(new RegExp(`${cMatch}`, "g"), `<b><color=#${channelPingColor}>#${ChannelStore.getChannel(channelId).name}</color></b>`);
-                    }
-                }
-
-                if (shouldIgnoreForChannelType(channel)) return;
-                sendMsgNotif(titleString, finalMsg, message);
-            } catch (err) {
-                XSLog.error(`Failed to catch MESSAGE_CREATE: ${err}`);
+            if (channel.guild_id) {
+                const guild = GuildStore.getGuild(channel.guild_id);
+                titleString = `${message.author.username} (${guild.name}, #${channel.name})`;
             }
+
+
+            switch (channel.type) {
+                case ChannelTypes.DM:
+                    titleString = message.author.username.trim();
+                    break;
+                case ChannelTypes.GROUP_DM:
+                    const channelName = channel.name.trim() ?? channel.rawRecipients.map(e => e.username).join(", ");
+                    titleString = `${message.author.username} (${channelName})`;
+                    break;
+            }
+
+            if (message.referenced_message) {
+                titleString += " (reply)";
+            }
+
+            if (message.embeds.length > 0) {
+                finalMsg += " [embed] ";
+                if (message.content === "") {
+                    finalMsg = "sent message embed(s)";
+                }
+            }
+
+            if (message.sticker_items) {
+                finalMsg += " [sticker] ";
+                if (message.content === "") {
+                    finalMsg = "sent a sticker";
+                }
+            }
+
+            const images = message.attachments.filter(e =>
+                typeof e?.content_type === "string"
+                && e?.content_type.startsWith("image")
+            );
+
+
+            images.forEach(img => {
+                finalMsg += ` [image: ${img.filename}] `;
+            });
+
+            message.attachments.filter(a => a && !a.content_type?.startsWith("image")).forEach(a => {
+                finalMsg += ` [attachment: ${a.filename}] `;
+            });
+
+            // make mentions readable
+            if (message.mentions.length > 0) {
+                finalMsg = finalMsg.replace(/<@!?(\d{17,20})>/g, (_, id) => `<color=#${pingColor}><b>@${UserStore.getUser(id)?.username || "unknown-user"}</color></b>`);
+            }
+
+            // color role mentions (unity styling btw lol)
+            if (message.mention_roles.length > 0) {
+                for (const roleId of message.mention_roles) {
+                    const role = GuildStore.getRole(channel.guild_id, roleId);
+                    if (!role) continue;
+                    const roleColor = role.colorString ?? `#${pingColor}`;
+                    finalMsg = finalMsg.replace(`<@&${roleId}>`, `<b><color=${roleColor}>@${role.name}</color></b>`);
+                }
+            }
+
+            // make emotes and channel mentions readable
+            const emoteMatches = finalMsg.match(new RegExp("(<a?:\\w+:\\d+>)", "g"));
+            const channelMatches = finalMsg.match(new RegExp("<(#\\d+)>", "g"));
+
+            if (emoteMatches) {
+                for (const eMatch of emoteMatches) {
+                    finalMsg = finalMsg.replace(new RegExp(`${eMatch}`, "g"), `:${eMatch.split(":")[1]}:`);
+                }
+            }
+
+            // color channel mentions
+            if (channelMatches) {
+                for (const cMatch of channelMatches) {
+                    let channelId = cMatch.split("<#")[1];
+                    channelId = channelId.substring(0, channelId.length - 1);
+                    finalMsg = finalMsg.replace(new RegExp(`${cMatch}`, "g"), `<b><color=#${channelPingColor}>#${ChannelStore.getChannel(channelId).name}</color></b>`);
+                }
+            }
+
+            if (shouldIgnoreForChannelType(channel)) return;
+            sendMsgNotif(titleString, finalMsg, message);
         }
     }
 });
