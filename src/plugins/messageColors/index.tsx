@@ -57,7 +57,7 @@ export default definePlugin({
         return {
             order,
             // Don't even try to match if the message chunk doesn't start with...
-            requiredFirstCharacters: ["h", "r", "#"].flatMap(r => [` ${r}`, r]),
+            requiredFirstCharacters: ["h", "r", "#"],
             // Match -> Parse -> React
             // Result of previous action is dropped as a first argument of the next one
             match(content: string) {
@@ -94,7 +94,7 @@ export default definePlugin({
             // react(args: ReturnType<typeof this.parse>)
             react({ text, colorType, color }) {
                 if (settings.store.renderType === RenderType.FOREGROUND) {
-                    return <span style={{ color: color }}>{text}</span>;
+                    return <><span style={{ color: color }}>{text}</span></>;
                 }
                 const styles = {
                     "--color": color
