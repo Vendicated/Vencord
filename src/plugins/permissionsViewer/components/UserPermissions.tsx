@@ -42,7 +42,7 @@ const RoleClasses3 = findByProps("roleNameOverflow", "root", "roleName", "roleRe
 
 const Classes = proxyLazy(() => Object.assign({}, RoleClasses1, RoleClasses2, RoleClasses3));
 
-function UserPermissionsComponent({ guild, guildMember, showBorder }: { guild: Guild; guildMember: GuildMember; showBorder: boolean; }) {
+function UserPermissionsComponent({ guild, guildMember, showBorder, forceOpen = false }: { guild: Guild; guildMember: GuildMember; showBorder: boolean; forceOpen?: boolean; }) {
     const stns = settings.use(["permissionsSortOrder"]);
 
     const [rolePermissions, userPermissions] = useMemo(() => {
@@ -94,6 +94,7 @@ function UserPermissionsComponent({ guild, guildMember, showBorder }: { guild: G
 
     return (
         <ExpandableHeader
+            forceOpen={forceOpen}
             headerText="Permissions"
             moreTooltipText="Role Details"
             onMoreClick={() =>
