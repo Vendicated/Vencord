@@ -11,28 +11,105 @@ import { DataStore } from "@api/index";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { React } from "@webpack/common";
-import type { Message } from "discord-types/general";
 
 import { ColorPickerChatButton } from "./ColorPicker";
 import { CHAT_BUTTON_ID, COLOR_PICKER_DATA_KEY, ColorType, regex, RenderType, savedColors, settings } from "./constants";
 
-const enum MessageTypes {
-    DEFAULT = 0,
-    REPLY = 19
-}
+const source = regex.map(r => r.reg.source).join("|");
+const matchAllRegExp = new RegExp(`^\\s*?(${source})`);
 
 export default definePlugin({
     authors: [Devs.hen],
     name: "MessageColors",
     description: "Displays color codes like #FF0042 inside of messages",
     settings,
-    patches: [{
-        find: ".VOICE_HANGOUT_INVITE?\"\"",
-        replacement: {
-            match: /(\?\i.\i.Messages.SOURCE_MESSAGE_DELETED:)\i/,
-            replace: "$1$self.getColoredText(...arguments)"
-        }
-    }],
+    patches: [
+        // Create a new markdown rule, so it parses just like any other features
+        // Like bolding, spoilers, mentions, etc
+        {
+            find: "roleMention:{order:",
+            replacement: {
+                match: /roleMention:\{order:(\i\.\i\.order)/,
+                replace: "color:$self.getColor($1),$&"
+            }
+        },
+        // Changes text md rule regex, so it stops right before hsl( | rgb(
+        // Without it discord will try to pass a string without those to color rule
+        {
+            find: ".defaultRules.text,match:",
+            replacement: {
+                // $)/)
+                match: /\$\)\/\)}/,
+                replace: "hsl\\(|rgb\\(|$&"
+            }
+        },
+        // Discord just requires it to be here
+        // Or it explodes (bad)
+        {
+            find: "Unknown markdown rule:",
+            replacement: {
+                match: /roleMention:{type:/,
+                replace: "color:{type:\"inlineObject\"},$&",
+            }
+        },
+    ],
+    getColor(order: number) {
+        return {
+            order,
+            // Don't even try to match if the message chunk doesn't start with...
+            requiredFirstCharacters: ["h", "r", "#"].flatMap(r => [` ${r}`, r]),
+            // Match -> Parse -> React
+            // Result of previous action is dropped as a first argument of the next one
+            match(content: string) {
+                return matchAllRegExp.exec(content);
+            },
+            parse(matchedContent: RegExpExecArray, _, parseProps: Record<string, any>) {
+                // This check makes sure that it doesn't try to parse color
+                // When typing/editing message
+                //
+                // Discord doesn't know how to deal with color and crashes
+                if (!parseProps.messageId) return {
+                    type: "text",
+                    content: matchedContent[0]
+                };
+
+                const content = matchedContent[0];
+                try {
+                    const type = getColorType(content);
+
+                    return {
+                        type: "color",
+                        colorType: type,
+                        color: parseColor(content, type),
+                        text: content
+                    };
+                } catch (e) {
+                    console.error(e);
+                    return {
+                        type: "text",
+                        content: matchedContent[0]
+                    };
+                }
+            },
+            // react(args: ReturnType<typeof this.parse>)
+            react({ text, colorType, color }) {
+                if (settings.store.renderType === RenderType.FOREGROUND) {
+                    return <span style={{ color: color }}>{text}</span>;
+                }
+                const styles = {
+                    "--color": color
+                } as React.CSSProperties;
+
+                if (settings.store.renderType === RenderType.BACKGROUND) {
+                    const isDark = isColorDark(color, colorType);
+                    const className = `vc-color-bg ${!isDark ? "vc-color-bg-invert" : ""}`;
+                    return <span className={className} style={styles}>{text}</span>;
+                }
+
+                return <>{text}<span className="vc-color-block" style={styles}></span></>;
+            }
+        };
+    },
     async start() {
         if (settings.store.colorPicker) {
             addChatBarButton(CHAT_BUTTON_ID, ColorPickerChatButton);
@@ -49,27 +126,7 @@ export default definePlugin({
 
         savedColors.push(...colors);
     },
-    getColoredText(message: Message, originalChildren: React.ReactElement[]) {
-        if (settings.store.renderType === RenderType.NONE) return originalChildren;
-        if (![MessageTypes.DEFAULT, MessageTypes.REPLY].includes(message.type)) return originalChildren;
-
-        const hasColor = regex.some(({ reg }) => reg.test(message.content));
-        if (!hasColor) return originalChildren;
-
-        return <ColoredMessage children={originalChildren} />;
-    }
 });
-
-function parseColor(str: string, type: ColorType): string {
-    switch (type) {
-        case ColorType.RGB:
-            return str;
-        case ColorType.HEX:
-            return str[0] === "#" ? str : `#${str}`;
-        case ColorType.HSL:
-            return str.replace("°", "");
-    }
-}
 
 
 // https://en.wikipedia.org/wiki/Relative_luminance
@@ -99,73 +156,23 @@ const isColorDark = (color: string, type: ColorType): boolean => {
     }
 };
 
-const renderColor = (element: string, type: ColorType) => {
-    const color = parseColor(element, type);
-    if (settings.store.renderType === RenderType.FOREGROUND) {
-        return [<span style={{ color: color }}>{element}</span>];
-    }
-    const styles = {
-        "--color": color
-    } as React.CSSProperties;
+const getColorType = (color: string): ColorType => {
+    color = color.toLowerCase().trim();
+    if (color.startsWith("#")) return ColorType.HEX;
+    if (color.startsWith("hsl")) return ColorType.HSL;
+    if (color.startsWith("rgb")) return ColorType.RGB;
 
-    if (settings.store.renderType === RenderType.BACKGROUND) {
-        const isDark = isColorDark(color, type);
-        const className = `vc-color-bg ${!isDark ? "vc-color-bg-invert" : ""}`;
-        return [<span className={className} style={styles}>{element}</span>];
-    }
-
-    return [element, <span className="vc-color-block" style={styles}></span>];
+    throw new Error(`Can't resolve color type of ${color}`);
 };
 
-function ColoredMessage({ children }: { children: React.ReactElement[]; }) {
-    let result: (string | React.ReactElement)[] = [];
-    // Discord renders message as bunch of small span chunks
-    // Mostly they are splitted by a space, which breaks rgb/hsl regex
-    // Mentions are nested react elements, so we don't want to affect them
-    // Ignore everything except plain text and combine it
-    for (let i = 0; i < children.length; i++) {
-        const chunk = children[i];
-        if (chunk.type !== "span") {
-            result.push(chunk);
-            continue;
-        }
-        if (typeof result[result.length - 1] !== "string") {
-            result.push(chunk.props.children);
-            continue;
-        }
-
-        result[result.length - 1] += chunk.props.children;
+function parseColor(str: string, type: ColorType): string {
+    str = str.toLowerCase().trim();
+    switch (type) {
+        case ColorType.RGB:
+            return str;
+        case ColorType.HEX:
+            return str[0] === "#" ? str : `#${str}`;
+        case ColorType.HSL:
+            return str.replace("°", "");
     }
-
-    // Dynamic react element creation is a pain
-    // I could just make inplace replace without this :(
-    for (const { reg, type } of regex) {
-        let temp: typeof result = [];
-        for (const chunk of result) {
-            if (typeof chunk !== "string") {
-                temp.push(chunk);
-                continue;
-            }
-
-            const parts: any[] = chunk.split(reg);
-            const matches = chunk.match(reg)!;
-            if (!matches) {
-                temp.push(chunk);
-                continue;
-            }
-            temp = parts.reduce((arr, element) => {
-                if (!element || typeof element !== "string") return arr;
-
-                if (!matches.includes(element))
-                    return [...arr, element];
-
-                const elements = renderColor(element, type);
-
-                return [...arr, ...elements];
-            }, temp);
-        }
-        result = temp;
-    }
-
-    return <>{result}</>;
 }
