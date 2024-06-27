@@ -29,7 +29,7 @@ import { Menu } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
 const updateGuildNotificationSettings = findByPropsAndExtract("updateGuildNotificationSettings");
-const OnboardingChannelUtils = mapMangledModule(".onboardExistingMember(", {
+const { toggleShowAllChannels } = mapMangledModule(".onboardExistingMember(", {
     toggleShowAllChannels: m => {
         const s = String(m);
         return s.length < 100 && !s.includes("onboardExistingMember") && !s.includes("getOptedInChannels");
@@ -111,7 +111,7 @@ function applyDefaultSettings(guildId: string | null) {
             });
     }
     if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId)) {
-        OnboardingChannelUtils.toggleShowAllChannels(guildId);
+        toggleShowAllChannels(guildId);
     }
 }
 

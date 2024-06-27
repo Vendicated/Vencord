@@ -75,23 +75,32 @@ async function runReporter() {
                         if (findResult != null) {
                             if (findResult.$$vencordCallbackCalled != null && findResult.$$vencordCallbackCalled()) {
                                 result = findResult;
+                                break;
                             }
 
                             if (findResult[SYM_PROXY_INNER_GET] != null) {
                                 result = findResult[SYM_PROXY_INNER_VALUE];
 
-                                if (result != null && searchType === "mapMangledModule") {
-                                    for (const innerMap in result) {
-                                        if (result[innerMap][SYM_PROXY_INNER_GET] != null) {
-                                            throw new Error("Webpack Find Fail");
-                                        }
-                                    }
-                                }
+                                break;
                             }
 
                             if (findResult[SYM_LAZY_COMPONENT_INNER] != null) {
                                 result = findResult[SYM_LAZY_COMPONENT_INNER]();
+                                break;
                             }
+
+                            if (searchType === "mapMangledModule") {
+                                result = findResult;
+
+                                for (const innerMap in result) {
+                                    if (result[innerMap][SYM_PROXY_INNER_GET] != null && result[innerMap][SYM_PROXY_INNER_VALUE] == null) {
+                                        throw new Error("Webpack Find Fail");
+                                    }
+                                }
+                            }
+
+                            // This can happen if a `find` was immediately found
+                            result = findResult;
                         }
 
                         break;
@@ -142,7 +151,7 @@ async function runReporter() {
                     const [code, mappers] = parsedArgs;
 
                     const parsedFailedMappers = Object.entries<any>(mappers)
-                        .filter(([key]) => result == null || result[key][SYM_PROXY_INNER_GET] != null)
+                        .filter(([key]) => result == null || (result[key][SYM_PROXY_INNER_GET] != null && result[key][SYM_PROXY_INNER_VALUE] == null))
                         .map(([key, filter]) => {
                             let parsedFilter: string;
 

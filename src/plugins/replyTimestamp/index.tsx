@@ -14,7 +14,7 @@ import { Timestamp } from "@webpack/common";
 import type { Message } from "discord-types/general";
 import type { HTMLAttributes } from "react";
 
-const DateFormatUtils = mapMangledModule("millisecondsInUnit:", {
+const { calendarFormat, dateFormat, isSameDay } = mapMangledModule("millisecondsInUnit:", {
     calendarFormat: filters.byCode("sameElse"),
     dateFormat: filters.byCode(':").concat'),
     isSameDay: filters.byCode("Math.abs(+"),
@@ -46,14 +46,14 @@ function ReplyTimestamp({
     return (
         <Timestamp
             className="vc-reply-timestamp"
-            compact={DateFormatUtils.isSameDay(refTimestamp, baseTimestamp)}
+            compact={isSameDay(refTimestamp, baseTimestamp)}
             timestamp={refTimestamp}
             isInline={false}
         >
             <Sep>[</Sep>
-            {DateFormatUtils.isSameDay(refTimestamp, baseTimestamp)
-                ? DateFormatUtils.dateFormat(refTimestamp, "LT")
-                : DateFormatUtils.calendarFormat(refTimestamp)
+            {isSameDay(refTimestamp, baseTimestamp)
+                ? dateFormat(refTimestamp, "LT")
+                : calendarFormat(refTimestamp)
             }
             <Sep>]</Sep>
         </Timestamp>
