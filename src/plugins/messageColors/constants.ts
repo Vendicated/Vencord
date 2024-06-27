@@ -65,7 +65,7 @@ export const enum ColorType {
 }
 
 export const regex = [
-    { reg: /(rgb\(\s*?\d+?\s*?,\s*?\d+?\s*?,\s*?\d+?\s*?\))/g, type: ColorType.RGB },
-    { reg: /(hsl\(\s*\d+\s*°?,\s*\d+%\s*,\s*\d+%\s*\))/g, type: ColorType.HSL },
-    { reg: /(#(?:[0-9a-fA-F]{3}){1,2})/g, type: ColorType.HEX }
+    { reg: /rgb\(\s*?\d+?\s*?,\s*?\d+?\s*?,\s*?\d+?\s*?\)/g, type: ColorType.RGB },
+    { reg: /hsl\(\s*\d+\s*°?,\s*\d+%\s*,\s*\d+%\s*\)/g, type: ColorType.HSL },
+    { reg: /#(?:[0-9a-fA-F]{3}){1,2}/g, type: ColorType.HEX }
 ];
