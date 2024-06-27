@@ -430,7 +430,7 @@ export function findByFactoryCode<T = AnyObject>(...code: string[] | [...string[
  * @returns Unmangled exports as specified in mappers
  */
 export function mapMangledModule<S extends PropertyKey>(code: string | string[], mappers: Record<S, FilterFn>) {
-    const mapping = {} as Record<S, any>;
+    const mapping = {} as Record<S, ProxyInner<AnyObject>>;
     const setters = {} as Record<S, (innerValue: any) => void>;
 
     for (const newName in mappers) {
