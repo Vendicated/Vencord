@@ -142,7 +142,7 @@ function printFilter(filter: FilterFn) {
         return `${props[0]}(${props.slice(1).map(arg => JSON.stringify(arg)).join(", ")})`;
     }
 
-    return filter.toString();
+    return String(filter);
 }
 
 /**
