@@ -5,12 +5,6 @@
  */
 
 import { UNCONFIGURABLE_PROPERTIES } from "./misc";
-import { AnyObject } from "./types";
-
-export type ProxyLazy<T = AnyObject> = T & {
-    [SYM_LAZY_GET]: () => T;
-    [SYM_LAZY_CACHED]: T | undefined;
-};
 
 export const SYM_LAZY_GET = Symbol.for("vencord.lazy.get");
 export const SYM_LAZY_CACHED = Symbol.for("vencord.lazy.cached");
@@ -77,7 +71,7 @@ const handler: ProxyHandler<any> = {
  * @param attempts How many times to try to evaluate the factory before giving up
  * @returns Result of factory function
  */
-export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5): ProxyLazy<T> {
+export function proxyLazy<T = any>(factory: () => T, attempts = 5): T {
     const get = makeLazy(factory, attempts, { isIndirect: true });
 
     const proxyDummy = Object.assign(function () { }, {
