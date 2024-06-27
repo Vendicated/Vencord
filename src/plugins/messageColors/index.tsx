@@ -57,7 +57,7 @@ export default definePlugin({
         return {
             order,
             // Don't even try to match if the message chunk doesn't start with...
-            requiredFirstCharacters: ["h", "r", "#"],
+            requiredFirstCharacters: ["hsl", "rgb", "#"],
             // Match -> Parse -> React
             // Result of previous action is dropped as a first argument of the next one
             match(content: string) {
