@@ -4,15 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
-
-import { ColorPickerChatButton } from "./ColorPicker";
-
-export const COLOR_PICKER_DATA_KEY = "vc-color-picker-latest" as const;
-export const CHAT_BUTTON_ID = "vc-color-picker" as const;
-export const savedColors: number[] = [];
 
 export const enum RenderType {
     BLOCK,
@@ -21,17 +14,6 @@ export const enum RenderType {
 }
 
 export const settings = definePluginSettings({
-    colorPicker: {
-        type: OptionType.BOOLEAN,
-        description: "Enable color picker",
-        onChange(newValue) {
-            if (newValue) {
-                addChatBarButton(CHAT_BUTTON_ID, ColorPickerChatButton);
-            } else {
-                removeChatBarButton(CHAT_BUTTON_ID);
-            }
-        },
-    },
     renderType: {
         type: OptionType.SELECT,
         description: "How to render colors",
