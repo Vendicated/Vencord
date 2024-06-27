@@ -18,7 +18,6 @@ export const enum RenderType {
     BLOCK,
     FOREGROUND,
     BACKGROUND,
-    NONE
 }
 
 export const settings = definePluginSettings({
@@ -50,10 +49,6 @@ export const settings = definePluginSettings({
                 label: "Background color",
                 value: RenderType.BACKGROUND
             },
-            {
-                label: "Disabled",
-                value: RenderType.NONE
-            }
         ]
     }
 });
