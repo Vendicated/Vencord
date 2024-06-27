@@ -105,6 +105,15 @@ export default definePlugin({
                 replace: "=[]"
             }
         },
+        // empty 2nd word filter
+        {
+            find: '"pepe","nude"',
+            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
+            replacement: {
+                match: /\?\["pepe",.+?\]/,
+                replace: "?[]",
+            },
+        },
         // patch request that queries if term is allowed
         {
             find: ".GUILD_DISCOVERY_VALID_TERM",
