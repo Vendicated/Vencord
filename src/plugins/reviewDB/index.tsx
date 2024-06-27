@@ -21,11 +21,13 @@ import "./style.css";
 import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ExpandableHeader } from "@components/ExpandableHeader";
-import { OpenExternalIcon } from "@components/Icons";
+import { NotesIcon, OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import type { GuildRecord, UserRecord } from "@vencord/discord-types";
-import { AlertActionCreators, MarkupUtils, Menu, useState } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { AlertActionCreators, Button, MarkupUtils, Menu, TooltipContainer, useState } from "@webpack/common";
 
 import { Auth, initAuth, updateAuth } from "./auth";
 import { openReviewsModal } from "./components/ReviewModal";
@@ -35,16 +37,18 @@ import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
 import { showToast } from "./utils";
 
-const guildPopoutPatch = ((children, { guild }: { guild?: GuildRecord, onClose(): void; }) => {
-    if (guild)
-        children.push(
-            <Menu.MenuItem
-                label="View Reviews"
-                id="vc-rdb-server-reviews"
-                icon={OpenExternalIcon}
-                action={() => { openReviewsModal(guild.id, guild.name); }}
-            />
-        );
+const RoleButtonClasses: Record<string, string> = findByPropsLazy("button", "buttonInner", "icon", "text");
+
+const guildPopoutPatch = ((children, { guild }: { guild?: GuildRecord; onClose: () => void; }) => {
+    if (!guild) return;
+    children.push(
+        <Menu.MenuItem
+            label="View Reviews"
+            id="vc-rdb-server-reviews"
+            icon={OpenExternalIcon}
+            action={() => { openReviewsModal(guild.id, guild.name); }}
+        />
+    );
 }) satisfies NavContextMenuPatchCallback;
 
 const userContextPatch = ((children, { user }: { user?: UserRecord, onClose(): void; }) => {
@@ -69,7 +73,8 @@ export default definePlugin({
         "guild-header-popout": guildPopoutPatch,
         "guild-context": guildPopoutPatch,
         "user-context": userContextPatch,
-        "user-profile-actions": userContextPatch
+        "user-profile-actions": userContextPatch,
+        "user-profile-overflow-menu": userContextPatch
     },
 
     patches: [
@@ -78,6 +83,13 @@ export default definePlugin({
             replacement: {
                 match: /user:(\i),setNote:\i,canDM.+?\}\)/,
                 replace: "$&,$self.getReviewsComponent($1)"
+            }
+        },
+        {
+            find: ".VIEW_FULL_PROFILE,",
+            replacement: {
+                match: /(?<=\.BITE_SIZE,children:\[)\(0,\i\.jsx\)\(\i\.\i,\{user:(\i),/,
+                replace: "$self.BiteSizeReviewsButton({user:$1}),$&"
             }
         }
     ],
@@ -160,5 +172,20 @@ export default definePlugin({
                 />
             </ExpandableHeader>
         );
-    }, { message: "Failed to render Reviews" })
+    }, { message: "Failed to render Reviews" }),
+
+    BiteSizeReviewsButton: ErrorBoundary.wrap(({ user }: { user: UserRecord; }) => (
+        <TooltipContainer text="View Reviews">
+            <Button
+                onClick={() => { openReviewsModal(user.id, user.username); }}
+                look={Button.Looks.FILLED}
+                size={Button.Sizes.NONE}
+                color={RoleButtonClasses.color}
+                className={classes(RoleButtonClasses.button, RoleButtonClasses.banner)}
+                innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.banner)}
+            >
+                <NotesIcon height={16} width={16} />
+            </Button>
+        </TooltipContainer>
+    ), { noop: true })
 });

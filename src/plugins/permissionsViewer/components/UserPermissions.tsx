@@ -42,7 +42,14 @@ const Classes: Record<"roles" | "rolePill" | "rolePillBorder" | "desaturateUserC
         ))
     );
 
-function UserPermissionsComponent({ guild, guildMember, showBorder }: { guild: GuildRecord; guildMember: GuildMember; showBorder: boolean; }) {
+interface UserPermissionsComponentProps {
+    forceOpen?: boolean;
+    guild: GuildRecord;
+    guildMember: GuildMember;
+    showBorder: boolean;
+}
+
+function UserPermissionsComponent({ forceOpen = false, guild, guildMember, showBorder }: UserPermissionsComponentProps) {
     const stns = settings.use(["permissionsSortOrder"]);
 
     const [rolePermissions, userPermissions] = useMemo(() => {
@@ -94,6 +101,7 @@ function UserPermissionsComponent({ guild, guildMember, showBorder }: { guild: G
 
     return (
         <ExpandableHeader
+            forceOpen={forceOpen}
             headerText="Permissions"
             moreTooltipText="Role Details"
             onMoreClick={() =>

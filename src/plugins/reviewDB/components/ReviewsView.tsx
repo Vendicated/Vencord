@@ -39,7 +39,7 @@ interface UserProps {
     name: string;
 }
 
-interface Props extends UserProps {
+interface ReviewsViewProps extends UserProps {
     hideOwnReview?: boolean;
     onFetchReviews: (data: Response) => void;
     page?: number;
@@ -57,7 +57,7 @@ export default function ReviewsView({
     page = 1,
     showInput = false,
     hideOwnReview = false,
-}: Props) {
+}: ReviewsViewProps) {
     const [signal, refetch] = useForceUpdater(true);
 
     const [reviewData] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
@@ -95,7 +95,14 @@ export default function ReviewsView({
     );
 }
 
-function ReviewList({ refetch, reviews, hideOwnReview, profileId }: { refetch(): void; reviews: Review[]; hideOwnReview: boolean; profileId: string; }) {
+interface ReviewListProps {
+    hideOwnReview: boolean;
+    profileId: string;
+    refetch: () => void;
+    reviews: Review[];
+}
+
+function ReviewList({ hideOwnReview, profileId, refetch, reviews }: ReviewListProps) {
     const meId = UserStore.getCurrentUser()!.id;
 
     return (
@@ -119,8 +126,13 @@ function ReviewList({ refetch, reviews, hideOwnReview, profileId }: { refetch():
     );
 }
 
+interface ReviewsInputComponentProps extends UserProps {
+    isAuthor: boolean;
+    modalKey?: string;
+    refetch: () => void;
+}
 
-export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; }) {
+export function ReviewsInputComponent({ discordId, isAuthor, modalKey, name, refetch }: ReviewsInputComponentProps) {
     const { token } = Auth;
     const editorRef = useRef<any>(null);
     const inputType = ChatInputTypes.FORM;
@@ -149,6 +161,7 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
                     type={inputType}
                     disableThemedBackground={true}
                     setEditorRef={(ref: any) => { editorRef.current = ref; }}
+                    parentModalKey={modalKey}
                     textValue=""
                     onSubmit={
                         async (res: any) => {

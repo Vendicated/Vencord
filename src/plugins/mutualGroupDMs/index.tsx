@@ -49,7 +49,7 @@ export default definePlugin({
             find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Note: the module is lazy-loaded
             replacement: {
                 match: /(?<=\.tabBarItem.{0,50}MUTUAL_GUILDS.+?}\),)(?=.+?(\(0,\i\.jsxs?\)\(.{0,100}id:))/,
-                replace: '(arguments[0].user.bot||arguments[0].isCurrentUser)?null:$1"MUTUAL_GDMS",children:"Mutual Groups"}),'
+                replace: '$self.isBotOrMe(arguments[0].user)?null:$1"MUTUAL_GDMS",children:"Mutual Groups"}),'
             }
         },
         {
@@ -58,12 +58,30 @@ export default definePlugin({
                 match: /(?<={user:(\i),onClose:(\i)}\);)(?=case \i\.\i\.MUTUAL_FRIENDS)/,
                 replace: "case \"MUTUAL_GDMS\":return $self.renderMutualGDMs({user: $1, onClose: $2});"
             }
+        },
+        {
+            find: ".MUTUAL_FRIENDS?(",
+            replacement: [
+                {
+                    match: /(?<=onItemSelect:\i,children:)(\i)\.map/,
+                    replace: "[...$1, ...($self.isBotOrMe(arguments[0].user) ? [] : [{section:'MUTUAL_GDMS',text:'Mutual Groups'}])].map"
+                },
+                {
+                    match: /\(0,\i\.jsx\)\(\i,\{items:\i,section:(\i)/,
+                    replace: "$1==='MUTUAL_GDMS'?$self.renderMutualGDMs(arguments[0]):$&"
+                }
+            ]
         }
     ],
 
+    isBotOrMe: (user: UserRecord) => user.bot || user.id === UserStore.getCurrentUser()!.id,
+
     renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: UserRecord, onClose: () => void; }) => {
         const entries = ChannelStore.getSortedPrivateChannels()
-            .filter((channel): channel is GroupDMChannelRecord => channel.isGroupDM() && channel.recipients.includes(user.id))
+            .filter((channel): channel is GroupDMChannelRecord =>
+                channel.isGroupDM()
+                && channel.recipients.includes(user.id)
+            )
             .map(channel => (
                 <Clickable
                     className={ProfileListClasses.listRow}
