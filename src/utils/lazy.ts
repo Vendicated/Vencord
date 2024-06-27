@@ -122,3 +122,22 @@ export function proxyLazy<T = AnyObject>(factory: () => T, attempts = 5): ProxyL
 
     return proxy;
 }
+
+/**
+ * A string which returns the factory result every time its value is accessed.
+ *
+ * @param factory Factory returning the string to use as the value
+ */
+export function lazyString<T extends string>(factory: () => T) {
+    const descriptor: PropertyDescriptor = {
+        configurable: true,
+        enumerable: false,
+        writable: false,
+        value: factory
+    };
+
+    return Object.create(String.prototype, {
+        toString: descriptor,
+        valueOf: descriptor
+    });
+}

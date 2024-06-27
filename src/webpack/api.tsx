@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { makeLazy, proxyLazy } from "@utils/lazy";
+import { lazyString, makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent, LazyComponentType, SYM_LAZY_COMPONENT_INNER } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
@@ -430,37 +430,53 @@ export function findByFactoryCode<T = AnyObject>(...code: string[] | [...string[
  * @returns Unmangled exports as specified in mappers
  */
 export function mapMangledModule<S extends PropertyKey>(code: string | string[], mappers: Record<S, FilterFn>) {
-    const result = find<Record<S, any>>(filters.byFactoryCode(...Array.isArray(code) ? code : [code]), exports => {
-        const mapping = {} as Record<S, any>;
+    const mapping = {} as Record<S, any>;
+    const setters = {} as Record<S, (innerValue: any) => void>;
 
-        outer:
-        for (const newName in mappers) {
-            const filter = mappers[newName];
+    for (const newName in mappers) {
+        // Wrapper to select whether the parent factory filter or child mapper filter failed when the error is thrown
+        const errorMsgWrapper = lazyString(() => `Webpack mapMangledModule ${callbackCalled ? "mapper" : "factory"} filter matched no module. Filter: ${printFilter(callbackCalled ? mappers[newName] : factoryFilter)}`);
 
-            if (typeof exports === "object") {
-                for (const exportKey in exports) {
-                    const exportValue = exports[exportKey];
+        const [proxy, setInnerValue] = proxyInner(errorMsgWrapper, "Webpack find with proxy called on a primitive value.");
+        mapping[newName] = proxy;
+        setters[newName] = setInnerValue;
+    }
 
-                    if (exportValue != null && filter(exportValue)) {
-                        mapping[newName] = exportValue;
-                        continue outer;
-                    }
+    const factoryFilter = filters.byFactoryCode(...Array.isArray(code) ? code : [code]);
+
+    let callbackCalled = false;
+    waitFor(factoryFilter, exports => {
+        callbackCalled = true;
+
+        for (const exportKey in exports) {
+            const exportValue = exports[exportKey];
+            if (exportValue == null) continue;
+
+            for (const newName in mappers) {
+                const filter = mappers[newName];
+
+                if (filter(exportValue)) {
+                    setters[newName](exportValue);
                 }
             }
-
-            const [proxy] = proxyInner(`Webpack mapMangledModule mapper filter matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value.");
-            // Use the proxy to throw errors because no export matched the filter
-            mapping[newName] = proxy;
         }
-
-        return mapping;
     }, { isIndirect: true });
 
     if (IS_REPORTER) {
-        webpackSearchHistory.push(["mapMangledModule", [result, code, mappers]]);
+        webpackSearchHistory.push(["mapMangledModule", [mapping, code, mappers]]);
     }
 
-    return result;
+    if (callbackCalled) {
+        for (const innerMap in mapping) {
+            const innerValue = mapping[innerMap];
+
+            if (innerValue[SYM_PROXY_INNER_VALUE] != null) {
+                mapping[innerMap] = innerValue[SYM_PROXY_INNER_VALUE];
+            }
+        }
+    }
+
+    return mapping;
 }
 
 /**

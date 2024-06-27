@@ -129,7 +129,7 @@ export const Clipboard: t.Clipboard = mapMangledModule('queryCommandEnabled("cop
     SUPPORTS_COPY: e => typeof e === "boolean"
 });
 
-export const NavigationRouter: t.NavigationRouter = mapMangledModule("Transitioning to ", {
+export const NavigationRouter: t.NavigationRouter = mapMangledModule("aTransitioning to ", {
     transitionTo: filters.byCode("transitionTo -"),
     transitionToGuild: filters.byCode("transitionToGuild -"),
     back: filters.byCode("goBack()"),
