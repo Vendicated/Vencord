@@ -36,6 +36,11 @@ const settings = definePluginSettings({
         description: "Show the member mod view context menu item in all servers.",
         default: true,
     },
+    showViewAsRole: {
+        type: OptionType.BOOLEAN,
+        description: "Always show view as role, whether or not you're an admin.",
+        default: true,
+    },
     disableDiscoveryFilters: {
         type: OptionType.BOOLEAN,
         description: "Disable filters in Server Discovery search that hide servers that don't meet discovery criteria.",
@@ -53,7 +58,7 @@ export default definePlugin({
     name: "ShowHiddenThings",
     tags: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters"],
     description: "Displays various hidden & moderator-only things regardless of permissions.",
-    authors: [Devs.Dolfies],
+    authors: [Devs.Dolfies, Devs.niko],
     patches: [
         {
             find: "showCommunicationDisabledStyles",
@@ -122,6 +127,24 @@ export default definePlugin({
             replacement: {
                 match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\);/g,
                 replace: "Promise.resolve({ body: { valid: true } });"
+            }
+        },
+        // Role list patch for view as role
+        {
+            find: "}canImpersonateRole(",
+            predicate: () => settings.store.showViewAsRole,
+            replacement: {
+                match: /\i\.can\(\i\.\i\.MANAGE_GUILD,\i\)&&\i\.can\(\i\.\i\.MANAGE_ROLES,\i\)/,
+                replace: "true"
+            }
+        },
+        // Patch "select roles" dropdown on view as role banner, otherwise it will pop out "You do not have permissions to use this feature" instead of the roles list
+        {
+            find: ".VIEW_AS_ROLES_NO_ACCESS",
+            predicate: () => settings.store.showViewAsRole,
+            replacement: {
+                match: /\i\.isOwner\(\i\.id\)/,
+                replace: "true"
             }
         }
     ],
