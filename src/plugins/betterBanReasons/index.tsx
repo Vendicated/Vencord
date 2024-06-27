@@ -92,7 +92,7 @@ export default definePlugin({
             { name: reason, value: reason }
         ));
     },
-    isOtherDefault() {
+    getDefaultState() {
         return settings.store.textInputDefault ? 1 : 0;
     },
     settings,
