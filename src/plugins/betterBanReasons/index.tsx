@@ -75,12 +75,12 @@ export default definePlugin({
         {
             find: "Messages.BAN_MULTIPLE_CONFIRM_TITLE",
             replacement: [{
-                match: /=\[[^]*?\]/,
-                replace: "=$self.getReasons()"
+                match: /\[\{name:\i\.\i\.Messages\.BAN_REASON_OPTION_SPAM_ACCOUNT.+?\}\]/,
+                replace: "$self.getReasons()"
             },
             {
-                match: /useState\(0\)/,
-                replace: "useState($self.isOtherDefault())"
+                match: /useState\(0\)(?=.{0,100}targetUserId:)/,
+                replace: "useState($self.isOtherDefault())$2"
             }]
         }
     ],
