@@ -237,9 +237,9 @@ export default definePlugin({
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
                 onClick: () => {
-                    openModal((props) => {
-                        return <ProfilePopout  {...props} msg={msg}/>
-                    })
+                    openModal(props =>
+                        <ProfilePopout {...props} msg={msg}/>
+                    );
                 },
                 onContextMenu: _ => {}
             };
