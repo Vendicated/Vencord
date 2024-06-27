@@ -38,7 +38,7 @@ const settings = definePluginSettings({
     },
     showViewAsRole: {
         type: OptionType.BOOLEAN,
-        description: "Always show view as role, whether or not you're an admin.",
+        description: "Show view as role, whether or not you're an admin.",
         default: true,
     },
     disableDiscoveryFilters: {
