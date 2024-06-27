@@ -5,19 +5,18 @@
  */
 
 import { Logger } from "@utils/Logger";
+import { SingleNodeParserRule } from "simple-markdown";
 
-const logger = new Logger("MarkDownRules");
+const logger = new Logger("MarkdownRules");
 
-export interface Rule {
-    match: (...a: any) => RegExpExecArray;
-    parse: (...a: any) => any;
-    order: number;
+export interface Rule extends SingleNodeParserRule {
     requiredFirstCharacters: Array<string>;
+    Slate?: object;
     [k: string]: any;
 }
 
 export interface Rules {
-    [k: string]: any;
+    [k: string]: Rule;
 }
 
 export interface MarkDownRules {
@@ -35,7 +34,9 @@ export interface MarkDownRules {
 
 export type PluginMarkDownRules = Partial<MarkDownRules>;
 
+
 export const Rules: MarkDownRules = {} as MarkDownRules;
+
 export const PendingRules: Array<(r: MarkDownRules) => MarkDownRules | PluginMarkDownRules> = [];
 
 export function AddAPendingRule(rules: (r: MarkDownRules) => MarkDownRules | PluginMarkDownRules) {

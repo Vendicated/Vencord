@@ -17,14 +17,14 @@ export default definePlugin({
             find: "{RULES:",
             replacement: {
                 match: /{RULES:[^}]+}/,
-                replace: "Vencord.Api.MarkDownRules.patchMarkdownRules($&)"
+                replace: "Vencord.Api.MarkdownRules.patchMarkdownRules($&)"
             }
         },
         {
             find: "type:\"verbatim\"",
             replacement: {
                 match: /let (\i)=({link:.*,after:""}})/,
-                replace: "let $1=Vencord.Api.MarkDownRules.insertSlateRules($2)"
+                replace: "let $1=Vencord.Api.MarkdownRules.insertSlateRules($2)"
             }
         }
     ],
