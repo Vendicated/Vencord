@@ -5,11 +5,11 @@
  */
 
 import { Logger } from "@utils/Logger";
-import { SingleNodeParserRule } from "simple-markdown";
+import { ParserRule } from "simple-markdown";
 
 const logger = new Logger("MarkdownRules");
 
-export interface Rule extends SingleNodeParserRule {
+export interface Rule extends ParserRule {
     requiredFirstCharacters: Array<string>;
     Slate?: object;
     [k: string]: any;
