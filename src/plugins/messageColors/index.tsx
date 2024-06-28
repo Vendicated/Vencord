@@ -102,7 +102,7 @@ export default definePlugin({
             // react(args: ReturnType<typeof this.parse>)
             react({ text, colorType, color }: ParsedColorInfo) {
                 if (settings.store.renderType === RenderType.FOREGROUND) {
-                    return <><span style={{ color: color }}>{text}</span></>;
+                    return <span style={{ color: color }}>{text}</span>;
                 }
                 const styles = {
                     "--color": color
