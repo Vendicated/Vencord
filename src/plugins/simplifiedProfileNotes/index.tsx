@@ -13,8 +13,8 @@ import { i18n, useEffect, useRef, useState } from "@webpack/common";
 const useNote = findByCodeLazy(".getNote(");
 const NoteEditor = findComponentByCodeLazy("hideNote:", ".userId);return");
 const Section = findComponentByCodeLazy("section", '"header-secondary"', "requestAnimationFrame");
-const classes = findByPropsLazy("note", "appsConnections");
 
+const classes = findByPropsLazy("note", "appsConnections");
 const requireClasses = extractAndLoadChunksLazy(['"handleOpenUserProfileModal"']);
 
 const settings = definePluginSettings({
