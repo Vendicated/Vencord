@@ -110,8 +110,8 @@ export default definePlugin({
             find: '"pepe","nude"',
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
             replacement: {
-                match: /\?\["pepe",.+?\]/,
-                replace: "?[]",
+                match: /(?<=[?=])\["pepe",.+?\]/,
+                replace: "[]",
             },
         },
         // patch request that queries if term is allowed
