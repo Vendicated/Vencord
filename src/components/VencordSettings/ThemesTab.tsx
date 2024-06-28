@@ -90,6 +90,7 @@ interface ThemeCardProps {
     enabled: boolean;
     onChange: (enabled: boolean) => void;
     onDelete: () => void;
+    showDeleteButton?: boolean;
 }
 
 function ThemeCard({ theme, enabled, onChange, onDelete, showDeleteButton }: ThemeCardProps) {
