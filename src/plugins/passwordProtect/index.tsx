@@ -23,7 +23,7 @@ interface NSFWBlockProps {
 
 export default definePlugin({
     name: "PasswordProtect",
-    description: "Passcode protect servers, channels, and dms",
+    description: "Passcode protect servers, channels, and dms. WARNING: Disabling the plugin will allow anyone to open the channels!",
     authors: [Devs.ImLvna],
 
     contextMenus: contextMenus,
@@ -81,8 +81,4 @@ export default definePlugin({
     stop() {
         saveData();
     },
-
-    // navigate(href: string): boolean {
-    //     return Math.random() < 0.5;
-    // },
 });
