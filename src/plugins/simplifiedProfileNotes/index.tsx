@@ -94,7 +94,7 @@ export default definePlugin({
                 replace: "$&,vencordNotesHook=$self.useNoteBox($1)"
             },
             {
-                match: /(!\i)(&&\(0,\i\.jsx\)\(\i\.\i,{user:\i,isHovering:\i,onOpenProfile:\(\)=>)\i\({subsection:\i\.\i\.NOTE}\)/,
+                match: /(!\i)(&&\(0,\i\.jsx\)\(\i\.\i,{user:\i,isHovering:\i,onOpenProfile:\(\)=>).+?\({subsection:\i\.\i\.NOTE}\)/,
                 replace: "($1&&!vencordNotesHook.visible)$2vencordNotesHook.activate()"
             },
             p.replacement
