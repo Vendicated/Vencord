@@ -32,6 +32,7 @@ export default definePlugin({
         // Like bolding, spoilers, mentions, etc
         {
             find: "roleMention:{order:",
+            group: true,
             replacement: {
                 match: /roleMention:\{order:(\i\.\i\.order)/,
                 replace: "color:$self.getColor($1),$&"
@@ -41,6 +42,7 @@ export default definePlugin({
         // Without it discord will try to pass a string without those to color rule
         {
             find: ".defaultRules.text,match:",
+            group: true,
             replacement: {
                 // $)/)
                 match: /\$\)\/\)}/,
@@ -51,6 +53,7 @@ export default definePlugin({
         // Or it explodes (bad)
         {
             find: "Unknown markdown rule:",
+            group: true,
             replacement: {
                 match: /roleMention:{type:/,
                 replace: "color:{type:\"inlineObject\"},$&",
