@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, find, findByProps, findComponentByCode } from "@webpack";
+import { findByProps, findComponentByCode } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { NoopComponent } from "./react";
@@ -108,7 +108,7 @@ export let ModalContent: Modals["ModalContent"] = NoopComponent;
 export let ModalFooter: Modals["ModalFooter"] = NoopComponent;
 export let ModalCloseButton: Modals["ModalCloseButton"] = NoopComponent;
 
-export const Modals = find<Modals>(filters.byProps("ModalRoot", "ModalCloseButton"), (m: Modals) => {
+export const Modals = findByProps<Modals>("ModalRoot", "ModalCloseButton", (m: Modals) => {
     ({ ModalRoot, ModalHeader, ModalContent, ModalFooter, ModalCloseButton } = m);
 
     return m;
