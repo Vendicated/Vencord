@@ -5,7 +5,7 @@
  */
 
 import { Devs } from "@utils/constants";
-import definePlugin, { StartAt } from "@utils/types";
+import definePlugin from "@utils/types";
 
 
 export default definePlugin({
@@ -27,6 +27,5 @@ export default definePlugin({
                 replace: "let $1=Vencord.Api.Markdown.insertSlateRules($2)"
             }
         }
-    ],
-    startAt: StartAt.Init
+    ]
 });
