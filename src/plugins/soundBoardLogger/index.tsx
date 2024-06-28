@@ -27,8 +27,8 @@ export default definePlugin({
         {
             find: "\"invite-button\"",
             replacement: {
-                match: /\(0,(\w{1})\.(\w{3})\)\((\w{1})\.Fragment,{children:(\w{2})}/,
-                replace: "$4.unshift($self.getComp()),(0,$1.$2)($3.Fragment,{children:$4}"
+                match: /\)\),\(0,(\w{1,3})\.(\w{1,3})\)\((\w{1,3})\.Fragment,{children:(\w{1,3})}\)\}\}/,
+                replace: ")),$4.unshift($self.getComp()),(0,$1.$2)($3.Fragment,{children:$4})}}"
             }
         }
     ],
