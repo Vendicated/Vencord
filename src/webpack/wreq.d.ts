@@ -48,10 +48,10 @@ export type ChunkHandlers = {
 
 export type ScriptLoadDone = (event: Event) => void;
 
-export type OnChunksLoaded = ((this: WebpackRequire, result: any, chunkIds: PropertyKey[] | undefined | null, callback: () => any, priority: number) => any) & {
-    /** Check if a chunk has been loaded */
-    j: (this: OnChunksLoaded, chunkId: PropertyKey) => boolean;
-};
+// export type OnChunksLoaded = ((this: WebpackRequire, result: any, chunkIds: PropertyKey[] | undefined | null, callback: () => any, priority: number) => any) & {
+//     /** Check if a chunk has been loaded */
+//     j: (this: OnChunksLoaded, chunkId: PropertyKey) => boolean;
+// };
 
 export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
     /** The module factories, where all modules that have been loaded are stored (pre-loaded or loaded by lazy chunks) */
@@ -160,18 +160,18 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
     r: (this: WebpackRequire, exports: ModuleExports) => void;
     /** Node.js module decorator. Decorates a module as a Node.js module */
     nmd: (this: WebpackRequire, module: Module) => any;
-    /**
-     * Register deferred code which will be executed when the passed chunks are loaded.
-     *
-     * If chunkIds is defined, it defers the execution of the callback and returns undefined.
-     *
-     * If chunkIds is undefined, and no deferred code exists or can be executed, it returns the value of the result argument.
-     *
-     * If chunkIds is undefined, and some deferred code can already be executed, it returns the result of the callback function of the last deferred code.
-     *
-     * When (priority & 1) it will wait for all other handlers with lower priority to be executed before itself is executed.
-     */
-    O: OnChunksLoaded;
+    // /**
+    //  * Register deferred code which will be executed when the passed chunks are loaded.
+    //  *
+    //  * If chunkIds is defined, it defers the execution of the callback and returns undefined.
+    //  *
+    //  * If chunkIds is undefined, and no deferred code exists or can be executed, it returns the value of the result argument.
+    //  *
+    //  * If chunkIds is undefined, and some deferred code can already be executed, it returns the result of the callback function of the last deferred code.
+    //  *
+    //  * When (priority & 1) it will wait for all other handlers with lower priority to be executed before itself is executed.
+    //  */
+    // O: OnChunksLoaded;
     /**
      * Instantiate a wasm instance with source using "wasmModuleHash", and importObject "importsObj", and then assign the exports of its instance to "exports".
      * @returns The exports argument, but now assigned with the exports of the wasm instance
@@ -187,7 +187,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
 
 // Utility section for Vencord
 
-export type AnyWebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & Partial<Omit<WebpackRequire, "m" | "O">> & Pick<WebpackRequire, "O"> & {
+export type AnyWebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & Partial<Omit<WebpackRequire, "m">> & {
     /** The module factories, where all modules that have been loaded are stored (pre-loaded or loaded by lazy chunks) */
     m: Record<PropertyKey, AnyModuleFactory>;
 };
