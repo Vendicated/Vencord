@@ -34,25 +34,19 @@ const define: Define = (target, p, attributes) => {
     });
 };
 
-// wreq.O is the Webpack onChunksLoaded function.
-// It is pretty likely that all important Discord Webpack instances will have this property set,
-// because Discord bundled code is chunked.
-// As of the time of writing, only the main and sentry Webpack instances have this property, and they are the only ones we care about.
-
-// We use this setter to intercept when wreq.O is defined, so we can patch the modules factories (wreq.m).
-// wreq.m is pre-populated with module factories, and is also populated via webpackGlobal.push
-// The sentry module also has their own Webpack with a pre-populated wreq.m, so this also patches those.
+// wreq.m is the Webpack object containing module factories. It is pre-populated with module factories, and is also populated via webpackGlobal.push
+// We use this setter to intercept when wreq.m is defined and apply the patching in its module factories.
 // We wrap wreq.m with our proxy, which is responsible for patching the module factories when they are set, or definining getters for the patched versions.
 
 // If this is the main Webpack, we also set up the internal references to WebpackRequire.
-define(Function.prototype, "O", {
+define(Function.prototype, "m", {
     enumerable: false,
 
-    set(this: AnyWebpackRequire, onChunksLoaded: AnyWebpackRequire["O"]) {
-        define(this, "O", { value: onChunksLoaded });
+    set(this: AnyWebpackRequire, originalModules: AnyWebpackRequire["m"]) {
+        define(this, "m", { value: originalModules });
 
         const { stack } = new Error();
-        if (this.m == null || !(stack?.includes("discord.com") || stack?.includes("discordapp.com"))) {
+        if (!(stack?.includes("discord.com") || stack?.includes("discordapp.com")) || Array.isArray(originalModules)) {
             return;
         }
 
@@ -81,25 +75,25 @@ define(Function.prototype, "O", {
         const setterTimeout = setTimeout(() => Reflect.deleteProperty(this, "p"), 0);
 
         // Patch the pre-populated factories
-        for (const id in this.m) {
-            if (updateExistingFactory(this.m, id, this.m[id], true)) {
+        for (const id in originalModules) {
+            if (updateExistingFactory(originalModules, id, originalModules[id], true)) {
                 continue;
             }
 
-            notifyFactoryListeners(this.m[id]);
-            defineModulesFactoryGetter(id, Settings.eagerPatches ? wrapAndPatchFactory(id, this.m[id]) : this.m[id]);
+            notifyFactoryListeners(originalModules[id]);
+            defineModulesFactoryGetter(id, Settings.eagerPatches ? wrapAndPatchFactory(id, originalModules[id]) : originalModules[id]);
         }
 
-        define(this.m, Symbol.toStringTag, {
+        define(originalModules, Symbol.toStringTag, {
             value: "ModuleFactories",
             enumerable: false
         });
 
         // The proxy responsible for patching the module factories when they are set, or definining getters for the patched versions
-        const proxiedModuleFactories = new Proxy(this.m, moduleFactoriesHandler);
+        const proxiedModuleFactories = new Proxy(originalModules, moduleFactoriesHandler);
         /*
         If Discord ever decides to set module factories using the variable of the modules object directly, instead of wreq.m, switch the proxy to the prototype
-        define(this, "m", { value: Reflect.setPrototypeOf(this.m, new Proxy(this.m, moduleFactoriesHandler)) });
+        define(this, "m", { value: Reflect.setPrototypeOf(originalModules, new Proxy(originalModules, moduleFactoriesHandler)) });
         */
 
         define(this, "m", { value: proxiedModuleFactories });
