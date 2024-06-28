@@ -56,58 +56,56 @@ Object.defineProperty(window, WEBPACK_CHUNK, {
 // normally, this is populated via webpackGlobal.push, which we patch below.
 // However, Discord has their .m prepopulated.
 // Thus, we use this hack to immediately access their wreq.m and patch all already existing factories
-//
-// Update: Discord now has TWO webpack instances. Their normal one and sentry
-// Sentry does not push chunks to the global at all, so this same patch now also handles their sentry modules
 Object.defineProperty(Function.prototype, "m", {
     configurable: true,
 
     set(v: any) {
-        // When using react devtools or other extensions, we may also catch their webpack here.
-        // This ensures we actually got the right one
-        const { stack } = new Error();
-        if ((stack?.includes("discord.com") || stack?.includes("discordapp.com")) && !Array.isArray(v)) {
-            const fileName = stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "";
-
-            logger.info("Found Webpack module factory", fileName);
-            patchFactories(v);
-
-            // Define a setter for the bundlePath property of WebpackRequire. Only the main Webpack has this property.
-            // So if the setter is called, this means we can initialize the internal references to WebpackRequire.
-            Object.defineProperty(this, "p", {
-                configurable: true,
-
-                set(this: WebpackInstance, bundlePath: string) {
-                    Object.defineProperty(this, "p", {
-                        value: bundlePath,
-                        configurable: true,
-                        enumerable: true,
-                        writable: true
-                    });
-
-                    clearTimeout(setterTimeout);
-
-                    if (bundlePath !== "/assets/") return;
-
-                    logger.info(`Main Webpack found in ${fileName}, initializing internal references to WebpackRequire`);
-                    _initWebpack(this);
-
-                    for (const beforeInitListener of beforeInitListeners) {
-                        beforeInitListener(this);
-                    }
-                }
-            });
-            // setImmediate to clear this property setter if this is not the main Webpack.
-            // If this is the main Webpack, wreq.p will always be set before the timeout runs.
-            const setterTimeout = setTimeout(() => Reflect.deleteProperty(this, "p"), 0);
-        }
-
         Object.defineProperty(this, "m", {
             value: v,
             configurable: true,
             enumerable: true,
             writable: true
         });
+
+        // When using react devtools or other extensions, we may also catch their webpack here.
+        // This ensures we actually got the right one
+        const { stack } = new Error();
+        if (!(stack?.includes("discord.com") || stack?.includes("discordapp.com")) || Array.isArray(v)) {
+            return;
+        }
+
+        const fileName = stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "";
+        logger.info("Found Webpack module factory", fileName);
+
+        patchFactories(v);
+
+        // Define a setter for the bundlePath property of WebpackRequire. Only the main Webpack has this property.
+        // So if the setter is called, this means we can initialize the internal references to WebpackRequire.
+        Object.defineProperty(this, "p", {
+            configurable: true,
+
+            set(this: WebpackInstance, bundlePath: string) {
+                Object.defineProperty(this, "p", {
+                    value: bundlePath,
+                    configurable: true,
+                    enumerable: true,
+                    writable: true
+                });
+
+                clearTimeout(setterTimeout);
+                if (bundlePath !== "/assets/") return;
+
+                logger.info(`Main Webpack found in ${fileName}, initializing internal references to WebpackRequire`);
+                _initWebpack(this);
+
+                for (const beforeInitListener of beforeInitListeners) {
+                    beforeInitListener(this);
+                }
+            }
+        });
+        // setImmediate to clear this property setter if this is not the main Webpack.
+        // If this is the main Webpack, wreq.p will always be set before the timeout runs.
+        const setterTimeout = setTimeout(() => Reflect.deleteProperty(this, "p"), 0);
     }
 });
 
