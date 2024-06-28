@@ -114,6 +114,7 @@ export default definePlugin({
                             }
                         }));
 
+                        Reflect.deleteProperty(Function.prototype, "g");
                         Reflect.deleteProperty(Object.prototype, cacheExtractSym);
                         Reflect.deleteProperty(window, "DiscordSentry");
                         return { exports: {} };
@@ -130,6 +131,7 @@ export default definePlugin({
 
             set() {
                 new Logger("NoTrack", "#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry");
+                Reflect.deleteProperty(Function.prototype, "g");
                 Reflect.deleteProperty(window, "DiscordSentry");
             }
         });
