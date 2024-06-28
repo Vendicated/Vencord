@@ -23,7 +23,7 @@ import { Channel } from "discord-types/general";
 import { _resolveDiscordLoaded, filters, find, findByCode, findByProps, mapMangledModule, waitFor } from "../api";
 import type * as t from "./types/utils";
 
-export const FluxDispatcher = find<t.FluxDispatcher>(filters.byProps("dispatch", "subscribe"), (m: t.FluxDispatcher) => {
+export const FluxDispatcher = findByProps<t.FluxDispatcher>("dispatch", "subscribe", (m: t.FluxDispatcher) => {
     // Non import call to avoid circular dependency
     Vencord.Plugins.subscribeAllPluginsFluxEvents(m);
 

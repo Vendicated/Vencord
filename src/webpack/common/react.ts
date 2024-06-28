@@ -17,7 +17,7 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, find, findByProps } from "../api";
+import { findByProps } from "../api";
 
 export let useState: typeof React.useState;
 export let useEffect: typeof React.useEffect;
@@ -28,7 +28,7 @@ export let useCallback: typeof React.useCallback;
 
 export const ReactDOM = findByProps<typeof import("react-dom") & typeof import("react-dom/client")>("createPortal", "render");
 
-export const React = find<typeof import("react")>(filters.byProps("useState"), (m: typeof import("react")) => {
+export const React = findByProps<typeof import("react")>("useState", (m: typeof import("react")) => {
     ({ useEffect, useState, useMemo, useRef, useReducer, useCallback } = m);
 
     return m;

@@ -19,7 +19,7 @@
 import { NoopComponent } from "@utils/react";
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, find, findComponent, findExportedComponent } from "../api";
+import { filters, findByProps, findComponent, findComponentByCode, findExportedComponent } from "../api";
 import * as t from "./types/components";
 
 export let Card: t.Card = NoopComponent as any;
@@ -45,13 +45,13 @@ export let Avatar: t.Avatar = NoopComponent;
 export let FocusLock: t.FocusLock = NoopComponent;
 export let useToken: t.useToken;
 
-export const MaskedLink = findComponent<t.MaskedLinkProps>(filters.byComponentCode("MASKED_LINK)"));
-export const Timestamp = findComponent<t.TimestampProps>(filters.byComponentCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
+export const MaskedLink = findComponentByCode<t.MaskedLinkProps>("MASKED_LINK)");
+export const Timestamp = findComponentByCode<t.TimestampProps>(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format");
 export const Flex = findComponent(filters.byProps("Justify", "Align", "Wrap")) as t.Flex;
 
 export const OAuth2AuthorizeModal = findExportedComponent("OAuth2AuthorizeModal");
 
-export const Forms = find<t.Forms>(filters.byProps("FormItem", "Button"), m => {
+export const Forms = findByProps<t.Forms>("FormItem", "Button", m => {
     ({
         useToken,
         Card,
