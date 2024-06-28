@@ -136,7 +136,6 @@ async function printReport() {
             body: JSON.stringify({
                 description: "Here's the latest Equicord Report!",
                 username: "Equicord Reporter" + (CANARY ? " (Canary)" : ""),
-                avatar_url: "https://avatars.githubusercontent.com/u/150590884?s=48&v=4",
                 embeds: [
                     {
                         title: "Bad Patches",
