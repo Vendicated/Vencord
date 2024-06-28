@@ -45,6 +45,8 @@ define(Function.prototype, "m", {
     set(this: AnyWebpackRequire, originalModules: AnyWebpackRequire["m"]) {
         define(this, "m", { value: originalModules });
 
+        // We may also catch Discord bundled libs, React Devtools or other extensions WebpackInstance here.
+        // This ensures we actually got the right ones
         const { stack } = new Error();
         if (!(stack?.includes("discord.com") || stack?.includes("discordapp.com")) || Array.isArray(originalModules)) {
             return;
