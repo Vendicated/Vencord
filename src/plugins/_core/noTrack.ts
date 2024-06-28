@@ -20,6 +20,12 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
+// FIXME Do this without monkey patching maybe
+Object.defineProperty(window, "DiscordSentry", {
+    configurable: true,
+    set(v) { }
+});
+
 const settings = definePluginSettings({
     disableAnalytics: {
         type: OptionType.BOOLEAN,
