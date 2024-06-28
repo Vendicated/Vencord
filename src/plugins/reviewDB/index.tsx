@@ -87,7 +87,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".VIEW_FULL_PROFILE,",
+            find: ".BITE_SIZE,user:",
             replacement: {
                 match: /(?<=\.BITE_SIZE,children:\[)\(0,\i\.jsx\)\(\i\.\i,\{user:(\i),/,
                 replace: "$self.BiteSizeReviewsButton({user:$1}),$&"
