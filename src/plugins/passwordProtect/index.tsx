@@ -59,7 +59,6 @@ export default definePlugin({
         props.description = "This channel is password protected. Please enter the password to view the content.";
         props.agreement = "Enter password";
         props.disagreement = "Cancel";
-        const oldOnAgree = props.onAgree;
         props.onAgree = () => {
             openAccessModal(channel.id, async success => {
                 console.log(success);
