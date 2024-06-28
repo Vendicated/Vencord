@@ -13,7 +13,7 @@ import { React } from "@webpack/common";
 import { ColorType, regex, RenderType, settings } from "./constants";
 
 const source = regex.map(r => r.reg.source).join("|");
-const matchAllRegExp = new RegExp(`^(${source})`);
+const matchAllRegExp = new RegExp(`^(${source})`, "i");
 
 interface ParsedColorInfo {
     type: "color";
@@ -21,6 +21,8 @@ interface ParsedColorInfo {
     colorType: ColorType;
     text: string;
 }
+
+const requiredFirstCharacters = ["r", "h", "#"].flatMap(v => [v, v.toUpperCase()]);
 
 export default definePlugin({
     authors: [Devs.hen],
@@ -46,7 +48,8 @@ export default definePlugin({
             replacement: {
                 // $)/)
                 match: /\$\)\/\)}/,
-                replace: "hsl\\(|rgb\\(|$&"
+                // hsl(|rgb(|$&
+                replace: requiredFirstCharacters.join("|") + "|$&"
             }
         },
         // Discord just requires it to be here
@@ -64,7 +67,7 @@ export default definePlugin({
         return {
             order,
             // Don't even try to match if the message chunk doesn't start with...
-            requiredFirstCharacters: ["hsl", "rgb", "#"],
+            requiredFirstCharacters,
             // Match -> Parse -> React
             // Result of previous action is dropped as a first argument of the next one
             match(content: string) {
