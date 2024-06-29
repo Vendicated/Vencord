@@ -34,6 +34,7 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { JSX } from "react";
 
 import gitHash from "~git-hash";
 import plugins, { PluginMeta } from "~plugins";
@@ -77,7 +78,7 @@ async function generateDebugInfoMessage() {
     const client = (() => {
         if (IS_DISCORD_DESKTOP) return `Discord Desktop v${DiscordNative.app.getVersion()}`;
         if (IS_VESKTOP) return `Vesktop v${VesktopNative.app.getVersion()}`;
-        if ("armcord" in window) return `ArmCord v${window.armcord.version}`;
+        if ("legcord" in window) return `Legcord v${window.legcord.version}`;
 
         // @ts-expect-error
         const name = typeof unsafeWindow !== "undefined" ? "UserScript" : "Web";
@@ -142,15 +143,15 @@ export default definePlugin({
     required: true,
     description: "Helps us provide support to you",
     authors: [Devs.Ven],
-    dependencies: ["CommandsAPI", "UserSettingsAPI", "MessageAccessoriesAPI"],
+    dependencies: ["UserSettingsAPI", "MessageAccessoriesAPI"],
 
     settings,
 
     patches: [{
-        find: ".BEGINNING_DM.format",
+        find: "#{intl::BEGINNING_DM}",
         replacement: {
-            match: /BEGINNING_DM\.format\(\{.+?\}\),(?=.{0,100}userId:(\i\.getRecipientId\(\)))/,
-            replace: "$& $self.ContributorDmWarningCard({ userId: $1 }),"
+            match: /#{intl::BEGINNING_DM},{.+?}\),(?=.{0,300}(\i)\.isMultiUserDM)/,
+            replace: "$& $self.renderContributorDmWarningCard({ channel: $1 }),"
         }
     }],
 
@@ -235,7 +236,8 @@ export default definePlugin({
         }
     },
 
-    ContributorDmWarningCard: ErrorBoundary.wrap(({ userId }) => {
+    renderContributorDmWarningCard: ErrorBoundary.wrap(({ channel }) => {
+        const userId = channel.getRecipientId();
         if (!isPluginDev(userId)) return null;
         if (RelationshipStore.isFriend(userId) || isPluginDev(UserStore.getCurrentUser()?.id)) return null;
 

@@ -80,7 +80,10 @@ function GuildInfoModal({ guild }: GuildProps) {
                     className={cl("banner")}
                     src={bannerUrl}
                     alt=""
-                    onClick={() => openImageModal(bannerUrl)}
+                    onClick={() => openImageModal({
+                        url: bannerUrl,
+                        width: 1024
+                    })}
                 />
             )}
 
@@ -89,7 +92,11 @@ function GuildInfoModal({ guild }: GuildProps) {
                     ? <img
                         src={iconUrl}
                         alt=""
-                        onClick={() => openImageModal(iconUrl)}
+                        onClick={() => openImageModal({
+                            url: iconUrl,
+                            height: 512,
+                            width: 512,
+                        })}
                     />
                     : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{guild.acronym}</div>
                 }
@@ -151,7 +158,15 @@ function Owner(guildId: string, owner: User) {
 
     return (
         <div className={cl("owner")}>
-            <img src={ownerAvatarUrl} alt="" onClick={() => openImageModal(ownerAvatarUrl)} />
+            <img
+                src={ownerAvatarUrl}
+                alt=""
+                onClick={() => openImageModal({
+                    url: ownerAvatarUrl,
+                    height: 512,
+                    width: 512
+                })}
+            />
             {Parser.parse(`<@${owner.id}>`)}
         </div>
     );
@@ -232,6 +247,7 @@ function UserList(type: "friends" | "blocked", guild: Guild, ids: string[], setC
         <ScrollerThin fade className={cl("scroller")}>
             {members.map(id =>
                 <FriendRow
+                    key={id}
                     user={UserStore.getUser(id)}
                     status={PresenceStore.getStatus(id) || "offline"}
                     onSelect={() => openUserProfile(id)}

@@ -23,7 +23,7 @@ import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/mergeDefaults";
 import { putCloudSettings } from "@utils/settingsSync";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
-import { React } from "@webpack/common";
+import { React, useEffect } from "@webpack/common";
 
 import plugins from "~plugins";
 
@@ -192,7 +192,7 @@ export const Settings = SettingsStore.store;
 export function useSettings(paths?: UseSettings<Settings>[]) {
     const [, forceUpdate] = React.useReducer(() => ({}), {});
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (paths) {
             paths.forEach(p => SettingsStore.addChangeListener(p, forceUpdate));
             return () => paths.forEach(p => SettingsStore.removeChangeListener(p, forceUpdate));
@@ -200,7 +200,7 @@ export function useSettings(paths?: UseSettings<Settings>[]) {
             SettingsStore.addGlobalChangeListener(forceUpdate);
             return () => SettingsStore.removeGlobalChangeListener(forceUpdate);
         }
-    }, []);
+    }, [paths]);
 
     return SettingsStore.store;
 }
@@ -229,6 +229,10 @@ export function definePluginSettings<
         get store() {
             if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
             return Settings.plugins[definedSettings.pluginName] as any;
+        },
+        get plain() {
+            if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
+            return PlainSettings.plugins[definedSettings.pluginName] as any;
         },
         use: settings => useSettings(
             settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`) as UseSettings<Settings>[]

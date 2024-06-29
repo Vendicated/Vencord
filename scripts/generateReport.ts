@@ -36,7 +36,7 @@ for (const variable of ["DISCORD_TOKEN", "CHROMIUM_BIN"]) {
 const CANARY = process.env.USE_CANARY === "true";
 
 const browser = await pup.launch({
-    headless: "new",
+    headless: true,
     executablePath: process.env.CHROMIUM_BIN
 });
 
@@ -225,7 +225,7 @@ page.on("console", async e => {
                     plugin,
                     type,
                     id,
-                    match: regex.replace(/\[A-Za-z_\$\]\[\\w\$\]\*/g, "\\i"),
+                    match: regex.replace(/\(\?:\[A-Za-z_\$\]\[\\w\$\]\*\)/g, "\\i"),
                     error: await maybeGetError(e.args()[3])
                 });
 
