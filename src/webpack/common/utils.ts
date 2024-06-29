@@ -154,7 +154,7 @@ const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i,
 // TODO: type
 export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModule("expression-picker-last-active-view", {
     closeExpressionPicker: filters.byCode("setState({activeView:null"),
-    openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(m.toString()),
+    openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(String(m)),
 });
 
 export const PopoutActions: t.PopoutActions = mapMangledModule('type:"POPOUT_WINDOW_OPEN"', {
