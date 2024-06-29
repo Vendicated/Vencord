@@ -1,0 +1,74 @@
+#vc-indicators-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+#vc-serverlist-indicators {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-secondary);
+    height: 48px;
+    width: 48px;
+    border-radius: 100%;
+    transition: border-radius 0.15s ease-out, background-color 0.15s ease-out;
+}
+
+#vc-serverlist-indicators:hover {
+    border-radius: 34%;
+    background-color: var(--brand-experiment);
+}
+
+#vc-serverlist-indicators::before {
+    content: "";
+    display: block;
+    position: absolute;
+    /* stylelint-disable-next-line length-zero-no-unit */
+    width: 0px;
+    /* stylelint-disable-next-line length-zero-no-unit */
+    height: 0px;
+    /* stylelint-disable-next-line length-zero-no-unit */
+    left: 0px;
+    border-radius: 0 4px 4px 0;
+    background-color: var(--header-primary);
+    opacity: 0;
+    transition: width 0.15s ease-out, height 0.15s ease-out,
+        opacity 0.15s ease-out;
+}
+
+#vc-serverlist-indicators:hover::before {
+    width: 4px;
+    height: 20px;
+    opacity: 1;
+}
+
+#vc-friendcount,
+#vc-guildcount {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    width: 100%;
+    color: var(--text-normal);
+}
+
+#vc-friendcount-icon,
+#vc-guildcount-icon {
+    padding-left: 8px;
+    padding-right: 2px;
+    width: 14px;
+    height: 14px;
+}
+
+#vc-guildcount-icon {
+    padding-top: 2px;
+}
+
+#vc-friendcount-text,
+#vc-guildcount-text {
+    width: auto;
+}
