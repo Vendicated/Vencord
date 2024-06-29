@@ -94,7 +94,21 @@ export default definePlugin({
                 // Ensure this is most likely the Sentry WebpackInstance.
                 // Function.g is a very generic property and is not uncommon for another WebpackInstance (or even a React component: <g></g>) to include it
                 const { stack } = new Error();
-                if (!(stack?.includes("discord.com") || stack?.includes("discordapp.com")) || this.c != null || !String(this).includes("exports:{}")) {
+                if (!(stack?.includes("discord.com") || stack?.includes("discordapp.com")) || !String(this).includes("exports:{}") || this.c != null) {
+                    return;
+                }
+
+                const assetPath = stack?.match(/\/assets\/.+?\.js/)?.[0];
+                if (!assetPath) {
+                    return;
+                }
+
+                const srcRequest = new XMLHttpRequest();
+                srcRequest.open("GET", assetPath, false);
+                srcRequest.send();
+
+                // Final condition to see if this is the Sentry WebpackInstance
+                if (!srcRequest.responseText.includes("window.DiscordSentry=")) {
                     return;
                 }
 
@@ -103,11 +117,6 @@ export default definePlugin({
                     configurable: true,
 
                     get(this: WebpackRequire["c"]) {
-                        // One more condition to check if this is the Sentry WebpackInstance
-                        if (Array.isArray(this)) {
-                            return { exports: {} };
-                        }
-
                         new Logger("NoTrack", "#8caaee").info("Disabling Sentry by proxying its WebpackInstance cache");
                         Object.setPrototypeOf(this, new Proxy(this, {
                             get() {
@@ -118,6 +127,7 @@ export default definePlugin({
                         Reflect.deleteProperty(Function.prototype, "g");
                         Reflect.deleteProperty(Object.prototype, cacheExtractSym);
                         Reflect.deleteProperty(window, "DiscordSentry");
+
                         return { exports: {} };
                     }
                 });
@@ -132,6 +142,7 @@ export default definePlugin({
 
             set() {
                 new Logger("NoTrack", "#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry");
+
                 Reflect.deleteProperty(Function.prototype, "g");
                 Reflect.deleteProperty(window, "DiscordSentry");
             }
