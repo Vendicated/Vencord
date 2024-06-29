@@ -11,14 +11,23 @@
 }
 
 .vc-settings-quick-actions-card {
+    color: var(--text-normal);
     padding: 1em;
     display: flex;
-    gap: 1em;
-    align-items: center;
     justify-content: space-evenly;
-    flex-grow: 1;
-    flex-flow: row wrap;
+    gap: 1em;
+    flex-wrap: wrap;
+    align-items: center;
     margin-bottom: 1em;
+}
+
+.vc-settings-quick-actions-card button {
+    min-width: unset;
+}
+
+.vc-settings-quick-actions-img {
+    width: 30px;
+    height: 30px;
 }
 
 .vc-settings-donate {

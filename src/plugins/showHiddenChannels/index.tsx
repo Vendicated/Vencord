@@ -477,12 +477,17 @@ export default definePlugin({
     ],
 
     isHiddenChannel(channel: Channel & { channelId?: string; }, checkConnect = false) {
-        if (!channel) return false;
+        try {
+            if (!channel) return false;
 
-        if (channel.channelId) channel = ChannelStore.getChannel(channel.channelId);
-        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
+            if (channel.channelId) channel = ChannelStore.getChannel(channel.channelId);
+            if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
 
-        return !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || checkConnect && !PermissionStore.can(PermissionsBits.CONNECT, channel);
+            return !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || checkConnect && !PermissionStore.can(PermissionsBits.CONNECT, channel);
+        } catch (e) {
+            console.error("[ViewHiddenChannels#isHiddenChannel]: ", e);
+            return false;
+        }
     },
 
     resolveGuildChannels(channels: Record<string | number, Array<{ channel: Channel; comparator: number; }> | string | number>, shouldIncludeHidden: boolean) {
