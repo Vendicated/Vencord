@@ -46,10 +46,10 @@ export const RemoveAPendingRule = (name: string) => PendingRulesMap.delete(name)
 
 export function patchMarkdownRules(originalRules: MarkDownRules) {
     /**
-     * patchs the markdown rules
-     * by overwriting and/or adding each rule to the original rule entries
+     * modify the markdown rules
+     * by overwriting and/or adding each rule to the original rules entries
      * @param originalRles the original discord markdown rules
-     * @returns The patched rules
+     * @returns The modified rules
      */
     function assignEntries(target: any, source: any) {
         for (const [k, v] of Object.entries(source)) {
@@ -68,7 +68,13 @@ export function patchMarkdownRules(originalRules: MarkDownRules) {
     return originalRules;
 }
 
-export function insertSlateRules(slate: any) {
+export function patchSlateRules(slate: any) {
+    /**
+     * modify the default slates
+     * overwriting and/or adding each rule slate to the slate entries
+     * @param slate The original slate
+     * @returns The modified slate
+     */
     for (const [name, rule] of Object.entries(Rules)) {
         slate[name] = rule.Slate ?? slate[name] ?? { type: "skip" };
     }

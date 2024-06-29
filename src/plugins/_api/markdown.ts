@@ -24,7 +24,7 @@ export default definePlugin({
             find: "type:\"verbatim\"",
             replacement: {
                 match: /let (\i)=({link:.*,after:""}})/,
-                replace: "let $1=Vencord.Api.Markdown.insertSlateRules($2)"
+                replace: "let $1=Vencord.Api.Markdown.patchSlateRules($2)"
             }
         }
     ]
