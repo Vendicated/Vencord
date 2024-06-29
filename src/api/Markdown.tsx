@@ -47,6 +47,7 @@ export const RemoveAPendingRule = (name: string) => PendingRulesMap.delete(name)
 export function patchMarkdownRules(originalRules: MarkDownRules) {
     /**
      * patchs the markdown rules
+     * by overwriting and/or adding each rule to the original rule entries
      * @param originalRles the original discord markdown rules
      * @returns The patched rules
      */
@@ -57,9 +58,8 @@ export function patchMarkdownRules(originalRules: MarkDownRules) {
     }
     for (const [name, rule] of PendingRulesMap) {
         try {
-            const rules = rule(originalRules);
-            assignEntries(Rules, rules);
-            delete PendingRulesMap[name];
+            assignEntries(Rules, rule(originalRules));
+            RemoveAPendingRule(name);
         } catch (e) {
             logger.error("Failed to add Markdown rules for", name, e);
         }
@@ -74,4 +74,3 @@ export function insertSlateRules(slate: any) {
     }
     return slate;
 }
-
