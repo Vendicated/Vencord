@@ -48,7 +48,7 @@ define(Function.prototype, "m", {
         // We may also catch Discord bundled libs, React Devtools or other extensions WebpackInstance here.
         // This ensures we actually got the right ones
         const { stack } = new Error();
-        if (!(stack?.includes("discord.com") || stack?.includes("discordapp.com")) || Array.isArray(originalModules)) {
+        if (!(stack?.includes("discord.com") || stack?.includes("discordapp.com")) || (stack != null ? /at \d+? \(/.test(stack) : true) || !String(this).includes("exports:{}")) {
             return;
         }
 
@@ -66,7 +66,7 @@ define(Function.prototype, "m", {
                 define(this, "p", { value: bundlePath });
                 clearTimeout(setterTimeout);
 
-                if (bundlePath !== "/assets/") return;
+                if (window.GLOBAL_ENV?.PUBLIC_PATH != null && bundlePath !== window.GLOBAL_ENV.PUBLIC_PATH) return;
 
                 logger.info("Main Webpack found" + interpolateIfDefined` in ${fileName}` + ", initializing internal references to WebpackRequire");
                 _initWebpack(this);
