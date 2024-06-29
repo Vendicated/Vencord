@@ -25,5 +25,5 @@ export const Menu = findByProps<t.Menu>("MenuItem", "MenuSliderControl");
 export const ContextMenuApi: t.ContextMenuApi = mapMangledModule('type:"CONTEXT_MENU_OPEN', {
     closeContextMenu: filters.byCode("CONTEXT_MENU_CLOSE"),
     openContextMenu: filters.byCode("renderLazy:"),
-    openContextMenuLazy: e => typeof e === "function" && e.toString().length < 100
+    openContextMenuLazy: e => typeof e === "function" && String(e).length < 100
 });
