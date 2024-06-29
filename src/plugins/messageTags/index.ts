@@ -42,10 +42,28 @@ const addTag = async (tag: Tag) => {
 };
 const removeTag = async (name: string) => {
     let tags = await getTags();
-    tags = await tags.filter((t: Tag) => t.name !== name);
+    tags = tags.filter((t: Tag) => t.name !== name);
     DataStore.set(DATA_KEY, tags);
     return tags;
 };
+
+async function replaceSubTags(message: string) {
+    const templates = message.match(/\[insert-tag:.{1,32}?\]/gi);
+
+    if (templates?.length) {
+        for (const template of templates) {
+            const name = template.split(":")[1].slice(0, -1);
+            const tag = await getTag(name);
+
+            message = message.replace(
+                template,
+                tag?.message || `[invalid tag: ${name}]`
+            );
+        }
+    }
+
+    return message;
+}
 
 function createTagCommand(tag: Tag) {
     registerCommand({
@@ -57,13 +75,19 @@ function createTagCommand(tag: Tag) {
                 sendBotMessage(ctx.channel.id, {
                     content: `${EMOTE} The tag **${tag.name}** does not exist anymore! Please reload ur Discord to fix :)`
                 });
+
                 return { content: `/${tag.name}` };
             }
 
-            if (Settings.plugins.MessageTags.clyde) sendBotMessage(ctx.channel.id, {
-                content: `${EMOTE} The tag **${tag.name}** has been sent!`
-            });
-            return { content: tag.message.replaceAll("\\n", "\n") };
+            if (Settings.plugins.MessageTags.clyde) {
+                sendBotMessage(ctx.channel.id, {
+                    content: `${EMOTE} The Tag **${tag.name}** has been sent!`
+                });
+            }
+
+            const message = await replaceSubTags(tag.message);
+
+            return { content: message.replaceAll("\\n", "\n") };
         },
         [MessageTagsMarker]: true,
     }, "CustomTags");
@@ -91,23 +115,23 @@ export default definePlugin({
     commands: [
         {
             name: "tags",
-            description: "Manage all the tags for yourself",
+            description: "Manage all your custom commands.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             options: [
                 {
                     name: "create",
-                    description: "Create a new tag",
+                    description: "Create a new custom slash command.",
                     type: ApplicationCommandOptionType.SUB_COMMAND,
                     options: [
                         {
-                            name: "tag-name",
-                            description: "The name of the tag to trigger the response",
+                            name: "name",
+                            description: "The name of the command to trigger the response.",
                             type: ApplicationCommandOptionType.STRING,
                             required: true
                         },
                         {
                             name: "message",
-                            description: "The message that you will send when using this tag",
+                            description: "The message that will be sent as you when using this tag.",
                             type: ApplicationCommandOptionType.STRING,
                             required: true
                         }
@@ -115,18 +139,37 @@ export default definePlugin({
                 },
                 {
                     name: "list",
-                    description: "List all tags from yourself",
+                    description: "List all your custom commands.",
                     type: ApplicationCommandOptionType.SUB_COMMAND,
                     options: []
                 },
                 {
-                    name: "delete",
-                    description: "Remove a tag from your yourself",
+                    name: "edit",
+                    description: "Edit a custom slash command response.",
                     type: ApplicationCommandOptionType.SUB_COMMAND,
                     options: [
                         {
-                            name: "tag-name",
-                            description: "The name of the tag to trigger the response",
+                            name: "name",
+                            description: "The name of the command to trigger the response.",
+                            type: ApplicationCommandOptionType.STRING,
+                            required: true
+                        },
+                        {
+                            name: "message",
+                            description: "The message that will sent as you when using this tag.",
+                            type: ApplicationCommandOptionType.STRING,
+                            required: true
+                        }
+                    ]
+                },
+                {
+                    name: "delete",
+                    description: "Delete a custom slash command.",
+                    type: ApplicationCommandOptionType.SUB_COMMAND,
+                    options: [
+                        {
+                            name: "name",
+                            description: "The name of the command to trigger the response.",
                             type: ApplicationCommandOptionType.STRING,
                             required: true
                         }
@@ -138,10 +181,16 @@ export default definePlugin({
                     type: ApplicationCommandOptionType.SUB_COMMAND,
                     options: [
                         {
-                            name: "tag-name",
-                            description: "The name of the tag to trigger the response",
+                            name: "name",
+                            description: "The name of the command to trigger the response.",
                             type: ApplicationCommandOptionType.STRING,
                             required: true
+                        },
+                        {
+                            name: "raw",
+                            description: "Get the raw content of your custom response.",
+                            type: ApplicationCommandOptionType.BOOLEAN,
+                            required: false
                         }
                     ]
                 }
@@ -151,35 +200,73 @@ export default definePlugin({
 
                 switch (args[0].name) {
                     case "create": {
-                        const name: string = findOption(args[0].options, "tag-name", "");
-                        const message: string = findOption(args[0].options, "message", "");
+                        const name = findOption<string>(args[0].options, "name", "");
+                        const message = findOption<string>(args[0].options, "message", "");
 
-                        if (await getTag(name))
-                            return sendBotMessage(ctx.channel.id, {
+                        if (await getTag(name)) {
+                            sendBotMessage(ctx.channel.id, {
                                 content: `${EMOTE} A Tag with the name **${name}** already exists!`
                             });
+
+                            return;
+                        }
 
                         const tag = {
                             name: name,
                             enabled: true,
-                            message: message
+                            message: message.replaceAll("`​", "`") // replace "`<200b>" with "`"
                         };
 
-                        createTagCommand(tag);
                         await addTag(tag);
+                        createTagCommand(tag);
 
                         sendBotMessage(ctx.channel.id, {
                             content: `${EMOTE} Successfully created the tag **${name}**!`
                         });
+
                         break; // end 'create'
                     }
-                    case "delete": {
-                        const name: string = findOption(args[0].options, "tag-name", "");
+                    case "edit": {
+                        const name = findOption<string>(args[0].options, "name", "");
+                        const message = findOption<string>(args[0].options, "message", "");
 
-                        if (!await getTag(name))
-                            return sendBotMessage(ctx.channel.id, {
-                                content: `${EMOTE} A Tag with the name **${name}** does not exist!`
+                        if (!await getTag(name)) {
+                            sendBotMessage(ctx.channel.id, {
+                                content: `${EMOTE} No Tag with the name **${name}** exists!`
                             });
+
+                            return;
+                        }
+
+                        await removeTag(name);
+                        unregisterCommand(name);
+
+                        const tag = {
+                            name: name,
+                            enabled: true,
+
+                            message: message.replaceAll("`​", "`") // replace "`<200b>" with "`"
+                        };
+
+                        await addTag(tag);
+                        createTagCommand(tag);
+
+                        sendBotMessage(ctx.channel.id, {
+                            content: `${EMOTE} Successfully edited the tag **${name}**!`
+                        });
+
+                        break; // end 'edit'
+                    }
+                    case "delete": {
+                        const name = findOption<string>(args[0].options, "name", "");
+
+                        if (!await getTag(name)) {
+                            sendBotMessage(ctx.channel.id, {
+                                content: `${EMOTE} No Tag with the name **${name}** exists!`
+                            });
+
+                            return;
+                        }
 
                         unregisterCommand(name);
                         await removeTag(name);
@@ -187,6 +274,7 @@ export default definePlugin({
                         sendBotMessage(ctx.channel.id, {
                             content: `${EMOTE} Successfully deleted the tag **${name}**!`
                         });
+
                         break; // end 'delete'
                     }
                     case "list": {
@@ -197,7 +285,7 @@ export default definePlugin({
                                     title: "All Tags:",
                                     // @ts-ignore
                                     description: (await getTags())
-                                        .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
+                                        .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 64).replaceAll("\\n", " ")}${tag.message.length > 64 ? "..." : ""}`)
                                         .join("\n") || `${EMOTE} Woops! There are no tags yet, use \`/tags create\` to create one!`,
                                     // @ts-ignore
                                     color: 0xd77f7f,
@@ -205,20 +293,39 @@ export default definePlugin({
                                 }
                             ]
                         });
+
                         break; // end 'list'
                     }
                     case "preview": {
-                        const name: string = findOption(args[0].options, "tag-name", "");
+                        const name = findOption<string>(args[0].options, "name", "");
+                        const isRaw = findOption<boolean>(args[0].options, "raw", false);
+
                         const tag = await getTag(name);
 
-                        if (!tag)
-                            return sendBotMessage(ctx.channel.id, {
-                                content: `${EMOTE} A Tag with the name **${name}** does not exist!`
+                        if (!tag) {
+                            sendBotMessage(ctx.channel.id, {
+                                content: `${EMOTE} No Tag with the name **${name}** exists!`
                             });
 
-                        sendBotMessage(ctx.channel.id, {
-                            content: tag.message.replaceAll("\\n", "\n")
-                        });
+                            return;
+                        }
+
+
+                        if (isRaw) {
+                            const message = tag.message.replaceAll("`", "`​"); // replace "`" with "`<200b>"
+
+                            sendBotMessage(ctx.channel.id, {
+                                content: "```" + message + "```"
+                            });
+                        }
+                        else {
+                            const message = await replaceSubTags(tag.message);
+
+                            sendBotMessage(ctx.channel.id, {
+                                content: message.replaceAll("\\n", "\n")
+                            });
+                        }
+
                         break; // end 'preview'
                     }
 
@@ -226,6 +333,7 @@ export default definePlugin({
                         sendBotMessage(ctx.channel.id, {
                             content: "Invalid sub-command"
                         });
+
                         break;
                     }
                 }
