@@ -200,6 +200,34 @@ export default definePlugin({
                 match: /supports\(\i\)\{switch\(\i\)\{(case (\i).\i)/,
                 replace: "$&.DISABLE_VIDEO:return true;$1"
             }
+        },
+        {
+            find: ".Messages.SEARCH_WITH_GOOGLE",
+            replacement: {
+                match: /\i\.isPlatformEmbedded/,
+                replace: "true"
+            }
+        },
+        {
+            find: ".Messages.COPY,hint:",
+            replacement: [
+                {
+                    match: /\i\.isPlatformEmbedded/,
+                    replace: "true"
+                },
+                {
+                    match: /\i\.\i\.copy/,
+                    replace: "Vencord.Webpack.Common.Clipboard.copy"
+                }]
+        },
+        // Automod add filter words
+        {
+            find: '("interactionUsernameProfile',
+            replacement:
+                {
+                    match: /\i\.isPlatformEmbedded(?=.{0,50}\.tagName)/,
+                    replace: "true"
+                },
         }
     ],
 
