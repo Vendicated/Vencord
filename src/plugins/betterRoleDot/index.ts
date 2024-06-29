@@ -48,6 +48,7 @@ export default definePlugin({
 
         {
             find: ".ADD_ROLE_A11Y_LABEL",
+            all: true,
             predicate: () => Settings.plugins.BetterRoleDot.copyRoleColorInProfilePopout && !Settings.plugins.BetterRoleDot.bothStyles,
             noWarn: true,
             replacement: {
@@ -57,6 +58,7 @@ export default definePlugin({
         },
         {
             find: ".roleVerifiedIcon",
+            all: true,
             predicate: () => Settings.plugins.BetterRoleDot.copyRoleColorInProfilePopout && !Settings.plugins.BetterRoleDot.bothStyles,
             noWarn: true,
             replacement: {

@@ -131,11 +131,16 @@ if (!IS_VANILLA) {
 
     process.env.DATA_DIR = join(app.getPath("userData"), "..", "Vencord");
 
-    // Monkey patch commandLine to disable WidgetLayering: Fix DevTools context menus https://github.com/electron/electron/issues/38790
+    // Monkey patch commandLine to:
+    // - disable WidgetLayering: Fix DevTools context menus https://github.com/electron/electron/issues/38790
+    // - disable UseEcoQoSForBackgroundProcess: Work around Discord unloading when in background
     const originalAppend = app.commandLine.appendSwitch;
     app.commandLine.appendSwitch = function (...args) {
-        if (args[0] === "disable-features" && !args[1]?.includes("WidgetLayering")) {
-            args[1] += ",WidgetLayering";
+        if (args[0] === "disable-features") {
+            const disabledFeatures = new Set((args[1] ?? "").split(","));
+            disabledFeatures.add("WidgetLayering");
+            disabledFeatures.add("UseEcoQoSForBackgroundProcess");
+            args[1] += [...disabledFeatures].join(",");
         }
         return originalAppend.apply(this, args);
     };

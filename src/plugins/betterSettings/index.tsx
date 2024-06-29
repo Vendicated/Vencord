@@ -83,19 +83,19 @@ export default definePlugin({
             find: "this.renderArtisanalHack()",
             replacement: [
                 { // Fade in on layer
-                    match: /(?<=\((\i),"contextType",\i\.AccessibilityPreferencesContext\);)/,
+                    match: /(?<=\((\i),"contextType",\i\.\i\);)/,
                     replace: "$1=$self.Layer;",
                     predicate: () => settings.store.disableFade
                 },
                 { // Lazy-load contents
-                    match: /createPromise:\(\)=>([^:}]*?),webpackId:"\d+",name:(?!="CollectiblesShop")"[^"]+"/g,
+                    match: /createPromise:\(\)=>([^:}]*?),webpackId:"?\d+"?,name:(?!="CollectiblesShop")"[^"]+"/g,
                     replace: "$&,_:$1",
                     predicate: () => settings.store.eagerLoad
                 }
             ]
         },
         { // For some reason standardSidebarView also has a small fade-in
-            find: "DefaultCustomContentScroller:function()",
+            find: 'minimal:"contentColumnMinimal"',
             replacement: [
                 {
                     match: /\(0,\i\.useTransition\)\((\i)/,
@@ -111,7 +111,7 @@ export default definePlugin({
         { // Load menu TOC eagerly
             find: "Messages.USER_SETTINGS_WITH_BUILD_OVERRIDE.format",
             replacement: {
-                match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?openContextMenuLazy.{0,100}?(await Promise\.all[^};]*?\)\)).*?,(?=\1\(this)/,
+                match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?null!=\i&&.{0,100}?(await Promise\.all[^};]*?\)\)).*?,(?=\1\(this)/,
                 replace: "$&(async ()=>$2)(),"
             },
             predicate: () => settings.store.eagerLoad
@@ -119,8 +119,8 @@ export default definePlugin({
         { // Settings cog context menu
             find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
             replacement: {
-                match: /\(0,\i.useDefaultUserSettingsSections\)\(\)(?=\.filter\(\i=>\{let\{section:\i\}=)/,
-                replace: "$self.wrapMenu($&)"
+                match: /(EXPERIMENTS:.+?)(\(0,\i.\i\)\(\))(?=\.filter\(\i=>\{let\{section:\i\}=)/,
+                replace: "$1$self.wrapMenu($2)"
             }
         }
     ],

@@ -14,7 +14,7 @@ import { Message } from "discord-types/general";
  * @param messageId The message id
  * @param fields The fields of the message to change. Leave empty if you just want to re-render
  */
-export function updateMessage(channelId: string, messageId: string, fields?: Partial<Message>) {
+export function updateMessage(channelId: string, messageId: string, fields?: Partial<Message & Record<string, any>>) {
     const channelMessageCache = MessageCache.getOrCreate(channelId);
     if (!channelMessageCache.has(messageId)) return;
 
