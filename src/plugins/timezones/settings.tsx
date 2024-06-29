@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
@@ -24,10 +23,13 @@ import { classes } from "@utils/misc";
 import { IPluginOptionComponentProps, OptionType } from "@utils/types";
 import { Text } from "@webpack/common";
 
-import { DEFAULT_API, Snowflake } from "./api";
-import { TimezoneCache } from "./cache";
+import { Snowflake } from "./api";
 
+/** A mapping of each user id to the override, being either a timezone or "disabled" */
 export type TimezoneOverrides = Record<Snowflake, string | null>;
+
+/* A mapping of each authorized user id to the JWT token returned by the API. */
+export type TimezoneDBTokens = Record<Snowflake, string>;
 
 const settings = definePluginSettings({
     enableApi: {
@@ -35,14 +37,10 @@ const settings = definePluginSettings({
         description: "Fetch user timezones from TimezoneDB when a local override does not exist",
         default: true,
     },
-    apiUrl: {
-        type: OptionType.STRING,
-        description: "The TimezoneDB API instance",
-        default: DEFAULT_API,
-        placeholder: DEFAULT_API,
-        onChange(_: string) {
-            DataStore.clear(TimezoneCache).catch(_ => _);
-        },
+    tokens: {
+        type: OptionType.COMPONENT,
+        description: "Authorization with TimezoneDB",
+        component: props => <AuthorizeTimezoneDBSetting {...props} />,
     },
     displayInChat: {
         type: OptionType.BOOLEAN,
@@ -57,21 +55,13 @@ const settings = definePluginSettings({
     timezoneOverrides: {
         type: OptionType.COMPONENT,
         description: "Local overrides for users' timezones",
-        component: props => <>
-            <TimezoneOverridesSetting
-                setValue={props.setValue}
-                setError={props.setError}
-                option={props.option} />
-        </>,
+        component: props => <TimezoneOverridesSetting {...props} />,
     },
 });
 
 export default settings;
 
 export function SettingsComponent(): JSX.Element {
-    // const { apiUrl } = settings.use(["apiUrl"]);
-    // const url = `${apiUrl}/../?client_mod=${encodeURIComponent(VENCORD_USER_AGENT)}`;
-
     return <>
         <Text variant="text-md/normal" className={classes(Margins.top16, Margins.bottom20)}>
             This plugin supports setting your own timezone publicly for others to
@@ -82,5 +72,9 @@ export function SettingsComponent(): JSX.Element {
 }
 
 function TimezoneOverridesSetting(props: IPluginOptionComponentProps): JSX.Element {
+    return <></>;
+}
+
+function AuthorizeTimezoneDBSetting(props: IPluginOptionComponentProps): JSX.Element {
     return <></>;
 }

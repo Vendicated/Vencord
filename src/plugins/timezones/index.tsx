@@ -7,14 +7,12 @@
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { CogWheel } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { Menu, UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
-import { Promisable } from "type-fest";
 
-import { verifyApi } from "./api";
-import { LocalTimestamp, openTimezoneOverrideModal } from "./components";
+import { LocalTimestamp } from "./components/LocalTimestamp";
+import { openTimezoneOverrideModal } from "./components/SetTimezoneOverrideModal";
 import settings, { SettingsComponent } from "./settings";
 
 const contextMenuPatch: NavContextMenuPatchCallback = (children, { user }: { user: User }) => {
@@ -57,7 +55,7 @@ export default definePlugin({
             },
         })),
         {
-            find: '"Message Username"',
+            find: "\"Message Username\"",
             replacement: {
                 match: /(?<=isVisibleOnlyOnHover.+?)id:.{1,11},timestamp.{1,50}}\),/,
                 replace: "$&,$self.renderMessageTimezone(arguments[0]),",
@@ -68,20 +66,6 @@ export default definePlugin({
     contextMenus: {
         "user-profile-actions": contextMenuPatch,
         "user-profile-overflow-menu": contextMenuPatch,
-    },
-
-    beforeSave(options: Record<string, any>): Promisable<true | string> {
-        // Check that API url is valid
-        const { apiUrl } = options;
-        if (!apiUrl) return "Invalid API url!";
-
-        return verifyApi(apiUrl).then(success => {
-            if (success) return true;
-            return "Failed to verify API!";
-        }).catch(err => {
-            new Logger("Timezones").info("Failed to verify API url", err);
-            return "Failed to verify API!";
-        });
     },
 
     renderProfileTimezone: (props?: { user?: User; }) => {

@@ -6,33 +6,33 @@
 
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { Logger } from "@utils/Logger";
+import { UserStore } from "@webpack/common";
 
 import settings from "./settings";
 
-export const DEFAULT_API = "https://timezonedb.catvibers.me/api";
+export const API_URL: string = "https://timezonedb.catvibers.me/api";
 
 export type Snowflake = string;
 type ApiError = { error: string; };
 type UserFetchResponse = ApiError | { timezoneId: string }
 type BulkFetchResponse = ApiError | Record<Snowflake, { timezoneId: string | null }>;
 
-export async function verifyApi(url: string): Promise<boolean> {
-    if (url === DEFAULT_API) return true;
-
-    const res = await fetch(url, {
+export async function verifyLogin(token: string): Promise<boolean> {
+    const res = await fetch(API_URL, {
         method: "GET",
         headers: {
             "User-Agent": VENCORD_USER_AGENT,
+            "Authorization": token,
         },
     });
 
-    return "logged_in" in await res.json();
+    const json: { logged_in?: boolean } = await res.json();
+    return !!json.logged_in;
 }
 
 export async function fetchTimezonesBulk(ids: Snowflake[]): Promise<Record<Snowflake, string | null> | undefined> {
     try {
-        const { apiUrl } = settings.store;
-        const req = await fetch(`${apiUrl}/user/bulk`, {
+        const req = await fetch(`${API_URL}/user/bulk`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -58,8 +58,7 @@ export async function fetchTimezonesBulk(ids: Snowflake[]): Promise<Record<Snowf
 
 export async function fetchTimezone(userId: Snowflake): Promise<string | null | undefined> {
     try {
-        const { apiUrl } = settings.store;
-        const req = await fetch(`${apiUrl}/user/${userId}`, {
+        const req = await fetch(`${API_URL}/user/${userId}`, {
             method: "GET",
             headers: {
                 "User-Agent": VENCORD_USER_AGENT,
@@ -79,4 +78,11 @@ export async function fetchTimezone(userId: Snowflake): Promise<string | null | 
         new Logger("Timezones").error("Failed to fetch user timezone: ", e);
         return undefined;
     }
+}
+
+export function getCurrentToken(): string | undefined {
+    const userId = UserStore.getCurrentUser().id;
+    const { tokens } = settings.store;
+
+    return tokens[userId];
 }
