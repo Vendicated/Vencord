@@ -10,6 +10,7 @@ import { Devs } from "@utils/constants";
 import { closeModal, ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Button, Menu, Slider, TextInput, useState } from "@webpack/common";
+import settings from "./settings";
 const DATA_STORE_NAME = "CFI_DATA";
 interface folderIcon{
     url: string,
@@ -24,6 +25,7 @@ interface folderProp {
 }
 let folderData: folderStoredData;
 export default definePlugin({
+    settings,
     start: async ()=>{
         folderData = await DataStore.get(DATA_STORE_NAME).catch(e => handleUpdateError(e)) || {} as folderStoredData;
     },
