@@ -25,7 +25,7 @@ import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType, type Patch } from "@utils/types";
 import type { ChannelRecord, GuildCategoryChannelRecord, GuildChannel, GuildChannelRecord, Role } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, Permissions, PermissionStore, Tooltip } from "@webpack/common";
+import { Permissions, PermissionStore, Tooltip } from "@webpack/common";
 
 import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
 
@@ -476,14 +476,11 @@ export default definePlugin({
         }
     ],
 
-    isHiddenChannel(channel?: ChannelRecord & { channelId?: string; }, checkConnect = false) {
-        if (!channel) return false;
-
-        if (channel.channelId)
-            channel = ChannelStore.getChannel(channel.channelId);
+    isHiddenChannel(channel?: ChannelRecord, checkConnect = false) {
         if (!channel || channel.isPrivate()) return false;
 
-        return !PermissionStore.can(Permissions.VIEW_CHANNEL, channel) || checkConnect && !PermissionStore.can(Permissions.CONNECT, channel);
+        return !PermissionStore.can(Permissions.VIEW_CHANNEL, channel)
+            || checkConnect && !PermissionStore.can(Permissions.CONNECT, channel);
     },
 
     resolveGuildChannels(channels: Record<string | number, GuildChannel[] | string | number>, shouldIncludeHidden: boolean) {

@@ -19,6 +19,7 @@
 import { showNotification } from "@api/Notifications";
 import { Settings, useSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { Grid } from "@components/Grid";
 import { Link } from "@components/Link";
 import { authorizeCloud, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
@@ -154,24 +155,38 @@ function CloudTab() {
                     }}
                     validate={validateUrl}
                 />
-                <Button
-                    className={Margins.top8}
-                    size={Button.Sizes.MEDIUM}
-                    color={Button.Colors.RED}
-                    disabled={!settings.cloud.authenticated}
-                    onClick={() => {
-                        AlertActionCreators.show({
-                            title: "Are you sure?",
-                            body: "Once your data is erased, we cannot recover it. There's no going back!",
-                            onConfirm: eraseAllData,
-                            confirmText: "Erase it!",
-                            confirmColor: "vc-cloud-erase-data-danger-btn",
-                            cancelText: "Nevermind"
-                        });
-                    }}
-                >
-                    Erase All Data
-                </Button>
+
+                <Grid columns={2} gap="1em" className={Margins.top8}>
+                    <Button
+                        size={Button.Sizes.MEDIUM}
+                        disabled={!settings.cloud.authenticated}
+                        onClick={async () => {
+                            await deauthorizeCloud();
+                            settings.cloud.authenticated = false;
+                            await authorizeCloud();
+                        }}
+                    >
+                        Reauthorise
+                    </Button>
+                    <Button
+                        size={Button.Sizes.MEDIUM}
+                        color={Button.Colors.RED}
+                        disabled={!settings.cloud.authenticated}
+                        onClick={() => {
+                            AlertActionCreators.show({
+                                title: "Are you sure?",
+                                body: "Once your data is erased, we cannot recover it. There's no going back!",
+                                onConfirm: eraseAllData,
+                                confirmText: "Erase it!",
+                                confirmColor: "vc-cloud-erase-data-danger-btn",
+                                cancelText: "Nevermind"
+                            });
+                        }}
+                    >
+                        Erase All Data
+                    </Button>
+                </Grid>
+
                 <Forms.FormDivider className={Margins.top16} />
             </Forms.FormSection >
             <SettingsSyncSection />

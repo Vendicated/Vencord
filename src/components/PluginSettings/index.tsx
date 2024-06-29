@@ -23,7 +23,7 @@ import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { CogWheel, InfoIcon } from "@components/Icons";
-import PluginModal from "@components/PluginSettings/PluginModal";
+import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab } from "@components/VencordSettings/shared";
 import { ChangeList } from "@utils/ChangeList";
@@ -31,7 +31,6 @@ import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
-import { openModalLazy } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import type { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -46,7 +45,7 @@ const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => 
 const cl = classNameFactory("vc-plugins-");
 const logger = new Logger("PluginSettings", "#a6d189");
 
-const InputStyles: Record<string, string> = findByPropsLazy("inputDefault", "inputWrapper");
+const InputStyles: Record<string, string> = findByPropsLazy("inputWrapper", "inputDefault", "error");
 const ButtonClasses: Record<string, string> = findByPropsLazy("button", "disabled", "enabled");
 
 
@@ -95,16 +94,6 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const isEnabled = () => settings.enabled ?? false;
-
-    function openModal() {
-        openModalLazy(() => Promise.resolve(modalProps => (
-            <PluginModal
-                {...modalProps}
-                plugin={plugin}
-                onRestartNeeded={() => { onRestartNeeded(plugin.name); }}
-            />
-        )));
-    }
 
     function toggleEnabled() {
         const wasEnabled = isEnabled();
@@ -164,7 +153,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             infoButton={
                 <button
                     role="switch"
-                    onClick={() => { openModal(); }}
+                    onClick={() => { openPluginModal(plugin, onRestartNeeded); }}
                     className={classes(ButtonClasses.button, cl("info-button"))}
                 >
                     {plugin.options && !isObjectEmpty(plugin.options)
@@ -348,8 +337,8 @@ export default function PluginSettings() {
                 Filters
             </Forms.FormTitle>
 
-            <div className={cl("filter-controls")}>
-                <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} className={Margins.bottom20} />
+            <div className={classes(Margins.bottom20, cl("filter-controls"))}>
+                <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} />
                 <div className={InputStyles.inputWrapper}>
                     <Select
                         options={[
@@ -362,6 +351,7 @@ export default function PluginSettings() {
                         select={onStatusChange}
                         isSelected={v => v === searchValue.status}
                         closeOnSelect={true}
+                        className={InputStyles.inputDefault}
                     />
                 </div>
             </div>

@@ -60,6 +60,7 @@ export declare abstract class ChannelRecordBase {
     isManaged(): boolean;
     isMediaChannel(): this is GuildMediaChannelRecord;
     isMediaPost(): boolean;
+    /** This method is functionally the same as {@link isGroupDM}. */
     isMultiUserDM(): this is GroupDMChannelRecord;
     isNSFW(): boolean;
     isOwner(userId: string): boolean;
