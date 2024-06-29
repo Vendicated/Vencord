@@ -23,7 +23,7 @@ import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { CogWheel, InfoIcon } from "@components/Icons";
-import PluginModal from "@components/PluginSettings/PluginModal";
+import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab } from "@components/VencordSettings/shared";
 import { ChangeList } from "@utils/ChangeList";
@@ -31,7 +31,6 @@ import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
-import { openModalLazy } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -96,14 +95,6 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
 
     const isEnabled = () => settings.enabled ?? false;
 
-    function openModal() {
-        openModalLazy(async () => {
-            return modalProps => {
-                return <PluginModal {...modalProps} plugin={plugin} onRestartNeeded={() => onRestartNeeded(plugin.name)} />;
-            };
-        });
-    }
-
     function toggleEnabled() {
         const wasEnabled = isEnabled();
 
@@ -160,7 +151,11 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
             infoButton={
-                <button role="switch" onClick={() => openModal()} className={classes(ButtonClasses.button, cl("info-button"))}>
+                <button
+                    role="switch"
+                    onClick={() => openPluginModal(plugin, onRestartNeeded)}
+                    className={classes(ButtonClasses.button, cl("info-button"))}
+                >
                     {plugin.options && !isObjectEmpty(plugin.options)
                         ? <CogWheel />
                         : <InfoIcon />}
