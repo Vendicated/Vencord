@@ -209,19 +209,25 @@ export default definePlugin({
             }
         },
         {
-            find: "focus()}}):null",
-            replacement: {
-                match: /\i\.isPlatformEmbedded/,
-                replace: "true"
-            }
+            find: ".Messages.COPY,hint:",
+            replacement: [
+                {
+                    match: /\i\.isPlatformEmbedded/,
+                    replace: "true"
+                },
+                {
+                    match: /\i\.\i\.copy/,
+                    replace: "Vencord.Webpack.Common.Clipboard.copy"
+                }]
         },
         // Automod add filter words
         {
-            find: "({contextMenu:!0}),",
-            replacement: {
-                match: /\i\.isPlatformEmbedded/,
-                replace: "true"
-            }
+            find: '("interactionUsernameProfile',
+            replacement:
+                {
+                    match: /\i\.isPlatformEmbedded(?=.{0,50}\.tagName)/,
+                    replace: "true"
+                },
         }
     ],
 
