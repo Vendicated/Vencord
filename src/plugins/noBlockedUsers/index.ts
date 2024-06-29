@@ -21,6 +21,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
+import { User } from "discord-types/general";
 
 const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 
@@ -108,10 +109,7 @@ export default definePlugin({
             find: ".ALLOW_EVERYONE_OR_HERE,",
             replacement: {
                 match: /(queryResults.+?)return\{results:(.+?\))}/,
-                replace: "$1" +
-                    "let results = $2;" +
-                    "results.users=results?.users?.filter(item=>!$self.isBlocked(item?.user?.id));" +
-                    "return { results }",
+                replace: "$1 return { results: $self.filterAutocompleteQuery($2) }",
             },
         },
         {
@@ -132,5 +130,9 @@ export default definePlugin({
         } catch (e) {
             new Logger(this.name).error("Failed to check if user is blocked:", e);
         }
-    }
+    },
+    filterAutocompleteQuery(results: { users: { user: User }[] }) {
+        results.users = results?.users?.filter(item => !this.isBlocked(item?.user?.id));
+        return results;
+    },
 });
