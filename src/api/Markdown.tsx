@@ -69,11 +69,9 @@ export function patchMarkdownRules(originalRules: MarkDownRules) {
 }
 
 export function insertSlateRules(slate: any) {
-    return Object.assign(
-        slate,
-        Object.fromEntries(
-            Array.from(
-                Object.entries(Rules), ([_, rules]: [string, Rules]) => Object.entries(rules).map(([name, rule]: [string, Rule]) => [name, (rule.Slate ?? slate[name]) ?? { type: "skip" }])).flat()
-        )
-    );
+    for (const [name, rule] of Object.entries(Rules)) {
+        slate[name] = rule.Slate ?? slate[name] ?? { type: "skip" };
+    }
+    return slate;
 }
+
