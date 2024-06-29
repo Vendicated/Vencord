@@ -23,13 +23,17 @@ const logger = new Logger("ServerListAPI");
 export const enum ServerListRenderPosition {
     Above,
     In,
+    Below,
 }
 
-const renderFunctionsAbove = new Set<Function>();
-const renderFunctionsIn = new Set<Function>();
+const renderFunctions = {
+    [ServerListRenderPosition.Above]: new Set<Function>(),
+    [ServerListRenderPosition.In]: new Set<Function>(),
+    [ServerListRenderPosition.Below]: new Set<Function>(),
+};
 
 function getRenderFunctions(position: ServerListRenderPosition) {
-    return position === ServerListRenderPosition.Above ? renderFunctionsAbove : renderFunctionsIn;
+    return renderFunctions[position];
 }
 
 export function addServerListElement(position: ServerListRenderPosition, renderFunction: Function) {
