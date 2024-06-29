@@ -78,8 +78,7 @@ export default definePlugin({
         // Because of that, its WebpackInstance doesnt export wreq.m or wreq.c
 
         // To circuvent this and disable Sentry we are gonna hook when wreq.g of its WebpackInstance is set.
-        // When that happens we are gonna obtain a reference to its internal module cache (wreq.c) and proxy its prototype,
-        // so, when the first require to initialize the Sentry is attempted, we are gonna forcefully throw an error and abort everything.
+        // When that happens we are gonna forcefully throw an error and abort everything.
         Object.defineProperty(Function.prototype, "g", {
             configurable: true,
 
@@ -112,28 +111,12 @@ export default definePlugin({
                     return;
                 }
 
-                const cacheExtractSym = Symbol("vencord.cacheExtract");
-                Object.defineProperty(Object.prototype, cacheExtractSym, {
-                    configurable: true,
+                new Logger("NoTrack", "#8caaee").info("Disabling Sentry by erroring its WebpackInstance");
 
-                    get(this: WebpackRequire["c"]) {
-                        new Logger("NoTrack", "#8caaee").info("Disabling Sentry by proxying its WebpackInstance cache");
-                        Object.setPrototypeOf(this, new Proxy(this, {
-                            get() {
-                                throw new Error("Sentry successfully disabled");
-                            }
-                        }));
+                Reflect.deleteProperty(Function.prototype, "g");
+                Reflect.deleteProperty(window, "DiscordSentry");
 
-                        Reflect.deleteProperty(Function.prototype, "g");
-                        Reflect.deleteProperty(Object.prototype, cacheExtractSym);
-                        Reflect.deleteProperty(window, "DiscordSentry");
-
-                        return { exports: {} };
-                    }
-                });
-
-                // WebpackRequire our fake module id
-                this(cacheExtractSym);
+                throw new Error("Sentry successfully disabled");
             }
         });
 
