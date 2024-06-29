@@ -52,7 +52,7 @@ export default definePlugin({
         {
             find: ".PANEL}),nicknameIcons",
             replacement: {
-                match: /USER_PROFILE_MEMBER_SINCE.+?userId:(.+?)}\)}\)/,
+                match: /USER_PROFILE_MEMBER_SINCE,.{0,100}userId:(.{0,3}\.id)}\)}\)/,
                 replace: "$&,$self.friendsSinceNew({userId:$1,isSidebar:true})"
             }
         },
@@ -60,7 +60,7 @@ export default definePlugin({
         {
             find: "action:\"PRESS_APP_CONNECTION\"",
             replacement: {
-                match: /USER_PROFILE_MEMBER_SINCE.+?userId:(.+?),.+?}\)}\),/,
+                match: /USER_PROFILE_MEMBER_SINCE,.{0,100}userId:(.{0,3}\.id),.{0,100}}\)}\),/,
                 replace: "$&,$self.friendsSinceNew({userId:$1,isSidebar:false}),"
             }
         }
