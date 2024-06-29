@@ -18,7 +18,7 @@
 
 import { WEBPACK_CHUNK } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import { canonicalizeMatch, canonicalizeReplacement } from "@utils/patches";
+import { canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
 import { WebpackInstance } from "discord-types/other";
 
@@ -27,7 +27,6 @@ import { patches } from "../plugins";
 import { _initWebpack, beforeInitListeners, factoryListeners, moduleListeners, subscriptions, wreq } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
-const initCallbackRegex = canonicalizeMatch(/{return \i\(".+?"\)}/);
 
 let webpackChunk: any[];
 
@@ -53,71 +52,6 @@ Object.defineProperty(window, WEBPACK_CHUNK, {
     }
 });
 
-// wreq.O is the webpack onChunksLoaded function
-// Discord uses it to await for all the chunks to be loaded before initializing the app
-// We monkey patch it to also monkey patch the initialize app callback to get immediate access to the webpack require and run our listeners before doing it
-Object.defineProperty(Function.prototype, "O", {
-    configurable: true,
-
-    set(onChunksLoaded: any) {
-        // When using react devtools or other extensions, or even when discord loads the sentry, we may also catch their webpack here.
-        // This ensures we actually got the right one
-        // this.e (wreq.e) is the method for loading a chunk, and only the main webpack has it
-        const { stack } = new Error();
-        if ((stack?.includes("discord.com") || stack?.includes("discordapp.com")) && String(this.e).includes("Promise.all")) {
-            logger.info("Found main WebpackRequire.onChunksLoaded");
-
-            delete (Function.prototype as any).O;
-
-            const originalOnChunksLoaded = onChunksLoaded;
-            onChunksLoaded = function (this: unknown, result: any, chunkIds: string[], callback: () => any, priority: number) {
-                if (callback != null && initCallbackRegex.test(callback.toString())) {
-                    Object.defineProperty(this, "O", {
-                        value: originalOnChunksLoaded,
-                        configurable: true
-                    });
-
-                    const wreq = this as WebpackInstance;
-
-                    const originalCallback = callback;
-                    callback = function (this: unknown) {
-                        logger.info("Patched initialize app callback invoked, initializing our internal references to WebpackRequire and running beforeInitListeners");
-                        _initWebpack(wreq);
-
-                        for (const beforeInitListener of beforeInitListeners) {
-                            beforeInitListener(wreq);
-                        }
-
-                        originalCallback.apply(this, arguments as any);
-                    };
-
-                    callback.toString = originalCallback.toString.bind(originalCallback);
-                    arguments[2] = callback;
-                }
-
-                originalOnChunksLoaded.apply(this, arguments as any);
-            };
-
-            onChunksLoaded.toString = originalOnChunksLoaded.toString.bind(originalOnChunksLoaded);
-
-            // Returns whether a chunk has been loaded
-            Object.defineProperty(onChunksLoaded, "j", {
-                set(v) {
-                    delete onChunksLoaded.j;
-                    onChunksLoaded.j = v;
-                    originalOnChunksLoaded.j = v;
-                },
-                configurable: true
-            });
-        }
-
-        Object.defineProperty(this, "O", {
-            value: onChunksLoaded,
-            configurable: true
-        });
-    }
-});
-
 // wreq.m is the webpack module factory.
 // normally, this is populated via webpackGlobal.push, which we patch below.
 // However, Discord has their .m prepopulated.
@@ -133,13 +67,46 @@ Object.defineProperty(Function.prototype, "m", {
         // This ensures we actually got the right one
         const { stack } = new Error();
         if ((stack?.includes("discord.com") || stack?.includes("discordapp.com")) && !Array.isArray(v)) {
-            logger.info("Found Webpack module factory", stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "");
+            const fileName = stack.match(/\/assets\/(.+?\.js)/)?.[1] ?? "";
+
+            logger.info("Found Webpack module factory", fileName);
             patchFactories(v);
+
+            // Define a setter for the bundlePath property of WebpackRequire. Only the main Webpack has this property.
+            // So if the setter is called, this means we can initialize the internal references to WebpackRequire.
+            Object.defineProperty(this, "p", {
+                configurable: true,
+
+                set(this: WebpackInstance, bundlePath: string) {
+                    Object.defineProperty(this, "p", {
+                        value: bundlePath,
+                        configurable: true,
+                        enumerable: true,
+                        writable: true
+                    });
+
+                    clearTimeout(setterTimeout);
+
+                    if (bundlePath !== "/assets/") return;
+
+                    logger.info(`Main Webpack found in ${fileName}, initializing internal references to WebpackRequire`);
+                    _initWebpack(this);
+
+                    for (const beforeInitListener of beforeInitListeners) {
+                        beforeInitListener(this);
+                    }
+                }
+            });
+            // setImmediate to clear this property setter if this is not the main Webpack.
+            // If this is the main Webpack, wreq.p will always be set before the timeout runs.
+            const setterTimeout = setTimeout(() => Reflect.deleteProperty(this, "p"), 0);
         }
 
         Object.defineProperty(this, "m", {
             value: v,
-            configurable: true
+            configurable: true,
+            enumerable: true,
+            writable: true
         });
     }
 });
