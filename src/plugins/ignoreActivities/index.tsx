@@ -223,6 +223,13 @@ export default definePlugin({
             ]
         },
         {
+            find: '="ActivityTrackingStore",',
+            replacement: {
+                match: /getVisibleRunningGames\(\).+?;(?=for)(?<=(\i)=\i\.\i\.getVisibleRunningGames.+?)/,
+                replace: (m, runningGames) => `${m}${runningGames}=${runningGames}.filter(({id,name})=>$self.isActivityNotIgnored({type:0,application_id:id,name}));`
+            }
+        },
+        {
             find: ".Messages.SETTINGS_GAMES_TOGGLE_OVERLAY",
             replacement: {
                 match: /\.Messages\.SETTINGS_GAMES_TOGGLE_OVERLAY.+?}\(\),(?<={overlay:\i,.+?=(\i),.+?)(?=!(\i))/,
