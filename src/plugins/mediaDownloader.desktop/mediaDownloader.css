@@ -1,0 +1,9 @@
+/* Only way to make on:hover styles */
+
+.media-downloader-link {
+    text-decoration: none !important;
+}
+
+.media-downloader-link:hover {
+    text-decoration: none !important;
+}
