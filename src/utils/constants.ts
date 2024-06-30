@@ -530,27 +530,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "nekohaxx",
         id: 1176270221628153886n
     },
-    MrDiamond: {
-        name: "MrDiamond",
-        id: 523338295644782592n
-    },
-    Neon: {
-        name: "Neon Gamer Bot",
-        id: 566766267046821888n,
-        badge: true
-    },
-    Zeon: {
-        name: "Zeon [BOT]",
-        id: 778062673626660875n,
-        badge: false
-    },
-    iamme: {
-        name: "i am me",
-        id: 984392761929256980n
-    },
-    deimos: {
-        name: "doeimos.png",
-        id: 1105436709669314600n
+    Antti: {
+        name: "Antti",
+        id: 312974985876471810n
     }
 } satisfies Record<string, Dev>);
 
