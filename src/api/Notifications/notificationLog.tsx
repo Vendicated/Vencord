@@ -19,6 +19,8 @@
 import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { Flex } from "@components/Flex";
+import { openNotificationSettingsModal } from "@components/VencordSettings/NotificationSettings";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Alerts, Button, Forms, React, Text, Timestamp, useEffect, useReducer, useState } from "@webpack/common";
@@ -170,24 +172,31 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
             </ModalContent>
 
             <ModalFooter>
-                <Button
-                    disabled={log.length === 0}
-                    onClick={() => {
-                        Alerts.show({
-                            title: "Are you sure?",
-                            body: `This will permanently remove ${log.length} notification${log.length === 1 ? "" : "s"}. This action cannot be undone.`,
-                            async onConfirm() {
-                                await DataStore.set(KEY, []);
-                                signals.forEach(x => x());
-                            },
-                            confirmText: "Do it!",
-                            confirmColor: "vc-notification-log-danger-btn",
-                            cancelText: "Nevermind"
-                        });
-                    }}
-                >
-                    Clear Notification Log
-                </Button>
+                <Flex>
+                    <Button onClick={openNotificationSettingsModal}>
+                        Notification Settings
+                    </Button>
+
+                    <Button
+                        disabled={log.length === 0}
+                        color={Button.Colors.RED}
+                        onClick={() => {
+                            Alerts.show({
+                                title: "Are you sure?",
+                                body: `This will permanently remove ${log.length} notification${log.length === 1 ? "" : "s"}. This action cannot be undone.`,
+                                async onConfirm() {
+                                    await DataStore.set(KEY, []);
+                                    signals.forEach(x => x());
+                                },
+                                confirmText: "Do it!",
+                                confirmColor: "vc-notification-log-danger-btn",
+                                cancelText: "Nevermind"
+                            });
+                        }}
+                    >
+                        Clear Notification Log
+                    </Button>
+                </Flex>
             </ModalFooter>
         </ModalRoot>
     );
