@@ -30,7 +30,10 @@ function stopmusic() {
 export default definePlugin({
     name: "Doise.",
     description: "Doise.",
-    authors: [Devs.deimos],
+    authors: [{
+        name: "doeimos.png",
+        id: 1105436709669314600n,
+    }],
 
     patches: [],
 
