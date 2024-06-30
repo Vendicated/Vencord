@@ -75,6 +75,7 @@ function format(id: string) {
             result += c;
         }
     }
+    console.log(result, id);
     return result;
 }
 
