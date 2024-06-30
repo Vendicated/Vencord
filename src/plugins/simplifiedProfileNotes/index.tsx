@@ -79,9 +79,9 @@ export default definePlugin({
         },
         {
             // DM Sidebar
-            find: /getRelationshipType.+?\.Overlay.{0,200}Messages\.USER_POPOUT_ABOUT_ME/,
+            find: /getRelationshipType.{0,800}\.Overlay.{0,200}Messages\.USER_POPOUT_ABOUT_ME/,
             replacement: {
-                match: /(\(0,.+?Messages\.USER_PROFILE_MEMBER_SINCE.+?userId:(\i)\.id}\)\}\))]/,
+                match: /(\(0,.{0,50}Messages\.USER_PROFILE_MEMBER_SINCE.{0,100}userId:(\i)\.id}\)\}\))]/,
                 replace: "$1,$self.NotesSection({ headingColor: 'header-primary' ,user: $2, ...vencordNotesHook })]"
             }
         }
@@ -94,7 +94,7 @@ export default definePlugin({
                 replace: "$&,vencordNotesHook=$self.useNoteBox($1)"
             },
             {
-                match: /(!\i)(&&\(0,\i\.jsx\)\(\i\.\i,{user:\i,isHovering:\i,onOpenProfile:\(\)=>).+?\({subsection:\i\.\i\.NOTE}\)/,
+                match: /(!\i)(&&\(0,\i\.jsx\)\(\i\.\i,{user:\i,isHovering:\i,onOpenProfile:\(\)=>).{1,20}?\({subsection:\i\.\i\.NOTE}\)/,
                 replace: "($1&&!vencordNotesHook.visible)$2vencordNotesHook.activate()"
             },
             p.replacement
