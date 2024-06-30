@@ -120,7 +120,7 @@ export function openImageModal(url: string, props?: Partial<React.ComponentProps
                 placeholder={url}
                 src={url}
                 renderLinkComponent={props => <MaskedLink {...props} />}
-                // FIXME: wtf is this? do we need to pass some proper component??
+                // Don't render forward message button
                 renderForwardComponent={() => null}
                 shouldHideMediaOptions={false}
                 shouldAnimate

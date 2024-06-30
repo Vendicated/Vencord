@@ -31,10 +31,20 @@ export interface ExpandableHeaderProps {
     headerText: string;
     children: React.ReactNode;
     buttons?: React.ReactNode[];
+    forceOpen?: boolean;
 }
 
-export function ExpandableHeader({ children, onMoreClick, buttons, moreTooltipText, defaultState = false, onDropDownClick, headerText }: ExpandableHeaderProps) {
-    const [showContent, setShowContent] = useState(defaultState);
+export function ExpandableHeader({
+    children,
+    onMoreClick,
+    buttons,
+    moreTooltipText,
+    onDropDownClick,
+    headerText,
+    defaultState = false,
+    forceOpen = false,
+}: ExpandableHeaderProps) {
+    const [showContent, setShowContent] = useState(defaultState || forceOpen);
 
     return (
         <>
@@ -90,6 +100,7 @@ export function ExpandableHeader({ children, onMoreClick, buttons, moreTooltipTe
                                     setShowContent(v => !v);
                                     onDropDownClick?.(showContent);
                                 }}
+                                disabled={forceOpen}
                             >
                                 <svg
                                     width="24"
