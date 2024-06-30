@@ -1,23 +1,18 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Copyright (c) 2024 sadan
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { folderProp } from ".";
 import settings, { folderIcon, folderIconsData } from "./settings";
 
-export async function setFolderUrl(props: folderProp, newData: folderIcon) {
-    // FIXME: https://canary.discord.com/channels/1015060230222131221/1032770730703716362/1256504513125158924
+export async function setFolderData(props: folderProp, newData: folderIcon) {
     if(!settings.store.folderIcons){
         settings.store.folderIcons = {};
     }
     const folderSettings = (settings.store.folderIcons as folderIconsData);
-    const data = folderSettings[props.folderId] ?? {} as folderIcon;
-    for (const k in newData){
-        data[k] = newData[k];
-    }
-    folderSettings[props.folderId] = data;
+    folderSettings[props.folderId] = newData;
 }
 
 /**

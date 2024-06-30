@@ -1,6 +1,6 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Copyright (c) 2024 sadan
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -63,10 +63,3 @@ export default definePlugin({
         }
     }
 });
-export function handleUpdateError(e: any) {
-    showNotification({
-        title: "CustomFolderIcons: Error",
-        body: "An error has occurred. Check the console for more info."
-    });
-    console.error(e);
-}

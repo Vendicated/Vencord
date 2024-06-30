@@ -1,11 +1,11 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Copyright (c) 2024 sadan
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { IPluginOptionComponentProps, OptionType } from "@utils/types";
+import { OptionType } from "@utils/types";
 
 export interface folderIcon{
     url: string,
@@ -17,17 +17,8 @@ const settings = definePluginSettings({
     folderIcons: {
         type: OptionType.COMPONENT,
         hidden: true,
-        description: "guh",
-        component: props => <>
-            <FolderIconsSettings
-                setValue={props.setValue}
-                setError={props.setError}
-                option={props.option}
-            />
-        </>
+        description: "folder icon settings",
+        component: () => <></>
     }
 });
 export default settings;
-function FolderIconsSettings(props: IPluginOptionComponentProps): JSX.Element {
-    return <></>;
-}

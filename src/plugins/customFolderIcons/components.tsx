@@ -1,6 +1,6 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Copyright (c) 2024 sadan
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -9,17 +9,20 @@ import { Button, Menu, Slider, TextInput, useState } from "@webpack/common";
 
 import { folderProp } from ".";
 import settings, { folderIconsData } from "./settings";
-import { int2rgba, setFolderUrl } from "./util";
+import { int2rgba, setFolderData } from "./util";
 
 export function ImageModal(folderProps: folderProp) {
-    const [data, setData] = useState("");
+    const [data, setData] = useState(((settings.store.folderIcons ?? {}) as folderIconsData)[folderProps.folderId]?.url ?? "");
     const [size, setSize] = useState(100);
     return (
         <>
-            <TextInput onChange={(val, _n) => {
-                setData(val);
-            }}
-            placeholder="https://example.com/image.png"
+            <TextInput
+                // this looks like a horrorshow
+                defaultValue={data}
+                onChange={(val, _n) => {
+                    setData(val);
+                }}
+                placeholder="https://example.com/image.png"
             >
             </TextInput>
             <RenderPreview folderProps={folderProps} url={data} size={size} />
@@ -34,13 +37,14 @@ export function ImageModal(folderProps: folderProp) {
                     }}
                     maxValue={200}
                     minValue={25}
+                    // [25, 200]
                     markers={Array.apply(0, Array(176)).map((_, i) => i + 25)}
                     stickToMarkers={true}
                     keyboardStep={1}
                     renderMarker={() => null} />
             </>}
             <Button onClick={() => {
-                setFolderUrl(folderProps, {
+                setFolderData(folderProps, {
                     url: data,
                     size: size
                 });
@@ -67,18 +71,18 @@ export function ImageModal(folderProps: folderProp) {
 export function RenderPreview({ folderProps, url, size }: { folderProps: folderProp; url: string; size: number; }) {
     if (!url) return null;
     return (
-        <div style={{
+        <div className="test1234" style={{
             width: "20vh",
             height: "20vh",
-            borderRadius: "24px",
+            overflow: "hidden",
+            // 16/48
+            borderRadius: "33%",
             backgroundColor: int2rgba(folderProps.folderColor, 0.4),
             display: "flex",
             justifyContent: "center",
             alignItems: "center"
         }}>
-            <img src={url} width={`${size}%`} height={`${size}%`} style={{
-                // borderRadius: "24px",
-            }} />
+            <img src={url} width={`${size}%`} height={`${size}%`} />
         </div>
     );
 }
