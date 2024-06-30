@@ -134,7 +134,7 @@ function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: st
 
 function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
     const platform = platforms.get(useLegacyPlatformType(connection.type));
-    var url = platform.getPlatformUserUrl?.(connection);
+    const url = platform.getPlatformUserUrl?.(connection);
 
     const img = (
         <img
