@@ -17,7 +17,7 @@
 */
 
 import { Margins } from "@utils/margins";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalHeader, type ModalProps, ModalRoot } from "@utils/modal";
 import { Forms, SearchableSelect, Switch, useMemo } from "@webpack/common";
 
 import { Languages } from "./languages";
@@ -29,15 +29,13 @@ const LanguageSettingKeys = ["receivedInput", "receivedOutput", "sentInput", "se
 function LanguageSelect({ settingsKey, includeAuto }: { settingsKey: typeof LanguageSettingKeys[number]; includeAuto: boolean; }) {
     const currentValue = settings.use([settingsKey])[settingsKey];
 
-    const options = useMemo(
-        () => {
-            const options = Object.entries(Languages).map(([value, label]) => ({ value, label }));
-            if (!includeAuto)
-                options.shift();
+    const options = useMemo(() => {
+        const options = Object.entries(Languages).map(([value, label]) => ({ value, label }));
+        if (!includeAuto)
+            options.shift();
 
-            return options;
-        }, []
-    );
+        return options;
+    }, []);
 
     return (
         <section className={Margins.bottom16}>
@@ -51,7 +49,7 @@ function LanguageSelect({ settingsKey, includeAuto }: { settingsKey: typeof Lang
                 placeholder={"Select a language"}
                 maxVisibleItems={5}
                 closeOnSelect={true}
-                onChange={v => settings.store[settingsKey] = v}
+                onChange={v => { settings.store[settingsKey] = v; }}
             />
         </section>
     );
@@ -63,7 +61,7 @@ function AutoTranslateToggle() {
     return (
         <Switch
             value={value}
-            onChange={v => settings.store.autoTranslate = v}
+            onChange={v => { settings.store.autoTranslate = v; }}
             note={settings.def.autoTranslate.description}
             hideBorder
         >
@@ -73,29 +71,27 @@ function AutoTranslateToggle() {
 }
 
 
-export function TranslateModal({ rootProps }: { rootProps: ModalProps; }) {
-    return (
-        <ModalRoot {...rootProps}>
-            <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle tag="h2">
-                    Translate
-                </Forms.FormTitle>
-                <ModalCloseButton onClick={rootProps.onClose} />
-            </ModalHeader>
+export const TranslateModal = ({ rootProps }: { rootProps: ModalProps; }) => (
+    <ModalRoot {...rootProps}>
+        <ModalHeader className={cl("modal-header")}>
+            <Forms.FormTitle tag="h2">
+                Translate
+            </Forms.FormTitle>
+            <ModalCloseButton onClick={rootProps.onClose} />
+        </ModalHeader>
 
-            <ModalContent className={cl("modal-content")}>
-                {LanguageSettingKeys.map(s => (
-                    <LanguageSelect
-                        key={s}
-                        settingsKey={s}
-                        includeAuto={s.endsWith("Input")}
-                    />
-                ))}
+        <ModalContent className={cl("modal-content")}>
+            {LanguageSettingKeys.map(s => (
+                <LanguageSelect
+                    key={s}
+                    settingsKey={s}
+                    includeAuto={s.endsWith("Input")}
+                />
+            ))}
 
-                <Forms.FormDivider className={Margins.bottom16} />
+            <Forms.FormDivider className={Margins.bottom16} />
 
-                <AutoTranslateToggle />
-            </ModalContent>
-        </ModalRoot>
-    );
-}
+            <AutoTranslateToggle />
+        </ModalContent>
+    </ModalRoot>
+);

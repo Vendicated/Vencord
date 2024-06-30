@@ -1,0 +1,19 @@
+{
+    "exclude": ["src"],
+
+    "compilerOptions": {
+        "exactOptionalPropertyTypes": true,
+        "noUncheckedIndexedAccess": true,
+        "strict": true,
+
+        "module": "NodeNext",
+        "typeRoots": ["./node_modules/@eslint-types", "./node_modules/@types"],
+
+        "noEmit": true,
+
+        "allowJs": true,
+        "checkJs": true,
+
+        "target": "ESNext"
+    }
+}

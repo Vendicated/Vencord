@@ -4,28 +4,28 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { PluginIpcMappings } from "@main/ipcPlugins";
+import type { PluginIpcMappings } from "@main/ipcPlugins";
 import type { UserThemeHeader } from "@main/themes";
 import { IpcEvents } from "@shared/IpcEvents";
-import { IpcRes } from "@utils/types";
+import type { IpcRes } from "@utils/types";
 import type { Settings } from "api/Settings";
 import { ipcRenderer } from "electron";
 
-function invoke<T = any>(event: IpcEvents, ...args: any[]) {
+function invoke<T = any>(event: IpcEvents, ...args: unknown[]) {
     return ipcRenderer.invoke(event, ...args) as Promise<T>;
 }
 
-export function sendSync<T = any>(event: IpcEvents, ...args: any[]) {
+export function sendSync<T = any>(event: IpcEvents, ...args: unknown[]) {
     return ipcRenderer.sendSync(event, ...args) as T;
 }
 
-const PluginHelpers = {} as Record<string, Record<string, (...args: any[]) => Promise<any>>>;
+const PluginHelpers: Record<string, Record<string, (...args: any[]) => Promise<any>>> = {};
 const pluginIpcMap = sendSync<PluginIpcMappings>(IpcEvents.GET_PLUGIN_IPC_METHOD_MAP);
 
 for (const [plugin, methods] of Object.entries(pluginIpcMap)) {
-    const map = PluginHelpers[plugin] = {};
+    const map: typeof PluginHelpers[string] = PluginHelpers[plugin] = {};
     for (const [methodName, method] of Object.entries(methods)) {
-        map[methodName] = (...args: any[]) => invoke(method as IpcEvents, ...args);
+        map[methodName] = (...args) => invoke(method as IpcEvents, ...args);
     }
 }
 
@@ -34,7 +34,7 @@ export default {
         uploadTheme: (fileName: string, fileData: string) => invoke<void>(IpcEvents.UPLOAD_THEME, fileName, fileData),
         deleteTheme: (fileName: string) => invoke<void>(IpcEvents.DELETE_THEME, fileName),
         getThemesDir: () => invoke<string>(IpcEvents.GET_THEMES_DIR),
-        getThemesList: () => invoke<Array<UserThemeHeader>>(IpcEvents.GET_THEMES_LIST),
+        getThemesList: () => invoke<UserThemeHeader[]>(IpcEvents.GET_THEMES_LIST),
         getThemeData: (fileName: string) => invoke<string | undefined>(IpcEvents.GET_THEME_DATA, fileName),
         getSystemValues: () => invoke<Record<string, string>>(IpcEvents.GET_THEME_SYSTEM_VALUES),
     },
@@ -57,11 +57,11 @@ export default {
         set: (css: string) => invoke<void>(IpcEvents.SET_QUICK_CSS, css),
 
         addChangeListener(cb: (newCss: string) => void) {
-            ipcRenderer.on(IpcEvents.QUICK_CSS_UPDATE, (_, css) => cb(css));
+            ipcRenderer.on(IpcEvents.QUICK_CSS_UPDATE, (_, css) => { cb(css); });
         },
 
         addThemeChangeListener(cb: () => void) {
-            ipcRenderer.on(IpcEvents.THEME_UPDATE, () => cb());
+            ipcRenderer.on(IpcEvents.THEME_UPDATE, () => { cb(); });
         },
 
         openFile: () => invoke<void>(IpcEvents.OPEN_QUICKCSS),
@@ -69,7 +69,7 @@ export default {
     },
 
     native: {
-        getVersions: () => process.versions as Partial<NodeJS.ProcessVersions>,
+        getVersions: (): Partial<NodeJS.ProcessVersions> => process.versions,
         openExternal: (url: string) => invoke<void>(IpcEvents.OPEN_EXTERNAL, url)
     },
 

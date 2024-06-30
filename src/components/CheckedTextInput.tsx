@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React, TextInput } from "@webpack/common";
+import { TextInput, useState } from "@webpack/common";
 
 // TODO: Refactor settings to use this as well
 interface TextInputProps {
@@ -41,14 +41,14 @@ interface TextInputProps {
  * the user an error message and only calls your onChange when the input is valid
  */
 export function CheckedTextInput({ value: initialValue, onChange, validate }: TextInputProps) {
-    const [value, setValue] = React.useState(initialValue);
-    const [error, setError] = React.useState<string>();
+    const [value, setValue] = useState(initialValue);
+    const [error, setError] = useState<string>();
 
     function handleChange(v: string) {
         setValue(v);
         const res = validate(v);
         if (res === true) {
-            setError(void 0);
+            setError(undefined);
             onChange(v);
         } else {
             setError(res);

@@ -6,10 +6,9 @@
 
 import { debounce } from "@shared/debounce";
 import { proxyLazy } from "@utils/lazy";
+import type { AvatarDecorationData, UserRecord } from "@vencord/discord-types";
 import { useEffect, useState, zustandCreate } from "@webpack/common";
-import { User } from "discord-types/general";
 
-import { AvatarDecoration } from "../../";
 import { getUsersDecorations } from "../api";
 import { DECORATION_FETCH_COOLDOWN, SKU_ID } from "../constants";
 
@@ -22,15 +21,19 @@ interface UsersDecorationsState {
     usersDecorations: Map<string, UserDecorationData>;
     fetchQueue: Set<string>;
     bulkFetch: () => Promise<void>;
-    fetch: (userId: string, force?: boolean) => Promise<void>;
-    fetchMany: (userIds: string[]) => Promise<void>;
+    fetch: (userId: string, force?: boolean) => void;
+    fetchMany: (userIds: string[]) => void;
     get: (userId: string) => UserDecorationData | undefined;
     getAsset: (userId: string) => string | null | undefined;
     has: (userId: string) => boolean;
     set: (userId: string, decoration: string | null) => void;
 }
 
-export const useUsersDecorationsStore = proxyLazy(() => zustandCreate((set: any, get: any) => ({
+export const useUsersDecorationsStore: {
+    (): UsersDecorationsState;
+    getState: () => UsersDecorationsState
+    subscribe: (handler: (state: UsersDecorationsState) => void) => () => void;
+} = proxyLazy(() => zustandCreate((set: any, get: any): UsersDecorationsState => ({
     usersDecorations: new Map<string, UserDecorationData>(),
     fetchQueue: new Set(),
     bulkFetch: debounce(async () => {
@@ -53,7 +56,7 @@ export const useUsersDecorationsStore = proxyLazy(() => zustandCreate((set: any,
 
         set({ usersDecorations: newUsersDecorations });
     }),
-    async fetch(userId: string, force: boolean = false) {
+    fetch(userId: string, force: boolean = false) {
         const { usersDecorations, fetchQueue, bulkFetch } = get();
 
         const { fetchedAt } = usersDecorations.get(userId) ?? {};
@@ -64,7 +67,7 @@ export const useUsersDecorationsStore = proxyLazy(() => zustandCreate((set: any,
         set({ fetchQueue: new Set(fetchQueue).add(userId) });
         bulkFetch();
     },
-    async fetchMany(userIds) {
+    fetchMany(userIds) {
         if (!userIds.length) return;
         const { usersDecorations, fetchQueue, bulkFetch } = get();
 
@@ -92,9 +95,9 @@ export const useUsersDecorationsStore = proxyLazy(() => zustandCreate((set: any,
         newUsersDecorations.set(userId, { asset: decoration, fetchedAt: new Date() });
         set({ usersDecorations: newUsersDecorations });
     }
-} as UsersDecorationsState)));
+})));
 
-export function useUserDecorAvatarDecoration(user?: User): AvatarDecoration | null | undefined {
+export function useUserDecorAvatarDecoration(user?: UserRecord): AvatarDecorationData | null | undefined {
     const [decorAvatarDecoration, setDecorAvatarDecoration] = useState<string | null>(user ? useUsersDecorationsStore.getState().getAsset(user.id) ?? null : null);
 
     useEffect(() => {

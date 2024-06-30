@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, type NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Flex } from "@components/Flex";
 import { OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
@@ -36,69 +36,67 @@ function search(src: string, engine: string) {
     open(engine + encodeURIComponent(src), "_blank");
 }
 
-function makeSearchItem(src: string) {
-    return (
+const makeSearchItem = (src: string) => (
+    <Menu.MenuItem
+        label="Search Image"
+        key="search-image"
+        id="search-image"
+    >
+        {(Object.keys(Engines) as (keyof typeof Engines)[]).map((engine, i) => {
+            const key = "search-image-" + engine;
+            return (
+                <Menu.MenuItem
+                    key={key}
+                    id={key}
+                    label={
+                        <Flex style={{ alignItems: "center", gap: "0.5em" }}>
+                            <img
+                                style={{
+                                    borderRadius: i >= 3 // Do not round Google, Yandex & SauceNAO
+                                        ? "50%"
+                                        : undefined
+                                }}
+                                aria-hidden="true"
+                                height={16}
+                                width={16}
+                                src={new URL("/favicon.ico", Engines[engine]).toString().replace("lens.", "")}
+                            />
+                            {engine}
+                        </Flex>
+                    }
+                    action={() => { search(src, Engines[engine]); }}
+                />
+            );
+        })}
         <Menu.MenuItem
-            label="Search Image"
-            key="search-image"
-            id="search-image"
-        >
-            {Object.keys(Engines).map((engine, i) => {
-                const key = "search-image-" + engine;
-                return (
-                    <Menu.MenuItem
-                        key={key}
-                        id={key}
-                        label={
-                            <Flex style={{ alignItems: "center", gap: "0.5em" }}>
-                                <img
-                                    style={{
-                                        borderRadius: i >= 3 // Do not round Google, Yandex & SauceNAO
-                                            ? "50%"
-                                            : void 0
-                                    }}
-                                    aria-hidden="true"
-                                    height={16}
-                                    width={16}
-                                    src={new URL("/favicon.ico", Engines[engine]).toString().replace("lens.", "")}
-                                />
-                                {engine}
-                            </Flex>
-                        }
-                        action={() => search(src, Engines[engine])}
-                    />
-                );
-            })}
-            <Menu.MenuItem
-                key="search-image-all"
-                id="search-image-all"
-                label={
-                    <Flex style={{ alignItems: "center", gap: "0.5em" }}>
-                        <OpenExternalIcon height={16} width={16} />
-                        All
-                    </Flex>
-                }
-                action={() => Object.values(Engines).forEach(e => search(src, e))}
-            />
-        </Menu.MenuItem>
-    );
-}
+            key="search-image-all"
+            id="search-image-all"
+            label={
+                <Flex style={{ alignItems: "center", gap: "0.5em" }}>
+                    <OpenExternalIcon height={16} width={16} />
+                    All
+                </Flex>
+            }
+            action={() => { Object.values(Engines).forEach(e => { search(src, e); }); }}
+        />
+    </Menu.MenuItem>
+);
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+const messageContextMenuPatch = ((children, props) => {
     if (props?.reverseImageSearchType !== "img") return;
 
     const src = props.itemHref ?? props.itemSrc;
 
     const group = findGroupChildrenByChildId("copy-link", children);
     group?.push(makeSearchItem(src));
-};
+}) satisfies NavContextMenuPatchCallback;
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+const imageContextMenuPatch = ((children, props) => {
     if (!props?.src) return;
 
     const group = findGroupChildrenByChildId("copy-native-link", children) ?? children;
     group.push(makeSearchItem(props.src));
-};
+}) satisfies NavContextMenuPatchCallback;
 
 export default definePlugin({
     name: "ReverseImageSearch",

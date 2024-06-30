@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function isTruthy<T>(item: T): item is Exclude<T, 0 | "" | false | null | undefined> {
-    return Boolean(item);
+export function isTruthy<T>(value: T): value is Exclude<T, "" | 0n | 0 | false | null | undefined> {
+    return Boolean(value);
 }
 
-export function isNonNullish<T>(item: T): item is Exclude<T, null | undefined> {
-    return item != null;
+export function isNonNullish<T>(value: T): value is Exclude<T, null | undefined> {
+    return value != null;
 }

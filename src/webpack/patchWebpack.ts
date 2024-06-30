@@ -19,8 +19,17 @@
 import { WEBPACK_CHUNK } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { canonicalizeReplacement } from "@utils/patches";
-import { PatchReplacement } from "@utils/types";
-import { WebpackInstance } from "discord-types/other";
+import type { PatchReplacement } from "@utils/types";
+// Can be removed when #2485 gets merged.
+// eslint-disable-next-line no-restricted-imports
+import type { WebpackInstance as $WebpackInstance } from "discord-types/other";
+
+interface WebpackInstance extends Omit<$WebpackInstance, "c" | "m"> {
+    // Omit removes call signatures
+    (id: number): any;
+    c?: $WebpackInstance["c"] & Record<string | number, any>;
+    m: $WebpackInstance["m"] & Record<string | number, any>;
+}
 
 import { traceFunction } from "../debug/Tracer";
 import { patches } from "../plugins";
@@ -42,7 +51,7 @@ Object.defineProperty(window, WEBPACK_CHUNK, {
                 logger.info(`Patching ${WEBPACK_CHUNK}.push`);
                 patchPush(v);
 
-                // @ts-ignore
+                // @ts-expect-error
                 delete window[WEBPACK_CHUNK];
                 window[WEBPACK_CHUNK] = v;
             }
@@ -143,19 +152,21 @@ let webpackNotInitializedLogged = false;
 
 function patchFactories(factories: Record<string, (module: any, exports: any, require: WebpackInstance) => void>) {
     for (const id in factories) {
-        let mod = factories[id];
+        let mod = factories[id]!;
 
         const originalMod = mod;
         const patchedBy = new Set();
 
         const factory = factories[id] = function (module: any, exports: any, require: WebpackInstance) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             if (wreq == null && IS_DEV) {
                 if (!webpackNotInitializedLogged) {
                     webpackNotInitializedLogged = true;
                     logger.error("WebpackRequire was not initialized, running modules without patches instead.");
                 }
 
-                return void originalMod(module, exports, require);
+                originalMod(module, exports, require);
+                return;
             }
 
             try {
@@ -165,7 +176,8 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                 if (mod === originalMod) throw err;
 
                 logger.error("Error in patched module", err);
-                return void originalMod(module, exports, require);
+                originalMod(module, exports, require);
+                return;
             }
 
             exports = module.exports;
@@ -255,10 +267,10 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
         // cause issues.
         //
         // 0, prefix is to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
-        let code: string = "0," + mod.toString().replaceAll("\n", "");
+        let code = "0," + mod.toString().replaceAll("\n", "");
 
         for (let i = 0; i < patches.length; i++) {
-            const patch = patches[i];
+            const patch = patches[i]!;
             if (patch.predicate && !patch.predicate()) continue;
 
             const moduleMatches = typeof patch.find === "string"
@@ -324,7 +336,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                         // inline require to avoid including it in !IS_DEV builds
                         const diff = (require("diff") as typeof import("diff")).diffWordsWithSpace(context, patchedContext);
                         let fmt = "%c %s ";
-                        const elements = [] as string[];
+                        const elements: string[] = [];
                         for (const d of diff) {
                             const color = d.removed
                                 ? "red"

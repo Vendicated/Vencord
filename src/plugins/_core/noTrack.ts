@@ -96,7 +96,7 @@ export default definePlugin({
                     return;
                 }
 
-                const assetPath = stack?.match(/\/assets\/.+?\.js/)?.[0];
+                const assetPath = stack.match(/\/assets\/.+?\.js/)?.[0];
                 if (!assetPath) {
                     return;
                 }
@@ -124,7 +124,6 @@ export default definePlugin({
 
             set() {
                 new Logger("NoTrack", "#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry");
-
                 Reflect.deleteProperty(Function.prototype, "g");
                 Reflect.deleteProperty(window, "DiscordSentry");
             }

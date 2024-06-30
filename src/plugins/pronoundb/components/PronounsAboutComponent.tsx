@@ -17,11 +17,11 @@
 */
 
 import { Link } from "@components/Link";
-import { Forms, React } from "@webpack/common";
+import { Forms } from "@webpack/common";
 
 export default function PronounsAboutComponent() {
     return (
-        <React.Fragment>
+        <>
             <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
             <Forms.FormText>To add your own pronouns, visit{" "}
                 <Link href="https://pronoundb.org">pronoundb.org</Link>
@@ -36,6 +36,6 @@ export default function PronounsAboutComponent() {
                 Text like "Ask me my pronouns" or "Any pronouns" will always be capitalized. <br /><br />
                 You can also configure whether or not to display pronouns for the current user (since you probably already know them)
             </Forms.FormText>
-        </React.Fragment>
+        </>
     );
 }

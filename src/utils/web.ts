@@ -38,13 +38,13 @@ export function saveFile(file: File) {
  * @param mimeTypes A comma separated list of mime types to accept, see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept#unique_file_type_specifiers
  * @returns A promise that resolves to the chosen file or null if the user cancels
  */
-export function chooseFile(mimeTypes: string) {
-    return new Promise<File | null>(resolve => {
+export const chooseFile = (mimeTypes: string) =>
+    new Promise<File | null>(resolve => {
         const input = document.createElement("input");
         input.type = "file";
         input.style.display = "none";
         input.accept = mimeTypes;
-        input.onchange = async () => {
+        input.onchange = () => {
             resolve(input.files?.[0] ?? null);
         };
 
@@ -52,4 +52,3 @@ export function chooseFile(mimeTypes: string) {
         input.click();
         setImmediate(() => document.body.removeChild(input));
     });
-}

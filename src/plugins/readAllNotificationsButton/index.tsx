@@ -22,43 +22,45 @@ import { addServerListElement, removeServerListElement, ServerListRenderPosition
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { type FluxStore, GuildChannelType, ReadStateType, type ThreadChannelRecord } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
-import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
-import { Channel } from "discord-types/general";
+import { Button, FluxDispatcher, GuildChannelStore, GuildStore, ReadStateStore } from "@webpack/common";
 
 interface ThreadJoined {
-    channel: Channel;
+    channel: ThreadChannelRecord;
     joinTimestamp: number;
 }
 
 type ThreadsJoined = Record<string, ThreadJoined>;
 type ThreadsJoinedByParent = Record<string, ThreadsJoined>;
 
-interface ActiveJoinedThreadsStore {
+const ActiveJoinedThreadsStore: FluxStore & {
     getActiveJoinedThreadsForGuild(guildId: string): ThreadsJoinedByParent;
-}
-
-const ActiveJoinedThreadsStore: ActiveJoinedThreadsStore = findStoreLazy("ActiveJoinedThreadsStore");
+} = findStoreLazy("ActiveJoinedThreadsStore");
 
 function onClick() {
-    const channels: Array<any> = [];
+    const channels: {
+        channelId: string;
+        messageId: string | null;
+        readStateType: ReadStateType;
+    }[] = [];
 
-    Object.values(GuildStore.getGuilds()).forEach(guild => {
-        GuildChannelStore.getChannels(guild.id).SELECTABLE // Array<{ channel, comparator }>
-            .concat(GuildChannelStore.getChannels(guild.id).VOCAL) // Array<{ channel, comparator }>
-            .concat(
-                Object.values(ActiveJoinedThreadsStore.getActiveJoinedThreadsForGuild(guild.id))
-                    .flatMap(threadChannels => Object.values(threadChannels))
-            )
-            .forEach((c: { channel: { id: string; }; }) => {
-                if (!ReadStateStore.hasUnread(c.channel.id)) return;
-
+    GuildStore.getGuildIds().forEach(guildId => {
+        const guildChannels = GuildChannelStore.getChannels(guildId);
+        [
+            ...guildChannels[GuildChannelType.SELECTABLE],
+            ...guildChannels[GuildChannelType.VOCAL],
+            ...Object.values(ActiveJoinedThreadsStore.getActiveJoinedThreadsForGuild(guildId))
+                .flatMap(threadChannels => Object.values(threadChannels))
+        ].forEach(({ channel: { id } }) => {
+            if (ReadStateStore.hasUnread(id)) {
                 channels.push({
-                    channelId: c.channel.id,
-                    messageId: ReadStateStore.lastMessageId(c.channel.id),
-                    readStateType: 0
+                    channelId: id,
+                    messageId: ReadStateStore.lastMessageId(id),
+                    readStateType: ReadStateType.CHANNEL
                 });
-            });
+            }
+        });
     });
 
     FluxDispatcher.dispatch({

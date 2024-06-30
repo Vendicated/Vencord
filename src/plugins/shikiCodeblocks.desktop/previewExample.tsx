@@ -1,13 +1,17 @@
 /* eslint-disable simple-header/header */
-import React from "react";
 
-const handleClick = async () =>
-    console.log((await import("@webpack/common")).Clipboard.copy("\u200b"));
+import type { FC } from "react";
 
-export const Example: React.FC<{
+async function handleClick() {
+    (await import("@webpack/common")).ClipboardUtils.copy("\u200b");
+}
+
+export const Example: FC<{
     real: boolean,
     shigged?: number,
-}> = ({ real, shigged }) => <>
-    <p>{`Shigg${real ? `ies${shigged === 0x1B ? "t" : ""}` : "y"}`}</p>
-    <button onClick={handleClick}>Click Me</button>
-</>;
+}> = ({ real, shigged }) => (
+    <>
+        <p>{`Shigg${real ? `ies${shigged === 0x1B ? "t" : ""}` : "y"}`}</p>
+        <button onClick={handleClick}>Click Me</button>
+    </>
+);

@@ -44,7 +44,7 @@ export async function getAuthorization() {
         await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
             secrets ??= {};
             // use the current user ID
-            secrets[`${origin}:${getUserId()}`] = secrets[origin];
+            secrets[`${origin}:${getUserId()}`] = secrets[origin]!;
             delete secrets[origin];
             return secrets;
         });
@@ -56,16 +56,16 @@ export async function getAuthorization() {
     return secrets[`${origin}:${getUserId()}`];
 }
 
-async function setAuthorization(secret: string) {
-    await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
+function setAuthorization(secret: string) {
+    return DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
         secrets ??= {};
         secrets[`${cloudUrlOrigin()}:${getUserId()}`] = secret;
         return secrets;
     });
 }
 
-export async function deauthorizeCloud() {
-    await DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
+export function deauthorizeCloud() {
+    return DataStore.update<Record<string, string>>("Vencord_cloudSecret", secrets => {
         secrets ??= {};
         delete secrets[`${cloudUrlOrigin()}:${getUserId()}`];
         return secrets;

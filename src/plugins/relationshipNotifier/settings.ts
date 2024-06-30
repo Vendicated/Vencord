@@ -47,7 +47,7 @@ export default definePluginSettings({
     },
     groups: {
         type: OptionType.BOOLEAN,
-        description: "Notify when removed from a group chat",
+        description: "Notify when removed from a group DM",
         default: true
     }
 });

@@ -20,7 +20,7 @@ import { classNameFactory } from "@api/Styles";
 import { hljs } from "@webpack/common";
 
 import { resolveLang } from "../api/languages";
-import { HighlighterProps } from "../components/Highlighter";
+import type { HighlighterProps } from "../components/Highlighter";
 import { HljsSetting } from "../types";
 
 export const cl = classNameFactory("shiki-");
@@ -32,6 +32,7 @@ export const shouldUseHljs = ({
     lang: HighlighterProps["lang"],
     tryHljs: HljsSetting,
 }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const hljsLang = lang ? hljs?.getLanguage?.(lang) : null;
     const shikiLang = lang ? resolveLang(lang) : null;
     const langName = shikiLang?.name;

@@ -16,16 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Button, Forms, React, TextInput } from "@webpack/common";
-import { KeyboardEvent } from "react";
+import { ModalContent, ModalFooter, ModalHeader, type ModalProps, ModalRoot } from "@utils/modal";
+import { Button, Forms, TextInput, useState } from "@webpack/common";
+import type { Dispatch, KeyboardEvent, SetStateAction } from "react";
 
-import { SessionInfo } from "../types";
+import type { Session } from "../types";
 import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "../utils";
 
-export function RenameModal({ props, session, state }: { props: ModalProps, session: SessionInfo["session"], state: [string, React.Dispatch<React.SetStateAction<string>>]; }) {
+export function RenameModal({ props, session, state }: { props: ModalProps, session: Session, state: [string, Dispatch<SetStateAction<string>>]; }) {
     const [title, setTitle] = state;
-    const [value, setValue] = React.useState(savedSessionsCache.get(session.id_hash)?.name ?? "");
+    const [value, setValue] = useState(savedSessionsCache.get(session.id_hash)?.name ?? "");
 
     function onSaveClick() {
         savedSessionsCache.set(session.id_hash, { name: value, isNew: false });
@@ -68,7 +68,7 @@ export function RenameModal({ props, session, state }: { props: ModalProps, sess
                     look={Button.Looks.LINK}
                     color={Button.Colors.LINK}
                     size={Button.Sizes.NONE}
-                    onClick={() => setValue("")}
+                    onClick={() => { setValue(""); }}
                 >
                     Reset Name
                 </Button>
@@ -84,7 +84,7 @@ export function RenameModal({ props, session, state }: { props: ModalProps, sess
                 <Button
                     color={Button.Colors.TRANSPARENT}
                     look={Button.Looks.LINK}
-                    onClick={() => props.onClose()}
+                    onClick={() => { props.onClose(); }}
                 >
                     Cancel
                 </Button>

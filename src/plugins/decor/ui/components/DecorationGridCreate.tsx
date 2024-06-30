@@ -6,25 +6,27 @@
 
 import { PlusIcon } from "@components/Icons";
 import { i18n, Text } from "@webpack/common";
-import { HTMLProps } from "react";
+import type { HTMLProps } from "react";
 
 import { DecorationGridItem } from ".";
 
-type DecorationGridCreateProps = HTMLProps<HTMLDivElement> & {
+interface DecorationGridCreateProps extends HTMLProps<HTMLDivElement> {
     onSelect: () => void;
-};
+}
 
 export default function DecorationGridCreate(props: DecorationGridCreateProps) {
-    return <DecorationGridItem
-        {...props}
-        isSelected={false}
-    >
-        <PlusIcon />
-        <Text
-            variant="text-xs/normal"
-            color="header-primary"
+    return (
+        <DecorationGridItem
+            {...props}
+            isSelected={false}
         >
-            {i18n.Messages.CREATE}
-        </Text>
-    </DecorationGridItem >;
+            <PlusIcon />
+            <Text
+                variant="text-xs/normal"
+                color="header-primary"
+            >
+                {i18n.Messages.CREATE}
+            </Text>
+        </DecorationGridItem >
+    );
 }

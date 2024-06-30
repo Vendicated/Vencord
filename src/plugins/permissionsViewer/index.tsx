@@ -18,23 +18,23 @@
 
 import "./styles.css";
 
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, type NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { SafetyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
+import type { GuildMember, GuildRecord } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, Dialog, GuildMemberStore, GuildStore, Menu, PermissionsBits, Popout, TooltipContainer, UserStore } from "@webpack/common";
-import type { Guild, GuildMember } from "discord-types/general";
+import { Button, ChannelStore, Dialog, GuildMemberStore, GuildStore, Menu, Permissions, Popout, TooltipContainer, UserStore } from "@webpack/common";
 
-import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
+import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
 import { getSortedRoles, sortPermissionOverwrites } from "./utils";
 
-const PopoutClasses = findByPropsLazy("container", "scroller", "list");
-const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "text");
+const PopoutClasses: Record<string, string> = findByPropsLazy("container", "scroller", "list");
+const RoleButtonClasses: Record<string, string> = findByPropsLazy("button", "buttonInner", "icon", "text");
 
 export const enum PermissionsSortOrder {
     HighestRole,
@@ -64,21 +64,21 @@ export const settings = definePluginSettings({
 });
 
 function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
-    if (type === MenuItemParentType.User && !GuildMemberStore.isMember(guildId, id!)) return null;
+    if (type === MenuItemParentType.User && !GuildMemberStore.isMember(guildId, id)) return null;
 
     return (
         <Menu.MenuItem
             id="perm-viewer-permissions"
             label="Permissions"
             action={() => {
-                const guild = GuildStore.getGuild(guildId);
+                const guild = GuildStore.getGuild(guildId)!;
 
                 let permissions: RoleOrUserPermission[];
                 let header: string;
 
                 switch (type) {
                     case MenuItemParentType.User: {
-                        const member = GuildMemberStore.getMember(guildId, id!);
+                        const member = GuildMemberStore.getMember(guildId, id!)!;
 
                         permissions = getSortedRoles(guild, member)
                             .map(role => ({
@@ -89,20 +89,20 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                         if (guild.ownerId === id) {
                             permissions.push({
                                 type: PermissionType.Owner,
-                                permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
+                                permissions: Object.values(Permissions).reduce((prev, curr) => prev | curr, 0n)
                             });
                         }
 
-                        header = member.nick ?? UserStore.getUser(member.userId).username;
+                        header = member.nick ?? UserStore.getUser(member.userId)!.username;
 
                         break;
                     }
 
                     case MenuItemParentType.Channel: {
-                        const channel = ChannelStore.getChannel(id!);
+                        const channel = ChannelStore.getChannel(id)!;
 
                         permissions = sortPermissionOverwrites(Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
-                            type: type as PermissionType,
+                            type: type as number as PermissionType,
                             id,
                             overwriteAllow: allow,
                             overwriteDeny: deny
@@ -131,8 +131,8 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
     );
 }
 
-function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentType): NavContextMenuPatchCallback {
-    return (children, props) => {
+const makeContextMenuPatch = (childId: string | string[], type?: MenuItemParentType) =>
+    ((children, props) => {
         if (!props) return;
         if ((type === MenuItemParentType.User && !props.user) || (type === MenuItemParentType.Guild && !props.guild) || (type === MenuItemParentType.Channel && (!props.channel || !props.guild)))
             return;
@@ -159,8 +159,7 @@ function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentT
         else if (childId === "roles" && props.guildId)
             // "roles" may not be present due to the member not having any roles. In that case, add it above "Copy ID"
             children.splice(-1, 0, <Menu.MenuGroup>{item}</Menu.MenuGroup>);
-    };
-}
+    }) satisfies NavContextMenuPatchCallback;
 
 export default definePlugin({
     name: "PermissionsViewer",
@@ -185,10 +184,10 @@ export default definePlugin({
         }
     ],
 
-    UserPermissions: (guild: Guild, guildMember: GuildMember | undefined, showBorder: boolean) =>
+    UserPermissions: (guild: GuildRecord, guildMember: GuildMember | undefined, showBorder: boolean) =>
         !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} showBorder={showBorder} />,
 
-    ViewPermissionsButton: ErrorBoundary.wrap(({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) => (
+    ViewPermissionsButton: ErrorBoundary.wrap(({ guild, guildMember }: { guild: GuildRecord; guildMember: GuildMember; }) => (
         <Popout
             position="bottom"
             align="center"

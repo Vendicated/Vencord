@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DefinedSettings, PluginOptionBase } from "@utils/types";
+import type { DefinedSettings, PluginOptionBase } from "@utils/types";
 
 export interface ISettingElementProps<T extends PluginOptionBase> {
     option: T;

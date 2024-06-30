@@ -30,7 +30,7 @@ export function removeStyle(id: string) {
     return styles.delete(id);
 }
 
-export const clearStyles = () => {
-    styles.forEach(style => style.remove());
+export function clearStyles() {
+    styles.forEach(style => { style.remove(); });
     styles.clear();
-};
+}

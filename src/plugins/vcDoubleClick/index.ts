@@ -17,13 +17,13 @@
 */
 
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { type Patch } from "@utils/types";
 import { ChannelStore, SelectedChannelStore } from "@webpack/common";
 
-const timers = {} as Record<string, {
+const timers: Record<string, {
     timeout?: NodeJS.Timeout;
     i: number;
-}>;
+}> = {};
 
 export default definePlugin({
     name: "VoiceChatDoubleClick",
@@ -33,7 +33,7 @@ export default definePlugin({
         ...[
             ".handleVoiceStatusClick", // voice channels
             ".handleClickChat" // stage channels
-        ].map(find => ({
+        ].map<Omit<Patch, "plugin">>(find => ({
             find,
             // hack: these are not React onClick, it is a custom prop handled by Discord
             // thus, replacing this with onDoubleClick won't work, and you also cannot check
@@ -57,20 +57,20 @@ export default definePlugin({
         }
     ],
 
-    shouldRunOnClick(e: MouseEvent, { channelId }) {
+    shouldRunOnClick(e: MouseEvent, { channelId }: { channelId: string; }) {
         const channel = ChannelStore.getChannel(channelId);
-        if (!channel || ![2, 13].includes(channel.type)) return true;
+        if (!channel || !channel.isGuildVocal()) return true;
         return e.detail >= 2;
     },
 
     schedule(cb: () => void, e: any) {
-        const id = e.props.channel.id as string;
+        const { id }: { id: string; } = e.props.channel;
         if (SelectedChannelStore.getVoiceChannelId() === id) {
             cb();
             return;
         }
         // use a different counter for each channel
-        const data = (timers[id] ??= { timeout: void 0, i: 0 });
+        const data = (timers[id] ??= { timeout: undefined, i: 0 });
         // clear any existing timer
         clearTimeout(data.timeout);
 

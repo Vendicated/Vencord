@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { createSocket, Socket } from "dgram";
+import { createSocket, type Socket } from "dgram";
 
-let xsoSocket: Socket;
+let xsoSocket: Socket | undefined;
 
-export function sendToOverlay(_, data: any) {
+export function sendToOverlay(_: any, data: any) {
     data.icon = Buffer.from(data.icon).toString("base64");
     const json = JSON.stringify(data);
     xsoSocket ??= createSocket("udp4");

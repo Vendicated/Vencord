@@ -21,14 +21,14 @@ import { ipcMain } from "electron";
 
 import PluginNatives from "~pluginNatives";
 
-const PluginIpcMappings = {} as Record<string, Record<string, string>>;
+const PluginIpcMappings: Record<string, Record<string, string>> = {};
 export type PluginIpcMappings = typeof PluginIpcMappings;
 
 for (const [plugin, methods] of Object.entries(PluginNatives)) {
     const entries = Object.entries(methods);
     if (!entries.length) continue;
 
-    const mappings = PluginIpcMappings[plugin] = {};
+    const mappings: PluginIpcMappings[string] = PluginIpcMappings[plugin] = {};
 
     for (const [methodName, method] of entries) {
         const key = `VencordPluginNative_${plugin}_${methodName}`;

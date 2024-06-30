@@ -20,9 +20,9 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
 import { getUniqueUsername } from "@utils/discord";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Clipboard, ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, i18n, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
-import type { Guild } from "discord-types/general";
+import { ModalCloseButton, ModalContent, ModalHeader, type ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import type { GuildRecord } from "@vencord/discord-types";
+import { ClipboardUtils, ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, i18n, Menu, Permissions, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 
 import { settings } from "..";
 import { cl, getPermissionDescription, getPermissionString } from "../utils";
@@ -42,7 +42,7 @@ export interface RoleOrUserPermission {
     overwriteDeny?: bigint;
 }
 
-function openRolesAndUsersPermissionsModal(permissions: Array<RoleOrUserPermission>, guild: Guild, header: string) {
+function openRolesAndUsersPermissionsModal(permissions: RoleOrUserPermission[], guild: GuildRecord, header: string) {
     return openModal(modalProps => (
         <RolesAndUsersPermissions
             modalProps={modalProps}
@@ -53,7 +53,7 @@ function openRolesAndUsersPermissionsModal(permissions: Array<RoleOrUserPermissi
     ));
 }
 
-function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, header }: { permissions: Array<RoleOrUserPermission>; guild: Guild; modalProps: ModalProps; header: string; }) {
+function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, header }: { permissions: RoleOrUserPermission[]; guild: GuildRecord; modalProps: ModalProps; header: string; }) {
     permissions.sort((a, b) => a.type - b.type);
 
     useStateFromStores(
@@ -65,7 +65,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
 
     useEffect(() => {
         const usersToRequest = permissions
-            .filter(p => p.type === PermissionType.User && !GuildMemberStore.isMember(guild.id, p.id!))
+            .filter(p => p.type === PermissionType.User && !GuildMemberStore.isMember(guild.id, p.id))
             .map(({ id }) => id);
 
         FluxDispatcher.dispatch({
@@ -101,13 +101,13 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                     <div className={cl("perms-container")}>
                         <div className={cl("perms-list")}>
                             {permissions.map((permission, index) => {
-                                const user = UserStore.getUser(permission.id ?? "");
+                                const user = UserStore.getUser(permission.id);
                                 const role = roles[permission.id ?? ""];
 
                                 return (
                                     <button
                                         className={cl("perms-list-item-btn")}
-                                        onClick={() => selectItem(index)}
+                                        onClick={() => { selectItem(index); }}
                                     >
                                         <div
                                             className={cl("perms-list-item", { "perms-list-item-active": selectedItemIndex === index })}
@@ -122,10 +122,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                     ));
                                                 else if (permission.type === PermissionType.User) {
                                                     ContextMenuApi.openContextMenu(e, () => (
-                                                        <UserContextMenu
-                                                            userId={permission.id!}
-                                                            onClose={modalProps.onClose}
-                                                        />
+                                                        <UserContextMenu userId={permission.id!} />
                                                     ));
                                                 }
                                             }}
@@ -139,7 +136,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                             {permission.type === PermissionType.User && user !== undefined && (
                                                 <img
                                                     className={cl("perms-user-img")}
-                                                    src={user.getAvatarURL(void 0, void 0, false)}
+                                                    src={user.getAvatarURL()}
                                                 />
                                             )}
                                             <Text variant="text-md/normal">
@@ -166,20 +163,20 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                             })}
                         </div>
                         <div className={cl("perms-perms")}>
-                            {Object.entries(PermissionsBits).map(([permissionName, bit]) => (
+                            {Object.entries(Permissions).map(([permissionName, flag]) => (
                                 <div className={cl("perms-perms-item")}>
                                     <div className={cl("perms-perms-item-icon")}>
                                         {(() => {
                                             const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
 
                                             if (permissions)
-                                                return (permissions & bit) === bit
+                                                return (permissions & flag) === flag
                                                     ? PermissionAllowedIcon()
                                                     : PermissionDeniedIcon();
 
-                                            if (overwriteAllow && (overwriteAllow & bit) === bit)
+                                            if (overwriteAllow && (overwriteAllow & flag) === flag)
                                                 return PermissionAllowedIcon();
-                                            if (overwriteDeny && (overwriteDeny & bit) === bit)
+                                            if (overwriteDeny && (overwriteDeny & flag) === flag)
                                                 return PermissionDeniedIcon();
 
                                             return PermissionDefaultIcon();
@@ -200,7 +197,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
     );
 }
 
-function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: string; onClose: () => void; }) {
+function RoleContextMenu({ guild, roleId, onClose }: { guild: GuildRecord; roleId: string; onClose: () => void; }) {
     return (
         <Menu.Menu
             navId={cl("role-context-menu")}
@@ -211,7 +208,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
                 id="vc-copy-role-id"
                 label={i18n.Messages.COPY_ID_ROLE}
                 action={() => {
-                    Clipboard.copy(roleId);
+                    ClipboardUtils.copy(roleId);
                 }}
             />
 
@@ -243,7 +240,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
     );
 }
 
-function UserContextMenu({ userId, onClose }: { userId: string; onClose: () => void; }) {
+function UserContextMenu({ userId }: { userId: string; }) {
     return (
         <Menu.Menu
             navId={cl("user-context-menu")}
@@ -254,7 +251,7 @@ function UserContextMenu({ userId, onClose }: { userId: string; onClose: () => v
                 id="vc-copy-user-id"
                 label={i18n.Messages.COPY_ID_USER}
                 action={() => {
-                    Clipboard.copy(userId);
+                    ClipboardUtils.copy(userId);
                 }}
             />
         </Menu.Menu>

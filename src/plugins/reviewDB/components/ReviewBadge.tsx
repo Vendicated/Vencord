@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { MaskedLink, React, Tooltip } from "@webpack/common";
-import { HTMLAttributes } from "react";
+import { MaskedLink, Tooltip } from "@webpack/common";
+import type { HTMLAttributes } from "react";
 
-import { Badge } from "../entities";
+import type { Badge } from "../entities";
 import { cl } from "../utils";
 
 export default function ReviewBadge(badge: Badge & { onClick?(): void; }) {

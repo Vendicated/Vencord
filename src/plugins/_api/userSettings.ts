@@ -43,7 +43,6 @@ export default definePlugin({
                     match: /updateSetting:.{0,60}USER_SETTINGS_OVERRIDE_CLEAR/,
                     replace: "userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"
                 }
-
             ]
         }
     ]

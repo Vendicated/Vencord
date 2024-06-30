@@ -17,7 +17,7 @@
 */
 
 import { onceDefined } from "@shared/onceDefined";
-import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
+import electron, { app, type BrowserWindowConstructorOptions, Menu } from "electron";
 import { dirname, join } from "path";
 
 import { initIpc } from "./ipcMain";
@@ -58,7 +58,7 @@ if (!IS_VANILLA) {
                             visible: false,
                             acceleratorWorksWhenHidden: true,
                             accelerator: "Control+Q",
-                            click: () => app.quit()
+                            click: () => { app.quit(); }
                         });
                     }
                 }
@@ -69,6 +69,7 @@ if (!IS_VANILLA) {
 
     class BrowserWindow extends electron.BrowserWindow {
         constructor(options: BrowserWindowConstructorOptions) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             if (options?.webPreferences?.preload && options.title) {
                 const original = options.webPreferences.preload;
                 options.webPreferences.preload = join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js");
@@ -142,7 +143,7 @@ if (!IS_VANILLA) {
             disabledFeatures.add("UseEcoQoSForBackgroundProcess");
             args[1] += [...disabledFeatures].join(",");
         }
-        return originalAppend.apply(this, args);
+        originalAppend.apply(this, args);
     };
 
     // disable renderer backgrounding to prevent the app from unloading when in the background

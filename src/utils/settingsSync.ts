@@ -60,18 +60,21 @@ export async function downloadSettingsBackup() {
     }
 }
 
-const toast = (type: number, message: string) =>
+function toast(type: number, message: string) {
     Toasts.show({
         type,
         message,
         id: Toasts.genId()
     });
+}
 
-const toastSuccess = () =>
+function toastSuccess() {
     toast(Toasts.Type.SUCCESS, "Settings successfully imported. Restart to apply changes!");
+}
 
-const toastFailure = (err: any) =>
+function toastFailure(err: any) {
     toast(Toasts.Type.FAILURE, `Failed to import settings: ${String(err)}`);
+}
 
 export async function uploadSettingsBackup(showToast = true): Promise<void> {
     if (IS_DISCORD_DESKTOP) {
@@ -230,7 +233,7 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
                 title: "Cloud Settings",
                 body: "Your settings have been updated! Click here to restart to fully apply changes!",
                 color: "var(--green-360)",
-                onClick: IS_WEB ? () => location.reload() : relaunch,
+                onClick: IS_WEB ? () => { location.reload(); } : relaunch,
                 noPersist: true
             });
 

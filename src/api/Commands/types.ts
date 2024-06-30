@@ -16,26 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Channel, Guild } from "discord-types/general";
-import { Promisable } from "type-fest";
+import type { ApplicationCommandOptionType, ApplicationCommandType, ChannelRecord, GuildRecord } from "@vencord/discord-types";
+import type { Promisable } from "type-fest";
 
 export interface CommandContext {
-    channel: Channel;
-    guild?: Guild;
-}
-
-export const enum ApplicationCommandOptionType {
-    SUB_COMMAND = 1,
-    SUB_COMMAND_GROUP = 2,
-    STRING = 3,
-    INTEGER = 4,
-    BOOLEAN = 5,
-    USER = 6,
-    CHANNEL = 7,
-    ROLE = 8,
-    MENTIONABLE = 9,
-    NUMBER = 10,
-    ATTACHMENT = 11,
+    channel: ChannelRecord;
+    guild?: GuildRecord;
 }
 
 export const enum ApplicationCommandInputType {
@@ -54,7 +40,7 @@ export interface Option {
     displayDescription?: string;
     required?: boolean;
     options?: Option[];
-    choices?: Array<ChoicesOption>;
+    choices?: ChoicesOption[];
 }
 
 export interface ChoicesOption {
@@ -62,12 +48,6 @@ export interface ChoicesOption {
     value: string;
     name: string;
     displayName?: string;
-}
-
-export const enum ApplicationCommandType {
-    CHAT_INPUT = 1,
-    USER = 2,
-    MESSAGE = 3,
 }
 
 export interface CommandReturnValue {

@@ -24,11 +24,11 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Forms, React } from "@webpack/common";
+import { Forms } from "@webpack/common";
 
 import hideBugReport from "./hideBugReport.css?managed";
 
-const KbdStyles = findByPropsLazy("key", "combo");
+const KbdStyles: Record<string, string> = findByPropsLazy("key", "combo");
 
 const settings = definePluginSettings({
     toolbarDevMenu: {
@@ -94,15 +94,15 @@ export default definePlugin({
         }
     ],
 
-    start: () => enableStyle(hideBugReport),
-    stop: () => disableStyle(hideBugReport),
+    start() { enableStyle(hideBugReport); },
+    stop() { disableStyle(hideBugReport); },
 
-    settingsAboutComponent: () => {
+    settingsAboutComponent() {
         const isMacOS = navigator.platform.includes("Mac");
         const modKey = isMacOS ? "cmd" : "ctrl";
         const altKey = isMacOS ? "opt" : "alt";
         return (
-            <React.Fragment>
+            <>
                 <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
                 <Forms.FormText variant="text-md/normal">
                     You can open Discord's DevTools via {" "}
@@ -112,7 +112,7 @@ export default definePlugin({
                         <kbd className={KbdStyles.key}>O</kbd>{" "}
                     </div>
                 </Forms.FormText>
-            </React.Fragment>
+            </>
         );
     },
 

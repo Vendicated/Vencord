@@ -17,12 +17,13 @@
 */
 
 import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { ApplicationCommandInputType, findOption, sendBotMessage } from "@api/Commands";
+import { findGroupChildrenByChildId, type NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxDispatcher, Menu, React } from "@webpack/common";
+import { ApplicationCommandOptionType } from "@vencord/discord-types";
+import { FluxDispatcher, Menu } from "@webpack/common";
 
 const settings = definePluginSettings({
     showIcon: {
@@ -54,7 +55,11 @@ const SilentTypingToggle: ChatBarButton = ({ isMainChat }) => {
             tooltip={isEnabled ? "Disable Silent Typing" : "Enable Silent Typing"}
             onClick={toggle}
         >
-            <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+            <svg
+                width="24"
+                height="24"
+                viewBox="0 0 576 512"
+            >
                 <path fill="currentColor" d="M528 448H48c-26.51 0-48-21.49-48-48V112c0-26.51 21.49-48 48-48h480c26.51 0 48 21.49 48 48v288c0 26.51-21.49 48-48 48zM128 180v-40c0-6.627-5.373-12-12-12H76c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm-336 96v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm-336 96v-40c0-6.627-5.373-12-12-12H76c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12zm288 0v-40c0-6.627-5.373-12-12-12H172c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h232c6.627 0 12-5.373 12-12zm96 0v-40c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12z" />
                 {isEnabled && <path d="M13 432L590 48" stroke="var(--red-500)" stroke-width="72" stroke-linecap="round" />}
             </svg>
@@ -62,8 +67,7 @@ const SilentTypingToggle: ChatBarButton = ({ isMainChat }) => {
     );
 };
 
-
-const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
+const ChatBarContextCheckbox = (children => {
     const { isEnabled, contextMenu } = settings.use(["isEnabled", "contextMenu"]);
     if (!contextMenu) return;
 
@@ -73,16 +77,15 @@ const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
 
     const idx = group.findIndex(c => c?.props?.id === "submit-button");
 
-    group.splice(idx + 1, 0,
+    group.splice(idx + 1, 0, (
         <Menu.MenuCheckboxItem
             id="vc-silent-typing"
             label="Enable Silent Typing"
             checked={isEnabled}
-            action={() => settings.store.isEnabled = !settings.store.isEnabled}
+            action={() => { settings.store.isEnabled = !settings.store.isEnabled; }}
         />
-    );
-};
-
+    ));
+}) satisfies NavContextMenuPatchCallback;
 
 export default definePlugin({
     name: "SilentTyping",
@@ -115,7 +118,7 @@ export default definePlugin({
                 type: ApplicationCommandOptionType.BOOLEAN,
             },
         ],
-        execute: async (args, ctx) => {
+        execute: (args, ctx) => {
             settings.store.isEnabled = !!findOption(args, "value", !settings.store.isEnabled);
             sendBotMessage(ctx.channel.id, {
                 content: settings.store.isEnabled ? "Silent typing enabled!" : "Silent typing disabled!",
@@ -123,11 +126,11 @@ export default definePlugin({
         },
     }],
 
-    async startTyping(channelId: string) {
+    startTyping(channelId: string) {
         if (settings.store.isEnabled) return;
         FluxDispatcher.dispatch({ type: "TYPING_START_LOCAL", channelId });
     },
 
-    start: () => addChatBarButton("SilentTyping", SilentTypingToggle),
-    stop: () => removeChatBarButton("SilentTyping"),
+    start() { addChatBarButton("SilentTyping", SilentTypingToggle); },
+    stop() { removeChatBarButton("SilentTyping"); },
 });

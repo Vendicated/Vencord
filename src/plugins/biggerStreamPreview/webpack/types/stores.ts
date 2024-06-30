@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { FluxStore } from "@webpack/types";
+import type { FluxStore } from "@vencord/discord-types";
 
 export interface ApplicationStreamPreviewStore extends FluxStore {
-    getIsPreviewLoading: (guildId: string | bigint | null, channelId: string | bigint, ownerId: string | bigint) => boolean;
-    getPreviewURL: (guildId: string | bigint | null, channelId: string | bigint, ownerId: string | bigint) => Promise<string | null>;
+    getIsPreviewLoading: (guildId: string | null | undefined, channelId: string, ownerId: string) => boolean;
+    getPreviewURL: (guildId: string | null | undefined, channelId: string, ownerId: string) => string | null;
     getPreviewURLForStreamKey: (streamKey: string) => ReturnType<ApplicationStreamPreviewStore["getPreviewURL"]>;
 }
 
@@ -48,10 +48,10 @@ export interface StreamMetadata {
 }
 
 export interface StreamingStoreState {
-    activeStreams: [string, Stream][];
-    rtcStreams: { [key: string]: RTCStream; };
-    streamerActiveStreamMetadatas: { [key: string]: StreamMetadata | null; };
-    streamsByUserAndGuild: { [key: string]: { [key: string]: ApplicationStream; }; };
+    activeStreams: [streamKey: string, stream: Stream][];
+    rtcStreams: { [streamKey: string]: RTCStream; };
+    streamerActiveStreamMetadatas: { [streamKey: string]: StreamMetadata | null; };
+    streamsByUserAndGuild: { [userId: string]: { [guildId: string]: ApplicationStream; }; };
 }
 
 /**
@@ -60,18 +60,18 @@ export interface StreamingStoreState {
 export interface ApplicationStreamingStore extends FluxStore {
     getActiveStreamForApplicationStream: (stream: ApplicationStream) => Stream | null;
     getActiveStreamForStreamKey: (streamKey: string) => Stream | null;
-    getActiveStreamForUser: (userId: string | bigint, guildId?: string | bigint | null) => Stream | null;
+    getActiveStreamForUser: (userId: string, guildId?: string | null) => Stream | null;
     getAllActiveStreams: () => Stream[];
     getAllApplicationStreams: () => ApplicationStream[];
-    getAllApplicationStreamsForChannel: (channelId: string | bigint) => ApplicationStream[];
-    getAllActiveStreamsForChannel: (channelId: string | bigint) => Stream[];
-    getAnyStreamForUser: (userId: string | bigint) => Stream | ApplicationStream | null;
-    getStreamForUser: (userId: string | bigint, guildId?: string | bigint | null) => Stream | null;
+    getAllApplicationStreamsForChannel: (channelId: string) => ApplicationStream[];
+    getAllActiveStreamsForChannel: (channelId: string) => Stream[];
+    getAnyStreamForUser: (userId: string) => Stream | ApplicationStream | null;
+    getStreamForUser: (userId: string, guildId?: string | null) => Stream | null;
     getCurrentUserActiveStream: () => Stream | null;
     getLastActiveStream: () => Stream | null;
     getState: () => StreamingStoreState;
     getRTCStream: (streamKey: string) => RTCStream | null;
     getStreamerActiveStreamMetadata: () => StreamMetadata;
     getViewerIds: (stream: ApplicationStream) => string[];
-    isSelfStreamHidden: (channelId: string | bigint | null) => boolean;
+    isSelfStreamHidden: (channelId: string | null) => boolean;
 }

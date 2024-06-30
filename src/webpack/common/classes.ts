@@ -18,7 +18,7 @@
 
 import { findByPropsLazy, findLazy } from "@webpack";
 
-import * as t from "./types/classes";
+import type * as t from "./types/classes";
 
 export const ModalImageClasses: t.ImageModalClasses = findLazy(m => m.image && m.modal && !m.applicationIcon);
 export const ButtonWrapperClasses: t.ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent");

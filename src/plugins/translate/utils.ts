@@ -36,8 +36,8 @@ export interface TranslationValue {
 }
 
 export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
-    const sourceLang = settings.store[kind + "Input"];
-    const targetLang = settings.store[kind + "Output"];
+    const sourceLang = settings.store[`${kind}Input`];
+    const targetLang = settings.store[`${kind}Output`];
 
     const url = "https://translate.googleapis.com/translate_a/single?" + new URLSearchParams({
         // see https://stackoverflow.com/a/29537590 for more params
@@ -68,7 +68,7 @@ export async function translate(kind: "received" | "sent", text: string): Promis
     return {
         src,
         text: sentences.
-            map(s => s?.trans).
+            map(s => s.trans).
             filter(Boolean).
             join("")
     };

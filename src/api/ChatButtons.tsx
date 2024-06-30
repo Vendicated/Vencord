@@ -8,16 +8,16 @@ import "./ChatButton.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
+import type { ChannelRecord } from "@vencord/discord-types";
 import { waitFor } from "@webpack";
 import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
-import { Channel } from "discord-types/general";
-import { HTMLProps, MouseEventHandler, ReactNode } from "react";
+import type { HTMLProps, JSX, MouseEventHandler, ReactNode } from "react";
 
-let ChannelTextAreaClasses: Record<"button" | "buttonContainer", string>;
+let ChannelTextAreaClasses: Record<"button" | "buttonContainer", string> | undefined;
 waitFor(["buttonContainer", "channelTextArea"], m => ChannelTextAreaClasses = m);
 
 export interface ChatBarProps {
-    channel: Channel;
+    channel: ChannelRecord;
     disabled: boolean;
     isEmpty: boolean;
     type: {
@@ -84,7 +84,11 @@ export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
 
     for (const [key, Button] of buttonFactories) {
         buttons.push(
-            <ErrorBoundary noop key={key} onError={e => logger.error(`Failed to render ${key}`, e.error)}>
+            <ErrorBoundary
+                noop
+                key={key}
+                onError={e => { logger.error(`Failed to render ${key}`, e.error); }}
+            >
                 <Button {...props} isMainChat={props.type.analyticsName === "normal"} />
             </ErrorBoundary>
         );

@@ -20,6 +20,7 @@ import type { MapValue } from "type-fest/source/entry";
 
 export type Style = MapValue<typeof VencordStyles>;
 
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 export const styleMap = window.VencordStyles ??= new Map();
 
 export function requireStyle(name: string) {
@@ -154,9 +155,14 @@ type ClassNameFactoryArg = string | string[] | Record<string, unknown> | false |
 export const classNameFactory = (prefix: string = "") => (...args: ClassNameFactoryArg[]) => {
     const classNames = new Set<string>();
     for (const arg of args) {
-        if (arg && typeof arg === "string") classNames.add(arg);
-        else if (Array.isArray(arg)) arg.forEach(name => classNames.add(name));
-        else if (arg && typeof arg === "object") Object.entries(arg).forEach(([name, value]) => value && classNames.add(name));
+        if (arg && typeof arg === "string")
+            classNames.add(arg);
+        else if (Array.isArray(arg))
+            arg.forEach(name => { classNames.add(name); });
+        else if (arg && typeof arg === "object")
+            Object.entries(arg).forEach(([name, value]) => {
+                if (value) classNames.add(name);
+            });
     }
     return Array.from(classNames, name => prefix + name).join(" ");
 };

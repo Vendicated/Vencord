@@ -23,7 +23,7 @@ export async function loadLazyChunks() {
         const chunksSearchingDone = new Promise<void>(r => chunksSearchingResolve = r);
 
         // True if resolved, false otherwise
-        const chunksSearchPromises = [] as Array<() => boolean>;
+        const chunksSearchPromises: (() => boolean)[] = [];
 
         const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?)\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/g);
 
@@ -36,7 +36,7 @@ export async function loadLazyChunks() {
             const shouldForceDefer = factoryCode.includes(".Messages.GUILD_FEED_UNFEATURE_BUTTON_TEXT");
 
             await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
-                const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Webpack.ChunkIdsRegex)).map(m => m[1]) : [];
+                const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Webpack.ChunkIdsRegex)).map(m => m[1]!) : [];
 
                 if (chunkIds.length === 0) {
                     return;
@@ -47,9 +47,8 @@ export async function loadLazyChunks() {
                 for (const id of chunkIds) {
                     if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
 
-                    const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
-                        .then(r => r.text())
-                        .then(t => t.includes("importScripts("));
+                    const isWorkerAsset = (await (await fetch(wreq.p + wreq.u(id))).text())
+                        .includes("importScripts(");
 
                     if (isWorkerAsset) {
                         invalidChunks.add(id);
@@ -61,7 +60,7 @@ export async function loadLazyChunks() {
                 }
 
                 if (!invalidChunkGroup) {
-                    validChunkGroups.add([chunkIds, entryPoint]);
+                    validChunkGroups.add([chunkIds, entryPoint!]);
                 }
             }));
 
@@ -95,7 +94,7 @@ export async function loadLazyChunks() {
                 let allResolved = true;
 
                 for (let i = 0; i < chunksSearchPromises.length; i++) {
-                    const isResolved = chunksSearchPromises[i]();
+                    const isResolved = chunksSearchPromises[i]!();
 
                     if (isResolved) {
                         // Remove finished promises to avoid having to iterate through a huge array everytime
@@ -127,14 +126,14 @@ export async function loadLazyChunks() {
 
         // Require deferred entry points
         for (const deferredRequire of deferredRequires) {
-            wreq!(deferredRequire as any);
+            wreq(deferredRequire as any);
         }
 
         // All chunks Discord has mapped to asset files, even if they are not used anymore
-        const allChunks = [] as string[];
+        const allChunks: string[] = [];
 
         // Matches "id" or id:
-        for (const currentMatch of wreq!.u.toString().matchAll(/(?:"(\d+?)")|(?:(\d+?):)/g)) {
+        for (const currentMatch of wreq.u.toString().matchAll(/(?:"(\d+?)")|(?:(\d+?):)/g)) {
             const id = currentMatch[1] ?? currentMatch[2];
             if (id == null) continue;
 
@@ -144,14 +143,11 @@ export async function loadLazyChunks() {
         if (allChunks.length === 0) throw new Error("Failed to get all chunks");
 
         // Chunks that are not loaded (not used) by Discord code anymore
-        const chunksLeft = allChunks.filter(id => {
-            return !(validChunks.has(id) || invalidChunks.has(id));
-        });
+        const chunksLeft = allChunks.filter(id => !(validChunks.has(id) || invalidChunks.has(id)));
 
         await Promise.all(chunksLeft.map(async id => {
-            const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
-                .then(r => r.text())
-                .then(t => t.includes("importScripts("));
+            const isWorkerAsset = (await (await fetch(wreq.p + wreq.u(id))).text())
+                .includes("importScripts(");
 
             // Loads and requires a chunk
             if (!isWorkerAsset) {

@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { ApplicationCommandOptionType, MessageEmbedType } from "@vencord/discord-types";
 
 export default definePlugin({
     name: "Wikisearch",
@@ -56,12 +57,14 @@ export default definePlugin({
                     srsearch: word
                 });
 
-                const data = await fetch("https://en.wikipedia.org/w/api.php?" + dataSearchParams).then(response => response.json())
-                    .catch(err => {
-                        console.log(err);
-                        sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
-                        return null;
-                    });
+                let data: any;
+                try {
+                    data = await (await fetch("https://en.wikipedia.org/w/api.php?" + dataSearchParams)).json();
+                } catch (err) {
+                    console.log(err);
+                    sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
+                    return;
+                }
 
                 if (!data) return;
 
@@ -70,14 +73,27 @@ export default definePlugin({
                     return sendBotMessage(ctx.channel.id, { content: "No results given" });
                 }
 
-                const altData = await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&prop=info%7Cdescription%7Cimages%7Cimageinfo%7Cpageimages&list=&meta=&indexpageids=1&pageids=${data.query.search[0].pageid}&formatversion=2&origin=*`)
-                    .then(res => res.json())
-                    .then(data => data.query.pages[0])
-                    .catch(err => {
-                        console.log(err);
-                        sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
-                        return null;
-                    });
+                const altDataSearchParams = new URLSearchParams({
+                    action: "query",
+                    format: "json",
+                    prop: "info|description|images|imageinfo|pageimages",
+                    list: "",
+                    meta: "",
+                    indexpageids: "1",
+                    pageids: data.query.search[0].pageid,
+                    formatversion: "2",
+                    origin: "*"
+                });
+
+                let altData: any;
+                try {
+                    altData = (await (await fetch("https://en.wikipedia.org/w/api.php?" + altDataSearchParams)).json())
+                        .query.pages[0];
+                } catch (err) {
+                    console.log(err);
+                    sendBotMessage(ctx.channel.id, { content: "There was an error. Check the console for more info" });
+                    return;
+                }
 
                 if (!altData) return;
 
@@ -92,17 +108,17 @@ export default definePlugin({
                 sendBotMessage(ctx.channel.id, {
                     embeds: [
                         {
-                            type: "rich",
+                            type: MessageEmbedType.RICH,
                             title: data.query.search[0].title,
                             url: `https://wikipedia.org/w/index.php?curid=${data.query.search[0].pageid}`,
-                            color: "0x8663BE",
+                            color: 0x8663BE,
                             description: data.query.search[0].snippet.replace(/(&nbsp;|<([^>]+)>)/ig, "").replace(/(&quot;)/ig, "\"") + "...",
                             image: thumbnail,
                             footer: {
                                 text: "Powered by the Wikimedia API",
                             },
                         }
-                    ] as any
+                    ]
                 });
             }
         }

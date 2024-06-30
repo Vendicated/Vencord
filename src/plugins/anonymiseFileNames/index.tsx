@@ -16,17 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Upload } from "@api/MessageEvents";
+import type { CloudUpload } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByCodeLazy } from "@webpack";
+import { UploadAttachmentActionCreators } from "@webpack/common";
 
-type AnonUpload = Upload & { anonymise?: boolean; };
+type AnonUpload = CloudUpload & { anonymise?: boolean; };
 
 const ActionBarIcon = findByCodeLazy(".actionBarIcon)");
-const UploadDraft = findByPropsLazy("popFirstFile", "update");
 
 const enum Methods {
     Random,
@@ -102,12 +102,12 @@ export default definePlugin({
                 tooltip={anonymise ? "Using anonymous file name" : "Using normal file name"}
                 onClick={() => {
                     upload.anonymise = !anonymise;
-                    UploadDraft.update(channelId, upload.id, draftType, {}); // dummy update so component rerenders
+                    UploadAttachmentActionCreators.update(channelId, upload.id, draftType, {}); // dummy update so component rerenders
                 }}
             >
                 {anonymise
-                    ? <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M17.06 13C15.2 13 13.64 14.33 13.24 16.1C12.29 15.69 11.42 15.8 10.76 16.09C10.35 14.31 8.79 13 6.94 13C4.77 13 3 14.79 3 17C3 19.21 4.77 21 6.94 21C9 21 10.68 19.38 10.84 17.32C11.18 17.08 12.07 16.63 13.16 17.34C13.34 19.39 15 21 17.06 21C19.23 21 21 19.21 21 17C21 14.79 19.23 13 17.06 13M6.94 19.86C5.38 19.86 4.13 18.58 4.13 17S5.39 14.14 6.94 14.14C8.5 14.14 9.75 15.42 9.75 17S8.5 19.86 6.94 19.86M17.06 19.86C15.5 19.86 14.25 18.58 14.25 17S15.5 14.14 17.06 14.14C18.62 14.14 19.88 15.42 19.88 17S18.61 19.86 17.06 19.86M22 10.5H2V12H22V10.5M15.53 2.63C15.31 2.14 14.75 1.88 14.22 2.05L12 2.79L9.77 2.05L9.72 2.04C9.19 1.89 8.63 2.17 8.43 2.68L6 9H18L15.56 2.68L15.53 2.63Z" /></svg>
-                    : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style={{ transform: "scale(-1,1)" }}><path fill="currentColor" d="M22.11 21.46L2.39 1.73L1.11 3L6.31 8.2L6 9H7.11L8.61 10.5H2V12H10.11L13.5 15.37C13.38 15.61 13.3 15.85 13.24 16.1C12.29 15.69 11.41 15.8 10.76 16.09C10.35 14.31 8.79 13 6.94 13C4.77 13 3 14.79 3 17C3 19.21 4.77 21 6.94 21C9 21 10.68 19.38 10.84 17.32C11.18 17.08 12.07 16.63 13.16 17.34C13.34 19.39 15 21 17.06 21C17.66 21 18.22 20.86 18.72 20.61L20.84 22.73L22.11 21.46M6.94 19.86C5.38 19.86 4.13 18.58 4.13 17C4.13 15.42 5.39 14.14 6.94 14.14C8.5 14.14 9.75 15.42 9.75 17C9.75 18.58 8.5 19.86 6.94 19.86M17.06 19.86C15.5 19.86 14.25 18.58 14.25 17C14.25 16.74 14.29 16.5 14.36 16.25L17.84 19.73C17.59 19.81 17.34 19.86 17.06 19.86M22 12H15.2L13.7 10.5H22V12M17.06 13C19.23 13 21 14.79 21 17C21 17.25 20.97 17.5 20.93 17.73L19.84 16.64C19.68 15.34 18.66 14.32 17.38 14.17L16.29 13.09C16.54 13.03 16.8 13 17.06 13M12.2 9L7.72 4.5L8.43 2.68C8.63 2.17 9.19 1.89 9.72 2.04L9.77 2.05L12 2.79L14.22 2.05C14.75 1.88 15.32 2.14 15.54 2.63L15.56 2.68L18 9H12.2Z" /></svg>
+                    ? <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.06 13c-1.86 0-3.42 1.33-3.82 3.1-.95-.41-1.82-.3-2.48-.01C10.35 14.31 8.79 13 6.94 13 4.77 13 3 14.79 3 17s1.77 4 3.94 4c2.06 0 3.74-1.62 3.9-3.68.34-.24 1.23-.69 2.32.02.18 2.05 1.84 3.66 3.9 3.66 2.17 0 3.94-1.79 3.94-4s-1.77-4-3.94-4M6.94 19.86c-1.56 0-2.81-1.28-2.81-2.86s1.26-2.86 2.81-2.86c1.56 0 2.81 1.28 2.81 2.86s-1.25 2.86-2.81 2.86m10.12 0c-1.56 0-2.81-1.28-2.81-2.86s1.25-2.86 2.81-2.86 2.82 1.28 2.82 2.86-1.27 2.86-2.82 2.86M22 10.5H2V12h20v-1.5m-6.47-7.87c-.22-.49-.78-.75-1.31-.58L12 2.79l-2.23-.74-.05-.01c-.53-.15-1.09.13-1.29.64L6 9h12l-2.44-6.32-.03-.05Z" /></svg>
+                    : <svg viewBox="0 0 24 24" fill="currentColor" transform="scale(-1 1)"><path d="M22.11 21.46 2.39 1.73 1.11 3l5.2 5.2L6 9h1.11l1.5 1.5H2V12h8.11l3.39 3.37c-.12.24-.2.48-.26.73-.95-.41-1.83-.3-2.48-.01C10.35 14.31 8.79 13 6.94 13 4.77 13 3 14.79 3 17s1.77 4 3.94 4c2.06 0 3.74-1.62 3.9-3.68.34-.24 1.23-.69 2.32.02.18 2.05 1.84 3.66 3.9 3.66.6 0 1.16-.14 1.66-.39l2.12 2.12 1.27-1.27m-15.17-1.6c-1.56 0-2.81-1.28-2.81-2.86 0-1.58 1.26-2.86 2.81-2.86 1.56 0 2.81 1.28 2.81 2.86 0 1.58-1.25 2.86-2.81 2.86m10.12 0c-1.56 0-2.81-1.28-2.81-2.86 0-.26.04-.5.11-.75l3.48 3.48c-.25.08-.5.13-.78.13M22 12h-6.8l-1.5-1.5H22V12m-4.94 1c2.17 0 3.94 1.79 3.94 4 0 .25-.03.5-.07.73l-1.09-1.09c-.16-1.3-1.18-2.32-2.46-2.47l-1.09-1.08c.25-.06.51-.09.77-.09M12.2 9 7.72 4.5l.71-1.82c.2-.51.76-.79 1.29-.64l.05.01 2.23.74 2.22-.74c.53-.17 1.1.09 1.32.58l.02.05L18 9h-5.8Z" /></svg>
                 }
             </ActionBarIcon>
         );

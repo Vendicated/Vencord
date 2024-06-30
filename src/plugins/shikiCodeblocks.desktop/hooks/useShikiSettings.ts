@@ -16,16 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PartialExcept } from "@utils/types";
-import { React } from "@webpack/common";
+import type { PartialExcept } from "@utils/types";
+import { useState } from "@webpack/common";
 
 import { shiki } from "../api/shiki";
-import { settings as pluginSettings, ShikiSettings } from "../settings";
+import { settings as pluginSettings, type ShikiSettings } from "../settings";
 
 export function useShikiSettings<F extends keyof ShikiSettings>(settingKeys: F[], overrides?: Partial<ShikiSettings>) {
     const settings: Partial<ShikiSettings> = pluginSettings.use(settingKeys);
-    const [isLoading, setLoading] = React.useState(false);
+    const [isLoading, setLoading] = useState(false);
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const withOverrides = { ...settings, ...overrides } as PartialExcept<ShikiSettings, F>;
     const themeUrl = withOverrides.customTheme || withOverrides.theme;
 

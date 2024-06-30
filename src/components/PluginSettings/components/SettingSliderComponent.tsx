@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionSlider } from "@utils/types";
-import { Forms, React, Slider } from "@webpack/common";
+import type { PluginOptionSlider } from "@utils/types";
+import { Forms, Slider, useEffect, useState } from "@webpack/common";
 
-import { ISettingElementProps } from ".";
+import type { ISettingElementProps } from ".";
 
 export function makeRange(start: number, end: number, step = 1) {
     const ranges: number[] = [];
@@ -32,16 +32,18 @@ export function makeRange(start: number, end: number, step = 1) {
 export function SettingSliderComponent({ option, pluginSettings, definedSettings, id, onChange, onError }: ISettingElementProps<PluginOptionSlider>) {
     const def = pluginSettings[id] ?? option.default;
 
-    const [error, setError] = React.useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         onError(error !== null);
     }, [error]);
 
     function handleChange(newValue: number): void {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
-        if (typeof isValid === "string") setError(isValid);
-        else if (!isValid) setError("Invalid input provided.");
+        if (typeof isValid === "string")
+            setError(isValid);
+        else if (!isValid)
+            setError("Invalid input provided.");
         else {
             setError(null);
             onChange(newValue);

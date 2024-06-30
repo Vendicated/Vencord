@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function onlyOnce<F extends Function>(f: F): F {
+export function onlyOnce<F extends (...args: unknown[]) => unknown>(f: F): F {
     let called = false;
     let result: any;
     return function onlyOnceWrapper(this: unknown) {
@@ -24,6 +24,7 @@ export function onlyOnce<F extends Function>(f: F): F {
 
         called = true;
 
-        return (result = f.apply(this, arguments));
-    } as unknown as F;
+        // https://github.com/microsoft/TypeScript/issues/57164
+        return (result = f.apply(this, arguments as unknown as unknown[]));
+    } as F;
 }

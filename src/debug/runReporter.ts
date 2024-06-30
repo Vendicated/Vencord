@@ -63,7 +63,7 @@ async function runReporter() {
             } catch (e) {
                 let logMessage = searchType;
                 if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
-                else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
+                else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map((arg: any) => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
                 else if (method === "mapMangledModule") {
                     const failedMappings = Object.keys(args[1]).filter(key => result?.[key] == null);
 

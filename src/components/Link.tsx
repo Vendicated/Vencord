@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React } from "@webpack/common";
+import type { AnchorHTMLAttributes, DetailedHTMLProps, PropsWithChildren } from "react";
 
-interface Props extends React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement> {
+interface Props extends DetailedHTMLProps<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement> {
     disabled?: boolean;
 }
 
-export function Link(props: React.PropsWithChildren<Props>) {
+export function Link(props: PropsWithChildren<Props>) {
     if (props.disabled) {
         props.style ??= {};
         props.style.pointerEvents = "none";

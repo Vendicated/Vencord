@@ -19,7 +19,7 @@
 import { Logger } from "@utils/Logger";
 
 if (IS_DEV || IS_REPORTER) {
-    var traces = {} as Record<string, [number, any[]]>;
+    var traces: Record<string, [number, any[]]> = {};
     var logger = new Logger("Tracer", "#FFD166");
 }
 
@@ -36,7 +36,7 @@ export const beginTrace = !(IS_DEV || IS_REPORTER) ? noop :
 export const finishTrace = !(IS_DEV || IS_REPORTER) ? noop : function finishTrace(name: string) {
     const end = performance.now();
 
-    const [start, args] = traces[name];
+    const [start, args] = traces[name]!;
     delete traces[name];
 
     logger.debug(`${name} took ${end - start}ms`, args);

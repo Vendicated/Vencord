@@ -21,37 +21,13 @@ import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { type Activity, type ActivityAssets, ActivityFlags, ActivityType, type FluxStore } from "@vencord/discord-types";
+import { findStoreLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
-
-interface ActivityAssets {
-    large_image?: string;
-    large_text?: string;
-    small_image?: string;
-    small_text?: string;
-}
-
 
 interface ActivityButton {
     label: string;
     url: string;
-}
-
-interface Activity {
-    state: string;
-    details?: string;
-    timestamps?: {
-        start?: number;
-    };
-    assets?: ActivityAssets;
-    buttons?: Array<string>;
-    name: string;
-    application_id: string;
-    metadata?: {
-        button_urls?: Array<string>;
-    };
-    type: number;
-    flags: number;
 }
 
 interface TrackData {
@@ -60,16 +36,6 @@ interface TrackData {
     artist: string;
     url: string;
     imageUrl?: string;
-}
-
-// only relevant enum values
-const enum ActivityType {
-    PLAYING = 0,
-    LISTENING = 2,
-}
-
-const enum ActivityFlag {
-    INSTANCE = 1 << 0,
 }
 
 const enum NameFormat {
@@ -86,13 +52,16 @@ const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
 
 const logger = new Logger("LastFMRichPresence");
 
-const presenceStore = findByPropsLazy("getLocalPresence");
+const SelfPresenceStore: FluxStore & Record<string, any> = findStoreLazy("SelfPresenceStore");
 
-async function getApplicationAsset(key: string): Promise<string> {
-    return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];
-}
+const getApplicationAsset = async (key: string) =>
+    (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0]!;
+
+let createdAt: number | null = null;
 
 function setActivity(activity: Activity | null) {
+    if (!activity)
+        createdAt = null;
     FluxDispatcher.dispatch({
         type: "LOCAL_ACTIVITY_UPDATE",
         activity,
@@ -275,7 +244,7 @@ export default definePlugin({
 
     async getActivity(): Promise<Activity | null> {
         if (settings.store.hideWithSpotify) {
-            for (const activity of presenceStore.getActivities()) {
+            for (const activity of SelfPresenceStore.getActivities()) {
                 if (activity.type === ActivityType.LISTENING && activity.application_id !== applicationId) {
                     // there is already music status because of Spotify or richerCider (probably more)
                     return null;
@@ -331,7 +300,11 @@ export default definePlugin({
             }
         })();
 
+        createdAt ??= Date.now();
+
         return {
+            id: "custom",
+            created_at: createdAt,
             application_id: applicationId,
             name: statusName,
 
@@ -345,7 +318,7 @@ export default definePlugin({
             },
 
             type: settings.store.useListeningStatus ? ActivityType.LISTENING : ActivityType.PLAYING,
-            flags: ActivityFlag.INSTANCE,
+            flags: ActivityFlags.INSTANCE,
         };
     }
 });

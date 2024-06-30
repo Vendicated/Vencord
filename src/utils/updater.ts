@@ -20,7 +20,7 @@ import gitHash from "~git-hash";
 
 import { Logger } from "./Logger";
 import { relaunch } from "./native";
-import { IpcRes } from "./types";
+import type { IpcRes } from "./types";
 
 export const UpdateLogger = /* #__PURE__*/ new Logger("Updater", "white");
 export let isOutdated = false;
@@ -70,7 +70,10 @@ export async function maybePromptToUpdate(confirmMessage: string, checkForDev = 
         const isOutdated = await checkForUpdates();
         if (isOutdated) {
             const wantsUpdate = confirm(confirmMessage);
-            if (wantsUpdate && isNewer) return alert("Your local copy has more recent commits. Please stash or reset them.");
+            if (wantsUpdate && isNewer) {
+                alert("Your local copy has more recent commits. Please stash or reset them.");
+                return;
+            }
             if (wantsUpdate) {
                 await update();
                 relaunch();

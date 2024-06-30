@@ -22,6 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
+import { RelationshipType, StatusType } from "@vencord/discord-types";
 import { GuildStore, PresenceStore, RelationshipStore } from "@webpack/common";
 
 const enum IndicatorType {
@@ -32,8 +33,8 @@ const enum IndicatorType {
 
 let onlineFriends = 0;
 let guildCount = 0;
-let forceUpdateFriendCount: () => void;
-let forceUpdateGuildCount: () => void;
+let forceUpdateFriendCount = () => {};
+let forceUpdateGuildCount = () => {};
 
 function FriendsIndicator() {
     forceUpdateFriendCount = useForceUpdater();
@@ -76,17 +77,15 @@ function handlePresenceUpdate() {
     const relations = RelationshipStore.getRelationships();
     for (const id of Object.keys(relations)) {
         const type = relations[id];
-        // FRIEND relationship type
-        if (type === 1 && PresenceStore.getStatus(id) !== "offline") {
+        if (type === RelationshipType.FRIEND && PresenceStore.getStatus(id) !== StatusType.OFFLINE)
             onlineFriends += 1;
-        }
     }
-    forceUpdateFriendCount?.();
+    forceUpdateFriendCount();
 }
 
 function handleGuildUpdate() {
     guildCount = GuildStore.getGuildCount();
-    forceUpdateGuildCount?.();
+    forceUpdateGuildCount();
 }
 
 export default definePlugin({
@@ -107,14 +106,16 @@ export default definePlugin({
         }
     },
 
-    renderIndicator: () => {
-        const { mode } = Settings.plugins.ServerListIndicators;
-        return <ErrorBoundary noop>
-            <div style={{ marginBottom: "4px" }}>
-                {!!(mode & IndicatorType.FRIEND) && <FriendsIndicator />}
-                {!!(mode & IndicatorType.SERVER) && <ServersIndicator />}
-            </div>
-        </ErrorBoundary>;
+    renderIndicator() {
+        const { mode } = Settings.plugins.ServerListIndicators!;
+        return (
+            <ErrorBoundary noop>
+                <div style={{ marginBottom: "4px" }}>
+                    {!!(mode & IndicatorType.FRIEND) && <FriendsIndicator />}
+                    {!!(mode & IndicatorType.SERVER) && <ServersIndicator />}
+                </div>
+            </ErrorBoundary>
+        );
     },
 
     flux: {

@@ -25,8 +25,8 @@ import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { Button, Card, Forms, React, Select, Switch, TooltipContainer } from "@webpack/common";
-import { ComponentType } from "react";
+import { Button, Card, Forms, Select, Switch, TooltipContainer, useMemo } from "@webpack/common";
+import type { ComponentType } from "react";
 
 import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "..";
 import { openNotificationSettingsModal } from "./NotificationSettings";
@@ -37,9 +37,9 @@ const cl = classNameFactory("vc-settings-");
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
 
-type KeysOfType<Object, Type> = {
-    [K in keyof Object]: Object[K] extends Type ? K : never;
-}[keyof Object];
+type KeysOfType<T extends object, Type> = keyof {
+    [Key in keyof T as T[Key] extends Type ? Key : never]: never;
+};
 
 const iconWithTooltip = (Icon: ComponentType<{ className?: string; }>, tooltip: string) => () => (
     <TooltipContainer text={tooltip}>
@@ -59,17 +59,17 @@ function VencordSettings() {
     });
     const settings = useSettings();
 
-    const donateImage = React.useMemo(() => Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE, []);
+    const donateImage = useMemo(() => Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE, []);
 
     const isWindows = navigator.platform.toLowerCase().startsWith("win");
     const isMac = navigator.platform.toLowerCase().startsWith("mac");
     const needsVibrancySettings = IS_DISCORD_DESKTOP && isMac;
 
-    const Switches: Array<false | {
+    const Switches: ({
         key: KeysOfType<typeof settings, boolean>;
         title: string;
         note: string;
-    }> =
+    } | false)[] =
         [
             {
                 key: "useQuickCss",
@@ -119,7 +119,7 @@ function VencordSettings() {
                         <NotificationLogIcon />
                     </Button>
                     <Button
-                        onClick={() => VencordNative.quickCss.openEditor()}
+                        onClick={() => { VencordNative.quickCss.openEditor(); }}
                         look={Button.Looks.BLANK}
                     >
                         <QuickCssIcon />
@@ -134,7 +134,7 @@ function VencordSettings() {
                     )}
                     {!IS_WEB && (
                         <Button
-                            onClick={() => showItemInFolder(settingsDir)}
+                            onClick={() => { showItemInFolder(settingsDir); }}
                             look={Button.Looks.BLANK}
                             disabled={settingsDirPending}
                         >
@@ -142,7 +142,7 @@ function VencordSettings() {
                         </Button>
                     )}
                     <Button
-                        onClick={() => VencordNative.native.openExternal("https://github.com/Vendicated/Vencord")}
+                        onClick={() => { VencordNative.native.openExternal("https://github.com/Vendicated/Vencord"); }}
                         look={Button.Looks.BLANK}
                         disabled={settingsDirPending}
                     >
@@ -159,7 +159,7 @@ function VencordSettings() {
                     {" "}<Button
                         look={Button.Looks.BLANK}
                         style={{ color: "var(--text-link)", display: "inline-block" }}
-                        onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}
+                        onClick={() => { openPluginModal(Vencord.Plugins.plugins.Settings!); }}
                     >
                         settings of the Settings plugin
                     </Button>!
@@ -169,7 +169,7 @@ function VencordSettings() {
                     <Switch
                         key={s.key}
                         value={settings[s.key]}
-                        onChange={v => settings[s.key] = v}
+                        onChange={v => { settings[s.key] = v; }}
                         note={s.note}
                     >
                         {s.title}
@@ -237,7 +237,7 @@ function VencordSettings() {
                             value: "hud"
                         },
                     ]}
-                    select={v => settings.macosVibrancyStyle = v}
+                    select={v => { settings.macosVibrancyStyle = v; }}
                     isSelected={v => settings.macosVibrancyStyle === v}
                     serialize={identity} />
             </>}
@@ -274,9 +274,9 @@ function DonateCard({ image }: DonateCardProps) {
                 alt=""
                 height={128}
                 style={{
-                    imageRendering: image === SHIGGY_DONATE_IMAGE ? "pixelated" : void 0,
+                    imageRendering: image === SHIGGY_DONATE_IMAGE ? "pixelated" : undefined,
                     marginLeft: "auto",
-                    transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : void 0
+                    transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : undefined
                 }}
             />
         </Card>

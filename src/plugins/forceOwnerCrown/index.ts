@@ -18,8 +18,8 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { type ChannelRecord, ChannelType, type UserRecord } from "@vencord/discord-types";
 import { GuildStore } from "@webpack/common";
-import { Channel, User } from "discord-types/general";
 
 export default definePlugin({
     name: "ForceOwnerCrown",
@@ -34,9 +34,9 @@ export default definePlugin({
             }
         }
     ],
-    isGuildOwner(props: { user: User, channel: Channel, isOwner: boolean, guildId?: string; }) {
-        if (!props?.user?.id) return props.isOwner;
-        if (props.channel?.type === 3 /* GROUP_DM */)
+    isGuildOwner(props: { user?: UserRecord, channel?: ChannelRecord, isOwner: boolean, guildId?: string; }) {
+        if (!props.user?.id) return props.isOwner;
+        if (props.channel?.type === ChannelType.GROUP_DM)
             return props.isOwner;
 
         // guild id is in props twice, fallback if the first is undefined

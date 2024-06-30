@@ -25,24 +25,30 @@ import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
+import type { FluxPersistedStore, PlatformType, ProfileConnectedAccountData, UserRecord } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Text, Tooltip, UserProfileStore } from "@webpack/common";
-import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
 
-const Section = findComponentByCodeLazy(".lastSection", "children:");
-const ThemeStore = findStoreLazy("ThemeStore");
-
-const useLegacyPlatformType: (platform: string) => string = findByCodeLazy(".TWITTER_LEGACY:");
-const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
 const getProfileThemeProps = findByCodeLazy(".getPreviewThemeColors", "primaryColor:");
+
+const Platforms: {
+    get(type: PlatformType): ConnectionPlatform;
+} = findByPropsLazy("isSupported", "getByUrl");
+
+const Section = findComponentByCodeLazy(".lastSection", "children:");
+
+const ThemeStore: FluxPersistedStore & Record<string, any> = findStoreLazy("ThemeStore");
+
+const useLegacyPlatformType: (platform: PlatformType) => PlatformType = findByCodeLazy(".TWITTER_LEGACY:");
 
 const enum Spacing {
     COMPACT,
     COZY,
     ROOMY
 }
+
 const getSpacingPx = (spacing: Spacing | undefined) => (spacing ?? Spacing.COMPACT) * 2 + 4;
 
 const settings = definePluginSettings({
@@ -63,20 +69,13 @@ const settings = definePluginSettings({
     }
 });
 
-interface Connection {
-    type: string;
-    id: string;
-    name: string;
-    verified: boolean;
-}
-
 interface ConnectionPlatform {
-    getPlatformUserUrl(connection: Connection): string;
-    icon: { lightSVG: string, darkSVG: string; };
+    getPlatformUserUrl?: (connection: ProfileConnectedAccountData) => string;
+    icon: { lightSVG: string; darkSVG: string; };
 }
 
 const profilePopoutComponent = ErrorBoundary.wrap(
-    (props: { user: User; displayProfile?: any; simplified?: boolean; }) => (
+    (props: { user: UserRecord; displayProfile?: any; simplified?: boolean; }) => (
         <ConnectionsComponent
             {...props}
             id={props.user.id}
@@ -101,8 +100,8 @@ function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: st
     if (!profile)
         return null;
 
-    const connections: Connection[] = profile.connectedAccounts;
-    if (!connections?.length)
+    const connections = profile.connectedAccounts;
+    if (connections.length <= 0)
         return null;
 
     const connectionsContainer = (
@@ -132,8 +131,8 @@ function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: st
     );
 }
 
-function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
-    const platform = platforms.get(useLegacyPlatformType(connection.type));
+function CompactConnectionComponent({ connection, theme }: { connection: ProfileConnectedAccountData, theme: string; }) {
+    const platform = Platforms.get(useLegacyPlatformType(connection.type));
     const url = platform.getPlatformUserUrl?.(connection);
 
     const img = (
@@ -180,7 +179,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
                     : <button
                         {...tooltipProps}
                         className="vc-user-connection"
-                        onClick={() => copyWithToast(connection.name)}
+                        onClick={() => { copyWithToast(connection.name); }}
                     >
                         {img}
                     </button>

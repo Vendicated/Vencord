@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Clipboard, React } from "@webpack/common";
+import { ClipboardUtils, useState } from "@webpack/common";
 
 export function useCopyCooldown(cooldown: number) {
-    const [copyCooldown, setCopyCooldown] = React.useState(false);
+    const [copyCooldown, setCopyCooldown] = useState(false);
 
     function copy(text: string) {
-        Clipboard.copy(text);
+        ClipboardUtils.copy(text);
         setCopyCooldown(true);
 
         setTimeout(() => {

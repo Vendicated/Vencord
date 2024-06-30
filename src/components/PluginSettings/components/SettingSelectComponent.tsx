@@ -16,22 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { PluginOptionSelect } from "@utils/types";
-import { Forms, React, Select } from "@webpack/common";
+import type { PluginOptionSelect } from "@utils/types";
+import { Forms, Select, useEffect, useState } from "@webpack/common";
 
-import { ISettingElementProps } from ".";
+import type { ISettingElementProps } from ".";
 
 export function SettingSelectComponent({ option, pluginSettings, definedSettings, onChange, onError, id }: ISettingElementProps<PluginOptionSelect>) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const def = pluginSettings[id] ?? option.options?.find(o => o.default)?.value;
 
-    const [state, setState] = React.useState<any>(def ?? null);
-    const [error, setError] = React.useState<string | null>(null);
+    const [state, setState] = useState<any>(def ?? null);
+    const [error, setError] = useState<string | null>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         onError(error !== null);
     }, [error]);
 
-    function handleChange(newValue) {
+    function handleChange(newValue: any) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");

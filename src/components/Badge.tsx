@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function Badge({ text, color }): JSX.Element {
-    return (
-        <div className="vc-plugins-badge" style={{
-            backgroundColor: color,
-            justifySelf: "flex-end",
-            marginLeft: "auto"
-        }}>
-            {text}
-        </div>
-    );
-}
+import type { ReactNode } from "react";
+
+export const Badge = ({ text, color }: { text: ReactNode; color: string; }) => (
+    <div className="vc-plugins-badge" style={{
+        backgroundColor: color,
+        justifySelf: "flex-end",
+        marginLeft: "auto"
+    }}>
+        {text}
+    </div>
+);

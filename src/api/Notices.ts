@@ -21,7 +21,7 @@ import { waitFor } from "@webpack";
 let NoticesModule: any;
 waitFor(m => m.show && m.dismiss && !m.suppressAll, m => NoticesModule = m);
 
-export const noticesQueue = [] as any[];
+export const noticesQueue: any[] = [];
 export let currentNotice: any = null;
 
 export function popNotice() {

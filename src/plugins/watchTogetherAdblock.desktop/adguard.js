@@ -201,11 +201,14 @@ const jsonOverride = (propertyName, overrideValue) => {
             // Call the target function, get the original Promise
             const promise = Reflect.apply(...args);
             // Create a new one and override the JSON inside
-            return new Promise((resolve, reject) => {
-                promise.then(data => {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    const data = await promise;
                     overrideObject(data, propertyName, overrideValue);
                     resolve(data);
-                }).catch(error => reject(error));
+                } catch (error) {
+                    reject(error);
+                }
             });
         },
     });
