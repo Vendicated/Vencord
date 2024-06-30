@@ -134,7 +134,7 @@ function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: st
 
 function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
     const platform = platforms.get(useLegacyPlatformType(connection.type));
-    const url = platform.getPlatformUserUrl?.(connection);
+    var url = platform.getPlatformUserUrl?.(connection);
 
     const img = (
         <img
@@ -146,6 +146,11 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
             }}
         />
     );
+
+    if (Vencord.Plugins.isPluginEnabled("OpenMoreConnections") && url == null) {
+        const OpenMoreConnections = Vencord.Plugins.plugins.OpenMoreConnections as any as typeof import("../openMoreConnections").default;
+        url = OpenMoreConnections.addConnectionLink(connection) as string;
+    }
 
     const TooltipIcon = url ? LinkIcon : CopyIcon;
 
