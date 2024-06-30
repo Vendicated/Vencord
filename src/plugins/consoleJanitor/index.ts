@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 
 const Noop = () => { };
 const NoopLogger = {
@@ -21,10 +22,20 @@ const NoopLogger = {
     fileOnly: Noop
 };
 
+const settings = definePluginSettings({
+    disableNoisyLoggers: {
+        type: OptionType.BOOLEAN,
+        description: "Disable noisy loggers like the MessageActionCreators",
+        default: true,
+        restartNeeded: true
+    }
+});
+
 export default definePlugin({
     name: "ConsoleJanitor",
     description: "Disables annoying console messages/errors",
     authors: [Devs.Nuckyz],
+    settings,
 
     NoopLogger: () => NoopLogger,
 
@@ -79,13 +90,48 @@ export default definePlugin({
                 replace: ""
             }
         },
-        ...['("MessageActionCreators")', '("MessageQueue")', '("ChannelMessages")', '("Routing/Utils")'].map(logger => ({
+        {
+            find: "failed to send analytics events",
+            replacement: {
+                match: /console\.error\("\[analytics\] failed to send analytics events query: "\.concat\(\i\)\)/,
+                replace: ""
+            }
+        },
+        {
+            find: "Slow dispatch on",
+            replacement: {
+                match: /\i\.totalTime>100&&\i\.verbose\("Slow dispatch on ".+?\)\);/,
+                replace: ""
+            }
+        },
+        ...[
+            '("MessageActionCreators")', '("ChannelMessages")',
+            '("Routing/Utils")', '("RTCControlSocket")',
+            '("ConnectionEventFramerateReducer")', '("RTCLatencyTestManager")',
+            '("OverlayBridgeStore")', '("RPCServer:WSS")'
+        ].map(logger => ({
             find: logger,
+            predicate: () => settings.store.disableNoisyLoggers,
             all: true,
             replacement: {
                 match: new RegExp(String.raw`new \i\.\i${logger.replace(/([()])/g, "\\$1")}`),
                 replace: `$self.NoopLogger${logger}`
             }
-        }))
+        })),
+        {
+            find: '"Experimental codecs: "',
+            predicate: () => settings.store.disableNoisyLoggers,
+            replacement: {
+                match: /new \i\.\i\("Connection\("\.concat\(\i,"\)"\)\)/,
+                replace: "$self.NoopLogger()"
+            }
+        },
+        {
+            find: '"Handling ping: "',
+            replacement: {
+                match: /new \i\.\i\("RTCConnection\("\.concat.+?\)\)(?=,)/,
+                replace: "$self.NoopLogger()"
+            }
+        }
     ]
 });
