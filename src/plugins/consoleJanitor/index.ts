@@ -86,7 +86,7 @@ export default definePlugin({
         {
             find: "Unable to determine render window for element",
             replacement: {
-                match: /return console\.warn\("Unable to determine render window for element",\i\),/,
+                match: /console\.warn\("Unable to determine render window for element",\i\),/,
                 replace: ""
             }
         },
