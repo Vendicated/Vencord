@@ -8,7 +8,8 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { extractAndLoadChunksLazy, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { i18n, useEffect, useRef, useState } from "@webpack/common";
+import { i18n, useEffect, useState } from "@webpack/common";
+import { User } from "discord-types/general";
 
 const useNote = findByCodeLazy(".getNote(");
 const NoteEditor = findComponentByCodeLazy("hideNote:", ".userId);return");
@@ -25,25 +26,34 @@ const settings = definePluginSettings({
     }
 });
 
-function useNoteBox(userId: string) {
+type NoteHook = {
+    visible: boolean;
+    autoFocus: boolean;
+    note: string;
+    activate: () => void;
+};
+
+type NotesSectionProps = {
+    user: User;
+    headingColor?: string;
+};
+
+function useNoteBox(userId: string): NoteHook {
     const { note, loading } = useNote(userId);
     const [forced, setForced] = useState(!settings.store.hideWhenEmpty);
     const [autoFocus, setAutoFocus] = useState(false);
-    const editorRef = useRef<HTMLTextAreaElement>(null);
     return {
         visible: forced || (!loading && note !== undefined),
         autoFocus,
         note,
-        editorRef,
         activate() {
             setForced(true);
             setAutoFocus(true);
-            editorRef.current?.focus();
         }
     };
 }
 
-function NotesSection(props: any) {
+function NotesSection(props: NoteHook & NotesSectionProps) {
     const [loaded, setLoaded] = useState(false);
     useEffect(() => {
         requireClasses().then(() => setLoaded(true)).catch(() => { });
@@ -82,7 +92,7 @@ export default definePlugin({
             find: /getRelationshipType.{0,800}\.Overlay.{0,200}Messages\.USER_POPOUT_ABOUT_ME/,
             replacement: {
                 match: /(\(0,.{0,50}Messages\.USER_PROFILE_MEMBER_SINCE.{0,100}userId:(\i)\.id}\)\}\))]/,
-                replace: "$1,$self.NotesSection({ headingColor: 'header-primary' ,user: $2, ...vencordNotesHook })]"
+                replace: "$1,$self.NotesSection({ headingColor: 'header-primary', user: $2, ...vencordNotesHook })]"
             }
         }
     ].map(p => ({
