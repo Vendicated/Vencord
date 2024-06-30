@@ -128,6 +128,7 @@ export default definePlugin({
         },
         {
             find: '"Handling ping: "',
+            predicate: () => settings.store.disableNoisyLoggers,
             replacement: {
                 match: /new \i\.\i\("RTCConnection\("\.concat.+?\)\)(?=,)/,
                 replace: "$self.NoopLogger()"
