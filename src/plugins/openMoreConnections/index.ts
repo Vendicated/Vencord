@@ -50,7 +50,7 @@ export default definePlugin({
             case ConnectionType.Roblox:
                 return `https://www.roblox.com/users/${con.id}/profile`;
             case ConnectionType.Xbox:
-                return `https://www.xbox.com/en-US/play/user/${con.name}`;
+                return `https://www.xbox.com/play/user/${con.name}`;
         }
 
 

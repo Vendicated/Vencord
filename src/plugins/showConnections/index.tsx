@@ -147,11 +147,6 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
         />
     );
 
-    if (Vencord.Plugins.isPluginEnabled("OpenMoreConnections") && url == null) {
-        const OpenMoreConnections = Vencord.Plugins.plugins.OpenMoreConnections as any as typeof import("../openMoreConnections").default;
-        url = OpenMoreConnections.addConnectionLink(connection) as string;
-    }
-
     const TooltipIcon = url ? LinkIcon : CopyIcon;
 
     return (
