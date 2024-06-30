@@ -49,7 +49,7 @@ const iconWithTooltip = (Icon: ComponentType<{ className?: string; }>, tooltip: 
 
 const NotificationLogIcon = iconWithTooltip(LogIcon, "Open Notification Log");
 const QuickCssIcon = iconWithTooltip(PaintbrushIcon, "Edit QuickCSS");
-const RelaunchIcon = iconWithTooltip(RestartIcon, "Relaunch Discord");
+const RelaunchIcon = iconWithTooltip(RestartIcon, "Restart Discord");
 const OpenSettingsDirIcon = iconWithTooltip(FolderIcon, "Open Settings Directory");
 const OpenGithubIcon = iconWithTooltip(GithubIcon, "View Vencord's GitHub Repository");
 
