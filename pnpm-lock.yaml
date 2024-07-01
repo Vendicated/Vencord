@@ -40,6 +40,9 @@ importers:
       nanoid:
         specifier: ^4.0.2
         version: 4.0.2
+      simple-markdown:
+        specifier: ^0.7.3
+        version: 0.7.3
       virtual-merge:
         specifier: ^1.0.1
         version: 1.0.1
@@ -2157,6 +2160,9 @@ packages:
   signal-exit@4.0.1:
     resolution: {integrity: sha512-uUWsN4aOxJAS8KOuf3QMyFtgm1pkb6I+KRZbRF/ghdf5T7sM+B1lLLzPDxswUjkmHyxQAVzEgG35E3NzDM9GVw==}
     engines: {node: '>=14'}
+
+  simple-markdown@0.7.3:
+    resolution: {integrity: sha512-uGXIc13NGpqfPeFJIt/7SHHxd6HekEJYtsdoCM06mEBPL9fQH/pSD7LRM6PZ7CKchpSvxKL4tvwMamqAaNDAyg==}
 
   slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
@@ -4551,6 +4557,10 @@ snapshots:
       object-inspect: 1.13.1
 
   signal-exit@4.0.1: {}
+
+  simple-markdown@0.7.3:
+    dependencies:
+      '@types/react': 18.2.0
 
   slash@3.0.0: {}
 

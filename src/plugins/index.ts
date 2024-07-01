@@ -18,6 +18,7 @@
 
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import { AddAPendingRule } from "@api/Markdown";
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind } from "@utils/patches";
@@ -119,6 +120,9 @@ for (const p of pluginsValues) {
                 addPatch(patch, p.name);
             }
         }
+    }
+    if (p.rules && isPluginEnabled(p.name)) {
+        AddAPendingRule(p.name, p.rules);
     }
 }
 
