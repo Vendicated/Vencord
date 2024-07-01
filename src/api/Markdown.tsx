@@ -16,35 +16,42 @@ export interface Rule extends ParserRule {
     [k: string]: any;
 }
 
-export interface Rules {
+export interface SlateRule {
+    type: string;
+    after?: string;
+    before?: string;
+    [k: string]: any;
+}
+
+export interface ParserRules {
     [k: string]: Rule;
 }
 
-export interface MarkDownRules {
-    RULES: Rules;
-    CHANNEL_TOPIC_RULES: Rules;
-    VOICE_CHANNEL_STATUS_RULES: Rules;
-    EMBED_TITLE_RULES: Rules;
-    INLINE_REPLY_RULES: Rules;
-    GUILD_VERIFICATION_FORM_RULES: Rules;
-    GUILD_EVENT_RULES: Rules;
-    PROFILE_BIO_RULES: Rules;
-    AUTO_MODERATION_SYSTEM_MESSAGE_RULES: Rules;
-    NATIVE_SEARCH_RESULT_LINK_RULES: Rules;
+export interface MarkdownRulesType {
+    RULES: ParserRules;
+    CHANNEL_TOPIC_RULES: ParserRules;
+    VOICE_CHANNEL_STATUS_RULES: ParserRules;
+    EMBED_TITLE_RULES: ParserRules;
+    INLINE_REPLY_RULES: ParserRules;
+    GUILD_VERIFICATION_FORM_RULES: ParserRules;
+    GUILD_EVENT_RULES: ParserRules;
+    PROFILE_BIO_RULES: ParserRules;
+    AUTO_MODERATION_SYSTEM_MESSAGE_RULES: ParserRules;
+    NATIVE_SEARCH_RESULT_LINK_RULES: ParserRules;
 }
 
-export type PluginMarkDownRules = Partial<MarkDownRules>;
+export type PluginMarkdownRulesType = Partial<MarkdownRulesType>;
 
-export const Rules: MarkDownRules = {} as MarkDownRules;
+export const MarkdownRules: MarkdownRulesType = {} as MarkdownRulesType;
 
-export type PluginRulesFunction = (r: MarkDownRules) => MarkDownRules | PluginMarkDownRules;
+export type PluginRulesFunction = (r: MarkdownRulesType) => MarkdownRulesType | PluginMarkdownRulesType;
 
 const PendingRulesMap = new Map<string, PluginRulesFunction>();
 
 export const AddAPendingRule = (name: string, rules: PluginRulesFunction) => PendingRulesMap.set(name, rules);
 export const RemoveAPendingRule = (name: string) => PendingRulesMap.delete(name);
 
-export function patchMarkdownRules(originalRules: MarkDownRules) {
+export function patchMarkdownRules(originalMarkdownRules: MarkdownRulesType) {
     /**
      * patchs the markdown rules
      * by overwriting and/or adding each rule to the original rules entries
@@ -58,24 +65,24 @@ export function patchMarkdownRules(originalRules: MarkDownRules) {
     }
     for (const [name, rule] of PendingRulesMap) {
         try {
-            assignEntries(Rules, rule(originalRules));
+            assignEntries(MarkdownRules, rule(originalMarkdownRules));
             RemoveAPendingRule(name);
         } catch (e) {
             logger.error("Failed to add Markdown rules for", name, e);
         }
     }
-    assignEntries(originalRules, Rules);
-    return originalRules;
+    assignEntries(originalMarkdownRules, MarkdownRules);
+    return originalMarkdownRules;
 }
 
-export function patchSlateRules(slate: any) {
+export function patchSlateRules(slate: { [k: string]: SlateRule; }) {
     /**
      * patchs the default slates
      * overwriting and/or adding each rule slate to the slate entries
      * @param slate The original slate
      * @returns The patched slate
      */
-    for (const [name, rule] of Object.entries(Rules)) {
+    for (const [name, rule] of Object.entries(MarkdownRules)) {
         slate[name] = rule.Slate ?? slate[name] ?? { type: "skip" };
     }
     return slate;

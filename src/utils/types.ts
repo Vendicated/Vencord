@@ -18,7 +18,7 @@
 
 import { Command } from "@api/Commands";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { MarkDownRules, PluginMarkDownRules } from "@api/Markdown";
+import { MarkdownRulesType, PluginMarkdownRulesType } from "@api/Markdown";
 import { FluxEvents } from "@webpack/types";
 import { Promisable } from "type-fest";
 
@@ -143,7 +143,7 @@ export interface PluginDef {
     /**
      * Allows you to add custom Rules to markdown
      */
-    rules?(r: MarkDownRules): PluginMarkDownRules;
+    rules?(r: MarkdownRulesType): PluginMarkdownRulesType;
 
     tags?: string[];
 }
