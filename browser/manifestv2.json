@@ -17,15 +17,23 @@
     "content_scripts": [
         {
             "run_at": "document_start",
-            "matches": ["*://*.discord.com/*"],
-            "js": ["content.js"],
+            "matches": [
+                "*://*.discord.com/*"
+            ],
+            "js": [
+                "content.js"
+            ],
             "all_frames": true,
             "world": "ISOLATED"
         },
         {
             "run_at": "document_start",
-            "matches": ["*://*.discord.com/*"],
-            "js": ["dist/Vencord.js"],
+            "matches": [
+                "*://*.discord.com/*"
+            ],
+            "js": [
+                "dist/Vencord.js"
+            ],
             "all_frames": true,
             "world": "MAIN"
         }
@@ -41,8 +49,8 @@
     ],
     "browser_specific_settings": {
         "gecko": {
-            "id": "Equicord@equicord.patrickdk.com",
-            "strict_min_version": "91.0"
+            "id": "vencord-firefox@vendicated.dev",
+            "strict_min_version": "128.0"
         }
     }
 }

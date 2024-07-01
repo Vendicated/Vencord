@@ -17,6 +17,7 @@
 */
 
 import { addAccessory } from "@api/MessageAccessories";
+import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -32,12 +33,12 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Toasts, UserStore } from "@webpack/common";
+import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
 
 import gitHash from "~git-hash";
 import plugins, { PluginMeta } from "~plugins";
 
-import settings from "./settings";
+import SettingsPlugin from "./settings";
 
 const VENCORD_GUILD_ID = "1015060230222131221";
 const EQUICORD_GUILD_ID = "1015060230222131221";
@@ -90,7 +91,7 @@ async function generateDebugInfoMessage() {
     const info = {
         Equicord:
             `v${VERSION} • [${gitHash}](<https://github.com/Equicord/Equicord/commit/${gitHash}>)` +
-            `${settings.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
+            `${SettingsPlugin.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${client}`,
         Platform: window.navigator.platform
     };
@@ -136,12 +137,18 @@ function generatePluginList() {
 
 const checkForUpdatesOnce = onlyOnce(checkForUpdates);
 
+const settings = definePluginSettings({}).withPrivateSettings<{
+    dismissedDevBuildWarning?: boolean;
+}>();
+
 export default definePlugin({
     name: "SupportHelper",
     required: true,
     description: "Helps us provide support to you",
     authors: [Devs.Ven, EquicordDevs.thororen],
     dependencies: ["CommandsAPI", "UserSettingsAPI", "MessageAccessoriesAPI"],
+
+    settings,
 
     patches: [{
         find: ".BEGINNING_DM.format",
@@ -224,17 +231,22 @@ export default definePlugin({
                 });
             }
 
-            const repo = await VencordNative.updater.getRepo();
-            if (repo.ok && !repo.value.includes("Vendicated/Vencord") && Vencord.Plugins.isPluginEnabled("VCSupport")) {
+            if (!IS_STANDALONE && !settings.store.dismissedDevBuildWarning) {
                 return Alerts.show({
                     title: "Hold on!",
                     body: <div>
-                        <Forms.FormText>You are running a modified version of Vencord.</Forms.FormText>
+                        <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
+
                         <Forms.FormText className={Margins.top8}>
-                            Please join the <Link href="https://discord.gg/5Xh2W87egW">Equicord Server </Link> for support,
-                            or if this issue persists on Vencord, continue on.
+                            We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
+                            Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
                         </Forms.FormText>
-                    </div>
+
+                        <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
+                    </div>,
+                    confirmText: "Understood",
+                    secondaryConfirmText: "Don't show again",
+                    onConfirmSecondary: () => settings.store.dismissedDevBuildWarning = true
                 });
             }
         }

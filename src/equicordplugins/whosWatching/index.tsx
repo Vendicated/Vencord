@@ -37,6 +37,19 @@ const settings = definePluginSettings({
     },
 });
 
+function encodeStreamKey(stream) {
+    const { streamType, guildId, channelId, ownerId } = stream;
+    console.log(streamType);
+    switch (streamType) {
+        case "guild":
+            return [streamType, guildId, channelId, ownerId].join(":");
+        case "call":
+            return [streamType, channelId, ownerId].join(":");
+        default:
+            throw console.log("Unknown stream type ".concat(streamType));
+    }
+}
+
 function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
     // Missing Users happen when UserStore.getUser(id) returns null -- The client should automatically cache spectators, so this might not be possible but it's better to be sure just in case
     let missingUsers = 0;
@@ -95,7 +108,7 @@ export default definePlugin({
 
         if (!stream) return <div {...props}>{props.children}</div>;
 
-        const userIds = ApplicationStreamingStore.getViewerIds(stream);
+        const userIds = ApplicationStreamingStore.getViewerIds(encodeStreamKey(stream));
 
         let missingUsers = 0;
         const users = userIds.map(id => UserStore.getUser(id)).filter(user => Boolean(user) ? true : (missingUsers += 1, false));
@@ -157,7 +170,7 @@ export default definePlugin({
     component: function ({ OriginalComponent }) {
         return (props: any) => {
             const stream = useStateFromStores([ApplicationStreamingStore], () => ApplicationStreamingStore.getCurrentUserActiveStream());
-            const viewers = ApplicationStreamingStore.getViewerIds(stream);
+            const viewers = ApplicationStreamingStore.getViewerIds(encodeStreamKey(stream));
             return <Tooltip text={<Watching userIds={viewers} guildId={stream.guildId} />}>
                 {({ onMouseEnter, onMouseLeave }) => (
                     <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
