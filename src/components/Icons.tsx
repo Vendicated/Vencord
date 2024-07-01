@@ -18,19 +18,17 @@
 
 import "./iconStyles.css";
 
+import { getTheme, Theme } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { i18n } from "@webpack/common";
-import type { PropsWithChildren, SVGProps } from "react";
+import type { PropsWithChildren } from "react";
 
 interface BaseIconProps extends IconProps {
     viewBox: string;
 }
 
-interface IconProps extends SVGProps<SVGSVGElement> {
-    className?: string;
-    height?: string | number;
-    width?: string | number;
-}
+type IconProps = JSX.IntrinsicElements["svg"];
+type ImageProps = JSX.IntrinsicElements["img"];
 
 function Icon({ height = 24, width = 24, className, children, viewBox, ...svgProps }: PropsWithChildren<BaseIconProps>) {
     return (
@@ -289,4 +287,128 @@ export function NoEntrySignIcon(props: IconProps) {
             />
         </Icon>
     );
+}
+
+export function SafetyIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-safety-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M4.27 5.22A2.66 2.66 0 0 0 3 7.5v2.3c0 5.6 3.3 10.68 8.42 12.95.37.17.79.17 1.16 0A14.18 14.18 0 0 0 21 9.78V7.5c0-.93-.48-1.78-1.27-2.27l-6.17-3.76a3 3 0 0 0-3.12 0L4.27 5.22ZM6 7.68l6-3.66V12H6.22C6.08 11.28 6 10.54 6 9.78v-2.1Zm6 12.01V12h5.78A11.19 11.19 0 0 1 12 19.7Z"
+            />
+        </Icon>
+
+    );
+}
+
+export function NotesIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-notes-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                d="M8 3C7.44771 3 7 3.44772 7 4V5C7 5.55228 7.44772 6 8 6H16C16.5523 6 17 5.55228 17 5V4C17 3.44772 16.5523 3 16 3H15.1245C14.7288 3 14.3535 2.82424 14.1002 2.52025L13.3668 1.64018C13.0288 1.23454 12.528 1 12 1C11.472 1 10.9712 1.23454 10.6332 1.64018L9.8998 2.52025C9.64647 2.82424 9.27121 3 8.8755 3H8Z"
+            />
+            <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                fill="currentColor"
+                d="M19 4.49996V4.99996C19 6.65681 17.6569 7.99996 16 7.99996H8C6.34315 7.99996 5 6.65681 5 4.99996V4.49996C5 4.22382 4.77446 3.99559 4.50209 4.04109C3.08221 4.27826 2 5.51273 2 6.99996V19C2 20.6568 3.34315 22 5 22H19C20.6569 22 22 20.6568 22 19V6.99996C22 5.51273 20.9178 4.27826 19.4979 4.04109C19.2255 3.99559 19 4.22382 19 4.49996ZM8 12C7.44772 12 7 12.4477 7 13C7 13.5522 7.44772 14 8 14H16C16.5523 14 17 13.5522 17 13C17 12.4477 16.5523 12 16 12H8ZM7 17C7 16.4477 7.44772 16 8 16H13C13.5523 16 14 16.4477 14 17C14 17.5522 13.5523 18 13 18H8C7.44772 18 7 17.5522 7 17Z"
+            />
+        </Icon>
+    );
+}
+
+export function FolderIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-folder-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                d="M2 5a3 3 0 0 1 3-3h3.93a2 2 0 0 1 1.66.9L12 5h7a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V5Z"
+            />
+        </Icon>
+    );
+}
+
+export function LogIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-log-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M3.11 8H6v10.82c0 .86.37 1.68 1 2.27.46.43 1.02.71 1.63.84A1 1 0 0 0 9 22h10a4 4 0 0 0 4-4v-1a2 2 0 0 0-2-2h-1V5a3 3 0 0 0-3-3H4.67c-.87 0-1.7.32-2.34.9-.63.6-1 1.42-1 2.28 0 .71.3 1.35.52 1.75a5.35 5.35 0 0 0 .48.7l.01.01h.01L3.11 7l-.76.65a1 1 0 0 0 .76.35Zm1.56-4c-.38 0-.72.14-.97.37-.24.23-.37.52-.37.81a1.69 1.69 0 0 0 .3.82H6v-.83c0-.29-.13-.58-.37-.8C5.4 4.14 5.04 4 4.67 4Zm5 13a3.58 3.58 0 0 1 0 3H19a2 2 0 0 0 2-2v-1H9.66ZM3.86 6.35ZM11 8a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2h-5Zm-1 5a1 1 0 0 1 1-1h5a1 1 0 1 1 0 2h-5a1 1 0 0 1-1-1Z"
+            />
+        </Icon>
+    );
+}
+
+export function RestartIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-restart-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                d="M4 12a8 8 0 0 1 14.93-4H15a1 1 0 1 0 0 2h6a1 1 0 0 0 1-1V3a1 1 0 1 0-2 0v3a9.98 9.98 0 0 0-18 6 10 10 0 0 0 16.29 7.78 1 1 0 0 0-1.26-1.56A8 8 0 0 1 4 12Z"
+            />
+        </Icon>
+    );
+}
+
+export function PaintbrushIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-paintbrush-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M15.35 7.24C15.9 6.67 16 5.8 16 5a3 3 0 1 1 3 3c-.8 0-1.67.09-2.24.65a1.5 1.5 0 0 0 0 2.11l1.12 1.12a3 3 0 0 1 0 4.24l-5 5a3 3 0 0 1-4.25 0l-5.76-5.75a3 3 0 0 1 0-4.24l4.04-4.04.97-.97a3 3 0 0 1 4.24 0l1.12 1.12c.58.58 1.52.58 2.1 0ZM6.9 9.9 4.3 12.54a1 1 0 0 0 0 1.42l2.17 2.17.83-.84a1 1 0 0 1 1.42 1.42l-.84.83.59.59 1.83-1.84a1 1 0 0 1 1.42 1.42l-1.84 1.83.17.17a1 1 0 0 0 1.42 0l2.63-2.62L6.9 9.9Z"
+            />
+        </Icon>
+    );
+}
+
+const WebsiteIconDark = "/assets/e1e96d89e192de1997f73730db26e94f.svg";
+const WebsiteIconLight = "/assets/730f58bcfd5a57a5e22460c445a0c6cf.svg";
+const GithubIconLight = "/assets/3ff98ad75ac94fa883af5ed62d17c459.svg";
+const GithubIconDark = "/assets/6a853b4c87fce386cbfef4a2efbacb09.svg";
+
+export function GithubIcon(props: ImageProps) {
+    const src = getTheme() === Theme.Light
+        ? GithubIconLight
+        : GithubIconDark;
+
+    return <img {...props} src={src} />;
+}
+
+export function WebsiteIcon(props: ImageProps) {
+    const src = getTheme() === Theme.Light
+        ? WebsiteIconLight
+        : WebsiteIconDark;
+
+    return <img {...props} src={src} />;
 }
