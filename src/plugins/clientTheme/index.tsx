@@ -10,6 +10,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
+import { t } from "@utils/translation";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, Forms, useStateFromStores } from "@webpack/common";
@@ -64,8 +65,8 @@ function ThemeSettings() {
         <div className="client-theme-settings">
             <div className="client-theme-container">
                 <div className="client-theme-settings-labels">
-                    <Forms.FormTitle tag="h3">Theme Color</Forms.FormTitle>
-                    <Forms.FormText>Add a color to your Discord client theme</Forms.FormText>
+                    <Forms.FormTitle tag="h3">{t("clientTheme.settingsTitle")}</Forms.FormTitle>
+                    <Forms.FormText>{t("clientTheme.settingsDescription")}</Forms.FormText>
                 </div>
                 <ColorPicker
                     color={parseInt(settings.store.color, 16)}
@@ -78,12 +79,12 @@ function ThemeSettings() {
                 <Forms.FormDivider className={classes(Margins.top8, Margins.bottom8)} />
                 <div className={`client-theme-contrast-warning ${contrastWarning ? (isLightTheme ? "theme-dark" : "theme-light") : ""}`}>
                     <div className="client-theme-warning">
-                        <Forms.FormText>Warning, your theme won't look good:</Forms.FormText>
-                        {contrastWarning && <Forms.FormText>Selected color won't contrast well with text</Forms.FormText>}
-                        {nitroThemeEnabled && <Forms.FormText>Nitro themes aren't supported</Forms.FormText>}
+                        <Forms.FormText>{t("clientTheme.warningTitle")}</Forms.FormText>
+                        {contrastWarning && <Forms.FormText>{t("clientTheme.warnings.badContrast")}</Forms.FormText>}
+                        {nitroThemeEnabled && <Forms.FormText>{t("clientTheme.warnings.nitro")}</Forms.FormText>}
                     </div>
-                    {(contrastWarning && fixableContrast) && <Button onClick={() => setTheme(oppositeTheme)} color={Button.Colors.RED}>Switch to {oppositeTheme} mode</Button>}
-                    {(nitroThemeEnabled) && <Button onClick={() => setTheme(theme)} color={Button.Colors.RED}>Disable Nitro Theme</Button>}
+                    {(contrastWarning && fixableContrast) && <Button onClick={() => setTheme(oppositeTheme)} color={Button.Colors.RED}>{t(`clientTheme.switchToOpposite.${oppositeTheme}`)}</Button>}
+                    {(nitroThemeEnabled) && <Button onClick={() => setTheme(theme)} color={Button.Colors.RED}>{t("clientTheme.disableNitroTheme")}</Button>}
                 </div>
             </>)}
         </div>
@@ -92,18 +93,18 @@ function ThemeSettings() {
 
 const settings = definePluginSettings({
     color: {
-        description: "Color your Discord client theme will be based around. Light mode isn't supported",
+        description: t("clientTheme.colorDescription"),
         type: OptionType.COMPONENT,
         default: "313338",
         component: () => <ThemeSettings />
     },
     resetColor: {
-        description: "Reset Theme Color",
+        description: t("clientTheme.resetColorDescription"),
         type: OptionType.COMPONENT,
         default: "313338",
         component: () => (
             <Button onClick={() => onPickColor(0x313338)}>
-                Reset Theme Color
+                {t("clientTheme.resetButton")}
             </Button>
         )
     }
@@ -112,7 +113,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ClientTheme",
     authors: [Devs.F53, Devs.Nuckyz],
-    description: "Recreation of the old client theme experiment. Add a color to your Discord client theme",
+    description: t("clientTheme.description"),
     settings,
 
     startAt: StartAt.DOMContentLoaded,

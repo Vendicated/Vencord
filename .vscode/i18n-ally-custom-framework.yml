@@ -1,0 +1,16 @@
+languageIds:
+    - javascript
+    - typescript
+    - javascriptreact
+    - typescriptreact
+
+usageMatchRegex:
+    - "[^\\w\\d]t\\(['\"`]({key})['\"`]"
+    - "<Translate ?.* i18nKey=\\{?['\"`]({key})['\"`]"
+
+refactorTemplates:
+    - "t(\"$1\")"
+    - "{t(\"$1\")}"
+    - "<Translate i18nKey=\"$1\" />"
+
+monopoly: true

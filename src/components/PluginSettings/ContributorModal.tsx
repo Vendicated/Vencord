@@ -12,8 +12,9 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
 import { DevsById } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
-import { classes, pluralise } from "@utils/misc";
+import { classes } from "@utils/misc";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
+import { t, Translate } from "@utils/translation";
 import { Forms, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -60,8 +61,6 @@ function ContributorModal({ user }: { user: User; }) {
             .sort((a, b) => Number(a.required ?? false) - Number(b.required ?? false));
     }, [user.id, user.username]);
 
-    const ContributedHyperLink = <Link href="https://vencord.dev/source">contributed</Link>;
-
     return (
         <>
             <div className={cl("header")}>
@@ -88,15 +87,11 @@ function ContributorModal({ user }: { user: User; }) {
                 </div>
             </div>
 
-            {plugins.length ? (
-                <Forms.FormText>
-                    This person has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
-                </Forms.FormText>
-            ) : (
-                <Forms.FormText>
-                    This person has not made any plugins. They likely {ContributedHyperLink} to Vencord in other ways!
-                </Forms.FormText>
-            )}
+            <Forms.FormText>
+                <Translate i18nKey="vencord.pluginContributed" variables={{ count: plugins.length }}>
+                    <Link href="https://vencord.dev/source" />
+                </Translate>
+            </Forms.FormText>
 
             {!!plugins.length && (
                 <div className={cl("plugins")}>
@@ -105,7 +100,7 @@ function ContributorModal({ user }: { user: User; }) {
                             key={p.name}
                             plugin={p}
                             disabled={p.required ?? false}
-                            onRestartNeeded={() => showToast("Restart to apply changes!")}
+                            onRestartNeeded={() => showToast(t("vencord.pluginRestart"))}
                         />
                     )}
                 </div>

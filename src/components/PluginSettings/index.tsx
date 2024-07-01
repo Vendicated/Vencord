@@ -32,6 +32,7 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
+import { t } from "@utils/translation";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
@@ -64,19 +65,19 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
         <Card className={cl("info-card", { "restart-card": required })}>
             {required ? (
                 <>
-                    <Forms.FormTitle tag="h5">Restart required!</Forms.FormTitle>
+                    <Forms.FormTitle tag="h5">{t("vencord.pluginHeader.reloadHeader")}</Forms.FormTitle>
                     <Forms.FormText className={cl("dep-text")}>
-                        Restart now to apply new plugins and their settings
+                        {t("vencord.pluginHeader.reloadDescription")}
                     </Forms.FormText>
                     <Button onClick={() => location.reload()}>
-                        Restart
+                        {t("vencord.pluginHeader.restart")}
                     </Button>
                 </>
             ) : (
                 <>
-                    <Forms.FormTitle tag="h5">Plugin Management</Forms.FormTitle>
-                    <Forms.FormText>Press the cog wheel or info icon to get more info on a plugin</Forms.FormText>
-                    <Forms.FormText>Plugins with a cog wheel have settings you can modify!</Forms.FormText>
+                    <Forms.FormTitle tag="h5">{t("vencord.pluginHeader.managementHeader")}</Forms.FormTitle>
+                    <Forms.FormText>{t("vencord.pluginHeader.iconInformation")}</Forms.FormText>
+                    <Forms.FormText>{t("vencord.pluginHeader.cogWheel")}</Forms.FormText>
                 </>
             )}
         </Card>
@@ -209,10 +210,10 @@ export default function PluginSettings() {
 
     React.useEffect(() => {
         return () => void (changes.hasChanges && Alerts.show({
-            title: "Restart required",
+            title: t("vencord.restartRequired"),
             body: (
                 <>
-                    <p>The following plugins require a restart:</p>
+                    <p>$t("vencord.pluginsNeedRestart")</p>
                     <div>{changes.map((s, i) => (
                         <>
                             {i > 0 && ", "}
@@ -221,8 +222,8 @@ export default function PluginSettings() {
                     ))}</div>
                 </>
             ),
-            confirmText: "Restart now",
-            cancelText: "Later!",
+            confirmText: t("vencord.restartNow"),
+            cancelText: t("vencord.restartLater"),
             onConfirm: () => location.reload()
         }));
     }, []);
@@ -296,7 +297,7 @@ export default function PluginSettings() {
 
         if (isRequired) {
             const tooltipText = p.required
-                ? "This plugin is required for Vencord to function."
+                ? t("vencord.requiredPlugin")
                 : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
 
             requiredPlugins.push(
@@ -331,18 +332,18 @@ export default function PluginSettings() {
             <ReloadRequiredCard required={changes.hasChanges} />
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
-                Filters
+                {t("vencord.pluginFilters")}
             </Forms.FormTitle>
 
             <div className={classes(Margins.bottom20, cl("filter-controls"))}>
-                <TextInput autoFocus value={searchValue.value} placeholder="Search for a plugin..." onChange={onSearch} />
+                <TextInput autoFocus value={searchValue.value} placeholder={t("vencord.search.placeholder")} onChange={onSearch} />
                 <div className={InputStyles.inputWrapper}>
                     <Select
                         options={[
-                            { label: "Show All", value: SearchStatus.ALL, default: true },
-                            { label: "Show Enabled", value: SearchStatus.ENABLED },
-                            { label: "Show Disabled", value: SearchStatus.DISABLED },
-                            { label: "Show New", value: SearchStatus.NEW }
+                            { label: t("vencord.search.all"), value: SearchStatus.ALL, default: true },
+                            { label: t("vencord.search.enabled"), value: SearchStatus.ENABLED },
+                            { label: t("vencord.search.disabled"), value: SearchStatus.DISABLED },
+                            { label: t("vencord.search.new"), value: SearchStatus.NEW }
                         ]}
                         serialize={String}
                         select={onStatusChange}
@@ -353,7 +354,7 @@ export default function PluginSettings() {
                 </div>
             </div>
 
-            <Forms.FormTitle className={Margins.top20}>Plugins</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top20}>{t("vencord.plugins")}</Forms.FormTitle>
 
             {plugins.length || requiredPlugins.length
                 ? (
@@ -371,7 +372,7 @@ export default function PluginSettings() {
             <Forms.FormDivider className={Margins.top20} />
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
-                Required Plugins
+                {t("vencord.requiredPlugins")}
             </Forms.FormTitle>
             <div className={cl("grid")}>
                 {requiredPlugins.length
@@ -386,7 +387,7 @@ export default function PluginSettings() {
 function makeDependencyList(deps: string[]) {
     return (
         <React.Fragment>
-            <Forms.FormText>This plugin is required by:</Forms.FormText>
+            <Forms.FormText>{t("vencord.pluginRequiredBy")}</Forms.FormText>
             {deps.map((dep: string) => <Forms.FormText className={cl("dep-text")}>{dep}</Forms.FormText>)}
         </React.Fragment>
     );
