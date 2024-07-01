@@ -40,7 +40,6 @@ import {
     isPk,
     loadAuthors, ProfilePopout,
     replaceTags,
-    UserPopoutComponent
 } from "./utils";
 import { openModal } from "@utils/modal";
 
@@ -98,13 +97,13 @@ const settings = definePluginSettings({
             }}>Print Data</Button>;
         },
         description: "Print stored data to console",
-        hidden: true // showDebug
+        hidden: IS_DEV // showDebug
     },
     data: {
         type: OptionType.STRING,
         description: "Datastore",
         default: "{}",
-        hidden: true // showDebug
+        hidden: IS_DEV // showDebug
     }
 });
 
@@ -135,27 +134,8 @@ export default definePlugin({
                 match: /return (.)\(\)\(this.getMessages\((.)\).{10,100}:.\.id\)/,
                 replace: "return $1()(this.getMessages($2).toArray()).reverse().find(msg => $self.isOwnMessage(msg)"
             }
-        },/*
-        {
-            find: "\"UserPopoutExperimentWrapper: user cannot be undefined\"",
-            replacement: {
-                match: /a.default.getUser\(\i\)/,
-                replace: "{$self.getUser(arguments[0]);}"
-            },
-        }*/
+        },
     ],
-
-    getUser: (arg: { userId: string, user: User|undefined }) => {
-        const user: User = UserStore.getUser(arg.userId);
-        arg.user = user;
-        if (!user.bot || !user.username) return arg.user;
-        user.bio = "Test Bio";
-        user.discriminator= "0001";
-        user.bot = false;
-        arg.user = user;
-        console.log(arg);
-        return arg.user;
-    },
 
     isOwnMessage: (message: Message) => isOwnPkMessage(message, settings.store.data) || message.author.id === UserStore.getCurrentUser().id,
 
