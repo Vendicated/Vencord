@@ -8,7 +8,8 @@ import { DataStore } from "@api/index";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import { ChannelStore, FluxDispatcher, Toasts } from "@webpack/common";
 import { Message } from "discord-types/general";
-import { Member, MemberGuildSettings, PKAPI, System, SystemGuildSettings } from "pkapi.js";
+
+import { Member, MemberGuildSettings, PKAPI, System, SystemGuildSettings } from "./pkapi.js/lib";
 
 
 // I dont fully understand how to use datastores, if I used anything incorrectly please let me know

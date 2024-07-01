@@ -29,9 +29,9 @@ import {
     UserStore
 } from "@webpack/common";
 import { Message } from "discord-types/general";
-import { Member, PKAPI } from "pkapi.js";
 
 import pluralKit from "./index";
+import { Member, PKAPI } from "./pkapi.js/lib";
 import {
     Author,
     deleteMessage,
@@ -165,9 +165,7 @@ export default definePlugin({
         }
     },
 
-    api: new PKAPI({
-        token: "H2hS5SgyjWN/dpPKyx5Lrc8ggWsqgMHEQqsr9nXL5X6Eg2FF2/6XKsBjQhhgr2F+"
-    }),
+    api: new PKAPI({}),
 
     async start() {
         await loadAuthors();
