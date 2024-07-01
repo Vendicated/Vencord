@@ -211,7 +211,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".BITE_SIZE,onOpenProfile",
+            find: /\.BITE_SIZE,onOpenProfile:\i,usernameIcon:/,
             replacement: {
                 match: /currentUser:\i,guild:\i,onOpenProfile:.+?}\)(?=])(?<=user:(\i),bio:null==(\i)\?.+?)/,
                 replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, simplified: true })"

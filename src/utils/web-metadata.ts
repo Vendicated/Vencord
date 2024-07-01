@@ -8,7 +8,12 @@ export let EXTENSION_BASE_URL: string;
 export let EXTENSION_VERSION: string;
 
 if (IS_EXTENSION) {
-    const script = document.querySelector("#vencord-script") as HTMLScriptElement;
-    EXTENSION_BASE_URL = script.dataset.extensionBaseUrl!;
-    EXTENSION_VERSION = script.dataset.version!;
+    const listener = (e: MessageEvent) => {
+        if (e.data?.type === "vencord:meta") {
+            ({ EXTENSION_BASE_URL, EXTENSION_VERSION } = e.data.meta);
+            window.removeEventListener("message", listener);
+        }
+    };
+
+    window.addEventListener("message", listener);
 }

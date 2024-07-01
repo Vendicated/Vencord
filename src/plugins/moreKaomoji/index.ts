@@ -27,12 +27,12 @@ export default definePlugin({
     dependencies: ["CommandsAPI"],
     commands: [
         { name: "dissatisfaction", description: " ＞﹏＜" },
-        { name: "smug", description: " ಠ_ಠ" },
-        { name: "happy", description: " ヽ(´▽`)/" },
-        { name: "crying", description: " ಥ_ಥ" },
-        { name: "angry", description: " ヽ(｀Д´)ﾉ" },
-        { name: "anger", description: " ヽ(ｏ`皿′ｏ)ﾉ" },
-        { name: "joy", description: " <(￣︶￣)>" },
+        { name: "smug", description: "ಠ_ಠ" },
+        { name: "happy", description: "ヽ(´▽`)/" },
+        { name: "crying", description: "ಥ_ಥ" },
+        { name: "angry", description: "ヽ(｀Д´)ﾉ" },
+        { name: "anger", description: "ヽ(ｏ`皿′ｏ)ﾉ" },
+        { name: "joy", description: "<(￣︶￣)>" },
         { name: "blush", description: "૮ ˶ᵔ ᵕ ᵔ˶ ა" },
         { name: "confused", description: "(•ิ_•ิ)?" },
         { name: "sleeping", description: "(ᴗ_ᴗ)" },
@@ -42,7 +42,7 @@ export default definePlugin({
         ...data,
         options: [OptionalMessageOption],
         execute: opts => ({
-            content: findOption(opts, "message", "") + data.description
+            content: findOption(opts, "message", "") + " " + data.description
         })
     }))
 });

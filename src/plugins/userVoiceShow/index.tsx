@@ -98,8 +98,8 @@ export default definePlugin({
         {
             find: ".popularApplicationCommandIds,",
             replacement: {
-                match: /applicationId:\i\.id}\),(?=.{0,50}setNote:\i)/,
-                replace: "$&$self.patchPopout(arguments[0]),",
+                match: /(?<=,)(?=!\i&&!\i&&.{0,50}setNote:)/,
+                replace: "$self.patchPopout(arguments[0]),",
             }
         },
         // below username

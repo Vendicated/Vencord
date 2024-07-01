@@ -16,7 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addBadge, BadgePosition, ProfileBadge, removeBadge } from "@api/Badges";
+import "./style.css";
+
+import { addBadge, BadgePosition, BadgeUserArgs, ProfileBadge, removeBadge } from "@api/Badges";
 import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
 import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import { Settings } from "@api/Settings";
@@ -27,7 +29,20 @@ import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-const SessionsStore = findStoreLazy("SessionsStore");
+export interface Session {
+    sessionId: string;
+    status: string;
+    active: boolean;
+    clientInfo: {
+        version: number;
+        os: string;
+        client: string;
+    };
+}
+
+const SessionsStore = findStoreLazy("SessionsStore") as {
+    getSessions(): Record<string, Session>;
+};
 
 function Icon(path: string, opts?: { viewBox?: string; width?: number; height?: number; }) {
     return ({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) => (
@@ -67,15 +82,11 @@ const PlatformIcon = ({ platform, status, small }: { platform: Platform, status:
     return <Icon color={StatusUtils.useStatusFillColor(status)} tooltip={tooltip} small={small} />;
 };
 
-const getStatus = (id: string): Record<Platform, string> => PresenceStore.getState()?.clientStatuses?.[id];
-
-const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; small?: boolean; }) => {
-    if (!user || user.bot) return null;
-
+function ensureOwnStatus(user: User) {
     if (user.id === UserStore.getCurrentUser().id) {
         const sessions = SessionsStore.getSessions();
         if (typeof sessions !== "object") return null;
-        const sortedSessions = Object.values(sessions).sort(({ status: a }: any, { status: b }: any) => {
+        const sortedSessions = Object.values(sessions).sort(({ status: a }, { status: b }) => {
             if (a === b) return 0;
             if (a === "online") return 1;
             if (b === "online") return -1;
@@ -84,7 +95,7 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, sma
             return 0;
         });
 
-        const ownStatus = Object.values(sortedSessions).reduce((acc: any, curr: any) => {
+        const ownStatus = Object.values(sortedSessions).reduce((acc, curr) => {
             if (curr.clientInfo.client !== "unknown")
                 acc[curr.clientInfo.client] = curr.status;
             return acc;
@@ -93,6 +104,37 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, sma
         const { clientStatuses } = PresenceStore.getState();
         clientStatuses[UserStore.getCurrentUser().id] = ownStatus;
     }
+}
+
+function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
+    const user = UserStore.getUser(userId);
+
+    if (!user || user.bot) return [];
+
+    ensureOwnStatus(user);
+
+    const status = PresenceStore.getState()?.clientStatuses?.[user.id] as Record<Platform, string>;
+    if (!status) return [];
+
+    return Object.entries(status).map(([platform, status]) => ({
+        component: () => (
+            <span className="vc-platform-indicator">
+                <PlatformIcon
+                    key={platform}
+                    platform={platform as Platform}
+                    status={status}
+                    small={false}
+                />
+            </span>
+        ),
+        key: `vc-platform-indicator-${platform}`
+    }));
+}
+
+const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; small?: boolean; }) => {
+    if (!user || user.bot) return null;
+
+    ensureOwnStatus(user);
 
     const status = PresenceStore.getState()?.clientStatuses?.[user.id] as Record<Platform, string>;
     if (!status) return null;
@@ -112,17 +154,10 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, sma
         <span
             className="vc-platform-indicator"
             style={{
-                display: "inline-flex",
-                justifyContent: "center",
-                alignItems: "center",
                 marginLeft: wantMargin ? 4 : 0,
-                verticalAlign: "top",
-                position: "relative",
                 top: wantTopMargin ? 2 : 0,
-                padding: !wantMargin ? 1 : 0,
                 gap: 2
             }}
-
         >
             {icons}
         </span>
@@ -130,10 +165,8 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, sma
 };
 
 const badge: ProfileBadge = {
-    component: p => <PlatformIndicator {...p} user={UserStore.getUser(p.userId)} wantMargin={false} />,
+    getBadges,
     position: BadgePosition.START,
-    shouldShow: userInfo => !!Object.keys(getStatus(userInfo.userId) ?? {}).length,
-    key: "indicator"
 };
 
 const indicatorLocations = {
