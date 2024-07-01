@@ -19,6 +19,7 @@
 import { showNotification } from "@api/Notifications";
 import { Settings, useSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { Grid } from "@components/Grid";
 import { Link } from "@components/Link";
 import { authorizeCloud, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
@@ -85,7 +86,9 @@ function SettingsSyncSection() {
                     size={Button.Sizes.SMALL}
                     disabled={!sectionEnabled}
                     onClick={() => putCloudSettings(true)}
-                >{t("vencord.cloud.settings.syncToCloud")}</Button>
+                >
+                    {t("vencord.cloud.settings.syncToCloud")}
+                </Button>
                 <Tooltip text={t("vencord.cloud.settings.overwriteWarning")}>
                     {({ onMouseLeave, onMouseEnter }) => (
                         <Button
@@ -95,7 +98,9 @@ function SettingsSyncSection() {
                             color={Button.Colors.RED}
                             disabled={!sectionEnabled}
                             onClick={() => getCloudSettings(true, true)}
-                        >{t("vencord.cloud.settings.syncFromCloud")}</Button>
+                        >
+                            {t("vencord.cloud.settings.syncFromCloud")}
+                        </Button>
                     )}
                 </Tooltip>
                 <Button
@@ -103,7 +108,9 @@ function SettingsSyncSection() {
                     color={Button.Colors.RED}
                     disabled={!sectionEnabled}
                     onClick={() => deleteCloudSettings()}
-                >{t("vencord.cloud.settings.deleteCloudSettings")}</Button>
+                >
+                    {t("vencord.cloud.settings.deleteCloudSettings")}
+                </Button>
             </div>
         </Forms.FormSection>
     );
@@ -124,7 +131,12 @@ function CloudTab() {
                 <Switch
                     key="backend"
                     value={settings.cloud.authenticated}
-                    onChange={v => { v && authorizeCloud(); if (!v) settings.cloud.authenticated = v; }}
+                    onChange={v => {
+                        if (v)
+                            authorizeCloud();
+                        else
+                            settings.cloud.authenticated = v;
+                    }}
                     note={t("vencord.cloud.integrations.authorizationNote")}
                 >
                     {t("vencord.cloud.integrations.enable")}
@@ -136,23 +148,42 @@ function CloudTab() {
                 <CheckedTextInput
                     key="backendUrl"
                     value={settings.cloud.url}
-                    onChange={v => { settings.cloud.url = v; settings.cloud.authenticated = false; deauthorizeCloud(); }}
+                    onChange={async v => {
+                        settings.cloud.url = v;
+                        settings.cloud.authenticated = false;
+                        deauthorizeCloud();
+                    }}
                     validate={validateUrl}
                 />
-                <Button
-                    className={Margins.top8}
-                    size={Button.Sizes.MEDIUM}
-                    color={Button.Colors.RED}
-                    disabled={!settings.cloud.authenticated}
-                    onClick={() => Alerts.show({
-                        title: t("vencord.areYouSure"),
-                        body: t("vencord.cloud.integrations.eraseWarning"),
-                        onConfirm: eraseAllData,
-                        confirmText: t("vencord.cloud.integrations.eraseIt"),
-                        confirmColor: "vc-cloud-erase-data-danger-btn",
-                        cancelText: t("vencord.nevermind")
-                    })}
-                >{t("vencord.cloud.integrations.eraseAllData")}</Button>
+
+                <Grid columns={2} gap="1em" className={Margins.top8}>
+                    <Button
+                        size={Button.Sizes.MEDIUM}
+                        disabled={!settings.cloud.authenticated}
+                        onClick={async () => {
+                            await deauthorizeCloud();
+                            settings.cloud.authenticated = false;
+                            await authorizeCloud();
+                        }}
+                    >
+                        Reauthorise
+                    </Button>
+                    <Button
+                        size={Button.Sizes.MEDIUM}
+                        color={Button.Colors.RED}
+                        disabled={!settings.cloud.authenticated}
+                        onClick={() => Alerts.show({
+                            title: t("vencord.areYouSure"),
+                            body: t("vencord.cloud.integrations.eraseWarning"),
+                            onConfirm: eraseAllData,
+                            confirmText: t("vencord.cloud.integrations.eraseIt"),
+                            confirmColor: "vc-cloud-erase-data-danger-btn",
+                            cancelText: t("vencord.nevermind")
+                        })}
+                    >
+                        Erase All Data
+                    </Button>
+                </Grid>
                 <Forms.FormDivider className={Margins.top16} />
             </Forms.FormSection >
             <SettingsSyncSection />
