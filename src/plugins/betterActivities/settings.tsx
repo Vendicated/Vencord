@@ -45,15 +45,9 @@ const settings = definePluginSettings({
             }}/>
         ),
     },
-    profileSidebar: {
+    profiles: {
         type: OptionType.BOOLEAN,
-        description: "Show all activities in the profile sidebar",
-        default: true,
-        restartNeeded: true,
-    },
-    userPopout: {
-        type: OptionType.BOOLEAN,
-        description: "Show all activities in the user popout",
+        description: "Show all activities in the profile popout/sidebar",
         default: true,
         restartNeeded: true,
     },

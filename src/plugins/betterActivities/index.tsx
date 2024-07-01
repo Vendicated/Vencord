@@ -38,7 +38,7 @@ import {
 
 const cl = classNameFactory("vc-bactivities-");
 
-const ActivityView = findComponentByCodeLazy<ActivityViewProps>("onOpenGameProfile:");
+const ActivityView = findComponentByCodeLazy<ActivityViewProps>("onOpenGameProfile:", "USER_POPOUT_V2");
 
 // if discord one day decides to change their icon this needs to be updated
 const DefaultActivityIcon = findComponentByCodeLazy("M6,7 L2,7 L2,6 L6,6 L6,7 Z M8,5 L2,5 L2,4 L8,4 L8,5 Z M8,3 L2,3 L2,2 L8,2 L8,3 Z M8.88888889,0 L1.11111111,0 C0.494444444,0 0,0.494444444 0,1.11111111 L0,8.88888889 C0,9.50253861 0.497461389,10 1.11111111,10 L8.88888889,10 C9.50253861,10 10,9.50253861 10,8.88888889 L10,1.11111111 C10,0.494444444 9.5,0 8.88888889,0 Z");
@@ -251,22 +251,13 @@ export default definePlugin({
             predicate: () => settings.store.memberList,
         },
         {
-            // Show all activities in the profile panel
-            find: "Profile Panel: user cannot be undefined",
+            // Show all activities in the user popout/sidebar
+            find: "\"BiteSizeProfileActivitySection\"",
             replacement: {
-                match: /(?<=\(0,\i\.jsx\)\()\i\.\i(?=,{activity:.+?,user:\i,channelId:\i.id,)/,
+                match: /(?<=\(0,\i\.jsx\)\()\i\.\i(?=,{type:\i.\i.USER_POPOUT_V2,activity:\i,className:\i\.activity,user:\in)/,
                 replace: "$self.showAllActivitiesComponent"
             },
-            predicate: () => settings.store.profileSidebar,
+            predicate: () => settings.store.profiles
         },
-        {
-            // Show all activities in the user popout
-            find: "customStatusSection,",
-            replacement: {
-                match: /(?<=\(0,\i\.jsx\)\()\i\.\i(?=,{activity:\i,user:\i,guild:\i,channelId:\i,onClose:\i,)/,
-                replace: "$self.showAllActivitiesComponent"
-            },
-            predicate: () => settings.store.userPopout
-        }
     ],
 });
