@@ -2,9 +2,6 @@
 
 import definePlugin from "@utils/types";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
-import { Devs } from "@utils/constants";
-import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, i18n, Menu, MessageStore, Parser, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 import { enableStyle, disableStyle } from "@api/Styles";
 import style from "./index.css?managed";
 
@@ -26,9 +23,7 @@ export default definePlugin({
         enableStyle(style);
         console.log("mreowww blehhh i kill people");
         this.preSend = addPreSendListener((channelId, msg) => {
-            if (msg.content.toLowerCase() == 'do a flip') {
-                doaflip();
-            }
+            console.log(msg.content);
         });
     },
 
