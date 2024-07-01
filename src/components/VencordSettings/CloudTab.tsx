@@ -121,7 +121,7 @@ function CloudTab() {
 
     return (
         <SettingsTab title="Vencord Cloud">
-            <Forms.FormSection title="Cloud Settings" className={Margins.top16}>
+            <Forms.FormSection title={t("vencord.cloudSettings")} className={Margins.top16}>
                 <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
                     <Translate i18nKey="vencord.cloud.integrations.description">
                         <Link href="https://vencord.dev/cloud/privacy" />
