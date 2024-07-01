@@ -120,6 +120,8 @@ export function openImageModal(url: string, props?: Partial<React.ComponentProps
                 placeholder={url}
                 src={url}
                 renderLinkComponent={props => <MaskedLink {...props} />}
+                // Don't render forward message button
+                renderForwardComponent={() => null}
                 shouldHideMediaOptions={false}
                 shouldAnimate
                 {...props}

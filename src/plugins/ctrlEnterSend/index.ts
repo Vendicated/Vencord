@@ -40,9 +40,9 @@ export default definePlugin({
     }),
     patches: [
         {
-            find: "KeyboardKeys.ENTER&&(!",
+            find: "!this.hasOpenCodeBlock()",
             replacement: {
-                match: /(?<=(\i)\.which===\i\.KeyboardKeys.ENTER&&).{0,100}(\(0,\i\.hasOpenPlainTextCodeBlock\)\(\i\)).{0,100}(?=&&\(\i\.preventDefault)/,
+                match: /!(\i).shiftKey&&!(this.hasOpenCodeBlock\(\))&&\(.{0,100}?\)/,
                 replace: "$self.shouldSubmit($1, $2)"
             }
         }

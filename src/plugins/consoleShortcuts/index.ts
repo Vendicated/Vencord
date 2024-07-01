@@ -141,7 +141,15 @@ function makeShortcuts() {
         guildId: { getter: () => Common.SelectedGuildStore.getGuildId(), preload: false },
         me: { getter: () => Common.UserStore.getCurrentUser(), preload: false },
         meId: { getter: () => Common.UserStore.getCurrentUser().id, preload: false },
-        messages: { getter: () => Common.MessageStore.getMessages(Common.SelectedChannelStore.getChannelId()), preload: false }
+        messages: { getter: () => Common.MessageStore.getMessages(Common.SelectedChannelStore.getChannelId()), preload: false },
+
+        Stores: {
+            getter: () => Object.fromEntries(
+                Common.Flux.Store.getAll()
+                    .map(store => [store.getName(), store] as const)
+                    .filter(([name]) => name.length > 1)
+            )
+        }
     };
 }
 
