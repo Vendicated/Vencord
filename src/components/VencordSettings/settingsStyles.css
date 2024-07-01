@@ -10,26 +10,6 @@
     margin-bottom: -2px;
 }
 
-.vc-settings-quick-actions-card {
-    color: var(--text-normal);
-    padding: 1em;
-    display: flex;
-    justify-content: space-evenly;
-    gap: 1em;
-    flex-wrap: wrap;
-    align-items: center;
-    margin-bottom: 1em;
-}
-
-.vc-settings-quick-actions-card button {
-    min-width: unset;
-}
-
-.vc-settings-quick-actions-img {
-    width: 30px;
-    height: 30px;
-}
-
 .vc-settings-donate {
     display: flex;
     flex-direction: row;
