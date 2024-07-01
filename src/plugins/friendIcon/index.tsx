@@ -43,12 +43,12 @@ export default definePlugin({
 const indicatorLocations = {
     list: {
         description: "In the member list",
-        onEnable: () => addDecorator("platform-indicator", props =>
+        onEnable: () => addDecorator("friend-indicator", props =>
             <ErrorBoundary noop>
                 <FriendIndicator user={props.user} small={true} />
             </ErrorBoundary>
         ),
-        onDisable: () => removeDecorator("platform-indicator")
+        onDisable: () => removeDecorator("friend-indicator")
     },
     /*
     badges: {
@@ -58,7 +58,7 @@ const indicatorLocations = {
     },*/
     messages: {
         description: "Inside messages",
-        onEnable: () => addDecoration("platform-indicator", props =>
+        onEnable: () => addDecoration("friend-indicator", props =>
             <ErrorBoundary noop>
                 <FriendIndicator user={props.message?.author} wantTopMargin={true} />
             </ErrorBoundary>
