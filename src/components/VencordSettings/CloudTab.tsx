@@ -166,7 +166,7 @@ function CloudTab() {
                             await authorizeCloud();
                         }}
                     >
-                        Reauthorise
+                        {t("vencord.reauthorise")}
                     </Button>
                     <Button
                         size={Button.Sizes.MEDIUM}

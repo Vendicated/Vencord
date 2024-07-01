@@ -88,6 +88,7 @@
   "pluginRestart": "Restart to apply changes!",
   "plugins": "Plugins",
   "pluginsNeedRestart": "The following plugins require a restart:",
+  "reauthorise": "Reauthorise",
   "requiredPlugin": "This plugin is required for Vencord to function.",
   "requiredPlugins": "Required Plugins",
   "restartLater": "Later!",
