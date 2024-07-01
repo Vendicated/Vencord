@@ -19,7 +19,7 @@
 import { addPreEditListener } from "@api/MessageEvents";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
-import { DeleteIcon, PlusIcon } from "@components/Icons";
+import { DeleteIcon } from "@components/Icons";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import {
     Button,
@@ -28,7 +28,7 @@ import {
     MessageStore,
     UserStore
 } from "@webpack/common";
-import { Message, User } from "discord-types/general";
+import { Message } from "discord-types/general";
 import { Member, PKAPI } from "pkapi.js";
 
 import pluralKit from "./index";
@@ -38,10 +38,9 @@ import {
     getAuthorOfMessage,
     isOwnPkMessage,
     isPk,
-    loadAuthors, ProfilePopout,
+    loadAuthors,
     replaceTags,
 } from "./utils";
-import { openModal } from "@utils/modal";
 
 const EditIcon = () => {
     return <svg role={"img"} width={"16"} height={"16"} fill={"none"} viewBox={"0 0 24 24"}>
@@ -204,27 +203,6 @@ export default definePlugin({
                 onContextMenu: _ => {}
             };
         });
-
-        addButton("pk-profile", msg => {
-            if (!msg) return null;
-            if (!isPk(msg)) return null;
-
-            return {
-                label: "View Profile",
-                icon: () => {
-                    return <PlusIcon/>;
-                },
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: () => {
-                    openModal(props =>
-                        <ProfilePopout {...props} msg={msg}/>
-                    );
-                },
-                onContextMenu: _ => {}
-            };
-        });
-
 
         // Stolen directly from https://github.com/lynxize/vencord-plugins/blob/plugins/src/userplugins/pk4vc/index.tsx
         this.preEditListener = addPreEditListener((channelId, messageId, messageObj) => {

@@ -6,7 +6,6 @@
 
 import { DataStore } from "@api/index";
 import { insertTextIntoChatInputBox } from "@utils/discord";
-import { findComponentByCodeLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Toasts } from "@webpack/common";
 import { Message } from "discord-types/general";
 import { Member, MemberGuildSettings, PKAPI, System, SystemGuildSettings } from "pkapi.js";
@@ -14,9 +13,6 @@ import { Member, MemberGuildSettings, PKAPI, System, SystemGuildSettings } from 
 
 // I dont fully understand how to use datastores, if I used anything incorrectly please let me know
 export const DATASTORE_KEY = "pk";
-export const UserPopoutComponent = findComponentByCodeLazy("customStatusActivity:", "isApplicationStreaming:", "disableUserProfileLink:");
-const VerifiedIconComponent = findComponentByCodeLazy(".CONNECTIONS_ROLE_OFFICIAL_ICON_TOOLTIP");
-
 export let authors: Record<string, Author> = {};
 
 export interface Author {
