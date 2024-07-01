@@ -19,6 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
+
 export const settings = definePluginSettings({
     receivedInput: {
         type: OptionType.STRING,
@@ -53,6 +54,13 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show translate button in chat bar",
         default: true
+    },
+    amountToAutoTranslate: {
+        type: OptionType.SLIDER,
+        description: "How many messages to auto-translate when you switch channels (only works for channels with Auto Translate Received enabled)",
+        markers: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
+        stickToMarkers: true,
+        default: 5,
     }
 }).withPrivateSettings<{
     showAutoTranslateAlert: boolean;
