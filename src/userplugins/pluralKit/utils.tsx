@@ -30,6 +30,8 @@ export function isPk(msg: Message) {
 
 export function isOwnPkMessage(message: Message, localSystemData: string): boolean {
     if (!isPk(message)) return false;
+    if (!localSystemData) return false;
+    if (["[]", "{}"].includes(localSystemData)) return false;
     const localSystem: Author[] = JSON.parse(localSystemData);
     return localSystem.map(author => author.member.id).some(id => id === getAuthorOfMessage(message, new PKAPI()).member.id);
 }
