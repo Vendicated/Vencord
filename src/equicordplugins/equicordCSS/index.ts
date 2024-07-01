@@ -25,7 +25,6 @@ import definePlugin, { OptionType } from "@utils/types";
 // Importing the style managed fixes on and off switch
 import betterauthapps from "./css/betterauthapps.css?managed";
 import betterstatuspicker from "./css/betterstatuspicker.css?managed";
-import equicord from "./css/equicord.css?managed";
 import graidentbuttons from "./css/graidentbuttons.css?managed";
 import nitrothemesfix from "./css/nitrothemesfix.css?managed";
 import settingsicons from "./css/settingsicons.css?managed";
@@ -41,12 +40,6 @@ const settings = definePluginSettings({
     betterStatusPicker: {
         type: OptionType.BOOLEAN,
         description: "Enable Better Status Picker CSS",
-        restartNeeded: false,
-        default: false
-    },
-    equicord: {
-        type: OptionType.BOOLEAN,
-        description: "Enable Equicords CSS",
         restartNeeded: false,
         default: false
     },
@@ -91,9 +84,6 @@ export default definePlugin({
         if (settings.store.betterStatusPicker) {
             enableStyle(betterstatuspicker);
         }
-        if (settings.store.equicord) {
-            enableStyle(equicord);
-        }
         if (settings.store.graidentButtons) {
             enableStyle(graidentbuttons);
         }
@@ -113,9 +103,6 @@ export default definePlugin({
         }
         if (settings.store.betterStatusPicker) {
             disableStyle(betterstatuspicker);
-        }
-        if (settings.store.equicord) {
-            disableStyle(equicord);
         }
         if (settings.store.graidentButtons) {
             disableStyle(graidentbuttons);

@@ -36,7 +36,7 @@
 .lookFilled-yCfaCM.colorBrand-I6CyqQ {
     --gradient: linear-gradient(var(--gradient-blurple));
 }
-.lookFilled-yCfaCM.colorGreen-3y-Z79, .lookFilled-yCfaCM.button-1EGGcP.buttonActive-Uc1jHx {
+.lookFilled-yCfaCM.colorGreen-3y-Z79, .lookFilled-yCfaCM.button_adcaac.buttonActive_adcaac {
     --gradient: linear-gradient(var(--gradient-green));
 }
 .lookFilled-yCfaCM.colorYellow-Pgtmch {
@@ -45,56 +45,56 @@
 .lookFilled-yCfaCM.colorRed-rQXKgM {
     --gradient: linear-gradient(var(--gradient-red));
 }
-.lookFilled-yCfaCM.colorPrimary-2AuQVo, .lookFilled-yCfaCM.colorGrey-2iAG-B, .lookFilled-yCfaCM.buttonColor-3bP3fX {
+.lookFilled-yCfaCM.colorPrimary-2AuQVo, .lookFilled-yCfaCM.colorGrey-2iAG-B, .lookFilled-yCfaCM.buttonColor_adcaac {
     --gradient: linear-gradient(var(--gradient-grey));
 }
 
 /* || Context Menus */
-.menu-1QACrS .item-1OdjEX:not(.hideInteraction-2jPGL_) {
+.menu_d90b3d .item-1OdjEX:not(.hideInteraction-2jPGL_) {
     font-weight: var(--font-default);
     transition: var(--button-transition);
 }
-.menu-1QACrS .item-1OdjEX:not(.hideInteraction-2jPGL_).focused-3qFvc8, .menu-1QACrS .item-1OdjEX:not(.hideInteraction-2jPGL_):active {
+.menu_d90b3d .item-1OdjEX:not(.hideInteraction-2jPGL_).focused-3qFvc8, .menu_d90b3d .item-1OdjEX:not(.hideInteraction-2jPGL_):active {
     font-size: var(--fontsize-hover);
     font-weight: var(--font-hover);
     background: var(--gradient);
 }
-.menu-1QACrS .colorDefault-CDqZdO.focused-3qFvc8, .menu-1QACrS .colorDefault-CDqZdO:active {
+.menu_d90b3d .colorDefault-CDqZdO.focused-3qFvc8, .menu_d90b3d .colorDefault-CDqZdO:active {
     --gradient: linear-gradient(var(--gradient-blurple));
 }
-.menu-1QACrS .colorDanger-3n-KnP.focused-3qFvc8, .menu-1QACrS .colorDanger-3n-KnP:active,
-.menu-1QACrS #status-picker-dnd.focused-3qFvc8,
-.menu-1QACrS #status-picker-dnd:active {
+.menu_d90b3d .colorDanger-3n-KnP.focused-3qFvc8, .menu_d90b3d .colorDanger-3n-KnP:active,
+.menu_d90b3d #status-picker-dnd.focused-3qFvc8,
+.menu_d90b3d #status-picker-dnd:active {
     --gradient: linear-gradient(var(--gradient-red));
 }
-.menu-1QACrS .colorPremium-vwmYZQ.focused-3qFvc8, .menu-1QACrS .colorPremium-vwmYZQ:active {
+.menu_d90b3d .colorPremium-vwmYZQ.focused-3qFvc8, .menu_d90b3d .colorPremium-vwmYZQ:active {
     --gradient: linear-gradient(var(--gradient-special)) ;
 }
-.menu-1QACrS #status-picker-online.focused-3qFvc8, .menu-1QACrS #status-picker-online:active {
+.menu_d90b3d #status-picker-online.focused-3qFvc8, .menu_d90b3d #status-picker-online:active {
     --gradient: linear-gradient(var(--gradient-green));
 }
-.menu-1QACrS #status-picker-idle.focused-3qFvc8, .menu-1QACrS #status-picker-idle:active {
+.menu_d90b3d #status-picker-idle.focused-3qFvc8, .menu_d90b3d #status-picker-idle:active {
     --gradient: linear-gradient(var(--gradient-yellow));
 }
-.menu-1QACrS #status-picker-invisible.focused-3qFvc8, .menu-1QACrS #status-picker-invisible:active {
+.menu_d90b3d #status-picker-invisible.focused-3qFvc8, .menu_d90b3d #status-picker-invisible:active {
     --gradient: linear-gradient(var(--gradient-grey));
 }
 
 /* || Message Actions */
-.wrapper-2vIMkT .button-3bklZh {
+.wrapper_ef319f .button_ef319f {
     background: var(--gradient);
 }
-.wrapper-2vIMkT .button-3bklZh img, .wrapper-2vIMkT .button-3bklZh svg {
+.wrapper_ef319f .button_ef319f img, .wrapper_ef319f .button_ef319f svg {
     transition: var(--button-transition);
     transform: var(--transform-normal);
 }
-.wrapper-2vIMkT .button-3bklZh:hover {
+.wrapper_ef319f .button_ef319f:hover {
     --gradient: linear-gradient(var(--gradient-blurple));
 }
-.wrapper-2vIMkT .button-3bklZh:hover svg {
+.wrapper_ef319f .button_ef319f:hover svg {
     transform: var(--transform-hover);
     color: white;
 }
-.wrapper-2vIMkT .button-3bklZh.dangerous-Y36ifs:hover {
+.wrapper_ef319f .button_ef319f.dangerous_ef319f:hover {
     --gradient: linear-gradient(var(--gradient-red)) ;
 }

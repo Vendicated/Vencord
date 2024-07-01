@@ -70,7 +70,7 @@ const buildCss = () => {
             background: var(--brand-experiment-10a);
         }
         :is(${elements}):not(.messagelogger-deleted) > div:before {
-            background: var(--brand-experiment);
+            background: var(--brand-500);
             content: "";
             position: absolute;
             display: block;

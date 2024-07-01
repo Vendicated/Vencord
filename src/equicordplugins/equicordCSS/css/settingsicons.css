@@ -1,18 +1,6 @@
-/**
- * @name SettingsIcons
- * @author Saltssaumure, DevilBro
- * @authorLink https://github.com/Saltssaumure
- * @description Adds icons to Discord settings, for use with Vencord plugin ThemeAttributes.
- * @license GPL-2.0
- * @version 1.1
- * @invite uy8nKQVatp
- * @source https://github.com/MiniDiscordThemes/SettingsIcons
- * @donate https://ko-fi.com/saltssaumure
-*/
-
 @import url("https://raw.githubusercontent.com/Equicord/Equicord/main/src/equicordplugins/equicordCSS/css/main.min.css");
 
-/* See https://github.com/MiniDiscordThemes/SettingsIcons#customisation for customisation settings. */
+/* https://github.com/MiniDiscordThemes/SettingsIcons#customisation */
 
 :root {
     --settingsicons: 1;
