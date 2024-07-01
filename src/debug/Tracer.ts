@@ -18,14 +18,14 @@
 
 import { Logger } from "@utils/Logger";
 
-if (IS_DEV) {
+if (IS_DEV || IS_REPORTER) {
     var traces = {} as Record<string, [number, any[]]>;
     var logger = new Logger("Tracer", "#FFD166");
 }
 
 const noop = function () { };
 
-export const beginTrace = !IS_DEV ? noop :
+export const beginTrace = !(IS_DEV || IS_REPORTER) ? noop :
     function beginTrace(name: string, ...args: any[]) {
         if (name in traces)
             throw new Error(`Trace ${name} already exists!`);
@@ -33,7 +33,7 @@ export const beginTrace = !IS_DEV ? noop :
         traces[name] = [performance.now(), args];
     };
 
-export const finishTrace = !IS_DEV ? noop : function finishTrace(name: string) {
+export const finishTrace = !(IS_DEV || IS_REPORTER) ? noop : function finishTrace(name: string) {
     const end = performance.now();
 
     const [start, args] = traces[name];
@@ -48,7 +48,7 @@ type TraceNameMapper<F extends Func> = (...args: Parameters<F>) => string;
 const noopTracer =
     <F extends Func>(name: string, f: F, mapper?: TraceNameMapper<F>) => f;
 
-export const traceFunction = !IS_DEV
+export const traceFunction = !(IS_DEV || IS_REPORTER)
     ? noopTracer
     : function traceFunction<F extends Func>(name: string, f: F, mapper?: TraceNameMapper<F>): F {
         return function (this: any, ...args: Parameters<F>) {

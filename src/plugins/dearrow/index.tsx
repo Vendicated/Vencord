@@ -69,7 +69,7 @@ async function embedDidMount(this: Component<Props>) {
 
         if (hasTitle && replaceElements !== ReplaceElements.ReplaceThumbnailsOnly) {
             embed.dearrow.oldTitle = embed.rawTitle;
-            embed.rawTitle = titles[0].title.replace(/ >(\S)/g, " $1");
+            embed.rawTitle = titles[0].title.replace(/(^|\s)>(\S)/g, "$1$2");
         }
 
         if (hasThumb && replaceElements !== ReplaceElements.ReplaceTitlesOnly) {
@@ -182,8 +182,8 @@ export default definePlugin({
 
             // add dearrow button
             {
-                match: /children:\[(?=null!=\i\?\i\.renderSuppressButton)/,
-                replace: "children:[$self.renderButton(this),",
+                match: /children:\[(?=null!=\i\?(\i)\.renderSuppressButton)/,
+                replace: "children:[$self.renderButton($1),",
                 predicate: () => !settings.store.hideButton
             }
         ]

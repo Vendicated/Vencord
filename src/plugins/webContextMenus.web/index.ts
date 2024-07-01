@@ -197,9 +197,37 @@ export default definePlugin({
         {
             find: '"MediaEngineWebRTC");',
             replacement: {
-                match: /supports\(\i\)\{switch\(\i\)\{case (\i).Features/,
-                replace: "$&.DISABLE_VIDEO:return true;case $1.Features"
+                match: /supports\(\i\)\{switch\(\i\)\{(case (\i).\i)/,
+                replace: "$&.DISABLE_VIDEO:return true;$1"
             }
+        },
+        {
+            find: ".Messages.SEARCH_WITH_GOOGLE",
+            replacement: {
+                match: /\i\.isPlatformEmbedded/,
+                replace: "true"
+            }
+        },
+        {
+            find: ".Messages.COPY,hint:",
+            replacement: [
+                {
+                    match: /\i\.isPlatformEmbedded/,
+                    replace: "true"
+                },
+                {
+                    match: /\i\.\i\.copy/,
+                    replace: "Vencord.Webpack.Common.Clipboard.copy"
+                }]
+        },
+        // Automod add filter words
+        {
+            find: '("interactionUsernameProfile',
+            replacement:
+                {
+                    match: /\i\.isPlatformEmbedded(?=.{0,50}\.tagName)/,
+                    replace: "true"
+                },
         }
     ],
 
