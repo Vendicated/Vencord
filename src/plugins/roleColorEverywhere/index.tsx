@@ -58,53 +58,45 @@ export default definePlugin({
         // Chat Mentions
         {
             find: 'location:"UserMention',
-            replacement: [
-                {
-                    match: /user:(\i),channel:(\i).{0,400}?"@"\.concat\(.+?\)/,
-                    replace: "$&,color:$self.getUserColor($1?.id,{channelId:$2?.id})"
-                }
-            ],
+            replacement: {
+                match: /user:(\i),channel:(\i).{0,400}?"@"\.concat\(.+?\)/,
+                replace: "$&,color:$self.getUserColor($1?.id,{channelId:$2?.id})"
+            },
             predicate: () => settings.store.chatMentions,
         },
         // Slate
         {
             find: ".userTooltip,children",
-            replacement: [
-                {
-                    match: /let\{id:(\i),guildId:(\i)[^}]*\}.*?\.\i,{(?=children)/,
-                    replace: "$&color:$self.getUserColor($1,{guildId:$2}),"
-                }
-            ],
+            replacement: {
+                match: /let\{id:(\i),guildId:(\i)[^}]*\}.*?\.\i,{(?=children)/,
+                replace: "$&color:$self.getUserColor($1,{guildId:$2}),"
+            },
             predicate: () => settings.store.chatMentions,
         },
         {
             find: 'tutorialId:"whos-online',
-            replacement: [
-                {
-                    match: /null,\i," — ",\i\]/,
-                    replace: "null,$self.roleGroupColor(arguments[0])]"
-                },
-            ],
+            replacement: {
+                match: /null,\i," — ",\i\]/,
+                replace: "null,$self.roleGroupColor(arguments[0])]"
+            },
             predicate: () => settings.store.memberList,
         },
         {
             find: ".Messages.THREAD_BROWSER_PRIVATE",
-            replacement: [
-                {
-                    match: /children:\[\i," — ",\i\]/,
-                    replace: "children:[$self.roleGroupColor(arguments[0])]"
-                },
-            ],
+            replacement:
+            {
+                match: /children:\[\i," — ",\i\]/,
+                replace: "children:[$self.roleGroupColor(arguments[0])]"
+            },
             predicate: () => settings.store.memberList,
         },
         {
             find: "renderPrioritySpeaker",
-            replacement: [
-                {
-                    match: /renderName\(\){.+?usernameSpeaking\]:.+?(?=children)/,
-                    replace: "$&...$self.getVoiceProps(this.props),"
-                }
-            ],
+            replacement:
+            {
+                match: /renderName\(\){.+?usernameSpeaking\]:.+?(?=children)/,
+                replace: "$&...$self.getVoiceProps(this.props),"
+            },
             predicate: () => settings.store.voiceUsers,
         },
         {
