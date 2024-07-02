@@ -17,6 +17,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import definePlugin, { OptionType } from "@utils/types";
 
 import { getBadges, RelationshipIndicator } from "./utils";
+import { Devs } from "@utils/constants";
 
 const indicatorLocations = {
     list: {
@@ -65,10 +66,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "RelationshipIndicators",
-    authors: [{
-        name: "Scyye",
-        id: 553652308295155723n
-    }],
+    authors: [Devs.Scyye],
     settings,
     description: "Adds icons to indicate relationships with users.",
     start() {
