@@ -20,9 +20,9 @@ import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
-import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
+import { AnyModuleFactory, ModuleExports, ModuleFactory, WebpackRequire } from "./wreq";
 
 const logger = new Logger("Webpack");
 
@@ -33,10 +33,10 @@ export let _resolveReady: () => void;
  */
 export const onceReady = new Promise<void>(r => _resolveReady = r);
 
-export let wreq: WebpackInstance;
-export let cache: WebpackInstance["c"];
+export let wreq: WebpackRequire;
+export let cache: WebpackRequire["c"];
 
-export type FilterFn = (mod: any) => boolean;
+export type FilterFn = (module: ModuleExports) => boolean;
 
 export const filters = {
     byProps: (...props: string[]): FilterFn =>
@@ -68,16 +68,24 @@ export const filters = {
     }
 };
 
-export type CallbackFn = (mod: any, id: string) => void;
+export type CallbackFn = (module: ModuleExports, id: PropertyKey) => void;
 
 export const subscriptions = new Map<FilterFn, CallbackFn>();
 export const moduleListeners = new Set<CallbackFn>();
-export const factoryListeners = new Set<(factory: (module: any, exports: any, require: WebpackInstance) => void) => void>();
-export const beforeInitListeners = new Set<(wreq: WebpackInstance) => void>();
+export const factoryListeners = new Set<(factory: AnyModuleFactory) => void>();
 
-export function _initWebpack(webpackRequire: WebpackInstance) {
+export function _initWebpack(webpackRequire: WebpackRequire) {
     wreq = webpackRequire;
+
+    if (webpackRequire.c == null) return;
     cache = webpackRequire.c;
+
+    Reflect.defineProperty(webpackRequire.c, Symbol.toStringTag, {
+        value: "ModuleCache",
+        configurable: true,
+        writable: true,
+        enumerable: false
+    });
 }
 
 let devToolsOpen = false;
@@ -139,7 +147,7 @@ export function findAll(filter: FilterFn) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
-    const ret = [] as any[];
+    const ret: ModuleExports[] = [];
     for (const key in cache) {
         const mod = cache[key];
         if (!mod.loaded || !mod?.exports) continue;
@@ -185,7 +193,7 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
     const filters = filterFns as Array<FilterFn | undefined>;
 
     let found = 0;
-    const results = Array(length);
+    const results: ModuleExports[] = Array(length);
 
     outer:
     for (const key in cache) {
@@ -248,7 +256,7 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
 export const findModuleId = traceFunction("findModuleId", function findModuleId(...code: string[]) {
     outer:
     for (const id in wreq.m) {
-        const str = wreq.m[id].toString();
+        const str = String(wreq.m[id]);
 
         for (const c of code) {
             if (!str.includes(c)) continue outer;
@@ -445,14 +453,14 @@ export function findExportedComponentLazy<T extends object = any>(...props: stri
  *             closeModal: filters.byCode("key==")
  *          })
  */
-export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
-    const exports = {} as Record<S, any>;
+export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, ModuleExports> {
+    const exports = {} as Record<S, ModuleExports>;
 
     const id = findModuleId(code);
     if (id === null)
         return exports;
 
-    const mod = wreq(id as any);
+    const mod = wreq(id);
     outer:
     for (const key in mod) {
         const member = mod[key];
@@ -510,7 +518,7 @@ export async function extractAndLoadChunks(code: string[], matcher: RegExp = Def
         return false;
     }
 
-    const match = module.toString().match(canonicalizeMatch(matcher));
+    const match = String(module).match(canonicalizeMatch(matcher));
     if (!match) {
         const err = new Error("extractAndLoadChunks: Couldn't find chunk loading in module factory code");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
@@ -597,15 +605,15 @@ export function waitFor(filter: string | string[] | FilterFn, callback: Callback
  * @returns Mapping of found modules
  */
 export function search(...filters: Array<string | RegExp>) {
-    const results = {} as Record<number, Function>;
+    const results: WebpackRequire["m"] = {};
     const factories = wreq.m;
     outer:
     for (const id in factories) {
-        const factory = factories[id].original ?? factories[id];
-        const str: string = factory.toString();
+        const factory = factories[id];
+        const factoryStr = String(factory);
         for (const filter of filters) {
-            if (typeof filter === "string" && !str.includes(filter)) continue outer;
-            if (filter instanceof RegExp && !filter.test(str)) continue outer;
+            if (typeof filter === "string" && !factoryStr.includes(filter)) continue outer;
+            if (filter instanceof RegExp && !filter.test(factoryStr)) continue outer;
         }
         results[id] = factory;
     }
@@ -621,18 +629,18 @@ export function search(...filters: Array<string | RegExp>) {
  * so putting breakpoints or similar will have no effect.
  * @param id The id of the module to extract
  */
-export function extract(id: string | number) {
-    const mod = wreq.m[id] as Function;
-    if (!mod) return null;
+export function extract(id: PropertyKey) {
+    const factory = wreq.m[id];
+    if (!factory) return null;
 
     const code = `
-// [EXTRACTED] WebpackModule${id}
+// [EXTRACTED] WebpackModule${String(id)}
 // WARNING: This module was extracted to be more easily readable.
 //          This module is NOT ACTUALLY USED! This means putting breakpoints will have NO EFFECT!!
 
-0,${mod.toString()}
-//# sourceURL=ExtractedWebpackModule${id}
+0,${String(factory)}
+//# sourceURL=ExtractedWebpackModule${String(id)}
 `;
-    const extracted = (0, eval)(code);
-    return extracted as Function;
+    const extracted: ModuleFactory = (0, eval)(code);
+    return extracted;
 }

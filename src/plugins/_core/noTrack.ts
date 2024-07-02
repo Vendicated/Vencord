@@ -20,6 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
+import { WebpackRequire } from "webpack";
 
 const settings = definePluginSettings({
     disableAnalytics: {
@@ -81,9 +82,9 @@ export default definePlugin({
         Object.defineProperty(Function.prototype, "g", {
             configurable: true,
 
-            set(v: any) {
+            set(this: WebpackRequire, globalObj: WebpackRequire["g"]) {
                 Object.defineProperty(this, "g", {
-                    value: v,
+                    value: globalObj,
                     configurable: true,
                     enumerable: true,
                     writable: true

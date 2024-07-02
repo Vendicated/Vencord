@@ -6,7 +6,7 @@
 
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { patches } from "plugins";
+import { addPatch, patches } from "plugins";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 
@@ -19,7 +19,24 @@ async function runReporter() {
         let loadLazyChunksResolve: (value: void | PromiseLike<void>) => void;
         const loadLazyChunksDone = new Promise<void>(r => loadLazyChunksResolve = r);
 
-        Webpack.beforeInitListeners.add(() => loadLazyChunks().then((loadLazyChunksResolve)));
+        // The main patch for starting the reporter chunk loading
+        addPatch({
+            find: '"Could not find app-mount"',
+            replacement: {
+                match: /(?<="use strict";)/,
+                replace: "Vencord.Webpack._initReporter();"
+            }
+        }, "Vencord Reporter");
+
+        // @ts-ignore
+        Vencord.Webpack._initReporter = function () {
+            // initReporter is called in the patched entry point of Discord
+            // setImmediate to only start searching for lazy chunks after Discord initialized the app
+            setTimeout(async () => {
+                loadLazyChunks().then(loadLazyChunksResolve);
+            }, 0);
+        };
+
         await loadLazyChunksDone;
 
         for (const patch of patches) {
@@ -62,12 +79,12 @@ async function runReporter() {
                 if (result == null || (result.$$vencordInternal != null && result.$$vencordInternal() == null)) throw new Error("Webpack Find Fail");
             } catch (e) {
                 let logMessage = searchType;
-                if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
-                else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
+                if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${String(args[0]).slice(0, 147)}...)`;
+                else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${String(args[1])})`;
                 else if (method === "mapMangledModule") {
                     const failedMappings = Object.keys(args[1]).filter(key => result?.[key] == null);
 
-                    logMessage += `("${args[0]}", {\n${failedMappings.map(mapping => `\t${mapping}: ${args[1][mapping].toString().slice(0, 147)}...`).join(",\n")}\n})`;
+                    logMessage += `("${args[0]}", {\n${failedMappings.map(mapping => `\t${mapping}: ${String(args[1][mapping]).slice(0, 147)}...`).join(",\n")}\n})`;
                 }
                 else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
 
@@ -81,4 +98,5 @@ async function runReporter() {
     }
 }
 
-runReporter();
+// Run after the Vencord object has been created
+setTimeout(runReporter, 0);
