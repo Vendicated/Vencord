@@ -10,8 +10,12 @@ import { User } from "discord-types/general";
 
 import { BlockedIcon, FriendIcon } from "./icons";
 
+const shouldShowIndicator = (user?: User|null) => {
+    return user && !user.bot && (RelationshipStore.isFriend(user.id) || RelationshipStore.isBlocked(user.id));
+};
+
 export const RelationshipIndicator = ({ user, wantMargin = true, wantTopMargin = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; }) => {
-    if (!user || user.bot || (!RelationshipStore.isFriend(user.id) && !RelationshipStore.isBlocked(user.id))) return null;
+    if (!shouldShowIndicator(user)) return null;
 
     return (
         <span
@@ -35,8 +39,7 @@ export const RelationshipIndicator = ({ user, wantMargin = true, wantTopMargin =
 
 export function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
     const user = UserStore.getUser(userId);
-
-    if (!user || user.bot || (!RelationshipStore.isFriend(user.id) && !RelationshipStore.isBlocked(user.id))) return [];
+    if (!shouldShowIndicator(user)) return [];
 
     return [{
         component: () => (
