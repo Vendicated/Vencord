@@ -7,72 +7,23 @@
 import {
     addBadge,
     BadgePosition,
-    BadgeUserArgs,
     ProfileBadge,
     removeBadge
 } from "@api/Badges";
 import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
 import { addDecoration, removeDecoration } from "@api/MessageDecorations";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import definePlugin from "@utils/types";
-import { RelationshipStore, UserStore } from "@webpack/common";
-import { User } from "discord-types/general";
+import definePlugin, { OptionType } from "@utils/types";
 
-import { BlockedIcon, FriendIcon } from "./icons";
-
-function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
-    const user = UserStore.getUser(userId);
-
-    if (!user || user.bot || (!RelationshipStore.isFriend(user.id) && !RelationshipStore.isBlocked(user.id))) return [];
-
-    return [{
-        component: () => (
-            <span className="vc-platform-indicator">
-                <FriendIndicator
-                    user={user}
-                    small={true}
-                />
-            </span>
-        ),
-        key: `vc-${RelationshipStore.isFriend(userId)?"friend":"blocked"}-indicator`,
-    }];
-}
-
-const badge: ProfileBadge = {
-    getBadges,
-    position: BadgePosition.START
-};
-
-export default definePlugin({
-    name: "FriendIcon",
-    authors: [{
-        name: "Scyye",
-        id: 553652308295155723n
-    }],
-    description: "Adds icons to indicate relationships with users.",
-    start() {
-        for (const location in indicatorLocations) {
-            if (indicatorLocations[location]) {
-                indicatorLocations[location].onEnable();
-            }
-        }
-    },
-    stop() {
-        for (const location in indicatorLocations) {
-            if (indicatorLocations[location]) {
-                indicatorLocations[location].onDisable();
-            }
-        }
-    }
-});
-
+import { getBadges, RelationshipIndicator } from "./utils";
 
 const indicatorLocations = {
     list: {
         description: "In the member list",
         onEnable: () => addDecorator("friend-indicator", props =>
             <ErrorBoundary noop>
-                <FriendIndicator user={props.user} small={true} />
+                <RelationshipIndicator user={props.user} />
             </ErrorBoundary>
         ),
         onDisable: () => removeDecorator("friend-indicator")
@@ -86,32 +37,51 @@ const indicatorLocations = {
         description: "Inside messages",
         onEnable: () => addDecoration("friend-indicator", props =>
             <ErrorBoundary noop>
-                <FriendIndicator user={props.message?.author} wantTopMargin={true} />
+                <RelationshipIndicator user={props.message?.author} wantTopMargin={true} />
             </ErrorBoundary>
         ),
-        onDisable: () => removeDecoration("platform-indicator")
+        onDisable: () => removeDecoration("friend-indicator")
     }
 };
 
-const FriendIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; small?: boolean; }) => {
-    if (!user || user.bot || (!RelationshipStore.isFriend(user.id) && !RelationshipStore.isBlocked(user.id))) return null;
-
-    return (
-        <span
-            className="vc-friend-indicator"
-            style={{
-                display: "inline-flex",
-                justifyContent: "center",
-                alignItems: "center",
-                marginLeft: wantMargin ? 4 : 0,
-                verticalAlign: "top",
-                position: "relative",
-                top: wantTopMargin ? 2 : 0,
-                padding: !wantMargin ? 1 : 0,
-                gap: 2
-            }}
-        >
-            {RelationshipStore.isFriend(user.id)? <FriendIcon /> : <BlockedIcon />}
-        </span>
-    );
+const badge: ProfileBadge = {
+    getBadges,
+    position: BadgePosition.START
 };
+
+const settings = definePluginSettings({
+    ...Object.fromEntries(
+        Object.entries(indicatorLocations).map(([key, value]) => {
+            return [key, {
+                type: OptionType.BOOLEAN,
+                description: `Show indicators ${value.description.toLowerCase()}`,
+                // onChange doesn't give any way to know which setting was changed, so restart required
+                restartNeeded: true,
+                default: true
+            }];
+        })
+    ),
+});
+
+export default definePlugin({
+    name: "RelationshipIndicators",
+    authors: [{
+        name: "Scyye",
+        id: 553652308295155723n
+    }],
+    settings,
+    description: "Adds icons to indicate relationships with users.",
+    start() {
+        Object.entries(indicatorLocations).forEach(([key, value]) => {
+            if (settings.store[key]) value.onEnable();
+        });
+    },
+    stop() {
+        Object.entries(indicatorLocations).forEach(([key, value]) => {
+            if (settings.store[key]) value.onDisable();
+        });
+    },
+});
+
+
+
