@@ -841,17 +841,17 @@ export const cacheFindModuleFactory = traceFunction("cacheFindModuleFactory", fu
  * Search modules by keyword. This searches the factory methods,
  * meaning you can search all sorts of things, methodName, strings somewhere in the code, etc.
  *
- * @param filters One or more strings or regexes
+ * @param code One or more strings or regexes
  * @returns Mapping of found modules
  */
-export function search(...filters: CodeFilter) {
+export function search(...code: CodeFilter) {
     const results = {} as Record<number, Function>;
     const factories = wreq.m;
 
     for (const id in factories) {
         const factory = factories[id];
 
-        if (stringMatches(String(factory), filters)) {
+        if (stringMatches(String(factory), code)) {
             results[id] = factory;
         }
     }
