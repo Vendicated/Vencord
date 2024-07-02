@@ -480,6 +480,7 @@ export default definePlugin({
                 match: /if\((\i)\.blocked\)return \i\.ChannelStreamTypes\.MESSAGE_GROUP_BLOCKED;/,
                 replace: '$&else if($1.deleted && Vencord.Settings.plugins.MessageLogger.collapseDeleted) return"MESSAGE_GROUP_DELETED";',
             },
+            predicate: () => Settings.plugins.MessageLogger.collapseDeleted
         },
         {
             // Message group rendering
@@ -495,6 +496,7 @@ export default definePlugin({
                     replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$self.Messages.DELETED_MESSAGE_COUNT:',
                 },
             ],
+            predicate: () => Settings.plugins.MessageLogger.collapseDeleted
         }
     ]
 });
