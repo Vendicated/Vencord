@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { canonicalizeMatch } from "@utils/patches";
 import { Channel } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
@@ -152,11 +151,10 @@ export const InviteActions = findByProps("resolveInvite");
 
 export const IconUtils = findByProps<t.IconUtils>("getGuildBannerURL", "getUserAvatarURL");
 
-const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i,activeViewType:/);
 // TODO: type
 export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModule("expression-picker-last-active-view", {
     closeExpressionPicker: filters.byCode("setState({activeView:null"),
-    openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(String(m)),
+    openExpressionPicker: filters.byCode(/setState\({activeView:\i,activeViewType:/),
 });
 
 export const PopoutActions: t.PopoutActions = mapMangledModule('type:"POPOUT_WINDOW_OPEN"', {
@@ -165,7 +163,7 @@ export const PopoutActions: t.PopoutActions = mapMangledModule('type:"POPOUT_WIN
     setAlwaysOnTop: filters.byCode('type:"POPOUT_WINDOW_SET_ALWAYS_ON_TOP"'),
 });
 
-export const UsernameUtils: t.UsernameUtils = findByProps("useName", "getGlobalName");
+export const UsernameUtils = findByProps<t.UsernameUtils>("useName", "getGlobalName");
 export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModule(/=\i\.getUserProfile\(\i\),\i=\i\.getGuildMemberProfile\(/, {
     getDisplayProfile: filters.byCode(".getGuildMemberProfile("),
     useDisplayProfile: filters.byCode(/\[\i\.\i,\i\.\i],\(\)=>/)
