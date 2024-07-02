@@ -68,13 +68,24 @@ if (IS_DEV && IS_DISCORD_DESKTOP) {
     }, 0);
 }
 
+export type PropsFilter = Array<string>;
+export type CodeFilter = Array<string | RegExp>;
+export type StoreNameFilter = string;
+
 export type FilterFn = ((module: ModuleExports) => boolean) & {
-    $$vencordProps?: string[];
+    $$vencordProps?: Array<string | RegExp>;
     $$vencordIsFactoryFilter?: boolean;
 };
 
+const stringMatches = (s: string, filter: CodeFilter) =>
+    filter.every(f =>
+        typeof f === "string"
+            ? s.includes(f)
+            : (f.global && (f.lastIndex = 0), f.test(s))
+    );
+
 export const filters = {
-    byProps: (...props: string[]): FilterFn => {
+    byProps: (...props: PropsFilter): FilterFn => {
         const filter: FilterFn = props.length === 1
             ? m => m?.[props[0]] !== void 0
             : m => props.every(p => m?.[p] !== void 0);
@@ -83,28 +94,25 @@ export const filters = {
         return filter;
     },
 
-    byCode: (...code: string[]): FilterFn => {
+    byCode: (...code: CodeFilter): FilterFn => {
+        code = code.map(canonicalizeMatch);
         const filter: FilterFn = m => {
             if (typeof m !== "function") return false;
-            const s = String(m);
-            for (const c of code) {
-                if (!s.includes(c)) return false;
-            }
-            return true;
+            return stringMatches(String(m), code);
         };
 
         filter.$$vencordProps = ["byCode", ...code];
         return filter;
     },
 
-    byStoreName: (name: string): FilterFn => {
+    byStoreName: (name: StoreNameFilter): FilterFn => {
         const filter: FilterFn = m => m?.constructor?.displayName === name;
 
         filter.$$vencordProps = ["byStoreName", name];
         return filter;
     },
 
-    byComponentCode: (...code: string[]): FilterFn => {
+    byComponentCode: (...code: CodeFilter): FilterFn => {
         const byCodeFilter = filters.byCode(...code);
         const filter: FilterFn = m => {
             let inner = m;
@@ -124,7 +132,7 @@ export const filters = {
         return filter;
     },
 
-    byFactoryCode: (...code: string[]): FilterFn => {
+    byFactoryCode: (...code: CodeFilter): FilterFn => {
         const byCodeFilter = filters.byCode(...code);
 
         byCodeFilter.$$vencordProps = ["byFactoryCode", ...code];
@@ -139,7 +147,7 @@ export const webpackSearchHistory = [] as Array<["waitFor" | "find" | "findCompo
 function printFilter(filter: FilterFn) {
     if (filter.$$vencordProps != null) {
         const props = filter.$$vencordProps;
-        return `${props[0]}(${props.slice(1).map(arg => JSON.stringify(arg)).join(", ")})`;
+        return `${props[0]}(${props.slice(1).map(arg => arg instanceof RegExp ? String(arg) : JSON.stringify(arg)).join(", ")})`;
     }
 
     return String(filter);
@@ -269,9 +277,9 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findExportedComponent<T extends object = any>(...props: string[] | [...string[], (component: ModuleExports) => LazyComponentType<T>]) {
+export function findExportedComponent<T extends object = any>(...props: PropsFilter | [...PropsFilter, (component: ModuleExports) => LazyComponentType<T>]) {
     const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (component: ModuleExports) => LazyComponentType<T>;
-    const newProps = props as string[];
+    const newProps = props as PropsFilter;
 
     const filter = filters.byProps(...newProps);
 
@@ -314,9 +322,9 @@ export function findExportedComponent<T extends object = any>(...props: string[]
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findComponentByCode<T extends object = any>(...code: string[] | [...string[], (component: ModuleExports) => LazyComponentType<T>]) {
+export function findComponentByCode<T extends object = any>(...code: CodeFilter | [...CodeFilter, (component: ModuleExports) => LazyComponentType<T>]) {
     const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (component: ModuleExports) => LazyComponentType<T>;
-    const newCode = code as string[];
+    const newCode = code as CodeFilter;
 
     const ComponentResult = findComponent<T>(filters.byComponentCode(...newCode), parse, { isIndirect: true });
 
@@ -333,9 +341,9 @@ export function findComponentByCode<T extends object = any>(...code: string[] | 
  * @param props A list of props to search the module or exports for
  * @param parse A function that takes the find result as its first argument and returns something. Useful if you want to use a value from the find result, instead of all of it. Defaults to the find result itself
  */
-export function findByProps<T = any>(...props: string[] | [...string[], (module: ModuleExports) => T]) {
+export function findByProps<T = any>(...props: PropsFilter | [...PropsFilter, (module: ModuleExports) => T]) {
     const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (module: ModuleExports) => T;
-    const newProps = props as string[];
+    const newProps = props as PropsFilter;
 
     const result = find<T>(filters.byProps(...newProps), parse, { isIndirect: true });
 
@@ -354,9 +362,9 @@ export function findByProps<T = any>(...props: string[] | [...string[], (module:
  * @param props A list of props to search the module or exports for
  * @param parse A function that takes the find result as its first argument and returns something. Useful if you want to use a value from the find result, instead of all of it. Defaults to the find result itself
  */
-export function findByPropsAndExtract<T = any>(...props: string[] | [...string[], (module: ModuleExports) => T]) {
+export function findByPropsAndExtract<T = any>(...props: PropsFilter | [...PropsFilter, (module: ModuleExports) => T]) {
     const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (module: ModuleExports) => T;
-    const newProps = props as string[];
+    const newProps = props as PropsFilter;
 
     const result = find<T>(filters.byProps(...newProps), m => parse(m[newProps[0]]), { isIndirect: true });
 
@@ -373,9 +381,9 @@ export function findByPropsAndExtract<T = any>(...props: string[] | [...string[]
  * @param code A list of code to search each export for
  * @param parse A function that takes the find result as its first argument and returns something. Useful if you want to use a value from the find result, instead of all of it. Defaults to the find result itself
  */
-export function findByCode<T = any>(...code: string[] | [...string[], (module: ModuleExports) => T]) {
+export function findByCode<T = any>(...code: CodeFilter | [...CodeFilter, (module: ModuleExports) => T]) {
     const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (module: ModuleExports) => T;
-    const newCode = code as string[];
+    const newCode = code as CodeFilter;
 
     const result = find<T>(filters.byCode(...newCode), parse, { isIndirect: true });
 
@@ -391,7 +399,7 @@ export function findByCode<T = any>(...code: string[] | [...string[], (module: M
  *
  * @param name The store name
  */
-export function findStore<T = GenericStore>(name: string) {
+export function findStore<T = GenericStore>(name: StoreNameFilter) {
     const result = find<T>(filters.byStoreName(name), m => m, { isIndirect: true });
 
     if (IS_REPORTER) {
@@ -407,9 +415,9 @@ export function findStore<T = GenericStore>(name: string) {
  * @param code A list of code to search each factory for
  * @param parse A function that takes the find result as its first argument and returns something. Useful if you want to use a value from the find result, instead of all of it. Defaults to the find result itself
  */
-export function findByFactoryCode<T = any>(...code: string[] | [...string[], (module: ModuleExports) => T]) {
+export function findByFactoryCode<T = any>(...code: CodeFilter | [...CodeFilter, (module: ModuleExports) => T]) {
     const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (module: ModuleExports) => T;
-    const newCode = code as string[];
+    const newCode = code as CodeFilter;
 
     const result = find<T>(filters.byFactoryCode(...newCode), parse, { isIndirect: true });
 
@@ -434,7 +442,7 @@ export function findByFactoryCode<T = any>(...code: string[] | [...string[], (mo
  * @param mappers Mappers to create the non mangled exports object
  * @returns Unmangled exports as specified in mappers
  */
-export function mapMangledModule<S extends PropertyKey>(code: string | string[], mappers: Record<S, FilterFn>) {
+export function mapMangledModule<S extends PropertyKey>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>) {
     const mapping = {} as Record<S, any>;
     const setters = {} as Record<S, (innerValue: ModuleExports) => void>;
 
@@ -487,7 +495,7 @@ export function mapMangledModule<S extends PropertyKey>(code: string | string[],
 /**
  * Find the first module factory that includes all the given code.
  */
-export function findModuleFactory(...code: string[]) {
+export function findModuleFactory(...code: CodeFilter) {
     const filter = filters.byFactoryCode(...code);
 
     const [proxy, setInnerValue] = proxyInner<AnyModuleFactory>(`Webpack module factory find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value.");
@@ -539,7 +547,7 @@ export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
  * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the first lazy chunk loading found in the module factory
  * @returns A function that returns a promise that resolves with a boolean whether the chunks were loaded, on first call
  */
-export function extractAndLoadChunksLazy(code: string | string[], matcher: RegExp = DefaultExtractAndLoadChunksRegex) {
+export function extractAndLoadChunksLazy(code: string | RegExp | CodeFilter, matcher: RegExp = DefaultExtractAndLoadChunksRegex) {
     const module = findModuleFactory(...Array.isArray(code) ? code : [code]);
 
     const extractAndLoadChunks = makeLazy(async () => {
@@ -811,16 +819,9 @@ export const cacheFindBulk = traceFunction("cacheFindBulk", function cacheFindBu
 /**
  * Find the id of the first already loaded module factory that includes all the given code.
  */
-export const cacheFindModuleId = traceFunction("cacheFindModuleId", function cacheFindModuleId(...code: string[]) {
-    outer:
+export const cacheFindModuleId = traceFunction("cacheFindModuleId", function cacheFindModuleId(...code: CodeFilter) {
     for (const id in wreq.m) {
-        const str = String(wreq.m[id]);
-
-        for (const c of code) {
-            if (!str.includes(c)) continue outer;
-        }
-
-        return id;
+        if (stringMatches(String(wreq.m[id]), code)) return id;
     }
 
     const err = new Error("Didn't find module with code(s):\n" + code.join("\n"));
@@ -835,32 +836,30 @@ export const cacheFindModuleId = traceFunction("cacheFindModuleId", function cac
 /**
  * Find the first already loaded module factory that includes all the given code.
  */
-export function cacheFindModuleFactory(...code: string[]) {
+export const cacheFindModuleFactory = traceFunction("cacheFindModuleFactory", function cacheFindModuleFactory(...code: CodeFilter) {
     const id = cacheFindModuleId(...code);
     if (id == null) return;
 
     return wreq.m[id];
-}
+});
 
 /**
  * Search modules by keyword. This searches the factory methods,
  * meaning you can search all sorts of things, methodName, strings somewhere in the code, etc.
  *
- * @param filters One or more strings or regexes
+ * @param code One or more strings or regexes
  * @returns Mapping of found modules
  */
-export function search(...filters: Array<string | RegExp>) {
+export function search(...code: CodeFilter) {
     const results: WebpackRequire["m"] = {};
     const factories = wreq.m;
-    outer:
+
     for (const id in factories) {
         const factory = factories[id];
-        const factoryStr = String(factory);
-        for (const filter of filters) {
-            if (typeof filter === "string" && !factoryStr.includes(filter)) continue outer;
-            if (filter instanceof RegExp && !filter.test(factoryStr)) continue outer;
+
+        if (stringMatches(String(factory), code)) {
+            results[id] = factory;
         }
-        results[id] = factory;
     }
 
     return results;

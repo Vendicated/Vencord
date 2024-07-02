@@ -157,7 +157,7 @@ async function runReporter() {
 
                             if (filter.$$vencordProps != null) {
                                 const filterName = filter.$$vencordProps[0];
-                                parsedFilter = `${filterName}(${filter.$$vencordProps.slice(1).map((arg: any) => JSON.stringify(arg)).join(", ")})`;
+                                parsedFilter = `${filterName}(${filter.$$vencordProps.slice(1).map((arg: any) => arg instanceof RegExp ? String(arg) : JSON.stringify(arg)).join(", ")})`;
                             } else {
                                 parsedFilter = String(filter).slice(0, 147) + "...";
                             }
@@ -167,7 +167,7 @@ async function runReporter() {
 
                     logMessage += `(${JSON.stringify(code)}, {\n${parsedFailedMappers.map(([key, parsedFilter]) => `\t${key}: ${parsedFilter}`).join(",\n")}\n})`;
                 } else {
-                    logMessage += `(${filterName.length ? `${filterName}(` : ""}${parsedArgs.map(arg => JSON.stringify(arg)).join(", ")})${filterName.length ? ")" : ""}`;
+                    logMessage += `(${filterName.length ? `${filterName}(` : ""}${parsedArgs.map(arg => arg instanceof RegExp ? String(arg) : JSON.stringify(arg)).join(", ")})${filterName.length ? ")" : ""}`;
                 }
 
                 ReporterLogger.log("Webpack Find Fail:", logMessage);
