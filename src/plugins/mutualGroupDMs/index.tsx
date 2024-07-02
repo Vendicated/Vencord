@@ -20,15 +20,15 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, UserStore } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
 
-const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
-const UserUtils = findByPropsLazy("getGlobalName");
+const SelectedChannelActionCreators = findByProps("selectPrivateChannel");
+const UserUtils = findByProps("getGlobalName");
 
-const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
-const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
+const ProfileListClasses = findByProps("emptyIconFriends", "emptyIconGuilds");
+const GuildLabelClasses = findByProps("guildNick", "guildAvatarWithoutIcon");
 
 function getGroupDMName(channel: Channel) {
     return channel.name ||

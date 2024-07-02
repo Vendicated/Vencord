@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByPropsLazy, findLazy } from "@webpack";
-
+// eslint-disable-next-line path-alias/no-relative
+import { find, findByProps } from "../api";
 import * as t from "./types/classes";
 
-export const ModalImageClasses: t.ImageModalClasses = findLazy(m => m.image && m.modal && !m.applicationIcon);
-export const ButtonWrapperClasses: t.ButtonWrapperClasses = findByPropsLazy("buttonWrapper", "buttonContent");
+export const ModalImageClasses = find<t.ImageModalClasses>(m => m.image && m.modal && !m.applicationIcon);
+export const ButtonWrapperClasses = findByProps<t.ButtonWrapperClasses>("buttonWrapper", "buttonContent");

@@ -32,6 +32,7 @@ export * from "./misc";
 export * from "./modal";
 export * from "./onlyOnce";
 export * from "./patches";
+export * from "./proxyInner";
 export * from "./Queue";
 export * from "./react";
 export * from "./text";

@@ -1,6 +1,9 @@
 {
     "root": true,
     "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": "./tsconfig.json"
+    },
     "ignorePatterns": ["dist", "browser", "packages/vencord-types"],
     "plugins": [
         "@typescript-eslint",
@@ -62,7 +65,14 @@
         "no-constant-condition": ["error", { "checkLoops": false }],
         "no-duplicate-imports": "error",
         "no-extra-semi": "error",
-        "dot-notation": "error",
+        "dot-notation": "off",
+        "@typescript-eslint/dot-notation": [
+            "error",
+            {
+              "allowPrivateClassPropertyAccess": true,
+              "allowProtectedClassPropertyAccess": true
+            }
+        ],
         "no-useless-escape": [
             "error",
             {

@@ -20,12 +20,11 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { ReplyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByCodeLazy } from "@webpack";
+import { findByCode } from "@webpack";
 import { ChannelStore, i18n, Menu, PermissionsBits, PermissionStore, SelectedChannelStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-
-const replyToMessage = findByCodeLazy(".TEXTAREA_FOCUS)", "showMentionToggle:");
+const replyToMessage = findByCode(".TEXTAREA_FOCUS)", "showMentionToggle:");
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
     // make sure the message is in the selected channel

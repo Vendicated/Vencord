@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -32,12 +33,13 @@ export default definePlugin({
             }
         }
     ],
-    options: {
+
+    settings: definePluginSettings({
         source: {
             description: "Source to replace ban GIF with (Video or Gif)",
             type: OptionType.STRING,
             default: "https://i.imgur.com/wp5q52C.mp4",
             restartNeeded: true,
         }
-    }
+    })
 });

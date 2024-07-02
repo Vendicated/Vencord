@@ -10,10 +10,10 @@ import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { getCurrentGuild, openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { Clipboard, GuildStore, Menu, PermissionStore } from "@webpack/common";
 
-const GuildSettingsActions = findByPropsLazy("open", "selectRole", "updateGuild");
+const GuildSettingsActions = findByProps("open", "selectRole", "updateGuild");
 
 const DeveloperMode = getUserSettingLazy("appearance", "developerMode")!;
 

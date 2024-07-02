@@ -111,14 +111,14 @@ export async function loadLazyChunks() {
 
         Webpack.factoryListeners.add(factory => {
             let isResolved = false;
-            searchAndLoadLazyChunks(factory.toString()).then(() => isResolved = true);
+            searchAndLoadLazyChunks(String(factory)).then(() => isResolved = true);
 
             chunksSearchPromises.push(() => isResolved);
         });
 
         for (const factoryId in wreq.m) {
             let isResolved = false;
-            searchAndLoadLazyChunks(wreq.m[factoryId].toString()).then(() => isResolved = true);
+            searchAndLoadLazyChunks(String(wreq.m[factoryId])).then(() => isResolved = true);
 
             chunksSearchPromises.push(() => isResolved);
         }

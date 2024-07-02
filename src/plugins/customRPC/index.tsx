@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
@@ -26,12 +26,12 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByCode, findByProps, findComponentByCode } from "@webpack";
 import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
-const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
-const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
-const ActivityClassName = findByPropsLazy("activity", "buttonColor");
+const useProfileThemeStyle = findByCode("profileThemeStyle:", "--profile-gradient-primary-color");
+const ActivityComponent = findComponentByCode("onOpenGameProfile");
+const ActivityClassName = findByProps("activity", "buttonColor");
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
@@ -261,7 +261,7 @@ const settings = definePluginSettings({
 
 function onChange() {
     setRpc(true);
-    if (Settings.plugins.CustomRPC.enabled) setRpc();
+    if (Vencord.Plugins.isPluginEnabled("CustomRPC")) setRpc();
 }
 
 function isStreamLinkDisabled() {

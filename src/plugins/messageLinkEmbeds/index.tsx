@@ -25,7 +25,7 @@ import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByProps, findComponentByCode } from "@webpack";
 import {
     Button,
     ChannelStore,
@@ -47,12 +47,12 @@ const messageCache = new Map<string, {
     fetched: boolean;
 }>();
 
-const Embed = findComponentByCodeLazy(".inlineMediaEmbed");
-const AutoModEmbed = findComponentByCodeLazy(".withFooter]:", "childrenMessageContent:");
-const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
+const Embed = findComponentByCode(".inlineMediaEmbed");
+const AutoModEmbed = findComponentByCode(".withFooter]:", "childrenMessageContent:");
+const ChannelMessage = findComponentByCode("childrenExecutedCommand:", ".hideAccessories");
 
-const SearchResultClasses = findByPropsLazy("message", "searchResult");
-const EmbedClasses = findByPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
+const SearchResultClasses = findByProps("message", "searchResult");
+const EmbedClasses = findByProps("embedAuthorIcon", "embedAuthor", "embedAuthor");
 
 const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact")!;
 
@@ -214,10 +214,9 @@ function computeWidthAndHeight(width: number, height: number) {
 
 function withEmbeddedBy(message: Message, embeddedBy: string[]) {
     return new Proxy(message, {
-        get(_, prop) {
+        get(target, prop, receiver) {
             if (prop === "vencordEmbeddedBy") return embeddedBy;
-            // @ts-ignore ts so bad
-            return Reflect.get(...arguments);
+            return Reflect.get(target, prop, receiver);
         }
     });
 }

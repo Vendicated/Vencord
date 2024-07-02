@@ -18,10 +18,10 @@
 
 import { DeleteIcon } from "@components/Icons";
 import { classes } from "@utils/misc";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { Tooltip } from "@webpack/common";
 
-const iconClasses = findByPropsLazy("button", "wrapper", "disabled", "separator");
+const iconClasses = findByProps("button", "wrapper", "disabled", "separator");
 
 export function DeleteButton({ onClick }: { onClick(): void; }) {
     return (

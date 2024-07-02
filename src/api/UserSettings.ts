@@ -17,8 +17,7 @@
 */
 
 import { proxyLazy } from "@utils/lazy";
-import { Logger } from "@utils/Logger";
-import { findModuleId, proxyLazyWebpack, wreq } from "@webpack";
+import { findByFactoryCode } from "@webpack";
 
 interface UserSettingDefinition<T> {
     /**
@@ -43,12 +42,7 @@ interface UserSettingDefinition<T> {
     userSettingsAPIName: string;
 }
 
-export const UserSettings: Record<PropertyKey, UserSettingDefinition<any>> | undefined = proxyLazyWebpack(() => {
-    const modId = findModuleId('"textAndImages","renderSpoilers"');
-    if (modId == null) return new Logger("UserSettingsAPI ").error("Didn't find settings module.");
-
-    return wreq(modId as any);
-});
+export const UserSettings = findByFactoryCode<Record<PropertyKey, UserSettingDefinition<any>>>('"textAndImages","renderSpoilers"');
 
 /**
  * Get the setting with the given setting group and name.
@@ -69,7 +63,7 @@ export function getUserSetting<T = any>(group: string, name: string): UserSettin
 }
 
 /**
- * {@link getUserSettingDefinition}, lazy.
+ * Lazy version of {@link getUserSetting}
  *
  * Get the setting with the given setting group and name.
  *

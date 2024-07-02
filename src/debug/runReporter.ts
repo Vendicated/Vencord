@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { SYM_LAZY_COMPONENT_INNER } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
+import { SYM_PROXY_INNER_GET, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
 import * as Webpack from "@webpack";
 import { patches } from "plugins";
 
@@ -28,52 +30,132 @@ async function runReporter() {
             }
         }
 
-        for (const [searchType, args] of Webpack.lazyWebpackSearchHistory) {
-            let method = searchType;
+        await Promise.all(Webpack.webpackSearchHistory.map(async ([searchType, args]) => {
+            args = [...args];
 
-            if (searchType === "findComponent") method = "find";
-            if (searchType === "findExportedComponent") method = "findByProps";
-            if (searchType === "waitFor" || searchType === "waitForComponent") {
-                if (typeof args[0] === "string") method = "findByProps";
-                else method = "find";
-            }
-            if (searchType === "waitForStore") method = "findStore";
-
-            let result: any;
+            let result = null as any;
             try {
-                if (method === "proxyLazyWebpack" || method === "LazyComponentWebpack") {
-                    const [factory] = args;
-                    result = factory();
-                } else if (method === "extractAndLoadChunks") {
-                    const [code, matcher] = args;
+                switch (searchType) {
+                    case "webpackDependantLazy":
+                    case "webpackDependantLazyComponent": {
+                        const [factory] = args;
+                        result = factory();
+                        break;
+                    }
+                    case "extractAndLoadChunks": {
+                        const extractAndLoadChunks = args.shift();
 
-                    result = await Webpack.extractAndLoadChunks(code, matcher);
-                    if (result === false) result = null;
-                } else if (method === "mapMangledModule") {
-                    const [code, mapper] = args;
+                        result = await extractAndLoadChunks();
+                        if (result === false) {
+                            result = null;
+                        }
 
-                    result = Webpack.mapMangledModule(code, mapper);
-                    if (Object.keys(result).length !== Object.keys(mapper).length) throw new Error("Webpack Find Fail");
-                } else {
-                    // @ts-ignore
-                    result = Webpack[method](...args);
+                        break;
+                    }
+                    default: {
+                        const findResult = args.shift();
+
+                        if (findResult != null) {
+                            if (findResult.$$vencordCallbackCalled != null && findResult.$$vencordCallbackCalled()) {
+                                result = findResult;
+                                break;
+                            }
+
+                            if (findResult[SYM_PROXY_INNER_GET] != null) {
+                                result = findResult[SYM_PROXY_INNER_VALUE];
+
+                                break;
+                            }
+
+                            if (findResult[SYM_LAZY_COMPONENT_INNER] != null) {
+                                result = findResult[SYM_LAZY_COMPONENT_INNER]();
+                                break;
+                            }
+
+                            if (searchType === "mapMangledModule") {
+                                result = findResult;
+
+                                for (const innerMap in result) {
+                                    if (result[innerMap][SYM_PROXY_INNER_GET] != null && result[innerMap][SYM_PROXY_INNER_VALUE] == null) {
+                                        throw new Error("Webpack Find Fail");
+                                    }
+                                }
+                            }
+
+                            // This can happen if a `find` was immediately found
+                            result = findResult;
+                        }
+
+                        break;
+                    }
                 }
 
-                if (result == null || (result.$$vencordInternal != null && result.$$vencordInternal() == null)) throw new Error("Webpack Find Fail");
+                if (result == null) {
+                    throw new Error("Webpack Find Fail");
+                }
             } catch (e) {
                 let logMessage = searchType;
-                if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
-                else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
-                else if (method === "mapMangledModule") {
-                    const failedMappings = Object.keys(args[1]).filter(key => result?.[key] == null);
 
-                    logMessage += `("${args[0]}", {\n${failedMappings.map(mapping => `\t${mapping}: ${args[1][mapping].toString().slice(0, 147)}...`).join(",\n")}\n})`;
+                let filterName = "";
+                let parsedArgs = args;
+
+                if (args[0].$$vencordProps != null) {
+                    if (["find", "findComponent", "waitFor"].includes(searchType)) {
+                        filterName = args[0].$$vencordProps[0];
+                    }
+
+                    parsedArgs = args[0].$$vencordProps.slice(1);
                 }
-                else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
+
+                // if parsedArgs is the same as args, it means vencordProps of the filter was not available (like in normal filter functions),
+                // so log the filter function instead
+                if (
+                    parsedArgs === args &&
+                    ["waitFor", "find", "findComponent", "webpackDependantLazy", "webpackDependantLazyComponent"].includes(searchType)
+                ) {
+                    let filter = String(parsedArgs[0]);
+                    if (filter.length > 150) {
+                        filter = filter.slice(0, 147) + "...";
+                    }
+
+                    logMessage += `(${filter})`;
+                } else if (searchType === "extractAndLoadChunks") {
+                    const [code, matcher] = parsedArgs;
+
+                    let regexStr: string;
+                    if (matcher === Webpack.DefaultExtractAndLoadChunksRegex) {
+                        regexStr = "DefaultExtractAndLoadChunksRegex";
+                    } else {
+                        regexStr = String(matcher);
+                    }
+
+                    logMessage += `(${JSON.stringify(code)}, ${regexStr})`;
+                } else if (searchType === "mapMangledModule") {
+                    const [code, mappers] = parsedArgs;
+
+                    const parsedFailedMappers = Object.entries<any>(mappers)
+                        .filter(([key]) => result == null || (result[key][SYM_PROXY_INNER_GET] != null && result[key][SYM_PROXY_INNER_VALUE] == null))
+                        .map(([key, filter]) => {
+                            let parsedFilter: string;
+
+                            if (filter.$$vencordProps != null) {
+                                const filterName = filter.$$vencordProps[0];
+                                parsedFilter = `${filterName}(${filter.$$vencordProps.slice(1).map((arg: any) => JSON.stringify(arg)).join(", ")})`;
+                            } else {
+                                parsedFilter = String(filter).slice(0, 147) + "...";
+                            }
+
+                            return [key, parsedFilter];
+                        });
+
+                    logMessage += `(${JSON.stringify(code)}, {\n${parsedFailedMappers.map(([key, parsedFilter]) => `\t${key}: ${parsedFilter}`).join(",\n")}\n})`;
+                } else {
+                    logMessage += `(${filterName.length ? `${filterName}(` : ""}${parsedArgs.map(arg => JSON.stringify(arg)).join(", ")})${filterName.length ? ")" : ""}`;
+                }
 
                 ReporterLogger.log("Webpack Find Fail:", logMessage);
             }
-        }
+        }));
 
         ReporterLogger.log("Finished test");
     } catch (e) {

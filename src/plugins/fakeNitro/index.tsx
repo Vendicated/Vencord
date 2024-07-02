@@ -23,22 +23,22 @@ import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
+import { findByCode, findByProps, findStore, webpackDependantLazy } from "@webpack";
 import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Emoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
-const StickerStore = findStoreLazy("StickersStore") as {
+const StickerStore = findStore("StickersStore") as {
     getPremiumPacks(): StickerPack[];
     getAllGuildStickers(): Map<string, Sticker[]>;
     getStickerById(id: string): Sticker | undefined;
 };
 
-const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
+const UserSettingsProtoStore = findStore("UserSettingsProtoStore");
 
-const BINARY_READ_OPTIONS = findByPropsLazy("readerFactory");
+const BINARY_READ_OPTIONS = findByProps("readerFactory");
 
 function searchProtoClassField(localName: string, protoClass: any) {
     const field = protoClass?.fields?.find((field: any) => field.localName === localName);
@@ -48,11 +48,11 @@ function searchProtoClassField(localName: string, protoClass: any) {
     return fieldGetter?.();
 }
 
-const PreloadedUserSettingsActionCreators = proxyLazyWebpack(() => UserSettingsActionCreators.PreloadedUserSettingsActionCreators);
-const AppearanceSettingsActionCreators = proxyLazyWebpack(() => searchProtoClassField("appearance", PreloadedUserSettingsActionCreators.ProtoClass));
-const ClientThemeSettingsActionsCreators = proxyLazyWebpack(() => searchProtoClassField("clientThemeSettings", AppearanceSettingsActionCreators));
+const PreloadedUserSettingsActionCreators = webpackDependantLazy(() => UserSettingsActionCreators.PreloadedUserSettingsActionCreators);
+const AppearanceSettingsActionCreators = webpackDependantLazy(() => searchProtoClassField("appearance", PreloadedUserSettingsActionCreators.ProtoClass));
+const ClientThemeSettingsActionsCreators = webpackDependantLazy(() => searchProtoClassField("clientThemeSettings", AppearanceSettingsActionCreators));
 
-const isUnusableRoleSubscriptionEmoji = findByCodeLazy(".getUserIsAdmin(");
+const isUnusableRoleSubscriptionEmoji = findByCode(".getUserIsAdmin(");
 
 const enum EmojiIntentions {
     REACTION,

@@ -8,16 +8,17 @@ import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
+import { SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
+import { NoopComponent } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { waitFor } from "@webpack";
+import { findByProps } from "@webpack";
 import { ComponentDispatch, FocusLock, i18n, Menu, useEffect, useRef } from "@webpack/common";
 import type { HTMLAttributes, ReactElement } from "react";
 
 type SettingsEntry = { section: string, label: string; };
 
 const cl = classNameFactory("");
-let Classes: Record<string, string>;
-waitFor(["animating", "baseLayer", "bg", "layer", "layers"], m => Classes = m);
+const Classes = findByProps("animating", "baseLayer", "bg", "layer", "layers");
 
 const settings = definePluginSettings({
     disableFade: {
@@ -132,7 +133,7 @@ export default definePlugin({
     // try catch will only catch errors in the Layer function (hence why it's called as a plain function rather than a component), but
     // not in children
     Layer(props: LayerProps) {
-        if (!FocusLock || !ComponentDispatch || !Classes) {
+        if (FocusLock === NoopComponent || ComponentDispatch[SYM_PROXY_INNER_VALUE] == null || Classes[SYM_PROXY_INNER_VALUE] == null) {
             new Logger("BetterSettings").error("Failed to find some components");
             return props.children;
         }

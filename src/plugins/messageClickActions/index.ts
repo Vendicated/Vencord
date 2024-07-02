@@ -20,11 +20,11 @@ import { addClickListener, removeClickListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
 
-const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
-const EditStore = findByPropsLazy("isEditing", "isEditingAny");
+const MessageActions = findByProps("deleteMessage", "startEditMessage");
+const EditStore = findByProps("isEditing", "isEditingAny");
 
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);

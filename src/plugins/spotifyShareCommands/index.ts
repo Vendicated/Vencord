@@ -19,7 +19,7 @@
 import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { FluxDispatcher, MessageActions } from "@webpack/common";
 
 interface Album {
@@ -52,8 +52,8 @@ interface Track {
     name: string;
 }
 
-const Spotify = findByPropsLazy("getPlayerState");
-const PendingReplyStore = findByPropsLazy("getPendingReply");
+const Spotify = findByProps("getPlayerState");
+const PendingReplyStore = findByProps("getPendingReply");
 
 function sendMessage(channelId, message) {
     message = {

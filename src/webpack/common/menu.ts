@@ -17,16 +17,13 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, mapMangledModuleLazy, waitFor } from "../webpack";
+import { filters, findByProps, mapMangledModule } from "../api";
 import type * as t from "./types/menu";
 
-export let Menu = {} as t.Menu;
+export const Menu = findByProps<t.Menu>("MenuItem", "MenuSliderControl");
 
-waitFor(["MenuItem", "MenuSliderControl"], m => Menu = m);
-
-export const ContextMenuApi: t.ContextMenuApi = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN', {
+export const ContextMenuApi: t.ContextMenuApi = mapMangledModule('type:"CONTEXT_MENU_OPEN', {
     closeContextMenu: filters.byCode("CONTEXT_MENU_CLOSE"),
     openContextMenu: filters.byCode("renderLazy:"),
-    openContextMenuLazy: e => typeof e === "function" && e.toString().length < 100
+    openContextMenuLazy: e => typeof e === "function" && String(e).length < 100
 });
-

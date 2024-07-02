@@ -9,17 +9,17 @@ import "./style.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
+import { filters, findByProps, mapMangledModule } from "@webpack";
 import { Timestamp } from "@webpack/common";
 import type { Message } from "discord-types/general";
 import type { HTMLAttributes } from "react";
 
-const { calendarFormat, dateFormat, isSameDay } = mapMangledModuleLazy("millisecondsInUnit:", {
+const { calendarFormat, dateFormat, isSameDay } = mapMangledModule("millisecondsInUnit:", {
     calendarFormat: filters.byCode("sameElse"),
-    dateFormat: filters.byCode('":'),
+    dateFormat: filters.byCode(':").concat'),
     isSameDay: filters.byCode("Math.abs(+"),
 });
-const MessageClasses = findByPropsLazy("separator", "latin24CompactTimeStamp");
+const MessageClasses = findByProps("separator", "latin24CompactTimeStamp");
 
 function Sep(props: HTMLAttributes<HTMLElement>) {
     return <i className={MessageClasses.separator} aria-hidden={true} {...props} />;

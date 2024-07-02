@@ -19,11 +19,12 @@
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
+import { LazyComponentType } from "@utils/lazyReact";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findLazy } from "@webpack";
+import { findByCode, findComponentByCode } from "@webpack";
 import { Card, ChannelStore, Forms, GuildStore, PermissionsBits, Switch, TextInput, Tooltip, useState } from "@webpack/common";
-import type { Permissions, RC } from "@webpack/types";
+import type { Permissions } from "@webpack/types";
 import type { Channel, Guild, Message, User } from "discord-types/general";
 
 interface Tag {
@@ -59,9 +60,9 @@ const computePermissions: (options: {
     overwrites?: Channel["permissionOverwrites"] | null;
     checkElevated?: boolean /* = true */;
     excludeGuildPermissions?: boolean /* = false */;
-}) => bigint = findByCodeLazy(".getCurrentUser()", ".computeLurkerPermissionsAllowList()");
+}) => bigint = findByCode(".getCurrentUser()", ".computeLurkerPermissionsAllowList()");
 
-const Tag = findLazy(m => m.Types?.[0] === "BOT") as RC<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
+const Tag = findComponentByCode(".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP_OFFICIAL,") as LazyComponentType<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
 
 const isWebhook = (message: Message, user: User) => !!message?.webhookId && user.isNonUserBot();
 

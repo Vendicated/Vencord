@@ -16,10 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { formatDuration } from "@utils/text";
-import { findByPropsLazy, findComponentByCodeLazy, findComponentLazy } from "@webpack";
+import { findByProps, findComponentByCode } from "@webpack";
 import { EmojiStore, FluxDispatcher, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, SnowflakeUtils, Text, Timestamp, Tooltip, useEffect, useState } from "@webpack/common";
 import type { Channel } from "discord-types/general";
 
@@ -78,19 +77,13 @@ const enum ChannelFlags {
 }
 
 
-const ChatScrollClasses = findByPropsLazy("auto", "managedReactiveScroller");
-const ChatClasses = findByPropsLazy("chat", "content", "noChat", "chatContent");
-const ChannelBeginHeader = findComponentByCodeLazy(".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE");
-const TagComponent = findComponentLazy(m => {
-    if (typeof m !== "function") return false;
+const ChatScrollClasses = findByProps("auto", "managedReactiveScroller");
+const ChatClasses = findByProps("chat", "content", "noChat", "chatContent");
+const ChannelBeginHeader = findComponentByCode(".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE");
+const TagComponent = findComponentByCode(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG");
 
-    const code = Function.prototype.toString.call(m);
-    // Get the component which doesn't include increasedActivity
-    return code.includes(".Messages.FORUM_TAG_A11Y_FILTER_BY_TAG") && !code.includes("increasedActivityPill");
-});
-
-const EmojiParser = findByPropsLazy("convertSurrogateToName");
-const EmojiUtils = findByPropsLazy("getURL", "getEmojiColors");
+const EmojiParser = findByProps("convertSurrogateToName");
+const EmojiUtils = findByProps("getURL", "getEmojiColors");
 
 const ChannelTypesToChannelNames = {
     [ChannelTypes.GUILD_TEXT]: "text",
@@ -163,7 +156,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
             });
         }
 
-        if (Settings.plugins.PermissionsViewer.enabled) {
+        if (Vencord.Plugins.isPluginEnabled("PermissionsViewer")) {
             setPermissions(sortPermissionOverwrites(Object.values(permissionOverwrites).map(overwrite => ({
                 type: overwrite.type as PermissionType,
                 id: overwrite.id,
@@ -280,7 +273,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 }
                 <div className="shc-lock-screen-allowed-users-and-roles-container">
                     <div className="shc-lock-screen-allowed-users-and-roles-container-title">
-                        {Settings.plugins.PermissionsViewer.enabled && (
+                        {Vencord.Plugins.isPluginEnabled("PermissionsViewer") && (
                             <Tooltip text="Permission Details">
                                 {({ onMouseLeave, onMouseEnter }) => (
                                     <button

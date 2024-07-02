@@ -16,9 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
-import { findByProps, findByPropsLazy, proxyLazyWebpack } from "@webpack";
+import { proxyLazy } from "@utils/lazy";
+import { findByProps, webpackDependantLazy } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
+
+// Avoid circular dependency
+const SpotifyControls = proxyLazy(() => require(".")) as typeof import(".");
 
 export interface Track {
     id: string;
@@ -64,13 +67,13 @@ interface Device {
 
 type Repeat = "off" | "track" | "context";
 
+const SpotifySocket = findByProps("getActiveSocketAndDevice");
+const SpotifyAPI = findByProps("vcSpotifyMarker");
+
 // Don't wanna run before Flux and Dispatcher are ready!
-export const SpotifyStore = proxyLazyWebpack(() => {
+export const SpotifyStore = webpackDependantLazy(() => {
     // For some reason ts hates extends Flux.Store
     const { Store } = Flux;
-
-    const SpotifySocket = findByProps("getActiveSocketAndDevice");
-    const SpotifyAPI = findByPropsLazy("vcSpotifyMarker");
 
     const API_BASE = "https://api.spotify.com/v1/me/player";
 
@@ -88,7 +91,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
         public isSettingPosition = false;
 
         public openExternal(path: string) {
-            const url = Settings.plugins.SpotifyControls.useSpotifyUris || Vencord.Plugins.isPluginEnabled("OpenInApp")
+            const url = SpotifyControls.settings.store.useSpotifyUris || Vencord.Plugins.isPluginEnabled("OpenInApp")
                 ? "spotify:" + path.replaceAll("/", (_, idx) => idx === 0 ? "" : ":")
                 : "https://open.spotify.com" + path;
 

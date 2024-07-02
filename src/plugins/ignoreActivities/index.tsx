@@ -12,7 +12,7 @@ import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
+import { findStore } from "@webpack";
 import { Button, Forms, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "webpack/common";
 
 const enum ActivitiesTypes {
@@ -26,7 +26,7 @@ interface IgnoredActivity {
     type: ActivitiesTypes;
 }
 
-const RunningGameStore = findStoreLazy("RunningGameStore");
+const RunningGameStore = findStore("RunningGameStore");
 
 const ShowCurrentGame = getUserSettingLazy("status", "showCurrentGame")!;
 

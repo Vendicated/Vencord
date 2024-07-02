@@ -18,6 +18,7 @@
 
 import { DraftType } from "@webpack/common";
 import { Channel, Guild, Role } from "discord-types/general";
+import type * as Stores from "discord-types/stores";
 
 import { FluxDispatcher, FluxEvents } from "./utils";
 
@@ -38,7 +39,6 @@ export class FluxStore {
     registerActionHandlers: GenericFunction;
     syncWith: GenericFunction;
     waitFor: GenericFunction;
-    __getLocalVars(): Record<string, any>;
 
     static getAll(): FluxStore[];
 }
@@ -220,9 +220,23 @@ export class GuildStore extends FluxStore {
     getAllGuildRoles(): Record<string, Record<string, Role>>;
 }
 
+export type MessageStore = FluxStore & Omit<Stores.MessageStore, "getMessages"> & {
+    getMessages(channelId: string): any;
+};
+
+export type UserStore = FluxStore & Stores.UserStore;
+export type SelectedChannelStore = FluxStore & Stores.SelectedChannelStore;
+export type ChannelStore = FluxStore & Stores.ChannelStore;
+export type GuildMemberStore = FluxStore & Stores.GuildMemberStore;
+
+export type RelationshipStore = FluxStore & Stores.RelationshipStore & {
+    /** Get the date (as a string) that the relationship was created */
+    getSince(userId: string): string;
+};
+
 export type useStateFromStores = <T>(
-    stores: t.FluxStore[],
+    stores: FluxStore[],
     mapper: () => T,
-    dependencies?: any,
+    dependencies?: any[] | null,
     isEqual?: (old: T, newer: T) => boolean
 ) => T;

@@ -33,19 +33,19 @@ import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
 
 // Avoid circular dependency
-const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("../../plugins"));
+const PluginManager = proxyLazy(() => require("../../plugins")) as typeof import("../../plugins");
 
 const cl = classNameFactory("vc-plugins-");
 const logger = new Logger("PluginSettings", "#a6d189");
 
-const InputStyles = findByPropsLazy("inputWrapper", "inputDefault", "error");
-const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
+const InputStyles = findByProps("inputWrapper", "inputDefault", "error");
+const ButtonClasses = findByProps("button", "disabled", "enabled");
 
 
 function showErrorToast(message: string) {
@@ -100,7 +100,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
 
         // If we're enabling a plugin, make sure all deps are enabled recursively.
         if (!wasEnabled) {
-            const { restartNeeded, failures } = startDependenciesRecursive(plugin);
+            const { restartNeeded, failures } = PluginManager.startDependenciesRecursive(plugin);
             if (failures.length) {
                 logger.error(`Failed to start dependencies for ${plugin.name}: ${failures.join(", ")}`);
                 showNotice("Failed to start dependencies: " + failures.join(", "), "Close", () => null);
@@ -126,7 +126,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             return;
         }
 
-        const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
+        const result = wasEnabled ? PluginManager.stopPlugin(plugin) : PluginManager.startPlugin(plugin);
 
         if (!result) {
             settings.enabled = false;

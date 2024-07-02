@@ -16,10 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { waitFor } from "@webpack";
+import { find } from "@webpack";
 
-let NoticesModule: any;
-waitFor(m => m.show && m.dismiss && !m.suppressAll, m => NoticesModule = m);
+const NoticesModule = find(m => m.show && m.dismiss && !m.suppressAll);
 
 export const noticesQueue = [] as any[];
 export let currentNotice: any = null;

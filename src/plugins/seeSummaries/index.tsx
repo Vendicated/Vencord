@@ -8,11 +8,11 @@ import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByCode, findByProps } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
-const SummaryStore = findByPropsLazy("allSummaries", "findSummary");
-const createSummaryFromServer = findByCodeLazy(".people)),startId:", ".type}");
+const SummaryStore = findByProps("allSummaries", "findSummary");
+const createSummaryFromServer = findByCode(".people)),startId:", ".type}");
 
 const settings = definePluginSettings({
     summaryExpiryThresholdDays: {

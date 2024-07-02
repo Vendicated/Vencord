@@ -22,8 +22,8 @@ import { addServerListElement, removeServerListElement, ServerListRenderPosition
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
+import { findStore } from "@webpack";
+import { Button, FluxDispatcher, GenericStore, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 interface ThreadJoined {
@@ -34,11 +34,11 @@ interface ThreadJoined {
 type ThreadsJoined = Record<string, ThreadJoined>;
 type ThreadsJoinedByParent = Record<string, ThreadsJoined>;
 
-interface ActiveJoinedThreadsStore {
+interface ActiveJoinedThreadsStore extends GenericStore {
     getActiveJoinedThreadsForGuild(guildId: string): ThreadsJoinedByParent;
 }
 
-const ActiveJoinedThreadsStore: ActiveJoinedThreadsStore = findStoreLazy("ActiveJoinedThreadsStore");
+const ActiveJoinedThreadsStore = findStore<ActiveJoinedThreadsStore>("ActiveJoinedThreadsStore");
 
 function onClick() {
     const channels: Array<any> = [];

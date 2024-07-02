@@ -17,7 +17,7 @@
 */
 
 import { useAwaiter, useForceUpdater } from "@utils/react";
-import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByCode, findByProps, findComponentByCode } from "@webpack";
 import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
 import { Auth, authorize } from "../auth";
@@ -27,11 +27,11 @@ import { settings } from "../settings";
 import { cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 
-const Transforms = findByPropsLazy("insertNodes", "textToText");
-const Editor = findByPropsLazy("start", "end", "toSlateRange");
-const ChatInputTypes = findByPropsLazy("FORM");
-const InputComponent = findComponentByCodeLazy("disableThemedBackground", "CHANNEL_TEXT_AREA");
-const createChannelRecordFromServer = findByCodeLazy(".GUILD_TEXT])", "fromServer)");
+const Transforms = findByProps("insertNodes", "textToText");
+const Editor = findByProps("start", "end", "toSlateRange");
+const ChatInputTypes = findByProps("FORM");
+const InputComponent = findComponentByCode("disableThemedBackground", "CHANNEL_TEXT_AREA");
+const createChannelRecordFromServer = findByCode(".GUILD_TEXT])", "fromServer)");
 
 interface UserProps {
     discordId: string;

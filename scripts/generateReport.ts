@@ -301,7 +301,7 @@ page.on("pageerror", e => {
 
 async function reporterRuntime(token: string) {
     Vencord.Webpack.waitFor(
-        "loginToken",
+        Vencord.Webpack.filters.byProps("loginToken"),
         m => {
             console.log("[PUP_DEBUG]", "Logging in with token...");
             m.loginToken(token);
