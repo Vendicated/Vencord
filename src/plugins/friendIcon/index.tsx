@@ -4,17 +4,44 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import {
+    addBadge,
+    BadgePosition,
+    BadgeUserArgs,
+    ProfileBadge,
+    removeBadge
+} from "@api/Badges";
 import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
 import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import ErrorBoundary from "@components/ErrorBoundary";
 import definePlugin from "@utils/types";
-import {
-    RelationshipStore,
-    UserStore
-} from "@webpack/common";
+import { RelationshipStore, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { BlockedIcon, FriendIcon } from "./icons";
+
+function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
+    const user = UserStore.getUser(userId);
+
+    if (!user || user.bot || (!RelationshipStore.isFriend(user.id) && !RelationshipStore.isBlocked(user.id))) return [];
+
+    return [{
+        component: () => (
+            <span className="vc-platform-indicator">
+                <FriendIndicator
+                    user={user}
+                    small={true}
+                />
+            </span>
+        ),
+        key: `vc-${RelationshipStore.isFriend(userId)?"friend":"blocked"}-indicator`,
+    }];
+}
+
+const badge: ProfileBadge = {
+    getBadges,
+    position: BadgePosition.START
+};
 
 export default definePlugin({
     name: "FriendIcon",
@@ -22,7 +49,7 @@ export default definePlugin({
         name: "Scyye",
         id: 553652308295155723n
     }],
-    description: "Adds a friend icon to your friends.",
+    description: "Adds icons to indicate relationships with users.",
     start() {
         for (const location in indicatorLocations) {
             if (indicatorLocations[location]) {
@@ -50,12 +77,11 @@ const indicatorLocations = {
         ),
         onDisable: () => removeDecorator("friend-indicator")
     },
-    /*
     badges: {
         description: "In user profiles, as badges",
         onEnable: () => addBadge(badge),
         onDisable: () => removeBadge(badge)
-    },*/
+    },
     messages: {
         description: "Inside messages",
         onEnable: () => addDecoration("friend-indicator", props =>
@@ -68,12 +94,7 @@ const indicatorLocations = {
 };
 
 const FriendIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; small?: boolean; }) => {
-    if (!user || user.bot || user.id === UserStore.getCurrentUser().id ||
-    !(RelationshipStore.isFriend(user.id)||RelationshipStore.isBlocked(user.id))) return null;
-
-    const friend = RelationshipStore.isFriend(user.id);
-
-    const icons = friend? <FriendIcon /> : <BlockedIcon />;
+    if (!user || user.bot || (!RelationshipStore.isFriend(user.id) && !RelationshipStore.isBlocked(user.id))) return null;
 
     return (
         <span
@@ -90,7 +111,7 @@ const FriendIndicator = ({ user, wantMargin = true, wantTopMargin = false, small
                 gap: 2
             }}
         >
-            {icons}
+            {RelationshipStore.isFriend(user.id)? <FriendIcon /> : <BlockedIcon />}
         </span>
     );
 };
