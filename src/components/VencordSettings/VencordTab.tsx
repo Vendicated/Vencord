@@ -83,7 +83,7 @@ function VencordSettings() {
             !IS_WEB && {
                 key: "transparent",
                 title: "Enable window transparency.",
-                note: "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart"
+                note: `You need a theme that supports transparency or this will do nothing. ${isWindows ? "WILL STOP THE WINDOW FROM BEING RESIZABLE!!" : ""} Requires a full restart`
             },
             !IS_WEB && isWindows && {
                 key: "winCtrlQ",
