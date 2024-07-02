@@ -37,8 +37,7 @@ export default definePlugin({
         }
     },
     shouldReplace(props: any): boolean{
-        const folderSettings = (settings.store.folderIcons as folderIconsData);
-        return !!(folderSettings?.[props.folderNode.id]?.url);
+        return !!((settings.store.folderIcons as folderIconsData)?.[props.folderNode.id]?.url);
     },
     replace(props: any){
         const folderSettings = (settings.store.folderIcons as folderIconsData);
