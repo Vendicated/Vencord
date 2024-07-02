@@ -23,7 +23,7 @@ export const Native = getNative();
 import "./styles.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
@@ -53,6 +53,7 @@ export const cacheSentMessages = new LimitedMap<string, LoggedMessageJSON>();
 
 const cacheThing = findByPropsLazy("commit", "getOrCreate");
 
+let oldGetMessage: typeof MessageStore.getMessage;
 
 const handledMessageIds = new Set();
 async function messageDeleteHandler(payload: MessageDeletePayload & { isBulk: boolean; }) {
@@ -72,7 +73,7 @@ async function messageDeleteHandler(payload: MessageDeletePayload & { isBulk: bo
         handledMessageIds.add(payload.id);
 
         let message: LoggedMessage | LoggedMessageJSON | null =
-            MessageStore.getMessage(payload.channelId, payload.id);
+            oldGetMessage?.(payload.channelId, payload.id);
         if (message == null) {
             // most likely an edited message
             const cachedMessage = cacheSentMessages.get(`${payload.channelId},${payload.id}`);
@@ -141,8 +142,7 @@ async function messageUpdateHandler(payload: MessageUpdatePayload) {
         return;//  Flogger.log("this message has been ignored", payload);
     }
 
-    let message = MessageStore
-        .getMessage(payload.message.channel_id, payload.message.id) as LoggedMessage | LoggedMessageJSON | null;
+    let message = oldGetMessage?.(payload.message.channel_id, payload.message.id) as LoggedMessage | LoggedMessageJSON | null;
 
     if (message == null) {
         // MESSAGE_UPDATE gets dispatched when emebeds change too and content becomes null
@@ -570,8 +570,9 @@ const contextMenuPath: NavContextMenuPatchCallback = (children, props) => {
     }
 };
 
+migratePluginSettings("MessageLoggerEnhanced", "MLEnhanced");
 export default definePlugin({
-    name: "MLEnhanced",
+    name: "MessageLoggerEnhanced",
     authors: [Devs.Aria],
     description: "G'day",
     dependencies: ["MessageLogger"],
@@ -747,7 +748,7 @@ export default definePlugin({
     },
 
     async start() {
-        this.oldGetMessage = MessageStore.getMessage;
+        this.oldGetMessage = oldGetMessage = MessageStore.getMessage;
         // we have to do this because the original message logger fetches the message from the store now
         MessageStore.getMessage = (channelId: string, messageId: string) => {
             const MLMessage = LoggedMessageManager.getMessage(channelId, messageId);

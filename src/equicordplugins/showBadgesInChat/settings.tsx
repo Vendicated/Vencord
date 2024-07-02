@@ -33,6 +33,30 @@ const settings = definePluginSettings({
         hidden: true,
         default: 1
     },
+    showSuncordDonor: {
+        type: OptionType.BOOLEAN,
+        description: "Enable to show Suncord Donor badges in chat.",
+        hidden: true,
+        default: true
+    },
+    SuncordDonorPosition: {
+        type: OptionType.NUMBER,
+        description: "The position of the Suncord Donor badges.",
+        hidden: true,
+        default: 2
+    },
+    showSuncordContributor: {
+        type: OptionType.BOOLEAN,
+        description: "Enable to show Suncord Contributor badges in chat.",
+        hidden: true,
+        default: true
+    },
+    SuncordContributorPosition: {
+        type: OptionType.NUMBER,
+        description: "The position of the Suncord Contributor badge.",
+        hidden: true,
+        default: 3
+    },
     showVencordDonor: {
         type: OptionType.BOOLEAN,
         description: "Enable to show Vencord donor badges in chat.",
@@ -43,7 +67,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Vencord Donor badges.",
         hidden: true,
-        default: 2
+        default: 4
     },
     showVencordContributor: {
         type: OptionType.BOOLEAN,
@@ -55,7 +79,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Vencord Contributor badge.",
         hidden: true,
-        default: 3
+        default: 5
     },
     showDiscordProfile: {
         type: OptionType.BOOLEAN,
@@ -67,7 +91,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Discord profile badges.",
         hidden: true,
-        default: 4
+        default: 6
     },
     showDiscordNitro: {
         type: OptionType.BOOLEAN,
@@ -79,7 +103,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Discord Nitro badge.",
         hidden: true,
-        default: 5
+        default: 7
     },
     badgeSettings: {
         type: OptionType.COMPONENT,
@@ -94,6 +118,8 @@ const BadgeSettings = () => {
     const [images, setImages] = useState([
         { src: "https://i.imgur.com/KsxHlbD.png", shown: settings.store.showEquicordDonor, title: "Equicord donor badges", key: "EquicordDonor", position: settings.store.EquicordDonorPosition },
         { src: "https://i.imgur.com/rJDRtUB.png", shown: settings.store.showEquicordContributor, title: "Equicord contributor badge", key: "EquicordContributer", position: settings.store.EquicordContributorPosition },
+        { src: "https://i.imgur.com/H3GPhpd.png", shown: settings.store.showSuncordDonor, title: "Suncord donor badges", key: "SuncordDonor", position: settings.store.SuncordDonorPosition },
+        { src: "https://raw.githubusercontent.com/verticalsync/Suncord/main/src/assets/icon.png", shown: settings.store.showSuncordContributor, title: "Suncord contributor badge", key: "SuncordContributer", position: settings.store.SuncordContributorPosition },
         { src: "https://cdn.discordapp.com/emojis/1026533070955872337.png", shown: settings.store.showVencordDonor, title: "Vencord donor badges", key: "VencordDonor", position: settings.store.VencordDonorPosition },
         { src: "https://vencord.dev/assets/favicon.png", shown: settings.store.showVencordContributor, title: "Vencord contributor badge", key: "VencordContributer", position: settings.store.VencordContributorPosition },
         { src: "https://cdn.discordapp.com/badge-icons/bf01d1073931f921909045f3a39fd264.png", shown: settings.store.showDiscordProfile, title: "Discord profile badges (HypeSquad, Discord Staff, Active Developer, etc.)", key: "DiscordProfile", position: settings.store.DiscordProfilePosition },
@@ -110,6 +136,14 @@ const BadgeSettings = () => {
                 case "EquicordContributer":
                     settings.store.EquicordContributorPosition = image.position;
                     settings.store.showEquicordContributor = image.shown;
+                    break;
+                case "SuncordDonor":
+                    settings.store.SuncordDonorPosition = image.position;
+                    settings.store.showSuncordDonor = image.shown;
+                    break;
+                case "SuncordContributer":
+                    settings.store.SuncordContributorPosition = image.position;
+                    settings.store.showSuncordContributor = image.shown;
                     break;
                 case "VencordDonor":
                     settings.store.VencordDonorPosition = image.position;

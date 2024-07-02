@@ -27,7 +27,7 @@ import { openContributorModal } from "@components/PluginSettings/ContributorModa
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { isEquicordPluginDev, isPluginDev } from "@utils/misc";
+import { isEquicordPluginDev, isPluginDev, isSuncordPluginDev } from "@utils/misc";
 import { closeModal, Modals, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Forms, Toasts, UserStore } from "@webpack/common";
@@ -35,6 +35,7 @@ import { User } from "discord-types/general";
 
 const CONTRIBUTOR_BADGE = "https://vencord.dev/assets/favicon.png";
 const EQUICORD_CONTRIBUTOR_BADGE = "https://i.imgur.com/rJDRtUB.png";
+const SUNCORD_CONTRIBUTOR_BADGE = "https://raw.githubusercontent.com/verticalsync/Suncord/main/src/assets/icon.png";
 
 const ContributorBadge: ProfileBadge = {
     description: "Vencord Contributor",
@@ -49,6 +50,14 @@ const EquicordContributorBadge: ProfileBadge = {
     image: EQUICORD_CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     shouldShow: ({ userId }) => isEquicordPluginDev(userId),
+    onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
+};
+
+const SuncordContributorBadge: ProfileBadge = {
+    description: "Suncord Contributor",
+    image: SUNCORD_CONTRIBUTOR_BADGE,
+    position: BadgePosition.START,
+    shouldShow: ({ userId }) => isSuncordPluginDev(userId),
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
@@ -151,6 +160,7 @@ export default definePlugin({
     async start() {
         Vencord.Api.Badges.addBadge(ContributorBadge);
         Vencord.Api.Badges.addBadge(EquicordContributorBadge);
+        Vencord.Api.Badges.addBadge(SuncordContributorBadge);
         await loadAllBadges();
     },
 

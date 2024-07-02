@@ -54,7 +54,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - KeywordNotify by camila314
 - Meow by Samwich
 - MessageLinkTooltip by Kyuuhachi
-- MessageLoggerEnhanced (MLEnhanced) by Aria
+- MessageLoggerEnhanced by Aria
 - noAppsAllowed by kvba
 - NoModalAnimation by AutumnVN
 - NoNitroUpsell by thororen
@@ -62,12 +62,12 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - OnePingPerDM by ProffDea
 - PlatformSpoofer by Drag
 - PurgeMessages by bhop and nyx
-- QuestionMarkReplacement (QuestionMarkReplace) by nyx
+- Quest Completer by HappyEnderman, SerStars, thororen
+- QuestionMarkReplacement by nyx
 - Quoter by Samwich
 - RepeatMessage by Tolgchu
 - ReplyPingControl by ant0n and MrDiamond
 - ScreenRecorder by AutumnVN
-- Search by JacobTm and thororen
 - SearchFix by Jaxx
 - Sekai Stickers by MaiKokain
 - ServerSearch by camila314

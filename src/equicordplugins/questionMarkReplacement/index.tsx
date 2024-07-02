@@ -5,7 +5,7 @@
  */
 
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -28,8 +28,9 @@ function replaceQuestionMarks(content: string): string {
     }
 }
 
+migratePluginSettings("QuestionMarkReplacement", "QuestionMarkReplace");
 export default definePlugin({
-    name: "QuestionMarkReplace",
+    name: "QuestionMarkReplacement",
     description: "Replace all question marks with chosen string, if message only contains question marks.",
     authors: [Devs.nyx],
 

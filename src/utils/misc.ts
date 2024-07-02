@@ -18,7 +18,7 @@
 
 import { Clipboard, Toasts } from "@webpack/common";
 
-import { DevsById, EquicordDevsById } from "./constants";
+import { EquicordDevsById, SuncordDevsById, VencordDevsById } from "./constants";
 
 /**
  * Calls .join(" ") on the arguments
@@ -94,8 +94,9 @@ export function identity<T>(value: T): T {
 // "In summary, we recommend looking for the string Mobi anywhere in the User Agent to detect a mobile device."
 export const isMobile = navigator.userAgent.includes("Mobi");
 
-export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);
+export const isPluginDev = (id: string) => Object.hasOwn(VencordDevsById, id);
 export const isEquicordPluginDev = (id: string) => Object.hasOwn(EquicordDevsById, id);
+export const isSuncordPluginDev = (id: string) => Object.hasOwn(SuncordDevsById, id);
 
 export function pluralise(amount: number, singular: string, plural = singular + "s") {
     return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`;
