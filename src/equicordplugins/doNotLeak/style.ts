@@ -92,8 +92,8 @@ filter: blur(0px) brightness(1) !important;
 ]
 */
 
-export function getStyle(): [string, object] {
-    const messageContent = findByProps("messageEditorCompact"); // ["messageContent","wrapper"]
+export function getStyle(): string {
+    const messageContent = findByProps("messageContent", "titleCase"); // ["messageContent","wrapper"]
     const embedWrapper = findByProps("embedWrapper");
     const mediaContainer = findByProps("visualMediaItemContainer");
     const notice = findByProps("colorStreamerMode", "notice");
@@ -112,5 +112,5 @@ export function getStyle(): [string, object] {
     for (const className in Classes) {
         CssCode = CssCode.replaceAll(`{${className}}`, Classes[className]);
     }
-    return [CssCode, Classes];
+    return CssCode;
 }

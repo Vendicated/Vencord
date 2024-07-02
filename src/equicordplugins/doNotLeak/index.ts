@@ -10,8 +10,6 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import { getStyle } from "./style";
 
-let [styles, Classes]: [string, object] = ["", {}];
-
 const settings = definePluginSettings({
     hoverToView: {
         type: OptionType.BOOLEAN,
@@ -43,12 +41,13 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "Do Not Leak!",
+    name: "DoNotLeak",
+    tags: ["DontLeak"],
     description: "Hide all message contents and attachments when you're streaming or sharing your screen.",
     authors: [EquicordDevs.Perny],
     settings,
     start() {
-        [styles, Classes] = getStyle();
+        const styles = getStyle();
 
         const style = document.createElement("style");
         style.setAttribute("id", "vc-dont-leak-style");
@@ -58,10 +57,7 @@ export default definePlugin({
         document.addEventListener("keyup", keyUpHandler);
         document.addEventListener("keydown", keyDownHandler);
         updateClassList("hover-to-view", settings.store.hoverToView);
-        updateClassList(
-            "hide-in-streamer-mode",
-            settings.store.enableForStream
-        );
+        updateClassList("hide-in-streamer-mode", settings.store.enableForStream);
     },
     stop() {
         document.removeEventListener("keyup", keyUpHandler);
