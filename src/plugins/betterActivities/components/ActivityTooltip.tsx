@@ -10,6 +10,7 @@ import { findComponentByCodeLazy } from "@webpack";
 import { moment, React, useMemo } from "@webpack/common";
 import { User } from "discord-types/general";
 
+import settings from "../settings";
 import { Activity, Application } from "../types";
 import {
     formatElapsedTime,
@@ -55,6 +56,7 @@ export default function ActivityTooltip({ activity, application, user, cl }: Rea
                 <div className={cl("activity-details")}>
                     <div>{activity.details}</div>
                     <div>{activity.state}</div>
+                    {settings.store.showAppDescriptions && application?.description && <div>{application.description}</div>}
                     {!timestamps && startTime &&
                         <div className={cl("activity-time-bar")}>
                             {formatElapsedTime(moment(startTime), moment())}

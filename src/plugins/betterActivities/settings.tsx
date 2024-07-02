@@ -32,6 +32,12 @@ const settings = definePluginSettings({
         description: "Allow rendering GIFs",
         default: true,
     },
+    showAppDescriptions: {
+        type: OptionType.BOOLEAN,
+        description: "Show application descriptions in the activity tooltip",
+        default: true,
+        restartNeeded: false,
+    },
     divider: {
         type: OptionType.COMPONENT,
         description: "",
