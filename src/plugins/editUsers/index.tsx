@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Menu } from "@webpack/common";
@@ -11,8 +13,6 @@ import { User } from "discord-types/general";
 
 import { getUserOverride, hasFlag, OverrideFlags, settings } from "./data";
 import { openUserEditModal } from "./modal";
-
-
 
 export default definePlugin({
     name: "EditUsers",

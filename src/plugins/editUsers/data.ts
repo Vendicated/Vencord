@@ -18,26 +18,23 @@ export const enum OverrideFlags {
 
 export interface UserOverride {
     username: string;
-    avatarUrl: string | null;
-    bannerUrl: string | null;
+    avatarUrl: string;
+    bannerUrl: string;
     flags: OverrideFlags;
 }
 
-export function makeBlankUserOverride(): UserOverride {
-    return {
-        username: "",
-        avatarUrl: "",
-        bannerUrl: "",
-        flags: OverrideFlags.None,
-    };
-}
-
-const emptyConstantOverride = makeBlankUserOverride();
+export const emptyOverride: UserOverride = Object.freeze({
+    username: "",
+    avatarUrl: "",
+    bannerUrl: "",
+    flags: OverrideFlags.None,
+});
 
 export const settings = definePluginSettings({})
     .withPrivateSettings<{
         users?: Record<string, UserOverride>;
     }>();
 
-export const getUserOverride = (userId: string) => settings.store.users?.[userId] ?? emptyConstantOverride;
+export const getUserOverride = (userId: string) => settings.store.users?.[userId] ?? emptyOverride;
+
 export const hasFlag = (field: OverrideFlags, flag: OverrideFlags) => (field & flag) === flag;
