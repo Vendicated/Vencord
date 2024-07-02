@@ -89,7 +89,7 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
     });
 
     if (customColorways) {
-        if (!customColorways[0].colorways) {
+        if (!customColorways[0]?.colorways) {
             DataStore.set("customColorways", [{ name: "Custom", colorways: customColorways }]);
         }
     } else {

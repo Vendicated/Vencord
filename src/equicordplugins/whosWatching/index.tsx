@@ -39,7 +39,6 @@ const settings = definePluginSettings({
 
 function encodeStreamKey(stream) {
     const { streamType, guildId, channelId, ownerId } = stream;
-    console.log(streamType);
     switch (streamType) {
         case "guild":
             return [streamType, guildId, channelId, ownerId].join(":");
