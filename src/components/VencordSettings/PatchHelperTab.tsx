@@ -46,7 +46,7 @@ const findCandidates = debounce(function ({ find, setModule, setError }) {
 
 interface ReplacementComponentProps {
     module: [id: number, factory: Function];
-    match: string;
+    match: string | RegExp | undefined;
     replacement: string | ReplaceFn;
     setReplacementError(error: any): void;
 }
@@ -58,21 +58,19 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
     const [patchedCode, matchResult, diff] = React.useMemo(() => {
         const src: string = fact.toString().replaceAll("\n", "");
 
-        try {
-            new RegExp(match);
-        } catch (e) {
+        if (match === undefined) {
             return ["", [], []];
         }
         const canonicalMatch = canonicalizeMatch(new RegExp(match));
         try {
             const canonicalReplace = canonicalizeReplace(replacement, "YourPlugin");
-            var patched = src.replace(canonicalMatch, canonicalReplace as string);
+            var patched = src.replace(match, canonicalReplace as string);
             setReplacementError(void 0);
         } catch (e) {
             setReplacementError((e as Error).message);
             return ["", [], []];
         }
-        const m = src.match(canonicalMatch);
+        const m = src.match(match);
         return [patched, m, makeDiff(src, patched, m)];
     }, [id, match, replacement]);
 
@@ -336,7 +334,9 @@ function PatchHelper() {
     const [find, setFind] = React.useState<string | RegExp | undefined>(undefined);
     const [findSource, setFindSource] = React.useState<string | undefined>(undefined);
     const [rawFindSource, setRawFindSource] = React.useState<string>("");
-    const [match, setMatch] = React.useState<string>("");
+    const [match, setMatch] = React.useState<string | RegExp | undefined>(undefined);
+    const [matchSource, setMatchSource] = React.useState<string | undefined>(undefined);
+    const [rawMatchSource, setRawMatchSource] = React.useState<string>("");
     const [replacement, setReplacement] = React.useState<string | ReplaceFn>("");
 
     const [replacementError, setReplacementError] = React.useState<string>();
@@ -350,12 +350,12 @@ function PatchHelper() {
 {
     find: ${findSource},
     replacement: {
-        match: /${match.replace(/(?<!\\)\//g, "\\/")}/,
+        match: ${matchSource},
         replace: ${typeof replacement === "function" ? replacement.toString() : JSON.stringify(replacement)}
     }
 },
         `.trim();
-    }, [findSource, match, replacement]);
+    }, [findSource, matchSource, replacement]);
 
     React.useEffect(() => {
         if (find !== undefined && (find instanceof RegExp ? find.source !== "(?:)" : find !== "")) {
@@ -374,16 +374,16 @@ function PatchHelper() {
         setMatchError: setFindError,
     });
 
-    function onMatchChange(v: string, name?: string) {
-        setMatch(v);
-
-        try {
-            new RegExp(v);
-            setMatchError(void 0);
-        } catch (e: any) {
-            setMatchError((e as Error).message);
-        }
-    }
+    const {
+        onMatchChange,
+        onMatchSourceChange,
+        onRawMatchSourceChange,
+    } = makeOnMatchChangeFunctions({
+        setMatch,
+        setMatchSource,
+        setRawMatchSource,
+        setMatchError,
+    });
 
     return (
         <SettingsTab title="Patch Helper">
@@ -405,8 +405,8 @@ function PatchHelper() {
             <Forms.FormTitle className={Margins.top8}>match</Forms.FormTitle>
             <TextInput
                 type="text"
-                value={match}
-                onChange={onMatchChange}
+                value={rawMatchSource}
+                onChange={onRawMatchSourceChange}
                 error={matchError}
             />
 
