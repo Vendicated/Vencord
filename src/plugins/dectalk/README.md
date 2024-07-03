@@ -13,4 +13,4 @@ To make DecTalk read the contents of a codeblock, simply set the langauge to `dt
 Every standard DecTalk feature should be supported *(Including phonemes of course, can't have DecTalk without phonemes)* as well as some extra things, like blocking specific users from using DecTalk on your client.
 
 ## Important note:
-In order for this to work, you need the DecTalk executables (path configured in plugin settings). You can get them [here](https://github.com/TheZoidMaster/dectalk-exes).
+In order for this to work, you need the DecTalk executables (path configured in plugin settings). You can get them [here](https://github.com/TheZoidMaster/dectalk-exes) or find them elsewhere online.
