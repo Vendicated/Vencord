@@ -66,14 +66,33 @@ export default definePlugin({
                 {
                     match: /(?<=:).{0,10}\(\{id:this\.userId,banner/,
                     replace: "$self.getBannerUrl(this.userId)||$&"
+                },
+                {
+                    match: /isUsingGuildMemberPronouns\(\)\{/,
+                    replace:
+                        "set pronouns(v){this._vcPronouns=v}" +
+                        "get pronouns(){return $self.getPronouns(this.userId)||this._vcPronouns}" +
+                        "isUsingGuildMemberPronouns(){"
+                },
+                {
+                    match: /\i\(this,"pronouns",void 0\),/,
+                    replace: ""
                 }
             ]
+        },
+        {
+            find: '"GuildMemberStore"',
+            replacement: {
+                match: /getNick\(\i,(\i)\)\{/,
+                replace: "$& if ($self.shouldIgnoreNick($1)) return null;"
+            }
         }
     ],
 
     getUsername: (user: User) => getUserOverride(user.id).username,
     getAvatarUrl: (user: User) => getUserOverride(user.id).avatarUrl,
     getBannerUrl: (userId: string) => getUserOverride(userId).bannerUrl,
+    getPronouns: (userId: string) => getUserOverride(userId).pronouns,
 
     shouldIgnoreGuildAvatar(user: User) {
         const { avatarUrl, flags } = getUserOverride(user.id);
@@ -91,5 +110,16 @@ export default definePlugin({
             return true;
 
         return hasFlag(flags, OverrideFlags.DisableServerBanners);
+    },
+
+    shouldIgnoreNick(userId?: string) {
+        if (!userId) return false;
+
+        const { username, flags } = getUserOverride(userId);
+
+        if (username && !hasFlag(flags, OverrideFlags.PreferServerNicks))
+            return true;
+
+        return hasFlag(flags, OverrideFlags.DisableNicks);
     }
 });

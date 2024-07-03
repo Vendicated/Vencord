@@ -20,6 +20,7 @@ export interface UserOverride {
     username: string;
     avatarUrl: string;
     bannerUrl: string;
+    pronouns: string;
     flags: OverrideFlags;
 }
 
@@ -27,6 +28,7 @@ export const emptyOverride: UserOverride = Object.freeze({
     username: "",
     avatarUrl: "",
     bannerUrl: "",
+    pronouns: "",
     flags: OverrideFlags.None,
 });
 
