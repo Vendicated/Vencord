@@ -9,7 +9,6 @@
 
 .vc-settings-quickActions-pill {
     all: unset;
-
     background: var(--background-secondary);
     color: var(--header-secondary);
     display: flex;
