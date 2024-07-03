@@ -14,6 +14,8 @@ import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, Forms, useStateFromStores } from "@webpack/common";
 
+import { getStyles, newStyleListener } from "./cssUtil";
+
 const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
 
 const colorPresets = [
@@ -121,7 +123,11 @@ export default definePlugin({
 
         const styles = await getStyles();
         generateColorOffsets(styles);
-        generateLightModeFixes(styles);
+
+        const lightFixSheet = createStyleSheet("clientThemeLightModeFixes", generateLightModeFixes(styles));
+        newStyleListener(styles => {
+            lightFixSheet.innerText += `\n\n${generateLightModeFixes(styles)}`;
+        });
     },
 
     stop() {
@@ -188,11 +194,7 @@ function generateLightModeFixes(styles) {
     // create css to reassign every var
     const reassignVariables = `.theme-light {\n ${lightBgVars.map(variable => `${variable}: var(--primary-100);`).join("\n")} \n}`;
 
-    createStyleSheet("clientThemeLightModeFixes", [
-        reassignBackgrounds,
-        reassignBackgroundColors,
-        reassignVariables,
-    ].join("\n\n"));
+    return [reassignBackgrounds, reassignBackgroundColors, reassignVariables].join("\n\n");
 }
 
 function captureOne(str, regex) {
@@ -218,26 +220,12 @@ function updateColorVars(color: string) {
     }`;
 }
 
-function createStyleSheet(id, content = "") {
+function createStyleSheet(id, content = ""): HTMLStyleElement {
     const style = document.createElement("style");
     style.setAttribute("id", id);
     style.textContent = content.split("\n").map(line => line.trim()).join("\n");
     document.body.appendChild(style);
     return style;
-}
-
-// returns all of discord's native styles in a single string
-async function getStyles(): Promise<string> {
-    let out = "";
-    const styleLinkNodes = document.querySelectorAll('link[rel="stylesheet"]');
-    for (const styleLinkNode of styleLinkNodes) {
-        const cssLink = styleLinkNode.getAttribute("href");
-        if (!cssLink) continue;
-
-        const res = await fetch(cssLink);
-        out += await res.text();
-    }
-    return out;
 }
 
 // https://css-tricks.com/converting-color-spaces-in-javascript/
