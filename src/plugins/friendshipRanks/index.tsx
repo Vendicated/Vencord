@@ -10,7 +10,7 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { Modals,ModalSize, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { Button, Flex, Forms, RelationshipStore } from "@webpack/common";
+import { Button, Flex, Forms, RelationshipStore, Tooltip } from "@webpack/common";
 
 import { bestiesIcon, bloomingIcon, burningIcon, fighterIcon, royalIcon, sproutIcon, starIcon } from "./icons";
 
@@ -111,15 +111,18 @@ function openRankModal(rank : rankInfo)
     ));
 }
 
-function getBadgeComponent(rank,)
+function getBadgeComponent(rank)
 {
-    // there may be a better button component to do this with
     return (
-        <div style={{ transform: "scale(0.80)" }}>
-            <Button onClick={() => openRankModal(rank)} width={"21.69px"} height={"21.69px"} size={Button.Sizes.NONE} look={Button.Looks.BLANK}>
-                <rank.assetSVG height={"21.69px"}/>
-            </Button>
-        </div>
+        <Tooltip text={rank.title}>
+            {() => 
+                <div style={{ transform: "scale(0.80)" }}>
+                    <Button onClick={() => openRankModal(rank)} width={"21.69px"} height={"21.69px"} size={Button.Sizes.NONE} look={Button.Looks.BLANK}>
+                        <rank.assetSVG height={"21.69px"}/>
+                    </Button>
+                </div>  
+            }
+        </Tooltip>
     );
 }
 
@@ -131,9 +134,9 @@ function getBadgesToApply()
             component: () => getBadgeComponent(rank),
             shouldShow: (info : BadgeUserArgs) =>
             {
-                if(!RelationshipStore.isFriend(info.user.id)) { return false; }
+                if(!RelationshipStore.isFriend(info.userId)) { return false; }
 
-                const days = daysSince(RelationshipStore.getSince(info.user.id));
+                const days = daysSince(RelationshipStore.getSince(info.userId));
 
                 if(self[index + 1] == null)
                 {
