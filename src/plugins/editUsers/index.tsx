@@ -51,8 +51,8 @@ export default definePlugin({
                     replace: "$& && !$self.shouldIgnoreGuildAvatar(this)"
                 },
                 {
-                    match: /(?<=:)\i\.\i\.getUserAvatarURL\(this/,
-                    replace: "$self.getAvatarUrl(this)||$&"
+                    match: /(?<=null!=(\i))\?(\i\.\i\.getGuildMemberAvatarURLSimple.+?):(?=\i\.\i\.getUserAvatarURL\(this)/,
+                    replace: "&& this.hasAvatarForGuild?.($1) ? $2 : $self.getAvatarUrl(this)||"
                 }
             ]
         },
