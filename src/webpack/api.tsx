@@ -87,18 +87,18 @@ const stringMatches = (s: string, filter: CodeFilter) =>
 export const filters = {
     byProps: (...props: PropsFilter): FilterFn => {
         const filter: FilterFn = props.length === 1
-            ? m => m?.[props[0]] !== void 0
-            : m => props.every(p => m?.[p] !== void 0);
+            ? m => m?.[props[0]] !== undefined
+            : m => props.every(p => m?.[p] !== undefined);
 
         filter.$$vencordProps = ["byProps", ...props];
         return filter;
     },
 
     byCode: (...code: CodeFilter): FilterFn => {
-        code = code.map(canonicalizeMatch);
+        const parsedCode = code.map(canonicalizeMatch);
         const filter: FilterFn = m => {
             if (typeof m !== "function") return false;
-            return stringMatches(String(m), code);
+            return stringMatches(String(m), parsedCode);
         };
 
         filter.$$vencordProps = ["byCode", ...code];
