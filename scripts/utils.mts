@@ -20,11 +20,11 @@
  * @param {string} filePath
  * @returns {string | null}
  */
-export function getPluginTarget(filePath) {
+export function getPluginTarget(filePath: string): string | undefined {
     const pathParts = filePath.split(/[/\\]/);
-    if (/^index\.tsx?$/.test(pathParts.at(-1))) pathParts.pop();
+    if (/^index\.tsx?$/.test(pathParts.at(-1) ?? "")) pathParts.pop();
 
-    const identifier = pathParts.at(-1).replace(/\.tsx?$/, "");
+    const identifier = (pathParts.at(-1) ?? "").replace(/\.tsx?$/, "");
     const identiferBits = identifier.split(".");
-    return identiferBits.length === 1 ? null : identiferBits.at(-1);
+    return identiferBits.length === 1 ? undefined : identiferBits.at(-1);
 }

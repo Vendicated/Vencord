@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env tsx
 /*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
@@ -25,10 +25,7 @@ import Zip from "zip-local";
 
 import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION } from "./common.mjs";
 
-/**
- * @type {esbuild.BuildOptions}
- */
-const commonOptions = {
+const commonOptions: esbuild.BuildOptions = {
     ...commonOpts,
     entryPoints: ["browser/Vencord.ts"],
     globalName: "Vencord",
@@ -36,20 +33,20 @@ const commonOptions = {
     external: ["~plugins", "~git-hash", "/assets/*"],
     plugins: [
         globPlugins("web"),
-        ...commonOpts.plugins,
+        ...(commonOpts.plugins ?? []),
     ],
     target: ["esnext"],
     define: {
-        IS_WEB: true,
-        IS_EXTENSION: false,
-        IS_STANDALONE: true,
-        IS_DEV,
-        IS_REPORTER,
-        IS_DISCORD_DESKTOP: false,
-        IS_VESKTOP: false,
-        IS_UPDATER_DISABLED: true,
+        IS_WEB: JSON.stringify(true),
+        IS_EXTENSION: JSON.stringify(false),
+        IS_STANDALONE: JSON.stringify(true),
+        IS_DEV: JSON.stringify(IS_DEV),
+        IS_REPORTER: JSON.stringify(IS_REPORTER),
+        IS_DISCORD_DESKTOP: JSON.stringify(false),
+        IS_VESKTOP: JSON.stringify(false),
+        IS_UPDATER_DISABLED: JSON.stringify(true),
         VERSION: JSON.stringify(VERSION),
-        BUILD_TIMESTAMP
+        BUILD_TIMESTAMP: JSON.stringify(BUILD_TIMESTAMP),
     }
 };
 
@@ -95,7 +92,7 @@ await Promise.all(
             outfile: "dist/extension.js",
             define: {
                 ...commonOptions?.define,
-                IS_EXTENSION: true,
+                IS_EXTENSION: JSON.stringify(true),
             },
             footer: { js: "//# sourceURL=VencordWeb" }
         }),
@@ -118,11 +115,8 @@ await Promise.all(
     ]
 );
 
-/**
- * @type {(dir: string) => Promise<string[]>}
- */
-async function globDir(dir) {
-    const files = [];
+async function globDir(dir: string): Promise<string[]> {
+    const files = [] as string[];
 
     for (const child of await readdir(dir, { withFileTypes: true })) {
         const p = join(dir, child.name);
@@ -135,19 +129,14 @@ async function globDir(dir) {
     return files;
 }
 
-/**
- * @type {(dir: string, basePath?: string) => Promise<Record<string, string>>}
- */
-async function loadDir(dir, basePath = "") {
+async function loadDir(dir: string, basePath: string = ""): Promise<Record<string, string>> {
     const files = await globDir(dir);
-    return Object.fromEntries(await Promise.all(files.map(async f => [f.slice(basePath.length), await readFile(f)])));
+    const dirContentEntries = await Promise.all(files.map(async (f): Promise<[string, string]> => [f.slice(basePath.length), await readFile(f, { encoding: "utf-8" })]));
+    return Object.fromEntries(dirContentEntries satisfies [string, string][]);
 }
 
-/**
-  * @type {(target: string, files: string[]) => Promise<void>}
- */
-async function buildExtension(target, files) {
-    const entries = {
+async function buildExtension(target: string, files: string[]): Promise<void> {
+    const entries: Record<string, Buffer> = {
         "dist/Vencord.js": await readFile("dist/extension.js"),
         "dist/Vencord.css": await readFile("dist/extension.css"),
         ...await loadDir("dist/monaco"),
@@ -159,7 +148,7 @@ async function buildExtension(target, files) {
             if (f.startsWith("manifest")) {
                 const json = JSON.parse(content.toString("utf-8"));
                 json.version = VERSION;
-                content = new TextEncoder().encode(JSON.stringify(json));
+                content = Buffer.from(JSON.stringify(json), "utf-8");
             }
 
             return [

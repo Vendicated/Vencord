@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env tsx
 /*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
@@ -23,41 +23,35 @@ import { join } from "path";
 
 import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, watch } from "./common.mjs";
 
-const defines = {
-    IS_STANDALONE,
-    IS_DEV,
-    IS_REPORTER,
-    IS_UPDATER_DISABLED,
-    IS_WEB: false,
-    IS_EXTENSION: false,
+const defines: esbuild.CommonOptions["define"] = {
+    IS_STANDALONE: JSON.stringify(IS_STANDALONE),
+    IS_DEV: JSON.stringify(IS_DEV),
+    IS_REPORTER: JSON.stringify(IS_REPORTER),
+    IS_UPDATER_DISABLED: JSON.stringify(IS_UPDATER_DISABLED),
+    IS_WEB: JSON.stringify(false),
+    IS_EXTENSION: JSON.stringify(false),
     VERSION: JSON.stringify(VERSION),
-    BUILD_TIMESTAMP
+    BUILD_TIMESTAMP: JSON.stringify(BUILD_TIMESTAMP),
 };
 
-if (defines.IS_STANDALONE === false)
+if (defines.IS_STANDALONE === "false")
     // If this is a local build (not standalone), optimize
     // for the specific platform we're on
     defines["process.platform"] = JSON.stringify(process.platform);
 
-/**
- * @type {esbuild.BuildOptions}
- */
-const nodeCommonOpts = {
+const nodeCommonOpts: esbuild.BuildOptions = {
     ...commonOpts,
     format: "cjs",
     platform: "node",
     target: ["esnext"],
-    external: ["electron", "original-fs", "~pluginNatives", ...commonOpts.external],
+    external: ["electron", "original-fs", "~pluginNatives", ...(commonOpts.external ?? [])],
     define: defines
 };
 
-const sourceMapFooter = s => watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
+const sourceMapFooter = (s: string) => watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
 const sourcemap = watch ? "inline" : "external";
 
-/**
- * @type {import("esbuild").Plugin}
- */
-const globNativesPlugin = {
+const globNativesPlugin: esbuild.Plugin = {
     name: "glob-natives-plugin",
     setup: build => {
         const filter = /^~pluginNatives$/;
@@ -112,11 +106,11 @@ await Promise.all([
         sourcemap,
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: true,
-            IS_VESKTOP: false
+            IS_DISCORD_DESKTOP: JSON.stringify(true),
+            IS_VESKTOP: JSON.stringify(false)
         },
         plugins: [
-            ...nodeCommonOpts.plugins,
+            ...(nodeCommonOpts.plugins ?? []),
             globNativesPlugin
         ]
     }),
@@ -131,12 +125,12 @@ await Promise.all([
         sourcemap,
         plugins: [
             globPlugins("discordDesktop"),
-            ...commonOpts.plugins
+            ...(commonOpts.plugins ?? [])
         ],
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: true,
-            IS_VESKTOP: false
+            IS_DISCORD_DESKTOP: JSON.stringify(true),
+            IS_VESKTOP: JSON.stringify(false)
         }
     }),
     esbuild.build({
@@ -147,8 +141,8 @@ await Promise.all([
         sourcemap,
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: true,
-            IS_VESKTOP: false
+            IS_DISCORD_DESKTOP: JSON.stringify(true),
+            IS_VESKTOP: JSON.stringify(false)
         }
     }),
 
@@ -161,11 +155,11 @@ await Promise.all([
         sourcemap,
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true
+            IS_DISCORD_DESKTOP: JSON.stringify(false),
+            IS_VESKTOP: JSON.stringify(true)
         },
         plugins: [
-            ...nodeCommonOpts.plugins,
+            ...(nodeCommonOpts.plugins ?? []),
             globNativesPlugin
         ]
     }),
@@ -180,12 +174,12 @@ await Promise.all([
         sourcemap,
         plugins: [
             globPlugins("vencordDesktop"),
-            ...commonOpts.plugins
+            ...(commonOpts.plugins ?? [])
         ],
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true
+            IS_DISCORD_DESKTOP: JSON.stringify(false),
+            IS_VESKTOP: JSON.stringify(true)
         }
     }),
     esbuild.build({
@@ -196,8 +190,8 @@ await Promise.all([
         sourcemap,
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true
+            IS_DISCORD_DESKTOP: JSON.stringify(false),
+            IS_VESKTOP: JSON.stringify(true)
         }
     }),
 ]).catch(err => {
