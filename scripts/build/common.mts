@@ -374,7 +374,7 @@ export const logRebuildToConsolePlugin: esbuild.Plugin = {
 
 export function makeContextPromise<
     SpecificOptions extends esbuild.BuildOptions = esbuild.BuildOptions,
->(buildOptions: SpecificOptions): Promise<esbuild.BuildContext<SpecificOptions>> {
+>(buildOptions: esbuild.SameShape<esbuild.BuildOptions, SpecificOptions>): Promise<esbuild.BuildContext<SpecificOptions>> {
     const initialLogLevel = buildOptions.logLevel ?? "info";
     return esbuild.context(Object.defineProperty({
         ...buildOptions,
@@ -392,8 +392,8 @@ export async function makeBuildPromise<
     SpecificWatchOptions extends esbuild.WatchOptions = esbuild.WatchOptions,
 >(
     context: esbuild.BuildContext<SpecificBuildOptions>,
-    buildOptions: SpecificBuildOptions,
-    watchOptions: SpecificWatchOptions,
+    buildOptions: esbuild.SameShape<esbuild.BuildOptions, SpecificBuildOptions>,
+    watchOptions: esbuild.SameShape<esbuild.BuildOptions, SpecificWatchOptions>,
 ): Promise<esbuild.BuildResult<SpecificBuildOptions> | void> {
     let buildResult: esbuild.BuildResult | void;
     // `esbuild.build` internally calls `rebuild`, but we have to call `build` first for a summary.
