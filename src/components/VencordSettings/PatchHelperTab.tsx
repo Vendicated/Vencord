@@ -225,13 +225,12 @@ function ReplacementInput({ replacement, setReplacement, replacementError }) {
 }
 
 interface FullPatchInputProps {
-    setFind(v: string): void;
-    setParsedFind(v: string | RegExp): void;
+    setFind(find: string | RegExp | undefined): void;
     setMatch(v: string): void;
     setReplacement(v: string | ReplaceFn): void;
 }
 
-function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacement }: FullPatchInputProps) {
+function FullPatchInput({ setFind, setMatch, setReplacement }: FullPatchInputProps) {
     const [fullPatch, setFullPatch] = React.useState<string>("");
     const [fullPatchError, setFullPatchError] = React.useState<string>("");
 
@@ -239,8 +238,7 @@ function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacement }: Fu
         if (fullPatch === "") {
             setFullPatchError("");
 
-            setFind("");
-            setParsedFind("");
+            setFind(undefined);
             setMatch("");
             setReplacement("");
             return;
@@ -249,7 +247,7 @@ function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacement }: Fu
         try {
             const parsed = (0, eval)(`(${fullPatch})`) as Patch;
 
-            if (!parsed.find) throw new Error("No 'find' field");
+            if (parsed.find === undefined) throw new Error("No 'find' field");
             if (!parsed.replacement) throw new Error("No 'replacement' field");
 
             if (parsed.replacement instanceof Array) {
@@ -264,8 +262,7 @@ function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacement }: Fu
             if (!parsed.replacement.match) throw new Error("No 'replacement.match' field");
             if (!parsed.replacement.replace) throw new Error("No 'replacement.replace' field");
 
-            setFind(parsed.find instanceof RegExp ? parsed.find.toString() : parsed.find);
-            setParsedFind(parsed.find);
+            setFind(parsed.find);
             setMatch(parsed.replacement.match instanceof RegExp ? parsed.replacement.match.source : parsed.replacement.match);
             setReplacement(parsed.replacement.replace);
             setFullPatchError("");
@@ -282,8 +279,9 @@ function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacement }: Fu
 }
 
 function PatchHelper() {
-    const [find, setFind] = React.useState<string>("");
-    const [parsedFind, setParsedFind] = React.useState<string | RegExp>("");
+    const [find, setFind] = React.useState<string | RegExp | undefined>(undefined);
+    const [findSource, setFindSource] = React.useState<string | undefined>(undefined);
+    const [rawFindSource, setRawFindSource] = React.useState<string>("");
     const [match, setMatch] = React.useState<string>("");
     const [replacement, setReplacement] = React.useState<string | ReplaceFn>("");
 
@@ -296,34 +294,69 @@ function PatchHelper() {
     const code = React.useMemo(() => {
         return `
 {
-    find: ${parsedFind instanceof RegExp ? parsedFind.toString() : JSON.stringify(parsedFind)},
+    find: ${findSource},
     replacement: {
         match: /${match.replace(/(?<!\\)\//g, "\\/")}/,
         replace: ${typeof replacement === "function" ? replacement.toString() : JSON.stringify(replacement)}
     }
 },
         `.trim();
-    }, [parsedFind, match, replacement]);
+    }, [findSource, match, replacement]);
 
-    function onFindChange(v: string) {
-        setFind(v);
-
+    function onFindChange(find: string | RegExp | undefined, name?: string, findSource?: string | undefined) {
+        setFindError(void 0);
         try {
-            let parsedFind = v as string | RegExp;
-            if (/^\/.+?\/$/.test(v)) parsedFind = new RegExp(v.slice(1, -1));
+            setFind(find);
 
-            setFindError(void 0);
-            setParsedFind(parsedFind);
+            if (findSource === undefined) {
+                if (findSource === undefined && find instanceof RegExp) {
+                    findSource = find.toString();
+                }
+                if (findSource === undefined && find !== undefined) {
+                    findSource = JSON.stringify(find);
+                }
+                if (find !== undefined) onFindSourceChange(findSource, name, find);
+            }
 
-            if (v.length) {
-                findCandidates({ find: canonicalizeMatch(parsedFind), setModule, setError: setFindError });
+            if (find !== undefined) {
+                findCandidates({ find: canonicalizeMatch(find), setModule, setError: setFindError });
             }
         } catch (e: any) {
             setFindError((e as Error).message);
         }
     }
 
-    function onMatchChange(v: string) {
+    function onFindSourceChange(findSource: string | undefined, name?: string, find?: string | RegExp | undefined) {
+        try {
+            if (find === undefined) {
+                if (find === undefined && findSource !== undefined) {
+                    const regExpMatch = findSource.match(/^\/(.+)\/(\p{ID_Continue}*)$/sv);
+                    if (regExpMatch !== undefined && regExpMatch !== null) find = new RegExp(...(regExpMatch.slice(1) as [string, string]));
+                }
+                if (find === undefined && findSource !== undefined) {
+                    const stringMatch = findSource.match(/^(["'])(?:(?!\1|\\).|\\.)*\1$/v);
+                    if (stringMatch?.input !== undefined) find = (0, eval)(stringMatch.input) as string;
+                }
+                if (find === undefined && findSource !== undefined) {
+                    find = findSource;
+                    findSource = JSON.stringify(find);
+                }
+                setFindSource(findSource);
+                if (findSource !== undefined) onFindChange(find, name, findSource);
+            } else {
+                setFindSource(findSource);
+            }
+        } catch (e: any) {
+            setFindError((e as Error).message);
+        }
+    }
+
+    function onRawFindSourceChange(rawFindSource: string, name?: string, find?: string | RegExp | undefined) {
+        setRawFindSource(rawFindSource);
+        return onFindSourceChange(rawFindSource, name, find);
+    }
+
+    function onMatchChange(v: string, name?: string) {
         setMatch(v);
 
         try {
@@ -339,7 +372,6 @@ function PatchHelper() {
             <Forms.FormTitle>full patch</Forms.FormTitle>
             <FullPatchInput
                 setFind={onFindChange}
-                setParsedFind={setParsedFind}
                 setMatch={onMatchChange}
                 setReplacement={setReplacement}
             />
@@ -347,8 +379,8 @@ function PatchHelper() {
             <Forms.FormTitle className={Margins.top8}>find</Forms.FormTitle>
             <TextInput
                 type="text"
-                value={find}
-                onChange={onFindChange}
+                value={rawFindSource}
+                onChange={onRawFindSourceChange}
                 error={findError}
             />
 
@@ -377,13 +409,9 @@ function PatchHelper() {
                 />
             )}
 
-            {!!(find && match && replacement) && (
-                <>
-                    <Forms.FormTitle className={Margins.top20}>Code</Forms.FormTitle>
-                    <CodeBlock lang="js" content={code} />
-                    <Button onClick={() => Clipboard.copy(code)}>Copy to Clipboard</Button>
-                </>
-            )}
+            <Forms.FormTitle className={Margins.top20}>Code</Forms.FormTitle>
+            <CodeBlock lang="js" content={code} />
+            <Button onClick={() => Clipboard.copy(code)}>Copy to Clipboard</Button>
         </SettingsTab>
     );
 }
