@@ -58,8 +58,8 @@ const getRichBody = (user: User, text: string | React.ReactNode) => <div
     style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "10px" }}>
     <div style={{ position: "relative" }}>
         <img src={user.getAvatarURL(void 0, 80, true)}
-            style={{ width: "80px", height: "80px", borderRadius: "15%" }} alt={`${user.username}'s avatar`}/>
-        <PlatformIndicator user={user} style={{ position: "absolute", top: "-8px", right: "-10px" }}/>
+            style={{ width: "80px", height: "80px", borderRadius: "15%" }} alt={`${user.username}'s avatar`} />
+        <PlatformIndicator user={user} style={{ position: "absolute", top: "-8px", right: "-10px" }} />
     </div>
     <span>{text}</span>
 </div>;
@@ -159,24 +159,28 @@ export default definePlugin({
                 }
             }
         },
-        PRESENCE_UPDATES({ updates }: { updates: PresenceUpdate[] }) {
+        PRESENCE_UPDATES({ updates }: { updates: PresenceUpdate[]; }) {
             if (!settings.store.notifyStatus || !settings.store.userIds) {
                 return;
             }
-            for (const { user: { id: userId, username }, status } of updates) {
+            for (const { user: { id: userId, username }, status, clientStatus } of updates) {
                 const isFollowed = getUserIdList().includes(userId);
                 if (!isFollowed) {
                     continue;
                 }
 
+                if (!clientStatus) {
+                    continue;
+                }
                 // this is also triggered for multiple guilds and when only the activities change, so we have to check if the status actually changed
                 if (lastStatuses.has(userId) && lastStatuses.get(userId) !== status) {
                     const user = UserStore.getUser(userId);
-                    const name = username ?? user.username;
+                    // @ts-ignore
+                    const name = user.globalName || username;
 
                     showNotification({
-                        title: shouldBeNative() ? `User ${name} changed status` : "User status change",
-                        body: `is now ${status}`,
+                        title: shouldBeNative() ? `${name} changed status` : "User status change",
+                        body: `They are now ${status}`,
                         noPersist: !settings.store.persistNotifications,
                         richBody: getRichBody(user, `${name}'s status is now ${status}`),
                     });
