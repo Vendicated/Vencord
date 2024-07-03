@@ -26,6 +26,12 @@ const settings = definePluginSettings({
     disableNoisyLoggers: {
         type: OptionType.BOOLEAN,
         description: "Disable noisy loggers like the MessageActionCreators",
+        default: false,
+        restartNeeded: true
+    },
+    disableSpotifyLogger: {
+        type: OptionType.BOOLEAN,
+        description: "Disable the Spotify logger, which leaks account information and access token",
         default: true,
         restartNeeded: true
     }
@@ -35,6 +41,7 @@ export default definePlugin({
     name: "ConsoleJanitor",
     description: "Disables annoying console messages/errors",
     authors: [Devs.Nuckyz],
+    enabledByDefault: true,
     settings,
 
     NoopLogger: () => NoopLogger,
@@ -131,6 +138,14 @@ export default definePlugin({
             predicate: () => settings.store.disableNoisyLoggers,
             replacement: {
                 match: /new \i\.\i\("RTCConnection\("\.concat.+?\)\)(?=,)/,
+                replace: "$self.NoopLogger()"
+            }
+        },
+        {
+            find: '("Spotify")',
+            predicate: () => settings.store.disableSpotifyLogger,
+            replacement: {
+                match: /new \i\.\i\("Spotify"\)/,
                 replace: "$self.NoopLogger()"
             }
         }
