@@ -301,7 +301,7 @@ function PatchHelper() {
         match: /${match.replace(/(?<!\\)\//g, "\\/")}/,
         replace: ${typeof replacement === "function" ? replacement.toString() : JSON.stringify(replacement)}
     }
-}
+},
         `.trim();
     }, [parsedFind, match, replacement]);
 
@@ -316,7 +316,7 @@ function PatchHelper() {
             setParsedFind(parsedFind);
 
             if (v.length) {
-                findCandidates({ find: parsedFind, setModule, setError: setFindError });
+                findCandidates({ find: canonicalizeMatch(parsedFind), setModule, setError: setFindError });
             }
         } catch (e: any) {
             setFindError((e as Error).message);
