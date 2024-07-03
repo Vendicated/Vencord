@@ -439,6 +439,7 @@ export const buildOpts: esbuild.BuildOptions = {
     bundle: true,
     external: ["~plugins", "~git-hash", "~git-remote", "/assets/*"],
     inject: ["./scripts/build/inject/react.mjs"],
+    packages: "bundle",
     plugins: [fileUrlPlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
     // Work around https://github.com/evanw/esbuild/issues/2460
     tsconfig: "./scripts/build/tsconfig.esbuild.json"
