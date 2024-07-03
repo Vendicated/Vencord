@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useSettings } from "@api/Settings";
+import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { DeleteIcon, FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
@@ -31,6 +31,8 @@ import { useAwaiter } from "@utils/react";
 import { findByPropsLazy, findLazy } from "@webpack";
 import { Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
+
+import Plugins from "~plugins";
 
 import { AddonCard } from "./AddonCard";
 import { QuickAction, QuickActionCard } from "./quickActions";
@@ -250,10 +252,10 @@ function ThemesTab() {
                                 Icon={PaintbrushIcon}
                             />
 
-                            {Vencord.Settings.plugins.ClientTheme.enabled && (
+                            {Settings.plugins.ClientTheme.enabled && (
                                 <QuickAction
                                     text="Edit ClientTheme"
-                                    action={() => openPluginModal(Vencord.Plugins.plugins.ClientTheme)}
+                                    action={() => openPluginModal(Plugins.ClientTheme)}
                                     Icon={PencilIcon}
                                 />
                             )}
