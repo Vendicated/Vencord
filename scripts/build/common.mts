@@ -27,7 +27,7 @@ import { minify as minifyHtml } from "html-minifier-terser";
 import { join, relative } from "path";
 import { promisify } from "util";
 
-import { getPluginTarget } from "../utils.mjs";
+import { getPluginTarget, type PromiseWithResolvers, promiseWithResolvers } from "../utils.mjs";
 
 const PackageJSON: typeof import("../../package.json") = JSON.parse(readFileSync("package.json", { encoding: "utf-8" }));
 
@@ -36,6 +36,7 @@ export const VERSION = PackageJSON.version;
 export const BUILD_TIMESTAMP = Number(process.env.SOURCE_DATE_EPOCH) || Date.now();
 
 export const watch = process.argv.includes("--watch");
+export const summary = process.argv.includes("--summary");
 export const IS_DEV = watch || process.argv.includes("--dev");
 export const IS_REPORTER = process.argv.includes("--reporter");
 export const IS_STANDALONE = process.argv.includes("--standalone");
@@ -75,9 +76,12 @@ export async function resolvePluginName(base: string, dirent: Dirent): Promise<s
 }
 
 export async function exists(path: PathLike): Promise<boolean> {
-    return await access(path, FsConstants.F_OK)
-        .then(() => true)
-        .catch(() => false);
+    try {
+        await access(path, FsConstants.F_OK);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
@@ -269,19 +273,176 @@ export const stylePlugin: esbuild.Plugin = {
     }
 };
 
-export const commonOpts: esbuild.BuildOptions = {
+interface ConsoleLock {
+    unlock: () => void;
+}
+let consoleLockPromise: PromiseWithResolvers<undefined> | undefined = undefined;
+export let consoleLock: ConsoleLock | undefined = undefined;
+export async function lockConsole(): Promise<ConsoleLock> {
+    while (consoleLockPromise !== undefined) {
+        await consoleLockPromise.promise;
+    }
+    consoleLockPromise = promiseWithResolvers<undefined>();
+    const { resolve } = consoleLockPromise;
+    const unlock = () => {
+        consoleLockPromise = undefined;
+        consoleLock = undefined;
+        return resolve(undefined);
+    };
+    return consoleLock = { unlock };
+}
+
+const sizeWarningThreshold = 1024 * 1024;
+export const logRebuildToConsolePlugin: esbuild.Plugin = {
+    name: "log-rebuild-to-console-plugin",
+    setup: build => {
+        let consoleLock: ConsoleLock | undefined = undefined;
+        let startMs: number = 0;
+        let index = 0;
+        build.onStart(async () => {
+            startMs = Date.now();
+            // If esbuild is also logging anything, lock early.
+            if (consoleLock === undefined && build.initialOptions.logLevel !== "silent") consoleLock = await lockConsole();
+        });
+        build.onEnd(async result => {
+            const endMs = Date.now();
+            if (consoleLock === undefined) consoleLock = await lockConsole();
+            // in case you're wondering where the colors are: https://github.com/nodejs/node/pull/49205
+            console.group(`⚡ Rebuild ${index} of ${build.initialOptions.outfile} ${result.errors.length > 0 ? "failed" : "done"} in ${endMs - startMs}ms`);
+            let group = 1;
+            if (build.initialOptions.logLevel === "silent") {
+                const initialLogLevel = (build.initialOptions as any).initialLogLevel as esbuild.LogLevel ?? build.initialOptions.logLevel;
+                switch (initialLogLevel) {
+                    case "info":
+                        if (result.metafile !== undefined) {
+                            // our very own summary
+                            const { outputs } = result.metafile;
+                            for (const path of Object.getOwnPropertyNames(outputs).sort()) {
+                                const output = outputs[path];
+                                const sizeWarning = output.bytes > sizeWarningThreshold;
+                                console.log(
+                                    "%c%s%c (%c%d b%s%c, entryPoint: %o)",
+                                    "font-weight: bold",
+                                    path,
+                                    "font-weight: reset",
+                                    sizeWarning ? "color: yellow" : "color: cyan",
+                                    output.bytes,
+                                    sizeWarning ? " ⚠️" : "",
+                                    "color: unset",
+                                    output.entryPoint,
+                                );
+                            }
+                        }
+                    // eslint-disable-next-line no-fallthrough
+                    case "warning":
+                        if (result.warnings.length > 0) {
+                            while (group > 0) {
+                                console.groupEnd();
+                                group--;
+                            }
+                            for (const formattedMessage of await esbuild.formatMessages(result.warnings, { kind: "warning", color: true })) {
+                                console.warn("%s", formattedMessage);
+                            }
+                        }
+                    // eslint-disable-next-line no-fallthrough
+                    case "error":
+                        if (result.errors.length > 0) {
+                            while (group > 0) {
+                                console.groupEnd();
+                                group--;
+                            }
+                            for (const formattedMessage of await esbuild.formatMessages(result.errors, { kind: "error", color: true })) {
+                                console.error("%s", formattedMessage);
+                            }
+                        }
+                }
+            }
+            while (group > 0) {
+                console.groupEnd();
+                group--;
+            }
+            if (!((build.initialOptions as any).summary as unknown)) consoleLock?.unlock();
+            startMs = 0;
+            index++;
+            return {};
+        });
+        build.onDispose(() => {
+            consoleLock?.unlock();
+        });
+    },
+};
+
+export function makeContextPromise<
+    SpecificOptions extends esbuild.BuildOptions = esbuild.BuildOptions,
+>(buildOptions: SpecificOptions): Promise<esbuild.BuildContext<SpecificOptions>> {
+    const initialLogLevel = buildOptions.logLevel ?? "info";
+    return esbuild.context(Object.defineProperty({
+        ...buildOptions,
+        metafile: true,
+        logLevel: initialLogLevel === "error" || initialLogLevel === "warning" || initialLogLevel === "info" ? "silent" : initialLogLevel,
+        plugins: [
+            ...(buildOptions.plugins ?? []),
+            logRebuildToConsolePlugin,
+        ],
+    }, "initialLogLevel", { configurable: true, writable: true, enumerable: false, value: buildOptions.logLevel }));
+}
+
+export async function makeBuildPromise<
+    SpecificBuildOptions extends esbuild.BuildOptions = esbuild.BuildOptions,
+    SpecificWatchOptions extends esbuild.WatchOptions = esbuild.WatchOptions,
+>(
+    context: esbuild.BuildContext<SpecificBuildOptions>,
+    buildOptions: SpecificBuildOptions,
+    watchOptions: SpecificWatchOptions,
+): Promise<esbuild.BuildResult<SpecificBuildOptions> | void> {
+    let buildResult: esbuild.BuildResult | void;
+    // `esbuild.build` internally calls `rebuild`, but we have to call `build` first for a summary.
+    // https://github.com/evanw/esbuild/issues/2886
+    try {
+        const buildOpts = {
+            ...buildOptions,
+            metafile: true,
+            plugins: [
+                ...(buildOptions.plugins ?? []),
+                logRebuildToConsolePlugin,
+            ],
+        };
+        if (summary) {
+            buildResult = await esbuild.build(buildOpts);
+            if (watch) await context.watch(watchOptions);
+        } else {
+            buildResult = watch ? await context.watch(watchOptions) : await context.rebuild();
+        }
+        return buildResult;
+    } catch (error) {
+        context.dispose();
+        if (watch) {
+            throw error;
+        } else {
+            process.exitCode = 1;
+        }
+    }
+}
+
+export const commonOpts: esbuild.CommonOptions = {
     logLevel: "info",
-    bundle: true,
-    watch,
     minify: !watch,
     sourcemap: watch ? "inline" : undefined,
     legalComments: "linked",
-    banner,
-    plugins: [fileUrlPlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
-    external: ["~plugins", "~git-hash", "~git-remote", "/assets/*"],
-    inject: ["./scripts/build/inject/react.mjs"],
     jsxFactory: "VencordCreateElement",
     jsxFragment: "VencordFragment",
+};
+
+export const buildOpts: esbuild.BuildOptions = {
+    ...commonOpts,
+    banner,
+    bundle: true,
+    external: ["~plugins", "~git-hash", "~git-remote", "/assets/*"],
+    inject: ["./scripts/build/inject/react.mjs"],
+    plugins: [fileUrlPlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
     // Work around https://github.com/evanw/esbuild/issues/2460
     tsconfig: "./scripts/build/tsconfig.esbuild.json"
+};
+
+export const watchOpts: esbuild.WatchOptions = {
 };

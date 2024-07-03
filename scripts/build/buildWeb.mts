@@ -23,17 +23,17 @@ import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises
 import { join } from "path";
 import Zip from "zip-local";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION } from "./common.mjs";
+import { BUILD_TIMESTAMP, buildOpts, globPlugins, IS_DEV, IS_REPORTER, makeBuildPromise, makeContextPromise, VERSION, watch, watchOpts } from "./common.mjs";
 
-const commonOptions: esbuild.BuildOptions = {
-    ...commonOpts,
+const webBuildOpts: esbuild.BuildOptions = {
+    ...buildOpts,
     entryPoints: ["browser/Vencord.ts"],
     globalName: "Vencord",
     format: "iife",
     external: ["~plugins", "~git-hash", "/assets/*"],
     plugins: [
         globPlugins("web"),
-        ...(commonOpts.plugins ?? []),
+        ...(buildOpts.plugins ?? []),
     ],
     target: ["esnext"],
     define: {
@@ -62,58 +62,77 @@ const RnNoiseFiles = [
     "LICENSE"
 ];
 
-await Promise.all(
-    [
-        esbuild.build({
-            entryPoints: MonacoWorkerEntryPoints.map(entry => `node_modules/monaco-editor/esm/${entry}`),
-            bundle: true,
-            minify: true,
-            format: "iife",
-            outbase: "node_modules/monaco-editor/esm/",
-            outdir: "dist/monaco"
-        }),
-        esbuild.build({
-            entryPoints: ["browser/monaco.ts"],
-            bundle: true,
-            minify: true,
-            format: "iife",
-            outfile: "dist/monaco/index.js",
-            loader: {
-                ".ttf": "file"
-            }
-        }),
-        esbuild.build({
-            ...commonOptions,
-            outfile: "dist/browser.js",
-            footer: { js: "//# sourceURL=VencordWeb" }
-        }),
-        esbuild.build({
-            ...commonOptions,
-            outfile: "dist/extension.js",
-            define: {
-                ...commonOptions?.define,
-                IS_EXTENSION: JSON.stringify(true),
-            },
-            footer: { js: "//# sourceURL=VencordWeb" }
-        }),
-        esbuild.build({
-            ...commonOptions,
-            inject: ["browser/GMPolyfill.js", ...(commonOptions?.inject || [])],
-            define: {
-                ...(commonOptions?.define),
-                window: "unsafeWindow",
-            },
-            outfile: "dist/Vencord.user.js",
-            banner: {
-                js: readFileSync("browser/userscript.meta.js", "utf-8").replace("%version%", `${VERSION}.${new Date().getTime()}`)
-            },
-            footer: {
-                // UserScripts get wrapped in an iife, so define Vencord prop on window that returns our local
-                js: "Object.defineProperty(unsafeWindow,'Vencord',{get:()=>Vencord});"
-            }
-        })
-    ]
-);
+const buildOptions: esbuild.BuildOptions[] = [
+    {
+        entryPoints: MonacoWorkerEntryPoints.map(entry => `node_modules/monaco-editor/esm/${entry}`),
+        bundle: true,
+        minify: true,
+        format: "iife",
+        outbase: "node_modules/monaco-editor/esm/",
+        outdir: "dist/monaco"
+    },
+    {
+        entryPoints: ["browser/monaco.ts"],
+        bundle: true,
+        minify: true,
+        format: "iife",
+        outfile: "dist/monaco/index.js",
+        loader: {
+            ".ttf": "file"
+        }
+    },
+    {
+        ...webBuildOpts,
+        outfile: "dist/browser.js",
+        footer: { js: "//# sourceURL=VencordWeb" }
+    },
+    {
+        ...webBuildOpts,
+        outfile: "dist/extension.js",
+        define: {
+            ...webBuildOpts?.define,
+            IS_EXTENSION: JSON.stringify(true),
+        },
+        footer: { js: "//# sourceURL=VencordWeb" }
+    },
+    {
+        ...webBuildOpts,
+        inject: ["browser/GMPolyfill.js", ...(webBuildOpts?.inject || [])],
+        define: {
+            ...(webBuildOpts?.define),
+            window: "unsafeWindow",
+        },
+        outfile: "dist/Vencord.user.js",
+        banner: {
+            js: readFileSync("browser/userscript.meta.js", "utf-8").replace("%version%", `${VERSION}.${new Date().getTime()}`)
+        },
+        footer: {
+            // UserScripts get wrapped in an iife, so define Vencord prop on window that returns our local
+            js: "Object.defineProperty(unsafeWindow,'Vencord',{get:()=>Vencord});"
+        }
+    }
+];
+
+const contextPromises = buildOptions.map(makeContextPromise);
+await Promise.all(contextPromises.map(async (contextPromise, buildIndex) => {
+    return makeBuildPromise(await contextPromise, buildOptions[buildIndex], watchOpts);
+}));
+
+await Promise.all(contextPromises.map(async contextPromise => {
+    const context = await contextPromise;
+    try {
+        if (watch) await context.watch(watchOpts);
+    } catch (error) {
+        context.dispose();
+        throw error;
+    }
+}));
+
+if (!watch) {
+    await Promise.all(contextPromises.map(async contextPromise => {
+        return (await contextPromise).dispose();
+    }));
+}
 
 async function globDir(dir: string): Promise<string[]> {
     const files = [] as string[];
