@@ -278,6 +278,60 @@ function FullPatchInput({ setFind, setMatch, setReplacement }: FullPatchInputPro
     </>;
 }
 
+function makeOnMatchChangeFunctions({ setMatch, setMatchSource, setRawMatchSource, setMatchError }) {
+    function onMatchChange(match: string | RegExp | undefined, name?: string, matchSource?: string | undefined) {
+        setMatchError(void 0);
+        try {
+            if (matchSource === undefined) {
+                if (matchSource === undefined && match instanceof RegExp) {
+                    matchSource = match.toString();
+                }
+                if (matchSource === undefined && match !== undefined) {
+                    matchSource = JSON.stringify(match);
+                }
+                setMatch(match);
+                if (match !== undefined) onMatchSourceChange(matchSource, name, match);
+            } else {
+                setMatch(match);
+            }
+        } catch (e: any) {
+            setMatchError((e as Error).message);
+        }
+    }
+
+    function onMatchSourceChange(matchSource: string | undefined, name?: string, match?: string | RegExp | undefined) {
+        try {
+            if (match === undefined) {
+                if (match === undefined && matchSource !== undefined) {
+                    const regExpMatch = matchSource.match(/^\/(.*)\/(\p{ID_Continue}*)$/sv);
+                    if (regExpMatch !== undefined && regExpMatch !== null) match = new RegExp(...(regExpMatch.slice(1) as [string, string]));
+                }
+                if (match === undefined && matchSource !== undefined) {
+                    const stringMatch = matchSource.match(/^(["'])(?:(?!\1|\\).|\\.)*\1$/v);
+                    if (stringMatch?.input !== undefined) match = (0, eval)(stringMatch.input) as string;
+                }
+                if (match === undefined && matchSource !== undefined) {
+                    match = matchSource;
+                    matchSource = JSON.stringify(match);
+                }
+                setMatchSource(matchSource);
+                if (matchSource !== undefined) onMatchChange(match, name, matchSource);
+            } else {
+                setMatchSource(matchSource);
+            }
+        } catch (e: any) {
+            setMatchError((e as Error).message);
+        }
+    }
+
+    function onRawMatchSourceChange(rawMatchSource: string, name?: string, match?: string | RegExp | undefined) {
+        setRawMatchSource(rawMatchSource);
+        return onMatchSourceChange(rawMatchSource, name, match);
+    }
+
+    return { onMatchChange, onMatchSourceChange, onRawMatchSourceChange };
+}
+
 function PatchHelper() {
     const [find, setFind] = React.useState<string | RegExp | undefined>(undefined);
     const [findSource, setFindSource] = React.useState<string | undefined>(undefined);
@@ -303,58 +357,22 @@ function PatchHelper() {
         `.trim();
     }, [findSource, match, replacement]);
 
-    function onFindChange(find: string | RegExp | undefined, name?: string, findSource?: string | undefined) {
-        setFindError(void 0);
-        try {
-            setFind(find);
-
-            if (findSource === undefined) {
-                if (findSource === undefined && find instanceof RegExp) {
-                    findSource = find.toString();
-                }
-                if (findSource === undefined && find !== undefined) {
-                    findSource = JSON.stringify(find);
-                }
-                if (find !== undefined) onFindSourceChange(findSource, name, find);
-            }
-
-            if (find !== undefined) {
-                findCandidates({ find: canonicalizeMatch(find), setModule, setError: setFindError });
-            }
-        } catch (e: any) {
-            setFindError((e as Error).message);
+    React.useEffect(() => {
+        if (find !== undefined && (find instanceof RegExp ? find.source !== "(?:)" : find !== "")) {
+            findCandidates({ find: canonicalizeMatch(find), setModule, setError: setFindError });
         }
-    }
+    }, [find]);
 
-    function onFindSourceChange(findSource: string | undefined, name?: string, find?: string | RegExp | undefined) {
-        try {
-            if (find === undefined) {
-                if (find === undefined && findSource !== undefined) {
-                    const regExpMatch = findSource.match(/^\/(.+)\/(\p{ID_Continue}*)$/sv);
-                    if (regExpMatch !== undefined && regExpMatch !== null) find = new RegExp(...(regExpMatch.slice(1) as [string, string]));
-                }
-                if (find === undefined && findSource !== undefined) {
-                    const stringMatch = findSource.match(/^(["'])(?:(?!\1|\\).|\\.)*\1$/v);
-                    if (stringMatch?.input !== undefined) find = (0, eval)(stringMatch.input) as string;
-                }
-                if (find === undefined && findSource !== undefined) {
-                    find = findSource;
-                    findSource = JSON.stringify(find);
-                }
-                setFindSource(findSource);
-                if (findSource !== undefined) onFindChange(find, name, findSource);
-            } else {
-                setFindSource(findSource);
-            }
-        } catch (e: any) {
-            setFindError((e as Error).message);
-        }
-    }
-
-    function onRawFindSourceChange(rawFindSource: string, name?: string, find?: string | RegExp | undefined) {
-        setRawFindSource(rawFindSource);
-        return onFindSourceChange(rawFindSource, name, find);
-    }
+    const {
+        onMatchChange: onFindChange,
+        onMatchSourceChange: onFindSourceChange,
+        onRawMatchSourceChange: onRawFindSourceChange,
+    } = makeOnMatchChangeFunctions({
+        setMatch: setFind,
+        setMatchSource: setFindSource,
+        setRawMatchSource: setRawFindSource,
+        setMatchError: setFindError,
+    });
 
     function onMatchChange(v: string, name?: string) {
         setMatch(v);
