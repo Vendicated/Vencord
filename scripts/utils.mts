@@ -16,10 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/**
- * @param {string} filePath
- * @returns {string | null}
- */
 export function getPluginTarget(filePath: string): string | undefined {
     const pathParts = filePath.split(/[/\\]/);
     if (/^index\.tsx?$/.test(pathParts.at(-1) ?? "")) pathParts.pop();
