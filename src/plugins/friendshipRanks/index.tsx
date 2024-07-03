@@ -120,7 +120,7 @@ function getBadgeComponent(rank)
                     <Button onClick={() => openRankModal(rank)} width={"21.69px"} height={"21.69px"} size={Button.Sizes.NONE} look={Button.Looks.BLANK}>
                         <rank.assetSVG height={"21.69px"}/>
                     </Button>
-                </div>  
+                </div>
             }
         </Tooltip>
     );
