@@ -59,10 +59,14 @@ export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
         delete patch.group;
     }
 
+    if (patch.predicate && !patch.predicate()) return;
+
     canonicalizeFind(patch);
     if (!Array.isArray(patch.replacement)) {
         patch.replacement = [patch.replacement];
     }
+
+    patch.replacement = patch.replacement.filter(({ predicate }) => !predicate || predicate());
 
     if (IS_REPORTER) {
         patch.replacement.forEach(r => {
