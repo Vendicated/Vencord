@@ -21,8 +21,6 @@ export function newStyleListener(callback: (styles: string) => void) {
             for (const node of mutation.addedNodes) {
                 if (!(node instanceof HTMLLinkElement) || node.rel !== "stylesheet")
                     continue;
-                // TODO: remove before committing
-                console.log(`NEW STYLESHEET!!!! ${node.href}`, node);
 
                 parseStyleLinkNode(node).then(callback);
             }
