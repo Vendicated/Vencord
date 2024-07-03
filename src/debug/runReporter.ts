@@ -124,6 +124,14 @@ async function runReporter() {
                     parsedArgs = args[0].$$vencordProps.slice(1);
                 }
 
+                function stringifyCodeFilter(code: string | RegExp | Webpack.CodeFilter) {
+                    if (Array.isArray(code)) {
+                        return `[${code.map(arg => arg instanceof RegExp ? String(arg) : JSON.stringify(arg)).join(", ")}]`;
+                    }
+
+                    return code instanceof RegExp ? String(code) : JSON.stringify(code);
+                }
+
                 // if parsedArgs is the same as args, it means vencordProps of the filter was not available (like in normal filter functions),
                 // so log the filter function instead
                 if (
@@ -146,7 +154,7 @@ async function runReporter() {
                         regexStr = String(matcher);
                     }
 
-                    logMessage += `(${JSON.stringify(code)}, ${regexStr})`;
+                    logMessage += `(${stringifyCodeFilter(code)}, ${regexStr})`;
                 } else if (searchType === "mapMangledModule") {
                     const [code, mappers] = parsedArgs;
 
@@ -159,13 +167,16 @@ async function runReporter() {
                                 const filterName = filter.$$vencordProps[0];
                                 parsedFilter = `${filterName}(${filter.$$vencordProps.slice(1).map((arg: any) => arg instanceof RegExp ? String(arg) : JSON.stringify(arg)).join(", ")})`;
                             } else {
-                                parsedFilter = String(filter).slice(0, 147) + "...";
+                                parsedFilter = String(filter);
+                                if (parsedFilter.length > 150) {
+                                    parsedFilter = parsedFilter.slice(0, 147) + "...";
+                                }
                             }
 
                             return [key, parsedFilter];
                         });
 
-                    logMessage += `(${JSON.stringify(code)}, {\n${parsedFailedMappers.map(([key, parsedFilter]) => `\t${key}: ${parsedFilter}`).join(",\n")}\n})`;
+                    logMessage += `(${stringifyCodeFilter(code)}, {\n${parsedFailedMappers.map(([key, parsedFilter]) => `\t${key}: ${parsedFilter}`).join(",\n")}\n})`;
                 } else {
                     logMessage += `(${filterName.length ? `${filterName}(` : ""}${parsedArgs.map(arg => arg instanceof RegExp ? String(arg) : JSON.stringify(arg)).join(", ")})${filterName.length ? ")" : ""}`;
                 }
