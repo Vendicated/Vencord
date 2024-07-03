@@ -136,7 +136,6 @@ async function printReport() {
             body: JSON.stringify({
                 description: "Here's the latest Vencord Report!",
                 username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
-                avatar_url: "https://cdn.discordapp.com/avatars/1017176847865352332/c312b6b44179ae6817de7e4b09e9c6af.webp?size=512",
                 embeds: [
                     {
                         title: "Bad Patches",
@@ -290,6 +289,8 @@ page.on("console", async e => {
 
 page.on("error", e => console.error("[Error]", e.message));
 page.on("pageerror", e => {
+    if (e.message.includes("Sentry successfully disabled")) return;
+
     if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module")) {
         console.error("[Page Error]", e.message);
         report.otherErrors.push(e.message);

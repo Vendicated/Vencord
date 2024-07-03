@@ -279,7 +279,7 @@ export function findModuleFactory(...code: string[]) {
     return wreq.m[id];
 }
 
-export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks", any[]]>;
+export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks" | "mapMangledModule", any[]]>;
 
 /**
  * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
@@ -483,6 +483,8 @@ export const mapMangledModule = traceFunction("mapMangledModule", function mapMa
  *          })
  */
 export function mapMangledModuleLazy<S extends string>(code: string, mappers: Record<S, FilterFn>): Record<S, any> {
+    if (IS_REPORTER) lazyWebpackSearchHistory.push(["mapMangledModule", [code, mappers]]);
+
     return proxyLazy(() => mapMangledModule(code, mappers));
 }
 

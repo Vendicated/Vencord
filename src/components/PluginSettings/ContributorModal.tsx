@@ -11,20 +11,16 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
 import { DevsById } from "@utils/constants";
-import { fetchUserProfile, getTheme, Theme } from "@utils/discord";
-import { pluralise } from "@utils/misc";
+import { fetchUserProfile } from "@utils/discord";
+import { classes, pluralise } from "@utils/misc";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
-import { Forms, MaskedLink, showToast, Tooltip, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
+import { Forms, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import Plugins from "~plugins";
 
 import { PluginCard } from ".";
-
-const WebsiteIconDark = "/assets/e1e96d89e192de1997f73730db26e94f.svg";
-const WebsiteIconLight = "/assets/730f58bcfd5a57a5e22460c445a0c6cf.svg";
-const GithubIconLight = "/assets/3ff98ad75ac94fa883af5ed62d17c459.svg";
-const GithubIconDark = "/assets/6a853b4c87fce386cbfef4a2efbacb09.svg";
+import { GithubButton, WebsiteButton } from "./LinkIconButton";
 
 const cl = classNameFactory("vc-author-modal-");
 
@@ -38,16 +34,6 @@ export function openContributorModal(user: User) {
             </ErrorBoundary>
         </ModalRoot>
     );
-}
-
-function GithubIcon() {
-    const src = getTheme() === Theme.Light ? GithubIconLight : GithubIconDark;
-    return <img src={src} alt="GitHub" />;
-}
-
-function WebsiteIcon() {
-    const src = getTheme() === Theme.Light ? WebsiteIconLight : WebsiteIconDark;
-    return <img src={src} alt="Website" />;
 }
 
 function ContributorModal({ user }: { user: User; }) {
@@ -86,24 +72,18 @@ function ContributorModal({ user }: { user: User; }) {
                 />
                 <Forms.FormTitle tag="h2" className={cl("name")}>{user.username}</Forms.FormTitle>
 
-                <div className={cl("links")}>
+                <div className={classes("vc-settings-modal-links", cl("links"))}>
                     {website && (
-                        <Tooltip text={website}>
-                            {props => (
-                                <MaskedLink {...props} href={"https://" + website}>
-                                    <WebsiteIcon />
-                                </MaskedLink>
-                            )}
-                        </Tooltip>
+                        <WebsiteButton
+                            text={website}
+                            href={`https://${website}`}
+                        />
                     )}
                     {githubName && (
-                        <Tooltip text={githubName}>
-                            {props => (
-                                <MaskedLink {...props} href={`https://github.com/${githubName}`}>
-                                    <GithubIcon />
-                                </MaskedLink>
-                            )}
-                        </Tooltip>
+                        <GithubButton
+                            text={githubName}
+                            href={`https://github.com/${githubName}`}
+                        />
                     )}
                 </div>
             </div>
