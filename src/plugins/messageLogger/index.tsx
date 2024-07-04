@@ -28,7 +28,7 @@ import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, i18n, Menu, MessageStore, Parser, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 import { Message } from "discord-types/general";
 
@@ -42,7 +42,7 @@ interface MLMessage extends Message {
 }
 
 const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
-const { getMessage } = findByPropsLazy("FormattedMessage", "setUpdateRules", "getMessage");
+const getMessage = findByCodeLazy('replace(/^\\n+|\\n+$/g,"")');
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -356,7 +356,7 @@ export default definePlugin({
                     replace: "this.customRenderedContent = $1.customRenderedContent," +
                         "this.deleted = $1.deleted || false," +
                         "this.editHistory = $1.editHistory || []," +
-                        "this.firstEditTimestamp = $1.firstEditTimestamp || this.timestamp,"
+                        "this.firstEditTimestamp = $1.firstEditTimestamp || this.editedTimestamp || this.timestamp,"
                 }
             ]
         },
@@ -389,7 +389,7 @@ export default definePlugin({
                         "})())," +
                         "deleted: arguments[1]?.deleted," +
                         "editHistory: arguments[1]?.editHistory," +
-                        "firstEditTimestamp: new Date(arguments[1]?.firstEditTimestamp ?? $2.edited_timestamp ?? $2.timestamp)"
+                        "firstEditTimestamp: new Date(arguments[1]?.firstEditTimestamp ?? $2.editedTimestamp ?? $2.timestamp)"
                 },
                 {
                     // Preserve deleted attribute on attachments
@@ -474,25 +474,23 @@ export default definePlugin({
         },
         {
             // Message grouping
-            // Module 51714
-            find: "MessageTypesSets.NON_COLLAPSIBLE.has(",
+            find: "NON_COLLAPSIBLE.has(",
             replacement: {
-                match: /if\((\i)\.blocked\)return \i\.ChannelStreamTypes\.MESSAGE_GROUP_BLOCKED;/,
+                match: /if\((\i)\.blocked\)return \i\.\i\.MESSAGE_GROUP_BLOCKED;/,
                 replace: '$&else if($1.deleted && Vencord.Settings.plugins.MessageLogger.collapseDeleted) return"MESSAGE_GROUP_DELETED";',
             },
             predicate: () => Settings.plugins.MessageLogger.collapseDeleted
         },
         {
             // Message group rendering
-            // Module 221068
             find: "Messages.NEW_MESSAGES_ESTIMATED_WITH_DATE",
             replacement: [
                 {
-                    match: /(\i).type===\i\.ChannelStreamTypes\.MESSAGE_GROUP_BLOCKED\|\|/,
+                    match: /(\i).type===\i\.\i\.MESSAGE_GROUP_BLOCKED\|\|/,
                     replace: '$&$1.type==="MESSAGE_GROUP_DELETED"||',
                 },
                 {
-                    match: /(\i).type===\i\.ChannelStreamTypes\.MESSAGE_GROUP_BLOCKED\?.*?:/,
+                    match: /(\i).type===\i\.\i\.MESSAGE_GROUP_BLOCKED\?.*?:/,
                     replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$self.Messages.DELETED_MESSAGE_COUNT:',
                 },
             ],
