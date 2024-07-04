@@ -1,4 +1,6 @@
 name: Build DevBuild
+permissions: write-all
+
 on:
     push:
         branches:
