@@ -29,8 +29,11 @@ jobs:
             - name: Build web
               run: pnpm buildWebStandalone
 
-            - name: Build
+            - name: Build standalone
               run: pnpm build --standalone
+
+            - name: Build
+              run: pnpm build
 
             - name: Generate plugin list
               run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
