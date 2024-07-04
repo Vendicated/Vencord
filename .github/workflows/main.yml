@@ -18,6 +18,12 @@ jobs:
       with:
         node-version: 20
 
+    - name: Install GitHub CLI
+      run: |
+        choco install gh
+        gh auth login --with-token ${{ secrets.GITHUB_TOKEN }}
+
+
     - name: Install pnpm
       run: npm install -g pnpm
 
