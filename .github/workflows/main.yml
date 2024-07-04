@@ -28,16 +28,20 @@ jobs:
     - name: Build project
       run: pnpm build
 
+    - name: Get short commit SHA
+      id: commit_sha
+      run: echo ::set-output name=short_sha::${GITHUB_SHA::7}
+
     - name: Create new release
       id: create_release
-      run: gh release create ${{ github.sha }} --notes "Automated release for commit ${{ github.sha }}"
+      run: gh release create ${{ steps.commit_sha.outputs.short_sha }} --notes "Automated release for commit ${{ steps.commit_sha.outputs.short_sha }}"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Remove old releases
       run: |
         gh release list --limit 100 --json tagName --jq '.[].tagName' | ForEach-Object {
-          if ($_ -ne "${{ github.sha }}") {
+          if ($_ -ne "${{ steps.commit_sha.outputs.short_sha }}") {
             gh release delete $_ --yes
           }
         }
