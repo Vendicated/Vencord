@@ -34,7 +34,7 @@ import { SettingsTab, wrapTab } from "./shared";
 const cl = classNameFactory("vc-settings-");
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1258290490961559633.png";
-const SHIGGY_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1258290490004996177.png";
+const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1258484151670018220.gif";
 
 type KeysOfType<Object, Type> = {
     [K in keyof Object]: Object[K] extends Type ? K : never;
