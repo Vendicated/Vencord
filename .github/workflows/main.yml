@@ -27,12 +27,6 @@ jobs:
     - name: Build project
       run: pnpm build
 
-    - name: Install GitHub CLI
-      run: choco install gh
-
-    - name: Authenticate GitHub CLI
-      run: gh auth login --with-token ${{ secrets.GITHUB_TOKEN }}
-
     - name: Create new release
       id: create_release
       uses: actions/create-release@v1
@@ -45,7 +39,7 @@ jobs:
 
     - name: Remove old releases
       run: |
-        gh release list --limit 100 --json tagName --jq '.[].tagName' | ForEach-Object {
+        gh release list --token ${{ secrets.GITHUB_TOKEN }} --limit 100 --json tagName --jq '.[].tagName' | ForEach-Object {
           if ($_ -ne "${{ github.sha }}") {
             gh release delete $_ --yes
           }
