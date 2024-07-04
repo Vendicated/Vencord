@@ -96,6 +96,14 @@ export default definePlugin({
     patches: [
         // above message box
         {
+            find: ".popularApplicationCommandIds,",
+            replacement: {
+                match: /(?<=,)(?=!\i&&!\i&&.{0,50}setNote:)/,
+                replace: "$self.patchPopout(arguments[0]),",
+            }
+        },
+        // simplified profiles
+        {
             find: "location:\"BiteSizeProfileActivitySection\"",
             replacement: {
                 match: /let{user:\i,guild:\i,channelId:\i,onClose:\i}/,
@@ -103,6 +111,14 @@ export default definePlugin({
             }
         },
         // below username
+        {
+            find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Lazy-loaded
+            replacement: {
+                match: /\.body.+?displayProfile:\i}\),/,
+                replace: "$&$self.patchModal(arguments[0]),",
+            }
+        },
+        // simplified profiles
         {
             find: "action:\"PRESS_APP_CONNECTION\"", // Lazy-loaded
             replacement: {
