@@ -32,9 +32,6 @@ jobs:
             - name: Build standalone
               run: pnpm build --standalone
 
-            - name: Build
-              run: pnpm build
-
             - name: Generate plugin list
               run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
 
