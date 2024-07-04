@@ -8,8 +8,8 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, 
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, Forms, React, Switch, TextInput, useState } from "@webpack/common";
 import definePlugin, { PluginNative } from "@utils/types";
+import { Button, Forms, React, Switch, TextInput, useState } from "@webpack/common";
 
 const Native = VencordNative.pluginHelpers.WebhookManager as PluginNative<typeof import("./native")>;
 let url, content, username, avatarUrl = "";
@@ -59,7 +59,7 @@ function WebhookMessageModal(props: ModalProps) {
             >Send as Raw JSON</Switch>
             <Button
                 onClick={() => {
-                    if (jsonMode != true) {
+                    if (jsonMode !== true) {
                         Native.executeWebhook(params.url, {
                             content: params.content,
                             username: params.username,
