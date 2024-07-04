@@ -19,10 +19,9 @@
 import "./fixBadgeOverflow.css";
 
 import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
-import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { Heart } from "@components/Heart";
+import { Link } from "@components/Link";
 import { openContributorModal } from "@components/PluginSettings/ContributorModal";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
@@ -33,10 +32,10 @@ import definePlugin from "@utils/types";
 import { Forms, Toasts, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-const CONTRIBUTOR_BADGE = "https://vencord.dev/assets/favicon.png";
+const CONTRIBUTOR_BADGE = "https://github.com/Zoidcord/assets/blob/main/badges/contributor.png?raw=true";
 
 const ContributorBadge: ProfileBadge = {
-    description: "Vencord Contributor",
+    description: "Zoidcord Contributor",
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     shouldShow: ({ userId }) => isPluginDev(userId),
@@ -52,7 +51,7 @@ async function loadBadges(noCache = false) {
     if (noCache)
         init.cache = "no-cache";
 
-    DonorBadges = await fetch("https://badges.vencord.dev/badges.json", init)
+    DonorBadges = await fetch("https://raw.githubusercontent.com/Zoidcord/assets/main/badges.json", init)
         .then(r => r.json());
 }
 
@@ -169,7 +168,7 @@ export default definePlugin({
                 const modalKey = openModal(props => (
                     <ErrorBoundary noop onError={() => {
                         closeModal(modalKey);
-                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
+                        VencordNative.native.openExternal("https://github.com/Zoidcord/assets/blob/main/badges.json");
                     }}>
                         <Modals.ModalRoot {...props}>
                             <Modals.ModalHeader>
@@ -182,8 +181,7 @@ export default definePlugin({
                                             margin: 0
                                         }}
                                     >
-                                        <Heart />
-                                        Vencord Donor
+                                        Special Badge
                                     </Forms.FormTitle>
                                 </Flex>
                             </Modals.ModalHeader>
@@ -191,29 +189,31 @@ export default definePlugin({
                                 <Flex>
                                     <img
                                         role="presentation"
-                                        src="https://cdn.discordapp.com/emojis/1026533070955872337.png"
+                                        src="https://cdn.discordapp.com/emojis/1258290490004996177.png"
                                         alt=""
                                         style={{ margin: "auto" }}
                                     />
                                     <img
                                         role="presentation"
-                                        src="https://cdn.discordapp.com/emojis/1026533090627174460.png"
+                                        src="https://cdn.discordapp.com/emojis/1258290490961559633.png"
                                         alt=""
                                         style={{ margin: "auto" }}
                                     />
                                 </Flex>
                                 <div style={{ padding: "1em" }}>
                                     <Forms.FormText>
-                                        This Badge is a special perk for Vencord Donors
+                                        This Badge is granted to a user by the owner of Zoidcord.
                                     </Forms.FormText>
                                     <Forms.FormText className={Margins.top20}>
-                                        Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
+                                        Currently the only way to get one is by asking @thezoidmaster for it, or getting a PR accepted on the assets repo.
                                     </Forms.FormText>
                                 </div>
                             </Modals.ModalContent>
                             <Modals.ModalFooter>
                                 <Flex style={{ width: "100%", justifyContent: "center" }}>
-                                    <DonateButton />
+                                    <Forms.FormText>
+                                        <Link href="https://github.com/Zoidcord/assets">Visit the assets repo</Link>
+                                    </Forms.FormText>
                                 </Flex>
                             </Modals.ModalFooter>
                         </Modals.ModalRoot>
