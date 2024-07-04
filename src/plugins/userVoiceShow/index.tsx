@@ -96,17 +96,17 @@ export default definePlugin({
     patches: [
         // above message box
         {
-            find: ".popularApplicationCommandIds,",
+            find: "location:\"BiteSizeProfileActivitySection\"",
             replacement: {
-                match: /(?<=,)(?=!\i&&!\i&&.{0,50}setNote:)/,
-                replace: "$self.patchPopout(arguments[0]),",
+                match: /let{user:\i,guild:\i,channelId:\i,onClose:\i}/,
+                replace: "return $self.patchPopout(arguments[0]);$&",
             }
         },
         // below username
         {
-            find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Lazy-loaded
+            find: "action:\"PRESS_APP_CONNECTION\"", // Lazy-loaded
             replacement: {
-                match: /\.body.+?displayProfile:\i}\),/,
+                match: /.Messages.CONNECTIONS,.+?}\)}\),/,
                 replace: "$&$self.patchModal(arguments[0]),",
             }
         }
