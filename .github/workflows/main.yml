@@ -31,7 +31,7 @@ jobs:
       id: create_release
       run: gh release create ${{ github.sha }} --notes "Automated release for commit ${{ github.sha }}"
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
     - name: Remove old releases
       run: |
@@ -41,7 +41,7 @@ jobs:
           }
         }
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
     - name: Upload files to release
       run: |
