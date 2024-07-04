@@ -108,7 +108,7 @@ const DefaultSettings: Settings = {
 
     cloud: {
         authenticated: false,
-        url: "https://equicord.patrickdk.com/",
+        url: "https://equicord.thororen.com/",
         settingsSync: false,
         settingsSyncVersion: 0
     },
