@@ -1,0 +1,91 @@
+name: Build and Update Release
+
+on:
+  push:
+    branches:
+      - main  # Adjust this if your default branch is not 'main'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'  # Specify the Node.js version you need
+
+    - name: Install pnpm
+      run: npm install -g pnpm
+
+    - name: Install dependencies
+      run: pnpm install
+
+    - name: Build the project
+      run: pnpm build
+
+    - name: List files in dist for debugging
+      run: ls -R dist
+
+    - name: Get the latest release
+      id: get_latest_release
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const latestRelease = await github.repos.getLatestRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          });
+          return latestRelease.data;
+
+    - name: Delete files from the latest release
+      id: delete_files
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const latestRelease = await github.repos.getLatestRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          });
+          const releaseId = latestRelease.data.id;
+          const files = await github.repos.listReleaseAssets({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            release_id: releaseId,
+          });
+          for (const file of files.data) {
+            await github.repos.deleteReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              asset_id: file.id,
+            });
+          }
+
+    - name: Upload files to the latest release
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const latestRelease = await github.repos.getLatestRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          });
+          const releaseId = latestRelease.data.id;
+          const path = 'dist';
+          const files = fs.readdirSync(path);
+          for (const file of files) {
+            if (file !== 'package.json' && file !== 'installer') {
+              const content = fs.readFileSync(`${path}/${file}`);
+              await github.repos.uploadReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: releaseId,
+                name: file,
+                data: content,
+              });
+            }
+          }
