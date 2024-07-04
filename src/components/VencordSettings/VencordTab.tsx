@@ -19,7 +19,6 @@
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import DonateButton from "@components/DonateButton";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
@@ -34,8 +33,8 @@ import { SettingsTab, wrapTab } from "./shared";
 
 const cl = classNameFactory("vc-settings-");
 
-const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
-const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
+const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1258290490961559633.png";
+const SHIGGY_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1258290490004996177.png";
 
 type KeysOfType<Object, Type> = {
     [K in keyof Object]: Object[K] extends Type ? K : never;
@@ -51,7 +50,7 @@ const NotificationLogIcon = iconWithTooltip(LogIcon, "Open Notification Log");
 const QuickCssIcon = iconWithTooltip(PaintbrushIcon, "Edit QuickCSS");
 const RelaunchIcon = iconWithTooltip(RestartIcon, "Relaunch Discord");
 const OpenSettingsDirIcon = iconWithTooltip(FolderIcon, "Open Settings Directory");
-const OpenGithubIcon = iconWithTooltip(GithubIcon, "View Vencord's GitHub Repository");
+const OpenGithubIcon = iconWithTooltip(GithubIcon, "View Zoidcord's GitHub Repository");
 
 function VencordSettings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(VencordNative.settings.getSettingsDir, {
@@ -108,7 +107,7 @@ function VencordSettings() {
         ];
 
     return (
-        <SettingsTab title="Vencord Settings">
+        <SettingsTab title="Zoidcord Settings">
             <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
                 <Card className={cl("quick-actions-card")}>
@@ -142,7 +141,7 @@ function VencordSettings() {
                         </Button>
                     )}
                     <Button
-                        onClick={() => VencordNative.native.openExternal("https://github.com/Vendicated/Vencord")}
+                        onClick={() => VencordNative.native.openExternal("https://github.com/Zoidcord/Zoidcord")}
                         look={Button.Looks.BLANK}
                         disabled={settingsDirPending}
                     >
@@ -242,7 +241,7 @@ function VencordSettings() {
                     serialize={identity} />
             </>}
 
-            <Forms.FormSection className={Margins.top16} title="Vencord Notifications" tag="h5">
+            <Forms.FormSection className={Margins.top16} title="Zoidcord Notifications" tag="h5">
                 <Flex>
                     <Button onClick={openNotificationSettingsModal}>
                         Notification Settings
@@ -265,8 +264,8 @@ function DonateCard({ image }: DonateCardProps) {
         <Card className={cl("card", "donate")}>
             <div>
                 <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
-                <Forms.FormText>Please consider supporting the development of Vencord by donating!</Forms.FormText>
-                <DonateButton style={{ transform: "translateX(-1em)" }} />
+                <Forms.FormText>Please consider supporting the development of Zoidcord by giving it a star!</Forms.FormText>
+                <link href="https://www.github.com/Zoidcord/">Github</link>
             </div>
             <img
                 role="presentation"
@@ -283,4 +282,4 @@ function DonateCard({ image }: DonateCardProps) {
     );
 }
 
-export default wrapTab(VencordSettings, "Vencord Settings");
+export default wrapTab(VencordSettings, "Zoidcord Settings");
