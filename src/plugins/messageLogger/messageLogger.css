@@ -89,6 +89,7 @@
 
 .vc-ml-modal-timestamp {
     cursor: unset;
+    height: unset;
 }
 
 .vc-ml-modal-revision:hover {

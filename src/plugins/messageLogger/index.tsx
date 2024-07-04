@@ -39,6 +39,7 @@ import { openHistoryModal } from "./HistoryModal";
 interface MLMessage extends Message {
     deleted?: boolean;
     editHistory?: { timestamp: Date; content: string; }[];
+    firstEditTimestamp?: Date;
 }
 
 const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
