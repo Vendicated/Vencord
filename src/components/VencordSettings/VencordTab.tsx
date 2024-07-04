@@ -263,9 +263,8 @@ function DonateCard({ image }: DonateCardProps) {
     return (
         <Card className={cl("card", "donate")}>
             <div>
-                <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
-                <Forms.FormText>Please consider supporting the development of Zoidcord by giving it a star!</Forms.FormText>
-                <link href="https://www.github.com/Zoidcord/">Github</link>
+                <Forms.FormTitle tag="h5">No need to support Zoidcord</Forms.FormTitle>
+                <Forms.FormText>Zoidcord is a mostly private project and doesn't need any donations!</Forms.FormText>
             </div>
             <img
                 role="presentation"
