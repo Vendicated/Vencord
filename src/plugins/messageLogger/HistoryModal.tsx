@@ -8,7 +8,7 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
-import { Parser, Text, Timestamp, useMemo, useState } from "@webpack/common";
+import { Parser, Text, Timestamp, useState } from "@webpack/common";
 
 const CodeContainerClasses = findByPropsLazy("markup", "codeContainer");
 const MiscClasses = findByPropsLazy("messageContent", "markupRtl");
