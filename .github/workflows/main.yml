@@ -30,7 +30,7 @@ jobs:
 
     - name: Get short commit SHA
       id: commit_sha
-      run: echo ::set-output name=short_sha::${GITHUB_SHA::7}
+      run: echo ${{ github.sha }} | cut -c1-7 | tee -a $GITHUB_OUTPUT
 
     - name: Create new release
       id: create_release
