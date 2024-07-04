@@ -29,22 +29,19 @@ jobs:
 
     - name: Create new release
       id: create_release
-      uses: actions/create-release@v1
-      with:
-        tag_name: ${{ github.sha }}
-        release_name: Release ${{ github.sha }}
-        draft: false
-        prerelease: false
-        body: "Automated release for commit ${{ github.sha }}"
-        token: ${{ secrets.GITHUB_TOKEN }}
+      run: gh release create ${{ github.sha }} --notes "Automated release for commit ${{ github.sha }}"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Remove old releases
       run: |
-        gh release list --token ${{ secrets.GITHUB_TOKEN }} --limit 100 --json tagName --jq '.[].tagName' | ForEach-Object {
+        gh release list --limit 100 --json tagName --jq '.[].tagName' | ForEach-Object {
           if ($_ -ne "${{ github.sha }}") {
             gh release delete $_ --yes
           }
         }
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload files to release
       run: |
