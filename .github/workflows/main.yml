@@ -36,6 +36,7 @@ jobs:
         draft: false
         prerelease: false
         body: "Automated release for commit ${{ github.sha }}"
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Remove old releases
       run: |
