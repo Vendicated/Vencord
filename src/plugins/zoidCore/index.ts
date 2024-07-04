@@ -8,7 +8,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "ZoidcordCore",
+    name: "ZoidCore",
     description: "Core functions for Zoidcord",
     authors: [Devs.Zoid],
     required: true
