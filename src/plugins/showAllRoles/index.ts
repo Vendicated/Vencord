@@ -15,8 +15,8 @@ export default definePlugin({
         {
             find: ".Messages.VIEW_ALL_ROLES",
             replacement: {
-                match: /return null!=\i(?=\?\i\.slice)/,
-                replace: "return false"
+                match: /(\i)\.slice\(0,\i\)/,
+                replace: "$1"
             }
         }
     ]
