@@ -9,10 +9,11 @@ import definePlugin from "@utils/types";
 import { UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
+
 export default definePlugin({
     name: "ThemeAttributes",
     description: "Adds data attributes to various elements for theming purposes",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.Board],
 
     patches: [
         // Add data-tab-id to all tab bar items
@@ -32,8 +33,35 @@ export default definePlugin({
                 match: /\.messageListItem(?=,"aria)/,
                 replace: "$&,...$self.getMessageProps(arguments[0])"
             }
+        },
+
+        // add --avatar-url-<resolution> css variable to avatar img elements
+        // popout profiles
+        {
+            find: ".LABEL_WITH_ONLINE_STATUS",
+            replacement: {
+                match: /src:null!=\i\?(\i).{1,50}"aria-hidden":!0/,
+                replace: "$&,style:$self.getAvatarStyles($1)"
+            }
+        },
+        // chat avatars
+        {
+            find: "showCommunicationDisabledStyles",
+            replacement: {
+                match: /src:(\i),"aria-hidden":!0/,
+                replace: "$&,style:$self.getAvatarStyles($1)"
+            }
         }
     ],
+
+    getAvatarStyles(src: string) {
+        return Object.fromEntries(
+            [128, 256, 512, 1024, 2048, 4096].map(size => [
+                `--avatar-url-${size}`,
+                `url(${src.replace(/\d+$/, String(size))})`
+            ])
+        );
+    },
 
     getMessageProps(props: { message: Message; }) {
         const author = props.message?.author;

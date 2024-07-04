@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
-import { React, RestAPI, Tooltip } from "@webpack/common";
+import { Constants, React, RestAPI, Tooltip } from "@webpack/common";
 
 import { RenameButton } from "./components/RenameButton";
 import { Session, SessionInfo } from "./types";
@@ -77,15 +77,6 @@ export default definePlugin({
                     replace: "$& $self.renderIcon({ ...arguments[0], DeviceIcon: $1 }), false &&"
                 }
             ]
-        },
-        {
-            // Add the ability to change BlobMask's lower badge height
-            // (it allows changing width so we can mirror that logic)
-            find: "this.getBadgePositionInterpolation(",
-            replacement: {
-                match: /(\i\.animated\.rect,{id:\i,x:48-\(\i\+8\)\+4,y:)28(,width:\i\+8,height:)24,/,
-                replace: (_, leftPart, rightPart) => `${leftPart} 48 - ((this.props.lowerBadgeHeight ?? 16) + 8) + 4 ${rightPart} (this.props.lowerBadgeHeight ?? 16) + 8,`
-            }
         }
     ],
 
@@ -153,14 +144,16 @@ export default definePlugin({
                         <PlatformIcon width={14} height={14} />
                     </div>
                 }
-                lowerBadgeWidth={20}
-                lowerBadgeHeight={20}
+                lowerBadgeSize={{
+                    width: 20,
+                    height: 20
+                }}
             >
                 <div
                     className={SessionIconClasses.sessionIcon}
                     style={{ backgroundColor: GetOsColor(session.client_info.os) }}
                 >
-                    <DeviceIcon width={28} height={28} />
+                    <DeviceIcon width={28} height={28} color="currentColor" />
                 </div>
             </BlobMask>
         );
@@ -168,7 +161,7 @@ export default definePlugin({
 
     async checkNewSessions() {
         const data = await RestAPI.get({
-            url: "/auth/sessions"
+            url: Constants.Endpoints.AUTH_SESSIONS
         });
 
         for (const session of data.body.user_sessions) {

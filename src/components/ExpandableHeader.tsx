@@ -16,10 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./ExpandableHeader.css";
+
 import { classNameFactory } from "@api/Styles";
 import { Text, Tooltip, useState } from "@webpack/common";
-export const cl = classNameFactory("vc-expandableheader-");
-import "./ExpandableHeader.css";
+
+const cl = classNameFactory("vc-expandableheader-");
 
 export interface ExpandableHeaderProps {
     onMoreClick?: () => void;
@@ -29,10 +31,20 @@ export interface ExpandableHeaderProps {
     headerText: string;
     children: React.ReactNode;
     buttons?: React.ReactNode[];
+    forceOpen?: boolean;
 }
 
-export default function ExpandableHeader({ children, onMoreClick, buttons, moreTooltipText, defaultState = false, onDropDownClick, headerText }: ExpandableHeaderProps) {
-    const [showContent, setShowContent] = useState(defaultState);
+export function ExpandableHeader({
+    children,
+    onMoreClick,
+    buttons,
+    moreTooltipText,
+    onDropDownClick,
+    headerText,
+    defaultState = false,
+    forceOpen = false,
+}: ExpandableHeaderProps) {
+    const [showContent, setShowContent] = useState(defaultState || forceOpen);
 
     return (
         <>
@@ -88,6 +100,7 @@ export default function ExpandableHeader({ children, onMoreClick, buttons, moreT
                                     setShowContent(v => !v);
                                     onDropDownClick?.(showContent);
                                 }}
+                                disabled={forceOpen}
                             >
                                 <svg
                                     width="24"

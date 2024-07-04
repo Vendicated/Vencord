@@ -27,7 +27,7 @@ export default definePlugin({
     authors: [Devs.D3SOX, Devs.Nickyux],
     patches: [
         {
-            find: "AVATAR_DECORATION_PADDING:",
+            find: ".PREMIUM_GUILD_SUBSCRIPTION_TOOLTIP",
             replacement: {
                 match: /,isOwner:(\i),/,
                 replace: ",_isOwner:$1=$self.isGuildOwner(e),"
