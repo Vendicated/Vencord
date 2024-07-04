@@ -1,0 +1,53 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+
+    - name: Install pnpm
+      run: npm install -g pnpm
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Build project
+      run: pnpm build
+
+    - name: Create new release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: ${{ github.sha }}
+        release_name: Release ${{ github.sha }}
+        draft: false
+        prerelease: false
+        body: "Automated release for commit ${{ github.sha }}"
+
+    - name: Remove old releases
+      run: |
+        releases=$(gh release list -L 100 --json tagName --jq '.[].tagName')
+        for tag in $releases; do
+          if [ "$tag" != "${{ github.sha }}" ]; then
+            gh release delete $tag --yes
+          fi
+        done
+
+    - name: Upload files to release
+      run: |
+        for file in $(find dist -type f ! -name "package.json" ! -path "dist/installer/*"); do
+          gh release upload ${{ steps.create_release.outputs.upload_url }} $file
+        done
