@@ -18,12 +18,6 @@ jobs:
       with:
         node-version: 20
 
-    - name: Install GitHub CLI
-      run: |
-        choco install gh
-        gh auth login --with-token ${{ secrets.GITHUB_TOKEN }}
-
-
     - name: Install pnpm
       run: npm install -g pnpm
 
@@ -32,6 +26,12 @@ jobs:
 
     - name: Build project
       run: pnpm build
+
+    - name: Install GitHub CLI
+      run: choco install gh
+
+    - name: Authenticate GitHub CLI
+      run: gh auth login --with-token ${{ secrets.GITHUB_TOKEN }}
 
     - name: Create new release
       id: create_release
@@ -45,15 +45,15 @@ jobs:
 
     - name: Remove old releases
       run: |
-        releases=$(gh release list -L 100 --json tagName --jq '.[].tagName')
-        for tag in $releases; do
-          if [ "$tag" != "${{ github.sha }}" ]; then
-            gh release delete $tag --yes
-          fi
-        done
+        gh release list --limit 100 --json tagName --jq '.[].tagName' | ForEach-Object {
+          if ($_ -ne "${{ github.sha }}") {
+            gh release delete $_ --yes
+          }
+        }
 
     - name: Upload files to release
       run: |
-        for file in $(find dist -type f ! -name "package.json" ! -path "dist/installer/*"); do
-          gh release upload ${{ steps.create_release.outputs.upload_url }} $file
-        done
+        $files = Get-ChildItem -Path dist -Recurse -File | Where-Object { $_.FullName -notmatch 'package\.json' -and $_.FullName -notmatch 'installer\\' }
+        foreach ($file in $files) {
+          gh release upload ${{ steps.create_release.outputs.upload_url }} $file.FullName
+        }
