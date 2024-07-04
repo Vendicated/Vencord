@@ -478,7 +478,7 @@ export default definePlugin({
             find: "NON_COLLAPSIBLE.has(",
             replacement: {
                 match: /if\((\i)\.blocked\)return \i\.\i\.MESSAGE_GROUP_BLOCKED;/,
-                replace: '$&else if($1.deleted && Vencord.Settings.plugins.MessageLogger.collapseDeleted) return"MESSAGE_GROUP_DELETED";',
+                replace: '$&else if($1.deleted) return"MESSAGE_GROUP_DELETED";',
             },
             predicate: () => Settings.plugins.MessageLogger.collapseDeleted
         },
