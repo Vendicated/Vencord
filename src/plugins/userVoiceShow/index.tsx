@@ -104,10 +104,10 @@ export default definePlugin({
         },
         // simplified profiles
         {
-            find: "location:\"BiteSizeProfileActivitySection\"",
+            find: /\.BITE_SIZE,onOpenProfile:\i,usernameIcon:/,
             replacement: {
-                match: /let{user:\i,guild:\i,channelId:\i,onClose:\i}/,
-                replace: "return $self.patchPopout(arguments[0]);$&",
+                match: /currentUser:\i,guild:\i,onOpenProfile:.+?}\)}\)/,
+                replace: "$&,$self.patchPopout(arguments[0])",
             }
         },
         // below username
