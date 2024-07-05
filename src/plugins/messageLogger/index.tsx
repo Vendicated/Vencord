@@ -337,7 +337,7 @@ export default definePlugin({
                     // Pass through editHistory & deleted & original attachments to the "edited message" transformer
                     match: /(?<=null!=\i\.edited_timestamp\)return )\i\(\i,\{reactions:(\i)\.reactions.{0,50}\}\)/,
                     replace:
-                        "Object.assign($&,{ deleted:$1.deleted, editHistory:$1.editHistory, attachments:$1.attachments })"
+                        "Object.assign($&,{ deleted:$1.deleted, editHistory:$1.editHistory })"
                 },
 
                 {
