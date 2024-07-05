@@ -264,7 +264,7 @@ async function cleanMessages(loggedMessages: LoggedMessages, _Native: any = Nati
         }
 
         if (hasChanged)
-            await _Native.writeLogs(Settings.plugins.MLEnhanced.logsDir, JSON.stringify(cleaned));
+            await _Native.writeLogs(Settings.plugins.MessageLoggerEnhanced.logsDir, JSON.stringify(cleaned));
 
         return cleaned;
 
