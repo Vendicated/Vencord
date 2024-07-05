@@ -205,7 +205,7 @@ export default definePlugin({
                                         This Badge is granted to a user by the owner of Zoidcord.
                                     </Forms.FormText>
                                     <Forms.FormText className={Margins.top20}>
-                                        Currently the only way to get one is by asking @thezoidmaster for it, or getting a PR accepted on the assets repo.
+                                        Currently the only way to get one is by asking @thezoidmaster, or getting a PR accepted on the assets repo.
                                     </Forms.FormText>
                                 </div>
                             </Modals.ModalContent>
