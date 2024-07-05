@@ -8,7 +8,7 @@
     .emoji,
     [data-type="sticker"],
     iframe,
-    .messagelogger-deleted-attachment:not([class*="hiddenAttachment_"]),
+    .messagelogger-deleted-attachment:not([class*="messagelogger-deleted-attachment"]),
     [class|="inlineMediaEmbed"]
 ) {
     filter: grayscale(1) !important;
