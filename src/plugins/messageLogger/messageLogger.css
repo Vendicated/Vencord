@@ -8,11 +8,15 @@
     .emoji,
     [data-type="sticker"],
     iframe,
-    .messagelogger-deleted-attachment:not([class*="hiddenAttachment_"]),
+    .messagelogger-deleted-attachment,
     [class|="inlineMediaEmbed"]
 ) {
     filter: grayscale(1) !important;
     transition: 150ms filter ease-in-out;
+
+    &[class*="hiddenMosaicItem_"] {
+        filter: grayscale(1) blur(var(--custom-message-attachment-spoiler-blur-radius, 44px)) !important;
+    }
 }
 
 .messagelogger-deleted
@@ -23,8 +27,7 @@
     iframe,
     .messagelogger-deleted-attachment,
     [class|="inlineMediaEmbed"]
-):hover,
-.messagelogger-deleted {
+):hover {
     filter: grayscale(0) !important;
 }
 
