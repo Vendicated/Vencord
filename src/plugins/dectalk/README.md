@@ -1,15 +1,17 @@
 # DecTalk
 Adds a DecTalk reader to codeblocks!
 To make DecTalk read the contents of a codeblock, simply set the langauge to `dt` or `dectalk`, for example:
-\```dt
+
+\```dt</br>
 [bah<235,30>bah<235,25>bah<235,30>bah<235,25>bah<235,30>bah<235,25>bah<235,30>]
 [bah<235,25>bah<235,30>bah<235,25>bah<235,30>bah<235,25>]
 [bah<235,23>bah<235,21>bah<525,25>bah<235,21>bah<235,23>bah<235,28>bah<235,27>]
 [bah<235,28>bah<235,30>bah<235,27>bah<235,23>]
 [bah<235,30>bah<235,23>bah<235,30>bah<235,23>bah<235,30>bah<235,23>bah<235,30>]
 [bah<235,22>bah<235,30>bah<235,22>bah<525,31>bah<235,30>bah<235,26>bah<235,30>]
-[bah<235,26>bah<235,28>bah<235,30>bah<510,28>bah<510,26>bah<510,25>]
+[bah<235,26>bah<235,28>bah<235,30>bah<510,28>bah<510,26>bah<510,25>]</br>
 \```
+
 Every standard DecTalk feature should be supported *(Including phonemes of course, can't have DecTalk without phonemes)* as well as some extra things, like blocking specific users from using DecTalk on your client.
 
 ## Important note:
