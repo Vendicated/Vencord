@@ -64,13 +64,6 @@ export default definePlugin({
             }
         }
     },
-
-    start() {
-        console.log("Plugin loaded");
-    },
-    stop() {
-        console.log("Plugin unloaded");
-    },
 });
 
 function sanitizeInput(input: string): string {
