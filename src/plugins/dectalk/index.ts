@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { showNotification } from "@api/Notifications/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
-import { SelectedChannelStore } from "@webpack/common";
+import { SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 
@@ -34,6 +35,11 @@ const settings = definePluginSettings({
         description: "Comma-separated list of user IDs to block",
         default: ""
     },
+    maxCodeblocks: {
+        type: OptionType.NUMBER,
+        description: "Maximum number of codeblocks to play at once",
+        default: 5
+    },
     playUnfocused: {
         type: OptionType.BOOLEAN,
         description: "Play audio when window is not focused",
@@ -57,6 +63,19 @@ export default definePlugin({
             if (settings.store.userBlockList.includes(message.author.id)) return;
             if (!settings.store.playUnfocused && !document.hasFocus()) return;
 
+            let count = 0;
+            for (const match of message.content.matchAll(dectalkRegex)) {
+                count++;
+            }
+
+            if (count >= settings.store.maxCodeblocks + 1) {
+                if (message.author.id === getUserId()) showNotification({
+                    title: "DecTalk",
+                    body: "Too many codeblocks in one message!",
+                });
+                return;
+            }
+
             for (const match of message.content.matchAll(dectalkRegex)) {
                 const sanitizedInput = sanitizeInput(match[1]);
 
@@ -73,3 +92,9 @@ function sanitizeInput(input: string): string {
 
     return sanitizedInput;
 }
+
+const getUserId = () => {
+    const id = UserStore.getCurrentUser()?.id;
+    if (!id) throw new Error("User not yet logged in");
+    return id;
+};
