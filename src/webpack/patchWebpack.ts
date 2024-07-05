@@ -10,7 +10,7 @@ import { interpolateIfDefined } from "@utils/misc";
 import { canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
 
-import { traceFunction } from "../debug/Tracer";
+import { traceFunctionWithResults } from "../debug/Tracer";
 import { patches } from "../plugins";
 import { _initWebpack, AnyModuleFactory, AnyWebpackRequire, factoryListeners, moduleListeners, waitForSubscriptions, WebpackRequire, WrappedModuleFactory, wreq } from ".";
 
@@ -20,6 +20,8 @@ const logger = new Logger("WebpackInterceptor", "#8caaee");
 export const allWebpackInstances = new Set<AnyWebpackRequire>();
 /** Whether we tried to fallback to factory WebpackRequire, or disabled patches */
 let wreqFallbackApplied = false;
+
+export const patchTimings = [] as Array<[plugin: string, moduleId: PropertyKey, match: string | RegExp, totalTime: number]>;
 
 type Define = typeof Reflect.defineProperty;
 const define: Define = (target, p, attributes) => {
@@ -391,7 +393,7 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
 
         patchedBy.add(patch.plugin);
 
-        const executePatch = traceFunction(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => code.replace(match, replace));
+        const executePatch = traceFunctionWithResults(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => code.replace(match, replace));
         const previousCode = code;
         const previousFactory = factory;
 
@@ -403,7 +405,12 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
             canonicalizeReplacement(replacement, patch.plugin);
 
             try {
-                const newCode = executePatch(replacement.match, replacement.replace as string);
+                const [newCode, totalTime] = executePatch(replacement.match, replacement.replace as string);
+
+                if (IS_REPORTER) {
+                    patchTimings.push([patch.plugin, id, replacement.match, totalTime]);
+                }
+
                 if (newCode === code) {
                     if (!patch.noWarn) {
                         logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${String(id)}): ${replacement.match}`);

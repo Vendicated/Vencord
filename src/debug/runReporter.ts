@@ -47,6 +47,12 @@ async function runReporter() {
             }
         }
 
+        for (const [plugin, moduleId, match, totalTime] of Vencord.WebpackPatcher.patchTimings) {
+            if (totalTime > 3) {
+                new Logger("WebpackInterceptor").warn(`Patch by ${plugin} took ${totalTime}ms (Module id is ${String(moduleId)}): ${match}`);
+            }
+        }
+
         await Promise.all(Webpack.webpackSearchHistory.map(async ([searchType, args]) => {
             args = [...args];
 
