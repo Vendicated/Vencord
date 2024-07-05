@@ -19,22 +19,22 @@
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
-import { DeleteIcon } from "@components/Icons";
+import { DeleteIcon, FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
-import PluginModal from "@components/PluginSettings/PluginModal";
+import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import type { UserThemeHeader } from "@main/themes";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { t } from "@utils/translation";
 import { findByPropsLazy, findLazy } from "@webpack";
-import { Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
+import { Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { AddonCard } from "./AddonCard";
+import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
 
 type FileInput = ComponentType<{
@@ -231,9 +231,9 @@ function ThemesTab() {
                                         />
                                     </Button>
                                 ) : (
-                                    <Button
-                                        onClick={() => showItemInFolder(themeDir!)}
-                                        size={Button.Sizes.SMALL}
+                                    <QuickAction
+                                        text={t("vencord.themes.openFolder")}
+                                        action={() => showItemInFolder(themeDir!)}
                                         disabled={themeDirPending}
                                     >
                                         {t("vencord.themes.openFolder")}
@@ -267,7 +267,7 @@ function ThemesTab() {
                                 </Button>
                             )}
                         </>
-                    </Card>
+                    </QuickActionCard>
 
                     <div className={cl("grid")}>
                         {userThemes?.map(theme => (
