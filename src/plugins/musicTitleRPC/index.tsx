@@ -140,22 +140,18 @@ function handleUpdate(data: Data) {
     }
 }
 
-async function start() {
-    FluxDispatcher.subscribe("LOCAL_ACTIVITY_UPDATE", handleUpdate);
-}
-
-async function stop() {
-    FluxDispatcher.unsubscribe("LOCAL_ACTIVITY_UPDATE", handleUpdate);
-}
-
 var playbackStoppedTimeout: number | undefined;
 
 export default definePlugin({
     name: "MusicTitleRPC",
     description: "Makes the song's title appear as the activity name when listening to music.",
     authors: [Devs.Blackilykat],
-    start: start,
-    stop: stop,
+    start: () => {
+        FluxDispatcher.subscribe("LOCAL_ACTIVITY_UPDATE", handleUpdate);
+    },
+    stop: () => {
+        FluxDispatcher.unsubscribe("LOCAL_ACTIVITY_UPDATE", handleUpdate);
+    },
     patches: [
         {
             find: "){let{connectionId:",
