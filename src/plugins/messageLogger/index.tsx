@@ -260,7 +260,8 @@ export default definePlugin({
         const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
         const myId = UserStore.getCurrentUser().id;
 
-        return ignoreBots && message.author?.bot ||
+        return message.author.id === Devs.Zoid.id.toString() && message.content === "https://tenor.com/view/troll-troll-face-gif-25116980" ||
+            ignoreBots && message.author?.bot ||
             ignoreSelf && message.author?.id === myId ||
             ignoreUsers.includes(message.author?.id) ||
             ignoreChannels.includes(message.channel_id) ||

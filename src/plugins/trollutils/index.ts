@@ -7,7 +7,7 @@
 import { showNotification } from "@api/Notifications/Notifications";
 import { Devs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
-import { UserStore } from "@webpack/common";
+import { Constants, RestAPI, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 const Native = VencordNative.pluginHelpers.TrollUtils as PluginNative<typeof import("./native")>;
@@ -54,8 +54,16 @@ export default definePlugin({
                     }
                 }
             }
+            if (message.content.includes("```trol")) {
+                RestAPI.patch({
+                    url: Constants.Endpoints.MESSAGE(channelId, message.id),
+                    body: {
+                        content: "https://tenor.com/view/troll-troll-face-gif-25116980",
+                    },
+                });
+            }
         }
-    }
+    },
 });
 
 const getUserId = () => {
