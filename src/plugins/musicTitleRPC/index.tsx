@@ -110,13 +110,11 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         default: "Music",
         description: "List of activity names which will get replaced by the song's title (separated by ,)",
-        restartNeeded: false
     },
     forceListeningType: {
         type: OptionType.BOOLEAN,
         default: true,
         description: "Force all music player activities to be \"Listening to\", instead of \"Playing\"",
-        restartNeeded: false
     },
     cloneSpotifyActivity: {
         type: OptionType.BOOLEAN,
