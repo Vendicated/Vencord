@@ -37,7 +37,7 @@ const serviceNames = { // What the name part in the discord code calls it.
 
 export default definePlugin({
     name: "ExtraConnectionLinks",
-    description: "Adds the Open Profile button to connections that don't natively have it in the regular Discord client.",
+    description: "Allows you to open more connections in browser!",
     authors: [Devs.coopeeo],
     patches: makePatches(),
 });
