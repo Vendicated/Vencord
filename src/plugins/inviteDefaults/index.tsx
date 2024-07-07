@@ -19,7 +19,7 @@ const settings = definePluginSettings({
             { label: "12 hours", value: 43200 },
             { label: "1 day", value: 86400 },
             { label: "7 days", value: 604800 },
-            { label: "Never", value: 0, default: true },
+            { label: "Forever", value: 0, default: true },
         ],
     },
     maxUses: {
@@ -35,6 +35,11 @@ const settings = definePluginSettings({
             { label: "100", value: 100 },
         ],
     },
+    temporaryMembership: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Temporary Membership",
+    },
 });
 
 export default definePlugin({
@@ -49,16 +54,21 @@ export default definePlugin({
             replacement: [
                 {
                     match: /maxAge:null!==\(\i=null!=\i\?\i:\i\)&&void 0!==\i\?\i:\i.value/,
-                    replace: "maxAge:$self.getDuration(),"
+                    replace: "maxAge:$self.getDuration()"
                 },
                 {
                     match: /maxUses:null!=\i&&0!==\i\?\i:\i.value/,
-                    replace: "maxUses:$self.getMaxUses(),"
+                    replace: "maxUses:$self.getMaxUses()"
+                },
+                {
+                    match: /temporary:null!=ex&&ex/,
+                    replace: "temporary:$self.getTemporary()"
                 }
             ]
         }
     ],
 
     getDuration: () => settings.store.inviteDuration,
-    getMaxUses: () => settings.store.maxUses
+    getMaxUses: () => settings.store.maxUses,
+    getTemporary: () => settings.store.temporaryMembership
 });
