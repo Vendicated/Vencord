@@ -43,6 +43,9 @@
             ],
             "@webpack": [
                 "./webpack/webpack"
+            ],
+            "@plugins": [
+                "./plugins"
             ]
         },
         "plugins": [

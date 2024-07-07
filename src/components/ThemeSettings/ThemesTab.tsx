@@ -27,6 +27,7 @@ import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { QuickAction, QuickActionCard } from "@components/VencordSettings/quickActions";
 import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
+import { isPluginEnabled } from "@plugins";
 import { openInviteModal } from "@utils/discord";
 import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
@@ -38,6 +39,8 @@ import { findByPropsLazy, findLazy } from "@webpack";
 import { Button, Card, Forms, React, showToast, TabBar, TextInput, Tooltip, useEffect, useMemo, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 import type { UserstyleHeader } from "usercss-meta";
+
+import Plugins from "~plugins";
 
 import { UserCSSSettingsModal } from "./UserCSSModal";
 
@@ -96,7 +99,7 @@ interface UserCSSCardProps {
 
 function UserCSSThemeCard({ theme, enabled, onChange, onDelete, onSettingsReset }: UserCSSCardProps) {
     const missingPlugins = useMemo(() =>
-        theme.requiredPlugins?.filter(p => !Vencord.Plugins.isPluginEnabled(p)), [theme]);
+        theme.requiredPlugins?.filter(p => !isPluginEnabled(p)), [theme]);
 
     return (
         <AddonCard
@@ -343,10 +346,10 @@ function ThemesTab() {
                                 Icon={PaintbrushIcon}
                             />
 
-                            {Vencord.Settings.plugins.ClientTheme.enabled && (
+                            {Settings.plugins.ClientTheme.enabled && (
                                 <QuickAction
                                     text="Edit ClientTheme"
-                                    action={() => openPluginModal(Vencord.Plugins.plugins.ClientTheme)}
+                                    action={() => openPluginModal(Plugins.ClientTheme)}
                                     Icon={PencilIcon}
                                 />
                             )}
