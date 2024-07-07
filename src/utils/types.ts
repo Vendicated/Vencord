@@ -161,6 +161,7 @@ export const enum ReporterTestable {
 
 export const enum OptionType {
     STRING,
+    STRING_MULTILINE,
     NUMBER,
     BIGINT,
     BOOLEAN,
@@ -217,7 +218,7 @@ interface IsValid<T, D = unknown> {
 }
 
 export interface PluginSettingStringDef {
-    type: OptionType.STRING;
+    type: OptionType.STRING | OptionType.STRING_MULTILINE;
     default?: string;
 }
 export interface PluginSettingNumberDef {

@@ -43,7 +43,8 @@ import {
     SettingNumericComponent,
     SettingSelectComponent,
     SettingSliderComponent,
-    SettingTextComponent
+    SettingTextComponent,
+    SettingTextMultilineComponent
 } from "./components";
 import { openContributorModal } from "./ContributorModal";
 import { GithubButton, WebsiteButton } from "./LinkIconButton";
@@ -76,6 +77,7 @@ function makeDummyUser(user: { username: string; id?: string; avatar?: string; }
 
 const Components: Record<OptionType, React.ComponentType<ISettingElementProps<any>>> = {
     [OptionType.STRING]: SettingTextComponent,
+    [OptionType.STRING_MULTILINE]: SettingTextMultilineComponent,
     [OptionType.NUMBER]: SettingNumericComponent,
     [OptionType.BIGINT]: SettingNumericComponent,
     [OptionType.BOOLEAN]: SettingBooleanComponent,

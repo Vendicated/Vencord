@@ -37,4 +37,5 @@ export * from "./SettingNumericComponent";
 export * from "./SettingSelectComponent";
 export * from "./SettingSliderComponent";
 export * from "./SettingTextComponent";
+export * from "./SettingTextMultilineComponent";
 
