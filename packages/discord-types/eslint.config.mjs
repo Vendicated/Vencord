@@ -156,7 +156,8 @@ export default tseslint.config(
         }
     },
     {
-        files: ["!(src)/**/*", "*"],
+        files: ["**/*"],
+        ignores: ["src/**/*"],
         rules: {
             "simple-import-sort/imports": ["error", {
                 groups: [
@@ -241,7 +242,8 @@ export default tseslint.config(
     },
     {
         // https://github.com/import-js/eslint-plugin-import/issues/2414
-        files: ["src/**/!(index.ts)"],
+        files: ["src/**/*"],
+        ignores: ["src/**/index.ts"],
         rules: {
             "import/no-unused-modules": ["error", { missingExports: true }],
         }
