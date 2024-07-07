@@ -20,15 +20,16 @@ import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
+import { gitRemote } from "@shared/vencordUserAgent";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { Button, Card, Forms, React, Select, Switch, TooltipContainer } from "@webpack/common";
-import { ComponentType } from "react";
+import { Button, Card, Forms, React, Select, Switch } from "@webpack/common";
 
 import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "..";
 import { openNotificationSettingsModal } from "./NotificationSettings";
+import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
 
 const cl = classNameFactory("vc-settings-");
@@ -40,17 +41,6 @@ type KeysOfType<Object, Type> = {
     [K in keyof Object]: Object[K] extends Type ? K : never;
 }[keyof Object];
 
-const iconWithTooltip = (Icon: ComponentType<{ className?: string; }>, tooltip: string) => () => (
-    <TooltipContainer text={tooltip}>
-        <Icon className={cl("quick-actions-img")} />
-    </TooltipContainer>
-);
-
-const NotificationLogIcon = iconWithTooltip(LogIcon, "Open Notification Log");
-const QuickCssIcon = iconWithTooltip(PaintbrushIcon, "Edit QuickCSS");
-const RelaunchIcon = iconWithTooltip(RestartIcon, "Relaunch Discord");
-const OpenSettingsDirIcon = iconWithTooltip(FolderIcon, "Open Settings Directory");
-const OpenGithubIcon = iconWithTooltip(GithubIcon, "View Zoidcord's GitHub Repository");
 
 function VencordSettings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(VencordNative.settings.getSettingsDir, {
@@ -110,44 +100,37 @@ function VencordSettings() {
         <SettingsTab title="Zoidcord Settings">
             <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
-                <Card className={cl("quick-actions-card")}>
-                    <Button
-                        onClick={openNotificationLogModal}
-                        look={Button.Looks.BLANK}
-                    >
-                        <NotificationLogIcon />
-                    </Button>
-                    <Button
-                        onClick={() => VencordNative.quickCss.openEditor()}
-                        look={Button.Looks.BLANK}
-                    >
-                        <QuickCssIcon />
-                    </Button>
+                <QuickActionCard>
+                    <QuickAction
+                        Icon={LogIcon}
+                        text="Notification Log"
+                        action={openNotificationLogModal}
+                    />
+                    <QuickAction
+                        Icon={PaintbrushIcon}
+                        text="Edit QuickCSS"
+                        action={() => VencordNative.quickCss.openEditor()}
+                    />
                     {!IS_WEB && (
-                        <Button
-                            onClick={relaunch}
-                            look={Button.Looks.BLANK}
-                        >
-                            <RelaunchIcon />
-                        </Button>
+                        <QuickAction
+                            Icon={RestartIcon}
+                            text="Relaunch Discord"
+                            action={relaunch}
+                        />
                     )}
                     {!IS_WEB && (
-                        <Button
-                            onClick={() => showItemInFolder(settingsDir)}
-                            look={Button.Looks.BLANK}
-                            disabled={settingsDirPending}
-                        >
-                            <OpenSettingsDirIcon />
-                        </Button>
+                        <QuickAction
+                            Icon={FolderIcon}
+                            text="Open Settings Folder"
+                            action={() => showItemInFolder(settingsDir)}
+                        />
                     )}
-                    <Button
-                        onClick={() => VencordNative.native.openExternal("https://github.com/Zoidcord/Zoidcord")}
-                        look={Button.Looks.BLANK}
-                        disabled={settingsDirPending}
-                    >
-                        <OpenGithubIcon />
-                    </Button>
-                </Card>
+                    <QuickAction
+                        Icon={GithubIcon}
+                        text="View Source Code"
+                        action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
+                    />
+                </QuickActionCard>
             </Forms.FormSection>
 
             <Forms.FormDivider />
