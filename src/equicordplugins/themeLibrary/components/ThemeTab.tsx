@@ -8,6 +8,7 @@
 import "./styles.css";
 
 import { generateId } from "@api/Commands";
+import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { CodeBlock } from "@components/CodeBlock";
@@ -20,16 +21,17 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
 import { findByPropsLazy, findLazy } from "@webpack";
-import { Button, Card, FluxDispatcher, Forms, React, Select, showToast, TabBar, TextArea, TextInput, Toasts, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
+import { Button, Card, FluxDispatcher, Forms, React, SearchableSelect, TabBar, TextArea, TextInput, Toasts, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
 
+import { isAuthorized } from "../auth";
 import { SearchStatus, TabItem, Theme, ThemeLikeProps } from "../types";
 import { LikesComponent } from "./LikesComponent";
 import { ThemeInfoModal } from "./ThemeInfoModal";
 
 const cl = classNameFactory("vc-plugins-");
-const InputStyles = findByPropsLazy("inputDefault", "inputWrapper");
+const InputStyles = findByPropsLazy("inputDefault", "inputWrapper", "error");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
@@ -37,31 +39,16 @@ const API_URL = "https://themes-delta.vercel.app/api";
 
 const logger = new Logger("ThemeLibrary", "#e5c890");
 
-async function fetchThemes(url: string): Promise<Theme[]> {
-    const response = await fetch(url);
+export async function fetchAllThemes(): Promise<Theme[]> {
+    const response = await themeRequest("/themes");
     const data = await response.json();
     const themes: Theme[] = Object.values(data);
     themes.forEach(theme => {
         if (!theme.source) {
             theme.source = `${API_URL}/${theme.name}`;
-        } else {
-            theme.source = theme.source.replace("?raw=true", "") + "?raw=true";
         }
     });
     return themes.sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime());
-}
-
-function API_TYPE(theme: Theme | Object, returnAll?: boolean) {
-    if (!theme) return;
-    const settings = Settings.plugins.ThemeLibrary.domain ?? false;
-
-    if (returnAll) {
-        const url = settings ? "https://raw.githubusercontent.com/Faf4a/plugins/main/assets/meta.json" : `${API_URL}/themes`;
-        return fetchThemes(url);
-    } else {
-        // @ts-ignore
-        return settings ? theme.source : `${API_URL}/${theme.name}`;
-    }
 }
 
 export async function themeRequest(path: string, options: RequestInit = {}) {
@@ -115,7 +102,7 @@ function ThemeTab() {
     const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
 
     const themeFilter = (theme: Theme) => {
-        const enabled = themeLinks.includes(API_TYPE(theme));
+        const enabled = themeLinks.includes(`${API_URL}/${theme.name}`);
         if (enabled && searchValue.status === SearchStatus.DISABLED) return false;
         if (!theme.tags.includes("theme") && searchValue.status === SearchStatus.THEME) return false;
         if (!theme.tags.includes("snippet") && searchValue.status === SearchStatus.SNIPPET) return false;
@@ -146,7 +133,7 @@ function ThemeTab() {
     useEffect(() => {
         const fetchThemes = async () => {
             try {
-                const themes = await API_TYPE({}, true);
+                const themes = await fetchAllThemes();
                 // fetch likes
                 setThemes(themes);
                 const likes = await fetchLikes();
@@ -187,7 +174,7 @@ function ThemeTab() {
                 ) : (
                     <>
                         {hideWarningCard ? null : (
-                            <ErrorCard id="vc-themetab-warning">
+                            <ErrorCard>
                                 <Forms.FormTitle tag="h4">Want your theme removed?</Forms.FormTitle>
                                 <Forms.FormText className={Margins.top8}>
                                     If you want your theme(s) permanently removed, please open an issue on <a href="https://github.com/Faf4a/plugins/issues/new?labels=removal&projects=&template=request_removal.yml&title=Theme+Removal">GitHub <OpenExternalIcon height={16} width={16} /></a>
@@ -200,7 +187,7 @@ function ThemeTab() {
                                     size={Button.Sizes.SMALL}
                                     color={Button.Colors.RED}
                                     look={Button.Looks.FILLED}
-                                    className={Margins.top8}
+                                    className={classes(Margins.top16, "vce-warning-button")}
                                 >Hide</Button>
                             </ErrorCard >
                         )}
@@ -247,10 +234,10 @@ function ThemeTab() {
                                                 </Forms.FormText>
                                             )}
                                             <div style={{ marginTop: "8px", display: "flex", flexDirection: "row" }}>
-                                                {themeLinks.includes(API_TYPE(theme)) ? (
+                                                {themeLinks.includes(`${API_URL}/${theme.name}`) ? (
                                                     <Button
                                                         onClick={() => {
-                                                            const onlineThemeLinks = themeLinks.filter(x => x !== API_TYPE(theme));
+                                                            const onlineThemeLinks = themeLinks.filter(x => x !== `${API_URL}/${theme.name}`);
                                                             setThemeLinks(onlineThemeLinks);
                                                             Vencord.Settings.themeLinks = onlineThemeLinks;
                                                         }}
@@ -264,7 +251,7 @@ function ThemeTab() {
                                                 ) : (
                                                     <Button
                                                         onClick={() => {
-                                                            const onlineThemeLinks = [...themeLinks, API_TYPE(theme)];
+                                                            const onlineThemeLinks = [...themeLinks, `${API_URL}/${theme.name}`];
                                                             setThemeLinks(onlineThemeLinks);
                                                             Vencord.Settings.themeLinks = onlineThemeLinks;
                                                         }}
@@ -289,14 +276,14 @@ function ThemeTab() {
                                                 </Button>
                                                 <Button
                                                     onClick={() => {
-                                                        const content = atob(theme.content);
+                                                        const content = window.atob(theme.content);
                                                         const metadata = content.match(/\/\*\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g)?.[0] || "";
                                                         const source = metadata.match(/@source\s+(.+)/)?.[1] || "";
 
                                                         if (source) {
                                                             VencordNative.native.openExternal(source);
                                                         } else {
-                                                            VencordNative.native.openExternal(API_TYPE(theme).replace("?raw=true", ""));
+                                                            VencordNative.native.openExternal(`${API_URL}/${theme.name}`);
                                                         }
                                                     }}
                                                     size={Button.Sizes.MEDIUM}
@@ -318,10 +305,10 @@ function ThemeTab() {
                         }}>
                             Themes
                         </Forms.FormTitle>
-                        <div className={cl("filter-controls")}>
+                        <div className={classes(Margins.bottom20, cl("filter-controls"))}>
                             <TextInput value={searchValue.value} placeholder="Search for a theme..." onChange={onSearch} />
                             <div className={InputStyles.inputWrapper}>
-                                <Select
+                                <SearchableSelect
                                     options={[
                                         { label: "Show All", value: SearchStatus.ALL, default: true },
                                         { label: "Show Themes", value: SearchStatus.THEME },
@@ -333,10 +320,12 @@ function ThemeTab() {
                                         { label: "Show Enabled", value: SearchStatus.ENABLED },
                                         { label: "Show Disabled", value: SearchStatus.DISABLED },
                                     ]}
-                                    serialize={String}
-                                    select={onStatusChange}
-                                    isSelected={v => v === searchValue.status}
+                                    // @ts-ignore
+                                    value={searchValue.status}
+                                    clearable={false}
+                                    onChange={v => onStatusChange(v as SearchStatus)}
                                     closeOnSelect={true}
+                                    className={InputStyles.inputDefault}
                                 />
                             </div>
                         </div>
@@ -382,10 +371,10 @@ function ThemeTab() {
                                                 </Forms.FormText>
                                             )}
                                             <div style={{ marginTop: "8px", display: "flex", flexDirection: "row" }}>
-                                                {themeLinks.includes(API_TYPE(theme)) ? (
+                                                {themeLinks.includes(`${API_URL}/${theme.name}`) ? (
                                                     <Button
                                                         onClick={() => {
-                                                            const onlineThemeLinks = themeLinks.filter(x => x !== API_TYPE(theme));
+                                                            const onlineThemeLinks = themeLinks.filter(x => x !== `${API_URL}/${theme.name}`);
                                                             setThemeLinks(onlineThemeLinks);
                                                             Vencord.Settings.themeLinks = onlineThemeLinks;
                                                         }}
@@ -399,7 +388,7 @@ function ThemeTab() {
                                                 ) : (
                                                     <Button
                                                         onClick={() => {
-                                                            const onlineThemeLinks = [...themeLinks, API_TYPE(theme)];
+                                                            const onlineThemeLinks = [...themeLinks, `${API_URL}/${theme.name}`];
                                                             setThemeLinks(onlineThemeLinks);
                                                             Vencord.Settings.themeLinks = onlineThemeLinks;
                                                         }}
@@ -425,14 +414,14 @@ function ThemeTab() {
                                                 <LikesComponent themeId={theme.id} likedThemes={likedThemes} />
                                                 <Button
                                                     onClick={() => {
-                                                        const content = atob(theme.content);
+                                                        const content = window.atob(theme.content);
                                                         const metadata = content.match(/\/\*\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g)?.[0] || "";
                                                         const source = metadata.match(/@source\s+(.+)/)?.[1] || "";
 
                                                         if (source) {
                                                             VencordNative.native.openExternal(source);
                                                         } else {
-                                                            VencordNative.native.openExternal(API_TYPE(theme).replace("?raw=true", ""));
+                                                            VencordNative.native.openExternal(`${API_URL}/${theme.name}`);
                                                         }
                                                     }}
                                                     size={Button.Sizes.MEDIUM}
@@ -455,9 +444,7 @@ function ThemeTab() {
 }
 
 function SubmitThemes() {
-    const currentUser = UserStore.getCurrentUser();
     const [themeContent, setContent] = useState("");
-
     const handleChange = (v: string) => setContent(v);
 
     return (
@@ -483,7 +470,7 @@ function SubmitThemes() {
             }}>
                 Submit Themes
             </Forms.FormTitle>
-            <Forms.FormText>
+            <Forms.FormText className={Margins.bottom16}>
                 If you plan on updating your theme / snippet frequently, consider using an <code>@import</code> instead!
             </Forms.FormText>
             <Forms.FormText>
@@ -497,8 +484,20 @@ function SubmitThemes() {
                 />
                 <div style={{ display: "flex", alignItems: "center" }}>
                     <Button
-                        onClick={() => {
-                            if (themeContent.length < 50) return showToast("Theme content is too short, must be above 50", Toasts.Type.FAILURE);
+                        onClick={async () => {
+                            if (!(await isAuthorized())) return;
+
+                            if (themeContent.length < 50) return Toasts.show({
+                                message: "Failed to submit theme, content must be at least 50 characters long.",
+                                id: Toasts.genId(),
+                                type: Toasts.Type.FAILURE,
+                                options: {
+                                    duration: 5e3,
+                                    position: Toasts.Position.TOP
+                                }
+                            });
+
+                            const token = await DataStore.get("ThemeLibrary_uniqueToken");
 
                             themeRequest("/submit/theme", {
                                 method: "POST",
@@ -506,13 +505,14 @@ function SubmitThemes() {
                                     "Content-Type": "application/json",
                                 },
                                 body: JSON.stringify({
-                                    userId: `${currentUser.id}`,
-                                    content: btoa(themeContent),
+                                    token,
+                                    content: window.btoa(themeContent),
                                 }),
-                            }).then(response => {
+                            }).then(async response => {
                                 if (!response.ok) {
+                                    const res = await response.json();
                                     Toasts.show({
-                                        message: "Failed to submit theme, try again later. Probably ratelimit, wait 2 minutes.",
+                                        message: `Failed to submit theme, ${res.message}`,
                                         id: Toasts.genId(),
                                         type: Toasts.Type.FAILURE,
                                         options: {
@@ -531,8 +531,17 @@ function SubmitThemes() {
                                         }
                                     });
                                 }
-                            }).catch(() => {
-                                showToast("Failed to submit theme, try later", Toasts.Type.FAILURE);
+                            }).catch(error => {
+                                logger.error("Failed to submit theme", error);
+                                Toasts.show({
+                                    message: "Failed to submit theme, check your console!",
+                                    type: Toasts.Type.FAILURE,
+                                    id: Toasts.genId(),
+                                    options: {
+                                        duration: 5e3,
+                                        position: Toasts.Position.BOTTOM
+                                    }
+                                });
                             });
                         }}
                         size={Button.Sizes.MEDIUM}
@@ -548,7 +557,7 @@ function SubmitThemes() {
                         marginTop: "8px",
                         marginLeft: "8px",
                     }}>
-                        By submitting your theme, you agree to your Discord User ID being processed.
+                        Abusing this feature will result in you being blocked from further submissions.
                     </p>
                 </div>
             </Forms.FormText>

@@ -18,7 +18,7 @@ const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaul
 
 export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, ...props }) => {
 
-    const content = atob(theme.content);
+    const content = window.atob(theme.content);
     const metadata = content.match(/\/\*\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g)?.[0] || "";
     const donate = metadata.match(/@donate\s+(.+)/)?.[1] || "";
     const version = metadata.match(/@version\s+(.+)/)?.[1] || "";

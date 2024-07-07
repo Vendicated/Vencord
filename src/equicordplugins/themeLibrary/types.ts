@@ -65,7 +65,6 @@ export const enum SearchStatus {
 export type ThemeLikeProps = {
     status: number;
     likes: [{
-        _id?: string;
         themeId: number;
         userIds: User["id"][];
     }];

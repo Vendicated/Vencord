@@ -63,3 +63,14 @@
     margin-right: 0.5rem;
     transition: fill 0.3s ease;
 }
+
+.vce-button-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.vce-warning-button {
+    display: flex;
+    width: 100%;
+}

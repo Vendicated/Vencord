@@ -4,30 +4,20 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
-import { EquicordDevs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
-const settings = definePluginSettings({
-    hideWarningCard: {
-        type: OptionType.BOOLEAN,
-        default: false,
-        description: "Hide the warning card displayed at the top of the theme library tab",
-        restartNeeded: false,
-    },
-    domain: {
-        type: OptionType.BOOLEAN,
-        default: false,
-        description: "Use Github instead of the default domain for themes",
-        restartNeeded: false,
-    },
-});
+import { settings } from "./settings";
 
 export default definePlugin({
     name: "ThemeLibrary",
     description: "A library of themes for Vencord.",
-    authors: [EquicordDevs.Fafa],
+    authors: [
+        {
+            name: "Fafa",
+            id: 428188716641812481n,
+        },
+    ],
     settings,
     toolboxActions: {
         "Open Theme Library": () => {

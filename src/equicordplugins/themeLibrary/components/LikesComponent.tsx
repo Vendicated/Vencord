@@ -4,32 +4,24 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import * as DataStore from "@api/DataStore";
 import { Logger } from "@utils/Logger";
-import { Button, useEffect, UserStore, useState } from "@webpack/common";
+import { Button, useEffect, useRef, UserStore, useState } from "@webpack/common";
 import type { User } from "discord-types/general";
 
+import { isAuthorized } from "../auth";
 import type { Theme, ThemeLikeProps } from "../types";
 import { themeRequest } from "./ThemeTab";
 
-const logger = new Logger("ThemeLibrary", "#e5c890");
-
-const fetchLikes = async () => {
-    try {
-        const response = await themeRequest("/likes/get");
-        const data = await response.json();
-        return data;
-    } catch (err) {
-        logger.error(err);
-    }
-};
+export const logger = new Logger("ThemeLibrary", "#e5c890");
 
 export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { themeId: Theme["id"], likedThemes: ThemeLikeProps | undefined; }) => {
     const [likesCount, setLikesCount] = useState(0);
     const [likedThemes, setLikedThemes] = useState(initialLikedThemes);
+    const debounce = useRef(false);
 
     useEffect(() => {
         const likes = getThemeLikes(themeId);
-        logger.debug("likes", likes, "for:", themeId);
         setLikesCount(likes);
     }, [likedThemes, themeId]);
 
@@ -45,10 +37,17 @@ export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { t
     );
 
     const handleLikeClick = async (themeId: Theme["id"]) => {
+        if (!isAuthorized()) return;
         const theme = likedThemes?.likes.find(like => like.themeId === themeId as unknown as Number);
         const currentUser: User = UserStore.getCurrentUser();
         const hasLiked: boolean = theme?.userIds.includes(currentUser.id) ?? false;
         const endpoint = hasLiked ? "/likes/remove" : "/likes/add";
+        const token = await DataStore.get("ThemeLibrary_uniqueToken");
+
+        // doing this so the delay is not visible to the user
+        if (debounce.current) return;
+        setLikesCount(likesCount + (hasLiked ? -1 : 1));
+        debounce.current = true;
 
         try {
             const response = await themeRequest(endpoint, {
@@ -56,14 +55,13 @@ export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { t
                 headers: {
                     "Content-Type": "application/json",
                 },
-                cache: "no-store",
                 body: JSON.stringify({
-                    userId: currentUser.id,
+                    token,
                     themeId: themeId,
                 }),
             });
 
-            if (!response.ok) return logger.error("Couldnt update likes, res:", response.statusText);
+            if (!response.ok) return logger.error("Couldnt update likes, response not ok");
 
             const fetchLikes = async () => {
                 try {
@@ -76,11 +74,10 @@ export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { t
             };
 
             fetchLikes();
-            // doing it locally isnt the best way probably, but it does the same
-            setLikesCount(likesCount + (hasLiked ? -1 : 1));
         } catch (err) {
             logger.error(err);
         }
+        debounce.current = false;
     };
 
     const hasLiked = likedThemes?.likes.some(like => like.themeId === themeId as unknown as Number && like.userIds.includes(UserStore.getCurrentUser().id)) ?? false;
