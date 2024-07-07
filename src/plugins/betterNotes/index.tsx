@@ -70,7 +70,7 @@ export default definePlugin({
             find: "Messages.NOTE_PLACEHOLDER",
             replacement: {
                 match: /\.NOTE_PLACEHOLDER,/,
-                replace: "$&spellCheck:!$self.settings.store.noSpellCheck,"
+                replace: "$&spellCheck:!$self.noSpellCheck,"
             }
         },
         {
@@ -87,5 +87,9 @@ export default definePlugin({
         return (
             <div className={UserPopoutSectionCssClasses.lastSection} ></div>
         );
-    })
+    }),
+
+    get noSpellCheck() {
+        return settings.store.noSpellCheck;
+    }
 });
