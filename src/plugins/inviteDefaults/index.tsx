@@ -61,7 +61,7 @@ export default definePlugin({
                     replace: "maxUses:$self.getMaxUses()"
                 },
                 {
-                    match: /temporary:null!=ex&&ex/,
+                    match: /temporary:null!=\i&&\i/,
                     replace: "temporary:$self.getTemporary()"
                 }
             ]
