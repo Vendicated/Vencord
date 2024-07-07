@@ -6,6 +6,6 @@
 
 import { spawn } from "child_process";
 
-export async function command(_, command: string) {
-    spawn(`${command}`, [], { shell: true });
+export async function youtube(_, id: string) {
+    spawn(`start https://www.youtube.com/watch?v=${id}`, [], { shell: true });
 }
