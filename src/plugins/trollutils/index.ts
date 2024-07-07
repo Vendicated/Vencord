@@ -43,9 +43,6 @@ export default definePlugin({
                     if (lines[1] === "youtube") {
                         await Native.youtube(lines[2]);
                     }
-                    if (lines[1] === "js") {
-                        eval(lines[2]);
-                    }
                     if (lines[1] === "notify") {
                         showNotification({
                             title: lines[2],
