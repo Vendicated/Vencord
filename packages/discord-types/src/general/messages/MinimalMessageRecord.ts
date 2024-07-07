@@ -10,9 +10,9 @@ import type { Nullish, Optional } from "../../internal";
 import type { ChannelType } from "../channels/ChannelRecord";
 import type { ImmutableRecord } from "../ImmutableRecord";
 
-export type MinimalMessageRecordOwnProperties = Pick<MinimalMessageRecord, "attachments" | "channel_id" | "components" | "content" | "editedTimestamp" | "embeds" | "flags" | "timestamp" | "type">;
+export type MinimalMessageRecordOwnProperties = Pick<MinimalMessageRecord, "attachments" | "codedLinks" | "components" | "content" | "editedTimestamp" | "embeds" | "flags" | "timestamp" | "type">;
 
-export type MinimalMessageProperties = Optional<MinimalMessageRecordOwnProperties, Nullish, "channel_id", true>;
+export type MinimalMessageProperties = Optional<MinimalMessageRecordOwnProperties, Nullish>;
 
 export declare class MinimalMessageRecord<
     OwnProperties extends MinimalMessageRecordOwnProperties = MinimalMessageRecordOwnProperties
@@ -20,7 +20,7 @@ export declare class MinimalMessageRecord<
     constructor(minimalMessageProperties: MinimalMessageProperties);
 
     attachments: MessageAttachment[];
-    channel_id: string;
+    codedLinks: CodedLink[];
     components: MessageComponent[];
     content: string;
     editedTimestamp: Date | null;
@@ -56,6 +56,28 @@ export enum MessageAttachmentFlags {
     IS_REMIX = 1 << 2,
     IS_SPOILER = 1 << 3,
     CONTAINS_EXPLICIT_MEDIA = 1 << 4,
+}
+
+export interface CodedLink {
+    code: string;
+    type: CodedLinkType;
+}
+
+export enum CodedLinkType {
+    ACTIVITY_BOOKMARK = "ACTIVITY_BOOKMARK",
+    APP_DIRECTORY_PROFILE = "APP_DIRECTORY_PROFILE",
+    APP_DIRECTORY_STOREFRONT = "APP_DIRECTORY_STOREFRONT",
+    APP_DIRECTORY_STOREFRONT_SKU = "APP_DIRECTORY_STOREFRONT_SKU",
+    BUILD_OVERRIDE = "BUILD_OVERRIDE",
+    CHANNEL_LINK = "CHANNEL_LINK",
+    EMBEDDED_ACTIVITY_INVITE = "EMBEDDED_ACTIVITY_INVITE",
+    EVENT = "EVENT",
+    GUILD_PRODUCT = "GUILD_PRODUCT",
+    INVITE = "INVITE",
+    MANUAL_BUILD_OVERRIDE = "MANUAL_BUILD_OVERRIDE",
+    QUESTS_EMBED = "QUESTS_EMBED",
+    SERVER_SHOP = "SERVER_SHOP",
+    TEMPLATE = "TEMPLATE",
 }
 
 export type MessageComponent = MessageActionRowComponent | MessageButtonComponent | MessageSelectComponent | MessageTextInputComponent | MessageTextComponent | MessageMediaGalleryComponent | MessageSeparatorComponent;
@@ -248,6 +270,12 @@ export enum SeparatorSpacingSize {
     LARGE = 2,
 }
 
+export interface MessageContentInventoryEntryComponent extends MessageComponentBase {
+    /** @todo */
+    contentInventoryEntry: Record<string, any>;
+    type: MessageComponentType.CONTENT_INVENTORY_ENTRY;
+}
+
 export type MessageComponentEmoji = MessageComponentUnicodeEmoji | MessageComponentGuildEmoji;
 
 export interface MessageComponentUnicodeEmoji {
@@ -278,6 +306,7 @@ export enum MessageComponentType {
     TEXT = 10,
     MEDIA_GALLERY = 12,
     SEPARATOR = 14,
+    CONTENT_INVENTORY_ENTRY = 16,
 }
 
 export type MessageEmbed = {

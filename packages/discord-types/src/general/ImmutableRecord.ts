@@ -6,7 +6,9 @@
 
 // Original name: Record
 // Renamed to avoid name conflicts with TypeScripts's Record utility type.
-export declare class ImmutableRecord<OwnProperties extends object = object> {
+export declare class ImmutableRecord<
+    OwnProperties extends Record<PropertyKey, unknown> = Record<PropertyKey, unknown>
+> {
     merge(collection: Partial<OwnProperties>): this;
     set<Key extends keyof OwnProperties>(key: Key, value: OwnProperties[Key]): this;
     toJS(): OwnProperties;

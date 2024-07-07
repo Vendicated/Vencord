@@ -7,17 +7,16 @@
 import type { ImmutableRecord } from "../ImmutableRecord";
 import type { MinimalMessageProperties, MinimalMessageRecord } from "./MinimalMessageRecord";
 
-export type MessageSnapshotRecordOwnProperties = Pick<MessageSnapshotRecord, "guild" | "message">;
+export type MessageSnapshotRecordOwnProperties = Pick<MessageSnapshotRecord, "message">;
 
-export type MessageSnapshotProperties = Pick<MessageSnapshotRecordOwnProperties, "guild">
-    & { message: MinimalMessageProperties; };
+export interface MessageSnapshotProperties {
+    message: MinimalMessageProperties;
+}
 
 export declare class MessageSnapshotRecord<
     OwnProperties extends MessageSnapshotRecordOwnProperties = MessageSnapshotRecordOwnProperties
 > extends ImmutableRecord<OwnProperties> {
     constructor(messageSnapshotProperties: MessageSnapshotProperties);
 
-    /** @todo This is not a GuildRecord; it's a guild object from the API. */
-    guild: Record<string, any>;
     message: MinimalMessageRecord;
 }

@@ -29,7 +29,6 @@ export declare class UserProfileStore<
     static LATEST_SNAPSHOT_VERSION: number;
 
     getGuildMemberProfile(userId: string, guildId?: string | Nullish): GuildMemberProfile | Nullish;
-    getIsAccessibilityTooltipViewed(): boolean;
     getMutualFriends(userId: string): {
         /** The ID of the user. */
         key: string;

@@ -44,7 +44,6 @@ export declare class PresenceStore<Action extends FluxAction = PresenceStoreActi
         guildId?: string | Nullish /* = null */
     ): Activity | undefined;
     getClientStatus(userId: string): ClientStatusMap | undefined;
-    getLastOnlineTimestamp(userId: string): number | undefined;
     getPrimaryActivity(userId: string, guildId?: string | Nullish /* = null */): Activity | undefined;
     getState(): {
         activities: { [userId: string]: Activity[]; };

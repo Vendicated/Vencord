@@ -51,6 +51,7 @@ export declare class ReadStateStore<Action extends FluxAction = ReadStateStoreAc
     hasRecentlyVisitedAndRead(id: string, type?: ReadStateType | undefined /* = ReadStateType.CHANNEL */): boolean;
     hasTrackedUnread(id: string, type?: ReadStateType | undefined /* = ReadStateType.CHANNEL */): boolean;
     hasUnread(id: string, type?: ReadStateType | undefined /* = ReadStateType.CHANNEL */): boolean;
+    hasUnreadOrMentions(id: string, type?: ReadStateType | undefined /* = ReadStateType.CHANNEL */): boolean;
     hasUnreadPins(channelId: string): boolean;
     initialize(): void;
     isEstimated(id: string, type?: ReadStateType | undefined /* = ReadStateType.CHANNEL */): boolean;

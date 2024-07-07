@@ -42,7 +42,6 @@ export declare class UserRecord<
         canAnimate?: boolean | undefined /* = false */
     ): string;
     hasAvatarForGuild(guildId?: string | Nullish): boolean;
-    hasDisabledPremium(): boolean;
     hasFreePremium(): boolean;
     hasHadPremium(): boolean;
     hasHadSKU(skuId: string): boolean;

@@ -17,10 +17,11 @@ import type { InteractionRecord, InteractionType } from "./InteractionRecord";
 import type { MessageSnapshotRecord } from "./MessageSnapshotRecord";
 import type { MessageFlags, MinimalMessageRecord, MinimalMessageRecordOwnProperties } from "./MinimalMessageRecord";
 
-export type MessageRecordOwnProperties = MinimalMessageRecordOwnProperties & Pick<MessageRecord, "activity" | "activityInstance" | "application" | "applicationId" | "author" | "blocked" | "bot" | "call" | "changelogId" | "codedLinks" | "colorString" | "customRenderedContent" | "giftCodes" | "giftInfo" | "id" | "interaction" | "interactionData" | "interactionError" | "interactionMetadata" | "isSearchHit" | "isUnsupported" | "loggingName" | "mentionChannels" | "mentionEveryone" | "mentionRoles" | "mentioned" | "mentions" | "messageReference" | "messageSnapshots" | "nick" | "nonce" | "pinned" | "poll" | "purchaseNotification" | "reactions" | "referralTrialOfferId" | "roleSubscriptionData" | "state" | "stickerItems" | "stickers" | "tts" | "webhookId">;
+export type MessageRecordOwnProperties = MinimalMessageRecordOwnProperties & Pick<MessageRecord, "activity" | "activityInstance" | "application" | "applicationId" | "author" | "blocked" | "bot" | "call" | "changelogId" | "channel_id" | "colorString" | "customRenderedContent" | "giftCodes" | "giftInfo" | "id" | "interaction" | "interactionData" | "interactionError" | "interactionMetadata" | "isSearchHit" | "isUnsupported" | "loggingName" | "mentionChannels" | "mentioned" | "mentionEveryone" | "mentionRoles" | "mentions" | "messageReference" | "messageSnapshots" | "nick" | "nonce" | "pinned" | "poll" | "purchaseNotification" | "reactions" | "referralTrialOfferId" | "roleSubscriptionData" | "state" | "stickerItems" | "stickers" | "tts" | "webhookId">;
 
-export type MessageProperties = Optional<PartialOnUndefined<MessageRecordOwnProperties>, Nullish, "author" | "channel_id" | "id" | "customRenderedContent" | "colorString" | "giftInfo" | "nick" | "roleSubscriptionData" | "purchaseNotification" | "poll", true>
-    & SnakeCasedProperties<Optional<Pick<MessageRecordOwnProperties, "applicationId" | "activityInstance" | "giftInfo" | "stickerItems" | "changelogId">, Nullish>>;
+export type MessageProperties = Optional<PartialOnUndefined<MessageRecordOwnProperties>, Nullish, "author" | "channel_id" | "id" | "colorString" | "giftInfo" | "nick" | "roleSubscriptionData" | "purchaseNotification" | "poll", true>
+    & SnakeCasedProperties<Optional<Pick<MessageRecordOwnProperties, "applicationId" | "activityInstance" | "giftInfo" | "stickerItems" | "changelogId">, Nullish>>
+    & { hit?: boolean | Nullish; };
 
 export declare class MessageRecord<
     OwnProperties extends MessageRecordOwnProperties = MessageRecordOwnProperties
@@ -64,7 +65,7 @@ export declare class MessageRecord<
     bot: boolean;
     call: MessageCall | null;
     changelogId: string | null;
-    codedLinks: CodedLink[];
+    channel_id: string;
     colorString: string | undefined;
     customRenderedContent: MessageCustomRenderedContent | Nullish;
     giftCodes: string[];
@@ -82,7 +83,7 @@ export declare class MessageRecord<
     mentionEveryone: boolean;
     mentionRoles: string[];
     mentions: string[];
-    /** Only present for MessageRecords with type MessageType.REPLY or MessageType.THREAD_STARTER_MESSAGE. */
+    /** Only non-null for MessageRecords with type MessageType.REPLY or MessageType.THREAD_STARTER_MESSAGE. */
     messageReference: MessageReference | null;
     messageSnapshots: MessageSnapshotRecord[];
     nick: string | undefined;
@@ -118,26 +119,6 @@ export interface MessageCall {
     duration: Duration | null;
     endedTimestamp: Moment | null;
     participants: string[];
-}
-
-export interface CodedLink {
-    code: string;
-    type: CodedLinkType;
-}
-
-export enum CodedLinkType {
-    ACTIVITY_BOOKMARK = "ACTIVITY_BOOKMARK",
-    APP_DIRECTORY_PROFILE = "APP_DIRECTORY_PROFILE",
-    BUILD_OVERRIDE = "BUILD_OVERRIDE",
-    CHANNEL_LINK = "CHANNEL_LINK",
-    EMBEDDED_ACTIVITY_INVITE = "EMBEDDED_ACTIVITY_INVITE",
-    EVENT = "EVENT",
-    GUILD_PRODUCT = "GUILD_PRODUCT",
-    INVITE = "INVITE",
-    MANUAL_BUILD_OVERRIDE = "MANUAL_BUILD_OVERRIDE",
-    QUESTS_EMBED = "QUESTS_EMBED",
-    SERVER_SHOP = "SERVER_SHOP",
-    TEMPLATE = "TEMPLATE",
 }
 
 export interface MessageCustomRenderedContent {

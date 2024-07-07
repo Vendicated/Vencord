@@ -6,7 +6,7 @@
 
 import type { ExtractAction, FluxAction } from "../flux/fluxActions";
 import type { ChannelRecord, GuildChannelRecord } from "../general/channels/ChannelRecord";
-import type { PrivateChannelRecord } from "../general/channels/PrivateChannelRecord";
+import type { DMChannelRecord, PrivateChannelRecord } from "../general/channels/PrivateChannelRecord";
 import type { ThreadChannelRecord } from "../general/channels/ThreadChannelRecord";
 import type { Nullish } from "../internal";
 import type { FluxStore } from "./abstract/FluxStore";
@@ -27,6 +27,7 @@ export declare class ChannelStore<Action extends FluxAction = ChannelStoreAction
         /** @todo */
         pendingGuildLoads: any[];
     };
+    getDMChannelFromUserId(userId?: string | Nullish): DMChannelRecord | undefined;
     getDMFromUserId(userId?: string | Nullish): string | undefined;
     getDMUserIds(): string[];
     getGuildChannelsVersion(guildId: string): number;

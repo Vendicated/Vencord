@@ -5,6 +5,8 @@
  */
 
 import type { ExtractAction, FluxAction } from "../flux/fluxActions";
+import type { MessageRecord } from "../general/messages/MessageRecord";
+import type { Nullish } from "../internal";
 import type { FluxStore } from "./abstract/FluxStore";
 
 export type RelationshipStoreAction = ExtractAction<FluxAction, "CONNECTION_OPEN" | "OVERLAY_INITIALIZE" | "RELATIONSHIP_ADD" | "RELATIONSHIP_PENDING_INCOMING_REMOVED" | "RELATIONSHIP_REMOVE" | "RELATIONSHIP_UPDATE">;
@@ -24,8 +26,12 @@ export declare class RelationshipStore<Action extends FluxAction = RelationshipS
     getSince(userId: string): string | undefined;
     getSinces(): { [userId: string]: string; };
     initialize(): void;
-    isBlocked(userId: string): boolean;
-    isFriend(userId: string): boolean;
+    isBlocked(userId?: string | Nullish): boolean;
+    isBlockedForMessage(message?: MessageRecord | {
+        author?: { id: string; } | Nullish;
+        interaction_metadata?: { user: { id?: string | Nullish; } | Nullish; } | Nullish;
+    }): boolean;
+    isFriend(userId?: string | Nullish): boolean;
 }
 
 // Original name: RelationshipTypes

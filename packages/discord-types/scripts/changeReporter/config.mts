@@ -448,14 +448,16 @@ export const config: CR.ReporterConfig = {
                 type: "class",
             },
         },
-        /*
-        // This seems to have been removed
         "./general/Draft.ts": {
             DraftType: {
                 type: "enum",
+                // Screaming snake case to pascal case
+                keyMapper: key => key.replaceAll(
+                    /(?:^|_)(.)([^_]*)/g,
+                    (_, first: string, rest: string) => first.toUpperCase() + rest.toLowerCase()
+                ),
             },
         },
-        */
         "./general/Frecency.ts": {
             Frecency: {
                 type: "class",
