@@ -392,6 +392,21 @@ export function PaintbrushIcon(props: IconProps) {
     );
 }
 
+export function PencilIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-pencil-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                d="m13.96 5.46 4.58 4.58a1 1 0 0 0 1.42 0l1.38-1.38a2 2 0 0 0 0-2.82l-3.18-3.18a2 2 0 0 0-2.82 0l-1.38 1.38a1 1 0 0 0 0 1.42ZM2.11 20.16l.73-4.22a3 3 0 0 1 .83-1.61l7.87-7.87a1 1 0 0 1 1.42 0l4.58 4.58a1 1 0 0 1 0 1.42l-7.87 7.87a3 3 0 0 1-1.6.83l-4.23.73a1.5 1.5 0 0 1-1.73-1.73Z"
+            />
+        </Icon>
+    );
+}
+
 const WebsiteIconDark = "/assets/e1e96d89e192de1997f73730db26e94f.svg";
 const WebsiteIconLight = "/assets/730f58bcfd5a57a5e22460c445a0c6cf.svg";
 const GithubIconLight = "/assets/3ff98ad75ac94fa883af5ed62d17c459.svg";
