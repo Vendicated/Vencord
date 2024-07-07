@@ -268,8 +268,8 @@ function FullPatchInput({ setFind, setParsedFind, setMatch, setReplacement }: Fu
                 if (parsed.replacement.length === 0) throw new Error("Invalid replacement");
 
                 parsed.replacement = {
-                    match: parsed.replacement[0].match,
-                    replace: parsed.replacement[0].replace
+                    match: parsed.replacement[0]!.match,
+                    replace: parsed.replacement[0]!.replace
                 };
             }
 

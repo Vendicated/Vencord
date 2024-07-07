@@ -176,3 +176,62 @@ export interface PopoutWindowActionCreators {
     ) => Promise<void>;
     setAlwaysOnTop: (key: string, alwaysOnTop: boolean) => Promise<void>;
 }
+
+export type UserUtilsTagInclude = LiteralUnion<"auto" | "always" | "never", string>;
+export interface UserUtilsTagOptions {
+    forcePomelo?: boolean;
+    identifiable?: UserUtilsTagInclude;
+    decoration?: UserUtilsTagInclude;
+    mode?: "full" | "username";
+}
+
+export interface UserUtils {
+    getGlobalName: (user: UserRecord) => string;
+    getFormattedName: (user: UserRecord, useTagInsteadOfUsername?: boolean) => string;
+    getName: (user: UserRecord) => string;
+    useName: (user: UserRecord) => string;
+    getUserTag: (user: UserRecord, options?: UserUtilsTagOptions) => string;
+    useUserTag: (user: UserRecord, options?: UserUtilsTagOptions) => string;
+
+    useDirectMessageRecipient: any;
+    humanizeStatus: any;
+}
+
+export class DisplayProfile {
+    userId: string;
+    banner?: string;
+    bio?: string;
+    pronouns?: string;
+    accentColor?: number;
+    themeColors?: number[];
+    popoutAnimationParticleType?: any;
+    profileEffectId?: string;
+    _userProfile?: any;
+    _guildMemberProfile?: any;
+    canUsePremiumProfileCustomization: boolean;
+    canEditThemes: boolean;
+    premiumGuildSince: Date | null;
+    premiumSince: Date | null;
+    premiumType?: number;
+    primaryColor?: number;
+
+    getBadges(): {
+        id: string;
+        description: string;
+        icon: string;
+        link?: string;
+    }[];
+    getBannerURL(options: { canAnimate: boolean; size: number; }): string;
+    getLegacyUsername(): string | null;
+    hasFullProfile(): boolean;
+    hasPremiumCustomization(): boolean;
+    hasThemeColors(): boolean;
+    isUsingGuildMemberBanner(): boolean;
+    isUsingGuildMemberBio(): boolean;
+    isUsingGuildMemberPronouns(): boolean;
+}
+
+export interface DisplayProfileUtils {
+    getDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
+    useDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
+}

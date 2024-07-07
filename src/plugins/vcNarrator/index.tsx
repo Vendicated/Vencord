@@ -242,6 +242,7 @@ export default definePlugin({
 
     get options() {
         return this.optionsCache ??= {
+            // @ts-ignore
             voice: {
                 type: OptionType.SELECT,
                 description: "Narrator Voice",
@@ -252,6 +253,7 @@ export default definePlugin({
                     default: v.default
                 })) ?? []
             },
+            // @ts-ignore
             volume: {
                 type: OptionType.SLIDER,
                 description: "Narrator Volume",
@@ -259,6 +261,7 @@ export default definePlugin({
                 markers: [0, 0.25, 0.5, 0.75, 1],
                 stickToMarkers: false
             },
+            // @ts-ignore
             rate: {
                 type: OptionType.SLIDER,
                 description: "Narrator Speed",
@@ -266,46 +269,55 @@ export default definePlugin({
                 markers: [0.1, 0.5, 1, 2, 5, 10],
                 stickToMarkers: false
             },
+            // @ts-ignore
             sayOwnName: {
                 description: "Say own name",
                 type: OptionType.BOOLEAN,
                 default: false
             },
+            // @ts-ignore
             latinOnly: {
                 description: "Strip non latin characters from names before saying them",
                 type: OptionType.BOOLEAN,
                 default: false
             },
+            // @ts-ignore
             joinMessage: {
                 type: OptionType.STRING,
                 description: "Join Message",
                 default: "{{USER}} joined"
             },
+            // @ts-ignore
             leaveMessage: {
                 type: OptionType.STRING,
                 description: "Leave Message",
                 default: "{{USER}} left"
             },
+            // @ts-ignore
             moveMessage: {
                 type: OptionType.STRING,
                 description: "Move Message",
                 default: "{{USER}} moved to {{CHANNEL}}"
             },
+            // @ts-ignore
             muteMessage: {
                 type: OptionType.STRING,
                 description: "Mute Message (only self for now)",
                 default: "{{USER}} Muted"
             },
+            // @ts-ignore
             unmuteMessage: {
                 type: OptionType.STRING,
                 description: "Unmute Message (only self for now)",
                 default: "{{USER}} unmuted"
             },
+            // @ts-ignore
             deafenMessage: {
                 type: OptionType.STRING,
                 description: "Deafen Message (only self for now)",
                 default: "{{USER}} deafened"
             },
+            // @ts-ignore
             undeafenMessage: {
                 type: OptionType.STRING,
                 description: "Undeafen Message (only self for now)",

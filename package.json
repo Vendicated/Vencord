@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.9.3",
+    "version": "1.9.4",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -31,7 +31,7 @@
         "lint:fix": "pnpm lint --fix",
         "test": "pnpm buildStandalone && pnpm lint && pnpm lint-styles && pnpm testTsc && pnpm generatePluginJson",
         "testWeb": "pnpm lint && pnpm buildWeb && pnpm testTsc",
-        "testTsc": "tsc --noEmit"
+        "testTsc": "tsc --noEmit --emitDeclarationOnly false"
     },
     "dependencies": {
         "@sapphi-red/web-noise-suppressor": "0.3.5",

@@ -52,6 +52,25 @@ const ToastPosition = {
     BOTTOM: 1,
 };
 
+export interface ToastData {
+    message: string,
+    id: string,
+    /**
+     * Toasts.Type
+     */
+    type: number,
+    options?: ToastOptions;
+}
+
+export interface ToastOptions {
+    /**
+     * Toasts.Position
+     */
+    position?: number;
+    component?: ReactNode,
+    duration?: number;
+}
+
 export const Toasts = {
     Type: ToastType,
     Position: ToastPosition,
@@ -61,23 +80,9 @@ export const Toasts = {
     // hack to merge with the following interface, dunno if there's a better way
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     ...{} as {
-        show(data: {
-            message: string,
-            id: string,
-            /**
-             * Toasts.Type
-             */
-            type: number,
-            options?: {
-                /**
-                 * Toasts.Position
-                 */
-                position?: number;
-                component?: ReactNode,
-                duration?: number;
-            };
-        }): void;
+        show(data: ToastData): void;
         pop(): void;
+        create(message: string, type: number, options?: ToastOptions): ToastData;
     }
 };
 
@@ -86,17 +91,14 @@ export const Toasts = {
 waitFor("showToast", m => {
     Toasts.show = m.showToast;
     Toasts.pop = m.popToast;
+    Toasts.create = m.createToast;
 });
 
 /**
  * Show a simple toast. If you need more options, use Toasts.show manually
  */
-export function showToast(message: string, type = ToastType.MESSAGE) {
-    Toasts.show({
-        id: Toasts.genId(),
-        message,
-        type
-    });
+export function showToast(message: string, type = ToastType.MESSAGE, options?: ToastOptions) {
+    Toasts.show(Toasts.create(message, type, options));
 }
 
 export let AlertActionCreators: t.AlertActionCreators;
@@ -119,6 +121,12 @@ export let ComponentDispatch: any;
 waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
 
 export const Constants = findByPropsLazy("Endpoints");
+
+// useDisplayProfile.tsx
+export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModuleLazy(/=\i\.getUserProfile\(\i\),\i=\i\.getGuildMemberProfile\(/, {
+    getDisplayProfile: filters.byCode(".getGuildMemberProfile("),
+    useDisplayProfile: filters.byCode(/\[\i\.\i,\i\.\i],\(\)=>/)
+});
 
 const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i,activeViewType:/);
 
@@ -181,6 +189,8 @@ export const UserProfileModalActionCreators = findByPropsLazy("openUserProfileMo
 
 export let UserSettingsModalActionCreators: any;
 waitFor(["open", "saveAccountChanges"], m => UserSettingsModalActionCreators = m);
+
+export const UserUtils: t.UserUtils = findByPropsLazy("useName", "getGlobalName");
 
 export const zustandCreate = findByCodeLazy("will be removed in v4");
 
