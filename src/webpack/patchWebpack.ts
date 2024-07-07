@@ -97,7 +97,7 @@ define(Function.prototype, "m", {
         const proxiedModuleFactories = new Proxy(originalModules, moduleFactoriesHandler);
         /*
         If Discord ever decides to set module factories using the variable of the modules object directly, instead of wreq.m, switch the proxy to the prototype
-        define(this, "m", { value: Reflect.setPrototypeOf(originalModules, new Proxy(originalModules, moduleFactoriesHandler)) });
+        Reflect.setPrototypeOf(originalModules, new Proxy(originalModules, moduleFactoriesHandler));
         */
 
         define(this, "m", { value: proxiedModuleFactories });
