@@ -30,7 +30,7 @@ import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpa
 import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
 const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
-const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
+const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile", "USER_POPOUT_V2");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
