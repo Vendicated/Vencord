@@ -101,7 +101,8 @@ function HiddenChannelLockScreen({ channel }: { channel: Exclude<GuildChannelRec
     useEffect(() => {
         const membersToFetch: string[] = [];
 
-        const guildOwnerId = GuildStore.getGuild(guildId)!.ownerId!;
+        const guildOwnerId = GuildStore.getGuild(guildId)?.ownerId;
+        if (!guildOwnerId) return;
         if (!GuildMemberStore.getMember(guildId!, guildOwnerId))
             membersToFetch.push(guildOwnerId);
 

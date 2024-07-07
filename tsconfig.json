@@ -24,7 +24,8 @@
         },
         "resolveJsonModule": true,
 
-        "noEmit": true,
+        "emitDeclarationOnly": true,
+        "outDir": "dist",
 
         "plugins": [
             // Transform paths in output .d.ts files (Include this line if you output declarations files)
@@ -43,6 +44,8 @@
             "DOM.Iterable",
             "ESNext"
         ],
-        "target": "ESNext"
+        "target": "ESNext",
+
+        "composite": true
     }
 }

@@ -33,7 +33,7 @@ export interface UserContextProps {
     className: string;
     config: { context: string; };
     context: string;
-    onHeightUpdate: (...args: unknown[]) => void;
+    onHeightUpdate: (...args: any[]) => void;
     position: string;
     target: HTMLElement;
     theme: string;
@@ -45,8 +45,8 @@ export interface StreamContextProps {
     className: string;
     config: { context: string; };
     context: string;
-    exitFullscreen: (...args: unknown[]) => void;
-    onHeightUpdate: (...args: unknown[]) => void;
+    exitFullscreen: (...args: any[]) => void;
+    onHeightUpdate: (...args: any[]) => void;
     position: string;
     stream: Stream;
     target: HTMLElement;

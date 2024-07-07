@@ -162,7 +162,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
             }
         }
 
-        private req(method: "post" | "get" | "put", route: string, data: any = {}) {
+        private req(method: "post" | "get" | "put", route: string, data: any = {}): Promise<any> {
             if (this.device?.is_active)
                 (data.query ??= {}).device_id = this.device.id;
 

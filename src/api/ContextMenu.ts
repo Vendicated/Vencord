@@ -127,7 +127,7 @@ interface ContextMenuProps {
     children: (ReactElement | null)[];
     "aria-label": string;
     onSelect: (() => void) | undefined;
-    onClose: (callback: (...args: unknown[]) => unknown) => void;
+    onClose: (callback: (...args: any[]) => unknown) => void;
 }
 
 export function _usePatchContextMenu(props: ContextMenuProps) {

@@ -41,7 +41,7 @@ export interface Menu {
 
         color?: string;
         render?: ComponentType<any>;
-        onChildrenScroll?: (...args: unknown[]) => unknown;
+        onChildrenScroll?: (...args: any[]) => unknown;
         childRowHeight?: number;
         listClassName?: string;
         disabled?: boolean;

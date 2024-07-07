@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { FluxStore, FluxSyncWithFunction } from "../stores/abstract/FluxStore";
+import type { FluxStore } from "../stores/abstract/FluxStore";
 
 // Original name: Emitter
 export declare class FluxEmitter {
     batched<T>(callback: () => T): T;
     destroy(): void;
     emit(): void;
-    emitNonReactOnce(syncWiths: Set<FluxSyncWithFunction>, changedStores: Set<FluxStore>): void;
+    emitNonReactOnce(syncWiths: Set<() => unknown>, changedStores: Set<FluxStore>): void;
     emitReactOnce(): void;
     getChangeSentinel(): number;
     getIsPaused(): boolean;

@@ -28,7 +28,7 @@ export declare class UserStore<
     findByTag(username: string, discriminator?: string | Nullish): UserRecord | undefined;
     forEach(callback: (user: UserRecord) => boolean | undefined): void;
     /**
-     * @returns The UserRecord object for the current user. If no USER_UPDATE action has been dispatched for the current user, undefined is returned.
+     * @returns The UserRecord object for the current user. If the current user has not yet been loaded, undefined is returned.
      */
     getCurrentUser(): UserRecord | undefined;
     getUser(userId?: string | Nullish): UserRecord | undefined;

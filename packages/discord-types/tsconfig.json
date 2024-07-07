@@ -1,32 +1,27 @@
 {
-    "include": ["src"],
+    "exclude": ["src"],
+    "references": [{ "path": "../.." }],
 
     "compilerOptions": {
         "exactOptionalPropertyTypes": true,
         "noUncheckedIndexedAccess": true,
         "strict": true,
 
-        "module": "Node16",
-        "types": ["events", "lodash", "react"],
+        "module": "NodeNext",
+        "typeRoots": ["./node_modules/@types"],
+        "types": ["node", "semver"],
 
+        "inlineSourceMap": true,
         "noEmit": true,
 
-        "isolatedModules": true,
+        "allowJs": true,
+        "checkJs": true,
 
-        "lib": [
-            "ES2019",
-            "ES2020.BigInt",
-            "ES2020.Date",
-            "ES2020.Intl",
-            "ES2020.Number",
-            "ES2020.Promise",
-            "ES2020.String",
-            "ES2021.String",
-            "ES2022.Array",
-            "ES2022.Object",
-            "ES2022.String",
-            "ES2023.Array"
-        ],
-        "target": "ES2020"
+        "esModuleInterop": true,
+
+        "target": "ESNext",
+
+        // https://github.com/microsoft/TypeScript/issues/8836
+        "skipLibCheck": true
     }
 }

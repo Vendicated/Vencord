@@ -18,7 +18,7 @@ export type FluxAction = FluxGenericAction<FluxActionType>;
 export type ExcludeAction<Action extends FluxAction, ActionType extends Action["type"]>
     = Action extends unknown
         // Workaround to avoid ts(2589)
-        ? [Exclude<Action["type"], ActionType>] extends [never]
+        ? Exclude<Action["type"], ActionType> extends never
             ? never
             : { type: Exclude<Action["type"], ActionType>; } & Omit<Action, "type">
         : never;
@@ -26,7 +26,7 @@ export type ExcludeAction<Action extends FluxAction, ActionType extends Action["
 export type ExtractAction<Action extends FluxAction, ActionType extends Action["type"]>
     = Action extends unknown
         // Workaround to avoid ts(2589)
-        ? [Extract<Action["type"], ActionType>] extends [never]
+        ? Extract<Action["type"], ActionType> extends never
             ? never
             : { type: Extract<Action["type"], ActionType>; } & Omit<Action, "type">
         : never;

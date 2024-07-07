@@ -36,7 +36,7 @@ for (const variable of ["DISCORD_TOKEN", "CHROMIUM_BIN"]) {
 const CANARY = process.env.USE_CANARY === "true";
 
 const browser = await pup.launch({
-    headless: "new",
+    headless: true,
     executablePath: process.env.CHROMIUM_BIN
 });
 
@@ -310,7 +310,7 @@ function reporterRuntime(token: string) {
 }
 
 await page.evaluateOnNewDocument(`
-    if (location.host.endsWith("discord.com")) {
+    if (/(?:^|\\.)discord\\.com$/.test(location.hostname)) {
         ${readFileSync("./dist/browser.js", "utf-8")};
         (${reporterRuntime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
     }

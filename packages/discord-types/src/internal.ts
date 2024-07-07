@@ -5,7 +5,7 @@
  */
 
 /** @internal */
-export type Bivariant<T extends (...args: any[]) => unknown>
+export type Bivariant<T extends (...args: never[]) => unknown>
     // eslint-disable-next-line @typescript-eslint/method-signature-style
     = { _(...args: Parameters<T>): ReturnType<T>; }["_"];
 

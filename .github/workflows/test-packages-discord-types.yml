@@ -18,16 +18,17 @@ jobs:
             - name: Use Node.js 20
               uses: actions/setup-node@v4
               with:
-                  node-version: ^20.11.0
+                  node-version: ^20.9.0
                   cache: pnpm
 
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
             - name: Check packages/discord-types for TypeScript errors and lint
-              run: |
+              run: | # https://github.com/microsoft/TypeScript/issues/40431
+                  tsc --emitDeclarationOnly
                   cd packages/discord-types
                   pnpm test
 
             - name: Check if packages/discord-types is compatible with Vencord
-              run: pnpm testTsc
+              run: pnpm testTsc && pnpm lint

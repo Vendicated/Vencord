@@ -11,12 +11,12 @@ import type { IpcRes } from "@utils/types";
 import type { Settings } from "api/Settings";
 import { ipcRenderer } from "electron";
 
-function invoke<T = any>(event: IpcEvents, ...args: unknown[]) {
-    return ipcRenderer.invoke(event, ...args) as Promise<T>;
+function invoke<T = any>(event: IpcEvents, ...args: unknown[]): Promise<T> {
+    return ipcRenderer.invoke(event, ...args);
 }
 
-export function sendSync<T = any>(event: IpcEvents, ...args: unknown[]) {
-    return ipcRenderer.sendSync(event, ...args) as T;
+export function sendSync<T = any>(event: IpcEvents, ...args: unknown[]): T {
+    return ipcRenderer.sendSync(event, ...args);
 }
 
 const PluginHelpers: Record<string, Record<string, (...args: any[]) => Promise<any>>> = {};

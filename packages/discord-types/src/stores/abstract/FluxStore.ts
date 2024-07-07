@@ -27,7 +27,7 @@ export declare abstract class FluxStore<Action extends FluxAction = FluxAction> 
     emitChange(): void;
     getDispatchToken(): string;
     getName(): string;
-    initialize(...args: unknown[]): void;
+    initialize(...args: never[]): void;
     initializeIfNeeded(): void;
     mustEmitChanges(
         mustEmitChanges?: ((action: Action) => boolean) | Nullish /* = () => true */
@@ -38,7 +38,7 @@ export declare abstract class FluxStore<Action extends FluxAction = FluxAction> 
     ): void;
     syncWith(
         stores: FluxStore[],
-        func: FluxSyncWithFunction,
+        func: () => unknown,
         timeout?: number | Nullish
     ): void;
     waitFor(...stores: FluxStore[]): void;
@@ -51,17 +51,18 @@ export declare abstract class FluxStore<Action extends FluxAction = FluxAction> 
     _mustEmitChanges: Bivariant<((action: Action) => boolean)> | Nullish;
     _reactChangeCallbacks: FluxChangeListeners;
     _syncWiths: {
-        func: FluxSyncWithFunction;
+        func: () => unknown;
         store: FluxStore;
     }[];
     addChangeListener: FluxChangeListeners["add"];
+    /**
+     * @param listener The change listener to add. It will be removed when it returns false.
+     */
     addConditionalChangeListener: FluxChangeListeners["addConditional"];
     addReactChangeListener: FluxChangeListeners["add"];
     removeChangeListener: FluxChangeListeners["remove"];
     removeReactChangeListener: FluxChangeListeners["remove"];
 }
-
-export type FluxSyncWithFunction = () => boolean | undefined;
 
 // Original name: ChangeListeners
 export declare class FluxChangeListeners {
@@ -69,13 +70,19 @@ export declare class FluxChangeListeners {
     hasAny(): boolean;
     invokeAll(): void;
 
-    add: (listener: FluxChangeListener) => void;
+    add: (listener: FluxChangeListener<false>) => void;
+    /**
+     * @param listener The change listener to add. It will be removed when it returns false.
+     */
     addConditional: (
-        listener: FluxChangeListener,
+        listener: FluxChangeListener<true>,
         immediatelyCall?: boolean | undefined /* = true */
     ) => void;
     listeners: Set<FluxChangeListener>;
     remove: (listener: FluxChangeListener) => void;
 }
 
-export type FluxChangeListener = () => boolean;
+export type FluxChangeListener<Conditional extends boolean = boolean>
+    = Conditional extends true
+        ? () => unknown
+        : () => void;

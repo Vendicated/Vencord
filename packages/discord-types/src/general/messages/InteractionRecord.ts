@@ -34,7 +34,7 @@ export declare class InteractionRecord<
 
 // Original name: InteractionTypes
 export enum InteractionType {
-    PING = 1,
+    PING = 1, // From the API documentation
     APPLICATION_COMMAND = 2,
     MESSAGE_COMPONENT = 3,
     APPLICATION_COMMAND_AUTOCOMPLETE = 4,

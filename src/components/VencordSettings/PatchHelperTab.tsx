@@ -50,7 +50,7 @@ const findCandidates = debounce(({ find, setError, setModule }: FindCandidatesOp
 });
 
 interface ReplacementComponentProps {
-    module: [id: string | number, factory: (...args: unknown[]) => unknown];
+    module: [id: string | number, factory: (...args: any[]) => unknown];
     match: string;
     replacement: string | ReplaceFn;
     setReplacementError: (error: any) => void;

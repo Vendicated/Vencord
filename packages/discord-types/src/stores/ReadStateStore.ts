@@ -36,7 +36,11 @@ export declare class ReadStateStore<Action extends FluxAction = ReadStateStoreAc
     getMentionChannelIds(): string[];
     getMentionCount(id: string, type?: ReadStateType | undefined /* = ReadStateType.CHANNEL */): number;
     getNonChannelAckId(type: ReadStateType.NOTIFICATION_CENTER | ReadStateType.MESSAGE_REQUESTS): string | null;
-    getNotifCenterReadState(userId: string): ReadState<ReadStateType.NOTIFICATION_CENTER>;
+    /**
+     * @param meId The user ID of the current user.
+     * @returns The ReadState object for the inbox of the current user. If the current user has not yet been loaded, undefined is returned.
+     */
+    getNotifCenterReadState(meId: string): ReadState<ReadStateType.NOTIFICATION_CENTER> | undefined;
     getOldestUnreadMessageId(id: string, type?: ReadStateType | undefined /* = ReadStateType.CHANNEL */): string | null;
     getOldestUnreadTimestamp(id: string, type?: ReadStateType | undefined /* = ReadStateType.CHANNEL */): number;
     getReadStatesByChannel(): { [channelId: string]: ReadState<ReadStateType.CHANNEL>; };

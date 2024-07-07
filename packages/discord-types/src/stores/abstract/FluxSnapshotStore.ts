@@ -28,7 +28,10 @@ export declare abstract class FluxSnapshotStore<
 
     static allStores: FluxSnapshotStore[];
     static clearAll(): void;
-    /** Not present on FluxSnapshotStore's constructor. */
+    /**
+     * Not present on FluxSnapshotStore's constructor.
+     * All subclasses are required to define their own.
+     */
     static displayName: string;
 
     clear(): void;
