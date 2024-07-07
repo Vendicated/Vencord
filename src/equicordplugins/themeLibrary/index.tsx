@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
@@ -12,12 +13,7 @@ import { settings } from "./settings";
 export default definePlugin({
     name: "ThemeLibrary",
     description: "A library of themes for Vencord.",
-    authors: [
-        {
-            name: "Fafa",
-            id: 428188716641812481n,
-        },
-    ],
+    authors: [EquicordDevs.Fafa],
     settings,
     toolboxActions: {
         "Open Theme Library": () => {

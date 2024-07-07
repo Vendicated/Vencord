@@ -146,9 +146,7 @@ function getBadgesToApply() {
 export default definePlugin({
     name: "FriendshipRanks",
     description: "Adds badges showcasing how long you have been friends with a user for",
-    authors: [
-        Devs.Samwich
-    ],
+    authors: [Devs.Samwich],
     start() {
         getBadgesToApply().forEach(thing => Vencord.Api.Badges.addBadge(thing));
 

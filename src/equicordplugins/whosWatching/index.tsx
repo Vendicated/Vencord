@@ -81,9 +81,7 @@ const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer"
 export default definePlugin({
     name: "WhosWatching",
     description: "Hover over the screenshare icon to view what users are watching your stream",
-    authors: [
-        EquicordDevs.Fres
-    ],
+    authors: [EquicordDevs.Fres],
     settings: settings,
     patches: [
         {
