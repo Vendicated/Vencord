@@ -32,6 +32,8 @@ import { findByProps, findComponent } from "@webpack";
 import { Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { Ref, SyntheticEvent } from "react";
 
+import Plugins from "~plugins";
+
 import { AddonCard } from "./AddonCard";
 import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
@@ -252,7 +254,7 @@ function ThemesTab() {
                             {Vencord.Plugins.isPluginEnabled("ClientTheme") && (
                                 <QuickAction
                                     text="Edit ClientTheme"
-                                    action={() => openPluginModal(Vencord.Plugins.plugins.ClientTheme)}
+                                    action={() => openPluginModal(Plugins.ClientTheme)}
                                     Icon={PencilIcon}
                                 />
                             )}
