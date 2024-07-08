@@ -36,6 +36,12 @@ interface VoiceState {
     selfMute: boolean;
 }
 
+enum IgnoreOwnStatus {
+    Never,
+    Joining_leaving,
+    Always
+}
+
 const VoiceStateStore = findByPropsLazy("getVoiceStatesForChannel", "getCurrentClientVoiceChannelId");
 
 // Mute/Deaf for other people than you is commented out, because otherwise someone can spam it and it will be annoying
@@ -176,6 +182,11 @@ export default definePlugin({
                 const [type, id] = getTypeAndChannelId(state, isMe);
                 if (!type) continue;
 
+                if(isMe){
+                    if(Settings.plugins.VcNarrator.ignoreSelf == IgnoreOwnStatus.Always) continue;
+                    if(isMe && Settings.plugins.VcNarrator.ignoreSelf == IgnoreOwnStatus.Joining_leaving && (type == "join" || type == "leave")) continue;
+                }
+
                 const template = Settings.plugins.VcNarrator[type + "Message"];
                 const user = isMe && !Settings.plugins.VcNarrator.sayOwnName ? "" : UserStore.getUser(userId).username;
                 const displayName = user && ((UserStore.getUser(userId) as any).globalName ?? user);
@@ -253,6 +264,15 @@ export default definePlugin({
                 description: "Strip non latin characters from names before saying them",
                 type: OptionType.BOOLEAN,
                 default: false
+            },
+            ignoreSelf: {
+                type: OptionType.SELECT,
+                description: "Do not say own action",
+                options: [
+                    { label: "Never", value: IgnoreOwnStatus.Never, default: true},
+                    { label: "Joining/leaving", value: IgnoreOwnStatus.Joining_leaving },
+                    { label: "Always", value: IgnoreOwnStatus.Always }
+                ],
             },
             joinMessage: {
                 type: OptionType.STRING,
