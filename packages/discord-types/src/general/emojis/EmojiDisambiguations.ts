@@ -18,6 +18,7 @@ export declare class EmojiDisambiguations {
     static reset(): void;
     static resetFavorites(): void;
     static resetFrequentlyUsed(): void;
+    static resetFrequentlyUsedReactionEmojis(): void;
 
     _buildDisambiguatedCustomEmoji(): void;
     ensureDisambiguated(): void;
@@ -32,6 +33,7 @@ export declare class EmojiDisambiguations {
     getEmoticonByName(emoticonName: string): GuildEmoji | undefined;
     getEscapedCustomEmoticonNames(): string;
     getFrequentlyUsedEmojisWithoutFetchingLatest(): Emoji[];
+    getFrequentlyUsedReactionEmojisWithoutFetchingLatest(): Emoji[];
     getGroupedCustomEmoji(): Defined<this["groupedCustomEmojis"]>;
     getNewlyAddedEmojiForGuild(guildId: string): GuildEmoji[];
     getTopEmojiWithoutFetchingLatest(guildId: string): GuildEmoji[];
@@ -51,6 +53,7 @@ export declare class EmojiDisambiguations {
     favoriteNamesAndIds: Set<string> | null;
     favorites: Emoji[] | null;
     frequentlyUsed: Emoji[] | null;
+    frequentlyUsedReactionEmojis: Emoji[] | null;
     groupedCustomEmojis: { [guildId: string]: GuildEmoji; } | undefined;
     guildId: string | null;
     isFavoriteEmojiWithoutFetchingLatest: (emoji?: Emoji | Nullish) => boolean;

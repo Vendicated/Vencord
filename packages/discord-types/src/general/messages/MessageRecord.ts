@@ -95,8 +95,6 @@ export declare class MessageRecord<
     referralTrialOfferId: string | null;
     roleSubscriptionData: MessageRoleSubscriptionData | undefined;
     state: MessageState;
-    stickerItems: StickerItem[];
-    stickers: Sticker[];
     tts: boolean;
     webhookId: string | null;
 }
@@ -278,47 +276,4 @@ export enum MessageState {
     SEND_FAILED = "SEND_FAILED",
     SENDING = "SENDING",
     SENT = "SENT",
-}
-
-export interface StickerItem {
-    format_type: StickerFormat;
-    id: string;
-    name: string;
-}
-
-export enum StickerFormat {
-    PNG = 1,
-    APNG = 2,
-    LOTTIE = 3,
-    GIF = 4,
-}
-
-export type Sticker = StandardSticker | GuildSticker;
-
-export interface StickerBase {
-    asset?: "";
-    description: string | null;
-    format_type: StickerFormat;
-    id: string;
-    name: string;
-    tags: string;
-    type: MetaStickerType;
-}
-
-export interface StandardSticker extends StickerBase {
-    pack_id: string;
-    sort_value: number;
-}
-
-export interface GuildSticker extends StickerBase {
-    /** @todo May actually not be optional. */
-    available?: boolean;
-    guild_id: string;
-    /** @todo This is not a UserRecord; it's a user object from the API. */
-    user: Record<string, any>;
-}
-
-export enum MetaStickerType {
-    STANDARD = 1,
-    GUILD = 2,
 }

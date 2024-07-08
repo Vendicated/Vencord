@@ -33,6 +33,7 @@ export declare class EmojiStore<
     get categories(): string[];
     get diversitySurrogate(): string;
     get emojiFrecencyWithoutFetchingLatest(): Frecency<string, Emoji>;
+    get emojiReactionFrecencyWithoutFetchingLatest(): Frecency<string, Emoji>;
     getCustomEmojiById(emojiId: string): GuildEmoji | undefined;
     getDisambiguatedEmojiContext(guildId?: string | Nullish): EmojiDisambiguations;
     getEmojiAutosuggestion(channel?: ChannelRecord): Emoji[];

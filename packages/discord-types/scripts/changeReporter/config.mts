@@ -631,6 +631,10 @@ export const config: CR.ReporterConfig = {
         "./stores/EmojiStore.ts": {
             EmojiStore: {
                 type: "class",
+                ignoredAdditions: {
+                    // Overrides
+                    staticMethodsAndFields: ["migrations"],
+                },
             },
             EmojiIntention: {
                 type: "enum",
