@@ -479,10 +479,12 @@ export default definePlugin({
     isHiddenChannel(channel?: ChannelRecord | { channelId: string; }, checkConnect = false) {
         if (!channel) return false;
 
-        if (!("isPrivate" in channel)) {
+        if ("channelId" in channel) {
             channel = ChannelStore.getChannel(channel.channelId);
-            if (!channel || !channel.isPrivate()) return false;
+            if (!channel) return false;
         }
+
+        if (channel.isPrivate()) return false;
 
         return !PermissionStore.can(Permissions.VIEW_CHANNEL, channel)
             || checkConnect && !PermissionStore.can(Permissions.CONNECT, channel);
