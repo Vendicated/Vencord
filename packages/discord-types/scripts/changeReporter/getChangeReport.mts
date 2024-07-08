@@ -13,8 +13,8 @@ import { satisfies, subset, valid, validRange } from "semver";
 import type { JsonObject, JsonValue } from "type-fest";
 
 import { config } from "./config.mjs";
+import type { autoFindClass, autoFindEnum, autoFindStore } from "./finds.mts";
 import type { CR } from "./types.mts";
-import type { autoFindClass, autoFindEnum, autoFindStore } from "./utils.mts";
 
 export async function getChangeReport(page: Page): Promise<CR.ChangeReport> {
     const { rootDir, deps, src } = config;
@@ -290,7 +290,7 @@ async function getClassReport(
                 changes.unchangedCount > 1
                 || changes.unchangedCount > 0
                 && (changes.additions.constructorDefinition
-                || changes.removals.constructorDefinition)
+                    || changes.removals.constructorDefinition)
             ) {
                 checkClassIgnores(changes, config, report);
                 report.changes = changes;

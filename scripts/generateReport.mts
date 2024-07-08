@@ -79,7 +79,7 @@ const IGNORED_DISCORD_ERRORS: (RegExp | string)[] = [
 function toCodeBlock(s: string, indentation = 0, isDiscord = false) {
     s = s.replace(/```/g, "`\u200B`\u200B`");
 
-    const indentationStr = Array(!isDiscord ? indentation : 0).fill(" ").join("");
+    const indentationStr = " ".repeat(!isDiscord ? indentation : 0);
     return `\`\`\`\n${s.split("\n").map(s => indentationStr + s).join("\n")}\n${indentationStr}\`\`\``;
 }
 

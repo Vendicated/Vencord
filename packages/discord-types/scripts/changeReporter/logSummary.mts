@@ -5,11 +5,12 @@
  */
 
 import type { CR } from "./types.mts";
+import { capitalize, codeBlock, formatChannel, formatEnumEntryList, formatKeyList, formatWarnList } from "./utils.mjs";
 
-export function logSummary(report: CR.ChangeReport, channel: "stable" | "ptb" | "canary") {
+export function logSummary(report: CR.ChangeReport, channel?: string | undefined) {
     const { deps, src } = report;
 
-    let summary = `# Change Report (${channel === "ptb" ? channel.toUpperCase() : capitalize(channel)})\n`;
+    let summary = `# Change Report (${formatChannel(channel)})\n`;
 
     let sections = "";
 
@@ -77,12 +78,12 @@ export function logSummary(report: CR.ChangeReport, channel: "stable" | "ptb" | 
                             section += `* The report for \`${name}\` has ${warns.length} warning${warns.length === 1 ? "" : "s"}:\n`
                                 + formatWarnList(warns);
 
-                        section += `* The report for \`${name}\` has an error:\n` + formatError(error);
+                        section += `* The report for \`${name}\` has an error:\n` + codeBlock(error);
                     }
                 } else
                     section += ".  \n";
             } else
-                section += `\`${fileName}\` has a file-level error:\n` + formatError(fileError);
+                section += `\`${fileName}\` has a file-level error:\n` + codeBlock(fileError);
         }
 
         if (fileToLogCount > 0) {
@@ -252,12 +253,12 @@ export function logSummary(report: CR.ChangeReport, channel: "stable" | "ptb" | 
                             section += `* The report for ${type} \`${identifier}\` has ${warns.length} warning${warns.length === 1 ? "" : "s"}:\n`
                                 + formatWarnList(warns);
 
-                        section += `* The report for ${type} \`${identifier}\` has an error:\n${formatError(error)}`;
+                        section += `* The report for ${type} \`${identifier}\` has an error:\n` + codeBlock(error);
                     }
                 } else
                     section += ".  \n";
             } else
-                section += `\`${fileName}\` has a file-level error:\n${formatError(fileError)}`;
+                section += `\`${fileName}\` has a file-level error:\n` + codeBlock(fileError);
         }
 
         if (fileToLogCount > 0) {
@@ -268,29 +269,7 @@ export function logSummary(report: CR.ChangeReport, channel: "stable" | "ptb" | 
             sections += "### All watched declarations are unchanged without warnings.\n";
     }
 
-    summary += sections || "## There are 0 watched dependencies and declarations.";
+    summary += sections || "## There are 0 watched dependencies and declarations.\n";
 
     console.log(summary);
-}
-
-function capitalize(string: string) {
-    return string.replace(/^./, c => c.toUpperCase());
-}
-
-function formatWarnList(warns: string[]) {
-    return warns.map(formatError).join("");
-}
-
-function formatError(error: string) {
-    return `\`\`\`\n${error}\n\`\`\`\n`;
-}
-
-function formatKeyList(keys: string[], indentLevel = 0) {
-    const indent = "  ".repeat(indentLevel);
-    return keys.map(key => indent + `* \`${key}\`\n`).join("");
-}
-
-function formatEnumEntryList(entries: [key: string, value: unknown][], indentLevel = 0) {
-    const indent = "  ".repeat(indentLevel);
-    return entries.map(([key, value]) => indent + `* \`${key} = ${JSON.stringify(value)}\`\n`).join("");
 }

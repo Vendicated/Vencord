@@ -80,7 +80,7 @@ export enum CodedLinkType {
     TEMPLATE = "TEMPLATE",
 }
 
-export type MessageComponent = MessageActionRowComponent | MessageButtonComponent | MessageSelectComponent | MessageTextInputComponent | MessageTextComponent | MessageMediaGalleryComponent | MessageSeparatorComponent;
+export type MessageComponent = MessageActionRowComponent | MessageButtonComponent | MessageSelectComponent | MessageTextInputComponent | MessageTextComponent | MessageMediaGalleryComponent | MessageSeparatorComponent | MessageContentInventoryEntryComponent;
 
 export interface MessageComponentBase {
     id: string;

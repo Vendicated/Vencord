@@ -12,7 +12,7 @@ type ValidEnv<Config extends EnvConfig> = NodeJS.ProcessEnv & {
         : string;
 } & { [Key in keyof Config as false extends Config[Key] ? Key : never]?: string; };
 
-export function validateEnv<const Config extends EnvConfig>(
+export function assertEnvValidity<const Config extends EnvConfig>(
     env: NodeJS.ProcessEnv,
     config: Config
 ): asserts env is ValidEnv<Config> {

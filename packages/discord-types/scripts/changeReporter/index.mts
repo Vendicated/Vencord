@@ -9,12 +9,18 @@ import { join } from "path";
 
 import puppeteer from "puppeteer-core";
 
-import { validateEnv } from "../utils.mjs";
+import { assertEnvValidity } from "../utils.mjs";
+import { autoFindClass, autoFindEnum, autoFindStore, getClassChanges, getEnumChanges, isValidClass, isValidEnum } from "./finds.mjs";
 import { getChangeReport } from "./getChangeReport.mjs";
 import { logSummary } from "./logSummary.mjs";
-import { autoFindClass, autoFindEnum, autoFindStore, getClassChanges, getEnumChanges, isValidClass, isValidEnum } from "./utils.mjs";
+import { postError, postReport } from "./webhooks.mjs";
 
-validateEnv(process.env, {
+process.on("uncaughtExceptionMonitor", error => {
+    const { DISCORD_WEBHOOK, CHANNEL } = process.env;
+    postError(error, DISCORD_WEBHOOK, CHANNEL);
+});
+
+assertEnvValidity(process.env, {
     CHANNEL: ["stable", "ptb", "canary"],
     CHROMIUM_BIN: true,
     DISCORD_TOKEN: true,
@@ -69,6 +75,5 @@ browser.close();
 
 logSummary(report, CHANNEL);
 
-if (DISCORD_WEBHOOK) {
-    // TODO
-}
+if (DISCORD_WEBHOOK)
+    postReport(report, DISCORD_WEBHOOK, CHANNEL);
