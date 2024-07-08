@@ -82,10 +82,22 @@ export interface IconCSSProperties extends CSSProperties {
     "--icon-size": string;
 }
 
+export enum ActivityViewType {
+    USER_POPOUT = "UserPopout",
+    USER_POPOUT_V2 = "UserPopoutV2",
+    ACTIVITY_FEED = "ActivityFeed",
+    PROFILE = "Profile",
+    PROFILE_V2 = "ProfileV2",
+    STREAM_PREVIEW = "StreamPreview",
+    VOICE_CHANNEL = "VoiceChannel",
+    SIMPLIFIED_PROFILE = "SimplifiedProfile",
+    BITE_SIZE_POPOUT = "BiteSizePopout"
+}
+
 export interface ActivityViewProps {
     activity: Activity | null;
     user: User;
-    guild: Guild;
-    channelId: string;
-    onClose: () => void;
+    activityGuild: Guild;
+    type: ActivityViewType;
+    showChannelDetails: boolean;
 }

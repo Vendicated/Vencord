@@ -32,7 +32,7 @@ export function getActivityImage(activity: Activity, application?: Application):
         const image = activity.assets?.large_image;
         // image needs to replace 'twitch:'
         if (image?.startsWith("twitch:")) {
-            // twitch images are always https://static-cdn.jtvnw.net/previews-ttv/live_user_USERNAME-RESOLTUON.jpg
+            // twitch images are always https://static-cdn.jtvnw.net/previews-ttv/live_user_USERNAME-RESOLUTION.jpg
             return `${image.replace("twitch:", "https://static-cdn.jtvnw.net/previews-ttv/live_user_")}-108x60.jpg`;
         }
     }
@@ -54,7 +54,6 @@ export function getApplicationIcons(activities: Activity[], preferSmall = false)
             continue;
         }
         if (assets) {
-
             const addImage = (image: string, alt: string) => {
                 if (image.startsWith("mp:")) {
                     const discordMediaLink = `https://media.discordapp.net/${image.replace(/mp:/, "")}`;
