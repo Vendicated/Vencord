@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Guild, GuildMember } from "discord-types/general";
+import { Guild, GuildMember, User } from "discord-types/general";
 import type { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
@@ -255,4 +255,64 @@ export interface PopoutActions {
     open(key: string, render: (windowKey: string) => ReactNode, features?: BrowserWindowFeatures);
     close(key: string): void;
     setAlwaysOnTop(key: string, alwaysOnTop: boolean): void;
+}
+
+export type UserNameUtilsTagInclude = LiteralUnion<"auto" | "always" | "never", string>;
+export interface UserNameUtilsTagOptions {
+    forcePomelo?: boolean;
+    identifiable?: UserNameUtilsTagInclude;
+    decoration?: UserNameUtilsTagInclude;
+    mode?: "full" | "username";
+}
+
+export interface UsernameUtils {
+    getGlobalName(user: User): string;
+    getFormattedName(user: User, useTagInsteadOfUsername?: boolean): string;
+    getName(user: User): string;
+    useName(user: User): string;
+    getUserTag(user: User, options?: UserNameUtilsTagOptions): string;
+    useUserTag(user: User, options?: UserNameUtilsTagOptions): string;
+
+
+    useDirectMessageRecipient: any;
+    humanizeStatus: any;
+}
+
+export class DisplayProfile {
+    userId: string;
+    banner?: string;
+    bio?: string;
+    pronouns?: string;
+    accentColor?: number;
+    themeColors?: number[];
+    popoutAnimationParticleType?: any;
+    profileEffectId?: string;
+    _userProfile?: any;
+    _guildMemberProfile?: any;
+    canUsePremiumProfileCustomization: boolean;
+    canEditThemes: boolean;
+    premiumGuildSince: Date | null;
+    premiumSince: Date | null;
+    premiumType?: number;
+    primaryColor?: number;
+
+    getBadges(): Array<{
+        id: string;
+        description: string;
+        icon: string;
+        link?: string;
+    }>;
+    getBannerURL(options: { canAnimate: boolean; size: number; }): string;
+    getLegacyUsername(): string | null;
+    hasFullProfile(): boolean;
+    hasPremiumCustomization(): boolean;
+    hasThemeColors(): boolean;
+    isUsingGuildMemberBanner(): boolean;
+    isUsingGuildMemberBio(): boolean;
+    isUsingGuildMemberPronouns(): boolean;
+}
+
+export interface DisplayProfileUtils {
+    getDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
+    useDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
 }
