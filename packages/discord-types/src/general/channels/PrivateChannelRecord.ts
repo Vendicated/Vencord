@@ -10,7 +10,7 @@ import type { ChannelBaseProperties, ChannelRecipient, ChannelRecordBase, Channe
 export type PrivateChannelRecord = DMChannelRecord | GroupDMChannelRecord;
 
 // @ts-expect-error: https://github.com/microsoft/TypeScript/issues/59000
-export type PrivateChannelProperties<Channel extends PrivateChannelRecordBase> = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "rawRecipients" | "recipients" | "safetyWarnings">;
+export type PrivateChannelProperties<Channel extends PrivateChannelRecordBase> = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>, "blocked_user_warning_dismissed">>, Nullish, "rawRecipients" | "recipients" | "safetyWarnings">;
 
 type PrivateChannelType = ChannelType.DM | ChannelType.GROUP_DM;
 
@@ -34,6 +34,7 @@ export declare abstract class PrivateChannelRecordBase extends ChannelRecordBase
     appliedTags?: undefined;
     availableTags?: undefined;
     bitrate_?: undefined;
+    blocked_user_warning_dismissed?: ChannelRecordBase["blocked_user_warning_dismissed"];
     defaultAutoArchiveDuration?: undefined;
     defaultForumLayout?: undefined;
     defaultReactionEmoji?: undefined;

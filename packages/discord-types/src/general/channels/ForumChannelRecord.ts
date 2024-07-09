@@ -30,6 +30,7 @@ export declare abstract class ForumChannelRecordBase extends ChannelRecordBase {
     appliedTags?: undefined;
     availableTags: Defined<ChannelRecordBase["availableTags"]>;
     bitrate_?: undefined;
+    blocked_user_warning_dismissed?: undefined;
     defaultAutoArchiveDuration: ChannelRecordBase["defaultAutoArchiveDuration"];
     defaultForumLayout: ChannelRecordBase["defaultForumLayout"];
     defaultReactionEmoji: ChannelRecordBase["defaultReactionEmoji"];

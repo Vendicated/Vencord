@@ -294,9 +294,6 @@ export const config: CR.ReporterConfig = {
                 // From the API documentation
                 ignoredRemovals: [["SPECTATE"]],
             },
-            CodedLinkType: {
-                type: "enum",
-            },
             PollLayoutType: {
                 type: "enum",
             },
@@ -309,12 +306,6 @@ export const config: CR.ReporterConfig = {
             MessageState: {
                 type: "enum",
             },
-            StickerFormat: {
-                type: "enum",
-            },
-            MetaStickerType: {
-                type: "enum"
-            },
         },
         "./general/messages/MessageSnapshotRecord.ts": {
             MessageSnapshotRecord: {
@@ -326,6 +317,9 @@ export const config: CR.ReporterConfig = {
                 type: "class",
             },
             MessageAttachmentFlags: {
+                type: "enum",
+            },
+            CodedLinkType: {
                 type: "enum",
             },
             MessageButtonComponentStyle: {
@@ -373,6 +367,12 @@ export const config: CR.ReporterConfig = {
             },
             MessageFlags: {
                 type: "enum",
+            },
+            StickerFormat: {
+                type: "enum",
+            },
+            MetaStickerType: {
+                type: "enum"
             },
             MessageType: {
                 type: "enum",

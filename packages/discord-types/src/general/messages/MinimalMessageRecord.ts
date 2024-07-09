@@ -5,14 +5,16 @@
  */
 
 import type { Moment } from "moment";
+import type { SnakeCasedProperties } from "type-fest";
 
 import type { Nullish, Optional } from "../../internal";
 import type { ChannelType } from "../channels/ChannelRecord";
 import type { ImmutableRecord } from "../ImmutableRecord";
 
-export type MinimalMessageRecordOwnProperties = Pick<MinimalMessageRecord, "attachments" | "codedLinks" | "components" | "content" | "editedTimestamp" | "embeds" | "flags" | "timestamp" | "type">;
+export type MinimalMessageRecordOwnProperties = Pick<MinimalMessageRecord, "attachments" | "codedLinks" | "components" | "content" | "editedTimestamp" | "embeds" | "flags" | "stickerItems" | "stickers" | "timestamp" | "type">;
 
-export type MinimalMessageProperties = Optional<MinimalMessageRecordOwnProperties, Nullish>;
+export type MinimalMessageProperties = Optional<MinimalMessageRecordOwnProperties, Nullish>
+    & SnakeCasedProperties<Optional<Pick<MinimalMessageRecordOwnProperties, "stickerItems">, Nullish>>;
 
 export declare class MinimalMessageRecord<
     OwnProperties extends MinimalMessageRecordOwnProperties = MinimalMessageRecordOwnProperties

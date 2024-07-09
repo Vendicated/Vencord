@@ -79,7 +79,7 @@ async function getDependenciesReport(page: Page, filePath: string, config: CR.De
         // https://github.com/microsoft/TypeScript/issues/53395
         const packageVersionRange = (dependencies as JsonObject)[key];
         if (typeof packageVersionRange !== "string") {
-            report.error = `File '${fileName}' does not have a dependency named '${key}'.`;
+            report.error = `File '${fileName}' does not have a dependency with name '${key}'.`;
             fileReport.errored.push(report);
             continue;
         }
@@ -152,6 +152,7 @@ async function getSrcFileReport(page: Page, filePath: string, config: CR.SrcFile
         return fileReport;
     }
 
+    const unfoundDeclarations = new Set(Object.keys(config));
     const reports: Promise<CR.DeclarationReport>[] = [];
     for (const node of ast.body) {
         const declaration = node.type === AST_NODE_TYPES.ExportNamedDeclaration
@@ -168,6 +169,7 @@ async function getSrcFileReport(page: Page, filePath: string, config: CR.SrcFile
                 const declarationConfig = config[name];
                 if (!declarationConfig) continue;
 
+                unfoundDeclarations.delete(name);
                 reports.push(getClassReport(
                     page,
                     // @ts-expect-error: Control flow narrowing bug
@@ -181,6 +183,7 @@ async function getSrcFileReport(page: Page, filePath: string, config: CR.SrcFile
                 const declarationConfig = config[name];
                 if (!declarationConfig) continue;
 
+                unfoundDeclarations.delete(name);
                 reports.push(getEnumReport(
                     page,
                     declaration,
@@ -204,6 +207,16 @@ async function getSrcFileReport(page: Page, filePath: string, config: CR.SrcFile
                 fileReport.unchanged.push(report);
         }
     }
+
+    for (const identifier of unfoundDeclarations)
+        fileReport.errored.push({
+            type: config[identifier]!.type,
+            identifier,
+            changes: undefined,
+            error: `File '${fileName}' does not have a declaration with identifier '${identifier}'.`,
+            warns: []
+        });
+
     return fileReport;
 }
 

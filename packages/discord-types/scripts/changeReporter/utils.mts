@@ -8,8 +8,9 @@ export function capitalize(string: string) {
     return string.replace(/^./, c => c.toUpperCase());
 }
 
-export function codeBlock(content: unknown) {
-    return `\`\`\`\n${content}\n\`\`\`\n`;
+export function codeBlock(content: unknown, indentLevel = 0) {
+    const indent = "  ".repeat(indentLevel);
+    return `\`\`\`\n${content}\n\`\`\``.replaceAll(/^/gm, indent) + "\n";
 }
 
 export function formatChannel(channel?: string | undefined) {
@@ -24,8 +25,8 @@ export function formatChannel(channel?: string | undefined) {
     }
 }
 
-export function formatWarnList(warns: string[]) {
-    return warns.map(codeBlock).join("");
+export function formatWarnList(warns: string[], indentLevel = 0) {
+    return warns.map(warn => codeBlock(warn, indentLevel)).join("");
 }
 
 export function formatKeyList(keys: string[], indentLevel = 0) {
