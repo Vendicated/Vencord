@@ -31,18 +31,17 @@ export default definePlugin({
         },
         {
             find: '="NoteStore",',
-            replacement: {
-                match: /getNote\(\i\){return (\i)/,
-                replace: "getNotes(){return $1}$&",
-            },
-        },
-        // not sure it won't break anything but should be fine
-        {
-            find: '="NoteStore",',
-            replacement: {
-                match: /CONNECTION_OPEN:_,OVERLAY_INITIALIZE:_,/,
-                replace: "",
-            },
+            replacement: [
+                {
+                    match: /getNote\(\i\){return (\i)/,
+                    replace: "getNotes(){return $1}$&",
+                },
+                // not sure it won't break anything but should be fine
+                {
+                    match: /CONNECTION_OPEN:\i,OVERLAY_INITIALIZE:\i,/,
+                    replace: "",
+                },
+            ],
         },
         {
             find: ".REQUEST_GUILD_MEMBERS",
