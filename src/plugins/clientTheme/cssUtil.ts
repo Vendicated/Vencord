@@ -9,9 +9,8 @@
 export async function getStyles(): Promise<string> {
     let out = "";
     const styleLinkNodes: NodeListOf<HTMLLinkElement> = document.querySelectorAll('link[rel="stylesheet"]');
-    for (const styleLinkNode of styleLinkNodes)
-        out += await parseStyleLinkNode(styleLinkNode);
-    return out;
+    return Promise.all(styleLinkNodes.map(n => parseStyleLinkNode(n)))
+    	.then(contents => contents.join("\n"));
 }
 
 // runs callback with styles of new style nodes added to the head
