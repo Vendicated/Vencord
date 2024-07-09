@@ -34,11 +34,8 @@ async function parseStyleLinkNode(node: HTMLLinkElement): Promise<string> {
     const link = node.getAttribute("href");
     if (!link) return "";
 
-    try {
-        const res = await fetch(link);
-        return await res.text();
-    } catch (error) {
-        return "";
-    }
+    return fetch(link)
+    	.then(res => res.text())
+        .catch(() => "");
 }
 
