@@ -11,6 +11,7 @@ import { join } from "path";
 import puppeteer from "puppeteer-core";
 
 import { assertEnvValidity } from "../utils.mjs";
+import config from "./config.mjs";
 import { autoFindClass, autoFindEnum, autoFindStore, getClassChanges, getEnumChanges, isValidClass, isValidEnum } from "./finds.mjs";
 import { getChangeReport } from "./getChangeReport.mjs";
 import { getSummary } from "./getSummary.mjs";
@@ -71,7 +72,7 @@ await page.evaluate(`(async () => {
 })();
 `);
 
-const report = await getChangeReport(page);
+const report = await getChangeReport(page, config);
 browser.close();
 
 const summary = getSummary(report, CHANNEL);

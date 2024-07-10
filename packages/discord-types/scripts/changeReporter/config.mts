@@ -8,7 +8,7 @@ import { join } from "path";
 
 import type { CR } from "./types.mts";
 
-export const config: CR.ReporterConfig = {
+export default {
     rootDir: join(import.meta.dirname, "../../src"),
     deps: {
         "../package.json": {
@@ -717,4 +717,4 @@ export const config: CR.ReporterConfig = {
             },
         },
     },
-};
+} satisfies CR.ReporterConfig;

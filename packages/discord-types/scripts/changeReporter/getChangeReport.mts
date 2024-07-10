@@ -12,11 +12,10 @@ import type { Page } from "puppeteer-core";
 import { satisfies, subset, valid, validRange } from "semver";
 import type { JsonObject, JsonValue } from "type-fest";
 
-import { config } from "./config.mjs";
 import type { autoFindClass, autoFindEnum, autoFindStore } from "./finds.mts";
 import type { CR } from "./types.mts";
 
-export async function getChangeReport(page: Page): Promise<CR.ChangeReport> {
+export async function getChangeReport(page: Page, config: CR.ReporterConfig): Promise<CR.ChangeReport> {
     const { rootDir, deps, src } = config;
 
     const depsReports: Promise<CR.DependenciesReport>[] = [];
