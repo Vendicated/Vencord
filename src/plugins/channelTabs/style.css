@@ -15,7 +15,7 @@
 }
 
 /* user avatars */
-.vc-channeltabs-tab [class^="wrapper-"] {
+.vc-channeltabs-tab [class^="wrapper_"] {
     min-width: 1.5rem;
 }
 
@@ -150,6 +150,14 @@
 .vc-channeltabs-tab-selected {
     background: var(--bg-overlay-selected);
     background-color: var(--background-modifier-selected);
+}
+
+/* channel type container */
+.vc-channeltabs-container [class^="iconContainer_"] {
+    margin: 0 -0.25rem 0 0;
+    pointer-events: none;
+    height: 1rem;
+    transform: scale(0.8);
 }
 
 .vc-channeltabs-ghost-tab {
