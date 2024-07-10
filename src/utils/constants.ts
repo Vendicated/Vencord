@@ -526,6 +526,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "zack.io",
         id: 133314498214756352n,
     },
+    jg: {
+        name: "johnghall",
+        id: 184010879161991168n,
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
@@ -533,7 +537,7 @@ export const DevsById = /* #__PURE__*/ (() =>
     Object.freeze(
         Object.fromEntries(
             Object.entries(Devs)
-                .filter(d => d[1].id !== 0n)
+                .filter((d) => d[1].id !== 0n)
                 .map(([_, v]) => [v.id, v] as const),
         ),
     ))() as Record<string, Dev>;
