@@ -12,6 +12,9 @@ export enum ToggledTheme {
     Dark
 }
 
+/**
+ * A vanilla Discord theme: light, dark, or Nitro themes.
+ */
 export interface DiscordTheme {
     getName(): string;
     theme: string;

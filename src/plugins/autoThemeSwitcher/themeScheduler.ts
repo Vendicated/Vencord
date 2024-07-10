@@ -4,23 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Logger } from "@utils/Logger";
-
-import { ToggledTheme } from "./theme-types";
-
-const logger = new Logger("AutoThemeSwitcher", "#BBBBBB");
-
-// HH:MM
-export const timeRegex = /^([0-1][0-9]|2[0-3]):([0-5][0-9])$/;
+import { ToggledTheme } from "./types";
 
 function getMinutesFromMidnight(time: string) {
-    const regexec = timeRegex.exec(time);
-    if (regexec === null) {
-        logger.error("Failed to extract time from string:", time);
-        return 0;
-    }
-
-    return parseInt(regexec[1]) * 60 + parseInt(regexec[2]);
+    // time is necessarily in HH:MM format
+    const separatedTime = time.split(":");
+    return parseInt(separatedTime[0]) * 60 + parseInt(separatedTime[1]);
 }
 
 /**

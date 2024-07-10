@@ -7,10 +7,10 @@
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
 
-import * as pluginSettings from "./plugin-settings";
-import * as themeScheduler from "./theme-scheduler";
-import * as themeToggler from "./theme-toggler";
-import { ToggledTheme } from "./theme-types";
+import * as pluginSettings from "./pluginSettings";
+import * as themeScheduler from "./themeScheduler";
+import * as themeToggler from "./themeToggler";
+import { ToggledTheme } from "./types";
 
 const settings = pluginSettings.getPluginSettings(onChange);
 

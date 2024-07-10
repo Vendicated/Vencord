@@ -8,8 +8,8 @@ import { PluginSettingSelectOption } from "@utils/types";
 import { mapMangledModuleLazy } from "@webpack";
 import { i18n } from "@webpack/common";
 
-import * as themeToggler from "./theme-toggler";
-import { DiscordTheme, ToggledTheme } from "./theme-types";
+import * as themeToggler from "./themeToggler";
+import { DiscordTheme, ToggledTheme } from "./types";
 
 const classicThemeList: Array<DiscordTheme> = [
     { theme: "light", getName: () => i18n.Messages.THEME_LIGHT },

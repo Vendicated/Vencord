@@ -8,7 +8,7 @@ import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { findByCodeLazy } from "@webpack";
 
-import { DiscordTheme } from "./theme-types";
+import { DiscordTheme } from "./types";
 
 const logger = new Logger("AutoThemeSwitcher", "#BBBBBB");
 
