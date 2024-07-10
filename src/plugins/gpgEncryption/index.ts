@@ -39,7 +39,7 @@ const decryptPgpMessages = async (channelId: string) => {
             if (containsPGPMessage(m.content)) {
                 pgp.push(m);
                 updateMessage(channelId, m.id, {
-                    content: "*Encrypted Message - pending decription...*",
+                    content: "*Encrypted Message - pending decryption...*",
                 });
             }
         }
