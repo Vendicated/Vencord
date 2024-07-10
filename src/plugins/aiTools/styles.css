@@ -1,0 +1,53 @@
+/* stylelint-disable color-function-notation */
+.vc-at-modal-header h1 {
+    margin: 0;
+}
+
+.vc-at-modal-content {
+    margin-top: 1rem;
+    padding-bottom: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.vc-at-modal-content h2 {
+    margin: 0;
+}
+
+.vc-at-modal-content .vc-at-modal-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.vc-at-textgenbtn-loading {
+    animation: loadgradient 5s infinite linear;
+}
+
+@keyframes loadgradient {
+    0% {
+        color: rgb(255, 0, 0);
+    }
+
+    25% {
+        color: rgb(253, 135, 0);
+    }
+
+    50% {
+        color: rgb(0, 162, 255);
+    }
+
+    75% {
+        color: rgb(255, 0, 255);
+    }
+
+    100% {
+        color: rgb(255, 0, 0);
+    }
+}
+
+.vc-at-context-menu {
+    scale: 0.85;
+    transform: translateY(-3px);
+}
