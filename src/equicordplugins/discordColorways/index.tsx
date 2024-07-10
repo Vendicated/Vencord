@@ -12,18 +12,14 @@ import { Flex } from "@components/Flex";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { ModalProps, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { findByProps } from "@webpack";
 import {
     Button,
     Clipboard,
     Forms,
-    Heading,
     i18n,
     SettingsRouter,
     Toasts
 } from "@webpack/common";
-import { CSSProperties } from "react";
-import { Plugins } from "Vencord";
 
 import AutoColorwaySelector from "./components/AutoColorwaySelector";
 import ColorPickerModal from "./components/ColorPicker";
@@ -185,20 +181,6 @@ export default definePlugin({
                 match: /function (\i).{0,200}colorPickerFooter:/,
                 replace: "$self.ColorPicker=$1;$&",
             },
-        },
-        {
-            find: "Messages.ACTIVITY_SETTINGS",
-            replacement: {
-                match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
-                replace: (_, sectionTypes, commaOrSemi, elements, element) => `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`
-            }
-        },
-        {
-            find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
-            replacement: {
-                match: /(?<=function\((\i).*?\{)(?=let \i=Object.values\(\i.\i\).*?(\i\.\i)\.open\()/,
-                replace: "$2.open($1);return;"
-            }
         }
     ],
 
@@ -226,87 +208,48 @@ export default definePlugin({
 
     patchedSettings: new WeakSet(),
 
-    addSettings(elements: any[], element: { header?: string; settings: string[]; }, sectionTypes: Record<string, unknown>) {
-        if (this.patchedSettings.has(elements) || !this.isRightSpot(element)) return;
-
-        this.patchedSettings.add(elements);
-
-        elements.push(...this.makeSettingsCategories(sectionTypes));
-    },
-
-    makeSettingsCategories(SectionTypes: Record<string, unknown>) {
-        const { headerText, header } = findByProps("headerText", "header", "separator");
-        return [
-            {
-                section: SectionTypes.CUSTOM,
-                label: "Discord Colorways",
-                className: "vc-settings-header",
-                element: () => <div className={header} style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "6px 10px"
-                }}>
-                    <Heading
-                        variant="eyebrow"
-                        className={headerText}
-                        style={{
-                            "text-wrap": "wrap",
-                            color: "var(--channels-default)"
-                        } as CSSProperties}
-                    >
-                        Discord Colorways
-                    </Heading>
-                    <Heading
-                        variant="eyebrow"
-                        className={headerText}
-                        style={{
-                            marginLeft: "auto",
-                            color: "var(--channels-default)"
-                        }}
-                    >
-                        v{(Plugins.plugins.DiscordColorways as any).pluginVersion}
-                    </Heading>
-                </div>
-            },
-            {
-                section: "ColorwaysSelector",
-                label: "Colorways",
-                element: () => <Selector isSettings modalProps={{ onClose: () => new Promise(() => true), transitionState: 1 }} />,
-                className: "dc-colorway-selector"
-            },
-            {
-                section: "ColorwaysSettings",
-                label: "Settings",
-                element: SettingsPage,
-                className: "dc-colorway-settings"
-            },
-            {
-                section: "ColorwaysSourceManager",
-                label: "Sources",
-                element: SourceManager,
-                className: "dc-colorway-sources-manager"
-            },
-            {
-                section: "ColorwaysOnDemand",
-                label: "On-Demand",
-                element: OnDemandWaysPage,
-                className: "dc-colorway-ondemand"
-            },
-            {
-                section: "ColorwaysStore",
-                label: "Store",
-                element: Store,
-                className: "dc-colorway-store"
-            },
-            {
-                section: SectionTypes.DIVIDER
-            }
-        ].filter(Boolean);
-    },
-
     ColorwaysButton: () => <ColorwaysButton />,
 
     async start() {
+        const customSettingsSections = (
+            Vencord.Plugins.plugins.Settings as any as {
+                customSections: ((ID: Record<string, unknown>) => any)[];
+            }
+        ).customSections;
+
+        const ColorwaysSelector = () => ({
+            section: "ColorwaysSelector",
+            label: "Colorways Selector",
+            element: () => <Selector isSettings modalProps={{ onClose: () => new Promise(() => true), transitionState: 1 }} />,
+            className: "dc-colorway-selector"
+        });
+        const ColorwaysSettings = () => ({
+            section: "ColorwaysSettings",
+            label: "Colorways Settings",
+            element: SettingsPage,
+            className: "dc-colorway-settings"
+        });
+        const ColorwaysSourceManager = () => ({
+            section: "ColorwaysSourceManager",
+            label: "Colorways Sources",
+            element: SourceManager,
+            className: "dc-colorway-sources-manager"
+        });
+        const ColorwaysOnDemand = () => ({
+            section: "ColorwaysOnDemand",
+            label: "Colorways On-Demand",
+            element: OnDemandWaysPage,
+            className: "dc-colorway-ondemand"
+        });
+        const ColorwaysStore = () => ({
+            section: "ColorwaysStore",
+            label: "Colorways Store",
+            element: Store,
+            className: "dc-colorway-store"
+        });
+
+        customSettingsSections.push(ColorwaysSelector, ColorwaysSettings, ColorwaysSourceManager, ColorwaysOnDemand, ColorwaysStore);
+
         addServerListElement(ServerListRenderPosition.In, this.ColorwaysButton);
 
         enableStyle(style);
@@ -412,5 +355,16 @@ export default definePlugin({
         disableStyle(style);
         ColorwayCSS.remove();
         removeAccessory("colorways-btn");
+        const customSettingsSections = (
+            Vencord.Plugins.plugins.Settings as any as {
+                customSections: ((ID: Record<string, unknown>) => any)[];
+            }
+        ).customSections;
+
+        const i = customSettingsSections.findIndex(
+            section => section({}).id === ("ColorwaysSelector" || "ColorwaysSettings" || "ColorwaysSourceManager" || "ColorwaysOnDemand" || "ColorwaysStore")
+        );
+
+        if (i !== -1) customSettingsSections.splice(i, 1);
     },
 });

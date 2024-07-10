@@ -595,8 +595,8 @@ export default definePlugin({
         {
             find: "THREAD_STARTER_MESSAGE?null===",
             replacement: {
-                match: /(?<=null!=\i\.edited_timestamp\)return )\i\(\i,.{0,100}\}\)/,
-                replace: "Object.assign($&,{ deleted:$self.getDeleted(...arguments), editHistory:$self.getEdited(...arguments) })"
+                match: /interactionData:null!=.{0,50}.interaction_data/,
+                replace: "deleted:$self.getDeleted(...arguments), editHistory:$self.getEdited(...arguments)"
             }
         },
 
