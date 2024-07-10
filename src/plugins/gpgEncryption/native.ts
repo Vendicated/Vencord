@@ -17,3 +17,15 @@ export function encryptMessage(_, message: string): Promise<string> {
         });
     });
 }
+
+export function decryptMessage(_, message: string): Promise<string> {
+    const gpgCommand = `echo "${message}" | gpg --decrypt --armor`;
+    return new Promise((resolve, reject) => {
+        exec(gpgCommand, (error, stdout, stderr) => {
+            if (error) {
+                return reject(new Error(stderr));
+            }
+            resolve(stdout);
+        });
+    });
+}

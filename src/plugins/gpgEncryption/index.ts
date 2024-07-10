@@ -5,12 +5,51 @@
  */
 
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
+import { updateMessage } from "@api/MessageUpdater";
 import { Devs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
+import { MessageCache } from "@webpack/common";
+import { Message } from "discord-types/general";
 
 const Native = VencordNative.pluginHelpers.GPGEncryption as PluginNative<
     typeof import("./native")
 >;
+
+const containsPGPMessage = (text: string): boolean => {
+    const pgpMessageRegex =
+        /-----BEGIN PGP MESSAGE-----(.*)-----END PGP MESSAGE-----/s;
+    return pgpMessageRegex.test(text);
+};
+
+const decryptPgpMessages = async (channelId: string) => {
+    try {
+        let cache = MessageCache.getOrCreate(channelId);
+
+        const messages: Message[] = cache.toArray();
+        const pgp: Message[] = [];
+
+        for (let m of messages) {
+            if (containsPGPMessage(m.content)) {
+                pgp.push(m);
+                updateMessage(channelId, m.id, {
+                    content: "*Encrypted Message - pending decription...*",
+                });
+            }
+        }
+
+        for (let pgpMessage of pgp) {
+            if (containsPGPMessage(pgpMessage.content)) {
+                const content = await Native.decryptMessage(pgpMessage.content);
+                console.log("decrypting message", pgpMessage.id);
+                updateMessage(channelId, pgpMessage.id, {
+                    content,
+                });
+            }
+        }
+    } catch (e) {
+        console.log(e);
+    }
+};
 
 export default definePlugin({
     name: "GPGEncryption",
@@ -19,11 +58,21 @@ export default definePlugin({
     authors: [Devs.zoeycodes],
     dependencies: ["MessageEventsAPI"],
 
+    flux: {
+        MESSAGE_CREATE: async (p) => {
+            decryptPgpMessages(p.message.channel_id);
+        },
+        CHANNEL_SELECT: async (p) => {
+            decryptPgpMessages(p.channelId);
+        },
+        LOAD_MESSAGES_SUCCESS: async (p) => {
+            decryptPgpMessages(p.channelId);
+        },
+    },
+
     start() {
         try {
             this.preSend = addPreSendListener(async (channelId, msg) => {
-
-
                 try {
                     const stdout = await Native.encryptMessage(msg.content);
 
@@ -31,10 +80,7 @@ export default definePlugin({
                 } catch (e) {
                     console.log("gpg error");
                 }
-                return false;
             });
-
-            console.log("adding presend listener");
         } catch (e) {
             console.log(e);
         }
