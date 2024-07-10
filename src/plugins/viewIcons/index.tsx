@@ -213,8 +213,8 @@ export default definePlugin({
         {
             find: ".canUsePremiumProfileCustomization,{avatarSrc:",
             replacement: {
-                match: /children:\(0,\i\.jsx\)\(\i,{src:(\i)/,
-                replace: "style:{cursor:\"pointer\"},onClick:()=>{$self.openImage($1)},$&"
+                match: /\.avatar,\i\.clickable\),onClick:\i,(?<=avatarSrc:(\i).+?)/,
+                replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openImage($1)},"
 
             }
         },
