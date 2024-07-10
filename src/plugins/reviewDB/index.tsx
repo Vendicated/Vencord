@@ -37,7 +37,7 @@ import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
 import { showToast } from "./utils";
 
-const RoleButtonClasses: Record<string, string> = findByPropsLazy("button", "buttonInner", "icon", "text");
+const RoleButtonClasses: Record<string, string> = findByPropsLazy("button", "buttonInner", "icon", "banner");
 
 const guildPopoutPatch = ((children, { guild }: { guild?: GuildRecord; onClose: () => void; }) => {
     if (!guild) return;
@@ -174,18 +174,20 @@ export default definePlugin({
         );
     }, { message: "Failed to render Reviews" }),
 
-    BiteSizeReviewsButton: ErrorBoundary.wrap(({ user }: { user: UserRecord; }) => (
-        <TooltipContainer text="View Reviews">
-            <Button
-                onClick={() => { openReviewsModal(user.id, user.username); }}
-                look={Button.Looks.FILLED}
-                size={Button.Sizes.NONE}
-                color={RoleButtonClasses.color}
-                className={classes(RoleButtonClasses.button, RoleButtonClasses.banner)}
-                innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.banner)}
-            >
-                <NotesIcon height={16} width={16} />
-            </Button>
-        </TooltipContainer>
-    ), { noop: true })
+    BiteSizeReviewsButton: ErrorBoundary.wrap(({ user }: { user: UserRecord; }) => {
+        return (
+            <TooltipContainer text="View Reviews">
+                <Button
+                    onClick={() => { openReviewsModal(user.id, user.username); }}
+                    look={Button.Looks.FILLED}
+                    size={Button.Sizes.NONE}
+                    color={RoleButtonClasses.bannerColor}
+                    className={classes(RoleButtonClasses.button, RoleButtonClasses.icon, RoleButtonClasses.banner)}
+                    innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.icon, RoleButtonClasses.banner)}
+                >
+                    <NotesIcon height={16} width={16} />
+                </Button>
+            </TooltipContainer>
+        );
+    }, { noop: true })
 });

@@ -34,7 +34,7 @@ import UserPermissions from "./components/UserPermissions";
 import { getSortedRoles, sortPermissionOverwrites } from "./utils";
 
 const PopoutClasses: Record<string, string> = findByPropsLazy("container", "scroller", "list");
-const RoleButtonClasses: Record<string, string> = findByPropsLazy("button", "buttonInner", "icon", "text");
+const RoleButtonClasses: Record<string, string> = findByPropsLazy("button", "buttonInner", "icon", "banner");
 
 export const enum PermissionsSortOrder {
     HighestRole,
