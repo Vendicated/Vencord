@@ -114,7 +114,7 @@ export default definePlugin({
             '("MessageActionCreators")', '("ChannelMessages")',
             '("Routing/Utils")', '("RTCControlSocket")',
             '("ConnectionEventFramerateReducer")', '("RTCLatencyTestManager")',
-            '("OverlayBridgeStore")', '("RPCServer:WSS")'
+            '("OverlayBridgeStore")', '("RPCServer:WSS")', '("RPCServer:IPC")'
         ].map(logger => ({
             find: logger,
             predicate: () => settings.store.disableNoisyLoggers,

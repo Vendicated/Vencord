@@ -37,8 +37,7 @@ import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
 import { showToast } from "./utils";
 
-const PopoutClasses = findByPropsLazy("container", "scroller", "list");
-const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "text");
+const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
 
 const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild, onClose(): void; }) => {
     if (!guild) return;
@@ -181,9 +180,9 @@ export default definePlugin({
                     onClick={() => openReviewsModal(user.id, user.username)}
                     look={Button.Looks.FILLED}
                     size={Button.Sizes.NONE}
-                    color={RoleButtonClasses.color}
-                    className={classes(RoleButtonClasses.button, RoleButtonClasses.banner)}
-                    innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.banner)}
+                    color={RoleButtonClasses.bannerColor}
+                    className={classes(RoleButtonClasses.button, RoleButtonClasses.icon, RoleButtonClasses.banner)}
+                    innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.icon, RoleButtonClasses.banner)}
                 >
                     <NotesIcon height={16} width={16} />
                 </Button>
