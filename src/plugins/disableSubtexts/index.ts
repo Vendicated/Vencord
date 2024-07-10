@@ -13,7 +13,7 @@ export default definePlugin({
     authors: [Devs.HappyEnderman],
     patches: [
         {
-            find: `/^ *-# +`,
+            find: "/^ *-# +",
             replacement: {
                 match: /match:\(.+?\)=>{.+\.match\(\i\)?.+\.anyScopeRegex\)\(\i\)\(\i,\i,\i\):null:null}/,
                 replace: "match:()=>null"
