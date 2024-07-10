@@ -162,7 +162,8 @@ export default definePlugin({
             props: {
                 style: {
                     borderRadius: "50%",
-                    transform: "scale(0.9)" // The image is a bit too big compared to default badges
+                    transform: "scale(0.9)", // The image is a bit too big compared to default badges
+                    objectFit: "contain" // Do not crop non-square images
                 }
             },
             onClick() {
