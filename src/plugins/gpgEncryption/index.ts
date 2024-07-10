@@ -4,9 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import {
+    ApplicationCommandInputType,
+    ApplicationCommandOptionType,
+    registerCommand,
+    sendBotMessage,
+} from "@api/Commands";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { updateMessage } from "@api/MessageUpdater";
 import { Devs } from "@utils/constants";
+import { sendMessage } from "@utils/discord";
 import definePlugin, { PluginNative } from "@utils/types";
 import { MessageCache } from "@webpack/common";
 import { Message } from "discord-types/general";
@@ -73,16 +80,52 @@ export default definePlugin({
     start() {
         try {
             this.preSend = addPreSendListener(async (channelId, msg) => {
+                this.channelId = channelId;
                 try {
                     const stdout = await Native.encryptMessage(msg.content);
 
-                    msg.content = stdout;
+                    // msg.content = stdout;
                 } catch (e) {
                     console.log("gpg error");
                 }
             });
         } catch (e) {
             console.log(e);
+        }
+
+        try {
+            registerCommand(
+                {
+                    name: "sharegpg",
+                    description: "Share GPG Public Key",
+                    inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
+                    options: [
+                        {
+                            required: true,
+                            name: "Key ID",
+                            type: ApplicationCommandOptionType.STRING,
+                            description: "ID of GPG key",
+                        },
+                    ],
+                    execute: async (args, ctx) => {
+                        let publicKey: string;
+                        try {
+                            publicKey = await Native.getPublicKey(
+                                args[0].value,
+                            );
+                        } catch (e) {
+                            publicKey = "";
+                            console.error(e);
+                        }
+                        return {
+                            content: publicKey,
+                        };
+                    },
+                },
+                "customCommand",
+            );
+        } catch (e) {
+            console.error(e);
         }
     },
 
