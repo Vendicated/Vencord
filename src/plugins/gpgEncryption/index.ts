@@ -59,14 +59,14 @@ export default definePlugin({
     dependencies: ["MessageEventsAPI"],
 
     flux: {
-        MESSAGE_CREATE: async (p) => {
-            decryptPgpMessages(p.message.channel_id);
+        MESSAGE_CREATE: async (event) => {
+            decryptPgpMessages(event.message.channel_id);
         },
-        CHANNEL_SELECT: async (p) => {
-            decryptPgpMessages(p.channelId);
+        CHANNEL_SELECT: async (event) => {
+            decryptPgpMessages(event.channelId);
         },
-        LOAD_MESSAGES_SUCCESS: async (p) => {
-            decryptPgpMessages(p.channelId);
+        LOAD_MESSAGES_SUCCESS: async (event) => {
+            decryptPgpMessages(event.channelId);
         },
     },
 
