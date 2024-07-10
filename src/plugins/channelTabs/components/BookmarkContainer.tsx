@@ -217,7 +217,7 @@ function Bookmark(props: BookmarkProps) {
 
     return (
         <div
-            className={cl("bookmark", "hoverable")}
+            className={cl("bookmark", "hoverable", { wider: settings.store.widerTabsAndBookmarks })}
             ref={ref}
             onClick={e => isBookmarkFolder(bookmark)
                 ? ContextMenuApi.openContextMenu(e, () => <BookmarkFolderOpenMenu {...props} />)

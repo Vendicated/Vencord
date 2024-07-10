@@ -108,6 +108,10 @@
     border-radius: 0.25rem;
 }
 
+.vc-channeltabs-bookmark.vc-channeltabs-wider {
+    max-width: 12rem;
+}
+
 .vc-channeltabs-bookmark .vc-channeltabs-name-text {
     margin-left: 0.25rem;
     margin-right: 0.25rem;
@@ -140,6 +144,10 @@
     width: 12rem;
     min-width: 0;
     margin-right: 0.25rem;
+}
+
+.vc-channeltabs-tab.vc-channeltabs-wider:not(.vc-channeltabs-tab-compact) {
+    width: 16rem;
 }
 
 .vc-channeltabs-tab-compact {

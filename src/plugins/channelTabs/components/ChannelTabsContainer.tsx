@@ -33,7 +33,7 @@ const cl = classNameFactory("vc-channeltabs-");
 
 export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
     const [userId, setUserId] = useState("");
-    const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
+    const { showBookmarkBar, widerTabsAndBookmarks } = settings.use(["showBookmarkBar", "widerTabsAndBookmarks"]);
     const GhostTabs = useGhostTabs();
 
     const _update = useForceUpdater();
@@ -73,6 +73,10 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
     useEffect(() => {
         (Vencord.Plugins.plugins.ChannelTabs as any).containerHeight = ref.current?.clientHeight;
     }, [userId, showBookmarkBar]);
+
+    useEffect(() => {
+        _update();
+    }, [widerTabsAndBookmarks]);
 
     if (!userId) return null;
     handleChannelSwitch(props);

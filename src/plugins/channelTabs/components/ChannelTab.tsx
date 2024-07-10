@@ -244,7 +244,7 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
     drag(drop(ref));
 
     return <div
-        className={cl("tab", { "tab-compact": compact, "tab-selected": isTabSelected(id) })}
+        className={cl("tab", { "tab-compact": compact, "tab-selected": isTabSelected(id), wider: settings.store.widerTabsAndBookmarks })}
         key={index}
         ref={ref}
         onAuxClick={e => {
