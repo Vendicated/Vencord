@@ -21,21 +21,23 @@ import { Channel, Guild, Role } from "discord-types/general";
 
 import { FluxDispatcher, FluxEvents } from "./utils";
 
+type GenericFunction = (...args: any[]) => any;
+
 export class FluxStore {
     constructor(dispatcher: FluxDispatcher, eventHandlers?: Partial<Record<FluxEvents, (data: any) => void>>);
 
-    addChangeListener(listener: () => void): void;
-    addConditionalChangeListener(removeListener: () => boolean, t?: boolean): void;
+    addChangeListener(callback: () => void): void;
+    addReactChangeListener(callback: () => void): void;
+    removeChangeListener(callback: () => void): void;
+    removeReactChangeListener(callback: () => void): void;
     emitChange(): void;
     getDispatchToken(): string;
     getName(): string;
-    hasChangeCallbacks(): boolean;
     initialize(): void;
     initializeIfNeeded(): void;
-    mustEmitChanges(conditional?: (t?: unknown) => boolean): void;
-    removeChangeListener(listener: () => void): void;
-    syncWith(stores: FluxStore[], emitChange: boolean, delay?: number): void;
-    waitFor(...stores: FluxStore[]): void;
+    registerActionHandlers: GenericFunction;
+    syncWith: GenericFunction;
+    waitFor: GenericFunction;
     __getLocalVars(): Record<string, any>;
 
     static getAll(): FluxStore[];
