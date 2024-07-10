@@ -20,7 +20,7 @@ import { Margins } from "@utils/margins";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, ReadStateUtils, Select, Text, TextInput, useState } from "@webpack/common";
 
-import { bookmarkFolderColors, bookmarkPlaceholderName, closeOtherTabs, closeTab, closeTabsToTheRight, hasClosedTabs, isBookmarkFolder, openedTabs, reopenClosedTab, settings, toggleCompactTab } from "../util";
+import { bookmarkFolderColors, bookmarkPlaceholderName, closeOtherTabs, closeTab, closeTabsToTheRight, createTab, hasClosedTabs, isBookmarkFolder, openedTabs, reopenClosedTab, settings, toggleCompactTab } from "../util";
 import { Bookmark, BookmarkFolder, Bookmarks, ChannelTabsProps, UseBookmarkMethods } from "../util/types";
 
 export function BasicContextMenu() {
@@ -185,14 +185,28 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
             onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
             aria-label="ChannelTabs Bookmark Context Menu"
         >
-            {bookmarkNotificationDot && !isFolder && <Menu.MenuGroup>
-                <Menu.MenuItem
-                    id="mark-as-read"
-                    label={i18n.Messages.MARK_AS_READ}
-                    disabled={!ReadStateStore.hasUnread(bookmark.channelId)}
-                    action={() => ReadStateUtils.ackChannel(ChannelStore.getChannel(bookmark.channelId))}
-                />
-            </Menu.MenuGroup>}
+            <Menu.MenuGroup>
+                {bookmarkNotificationDot && !isFolder &&
+                    <Menu.MenuItem
+                        id="mark-as-read"
+                        label={i18n.Messages.MARK_AS_READ}
+                        disabled={!ReadStateStore.hasUnread(bookmark.channelId)}
+                        action={() => ReadStateUtils.ackChannel(ChannelStore.getChannel(bookmark.channelId))}
+                    />
+                }
+                {isFolder
+                    ? <Menu.MenuItem
+                        id="open-all-in-folder"
+                        label={"Open All Bookmarks"}
+                        action={() => bookmark.bookmarks.forEach(b => createTab(b))}
+                    />
+                    : < Menu.MenuItem
+                        id="open-in-tab"
+                        label={"Open in New Tab"}
+                        action={() => createTab(bookmark)}
+                    />
+                }
+            </Menu.MenuGroup>
             <Menu.MenuGroup>
                 <Menu.MenuItem
                     id="edit-bookmark"
