@@ -98,7 +98,7 @@ export function getApplicationIcons(activities: Activity[], preferSmall = false)
                     fetchedApplications.set(application_id, null);
                     fetchApplication(application_id).then(app => {
                         fetchedApplications.set(application_id, app);
-                    });
+                    }).catch(console.error);
                 }
             }
 
