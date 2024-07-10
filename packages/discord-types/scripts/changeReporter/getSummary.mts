@@ -7,7 +7,7 @@
 import type { CR } from "./types.mts";
 import { capitalize, codeBlock, formatChannel, formatEnumEntryList, formatKeyList, formatWarnList } from "./utils.mjs";
 
-export function logSummary(report: CR.ChangeReport, channel?: string | undefined) {
+export function getSummary(report: CR.ChangeReport, channel?: string | undefined) {
     const { deps, src } = report;
 
     let summary = `# Change Report (${formatChannel(channel)})\n`;
@@ -265,5 +265,5 @@ export function logSummary(report: CR.ChangeReport, channel?: string | undefined
 
     summary += sections || "## There are 0 watched dependencies and declarations.\n";
 
-    console.log(summary);
+    return summary;
 }
