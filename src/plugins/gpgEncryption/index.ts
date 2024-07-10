@@ -13,7 +13,6 @@ import {
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { updateMessage } from "@api/MessageUpdater";
 import { Devs } from "@utils/constants";
-import { sendMessage } from "@utils/discord";
 import definePlugin, { PluginNative } from "@utils/types";
 import { MessageCache } from "@webpack/common";
 import { Message } from "discord-types/general";
@@ -21,6 +20,8 @@ import { Message } from "discord-types/general";
 const Native = VencordNative.pluginHelpers.GPGEncryption as PluginNative<
     typeof import("./native")
 >;
+
+let isActive = false;
 
 const containsPGPMessage = (text: string): boolean => {
     const pgpMessageRegex =
@@ -81,6 +82,7 @@ export default definePlugin({
         try {
             this.preSend = addPreSendListener(async (channelId, msg) => {
                 this.channelId = channelId;
+                if (!isActive) return;
                 try {
                     const stdout = await Native.encryptMessage(msg.content);
 
@@ -94,6 +96,41 @@ export default definePlugin({
         }
 
         try {
+            registerCommand(
+                {
+                    name: "gpg",
+                    description: "Toggle GPG Encryption on and off",
+                    inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
+                    options: [
+                        {
+                            required: true,
+                            name: "on or off",
+                            type: ApplicationCommandOptionType.STRING,
+                            description: "On or off",
+                        },
+                    ],
+                    execute: async (args, ctx) => {
+                        switch (args[0].value) {
+                            case "on":
+                                isActive = true;
+                                return sendBotMessage(ctx.channel.id, {
+                                    content: "GPG Enabled",
+                                });
+                            case "off":
+                                isActive = false;
+                                return sendBotMessage(ctx.channel.id, {
+                                    content: "GPG Disabled",
+                                });
+
+                            default:
+                                return sendBotMessage(ctx.channel.id, {
+                                    content: "Invalid Selection",
+                                });
+                        }
+                    },
+                },
+                "GPGEncryption",
+            );
             registerCommand(
                 {
                     name: "sharegpg",
@@ -122,7 +159,7 @@ export default definePlugin({
                         };
                     },
                 },
-                "customCommand",
+                "GPGEncryption",
             );
         } catch (e) {
             console.error(e);
