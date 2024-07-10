@@ -324,7 +324,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                 const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
                 const reaction = props.message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
                 if (!match && !reaction) return;
-                const name = (match && match[1]) ?? reaction?.emoji.name ?? "FakeNitroEmoji";
+                const name = (match && match[1]) ?? reaction?.emoji.name ?? props?.message?.content.match(/(?<=name=)\w[a-zA-Z_0-9]*/gm) ?? "FakeNitroEmoji";
 
                 return buildMenuItem("Emoji", () => ({
                     id: favoriteableId,
@@ -360,13 +360,66 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
     }
 };
 
+function imageContextPatch(c, p: {
+    src: string
+}){
+    console.log("passed", p);
+    if ("src" in p
+    && /https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.(gif|png).*/gm.test(p.src)
+    ){
+        const matches = [...p.src.matchAll(/https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.(gif|png).*/gm)];
+        if (!matches) return;
+        c.push(buildMenuItem("Emoji", () => ({
+            id: matches[0][1],
+            isAnimated: (matches[0][2] === "gif"),
+            name: "ProfileEmoji"
+        })));
+    }
+}
+interface HangStatus {
+    emoji?: {
+        // used for unicode emojis and custom emojis
+        name: string
+        // used for custom emojis
+        id?: string,
+        animated?: boolean
+    }
+}
+function vcHangStatusContextPatch(c, p: {
+    user: {
+        HangStatus?: HangStatus
+    }
+}){
+    if(p.user.HangStatus?.emoji?.id){
+        const e = p.user.HangStatus.emoji as Emoji;
+        e.isAnimated = p.user.HangStatus.emoji.animated ?? false;
+        c.push(buildMenuItem("Emoji", () => {
+            return e;
+        }));
+    }
+}
 export default definePlugin({
     name: "EmoteCloner",
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
     tags: ["StickerCloner"],
-    authors: [Devs.Ven, Devs.Nuckyz],
+    authors: [Devs.Ven, Devs.Nuckyz, Devs.sadan],
     contextMenus: {
         "message": messageContextMenuPatch,
-        "expression-picker": expressionPickerPatch
-    }
+        "expression-picker": expressionPickerPatch,
+        "user-context": vcHangStatusContextPatch,
+        "image-context": imageContextPatch,
+    },
+    patches: [
+        // needed to pass the HangStatus to the context menu
+        {
+            find: "renderPrioritySpeaker",
+            replacement: {
+                match: /(handleContextMenu".*?)(let)/,
+                replace: "$1$self.patchVcListProps(this.props);$2"
+            }
+        },
+    ],
+    patchVcListProps(props){
+        props.user.HangStatus = props.hangStatusActivity;
+    },
 });
