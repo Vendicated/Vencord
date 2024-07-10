@@ -144,7 +144,7 @@ export default definePlugin({
                             description: "ID of GPG key",
                         },
                     ],
-                    execute: async (args, ctx) => {
+                    execute: async (args, _) => {
                         let publicKey: string;
                         try {
                             publicKey = await Native.getPublicKey(
@@ -160,6 +160,41 @@ export default definePlugin({
                     },
                 },
                 "GPGEncryption",
+            );
+        } catch (e) {
+            console.error(e);
+        }
+
+        try {
+            registerCommand(
+                {
+                    name: "registergpg",
+                    description: "Share GPG Public Key",
+                    inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
+                    options: [
+                        {
+                            required: true,
+                            name: "Self key?",
+                            type: ApplicationCommandOptionType.BOOLEAN,
+                            description:
+                                "True if this is your key id, false if this is the recipient's",
+                        },
+                        {
+                            required: true,
+                            name: "keyId",
+                            type: ApplicationCommandOptionType.STRING,
+                            description: "The keyId",
+                        },
+                    ],
+                    execute: async (args, _) => {
+                        if (args[0].value) {
+                            Native.registerSelfKey(args[1].value);
+                        } else {
+                            Native.registerRecipientKey(args[1].value);
+                        }
+                    },
+                },
+                "customCommand",
             );
         } catch (e) {
             console.error(e);

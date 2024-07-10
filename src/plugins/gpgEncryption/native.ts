@@ -6,15 +6,8 @@
 
 import { exec } from "child_process";
 
-export function encryptMessage(_, message: string): Promise<string> {
-    const gpgCommand = `echo "${message}" | gpg --encrypt --armor -r hi@zoeys.computer`;
-    return executeCommand(gpgCommand);
-}
-
-export function getPublicKey(_, keyId: string): Promise<string> {
-    const gpgCommand = `gpg --armor --export ${keyId}`;
-    return executeCommand(gpgCommand);
-}
+let selfKey: string = "";
+let recipientKey: string = "";
 
 function executeCommand(command: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -27,14 +20,41 @@ function executeCommand(command: string): Promise<string> {
     });
 }
 
+export function encryptMessage(_, message: string): Promise<string> {
+    console.log("encrypt");
+    if (selfKey.length === 0) {
+        console.log("no self key", selfKey);
+        return Promise.resolve(
+            `[NOT ENCRYPTED - REGISTER SELF KEY] ${message}`,
+        );
+    }
+    if (recipientKey.length === 0) {
+        console.log("no recipient key", recipientKey);
+        return Promise.resolve(
+            `[NOT ENCRYPTED - REGISTER RECIPIENT KEY] ${message}`,
+        );
+    }
+    const gpgCommand = `echo "${message}" | gpg --encrypt --armor -r ${selfKey} -r ${recipientKey}`;
+    console.log(gpgCommand);
+    return executeCommand(gpgCommand);
+}
+
+export function getPublicKey(_, keyId: string): Promise<string> {
+    const gpgCommand = `gpg --armor --export ${keyId}`;
+    return executeCommand(gpgCommand);
+}
+
 export function decryptMessage(_, message: string): Promise<string> {
     const gpgCommand = `echo "${message}" | gpg --decrypt --armor`;
-    return new Promise((resolve, reject) => {
-        exec(gpgCommand, (error, stdout, stderr) => {
-            if (error) {
-                return reject(new Error(stderr));
-            }
-            resolve(stdout);
-        });
-    });
+    return executeCommand(gpgCommand);
+}
+
+export function registerSelfKey(_, keyId: string): Promise<string> {
+    selfKey = keyId;
+    return Promise.resolve(keyId);
+}
+
+export function registerRecipientKey(_, keyId: string): Promise<string> {
+    recipientKey = keyId;
+    return Promise.resolve(keyId);
 }
