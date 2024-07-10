@@ -35,7 +35,6 @@ import {
     Activity,
     ActivityListIcon,
     ActivityViewProps,
-    ActivityViewType,
     ApplicationIcon,
     IconCSSProperties
 } from "./types";
@@ -135,7 +134,7 @@ export default definePlugin({
         return null;
     },
 
-    showAllActivitiesComponent({ activity, user, activityGuild }: ActivityViewProps) {
+    showAllActivitiesComponent({ activity, user, ...props }: ActivityViewProps) {
         const [currentActivity, setCurrentActivity] = React.useState<Activity | null>(
             activity?.type !== 4 ? activity! : null
         );
@@ -160,11 +159,10 @@ export default definePlugin({
             return (
                 <div style={{ display: "flex", flexDirection: "column" }}>
                     <ActivityView
-                        type={ActivityViewType.USER_POPOUT_V2}
                         activity={currentActivity}
                         user={user}
-                        activityGuild={activityGuild}
-                        showChannelDetails={true}/>
+                        {...props}
+                    />
                     <div
                         className={cl("controls")}
                         style={{
@@ -234,11 +232,9 @@ export default definePlugin({
                     {activities.map((activity, index) => (
                         <ActivityView
                             key={index}
-                            type={ActivityViewType.USER_POPOUT_V2}
                             activity={activity}
                             user={user}
-                            activityGuild={activityGuild}
-                            showChannelDetails={true}
+                            {...props}
                         />
                     ))}
                 </div>
