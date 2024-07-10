@@ -46,11 +46,17 @@ const decryptPgpMessages = async (channelId: string) => {
 
         for (let pgpMessage of pgp) {
             if (containsPGPMessage(pgpMessage.content)) {
-                const content = await Native.decryptMessage(pgpMessage.content);
-                console.log("decrypting message", pgpMessage.id);
-                updateMessage(channelId, pgpMessage.id, {
-                    content,
-                });
+                try {
+                    const content = await Native.decryptMessage(
+                        pgpMessage.content,
+                    );
+                    console.log("decrypting message", pgpMessage.id);
+                    updateMessage(channelId, pgpMessage.id, {
+                        content,
+                    });
+                } catch (e) {
+                    console.log("unable to decrypt", e);
+                }
             }
         }
     } catch (e) {
