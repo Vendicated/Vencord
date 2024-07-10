@@ -117,14 +117,17 @@ export function getApplicationIcons(activities: Activity[], preferSmall = false)
                         application
                     });
                 }
-            }
-        } else {
-            if (platform === "xbox") {
+            } else if (platform === "xbox") {
                 applicationIcons.push({
                     image: { src: xboxUrl, alt: "Xbox" },
                     activity
                 });
             }
+        } else if (platform === "xbox") {
+            applicationIcons.push({
+                image: { src: xboxUrl, alt: "Xbox" },
+                activity
+            });
         }
     }
 
