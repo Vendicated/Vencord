@@ -64,7 +64,95 @@ export default definePlugin({
     description:
         "Allows you to send GPG encrypted messages to other users with the plugin",
     authors: [Devs.zoeycodes, Devs.jg],
-    dependencies: ["MessageEventsAPI"],
+    dependencies: ["MessageEventsAPI", "CommandsAPI"],
+
+    commands: [
+        {
+            name: "gpg",
+            description: "Toggle GPG Encryption on and off",
+            inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
+            options: [
+                {
+                    required: true,
+                    name: "on or off",
+                    type: ApplicationCommandOptionType.STRING,
+                    description: "On or off",
+                },
+            ],
+            execute: async (args, ctx) => {
+                switch (args[0].value) {
+                    case "on":
+                        isActive = true;
+                        return sendBotMessage(ctx.channel.id, {
+                            content: "GPG Enabled",
+                        });
+                    case "off":
+                        isActive = false;
+                        return sendBotMessage(ctx.channel.id, {
+                            content: "GPG Disabled",
+                        });
+
+                    default:
+                        return sendBotMessage(ctx.channel.id, {
+                            content: "Invalid Selection",
+                        });
+                }
+            },
+        },
+        {
+            name: "sharegpg",
+            description: "Share GPG Public Key",
+            inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
+            options: [
+                {
+                    required: true,
+                    name: "Key ID",
+                    type: ApplicationCommandOptionType.STRING,
+                    description: "ID of GPG key",
+                },
+            ],
+            execute: async (args, _) => {
+                let publicKey: string;
+                try {
+                    publicKey = await Native.getPublicKey(args[0].value);
+                } catch (e) {
+                    publicKey = "";
+                    console.error(e);
+                }
+                return {
+                    content: publicKey,
+                };
+            },
+        },
+
+        {
+            name: "registergpg",
+            description: "Share GPG Public Key",
+            inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
+            options: [
+                {
+                    required: true,
+                    name: "Self key?",
+                    type: ApplicationCommandOptionType.BOOLEAN,
+                    description:
+                        "True if this is your key id, false if this is the recipient's",
+                },
+                {
+                    required: true,
+                    name: "keyId",
+                    type: ApplicationCommandOptionType.STRING,
+                    description: "The keyId",
+                },
+            ],
+            execute: async (args, _) => {
+                if (args[0].value) {
+                    Native.registerSelfKey(args[1].value);
+                } else {
+                    Native.registerRecipientKey(args[1].value);
+                }
+            },
+        },
+    ],
 
     flux: {
         MESSAGE_CREATE: async (event) => {
@@ -93,111 +181,6 @@ export default definePlugin({
             });
         } catch (e) {
             console.log(e);
-        }
-
-        try {
-            registerCommand(
-                {
-                    name: "gpg",
-                    description: "Toggle GPG Encryption on and off",
-                    inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
-                    options: [
-                        {
-                            required: true,
-                            name: "on or off",
-                            type: ApplicationCommandOptionType.STRING,
-                            description: "On or off",
-                        },
-                    ],
-                    execute: async (args, ctx) => {
-                        switch (args[0].value) {
-                            case "on":
-                                isActive = true;
-                                return sendBotMessage(ctx.channel.id, {
-                                    content: "GPG Enabled",
-                                });
-                            case "off":
-                                isActive = false;
-                                return sendBotMessage(ctx.channel.id, {
-                                    content: "GPG Disabled",
-                                });
-
-                            default:
-                                return sendBotMessage(ctx.channel.id, {
-                                    content: "Invalid Selection",
-                                });
-                        }
-                    },
-                },
-                "GPGEncryption",
-            );
-            registerCommand(
-                {
-                    name: "sharegpg",
-                    description: "Share GPG Public Key",
-                    inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
-                    options: [
-                        {
-                            required: true,
-                            name: "Key ID",
-                            type: ApplicationCommandOptionType.STRING,
-                            description: "ID of GPG key",
-                        },
-                    ],
-                    execute: async (args, _) => {
-                        let publicKey: string;
-                        try {
-                            publicKey = await Native.getPublicKey(
-                                args[0].value,
-                            );
-                        } catch (e) {
-                            publicKey = "";
-                            console.error(e);
-                        }
-                        return {
-                            content: publicKey,
-                        };
-                    },
-                },
-                "GPGEncryption",
-            );
-        } catch (e) {
-            console.error(e);
-        }
-
-        try {
-            registerCommand(
-                {
-                    name: "registergpg",
-                    description: "Share GPG Public Key",
-                    inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
-                    options: [
-                        {
-                            required: true,
-                            name: "Self key?",
-                            type: ApplicationCommandOptionType.BOOLEAN,
-                            description:
-                                "True if this is your key id, false if this is the recipient's",
-                        },
-                        {
-                            required: true,
-                            name: "keyId",
-                            type: ApplicationCommandOptionType.STRING,
-                            description: "The keyId",
-                        },
-                    ],
-                    execute: async (args, _) => {
-                        if (args[0].value) {
-                            Native.registerSelfKey(args[1].value);
-                        } else {
-                            Native.registerRecipientKey(args[1].value);
-                        }
-                    },
-                },
-                "customCommand",
-            );
-        } catch (e) {
-            console.error(e);
         }
     },
 
