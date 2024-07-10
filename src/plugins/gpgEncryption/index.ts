@@ -84,7 +84,7 @@ export default definePlugin({
                 try {
                     const stdout = await Native.encryptMessage(msg.content);
 
-                    // msg.content = stdout;
+                    msg.content = stdout;
                 } catch (e) {
                     console.log("gpg error");
                 }
