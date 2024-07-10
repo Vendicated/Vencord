@@ -62,7 +62,7 @@ export default definePlugin({
     name: "GPGEncryption",
     description:
         "Allows you to send GPG encrypted messages to other users with the plugin",
-    authors: [Devs.zoeycodes],
+    authors: [Devs.zoeycodes, Devs.jg],
     dependencies: ["MessageEventsAPI"],
 
     flux: {
