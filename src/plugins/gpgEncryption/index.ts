@@ -1,6 +1,12 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 
 const Native = VencordNative.pluginHelpers.GPGEncryption as PluginNative<
     typeof import("./native")
@@ -16,6 +22,8 @@ export default definePlugin({
     start() {
         try {
             this.preSend = addPreSendListener(async (channelId, msg) => {
+
+
                 try {
                     const stdout = await Native.encryptMessage(msg.content);
 
