@@ -7,7 +7,6 @@
 import {
     ApplicationCommandInputType,
     ApplicationCommandOptionType,
-    registerCommand,
     sendBotMessage,
 } from "@api/Commands";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
