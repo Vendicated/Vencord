@@ -128,7 +128,6 @@ function patchPush(webpackGlobal: any) {
     // being applied multiple times.
     // Thus, override bind to use the original push
     handlePush.bind = (...args: unknown[]) => handlePush.$$vencordOriginal.bind(...args);
-    handlePush.toString = handlePush.$$vencordOriginal.toString.bind(handlePush.$$vencordOriginal);
 
     Object.defineProperty(webpackGlobal, "push", {
         configurable: true,
