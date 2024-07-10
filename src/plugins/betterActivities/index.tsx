@@ -254,7 +254,7 @@ export default definePlugin({
         },
         {
             // Show all activities in the user popout/sidebar
-            find: '"BiteSizeProfileActivitySection"',
+            find: '"UserActivityContainer"',
             replacement: {
                 match: /(?<=\(0,\i\.jsx\)\()\i\.\i(?=,{type:\i.\i.BITE_SIZE_POPOUT,activity:\i,className:\i\.activity,source:\i,user:\i)/,
                 replace: "$self.showAllActivitiesComponent"
