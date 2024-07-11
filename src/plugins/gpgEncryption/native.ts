@@ -6,9 +6,6 @@
 
 import { exec } from "child_process";
 
-const PUBLIC_KEY_REGEX: RegExp =
-    /-----BEGIN PGP PUBLIC KEY BLOCK-----(.*)-----END PGP PUBLIC KEY BLOCK-----/s;
-
 let selfKey: string = "";
 let recipientKey: string = "";
 
@@ -45,7 +42,7 @@ export function getPublicKey(_, keyId: string): Promise<string> {
 
 export function decryptMessage(_, message: string): Promise<string> {
     const gpgCommand = `echo "${message}" | gpg --decrypt --armor`;
-    return handleDecryptedMessage(executeCommand(gpgCommand));
+    return executeCommand(gpgCommand);
 }
 
 export function registerSelfKey(_, keyId: string): Promise<string> {
@@ -56,21 +53,4 @@ export function registerSelfKey(_, keyId: string): Promise<string> {
 export function registerRecipientKey(_, keyId: string): Promise<string> {
     recipientKey = keyId;
     return Promise.resolve(keyId);
-}
-
-function handleDecryptedMessage(msg: Promise<string>): Promise<string> {
-    return new Promise((resolve, reject) => {
-        msg.then(message => {
-            if (PUBLIC_KEY_REGEX.test(message)) {
-                resolve(handlePublicKey(message));
-            } else {
-                resolve(message);
-            }
-        });
-    });
-}
-
-// TODO: Zoey
-function handlePublicKey(message: string): string {
-    return message;
 }
