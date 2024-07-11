@@ -322,9 +322,12 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
 
             for (const [filter, callback] of waitForSubscriptions) {
                 try {
-                    if (filter.$$vencordIsFactoryFilter && filter(wrappedFactory.$$vencordOriginal!)) {
-                        waitForSubscriptions.delete(filter);
-                        callback(exports, { id, exportKey: null, factory: wrappedFactory.$$vencordOriginal! });
+                    if (filter.$$vencordIsFactoryFilter) {
+                        if (filter(wrappedFactory.$$vencordOriginal!)) {
+                            waitForSubscriptions.delete(filter);
+                            callback(exports, { id, exportKey: null, factory: wrappedFactory.$$vencordOriginal! });
+                        }
+
                         continue;
                     }
 

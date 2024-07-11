@@ -637,8 +637,12 @@ export const _cacheFind = traceFunction("cacheFind", function _cacheFind(filter:
         const mod = cache[key];
         if (!mod?.loaded || mod?.exports == null) continue;
 
-        if (filter.$$vencordIsFactoryFilter && filter(wreq.m[key])) {
-            return { result: mod.exports, id: key, exportKey: null, factory: wreq.m[key] as AnyModuleFactory };
+        if (filter.$$vencordIsFactoryFilter) {
+            if (filter(wreq.m[key])) {
+                return { result: mod.exports, id: key, exportKey: null, factory: wreq.m[key] as AnyModuleFactory };
+            }
+
+            continue;
         }
 
         if (filter(mod.exports)) {
@@ -692,8 +696,12 @@ export function cacheFindAll(filter: FilterFn) {
         const mod = cache[key];
         if (!mod?.loaded || mod?.exports == null) continue;
 
-        if (filter.$$vencordIsFactoryFilter && filter(wreq.m[key])) {
-            ret.push(mod.exports);
+        if (filter.$$vencordIsFactoryFilter) {
+            if (filter(wreq.m[key])) {
+                ret.push(mod.exports);
+            }
+
+            continue;
         }
 
         if (filter(mod.exports)) {
@@ -760,11 +768,14 @@ export const cacheFindBulk = traceFunction("cacheFindBulk", function cacheFindBu
             const filter = filters[i];
             if (filter == null) continue;
 
-            if (filter.$$vencordIsFactoryFilter && filter(wreq.m[key])) {
-                results[i] = mod.exports;
-                filters[i] = undefined;
+            if (filter.$$vencordIsFactoryFilter) {
+                if (filter(wreq.m[key])) {
+                    results[i] = mod.exports;
+                    filters[i] = undefined;
 
-                if (++found === length) break outer;
+                    if (++found === length) break outer;
+                }
+
                 break;
             }
 
