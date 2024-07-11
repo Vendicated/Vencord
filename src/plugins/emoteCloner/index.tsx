@@ -324,7 +324,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                 const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
                 const reaction = props.message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
                 if (!match && !reaction) return;
-                const name = (match && match[1]) ?? reaction?.emoji.name ?? props?.message?.content.match(/(?<=name=)\w[a-zA-Z_0-9]*/gm) ?? "FakeNitroEmoji";
+                const name = (match && match[1]) ?? reaction?.emoji.name ?? "FakeNitroEmoji";
 
                 return buildMenuItem("Emoji", () => ({
                     id: favoriteableId,
@@ -366,7 +366,7 @@ function imageContextPatch(c, p: {
     if ("src" in p
     && /https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.[a-zA-Z]{3,4}.*/gm.test(p.src)
     ){
-        const matches = [...p.src.matchAll(/https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.(gif|png).*/gm)];
+        const matches = [...p.src.matchAll(/https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.[a-zA-Z]{3,4}.*/gm)];
         if (!matches) return;
         c.push(buildMenuItem("Emoji", () => ({
             id: matches[0][1],
