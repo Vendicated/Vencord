@@ -45,7 +45,7 @@ export default LazyComponent(() => {
         p("container", "isHeader"),
         p("avatar", "zalgo"),
         p("button", "wrapper", "selected"),
-        p("botTag", "botTagRegular")
+        p("botTagRegular")
     );
 
     const dateFormat = new Intl.DateTimeFormat();
@@ -142,7 +142,7 @@ export default LazyComponent(() => {
 
                     {review.type === ReviewType.System && (
                         <span
-                            className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.botTag, botTag.px, botTag.rem)}
+                            className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.px, botTag.rem)}
                             style={{ marginLeft: "4px" }}>
                             <span className={botTag.botText}>
                                 System

@@ -21,6 +21,7 @@ import { Button, showToast, Toasts, useState } from "@webpack/common";
 
 import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
+import { MediaEngineStore } from "./utils";
 
 const Native = VencordNative.pluginHelpers.VoiceMessages as PluginNative<typeof import("./native")>;
 
@@ -41,6 +42,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
                 {
                     echoCancellation: settings.store.echoCancellation,
                     noiseCancellation: settings.store.noiseSuppression,
+                    deviceId: MediaEngineStore.getInputDeviceId(),
                 },
                 (success: boolean) => {
                     if (success)
