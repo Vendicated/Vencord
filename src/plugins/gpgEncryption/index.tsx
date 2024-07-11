@@ -4,7 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addBadge } from "@api/Badges";
+import {
+    ChatBarButton,
+    addChatBarButton,
+    removeChatBarButton,
+} from "@api/ChatButtons";
 import {
     ApplicationCommandInputType,
     ApplicationCommandOptionType,
@@ -18,6 +22,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
 import { MessageCache, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
+import { React } from "@webpack/common";
 
 const LOCK_ICON = ErrorBoundary.wrap(
     () => (
@@ -95,12 +100,66 @@ const decryptPgpMessages = async (channelId: string) => {
     }
 };
 
+function GPGToggle() {
+    const [isActiveListener, setIsActiveListener] = React.useState(false);
+
+    return (
+        <ChatBarButton
+            tooltip={`Encryption is ${isActiveListener ? "enabled" : "disabled"}.`}
+            onClick={() => {
+                console.log("isActive", isActive);
+                isActive = !isActive;
+                setIsActiveListener(isActive);
+            }}
+            buttonProps={{
+                style: {
+                    translate: "0 2px",
+                },
+            }}
+        >
+            {isActiveListener ? (
+                <svg
+                    fill="currentColor"
+                    fillRule="evenodd"
+                    width="24"
+                    height="24"
+                    style={{ scale: "0.9", translate: "0 -2px" }}
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        fillRule="evenodd"
+                        d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z"
+                        clipRule="evenodd"
+                    />
+                </svg>
+            ) : (
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    fillRule="evenodd"
+                    width="24"
+                    height="24"
+                    style={{ scale: "0.9", translate: "0 -2px" }}
+                    viewBox="0 0 24 24"
+                >
+                    <path d="M18 1.5c2.9 0 5.25 2.35 5.25 5.25v3.75a.75.75 0 0 1-1.5 0V6.75a3.75 3.75 0 1 0-7.5 0v3a3 3 0 0 1 3 3v6.75a3 3 0 0 1-3 3H3.75a3 3 0 0 1-3-3v-6.75a3 3 0 0 1 3-3h9v-3c0-2.9 2.35-5.25 5.25-5.25Z" />
+                </svg>
+            )}
+        </ChatBarButton>
+    );
+}
+
 export default definePlugin({
     name: "GPGEncryption",
     description:
         "Allows you to send GPG encrypted messages to other users with the plugin",
     authors: [Devs.zoeycodes, Devs.jg],
-    dependencies: ["MessageEventsAPI", "CommandsAPI", "MessageDecorationsAPI"],
+    dependencies: [
+        "MessageEventsAPI",
+        "CommandsAPI",
+        "MessageDecorationsAPI",
+        "ChatInputButtonAPI",
+    ],
 
     commands: [
         {
@@ -248,6 +307,8 @@ export default definePlugin({
     },
 
     start() {
+        addChatBarButton("gpgToggle", GPGToggle);
+        console.log("added");
         try {
             this.preSend = addPreSendListener(async (channelId, msg) => {
                 this.channelId = channelId;
@@ -267,5 +328,6 @@ export default definePlugin({
 
     stop() {
         removePreSendListener(this.preSend);
+        removeChatBarButton("gpgToggle");
     },
 });
