@@ -202,9 +202,12 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
             for (const [filter, callback] of waitForSubscriptions) {
                 try {
-                    if (filter.$$vencordIsFactoryFilter && filter(originalMod)) {
-                        waitForSubscriptions.delete(filter);
-                        callback(exports, { id, exportKey: null, factory: originalMod });
+                    if (filter.$$vencordIsFactoryFilter) {
+                        if (filter(originalMod)) {
+                            waitForSubscriptions.delete(filter);
+                            callback(exports, { id, exportKey: null, factory: originalMod });
+                        }
+
                         continue;
                     }
 
