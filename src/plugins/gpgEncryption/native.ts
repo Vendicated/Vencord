@@ -21,21 +21,17 @@ function executeCommand(command: string): Promise<string> {
 }
 
 export function encryptMessage(_, message: string): Promise<string> {
-    console.log("encrypt");
     if (selfKey.length === 0) {
-        console.log("no self key", selfKey);
         return Promise.resolve(
             `[NOT ENCRYPTED - REGISTER SELF KEY] ${message}`,
         );
     }
     if (recipientKey.length === 0) {
-        console.log("no recipient key", recipientKey);
         return Promise.resolve(
             `[NOT ENCRYPTED - REGISTER RECIPIENT KEY] ${message}`,
         );
     }
     const gpgCommand = `echo "${message}" | gpg --encrypt --armor -r ${selfKey} -r ${recipientKey}`;
-    console.log(gpgCommand);
     return executeCommand(gpgCommand);
 }
 

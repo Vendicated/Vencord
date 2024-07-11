@@ -16,6 +16,9 @@ import definePlugin, { PluginNative } from "@utils/types";
 import { MessageCache } from "@webpack/common";
 import { Message } from "discord-types/general";
 
+const PGP_MESSAGE_REGEX: RegExp =
+    /-----BEGIN PGP MESSAGE-----(.*)-----END PGP MESSAGE-----/s;
+
 const Native = VencordNative.pluginHelpers.GPGEncryption as PluginNative<
     typeof import("./native")
 >;
@@ -23,19 +26,17 @@ const Native = VencordNative.pluginHelpers.GPGEncryption as PluginNative<
 let isActive = false;
 
 const containsPGPMessage = (text: string): boolean => {
-    const pgpMessageRegex =
-        /-----BEGIN PGP MESSAGE-----(.*)-----END PGP MESSAGE-----/s;
-    return pgpMessageRegex.test(text);
+    return PGP_MESSAGE_REGEX.test(text);
 };
 
 const decryptPgpMessages = async (channelId: string) => {
     try {
-        let cache = MessageCache.getOrCreate(channelId);
+        const cache = MessageCache.getOrCreate(channelId);
 
         const messages: Message[] = cache.toArray();
         const pgp: Message[] = [];
 
-        for (let m of messages) {
+        for (const m of messages) {
             if (containsPGPMessage(m.content)) {
                 pgp.push(m);
                 updateMessage(channelId, m.id, {
@@ -44,7 +45,7 @@ const decryptPgpMessages = async (channelId: string) => {
             }
         }
 
-        for (let pgpMessage of pgp) {
+        for (const pgpMessage of pgp) {
             if (containsPGPMessage(pgpMessage.content)) {
                 try {
                     const content = await Native.decryptMessage(
@@ -55,12 +56,12 @@ const decryptPgpMessages = async (channelId: string) => {
                         content,
                     });
                 } catch (e) {
-                    console.log("unable to decrypt", e);
+                    console.error("unable to decrypt", e);
                 }
             }
         }
     } catch (e) {
-        console.log(e);
+        console.error(e);
     }
 };
 
@@ -105,7 +106,7 @@ export default definePlugin({
             },
         },
         {
-            name: "sharegpg",
+            name: "gpgshare",
             description: "Share GPG Public Key",
             inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
             options: [
@@ -131,16 +132,15 @@ export default definePlugin({
         },
 
         {
-            name: "registergpg",
-            description: "Share GPG Public Key",
+            name: "gpgregister",
+            description: "Manually register self/recipient keys",
             inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
             options: [
                 {
                     required: true,
-                    name: "Self key?",
-                    type: ApplicationCommandOptionType.BOOLEAN,
-                    description:
-                        "True if this is your key id, false if this is the recipient's",
+                    name: "self or recipient?",
+                    type: ApplicationCommandOptionType.STRING,
+                    description: "Whose key is this?",
                 },
                 {
                     required: true,
@@ -149,7 +149,37 @@ export default definePlugin({
                     description: "The keyId",
                 },
             ],
-            execute: async (args, _) => {
+            execute: async (args, ctx) => {
+                switch (args[0].value) {
+                    case "self":
+                        try {
+                            Native.registerSelfKey(args[1].value);
+                        } catch (e) {
+                            return sendBotMessage(ctx.channel.id, {
+                                content: `Failed to register self key, ${e}`,
+                            });
+                        }
+                        return sendBotMessage(ctx.channel.id, {
+                            content: "Self key registered",
+                        });
+                    case "recipient":
+                        try {
+                            Native.registerRecipientKey(args[1].value);
+                        } catch (e) {
+                            return sendBotMessage(ctx.channel.id, {
+                                content: `Failed to register recipient key, ${e}`,
+                            });
+                        }
+                        return sendBotMessage(ctx.channel.id, {
+                            content: "Recipient key registered",
+                        });
+
+                    default:
+                        return sendBotMessage(ctx.channel.id, {
+                            content: "Invalid Selection",
+                        });
+                }
+
                 if (args[0].value) {
                     Native.registerSelfKey(args[1].value);
                 } else {
@@ -160,13 +190,13 @@ export default definePlugin({
     ],
 
     flux: {
-        MESSAGE_CREATE: async (event) => {
+        MESSAGE_CREATE: async (event: any) => {
             decryptPgpMessages(event.message.channel_id);
         },
-        CHANNEL_SELECT: async (event) => {
+        CHANNEL_SELECT: async (event: any) => {
             decryptPgpMessages(event.channelId);
         },
-        LOAD_MESSAGES_SUCCESS: async (event) => {
+        LOAD_MESSAGES_SUCCESS: async (event: any) => {
             decryptPgpMessages(event.channelId);
         },
     },
