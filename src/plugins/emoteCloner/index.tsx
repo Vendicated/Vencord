@@ -360,19 +360,19 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
     }
 };
 
-function imageContextPatch(c, p: {
+const imageContextPatch: NavContextMenuPatchCallback = (children, props: {
     src: string
-}){
-    if ("src" in p && /https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.[a-zA-Z]{3,4}.*/gm.test(p.src)) {
-        const matches = [...p.src.matchAll(/https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.[a-zA-Z]{3,4}.*/gm)];
+}) => {
+    if ("src" in props && /https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.([a-zA-Z]{3,4}).*/gm.test(props.src)) {
+        const matches = [...props.src.matchAll(/https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.([a-zA-Z]{3,4}).*/gm)];
         if (!matches) return;
-        c.push(buildMenuItem("Emoji", () => ({
+        children.push(buildMenuItem("Emoji", () => ({
             id: matches[0][1],
             isAnimated: (matches[0][2] === "gif"),
             name: "ProfileEmoji"
         })));
     }
-}
+};
 interface HangStatus {
     emoji?: {
         // used for unicode emojis and custom emojis
@@ -382,19 +382,19 @@ interface HangStatus {
         animated?: boolean
     }
 }
-function vcHangStatusContextPatch(c, p: {
+const vcHangStatusContextPatch: NavContextMenuPatchCallback =(children, props: {
     user: {
         HangStatus?: HangStatus
     }
-}){
-    if(p.user.HangStatus?.emoji?.id){
-        const e = p.user.HangStatus.emoji as Emoji;
-        e.isAnimated = p.user.HangStatus.emoji.animated ?? false;
-        c.push(buildMenuItem("Emoji", () => {
+}) => {
+    if(props.user.HangStatus?.emoji?.id){
+        const e = props.user.HangStatus.emoji as Emoji;
+        e.isAnimated = props.user.HangStatus.emoji.animated ?? false;
+        children.push(buildMenuItem("Emoji", () => {
             return e;
         }));
     }
-}
+};
 export default definePlugin({
     name: "EmoteCloner",
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
