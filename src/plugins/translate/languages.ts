@@ -14,22 +14,22 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
 /*
-To generate:
-- Visit https://translate.google.com/?sl=auto&tl=en&op=translate
-- Open Language dropdown
-- Open Devtools and use the element picker to pick the root of the language picker
-- Right click on the element in devtools and click "Store as global variable"
-
-copy(Object.fromEntries(
-    Array.from(
-        temp1.querySelectorAll("[data-language-code]"),
-        e => [e.dataset.languageCode, e.children[1].textContent]
-    ).sort((a, b) => a[1] === "Detect language" ? -1 : b[1] === "Detect language" ? 1 : a[1].localeCompare(b[1]))
-))
-*/
+ * To generate:
+ * - Visit https://translate.google.com/?sl=auto&tl=en&op=translate
+ * - Open Language dropdown
+ * - Open Devtools and use the element picker to pick the root of the language picker
+ * - Right click on the element in devtools and click "Store as global variable"
+ *
+ * copy(Object.fromEntries(
+ *    Array.from(
+ *        temp1.querySelectorAll("[data-language-code]"),
+ *        e => [e.dataset.languageCode, e.children[1].textContent]
+ *    ).sort((a, b) => a[1] === "Detect language" ? -1 : b[1] === "Detect language" ? 1 : a[1].localeCompare(b[1]))
+ * ))
+ */
 
 export type Language = keyof typeof Languages;
 
@@ -52,7 +52,6 @@ export const Languages = {
     "bg": "Bulgarian",
     "ca": "Catalan",
     "ceb": "Cebuano",
-    "ny": "Chichewa",
     "zh-CN": "Chinese (Simplified)",
     "zh-TW": "Chinese (Traditional)",
     "co": "Corsican",
@@ -66,7 +65,7 @@ export const Languages = {
     "eo": "Esperanto",
     "et": "Estonian",
     "ee": "Ewe",
-    "tl": "Filipino",
+    "fil": "Filipino (Tagalog)",
     "fi": "Finnish",
     "fr": "French",
     "fy": "Frisian",
@@ -98,7 +97,7 @@ export const Languages = {
     "gom": "Konkani",
     "ko": "Korean",
     "kri": "Krio",
-    "ku": "Kurdish (Kurmanji)",
+    "ku": "Kurdish",
     "ckb": "Kurdish (Sorani)",
     "ky": "Kyrgyz",
     "lo": "Lao",
@@ -122,12 +121,13 @@ export const Languages = {
     "my": "Myanmar (Burmese)",
     "ne": "Nepali",
     "no": "Norwegian",
+    "ny": "Nyanja (Chichewa)",
     "or": "Odia (Oriya)",
     "om": "Oromo",
     "ps": "Pashto",
     "fa": "Persian",
     "pl": "Polish",
-    "pt": "Portuguese",
+    "pt": "Portuguese (Portugal, Brazil)",
     "pa": "Punjabi",
     "qu": "Quechua",
     "ro": "Romanian",
@@ -140,7 +140,7 @@ export const Languages = {
     "st": "Sesotho",
     "sn": "Shona",
     "sd": "Sindhi",
-    "si": "Sinhala",
+    "si": "Sinhala (Sinhalese)",
     "sk": "Slovak",
     "sl": "Slovenian",
     "so": "Somali",
@@ -148,6 +148,7 @@ export const Languages = {
     "su": "Sundanese",
     "sw": "Swahili",
     "sv": "Swedish",
+    "tl": "Tagalog (Filipino)",
     "tg": "Tajik",
     "ta": "Tamil",
     "tt": "Tatar",
@@ -157,7 +158,7 @@ export const Languages = {
     "ts": "Tsonga",
     "tr": "Turkish",
     "tk": "Turkmen",
-    "ak": "Twi",
+    "ak": "Twi (Akan)",
     "uk": "Ukrainian",
     "ur": "Urdu",
     "ug": "Uyghur",
