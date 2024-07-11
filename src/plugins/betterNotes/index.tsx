@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { canonicalizeMatch } from "@utils/patches";
@@ -25,10 +25,26 @@ import { findByPropsLazy } from "@webpack";
 
 const UserPopoutSectionCssClasses = findByPropsLazy("section", "lastSection");
 
+const settings = definePluginSettings({
+    hide: {
+        type: OptionType.BOOLEAN,
+        description: "Hide notes",
+        default: false,
+        restartNeeded: true
+    },
+    noSpellCheck: {
+        type: OptionType.BOOLEAN,
+        description: "Disable spellcheck in notes",
+        disabled: () => Settings.plugins.BetterNotesBox.hide,
+        default: false
+    }
+});
+
 export default definePlugin({
     name: "BetterNotesBox",
     description: "Hide notes or disable spellcheck (Configure in settings!!)",
     authors: [Devs.Ven],
+    settings,
 
     patches: [
         {
@@ -36,7 +52,7 @@ export default definePlugin({
             all: true,
             // Some modules match the find but the replacement is returned untouched
             noWarn: true,
-            predicate: () => Vencord.Settings.plugins.BetterNotesBox.hide,
+            predicate: () => settings.store.hide,
             replacement: {
                 match: /hideNote:.+?(?=([,}].*?\)))/g,
                 replace: (m, rest) => {
@@ -54,7 +70,7 @@ export default definePlugin({
             find: "Messages.NOTE_PLACEHOLDER",
             replacement: {
                 match: /\.NOTE_PLACEHOLDER,/,
-                replace: "$&spellCheck:!Vencord.Settings.plugins.BetterNotesBox.noSpellCheck,"
+                replace: "$&spellCheck:!$self.noSpellCheck,"
             }
         },
         {
@@ -66,25 +82,14 @@ export default definePlugin({
         }
     ],
 
-    options: {
-        hide: {
-            type: OptionType.BOOLEAN,
-            description: "Hide notes",
-            default: false,
-            restartNeeded: true
-        },
-        noSpellCheck: {
-            type: OptionType.BOOLEAN,
-            description: "Disable spellcheck in notes",
-            disabled: () => Settings.plugins.BetterNotesBox.hide,
-            default: false
-        }
-    },
-
     patchPadding: ErrorBoundary.wrap(({ lastSection }) => {
         if (!lastSection) return null;
         return (
             <div className={UserPopoutSectionCssClasses.lastSection} ></div>
         );
-    })
+    }),
+
+    get noSpellCheck() {
+        return settings.store.noSpellCheck;
+    }
 });
