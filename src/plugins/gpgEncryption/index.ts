@@ -16,6 +16,9 @@ import definePlugin, { PluginNative } from "@utils/types";
 import { MessageCache } from "@webpack/common";
 import { Message } from "discord-types/general";
 
+const PGP_MESSAGE_REGEX: RegExp =
+    /-----BEGIN PGP MESSAGE-----(.*)-----END PGP MESSAGE-----/s;
+
 const Native = VencordNative.pluginHelpers.GPGEncryption as PluginNative<
     typeof import("./native")
 >;
@@ -23,9 +26,7 @@ const Native = VencordNative.pluginHelpers.GPGEncryption as PluginNative<
 let isActive = false;
 
 const containsPGPMessage = (text: string): boolean => {
-    const pgpMessageRegex =
-        /-----BEGIN PGP MESSAGE-----(.*)-----END PGP MESSAGE-----/s;
-    return pgpMessageRegex.test(text);
+    return PGP_MESSAGE_REGEX.test(text);
 };
 
 const decryptPgpMessages = async (channelId: string) => {
@@ -137,7 +138,7 @@ export default definePlugin({
             options: [
                 {
                     required: true,
-                    name: "self or recipient key?",
+                    name: "self or recipient?",
                     type: ApplicationCommandOptionType.STRING,
                     description: "Whose key is this?",
                 },
@@ -148,7 +149,37 @@ export default definePlugin({
                     description: "The keyId",
                 },
             ],
-            execute: async (args, _) => {
+            execute: async (args, ctx) => {
+                switch (args[0].value) {
+                    case "self":
+                        try {
+                            Native.registerSelfKey(args[1].value);
+                        } catch (e) {
+                            return sendBotMessage(ctx.channel.id, {
+                                content: `Failed to register self key, ${e}`,
+                            });
+                        }
+                        return sendBotMessage(ctx.channel.id, {
+                            content: "Self key registered",
+                        });
+                    case "recipient":
+                        try {
+                            Native.registerRecipientKey(args[1].value);
+                        } catch (e) {
+                            return sendBotMessage(ctx.channel.id, {
+                                content: `Failed to register recipient key, ${e}`,
+                            });
+                        }
+                        return sendBotMessage(ctx.channel.id, {
+                            content: "Recipient key registered",
+                        });
+
+                    default:
+                        return sendBotMessage(ctx.channel.id, {
+                            content: "Invalid Selection",
+                        });
+                }
+
                 if (args[0].value) {
                     Native.registerSelfKey(args[1].value);
                 } else {

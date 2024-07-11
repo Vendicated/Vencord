@@ -6,7 +6,8 @@
 
 import { exec } from "child_process";
 
-const PUBLIC_KEY_PREAMBLE: string = "-----BEGIN PGP PUBLIC KEY BLOCK-----";
+const PUBLIC_KEY_REGEX: RegExp =
+    /-----BEGIN PGP PUBLIC KEY BLOCK-----(.*)-----END PGP PUBLIC KEY BLOCK-----/s;
 
 let selfKey: string = "";
 let recipientKey: string = "";
@@ -60,7 +61,7 @@ export function registerRecipientKey(_, keyId: string): Promise<string> {
 function handleDecryptedMessage(msg: Promise<string>): Promise<string> {
     return new Promise((resolve, reject) => {
         msg.then(message => {
-            if (message.startsWith(PUBLIC_KEY_PREAMBLE)) {
+            if (PUBLIC_KEY_REGEX.test(message)) {
                 resolve(handlePublicKey(message));
             } else {
                 resolve(message);
