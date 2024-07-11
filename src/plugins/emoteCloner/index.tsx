@@ -363,9 +363,8 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
 function imageContextPatch(c, p: {
     src: string
 }){
-    console.log("passed", p);
     if ("src" in p
-    && /https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.(gif|png).*/gm.test(p.src)
+    && /https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.[a-zA-Z]{3,4}.*/gm.test(p.src)
     ){
         const matches = [...p.src.matchAll(/https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.(gif|png).*/gm)];
         if (!matches) return;
