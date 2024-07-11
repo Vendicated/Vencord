@@ -17,7 +17,7 @@ const container = findByProps("memberSince");
 const getCreatedAtDate = findByCode('month:"short",day:"numeric"');
 const locale = findByProps("getLocale");
 const lastSection = findByProps("lastSection");
-const section = find((m: any) => m.section !== void 0 && Object.values(m).length === 1);
+const section = find((m: any) => m.section !== void 0 && m.heading !== void 0 && Object.values(m).length === 2);
 
 export default definePlugin({
     name: "FriendsSince",
