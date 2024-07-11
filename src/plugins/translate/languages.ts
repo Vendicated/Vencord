@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
 /*
  * To generate:
@@ -29,7 +29,7 @@
  *        e => [e.dataset.languageCode, e.children[1].textContent]
  *    ).sort((a, b) => a[1] === "Detect language" ? -1 : b[1] === "Detect language" ? 1 : a[1].localeCompare(b[1]))
  * ))
- */
+*/
 
 export type Language = keyof typeof Languages;
 
