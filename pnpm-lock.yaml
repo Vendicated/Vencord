@@ -26,8 +26,8 @@ importers:
         specifier: 0.10.5
         version: 0.10.5
       eslint-plugin-simple-header:
-        specifier: ^1.0.2
-        version: 1.0.2
+        specifier: ^1.1.1
+        version: 1.1.1
       fflate:
         specifier: ^0.8.2
         version: 0.8.2
@@ -111,8 +111,8 @@ importers:
         specifier: 2.22.2
         version: 2.22.2
       puppeteer-core:
-        specifier: ^22.12.1
-        version: 22.12.1
+        specifier: ^22.13.0
+        version: 22.13.0
       standalone-electron-types:
         specifier: ^1.0.0
         version: 1.0.0
@@ -190,8 +190,8 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2(eslint@9.6.0)
       eslint-plugin-import-x:
-        specifier: ^0.5.3
-        version: 0.5.3(eslint@9.6.0)(typescript@5.5.3)
+        specifier: ^3.0.0
+        version: 3.0.0(eslint@9.6.0)(typescript@5.5.3)
       eslint-plugin-simple-import-sort:
         specifier: ^12.1.1
         version: 12.1.1(eslint@9.6.0)
@@ -202,8 +202,8 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0(@typescript-eslint/eslint-plugin@7.16.0(@typescript-eslint/parser@7.16.0(eslint@8.57.0(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.3))(eslint@8.57.0(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.3))(eslint@9.6.0)
       puppeteer-core:
-        specifier: ^22.12.1
-        version: 22.12.1
+        specifier: ^22.13.0
+        version: 22.13.0
       semver:
         specifier: ^7.6.2
         version: 7.6.2
@@ -1133,8 +1133,8 @@ packages:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
 
-  chromium-bidi@0.5.24:
-    resolution: {integrity: sha512-5xQNN2SVBdZv4TxeMLaI+PelrnZsHDhn8h2JtyriLr+0qHcZS8BMuo93qN6J1VmtmrgYP+rmcLHcbpnA8QJh+w==}
+  chromium-bidi@0.6.0:
+    resolution: {integrity: sha512-VnxVrpGojAjkiGFN2I+KtsDILFAjiGWVEDizOEnKzEDkT93eQT1cqTfUkqmOyLq33i1q4a1KDYbH+52CUe4Ufw==}
     peerDependencies:
       devtools-protocol: '*'
 
@@ -1461,8 +1461,8 @@ packages:
     peerDependencies:
       eslint: '>=7'
 
-  eslint-plugin-import-x@0.5.3:
-    resolution: {integrity: sha512-hJ/wkMcsLQXAZL3+txXIDpbW5cqwdm1rLTqV4VRY03aIbzE3zWE7rPZKW6Gzf7xyl1u3V1iYC6tOG77d9NF4GQ==}
+  eslint-plugin-import-x@3.0.0:
+    resolution: {integrity: sha512-zk3QklFELk7mrSlhP9C27NpKx86G5YtIEvDV1dIJRS3VOIm5tCHQCln2JkwbO5lpYOvyYSoro35PCAAVG9lY8w==}
     engines: {node: '>=16'}
     peerDependencies:
       eslint: ^8.56.0 || ^9.0.0-0
@@ -1482,8 +1482,8 @@ packages:
     peerDependencies:
       eslint: ^8.0.0
 
-  eslint-plugin-simple-header@1.0.2:
-    resolution: {integrity: sha512-K1EJ/ueBIjPRA8qR44Ymo+GDmPYYmfoODtainGxVr7PSbX6QiaY+pTuGCrOhO+AtVsYJs8GLSVdGUTXyAxAtOA==}
+  eslint-plugin-simple-header@1.1.1:
+    resolution: {integrity: sha512-xFK54pYcSEC2uULHTeo2aEgmTmdhZ9ry3zIV9OspLaEPb/Xg1oaFmOcmoNhk9WNJPwzUKrAmYyA8s4YDBfbD+g==}
 
   eslint-plugin-simple-import-sort@12.1.1:
     resolution: {integrity: sha512-6nuzu4xwQtE3332Uz0to+TxDQYRLTKRESSc2hefVT48Zc8JthmN23Gx9lnYhu0FtkRSL1oxny3kJ2aveVhmOVA==}
@@ -2480,8 +2480,8 @@ packages:
     resolution: {integrity: sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==}
     engines: {node: '>=6'}
 
-  puppeteer-core@22.12.1:
-    resolution: {integrity: sha512-XmqeDPVdC5/3nGJys1jbgeoZ02wP0WV1GBlPtr/ULRbGXJFuqgXMcKQ3eeNtFpBzGRbpeoCGWHge1ZWKWl0Exw==}
+  puppeteer-core@22.13.0:
+    resolution: {integrity: sha512-ZkpRX8nm/S39BnpcCverMzIc6oGWBPOUeOeaWRLKHqiKVCZ1l28HxPTYLitJlDiB16xZATSKpjul+sl+ZEm0HQ==}
     engines: {node: '>=18'}
 
   q@1.5.1:
@@ -3003,8 +3003,8 @@ packages:
     resolution: {integrity: sha512-+QU2zd6OTD8XWIJCbffaiQeH9U73qIqafo1x6V1snCWYGJf6cVE0cDR4D8xRzcEnfI21IFrUPzPGtcPf8AC+Rw==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
 
-  ws@8.17.1:
-    resolution: {integrity: sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==}
+  ws@8.18.0:
+    resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -3242,7 +3242,7 @@ snapshots:
   '@eslint/eslintrc@2.1.4':
     dependencies:
       ajv: 6.12.6
-      debug: 4.3.4
+      debug: 4.3.5
       espree: 9.6.1
       globals: 13.20.0
       ignore: 5.3.1
@@ -3276,7 +3276,7 @@ snapshots:
   '@humanwhocodes/config-array@0.11.14':
     dependencies:
       '@humanwhocodes/object-schema': 2.0.3
-      debug: 4.3.4
+      debug: 4.3.5
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -3641,6 +3641,17 @@ snapshots:
       - supports-color
       - typescript
 
+  '@typescript-eslint/utils@7.16.0(eslint@9.6.0)(typescript@5.5.3)':
+    dependencies:
+      '@eslint-community/eslint-utils': 4.4.0(eslint@9.6.0)
+      '@typescript-eslint/scope-manager': 7.16.0
+      '@typescript-eslint/types': 7.16.0
+      '@typescript-eslint/typescript-estree': 7.16.0(typescript@5.5.3)
+      eslint: 9.6.0
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
+
   '@typescript-eslint/utils@8.0.0-alpha.41(eslint@9.6.0)(typescript@5.5.3)':
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@9.6.0)
@@ -3920,7 +3931,7 @@ snapshots:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
 
-  chromium-bidi@0.5.24(devtools-protocol@0.0.1299070):
+  chromium-bidi@0.6.0(devtools-protocol@0.0.1299070):
     dependencies:
       devtools-protocol: 0.0.1299070
       mitt: 3.0.1
@@ -4305,9 +4316,9 @@ snapshots:
     dependencies:
       eslint: 9.6.0
 
-  eslint-plugin-import-x@0.5.3(eslint@9.6.0)(typescript@5.5.3):
+  eslint-plugin-import-x@3.0.0(eslint@9.6.0)(typescript@5.5.3):
     dependencies:
-      '@typescript-eslint/utils': 7.14.1(eslint@9.6.0)(typescript@5.5.3)
+      '@typescript-eslint/utils': 7.16.0(eslint@9.6.0)(typescript@5.5.3)
       debug: 4.3.5
       doctrine: 3.0.0
       eslint: 9.6.0
@@ -4358,7 +4369,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-simple-header@1.0.2: {}
+  eslint-plugin-simple-header@1.1.1: {}
 
   eslint-plugin-simple-import-sort@12.1.1(eslint@8.57.0(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi)):
     dependencies:
@@ -5432,13 +5443,13 @@ snapshots:
 
   punycode@2.1.1: {}
 
-  puppeteer-core@22.12.1:
+  puppeteer-core@22.13.0:
     dependencies:
       '@puppeteer/browsers': 2.2.3
-      chromium-bidi: 0.5.24(devtools-protocol@0.0.1299070)
+      chromium-bidi: 0.6.0(devtools-protocol@0.0.1299070)
       debug: 4.3.5
       devtools-protocol: 0.0.1299070
-      ws: 8.17.1
+      ws: 8.18.0
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -6061,7 +6072,7 @@ snapshots:
       imurmurhash: 0.1.4
       signal-exit: 4.0.1
 
-  ws@8.17.1: {}
+  ws@8.18.0: {}
 
   y18n@5.0.8: {}
 
