@@ -15,7 +15,11 @@ const containerWrapper: Record<string, string> = findByPropsLazy("memberSinceWra
 const container: Record<string, string> = findByPropsLazy("memberSince");
 const getCreatedAtDate = findByCodeLazy('month:"short",day:"numeric"');
 const lastSection: Record<string, string> = findByPropsLazy("lastSection");
-const section: Record<string, string> = findLazy(m => m.section !== undefined && Object.keys(m).length === 1);
+const section: Record<string, string> = findLazy((m: any) =>
+    m.section !== undefined
+    && m.heading !== undefined
+    && Object.values(m).length === 2
+);
 
 export default definePlugin({
     name: "FriendsSince",
