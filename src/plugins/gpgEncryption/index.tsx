@@ -107,7 +107,6 @@ function GPGToggle() {
         <ChatBarButton
             tooltip={`Encryption is ${isActiveListener ? "enabled" : "disabled"}.`}
             onClick={() => {
-                console.log("isActive", isActive);
                 isActive = !isActive;
                 setIsActiveListener(isActive);
             }}
@@ -308,7 +307,6 @@ export default definePlugin({
 
     start() {
         addChatBarButton("gpgToggle", GPGToggle);
-        console.log("added");
         try {
             this.preSend = addPreSendListener(async (channelId, msg) => {
                 this.channelId = channelId;
