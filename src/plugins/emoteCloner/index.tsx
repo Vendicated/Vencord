@@ -415,11 +415,9 @@ export default definePlugin({
             find: "renderPrioritySpeaker",
             replacement: {
                 match: /(handleContextMenu".*?)(let)/,
-                replace: "$1$self.patchVcListProps(this.props);$2"
+                replace: "$1this.props.user.HangStatus=this.props.hangStatusActivity;$2"
+
             }
         },
     ],
-    patchVcListProps(props){
-        props.user.HangStatus = props.hangStatusActivity;
-    },
 });
