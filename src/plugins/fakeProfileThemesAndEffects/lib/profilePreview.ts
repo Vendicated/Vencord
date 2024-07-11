@@ -60,7 +60,7 @@ export function useShowPreview(initialState: typeof showPreview) {
     ] as const;
 }
 
-export function profilePreviewHook(props: any) {
+export function profilePreviewHook(props: Record<string, any>) {
     if (showPreview) {
         if (primaryColor !== null) {
             props.pendingThemeColors = [primaryColor, accentColor ?? primaryColor];

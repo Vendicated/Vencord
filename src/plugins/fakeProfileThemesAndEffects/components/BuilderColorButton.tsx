@@ -26,7 +26,7 @@ export const BuilderColorButton = ({ label, color, setColor, suggestedColors }: 
         )}
     >
         {popoutProps => {
-            const hexColor = color?.toString(16).padStart(6, "0").padStart(7, "#");
+            const hexColor = color ? "#" + color.toString(16).padStart(6, "0") : undefined;
 
             return (
                 <BuilderButton

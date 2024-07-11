@@ -10,8 +10,8 @@ import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { useMemo } from "@webpack/common";
 
-import { Builder, type BuilderProps, setCustomColorPicker, setCustomizationSection, setProfileEffectModal, settingsAboutComponent, setUseAvatarColors } from "./components";
-import { ProfileEffectRecord, ProfileEffectStore, setProfileEffectRecord, setProfileEffectStore } from "./lib/profileEffects";
+import { Builder, type BuilderProps, setProfileEffectModal, settingsAboutComponent } from "./components";
+import { ProfileEffectRecord, ProfileEffectStore } from "./lib/profileEffects";
 import { profilePreviewHook } from "./lib/profilePreview";
 import { decodeAboutMeFPTEHook } from "./lib/userProfile";
 
@@ -21,7 +21,7 @@ function replaceHelper(string: string, replaceArgs: [searchRegExp: RegExp, repla
         const beforeReplace = result;
         result = result.replace(
             canonicalizeMatch(searchRegExp),
-            canonicalizeReplace(replaceString, "FakeProfileThemesAndEffects") as string
+            canonicalizeReplace(replaceString, "FakeProfileThemesAndEffects")
         );
         if (beforeReplace === result)
             throw new Error("Replace had no effect: " + searchRegExp);
@@ -76,67 +76,33 @@ export default definePlugin({
         },
         // Adds the FPTE Builder to the Server Profiles settings page
         {
-            find: ".setNewPendingGuildIdentity",
+            find: '"guild should not be null"',
             replacement: {
                 match: /\.sectionsContainer,.*?children:\[(?=.+?[{,]guild:(\i))/,
                 replace: "$&$self.addFPTEBuilder($1),"
             }
         },
-        // CustomizationSection
-        {
-            find: ".customizationSectionBackground",
-            replacement: {
-                match: /default:function\(\){return (\i)}.+?;/,
-                replace: "$&$self.CustomizationSection=$1;"
-            }
-        },
-        // CustomColorPicker
-        {
-            find: ".colorPickerSwatch",
-            replacement: {
-                match: /CustomColorPicker:function\(\){return (\i)}.+?[ ,;}]\1=(?!=)/,
-                replace: "$&$self.CustomColorPicker="
-            }
-        },
-        // useAvatarColors
-        {
-            find: "useAvatarColors:function(){",
-            replacement: {
-                match: /useAvatarColors:function\(\){return (\i)}.+?;/,
-                replace: "$&$self.useAvatarColors=$1;"
-            }
-        },
-        // ProfileEffectRecord
-        {
-            find: "isProfileEffectRecord:function(){",
-            replacement: {
-                match: /default:function\(\){return (\i)}.+(?=}$)/,
-                replace: "$&;$self.ProfileEffectRecord=$1"
-            }
-        },
-        // ProfileEffectStore
-        {
-            find: '"ProfileEffectStore"',
-            replacement: {
-                match: /function\(\i,(\i),.+[,;}]\1\.default=(?!=)/,
-                replace: "$&$self.ProfileEffectStore="
-            }
-        },
         // ProfileEffectModal
         {
             find: "initialSelectedProfileEffectId",
-            replacement: {
-                match: /default:function\(\){return (\i)}(?=.+?(function \1\((?:.(?!function |}$))+\.jsxs?\)\((\i),.+?})(?:function |}$)).+?(function \3\(.+?})(?=function |}$).*(?=}$)/,
-                replace: (wpModule, modalRootName, ModalRoot, _modalInnerName, ModalInner) => (
-                    `${wpModule}{$self.ProfileEffectModal=${modalRootName};`
-                    + replaceHelper(ModalRoot, [
-                        // Required for the profile preview to show profile effects
-                        [
-                            /(?<=[{,]purchases:.+?}=).+?(?=,\i=|,{\i:|;)/,
-                            "{isFetching:!1,categories:new Map,purchases:$self.getPurchases()}"
-                        ]
-                    ])
-                    + replaceHelper(ModalInner, [
+            replacement: [
+                // Modal root
+                {
+                    match: /(function (\i)\([^)]*\){(?:.(?!function |}$))*\.ModalRoot,(?:.(?!function |}$))*}).*(?=}$)/,
+                    replace: (match, func, funcName) => `${match}{$self.ProfileEffectModal=${funcName};`
+                        + replaceHelper(func, [
+                            // Required for the profile preview to show profile effects
+                            [
+                                /(?<=[{,]purchases:.+?}=).+?(?=,\i=|,{\i:|;)/,
+                                "{isFetching:!1,categories:new Map,purchases:$self.getPurchases()}"
+                            ]
+                        ])
+                        + "}"
+                },
+                // Modal content
+                {
+                    match: /(function \i\([^)]*\){(?:.(?!function ))*\.ModalContent,(?:.(?!function ))*}).*(?=}}$)/,
+                    replace: (match, func) => match + replaceHelper(func, [
                         // Required to show the apply button
                         [
                             /(?<=[{,]purchase:.+?}=).+?(?=,\i=|,{\i:|;)/,
@@ -149,7 +115,7 @@ export default definePlugin({
                         ],
                         // Replaces the apply profile effect function with the modified version
                         [
-                            /(?<=[{,]onApply:).+?\.setNewPendingProfileEffectId\)\((\i).+?(?=,\i:|}\))/,
+                            /(?<=[{,]onApply:).*?\)\((\i).*?(?=,\i:|}\))/,
                             "()=>$self.onApply($1)"
                         ],
                         // Required to show the apply button
@@ -163,18 +129,17 @@ export default definePlugin({
                             "!1"
                         ]
                     ])
-                    + "}"
-                )
-            }
+                }
+            ],
+            group: true
         },
         // ProfileEffectModalList
         {
             find: "selectedProfileEffectRef",
             replacement: {
-                match: /function\(\i,(\i),.+[,;}]\1\.default=([^=].+?})(?=;|}$).*(?=}$)/,
-                replace: (wpModule, _wpModuleVar, List) => (
-                    `${wpModule};$self.ProfileEffectModalList=`
-                    + replaceHelper(List, [
+                match: /function\(\i,(\i),.+[,;}]\1\.\i=([^=].+?})(?=;|}$).*(?=}$)/,
+                replace: (match, _, func) => `${match};$self.ProfileEffectModalList=`
+                    + replaceHelper(func, [
                         // Removes the "Exclusive to Nitro" and "Preview The Shop" sections
                         // Adds every profile effect to the "Your Decorations" section and removes the "Shop" button
                         [
@@ -182,14 +147,13 @@ export default definePlugin({
                             "$self.getListSections($&)"
                         ]
                     ])
-                )
             }
         }
     ],
 
-    addFPTEBuilder: (guildId?: BuilderProps["guildId"]) => settings.store.hideBuilder ? null : <Builder guildId={guildId} />,
+    addFPTEBuilder: (guild?: BuilderProps["guild"]) => settings.store.hideBuilder ? null : <Builder guild={guild} />,
 
-    onApply(_effectId: string | undefined) { },
+    onApply(_effectId: string | undefined) {},
     set ProfileEffectModal(comp: Parameters<typeof setProfileEffectModal>[0]) {
         setProfileEffectModal(props => {
             this.onApply = effectId => {
@@ -210,7 +174,7 @@ export default definePlugin({
         [ProfileEffectStore.profileEffects]
     ),
 
-    getListSections: (origSections: any[]) => useMemo(
+    getListSections: (origSections: Record<string, any>[]) => useMemo(
         () => {
             origSections.splice(1);
             origSections[0].items.splice(1);
@@ -221,12 +185,6 @@ export default definePlugin({
         },
         [ProfileEffectStore.profileEffects]
     ),
-
-    set CustomizationSection(comp: Parameters<typeof setCustomizationSection>[0]) { setCustomizationSection(comp); },
-    set CustomColorPicker(comp: Parameters<typeof setCustomColorPicker>[0]) { setCustomColorPicker(comp); },
-    set useAvatarColors(hook: Parameters<typeof setUseAvatarColors>[0]) { setUseAvatarColors(hook); },
-    set ProfileEffectRecord(obj: Parameters<typeof setProfileEffectRecord>[0]) { setProfileEffectRecord(obj); },
-    set ProfileEffectStore(store: Parameters<typeof setProfileEffectStore>[0]) { setProfileEffectStore(store); },
 
     settingsAboutComponent,
     settings,

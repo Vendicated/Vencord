@@ -6,23 +6,24 @@
 
 import { copyWithToast } from "@utils/misc";
 import { Button, showToast, Switch, UserStore, useState } from "@webpack/common";
+import type { Guild } from "discord-types/general";
 
 import { buildFPTE } from "../lib/fpte";
 import { useAccentColor, usePrimaryColor, useProfileEffect, useShowPreview } from "../lib/profilePreview";
 import { BuilderButton, BuilderColorButton, CustomizationSection, openProfileEffectModal, useAvatarColors } from ".";
 
 export interface BuilderProps {
-    guildId?: string | undefined;
+    guild?: Guild | undefined;
 }
 
-export function Builder({ guildId }: BuilderProps) {
+export function Builder({ guild }: BuilderProps) {
     const [primaryColor, setPrimaryColor] = usePrimaryColor(null);
     const [accentColor, setAccentColor] = useAccentColor(null);
     const [effect, setEffect] = useProfileEffect(null);
     const [preview, setPreview] = useShowPreview(true);
     const [buildLegacy, setBuildLegacy] = useState(false);
 
-    const avatarColors = useAvatarColors(UserStore.getCurrentUser().getAvatarURL(guildId, 80));
+    const avatarColors = useAvatarColors(UserStore.getCurrentUser().getAvatarURL(guild?.id, 80));
 
     return (
         <>
@@ -48,7 +49,7 @@ export function Builder({ guildId }: BuilderProps) {
                         } : undefined}
                         buttonProps={{
                             onClick() {
-                                openProfileEffectModal(effect?.id, setEffect);
+                                openProfileEffectModal(effect?.id, setEffect, guild);
                             }
                         }}
                     />

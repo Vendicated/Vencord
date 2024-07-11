@@ -4,7 +4,38 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { findByCodeLazy, findStoreLazy } from "@webpack";
 import type { FluxStore } from "@webpack/types";
+import type { SnakeCasedProperties } from "type-fest";
+
+export const ProfileEffectStore: FluxStore & {
+    canFetch: () => boolean;
+    getProfileEffectById: (effectId: string) => ProfileEffect | undefined;
+    hasFetched: () => boolean;
+    readonly fetchError: Error | undefined;
+    readonly isFetching: boolean;
+    readonly profileEffects: ProfileEffect[];
+    readonly tryItOutId: string | null;
+} = findStoreLazy("ProfileEffectStore");
+
+export const ProfileEffectRecord: {
+    new (profileEffectProperties: ProfileEffectProperties): ProfileEffectRecordInstance;
+    fromServer: (profileEffectFromServer: SnakeCasedProperties<ProfileEffectProperties>) => ProfileEffectRecordInstance;
+} = findByCodeLazy(",this.type=", ".PROFILE_EFFECT");
+
+type ProfileEffectProperties = Omit<ProfileEffectRecordInstance, "type">;
+
+interface ProfileEffectRecordInstance {
+    id: string;
+    skuId: string;
+    type: CollectiblesItemType.PROFILE_EFFECT;
+}
+
+export interface ProfileEffect {
+    config: ProfileEffectConfig;
+    id: string;
+    skuId: string;
+}
 
 export interface ProfileEffectConfig {
     accessibilityLabel: string;
@@ -30,31 +61,12 @@ export interface ProfileEffectConfig {
     staticFrameSrc?: string;
     thumbnailPreviewSrc: string;
     title: string;
-    type: 1;
+    type: CollectiblesItemType.PROFILE_EFFECT;
 }
 
-export interface ProfileEffect extends Pick<ProfileEffectConfig, "id"> {
-    config: ProfileEffectConfig;
-    skuId: ProfileEffectConfig["sku_id"];
-}
-
-export let ProfileEffectRecord: {
-    new (effect: Omit<ProfileEffect, "config">): typeof effect & Pick<ProfileEffectConfig, "type">;
-    fromServer: (effect: Pick<ProfileEffectConfig, "id" | "sku_id">) => Omit<ProfileEffect, "config"> & Pick<ProfileEffectConfig, "type">;
-};
-
-export function setProfileEffectRecord(obj: typeof ProfileEffectRecord) {
-    ProfileEffectRecord = obj;
-}
-
-export let ProfileEffectStore: FluxStore & {
-    readonly isFetching: boolean;
-    readonly fetchError: Error | undefined;
-    readonly profileEffects: ProfileEffect[];
-    readonly tryItOutId: string | null;
-    getProfileEffectById: (effectId: string) => ProfileEffect | undefined;
-};
-
-export function setProfileEffectStore(store: typeof ProfileEffectStore) {
-    ProfileEffectStore = store;
+export const enum CollectiblesItemType {
+    AVATAR_DECORATION = 0,
+    PROFILE_EFFECT = 1,
+    NONE = 100,
+    BUNDLE = 1_000,
 }

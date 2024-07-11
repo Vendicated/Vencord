@@ -5,7 +5,8 @@
  */
 
 import { type ModalProps, openModal } from "@utils/modal";
-import { extractAndLoadChunksLazy } from "@webpack";
+import { extractAndLoadChunksLazy, findByCodeLazy, findComponentByCodeLazy } from "@webpack";
+import type { Guild } from "discord-types/general";
 import type { ComponentType, FunctionComponent, PropsWithChildren, ReactNode } from "react";
 
 import type { ProfileEffectConfig } from "../lib/profileEffects";
@@ -15,51 +16,49 @@ export * from "./BuilderButton";
 export * from "./BuilderColorButton";
 export * from "./settingsAboutComponent";
 
-export interface CustomColorPickerProps {
-    value?: number | null | undefined;
-    onChange: (color: number) => void;
-    onClose?: (() => void) | undefined;
-    suggestedColors?: string[] | undefined;
-    middle?: ReactNode;
-    footer?: ReactNode;
-    showEyeDropper?: boolean | undefined;
-}
-
-export let CustomColorPicker: ComponentType<CustomColorPickerProps> = () => null;
-
-export function setCustomColorPicker(comp: typeof CustomColorPicker) {
-    CustomColorPicker = comp;
-}
-
-export let useAvatarColors: (avatarURL: string, fillerColor?: string | undefined, desaturateColors?: boolean | undefined) => string[] = () => [];
-
-export function setUseAvatarColors(hook: typeof useAvatarColors) {
-    useAvatarColors = hook;
-}
-
-export interface CustomizationSectionProps {
+export interface CustomizationSectionProps extends PropsWithChildren {
+    borderType?: "limited" | "premium" | undefined;
+    className?: string | undefined;
+    description?: ReactNode;
+    disabled?: boolean | undefined /* = false */;
+    errors?: string[] | undefined;
+    forcedDivider?: boolean | undefined /* = false */;
+    hasBackground?: boolean | undefined /* = false */;
+    hideDivider?: boolean | undefined /* = false */;
+    showBorder?: boolean | undefined /* = false */;
+    showPremiumIcon?: boolean | undefined /* = false */;
     title?: ReactNode;
     titleIcon?: ReactNode;
     titleId?: string | undefined;
-    description?: ReactNode;
+}
+
+export const CustomizationSection: ComponentType<CustomizationSectionProps>
+    = findByCodeLazy(".customizationSectionBackground");
+
+export const useAvatarColors: (
+    avatarURL: string,
+    fillerColor?: string | undefined,
+    desaturateColors?: boolean | undefined /* = true */
+) => string[] = findByCodeLazy(".palette[", ".desaturateUserColors");
+
+export interface CustomColorPickerProps {
     className?: string | undefined;
-    errors?: string[] | undefined;
-    disabled?: boolean | undefined;
-    hideDivider?: boolean | undefined;
-    showBorder?: boolean | undefined;
-    borderType?: "limited" | "premium" | undefined;
-    hasBackground?: boolean | undefined;
-    forcedDivider?: boolean | undefined;
-    showPremiumIcon?: boolean | undefined;
+    eagerUpdate?: boolean | undefined /* = false */;
+    footer?: ReactNode;
+    middle?: ReactNode;
+    onChange: (color: number) => void;
+    onClose?: (() => void) | undefined;
+    showEyeDropper?: boolean | null | undefined /* = false */;
+    suggestedColors?: string[] | undefined;
+    wrapperComponentType?: ComponentType | null | undefined;
+    value?: string | number | null | undefined;
 }
 
-export let CustomizationSection: ComponentType<PropsWithChildren<CustomizationSectionProps>> = () => null;
-
-export function setCustomizationSection(comp: typeof CustomizationSection) {
-    CustomizationSection = comp;
-}
+export const CustomColorPicker = findComponentByCodeLazy<CustomColorPickerProps>(".customColorPicker");
 
 export interface ProfileEffectModalProps extends ModalProps {
+    analyticsLocations?: string[] | undefined;
+    guild?: Guild | null | undefined;
     initialSelectedEffectId?: string | undefined;
     onApply: (effect: ProfileEffectConfig | null) => void;
 }
@@ -70,16 +69,20 @@ export function setProfileEffectModal(comp: typeof ProfileEffectModal) {
     ProfileEffectModal = comp;
 }
 
-const requireProfileEffectModal = extractAndLoadChunksLazy(["openProfileEffectModal:function(){"]);
+const requireProfileEffectModal = extractAndLoadChunksLazy([".openModalLazy", "initialSelectedEffectId:"]);
 
-export function openProfileEffectModal(initialEffectId: ProfileEffectModalProps["initialSelectedEffectId"], onApply: ProfileEffectModalProps["onApply"]) {
-    requireProfileEffectModal().then(() => {
-        openModal(modalProps => (
-            <ProfileEffectModal
-                {...modalProps}
-                initialSelectedEffectId={initialEffectId}
-                onApply={onApply}
-            />
-        ));
-    });
+export async function openProfileEffectModal(
+    initialEffectId: ProfileEffectModalProps["initialSelectedEffectId"],
+    onApply: ProfileEffectModalProps["onApply"],
+    guild?: ProfileEffectModalProps["guild"]
+) {
+    await requireProfileEffectModal();
+    openModal(modalProps => (
+        <ProfileEffectModal
+            {...modalProps}
+            initialSelectedEffectId={initialEffectId}
+            guild={guild}
+            onApply={onApply}
+        />
+    ));
 }
