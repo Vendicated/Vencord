@@ -17,7 +17,7 @@ const container = findByPropsLazy("memberSince");
 const getCreatedAtDate = findByCodeLazy('month:"short",day:"numeric"');
 const locale = findByPropsLazy("getLocale");
 const lastSection = findByPropsLazy("lastSection");
-const section = findLazy((m: any) => m.section !== void 0 && Object.values(m).length === 1);
+const section = findLazy((m: any) => m.section !== void 0 && m.heading !== void 0 && Object.values(m).length === 2);
 
 export default definePlugin({
     name: "FriendsSince",
