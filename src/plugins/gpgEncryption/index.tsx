@@ -209,12 +209,6 @@ export default definePlugin({
                             content: "Invalid Selection",
                         });
                 }
-
-                if (args[0].value) {
-                    Native.registerSelfKey(args[1].value);
-                } else {
-                    Native.registerRecipientKey(args[1].value);
-                }
             },
         },
     ],
