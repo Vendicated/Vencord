@@ -20,6 +20,24 @@ function executeCommand(command: string): Promise<string> {
     });
 }
 
+export async function getPublicKeyInfo(_, message: string): Promise<string> {
+    const gpgCommand = `echo "${message}" | gpg --keyid-format long --list-packets`;
+    const stdout = await executeCommand(gpgCommand);
+    const result = stdout
+        .split("\n")
+        .find((u) => u.startsWith(":user"))
+        ?.split("packet: ")[1]
+        .replaceAll(`"`, "");
+    if (!result) {
+        throw new Error("unable to parse gpg");
+    }
+    return result;
+}
+
+export async function importKey(_, message: string): Promise<string> {
+    const gpgCommand = `echo "${message}" | gpg --import`;
+}
+
 export function encryptMessage(_, message: string): Promise<string> {
     if (selfKey.length === 0) {
         return Promise.resolve(

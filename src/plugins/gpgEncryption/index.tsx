@@ -56,6 +56,12 @@ const containsPGPMessage = (text: string): boolean => {
     return PGP_MESSAGE_REGEX.test(text);
 };
 
+const containsPGPKey = (text: string): boolean => {
+    const pgpMessageRegex =
+        /-----BEGIN PGP PUBLIC KEY BLOCK-----(.*)-----END PGP PUBLIC KEY BLOCK-----/s;
+    return pgpMessageRegex.test(text);
+};
+
 const decryptPgpMessages = async (channelId: string) => {
     try {
         const cache = MessageCache.getOrCreate(channelId);
@@ -73,19 +79,15 @@ const decryptPgpMessages = async (channelId: string) => {
         }
 
         for (const pgpMessage of pgp) {
-            if (containsPGPMessage(pgpMessage.content)) {
-                try {
-                    const content = await Native.decryptMessage(
-                        pgpMessage.content,
-                    );
-                    console.log("decrypting message", pgpMessage.id);
-                    updateMessage(channelId, pgpMessage.id, {
-                        content,
-                    });
-                    addDecoration(`pgp-lock`, LOCK_ICON, pgpMessage.id);
-                } catch (e) {
-                    console.error("unable to decrypt", e);
-                }
+            try {
+                const content = await Native.decryptMessage(pgpMessage.content);
+                console.log("decrypting message", pgpMessage.id);
+                updateMessage(channelId, pgpMessage.id, {
+                    content,
+                });
+                addDecoration(`pgp-lock`, LOCK_ICON, pgpMessage.id);
+            } catch (e) {
+                console.log("unable to decrypt", e);
             }
         }
     } catch (e) {
@@ -218,14 +220,36 @@ export default definePlugin({
     ],
 
     flux: {
-        MESSAGE_CREATE: async (event: any) => {
-            decryptPgpMessages(event.message.channel_id);
+        MESSAGE_CREATE: async (event) => {
+            await decryptPgpMessages(event.message.channel_id);
+            if (containsPGPKey(event.message.content)) {
+                let sender = await Native.getPublicKeyInfo(
+                    event.message.content,
+                );
+                sendBotMessage(event.message.channel_id, {
+                    bot: true,
+                    content: `This message looks to be a public key from \`${sender}\`, do you want to import it?`,
+                    components: [
+                        {
+                            type: "1",
+                            components: [
+                                {
+                                    type: "2",
+                                    label: "Click me!",
+                                    style: 1,
+                                    custom_id: "import_gpg",
+                                },
+                            ],
+                        },
+                    ],
+                });
+            }
         },
-        CHANNEL_SELECT: async (event: any) => {
-            decryptPgpMessages(event.channelId);
+        CHANNEL_SELECT: async (event) => {
+            await decryptPgpMessages(event.channelId);
         },
-        LOAD_MESSAGES_SUCCESS: async (event: any) => {
-            decryptPgpMessages(event.channelId);
+        LOAD_MESSAGES_SUCCESS: async (event) => {
+            await decryptPgpMessages(event.channelId);
         },
     },
 
