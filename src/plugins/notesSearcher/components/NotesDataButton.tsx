@@ -18,7 +18,7 @@ export const OpenNotesDataButton = LazyComponent(() => React.memo(() => {
         <HeaderBarIcon
             className="vc-notes-searcher-toolbox-button"
             onClick={() => openNotesDataModal()}
-            tooltip={"Open Notes Data"}
+            tooltip={"View Notes"}
             icon={NotesDataIcon}
         />
     );
