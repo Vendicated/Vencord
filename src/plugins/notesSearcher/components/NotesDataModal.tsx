@@ -98,7 +98,7 @@ export function NotesDataModal({ modalProps, close }: {
     return (
         <ModalRoot className={cl("root")} {...modalProps}>
             <ModalHeader className={cl("header")}>
-                <Text className={cl("header-text")} variant="heading-lg/semibold" style={{ whiteSpace: "nowrap", width: "fit-content", marginRight: "16px" }}>Notes Data</Text>
+                <Text className={cl("header-text")} variant="heading-lg/semibold" style={{ whiteSpace: "nowrap", width: "fit-content", marginRight: "16px" }}>User Notes</Text>
                 <TextInput className={cl("header-input")} value={searchValue.query} onChange={onSearch} placeholder="Filter Notes (ID/Global Name/Username/Notes text)" style={{ width: "100% !important", marginRight: "16px" }} />
                 <div className={cl("header-user-type")} style={{ minWidth: "160px", marginRight: "16px" }}>
                     <Select
