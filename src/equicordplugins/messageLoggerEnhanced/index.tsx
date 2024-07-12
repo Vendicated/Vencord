@@ -251,12 +251,6 @@ export const settings = definePluginSettings({
         description: "Usually message logger only logs from whitelisted ids and dms, enabling this would mean it would log messages from all servers as well. Note that this may cause the cache to exceed its limit, resulting in some messages being missed. If you are in a lot of servers, this may significantly increase the chances of messages being logged, which can result in a large message record and the inclusion of irrelevant messages.",
     },
 
-    autoCheckForUpdates: {
-        default: true,
-        type: OptionType.BOOLEAN,
-        description: "Automatically check for updates on startup.",
-    },
-
     ignoreBots: {
         type: OptionType.BOOLEAN,
         description: "Whether to ignore messages by bots",
@@ -309,7 +303,7 @@ export const settings = definePluginSettings({
     permanentlyRemoveLogByDefault: {
         default: false,
         type: OptionType.BOOLEAN,
-        description: "Vencord's base MessageLogger remove log button wiil delete logs permanently",
+        description: "Equicord's base MessageLogger remove log button wiil delete logs permanently",
     },
 
     hideMessageFromMessageLoggers: {
