@@ -25,7 +25,7 @@ export const onNoteUpdate = () => {
 export const updateNote = (userId: string, note: string | null) => {
     RestAPI.put({
         url: Constants.Endpoints.NOTE(userId),
-        body: { note: note !== "" ? note : null },
+        body: { note: note },
         oldFormErrors: true
     });
 };
