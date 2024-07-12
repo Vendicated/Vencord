@@ -30,7 +30,7 @@ export default ({ userId, userNotes: userNotesArg, refreshNotesData, usersCache 
         id: userId,
         globalName: "Loading...",
         username: "Loading...",
-        avatar: "https://discord.com/assets/0048cbfdd0b3ef186d22.png",
+        avatar: "https://cdn.discordapp.com/embed/avatars/4.png",
     };
 
     const [userNotes, setUserNotes] = useState(userNotesArg);
