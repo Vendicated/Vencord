@@ -38,6 +38,7 @@ async function runReporter() {
                 else method = "find";
             }
             if (searchType === "waitForStore") method = "findStore";
+            if (searchType === "waitForStore" && args[0] === "PermissionStore") continue;
 
             let result: any;
             try {

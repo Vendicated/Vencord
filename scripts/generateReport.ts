@@ -101,10 +101,7 @@ async function printReport() {
     console.log();
 
     console.log("## Bad Webpack Finds");
-    report.badWebpackFinds.forEach(p => {
-        if (p === "waitForStore(\"PermissionStore\")") return;
-        console.log("- " + toCodeBlock(p, "- ".length));
-    });
+    report.badWebpackFinds.forEach(p => console.log("- " + toCodeBlock(p, "- ".length)));
 
     console.log();
 
@@ -241,7 +238,6 @@ page.on("console", async e => {
                 process.exitCode = 1;
 
                 const [, name] = failedToStartMatch;
-                if (name === "Encryptcord") return;
                 report.badStarts.push({
                     plugin: name,
                     error: await maybeGetError(e.args()[3]) ?? "Unknown error"
