@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
+import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { getCurrentGuild } from "@utils/discord";
-import definePlugin from "@utils/types";
+import { getCurrentGuild, openImageModal } from "@utils/discord";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Clipboard, GuildStore, Menu, PermissionStore, TextAndImagesSettingsStores } from "@webpack/common";
 
@@ -34,10 +36,34 @@ function AppearanceIcon() {
     );
 }
 
+const settings = definePluginSettings({
+    roleIconFileFormat: {
+        type: OptionType.SELECT,
+        description: "File format to use when viewing role icons",
+        options: [
+            {
+                label: "png",
+                value: "png",
+                default: true
+            },
+            {
+                label: "webp",
+                value: "webp",
+            },
+            {
+                label: "jpg",
+                value: "jpg"
+            }
+        ]
+    }
+});
+
 export default definePlugin({
     name: "BetterRoleContext",
-    description: "Adds options to copy role color / edit role when right clicking roles in the user profile",
-    authors: [Devs.Ven],
+    description: "Adds options to copy role color / edit role / view role icon when right clicking roles in the user profile",
+    authors: [Devs.Ven, Devs.goodbee],
+
+    settings,
 
     start() {
         // DeveloperMode needs to be enabled for the context menu to be shown
@@ -60,6 +86,20 @@ export default definePlugin({
                         action={() => Clipboard.copy(role.colorString!)}
                         icon={AppearanceIcon}
                     />
+                );
+            }
+
+            if (role.icon) {
+                children.push(
+                    <Menu.MenuItem
+                        id="vc-view-role-icon"
+                        label="View Role Icon"
+                        action={() => {
+                            openImageModal(`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.${settings.store.roleIconFileFormat}`);
+                        }}
+                        icon={ImageIcon}
+                    />
+
                 );
             }
 

@@ -17,7 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import ExpandableHeader from "@components/ExpandableHeader";
+import { ExpandableHeader } from "@components/ExpandableHeader";
 import { classes } from "@utils/misc";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";

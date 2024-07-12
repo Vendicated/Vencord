@@ -9,11 +9,11 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentLazy } from "@webpack";
-import { ChannelStore, Forms, GuildMemberStore, i18n, Text, Tooltip } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, i18n, Text, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
+import { FunctionComponent, ReactNode } from "react";
 
 const CountDown = findComponentLazy(m => m.prototype?.render?.toString().includes(".MAX_AGE_NEVER"));
 
@@ -26,7 +26,6 @@ const settings = definePluginSettings({
     displayStyle: {
         description: "How to display the timeout duration",
         type: OptionType.SELECT,
-        restartNeeded: true,
         options: [
             { label: "In the Tooltip", value: DisplayStyle.Tooltip },
             { label: "Next to the timeout icon", value: DisplayStyle.Inline, default: true },
@@ -60,7 +59,7 @@ function renderTimeout(message: Message, inline: boolean) {
 export default definePlugin({
     name: "ShowTimeoutDuration",
     description: "Shows how much longer a user's timeout will last, either in the timeout icon tooltip or next to it",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.Sqaaakoi],
 
     settings,
 
@@ -70,33 +69,20 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(\i)\.Tooltip,{(text:.{0,30}\.Messages\.GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY)/,
-                    get replace() {
-                        if (settings.store.displayStyle === DisplayStyle.Inline)
-                            return "$self.TooltipWrapper,{vcProps:arguments[0],$2";
-
-                        return "$1.Tooltip,{text:$self.renderTimeoutDuration(arguments[0])";
-                    }
+                    replace: "$self.TooltipWrapper,{message:arguments[0].message,$2"
                 }
             ]
         }
     ],
 
-    renderTimeoutDuration: ErrorBoundary.wrap(({ message }: { message: Message; }) => {
-        return (
-            <>
-                <Forms.FormText>{i18n.Messages.GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}</Forms.FormText>
-                <Forms.FormText className={Margins.top8}>
-                    {renderTimeout(message, false)}
-                </Forms.FormText>
-            </>
-        );
-    }, { noop: true }),
-
-    TooltipWrapper: ErrorBoundary.wrap(({ vcProps: { message }, ...tooltipProps }: { vcProps: { message: Message; }; }) => {
+    TooltipWrapper: ErrorBoundary.wrap(({ message, children, text }: { message: Message; children: FunctionComponent<any>; text: ReactNode; }) => {
+        if (settings.store.displayStyle === DisplayStyle.Tooltip) return <Tooltip
+            children={children}
+            text={renderTimeout(message, false)}
+        />;
         return (
             <div className="vc-std-wrapper">
-                <Tooltip {...tooltipProps as any} />
-
+                <Tooltip text={text} children={children} />
                 <Text variant="text-md/normal" color="status-danger">
                     {renderTimeout(message, true)} timeout remaining
                 </Text>
