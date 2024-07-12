@@ -9,15 +9,14 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
-import { Heading, RelationshipStore, Text } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { RelationshipStore, Text } from "@webpack/common";
 
 const containerWrapper = findByPropsLazy("memberSinceWrapper");
 const container = findByPropsLazy("memberSince");
 const getCreatedAtDate = findByCodeLazy('month:"short",day:"numeric"');
 const locale = findByPropsLazy("getLocale");
-const lastSection = findByPropsLazy("lastSection");
-const section = findLazy((m: any) => m.section !== void 0 && Object.values(m).length === 1);
+const Section = findComponentByCodeLazy("section", '"header-secondary"', "requestAnimationFrame");
 
 export default definePlugin({
     name: "FriendsSince",
@@ -84,11 +83,9 @@ export default definePlugin({
         if (!friendsSince) return null;
 
         return (
-            <div className={lastSection.section}>
-                <Heading variant="eyebrow">
-                    Friends Since
-                </Heading>
-
+            <Section
+                title="Friends Since"
+            >
                 <div className={containerWrapper.memberSinceWrapper}>
                     {!!getCurrentChannel()?.guild_id && (
                         <svg
@@ -106,7 +103,7 @@ export default definePlugin({
                         {getCreatedAtDate(friendsSince, locale.getLocale())}
                     </Text>
                 </div>
-            </div>
+            </Section>
         );
     }, { noop: true }),
 
@@ -117,11 +114,10 @@ export default definePlugin({
         if (!friendsSince) return null;
 
         return (
-            <section className={section.section}>
-                <Heading variant="text-xs/semibold" style={isSidebar ? {} : { color: "var(--header-secondary)" }}>
-                    Friends Since
-                </Heading>
-
+            <Section
+                title="Friends Since"
+                headingColor={isSidebar ? "header-primary" : undefined}
+            >
                 {
                     isSidebar ? (
                         <Text variant="text-sm/normal">
@@ -150,7 +146,7 @@ export default definePlugin({
                     )
                 }
 
-            </section>
+            </Section>
         );
     }, { noop: true }),
 });
