@@ -9,13 +9,15 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { RelationshipStore, Text } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findLazy } from "@webpack";
+import { Heading, RelationshipStore, Text } from "@webpack/common";
 
 const containerWrapper = findByPropsLazy("memberSinceWrapper");
 const container = findByPropsLazy("memberSince");
 const getCreatedAtDate = findByCodeLazy('month:"short",day:"numeric"');
 const locale = findByPropsLazy("getLocale");
+const lastSection = findByPropsLazy("lastSection");
+const section = findLazy((m: any) => m.section !== void 0 && m.heading !== void 0 && Object.values(m).length === 2);
 const Section = findComponentByCodeLazy("section", '"header-secondary"', "requestAnimationFrame");
 
 export default definePlugin({
@@ -83,9 +85,11 @@ export default definePlugin({
         if (!friendsSince) return null;
 
         return (
-            <Section
-                title="Friends Since"
-            >
+            <div className={lastSection.section}>
+                <Heading variant="eyebrow">
+                    Friends Since
+                </Heading>
+
                 <div className={containerWrapper.memberSinceWrapper}>
                     {!!getCurrentChannel()?.guild_id && (
                         <svg
@@ -103,7 +107,7 @@ export default definePlugin({
                         {getCreatedAtDate(friendsSince, locale.getLocale())}
                     </Text>
                 </div>
-            </Section>
+            </div>
         );
     }, { noop: true }),
 
