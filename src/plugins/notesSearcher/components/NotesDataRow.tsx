@@ -95,7 +95,7 @@ export default ({ userId, userNotes: userNotesArg, refreshNotesData, usersCache 
                         }
                         <Menu.MenuItem
                             id={cl("copy-user-notes")}
-                            label="Copy Notes"
+                            label="Copy Note"
                             action={() => copyWithToast(userNotes)}
                         />
                     </Menu.Menu>
