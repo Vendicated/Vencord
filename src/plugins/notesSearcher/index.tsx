@@ -5,8 +5,6 @@
  */
 
 import { disableStyle, enableStyle } from "@api/Styles";
-import styles from "./styles.css?managed";
-
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -15,6 +13,7 @@ import { FluxDispatcher } from "@webpack/common";
 import { OpenNotesDataButton } from "./components/NotesDataButton";
 import { getNotes, onNoteUpdate, onUserUpdate } from "./data";
 import settings from "./settings";
+import styles from "./styles.css?managed";
 import { Notes } from "./types";
 
 export default definePlugin({
