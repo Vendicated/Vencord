@@ -37,12 +37,27 @@ export const settings = definePluginSettings({
 
 export const enum ColorType {
     RGB,
+    RGBA,
     HEX,
     HSL
 }
 
+// It's sooo hard to read regex without this, it makes it at least somewhat bearable
+export const replaceRegexp = (reg: string) => {
+    const n = new RegExp(reg
+        // \c - 'comma'
+        // \v - 'value'
+        // \f - 'float'
+        .replaceAll("\\f", "[+-]?([0-9]*[.])?[0-9]+")
+        .replaceAll("\\c", "(?:,|\\s)")
+        .replaceAll("\\v", "\\s*?\\d+?\\s*?"), "g");
+
+    return n;
+};
+
 export const regex = [
-    { reg: /rgb\(\s*?\d+?\s*?,\s*?\d+?\s*?,\s*?\d+?\s*?\)/g, type: ColorType.RGB },
-    { reg: /hsl\(\s*\d+\s*°?,\s*\d+%\s*,\s*\d+%\s*\)/g, type: ColorType.HSL },
+    { reg: /rgb\(\v\c\v\c\v\)/g, type: ColorType.RGB },
+    { reg: /rgba\(\v\c\v\c\v(\c|\/?)\s*\f\)/g, type: ColorType.RGBA },
+    { reg: /hsl\(\v°?\c\s*?\d+%?\s*?\c\s*?\d+%?\s*?\)/g, type: ColorType.HSL },
     { reg: /#(?:[0-9a-fA-F]{3}){1,2}/g, type: ColorType.HEX }
-];
+].map(v => { v.reg = replaceRegexp(v.reg.source); return v; });
