@@ -10,7 +10,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { React } from "@webpack/common";
 
-import { ColorType, regex, RenderType, settings } from "./constants";
+import { ColorType, regex, RenderType, replaceRegexp, settings } from "./constants";
 
 const source = regex.map(r => r.reg.source).join("|");
 const matchAllRegExp = new RegExp(`^(${source})`, "i");
@@ -129,6 +129,7 @@ const calcRGBLightness = (r: number, g: number, b: number) => {
 };
 const isColorDark = (color: string, type: ColorType): boolean => {
     switch (type) {
+        case ColorType.RGBA:
         case ColorType.RGB: {
             const match = color.match(/\d+/g)!;
             const lightness = calcRGBLightness(+match[0], +match[1], +match[2]);
@@ -154,15 +155,20 @@ const getColorType = (color: string): ColorType => {
     color = color.toLowerCase().trim();
     if (color.startsWith("#")) return ColorType.HEX;
     if (color.startsWith("hsl")) return ColorType.HSL;
+    if (color.startsWith("rgba")) return ColorType.RGBA;
     if (color.startsWith("rgb")) return ColorType.RGB;
 
     throw new Error(`Can't resolve color type of ${color}`);
 };
 
 function parseColor(str: string, type: ColorType): string {
-    str = str.toLowerCase().trim();
+    str = str.toLowerCase().trim().replaceAll(/(\s|,)+/g, " ");
     switch (type) {
         case ColorType.RGB:
+            return str;
+        case ColorType.RGBA:
+            if (!str.includes("/"))
+                return str.replaceAll(replaceRegexp(/\f(?=\s*?\))/.source), "/$&");
             return str;
         case ColorType.HEX:
             return str[0] === "#" ? str : `#${str}`;
