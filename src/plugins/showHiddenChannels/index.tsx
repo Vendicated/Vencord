@@ -257,7 +257,7 @@ export default definePlugin({
         {
             find: '"alt+shift+down"',
             replacement: {
-                match: /(?<=getChannel\(\i\);return null!=(\i))(?=.{0,150}?>0\)&&\(0,\i\.\i\)\(\i\))/,
+                match: /(?<=getChannel\(\i\);return null!=(\i))(?=.{0,200}?>0\)&&\(0,\i\.\i\)\(\i\))/,
                 replace: (_, channel) => `&&!$self.isHiddenChannel(${channel})`
             }
         },
@@ -265,8 +265,8 @@ export default definePlugin({
         {
             find: ".APPLICATION_STORE&&null!=",
             replacement: {
-                match: /(?<=getState\(\)\.channelId.{0,30}?\(0,\i\.\i\)\(\i\))(?=\.map\()/,
-                replace: ".filter(e=>!$self.isHiddenChannel(e))"
+                match: /getState\(\)\.channelId.+?(?=\.map\(\i=>\i\.id)/,
+                replace: "$&.filter(e=>!$self.isHiddenChannel(e))"
             }
         },
         {
@@ -477,12 +477,17 @@ export default definePlugin({
     ],
 
     isHiddenChannel(channel: Channel & { channelId?: string; }, checkConnect = false) {
-        if (!channel) return false;
+        try {
+            if (!channel) return false;
 
-        if (channel.channelId) channel = ChannelStore.getChannel(channel.channelId);
-        if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
+            if (channel.channelId) channel = ChannelStore.getChannel(channel.channelId);
+            if (!channel || channel.isDM() || channel.isGroupDM() || channel.isMultiUserDM()) return false;
 
-        return !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || checkConnect && !PermissionStore.can(PermissionsBits.CONNECT, channel);
+            return !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || checkConnect && !PermissionStore.can(PermissionsBits.CONNECT, channel);
+        } catch (e) {
+            console.error("[ViewHiddenChannels#isHiddenChannel]: ", e);
+            return false;
+        }
     },
 
     resolveGuildChannels(channels: Record<string | number, Array<{ channel: Channel; comparator: number; }> | string | number>, shouldIncludeHidden: boolean) {
