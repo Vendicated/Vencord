@@ -5,6 +5,7 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { onceDefined } from "@shared/onceDefined";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -17,15 +18,16 @@ const container = findByPropsLazy("memberSince");
 const getCreatedAtDate = findByCodeLazy('month:"short",day:"numeric"');
 const locale = findByPropsLazy("getLocale");
 const lastSection = findByPropsLazy("lastSection");
-const { RELEASE_CHANNEL } = window.GLOBAL_ENV;
 
 let section;
 
-if (RELEASE_CHANNEL === "stable") {
-    section = findLazy((m: any) => m.section !== void 0 && Object.values(m).length === 1);
-} else {
-    section = findLazy((m: any) => m.section !== void 0 && m.heading !== void 0 && Object.values(m).length === 2);
-}
+onceDefined(window, "GLOBAL_ENV", v => {
+    if (v.RELEASE_CHANNEL === "stable") {
+        section = findLazy((m: any) => m.section !== void 0 && Object.values(m).length === 1);
+    } else {
+        section = findLazy((m: any) => m.section !== void 0 && m.heading !== void 0 && Object.values(m).length === 2);
+    }
+});
 
 export default definePlugin({
     name: "FriendsSince",
