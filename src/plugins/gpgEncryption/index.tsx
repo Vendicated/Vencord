@@ -20,9 +20,10 @@ import { updateMessage } from "@api/MessageUpdater";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
-import { MessageCache, Tooltip } from "@webpack/common";
+import { ChannelStore, MessageCache, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
-import { React } from "@webpack/common";
+import { React, UserStore } from "@webpack/common";
+import { Config } from "./native";
 
 const LOCK_ICON = ErrorBoundary.wrap(
     () => (
@@ -51,20 +52,22 @@ const LOCK_ICON = ErrorBoundary.wrap(
 const PGP_MESSAGE_REGEX: RegExp =
     /-----BEGIN PGP MESSAGE-----(.*)-----END PGP MESSAGE-----/s;
 
+const PGP_PUBLIC_KEY_REGEX =
+    /-----BEGIN PGP PUBLIC KEY BLOCK-----(.*)-----END PGP PUBLIC KEY BLOCK-----/s;
+
 const Native = VencordNative.pluginHelpers.GPGEncryption as PluginNative<
     typeof import("./native")
 >;
 
 let isActive = false;
+let config: Config;
 
 const containsPGPMessage = (text: string): boolean => {
     return PGP_MESSAGE_REGEX.test(text);
 };
 
 const containsPGPKey = (text: string): boolean => {
-    const pgpMessageRegex =
-        /-----BEGIN PGP PUBLIC KEY BLOCK-----(.*)-----END PGP PUBLIC KEY BLOCK-----/s;
-    return pgpMessageRegex.test(text);
+    return PGP_PUBLIC_KEY_REGEX.test(text);
 };
 
 const decryptPgpMessages = async (channelId: string) => {
@@ -148,6 +151,13 @@ function GPGToggle() {
     );
 }
 
+enum SetupState {
+    NONE,
+    KEYSELECT,
+}
+
+let setupState = SetupState.NONE;
+
 export default definePlugin({
     name: "GPGEncryption",
     description:
@@ -161,38 +171,6 @@ export default definePlugin({
     ],
 
     commands: [
-        {
-            name: "gpg",
-            description: "Toggle GPG Encryption on and off",
-            inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
-            options: [
-                {
-                    required: true,
-                    name: "on or off",
-                    type: ApplicationCommandOptionType.STRING,
-                    description: "On or off",
-                },
-            ],
-            execute: async (args, ctx) => {
-                switch (args[0].value) {
-                    case "on":
-                        isActive = true;
-                        return sendBotMessage(ctx.channel.id, {
-                            content: "===== GPG ENABLED =====",
-                        });
-                    case "off":
-                        isActive = false;
-                        return sendBotMessage(ctx.channel.id, {
-                            content: "===== GPG DISABLED =====",
-                        });
-
-                    default:
-                        return sendBotMessage(ctx.channel.id, {
-                            content: "Invalid Selection",
-                        });
-                }
-            },
-        },
         {
             name: "gpgshare",
             description: "Share GPG Public Key",
@@ -220,81 +198,119 @@ export default definePlugin({
         },
 
         {
-            name: "gpgregister",
-            description: "Manually register self/recipient keys",
+            name: "gpgsetup",
+            description: "Setup GPG Encryption for your account",
             inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
-            options: [
-                {
-                    required: true,
-                    name: "self or recipient?",
-                    type: ApplicationCommandOptionType.STRING,
-                    description: "Whose key is this?",
-                },
-                {
-                    required: true,
-                    name: "keyId",
-                    type: ApplicationCommandOptionType.STRING,
-                    description: "The keyId",
-                },
-            ],
-            execute: async (args, ctx) => {
-                switch (args[0].value) {
-                    case "self":
-                        try {
-                            Native.registerSelfKey(args[1].value);
-                        } catch (e) {
-                            return sendBotMessage(ctx.channel.id, {
-                                content: `Failed to register self key, ${e}`,
-                            });
-                        }
-                        return sendBotMessage(ctx.channel.id, {
-                            content: "Self key registered",
-                        });
-                    case "recipient":
-                        try {
-                            Native.registerRecipientKey(args[1].value);
-                        } catch (e) {
-                            return sendBotMessage(ctx.channel.id, {
-                                content: `Failed to register recipient key, ${e}`,
-                            });
-                        }
-                        return sendBotMessage(ctx.channel.id, {
-                            content: "Recipient key registered",
-                        });
+            async execute(args, ctx) {
+                const keys = await Native.getPrivateKeys();
+                const user = UserStore.getCurrentUser();
 
-                    default:
-                        return sendBotMessage(ctx.channel.id, {
-                            content: "Invalid Selection",
-                        });
+                if (keys.length === 0) {
+                    sendBotMessage(ctx.channel.id, {
+                        content:
+                            "You do not have any signing keys, please generate one before running this command again!",
+                    });
+                    return;
+                }
+
+                if (keys.length > 1) {
+                    const selectionText = keys
+                        .map((k, idx) => `${idx}. ${k.info} (\`${k.id}\`)`)
+                        .join("\n");
+
+                    setupState = SetupState.KEYSELECT;
+
+                    sendBotMessage(ctx.channel.id, {
+                        content: `You have many private keys, please select one from the following (just say the number, ie \`1\`.) \n ${selectionText}`,
+                    });
+                } else {
+                    await Native.importSigningKey(keys[0].id);
+                    await Native.saveKey(keys[0], user.id, true);
                 }
             },
         },
     ],
 
     flux: {
+        LOCAL_MESSAGE_CREATE: async (event) => {
+            // TODO: make keyselect mode channel only
+            if (setupState === SetupState.KEYSELECT) {
+                const cache = MessageCache.getOrCreate(
+                    event.message.channel_id,
+                );
+
+                const messages: Message[] = cache
+                    .toArray()
+                    .filter(
+                        (m: Message) => m.author.id === event.message.author.id,
+                    );
+                // ^ i have to do all this tomfoolery because for some godforsaken reason LOCAL_MESSAGE_CREATE doesn't include the content of the message????
+
+                const message = messages[messages.length - 1];
+
+                const parsed = Number(message.content);
+                const keys = await Native.getPrivateKeys();
+
+                if (message.content.toLowerCase() === "/gpgsetup") return;
+                if (message.content.toLowerCase() === "cancel") {
+                    setupState = SetupState.NONE;
+                    sendBotMessage(event.message.channel_id, {
+                        content: "Canceled PGP setup",
+                    });
+                    return;
+                }
+
+                if (isNaN(parsed) || parsed > keys.length || parsed < 0) {
+                    sendBotMessage(event.message.channel_id, {
+                        content:
+                            "That is not a valid selection, please type a number in range or type `CANCEL`",
+                    });
+                    return;
+                }
+
+                const selected = keys[parsed - 1];
+                const user = UserStore.getCurrentUser();
+                await Native.importSigningKey(selected.id);
+                await Native.saveKey(selected, user.id, true);
+                setupState = SetupState.NONE;
+
+                sendBotMessage(event.message.channel_id, {
+                    content:
+                        "Your private key has been imported and is ready for use!",
+                });
+            }
+        },
         MESSAGE_CREATE: async (event) => {
             await decryptPgpMessages(event.message.channel_id);
+
             if (containsPGPKey(event.message.content)) {
                 let sender = await Native.getPublicKeyInfo(
                     event.message.content,
                 );
+
                 sendBotMessage(event.message.channel_id, {
                     bot: true,
-                    content: `This message looks to be a public key from \`${sender}\`, do you want to import it?`,
-                    components: [
-                        {
-                            type: "1",
-                            components: [
-                                {
-                                    type: "2",
-                                    label: "Click me!",
-                                    style: 1,
-                                    custom_id: "import_gpg",
-                                },
-                            ],
-                        },
-                    ],
+                    content: `This message looks to be a public key from \`${sender}\`, it has been automatically imported and signed.`,
+                    // TODO: make this shit work (dies)
+                    // specifically not auto import
+                    // components: [
+                    //     {
+                    //         type: "1",
+                    //         components: [
+                    //             {
+                    //                 type: "2",
+                    //                 label: "Click me!",
+                    //                 style: 1,
+                    //                 custom_id: "import_gpg",
+                    //             },
+                    //         ],
+                    //     },
+                    // ],
                 });
+
+                const importRes = await Native.importKey(event.message.content);
+                await Native.saveKey(importRes, "184010879161991168", false);
+                config = await Native.getConfig();
             }
         },
         CHANNEL_SELECT: async (event) => {
@@ -305,14 +321,24 @@ export default definePlugin({
         },
     },
 
-    start() {
+    async start() {
+        config = await Native.getConfig();
         addChatBarButton("gpgToggle", GPGToggle);
         try {
             this.preSend = addPreSendListener(async (channelId, msg) => {
                 this.channelId = channelId;
+                const channel = ChannelStore.getChannel(channelId);
+                console.log(channel);
                 if (!isActive) return;
+                const friend = config.friends.find(
+                    (f) => f.id === channel.recipients[0],
+                );
+                if (!friend) return;
                 try {
-                    const stdout = await Native.encryptMessage(msg.content);
+                    const stdout = await Native.encryptMessage(msg.content, [
+                        ...config.user.keys.map((k) => k.fingerprint),
+                        ...friend.keys.map((k) => k.fingerprint),
+                    ]);
 
                     msg.content = stdout;
                 } catch (e) {
