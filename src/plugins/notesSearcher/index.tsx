@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./styles.css";
+import { disableStyle, enableStyle } from "@api/Styles";
+import styles from "./styles.css?managed";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
@@ -83,10 +84,14 @@ export default definePlugin({
     start: async () => {
         FluxDispatcher.subscribe("USER_NOTE_UPDATE", onNoteUpdate);
         FluxDispatcher.subscribe("USER_UPDATE", onUserUpdate);
+
+        enableStyle(styles);
     },
     stop: () => {
         FluxDispatcher.unsubscribe("USER_NOTE_UPDATE", onNoteUpdate);
         FluxDispatcher.unsubscribe("USER_UPDATE", onUserUpdate);
+
+        disableStyle(styles);
     },
 
     ready: ({ notes }: { notes: { [userId: string]: string; }; }) => {
