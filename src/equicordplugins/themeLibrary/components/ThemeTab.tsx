@@ -10,7 +10,6 @@ import "./styles.css";
 import { generateId } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import { CodeBlock } from "@components/CodeBlock";
 import { ErrorCard } from "@components/ErrorCard";
 import { OpenExternalIcon } from "@components/Icons";
@@ -25,12 +24,11 @@ import { Button, Card, FluxDispatcher, Forms, React, SearchableSelect, TabBar, T
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
 
-import { isAuthorized } from "../auth";
 import { SearchStatus, TabItem, Theme, ThemeLikeProps } from "../types";
+import { isAuthorized } from "../utils/auth";
 import { LikesComponent } from "./LikesComponent";
 import { ThemeInfoModal } from "./ThemeInfoModal";
 
-const cl = classNameFactory("vc-plugins-");
 const InputStyles = findByPropsLazy("inputDefault", "inputWrapper", "error");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 const TextAreaProps = findLazy(m => typeof m.textarea === "string");
@@ -88,6 +86,15 @@ const themeTemplate = `/**
 /* Your CSS goes here */
 `;
 
+const SearchTags = {
+    [SearchStatus.THEME]: "THEME",
+    [SearchStatus.SNIPPET]: "SNIPPET",
+    [SearchStatus.LIKED]: "LIKED",
+    [SearchStatus.DARK]: "DARK",
+    [SearchStatus.LIGHT]: "LIGHT",
+};
+
+
 function ThemeTab() {
     const [themes, setThemes] = useState<Theme[]>([]);
     const [filteredThemes, setFilteredThemes] = useState<Theme[]>([]);
@@ -103,12 +110,15 @@ function ThemeTab() {
 
     const themeFilter = (theme: Theme) => {
         const enabled = themeLinks.includes(`${API_URL}/${theme.name}`);
-        if (enabled && searchValue.status === SearchStatus.DISABLED) return false;
-        if (!theme.tags.includes("theme") && searchValue.status === SearchStatus.THEME) return false;
-        if (!theme.tags.includes("snippet") && searchValue.status === SearchStatus.SNIPPET) return false;
-        if (!theme.tags.includes("dark") && searchValue.status === SearchStatus.DARK) return false;
-        if (!theme.tags.includes("light") && searchValue.status === SearchStatus.LIGHT) return false;
+        const tags = new Set(theme.tags.map(tag => tag.toLowerCase()));
+
         if (!enabled && searchValue.status === SearchStatus.ENABLED) return false;
+
+        const anyTags = SearchTags[searchValue.status];
+        if (anyTags && !tags.has(anyTags.toLowerCase())) return false;
+
+        if ((enabled && searchValue.status === SearchStatus.DISABLED) || (!enabled && searchValue.status === SearchStatus.ENABLED)) return false;
+
         if (!searchValue.value.length) return true;
 
         const v = searchValue.value.toLowerCase();
@@ -116,7 +126,7 @@ function ThemeTab() {
             theme.name.toLowerCase().includes(v) ||
             theme.description.toLowerCase().includes(v) ||
             theme.author.discord_name.toLowerCase().includes(v) ||
-            theme.tags?.some(t => t.toLowerCase().includes(v))
+            tags.has(v)
         );
     };
 
@@ -131,12 +141,10 @@ function ThemeTab() {
     };
 
     useEffect(() => {
-        const fetchThemes = async () => {
+        const fetchData = async () => {
             try {
-                const themes = await fetchAllThemes();
-                // fetch likes
+                const [themes, likes] = await Promise.all([fetchAllThemes(), fetchLikes()]);
                 setThemes(themes);
-                const likes = await fetchLikes();
                 setLikedThemes(likes);
                 setFilteredThemes(themes);
             } catch (err) {
@@ -145,7 +153,7 @@ function ThemeTab() {
                 setLoading(false);
             }
         };
-        fetchThemes();
+        fetchData();
     }, []);
 
     useEffect(() => {
@@ -153,9 +161,18 @@ function ThemeTab() {
     }, [Vencord.Settings.themeLinks]);
 
     useEffect(() => {
-        const filteredThemes = themes.filter(themeFilter);
-        setFilteredThemes(filteredThemes);
-    }, [searchValue]);
+        // likes only update after 12_000 due to cache
+        if (searchValue.status === SearchStatus.LIKED) {
+            const likedThemes = themes.sort((a, b) => b.likes - a.likes);
+            // replacement of themeFilter which wont work with SearchStatus.LIKED
+            const filteredLikedThemes = likedThemes.filter(x => x.name.includes(searchValue.value));
+            setFilteredThemes(filteredLikedThemes);
+        } else {
+            const sortedThemes = themes.sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime());
+            const filteredThemes = sortedThemes.filter(themeFilter);
+            setFilteredThemes(filteredThemes);
+        }
+    }, [searchValue, themes]);
 
     return (
         <div>
@@ -191,13 +208,13 @@ function ThemeTab() {
                                 >Hide</Button>
                             </ErrorCard >
                         )}
-                        <div className={`${Margins.bottom8} ${Margins.top16}`}>
+                        <div className={classes(Margins.bottom8, Margins.top16)}>
                             <Forms.FormTitle tag="h2"
                                 style={{
                                     overflowWrap: "break-word",
                                     marginTop: 8,
                                 }}>
-                                Newest Additions
+                                {searchValue.status === SearchStatus.LIKED ? "Most Liked" : "Newest Additions"}
                             </Forms.FormTitle>
 
                             {themes.slice(0, 2).map((theme: Theme) => (
@@ -305,7 +322,7 @@ function ThemeTab() {
                         }}>
                             Themes
                         </Forms.FormTitle>
-                        <div className={classes(Margins.bottom20, cl("filter-controls"))}>
+                        <div className={classes(Margins.bottom20, "vce-search-grid")}>
                             <TextInput value={searchValue.value} placeholder="Search for a theme..." onChange={onSearch} />
                             <div className={InputStyles.inputWrapper}>
                                 <SearchableSelect
@@ -313,8 +330,7 @@ function ThemeTab() {
                                         { label: "Show All", value: SearchStatus.ALL, default: true },
                                         { label: "Show Themes", value: SearchStatus.THEME },
                                         { label: "Show Snippets", value: SearchStatus.SNIPPET },
-                                        // TODO: filter for most liked themes
-                                        // { label: "Show Most Liked", value: SearchStatus.LIKED },
+                                        { label: "Show Most Liked", value: SearchStatus.LIKED },
                                         { label: "Show Dark", value: SearchStatus.DARK },
                                         { label: "Show Light", value: SearchStatus.LIGHT },
                                         { label: "Show Enabled", value: SearchStatus.ENABLED },
@@ -448,7 +464,7 @@ function SubmitThemes() {
     const handleChange = (v: string) => setContent(v);
 
     return (
-        <div className={`${Margins.bottom8} ${Margins.top16}`}>
+        <div className={classes(Margins.bottom8, Margins.top16)}>
             <Forms.FormTitle tag="h2" style={{
                 overflowWrap: "break-word",
                 marginTop: 8,
@@ -461,7 +477,7 @@ function SubmitThemes() {
             <Forms.FormText>
                 (your theme will be reviewed and can take up to 24 hours to be approved)
             </Forms.FormText>
-            <Forms.FormText className={`${Margins.bottom16} ${Margins.top8}`}>
+            <Forms.FormText className={classes(Margins.bottom16, Margins.top8)}>
                 <CodeBlock lang="css" content={themeTemplate} />
             </Forms.FormText>
             <Forms.FormTitle tag="h2" style={{
@@ -478,7 +494,7 @@ function SubmitThemes() {
                     content={themeTemplate}
                     onChange={handleChange}
                     className={classes(TextAreaProps.textarea, "vce-text-input")}
-                    placeholder="Theme CSS goes here..."
+                    placeholder={themeTemplate}
                     spellCheck={false}
                     rows={35}
                 />

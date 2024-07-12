@@ -8,7 +8,7 @@ import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
-import { settings } from "./settings";
+import { settings } from "./utils/settings";
 
 export default definePlugin({
     name: "ThemeLibrary",

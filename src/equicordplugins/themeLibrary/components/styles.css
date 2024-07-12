@@ -1,7 +1,3 @@
-@keyframes bounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-}
 
 [data-tab-id="ThemeLibrary"]::before {
     /* stylelint-disable-next-line property-no-vendor-prefix */
@@ -51,10 +47,10 @@
 .vce-text-input {
     display: inline-block !important;
     color: var(--text-normal) !important;
-    font-family: var(--font-code) !important;
     font-size: 16px !important;
     padding: 0.5em;
     border: 2px solid var(--background-tertiary);
+    line-height: 1.2;
     max-height: unset;
 }
 
@@ -73,4 +69,24 @@
 .vce-warning-button {
     display: flex;
     width: 100%;
+}
+
+.vce-search-grid {
+    display: grid;
+    height: 40px;
+    gap: 10px;
+    grid-template-columns: 1fr 200px;
+}
+
+.vce-button {
+    white-space: normal;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vce-overwrite-modal {
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 8px;
+    padding: 0.5em;
 }

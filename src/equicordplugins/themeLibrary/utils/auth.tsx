@@ -9,7 +9,7 @@ import { showNotification } from "@api/Notifications";
 import { openModal } from "@utils/modal";
 import { OAuth2AuthorizeModal, Toasts, UserStore } from "@webpack/common";
 
-import { logger } from "./components/LikesComponent";
+import { logger } from "../components/LikesComponent";
 
 export async function authorizeUser(triggerModal: boolean = true) {
     const isAuthorized = await getAuthorization();
