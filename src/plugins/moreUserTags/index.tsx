@@ -263,10 +263,11 @@ export default definePlugin({
                     // it's either this or extremely long lookbehind
                     match: /user:\i,nick:\i,/,
                     replace: "$&moreTags_channelId,"
-                }, {
-                    match: /,botType:(\i),(?<=user:(\i).+?)/g,
+                },
+                ...[/,botType:(\i\((\i)\)),/g, /,botType:(\i),(?<=user:(\i).+?)/g].map(match => ({
+                    match,
                     replace: ",botType:$self.getTag({user:$2,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),"
-                }
+                })),
             ]
         },
     ],
