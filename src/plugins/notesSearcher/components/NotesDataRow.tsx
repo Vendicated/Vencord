@@ -77,7 +77,7 @@ export default ({ userId, userNotes: userNotesArg, refreshNotesData, usersCache 
                                 <>
                                     <Menu.MenuItem
                                         id={cl("copy-user-globalname")}
-                                        label="Copy Global Name"
+                                        label="Copy Display Name"
                                         action={() => copyWithToast(userCache!.globalName ?? userCache!.username)}
                                     />
                                     <Menu.MenuItem
