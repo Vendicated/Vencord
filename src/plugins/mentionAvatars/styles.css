@@ -4,4 +4,5 @@
     height: 1em;
     margin: 0 4px 0.2rem 2px;
     border-radius: 50%;
+    box-sizing: border-box;
 }
