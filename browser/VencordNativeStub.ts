@@ -37,7 +37,7 @@ const NOOP_ASYNC = async () => { };
 
 const setCssDebounced = debounce((css: string) => VencordNative.quickCss.set(css));
 
-const themeStore = DataStore.createStore("EquicordThemes", "VencordThemeData");
+const themeStore = DataStore.createStore("VencordThemes", "VencordThemeData");
 
 // probably should make this less cursed at some point
 window.VencordNative = {
