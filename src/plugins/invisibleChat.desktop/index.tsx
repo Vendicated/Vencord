@@ -133,10 +133,12 @@ export default definePlugin({
                     message: message,
                     channel: ChannelStore.getChannel(message.channel_id),
                     onClick: async () => {
-                        const res: string | false = await iteratePasswords(message);
+                        const res = await iteratePasswords(message);
 
-                        if (res) return void this.buildEmbed(message, res);
-                        return void buildDecModal({ message });
+                        if (res)
+                            this.buildEmbed(message, res);
+                        else
+                            buildDecModal({ message });
                     }
                 }
                 : null;
