@@ -60,7 +60,7 @@ export default definePlugin({
             find: 'location:"UserMention',
             replacement: [
                 {
-                    match: /user:(\i),channel:(\i).{0,400}?"@"\.concat\(.+?\)/,
+                    match: /onContextMenu:\i,color:\i,\.\.\.\i(?=,children:)(?<=user:(\i),channel:(\i).{0,500}?)/,
                     replace: "$&,color:$self.getUserColor($1?.id,{channelId:$2?.id})"
                 }
             ],

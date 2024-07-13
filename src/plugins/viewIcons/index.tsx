@@ -186,12 +186,10 @@ export default definePlugin({
         // Avatar component used in User DMs "User Profile" popup in the right and Profiles Modal pfp
         {
             find: ".overlay:void 0,status:",
-            replacement: [
-                ...[/"PRESS_VIEW_PROFILE".+?(?=children:)(?<=avatarSrc:(\i).+?)/, /avatarSrc:(\i),eventHandlers:(\i).+?"div",{...\2,/].map(match => ({
-                    match,
-                    replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openImage($1)},"
-                }))
-            ]
+            replacement: {
+                match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",{...\2,/,
+                replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openImage($1)},"
+            }
         },
         // Old Profiles Modal pfp
         {
