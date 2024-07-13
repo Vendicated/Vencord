@@ -25,7 +25,7 @@ import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, type Patch } from "@utils/types";
 import { DraftType, type Emoji, EmojiIntention, EmojiType, type FluxPersistedStore, type FluxStore, type MessageAttachment, type MessageEmbed, type MessageRecord, type Sticker, StickerFormat, UserPremiumType } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { AlertActionCreators, ChannelStore, EmojiStore, FluxDispatcher, Forms, IconUtils, lodash, MarkupUtils, Permissions, PermissionStore, promptToUpload, UserSettingsProtoActionCreators, UserStore } from "@webpack/common";
+import { AlertActionCreators, ChannelStore, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, MarkupUtils, Permissions, PermissionStore, promptToUpload, UserSettingsProtoActionCreators, UserStore } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
@@ -384,7 +384,7 @@ export default definePlugin({
         return getCurrentGuild()?.id;
     },
 
-    get canUseEmotes() {
+    get canUseEmojis() {
         return (UserStore.getCurrentUser()!.premiumType ?? 0) > 0;
     },
 
@@ -772,13 +772,19 @@ export default definePlugin({
         promptToUpload([file], ChannelStore.getChannel(channelId)!, DraftType.CHANNEL_MESSAGE);
     },
 
-    canUseEmote(emoji: Emoji, channelId: string) {
+    canUseEmoji(emoji: Emoji, channelId: string) {
         if (emoji.type === EmojiType.UNICODE) return true;
-        if (emoji.available === false) return false;
+        if (!emoji.available) return false;
 
         if (isUnusableRoleSubscriptionEmoji(emoji, this.guildId, true)) return false;
 
-        if (this.canUseEmotes)
+        let isUsableIntegratedEmoji = false;
+        if (emoji.managed) {
+            const meRoles = GuildMemberStore.getSelfMember(emoji.guildId)?.roles ?? [];
+            isUsableIntegratedEmoji = emoji.roles.some(r => meRoles.includes(r));
+        }
+
+        if (this.canUseEmojis || isUsableIntegratedEmoji)
             return emoji.guildId === this.guildId || hasExternalEmojiPerms(channelId);
         else
             return !emoji.animated && emoji.guildId === this.guildId;
@@ -885,7 +891,7 @@ export default definePlugin({
 
             if (s.enableEmojiBypass) {
                 for (const emoji of messageObj.validNonShortcutEmojis) {
-                    if (this.canUseEmote(emoji, channelId)) continue;
+                    if (this.canUseEmoji(emoji, channelId)) continue;
 
                     hasBypass = true;
 
@@ -920,7 +926,7 @@ export default definePlugin({
             messageObj.content = messageObj.content.replace(/(?<!\\)<a?:(?:\w+):(\d+)>/ig, (emojiStr, emojiId, offset, origStr) => {
                 const emoji = EmojiStore.getCustomEmojiById(emojiId);
                 if (emoji == null) return emojiStr;
-                if (this.canUseEmote(emoji, channelId)) return emojiStr;
+                if (this.canUseEmoji(emoji, channelId)) return emojiStr;
 
                 hasBypass = true;
 

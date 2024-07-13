@@ -62,7 +62,8 @@ export interface GuildEmoji {
     available: boolean;
     guildId: string;
     id: string;
-    managed: false;
+    /** Only true for integrated emojis. */
+    managed: boolean;
     name: string;
     originalName?: string;
     /** False for emoticons. */
