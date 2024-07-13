@@ -284,6 +284,7 @@ export default definePlugin({
         // in profiles
         {
             find: ",overrideDiscriminator:",
+            group: true,
             replacement: [
                 {
                     // prevent channel id from getting ghosted
