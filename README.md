@@ -50,7 +50,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - Hop On by ImLvna
 - IgnoreTerms by D3SOX
 - IRememberYou by zoodogood
-- Keyboard Sounds by HypedDomi
+- KeyboardSounds by HypedDomi
 - KeywordNotify by camila314
 - Meow by Samwich
 - MessageLinkTooltip by Kyuuhachi
@@ -69,7 +69,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - ReplyPingControl by ant0n and MrDiamond
 - ScreenRecorder by AutumnVN
 - SearchFix by Jaxx
-- Sekai Stickers by MaiKokain
+- SekaiStickers by MaiKokain
 - ServerSearch by camila314
 - ShowBadgesInChat by Inbestigator and KrystalSkull
 - Slap by Korbo
