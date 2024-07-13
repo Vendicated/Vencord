@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./index.css";
+
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
@@ -238,7 +240,7 @@ export default definePlugin({
                 // also set the colors
                 {
                     match: /.botText,children:(\i)}\)]/,
-                    replace: "$&,'data-tag':$1.toLowerCase(),style:{'background-color':moreTags_bgColor,'color':moreTags_fgColor}"
+                    replace: "$&,'data-tag':$1.toLowerCase(),style:{'background-color':moreTags_bgColor,'color':moreTags_fgColor},'data-moreTags-darkFg':moreTags_fgColor?.includes('0')"
                 },
             ],
         },
@@ -290,11 +292,11 @@ export default definePlugin({
                     replace: "$&moreTags_channelId,"
                 }, {
                     // Get the tag type and tag colors so that they can be distributed
-                    match: /(,\i=\i\.isPomelo\(\)\|\|\i;)(.+?botType:(\i\((\i)\)),)/,
+                    match: /(,\i=\i\.isPomelo\(\)\|\|\i;)(.+?botType:(\i),(?<=user:(\i).+?))/,
                     replace: "$1let moreTags_tagType=$self.getTag({user:$4,channelId:moreTags_channelId,origType:$3,location:'not-chat'});let moreTags_tagColors=$self.getTagColors({user:$4,channelId:moreTags_channelId,tagType:moreTags_tagType,location:'not-chat'});$2"
                 }, {
                     // This isn't actually the function that passes into the tag renderer so we need more patches to help it along the way
-                    match: /,botType:(\i\((\i)\)),/g,
+                    match: /,botType:(\i),(?<=user:(\i).+?)/g,
                     replace: ",botType:moreTags_tagType,...moreTags_tagColors,"
                 }, {
                     // Get the parameters from the function that were passed in previously
