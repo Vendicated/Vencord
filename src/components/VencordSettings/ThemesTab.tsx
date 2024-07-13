@@ -16,24 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useSettings } from "@api/Settings";
+import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
-import { DeleteIcon } from "@components/Icons";
+import { DeleteIcon, FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
-import PluginModal from "@components/PluginSettings/PluginModal";
+import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import type { UserThemeHeader } from "@main/themes";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findByPropsLazy, findLazy } from "@webpack";
-import { Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
+import { Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
+import Plugins from "~plugins";
+
 import { AddonCard } from "./AddonCard";
+import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
 
 type FileInput = ComponentType<{
@@ -213,60 +215,52 @@ function ThemesTab() {
                 </Card>
 
                 <Forms.FormSection title="Local Themes">
-                    <Card className="vc-settings-quick-actions-card">
+                    <QuickActionCard>
                         <>
                             {IS_WEB ?
                                 (
-                                    <Button
-                                        size={Button.Sizes.SMALL}
-                                        disabled={themeDirPending}
-                                    >
-                                        Upload Theme
-                                        <FileInput
-                                            ref={fileInputRef}
-                                            onChange={onFileUpload}
-                                            multiple={true}
-                                            filters={[{ extensions: ["css"] }]}
-                                        />
-                                    </Button>
+                                    <QuickAction
+                                        text={
+                                            <span style={{ position: "relative" }}>
+                                                Upload Theme
+                                                <FileInput
+                                                    ref={fileInputRef}
+                                                    onChange={onFileUpload}
+                                                    multiple={true}
+                                                    filters={[{ extensions: ["css"] }]}
+                                                />
+                                            </span>
+                                        }
+                                        Icon={PlusIcon}
+                                    />
                                 ) : (
-                                    <Button
-                                        onClick={() => showItemInFolder(themeDir!)}
-                                        size={Button.Sizes.SMALL}
+                                    <QuickAction
+                                        text="Open Themes Folder"
+                                        action={() => showItemInFolder(themeDir!)}
                                         disabled={themeDirPending}
-                                    >
-                                        Open Themes Folder
-                                    </Button>
+                                        Icon={FolderIcon}
+                                    />
                                 )}
-                            <Button
-                                onClick={refreshLocalThemes}
-                                size={Button.Sizes.SMALL}
-                            >
-                                Load missing Themes
-                            </Button>
-                            <Button
-                                onClick={() => VencordNative.quickCss.openEditor()}
-                                size={Button.Sizes.SMALL}
-                            >
-                                Edit QuickCSS
-                            </Button>
+                            <QuickAction
+                                text="Load missing Themes"
+                                action={refreshLocalThemes}
+                                Icon={RestartIcon}
+                            />
+                            <QuickAction
+                                text="Edit QuickCSS"
+                                action={() => VencordNative.quickCss.openEditor()}
+                                Icon={PaintbrushIcon}
+                            />
 
-                            {Vencord.Settings.plugins.ClientTheme.enabled && (
-                                <Button
-                                    onClick={() => openModal(modalProps => (
-                                        <PluginModal
-                                            {...modalProps}
-                                            plugin={Vencord.Plugins.plugins.ClientTheme}
-                                            onRestartNeeded={() => { }}
-                                        />
-                                    ))}
-                                    size={Button.Sizes.SMALL}
-                                >
-                                    Edit ClientTheme
-                                </Button>
+                            {Settings.plugins.ClientTheme.enabled && (
+                                <QuickAction
+                                    text="Edit ClientTheme"
+                                    action={() => openPluginModal(Plugins.ClientTheme)}
+                                    Icon={PencilIcon}
+                                />
                             )}
                         </>
-                    </Card>
+                    </QuickActionCard>
 
                     <div className={cl("grid")}>
                         {userThemes?.map(theme => (
