@@ -154,6 +154,8 @@ async function getSrcFileReport(page: Page, filePath: string, config: CR.SrcFile
     const unfoundDeclarations = new Set(Object.keys(config));
     const reports: Promise<CR.DeclarationReport>[] = [];
     for (const node of ast.body) {
+        if (unfoundDeclarations.size <= 0) break;
+
         const declaration = node.type === AST_NODE_TYPES.ExportNamedDeclaration
             ? node.declaration
             : node;

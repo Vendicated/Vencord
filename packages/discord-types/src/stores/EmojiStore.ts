@@ -83,4 +83,5 @@ export enum EmojiIntention {
     GIFT = 8,
     AUTO_SUGGESTION = 9,
     POLLS = 10,
+    PROFILE = 11,
 }

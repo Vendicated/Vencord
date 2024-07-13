@@ -28,8 +28,8 @@ export type MergeUnion<T, U>
 export type Nullish = null | undefined;
 
 /** @internal */
-export type OmitOptional<T, ExcludedKeys extends keyof T = never>
-    = { [Key in keyof T as Key extends ExcludedKeys ? Key : IsOptional<T, Key, never, Key>]: T[Key]; };
+export type OmitOptional<T>
+    = { [Key in keyof T as IsOptional<T, Key, never, Key>]: T[Key]; };
 
 /** @internal */
 export type Optional<T, Value = undefined, Keys extends keyof T = keyof T, ExcludeKeys = false>

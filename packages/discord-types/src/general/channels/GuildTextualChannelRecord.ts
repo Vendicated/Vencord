@@ -33,7 +33,7 @@ export declare abstract class GuildTextualChannelRecordBase extends ChannelRecor
     appliedTags?: undefined;
     availableTags?: undefined;
     bitrate_?: undefined;
-    blocked_user_warning_dismissed?: undefined;
+    blockedUserWarningDismissed?: undefined;
     defaultAutoArchiveDuration: ChannelRecordBase["defaultAutoArchiveDuration"];
     defaultForumLayout?: undefined;
     defaultReactionEmoji?: undefined;

@@ -17,8 +17,6 @@
         "allowJs": true,
         "checkJs": true,
 
-        "esModuleInterop": true,
-
         "target": "ESNext",
 
         // https://github.com/microsoft/TypeScript/issues/8836

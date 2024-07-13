@@ -22,7 +22,7 @@ export declare class UnknownChannelRecord extends ChannelRecordBase {
     appliedTags: ChannelRecordBase["appliedTags"];
     availableTags: ChannelRecordBase["availableTags"];
     bitrate_: ChannelRecordBase["bitrate_"];
-    blocked_user_warning_dismissed?: undefined;
+    blockedUserWarningDismissed: ChannelRecordBase["blockedUserWarningDismissed"];
     defaultAutoArchiveDuration: ChannelRecordBase["defaultAutoArchiveDuration"];
     defaultForumLayout: ChannelRecordBase["defaultForumLayout"];
     defaultReactionEmoji: ChannelRecordBase["defaultReactionEmoji"];

@@ -30,7 +30,7 @@ export declare abstract class GuildVocalChannelRecordBase extends ChannelRecordB
     appliedTags?: undefined;
     availableTags?: undefined;
     bitrate_: Defined<ChannelRecordBase["bitrate_"]>;
-    blocked_user_warning_dismissed?: undefined;
+    blockedUserWarningDismissed?: undefined;
     defaultAutoArchiveDuration?: undefined;
     defaultForumLayout?: undefined;
     defaultReactionEmoji?: undefined;

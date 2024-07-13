@@ -24,7 +24,7 @@ export declare class ThreadChannelRecord<ChannelType extends ThreadChannelType =
     appliedTags: Defined<ChannelRecordBase["appliedTags"]>;
     availableTags?: undefined;
     bitrate_: undefined;
-    blocked_user_warning_dismissed?: undefined;
+    blockedUserWarningDismissed?: undefined;
     defaultAutoArchiveDuration?: undefined;
     defaultForumLayout?: undefined;
     defaultReactionEmoji?: undefined;
