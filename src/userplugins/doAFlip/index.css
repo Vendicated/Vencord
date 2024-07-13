@@ -3,6 +3,11 @@
     transform-style: flat;
 }
 
+#app-mount {
+    /*rotate: x 540deg*/
+    transform-style: flat;
+}
+
 @keyframes thing {
     0% {transform: rotateX(0deg);}
     100% {transform: rotateX(360deg);}

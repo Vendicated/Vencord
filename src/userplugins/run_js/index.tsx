@@ -28,8 +28,14 @@ export default definePlugin({
     name: "RunJS",
     description: "Run custom JS on plugin start!\n\t!! USE AT YOUR OWN RISK ALL SCRIPTS WILL HAVE ACCESS TO VENCORD API !!",
     authors: [
-        Devs.Neon,
-        Devs.Zeon,
+        {
+            name: "Neon Gamer Bot",
+            id: 566766267046821888n,
+        },
+        {
+            name: "Zeon [BOT]",
+            id: 778062673626660875n,
+        },
     ],
     settings,
     startAt: StartAt.DOMContentLoaded,
