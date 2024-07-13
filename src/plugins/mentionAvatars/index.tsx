@@ -9,12 +9,12 @@ import "./styles.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { IconUtils, useState } from "@webpack/common";
+import { SelectedGuildStore, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
 export default definePlugin({
     name: "MentionAvatars",
-    description: "a",
+    description: "Shows user avatars inside mentions",
     authors: [Devs.Ven],
 
     patches: [{
@@ -36,7 +36,7 @@ export default definePlugin({
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
             >
-                <img src={IconUtils.getUserAvatarURL(user, isHovering, 16)} className="vc-mentionAvatars-avatar" />
+                <img src={user.getAvatarURL(SelectedGuildStore.getGuildId(), 16, isHovering)} className="vc-mentionAvatars-avatar" />
                 @{username}
             </span>
         );
