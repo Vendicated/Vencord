@@ -24,7 +24,7 @@ import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Emoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
@@ -818,7 +818,14 @@ export default definePlugin({
 
         if (isUnusableRoleSubscriptionEmoji(e, this.guildId, true)) return false;
 
-        if (this.canUseEmotes)
+        let isUsableTwitchSubEmote = false;
+        if (e.managed && e.guildId) {
+            // @ts-ignore outdated type
+            const myRoles = GuildMemberStore.getSelfMember(e.guildId)?.roles ?? [];
+            isUsableTwitchSubEmote = e.roles.some(r => myRoles.includes(r));
+        }
+
+        if (this.canUseEmotes || isUsableTwitchSubEmote)
             return e.guildId === this.guildId || hasExternalEmojiPerms(channelId);
         else
             return !e.animated && e.guildId === this.guildId;
