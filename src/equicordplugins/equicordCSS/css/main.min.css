@@ -54,13 +54,13 @@
     --si-textplayground: url(https://minidiscordthemes.github.io/SettingsIcons/svg/textplayground.svg);
     --si-textcomponent: url(https://minidiscordthemes.github.io/SettingsIcons/svg/textcomponent.svg);
     --si-logout: url(https://minidiscordthemes.github.io/SettingsIcons/svg/logout.svg);
-    --si-vencordsettings: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordsettings.svg);
-    --si-vencordplugins: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordplugins.svg);
-    --si-vencordthemes: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordthemes.svg);
-    --si-vencordupdater: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordupdater.svg);
-    --si-vencordcloud: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordcloud.svg);
-    --si-vencordsettingssync: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordsettingssync.svg);
-    --si-vencordpatchhelper: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordpatchhelper.svg);
+    --si-equicordsettings: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordsettings.svg);
+    --si-equicordplugins: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordplugins.svg);
+    --si-equicordthemes: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordthemes.svg);
+    --si-equicordupdater: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordupdater.svg);
+    --si-equicordcloud: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordcloud.svg);
+    --si-equicordsettingssync: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordsettingssync.svg);
+    --si-equicordpatchhelper: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordpatchhelper.svg);
     --si-vesktop: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vesktop.svg);
     --si-overview: url(https://minidiscordthemes.github.io/SettingsIcons/svg/overview.svg);
     --si-roles: url(https://minidiscordthemes.github.io/SettingsIcons/svg/roles.svg);
@@ -280,33 +280,33 @@
     -webkit-mask:var(--si-logout) center/contain no-repeat;
     mask:var(--si-logout) center/contain no-repeat
 }
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=VencordSettings]::before{
-    -webkit-mask:var(--si-vencordsettings) center/contain no-repeat;
-    mask:var(--si-vencordsettings) center/contain no-repeat
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EquicordSettings]::before{
+    -webkit-mask:var(--si-equicordsettings) center/contain no-repeat;
+    mask:var(--si-equicordsettings) center/contain no-repeat
 }
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=VencordPlugins]::before{
-    -webkit-mask:var(--si-vencordplugins) center/contain no-repeat;
-    mask:var(--si-vencordplugins) center/contain no-repeat
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EquicordPlugins]::before{
+    -webkit-mask:var(--si-equicordplugins) center/contain no-repeat;
+    mask:var(--si-equicordplugins) center/contain no-repeat
 }
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=VencordThemes]::before{
-    -webkit-mask:var(--si-vencordthemes) center/contain no-repeat;
-    mask:var(--si-vencordthemes) center/contain no-repeat
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EquicordThemes]::before{
+    -webkit-mask:var(--si-equicordthemes) center/contain no-repeat;
+    mask:var(--si-equicordthemes) center/contain no-repeat
 }
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=VencordUpdater]::before{
-    -webkit-mask:var(--si-vencordupdater) center/contain no-repeat;
-    mask:var(--si-vencordupdater) center/contain no-repeat
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EquicordUpdater]::before{
+    -webkit-mask:var(--si-equicordupdater) center/contain no-repeat;
+    mask:var(--si-equicordupdater) center/contain no-repeat
 }
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=VencordCloud]::before{
-    -webkit-mask:var(--si-vencordcloud) center/contain no-repeat;
-    mask:var(--si-vencordcloud) center/contain no-repeat
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EquicordCloud]::before{
+    -webkit-mask:var(--si-equicordcloud) center/contain no-repeat;
+    mask:var(--si-equicordcloud) center/contain no-repeat
 }
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=VencordSettingsSync]::before{
-    -webkit-mask:var(--si-vencordsettingssync) center/contain no-repeat;
-    mask:var(--si-vencordsettingssync) center/contain no-repeat
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EquicordSettingsSync]::before{
+    -webkit-mask:var(--si-equicordsettingssync) center/contain no-repeat;
+    mask:var(--si-equicordsettingssync) center/contain no-repeat
 }
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=VencordPatchHelper]::before{
-    -webkit-mask:var(--si-vencordpatchhelper) center/contain no-repeat;
-    mask:var(--si-vencordpatchhelper) center/contain no-repeat
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EquicordPatchHelper]::before{
+    -webkit-mask:var(--si-equicordpatchhelper) center/contain no-repeat;
+    mask:var(--si-equicordpatchhelper) center/contain no-repeat
 }
 .sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Vesktop]::before{
     -webkit-mask:var(--si-vesktop) center/contain no-repeat;

@@ -1197,14 +1197,14 @@
 
 .dc-colorway-settings::before {
     /* stylelint-disable-next-line property-no-vendor-prefix */
-    -webkit-mask: var(--si-vencordsettings) center/contain no-repeat !important;
-    mask: var(--si-vencordsettings) center/contain no-repeat !important
+    -webkit-mask: var(--si-equicordsettings) center/contain no-repeat !important;
+    mask: var(--si-equicordsettings) center/contain no-repeat !important
 }
 
 .dc-colorway-ondemand::before {
     /* stylelint-disable-next-line property-no-vendor-prefix */
-    -webkit-mask: var(--si-vencordupdater) center/contain no-repeat !important;
-    mask: var(--si-vencordupdater) center/contain no-repeat !important
+    -webkit-mask: var(--si-equicordupdater) center/contain no-repeat !important;
+    mask: var(--si-equicordupdater) center/contain no-repeat !important
 }
 
 .dc-colorway-sources-manager::before {

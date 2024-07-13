@@ -181,7 +181,7 @@ function ExcludedPluginsList({ search }: { search: string; }) {
         discordDesktop: "Discord Desktop app",
         vencordDesktop: "Vesktop app",
         web: "Vesktop app and the Web version of Discord",
-        dev: "Developer version of Vencord"
+        dev: "Developer version of Equicord"
     };
 
     return (
@@ -296,7 +296,7 @@ export default function PluginSettings() {
 
         if (isRequired) {
             const tooltipText = p.required
-                ? "This plugin is required for Vencord to function."
+                ? "This plugin is required for Equicord to function."
                 : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
 
             requiredPlugins.push(

@@ -199,11 +199,11 @@ page.on("console", async e => {
 
     const firstArg = await rawArgs[0]?.jsonValue();
 
-    const isVencord = firstArg === "[Vencord]";
+    const isEquicord = firstArg === "[Equicord]";
     const isDebug = firstArg === "[PUP_DEBUG]";
 
     outer:
-    if (isVencord) {
+    if (isEquicord) {
         try {
             var args = await Promise.all(e.args().map(a => a.jsonValue()));
         } catch {

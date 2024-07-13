@@ -37,7 +37,7 @@ const NOOP_ASYNC = async () => { };
 
 const setCssDebounced = debounce((css: string) => VencordNative.quickCss.set(css));
 
-const themeStore = DataStore.createStore("VencordThemes", "VencordThemeData");
+const themeStore = DataStore.createStore("EquicordThemes", "VencordThemeData");
 
 // probably should make this less cursed at some point
 window.VencordNative = {
@@ -98,13 +98,13 @@ window.VencordNative = {
     settings: {
         get: () => {
             try {
-                return JSON.parse(localStorage.getItem("VencordSettings") || "{}");
+                return JSON.parse(localStorage.getItem("EquicordSettings") || "{}");
             } catch (e) {
                 console.error("Failed to parse settings from localStorage: ", e);
                 return {};
             }
         },
-        set: async (s: Settings) => localStorage.setItem("VencordSettings", JSON.stringify(s)),
+        set: async (s: Settings) => localStorage.setItem("EquicordSettings", JSON.stringify(s)),
         getSettingsDir: async () => "LocalStorage"
     },
 

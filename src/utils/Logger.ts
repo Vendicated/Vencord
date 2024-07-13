@@ -38,7 +38,7 @@ export class Logger {
         }
 
         console[level](
-            `%c Vencord %c %c ${this.name} ${customFmt}`,
+            `%c Equicord %c %c ${this.name} ${customFmt}`,
             `background: ${levelColor}; color: black; font-weight: bold; border-radius: 5px;`,
             "",
             `background: ${this.color}; color: black; font-weight: bold; border-radius: 5px;`

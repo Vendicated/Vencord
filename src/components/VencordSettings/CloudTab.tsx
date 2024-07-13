@@ -123,7 +123,7 @@ function CloudTab() {
         <SettingsTab title="Equicord Cloud">
             <Forms.FormSection title="Cloud Settings" className={Margins.top16}>
                 <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
-                    Vencord comes with a cloud integration that adds goodies like settings sync across devices.
+                    Equicord comes with the Vencord cloud integration that adds goodies like settings sync across devices.
                     It <Link href="https://vencord.dev/cloud/privacy">respects your privacy</Link>, and
                     the <Link href="https://github.com/Vencord/Backend">source code</Link> is AGPL 3.0 licensed so you
                     can host it yourself.
