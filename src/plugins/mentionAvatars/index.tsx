@@ -29,7 +29,7 @@ export default definePlugin({
 
         return (
             <>
-                <img src={IconUtils.getUserAvatarURL(user, true, 24)} className="vc-mentionAvatars-avatar" />
+                <img src={IconUtils.getUserAvatarURL(user, true, 48)} className="vc-mentionAvatars-avatar" />
                 @{username}
             </>
         );
