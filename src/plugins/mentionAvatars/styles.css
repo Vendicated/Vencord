@@ -1,8 +1,7 @@
 .vc-mentionAvatars-avatar {
-    display: inline;
     vertical-align: middle;
     width: 1em;
     height: 1em;
-    margin: 0 4px 0.2rem;
+    margin: 0 4px 0.2rem 2px;
     border-radius: 50%;
 }
