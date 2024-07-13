@@ -174,7 +174,7 @@ export function subscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof Flux
         logger.debug("Subscribing to flux events of plugin", p.name);
         for (const [event, handler] of Object.entries(p.flux)) {
             const wrappedHandler = p.flux[event] = function () {
-                if (p.name === "Encryptcord" && event === "MESSAGE_CREATE") continue;
+                if (p.name === "Encryptcord" && event === "MESSAGE_CREATE") return;
                 try {
                     const res = handler.apply(p, arguments as any);
                     return res instanceof Promise
