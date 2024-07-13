@@ -53,9 +53,9 @@ interface IVoiceChannelEffectSendEvent {
 
 const MOYAI = "🗿";
 const MOYAI_URL =
-    "https://github.com/Equicord/Ignore/raw/main/moyai.mp3";
+    "https://github.com/Equicord/Ignore/raw/main/sounds/moyai/moyai.mp3";
 const MOYAI_URL_HD =
-    "https://github.com/Equicord/Ignore/raw/main/moyai_hd.wav";
+    "https://github.com/Equicord/Ignore/raw/main/sounds/moyai/moyai.wav";
 
 const settings = definePluginSettings({
     volume: {
