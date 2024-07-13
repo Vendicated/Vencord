@@ -31,8 +31,10 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - BlockKrsip by D3SOX
 - BypassDND by Inbestigator
 - CleanChannelName by AutumnVN
+- ColorMessage by Kyuuhachi
 - CopyUserMention by Cortex and castdrian
 - CustomAppIcons by Happy Enderman and SerStars
+- DeadMembers by Kyuuhachi
 - DiscordColorways by DaBluLite
 - DNDWhilePlaying by thororen
 - DoNotLeak by Perny
@@ -76,6 +78,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - SoundBoardLogger by Moxxie, fres, echo, thororen
 - TalkInReverse by Tolgchu
 - ThemeLibrary by Fafa
+- Title by Kyuuhachi
 - UnlimitedAccounts by Balaclava and thororen
 - UserPFP by nexpid and thororen
 - VCSupport by thororen

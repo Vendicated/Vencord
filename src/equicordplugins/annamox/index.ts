@@ -27,6 +27,12 @@ export const settings = definePluginSettings({
         description: "Remove gift button",
         restartNeeded: true,
     },
+    emojiList: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Remove unavailable categories from the emoji picker",
+        restartNeeded: true,
+    },
 });
 
 export default definePlugin({
@@ -66,10 +72,16 @@ export default definePlugin({
         },
         { // Settings, sidebar
             find: "Messages.BILLING_SETTINGS",
-            replacement: {
-                match: /\{header:[^:,]*\.Messages.BILLING_SETTINGS,[^}]*\]},/,
-                replace: "/*$&*/"
-            },
+            replacement: [
+                {
+                    match: /(?<=Messages.BILLING_SETTINGS,)/,
+                    replace: "capitalism:true,"
+                },
+                {
+                    match: /\i\?\i:\i\.toSpliced\(3,0,\i\)/,
+                    replace: "($&).filter(e=>!e.capitalism)",
+                },
+            ],
             predicate: () => settings.store.billing,
         },
         { // Gift button
@@ -79,6 +91,22 @@ export default definePlugin({
                 replace: "return null;",
             },
             predicate: () => settings.store.gift,
+        },
+        { // Emoji list
+            find: "Messages.EMOJI_PICKER_CREATE_EMOJI_TITLE,size:",
+            replacement: {
+                match: /(\w+)=!\w+&&\w+.\i.isEmojiCategoryNitroLocked\(\{[^}]*\}\);/,
+                replace: "$&$1||"
+            },
+            predicate: () => settings.store.emojiList,
+        },
+        { // Emoji category list
+            find: "Messages.EMOJI_CATEGORY_TOP_GUILD_EMOJI.format({",
+            replacement: {
+                match: /(?<=(\i)\.unshift\((\i)\):)(?=\1\.push\(\2\))/,
+                replace: "$2.isNitroLocked||"
+            },
+            predicate: () => settings.store.emojiList,
         }
     ],
 });
