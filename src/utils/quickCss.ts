@@ -57,9 +57,9 @@ export async function toggle(isEnabled: boolean) {
 async function initThemes() {
     themesStyle ??= createStyle("vencord-themes");
 
-    const { themeLinks, enabledThemes } = Settings;
+    const { enabledThemeLinks, enabledThemes } = Settings;
 
-    const links: string[] = [...themeLinks];
+    const links: string[] = [...enabledThemeLinks];
 
     if (IS_WEB) {
         for (const theme of enabledThemes) {
@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
     toggle(Settings.useQuickCss);
     SettingsStore.addChangeListener("useQuickCss", toggle);
 
-    SettingsStore.addChangeListener("themeLinks", initThemes);
+    SettingsStore.addChangeListener("enabledThemeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
 
     if (!IS_WEB)
