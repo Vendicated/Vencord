@@ -18,7 +18,7 @@ const preprocessors: { [preprocessor: string]: (text: string, vars: Record<strin
             .map(([name, value]) => `--${name}: ${value}`)
             .join("; ");
 
-        return `/* ==Vencord== */\n:root{${variables}}\n/* ==/Vencord== */${text}`;
+        return `/* ==Equicord== */\n:root{${variables}}\n/* ==/Equicord== */${text}`;
     },
 
     async uso(text: string, vars: Record<string, string>) {
@@ -55,7 +55,11 @@ const preprocessors: { [preprocessor: string]: (text: string, vars: Record<strin
 };
 
 export async function compileUsercss(fileName: string) {
-    const themeData = await VencordNative.themes.getThemeData(fileName);
+    try {
+        var themeData = await VencordNative.themes.getThemeData(fileName);
+    } catch (e) {
+        UserCSSLogger.warn("Failed to get theme data for", fileName, "(has it gone missing?)", e);
+    }
     if (!themeData) return null;
 
     // UserCSS preprocessor order look like this:
