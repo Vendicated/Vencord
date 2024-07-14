@@ -56,11 +56,11 @@ export function NotesDataModal({ modalProps, close }: {
     const [usersNotesData, refreshNotesData] = useReducer(() => {
         return Object.entries(getNotes())
             .map<[string, string]>(([userId, { note }]) => [userId, note])
-            .filter((([_, note]) => note !== ""));
+            .filter((([_, note]) => note && note !== ""));
     },
     Object.entries(getNotes())
         .map<[string, string]>(([userId, { note }]) => [userId, note])
-        .filter((([_, note]) => note !== ""))
+        .filter((([_, note]) => note && note !== ""))
     );
 
     RefreshNotesDataEx = refreshNotesData;
