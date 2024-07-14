@@ -18,44 +18,23 @@
 
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, PluginSettingDef } from "@utils/types";
+
+const opt = (description: string) => ({
+    type: OptionType.BOOLEAN,
+    description,
+    default: true,
+    restartNeeded: true
+} satisfies PluginSettingDef);
 
 const settings = definePluginSettings({
-    showTimeouts: {
-        type: OptionType.BOOLEAN,
-        description: "Show member timeout icons in chat.",
-        default: true,
-    },
-    showInvitesPaused: {
-        type: OptionType.BOOLEAN,
-        description: "Show the invites paused tooltip in the server list.",
-        default: true,
-    },
-    showModView: {
-        type: OptionType.BOOLEAN,
-        description: "Show the member mod view context menu item in all servers.",
-        default: true,
-    },
-    disableDiscoveryFilters: {
-        type: OptionType.BOOLEAN,
-        description: "Disable filters in Server Discovery search that hide servers that don't meet discovery criteria.",
-        default: true,
-    },
-    disableDisallowedDiscoveryFilters: {
-        type: OptionType.BOOLEAN,
-        description: "Disable filters in Server Discovery search that hide NSFW & disallowed servers.",
-        default: true,
-    },
-    showMembersPageInSettings: {
-        type: OptionType.BOOLEAN,
-        description: "Shows the member page in the settings of non-community servers even if Show Members in Channel List is enabled, and disable the redirect to the sidebar in community servers.",
-        default: true,
-    },
-    showMembersPageInSidebar: {
-        type: OptionType.BOOLEAN,
-        description: "Shows the member page in sidebar of non-community servers regardless of the Show Members in Channel List setting.",
-        default: true,
-    },
+    showTimeouts: opt("Show member timeout icons in chat."),
+    showInvitesPaused: opt("Show the invites paused tooltip in the server list."),
+    showModView: opt("Show the member mod view context menu item in all servers."),
+    disableDiscoveryFilters: opt("Disable filters in Server Discovery search that hide servers that don't meet discovery criteria."),
+    disableDisallowedDiscoveryFilters: opt("Disable filters in Server Discovery search that hide NSFW & disallowed servers."),
+    showMembersPageInSettings: opt("Shows the member page in the settings of non-community servers even if Show Members in Channel List is enabled, and disable the redirect to the sidebar in community servers."),
+    showMembersPageInSidebar: opt("Shows the member page in sidebar of non-community servers regardless of the Show Members in Channel List setting."),
 });
 
 migratePluginSettings("ShowHiddenThings", "ShowTimeouts");
