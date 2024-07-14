@@ -130,9 +130,8 @@ export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModuleLazy(/
 
 const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i,activeViewType:/);
 
-// TODO: type
 // zustand store
-export const ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
+export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
     closeExpressionPicker: filters.byCode("setState({activeView:null"),
     openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(m.toString()),
 });

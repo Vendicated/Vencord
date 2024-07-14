@@ -10,6 +10,7 @@ export * from "./ApplicationRecord";
 export * from "./channels";
 export * from "./Clan";
 export * from "./CompanyRecord";
+export * from "./DisplayProfile";
 export * from "./Draft";
 export * from "./emojis";
 export * from "./Frecency";

@@ -448,6 +448,11 @@ export default {
                 type: "class",
             },
         },
+        "./general/DisplayProfile.ts": {
+            DisplayProfile: {
+                type: "class",
+            },
+        },
         "./general/Draft.ts": {
             DraftType: {
                 type: "enum",

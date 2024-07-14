@@ -38,6 +38,10 @@ export type Optional<T, Value = undefined, Keys extends keyof T = keyof T, Exclu
         : Omit<T, Keys> & { [Key in Keys]?: T[Key] | Value; };
 
 /** @internal */
+export type OptionalTuple<T extends unknown[], Value = undefined>
+    = { [Key in keyof T]?: T[Key] | Value; };
+
+/** @internal */
 export type PartialOnUndefined<T>
     = { [Key in keyof T as undefined extends T[Key] ? never : Key]: T[Key]; }
     & { [Key in keyof T as undefined extends T[Key] ? Key : never]?: T[Key]; };

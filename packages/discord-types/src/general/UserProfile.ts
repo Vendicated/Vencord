@@ -38,15 +38,25 @@ export interface UserProfileFetchFailed {
     accentColor: null;
     application: null;
     applicationRoleConnections: [];
+    /** Never present if fetch failed. */
+    badges?: undefined;
     banner: null;
     bio: "";
     connectedAccounts: [];
     lastFetched: number;
     legacyUsername: null;
+    /** Never present if fetch failed. */
+    popoutAnimationParticleType?: undefined;
     premiumGuildSince: null;
     premiumSince: null;
+    /** Never present if fetch failed. */
+    premiumType?: undefined;
+    /** Never present if fetch failed. */
+    profileEffectId?: undefined;
     profileFetchFailed: true;
     pronouns: "";
+    /** Never present if fetch failed. */
+    themeColors?: undefined;
     userId: string;
 }
 

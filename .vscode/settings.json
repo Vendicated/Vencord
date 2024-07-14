@@ -9,6 +9,8 @@
     "[typescriptreact]": {
         "editor.defaultFormatter": "vscode.typescript-language-features"
     },
+    "files.eol": "\n",
+    "files.insertFinalNewline": true,
     "javascript.format.semicolons": "insert",
     "typescript.format.semicolons": "insert",
     "typescript.preferences.quoteStyle": "double",

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { GuildMember, GuildRecord, UserRecord } from "@vencord/discord-types";
+import type { DisplayProfile, GuildMember, GuildRecord, UserProfileStore, UserRecord, UserStore } from "@vencord/discord-types";
 import type { ReactNode } from "react";
 import type { LiteralUnion } from "type-fest";
 
@@ -139,6 +139,7 @@ export interface Constants {
     FriendsSections: Record<string, string>;
 }
 
+// zustand store
 export interface ExpressionPickerStore {
     closeExpressionPicker(activeViewType?: any): void;
     openExpressionPicker(activeView: LiteralUnion<"emoji" | "gif" | "sticker", string>, activeViewType?: any): void;
@@ -197,41 +198,14 @@ export interface UserUtils {
     humanizeStatus: any;
 }
 
-export class DisplayProfile {
-    userId: string;
-    banner?: string;
-    bio?: string;
-    pronouns?: string;
-    accentColor?: number;
-    themeColors?: number[];
-    popoutAnimationParticleType?: any;
-    profileEffectId?: string;
-    _userProfile?: any;
-    _guildMemberProfile?: any;
-    canUsePremiumProfileCustomization: boolean;
-    canEditThemes: boolean;
-    premiumGuildSince: Date | null;
-    premiumSince: Date | null;
-    premiumType?: number;
-    primaryColor?: number;
-
-    getBadges(): {
-        id: string;
-        description: string;
-        icon: string;
-        link?: string;
-    }[];
-    getBannerURL(options: { canAnimate: boolean; size: number; }): string;
-    getLegacyUsername(): string | null;
-    hasFullProfile(): boolean;
-    hasPremiumCustomization(): boolean;
-    hasThemeColors(): boolean;
-    isUsingGuildMemberBanner(): boolean;
-    isUsingGuildMemberBio(): boolean;
-    isUsingGuildMemberPronouns(): boolean;
-}
-
 export interface DisplayProfileUtils {
-    getDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
-    useDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
+    getDisplayProfile(
+        userId: string,
+        guildId?: string | null | undefined,
+        stores?: [
+            Pick<UserStore, "getUser">,
+            Pick<UserProfileStore, "getUserProfile" | "getGuildMemberProfile">
+        ] | undefined /* = [UserStore, UserProfileStore] */
+    ): DisplayProfile | null;
+    useDisplayProfile(userId: string, guildId?: string | null | undefined): DisplayProfile | null;
 }

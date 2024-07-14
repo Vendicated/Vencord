@@ -67,6 +67,7 @@
         "no-mixed-spaces-and-tabs": "error",
         "indent": ["error", 4, { "SwitchCase": 1 }],
         "arrow-parens": ["error", "as-needed"],
+        "linebreak-style": ["error", "unix"],
         "eol-last": ["error", "always"],
         "@typescript-eslint/func-call-spacing": ["error", "never"],
         "no-multi-spaces": "error",
