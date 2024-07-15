@@ -360,18 +360,18 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
     }
 };
 
+const emojiRegex = /https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.([a-zA-Z]{3,4}).*/;
 const imageContextPatch: NavContextMenuPatchCallback = (children, props: {
     src: string
 }) => {
-    if ("src" in props && /https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.([a-zA-Z]{3,4}).*/gm.test(props.src)) {
-        const matches = [...props.src.matchAll(/https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.([a-zA-Z]{3,4}).*/gm)];
-        if (!matches) return;
-        children.push(buildMenuItem("Emoji", () => ({
-            id: matches[0][1],
-            isAnimated: (matches[0][2] === "gif"),
-            name: "ProfileEmoji"
-        })));
-    }
+    // this context menu is called on normal images, as well as stock emojis.
+    const matches = [...props.src.match(emojiRegex) ?? []];
+    if(matches.length === 0) return;
+    children.push(buildMenuItem("Emoji", () => ({
+        id: matches[1],
+        isAnimated: (matches[2] === "gif"),
+        name: "ProfileEmoji"
+    })));
 };
 interface HangStatus {
     emoji?: {
