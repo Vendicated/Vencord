@@ -383,13 +383,11 @@ interface HangStatus {
     }
 }
 const vcHangStatusContextPatch: NavContextMenuPatchCallback =(children, props: {
-    user: {
-        HangStatus?: HangStatus
-    }
+        hangStatusActivity?: HangStatus
 }) => {
-    if(props.user.HangStatus?.emoji?.id){
-        const e = props.user.HangStatus.emoji as Emoji;
-        e.isAnimated = props.user.HangStatus.emoji.animated ?? false;
+    if(props.hangStatusActivity?.emoji?.id){
+        const e = props.hangStatusActivity.emoji as Emoji;
+        e.isAnimated = props.hangStatusActivity.emoji.animated ?? false;
         children.push(buildMenuItem("Emoji", () => {
             return e;
         }));
@@ -409,12 +407,11 @@ export default definePlugin({
     patches: [
         // needed to pass the HangStatus to the context menu
         {
-            find: "renderPrioritySpeaker",
+            find: "canWatchStream",
             replacement: {
-                match: /(handleContextMenu".*?)(let)/,
-                replace: "$1this.props.user.HangStatus=this.props.hangStatusActivity;$2"
-
+                match: /Menu".*?\.\.\.\i,/,
+                replace: "$&hangStatusActivity:this.props.hangStatusActivity,"
             }
-        },
+        }
     ],
 });
