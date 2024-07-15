@@ -248,16 +248,6 @@ export default definePlugin({
             description: "Comma-separated list of guild IDs to ignore",
             default: ""
         },
-        logDeletes: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to log deleted messages",
-            default: true,
-        },
-        logEdits: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to log edited messages",
-            default: true,
-        },
     },
 
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
