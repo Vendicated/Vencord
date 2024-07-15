@@ -39,7 +39,7 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
         <ModalRoot {...modalProps} size={ModalSize.LARGE}>
             <ModalHeader className={cl("head")}>
                 <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Message Edit History</Text>
-                <ModalCloseButton onClick={close} />
+                <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 
             <ModalContent className={cl("contents")}>
