@@ -130,6 +130,18 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
     );
 };
 
+export function parseEditContent(content: string, message: Message) {
+    return Parser.parse(content, true, {
+        channelId: message.channel_id,
+        messageId: message.id,
+        allowLinks: true,
+        allowHeading: true,
+        allowList: true,
+        allowEmojiLinks: true,
+        viewingChannelId: SelectedChannelStore.getChannelId(),
+    });
+}
+
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
@@ -159,15 +171,7 @@ export default definePlugin({
             <>
                 {message.editHistory?.map(edit => (
                     <div className="messagelogger-edited">
-                        {Parser.parse(edit.content, true, {
-                            channelId,
-                            messageId,
-                            allowLinks: true,
-                            allowHeading: true,
-                            allowList: true,
-                            allowEmojiLinks: true,
-                            viewingChannelId: SelectedChannelStore.getChannelId(),
-                        })}
+                        {parseEditContent(edit.content, message)}
                         <Timestamp
                             timestamp={edit.timestamp}
                             isEdited={true}

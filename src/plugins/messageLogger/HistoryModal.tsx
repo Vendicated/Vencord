@@ -6,9 +6,13 @@
 
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Margins } from "@utils/margins";
+import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
-import { Parser, Text, Timestamp, useState } from "@webpack/common";
+import { TabBar, Text, Timestamp, TooltipContainer, useState } from "@webpack/common";
+
+import { parseEditContent } from ".";
 
 const CodeContainerClasses = findByPropsLazy("markup", "codeContainer");
 const MiscClasses = findByPropsLazy("messageContent", "markupRtl");
@@ -16,7 +20,7 @@ const MiscClasses = findByPropsLazy("messageContent", "markupRtl");
 const cl = classNameFactory("vc-ml-modal-");
 
 export function openHistoryModal(message: any) {
-    const key = openModal(props =>
+    openModal(props =>
         <ErrorBoundary>
             <HistoryModal
                 modalProps={props}
@@ -26,50 +30,62 @@ export function openHistoryModal(message: any) {
     );
 }
 
-export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; message: any }) {
-    const [selected, selectItem] = useState(message.editHistory.length);
-    const timestamps = [message.firstEditTimestamp, ...message.editHistory.map(a => a.timestamp)];
-    const contents = [...message.editHistory.map(a => a.content), message.content];
+export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; message: any; }) {
+    const [currentTab, setCurrentTab] = useState(message.editHistory.length);
+    const timestamps = [message.firstEditTimestamp, ...message.editHistory.map(m => m.timestamp)];
+    const contents = [...message.editHistory.map(m => m.content), message.content];
 
-    return <ModalRoot {...modalProps} size={ModalSize.LARGE}>
-        <ModalHeader className={cl("head")}>
-            <Text variant="heading-lg/semibold">Message Edit History</Text>
-            <ModalCloseButton onClick={modalProps.onClose} />
-            <div className={cl("revisions")}>
-                { message.firstEditTimestamp.getTime() !== message.timestamp.getTime() && (
-                    <button className={cl("revision-lost")} disabled>
-                        <Timestamp
-                            className={cl("timestamp")}
-                            timestamp={message.timestamp}
-                            isEdited={true}
-                            isInline={false}
-                        />
-                    </button>
-                ) }
-                {...timestamps.map((timestamp, index) =>
-                    <button
-                        key={timestamp}
-                        className={cl("revision", { "revision-active": selected === index })}
-                        onClick={() => selectItem(index)}
-                    >
-                        <Timestamp
-                            className={cl("timestamp")}
-                            timestamp={timestamp}
-                            isEdited={true}
-                            isInline={false}
-                        />
-                    </button>
-                )}
-            </div>
-        </ModalHeader>
-        <ModalContent className={cl("contents")}>
-            {...contents.map((content, index) =>
-                <div key={timestamps[index]} className={cl("content", { "content-active": selected === index })}>
-                    <div className={`${CodeContainerClasses.markup} ${MiscClasses.messageContent}`}>
-                        {Parser.parse(content, false, { channelId: message.channel_id })}
-                    </div>
+    return (
+        <ModalRoot {...modalProps} size={ModalSize.LARGE}>
+            <ModalHeader className={cl("head")}>
+                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Message Edit History</Text>
+                <ModalCloseButton onClick={close} />
+            </ModalHeader>
+
+            <ModalContent className={cl("contents")}>
+                <TabBar
+                    type="top"
+                    look="brand"
+                    className="vc-settings-tab-bar"
+                    selectedItem={currentTab}
+                    onItemSelect={setCurrentTab}
+                >
+                    {message.firstEditTimestamp.getTime() !== message.timestamp.getTime() && (
+                        <TooltipContainer text="This edit state was not logged so it can't be displayed.">
+                            <TabBar.Item
+                                className="vc-settings-tab-bar-item"
+                                id={-1}
+                                disabled
+                            >
+                                <Timestamp
+                                    className={cl("timestamp")}
+                                    timestamp={message.timestamp}
+                                    isEdited={true}
+                                    isInline={false}
+                                />
+                            </TabBar.Item>
+                        </TooltipContainer>
+                    )}
+
+                    {timestamps.map((timestamp, index) => (
+                        <TabBar.Item
+                            className="vc-settings-tab-bar-item"
+                            id={index}
+                        >
+                            <Timestamp
+                                className={cl("timestamp")}
+                                timestamp={timestamp}
+                                isEdited={true}
+                                isInline={false}
+                            />
+                        </TabBar.Item>
+                    ))}
+                </TabBar>
+
+                <div className={classes(CodeContainerClasses.markup, MiscClasses.messageContent, Margins.top8)}>
+                    {parseEditContent(contents[currentTab], message)}
                 </div>
-            )}
-        </ModalContent>
-    </ModalRoot>;
+            </ModalContent>
+        </ModalRoot>
+    );
 }
