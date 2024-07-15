@@ -27,7 +27,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, i18n, Menu, MessageStore, Parser, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, i18n, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
@@ -154,7 +154,15 @@ export default definePlugin({
             <>
                 {message.editHistory?.map(edit => (
                     <div className="messagelogger-edited">
-                        {Parser.parse(edit.content)}
+                        {Parser.parse(edit.content, true, {
+                            channelId,
+                            messageId,
+                            allowLinks: true,
+                            allowHeading: true,
+                            allowList: true,
+                            allowEmojiLinks: true,
+                            viewingChannelId: SelectedChannelStore.getChannelId(),
+                        })}
                         <Timestamp
                             timestamp={edit.timestamp}
                             isEdited={true}
