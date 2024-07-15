@@ -66,7 +66,6 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - PurgeMessages by bhop and nyx
 - Quest Completer by HappyEnderman, SerStars, thororen
 - QuestionMarkReplacement by nyx
-- Quoter by Samwich
 - RepeatMessage by Tolgchu
 - ReplyPingControl by ant0n and MrDiamond
 - ScreenRecorder by AutumnVN
