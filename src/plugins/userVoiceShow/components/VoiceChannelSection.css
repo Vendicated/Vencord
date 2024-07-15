@@ -17,6 +17,10 @@
     margin-bottom: 0 !important;
 }
 
+.vc-uvs-popout-margin-self {
+    padding-right: 8px;
+}
+
 .vc-uvs-popout-margin-self>[class^="section"] {
     padding-top: 0;
     padding-bottom: 12px;
