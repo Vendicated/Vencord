@@ -38,3 +38,17 @@
 .theme-light .messagelogger-edited {
     opacity: 0.5;
 }
+
+.messagelogger-edit-marker {
+    cursor: pointer;
+}
+
+.vc-ml-modal-timestamp {
+    cursor: unset;
+    height: unset;
+}
+
+.vc-ml-modal-tab-bar {
+    flex-wrap: wrap;
+    gap: 16px;
+}
