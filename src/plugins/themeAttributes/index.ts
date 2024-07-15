@@ -6,9 +6,11 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { UserStore } from "@webpack/common";
+import { findStoreLazy } from "@webpack";
+import { UserStore, useStateFromStores } from "@webpack/common";
 import { Message } from "discord-types/general";
 
+const StreamerModeStore = findStoreLazy("StreamerModeStore");
 
 export default definePlugin({
     name: "ThemeAttributes",
@@ -51,6 +53,13 @@ export default definePlugin({
                 match: /src:(\i),"aria-hidden":!0/,
                 replace: "$&,style:$self.getAvatarStyles($1)"
             }
+        },
+        {
+            find: '"; --devtools-sidebar-width: "',
+            replacement: {
+                match: /overlay:__OVERLAY__/,
+                replace: "$&,...$self.rootClassNames()"
+            }
         }
     ],
 
@@ -71,5 +80,9 @@ export default definePlugin({
             "data-author-username": author?.username,
             "data-is-self": authorId && authorId === UserStore.getCurrentUser()?.id,
         };
-    }
+    },
+
+    rootClassNames: () => ({
+        "streamer-mode": useStateFromStores([StreamerModeStore], () => StreamerModeStore.enabled),
+    })
 });
