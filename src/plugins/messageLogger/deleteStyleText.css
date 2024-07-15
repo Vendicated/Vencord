@@ -1,5 +1,6 @@
-/* Message content highlighting */
-.messagelogger-deleted [class*="contents"] > :is(div, h1, h2, h3, p) {
+/* Message content and mention highlighting */
+.messagelogger-deleted [class*="contents"] > :is(div, h1, h2, h3, p),
+.messagelogger-deleted .mention {
     color: var(--status-danger, #f04747) !important;
 }
 
