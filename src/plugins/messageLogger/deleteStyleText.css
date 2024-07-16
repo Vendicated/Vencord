@@ -4,6 +4,12 @@
     color: var(--status-danger, #f04747) !important;
 }
 
+/* Code highlighting */
+.messagelogger-deleted [class*="codeContainer"] code,
+.messagelogger-deleted [class*="codeContainer"] span {
+  color: var(--status-danger, #f04747) !important;
+}
+
 /* Markdown title highlighting */
 .messagelogger-deleted [class*="contents"] :is(h1, h2, h3) {
     color: var(--status-danger, #f04747) !important;
