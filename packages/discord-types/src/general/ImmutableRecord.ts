@@ -4,12 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { StringProperties } from "../internal";
+
 // Original name: Record
 // Renamed to avoid name conflicts with TypeScripts's Record utility type.
 export declare class ImmutableRecord<
     OwnProperties extends Record<PropertyKey, unknown> = Record<PropertyKey, unknown>
 > {
-    merge(collection: Partial<OwnProperties>): this;
+    merge(collection: Partial<StringProperties<OwnProperties>>): this;
     set<Key extends keyof OwnProperties>(key: Key, value: OwnProperties[Key]): this;
     toJS(): OwnProperties;
     update<Key extends keyof OwnProperties>(

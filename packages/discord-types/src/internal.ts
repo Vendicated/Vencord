@@ -53,3 +53,6 @@ export type Stringable
     = { [Symbol.toPrimitive]: (hint: "default" | "string") => StringablePrimitive; }
     | ({ toString: () => StringablePrimitive; } | { valueOf: () => StringablePrimitive; })
     & { [Symbol.toPrimitive]?: Nullish; };
+
+/** @internal */
+export type StringProperties<T> = { [Key in Exclude<keyof T, symbol>]: T[Key]; };

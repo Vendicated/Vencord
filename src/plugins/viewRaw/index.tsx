@@ -30,6 +30,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import type { MessageRecord } from "@vencord/discord-types";
 import { Button, ChannelStore, Forms, i18n, Menu, Text } from "@webpack/common";
 import type { MouseEvent } from "react";
+import type { Jsonify } from "type-fest";
 
 const CopyIcon = () => (
     <svg
@@ -47,18 +48,20 @@ const sortObject = <T extends object>(obj: T): T =>
     Object.fromEntries(Object.entries(obj).sort(([k1], [k2]) => k1.localeCompare(k2))) as T;
 
 function cleanMessage(message: MessageRecord) {
-    const clone = sortObject(JSON.parse(JSON.stringify(message)));
-    for (const key of [
-        "email",
-        "phone",
-        "mfaEnabled",
-        "personalConnectionId"
-    ]) delete clone.author[key];
+    const clone = sortObject<Jsonify<MessageRecord>>(JSON.parse(JSON.stringify(message)));
+
+    const { author } = clone;
+    author.email = null;
+    author.mfaEnabled = false;
+    author.personalConnectionId = null;
+    author.phone = null;
 
     // message logger added properties
-    delete clone.editHistory;
-    delete clone.deleted;
-    clone.attachments?.forEach((a: any) => { delete a.deleted; });
+    delete (clone as any).editHistory;
+    delete (clone as any).deleted;
+    delete (clone as any).firstEditTimestamp;
+    for (const a of clone.attachments)
+        delete (a as any).deleted;
 
     return clone;
 }
@@ -103,8 +106,8 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
 }
 
 function openViewRawModalMessage(message: MessageRecord) {
-    message = cleanMessage(message);
-    const messageJSON = JSON.stringify(message, null, 4);
+    const cleanedMessage = cleanMessage(message);
+    const messageJSON = JSON.stringify(cleanedMessage, null, 4);
 
     openViewRawModal(messageJSON, "Message", message.content);
 }
