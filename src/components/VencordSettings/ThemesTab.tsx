@@ -295,7 +295,6 @@ function ThemesTab() {
     }
 
     function renderOnlineThemes() {
-        console.log(ThemeStore);
         return (
             <>
                 <Card className="vc-settings-card vc-text-selectable">
