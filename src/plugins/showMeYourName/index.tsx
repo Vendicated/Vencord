@@ -10,6 +10,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 interface UsernameProps {
@@ -40,12 +41,17 @@ const settings = definePluginSettings({
         default: false,
         description: "Also apply functionality to reply previews",
     },
+    ignoreSelf: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Whether to display your username in messages",
+    },
 });
 
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display usernames next to nicks, or no nicks at all",
-    authors: [Devs.Rini, Devs.TheKodeToad],
+    authors: [Devs.Rini, Devs.TheKodeToad, Devs.Scab],
     patches: [
         {
             find: '?"@":"")',
@@ -61,20 +67,39 @@ export default definePlugin({
         try {
             const user = userOverride ?? message.author;
             let { username } = user;
-            if (settings.store.displayNames)
+
+            const currentUser = UserStore.getCurrentUser()?.id;
+
+            if (settings.store.displayNames) {
                 username = (user as any).globalName || username;
+            }
 
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
 
-            if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
+            if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase()) {
                 return <>{prefix}{nick}</>;
+            }
 
-            if (settings.store.mode === "user-nick")
+            if (settings.store.ignoreSelf && user.id === currentUser) {
+                if (settings.store.displayNames && (user as any).globalName) {
+                    return <>{prefix}{(user as any).globalName}</>;
+                } else {
+                    return <>{prefix}{nick}</>;
+                }
+            }
+
+            if (settings.store.mode === "user-nick") {
                 return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
+            }
 
-            if (settings.store.mode === "nick-user")
+            if (settings.store.mode === "nick-user") {
                 return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
+            }
+
+            if (settings.store.mode === "user") {
+                return <>{prefix}{username}</>;
+            }
 
             return <>{prefix}{username}</>;
         } catch {
