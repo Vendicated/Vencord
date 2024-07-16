@@ -16,16 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { Settings } from "@api/Settings";
-import { enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildStore, PresenceStore, RelationshipStore, Tooltip } from "@webpack/common";
-
-import style from "./styles.css?managed";
 
 const enum IndicatorType {
     SERVER = 1 << 0,
@@ -128,15 +127,19 @@ export default definePlugin({
 
     renderIndicator: () => {
         const { mode } = Settings.plugins.ServerListIndicators;
-        let text;
-
-        if (!!(mode & IndicatorType.FRIEND) && !!(mode & IndicatorType.SERVER)) {
-            text = `${onlineFriends} Friends, ${guildCount} Servers`;
-        } else if (!!(mode & IndicatorType.FRIEND)) {
-            text = `${onlineFriends} Friends`;
-        } else if (!!(mode & IndicatorType.SERVER)) {
-            text = `${guildCount} Servers`;
+        let text: string = `${onlineFriends} Friends, ${guildCount} Servers`;
+        switch (mode) {
+            case (!!(mode & IndicatorType.FRIEND)):
+                text = `${onlineFriends} Friends`;
+                break;
+            case (!!(mode & IndicatorType.SERVER)):
+                text = `${guildCount} Servers`;
+                break;
+            case (!!(mode & IndicatorType.FRIEND)) && (!!(mode & IndicatorType.SERVER)):
+                text = `${onlineFriends} Friends, ${guildCount} Servers`;
+                break;
         }
+
         return <ErrorBoundary noop>
             <div id="vc-indicators-container">
                 <Tooltip text={text} position="right">
@@ -163,7 +166,6 @@ export default definePlugin({
 
     start() {
         addServerListElement(ServerListRenderPosition.Above, this.renderIndicator);
-        enableStyle(style);
         handlePresenceUpdate();
         handleGuildUpdate();
     },

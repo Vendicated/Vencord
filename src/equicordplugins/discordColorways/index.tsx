@@ -250,7 +250,7 @@ export default definePlugin({
 
         customSettingsSections.push(ColorwaysSelector, ColorwaysSettings, ColorwaysSourceManager, ColorwaysOnDemand, ColorwaysStore);
 
-        addServerListElement(ServerListRenderPosition.In, this.ColorwaysButton);
+        addServerListElement(ServerListRenderPosition.Above, this.ColorwaysButton);
 
         enableStyle(style);
         ColorwayCSS.set((await DataStore.get("activeColorwayObject") as ColorwayObject).css || "");
