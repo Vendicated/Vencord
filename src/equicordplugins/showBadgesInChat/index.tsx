@@ -6,7 +6,7 @@
 
 import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import { Devs, EquicordDevs } from "@utils/constants";
-import { isEquicordPluginDev, isEquicordTeamDev, isPluginDev, isSuncordPluginDev } from "@utils/misc";
+import { isEquicordPluginDev, isPluginDev, isSuncordPluginDev } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import badges from "plugins/_api/badges";
@@ -57,17 +57,6 @@ function CheckBadge({ badge, author }: { badge: string; author: User; }): JSX.El
                         name="Equicord Contributor"
                         size={20}
                         src={"https://i.imgur.com/rJDRtUB.png"}
-                    />
-                </span>
-            ) : null;
-        case "EquicordTeam":
-            return isEquicordTeamDev(author.id) ? (
-                <span style={{ order: settings.store.EquicordTeamPosition }}>
-                    <RoleIconComponent
-                        className={roleIconClassName}
-                        name="Equicord Team"
-                        size={20}
-                        src={"https://i.imgur.com/2ydSGVq.png"}
                     />
                 </span>
             ) : null;
