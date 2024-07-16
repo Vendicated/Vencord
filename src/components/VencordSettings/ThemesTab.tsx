@@ -82,7 +82,6 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
             <div>
                 {themeLinks.map(link => {
                     const themeToggleMatch = /^@(light|dark) (.*)/.exec(link);
-
                     const label = themeToggleMatch === null ? link : `[${themeToggleMatch[1]} mode only] ${themeToggleMatch[2]}`;
 
                     return <Card style={{
