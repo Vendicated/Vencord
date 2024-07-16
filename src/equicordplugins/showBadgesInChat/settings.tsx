@@ -23,7 +23,7 @@ const settings = definePluginSettings({
     },
     showEquicordContributor: {
         type: OptionType.BOOLEAN,
-        description: "Enable to show Equicord Contributor badges in chat.",
+        description: "Enable to show Equicord Contributor badge in chat.",
         hidden: true,
         default: true
     },
@@ -32,6 +32,18 @@ const settings = definePluginSettings({
         description: "The position of the Equicord Contributor badge.",
         hidden: true,
         default: 1
+    },
+    showEquicordTeam: {
+        type: OptionType.BOOLEAN,
+        description: "Enable to show Equicord Team badge in chat.",
+        hidden: true,
+        default: true
+    },
+    EquicordTeamPosition: {
+        type: OptionType.NUMBER,
+        description: "The position of the Equicord Team badge.",
+        hidden: true,
+        default: 2
     },
     showSuncordDonor: {
         type: OptionType.BOOLEAN,
@@ -43,11 +55,11 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Suncord Donor badges.",
         hidden: true,
-        default: 2
+        default: 3
     },
     showSuncordContributor: {
         type: OptionType.BOOLEAN,
-        description: "Enable to show Suncord Contributor badges in chat.",
+        description: "Enable to show Suncord Contributor badge in chat.",
         hidden: true,
         default: true
     },
@@ -55,7 +67,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Suncord Contributor badge.",
         hidden: true,
-        default: 3
+        default: 4
     },
     showVencordDonor: {
         type: OptionType.BOOLEAN,
@@ -67,11 +79,11 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Vencord Donor badges.",
         hidden: true,
-        default: 4
+        default: 5
     },
     showVencordContributor: {
         type: OptionType.BOOLEAN,
-        description: "Enable to show Vencord contributor badges in chat.",
+        description: "Enable to show Vencord contributor badge in chat.",
         hidden: true,
         default: true
     },
@@ -79,7 +91,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Vencord Contributor badge.",
         hidden: true,
-        default: 5
+        default: 6
     },
     showDiscordProfile: {
         type: OptionType.BOOLEAN,
@@ -91,7 +103,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Discord profile badges.",
         hidden: true,
-        default: 6
+        default: 7
     },
     showDiscordNitro: {
         type: OptionType.BOOLEAN,
@@ -103,7 +115,7 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "The position of the Discord Nitro badge.",
         hidden: true,
-        default: 7
+        default: 8
     },
     badgeSettings: {
         type: OptionType.COMPONENT,
@@ -118,6 +130,7 @@ const BadgeSettings = () => {
     const [images, setImages] = useState([
         { src: "https://i.imgur.com/KsxHlbD.png", shown: settings.store.showEquicordDonor, title: "Equicord donor badges", key: "EquicordDonor", position: settings.store.EquicordDonorPosition },
         { src: "https://i.imgur.com/rJDRtUB.png", shown: settings.store.showEquicordContributor, title: "Equicord contributor badge", key: "EquicordContributer", position: settings.store.EquicordContributorPosition },
+        { src: "https://i.imgur.com/2ydSGVq.png", shown: settings.store.showEquicordTeam, title: "Equicord contributor badge", key: "EquicordContributer", position: settings.store.EquicordTeamPosition },
         { src: "https://i.imgur.com/H3GPhpd.png", shown: settings.store.showSuncordDonor, title: "Suncord donor badges", key: "SuncordDonor", position: settings.store.SuncordDonorPosition },
         { src: "https://raw.githubusercontent.com/verticalsync/Suncord/main/src/assets/icon.png", shown: settings.store.showSuncordContributor, title: "Suncord contributor badge", key: "SuncordContributer", position: settings.store.SuncordContributorPosition },
         { src: "https://cdn.discordapp.com/emojis/1026533070955872337.png", shown: settings.store.showVencordDonor, title: "Vencord donor badges", key: "VencordDonor", position: settings.store.VencordDonorPosition },
