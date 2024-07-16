@@ -56,7 +56,7 @@ const preprocessors: { [preprocessor: string]: (text: string, vars: Record<strin
 
 export async function compileUsercss(fileName: string) {
     const themeData = await VencordNative.themes.getThemeData(fileName);
-    
+
     if (!themeData) return null;
 
     // UserCSS preprocessor order look like this:

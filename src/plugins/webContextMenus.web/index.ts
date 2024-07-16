@@ -73,7 +73,7 @@ export default definePlugin({
     description: "Re-adds context menus missing in the web version of Discord: Links & Images (Copy/Open Link/Image), Text Area (Copy, Cut, Paste, SpellCheck)",
     authors: [Devs.Ven],
     enabledByDefault: true,
-    required: IS_VESKTOP,
+    required: IS_VESKTOP || IS_EQUIBOP,
 
     settings,
 
@@ -223,11 +223,10 @@ export default definePlugin({
         // Automod add filter words
         {
             find: '("interactionUsernameProfile',
-            replacement:
-                {
-                    match: /\i\.isPlatformEmbedded(?=.{0,50}\.tagName)/,
-                    replace: "true"
-                },
+            replacement: {
+                match: /\i\.isPlatformEmbedded(?=.{0,50}\.tagName)/,
+                replace: "true"
+            },
         }
     ],
 
@@ -251,7 +250,7 @@ export default definePlugin({
             });
         }
 
-        if (IS_VESKTOP && VesktopNative.clipboard) {
+        if (IS_VESKTOP && VesktopNative.clipboard || IS_EQUIBOP && VesktopNative.clipboard) {
             VesktopNative.clipboard.copyImage(await imageData.arrayBuffer(), url);
             return;
         } else {

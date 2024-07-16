@@ -113,7 +113,8 @@ await Promise.all([
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: true,
-            IS_VESKTOP: false
+            IS_VESKTOP: false,
+            IS_EQUIBOP: false
         },
         plugins: [
             ...nodeCommonOpts.plugins,
@@ -136,7 +137,8 @@ await Promise.all([
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: true,
-            IS_VESKTOP: false
+            IS_VESKTOP: false,
+            IS_EQUIBOP: false
         }
     }),
     esbuild.build({
@@ -148,7 +150,8 @@ await Promise.all([
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: true,
-            IS_VESKTOP: false
+            IS_VESKTOP: false,
+            IS_EQUIBOP: false
         }
     }),
 
@@ -162,7 +165,8 @@ await Promise.all([
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true
+            IS_VESKTOP: true,
+            IS_EQUIBOP: true
         },
         plugins: [
             ...nodeCommonOpts.plugins,
@@ -185,7 +189,8 @@ await Promise.all([
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true
+            IS_VESKTOP: true,
+            IS_EQUIBOP: true
         }
     }),
     esbuild.build({
@@ -197,7 +202,8 @@ await Promise.all([
         define: {
             ...defines,
             IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true
+            IS_VESKTOP: true,
+            IS_EQUIBOP: true
         }
     }),
 ]).catch(err => {
