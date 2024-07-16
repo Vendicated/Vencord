@@ -34,19 +34,6 @@ interface GroupData {
     name: string;
 }
 
-const constants = {
-    pluginLabel: "IRememberYou",
-    pluginId: "iremeberyou",
-
-    DM: "dm",
-    DataUIDescription:
-        "Provides a list of users you have mentioned or replied to, or those who own the servers you belong to (owner*), or are members of your guild",
-    marks: {
-        Owner: "owner"
-    }
-};
-
-
 class Data {
     declare usersCollection: Record<string, GroupData>;
     declare _storageAutoSaveProtocol_interval;
@@ -103,9 +90,9 @@ class Data {
                 continue;
             }
 
-            const groupKey = source?.id ?? constants.DM;
+            const groupKey = source?.id ?? "dm";
             const group = (target[groupKey] ||= {
-                name: source?.name || constants.DM,
+                name: source?.name || "dm",
                 id: source?.id || user.id,
                 users: {}
             });
@@ -202,7 +189,7 @@ class DataUI {
     }
 
     renderSectionDescription() {
-        return <Text>{constants.DataUIDescription}</Text>;
+        return <Text>{"Provides a list of users you have mentioned or replied to, or those who own the servers you belong to (owner*), or are members of your guild"}</Text>;
     }
 
     renderUsersCollectionAsRows(usersCollection: Data["usersCollection"]) {
@@ -255,7 +242,7 @@ class DataUI {
                     {this.renderUserAvatar(user)}
                     <Tooltip text={this.userTooltipText(user)}>
                         {props =>
-                            <Text {...props} selectable>{user.tag} {allowExtra.owner && user.extra?.isOwner && `(${constants.marks.Owner})`}</Text>
+                            <Text {...props} selectable>{user.tag} {allowExtra.owner && user.extra?.isOwner && "(owner)"}</Text>
                         }
                     </Tooltip>
                 </Flex>
@@ -341,7 +328,7 @@ class DataUI {
           */
             <main style={{ color: "#ffffff", paddingBottom: "4em" }}>
                 <Text tag="h1" variant="heading-lg/bold">
-                    {constants.pluginLabel}{" "}
+                    {"IRememberYou"}{" "}
                     <Heart />
                 </Text>
 
@@ -360,9 +347,8 @@ class DataUI {
 }
 
 export default definePlugin({
-    name: constants.pluginLabel,
-    description:
-        "Locally saves everyone you've been communicating with (including servers), in case of lose",
+    name: "IRememberYou",
+    description: "Locally saves everyone you've been communicating with (including servers), in case of lose",
     authors: [EquicordDevs.zoodogood],
     dependencies: ["MessageEventsAPI"],
 
@@ -382,8 +368,8 @@ export default definePlugin({
 
         // @ts-ignore
         Vencord.Plugins.plugins.Settings.customSections.push(ID => ({
-            section: `${constants.pluginId}.display-data`,
-            label: constants.pluginLabel,
+            section: "iremeberyou.display-data",
+            label: "IRememberYou",
             element: () => ui.toElement(data.usersCollection),
         }));
     },
