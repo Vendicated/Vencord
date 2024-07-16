@@ -22,7 +22,7 @@
     "dependencies": {
         "@types/events": "~3.0.3",
         "@types/intl-messageformat": "~1.3.1",
-        "@types/lodash": "~4.17.6",
+        "@types/lodash": "~4.17.7",
         "@types/react": "~18.2.79",
         "dependency-graph": "0.9.0",
         "moment": "2.22.2",
@@ -33,7 +33,7 @@
         "@stylistic/eslint-plugin": "^2.3.0",
         "@types/node": "^20.14.10",
         "@types/semver": "^7.5.8",
-        "@typescript-eslint/typescript-estree": "^8.0.0-alpha.42",
+        "@typescript-eslint/typescript-estree": "^8.0.0-alpha.44",
         "eslint": "^9.7.0",
         "eslint-plugin-check-file": "^2.8.0",
         "eslint-plugin-headers": "^1.1.2",
@@ -45,6 +45,6 @@
         "semver": "^7.6.2",
         "tsx": "^4.16.2",
         "typescript": "^5.5.3",
-        "typescript-eslint": "^8.0.0-alpha.42"
+        "typescript-eslint": "^8.0.0-alpha.44"
     }
 }

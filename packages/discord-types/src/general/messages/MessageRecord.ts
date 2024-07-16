@@ -41,6 +41,7 @@ export declare class MessageRecord<
     hasFlag(flag: MessageFlags): boolean;
     isCommandType(): boolean;
     isEdited(): boolean;
+    isEmptyInteractionMessage(): boolean;
     isFirstMessageInForumPost(channel: ChannelRecord): boolean;
     isInteractionPlaceholder(): boolean;
     isPoll(): boolean;
