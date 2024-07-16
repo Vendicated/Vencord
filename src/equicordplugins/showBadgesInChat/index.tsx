@@ -147,7 +147,7 @@ function CheckBadge({ badge, author }: { badge: string; author: User; }): JSX.El
 function ChatBadges({ author }: { author: User; }) {
 
     return (
-        <span className="vc-sbic-badge-row">
+        <span className="vc-sbic-badge-row" style={{ margin: "2px" }}>
             {settings.store.showEquicordDonor && <CheckBadge badge={"EquicordDonor"} author={author} />}
             {settings.store.showEquicordContributor && <CheckBadge badge={"EquicordContributer"} author={author} />}
             {settings.store.showSuncordDonor && <CheckBadge badge={"SuncordDonor"} author={author} />}
