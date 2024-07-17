@@ -29,17 +29,17 @@ export declare class DisplayProfile<
     }): string | undefined;
     getLegacyUsername(): UserProfile<FetchFailed>["legacyUsername"];
     getPreviewBanner(
-        previewBanner?: string | Nullish,
+        pendingBanner?: string | Nullish,
         canAnimate?: boolean | undefined,
         size?: number | undefined /* = 480 */
     ): string | Nullish;
-    getPreviewBio(previewBio?: string | Nullish): (true extends Guild ? boolean : false) extends infer GuildValue
+    getPreviewBio(pendingBio?: string | Nullish): (true extends Guild ? boolean : false) extends infer GuildValue
         ? GuildValue extends true
             ? { isUsingGuildValue: true; value: string; }
             : { isUsingGuildValue: false; value: string | undefined; }
         : never;
     getPreviewThemeColors(
-        previewThemeColors?: OptionalTuple<ProfileThemeColors, Nullish> | Nullish
+        pendingThemeColors?: OptionalTuple<ProfileThemeColors, Nullish> | Nullish
     ): UserProfile["themeColors"];
     hasFullProfile(): boolean;
     hasPremiumCustomization(): boolean;
