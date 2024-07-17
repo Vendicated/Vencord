@@ -159,7 +159,7 @@ function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], id
     }
 
     if (existingFactory != null) {
-        // If existingFactory exists in any Webpack instance, its either wrapped in defineModuleFactoryGetter, or it has already been required.
+        // If existingFactory exists in any Webpack instance, it's either wrapped in defineModuleFactoryGetter, or it has already been required.
         // So define the descriptor of it on this current Webpack instance, call Reflect.set with the new original,
         // and let the correct logic apply (normal set, or defineModuleFactoryGetter setter)
 

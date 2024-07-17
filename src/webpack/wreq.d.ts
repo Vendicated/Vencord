@@ -140,7 +140,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
      * Internally it uses the handlers in {@link WebpackRequire.f} to load/ensure the chunk is loaded.
      */
     e: (this: WebpackRequire, chunkId: PropertyKey) => Promise<void[]>;
-    /** Get the filename name for the css part of a chunk */
+    /** Get the filename for the css part of a chunk */
     k: (this: WebpackRequire, chunkId: PropertyKey) => string;
     /** Get the filename for the js part of a chunk */
     u: (this: WebpackRequire, chunkId: PropertyKey) => string;
