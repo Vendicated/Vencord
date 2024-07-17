@@ -12,7 +12,7 @@
 }
 
 /* Spoiler highlighting */
-.messagelogger-deleted  [class*=spoilerContent]:not(:has([aria-hidden="false"])) {
+.messagelogger-deleted [class*=spoilerContent]:not(:has([aria-hidden="false"])) {
   background-color: var(--status-danger, #f04747) !important;
 }
 
