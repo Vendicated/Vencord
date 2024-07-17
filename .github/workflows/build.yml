@@ -12,6 +12,7 @@ on:
       - pnpm-lock.yaml
 env:
   FORCE_COLOR: true
+  GITHUB_TOKEN: ${{ secrets.ETOKEN }}
 
 jobs:
   DetermineRunner:
@@ -28,8 +29,6 @@ jobs:
           fallback-runner: "ubuntu-latest"
           min-available-runners: 1
           github-token: ${{ env.GITHUB_TOKEN }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.ETOKEN }}
 
   Build:
     name: Build Equicord
@@ -67,5 +66,3 @@ jobs:
         if: github.repository == 'Equicord/Equicord'
         run: |
           gh release upload latest --clobber dist/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.ETOKEN }}
