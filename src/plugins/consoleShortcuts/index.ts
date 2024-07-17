@@ -162,16 +162,32 @@ function loadAndCacheShortcut(key: string, val: any, forceLoad: boolean) {
     const currentVal = val.getter();
     if (!currentVal || val.preload === false) return currentVal;
 
-    let value: any;
-    if (currentVal[SYM_LAZY_GET]) {
-        value = forceLoad ? currentVal[SYM_LAZY_GET]() : currentVal[SYM_LAZY_CACHED];
-    } else if (currentVal[SYM_PROXY_INNER_GET]) {
-        value = forceLoad ? currentVal[SYM_PROXY_INNER_GET]() : currentVal[SYM_PROXY_INNER_VALUE];
-    } else {
-        value = currentVal;
+    function unwrapProxy(value: any) {
+        if (value[SYM_LAZY_GET]) {
+            return forceLoad ? value[SYM_LAZY_GET]() : value[SYM_LAZY_CACHED];
+        } else if (value[SYM_PROXY_INNER_GET]) {
+            return forceLoad ? value[SYM_PROXY_INNER_GET]() : value[SYM_PROXY_INNER_VALUE];
+        }
+
+        return value;
     }
 
-    if (value) define(window.shortcutList, key, { value });
+    const value = unwrapProxy(currentVal);
+    if (typeof value === "object") {
+        const descriptors = Object.getOwnPropertyDescriptors(value);
+
+        for (const propKey in descriptors) {
+            const descriptor = descriptors[propKey];
+
+            if (descriptor.writable === true || descriptor.set != null) {
+                value[propKey] = unwrapProxy(value[propKey]);
+            }
+        }
+    }
+
+    if (value) {
+        define(window.shortcutList, key, { value });
+    }
 
     return value;
 }

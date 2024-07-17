@@ -432,6 +432,8 @@ export function findByFactoryCode<T = any>(...code: CodeFilter | [...CodeFilter,
  * Find the module exports of the first module which the factory includes all the given code,
  * then map them into an easily usable object via the specified mappers.
  *
+ * IMPORTANT: You can destructure the properties of the returned object at top level as long as the property filter does not return a primitive value export.
+ *
  * @example
  * const Modals = mapMangledModule("headerIdIsManaged:", {
  *     openModal: filters.byCode("headerIdIsManaged:"),
@@ -450,7 +452,7 @@ export function mapMangledModule<S extends PropertyKey>(code: string | RegExp | 
         // Wrapper to select whether the parent factory filter or child mapper filter failed when the error is thrown
         const errorMsgWrapper = lazyString(() => `Webpack mapMangledModule ${callbackCalled ? "mapper" : "factory"} filter matched no module. Filter: ${printFilter(callbackCalled ? mappers[newName] : factoryFilter)}`);
 
-        const [proxy, setInnerValue] = proxyInner(errorMsgWrapper, "Webpack find with proxy called on a primitive value.");
+        const [proxy, setInnerValue] = proxyInner(errorMsgWrapper, "Webpack find with proxy called on a primitive value. This may happen if you are trying to destructure a mapMangledModule primitive value on top level.");
         mapping[newName] = proxy;
         setters[newName] = setInnerValue;
     }
@@ -469,6 +471,10 @@ export function mapMangledModule<S extends PropertyKey>(code: string | RegExp | 
                 const filter = mappers[newName];
 
                 if (filter(exportValue)) {
+                    if (typeof exportValue !== "object" && typeof exportValue !== "function") {
+                        mapping[newName] = exportValue;
+                    }
+
                     setters[newName](exportValue);
                 }
             }
