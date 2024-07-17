@@ -28,7 +28,7 @@ const UploadAttachmentStore: FluxStore & Record<string, any> = findStoreLazy("Up
 
 const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.CHANNEL_MESSAGE);
 
-const getImageBox = (url: string): Promise<{ width: number, height: number; } | null> =>
+const getImageBox = (url: string): Promise<{ width: number; height: number; } | null> =>
     new Promise(res => {
         const img = new Image();
         img.onload = () => {

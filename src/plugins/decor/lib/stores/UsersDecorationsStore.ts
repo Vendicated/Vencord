@@ -31,7 +31,7 @@ interface UsersDecorationsState {
 
 export const useUsersDecorationsStore: {
     (): UsersDecorationsState;
-    getState: () => UsersDecorationsState
+    getState: () => UsersDecorationsState;
     subscribe: (handler: (state: UsersDecorationsState) => void) => () => void;
 } = proxyLazy(() => zustandCreate((set: any, get: any): UsersDecorationsState => ({
     usersDecorations: new Map<string, UserDecorationData>(),

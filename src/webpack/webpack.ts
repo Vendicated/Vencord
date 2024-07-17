@@ -603,7 +603,7 @@ export function waitFor(filter: string | PropsFilter | FilterFn, callback: Callb
     else if (typeof filter !== "function")
         throw new Error("filter must be a string, string[] or function, got " + typeof filter);
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+
     if (cache != null) {
         const [existing, id] = find(filter, { isIndirect: true, isWaitFor: true });
         if (existing) {

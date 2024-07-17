@@ -28,7 +28,7 @@ export interface Language {
     name: string;
     id: string;
     devicon?: string;
-    grammarUrl: string,
+    grammarUrl: string;
     grammar?: ILanguageRegistration["grammar"];
     scopeName: string;
     aliases?: string[];

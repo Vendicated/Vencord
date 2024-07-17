@@ -303,7 +303,7 @@ export default definePlugin({
         return true;
     },
 
-    renderToggleGameActivityButton: (props: { id?: string; name: string, exePath: string; }, nowPlaying: boolean) => (
+    renderToggleGameActivityButton: (props: { id?: string; name: string; exePath: string; }, nowPlaying: boolean) => (
         <ErrorBoundary noop>
             <div style={{ marginLeft: 12, zIndex: 0 }}>
                 {ToggleActivityComponent({ id: props.id ?? props.exePath, name: props.name, type: ActivitiesTypes.Game }, nowPlaying)}

@@ -70,7 +70,7 @@ function greet(channel: ChannelRecord, message: MessageRecord, stickers: string[
 }
 
 
-function GreetMenu({ channel, message }: { message: MessageRecord, channel: ChannelRecord; }) {
+function GreetMenu({ channel, message }: { message: MessageRecord; channel: ChannelRecord; }) {
     const s = settings.use(["greetMode", "multiGreetChoices"]);
     const { greetMode, multiGreetChoices = [] } = s;
 
@@ -172,7 +172,7 @@ export default definePlugin({
     pickSticker(
         event: UIEvent,
         props: {
-            channel: ChannelRecord,
+            channel: ChannelRecord;
             message: MessageRecord & { deleted?: boolean; };
         }
     ) {

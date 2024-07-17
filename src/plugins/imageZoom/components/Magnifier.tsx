@@ -25,13 +25,13 @@ import { settings } from "../index";
 import { waitFor } from "../utils/waitFor";
 
 interface Vec2 {
-    x: number,
+    x: number;
     y: number;
 }
 
 export interface MagnifierProps {
     zoom: number;
-    size: number,
+    size: number;
     instance: any;
 }
 

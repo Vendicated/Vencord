@@ -146,7 +146,7 @@ function updateStatuses(type: string, { deaf, mute, selfDeaf, selfMute, userId, 
 */
 
 function playSample(tempSettings: any, type: string) {
-    const settings = Object.assign({}, Settings.plugins.VcNarrator, tempSettings);
+    const settings = { ...Settings.plugins.VcNarrator, ...tempSettings };
     const me = UserStore.getCurrentUser()!;
     const currGuildId = SelectedGuildStore.getGuildId();
 

@@ -71,7 +71,7 @@ const Icons = {
 
 const StatusUtils = findByPropsLazy("useStatusFillColor", "StatusTypes");
 
-const PlatformIcon = ({ platform, status, small }: { platform: ClientType, status: StatusType; small: boolean; }) => {
+const PlatformIcon = ({ platform, status, small }: { platform: ClientType; status: StatusType; small: boolean; }) => {
     const tooltip = platform === ClientType.EMBEDDED
         ? "Console"
         : platform[0]!.toUpperCase() + platform.slice(1);

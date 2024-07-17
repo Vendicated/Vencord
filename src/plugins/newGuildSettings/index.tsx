@@ -78,7 +78,7 @@ const settings = definePluginSettings({
 });
 
 const makeContextMenuPatch = (shouldAddIcon: boolean) =>
-    ((children, { guild }: { guild?: GuildRecord, onClose: () => void; }) => {
+    ((children, { guild }: { guild?: GuildRecord; onClose: () => void; }) => {
         if (!guild) return;
 
         const group = findGroupChildrenByChildId("privacy", children);

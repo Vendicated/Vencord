@@ -419,7 +419,7 @@ export type Popout = ComponentType<{
 
 export type Dialog = ComponentType<JSX.IntrinsicElements["div"]>;
 
-type Resolve = (data: { theme: "light" | "dark", saturation: number; }) => {
+type Resolve = (data: { theme: "light" | "dark"; saturation: number; }) => {
     hex(): string;
     hsl(): string;
     int(): number;
@@ -445,7 +445,7 @@ export type MaskedLink = ComponentType<PropsWithChildren<{
     href: string;
     rel?: string;
     target?: string;
-    title?: string,
+    title?: string;
     className?: string;
     tabIndex?: number;
     onClick?(): void;

@@ -18,9 +18,9 @@ type Fill = [FillValue, FillValue, FillValue];
 type DiffKey = keyof Diff;
 
 interface Diff {
-    days: number,
-    hours: number,
-    minutes: number,
+    days: number;
+    hours: number;
+    minutes: number;
     seconds: number;
     milliseconds: number;
 }
@@ -172,7 +172,7 @@ export default definePlugin({
 
     Icon({ delta, fill, props }: {
         delta: string | null;
-        fill: Fill,
+        fill: Fill;
         props: {
             onClick: () => void;
             onMouseEnter: () => void;

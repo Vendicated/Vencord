@@ -42,7 +42,7 @@ const settings = definePluginSettings({
     }
 });
 
-export const buildSeveralUsers = ({ a, b, count }: { a: string, b: string, count: number; }) => [
+export const buildSeveralUsers = ({ a, b, count }: { a: string; b: string; count: number; }) => [
     <strong key="0">{a}</strong>,
     ", ",
     <strong key="1">{b}</strong>,

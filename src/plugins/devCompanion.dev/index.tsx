@@ -98,11 +98,12 @@ function initWs(isManual = false) {
 
         logger.info("Connected to WebSocket");
 
-        (settings.store.notifyOnAutoConnect || isManual) && showNotification({
-            title: "Dev Companion Connected",
-            body: "Connected to WebSocket",
-            noPersist: true
-        });
+        if (settings.store.notifyOnAutoConnect || isManual)
+            showNotification({
+                title: "Dev Companion Connected",
+                body: "Connected to WebSocket",
+                noPersist: true
+            });
     });
 
     ws.addEventListener("error", e => {

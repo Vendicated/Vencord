@@ -40,7 +40,7 @@ export const OnlineMemberCountStore = proxyLazy(() => {
     }
 
     return new OnlineMemberCountStore(FluxDispatcher, {
-        GUILD_MEMBER_LIST_UPDATE({ guildId, groups }: { guildId: string, groups: { count: number; id: string; }[]; }) {
+        GUILD_MEMBER_LIST_UPDATE({ guildId, groups }: { guildId: string; groups: { count: number; id: string; }[]; }) {
             onlineMemberMap.set(
                 guildId,
                 groups.reduce((total, curr) => total + (curr.id === StatusType.OFFLINE ? 0 : curr.count), 0)

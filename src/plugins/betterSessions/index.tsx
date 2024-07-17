@@ -107,7 +107,7 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    renderTimestamp: ErrorBoundary.wrap(({ session, timeLabel }: { session: Session, timeLabel: string; }) => (
+    renderTimestamp: ErrorBoundary.wrap(({ session, timeLabel }: { session: Session; timeLabel: string; }) => (
         <Tooltip
             text={session.approx_last_used_time.toLocaleString()}
             tooltipClassName={TimestampClasses.timestampTooltip}
@@ -120,7 +120,7 @@ export default definePlugin({
         </Tooltip>
     ), { noop: true }),
 
-    renderIcon: ErrorBoundary.wrap(({ session, DeviceIcon }: { session: Session, DeviceIcon: ComponentType<any>; }) => {
+    renderIcon: ErrorBoundary.wrap(({ session, DeviceIcon }: { session: Session; DeviceIcon: ComponentType<any>; }) => {
         const PlatformIcon = GetPlatformIcon(session.client_info.platform);
 
         return (

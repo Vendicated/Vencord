@@ -21,8 +21,8 @@ import type { Dispatch, SetStateAction } from "react";
 
 type Shiki = typeof import("../api/shiki").shiki;
 interface ThemeState {
-    id: Shiki["currentThemeUrl"],
-    theme: Shiki["currentTheme"],
+    id: Shiki["currentThemeUrl"];
+    theme: Shiki["currentTheme"];
 }
 
 const currentTheme: ThemeState = {

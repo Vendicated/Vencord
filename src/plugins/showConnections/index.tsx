@@ -95,7 +95,7 @@ const profilePanelComponent = ErrorBoundary.wrap(
     { noop: true }
 );
 
-function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: string, simplified?: boolean; }) {
+function ConnectionsComponent({ id, theme, simplified }: { id: string; theme: string; simplified?: boolean; }) {
     const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
@@ -131,7 +131,7 @@ function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: st
     );
 }
 
-function CompactConnectionComponent({ connection, theme }: { connection: ProfileConnectedAccountData, theme: string; }) {
+function CompactConnectionComponent({ connection, theme }: { connection: ProfileConnectedAccountData; theme: string; }) {
     const platform = Platforms.get(useLegacyPlatformType(connection.type));
     const url = platform.getPlatformUserUrl?.(connection);
 

@@ -44,7 +44,7 @@ function ReplyTimestamp({
     referencedMessage,
     baseMessage,
 }: {
-    referencedMessage: ReferencedMessage,
+    referencedMessage: ReferencedMessage;
     baseMessage: MessageRecord;
 }) {
     if (referencedMessage.state !== ReferencedMessageState.LOADED) return null;

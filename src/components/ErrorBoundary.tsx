@@ -30,7 +30,7 @@ interface Props<T = any> {
     /** Fallback component to render if an error occurs */
     fallback?: ComponentType<PropsWithChildren<{ error: any; message: string; stack: string; }>>;
     /** called when an error occurs. The props property is only available if using .wrap */
-    onError?(data: { error: Error, errorInfo: ErrorInfo, props: T; }): void;
+    onError?(data: { error: Error; errorInfo: ErrorInfo; props: T; }): void;
     /** Custom error message */
     message?: string;
 

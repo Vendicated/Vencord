@@ -153,7 +153,7 @@ async function doClone(guildId: string, data: Data) {
     } catch (e: any) {
         let message = "Something went wrong (check console!)";
         try {
-            message = JSON.parse(e.text).message;
+            ({ message } = JSON.parse(e.text));
         } catch { }
 
         new Logger("EmoteCloner").error("Failed to clone", data.name, "to", guildId, e);

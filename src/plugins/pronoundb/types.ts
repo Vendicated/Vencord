@@ -29,14 +29,14 @@ export interface PronounsResponse {
     [id: string]: {
         sets?: {
             [locale: string]: PronounCode[];
-        }
-    }
+        };
+    };
 }
 
 export interface CachePronouns {
     sets?: {
         [locale: string]: PronounCode[];
-    }
+    };
 }
 
 export type PronounCode = keyof typeof PronounMapping;

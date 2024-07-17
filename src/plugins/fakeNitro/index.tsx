@@ -426,8 +426,8 @@ export default definePlugin({
     },
 
     handleGradientThemeSelect(backgroundGradientPresetId: number | undefined, theme: number, original: () => void) {
-        const premiumType = UserStore.getCurrentUser()?.premiumType ?? 0;
-        if (premiumType === 2 || backgroundGradientPresetId == null) {
+        const premiumType = UserStore.getCurrentUser()?.premiumType;
+        if (premiumType === UserPremiumType.TIER_2 || backgroundGradientPresetId == null) {
             original();
             return;
         }
@@ -466,37 +466,41 @@ export default definePlugin({
     },
 
     trimContent(content: any[]) {
-        const firstContent = content[0];
+        const [firstContent] = content;
         if (typeof firstContent === "string") {
             content[0] = firstContent.trimStart();
-            content[0] || content.shift();
+            if (!content[0]) content.shift();
         } else if (typeof firstContent?.props?.children === "string") {
             firstContent.props.children = firstContent.props.children.trimStart();
-            firstContent.props.children || content.shift();
+            if (!firstContent.props.children) content.shift();
         }
 
         const lastIndex = content.length - 1;
         const lastContent = content[lastIndex];
         if (typeof lastContent === "string") {
             content[lastIndex] = lastContent.trimEnd();
-            content[lastIndex] || content.pop();
+            if (!content[lastIndex]) content.pop();
         } else if (typeof lastContent?.props?.children === "string") {
             lastContent.props.children = lastContent.props.children.trimEnd();
-            lastContent.props.children || content.pop();
+            if (!lastContent.props.children) content.pop();
         }
     },
 
-    clearEmptyArrayItems(array: any[]) {
+    clearEmptyArrayItems<T>(array: T[]) {
         return array.filter(item => item != null);
     },
 
     ensureChildrenIsArray(child: ReactElement) {
-        if (!Array.isArray(child.props.children)) child.props.children = [child.props.children];
+        if (!Array.isArray(child.props.children))
+            child.props.children = [child.props.children];
     },
 
     patchFakeNitroEmojisOrRemoveStickersLinks(content: any[], inline: boolean) {
         // If content has more than one child or it's a single ReactElement like a header, list or span
-        if ((content.length > 1 || typeof content[0]?.type === "string") && !settings.store.transformCompoundSentence) return content;
+        if (
+            (content.length > 1 || typeof content[0]?.type === "string")
+            && !settings.store.transformCompoundSentence
+        ) return content;
 
         let nextIndex = content.length;
 
@@ -509,7 +513,8 @@ export default definePlugin({
                         url = new URL(child.props.href);
                     } catch { }
 
-                    const emojiName = EmojiStore.getCustomEmojiById(fakeNitroMatch[1])?.name ?? url?.searchParams.get("name") ?? "FakeNitroEmoji";
+                    const emojiName = EmojiStore.getCustomEmojiById(fakeNitroMatch[1])?.name
+                        ?? url?.searchParams.get("name") ?? "FakeNitroEmoji";
 
                     return MarkupUtils.defaultRules.customEmoji!.react({
                         jumboable: !inline && content.length === 1 && typeof content[0].type !== "string",
@@ -603,10 +608,16 @@ export default definePlugin({
         if (settings.store.transformCompoundSentence) itemsToMaybePush.push(...contentItems);
         else if (contentItems.length === 1) itemsToMaybePush.push(contentItems[0]!);
 
-        itemsToMaybePush.push(...message.attachments.filter(attachment => attachment.content_type === "image/gif").map(attachment => attachment.url));
+        itemsToMaybePush.push(...message.attachments
+            .filter(attachment => attachment.content_type === "image/gif")
+            .map(attachment => attachment.url));
 
         for (const item of itemsToMaybePush) {
-            if (!settings.store.transformCompoundSentence && !item.startsWith("http") && !hyperLinkRegex.test(item)) continue;
+            if (
+                !settings.store.transformCompoundSentence
+                && !item.startsWith("http")
+                && !hyperLinkRegex.test(item)
+            ) continue;
 
             const imgMatch = item.match(fakeNitroStickerRegex);
             if (imgMatch) {
@@ -615,7 +626,8 @@ export default definePlugin({
                     url = new URL(item);
                 } catch { }
 
-                const stickerName = StickerStore.getStickerById(imgMatch[1]!)?.name ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
+                const stickerName = StickerStore.getStickerById(imgMatch[1]!)?.name
+                    ?? url?.searchParams.get("name") ?? "FakeNitroSticker";
                 stickers.push({
                     format_type: StickerFormat.PNG,
                     id: imgMatch[1],
@@ -693,19 +705,19 @@ export default definePlugin({
         return link.target && fakeNitroEmojiRegex.test(link.target);
     },
 
-    addFakeNotice(type: FakeNoticeType, node: ReactNode[], fake: boolean) {
+    addFakeNotice(type: FakeNoticeType, node: ReactNode, fake: boolean) {
         if (!fake) return node;
 
-        node = Array.isArray(node) ? node : [node];
+        const nodeArray: ReactNode[] = Array.isArray(node) ? node : [node];
 
         switch (type) {
             case FakeNoticeType.Sticker: {
-                node.push(" This is a FakeNitro sticker and renders like a real sticker only for you. Appears as a link to non-plugin users.");
+                nodeArray.push(" This is a FakeNitro sticker and renders like a real sticker only for you. Appears as a link to non-plugin users.");
 
                 return node;
             }
             case FakeNoticeType.Emoji: {
-                node.push(" This is a FakeNitro emoji and renders like a real emoji only for you. Appears as a link to non-plugin users.");
+                nodeArray.push(" This is a FakeNitro emoji and renders like a real emoji only for you. Appears as a link to non-plugin users.");
 
                 return node;
             }

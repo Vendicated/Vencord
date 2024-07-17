@@ -53,12 +53,12 @@ const ToastPosition = {
 };
 
 export interface ToastData {
-    message: string,
-    id: string,
+    message: string;
+    id: string;
     /**
      * Toasts.Type
      */
-    type: number,
+    type: number;
     options?: ToastOptions;
 }
 
@@ -67,7 +67,7 @@ export interface ToastOptions {
      * Toasts.Position
      */
     position?: number;
-    component?: ReactNode,
+    component?: ReactNode;
     duration?: number;
 }
 
@@ -102,7 +102,7 @@ export function showToast(message: string, type = ToastType.MESSAGE, options?: T
 }
 
 export let AlertActionCreators: t.AlertActionCreators;
-waitFor(["show", "close"], m => AlertActionCreators = m);
+waitFor(["show", "close"], m => { AlertActionCreators = m; });
 
 export const ApplicationAssetUtils: {
     fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
@@ -118,7 +118,7 @@ export const ClipboardUtils: t.ClipboardUtils = mapMangledModuleLazy('queryComma
 });
 
 export let ComponentDispatch: any;
-waitFor(["ComponentDispatch", "ComponentDispatcher"], m => ComponentDispatch = m.ComponentDispatch);
+waitFor(["ComponentDispatch", "ComponentDispatcher"], m => { ({ ComponentDispatch } = m); });
 
 export const Constants = findByPropsLazy("Endpoints");
 
@@ -149,7 +149,7 @@ export const InstantInviteActionCreators = findByPropsLazy("resolveInvite");
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
 export let MarkupUtils: t.MarkupUtils;
-waitFor("parseTopic", m => MarkupUtils = m);
+waitFor("parseTopic", m => { MarkupUtils = m; });
 
 export const MessageActionCreators = findByPropsLazy("editMessage", "sendMessage");
 
@@ -176,7 +176,7 @@ export const RouterUtils: t.RouterUtils = mapMangledModuleLazy("Transitioning to
 });
 
 export let SnowflakeUtils: t.SnowflakeUtils;
-waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
+waitFor(["fromTimestamp", "extractTimestamp"], m => { SnowflakeUtils = m; });
 
 export const UploadAttachmentActionCreators = findByPropsLazy("clearAll", "addFile");
 
@@ -187,7 +187,7 @@ export const UserActionCreators = {
 export const UserProfileModalActionCreators = findByPropsLazy("openUserProfileModal", "closeUserProfileModal");
 
 export let UserSettingsModalActionCreators: any;
-waitFor(["open", "saveAccountChanges"], m => UserSettingsModalActionCreators = m);
+waitFor(["open", "saveAccountChanges"], m => { UserSettingsModalActionCreators = m; });
 
 export const UserUtils: t.UserUtils = findByPropsLazy("useName", "getGlobalName");
 

@@ -18,9 +18,7 @@
 
 /* eslint-disable no-fallthrough */
 
-// eslint-disable-next-line spaced-comment
 /// <reference types="../src/globals.d.ts" />
-// eslint-disable-next-line spaced-comment
 /// <reference types="../src/modules.d.ts" />
 
 import { readFileSync } from "fs";

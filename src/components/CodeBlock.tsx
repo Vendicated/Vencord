@@ -12,7 +12,7 @@ const CodeContainerClasses: Record<string, string> = findByPropsLazy("markup", "
 /**
  * Renders code in a Discord codeblock
  */
-export const CodeBlock = (props: { content?: string, lang: string; }) => (
+export const CodeBlock = (props: { content?: string; lang: string; }) => (
     <div className={CodeContainerClasses.markup}>
         {MarkupUtils.defaultRules.codeBlock!.react(props, null, {})}
     </div>

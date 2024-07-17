@@ -36,14 +36,14 @@ export interface Stream extends ApplicationStream {
 }
 
 export interface RTCStream {
-    region: string,
-    streamKey: string,
+    region: string;
+    streamKey: string;
     viewerIds: string[];
 }
 
 export interface StreamMetadata {
-    id: string | null,
-    pid: number | null,
+    id: string | null;
+    pid: number | null;
     sourceName: string | null;
 }
 

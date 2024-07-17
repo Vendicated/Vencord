@@ -47,10 +47,10 @@ export interface Track {
 interface PlayerState {
     accountId: string;
     track: Track | null;
-    volumePercent?: number,
-    isPlaying?: boolean,
-    repeat: boolean,
-    position?: number,
+    volumePercent?: number;
+    isPlaying?: boolean;
+    repeat: boolean;
+    position?: number;
     context?: any;
     device?: Device;
 

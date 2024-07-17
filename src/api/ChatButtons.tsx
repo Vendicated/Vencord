@@ -14,7 +14,7 @@ import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/com
 import type { HTMLProps, JSX, MouseEventHandler, ReactNode } from "react";
 
 let ChannelTextAreaClasses: Record<"button" | "buttonContainer", string> | undefined;
-waitFor(["buttonContainer", "channelTextArea"], m => ChannelTextAreaClasses = m);
+waitFor(["buttonContainer", "channelTextArea"], m => { ChannelTextAreaClasses = m; });
 
 export interface ChatBarProps {
     channel: ChannelRecord;
@@ -24,52 +24,52 @@ export interface ChatBarProps {
         analyticsName: string;
         attachments: boolean;
         autocomplete: {
-            addReactionShortcut: boolean,
-            forceChatLayer: boolean,
+            addReactionShortcut: boolean;
+            forceChatLayer: boolean;
             reactions: boolean;
-        },
+        };
         commands: {
             enabled: boolean;
-        },
+        };
         drafts: {
-            type: number,
-            commandType: number,
+            type: number;
+            commandType: number;
             autoSave: boolean;
-        },
+        };
         emojis: {
             button: boolean;
-        },
+        };
         gifs: {
-            button: boolean,
+            button: boolean;
             allowSending: boolean;
-        },
+        };
         gifts: {
             button: boolean;
-        },
+        };
         permissions: {
             requireSendMessages: boolean;
-        },
-        showThreadPromptOnReply: boolean,
+        };
+        showThreadPromptOnReply: boolean;
         stickers: {
-            button: boolean,
-            allowSending: boolean,
+            button: boolean;
+            allowSending: boolean;
             autoSuggest: boolean;
-        },
+        };
         users: {
             allowMentioning: boolean;
-        },
+        };
         submit: {
-            button: boolean,
-            ignorePreference: boolean,
-            disableEnterToSubmit: boolean,
-            clearOnSubmit: boolean,
+            button: boolean;
+            ignorePreference: boolean;
+            disableEnterToSubmit: boolean;
+            clearOnSubmit: boolean;
             useDisabledStylesOnSubmit: boolean;
-        },
-        uploadLongMessages: boolean,
+        };
+        uploadLongMessages: boolean;
         upsellLongMessages: {
             iconOnly: boolean;
-        },
-        showCharacterCount: boolean,
+        };
+        showCharacterCount: boolean;
         sedReplace: boolean;
     };
 }

@@ -55,49 +55,49 @@ export const useStateFromStoresObject: Stores.UseStateFromStoresObjectHook = pro
 });
 
 export let ChannelStore: Stores.ChannelStore;
-waitForStore("ChannelStore", m => ChannelStore = m);
+waitForStore("ChannelStore", m => { ChannelStore = m; });
 
 export let DraftStore: Stores.DraftStore;
-waitForStore("DraftStore", s => DraftStore = s);
+waitForStore("DraftStore", s => { DraftStore = s; });
 
 export let EmojiStore: Stores.EmojiStore;
-waitForStore("EmojiStore", m => EmojiStore = m);
+waitForStore("EmojiStore", m => { EmojiStore = m; });
 
 export let GuildChannelStore: Stores.GuildChannelStore;
-waitForStore("GuildChannelStore", m => GuildChannelStore = m);
+waitForStore("GuildChannelStore", m => { GuildChannelStore = m; });
 
 export let GuildMemberStore: Stores.GuildMemberStore;
-waitForStore("GuildMemberStore", m => GuildMemberStore = m);
+waitForStore("GuildMemberStore", m => { GuildMemberStore = m; });
 
 export let GuildStore: Stores.GuildStore;
-waitForStore("GuildStore", m => GuildStore = m);
+waitForStore("GuildStore", m => { GuildStore = m; });
 
 export let MessageStore: Stores.MessageStore;
-waitForStore("MessageStore", m => MessageStore = m);
+waitForStore("MessageStore", m => { MessageStore = m; });
 
 export let PermissionStore: Stores.PermissionStore;
-waitForStore("PermissionStore", m => PermissionStore = m);
+waitForStore("PermissionStore", m => { PermissionStore = m; });
 
 export let PresenceStore: Stores.PresenceStore;
-waitForStore("PresenceStore", m => PresenceStore = m);
+waitForStore("PresenceStore", m => { PresenceStore = m; });
 
 export let ReadStateStore: Stores.ReadStateStore;
-waitForStore("ReadStateStore", m => ReadStateStore = m);
+waitForStore("ReadStateStore", m => { ReadStateStore = m; });
 
 export let RelationshipStore: Stores.RelationshipStore;
-waitForStore("RelationshipStore", m => RelationshipStore = m);
+waitForStore("RelationshipStore", m => { RelationshipStore = m; });
 
 export let SelectedChannelStore: Stores.SelectedChannelStore;
-waitForStore("SelectedChannelStore", m => SelectedChannelStore = m);
+waitForStore("SelectedChannelStore", m => { SelectedChannelStore = m; });
 
 export let SelectedGuildStore: Stores.SelectedGuildStore;
-waitForStore("SelectedGuildStore", m => SelectedGuildStore = m);
+waitForStore("SelectedGuildStore", m => { SelectedGuildStore = m; });
 
 export let UserProfileStore: Stores.UserProfileStore;
-waitForStore("UserProfileStore", m => UserProfileStore = m);
+waitForStore("UserProfileStore", m => { UserProfileStore = m; });
 
 export let UserStore: Stores.UserStore;
-waitForStore("UserStore", s => UserStore = s);
+waitForStore("UserStore", m => { UserStore = m; });
 
 export let WindowStore: Stores.WindowStore;
-waitForStore("WindowStore", m => WindowStore = m);
+waitForStore("WindowStore", m => { WindowStore = m; });

@@ -81,8 +81,8 @@ export default definePlugin({
 });
 
 type AudioMetadata = {
-    waveform: string,
-    duration: number,
+    waveform: string;
+    duration: number;
 };
 
 const EMPTY_META: AudioMetadata = {

@@ -19,7 +19,7 @@
 import { waitFor } from "@webpack";
 
 let NoticesModule: any;
-waitFor(m => m.show && m.dismiss && !m.suppressAll, m => NoticesModule = m);
+waitFor(m => m.show && m.dismiss && !m.suppressAll, m => { NoticesModule = m; });
 
 export const noticesQueue: any[] = [];
 export let currentNotice: any = null;

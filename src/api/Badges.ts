@@ -85,9 +85,10 @@ export function _getBadges(args: BadgeUserArgs) {
                 })
                 : [{ ...badge, ...args }];
 
-            badge.position === BadgePosition.START
-                ? badges.unshift(...b)
-                : badges.push(...b);
+            if (badge.position === BadgePosition.START)
+                badges.unshift(...b);
+            else
+                badges.push(...b);
         }
     }
     const donorBadges = (Plugins.BadgeAPI as unknown as typeof import("../plugins/_api/badges").default).getDonorBadges(args.userId);

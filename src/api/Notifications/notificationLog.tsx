@@ -136,7 +136,7 @@ function NotificationEntry({ data }: { data: PersistentNotificationData; }) {
     );
 }
 
-export function NotificationLog({ log, pending }: { log: PersistentNotificationData[], pending: boolean; }) {
+export function NotificationLog({ log, pending }: { log: PersistentNotificationData[]; pending: boolean; }) {
     if (!log.length && !pending)
         return (
             <div className={cl("container")}>

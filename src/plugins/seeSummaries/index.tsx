@@ -78,9 +78,10 @@ export default definePlugin({
             // idk if this is good for performance but it doesnt seem to be a problem in my experience
             DataStore.update("summaries-data", summaries => {
                 summaries ??= {};
-                summaries[data.channel_id]
-                    ? summaries[data.channel_id].unshift(...incomingSummaries)
-                    : (summaries[data.channel_id] = incomingSummaries);
+                if (summaries[data.channel_id])
+                    summaries[data.channel_id].unshift(...incomingSummaries);
+                else
+                    summaries[data.channel_id] = incomingSummaries;
                 if (summaries[data.channel_id].length > 50)
                     summaries[data.channel_id] = summaries[data.channel_id].slice(0, 50);
 

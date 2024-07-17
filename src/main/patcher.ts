@@ -51,7 +51,7 @@ if (!IS_VANILLA) {
             const originalBuild = Menu.buildFromTemplate;
             Menu.buildFromTemplate = function (template) {
                 if (template[0]?.label === "&File") {
-                    const { submenu } = template[0];
+                    const [{ submenu }] = template;
                     if (Array.isArray(submenu)) {
                         submenu.push({
                             label: "Quit (Hidden)",

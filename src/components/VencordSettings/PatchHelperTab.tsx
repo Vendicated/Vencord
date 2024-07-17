@@ -190,7 +190,12 @@ function ReplacementInput({ replacement, setReplacement, replacementError }: Rep
     }
 
     useEffect(
-        () => { (isFunc ? onChange(replacement) : setError(undefined)); },
+        () => {
+            if (isFunc)
+                onChange(replacement);
+            else
+                setError(undefined);
+        },
         [isFunc]
     );
 

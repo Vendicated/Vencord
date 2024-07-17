@@ -149,11 +149,11 @@ async function bulkFetchPronouns(ids: string[]): Promise<PronounsResponse> {
 
 const SpecialCodes = new Set(["any", "ask", "avoid", "other", "unspecified"]);
 
-export function extractPronouns(pronounSet?: { [locale: string]: PronounCode[] }): string {
+export function extractPronouns(pronounSet?: { [locale: string]: PronounCode[]; }): string {
     if (!pronounSet || !pronounSet.en) return PronounMapping.unspecified;
     // PronounDB returns an empty set instead of {sets: {en: ["unspecified"]}}.
     const pronouns = pronounSet.en;
-    const { pronounsFormat } = Settings.plugins.PronounDB as { pronounsFormat: PronounsFormat, enabled: boolean; };
+    const { pronounsFormat } = Settings.plugins.PronounDB as { pronounsFormat: PronounsFormat; enabled: boolean; };
 
     if (pronouns.length === 1) {
         // For capitalized pronouns or special codes (any, ask, avoid), we always return the normal (capitalized) string

@@ -23,8 +23,8 @@ import { DEFAULT_CHUNK_SIZE } from "./constants";
 import { canMoveCategory, canMoveCategoryInDirection, categories, type Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getSections, init, isPinned, moveCategory, removeCategory } from "./data";
 
 interface ChannelComponentProps {
-    children: ReactNode,
-    channel: ChannelRecord,
+    children: ReactNode;
+    channel: ChannelRecord;
     selected: boolean;
 }
 

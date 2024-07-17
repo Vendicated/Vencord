@@ -287,7 +287,7 @@ export default definePlugin({
     },
 
     async paste() {
-        const clip = (await navigator.clipboard.read())[0];
+        const [clip] = await navigator.clipboard.read();
         if (!clip) return;
 
         const data = new DataTransfer();

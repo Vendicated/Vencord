@@ -49,9 +49,9 @@ interface RemoteData {
     artistArtwork?: string;
 }
 
-let cachedRemoteData: { id: string, data: RemoteData; } | { id: string, failures: number; } | null = null;
+let cachedRemoteData: { id: string; data: RemoteData; } | { id: string; failures: number; } | null = null;
 
-async function fetchRemoteData({ id, name, artist, album }: { id: string, name: string, artist: string, album: string; }) {
+async function fetchRemoteData({ id, name, artist, album }: { id: string; name: string; artist: string; album: string; }) {
     if (id === cachedRemoteData?.id) {
         if ("data" in cachedRemoteData) return cachedRemoteData.data;
         if ("failures" in cachedRemoteData && cachedRemoteData.failures >= 5) return null;

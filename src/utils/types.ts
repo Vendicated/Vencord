@@ -81,7 +81,7 @@ export interface PluginDef {
      * These will automatically be enabled and loaded before your plugin
      * Common examples are CommandsAPI, MessageEventsAPI...
      */
-    dependencies?: string[],
+    dependencies?: string[];
     /**
      * Whether this plugin is required and forcefully enabled
      */
@@ -98,7 +98,7 @@ export interface PluginDef {
      * When to call the start() method
      * @default StartAt.WebpackReady
      */
-    startAt?: StartAt,
+    startAt?: StartAt;
     /**
      * Which parts of the plugin can be tested by the reporter. Defaults to all parts
      */
@@ -170,8 +170,9 @@ export const enum OptionType {
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
 export type SettingsChecks<D extends SettingsDefinition> = {
-    [K in keyof D]?: D[K] extends PluginSettingComponentDef ? IsDisabled<DefinedSettings<D>> :
-    (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
+    [K in keyof D]?: D[K] extends PluginSettingComponentDef
+        ? IsDisabled<DefinedSettings<D>>
+        : (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
 };
 
 export type PluginSettingDef = (
@@ -328,7 +329,7 @@ export interface DefinedSettings<
 
 export type PartialExcept<T, R extends keyof T> = Partial<T> & Required<Pick<T, R>>;
 
-export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any; };
+export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false; error: any; };
 
 /* -------------------------------------------- */
 /*             Legacy Options Types             */
@@ -352,6 +353,8 @@ export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCom
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
     [key in keyof PluginExports]:
     PluginExports[key] extends (event: Electron.IpcMainInvokeEvent, ...args: infer Args) => infer Return
-    ? (...args: Args) => Return extends Promise<any> ? Return : Promise<Return>
-    : never;
+        ? (...args: Args) => Return extends Promise<any>
+            ? Return
+            : Promise<Return>
+        : never;
 };

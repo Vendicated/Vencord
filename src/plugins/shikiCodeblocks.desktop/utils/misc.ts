@@ -29,8 +29,8 @@ export const shouldUseHljs = ({
     lang,
     tryHljs,
 }: {
-    lang: HighlighterProps["lang"],
-    tryHljs: HljsSetting,
+    lang: HighlighterProps["lang"];
+    tryHljs: HljsSetting;
 }) => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const hljsLang = lang ? hljs?.getLanguage?.(lang) : null;

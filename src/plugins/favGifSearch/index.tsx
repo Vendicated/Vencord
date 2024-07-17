@@ -53,10 +53,10 @@ interface Instance {
         resultType?: string;
     };
     props: {
-        favCopy: Gif[],
+        favCopy: Gif[];
 
-        favorites: Gif[],
-    },
+        favorites: Gif[];
+    };
     forceUpdate: () => void;
 }
 

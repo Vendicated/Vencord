@@ -158,7 +158,7 @@ export default tseslint.config(
     },
     {
         files: ["**/*"],
-        ignores: ["src/**/*"],
+        ignores: ["src/**"],
         rules: {
             "simple-import-sort/imports": ["error", {
                 groups: [
@@ -169,7 +169,7 @@ export default tseslint.config(
         }
     },
     {
-        files: ["scripts/**/*", "src/**/*"],
+        files: ["scripts/**", "src/**"],
         rules: {
             "headers/header-format": ["error", {
                 source: "string",
@@ -188,7 +188,7 @@ export default tseslint.config(
         }
     },
     {
-        files: ["src/**/*"],
+        files: ["src/**"],
         rules: {
             "@typescript-eslint/member-ordering": ["error", {
                 default: {
@@ -243,7 +243,7 @@ export default tseslint.config(
     },
     {
         // https://github.com/import-js/eslint-plugin-import/issues/2414
-        files: ["src/**/*"],
+        files: ["src/**"],
         ignores: ["src/**/index.ts"],
         rules: {
             "import/no-unused-modules": ["error", { missingExports: true }],

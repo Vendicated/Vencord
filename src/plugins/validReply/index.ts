@@ -18,7 +18,7 @@ const enum ReferencedMessageState {
 }
 
 interface Reply {
-    baseAuthor: UserRecord,
+    baseAuthor: UserRecord;
     baseMessage: MessageRecord;
     channel: ChannelRecord;
     referencedMessage: { state: ReferencedMessageState; };

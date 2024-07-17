@@ -10,8 +10,8 @@ import { React } from "@webpack/common";
 import type { ComponentType, HTMLProps, PropsWithChildren } from "react";
 
 type DecorationGridItemComponent = ComponentType<PropsWithChildren<HTMLProps<HTMLDivElement>> & {
-    onSelect: () => void,
-    isSelected: boolean,
+    onSelect: () => void;
+    isSelected: boolean;
 }>;
 
 export let DecorationGridItem: DecorationGridItemComponent;
@@ -24,8 +24,8 @@ export const AvatarDecorationModalPreview = LazyComponentWebpack(() => {
 
 type DecorationGridDecorationComponent = ComponentType<HTMLProps<HTMLDivElement> & {
     avatarDecoration: AvatarDecorationData;
-    onSelect: () => void,
-    isSelected: boolean,
+    onSelect: () => void;
+    isSelected: boolean;
 }>;
 
 export let DecorationGridDecoration: DecorationGridDecorationComponent;

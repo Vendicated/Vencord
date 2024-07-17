@@ -61,7 +61,7 @@ const computePermissions: (options: {
     excludeGuildPermissions?: boolean /* = false */;
 }) => bigint = findByCodeLazy(".getCurrentUser()", ".computeLurkerPermissionsAllowList()");
 
-const Tag: RC<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; }
+const Tag: RC<{ type?: number; className?: string; useRemSizes?: boolean; }> & { Types: Record<string, number>; }
     = findLazy(m => m.Types?.[0] === "BOT");
 
 const isWebhook = (message: MessageRecord | undefined, user: UserRecord) => !!message?.webhookId && user.isNonUserBot();
@@ -332,9 +332,9 @@ export default definePlugin({
     getTag({
         message, user, channelId, origType, location, channel
     }: {
-        message?: MessageRecord,
-        user?: UserRecord,
-        channel?: ChannelRecord,
+        message?: MessageRecord;
+        user?: UserRecord;
+        channel?: ChannelRecord;
         channelId?: string;
         origType?: number;
         location: "chat" | "not-chat";

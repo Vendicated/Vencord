@@ -23,7 +23,7 @@ import type { Dispatch, KeyboardEvent, SetStateAction } from "react";
 import type { Session } from "../types";
 import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "../utils";
 
-export function RenameModal({ props, session, state }: { props: ModalProps, session: Session, state: [string, Dispatch<SetStateAction<string>>]; }) {
+export function RenameModal({ props, session, state }: { props: ModalProps; session: Session; state: [string, Dispatch<SetStateAction<string>>]; }) {
     const [title, setTitle] = state;
     const [value, setValue] = useState(savedSessionsCache.get(session.id_hash)?.name ?? "");
 

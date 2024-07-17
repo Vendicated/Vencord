@@ -76,7 +76,7 @@ export default definePlugin({
 
     isBotOrMe: (user: UserRecord) => user.bot || user.id === UserStore.getCurrentUser()!.id,
 
-    renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: UserRecord, onClose: () => void; }) => {
+    renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: UserRecord; onClose: () => void; }) => {
         const entries = ChannelStore.getSortedPrivateChannels()
             .filter((channel): channel is GroupDMChannelRecord =>
                 channel.isGroupDM()

@@ -38,7 +38,7 @@ const Dismiss = ({ onDismiss }: { onDismiss: () => void; }) => (
     </button>
 );
 
-export function TranslationAccessory({ message }: { message: MessageRecord & { vencordEmbeddedBy?: string[] }; }) {
+export function TranslationAccessory({ message }: { message: MessageRecord & { vencordEmbeddedBy?: string[]; }; }) {
     const [translation, setTranslation] = useState<TranslationValue>();
 
     useEffect(() => {

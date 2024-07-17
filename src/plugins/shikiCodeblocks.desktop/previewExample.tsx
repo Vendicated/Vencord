@@ -7,8 +7,8 @@ async function handleClick() {
 }
 
 export const Example: FC<{
-    real: boolean,
-    shigged?: number,
+    real: boolean;
+    shigged?: number;
 }> = ({ real, shigged }) => (
     <>
         <p>{`Shigg${real ? `ies${shigged === 0x1B ? "t" : ""}` : "y"}`}</p>

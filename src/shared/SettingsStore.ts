@@ -9,11 +9,11 @@ import type { LiteralUnion } from "type-fest";
 // Resolves a possibly nested prop in the form of "some.nested.prop" to type of T.some.nested.prop
 type ResolvePropDeep<T, P> = P extends `${infer Pre}.${infer Suf}`
     ? Pre extends keyof T
-    ? ResolvePropDeep<T[Pre], Suf>
-    : any
+        ? ResolvePropDeep<T[Pre], Suf>
+        : any
     : P extends keyof T
-    ? T[P]
-    : any;
+        ? T[P]
+        : any;
 
 interface SettingsStoreOptions {
     readOnly?: boolean;
@@ -26,6 +26,7 @@ interface SettingsStoreOptions {
 }
 
 // merges the SettingsStoreOptions type into the class
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface SettingsStore<T extends object> extends SettingsStoreOptions { }
 
 /**

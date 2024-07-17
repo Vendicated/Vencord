@@ -25,7 +25,7 @@ export default definePlugin({
         }
     }],
 
-    renderUsername: ErrorBoundary.wrap((props: { user?: UserRecord, username: string; }) => {
+    renderUsername: ErrorBoundary.wrap((props: { user?: UserRecord; username: string; }) => {
         const { user, username } = props;
         const [isHovering, setIsHovering] = useState(false);
 

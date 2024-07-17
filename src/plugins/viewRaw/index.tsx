@@ -135,7 +135,7 @@ function MakeContextCallback(name: "Guild" | "User" | "Channel"): NavContextMenu
             if (!Array.isArray(p.children))
                 p.children = [p.children];
 
-            children = p.children;
+            ({ children } = p);
         }
 
         children.splice(-1, 0,

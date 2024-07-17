@@ -17,7 +17,7 @@ type SettingsEntry = { section: string; label: string; };
 
 const cl = classNameFactory("");
 let Classes: Record<string, string>;
-waitFor(["animating", "baseLayer", "bg", "layer", "layers"], m => Classes = m);
+waitFor(["animating", "baseLayer", "bg", "layer", "layers"], m => { Classes = m; });
 
 const settings = definePluginSettings({
     disableFade: {

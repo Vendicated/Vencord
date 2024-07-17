@@ -30,7 +30,7 @@ import plugins from "~plugins";
 const logger = new Logger("Settings");
 export interface Settings {
     autoUpdate: boolean;
-    autoUpdateNotification: boolean,
+    autoUpdateNotification: boolean;
     useQuickCss: boolean;
     enableReactDevtools: boolean;
     themeLinks: string[];
@@ -250,11 +250,12 @@ export function definePluginSettings<
 type UseSettings<T extends object> = ResolveUseSettings<T>[keyof T];
 
 type ResolveUseSettings<T extends object> = {
-    [Key in keyof T]:
-    Key extends string
-    ? T[Key] extends Record<string, unknown>
-    // @ts-ignore "Type instantiation is excessively deep and possibly infinite"
-    ? UseSettings<T[Key]> extends string ? `${Key}.${UseSettings<T[Key]>}` : never
-    : Key
-    : never;
+    [Key in keyof T]: Key extends string
+        ? T[Key] extends Record<string, unknown>
+            ? UseSettings<T[Key]> extends string
+                // @ts-ignore "Type instantiation is excessively deep and possibly infinite"
+                ? `${Key}.${UseSettings<T[Key]>}`
+                : never
+            : Key
+        : never;
 };

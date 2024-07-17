@@ -34,7 +34,7 @@ export default definePlugin({
             }
         }
     ],
-    isGuildOwner(props: { user?: UserRecord, channel?: ChannelRecord, isOwner: boolean, guildId?: string; }) {
+    isGuildOwner(props: { user?: UserRecord; channel?: ChannelRecord; isOwner: boolean; guildId?: string; }) {
         if (!props.user?.id) return props.isOwner;
         if (props.channel?.type === ChannelType.GROUP_DM)
             return props.isOwner;

@@ -42,7 +42,7 @@ interface DecoratorProps {
 export type Decorator = (props: DecoratorProps) => JSX.Element | null;
 type OnlyIn = "guilds" | "dms";
 
-export const decorators = new Map<string, { decorator: Decorator, onlyIn?: OnlyIn; }>();
+export const decorators = new Map<string, { decorator: Decorator; onlyIn?: OnlyIn; }>();
 
 export function addDecorator(identifier: string, decorator: Decorator, onlyIn?: OnlyIn) {
     decorators.set(identifier, { decorator, onlyIn });

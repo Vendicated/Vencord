@@ -11,7 +11,7 @@ import type { Dispatch, SetStateAction } from "react";
 import type { Session } from "../types";
 import { RenameModal } from "./RenameModal";
 
-export const RenameButton = ({ session, state }: { session: Session, state: [string, Dispatch<SetStateAction<string>>]; }) => (
+export const RenameButton = ({ session, state }: { session: Session; state: [string, Dispatch<SetStateAction<string>>]; }) => (
     <Button
         look={Button.Looks.LINK}
         color={Button.Colors.LINK}

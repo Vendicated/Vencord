@@ -23,10 +23,10 @@ import type * as t from "./types/components";
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 export let Forms = {} as {
-    FormTitle: t.FormTitle,
-    FormSection: t.FormSection,
-    FormDivider: t.FormDivider,
-    FormText: t.FormText,
+    FormTitle: t.FormTitle;
+    FormSection: t.FormSection;
+    FormDivider: t.FormDivider;
+    FormText: t.FormText;
 };
 
 export let Card: t.Card;

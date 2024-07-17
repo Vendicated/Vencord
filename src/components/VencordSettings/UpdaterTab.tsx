@@ -77,7 +77,7 @@ interface CommonProps {
     repoPending: boolean;
 }
 
-const HashLink = ({ repo, hash, disabled = false }: { repo: string, hash: string, disabled?: boolean; }) => (
+const HashLink = ({ repo, hash, disabled = false }: { repo: string; hash: string; disabled?: boolean; }) => (
     <Link href={`${repo}/commit/${hash}`} disabled={disabled}>
         {hash}
     </Link>

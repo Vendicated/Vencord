@@ -32,5 +32,5 @@ document.addEventListener("DOMContentLoaded", () => {
     document.head.append(Object.assign(document.createElement("style"), {
         textContent: styleStr,
         id: "vencord-margins"
-    })), { once: true };
-});
+    }));
+}, { once: true });

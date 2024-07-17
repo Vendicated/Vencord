@@ -24,7 +24,7 @@ import type { Promisable } from "type-fest";
 const MessageEventsLogger = new Logger("MessageEvents", "#e5c890");
 
 export interface MessageObject {
-    content: string,
+    content: string;
     validNonShortcutEmojis: GuildEmoji[];
     invalidEmojis: any[];
     tts: boolean;

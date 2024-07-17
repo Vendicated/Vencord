@@ -255,7 +255,7 @@ export default definePlugin({
         },
     },
 
-    handleDelete(channelMessages: ChannelMessages | null | undefined, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
+    handleDelete(channelMessages: ChannelMessages | null | undefined, data: { ids: string[]; id: string; mlDeleted?: boolean; }, isBulk: boolean) {
         try {
             if (channelMessages == null || (!isBulk && !channelMessages.has(data.id)))
                 return channelMessages;

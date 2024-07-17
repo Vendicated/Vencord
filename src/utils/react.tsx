@@ -82,11 +82,11 @@ interface AwaiterOpts<T> {
 export function useAwaiter<T>(factory: () => Promise<T>): AwaiterRes<T | null>;
 export function useAwaiter<T>(factory: () => Promise<T>, providedOpts: AwaiterOpts<T>): AwaiterRes<T>;
 export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterOpts<T | null>): AwaiterRes<T | null> {
-    const opts: AwaiterOpts<T | null> = Object.assign({
+    const opts: AwaiterOpts<T | null> = {
         fallbackValue: null,
         deps: [],
-        onError: null,
-    }, providedOpts);
+        ...providedOpts
+    };
     const [state, setState] = useState({
         value: opts.fallbackValue,
         error: null,
@@ -109,7 +109,7 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
                 opts.onError?.(error);
             });
 
-        return () => { (isAlive = false); };
+        return () => { isAlive = false; };
     }, opts.deps);
 
     return [state.value, state.error, state.pending];

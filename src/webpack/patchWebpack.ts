@@ -180,7 +180,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                 return;
             }
 
-            exports = module.exports;
+            ({ exports } = module);
 
             if (!exports) return;
 
@@ -245,7 +245,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                     logger.error("Error while firing callback for Webpack subscription:\n", err, filter, callback);
                 }
             }
-        } as any as { toString: () => string, original: any, (...args: any[]): void; };
+        } as any as { toString: () => string; original: any; (...args: any[]): void; };
 
         factory.toString = originalMod.toString.bind(originalMod);
         factory.original = originalMod;

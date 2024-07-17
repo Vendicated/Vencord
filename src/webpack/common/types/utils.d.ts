@@ -92,18 +92,18 @@ export interface RouterUtils {
 export interface IconUtils {
     getUserAvatarURL(user: UserRecord, canAnimate?: boolean, size?: number, format?: string): string;
     getDefaultAvatarURL(id: string, discriminator?: string): string;
-    getUserBannerURL(data: { id: string, banner: string, canAnimate?: boolean, size: number; }): string | undefined;
-    getAvatarDecorationURL(data: { avatarDecoration: string, size: number; canCanimate?: boolean; }): string | undefined;
+    getUserBannerURL(data: { id: string; banner: string; canAnimate?: boolean; size: number; }): string | undefined;
+    getAvatarDecorationURL(data: { avatarDecoration: string; size: number; canCanimate?: boolean; }): string | undefined;
 
     getGuildMemberAvatarURL(member: GuildMember, canAnimate?: string): string | null;
-    getGuildMemberAvatarURLSimple(data: { guildId: string, userId: string, avatar: string, canAnimate?: boolean; size?: number; }): string;
-    getGuildMemberBannerURL(data: { id: string, guildId: string, banner: string, canAnimate?: boolean, size: number; }): string | undefined;
+    getGuildMemberAvatarURLSimple(data: { guildId: string; userId: string; avatar: string; canAnimate?: boolean; size?: number; }): string;
+    getGuildMemberBannerURL(data: { id: string; guildId: string; banner: string; canAnimate?: boolean; size: number; }): string | undefined;
 
-    getGuildIconURL(data: { id: string, icon?: string, size?: number, canAnimate?: boolean; }): string | undefined;
+    getGuildIconURL(data: { id: string; icon?: string; size?: number; canAnimate?: boolean; }): string | undefined;
     getGuildBannerURL(guild: GuildRecord, canAnimate?: boolean): string | null;
 
     getChannelIconURL(data: { id: string; icon?: string | null | undefined; applicationId?: string; size?: number; }): string | undefined;
-    getEmojiURL(data: { id: string, animated: boolean, size: number, forcePNG?: boolean; }): string;
+    getEmojiURL(data: { id: string; animated: boolean; size: number; forcePNG?: boolean; }): string;
 
     hasAnimatedGuildIcon(guild: GuildRecord): boolean;
     isAnimatedIconHash(hash: string): boolean;
