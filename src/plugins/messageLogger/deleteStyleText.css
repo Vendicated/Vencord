@@ -11,6 +11,11 @@
   color: var(--status-danger, #f04747) !important;
 }
 
+/* Spoiler highlighting */
+.messagelogger-deleted  [class*=spoilerContent]:not(:has([aria-hidden="false"])) {
+  background-color: var(--status-danger, #f04747) !important;
+}
+
 /* Markdown title highlighting */
 .messagelogger-deleted [class*="contents"] :is(h1, h2, h3) {
     color: var(--status-danger, #f04747) !important;
