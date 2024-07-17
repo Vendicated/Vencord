@@ -23,6 +23,9 @@ import { canonicalizeMatch } from "@utils/patches";
 // Can be removed when #2485 gets merged.
 // eslint-disable-next-line no-restricted-imports
 import type { WebpackInstance as $WebpackInstance } from "discord-types/other";
+import type { ComponentType } from "react";
+
+import { traceFunction } from "../debug/Tracer";
 
 interface WebpackInstance extends Omit<$WebpackInstance, "c" | "m"> {
     // Omit removes call signatures
@@ -30,8 +33,6 @@ interface WebpackInstance extends Omit<$WebpackInstance, "c" | "m"> {
     c?: $WebpackInstance["c"] & Record<string | number, any>;
     m: $WebpackInstance["m"] & Record<string | number, any>;
 }
-
-import { traceFunction } from "../debug/Tracer";
 
 const logger = new Logger("Webpack");
 
@@ -309,7 +310,7 @@ export const lazyWebpackSearchHistory: ["find" | "findByProps" | "findByCode" | 
  * Note that the example below exists already as an api, see {@link findByPropsLazy}
  * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
-export function proxyLazyWebpack<T = any>(factory: () => any, attempts?: number) {
+export function proxyLazyWebpack<T = any>(factory: () => T, attempts?: number) {
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["proxyLazyWebpack", [factory]]);
 
     return proxyLazy<T>(factory, attempts);
@@ -323,7 +324,7 @@ export function proxyLazyWebpack<T = any>(factory: () => any, attempts?: number)
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
  */
-export function LazyComponentWebpack<T extends object = any>(factory: () => any, attempts?: number) {
+export function LazyComponentWebpack<T extends object = any>(factory: () => ComponentType<T>, attempts?: number) {
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["LazyComponentWebpack", [factory]]);
 
     return LazyComponent<T>(factory, attempts);

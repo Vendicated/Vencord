@@ -331,7 +331,6 @@ export type MessageEmbed = {
     timestamp?: Moment;
     type: MessageEmbedType | undefined;
     url: string | undefined;
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 } & ({} | {
     provider: MessageEmbedProvider;
     thumbnail: MessageEmbedThumbnail;
@@ -383,7 +382,6 @@ export type MessageEmbedThumbnail = {
     url: string;
     /** Always greater than 0. */
     width: number;
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 } & ({} | {
     placeholder: string | undefined;
     placeholderVersion: number | undefined;

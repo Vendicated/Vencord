@@ -135,7 +135,7 @@ export namespace CR {
         /** Whether to include optional class members. */
         includeOptional?: boolean | undefined;
         /** Members expected to be added. */
-        ignoredAdditions?: Partial<ClassMembers> | undefined;
+        ignoredAdditions?: { [Key in keyof ClassMembers]?: ClassMembers[Key] | undefined; } | undefined;
         /**
          * Members expected to be removed.
          * If a category is `true`, all members in that category will be expected to be removed.
@@ -162,7 +162,7 @@ export namespace CR {
         /** Members expected to be added. */
         ignoredAdditions?: [key: string, value: string | number][] | undefined;
         /** Members expected to be removed. */
-        ignoredRemovals?: [key: string, value?: string | number][] | undefined;
+        ignoredRemovals?: [key: string, value?: string | number | undefined][] | undefined;
     }
 
     export type FindFunction<Args extends unknown[] = any[], Return = unknown>

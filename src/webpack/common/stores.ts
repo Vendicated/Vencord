@@ -41,17 +41,18 @@ export const Flux: {
  */
 export const useStateFromStores: Stores.UseStateFromStoresHook = findByCodeLazy("useStateFromStores");
 
+// shallowEqual.tsx
 const areArraysShallowEqual = (a: unknown[], b?: unknown[] | null | undefined) =>
-    b != null && a.length === b.length && !a.some((x, y) => b[y] !== x);
+    b != null && a.length === b.length && a.every((x, i) => x === b[i]);
 
 /** @see {@link useStateFromStores} */
 export const useStateFromStoresArray: Stores.UseStateFromStoresArrayHook
     = (a, b, c) => useStateFromStores(a, b, c, areArraysShallowEqual);
 
 /** @see {@link useStateFromStores} */
-export const useStateFromStoresObject: Stores.UseStateFromStoresObjectHook = proxyLazyWebpack(() => {
+export const useStateFromStoresObject = proxyLazyWebpack<Stores.UseStateFromStoresObjectHook>(() => {
     const shallowEqual = findByCode('"shallowEqual: unequal key lengths "');
-    return (a: any, b: any, c: any) => useStateFromStores(a, b, c, shallowEqual);
+    return (a, b, c) => useStateFromStores(a, b, c, shallowEqual);
 });
 
 export let ChannelStore: Stores.ChannelStore;

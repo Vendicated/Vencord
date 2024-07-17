@@ -5,17 +5,17 @@
  */
 
 import { readFileSync } from "fs";
-import { writeFile } from "fs/promises";
 import { join } from "path";
 
 import puppeteer from "puppeteer-core";
 
 import { assertEnvValidity } from "../utils.mjs";
 import config from "./config.mjs";
-import { autoFindClass, autoFindEnum, autoFindStore, getClassChanges, getEnumChanges, isValidClass, isValidEnum } from "./finds.mjs";
-import { getChangeReport } from "./getChangeReport.mjs";
-import { getSummary } from "./getSummary.mjs";
-import { postError, postReport } from "./webhooks.mjs";
+import { autoFindClass, autoFindStore, getClassChanges, isValidClass } from "./finds/classes.mjs";
+import { autoFindEnum, getEnumChanges, isValidEnum } from "./finds/enums.mjs";
+import { logSummary } from "./logging/summaries.mjs";
+import { postError, postReport } from "./logging/webhooks.mjs";
+import { getChangeReport } from "./reports/getChangeReport.mjs";
 
 process.on("uncaughtExceptionMonitor", error => {
     const { DISCORD_WEBHOOK, CHANNEL } = process.env;
@@ -30,7 +30,7 @@ assertEnvValidity(process.env, {
     VENCORD_DIST: true,
 });
 
-const { CHANNEL, CHROMIUM_BIN, DISCORD_TOKEN, DISCORD_WEBHOOK, GITHUB_STEP_SUMMARY, VENCORD_DIST } = process.env;
+const { CHANNEL, CHROMIUM_BIN, DISCORD_TOKEN, DISCORD_WEBHOOK, VENCORD_DIST } = process.env;
 const CWD = process.cwd();
 
 const browser = await puppeteer.launch({
@@ -75,11 +75,7 @@ await page.evaluate(`(async () => {
 const report = await getChangeReport(page, config);
 browser.close();
 
-const summary = getSummary(report, CHANNEL);
-if (GITHUB_STEP_SUMMARY)
-    writeFile(GITHUB_STEP_SUMMARY, summary, "utf-8");
-else
-    console.log(summary);
+logSummary(report, CHANNEL);
 
 if (DISCORD_WEBHOOK)
     postReport(report, DISCORD_WEBHOOK, CHANNEL);

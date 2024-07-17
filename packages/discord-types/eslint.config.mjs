@@ -101,7 +101,6 @@ export default tseslint.config(
             "@typescript-eslint/no-confusing-void-expression": "error",
             "@typescript-eslint/no-duplicate-enum-values": "error",
             "@typescript-eslint/no-duplicate-type-constituents": "error",
-            "@typescript-eslint/no-empty-object-type": "error",
             "@typescript-eslint/no-extra-non-null-assertion": "error",
             "@typescript-eslint/no-import-type-side-effects": "error",
             "@typescript-eslint/no-invalid-void-type": "error",

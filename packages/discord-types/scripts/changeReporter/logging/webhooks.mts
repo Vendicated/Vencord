@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { CR } from "./types.mts";
+import type { CR } from "../types.mts";
 import { codeBlock, formatChannel, getSummaryURL } from "./utils.mjs";
 
 export async function postError(

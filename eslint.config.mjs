@@ -72,7 +72,6 @@ export default tseslint.config(
                 fixStyle: "inline-type-imports"
             }],
             "@typescript-eslint/no-confusing-void-expression": "error",
-            "@typescript-eslint/no-empty-object-type": "error",
             "@typescript-eslint/no-extra-non-null-assertion": "error",
             "@typescript-eslint/no-import-type-side-effects": "error",
             "@typescript-eslint/no-loss-of-precision": "error",

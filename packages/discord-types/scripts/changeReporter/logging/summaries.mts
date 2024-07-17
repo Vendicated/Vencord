@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { CR } from "./types.mts";
+import { writeFile } from "fs/promises";
+
+import type { CR } from "../types.mts";
 import { capitalize, codeBlock, formatChannel, formatEnumEntryList, formatKeyList, formatWarnList } from "./utils.mjs";
 
-export function getSummary(report: CR.ChangeReport, channel?: string | undefined) {
+export function logSummary(report: CR.ChangeReport, channel?: string | undefined) {
     const { deps, src } = report;
 
     let summary = `# Change Report (${formatChannel(channel)})\n`;
@@ -265,5 +267,9 @@ export function getSummary(report: CR.ChangeReport, channel?: string | undefined
 
     summary += sections || "## There are 0 watched dependencies and declarations.\n";
 
-    return summary;
+    const { GITHUB_STEP_SUMMARY } = process.env;
+    if (GITHUB_STEP_SUMMARY)
+        writeFile(GITHUB_STEP_SUMMARY, summary, "utf-8");
+    else
+        console.log(summary);
 }

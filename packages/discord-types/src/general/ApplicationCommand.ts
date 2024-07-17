@@ -24,7 +24,6 @@ export type ApplicationCommand<CommandType extends ApplicationCommandType = Appl
     nsfw?: boolean;
     type?: ApplicationCommandType;
     version: string;
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 } & (CommandType extends ApplicationCommandType.CHAT ? { options?: ApplicationCommandOption[]; } : {});
 
 export enum InteractionContextType {
