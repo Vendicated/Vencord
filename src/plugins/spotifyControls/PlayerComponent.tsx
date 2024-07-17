@@ -373,7 +373,8 @@ export function Player() {
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const exportTrackImageStyle = {
-        "--vc-spotify-track-image": `url(${track?.album?.image?.url || ""})`,
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        "--vc-spotify-track-image": `url(${track.album?.image?.url || ""})`,
     } as CSSProperties;
 
     return (

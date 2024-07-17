@@ -17,7 +17,7 @@ type DecorationGridItemComponent = ComponentType<PropsWithChildren<HTMLProps<HTM
 export let DecorationGridItem: DecorationGridItemComponent;
 export const setDecorationGridItem = (v: any) => DecorationGridItem = v;
 
-export const AvatarDecorationModalPreview = LazyComponentWebpack(() => {
+export const AvatarDecorationModalPreview = LazyComponentWebpack<any>(() => {
     const component = findComponentByCode(".shopPreviewBanner");
     return React.memo(component);
 });

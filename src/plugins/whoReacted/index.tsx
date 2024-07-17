@@ -44,6 +44,13 @@ async function fetchReactions(message: MessageRecord, emoji: MessageReactionEmoj
             },
             oldFormErrors: true
         });
+
+        for (const user of res.body)
+            FluxDispatcher.dispatch({
+                type: "USER_UPDATE",
+                user
+            });
+
         FluxDispatcher.dispatch({
             type: "MESSAGE_REACTION_ADD_USERS",
             channelId: message.channel_id,
@@ -151,13 +158,6 @@ export default definePlugin({
 
         const reactions = getReactionsWithQueue(message, emoji, type);
         const users: UserRecord[] = Object.values(reactions).filter(Boolean);
-
-        for (const user of users) {
-            FluxDispatcher.dispatch({
-                type: "USER_UPDATE",
-                user
-            });
-        }
 
         return (
             <div

@@ -26,7 +26,6 @@ interface SettingsStoreOptions {
 }
 
 // merges the SettingsStoreOptions type into the class
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface SettingsStore<T extends object> extends SettingsStoreOptions { }
 
 /**
