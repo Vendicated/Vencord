@@ -7,10 +7,10 @@
 // returns all of discord's native styles in a single string
 // ! discord lazy loads css chunks, make sure to use newStyleListener as well
 export async function getStyles(): Promise<string> {
-    let out = "";
+    const out = "";
     const styleLinkNodes: NodeListOf<HTMLLinkElement> = document.querySelectorAll('link[rel="stylesheet"]');
-    return Promise.all(styleLinkNodes.map(n => parseStyleLinkNode(n)))
-    	.then(contents => contents.join("\n"));
+    return Promise.all(Array.from(styleLinkNodes, n => parseStyleLinkNode(n)))
+        .then(contents => contents.join("\n"));
 }
 
 // runs callback with styles of new style nodes added to the head
@@ -34,7 +34,7 @@ async function parseStyleLinkNode(node: HTMLLinkElement): Promise<string> {
     if (!link) return "";
 
     return fetch(link)
-    	.then(res => res.text())
+        .then(res => res.text())
         .catch(() => "");
 }
 
