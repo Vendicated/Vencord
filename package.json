@@ -12,12 +12,7 @@
         "url": "git+https://github.com/Equicord/Equicord.git"
     },
     "license": "GPL-3.0-or-later",
-    "author": "Vendicated",
-    "contributors": [
-        "Equicord",
-        "Thororen1234",
-        "Yeetov"
-    ],
+    "author": "Equicord",
     "scripts": {
         "build": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs",
         "buildStandalone": "pnpm build --standalone",
