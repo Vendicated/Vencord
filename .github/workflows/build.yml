@@ -62,7 +62,7 @@ jobs:
         run: |
           rm -rf dist/*-unpacked dist/monaco Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
 
-      - name: Upload DevBuild as release
+      - name: Upload Equicord
         if: github.repository == 'Equicord/Equicord'
         run: |
           gh release upload latest --clobber dist/*

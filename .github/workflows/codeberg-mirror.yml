@@ -27,6 +27,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ETOKEN }}
 
   codeberg:
+    name: Sync Codeberg and Github
     if: github.repository == 'Equicord/Equicord'
     needs: DetermineRunner
     runs-on: ${{ needs.DetermineRunner.outputs.runner }}

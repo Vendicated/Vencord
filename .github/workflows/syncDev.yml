@@ -1,4 +1,4 @@
-name: Sync Vencord dev branch
+name: Sync Vencord Dev
 
 env:
     WORKFLOW_TOKEN: ${{ secrets.ETOKEN }}
@@ -15,7 +15,7 @@ jobs:
     build:
         runs-on: ubuntu-latest
         steps:
-            - name: GitHub Sync to Upstream Repository
+            - name: Sync Vencord Dev
               id: sync
               uses: verticalsync/sync-upstream-repo@master
               with:
