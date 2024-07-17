@@ -4,14 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
+import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByCodeLazy } from "@webpack";
+import { Tooltip } from "webpack/common/components";
 
 const openPopout = findByCodeLazy(".QUICKSWITCHER_OPENED,{");
 function SearchIcon() {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" id="vc-searchbutton-icon">
             <path
                 fill="currentColor"
                 fill-rule="evenodd"
@@ -25,35 +30,30 @@ export default definePlugin({
     name: "ServerSearch",
     authors: [EquicordDevs.camila314],
     description: "Navigate your servers better with a quick search button",
-    patches: [
-        {
-            find: ".guildSeparator",
-            replacement: {
-                match: /return(\(0,.+?}\)}\))/,
-                replace: "return $self.insertSearch(() => $1)"
-            }
-        },
-        {
-            find: "__invalid_circleButtonMask",
-            replacement: {
-                match: /let (\i)=(\i)\.forwardRef/,
-                replace: "let $1 = $self.BigComponent = $2.forwardRef"
-            }
-        },
-    ],
 
-    insertSearch(Elem) {
-        return (<>
-            <this.BigComponent
-                id="search-btn"
-                showPill={true}
-                tooltip="Search"
-                icon={() => <SearchIcon />}
-                onClick={() => openPopout("DM_SEARCH")}
-                search={true}
-            />
+    renderButton() {
+        return <ErrorBoundary noop>
+            <div id="vc-searchbutton-container">
+                <Tooltip text="Search" position="right">
+                    {({ onMouseEnter, onMouseLeave }) => (
+                        <div
+                            id="vc-searchbutton"
+                            onMouseEnter={onMouseEnter}
+                            onMouseLeave={onMouseLeave}
+                            onClick={() => openPopout("DM_SEARCH")}>
+                            <SearchIcon />
+                        </div>
+                    )}
+                </Tooltip>
+            </div>
+        </ErrorBoundary>;
+    },
 
-            <Elem />
-        </>);
+    start() {
+        addServerListElement(ServerListRenderPosition.Above, this.renderButton);
+    },
+
+    stop() {
+        removeServerListElement(ServerListRenderPosition.Above, this.renderButton);
     }
 });
