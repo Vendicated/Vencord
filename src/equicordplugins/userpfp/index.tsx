@@ -24,10 +24,19 @@ const settings = definePluginSettings({
         ],
     },
     urlForDB: {
-        type: OptionType.STRING,
+        type: OptionType.SELECT,
         description: "Which Database url to use to load avatars, KNOW WHAT YOUR DOING",
-        default: "https://userpfp.github.io/UserPFP/source/data.json",
-        placeholder: "Default value: https://userpfp.github.io/UserPFP/source/data.json"
+        options: [
+            {
+                label: "UserPFP Default DB",
+                value: "https://userpfp.github.io/UserPFP/source/data.json",
+                default: true
+            },
+            {
+                label: "UserPFP Backup DB",
+                value: "https://userpfp.thororen.com/UserPFP/source/data.json"
+            }
+        ]
     }
 });
 
