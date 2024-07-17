@@ -128,6 +128,7 @@ export const globPlugins = kind => ({
                     const fileName = file.name;
                     if (fileName.startsWith("_") || fileName.startsWith(".")) continue;
                     if (fileName === "index.ts") continue;
+                    if (dir === "plugins/_core" && fileName === "native") continue;
 
                     const target = getPluginTarget(fileName);
 
