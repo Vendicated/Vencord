@@ -147,6 +147,7 @@ async function fetchMessage(channelID: string, messageID: string) {
     if (!msg) return;
 
     const message: Message = MessageStore.getMessages(msg.channel_id).receiveMessage(msg).get(msg.id);
+    if (!message) return;
 
     messageCache.set(message.id, {
         message,
