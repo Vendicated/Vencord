@@ -75,7 +75,10 @@ export default definePlugin({
         return data.avatars[user.id] ?? original(user, animated, size);
     },
     async start() {
-        const res = await fetch(settings.store.urlForDB);
-        if (res.ok) this.data = data = await res.json();
+        const res = await fetch(settings.store.urlForDB)
+            .then(async res => {
+                if (res.ok) this.data = data = await res.json();
+            })
+            .catch(() => null);
     }
 });

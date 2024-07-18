@@ -52,7 +52,8 @@ const fetchBadges = (id: string): BadgeCache["badges"] | undefined => {
             .then(body => {
                 cache.set(id, { badges: body, expires: Date.now() + EXPIRES });
                 return body;
-            });
+            })
+            .catch(() => null);
     } else if (cachedValue) {
         return cachedValue.badges;
     }
