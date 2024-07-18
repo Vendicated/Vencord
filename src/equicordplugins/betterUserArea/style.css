@@ -1,0 +1,11 @@
+/* stylelint-disable rule-empty-line-before */
+.vc-userAreaStyles
+{
+    display: grid;
+    height: 75px !important;
+    max-height: 9239080123px !important;
+    [class*="flex_"]
+    {
+        justify-content: space-between !important;
+    }
+}
