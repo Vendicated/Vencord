@@ -27,6 +27,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - AltKrispSwitch by newwares
 - AmITyping by MrDiamond
 - Anammox by Kyuuhachi
+- DecodeBase64 by ThePirateStoner
 - BetterActivities by D3SOX, Arjix, AutumnVN
 - BetterBanReasons by Inbestigator
 - BetterQuickReact by Ven and Sqaaakoi
@@ -37,6 +38,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - CommandPalette by Ethan
 - CopyUserMention by Cortex and castdrian
 - CustomAppIcons by Happy Enderman and SerStars
+- CustomSounds by ScattrdBlade
 - DeadMembers by Kyuuhachi
 - DiscordColorways by DaBluLite
 - DNDWhilePlaying by thororen
@@ -46,10 +48,13 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - Encryptcord by Inbestigator
 - EquicordCSS by FoxStorm1 and thororen (and all respective css developers)
 - ExportContacts by dat_insanity
+- FakeProfile by Sampath
 - FindReply by newwares
 - FriendshipRanks by Samwich
+- GensokyoRadioRPC by RyanCaoDev and Prince527
 - GlobalBadges by HypedDomi and Hosted by Wolfie
 - GodMode by Tolgchu
+- GrammarFix by unstream
 - HideMessage by Hanzy
 - HolyNotes by Wolfie
 - Hop On by ImLvna
@@ -62,6 +67,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - MessageLinkTooltip by Kyuuhachi
 - MessageLoggerEnhanced by Aria
 - ModalFade by Kyuuhachi
+- NewPluginsManager by Sqaaakoi
 - noAppsAllowed by kvba
 - NoModalAnimation by AutumnVN
 - NoNitroUpsell by thororen
@@ -76,6 +82,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - Quest Completer by HappyEnderman, SerStars, thororen
 - QuestionMarkReplacement by nyx
 - RepeatMessage by Tolgchu
+- ReplaceActivityTypes by Nyako
 - ReplyPingControl by ant0n and MrDiamond
 - ScreenRecorder by AutumnVN
 - SearchFix by Jaxx
@@ -89,6 +96,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - ThemeLibrary by Fafa
 - Title by Kyuuhachi
 - TosuRPC by AutumnVN
+- Translate+ by Prince527 (Using Translate by Ven)
 - UnlimitedAccounts by Balaclava and thororen
 - UserPFP by nexpid and thororen
 - VCSupport by thororen

@@ -22,7 +22,7 @@ import { ModalSize, openModalLazy } from "@utils/modal";
 import { Button, Card, Forms, React, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
 import { SelectOption } from "@webpack/types";
 
-import { MicrophoneSettingsModal } from "../../betterMicrophone/components";
+import { MicrophoneSettingsModal } from "../../betterMicrophone.desktop/components";
 import {
     MediaEngineStore,
     openURL,

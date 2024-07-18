@@ -19,7 +19,7 @@
 import { Logger } from "@utils/Logger";
 import { lodash } from "@webpack/common";
 
-import { MicrophoneProfile, MicrophoneStore } from "../../betterMicrophone/stores";
+import { MicrophoneProfile, MicrophoneStore } from "../../betterMicrophone.desktop/stores";
 import { ProfilableStore, replaceObjectValuesIfExist, types } from "..";
 
 export function getDefaultAudioTransportationOptions(connection: types.Connection) {

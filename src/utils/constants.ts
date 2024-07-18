@@ -679,6 +679,22 @@ export const EquicordDevs = Object.freeze({
         name: "walrus",
         id: 305317288775778306n,
     },
+    Prince527: {
+        name: "Prince527",
+        id: 364105797162237952n,
+    },
+    unstream: {
+        name: "Unstream",
+        id: 1125315673829154837n,
+    },
+    ThePirateStoner: {
+        name: "ThePirateStoner",
+        id: 1196220620376121381n
+    },
+    Sampath: {
+        name: "Sampath",
+        id: 984015688807100419n,
+    },
 } satisfies Record<string, Dev>);
 
 export const SuncordDevs = /* #__PURE__*/ Object.freeze({

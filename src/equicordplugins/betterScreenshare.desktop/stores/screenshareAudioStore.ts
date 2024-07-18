@@ -21,7 +21,7 @@ import {
     MicrophoneProfile as ScreenshareAudioProfile,
     MicrophoneStore as ScreenshareAudioStore,
     microphoneStoreDefault as screenshareAudioStoreDefault
-} from "../../betterMicrophone/stores";
+} from "../../betterMicrophone.desktop/stores";
 import { createPluginStore, ProfilableStore, profileable } from "../../philsPluginLibrary";
 import { PluginInfo } from "../constants";
 
