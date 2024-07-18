@@ -19,7 +19,8 @@
 
 import { createPackage } from "@electron/asar";
 import esbuild from "esbuild";
-import { readdir, writeFile } from "fs/promises";
+import { existsSync, readdirSync } from "fs";
+import { readdir, rm, writeFile } from "fs/promises";
 import { join } from "path";
 
 import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, watch } from "./common.mjs";
@@ -224,3 +225,18 @@ await Promise.all([
     createPackage("dist/desktop", "dist/desktop.asar"),
     createPackage("dist/vesktop", "dist/vesktop.asar")
 ]);
+
+if (existsSync("dist/renderer.js")) {
+    console.warn("Legacy dist folder. Cleaning up and adding shims.");
+
+    await Promise.all(
+        readdirSync("dist")
+            .filter(f => ["patcher", "preload", "renderer", "main"].some(name => f.toLowerCase().includes(name)))
+            .map(file => rm(join("dist", file)))
+    );
+
+    await Promise.all([
+        writeFile("dist/patcher.js", 'require("./desktop.asar")'),
+        writeFile("dist/vencordDesktopMain.js", 'require("./vesktop.asar")')
+    ]);
+}
