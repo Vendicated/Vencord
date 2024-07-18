@@ -28,7 +28,7 @@ async function fetchReddit(sub: string) {
 }
 
 export default definePlugin({
-    name: "Cute-Anime-Boys",
+    name: "CuteAnimeBoys",
     authors: [EquicordDevs.ShadyGoat],
     description: "Add a command to send cute anime boys in the chat",
     dependencies: ["CommandsAPI"],

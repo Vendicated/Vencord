@@ -767,10 +767,7 @@ function getCSS(fontName) {
 export default definePlugin({
     name: "Glide",
     description: "A sleek, rounded theme for discord.",
-    authors:
-        [
-            Devs.Samwich
-        ],
+    authors: [Devs.Samwich],
     settings,
     start() {
         injectCSS();

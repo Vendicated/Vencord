@@ -112,7 +112,7 @@ function utilityDock({ children }: { children: ReactNode[]; }) {
 }
 
 export default definePlugin({
-    name: "utilityDock",
+    name: "UtilityDock",
     description: "Adds a button on your titlebar with multiple useful features",
     authors: [Devs.Samwich],
 

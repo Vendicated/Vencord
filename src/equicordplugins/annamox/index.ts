@@ -37,7 +37,7 @@ export const settings = definePluginSettings({
 
 export default definePlugin({
     name: "Anammox",
-    description: "A microbial process that plays an important part in the nitrogen cycle",
+    description: "Remove Some Discord Settings",
     authors: [Devs.Kyuuhachi],
     settings,
 

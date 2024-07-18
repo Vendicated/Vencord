@@ -58,6 +58,9 @@ jobs:
       - name: Generate plugin list
         run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
 
+      - name: Generate Equicord plugin list
+        run: pnpm generateEquicordPluginJson dist/equicordplugins.json
+
       - name: Clean up obsolete files
         run: |
           rm -rf dist/*-unpacked dist/monaco Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
@@ -66,3 +69,23 @@ jobs:
         if: github.repository == 'Equicord/Equicord'
         run: |
           gh release upload latest --clobber dist/*
+
+      - name: Upload DevBuild to builds repo
+        if: github.repository == 'Equicord/Equicord'
+        run: |
+            git config --global user.name "$USERNAME"
+            git config --global user.email "78185467+thororen1234@users.noreply.github.com"
+
+            git clone https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git upload
+            cd upload
+
+            rm plugins.json
+            cp -r ../dist/equicordplugins.json plugins.json
+
+            git add -A
+            git commit -m "Plugins for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+            git push --force https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git
+        env:
+            API_TOKEN: ${{ secrets.ETOKEN }}
+            GH_REPO: Equicord/Ignore
+            USERNAME: thororen1234
