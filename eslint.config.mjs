@@ -9,7 +9,7 @@ import unusedImports from "eslint-plugin-unused-imports";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-    { ignores: ["browser", "dist", "packages", "src/**/*.?(c|m)js?(x)"] },
+    { ignores: ["browser", "dist", "packages", "src/**/*.?(c|m)js?(x)", "eslint.config.mjs"] },
     {
         files: ["**/*.?(c|m)[jt]s?(x)"],
         languageOptions: {
@@ -29,6 +29,13 @@ export default tseslint.config(
             "unused-imports": unusedImports,
         },
         rules: {
+            // Since it's only been a month and Vencord has already been stolen
+            // by random skids who rebranded it to "AlphaCord" and erased all license
+            // information
+            "simple-header/header": ["error", {
+                files: ["scripts/header-new.txt", "scripts/header-old.txt"],
+                templates: { author: [".*", "Vendicated and contributors"] }
+            }],
             "@stylistic/arrow-parens": ["error", "as-needed"],
             "@stylistic/block-spacing": "error",
             "@stylistic/eol-last": "error",
@@ -71,7 +78,6 @@ export default tseslint.config(
             "@typescript-eslint/no-confusing-void-expression": "error",
             "@typescript-eslint/no-extra-non-null-assertion": "error",
             "@typescript-eslint/no-import-type-side-effects": "error",
-            "@typescript-eslint/no-loss-of-precision": "error",
             "@typescript-eslint/no-non-null-asserted-nullish-coalescing": "error",
             "@typescript-eslint/no-non-null-asserted-optional-chain": "error",
             "@typescript-eslint/no-unnecessary-condition": "error",
@@ -96,6 +102,7 @@ export default tseslint.config(
             "no-fallthrough": "error",
             "no-invalid-regexp": "error",
             "no-irregular-whitespace": "error",
+            "no-loss-of-precision": "error",
             "no-misleading-character-class": "error",
             "no-prototype-builtins": "error",
             "no-regex-spaces": "error",
@@ -124,18 +131,6 @@ export default tseslint.config(
             "unused-imports/no-unused-imports": "error",
             "use-isnan": "error",
             "yoda": "error",
-        }
-    },
-    {
-        files: ["scripts/**", "src/**"],
-        rules: {
-            // Since it's only been a month and Vencord has already been stolen
-            // by random skids who rebranded it to "AlphaCord" and erased all license
-            // information
-            "simple-header/header": ["error", {
-                files: ["scripts/header-new.txt", "scripts/header-old.txt"],
-                templates: { author: [".*", "Vendicated and contributors"] }
-            }],
         }
     },
 );
