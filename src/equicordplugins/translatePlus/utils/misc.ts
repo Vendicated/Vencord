@@ -35,61 +35,16 @@ export interface TranslationValue {
     text: string;
 }
 
+const dictonary = /\b(?:leko|weka|pan|lete|linja|lipu|suli|nimi|akesi|misikeke|selo|ike|sijelo|sona|lili|pimeja|ante|jo|loje|telo|walo|kijetesantakalu|kasi|waso|wile|utala|lukin|sina|lape|ma|pilin|jasima|la|olin|pipi|meso|lawa|pi|pakala|oko|tan|ken|jaki|unpa|esun|seme|sitelen|len|kule|soko|open|ala|tenpo|lon|sinpin|pini|kokosila|mama|musi|monsi|mewika|taso|ona|mun|kiwen|tomo|mute|mi|nena|palisa|meli|laso|wawa|ale|kipisi|kulupu|ilo|lupa|nanpa|en|mu|jelo|kili|tonsi|moku|ni|kama|pu|poki|monsuta|sin|lasina|poka|soweli|sewi|elena|epiku|moli|pona|lanpan|alasa|anu|kute|uta|luka|suno|sama|awen|namako|suwi|noka|seli|mije|sike|jan|pali|tawa|inli|nasa|mani|wan|insa|nijon|nasin|kalama|ijo|toki|anpa|kala|kepeken|ko|kon|pana|tu|supa|kin|usawi|yupekosi)\b/gm;
+
 function isTokiPona(string) {
     const words = string.split(/\s+/);
 
-    const matches = string.match(/\b(?:leko|weka|pan|lete|linja|lipu|suli|nimi|akesi|misikeke|selo|ike|sijelo|sona|lili|pimeja|ante|jo|loje|telo|walo|kijetesantakalu|kasi|waso|wile|utala|lukin|sina|lape|ma|pilin|jasima|la|olin|pipi|meso|lawa|pi|pakala|oko|tan|ken|jaki|unpa|esun|seme|sitelen|len|kule|soko|open|ala|tenpo|lon|sinpin|pini|kokosila|mama|musi|monsi|mewika|taso|ona|mun|kiwen|tomo|mute|mi|nena|palisa|meli|laso|wawa|ale|kipisi|kulupu|ilo|lupa|nanpa|en|mu|jelo|kili|tonsi|moku|ni|kama|pu|poki|monsuta|sin|lasina|poka|soweli|sewi|elena|epiku|moli|pona|lanpan|alasa|anu|kute|uta|luka|suno|sama|awen|namako|suwi|noka|seli|mije|sike|jan|pali|tawa|inli|nasa|mani|wan|insa|nijon|nasin|kalama|ijo|toki|anpa|kala|kepeken|ko|kon|pana|tu|supa|kin|usawi|yupekosi)\b/gm) || [];
+    const matches = string.match(dictonary) || [];
 
     const percentage = (matches.length / words.length) * 100;
 
     return percentage >= 50;
-}
-
-import { rawDictionary } from "../misc/dictionary";
-
-function translateShavian(message) {
-    const dictionary = JSON.parse(rawDictionary);
-
-    const punctuationMap = {
-        '"': "\"",
-        "«": "\"",
-        "»": "\"",
-        ",": ",",
-        "!": "!",
-        "?": "?",
-        ".": ".",
-        "(": "(",
-        ")": ")",
-        "/": "/",
-        ";": ";",
-        ":": ":"
-    };
-
-    let translated = "";
-    const words = message.split(/\s+/);
-
-    for (let word of words) {
-        let punctuationBefore = "", punctuationAfter = "";
-
-        if (word[0] in punctuationMap) {
-            punctuationBefore = punctuationMap[word[0]];
-            word = word.slice(1);
-        }
-
-        if (word[word.length - 1] in punctuationMap) {
-            punctuationAfter = punctuationMap[word[word.length - 1]];
-            word = word.slice(0, -1);
-        }
-
-        translated += punctuationBefore;
-
-        if (word in dictionary) translated += dictionary[word];
-        else translated += word;
-
-        translated += punctuationAfter + " ";
-    }
-
-    return translated.trim();
 }
 
 export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
@@ -115,11 +70,6 @@ export async function translate(kind: "received" | "sent", text: string): Promis
         output = {
             src: "tp",
             text: translate.translation[0]
-        };
-    } else if (/[\u{10450}-\u{1047F}]+/u.test(text)) {
-        output = {
-            src: "sh",
-            text: translateShavian(text)
         };
     } else {
         const [sourceLang, targetLang] = [settings.store[kind + "Input"], settings.store[kind + "Output"]];
