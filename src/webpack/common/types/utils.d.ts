@@ -56,11 +56,11 @@ export interface AlertActionCreators {
 }
 
 export interface SnowflakeUtils {
-    fromTimestamp(timestamp: number): string;
-    extractTimestamp(snowflake: string): number;
-    age(snowflake: string): number;
-    atPreviousMillisecond(snowflake: string): string;
-    compare(snowflake1?: string, snowflake2?: string): number;
+    fromTimestamp: (timestamp: number) => string;
+    extractTimestamp: (snowflake: string) => number;
+    age: (snowflake: string) => number;
+    atPreviousMillisecond: (snowflake: string) => string;
+    compare: (snowflake1?: string, snowflake2?: string) => number;
 }
 
 interface RestRequestData {
@@ -78,35 +78,35 @@ export type PermissionsKeys = "CREATE_INSTANT_INVITE" | "KICK_MEMBERS" | "BAN_ME
 export type Permissions = Record<PermissionsKeys, bigint>;
 
 export interface ClipboardUtils {
-    copy(text: string): void;
+    copy: (text: string) => void;
     SUPPORTS_COPY: boolean;
 }
 
 export interface RouterUtils {
-    back(): void;
-    forward(): void;
-    transitionTo(path: string, ...args: unknown[]): void;
-    transitionToGuild(guildId: string, ...args: unknown[]): void;
+    back: () => void;
+    forward: () => void;
+    transitionTo: (path: string, ...args: unknown[]) => void;
+    transitionToGuild: (guildId: string, ...args: unknown[]) => void;
 }
 
 export interface IconUtils {
-    getUserAvatarURL(user: UserRecord, canAnimate?: boolean, size?: number, format?: string): string;
-    getDefaultAvatarURL(id: string, discriminator?: string): string;
-    getUserBannerURL(data: { id: string; banner: string; canAnimate?: boolean; size: number; }): string | undefined;
-    getAvatarDecorationURL(data: { avatarDecoration: string; size: number; canCanimate?: boolean; }): string | undefined;
+    getUserAvatarURL: (user: UserRecord, canAnimate?: boolean, size?: number, format?: string) => string;
+    getDefaultAvatarURL: (id: string, discriminator?: string) => string;
+    getUserBannerURL: (data: { id: string; banner: string; canAnimate?: boolean; size: number; }) => string | undefined;
+    getAvatarDecorationURL: (data: { avatarDecoration: string; size: number; canCanimate?: boolean; }) => string | undefined;
 
-    getGuildMemberAvatarURL(member: GuildMember, canAnimate?: string): string | null;
-    getGuildMemberAvatarURLSimple(data: { guildId: string; userId: string; avatar: string; canAnimate?: boolean; size?: number; }): string;
-    getGuildMemberBannerURL(data: { id: string; guildId: string; banner: string; canAnimate?: boolean; size: number; }): string | undefined;
+    getGuildMemberAvatarURL: (member: GuildMember, canAnimate?: string) => string | null;
+    getGuildMemberAvatarURLSimple: (data: { guildId: string; userId: string; avatar: string; canAnimate?: boolean; size?: number; }) => string;
+    getGuildMemberBannerURL: (data: { id: string; guildId: string; banner: string; canAnimate?: boolean; size: number; }) => string | undefined;
 
-    getGuildIconURL(data: { id: string; icon?: string; size?: number; canAnimate?: boolean; }): string | undefined;
-    getGuildBannerURL(guild: GuildRecord, canAnimate?: boolean): string | null;
+    getGuildIconURL: (data: { id: string; icon?: string; size?: number; canAnimate?: boolean; }) => string | undefined;
+    getGuildBannerURL: (guild: GuildRecord, canAnimate?: boolean) => string | null;
 
-    getChannelIconURL(data: { id: string; icon?: string | null | undefined; applicationId?: string; size?: number; }): string | undefined;
-    getEmojiURL(data: { id: string; animated: boolean; size: number; forcePNG?: boolean; }): string;
+    getChannelIconURL: (data: { id: string; icon?: string | null | undefined; applicationId?: string; size?: number; }) => string | undefined;
+    getEmojiURL: (data: { id: string; animated: boolean; size: number; forcePNG?: boolean; }) => string;
 
-    hasAnimatedGuildIcon(guild: GuildRecord): boolean;
-    isAnimatedIconHash(hash: string): boolean;
+    hasAnimatedGuildIcon: (guild: GuildRecord) => boolean;
+    isAnimatedIconHash: (hash: string) => boolean;
 
     getGuildSplashURL: any;
     getGuildDiscoverySplashURL: any;
@@ -141,8 +141,8 @@ export interface Constants {
 
 // zustand store
 export interface ExpressionPickerStore {
-    closeExpressionPicker(activeViewType?: any): void;
-    openExpressionPicker(activeView: LiteralUnion<"emoji" | "gif" | "sticker", string>, activeViewType?: any): void;
+    closeExpressionPicker: (activeViewType?: any) => void;
+    openExpressionPicker: (activeView: LiteralUnion<"emoji" | "gif" | "sticker", string>, activeViewType?: any) => void;
 }
 
 export interface BrowserWindowFeatures {
@@ -199,13 +199,13 @@ export interface UserUtils {
 }
 
 export interface DisplayProfileUtils {
-    getDisplayProfile(
+    getDisplayProfile: (
         userId: string,
         guildId?: string | null | undefined,
         stores?: [
             Pick<UserStore, "getUser">,
             Pick<UserProfileStore, "getUserProfile" | "getGuildMemberProfile">
         ] | undefined /* = [UserStore, UserProfileStore] */
-    ): DisplayProfile | null;
-    useDisplayProfile(userId: string, guildId?: string | null | undefined): DisplayProfile | null;
+    ) => DisplayProfile | null;
+    useDisplayProfile: (userId: string, guildId?: string | null | undefined) => DisplayProfile | null;
 }

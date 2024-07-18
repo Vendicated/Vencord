@@ -154,7 +154,7 @@ export function NotificationLog({ log, pending }: { log: PersistentNotificationD
     );
 }
 
-function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void; }) {
+function LogModal({ modalProps, close }: { modalProps: ModalProps; close: () => void; }) {
     const [log, pending] = useLogs();
 
     return (

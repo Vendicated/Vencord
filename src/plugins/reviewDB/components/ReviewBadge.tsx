@@ -22,7 +22,7 @@ import type { HTMLAttributes } from "react";
 import type { Badge } from "../entities";
 import { cl } from "../utils";
 
-export default function ReviewBadge(badge: Badge & { onClick?(): void; }) {
+export default function ReviewBadge(badge: Badge & { onClick?: () => void; }) {
     const Wrapper = badge.redirectURL
         ? MaskedLink
         : (props: HTMLAttributes<HTMLDivElement>) => (

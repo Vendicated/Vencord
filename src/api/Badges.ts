@@ -48,7 +48,7 @@ export interface ProfileBadge {
     /**
      * Allows dynamically returning multiple badges
      */
-    getBadges?(userInfo: BadgeUserArgs): ProfileBadge[];
+    getBadges?: (userInfo: BadgeUserArgs) => ProfileBadge[];
 }
 
 const Badges = new Set<ProfileBadge>();

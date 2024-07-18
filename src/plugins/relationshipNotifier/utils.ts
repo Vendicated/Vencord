@@ -30,7 +30,7 @@ export const GuildAvailabilityStore: FluxStore & {
     totalGuilds: number;
     totalUnavailableGuilds: number;
     unavailableGuilds: string[];
-    isUnavailable(guildId: string): boolean;
+    isUnavailable: (guildId: string) => boolean;
 } = findStoreLazy("GuildAvailabilityStore");
 
 const guilds = new Map<string, SimpleGuild>();

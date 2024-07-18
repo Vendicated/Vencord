@@ -24,21 +24,16 @@ interface UserSettingDefinition<T> {
     /**
      * Gets the setting value
      */
-    getSetting(): T;
+    getSetting: () => T;
     /**
      * Updates the setting value
      * @param value The new value
      */
-    updateSetting(value: T): Promise<void>;
-    /**
-     * Updates the setting value
-     * @param value A callback that accepts the old value as the first argument, and returns the new value
-     */
-    updateSetting(value: (old: T) => T): Promise<void>;
+    updateSetting: ((value: T) => Promise<void>) & ((value: (old: T) => T) => Promise<void>);
     /**
      * Stateful React hook for this setting value
      */
-    useSetting(): T;
+    useSetting: () => T;
     userSettingsAPIGroup: string;
     userSettingsAPIName: string;
 }

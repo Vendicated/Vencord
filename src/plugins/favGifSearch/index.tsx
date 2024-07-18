@@ -55,7 +55,7 @@ interface Instance {
     props: {
         favCopy: Gif[];
 
-        favorites: Gif[];
+        favorites?: Gif[] | null;
     };
     forceUpdate: () => void;
 }
@@ -129,9 +129,9 @@ export default definePlugin({
         if (!this.instance || this.instance.dead) return favorites;
         const { favorites: filteredFavorites } = this.instance.props;
 
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        return filteredFavorites != null && filteredFavorites?.length !== favorites.length ? filteredFavorites : favorites;
-
+        return filteredFavorites != null && filteredFavorites.length !== favorites.length
+            ? filteredFavorites
+            : favorites;
     }
 });
 
@@ -166,7 +166,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
                     score: fuzzySearch(searchQuery.toLowerCase(), getTargetString(gif.url ?? gif.src).replace(/(%20|[_-])/g, " ").toLowerCase()),
                     gif,
                 }))
-                .filter(m => m.score != null) as { score: number; gif: Gif; }[];
+                .filter((m): m is { score: number; gif: Gif; } => m.score != null);
 
         result.sort((a, b) => b.score - a.score);
         props.favorites = result.map(e => e.gif);
@@ -174,11 +174,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         instance.forceUpdate();
     }, [instance.state]);
 
-    useEffect(() => {
-        return () => {
-            instance.dead = true;
-        };
-    }, []);
+    useEffect(() => () => { instance.dead = true; }, []);
 
     return (
         <SearchBarComponent

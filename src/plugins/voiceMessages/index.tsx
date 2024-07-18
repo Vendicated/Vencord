@@ -43,8 +43,8 @@ const PendingReplyStore: FluxStore & Record<string, any> = findStoreLazy("Pendin
 const OptionClasses: Record<string, string> = findByPropsLazy("optionName", "optionIcon", "optionLabel");
 
 export type VoiceRecorder = ComponentType<{
-    setAudioBlob(blob: Blob): void;
-    onRecordingChange?(recording: boolean): void;
+    setAudioBlob: (blob: Blob) => void;
+    onRecordingChange?: (recording: boolean) => void;
 }>;
 
 const VoiceRecorder = IS_DISCORD_DESKTOP ? VoiceRecorderDesktop : VoiceRecorderWeb;

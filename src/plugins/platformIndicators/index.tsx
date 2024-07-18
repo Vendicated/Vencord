@@ -41,7 +41,7 @@ export interface Session {
 }
 
 const SessionsStore: FluxStore & {
-    getSessions(): Record<string, Session>;
+    getSessions: () => Record<string, Session>;
 } = findStoreLazy("SessionsStore");
 
 const Icon = (path: string, opts?: { viewBox?: string; width?: number; height?: number; }) =>

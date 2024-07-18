@@ -56,7 +56,7 @@ const UserRecord: typeof $UserRecord = proxyLazy<any>(() => UserStore.getCurrent
 
 interface PluginModalProps extends ModalProps {
     plugin: Plugin;
-    onRestartNeeded(): void;
+    onRestartNeeded: () => void;
 }
 
 function makeDummyUser(user: { username: string; id?: string; avatar?: string; }) {

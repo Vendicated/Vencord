@@ -23,7 +23,7 @@ import { Tooltip } from "@webpack/common";
 
 const iconClasses: Record<string, string> = findByPropsLazy("button", "wrapper", "disabled", "separator");
 
-export const DeleteButton = ({ onClick }: { onClick(): void; }) => (
+export const DeleteButton = ({ onClick }: { onClick: () => void; }) => (
     <Tooltip text="Delete Review">
         {props => (
             <div
@@ -38,7 +38,7 @@ export const DeleteButton = ({ onClick }: { onClick(): void; }) => (
     </Tooltip>
 );
 
-export const ReportButton = ({ onClick }: { onClick(): void; }) => (
+export const ReportButton = ({ onClick }: { onClick: () => void; }) => (
     <Tooltip text="Report Review">
         {props => (
             <div
@@ -58,7 +58,7 @@ export const ReportButton = ({ onClick }: { onClick(): void; }) => (
     </Tooltip>
 );
 
-export const BlockButton = ({ onClick, isBlocked }: { onClick(): void; isBlocked: boolean; }) => (
+export const BlockButton = ({ onClick, isBlocked }: { onClick: () => void; isBlocked: boolean; }) => (
     <Tooltip text={`${isBlocked ? "Unblock" : "Block"} user`}>
         {props => (
             <div

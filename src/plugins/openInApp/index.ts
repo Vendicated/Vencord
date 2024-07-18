@@ -156,7 +156,7 @@ export default definePlugin({
         return false;
     },
 
-    handleAccountView(event: { preventDefault(): void; }, platformType: PlatformType, userId: string) {
+    handleAccountView(event: { preventDefault: () => void; }, platformType: PlatformType, userId: string) {
         if (platformType === PlatformType.SPOTIFY && settings.store.spotify) {
             VencordNative.native.openExternal(`spotify:user:${userId}`);
             event.preventDefault();

@@ -34,7 +34,7 @@ import { VerifiedIcon } from "./VerifiedIcon";
 const getProfileThemeProps = findByCodeLazy(".getPreviewThemeColors", "primaryColor:");
 
 const Platforms: {
-    get(type: PlatformType): ConnectionPlatform;
+    get: (type: PlatformType) => ConnectionPlatform;
 } = findByPropsLazy("isSupported", "getByUrl");
 
 const Section = findComponentByCodeLazy(".lastSection", "children:");

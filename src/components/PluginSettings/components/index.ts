@@ -20,13 +20,13 @@ import type { DefinedSettings, PluginOptionBase } from "@utils/types";
 
 export interface ISettingElementProps<T extends PluginOptionBase> {
     option: T;
-    onChange(newValue: any): void;
+    onChange: (newValue: any) => void;
     pluginSettings: {
         [setting: string]: any;
         enabled: boolean;
     };
     id: string;
-    onError(hasError: boolean): void;
+    onError: (hasError: boolean) => void;
     definedSettings?: DefinedSettings;
 }
 

@@ -14,7 +14,7 @@ import type { ReviewDBUser } from "../entities";
 import { fetchBlocks, unblockUser } from "../reviewDbApi";
 import { cl } from "../utils";
 
-const UnblockButton = (props: { onClick?(): void; }) => (
+const UnblockButton = (props: { onClick?: () => void; }) => (
     <Tooltip text="Unblock user">
         {tooltipProps => (
             <div
@@ -36,7 +36,7 @@ const UnblockButton = (props: { onClick?(): void; }) => (
     </Tooltip>
 );
 
-function BlockedUser({ user, isBusy, setIsBusy }: { user: ReviewDBUser; isBusy: boolean; setIsBusy(v: boolean): void; }) {
+function BlockedUser({ user, isBusy, setIsBusy }: { user: ReviewDBUser; isBusy: boolean; setIsBusy: (v: boolean) => void; }) {
     const [gone, setGone] = useState(false);
     if (gone) return null;
 

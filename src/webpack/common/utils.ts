@@ -80,9 +80,9 @@ export const Toasts = {
     // hack to merge with the following interface, dunno if there's a better way
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     ...{} as {
-        show(data: ToastData): void;
-        pop(): void;
-        create(message: string, type: number, options?: ToastOptions): ToastData;
+        show: (data: ToastData) => void;
+        pop: () => void;
+        create: (message: string, type: number, options?: ToastOptions) => ToastData;
     }
 };
 

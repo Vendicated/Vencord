@@ -27,13 +27,13 @@ interface TextInputProps {
     /**
      * This will only be called if the new value passed validate()
      */
-    onChange(newValue: string): void;
+    onChange: (newValue: string) => void;
     /**
      * Optionally validate the user input
      * Return true if the input is valid
      * Otherwise, return a string containing the reason for this input being invalid
      */
-    validate(v: string): true | string;
+    validate: (v: string) => true | string;
 }
 
 /**

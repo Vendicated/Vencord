@@ -30,9 +30,9 @@ import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
 const StickerStore: FluxStore & {
-    getPremiumPacks(): StickerPack[];
-    getAllGuildStickers(): Map<string, Sticker[]>;
-    getStickerById(id: string): Sticker | undefined;
+    getPremiumPacks: () => StickerPack[];
+    getAllGuildStickers: () => Map<string, Sticker[]>;
+    getStickerById: (id: string) => Sticker | undefined;
 } = findStoreLazy("StickersStore");
 
 const UserSettingsProtoStore: FluxPersistedStore & Record<string, any> = findStoreLazy("UserSettingsProtoStore");

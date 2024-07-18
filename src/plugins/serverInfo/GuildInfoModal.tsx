@@ -39,7 +39,7 @@ interface GuildProps {
 }
 
 interface RelationshipProps extends GuildProps {
-    setCount(count: number): void;
+    setCount: (count: number) => void;
 }
 
 const fetched = {

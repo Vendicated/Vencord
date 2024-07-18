@@ -50,7 +50,7 @@ export default LazyComponent(() => {
 
     const dateFormat = new Intl.DateTimeFormat();
 
-    return function ReviewComponent({ review, refetch, profileId }: { review: Review; refetch(): void; profileId: string; }) {
+    return function ReviewComponent({ review, refetch, profileId }: { review: Review; refetch: () => void; profileId: string; }) {
         const [showAll, setShowAll] = useState(false);
 
         function openModal() {

@@ -24,7 +24,7 @@ import { makeLazy } from "./lazy";
 
 // needed to parse APNGs in the nitroBypass plugin
 export const importApngJs = makeLazy(() => {
-    return require("./apng-canvas").APNG as { parseURL(url: string): Promise<ApngFrameData>; };
+    return require("./apng-canvas").APNG as { parseURL: (url: string) => Promise<ApngFrameData>; };
 });
 
 // https://wiki.mozilla.org/APNG_Specification#.60fcTL.60:_The_Frame_Control_Chunk

@@ -35,7 +35,7 @@ type ThreadsJoined = Record<string, ThreadJoined>;
 type ThreadsJoinedByParent = Record<string, ThreadsJoined>;
 
 const ActiveJoinedThreadsStore: FluxStore & {
-    getActiveJoinedThreadsForGuild(guildId: string): ThreadsJoinedByParent;
+    getActiveJoinedThreadsForGuild: (guildId: string) => ThreadsJoinedByParent;
 } = findStoreLazy("ActiveJoinedThreadsStore");
 
 function onClick() {

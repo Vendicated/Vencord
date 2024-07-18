@@ -54,7 +54,7 @@ type Format = typeof Formats[number];
 
 const cl = classNameFactory("vc-st-");
 
-function PickerModal({ rootProps, close }: { rootProps: ModalProps; close(): void; }) {
+function PickerModal({ rootProps, close }: { rootProps: ModalProps; close: () => void; }) {
     const [value, setValue] = useState<string>();
     const [format, setFormat] = useState<Format>("");
     const time = Math.round((new Date(value!).getTime() || Date.now()) / 1000);

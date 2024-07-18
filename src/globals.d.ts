@@ -52,7 +52,7 @@ declare global {
         dom: HTMLStyleElement | null;
     }>;
     export var appSettings: {
-        set(setting: string, v: any): void;
+        set: (setting: string, v: any) => void;
     };
     /**
      * Only available when running in Electron, undefined on web.
@@ -66,8 +66,8 @@ declare global {
 
     interface Window {
         webpackChunkdiscord_app: {
-            push(chunk: any): any;
-            pop(): any;
+            push: (chunk: any) => any;
+            pop: () => any;
         };
         _: LoDashStatic;
         [k: string]: any;

@@ -169,7 +169,6 @@ export default definePlugin({
 
     isPinned,
     categoryLen,
-    getSections,
     getAllUncollapsedChannels,
     requireSettingsMenu,
 
@@ -177,7 +176,7 @@ export default definePlugin({
         this._instance = instance;
         this.sections = sections;
 
-        this.sections.splice(1, 0, ...this.getSections());
+        this.sections.splice(1, 0, ...getSections());
 
         if (this.instance?.props?.privateChannelIds?.length === 0) {
             // dont render direct messages header
@@ -203,7 +202,7 @@ export default definePlugin({
         // the higher the chunk size, the more rows are rendered at once
         // also if the chunk size is 0 it will render everything at once
 
-        const sections = this.getSections();
+        const sections = getSections();
         const sectionHeaderSizePx = sections.length * 40;
         // (header heights + DM heights + DEFAULT_CHUNK_SIZE) * 1.5
         // we multiply everything by 1.5 so it only gets unmounted after the entire list is off screen
@@ -234,7 +233,7 @@ export default definePlugin({
     isChannelHidden(categoryIndex: number, channelIndex: number) {
         if (categoryIndex === 0) return false;
 
-        if (settings.store.dmSectioncollapsed && this.getSections().length + 1 === categoryIndex)
+        if (settings.store.dmSectioncollapsed && getSections().length + 1 === categoryIndex)
             return true;
 
         if (!this.instance || !this.isChannelIndex(categoryIndex, channelIndex)) return false;
@@ -344,10 +343,9 @@ export default definePlugin({
 
     renderChannel(sectionIndex: number, index: number, ChannelComponent: ComponentType<ChannelComponentProps>) {
         return ErrorBoundary.wrap(() => {
-            const { channel, category } = this.getChannel(sectionIndex, index, this.instance.props.channels);
+            const channel = this.getChannel(sectionIndex, index, this.instance.props.channels);
 
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            if (!channel || !category) return null;
+            if (!channel) return null;
             if (this.isChannelHidden(sectionIndex, index)) return null;
 
             return (
@@ -363,11 +361,11 @@ export default definePlugin({
 
     getChannel(sectionIndex: number, index: number, channels: Record<string, ChannelRecord>) {
         const category = categories[sectionIndex - 1];
-        if (!category) return { channel: null, category: null };
+        if (!category) return null;
 
         const channelId = this.getCategoryChannels(category)[index]!;
 
-        return { channel: channels[channelId], category };
+        return channels[channelId];
     },
 
     getCategoryChannels(category: Category) {

@@ -33,14 +33,14 @@ interface UserPermission {
     rolePosition: number;
 }
 
-const Classes: Record<"roles" | "rolePill" | "rolePillBorder" | "desaturateUserColors" | "flex" | "alignCenter" | "justifyCenter" | "svg" | "background" | "dot" | "dotBorderColor" | "roleCircle" | "dotBorderBase" | "flex" | "alignCenter" | "justifyCenter" | "wrap" | "root" | "role" | "roleRemoveButton" | "roleDot" | "roleFlowerStar" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roleVerifiedIcon" | "roleName" | "roleNameOverflow" | "actionButton" | "overflowButton" | "addButton" | "addButtonIcon" | "overflowRolesPopout" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutArrow" | "popoutBottom" | "popoutTop" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "roleIcon", string>
-    = proxyLazyWebpack(() =>
-        Object.assign({}, ...findBulk(
+const Classes: Record<"actionButton" | "addButton" | "addButtonIcon" | "alignCenter" | "background" | "desaturateUserColors" | "dot" | "dotBorderBase" | "dotBorderColor" | "flex" | "justifyCenter" | "overflowButton" | "overflowRolesPopout" | "overflowRolesPopoutArrow" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "popoutBottom" | "popoutTop" | "role" | "roleCircle" | "roleDot" | "roleFlowerStar" | "roleIcon" | "roleName" | "roleNameOverflow" | "rolePill" | "rolePillBorder" | "roleRemoveButton" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roles" | "roleVerifiedIcon" | "root" | "svg" | "wrap", string>
+    = proxyLazyWebpack(() => ({
+        ...findBulk(
             filters.byProps("roles", "rolePill", "rolePillBorder"),
             filters.byProps("roleCircle", "dotBorderBase", "dotBorderColor"),
             filters.byProps("roleNameOverflow", "root", "roleName", "roleRemoveButton")
-        ))
-    );
+        )
+    }));
 
 interface UserPermissionsComponentProps {
     forceOpen?: boolean;

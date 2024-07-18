@@ -36,7 +36,7 @@ export interface PatchReplacement {
     /** The replacement string or function which returns the string for the patch replacement */
     replace: string | ReplaceFn;
     /** A function which returns whether this patch replacement should be applied */
-    predicate?(): boolean;
+    predicate?: () => boolean;
 }
 
 export interface Patch {
@@ -52,7 +52,7 @@ export interface Patch {
     /** Only apply this set of replacements if all of them succeed. Use this if your replacements depend on each other */
     group?: boolean;
     /** A function which returns whether this patch should be applied */
-    predicate?(): boolean;
+    predicate?: () => boolean;
 }
 
 export interface PluginAuthor {
@@ -70,8 +70,8 @@ export interface PluginDef {
     name: string;
     description: string;
     authors: PluginAuthor[];
-    start?(): void;
-    stop?(): void;
+    start?: () => void;
+    stop?: () => void;
     patches?: Omit<Patch, "plugin">[];
     /**
      * List of commands. If you specify these, you must add CommandsAPI to dependencies
@@ -118,7 +118,7 @@ export interface PluginDef {
      * Check that this returns true before allowing a save to complete.
      * If a string is returned, show the error to the user.
      */
-    beforeSave?(options: Record<string, any>): Promisable<true | string>;
+    beforeSave?: (options: Record<string, any>) => Promisable<true | string>;
     /**
      * Allows you to specify a custom Component that will be rendered in your
      * plugin's settings page
@@ -189,7 +189,7 @@ export type PluginSettingDef = (
 export interface PluginSettingCommon {
     description: string;
     placeholder?: string;
-    onChange?(newValue: any): void;
+    onChange?: (newValue: any) => void;
     /**
      * Whether changing this setting requires a restart
      */
@@ -208,12 +208,14 @@ interface IsDisabled<D = unknown> {
     /**
      * Checks if this setting should be disabled
      */
+    // eslint-disable-next-line @typescript-eslint/method-signature-style
     disabled?(this: D): boolean;
 }
 interface IsValid<T, D = unknown> {
     /**
      * Prevents the user from saving settings if this is false or a string
      */
+    // eslint-disable-next-line @typescript-eslint/method-signature-style
     isValid?(this: D, value: T): boolean | string;
 }
 
@@ -266,14 +268,14 @@ export interface IPluginOptionComponentProps {
      *
      * NOTE: The user will still need to click save to apply these changes.
      */
-    setValue(newValue: any): void;
+    setValue: (newValue: any) => void;
     /**
      * Set to true to prevent the user from saving.
      *
      * NOTE: This will not show the error to the user. It will only stop them saving.
      * Make sure to show the error in your component.
      */
-    setError(error: boolean): void;
+    setError: (error: boolean) => void;
     /**
      * The options object
      */

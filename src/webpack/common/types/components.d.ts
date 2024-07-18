@@ -71,12 +71,12 @@ export type FormText = ComponentType<PropsWithChildren<{
 export type Tooltip = ComponentType<{
     text: ReactNode;
     children: FunctionComponent<{
-        onClick(): void;
-        onMouseEnter(): void;
-        onMouseLeave(): void;
-        onContextMenu(): void;
-        onFocus(): void;
-        onBlur(): void;
+        onClick: () => void;
+        onMouseEnter: () => void;
+        onMouseLeave: () => void;
+        onContextMenu: () => void;
+        onFocus: () => void;
+        onBlur: () => void;
         "aria-label"?: string;
     }>;
     "aria-label"?: string;
@@ -135,11 +135,11 @@ export type Card = ComponentType<PropsWithChildren<HTMLProps<HTMLDivElement> & {
 export type ComboboxPopout = ComponentType<PropsWithChildren<{
     value: Set<any>;
     placeholder: string;
-    children(query: string): ReactNode[];
+    children: (query: string) => ReactNode[];
 
-    onChange(value: any): void;
+    onChange: (value: any) => void;
     itemToString?: (item: any) => string;
-    onClose?(): void;
+    onClose?: () => void;
 
     className?: string;
     listClassName?: string;
@@ -184,7 +184,7 @@ export type Button = ComponentType<PropsWithChildren<Omit<HTMLProps<HTMLButtonEl
 
 export type Switch = ComponentType<PropsWithChildren<{
     value: boolean;
-    onChange(value: boolean): void;
+    onChange: (value: boolean) => void;
 
     disabled?: boolean;
     hideBorder?: boolean;
@@ -210,7 +210,7 @@ export type Timestamp = ComponentType<PropsWithChildren<{
 
 export type TextInput = ComponentType<PropsWithChildren<{
     name?: string;
-    onChange?(value: string, name?: string): void;
+    onChange?: (value: string, name?: string) => void;
     placeholder?: string;
     editable?: boolean;
     maxLength?: number;
@@ -230,7 +230,7 @@ export type TextInput = ComponentType<PropsWithChildren<{
 };
 
 export type TextArea = ComponentType<PropsWithRef<Omit<HTMLProps<HTMLTextAreaElement>, "onChange"> & {
-    onChange(v: string): void;
+    onChange: (v: string) => void;
 }>>;
 
 interface SelectOption {
@@ -261,20 +261,20 @@ export type Select = ComponentType<PropsWithChildren<{
     closeOnSelect?: boolean;
     hideIcon?: boolean;
 
-    select(value: any): void;
-    isSelected(value: any): boolean;
-    serialize(value: any): string;
-    clear?(): void;
+    select: (value: any) => void;
+    isSelected: (value: any) => boolean;
+    serialize: (value: any) => string;
+    clear?: () => void;
 
     maxVisibleItems?: number;
     popoutWidth?: number;
 
-    onClose?(): void;
-    onOpen?(): void;
+    onClose?: () => void;
+    onOpen?: () => void;
 
-    renderOptionLabel?(option: SelectOption): ReactNode;
+    renderOptionLabel?: (option: SelectOption) => ReactNode;
     /** discord stupid this gets all options instead of one yeah */
-    renderOptionValue?(option: SelectOption[]): ReactNode;
+    renderOptionValue?: (option: SelectOption[]) => ReactNode;
 
     "aria-label"?: boolean;
     "aria-labelledby"?: boolean;
@@ -303,17 +303,17 @@ export type SearchableSelect = ComponentType<PropsWithChildren<{
     clearOnSelect?: boolean;
     multi?: boolean;
 
-    onChange(value: any): void;
-    onSearchChange?(value: string): void;
+    onChange: (value: any) => void;
+    onSearchChange?: (value: string) => void;
 
-    onClose?(): void;
-    onOpen?(): void;
-    onBlur?(): void;
+    onClose?: () => void;
+    onOpen?: () => void;
+    onBlur?: () => void;
 
-    renderOptionPrefix?(option: SelectOption): ReactNode;
-    renderOptionSuffix?(option: SelectOption): ReactNode;
+    renderOptionPrefix?: (option: SelectOption) => ReactNode;
+    renderOptionSuffix?: (option: SelectOption) => ReactNode;
 
-    filter?(option: SelectOption[], query: string): SelectOption[];
+    filter?: (option: SelectOption[], query: string) => SelectOption[];
 
     centerCaret?: boolean;
     debounceTime?: number;
@@ -336,12 +336,12 @@ export type Slider = ComponentType<PropsWithChildren<{
     markerPosition?: 0 | 1;
     orientation?: "horizontal" | "vertical";
 
-    getAriaValueText?(currentValue: number): string;
-    renderMarker?(marker: number): ReactNode;
-    onMarkerRender?(marker: number): ReactNode;
-    onValueRender?(value: number): ReactNode;
-    onValueChange?(value: number): void;
-    asValueChanges?(value: number): void;
+    getAriaValueText?: (currentValue: number) => string;
+    renderMarker?: (marker: number) => ReactNode;
+    onMarkerRender?: (marker: number) => ReactNode;
+    onValueRender?: (value: number) => ReactNode;
+    onValueChange?: (value: number) => void;
+    asValueChanges?: (value: number) => void;
 
     className?: string;
     disabled?: boolean;
@@ -377,31 +377,31 @@ declare enum PopoutAnimation {
 }
 
 export type Popout = ComponentType<{
-    children(
+    children: (
         thing: {
             "aria-controls": string;
             "aria-expanded": boolean;
-            onClick(event: MouseEvent<HTMLElement>): void;
-            onKeyDown(event: KeyboardEvent<HTMLElement>): void;
-            onMouseDown(event: MouseEvent<HTMLElement>): void;
+            onClick: (event: MouseEvent<HTMLElement>) => void;
+            onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
+            onMouseDown: (event: MouseEvent<HTMLElement>) => void;
         },
         data: {
             isShown: boolean;
             position: string;
         }
-    ): ReactNode;
+    ) => ReactNode;
     shouldShow?: boolean;
-    renderPopout(args: {
-        closePopout(): void;
+    renderPopout: (args: {
+        closePopout: () => void;
         isPositioned: boolean;
         nudge: number;
         position: string;
-        setPopoutRef(ref: any): void;
-        updatePosition(): void;
-    }): ReactNode;
+        setPopoutRef: (ref: any) => void;
+        updatePosition: () => void;
+    }) => ReactNode;
 
-    onRequestOpen?(): void;
-    onRequestClose?(): void;
+    onRequestOpen?: () => void;
+    onRequestClose?: () => void;
 
     /** "center" and others */
     align?: string;
@@ -420,10 +420,10 @@ export type Popout = ComponentType<{
 export type Dialog = ComponentType<JSX.IntrinsicElements["div"]>;
 
 type Resolve = (data: { theme: "light" | "dark"; saturation: number; }) => {
-    hex(): string;
-    hsl(): string;
-    int(): number;
-    spring(): string;
+    hex: () => string;
+    hsl: () => string;
+    int: () => number;
+    spring: () => string;
 };
 
 export type useToken = (color: {
@@ -437,7 +437,7 @@ export type Paginator = ComponentType<{
     pageSize: number;
     totalCount: number;
 
-    onPageChange?(page: number): void;
+    onPageChange?: (page: number) => void;
     hideMaxPage?: boolean;
 }>;
 
@@ -448,7 +448,7 @@ export type MaskedLink = ComponentType<PropsWithChildren<{
     title?: string;
     className?: string;
     tabIndex?: number;
-    onClick?(): void;
+    onClick?: () => void;
     trusted?: boolean;
     messageId?: string;
     channelId?: string;
@@ -463,8 +463,8 @@ export type ScrollerThin = ComponentType<PropsWithChildren<{
     paddingFix?: boolean;
     fade?: boolean;
 
-    onClose?(): void;
-    onScroll?(): void;
+    onClose?: () => void;
+    onScroll?: () => void;
 }>>;
 
 export type Clickable = ComponentType<PropsWithChildren<{
@@ -473,8 +473,8 @@ export type Clickable = ComponentType<PropsWithChildren<{
     href?: string;
     ignoreKeyPress?: boolean;
 
-    onClick?(): void;
-    onKeyPress?(): void;
+    onClick?: () => void;
+    onKeyPress?: () => void;
 }>>;
 
 export type Avatar = ComponentType<PropsWithChildren<{

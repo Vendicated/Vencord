@@ -106,7 +106,7 @@ function renderFindError(find: string) {
 function Input({ initialValue, onChange, placeholder }: {
     placeholder: string;
     initialValue: string;
-    onChange(value: string): void;
+    onChange: (value: string) => void;
 }) {
     const [value, setValue] = useState(initialValue);
     return (

@@ -108,7 +108,7 @@ const defaultSettings = Object.fromEntries(
     tags.map(({ name, displayName }) => [name, { text: displayName, showInChat: true, showInNotChat: true }])
 ) as TagSettings;
 
-function SettingsComponent(props: { setValue(v: any): void; }) {
+function SettingsComponent(props: { setValue: (v: any) => void; }) {
     settings.store.tagSettings ??= defaultSettings;
 
     const [tagSettings, setTagSettings] = useState(settings.store.tagSettings as TagSettings);

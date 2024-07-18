@@ -51,7 +51,7 @@ const guildPopoutPatch = ((children, { guild }: { guild?: GuildRecord; onClose: 
     );
 }) satisfies NavContextMenuPatchCallback;
 
-const userContextPatch = ((children, { user }: { user?: UserRecord; onClose(): void; }) => {
+const userContextPatch = ((children, { user }: { user?: UserRecord; onClose: () => void; }) => {
     if (user)
         children.push(
             <Menu.MenuItem
