@@ -70,7 +70,7 @@ jobs:
         run: |
           gh release upload latest --clobber dist/*
 
-      - name: Upload DevBuild to builds repo
+      - name: Upload Plugins JSON to Ignore repo
         if: github.repository == 'Equicord/Equicord'
         run: |
             git config --global user.name "$USERNAME"
