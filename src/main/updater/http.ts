@@ -99,7 +99,7 @@ export async function migrateLegacyToAsar() {
         originalWriteFileSync(__filename, '// Legacy shim for new asar\n\nrequire("../vencord.asar");');
 
         app.relaunch();
-        app.quit();
+        app.exit();
     } catch (e) {
         console.error("Failed to migrate to asar", e);
 
@@ -108,7 +108,7 @@ export async function migrateLegacyToAsar() {
                 "Legacy Install",
                 "The way Vencord loaded was changed and the updater failed to migrate. Please reinstall using the Vencord Installer!"
             );
-            app.quit();
+            app.exit(1);
         });
     }
 }
