@@ -20,7 +20,7 @@ export async function loadLazyChunks() {
         const deferredRequires = new Set<string>();
 
         let chunksSearchingResolve: (value: void | PromiseLike<void>) => void;
-        const chunksSearchingDone = new Promise<void>(r => chunksSearchingResolve = r);
+        const chunksSearchingDone = new Promise<void>(r => { chunksSearchingResolve = r; });
 
         // True if resolved, false otherwise
         const chunksSearchPromises: (() => boolean)[] = [];
@@ -38,9 +38,7 @@ export async function loadLazyChunks() {
             await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
                 const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Webpack.ChunkIdsRegex)).map(m => m[1]!) : [];
 
-                if (chunkIds.length === 0) {
-                    return;
-                }
+                if (chunkIds.length === 0) return;
 
                 let invalidChunkGroup = false;
 
