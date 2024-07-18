@@ -18,7 +18,7 @@
 
 import { IpcEvents } from "@shared/IpcEvents";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
-import { ipcMain } from "electron";
+import { app, dialog, ipcMain } from "electron";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 
@@ -76,14 +76,7 @@ async function applyUpdates() {
     if (!PendingUpdate) return true;
 
     const data = await get(PendingUpdate);
-
-    if (__dirname.endsWith(".asar")) {
-        await writeFile(__dirname, data);
-    } else { // legacy plain folder install
-        await writeFile(join(__dirname, "../vencord.asar"), data);
-
-        await writeFile(__filename, '// legacy install workaround\n\nrequire("../vencord.asar");');
-    }
+    await writeFile(__dirname, data);
 
     PendingUpdate = null;
 
@@ -94,3 +87,22 @@ ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${g
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors(fetchUpdates));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));
+
+export async function migrateLegacyToAsar() {
+    try {
+        const data = await get(`https://github.com/${gitRemote}/releases/latest/desktop.asar`);
+        await writeFile(join(__dirname, "../vencord.asar"), data);
+        await writeFile(__filename, "// Legacy shim for new asar\n\nrequire(\"../vencord.asar\");");
+        app.relaunch();
+    } catch (e) {
+        console.error("Failed to migrate to asar", e);
+
+        app.whenReady().then(() => {
+            dialog.showErrorBox(
+                "Legacy Install",
+                "The way Vencord loaded was changed and the updater failed to migrate. Please reinstall using the Vencord Installer!"
+            );
+            app.quit();
+        });
+    }
+}
