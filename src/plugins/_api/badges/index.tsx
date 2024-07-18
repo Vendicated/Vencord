@@ -74,7 +74,7 @@ async function loadBadges(url: string, noCache = false) {
 
 async function loadAllBadges(noCache = false) {
     const vencordBadges = await loadBadges("https://badges.vencord.dev/badges.json", noCache);
-    const equicordBadges = await loadBadges("https://raw.githubusercontent.com/Equicord/Ignore/main/badges.json", noCache);
+    const equicordBadges = await loadBadges("https://raw.githubusercontent.com/Equicord/Equibored/main/badges.json", noCache);
     const suncordBadges = await loadBadges("https://raw.githubusercontent.com/verticalsync/Suncord/main/src/assets/badges.json", noCache);
 
     DonorBadges = vencordBadges;

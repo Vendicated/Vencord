@@ -49,10 +49,10 @@ export default definePlugin({
     description: "Adds the Opera GX Keyboard Sounds to Discord",
     authors: [Devs.HypedDomi],
     start: () => {
-        click1 = new Audio("https://github.com/Equicord/Ignore/raw/main/sounds/keyboard/click1.wav");
-        click2 = new Audio("https://github.com/Equicord/Ignore/raw/main/sounds/keyboard/click2.wav");
-        click3 = new Audio("https://github.com/Equicord/Ignore/raw/main/sounds/keyboard/click3.wav");
-        backspace = new Audio("https://github.com/Equicord/Ignore/raw/main/sounds/keyboard/backspace.wav");
+        click1 = new Audio("https://github.com/Equicord/Equibored/raw/main/sounds/keyboard/click1.wav");
+        click2 = new Audio("https://github.com/Equicord/Equibored/raw/main/sounds/keyboard/click2.wav");
+        click3 = new Audio("https://github.com/Equicord/Equibored/raw/main/sounds/keyboard/click3.wav");
+        backspace = new Audio("https://github.com/Equicord/Equibored/raw/main/sounds/keyboard/backspace.wav");
         sounds = {
             click1,
             click2,

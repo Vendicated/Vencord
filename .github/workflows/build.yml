@@ -87,5 +87,5 @@ jobs:
             git push --force https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git
         env:
             API_TOKEN: ${{ secrets.ETOKEN }}
-            GH_REPO: Equicord/Ignore
+            GH_REPO: Equicord/Equibored
             USERNAME: thororen1234
