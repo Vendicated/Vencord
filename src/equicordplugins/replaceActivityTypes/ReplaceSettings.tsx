@@ -7,21 +7,21 @@
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
-import { findByPropsLazy } from "@webpack";
+import { findByCodeLazy } from "@webpack";
 import { Card, Forms, React, Select, SnowflakeUtils, Switch } from "@webpack/common";
 
 import { makeEmptyAppId } from ".";
 import { ActivityType, RpcApp, SettingsProps } from "./types";
 
 
-const RPCUtils = findByPropsLazy("fetchApplicationsRPC", "getRemoteIconURL");
+const fetchApplicationsRPC = findByCodeLazy("APPLICATION_RPC(", "Client ID");
 
 const cachedApps: any = {};
 async function lookupApp(appId: string): Promise<RpcApp | null> {
     if (cachedApps[appId]) return cachedApps[appId];
     const socket: any = {};
     try {
-        await RPCUtils.fetchApplicationsRPC(socket, appId);
+        await fetchApplicationsRPC(socket, appId);
         console.log(`Lookup finished for ${socket.application.name}`);
         cachedApps[appId] = socket.application;
         return socket.application;

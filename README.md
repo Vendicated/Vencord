@@ -48,7 +48,6 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - Encryptcord by Inbestigator
 - EquicordCSS by FoxStorm1 and thororen (and all respective css developers)
 - ExportContacts by dat_insanity
-- FakeProfile by Sampath
 - FindReply by newwares
 - FriendshipRanks by Samwich
 - GensokyoRadioRPC by RyanCaoDev and Prince527
