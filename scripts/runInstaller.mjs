@@ -39,7 +39,7 @@ function getFilename() {
         case "darwin":
             return "EquicordInstaller.MacOS.zip";
         case "linux":
-            return "EquicordInstaller-linux";
+            return "EquicordInstallerCli-linux";
         default:
             throw new Error("Unsupported platform: " + process.platform);
     }
