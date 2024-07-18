@@ -143,10 +143,20 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 
 ## Installing / Uninstalling
 
+Windows
+- [GUI](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl.exe)
+- [CLI](https://github.com/Equicord/Equilotl/releases/latest/download/EquilotlCli.exe)
+
+MacOS
+- [GUI](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl.MacOS.zip)
+
+Linux
+- [CLI](https://github.com/Equicord/Equilotl/releases/latest/download/EquilotlCli-Linux)
+
 ### Dependencies
 [Git](https://git-scm.com/download) and [Node.JS LTS](https://nodejs.dev/en/) are required.
 
-### Installing Equicord
+### Installing Equicord Devbuild
 
 Install `pnpm`:
 
