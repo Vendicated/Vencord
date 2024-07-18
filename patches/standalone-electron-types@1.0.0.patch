@@ -1,0 +1,56 @@
+diff --git a/electron.d.ts b/electron.d.ts
+index 492b758a13de744b5ddc47ef55e701b993f9aa32..4792cf68f403262fb6a27a2499de488ec4f3e7fb 100644
+--- a/electron.d.ts
++++ b/electron.d.ts
+@@ -5,7 +5,12 @@
+ 
+ /// <reference types="node" />
+ 
++declare module "standalone-electron-types" {
++  export = Electron;
++  global {
+ type GlobalEvent = Event & { returnValue: any };
++  }
++}
+ 
+ declare namespace Electron {
+   const NodeEventEmitter: typeof import('events').EventEmitter;
+@@ -17599,6 +17604,8 @@ declare module 'electron/renderer' {
+   export = Electron.Renderer
+ }
+ 
++declare module "standalone-electron-types" {
++  global {
+ interface NodeRequireFunction {
+   (moduleName: 'electron'): typeof Electron.CrossProcessExports;
+   (moduleName: 'electron/main'): typeof Electron.Main;
+@@ -17619,17 +17626,21 @@ interface File {
+   */
+   path: string;
+ }
++  }
++}
+ 
+ declare module 'original-fs' {
+   import * as fs from 'fs';
+   export = fs;
+ }
+ 
++declare module "standalone-electron-types" {
++  global {
+ interface Document {
+   createElement(tagName: 'webview'): Electron.WebviewTag;
+ }
+ 
+-declare namespace NodeJS {
++namespace NodeJS {
+   interface Process extends NodeJS.EventEmitter {
+ 
+     // Docs: https://electronjs.org/docs/api/process
+@@ -17840,4 +17851,6 @@ declare namespace NodeJS {
+     readonly electron: string;
+     readonly chrome: string;
+   }
++}
++  }
+ }

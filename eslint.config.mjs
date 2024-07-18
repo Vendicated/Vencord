@@ -1,12 +1,15 @@
 import stylistic from "@stylistic/eslint-plugin";
+// @ts-expect-error: No types
 import pathAlias from "eslint-plugin-path-alias";
+// @ts-expect-error: No types
 import simpleHeader from "eslint-plugin-simple-header";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
+// @ts-expect-error: No types
 import unusedImports from "eslint-plugin-unused-imports";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-    { ignores: ["browser", "dist", "packages", "src/**/*.?(c|m)js?(x)", "eslint.config.mjs"] },
+    { ignores: ["browser", "dist", "packages", "src/**/*.?(c|m)js?(x)"] },
     {
         files: ["**/*.?(c|m)[jt]s?(x)"],
         languageOptions: {
@@ -17,6 +20,7 @@ export default tseslint.config(
             }
         },
         plugins: {
+            // @ts-expect-error: https://github.com/eslint-stylistic/eslint-stylistic/issues/398#issuecomment-2178212946
             "@stylistic": stylistic,
             "@typescript-eslint": tseslint.plugin,
             "path-alias": pathAlias,
@@ -25,13 +29,6 @@ export default tseslint.config(
             "unused-imports": unusedImports,
         },
         rules: {
-            // Since it's only been a month and Vencord has already been stolen
-            // by random skids who rebranded it to "AlphaCord" and erased all license
-            // information
-            "simple-header/header": ["error", {
-                files: ["scripts/header-new.txt", "scripts/header-old.txt"],
-                templates: { author: [".*", "Vendicated and contributors"] }
-            }],
             "@stylistic/arrow-parens": ["error", "as-needed"],
             "@stylistic/block-spacing": "error",
             "@stylistic/eol-last": "error",
@@ -127,6 +124,18 @@ export default tseslint.config(
             "unused-imports/no-unused-imports": "error",
             "use-isnan": "error",
             "yoda": "error",
+        }
+    },
+    {
+        files: ["scripts/**", "src/**"],
+        rules: {
+            // Since it's only been a month and Vencord has already been stolen
+            // by random skids who rebranded it to "AlphaCord" and erased all license
+            // information
+            "simple-header/header": ["error", {
+                files: ["scripts/header-new.txt", "scripts/header-old.txt"],
+                templates: { author: [".*", "Vendicated and contributors"] }
+            }],
         }
     },
 );

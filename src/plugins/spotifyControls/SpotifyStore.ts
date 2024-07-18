@@ -76,7 +76,8 @@ export const SpotifyStore = proxyLazyWebpack(() => {
 
     class SpotifyStore extends Flux.Store<SpotifyStoreAction> {
         public mPosition = 0;
-        private start = 0;
+        // https://github.com/microsoft/TypeScript/issues/36060
+        /* private */ start = 0;
 
         public track: Track | null = null;
         public device: Device | null = null;
@@ -162,7 +163,8 @@ export const SpotifyStore = proxyLazyWebpack(() => {
             }
         }
 
-        private req(method: "post" | "get" | "put", route: string, data: any = {}): Promise<any> {
+        // https://github.com/microsoft/TypeScript/issues/36060
+        /* private */ req(method: "post" | "get" | "put", route: string, data: any = {}): Promise<any> {
             if (this.device?.is_active)
                 (data.query ??= {}).device_id = this.device.id;
 

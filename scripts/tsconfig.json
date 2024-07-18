@@ -1,4 +1,7 @@
 {
+    "include": ["**/*", "../eslint.config.mjs"],
+    "references": [{ "path": ".." }],
+
     "compilerOptions": {
         "noUncheckedIndexedAccess": true,
         "strict": true,
@@ -13,6 +16,9 @@
 
         "allowSyntheticDefaultImports": true,
 
+        // https://github.com/microsoft/TypeScript/issues/58353
+        // https://github.com/microsoft/TypeScript/issues/44540
+        "jsx": "preserve",
         "target": "ESNext"
-    },
+    }
 }

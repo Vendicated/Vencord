@@ -38,7 +38,6 @@
         "@sapphi-red/web-noise-suppressor": "0.3.5",
         "@vap/core": "0.0.12",
         "@vap/shiki": "0.10.5",
-        "eslint-plugin-simple-header": "^1.1.1",
         "fflate": "^0.8.2",
         "gifenc": "github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3",
         "monaco-editor": "^0.50.0",
@@ -63,6 +62,7 @@
         "esbuild": "^0.23.0",
         "eslint": "^9.7.0",
         "eslint-plugin-path-alias": "^2.1.0",
+        "eslint-plugin-simple-header": "^1.1.1",
         "eslint-plugin-simple-import-sort": "^12.1.1",
         "eslint-plugin-unused-imports": "^4.0.0",
         "highlight.js": "11.8.0",
@@ -84,7 +84,8 @@
     "pnpm": {
         "patchedDependencies": {
             "eslint-plugin-path-alias@2.1.0": "patches/eslint-plugin-path-alias@2.1.0.patch",
-            "eslint@9.7.0": "patches/eslint@9.7.0.patch"
+            "eslint@9.7.0": "patches/eslint@9.7.0.patch",
+            "standalone-electron-types@1.0.0": "patches/standalone-electron-types@1.0.0.patch"
         },
         "peerDependencyRules": {
             "allowedVersions": {

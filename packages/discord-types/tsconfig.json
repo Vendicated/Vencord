@@ -17,6 +17,9 @@
         "allowJs": true,
         "checkJs": true,
 
+        // https://github.com/microsoft/TypeScript/issues/58353
+        // https://github.com/microsoft/TypeScript/issues/44540
+        "jsx": "preserve",
         "target": "ESNext",
 
         // https://github.com/microsoft/TypeScript/issues/8836
