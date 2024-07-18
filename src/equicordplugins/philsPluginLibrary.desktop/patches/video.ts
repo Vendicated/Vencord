@@ -20,7 +20,7 @@ import { Logger } from "@utils/Logger";
 import { lodash } from "@webpack/common";
 
 import { ProfilableStore, replaceObjectValuesIfExist, types, utils } from "..";
-import { ScreenshareProfile, ScreenshareStore } from ".";
+import { ScreenshareProfile, ScreenshareStore } from "../store";
 
 
 export function getDefaultVideoTransportationOptions(connection: types.Connection) {

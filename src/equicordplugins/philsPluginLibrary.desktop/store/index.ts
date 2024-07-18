@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+export * from "../store/screenshareAudioStore";
+export * from "../store/screenshareStore";
 export * from "./microphoneStore";
 export * from "./profileable";
 export * from "./store";

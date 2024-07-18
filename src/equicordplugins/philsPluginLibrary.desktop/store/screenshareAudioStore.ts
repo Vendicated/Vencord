@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { createPluginStore, ProfilableStore, profileable } from "../../philsPluginLibrary.desktop";
+import { createPluginStore, ProfilableStore, profileable } from "..";
 import { PluginInfo } from "../constants";
 import {
     defaultMicrophoneProfiles as defaultScreenshareAudioProfiles,
     MicrophoneProfile as ScreenshareAudioProfile,
     MicrophoneStore as ScreenshareAudioStore,
     microphoneStoreDefault as screenshareAudioStoreDefault
-} from "../stores";
+} from ".";
 
 export let screenshareAudioStore: ProfilableStore<ScreenshareAudioStore, ScreenshareAudioProfile>;
 

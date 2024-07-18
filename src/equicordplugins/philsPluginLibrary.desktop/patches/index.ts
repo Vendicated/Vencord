@@ -17,7 +17,7 @@
 */
 
 export * from "./audio";
-export * from "./screenshareAudioStore";
-export * from "./screenshareStore";
+export * from "../store/screenshareAudioStore";
+export * from "../store/screenshareStore";
 export * from "./userPanel";
 export * from "./video";
