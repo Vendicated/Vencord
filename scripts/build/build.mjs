@@ -17,8 +17,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { createPackage } from "@electron/asar";
 import esbuild from "esbuild";
-import { readdir } from "fs/promises";
+import { readdir, writeFile } from "fs/promises";
 import { join } from "path";
 
 import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, watch } from "./common.mjs";
@@ -107,7 +108,7 @@ await Promise.all([
     esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/main/index.ts"],
-        outfile: "dist/patcher.js",
+        outfile: "dist/desktop/patcher.js",
         footer: { js: "//# sourceURL=VencordPatcher\n" + sourceMapFooter("patcher") },
         sourcemap,
         define: {
@@ -123,7 +124,7 @@ await Promise.all([
     esbuild.build({
         ...commonOpts,
         entryPoints: ["src/Vencord.ts"],
-        outfile: "dist/renderer.js",
+        outfile: "dist/desktop/renderer.js",
         format: "iife",
         target: ["esnext"],
         footer: { js: "//# sourceURL=VencordRenderer\n" + sourceMapFooter("renderer") },
@@ -142,7 +143,7 @@ await Promise.all([
     esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/preload.ts"],
-        outfile: "dist/preload.js",
+        outfile: "dist/desktop/preload.js",
         footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
         sourcemap,
         define: {
@@ -156,8 +157,8 @@ await Promise.all([
     esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/main/index.ts"],
-        outfile: "dist/vencordDesktopMain.js",
-        footer: { js: "//# sourceURL=VencordDesktopMain\n" + sourceMapFooter("vencordDesktopMain") },
+        outfile: "dist/vesktop/main.js",
+        footer: { js: "//# sourceURL=VencordMain\n" + sourceMapFooter("main") },
         sourcemap,
         define: {
             ...defines,
@@ -172,10 +173,10 @@ await Promise.all([
     esbuild.build({
         ...commonOpts,
         entryPoints: ["src/Vencord.ts"],
-        outfile: "dist/vencordDesktopRenderer.js",
+        outfile: "dist/vesktop/renderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "//# sourceURL=VencordDesktopRenderer\n" + sourceMapFooter("vencordDesktopRenderer") },
+        footer: { js: "//# sourceURL=VencordRenderer\n" + sourceMapFooter("renderer") },
         globalName: "Vencord",
         sourcemap,
         plugins: [
@@ -191,8 +192,8 @@ await Promise.all([
     esbuild.build({
         ...nodeCommonOpts,
         entryPoints: ["src/preload.ts"],
-        outfile: "dist/vencordDesktopPreload.js",
-        footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("vencordDesktopPreload") },
+        outfile: "dist/vesktop/preload.js",
+        footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
         sourcemap,
         define: {
             ...defines,
@@ -207,3 +208,19 @@ await Promise.all([
     if (!commonOpts.watch)
         process.exitCode = 1;
 });
+
+await Promise.all([
+    writeFile("dist/desktop/package.json", JSON.stringify({
+        name: "vencord",
+        main: "patcher.js"
+    })),
+    writeFile("dist/vesktop/package.json", JSON.stringify({
+        name: "vencord",
+        main: "main.js"
+    }))
+]);
+
+await Promise.all([
+    createPackage("dist/desktop", "dist/desktop.asar"),
+    createPackage("dist/vesktop", "dist/vesktop.asar")
+]);

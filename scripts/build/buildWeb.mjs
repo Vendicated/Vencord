@@ -73,26 +73,26 @@ await Promise.all(
             minify: true,
             format: "iife",
             outbase: "node_modules/monaco-editor/esm/",
-            outdir: "dist/monaco"
+            outdir: "dist/browser/monaco"
         }),
         esbuild.build({
             entryPoints: ["browser/monaco.ts"],
             bundle: true,
             minify: true,
             format: "iife",
-            outfile: "dist/monaco/index.js",
+            outfile: "dist/browser/monaco/index.js",
             loader: {
                 ".ttf": "file"
             }
         }),
         esbuild.build({
             ...commonOptions,
-            outfile: "dist/browser.js",
+            outfile: "dist/browser/browser.js",
             footer: { js: "//# sourceURL=VencordWeb" }
         }),
         esbuild.build({
             ...commonOptions,
-            outfile: "dist/extension.js",
+            outfile: "dist/browser/extension.js",
             define: {
                 ...commonOptions?.define,
                 IS_EXTENSION: true,
@@ -148,9 +148,9 @@ async function loadDir(dir, basePath = "") {
  */
 async function buildExtension(target, files) {
     const entries = {
-        "dist/Vencord.js": await readFile("dist/extension.js"),
-        "dist/Vencord.css": await readFile("dist/extension.css"),
-        ...await loadDir("dist/monaco"),
+        "dist/Vencord.js": await readFile("dist/browser/extension.js"),
+        "dist/Vencord.css": await readFile("dist/browser/extension.css"),
+        ...await loadDir("dist/browser/monaco"),
         ...Object.fromEntries(await Promise.all(RnNoiseFiles.map(async file =>
             [`third-party/rnnoise/${file.replace(/^dist\//, "")}`, await readFile(`node_modules/@sapphi-red/web-noise-suppressor/${file}`)]
         ))),
@@ -171,13 +171,13 @@ async function buildExtension(target, files) {
 
     await rm(target, { recursive: true, force: true });
     await Promise.all(Object.entries(entries).map(async ([file, content]) => {
-        const dest = join("dist", target, file);
+        const dest = join("dist/browser", target, file);
         const parentDirectory = join(dest, "..");
         await mkdir(parentDirectory, { recursive: true });
         await writeFile(dest, content);
     }));
 
-    console.info("Unpacked Extension written to dist/" + target);
+    console.info("Unpacked Extension written to dist/browser/" + target);
 }
 
 const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content => {
@@ -200,12 +200,14 @@ if (!process.argv.includes("--skip-extension")) {
         buildExtension("firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"]),
     ]);
 
-    Zip.sync.zip("dist/chromium-unpacked").compress().save("dist/extension-chrome.zip");
-    console.info("Packed Chromium Extension written to dist/extension-chrome.zip");
-
-    Zip.sync.zip("dist/firefox-unpacked").compress().save("dist/extension-firefox.zip");
-    console.info("Packed Firefox Extension written to dist/extension-firefox.zip");
-
+    Zip.zip("dist/browser/chromium-unpacked", (_err, zip) => {
+        zip.compress().save("dist/extension-chrome.zip");
+        console.info("Packed Chromium Extension written to dist/extension-chrome.zip");
+    });
+    Zip.zip("dist/browser/firefox-unpacked", (_err, zip) => {
+        zip.compress().save("dist/extension-firefox.zip");
+        console.info("Packed Firefox Extension written to dist/extension-firefox.zip");
+    });
 } else {
     await appendCssRuntime;
 }

@@ -16,12 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const VENCORD_FILES = [
-    IS_DISCORD_DESKTOP ? "patcher.js" : "vencordDesktopMain.js",
-    IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js",
-    IS_DISCORD_DESKTOP ? "renderer.js" : "vencordDesktopRenderer.js",
-    IS_DISCORD_DESKTOP ? "renderer.css" : "vencordDesktopRenderer.css",
-];
+export const ASAR_FILE = IS_VESKTOP
+    ? "vesktop.asar"
+    : "desktop.asar";
 
 export function serializeErrors(func: (...args: any[]) => any) {
     return async function () {

@@ -26,10 +26,10 @@ import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 
 import { get } from "../utils/simpleGet";
-import { serializeErrors, VENCORD_FILES } from "./common";
+import { ASAR_FILE, serializeErrors } from "./common";
 
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
-let PendingUpdates = [] as [string, string][];
+let PendingUpdate: string | null = null;
 
 async function githubGet(endpoint: string) {
     return get(API_BASE + endpoint, {
@@ -65,22 +65,28 @@ async function fetchUpdates() {
     if (hash === gitHash)
         return false;
 
-    data.assets.forEach(({ name, browser_download_url }) => {
-        if (VENCORD_FILES.some(s => name.startsWith(s))) {
-            PendingUpdates.push([name, browser_download_url]);
-        }
-    });
+
+    const asset = data.assets.find(a => a.name === ASAR_FILE);
+    PendingUpdate = asset.browser_download_url;
+
     return true;
 }
 
 async function applyUpdates() {
-    await Promise.all(PendingUpdates.map(
-        async ([name, data]) => writeFile(
-            join(__dirname, name),
-            await get(data)
-        )
-    ));
-    PendingUpdates = [];
+    if (!PendingUpdate) return true;
+
+    const data = await get(PendingUpdate);
+
+    if (__dirname.endsWith(".asar")) {
+        await writeFile(__dirname, data);
+    } else { // legacy plain folder install
+        await writeFile(join(__dirname, "../vencord.asar"), data);
+
+        await writeFile(__filename, '// legacy install workaround\n\nrequire("../vencord.asar");');
+    }
+
+    PendingUpdate = null;
+
     return true;
 }
 
