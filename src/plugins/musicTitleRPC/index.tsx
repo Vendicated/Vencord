@@ -95,10 +95,17 @@ interface SpotifyDevice {
     volume_percent: number;
 }
 
-enum ShowOptions {
+enum SpotifyShowOptions {
     Title,
     Artist,
     Album
+}
+
+enum NonSpotifyShowOptions {
+    Details,
+    State,
+    LargeImageText,
+    SmallImageText
 }
 
 
@@ -122,14 +129,29 @@ const settings = definePluginSettings({
         default: true,
         description: "Force all music player activities to be \"Listening to\", instead of \"Playing\"",
     },
-    whatToShow: {
+    spotifyWhatToShow: {
         type: OptionType.SELECT,
         options: [
-            { label: "Title", value: ShowOptions.Title, default: true },
-            { label: "Artist", value: ShowOptions.Artist },
-            { label: "Album", value: ShowOptions.Album }
+            { label: "Title", value: SpotifyShowOptions.Title, default: true },
+            { label: "Artist", value: SpotifyShowOptions.Artist },
+            { label: "Album", value: SpotifyShowOptions.Album }
         ],
-        description: "What to show (spotify only)"
+        description: "What to show (spotify)"
+    },
+    nonSpotifyWhatToShow: {
+        type: OptionType.SELECT,
+        options: [
+            { label: "Details", value: NonSpotifyShowOptions.Details, default: true },
+            { label: "State", value: NonSpotifyShowOptions.State },
+            { label: "Large image text", value: NonSpotifyShowOptions.LargeImageText },
+            { label: "Small image text", value: NonSpotifyShowOptions.SmallImageText },
+        ],
+        description: "What to show (non-spotify)"
+    },
+    nonSpotifyRegex: {
+        type: OptionType.STRING,
+        default: "(.+)",
+        description: "Regex pattern to determine what to show using the first captured group (non-spotify)"
     },
     cloneSpotifyActivity: {
         type: OptionType.BOOLEAN,
@@ -142,6 +164,7 @@ const settings = definePluginSettings({
 
 function handleUpdate(data: Data) {
     if (data.activity === null || data.activity.state === undefined) return;
+    const { nonSpotifyWhatToShow: what_to_show, nonSpotifyRegex: regex_option } = settings.store;
 
     const players = settings.store.musicPlayerNames.split(",").map(x => x.trim());
     if (!players.includes(data.activity.name)) return;
@@ -150,8 +173,23 @@ function handleUpdate(data: Data) {
         data.activity.type = ActivityType.LISTENING;
     }
 
-    if (data.activity.details !== undefined) {
-        data.activity.name = data.activity.details;
+    let name: string = "";
+    if (what_to_show === NonSpotifyShowOptions.Details && data.activity.details !== undefined) {
+        name = data.activity.details;
+    } else if (what_to_show === NonSpotifyShowOptions.State && data.activity.state !== undefined) {
+        name = data.activity.state;
+    } else if (what_to_show === NonSpotifyShowOptions.LargeImageText && data.activity.assets?.large_text !== undefined) {
+        name = data.activity.assets.large_text;
+    } else if (what_to_show === NonSpotifyShowOptions.State && data.activity.assets?.small_text !== undefined) {
+        name = data.activity.assets.small_text;
+    }
+
+    const regex_output = new RegExp(regex_option).exec(name);
+    if (regex_output === null || regex_output[1] === undefined) {
+        // no match, use the full string
+        data.activity.name = name;
+    } else {
+        data.activity.name = regex_output[1];
     }
 }
 
@@ -207,7 +245,7 @@ export default definePlugin({
     },
 
     async handleSpotifySongChange(e: SpotifyEvent) {
-        const { applicationId: application_id, whatToShow: what_to_show } = settings.store;
+        const { applicationId: application_id, spotifyWhatToShow: what_to_show } = settings.store;
         if (application_id === undefined) return;
 
         let large_image: string | undefined = undefined;
@@ -239,11 +277,11 @@ export default definePlugin({
             }
         };
 
-        if (what_to_show === ShowOptions.Title) {
+        if (what_to_show === SpotifyShowOptions.Title) {
             activity.name = e.track.name;
-        } else if (what_to_show === ShowOptions.Artist && e.track.artists !== undefined) {
+        } else if (what_to_show === SpotifyShowOptions.Artist && e.track.artists !== undefined) {
             activity.name = e.track.artists[0].name;
-        } else if (what_to_show === ShowOptions.Album && e.track.album !== undefined) {
+        } else if (what_to_show === SpotifyShowOptions.Album && e.track.album !== undefined) {
             activity.name = e.track.album.name;
         }
 
