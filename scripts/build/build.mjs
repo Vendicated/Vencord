@@ -231,7 +231,11 @@ if (existsSync("dist/renderer.js")) {
 
     await Promise.all(
         readdirSync("dist")
-            .filter(f => ["patcher", "preload", "renderer", "main"].some(name => f.toLowerCase().includes(name)))
+            .filter(f =>
+                f.endsWith(".map") ||
+                f.endsWith(".LEGAL.txt") ||
+                ["patcher", "preload", "renderer"].some(name => f.startsWith(name))
+            )
             .map(file => rm(join("dist", file)))
     );
 
