@@ -25,13 +25,16 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 
 - AllCallTimers by MaxHerbold and D3SOX
 - AltKrispSwitch by newwares
+- AmITyping by MrDiamond
 - Anammox by Kyuuhachi
 - BetterActivities by D3SOX, Arjix, AutumnVN
+- BetterBanReasons by Inbestigator
 - BetterQuickReact by Ven and Sqaaakoi
 - BlockKrsip by D3SOX
 - BypassDND by Inbestigator
 - CleanChannelName by AutumnVN
 - ColorMessage by Kyuuhachi
+- CommandPalette by Ethan
 - CopyUserMention by Cortex and castdrian
 - CustomAppIcons by Happy Enderman and SerStars
 - DeadMembers by Kyuuhachi
@@ -54,14 +57,20 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - IRememberYou by zoodogood
 - KeyboardSounds by HypedDomi
 - KeywordNotify by camila314
+- MediaDownloader by Colorman
 - Meow by Samwich
 - MessageLinkTooltip by Kyuuhachi
 - MessageLoggerEnhanced by Aria
+- ModalFade by Kyuuhachi
 - noAppsAllowed by kvba
 - NoModalAnimation by AutumnVN
 - NoNitroUpsell by thororen
+- NotificationTitle by Kyuuhachi
 - NotifyUserChanges by D3SOX
 - OnePingPerDM by ProffDea
+- PhilsBetterMicrophone by Philhk
+- PhilsBetterScreenshare by Philhk and walrus
+- PhilsPluginLibrary by Philhk
 - PlatformSpoofer by Drag
 - PurgeMessages by bhop and nyx
 - Quest Completer by HappyEnderman, SerStars, thororen
@@ -76,13 +85,17 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo, thororen
 - TalkInReverse by Tolgchu
+- TeX by Kyuuhachi
 - ThemeLibrary by Fafa
 - Title by Kyuuhachi
+- TosuRPC by AutumnVN
 - UnlimitedAccounts by Balaclava and thororen
 - UserPFP by nexpid and thororen
 - VCSupport by thororen
 - VencordRPC by AutumnVN
+- ViewRaw2 by Kyuuhachi
 - VoiceChatUtilities by Dams and D3SOX
+- WebpackTarball by Kyuuhachi
 - WhosWatching by fres
 - Woof by Samwich
 - YoutubeDescription by arHSM
