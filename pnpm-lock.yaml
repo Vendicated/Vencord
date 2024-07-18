@@ -16,9 +16,6 @@ importers:
 
   .:
     dependencies:
-      '@electron/asar':
-        specifier: ^3.2.10
-        version: 3.2.10
       '@sapphi-red/web-noise-suppressor':
         specifier: 0.3.3
         version: 0.3.3
@@ -47,6 +44,9 @@ importers:
         specifier: ^1.0.1
         version: 1.0.1
     devDependencies:
+      '@electron/asar':
+        specifier: ^3.2.10
+        version: 3.2.10
       '@types/chrome':
         specifier: ^0.0.246
         version: 0.0.246
