@@ -5,7 +5,6 @@
  */
 
 import { EquicordDevs } from "@utils/constants";
-import axios from "axios";
 
 import { ApplicationCommandOptionType } from "../../api/Commands";
 import definePlugin from "../../utils/types";
@@ -15,7 +14,7 @@ function rand(min, max) {
 }
 
 async function fetchReddit(sub: string) {
-    const res = (await axios.get(`https://www.reddit.com/r/${sub}/top.json?limit=100&t=all`)).data;
+    const res = await fetch(`https://www.reddit.com/r/${sub}/top.json?limit=100&t=all`);
     const resp = await res.json();
     try {
         const { children } = resp.data;
