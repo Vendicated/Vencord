@@ -27,13 +27,13 @@
         "dependency-graph": "0.9.0",
         "moment": "2.22.2",
         "simple-markdown": "0.7.2",
-        "type-fest": "^4.21.0"
+        "type-fest": "^4.22.1"
     },
     "devDependencies": {
         "@stylistic/eslint-plugin": "^2.3.0",
-        "@types/node": "^20.14.10",
+        "@types/node": "^20.14.11",
         "@types/semver": "^7.5.8",
-        "@typescript-eslint/typescript-estree": "^8.0.0-alpha.44",
+        "@typescript-eslint/typescript-estree": "^8.0.0-alpha.45",
         "eslint": "^9.7.0",
         "eslint-plugin-check-file": "^2.8.0",
         "eslint-plugin-headers": "^1.1.2",
@@ -41,10 +41,10 @@
         "eslint-plugin-simple-import-sort": "^12.1.1",
         "eslint-plugin-unicorn": "^54.0.0",
         "eslint-plugin-unused-imports": "^4.0.0",
-        "puppeteer-core": "^22.13.0",
-        "semver": "^7.6.2",
+        "puppeteer-core": "^22.13.1",
+        "semver": "^7.6.3",
         "tsx": "^4.16.2",
         "typescript": "^5.5.3",
-        "typescript-eslint": "^8.0.0-alpha.44"
+        "typescript-eslint": "^8.0.0-alpha.45"
     }
 }
