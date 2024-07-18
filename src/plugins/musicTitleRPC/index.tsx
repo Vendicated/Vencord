@@ -154,7 +154,7 @@ export default definePlugin({
     },
     patches: [
         {
-            find: "){let{connectionId:",
+            find: "let{connectionId:",
             predicate: () => settings.store.cloneSpotifyActivity,
             replacement: [
                 {
