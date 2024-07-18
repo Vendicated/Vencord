@@ -25,7 +25,7 @@ function isShavian(text: string) {
 }
 
 async function translateShavian(message: string) {
-    const dictionary = await (await fetch("https://forkprince.github.io/TranslatePlus/shavian.json")).json();
+    const dictionary = await (await fetch("https://github.com/ForkPrince/TranslatePlus/raw/322199d5fdb1a9506591c9f4a2826338b5d67e38/shavian.json")).json();
 
     const punctuationMap = {
         '"': "\"",
@@ -72,7 +72,7 @@ async function translateShavian(message: string) {
 async function translateSitelen(message: string) {
     message = Array.from(message).join(" ");
 
-    const dictionary = await (await fetch("https://forkprince.github.io/TranslatePlus/sitelen-pona.json")).json();
+    const dictionary = await (await fetch("https://github.com/ForkPrince/TranslatePlus/raw/5ca152b134ea11433971f21b2ef8d556d4306717/sitelen-pona.json")).json();
 
     const sorted = Object.keys(dictionary).sort((a, b) => b.length - a.length);
 
