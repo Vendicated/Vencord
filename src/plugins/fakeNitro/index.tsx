@@ -441,7 +441,8 @@ export default definePlugin({
         try {
             if (proto == null || typeof proto === "string") return;
 
-            const premiumType: number = user?.premium_type ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
+            // @ts-ignore
+            const premiumType: number = user?._realPremiumType ?? UserStore?.getCurrentUser?._realPremiumType ?? user?.premium_type ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
 
             if (premiumType !== 2) {
                 proto.appearance ??= AppearanceSettingsActionCreators.create();

@@ -126,13 +126,21 @@ function CheckBadge({ badge, author }: { badge: string; author: User; }): JSX.El
                 </span>
             ) : null;
         case "DiscordNitro":
-            return (author?.premiumType ?? 0) > 0 ? (
+            let premiumType: Number | undefined;
+            premiumType = author?.premiumType;
+            // @ts-ignore
+            if (author?._realPremiumType) {
+                // @ts-ignore
+                premiumType = author?._realPremiumType;
+            }
+            // @ts-ignore
+            return premiumType > 0 ? (
                 <span style={{ order: settings.store.DiscordNitroPosition }}>
                     <RoleIconComponent
                         className={roleIconClassName}
                         name={
                             "Discord Nitro" +
-                            (author.premiumType === 3 ? " Basic" : author.premiumType === 1 ? " Classic" : "")
+                            (premiumType === 3 ? " Basic" : premiumType === 1 ? " Classic" : "")
                         }
                         size={20}
                         src={"https://cdn.discordapp.com/badge-icons/2ba85e8026a8614b640c2837bcdfe21b.png"}

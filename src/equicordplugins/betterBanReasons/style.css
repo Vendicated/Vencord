@@ -1,0 +1,11 @@
+.vc-bbr-reason-wrapper {
+    display: grid;
+    padding: 0;
+    padding-bottom: 0.5rem;
+    gap: 0.5rem;
+    grid-template-columns: 6fr 1fr;
+}
+
+.vc-bbr-remove-button {
+    height: 100%;
+}
