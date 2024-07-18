@@ -95,6 +95,12 @@ interface SpotifyDevice {
     volume_percent: number;
 }
 
+enum ShowOptions {
+    Title,
+    Artist,
+    Album
+}
+
 
 const settings = definePluginSettings({
     applicationId: {
@@ -115,6 +121,15 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         description: "Force all music player activities to be \"Listening to\", instead of \"Playing\"",
+    },
+    whatToShow: {
+        type: OptionType.SELECT,
+        options: [
+            { label: "Title", value: ShowOptions.Title, default: true },
+            { label: "Artist", value: ShowOptions.Artist },
+            { label: "Album", value: ShowOptions.Album }
+        ],
+        description: "What to show (spotify only)"
     },
     cloneSpotifyActivity: {
         type: OptionType.BOOLEAN,
@@ -192,7 +207,7 @@ export default definePlugin({
     },
 
     async handleSpotifySongChange(e: SpotifyEvent) {
-        const { applicationId: application_id } = settings.store;
+        const { applicationId: application_id, whatToShow: what_to_show } = settings.store;
         if (application_id === undefined) return;
 
         let large_image: string | undefined = undefined;
@@ -201,7 +216,7 @@ export default definePlugin({
         }
         const activity: Activity = {
             application_id,
-            name: e.track.name,
+            name: "",
             type: ActivityType.LISTENING,
             flags: 0,
             details: e.track.name,
@@ -223,11 +238,20 @@ export default definePlugin({
                 ]
             }
         };
+
+        if (what_to_show === ShowOptions.Title) {
+            activity.name = e.track.name;
+        } else if (what_to_show === ShowOptions.Artist && e.track.artists !== undefined) {
+            activity.name = e.track.artists[0].name;
+        } else if (what_to_show === ShowOptions.Album && e.track.album !== undefined) {
+            activity.name = e.track.album.name;
+        }
+
         FluxDispatcher.dispatch({
             type: "LOCAL_ACTIVITY_UPDATE",
             activity: activity,
             socketId: "MusicTitleRPC:Spotify"
-        });
+        })
 
         if (playbackStoppedTimeout) clearTimeout(playbackStoppedTimeout);
         playbackStoppedTimeout = window.setTimeout(() => {
