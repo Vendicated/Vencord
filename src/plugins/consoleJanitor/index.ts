@@ -104,6 +104,13 @@ export default definePlugin({
             }
         },
         {
+            find: "ProductCatalog",
+            replacement: {
+                match: /\i\.warn\("Cannot find the corresponding SKU to the user's premium type "\.concat\(\i\.premiumType\)\),/,
+                replace: ""
+            }
+        },
+        {
             find: "Slow dispatch on",
             replacement: {
                 match: /\i\.totalTime>100&&\i\.verbose\("Slow dispatch on ".+?\)\);/,
