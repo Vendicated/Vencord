@@ -695,6 +695,14 @@ export const EquicordDevs = Object.freeze({
         name: "Sampath",
         id: 984015688807100419n,
     },
+    catcraft: {
+        name: "catcraft",
+        id: 290162449213292546n,
+    },
+    ShadyGoat: {
+        name: "Shady Goat",
+        id: 376079696489742338n,
+    },
 } satisfies Record<string, Dev>);
 
 export const SuncordDevs = /* #__PURE__*/ Object.freeze({
