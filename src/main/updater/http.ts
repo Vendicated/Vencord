@@ -19,7 +19,7 @@
 import { IpcEvents } from "@shared/IpcEvents";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { app, dialog, ipcMain } from "electron";
-import { writeFile } from "fs/promises";
+import { writeFileSync as originalWriteFileSync } from "original-fs";
 import { join } from "path";
 
 import gitHash from "~git-hash";
@@ -76,7 +76,7 @@ async function applyUpdates() {
     if (!PendingUpdate) return true;
 
     const data = await get(PendingUpdate);
-    await writeFile(__dirname, data);
+    originalWriteFileSync(__dirname, data);
 
     PendingUpdate = null;
 
@@ -90,10 +90,13 @@ ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));
 
 export async function migrateLegacyToAsar() {
     try {
-        const data = await get(`https://github.com/${gitRemote}/releases/latest/desktop.asar`);
-        await writeFile(join(__dirname, "../vencord.asar"), data);
-        await writeFile(__filename, '// Legacy shim for new asar\n\nrequire("../vencord.asar");');
+        const data = await get(`https://github.com/${gitRemote}/releases/latest/download/desktop.asar`);
+
+        originalWriteFileSync(join(__dirname, "../vencord.asar"), data);
+        originalWriteFileSync(__filename, '// Legacy shim for new asar\n\nrequire("../vencord.asar");');
+
         app.relaunch();
+        app.quit();
     } catch (e) {
         console.error("Failed to migrate to asar", e);
 

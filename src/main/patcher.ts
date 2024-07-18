@@ -22,7 +22,6 @@ import { dirname, join } from "path";
 
 import { initIpc } from "./ipcMain";
 import { RendererSettings } from "./settings";
-import { migrateLegacyToAsar } from "./updater/http";
 import { IS_VANILLA } from "./utils/constants";
 
 console.log("[Vencord] Starting up...");
@@ -31,7 +30,7 @@ console.log("[Vencord] Starting up...");
 const isLegacyNonAsarVencord = IS_STANDALONE && !__dirname.endsWith(".asar");
 if (isLegacyNonAsarVencord) {
     console.warn("This is a legacy non asar install! Migrating to asar and restarting...");
-    migrateLegacyToAsar();
+    require("./updater/http").migrateLegacyToAsar();
 }
 
 // Our injector file at app/index.js
