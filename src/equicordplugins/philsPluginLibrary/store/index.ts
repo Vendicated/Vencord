@@ -17,6 +17,4 @@
 */
 
 export * from "./profileable";
-export * from "./screenshareAudioStore";
-export * from "./screenshareStore";
 export * from "./store";

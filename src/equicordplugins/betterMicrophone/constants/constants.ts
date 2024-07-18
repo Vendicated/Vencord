@@ -21,7 +21,7 @@ import { Devs } from "@utils/constants";
 import { types } from "../../philsPluginLibrary";
 
 export const PluginInfo = {
-    PLUGIN_NAME: "BetterMicrophone",
+    PLUGIN_NAME: "PhilsBetterMicrophone",
     DESCRIPTION: "This plugin allows you to further customize your microphone.",
     AUTHOR: {
         ...Devs.philhk,
