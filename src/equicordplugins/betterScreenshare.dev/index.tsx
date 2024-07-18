@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 import { addSettingsPanelButton, Emitter, removeSettingsPanelButton, ScreenshareSettingsIcon } from "../philsPluginLibrary";
@@ -32,7 +32,7 @@ var screenshareAudioPatcher;
 export default definePlugin({
     name: "PhilsBetterScreenshare",
     description: "This plugin allows you to further customize your screen sharing.",
-    authors: [Devs.philhk, Devs.walrus],
+    authors: [Devs.philhk, EquicordDevs.walrus],
     dependencies: ["PhilsPluginLibrary"],
     replacedScreenshareModalComponent: replacedScreenshareModalComponent,
 

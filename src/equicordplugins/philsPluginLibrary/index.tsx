@@ -31,8 +31,8 @@ export default definePlugin({
         {
             find: "Messages.ACCOUNT_A11Y_LABEL",
             replacement: {
-                match: /(?<=function)( .{0,8}(?={).)(.{0,1000}isFullscreenInContext\(\).+?\)]}\))(})/,
-                replace: "$1return $self.replacedUserPanelComponent(function(){$2}, this, arguments)$3"
+                match: /(?<=function)( \i\i\(\i\)(?={).)(.{0,1000}\i\.\i\.isFullscreenInContext\(\).+?\)]}\))\}/,
+                replace: "$1 return $self.replacedUserPanelComponent(function(){$2}, this, arguments)}"
             }
         }
     ],
