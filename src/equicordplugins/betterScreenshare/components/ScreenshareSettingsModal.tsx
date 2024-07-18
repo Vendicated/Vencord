@@ -22,6 +22,7 @@ import { ModalSize, openModalLazy } from "@utils/modal";
 import { Button, Card, Forms, React, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
 import { SelectOption } from "@webpack/types";
 
+import { MicrophoneSettingsModal } from "../../betterMicrophone/components";
 import {
     MediaEngineStore,
     openURL,
@@ -38,7 +39,6 @@ import {
 import { Styles } from "../../philsPluginLibrary/styles";
 import { PluginInfo } from "../constants";
 import { ScreenshareAudioProfile, ScreenshareAudioStore, ScreenshareProfile, ScreenshareStore } from "../stores";
-import { MicrophoneSettingsModal } from ".";
 
 const simpleResolutions: readonly (SelectOption & { value: types.Resolution; })[] = [
     {

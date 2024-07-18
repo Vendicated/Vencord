@@ -22,6 +22,7 @@ import { ModalSize } from "@utils/modal";
 import { Card, Forms, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
 import { SelectOption } from "@webpack/types";
 
+import { MicrophoneProfile, MicrophoneStore } from "../../betterMicrophone/stores";
 import {
     ProfilableStore,
     SettingsModal,
@@ -33,7 +34,6 @@ import {
     validateTextInputNumber
 } from "../../philsPluginLibrary";
 import { Styles } from "../../philsPluginLibrary/styles";
-import { MicrophoneProfile, MicrophoneStore } from "../stores";
 
 const simpleVoiceBitrates: readonly SelectOption[] = [
     {
