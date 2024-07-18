@@ -69,7 +69,7 @@ const globNativesPlugin = {
         });
 
         build.onLoad({ filter, namespace: "import-natives" }, async () => {
-            const pluginDirs = ["plugins", "userplugins"];
+            const pluginDirs = ["plugins", "plugins/_core", "userplugins"];
             let code = "";
             let natives = "\n";
             let i = 0;
@@ -92,17 +92,6 @@ const globNativesPlugin = {
                     natives += `${JSON.stringify(pluginName)}:${mod},\n`;
                     i++;
                 }
-            }
-            const coreNativesPath = "src/plugins/_core/native";
-            const coreNatives = await readdir(coreNativesPath, { withFileTypes: true });
-            for (const file of coreNatives) {
-                const fileName = file.name;
-                const pluginName = await resolvePluginName(join(coreNativesPath, "../"), file);
-
-                const mod = `p${i}`;
-                code += `import * as ${mod} from "./plugins/_core/native/${fileName}";\n`;
-                natives += `${JSON.stringify(pluginName)}:${mod},\n`;
-                i++;
             }
             code += `export default {${natives}};`;
             return {
