@@ -143,7 +143,7 @@ export default definePlugin({
         {
             find: "AUDIO:\"AUDIO\"",
             replacement: {
-                match: /onVolumeHide:\i,iconClassName:\i.controlIcon,sliderWrapperClassName:\i.volumeSliderWrapper\}\)\}\),/,
+                match: /onVolumeHide:\i,iconClassName:\i.controlIcon,iconColor:"currentColor",sliderWrapperClassName:\i.volumeSliderWrapper\}\)\}\),/,
                 replace: "$&$self.renderComponent(this.props.mediaRef),"
             }
         }
