@@ -254,9 +254,8 @@ function isPluginFile({ name }: { name: string; }) {
 
     const data = JSON.stringify(plugins);
 
-    if (process.argv.length > 3) {
-        writeFileSync(process.argv[2], data);
-        writeFileSync(process.argv[3], JSON.stringify(readmes));
+    if (process.argv.length > 2) {
+        writeFileSync("dist/equicordplugins.json", data);
     } else {
         console.log(data);
     }
