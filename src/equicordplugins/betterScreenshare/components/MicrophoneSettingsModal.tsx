@@ -31,8 +31,8 @@ import {
     SettingsModalProfilesCard,
     validateNumberInput,
     validateTextInputNumber
-} from "../../philsPluginLibrary.discordDesktop";
-import { Styles } from "../../philsPluginLibrary.discordDesktop/styles";
+} from "../../philsPluginLibrary";
+import { Styles } from "../../philsPluginLibrary/styles";
 import { MicrophoneProfile, MicrophoneStore } from "../stores";
 
 const simpleVoiceBitrates: readonly SelectOption[] = [

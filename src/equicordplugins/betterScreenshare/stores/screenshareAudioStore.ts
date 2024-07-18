@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { createPluginStore, ProfilableStore, profileable } from "../../philsPluginLibrary.discordDesktop";
+import { createPluginStore, ProfilableStore, profileable } from "../../philsPluginLibrary";
 import { PluginInfo } from "../constants";
 import {
     defaultMicrophoneProfiles as defaultScreenshareAudioProfiles,

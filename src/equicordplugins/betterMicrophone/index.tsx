@@ -19,7 +19,7 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-import { addSettingsPanelButton, Emitter, MicrophoneSettingsIcon, removeSettingsPanelButton } from "../philsPluginLibrary.discordDesktop";
+import { addSettingsPanelButton, Emitter, MicrophoneSettingsIcon, removeSettingsPanelButton } from "../philsPluginLibrary";
 import { PluginInfo } from "./constants";
 import { openMicrophoneSettingsModal } from "./modals";
 import { MicrophonePatcher } from "./patchers";

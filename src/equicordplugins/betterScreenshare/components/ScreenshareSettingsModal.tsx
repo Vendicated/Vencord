@@ -34,8 +34,8 @@ import {
     types,
     validateNumberInput,
     validateTextInputNumber
-} from "../../philsPluginLibrary.discordDesktop";
-import { Styles } from "../../philsPluginLibrary.discordDesktop/styles";
+} from "../../philsPluginLibrary";
+import { Styles } from "../../philsPluginLibrary/styles";
 import { PluginInfo } from "../constants";
 import { ScreenshareAudioProfile, ScreenshareAudioStore, ScreenshareProfile, ScreenshareStore } from "../stores";
 import { MicrophoneSettingsModal } from ".";

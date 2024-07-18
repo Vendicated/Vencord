@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Emitter, MediaEngineStore, Patcher, types } from "../../philsPluginLibrary.discordDesktop";
-import { patchConnectionAudioTransportOptions } from "../../philsPluginLibrary.discordDesktop/patches/audio";
+import { Emitter, MediaEngineStore, Patcher, types } from "../../philsPluginLibrary";
+import { patchConnectionAudioTransportOptions } from "../../philsPluginLibrary/patches/audio";
 import { PluginInfo } from "../constants";
 import { logger } from "../logger";
 import { microphoneStore } from "../stores";

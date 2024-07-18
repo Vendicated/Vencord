@@ -20,7 +20,7 @@ import { Flex } from "@components/Flex";
 import { React } from "@webpack/common";
 import { Settings } from "Vencord";
 
-import { SettingsModalCard, SettingsModalCardItem } from "../../philsPluginLibrary.discordDesktop";
+import { SettingsModalCard, SettingsModalCardItem } from "../../philsPluginLibrary";
 import Plugin from "..";
 import { AudioSourceSelect, OpenScreenshareSettingsButton } from "../components";
 import { PluginInfo } from "../constants";
