@@ -16,16 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
+import { Connection, VideoQualityManager } from ".";
 
-import { types } from "../../philsPluginLibrary.desktop";
+export type FramerateReducer = FramerateReducer_ & {
+    connection: Connection;
+    sinkWants: VideoQualityManager;
+    framerateReductionTimeout?: number;
+    handleSelfMute: (...args: any[]) => any;
+    handleSpeaking: (...args: any[]) => any;
+    __proto__: FramerateReducer_;
+};
 
-export const PluginInfo = {
-    PLUGIN_NAME: "BetterMicrophone",
-    DESCRIPTION: "This plugin allows you to further customize your microphone.",
-    AUTHOR: {
-        ...Devs.philhk,
-        github: "https://github.com/philhk"
-    },
-    CONTRIBUTORS: {}
-} as const satisfies types.PluginInfo;
+export interface FramerateReducer_ {
+    destroy: (...args: any[]) => any;
+    destroyFramerateScaleFactorTimers: (...args: any[]) => any;
+    initialize: (...args: any[]) => any;
+    updateRemoteWantsFramerate: (...args: any[]) => any;
+    userSpeakingChange: (...args: any[]) => any;
+}

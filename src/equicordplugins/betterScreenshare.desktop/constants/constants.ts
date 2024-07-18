@@ -21,11 +21,18 @@ import { Devs } from "@utils/constants";
 import { types } from "../../philsPluginLibrary.desktop";
 
 export const PluginInfo = {
-    PLUGIN_NAME: "BetterMicrophone",
-    DESCRIPTION: "This plugin allows you to further customize your microphone.",
+    PLUGIN_NAME: "BetterScreenshare",
+    DESCRIPTION: "This plugin allows you to further customize your screen sharing.",
     AUTHOR: {
         ...Devs.philhk,
         github: "https://github.com/philhk"
     },
-    CONTRIBUTORS: {}
+    CONTRIBUTORS: {
+        walrus: {
+            github: "https://github.com/philhk",
+            id: 305317288775778306n,
+            name: "walrus"
+        },
+    },
+    README: "https://github.com/Vendicated/Vencord/tree/main/src/plugins/betterScreenshare"
 } as const satisfies types.PluginInfo;

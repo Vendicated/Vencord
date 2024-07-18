@@ -16,16 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Devs } from "@utils/constants";
+import { LazyComponent } from "@utils/react";
+import { findByCode } from "@webpack";
 
-import { types } from "../../philsPluginLibrary.desktop";
+import { types } from "..";
 
-export const PluginInfo = {
-    PLUGIN_NAME: "BetterMicrophone",
-    DESCRIPTION: "This plugin allows you to further customize your microphone.",
-    AUTHOR: {
-        ...Devs.philhk,
-        github: "https://github.com/philhk"
-    },
-    CONTRIBUTORS: {}
-} as const satisfies types.PluginInfo;
+export const UserSummaryItem = LazyComponent<React.ComponentProps<types.UserSummaryItem>>(() => findByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers"));

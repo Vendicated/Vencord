@@ -16,16 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Emitter, MediaEngineStore, Patcher, types } from "../../philsPluginLibrary.desktop";
-import { patchConnectionAudioTransportOptions } from "../../philsPluginLibrary.desktop/patches/audio";
+import { UserStore } from "@webpack/common";
+
+import { Emitter, MediaEngineStore, patchConnectionAudioTransportOptions, Patcher, types } from "../../philsPluginLibrary.desktop";
 import { PluginInfo } from "../constants";
 import { logger } from "../logger";
-import { microphoneStore } from "../stores";
+import { screenshareAudioStore } from "../stores/screenshareAudioStore";
 
-export class MicrophonePatcher extends Patcher {
+export class ScreenshareAudioPatcher extends Patcher {
     private mediaEngineStore: types.MediaEngineStore;
     private mediaEngine: types.MediaEngine;
     public connection?: types.Connection;
+
     public oldSetTransportOptions: (...args: any[]) => void;
     public forceUpdateTransportationOptions: () => void;
 
@@ -33,31 +35,42 @@ export class MicrophonePatcher extends Patcher {
         super();
         this.mediaEngineStore = MediaEngineStore;
         this.mediaEngine = this.mediaEngineStore.getMediaEngine();
-        this.oldSetTransportOptions = () => void 0;
+
         this.forceUpdateTransportationOptions = () => void 0;
+        this.oldSetTransportOptions = () => void 0;
     }
 
     public patch(): this {
         this.unpatch();
 
-        const { get } = microphoneStore;
+        const { get } = screenshareAudioStore;
 
         const connectionEventFunction =
             (connection: types.Connection) => {
-                if (connection.context !== "default") return;
+                if (connection.context !== "stream" || connection.streamUserId !== UserStore.getCurrentUser().id) return;
 
                 this.connection = connection;
 
-                const { oldSetTransportOptions, forceUpdateTransportationOptions } = patchConnectionAudioTransportOptions(connection, get, logger);
+                const {
+                    forceUpdateTransportationOptions: forceUpdateTransportationOptionsAudio,
+                    oldSetTransportOptions: oldSetTransportOptionsAudio
+                } = patchConnectionAudioTransportOptions(connection, get, logger);
 
-                this.oldSetTransportOptions = oldSetTransportOptions;
-                this.forceUpdateTransportationOptions = forceUpdateTransportationOptions;
+                this.forceUpdateTransportationOptions = forceUpdateTransportationOptionsAudio;
+                this.oldSetTransportOptions = oldSetTransportOptionsAudio;
+
+                Emitter.addListener(connection.emitter, "on", "connected", () => {
+                    this.forceUpdateTransportationOptions();
+                });
+
+                Emitter.addListener(connection.emitter, "on", "destroy", () => {
+                    this.forceUpdateTransportationOptions = () => void 0;
+                });
             };
 
         Emitter.addListener(
             this.mediaEngine.emitter,
             "on",
-            // @ts-ignore
             "connection",
             connectionEventFunction,
             PluginInfo.PLUGIN_NAME
