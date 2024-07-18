@@ -18,19 +18,16 @@
 
 import "./style.css";
 
-import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, Menu } from "@webpack/common";
 
 import { settings } from "./settings";
-import { translate } from "./utils/misc";
-import { TranslateChatBarIcon, TranslateIcon } from "./utils/TranslateIcon";
-import { handleTranslate, TranslationAccessory } from "./utils/TranslationAccessory";
+import { Accessory, handleTranslate } from "./utils/accessory";
+import { Icon } from "./utils/icon";
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => {
     if (!message.content) return;
@@ -40,61 +37,37 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
 
     group.splice(group.findIndex(c => c?.props?.id === "copy-text") + 1, 0, (
         <Menu.MenuItem
-            id="vc-trans"
+            id="ec-trans"
             label="Translate"
-            icon={TranslateIcon}
-            action={async () => {
-                const trans = await translate("received", message.content);
-                handleTranslate(message.id, trans);
-            }}
+            icon={Icon}
+            action={() => handleTranslate(message)}
         />
     ));
 };
 
 export default definePlugin({
     name: "Translate+",
-    description: "Translate messages with Google Translate and Toki Pona AI",
+    description: "Vencord's translate plugin but with support for artistic languages!",
+    dependencies: ["MessageAccessoriesAPI"],
     authors: [Devs.Ven, EquicordDevs.Prince527],
-    dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
     contextMenus: {
         "message": messageCtxPatch
     },
-    // not used, just here in case some other plugin wants it or w/e
-    translate,
 
     start() {
-        addAccessory("vc-translation", props => <TranslationAccessory message={props.message} />);
+        addAccessory("ec-translation", props => <Accessory message={props.message} />);
 
-        addChatBarButton("vc-translate", TranslateChatBarIcon);
-
-        addButton("vc-translate", message => {
-            if (!message.content) return null;
-
-            return {
-                label: "Translate",
-                icon: TranslateIcon,
-                message,
-                channel: ChannelStore.getChannel(message.channel_id),
-                onClick: async () => {
-                    const trans = await translate("received", message.content);
-                    handleTranslate(message.id, trans);
-                }
-            };
-        });
-
-        this.preSend = addPreSendListener(async (_, message) => {
-            if (!settings.store.autoTranslate) return;
-            if (!message.content) return;
-
-            message.content = (await translate("sent", message.content)).text;
-        });
+        addButton("ec-translate", message => ({
+            label: "Translate",
+            icon: Icon,
+            message: message,
+            channel: ChannelStore.getChannel(message.channel_id),
+            onClick: () => handleTranslate(message),
+        }));
     },
-
     stop() {
-        removePreSendListener(this.preSend);
-        removeChatBarButton("vc-translate");
-        removeButton("vc-translate");
-        removeAccessory("vc-translation");
-    },
+        removeButton("ec-translate");
+        removeAccessory("ec-translation");
+    }
 });

@@ -1,69 +1,35 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
 export const settings = definePluginSettings({
-    receivedInput: {
+    target: {
         type: OptionType.STRING,
-        description: "Input language for received messages",
-        default: "auto",
-        hidden: true
-    },
-    receivedOutput: {
-        type: OptionType.STRING,
-        description: "Output language for received messages",
+        description: "Target language",
         default: "en",
-        hidden: true
+        restartNeeded: true
     },
-    sentInput: {
-        type: OptionType.STRING,
-        description: "Input language for sent messages",
-        default: "auto",
-        hidden: true
-    },
-    sentOutput: {
-        type: OptionType.STRING,
-        description: "Output language for sent messages",
-        default: "en",
-        hidden: true
-    },
-    autoTranslate: {
+    toki: {
         type: OptionType.BOOLEAN,
-        description: "Automatically translate your messages before sending. You can also shift/right click the translate button to toggle this",
-        default: false
+        description: "Enable Toki Pona",
+        default: true,
+        restartNeeded: true
     },
-    showChatBarButton: {
+    sitelen: {
         type: OptionType.BOOLEAN,
-        description: "Show translate button in chat bar",
-        default: true
+        description: "Enable Sitelen Pona",
+        default: true,
+        restartNeeded: true
     },
-    tokiPonaAPI: {
-        type: OptionType.STRING,
-        description: "An API to translate messages to Toki Pona",
-        default: "https://aiapi.serversmp.xyz/toki"
-    },
-    tokiPonaAuth: {
-        type: OptionType.STRING,
-        description: "An API key to use with the Toki Pona API",
-        default: ""
+    shavian: {
+        type: OptionType.BOOLEAN,
+        description: "Enable Shavian",
+        default: true,
+        restartNeeded: true
     }
-}).withPrivateSettings<{
-    showAutoTranslateAlert: boolean;
-}>();
+});
