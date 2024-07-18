@@ -92,7 +92,7 @@ export async function migrateLegacyToAsar() {
     try {
         const data = await get(`https://github.com/${gitRemote}/releases/latest/desktop.asar`);
         await writeFile(join(__dirname, "../vencord.asar"), data);
-        await writeFile(__filename, "// Legacy shim for new asar\n\nrequire(\"../vencord.asar\");");
+        await writeFile(__filename, '// Legacy shim for new asar\n\nrequire("../vencord.asar");');
         app.relaunch();
     } catch (e) {
         console.error("Failed to migrate to asar", e);
