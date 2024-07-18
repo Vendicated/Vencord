@@ -17,5 +17,6 @@
 */
 
 export * from "./AudioSourceSelect";
+export * from "./MicrophoneSettingsModal";
 export * from "./OpenScreenshareSettingsButton";
 export * from "./ScreenshareSettingsModal";

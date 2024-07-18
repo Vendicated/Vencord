@@ -22,7 +22,6 @@ import { ModalSize, openModalLazy } from "@utils/modal";
 import { Button, Card, Forms, React, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
 import { SelectOption } from "@webpack/types";
 
-import { MicrophoneSettingsModal } from "../../betterMicrophone.desktop/components";
 import {
     MediaEngineStore,
     openURL,
@@ -37,6 +36,7 @@ import {
     validateTextInputNumber
 } from "../../philsPluginLibrary.desktop";
 import { Styles } from "../../philsPluginLibrary.desktop/styles";
+import { MicrophoneSettingsModal } from "../components";
 import { PluginInfo } from "../constants";
 import { ScreenshareAudioProfile, ScreenshareAudioStore, ScreenshareProfile, ScreenshareStore } from "../stores";
 
