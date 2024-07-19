@@ -17,7 +17,7 @@
 */
 
 export const ASAR_FILE = IS_VESKTOP
-    ? "vesktop.asar"
+    ? "equibop.asar"
     : "desktop.asar";
 
 export function serializeErrors(func: (...args: any[]) => any) {
