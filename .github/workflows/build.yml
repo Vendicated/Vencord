@@ -79,6 +79,10 @@ jobs:
                     filename=$(basename "$file")
                     cp "$file" "release/vencordDesktop${filename^}"
                   done
+                  for file in equibop/*; do
+                    filename=$(basename "$file")
+                    cp "$file" "release/equicordDesktop${filename^}"
+                  done
 
                   rm release/package.json
 

@@ -168,7 +168,7 @@ await Promise.all([
             ...defines,
             IS_DISCORD_DESKTOP: false,
             IS_VESKTOP: true,
-            IS_EQUIBOP: true
+            IS_EQUIBOP: false
         },
         plugins: [
             ...nodeCommonOpts.plugins,
@@ -192,7 +192,7 @@ await Promise.all([
             ...defines,
             IS_DISCORD_DESKTOP: false,
             IS_VESKTOP: true,
-            IS_EQUIBOP: true
+            IS_EQUIBOP: false
         }
     }),
     esbuild.build({
@@ -205,6 +205,58 @@ await Promise.all([
             ...defines,
             IS_DISCORD_DESKTOP: false,
             IS_VESKTOP: true,
+            IS_EQUIBOP: false
+        }
+    }),
+
+    // Equicord Desktop main & renderer & preload
+    esbuild.build({
+        ...nodeCommonOpts,
+        entryPoints: ["src/main/index.ts"],
+        outfile: "dist/equibop/main.js",
+        footer: { js: "//# sourceURL=EquicordMain\n" + sourceMapFooter("main") },
+        sourcemap,
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: false,
+            IS_VESKTOP: false,
+            IS_EQUIBOP: true
+        },
+        plugins: [
+            ...nodeCommonOpts.plugins,
+            globNativesPlugin
+        ]
+    }),
+    esbuild.build({
+        ...commonOpts,
+        entryPoints: ["src/Vencord.ts"],
+        outfile: "dist/equibop/renderer.js",
+        format: "iife",
+        target: ["esnext"],
+        footer: { js: "//# sourceURL=EquicordRenderer\n" + sourceMapFooter("renderer") },
+        globalName: "Vencord",
+        sourcemap,
+        plugins: [
+            globPlugins("equicordDesktop"),
+            ...commonOpts.plugins
+        ],
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: false,
+            IS_VESKTOP: false,
+            IS_EQUIBOP: true
+        }
+    }),
+    esbuild.build({
+        ...nodeCommonOpts,
+        entryPoints: ["src/preload.ts"],
+        outfile: "dist/equibop/preload.js",
+        footer: { js: "//# sourceURL=EquicordPreload\n" + sourceMapFooter("preload") },
+        sourcemap,
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: false,
+            IS_VESKTOP: false,
             IS_EQUIBOP: true
         }
     }),
@@ -218,18 +270,22 @@ await Promise.all([
 
 await Promise.all([
     writeFile("dist/desktop/package.json", JSON.stringify({
-        name: "vencord",
+        name: "equicord",
         main: "patcher.js"
     })),
     writeFile("dist/vesktop/package.json", JSON.stringify({
-        name: "vencord",
+        name: "equicord",
+        main: "main.js"
+    })),
+    writeFile("dist/equibop/package.json", JSON.stringify({
+        name: "equicord",
         main: "main.js"
     }))
 ]);
 
 await Promise.all([
     createPackage("dist/desktop", "dist/desktop.asar"),
-    createPackage("dist/vesktop", "dist/equibop.asar"),
+    createPackage("dist/equibop", "dist/equibop.asar"),
     createPackage("dist/vesktop", "dist/vesktop.asar")
 ]);
 
@@ -248,8 +304,7 @@ if (existsSync("dist/renderer.js")) {
 
     await Promise.all([
         writeFile("dist/patcher.js", 'require("./desktop.asar")'),
-        writeFile("dist/vencordDesktopMain.js", 'require("./equibop.asar")'),
-        writeFile("dist/vencordDesktopMain.js", 'require("./equibop.asar")'),
+        writeFile("dist/equicordDesktopMain.js", 'require("./equibop.asar")'),
         writeFile("dist/vencordDesktopMain.js", 'require("./vesktop.asar")')
     ]);
 }
