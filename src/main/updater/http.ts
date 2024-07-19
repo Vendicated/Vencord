@@ -95,8 +95,8 @@ export async function migrateLegacyToAsar() {
 
         const data = await get(`https://github.com/${gitRemote}/releases/latest/download/desktop.asar`);
 
-        originalWriteFileSync(join(__dirname, "../vencord.asar"), data);
-        originalWriteFileSync(__filename, '// Legacy shim for new asar\n\nrequire("../vencord.asar");');
+        originalWriteFileSync(join(__dirname, "../equicord.asar"), data);
+        originalWriteFileSync(__filename, '// Legacy shim for new asar\n\nrequire("../equicord.asar");');
 
         app.relaunch();
         app.exit();
