@@ -48,7 +48,7 @@ const settings = definePluginSettings({
                 borderTop: "thin solid var(--background-modifier-accent)",
                 paddingTop: 5,
                 paddingBottom: 5
-            }}/>
+            }} />
         ),
     },
     profiles: {

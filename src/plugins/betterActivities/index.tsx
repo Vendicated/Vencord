@@ -23,7 +23,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { PresenceStore, React, Tooltip, useStateFromStores } from "@webpack/common";
+import { PresenceStore, React, Tooltip, useEffect, useState, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import ActivityTooltip from "./components/ActivityTooltip";
@@ -44,7 +44,7 @@ import {
 
 const cl = classNameFactory("vc-bactivities-");
 
-const ActivityView = findComponentByCodeLazy<ActivityViewProps>(",onOpenGameProfileModal:");
+export const ActivityView = findComponentByCodeLazy<ActivityViewProps>(",onOpenGameProfileModal:");
 
 // if discord one day decides to change their icon this needs to be updated
 const DefaultActivityIcon = findComponentByCodeLazy("M6,7 L2,7 L2,6 L6,6 L6,7 Z M8,5 L2,5 L2,4 L8,4 L8,5 Z M8,3 L2,3 L2,2 L8,2 L8,3 Z M8.88888889,0 L1.11111111,0 C0.494444444,0 0,0.494444444 0,1.11111111 L0,8.88888889 C0,9.50253861 0.497461389,10 1.11111111,10 L8.88888889,10 C9.50253861,10 10,9.50253861 10,8.88888889 L10,1.11111111 C10,0.494444444 9.5,0 8.88888889,0 Z");
@@ -135,7 +135,7 @@ export default definePlugin({
     },
 
     showAllActivitiesComponent({ activity, user, ...props }: ActivityViewProps) {
-        const [currentActivity, setCurrentActivity] = React.useState<Activity | null>(
+        const [currentActivity, setCurrentActivity] = useState<Activity | null>(
             activity?.type !== 4 ? activity! : null
         );
 
@@ -143,7 +143,7 @@ export default definePlugin({
             [PresenceStore], () => PresenceStore.getActivities(user.id).filter((activity: Activity) => activity.type !== 4)
         ) ?? [];
 
-        React.useEffect(() => {
+        useEffect(() => {
             if (!activities.length) {
                 setCurrentActivity(null);
                 return;
@@ -186,7 +186,7 @@ export default definePlugin({
                             >
                                 <Caret
                                     disabled={activities.indexOf(currentActivity!) < 1}
-                                    direction="left"/>
+                                    direction="left" />
                             </span>;
                         }}</Tooltip>
 
@@ -195,7 +195,7 @@ export default definePlugin({
                                 <div
                                     key={"dot--" + index}
                                     onClick={() => setCurrentActivity(activity)}
-                                    className={`dot ${currentActivity === activity ? "selected" : ""}`}/>
+                                    className={`dot ${currentActivity === activity ? "selected" : ""}`} />
                             ))}
                         </div>
 
@@ -214,7 +214,7 @@ export default definePlugin({
                             >
                                 <Caret
                                     disabled={activities.indexOf(currentActivity!) >= activities.length - 1}
-                                    direction="right"/>
+                                    direction="right" />
                             </span>;
                         }}</Tooltip>
                     </div>

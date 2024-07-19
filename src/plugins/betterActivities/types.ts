@@ -85,4 +85,6 @@ export interface IconCSSProperties extends CSSProperties {
 export interface ActivityViewProps {
     activity: Activity | null;
     user: User;
+    application?: Application;
+    type: string;
 }

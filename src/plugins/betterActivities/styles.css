@@ -19,44 +19,8 @@
     border-radius: 50%;
 }
 
-.vc-bactivities-activity {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-.vc-bactivities-activity-title {
-    font-weight: bold;
-    text-align: center;
-}
-
-.vc-bactivities-activity-image {
-    height: 20px;
-    width: 20px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.vc-bactivities-activity-divider {
-    width: 100%;
-    border-top: 1px dotted rgb(255 255 255 / 20%);
-    margin-top: 3px;
-    margin-bottom: 3px;
-}
-
-.vc-bactivities-activity-details {
-    display: flex;
-    flex-direction: column;
-    color: var(--text-muted);
-    word-break: break-word;
-}
-
-.vc-bactivities-activity-time-bar {
-    width: 100%;
-    margin-top: 3px;
-    margin-bottom: 3px;
+.vc-bactivities-activity-tooltip {
+    padding: 1px;
 }
 
 .vc-bactivities-caret-left,
