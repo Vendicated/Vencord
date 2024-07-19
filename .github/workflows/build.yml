@@ -85,7 +85,7 @@ jobs:
             - name: Upload Equicord
               if: github.repository == 'Equicord/Equicord'
               run: |
-                gh release upload latest --clobber dist/*
+                gh release upload latest --clobber dist/release/*
 
             - name: Upload Plugins JSON to Ignore repo
               if: github.repository == 'Equicord/Equicord'
