@@ -20,7 +20,7 @@
 
 #vc-serverlist-indicators:hover {
     border-radius: 34%;
-    background-color: var(--brand-experiment);
+    background-color: var(--brand-500);
 }
 
 #vc-serverlist-indicators::before {
