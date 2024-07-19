@@ -25,14 +25,8 @@ export const DATA_DIR = process.env.EQUICORD_USER_DATA_DIR ?? (
         : join(app.getPath("userData"), "..", "Equicord")
 );
 
-export const DATA_DIR2 = process.env.VENCORD_USER_DATA_DIR ?? (
-    process.env.DISCORD_USER_DATA_DIR
-        ? join(process.env.DISCORD_USER_DATA_DIR, "..", "VencordData")
-        : join(app.getPath("userData"), "..", "Vencord")
-);
-
-export const SETTINGS_DIR = IS_VESKTOP ? join(DATA_DIR2, "settings") : join(DATA_DIR, "settings");
-export const THEMES_DIR = IS_VESKTOP ? join(DATA_DIR2, "themes") : join(DATA_DIR, "themes");
+export const SETTINGS_DIR = join(DATA_DIR, "settings");
+export const THEMES_DIR = join(DATA_DIR, "themes");
 export const QUICKCSS_PATH = join(SETTINGS_DIR, "quickCss.css");
 export const SETTINGS_FILE = join(SETTINGS_DIR, "settings.json");
 export const NATIVE_SETTINGS_FILE = join(SETTINGS_DIR, "native-settings.json");
