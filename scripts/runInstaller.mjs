@@ -124,7 +124,7 @@ try {
         env: {
             ...process.env,
             VENCORD_USER_DATA_DIR: BASE_DIR,
-            VENCORD_ASAR_FILE: join(BASE_DIR, "dist/desktop.asar"),
+            VENCORD_DIRECTORY: join(BASE_DIR, "dist/desktop"),
             VENCORD_DEV_INSTALL: "1"
         }
     });

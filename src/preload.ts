@@ -19,7 +19,7 @@
 import { debounce } from "@shared/debounce";
 import { contextBridge, webFrame } from "electron";
 import { readFileSync, watch } from "fs";
-import { dirname, join } from "path";
+import { join } from "path";
 
 import VencordNative from "./VencordNative";
 
@@ -45,7 +45,7 @@ if (location.protocol !== "data:") {
     if (IS_DEV) {
         // persistent means keep process running if watcher is the only thing still running
         // which we obviously don't want
-        watch(dirname(rendererCss), { persistent: false }, () => {
+        watch(rendererCss, { persistent: false }, () => {
             document.getElementById("vencord-css-core")!.textContent = readFileSync(rendererCss, "utf-8");
         });
     }
