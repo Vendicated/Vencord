@@ -50,7 +50,7 @@ const nodeCommonOpts = {
     define: defines
 } satisfies BuildOptions;
 
-const sourceMapFooter = s => watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
+const sourceMapFooter = (s: string) => watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
 const sourcemap = watch ? "inline" : "external";
 
 const globNativesPlugin: Plugin = {

@@ -23,7 +23,7 @@ import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises
 import { join } from "path";
 import Zip from "zip-local";
 
-import { BUILD_TIMESTAMP, buildOrWatchAll, commonOpts, addBuild, globPlugins, IS_DEV, IS_REPORTER, VERSION } from "./common.mjs";
+import { addBuild, BUILD_TIMESTAMP, buildOrWatchAll, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION } from "./common.mjs";
 
 /**
  * @type {esbuild.BuildOptions}
