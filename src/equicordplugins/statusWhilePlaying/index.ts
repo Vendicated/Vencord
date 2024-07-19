@@ -15,7 +15,7 @@ const updateAsync = findByCodeLazy("updateAsync", "status");
 const settings = definePluginSettings({
     statusToSet: {
         type: OptionType.SELECT,
-        description: "Status set while playing a game",
+        description: "Status to set while playing a game",
         options: [
             {
                 label: "Online",
@@ -47,8 +47,7 @@ export default definePlugin({
     runningGamesChange(event) {
         let savedStatus = "";
         if (event.games.length > 0) {
-            const currentUser = UserStore.getCurrentUser();
-            const status = PresenceStore.getStatus(currentUser.id);
+            const status = PresenceStore.getStatus(UserStore.getCurrentUser().id);
             savedStatus = status;
             updateAsync(settings.store.statusToSet);
         } else if (event.games.length === 0) {
