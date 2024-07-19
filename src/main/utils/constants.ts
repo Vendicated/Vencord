@@ -19,10 +19,14 @@
 import { app } from "electron";
 import { join } from "path";
 
-export const DATA_DIR = process.env.EQUICORD_USER_DATA_DIR ?? (
+export const DATA_DIR = process.env.EQUICORD_USER_DATA_DIR ?? process.env.VENCORD_USER_DATA_DIR ?? (
     process.env.DISCORD_USER_DATA_DIR
-        ? join(process.env.DISCORD_USER_DATA_DIR, "..", "EquicordData")
-        : join(app.getPath("userData"), "..", "Equicord")
+        ? IS_VESKTOP
+            ? join(process.env.DISCORD_USER_DATA_DIR, "..", "VencordData")
+            : join(process.env.DISCORD_USER_DATA_DIR, "..", "EquicordData")
+        : IS_VESKTOP
+            ? join(app.getPath("userData"), "..", "Vencord")
+            : join(app.getPath("userData"), "..", "Equicord")
 );
 
 export const SETTINGS_DIR = join(DATA_DIR, "settings");

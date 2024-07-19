@@ -62,6 +62,7 @@
     --si-equicordsettingssync: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordsettingssync.svg);
     --si-equicordpatchhelper: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordpatchhelper.svg);
     --si-equibop: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vesktop.svg);
+    --si-vesktop: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vesktop.svg);
     --si-overview: url(https://minidiscordthemes.github.io/SettingsIcons/svg/overview.svg);
     --si-roles: url(https://minidiscordthemes.github.io/SettingsIcons/svg/roles.svg);
     --si-emoji: url(https://minidiscordthemes.github.io/SettingsIcons/svg/emoji.svg);
@@ -365,6 +366,11 @@
 .sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Equibop]::before {
     -webkit-mask: var(--si-equibop) center/contain no-repeat;
     mask: var(--si-equibop) center/contain no-repeat
+}
+
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Vesktop]::before {
+    -webkit-mask: var(--si-vesktop) center/contain no-repeat;
+    mask: var(--si-vesktop) center/contain no-repeat
 }
 
 .sidebar_c25c6d .side_a0 .item_a0[data-tab-id=OVERVIEW]::before {
