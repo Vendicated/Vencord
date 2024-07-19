@@ -46,6 +46,8 @@ if (IS_REPORTER) {
     require("./debug/runReporter");
 }
 
+alert("balls");
+
 async function syncSettings() {
     // pre-check for local shared settings
     if (
