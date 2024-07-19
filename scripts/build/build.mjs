@@ -229,7 +229,6 @@ await Promise.all([
 
 await Promise.all([
     createPackage("dist/desktop", "dist/desktop.asar"),
-    createPackage("dist/vesktop", "dist/equibop.asar"),
     createPackage("dist/vesktop", "dist/vesktop.asar")
 ]);
 
@@ -248,7 +247,6 @@ if (existsSync("dist/renderer.js")) {
 
     await Promise.all([
         writeFile("dist/patcher.js", 'require("./desktop.asar")'),
-        writeFile("dist/vencordDesktopMain.js", 'require("./equibop.asar")'),
         writeFile("dist/vencordDesktopMain.js", 'require("./vesktop.asar")')
     ]);
 }
