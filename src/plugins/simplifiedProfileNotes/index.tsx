@@ -96,8 +96,8 @@ export default definePlugin({
             // DM Sidebar
             find: /getRelationshipType.{0,800}\.Overlay.{0,200}Messages\.USER_POPOUT_ABOUT_ME/,
             replacement: {
-                match: /(\(0,.{0,50}?Messages\.BOT_PROFILE_CREATED_ON.{0,100}?userId:(\i)\.id}\)\}\))/,
-                replace: "$1,$self.NotesSection({ headingColor: 'header-primary', user: $2, ...vencordNotesHook })"
+                match: /(\(0,.{0,50}?Messages\.BOT_PROFILE_CREATED_ON.{0,100}?userId:(\i)\.id}\)\}\))(.{0,200}?)\]\}/,
+                replace: "$1$3,$self.NotesSection({ headingColor: 'header-primary', user: $2, ...vencordNotesHook })]}"
             }
         }
     ].map(p => ({
