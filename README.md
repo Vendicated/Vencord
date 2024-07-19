@@ -21,7 +21,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 -   Request for plugins from Discord.
 
 <details>
-<summary>Extra included plugins (110 additional plugins)</summary>
+<summary>Extra included plugins (107 additional plugins)</summary>
 
 - AllCallTimers by MaxHerbold and D3SOX
 - AltKrispSwitch by newwares
@@ -96,9 +96,6 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - NotificationTitle by Kyuuhachi
 - NotifyUserChanges by D3SOX
 - OnePingPerDM by ProffDea
-- PhilsBetterMicrophone by Philhk
-- PhilsBetterScreenshare by Philhk and walrus
-- PhilsPluginLibrary by Philhk
 - PlatformSpoofer by Drag
 - PurgeMessages by bhop and nyx
 - QuestCompleter by HappyEnderman, SerStars, thororen
