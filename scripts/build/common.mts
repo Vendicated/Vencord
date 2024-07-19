@@ -296,6 +296,17 @@ export async function buildOrWatchAll() {
         const contexts = await Promise.all(builds.map(context));
         await Promise.all(contexts.map(ctx => ctx.watch()));
     } else {
-        await Promise.all(builds.map(build));
+        try {
+            await Promise.all(builds.map(build));
+        } catch (err) {
+            const reason = err instanceof Error
+                ? err.message
+                : err;
+
+            console.error("Build failed");
+            console.error(reason);
+            // make ci fail
+            process.exitCode = 1;
+        }
     }
 }
