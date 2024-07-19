@@ -4,35 +4,60 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { FluxDispatcher, PresenceStore, UserStore } from "@webpack/common";
 
-const updateAsync = findByCodeLazy("updateAsync");
+const updateAsync = findByCodeLazy("updateAsync", "status");
 
-async function runningGamesChange(event) {
-    const { games } = event;
-    let savedStatus;
-    if (games.length > 0) {
-        const currentUser = UserStore.getCurrentUser();
-        const status = PresenceStore.getStatus(currentUser.id);
-        savedStatus = status;
-        if (status === "invisible") return;
-        if (status !== "dnd") updateAsync("dnd");
-    } else if (games.length === 0) {
-        updateAsync(savedStatus);
+const settings = definePluginSettings({
+    statusToSet: {
+        type: OptionType.SELECT,
+        description: "Status set while playing a game",
+        options: [
+            {
+                label: "Online",
+                value: "online",
+            },
+            {
+                label: "Idle",
+                value: "idle",
+            },
+            {
+                label: "Do Not Disturb",
+                value: "dnd",
+            },
+            {
+                label: "Invisible",
+                value: "invisible",
+            }
+        ]
     }
-}
+});
 
+migratePluginSettings("StatusWhilePlaying", "DNDWhilePlaying");
 export default definePlugin({
-    name: "DNDWhilePlaying",
-    description: "Automatically updates your status to Do Not Disturb when playing games and resets it back when stopped playing",
+    name: "StatusWhilePlaying",
+    description: "Automatically updates your status when playing games",
     authors: [EquicordDevs.thororen],
+    settings,
+    runningGamesChange(event) {
+        let savedStatus = "";
+        if (event.games.length > 0) {
+            const currentUser = UserStore.getCurrentUser();
+            const status = PresenceStore.getStatus(currentUser.id);
+            savedStatus = status;
+            updateAsync(settings.store.statusToSet);
+        } else if (event.games.length === 0) {
+            updateAsync(savedStatus);
+        }
+    },
     start() {
-        FluxDispatcher.subscribe("RUNNING_GAMES_CHANGE", runningGamesChange);
+        FluxDispatcher.subscribe("RUNNING_GAMES_CHANGE", this.runningGamesChange);
     },
     stop() {
-        FluxDispatcher.unsubscribe("RUNNING_GAMES_CHANGE", runningGamesChange);
+        FluxDispatcher.unsubscribe("RUNNING_GAMES_CHANGE", this.runningGamesChange);
     }
 });
