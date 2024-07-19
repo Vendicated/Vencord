@@ -58,7 +58,7 @@ export async function getEnumReport(
                 checkEnumIgnores(changes, config, report);
                 report.changes = changes;
             } else
-                report.error = `Automatic enum find for enum '${name}' failed. The target enum may have too many additions.`;
+                report.error = `Automatic enum find for enum '${name}' failed. The target enum may have too many changes.`;
         } else
             report.error = `Automatic enum find for enum '${name}' failed.`;
     } catch (error) {

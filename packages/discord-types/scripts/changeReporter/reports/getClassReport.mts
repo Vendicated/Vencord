@@ -84,7 +84,7 @@ export async function getClassReport(
                 checkClassIgnores(changes, config, report);
                 report.changes = changes;
             } else
-                report.error = `Automatic class find for class '${name}' failed. The target class may have too many additions.`;
+                report.error = `Automatic class find for class '${name}' failed. The target class may have too many changes.`;
         } else
             report.error = `Automatic class find for class '${name}' failed.`;
     } catch (error) {
