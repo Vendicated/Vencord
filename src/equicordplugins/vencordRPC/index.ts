@@ -20,7 +20,6 @@ const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
 };
 const VoiceStates = findByPropsLazy("getVoiceStatesForChannel");
 const chino = "https://i.imgur.com/Dsa2rQy.png";
-const shiggy = "https://i.imgur.com/MgUzhs0.gif";
 const wysi = "https://i.imgur.com/uKtXde9.gif";
 
 async function getApplicationAsset(key: string): Promise<string> {
