@@ -28,6 +28,7 @@ const settings = definePluginSettings({
             {
                 label: "Do Not Disturb",
                 value: "dnd",
+                default: true
             },
             {
                 label: "Invisible",
