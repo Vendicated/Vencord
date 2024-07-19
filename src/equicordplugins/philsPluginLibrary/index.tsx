@@ -29,7 +29,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "Messages.ACCOUNT_A11Y_LABEL",
+            find: "isFullscreenInContext());",
             replacement: {
                 match: /(?<=function)( \i\i\(\i\)(?={).)(.{0,1000}\i\.\i\.isFullscreenInContext\(\).+?\)]}\))\}/,
                 replace: "$1 return $self.replacedUserPanelComponent(function(){$2}, this, arguments)}"

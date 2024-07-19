@@ -1,91 +1,105 @@
 name: Build DevBuild
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/build.yml
-      - src/**
-      - browser/**
-      - scripts/build/**
-      - package.json
-      - pnpm-lock.yaml
+    push:
+        branches:
+            - main
+        paths:
+            - .github/workflows/build.yml
+            - src/**
+            - browser/**
+            - scripts/build/**
+            - package.json
+            - pnpm-lock.yaml
 env:
-  FORCE_COLOR: true
-  GITHUB_TOKEN: ${{ secrets.ETOKEN }}
+    FORCE_COLOR: true
+    GITHUB_TOKEN: ${{ secrets.ETOKEN }}
 
 jobs:
-  DetermineRunner:
-    name: Determine Runner
-    runs-on: ubuntu-latest
-    outputs:
-      runner: ${{ steps.set-runner.outputs.runner }}
-    steps:
-      - name: Determine which runner to use
-        id: set-runner
-        uses: benjaminmichaelis/get-soonest-available-runner@v1.1.0
-        with:
-          primary-runner: "self-hosted"
-          fallback-runner: "ubuntu-latest"
-          min-available-runners: 1
-          github-token: ${{ env.GITHUB_TOKEN }}
+    DetermineRunner:
+        name: Determine Runner
+        runs-on: ubuntu-latest
+        outputs:
+            runner: ${{ steps.set-runner.outputs.runner }}
+        steps:
+        - name: Determine which runner to use
+          id: set-runner
+          uses: benjaminmichaelis/get-soonest-available-runner@v1.1.0
+          with:
+            primary-runner: "self-hosted"
+            fallback-runner: "ubuntu-latest"
+            min-available-runners: 1
+            github-token: ${{ env.GITHUB_TOKEN }}
 
-  Build:
-    name: Build Equicord
-    needs: DetermineRunner
-    runs-on: ${{ needs.DetermineRunner.outputs.runner}}
+    Build:
+        name: Build Equicord
+        needs: DetermineRunner
+        runs-on: ${{ needs.DetermineRunner.outputs.runner}}
 
-    steps:
-      - uses: actions/checkout@v4
+        steps:
+            - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v3
+            - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
 
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
+            - name: Use Node.js 20
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "pnpm"
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
 
-      - name: Build web
-        run: pnpm buildWebStandalone
+            - name: Build web
+              run: pnpm buildWebStandalone
 
-      - name: Build
-        run: pnpm build --standalone
+            - name: Build
+              run: pnpm build --standalone
 
-      - name: Generate plugin list
-        run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
+            - name: Generate plugin list
+              run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
 
-      - name: Generate Equicord plugin list
-        run: pnpm generateEquicordPluginJson dist/equicordplugins.json
+            - name: Generate Equicord plugin list
+              run: pnpm generateEquicordPluginJson dist/equicordplugins.json
 
-      - name: Clean up obsolete files
-        run: |
-          rm -rf dist/*-unpacked dist/monaco Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
+            - name: Collect files to be released
+              run: |
+                  cd dist
+                  mkdir release
 
-      - name: Upload Equicord
-        if: github.repository == 'Equicord/Equicord'
-        run: |
-          gh release upload latest --clobber dist/*
+                  cp browser/browser.* release
+                  cp Vencord.user.{js,js.LEGAL.txt} release
 
-      - name: Upload Plugins JSON to Ignore repo
-        if: github.repository == 'Equicord/Equicord'
-        run: |
-            git config --global user.name "$USERNAME"
-            git config --global user.email "78185467+thororen1234@users.noreply.github.com"
+                  # copy the plugin data jsons, the extension zips and the desktop/vesktop asars
+                  cp *.{json,zip,asar} release
 
-            git clone https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git upload
-            cd upload
+                  # legacy un-asared files
+                  # FIXME: remove at some point
+                  cp desktop/* release
+                  for file in vesktop/*; do
+                    filename=$(basename "$file")
+                    cp "$file" "release/vencordDesktop${filename^}"
+                  done
 
-            rm plugins.json
-            cp -r ../dist/equicordplugins.json plugins.json
+                  rm release/package.json
 
-            git add -A
-            git commit -m "Plugins for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
-            git push --force https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git
-        env:
-            API_TOKEN: ${{ secrets.ETOKEN }}
-            GH_REPO: Equicord/Equibored
-            USERNAME: thororen1234
+            - name: Upload Equicord
+              if: github.repository == 'Equicord/Equicord'
+              run: |
+                gh release upload latest --clobber dist/*
+
+            - name: Upload Plugins JSON to Ignore repo
+              if: github.repository == 'Equicord/Equicord'
+              run: |
+                git config --global user.name "$USERNAME"
+                git config --global user.email "78185467+thororen1234@users.noreply.github.com"
+                git clone https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git upload
+                cd upload
+                rm plugins.json
+                cp -r ../dist/equicordplugins.json plugins.json
+                git add -A
+                git commit -m "Plugins for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+                git push --force https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git
+              env:
+                API_TOKEN: ${{ secrets.ETOKEN }}
+                GH_REPO: Equicord/Equibored
+                USERNAME: thororen1234

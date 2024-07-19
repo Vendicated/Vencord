@@ -53,6 +53,7 @@
     },
     "devDependencies": {
         "@react-spring/web": "^9.7.3",
+        "@electron/asar": "^3.2.10",
         "@types/chrome": "^0.0.246",
         "@types/diff": "^5.0.3",
         "@types/lodash": "^4.14.194",

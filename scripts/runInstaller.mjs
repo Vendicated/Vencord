@@ -25,8 +25,8 @@ import { Readable } from "stream";
 import { finished } from "stream/promises";
 import { fileURLToPath } from "url";
 
-const BASE_URL = "https://github.com/Equicord/Installer/releases/latest/download/";
-const INSTALLER_PATH_DARWIN = "EquicordInstaller.app/Contents/MacOS/EquicordInstaller";
+const BASE_URL = "https://github.com/Equicord/Equilotl/releases/latest/download/";
+const INSTALLER_PATH_DARWIN = "Equilotl.app/Contents/MacOS/Equilotl";
 
 const BASE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
 const FILE_DIR = join(BASE_DIR, "dist", "Installer");
@@ -35,11 +35,11 @@ const ETAG_FILE = join(FILE_DIR, "etag.txt");
 function getFilename() {
     switch (process.platform) {
         case "win32":
-            return "EquicordInstallerCli.exe";
+            return "EquilotlCli.exe";
         case "darwin":
-            return "EquicordInstaller.MacOS.zip";
+            return "Equilotl.MacOS.zip";
         case "linux":
-            return "EquicordInstallerCli-linux";
+            return "EquilotlCli-linux";
         default:
             throw new Error("Unsupported platform: " + process.platform);
     }
@@ -53,7 +53,7 @@ async function ensureBinary() {
 
     const downloadName = join(FILE_DIR, filename);
     const outputFile = process.platform === "darwin"
-        ? join(FILE_DIR, "EquicordInstaller")
+        ? join(FILE_DIR, "Equilotl")
         : downloadName;
 
     const etag = existsSync(outputFile) && existsSync(ETAG_FILE)
@@ -96,7 +96,7 @@ async function ensureBinary() {
                 execSync(cmd);
             } catch { }
         };
-        logAndRun(`sudo spctl --add '${outputFile}' --label "Equicord Installer"`);
+        logAndRun(`sudo spctl --add '${outputFile}' --label "Equilotl"`);
         logAndRun(`sudo xattr -d com.apple.quarantine '${outputFile}'`);
     } else {
         // WHY DOES NODE FETCH RETURN A WEB STREAM OH MY GOD

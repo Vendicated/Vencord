@@ -62,13 +62,12 @@ export default definePlugin({
     name: "TextToSpeech",
     description: "Reads out chat messages with openai tts",
     authors: [Devs.Samwich],
-    flux:
-    {
+    flux: {
         async MESSAGE_CREATE({ optimistic, type, message, channelId }) {
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (message.state === "SENDING") return;
             if (!message.content) return;
-            if (message.channel_id !== getCurrentChannel().id) return;
+            if (message.channel_id !== getCurrentChannel()?.id ?? 0) return;
 
             readOutText(message.content);
         }

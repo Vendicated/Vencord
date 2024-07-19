@@ -18,25 +18,21 @@
 
 import { IpcEvents } from "@shared/IpcEvents";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
-import axios from "axios";
-import { ipcMain } from "electron";
-import { writeFile } from "fs/promises";
+import { app, dialog, ipcMain } from "electron";
+import { writeFileSync as originalWriteFileSync } from "original-fs";
 import { join } from "path";
 
 import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 
-import { serializeErrors, VENCORD_FILES } from "./common";
-
+import { get } from "../utils/simpleGet";
+import { ASAR_FILE, serializeErrors } from "./common";
 
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
-let PendingUpdates = [] as [string, string][];
+let PendingUpdate: string | null = null;
 
 async function githubGet(endpoint: string) {
-    return axios({
-        method: "get",
-        responseType: "json",
-        url: API_BASE + endpoint,
+    return get(API_BASE + endpoint, {
         headers: {
             Accept: "application/vnd.github+json",
             // "All API requests MUST include a valid User-Agent header.
@@ -52,7 +48,8 @@ async function calculateGitChanges() {
 
     const res = await githubGet(`/compare/${gitHash}...HEAD`);
 
-    return res.data.commits.map((c: any) => ({
+    const data = JSON.parse(res.toString("utf-8"));
+    return data.commits.map((c: any) => ({
         // github api only sends the long sha
         hash: c.sha.slice(0, 7),
         author: c.author.login,
@@ -63,32 +60,26 @@ async function calculateGitChanges() {
 async function fetchUpdates() {
     const release = await githubGet("/releases/latest");
 
-    const hash = release.data.name.slice(release.data.name.lastIndexOf(" ") + 1);
+    const data = JSON.parse(release.toString());
+    const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
     if (hash === gitHash)
         return false;
 
-    release.data.assets.forEach(({ name, browser_download_url }) => {
-        if (VENCORD_FILES.some(s => name.startsWith(s))) {
-            PendingUpdates.push([name, browser_download_url]);
-        }
-    });
+
+    const asset = data.assets.find(a => a.name === ASAR_FILE);
+    PendingUpdate = asset.browser_download_url;
+
     return true;
 }
 
 async function applyUpdates() {
-    await Promise.all(PendingUpdates.map(
-        async ([name, data]) => {
-            writeFile(
-                join(__dirname, name),
-                (await axios({
-                    method: "get",
-                    responseType: "arraybuffer",
-                    url: data,
-                })).data
-            );
-        }
-    ));
-    PendingUpdates = [];
+    if (!PendingUpdate) return true;
+
+    const data = await get(PendingUpdate);
+    originalWriteFileSync(__dirname, data);
+
+    PendingUpdate = null;
+
     return true;
 }
 
@@ -96,3 +87,28 @@ ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${g
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors(fetchUpdates));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));
+
+export async function migrateLegacyToAsar() {
+    try {
+        const isFlatpak = process.platform === "linux" && !!process.env.FLATPAK_ID;
+        if (isFlatpak) throw "Flatpak Discord can't automatically be migrated.";
+
+        const data = await get(`https://github.com/${gitRemote}/releases/latest/download/desktop.asar`);
+
+        originalWriteFileSync(join(__dirname, "../vencord.asar"), data);
+        originalWriteFileSync(__filename, '// Legacy shim for new asar\n\nrequire("../vencord.asar");');
+
+        app.relaunch();
+        app.exit();
+    } catch (e) {
+        console.error("Failed to migrate to asar", e);
+
+        app.whenReady().then(() => {
+            dialog.showErrorBox(
+                "Legacy Install",
+                "The way Vencord loaded was changed and the updater failed to migrate. Please reinstall using the Vencord Installer!"
+            );
+            app.exit(1);
+        });
+    }
+}

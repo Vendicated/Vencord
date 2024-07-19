@@ -26,14 +26,18 @@ import { IS_VANILLA } from "./utils/constants";
 
 console.log("[Equicord] Starting up...");
 
+// FIXME: remove at some point
+const isLegacyNonAsarVencord = IS_STANDALONE && !__dirname.endsWith(".asar");
+if (isLegacyNonAsarVencord) {
+    console.warn("This is a legacy non asar install! Migrating to asar and restarting...");
+    require("./updater/http").migrateLegacyToAsar();
+}
+
 // Our injector file at app/index.js
 const injectorPath = require.main!.filename;
 
-// special discord_arch_electron injection method
-const asarName = require.main!.path.endsWith("app.asar") ? "_app.asar" : "app.asar";
-
 // The original app.asar
-const asarPath = join(dirname(injectorPath), "..", asarName);
+const asarPath = join(dirname(injectorPath), "..", "_app.asar");
 
 const discordPkg = require(join(asarPath, "package.json"));
 require.main!.filename = join(asarPath, discordPkg.main);
@@ -41,7 +45,7 @@ require.main!.filename = join(asarPath, discordPkg.main);
 // @ts-ignore Untyped method? Dies from cringe
 app.setAppPath(asarPath);
 
-if (!IS_VANILLA) {
+if (!IS_VANILLA && !isLegacyNonAsarVencord) {
     const settings = RendererSettings.store;
     // Repatch after host updates on Windows
     if (process.platform === "win32") {
@@ -71,7 +75,7 @@ if (!IS_VANILLA) {
         constructor(options: BrowserWindowConstructorOptions) {
             if (options?.webPreferences?.preload && options.title) {
                 const original = options.webPreferences.preload;
-                options.webPreferences.preload = join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js");
+                options.webPreferences.preload = join(__dirname, "preload.js");
                 options.webPreferences.sandbox = false;
                 // work around discord unloading when in background
                 options.webPreferences.backgroundThrottling = false;
@@ -157,5 +161,7 @@ if (!IS_VANILLA) {
     console.log("[Equicord] Running in vanilla mode. Not loading Equicord");
 }
 
-console.log("[Equicord] Loading original Discord app.asar");
-require(require.main!.filename);
+if (!isLegacyNonAsarVencord) {
+    console.log("[Equicord] Loading original Discord app.asar");
+    require(require.main!.filename);
+}

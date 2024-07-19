@@ -21,7 +21,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 -   Request for plugins from Discord.
 
 <details>
-<summary>Extra included plugins (113 additional plugins)</summary>
+<summary>Extra included plugins (110 additional plugins)</summary>
 
 - AllCallTimers by MaxHerbold and D3SOX
 - AltKrispSwitch by newwares
@@ -85,7 +85,6 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - MessageLoggerEnhanced by Aria
 - MessageTranslate by Samwich
 - ModalFade by Kyuuhachi
-- ModViewBypass by Sqaaakoi
 - NewPluginsManager by Sqaaakoi
 - noAppsAllowed by kvba
 - NoBulletPoints by Samwich
@@ -123,10 +122,8 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - Title by Kyuuhachi
 - TosuRPC by AutumnVN
 - Translate+ by Prince527 (Using Translate by Ven)
-- TriggerWarning by Joona
 - UnlimitedAccounts by Balaclava and thororen
 - UserPFP by nexpid and thororen
-- UtilityDock by Samwich
 - UwUifier by echo
 - VCSupport by thororen
 - VencordRPC by AutumnVN

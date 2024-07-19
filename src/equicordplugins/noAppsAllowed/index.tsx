@@ -14,13 +14,6 @@ export default definePlugin({
 
     patches: [
         {
-            find: "\"APP_TAG\"",
-            replacement: {
-                match: /"APP_TAG":".*?"/,
-                replace: "\"APP_TAG\":\"BOT\""
-            }
-        },
-        {
             find: ",APP_TAG:\"",
             replacement: {
                 match: /APP_TAG:".*?"/,
