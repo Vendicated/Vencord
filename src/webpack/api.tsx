@@ -587,7 +587,7 @@ export function extractAndLoadChunksLazy(code: string | RegExp | CodeFilter, mat
         }
 
         if (rawChunkIds) {
-            const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map((m: any) => m[1]);
+            const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map(m => Number(m[1]));
             await Promise.all(chunkIds.map(id => wreq.e(id)));
         }
 
@@ -602,7 +602,7 @@ export function extractAndLoadChunksLazy(code: string | RegExp | CodeFilter, mat
             }
         }
 
-        wreq(entryPointId as any);
+        wreq(Number(entryPointId));
         return true;
     });
 
