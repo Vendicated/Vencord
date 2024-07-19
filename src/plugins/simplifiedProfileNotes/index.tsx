@@ -96,7 +96,7 @@ export default definePlugin({
             // DM Sidebar
             find: /getRelationshipType.{0,800}\.Overlay.{0,200}Messages\.USER_POPOUT_ABOUT_ME/,
             replacement: {
-                match: /(\(0,.{0,50}?Messages\.USER_PROFILE_MEMBER_SINCE.{0,100}?userId:(\i)\.id}\)\}\))/,
+                match: /(\(0,.{0,50}?Messages\.BOT_PROFILE_CREATED_ON.{0,100}?userId:(\i)\.id}\)\}\))/,
                 replace: "$1,$self.NotesSection({ headingColor: 'header-primary', user: $2, ...vencordNotesHook })"
             }
         }
