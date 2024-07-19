@@ -299,7 +299,7 @@ export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "f
  * Note that the example below exists already as an api, see {@link findByPropsLazy}
  * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
-export function proxyLazyWebpack<T = any>(factory: () => any, attempts?: number) {
+export function proxyLazyWebpack<T = any>(factory: () => T, attempts?: number) {
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["proxyLazyWebpack", [factory]]);
 
     return proxyLazy<T>(factory, attempts);
