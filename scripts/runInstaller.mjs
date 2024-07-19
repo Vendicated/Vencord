@@ -124,7 +124,7 @@ try {
         env: {
             ...process.env,
             EQUICORD_USER_DATA_DIR: BASE_DIR,
-            EQUICORD_ASAR_FILE: join(BASE_DIR, "dist/desktop.asar"),
+            EQUICORD_DIRECTORY: join(BASE_DIR, "dist/desktop"),
             EQUICORD_DEV_INSTALL: "1"
         }
     });

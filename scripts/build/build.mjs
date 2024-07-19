@@ -303,8 +303,8 @@ if (existsSync("dist/renderer.js")) {
     );
 
     await Promise.all([
-        writeFile("dist/patcher.js", 'require("./desktop.asar")'),
-        writeFile("dist/equicordDesktopMain.js", 'require("./equibop.asar")'),
-        writeFile("dist/vencordDesktopMain.js", 'require("./vesktop.asar")')
+        writeFile("dist/patcher.js", 'require("./desktop")'),
+        writeFile("dist/equicordDesktopMain.js", 'require("./equibop")'),
+        writeFile("dist/vencordDesktopMain.js", 'require("./vesktop")')
     ]);
 }
