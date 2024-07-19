@@ -18,32 +18,29 @@
 */
 
 import { createPackage } from "@electron/asar";
-import esbuild from "esbuild";
+import { BuildOptions, Plugin } from "esbuild";
 import { existsSync, readdirSync } from "fs";
 import { readdir, rm, writeFile } from "fs/promises";
 import { join } from "path";
 
-import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, watch } from "./common.mjs";
+import { addBuild, BUILD_TIMESTAMP, buildOrWatchAll, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, watch } from "./common.mjs";
 
 const defines = {
-    IS_STANDALONE,
-    IS_DEV,
-    IS_REPORTER,
-    IS_UPDATER_DISABLED,
-    IS_WEB: false,
-    IS_EXTENSION: false,
+    IS_STANDALONE: String(IS_STANDALONE),
+    IS_DEV: String(IS_DEV),
+    IS_REPORTER: String(IS_REPORTER),
+    IS_UPDATER_DISABLED: String(IS_UPDATER_DISABLED),
+    IS_WEB: "false",
+    IS_EXTENSION: "false",
     VERSION: JSON.stringify(VERSION),
-    BUILD_TIMESTAMP
+    BUILD_TIMESTAMP: String(BUILD_TIMESTAMP)
 };
 
-if (defines.IS_STANDALONE === false)
+if (defines.IS_STANDALONE === "false")
     // If this is a local build (not standalone), optimize
     // for the specific platform we're on
     defines["process.platform"] = JSON.stringify(process.platform);
 
-/**
- * @type {esbuild.BuildOptions}
- */
 const nodeCommonOpts = {
     ...commonOpts,
     format: "cjs",
@@ -51,15 +48,12 @@ const nodeCommonOpts = {
     target: ["esnext"],
     external: ["electron", "original-fs", "~pluginNatives", ...commonOpts.external],
     define: defines
-};
+} satisfies BuildOptions;
 
-const sourceMapFooter = s => watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
+const sourceMapFooter = (s: string) => watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
 const sourcemap = watch ? "inline" : "external";
 
-/**
- * @type {import("esbuild").Plugin}
- */
-const globNativesPlugin = {
+const globNativesPlugin: Plugin = {
     name: "glob-natives-plugin",
     setup: build => {
         const filter = /^~pluginNatives$/;
@@ -106,7 +100,7 @@ const globNativesPlugin = {
 
 await Promise.all([
     // Discord Desktop main & renderer & preload
-    esbuild.build({
+    addBuild({
         ...nodeCommonOpts,
         entryPoints: ["src/main/index.ts"],
         outfile: "dist/desktop/patcher.js",
@@ -114,16 +108,16 @@ await Promise.all([
         sourcemap,
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: true,
-            IS_VESKTOP: false,
-            IS_EQUIBOP: false
+            IS_DISCORD_DESKTOP: "true",
+            IS_VESKTOP: "false",
+            IS_EQUIBOP: "false"
         },
         plugins: [
             ...nodeCommonOpts.plugins,
             globNativesPlugin
         ]
     }),
-    esbuild.build({
+    addBuild({
         ...commonOpts,
         entryPoints: ["src/Vencord.ts"],
         outfile: "dist/desktop/renderer.js",
@@ -138,12 +132,12 @@ await Promise.all([
         ],
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: true,
-            IS_VESKTOP: false,
-            IS_EQUIBOP: false
+            IS_DISCORD_DESKTOP: "true",
+            IS_VESKTOP: "false",
+            IS_EQUIBOP: "false"
         }
     }),
-    esbuild.build({
+    addBuild({
         ...nodeCommonOpts,
         entryPoints: ["src/preload.ts"],
         outfile: "dist/desktop/preload.js",
@@ -151,14 +145,14 @@ await Promise.all([
         sourcemap,
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: true,
-            IS_VESKTOP: false,
-            IS_EQUIBOP: false
+            IS_DISCORD_DESKTOP: "true",
+            IS_VESKTOP: "false",
+            IS_EQUIBOP: "false"
         }
     }),
 
     // Vencord Desktop main & renderer & preload
-    esbuild.build({
+    addBuild({
         ...nodeCommonOpts,
         entryPoints: ["src/main/index.ts"],
         outfile: "dist/vesktop/main.js",
@@ -166,16 +160,16 @@ await Promise.all([
         sourcemap,
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true,
-            IS_EQUIBOP: false
+            IS_DISCORD_DESKTOP: "false",
+            IS_VESKTOP: "true",
+            IS_EQUIBOP: "false"
         },
         plugins: [
             ...nodeCommonOpts.plugins,
             globNativesPlugin
         ]
     }),
-    esbuild.build({
+    addBuild({
         ...commonOpts,
         entryPoints: ["src/Vencord.ts"],
         outfile: "dist/vesktop/renderer.js",
@@ -190,12 +184,12 @@ await Promise.all([
         ],
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true,
-            IS_EQUIBOP: false
+            IS_DISCORD_DESKTOP: "false",
+            IS_VESKTOP: "true",
+            IS_EQUIBOP: "false"
         }
     }),
-    esbuild.build({
+    addBuild({
         ...nodeCommonOpts,
         entryPoints: ["src/preload.ts"],
         outfile: "dist/vesktop/preload.js",
@@ -203,14 +197,14 @@ await Promise.all([
         sourcemap,
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true,
-            IS_EQUIBOP: false
+            IS_DISCORD_DESKTOP: "false",
+            IS_VESKTOP: "true",
+            IS_EQUIBOP: "false"
         }
     }),
 
     // Equicord Desktop main & renderer & preload
-    esbuild.build({
+    addBuild({
         ...nodeCommonOpts,
         entryPoints: ["src/main/index.ts"],
         outfile: "dist/equibop/main.js",
@@ -218,16 +212,16 @@ await Promise.all([
         sourcemap,
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: false,
-            IS_EQUIBOP: true
+            IS_DISCORD_DESKTOP: "false",
+            IS_VESKTOP: "false",
+            IS_EQUIBOP: "true"
         },
         plugins: [
             ...nodeCommonOpts.plugins,
             globNativesPlugin
         ]
     }),
-    esbuild.build({
+    addBuild({
         ...commonOpts,
         entryPoints: ["src/Vencord.ts"],
         outfile: "dist/equibop/renderer.js",
@@ -242,12 +236,12 @@ await Promise.all([
         ],
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: false,
-            IS_EQUIBOP: true
+            IS_DISCORD_DESKTOP: "false",
+            IS_VESKTOP: "false",
+            IS_EQUIBOP: "true"
         }
     }),
-    esbuild.build({
+    addBuild({
         ...nodeCommonOpts,
         entryPoints: ["src/preload.ts"],
         outfile: "dist/equibop/preload.js",
@@ -255,18 +249,14 @@ await Promise.all([
         sourcemap,
         define: {
             ...defines,
-            IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: false,
-            IS_EQUIBOP: true
+            IS_DISCORD_DESKTOP: "false",
+            IS_VESKTOP: "false",
+            IS_EQUIBOP: "true"
         }
     }),
-]).catch(err => {
-    console.error("Build failed");
-    console.error(err.message);
-    // make ci fail
-    if (!commonOpts.watch)
-        process.exitCode = 1;
-});
+]);
+
+await buildOrWatchAll();
 
 await Promise.all([
     writeFile("dist/desktop/package.json", JSON.stringify({
@@ -288,6 +278,7 @@ await Promise.all([
     createPackage("dist/equibop", "dist/equibop.asar"),
     createPackage("dist/vesktop", "dist/vesktop.asar")
 ]);
+
 
 if (existsSync("dist/renderer.js")) {
     console.warn("Legacy dist folder. Cleaning up and adding shims.");
