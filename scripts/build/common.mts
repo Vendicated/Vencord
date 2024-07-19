@@ -200,7 +200,7 @@ export const fileUrlPlugin: Plugin = {
 
             const encoding = base64 ? "base64" : "utf-8";
 
-            let content;
+            let content: string;
             if (!minify) {
                 content = await readFile(path, encoding);
                 if (!noTrim) content = content.trimEnd();
@@ -273,8 +273,7 @@ export const commonOpts = {
     inject: ["./scripts/build/inject/react.mjs"],
     jsxFactory: "VencordCreateElement",
     jsxFragment: "VencordFragment",
-    // Work around https://github.com/evanw/esbuild/issues/2460
-    tsconfig: "./scripts/build/tsconfig.esbuild.json"
+    jsx: "transform"
 } satisfies BuildOptions;
 
 
