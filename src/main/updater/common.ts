@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const ASAR_FILE = IS_VESKTOP
-    ? "equibop.asar"
-    : "desktop.asar";
+export let ASAR_FILE;
+if (IS_VESKTOP) ASAR_FILE = "vesktop.asar";
+if (IS_EQUIBOP) ASAR_FILE = "equibop.asar";
+if (!IS_VESKTOP && !IS_EQUIBOP) "desktop.asar";
 
 export function serializeErrors(func: (...args: any[]) => any) {
     return async function () {
