@@ -18,34 +18,21 @@
 
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, PluginSettingDef } from "@utils/types";
+
+const opt = (description: string) => ({
+    type: OptionType.BOOLEAN,
+    description,
+    default: true,
+    restartNeeded: true
+} satisfies PluginSettingDef);
 
 const settings = definePluginSettings({
-    showTimeouts: {
-        type: OptionType.BOOLEAN,
-        description: "Show member timeout icons in chat.",
-        default: true,
-    },
-    showInvitesPaused: {
-        type: OptionType.BOOLEAN,
-        description: "Show the invites paused tooltip in the server list.",
-        default: true,
-    },
-    showModView: {
-        type: OptionType.BOOLEAN,
-        description: "Show the member mod view context menu item in all servers.",
-        default: true,
-    },
-    disableDiscoveryFilters: {
-        type: OptionType.BOOLEAN,
-        description: "Disable filters in Server Discovery search that hide servers that don't meet discovery criteria.",
-        default: true,
-    },
-    disableDisallowedDiscoveryFilters: {
-        type: OptionType.BOOLEAN,
-        description: "Disable filters in Server Discovery search that hide NSFW & disallowed servers.",
-        default: true,
-    },
+    showTimeouts: opt("Show member timeout icons in chat."),
+    showInvitesPaused: opt("Show the invites paused tooltip in the server list."),
+    showModView: opt("Show the member mod view context menu item in all servers."),
+    disableDiscoveryFilters: opt("Disable filters in Server Discovery search that hide servers that don't meet discovery criteria."),
+    disableDisallowedDiscoveryFilters: opt("Disable filters in Server Discovery search that hide NSFW & disallowed servers."),
 });
 
 migratePluginSettings("ShowHiddenThings", "ShowTimeouts");
@@ -104,6 +91,15 @@ export default definePlugin({
                 match: /=\["egirl",.+?\]/,
                 replace: "=[]"
             }
+        },
+        // empty 2nd word filter
+        {
+            find: '"pepe","nude"',
+            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
+            replacement: {
+                match: /(?<=[?=])\["pepe",.+?\]/,
+                replace: "[]",
+            },
         },
         // patch request that queries if term is allowed
         {

@@ -10,17 +10,6 @@
     margin-bottom: -2px;
 }
 
-.vc-settings-quick-actions-card {
-    padding: 1em;
-    display: flex;
-    gap: 1em;
-    align-items: center;
-    justify-content: space-evenly;
-    flex-grow: 1;
-    flex-flow: row wrap;
-    margin-bottom: 1em;
-}
-
 .vc-settings-donate {
     display: flex;
     flex-direction: row;
