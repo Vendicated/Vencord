@@ -59,6 +59,7 @@ jobs:
                     cp "$file" "release/vencordDesktop${filename^}"
                   done
 
+                  find release -size 0 -delete
                   rm release/package.json
 
             - name: Get some values needed for the release
