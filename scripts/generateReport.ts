@@ -311,7 +311,7 @@ async function reporterRuntime(token: string) {
 
 await page.evaluateOnNewDocument(`
     if (location.host.endsWith("discord.com")) {
-        ${readFileSync("./dist/browser.js", "utf-8")};
+        ${readFileSync("./dist/browser/browser.js", "utf-8")};
         (${reporterRuntime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
     }
 `);
