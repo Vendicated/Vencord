@@ -6,6 +6,11 @@
     color: var(--status-danger, #f04747) !important;
 }
 
+/* Poll highlighting */
+.messagelogger-deleted [class*="pollContainer"] :is([class*=text]) {
+  color: var(--status-danger, #f04747) !important;
+}
+
 /* Code highlighting */
 .messagelogger-deleted [class*="codeContainer"] code,
 .messagelogger-deleted [class*="codeContainer"] span {
