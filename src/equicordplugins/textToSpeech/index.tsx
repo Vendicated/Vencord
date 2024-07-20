@@ -67,7 +67,7 @@ export default definePlugin({
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (message.state === "SENDING") return;
             if (!message.content) return;
-            if (message.channel_id !== getCurrentChannel()?.id ?? 0) return;
+            if (message.channel_id !== getCurrentChannel()?.id) return;
 
             readOutText(message.content);
         }
