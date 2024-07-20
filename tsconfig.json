@@ -20,12 +20,6 @@
         "jsx": "preserve",
         "baseUrl": "./src/",
         "paths": {
-            "@scripts/*": [
-                "../scripts/*"
-            ],
-            "@scripts/build/*": [
-                "../scripts/build/*"
-            ],
             "@main/*": [
                 "./main/*"
             ],

@@ -23,7 +23,7 @@ import { existsSync, readdirSync } from "fs";
 import { readdir, rm, writeFile } from "fs/promises";
 import { join } from "path";
 
-import { addBuild, BUILD_TIMESTAMP, buildOrWatchAll, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, watch } from "@scripts/build/common.mts";
+import { addBuild, BUILD_TIMESTAMP, buildOrWatchAll, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, watch } from "./common.mjs";
 
 const defines = {
     IS_STANDALONE: String(IS_STANDALONE),

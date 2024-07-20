@@ -84,7 +84,9 @@ jobs:
                     cp "$file" "release/equicordDesktop${filename^}"
                   done
 
+                  find release -size 0 -delete
                   rm release/package.json
+                  rm release/*.map
 
             - name: Upload Equicord
               if: github.repository == 'Equicord/Equicord'

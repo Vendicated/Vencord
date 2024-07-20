@@ -27,7 +27,7 @@ import { minify as minifyHtml } from "html-minifier-terser";
 import { join, relative } from "path";
 import { promisify } from "util";
 
-import { getPluginTarget } from "../utils.mts";
+import { getPluginTarget } from "../utils.mjs";
 
 const PackageJSON: typeof import("../../package.json") = JSON.parse(readFileSync("package.json", "utf-8"));
 
