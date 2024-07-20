@@ -17,7 +17,8 @@
 */
 
 import { Settings } from "@api/Settings";
-import { ChannelStore, SelectedChannelStore, UserGuildSettingsStore, UserStore } from "@webpack/common";
+import { findStoreLazy } from "@webpack";
+import { ChannelStore, SelectedChannelStore, UserStore } from "@webpack/common";
 
 import { settings } from "../index";
 import { loggedMessages } from "../LoggedMessageManager";
@@ -78,6 +79,8 @@ interface ShouldIgnoreArguments {
 }
 
 const EPHEMERAL = 64;
+
+const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
 
 /**
   * the function `shouldIgnore` evaluates whether a message should be ignored or kept, following a priority hierarchy: User > Channel > Server.

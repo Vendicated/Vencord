@@ -6,10 +6,10 @@
 
 import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
-import { PrivateChannelSortStore, UserStore } from "@webpack/common";
+import { UserStore } from "@webpack/common";
 
 import { DEFAULT_COLOR } from "./constants";
-import { forceUpdate, PinOrder, settings } from "./index";
+import { forceUpdate, PinOrder, PrivateChannelSortStore, settings } from "./index";
 
 export interface Category {
     id: string;

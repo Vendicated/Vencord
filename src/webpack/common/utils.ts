@@ -19,8 +19,7 @@
 import { canonicalizeMatch } from "@utils/patches";
 import type { Channel } from "discord-types/general";
 
-import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, findStoreLazy, mapMangledModuleLazy, waitFor } from "../webpack";
-import { FluxStore } from "./types/stores";
+import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
 export let FluxDispatcher: t.FluxDispatcher;
@@ -161,6 +160,13 @@ export const InviteActions = findByPropsLazy("resolveInvite");
 
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
 
+const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i,activeViewType:/);
+// TODO: type
+export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
+    closeExpressionPicker: filters.byCode("setState({activeView:null"),
+    openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(m.toString()),
+});
+
 export const PopoutActions: t.PopoutActions = mapMangledModuleLazy('type:"POPOUT_WINDOW_OPEN"', {
     open: filters.byCode('type:"POPOUT_WINDOW_OPEN"'),
     close: filters.byCode('type:"POPOUT_WINDOW_CLOSE"'),
@@ -172,41 +178,3 @@ export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModuleLazy(/
     getDisplayProfile: filters.byCode(".getGuildMemberProfile("),
     useDisplayProfile: filters.byCode(/\[\i\.\i,\i\.\i],\(\)=>/)
 });
-
-const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i,activeViewType:/);
-
-// findStoreLazy Stores
-export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
-    closeExpressionPicker: filters.byCode("setState({activeView:null"),
-    openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(m.toString()),
-});
-export const ApplicationStreamPreviewStore: t.ApplicationStreamPreviewStore = findStoreLazy("ApplicationStreamPreviewStore");
-export const ApplicationStreamingStore: t.ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
-export const VoiceStateStore = findStoreLazy("VoiceStateStore");
-export const RunningGameStore = findStoreLazy("RunningGameStore");
-export const TypingStore = findStoreLazy("TypingStore");
-export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
-export const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
-export const SessionsStore = findStoreLazy("SessionsStore") as {
-    getSessions(): Record<string, t.Session>;
-};
-export const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId: string): number | null; };
-export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
-    getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
-};
-export const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
-export const SortedGuildStore = findStoreLazy("SortedGuildStore");
-export const ExpandedGuildFolderStore = findStoreLazy("ExpandedGuildFolderStore");
-export const ThemeStore = findStoreLazy("ThemeStore");
-export const NitroThemeStore = findStoreLazy("ClientThemesBackgroundStore");
-export const AuthSessionsStore = findStoreLazy("AuthSessionsStore");
-export const StickerStore = findStoreLazy("StickersStore");
-export const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
-export const UserAffinitiesStore = findStoreLazy("UserAffinitiesStore");
-export const GuildAvailabilityStore = findStoreLazy("GuildAvailabilityStore") as FluxStore & {
-    totalGuilds: number;
-    totalUnavailableGuilds: number;
-    unavailableGuilds: string[];
-    isUnavailable(guildId: string): boolean;
-};
-export const MediaEngineStore = findStoreLazy("MediaEngineStore");

@@ -17,11 +17,13 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelRTCStore, ExpandedGuildFolderStore, useStateFromStores } from "@webpack/common";
+import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
+import { useStateFromStores } from "@webpack/common";
 import type { CSSProperties } from "react";
 
-import { settings } from ".";
+import { ExpandedGuildFolderStore, settings } from ".";
+
+const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
 const Animations = findByPropsLazy("a", "animated", "useTransition");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 

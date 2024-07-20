@@ -23,9 +23,11 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { findByCodeLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, StickerStore, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
+
+const StickersStore = findStoreLazy("StickersStore");
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
 
 interface Sticker {
@@ -58,7 +60,7 @@ function getUrl(data: Data) {
 }
 
 async function fetchSticker(id: string) {
-    const cached = StickerStore.getStickerById(id);
+    const cached = StickersStore.getStickerById(id);
     if (cached) return cached;
 
     const { body } = await RestAPI.get({

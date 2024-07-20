@@ -5,9 +5,9 @@
  */
 
 import { getCurrentChannel } from "@utils/discord";
-import { ChannelMemberStore, GuildMemberCountStore, SelectedChannelStore, Tooltip, useEffect, useStateFromStores } from "@webpack/common";
+import { SelectedChannelStore, Tooltip, useEffect, useStateFromStores } from "@webpack/common";
 
-import { cl, numberFormat } from ".";
+import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat } from ".";
 import { OnlineMemberCountStore } from "./OnlineMemberCountStore";
 
 export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; tooltipGuildId?: string; }) {
