@@ -32,8 +32,8 @@ function AppIconModal(props: ModalProps) {
 
 
         appIcons.push(icon);
-        findByProps("UZ", "QA").UZ.push(icon);
-        findByProps("UZ", "QA").QA[icon.id] = icon;
+        findByProps("M9", "UZ", "QA").UZ.push(icon);
+        findByProps("M9", "UZ", "QA").QA[icon.id] = icon;
         showToast("Added custom app icon!", Toasts.Type.SUCCESS);
         props.onClose();
         const oldIcon = findByProps("getCurrentDesktopIcon").getCurrentDesktopIcon();
