@@ -276,7 +276,7 @@ function ThemesTab() {
                             />
                         ))}
                     </div>
-                </Forms.FormSection >
+                </Forms.FormSection>
             </>
         );
     }
