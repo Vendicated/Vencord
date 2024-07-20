@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { lazyString, makeLazy, proxyLazy } from "@utils/lazy";
+import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent, LazyComponentType, SYM_LAZY_COMPONENT_INNER } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
@@ -74,6 +74,7 @@ export type StoreNameFilter = string;
 
 export type FilterFn = ((module: ModuleExports) => boolean) & {
     $$vencordProps?: Array<string | RegExp>;
+    $$vencordIsComponentFilter?: boolean;
     $$vencordIsFactoryFilter?: boolean;
 };
 
@@ -128,7 +129,8 @@ export const filters = {
             return false;
         };
 
-        filter.$$vencordProps = ["componentByCode", ...code];
+        filter.$$vencordProps = ["byComponentCode", ...code];
+        filter.$$vencordIsComponentFilter = true;
         return filter;
     },
 
@@ -151,6 +153,31 @@ function printFilter(filter: FilterFn) {
     }
 
     return String(filter);
+}
+
+function wrapWebpackComponent<T extends object = any>(
+    errMsg: string | (() => string)
+): [WrapperComponent: LazyComponentType<T>, setInnerComponent: (rawComponent: any, parsedComponent: LazyComponentType<T>) => void] {
+    let InnerComponent = null as LazyComponentType<T> | null;
+
+    let findFailedLogged = false;
+    const WrapperComponent = (props: T) => {
+        if (InnerComponent === null && !findFailedLogged) {
+            findFailedLogged = true;
+            logger.error(typeof errMsg === "string" ? errMsg : errMsg());
+        }
+
+        return InnerComponent && <InnerComponent {...props} />;
+    };
+
+    WrapperComponent[SYM_LAZY_COMPONENT_INNER] = () => InnerComponent;
+
+    function setInnerComponent(rawComponent: any, parsedComponent: LazyComponentType<T>) {
+        InnerComponent = parsedComponent;
+        Object.assign(WrapperComponent, rawComponent);
+    }
+
+    return [WrapperComponent, setInnerComponent];
 }
 
 /**
@@ -238,33 +265,16 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
     if (typeof parse !== "function")
         throw new Error("Invalid component parse. Expected a function got " + typeof parse);
 
-    let InnerComponent = null as LazyComponentType<T> | null;
-
-    let findFailedLogged = false;
-    const WrapperComponent = (props: T) => {
-        if (InnerComponent === null && !findFailedLogged) {
-            findFailedLogged = true;
-            logger.error(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
-        }
-
-        return InnerComponent && <InnerComponent {...props} />;
-    };
-
-    WrapperComponent[SYM_LAZY_COMPONENT_INNER] = () => InnerComponent;
-
-    waitFor(filter, (v: any) => {
-        const parsedComponent = parse(v);
-        InnerComponent = parsedComponent;
-        Object.assign(WrapperComponent, parsedComponent);
-    }, { isIndirect: true });
+    const [WrapperComponent, setInnerComponent] = wrapWebpackComponent<T>(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
+    waitFor(filter, m => setInnerComponent(m, parse(m)), { isIndirect: true });
 
     if (IS_REPORTER && !isIndirect) {
         webpackSearchHistory.push(["findComponent", [WrapperComponent, filter]]);
     }
 
-    if (InnerComponent !== null) return InnerComponent;
+    if (WrapperComponent[SYM_LAZY_COMPONENT_INNER]() != null) return WrapperComponent[SYM_LAZY_COMPONENT_INNER]() as LazyComponentType<T>;
 
-    return WrapperComponent as LazyComponentType<T>;
+    return WrapperComponent;
 }
 
 /**
@@ -283,33 +293,16 @@ export function findExportedComponent<T extends object = any>(...props: PropsFil
 
     const filter = filters.byProps(...newProps);
 
-    let InnerComponent = null as LazyComponentType<T> | null;
-
-    let findFailedLogged = false;
-    const WrapperComponent = (props: T) => {
-        if (InnerComponent === null && !findFailedLogged) {
-            findFailedLogged = true;
-            logger.error(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
-        }
-
-        return InnerComponent && <InnerComponent {...props} />;
-    };
-
-    WrapperComponent[SYM_LAZY_COMPONENT_INNER] = () => InnerComponent;
-
-    waitFor(filter, (v: any) => {
-        const parsedComponent = parse(v[newProps[0]]);
-        InnerComponent = parsedComponent;
-        Object.assign(WrapperComponent, parsedComponent);
-    }, { isIndirect: true });
+    const [WrapperComponent, setInnerComponent] = wrapWebpackComponent<T>(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
+    waitFor(filter, m => setInnerComponent(m[newProps[0]], parse(m[newProps[0]])), { isIndirect: true });
 
     if (IS_REPORTER) {
         webpackSearchHistory.push(["findExportedComponent", [WrapperComponent, ...newProps]]);
     }
 
-    if (InnerComponent !== null) return InnerComponent;
+    if (WrapperComponent[SYM_LAZY_COMPONENT_INNER]() != null) return WrapperComponent[SYM_LAZY_COMPONENT_INNER]() as LazyComponentType<T>;
 
-    return WrapperComponent as LazyComponentType<T>;
+    return WrapperComponent;
 }
 
 /**
@@ -446,15 +439,24 @@ export function findByFactoryCode<T = any>(...code: CodeFilter | [...CodeFilter,
  */
 export function mapMangledModule<S extends PropertyKey>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>) {
     const mapping = {} as Record<S, any>;
-    const setters = {} as Record<S, (innerValue: ModuleExports) => void>;
+    const proxyInnerSetters = {} as Record<S, ReturnType<typeof proxyInner>[1]>;
+    const wrapperComponentSetters = {} as Record<S, ReturnType<typeof wrapWebpackComponent>[1]>;
 
     for (const newName in mappers) {
-        // Wrapper to select whether the parent factory filter or child mapper filter failed when the error is thrown
-        const errorMsgWrapper = lazyString(() => `Webpack mapMangledModule ${callbackCalled ? "mapper" : "factory"} filter matched no module. Filter: ${printFilter(callbackCalled ? mappers[newName] : factoryFilter)}`);
+        const mapperFilter = mappers[newName];
 
-        const [proxy, setInnerValue] = proxyInner(errorMsgWrapper, "Webpack find with proxy called on a primitive value. This may happen if you are trying to destructure a mapMangledModule primitive value on top level.");
-        mapping[newName] = proxy;
-        setters[newName] = setInnerValue;
+        // Wrapper to select whether the parent factory filter or child mapper filter failed when the error is thrown
+        const errorMsgWrapper = () => `Webpack mapMangledModule ${callbackCalled ? "mapper" : "factory"} filter matched no module. Filter: ${printFilter(callbackCalled ? mapperFilter : factoryFilter)}`;
+
+        if (mapperFilter.$$vencordIsComponentFilter) {
+            const [WrapperComponent, setInnerComponent] = wrapWebpackComponent(errorMsgWrapper);
+            mapping[newName] = WrapperComponent;
+            wrapperComponentSetters[newName] = setInnerComponent;
+        } else {
+            const [proxy, setInnerValue] = proxyInner(errorMsgWrapper, "Webpack find with proxy called on a primitive value. This may happen if you are trying to destructure a mapMangledModule primitive value on top level.");
+            mapping[newName] = proxy;
+            proxyInnerSetters[newName] = setInnerValue;
+        }
     }
 
     const factoryFilter = filters.byFactoryCode(...Array.isArray(code) ? code : [code]);
@@ -475,7 +477,11 @@ export function mapMangledModule<S extends PropertyKey>(code: string | RegExp | 
                         mapping[newName] = exportValue;
                     }
 
-                    setters[newName](exportValue);
+                    if (filter.$$vencordIsComponentFilter) {
+                        wrapperComponentSetters[newName](exportValue, exportValue);
+                    } else {
+                        proxyInnerSetters[newName](exportValue);
+                    }
                 }
             }
         }
@@ -491,6 +497,8 @@ export function mapMangledModule<S extends PropertyKey>(code: string | RegExp | 
 
             if (innerValue[SYM_PROXY_INNER_VALUE] != null) {
                 mapping[innerMap] = innerValue[SYM_PROXY_INNER_VALUE];
+            } else if (innerValue[SYM_LAZY_COMPONENT_INNER] != null && innerValue[SYM_LAZY_COMPONENT_INNER]() != null) {
+                mapping[innerMap] = innerValue[SYM_LAZY_COMPONENT_INNER]();
             }
         }
     }

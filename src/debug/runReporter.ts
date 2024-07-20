@@ -101,6 +101,8 @@ async function runReporter() {
                                 for (const innerMap in result) {
                                     if (result[innerMap][SYM_PROXY_INNER_GET] != null && result[innerMap][SYM_PROXY_INNER_VALUE] == null) {
                                         throw new Error("Webpack Find Fail");
+                                    } else if (result[innerMap][SYM_LAZY_COMPONENT_INNER] != null && result[innerMap][SYM_LAZY_COMPONENT_INNER]() == null) {
+                                        throw new Error("Webpack Find Fail");
                                     }
                                 }
                             }
@@ -165,7 +167,11 @@ async function runReporter() {
                     const [code, mappers] = parsedArgs;
 
                     const parsedFailedMappers = Object.entries<any>(mappers)
-                        .filter(([key]) => result == null || (result[key][SYM_PROXY_INNER_GET] != null && result[key][SYM_PROXY_INNER_VALUE] == null))
+                        .filter(([key]) =>
+                            result == null ||
+                            (result[key]?.[SYM_PROXY_INNER_GET] != null && result[key][SYM_PROXY_INNER_VALUE] == null) ||
+                            (result[key]?.[SYM_LAZY_COMPONENT_INNER] != null && result[key][SYM_LAZY_COMPONENT_INNER]() == null)
+                        )
                         .map(([key, filter]) => {
                             let parsedFilter: string;
 

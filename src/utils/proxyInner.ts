@@ -47,13 +47,13 @@ const handler: ProxyHandler<any> = {
  * @returns A proxy which will act like the inner value when accessed
  */
 export function proxyInner<T = any>(
-    errMsg = "Proxy inner value is undefined, setInnerValue was never called.",
+    errMsg: string | (() => string) = "Proxy inner value is undefined, setInnerValue was never called.",
     primitiveErrMsg = "proxyInner called on a primitive value."
 ): [proxy: T, setInnerValue: (innerValue: T) => void] {
     const proxyDummy = Object.assign(function () { }, {
         [SYM_PROXY_INNER_GET]: function () {
             if (proxyDummy[SYM_PROXY_INNER_VALUE] == null) {
-                throw new Error(errMsg);
+                throw new Error(typeof errMsg === "string" ? errMsg : errMsg());
             }
 
             return proxyDummy[SYM_PROXY_INNER_VALUE];

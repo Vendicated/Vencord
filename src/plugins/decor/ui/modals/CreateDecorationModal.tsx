@@ -18,9 +18,9 @@ import { cl, DecorationModalStyles, requireAvatarDecorationModal, requireCreateS
 import { AvatarDecorationModalPreview } from "../components";
 
 const FileUpload = findComponentByCode("fileUploadInput,");
-const HelpMessage = findComponentByCode(".iconDiv,", "messageType");
 
-const { HelpMessageTypes } = mapMangledModule('POSITIVE=3]="POSITIVE', {
+const { HelpMessage, HelpMessageTypes } = mapMangledModule('POSITIVE=3]="POSITIVE', {
+    HelpMessage: filters.byComponentCode(".iconDiv,", "messageType"),
     HelpMessageTypes: filters.byProps("POSITIVE", "WARNING"),
 });
 
