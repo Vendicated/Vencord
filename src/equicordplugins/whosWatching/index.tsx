@@ -165,7 +165,7 @@ export default definePlugin({
         );
     }),
     component: function ({ OriginalComponent }) {
-        return (props: any) => {
+        return ErrorBoundary.wrap((props: any) => {
             const stream = useStateFromStores([ApplicationStreamingStore], () => ApplicationStreamingStore.getCurrentUserActiveStream());
             const viewers = ApplicationStreamingStore.getViewerIds(encodeStreamKey(stream));
             return <Tooltip text={<Watching userIds={viewers} guildId={stream.guildId} />}>
@@ -175,6 +175,6 @@ export default definePlugin({
                     </div>
                 )}
             </Tooltip>;
-        };
+        });
     }
 });
