@@ -6,6 +6,21 @@
     color: var(--status-danger, #f04747) !important;
 }
 
+/* Message Logger / Voice Message highlighting */
+.messagelogger-deleted [class*=nonVisualMediaItemContainer] [class*=duration] {
+  color: var(--status-danger, #f04747) !important;
+}
+.messagelogger-deleted [class*=nonVisualMediaItemContainer] path[d*="M12"],
+.messagelogger-deleted [class*=nonVisualMediaItemContainer] path[d*="M15"] {
+  fill: var(--status-danger, #f04747) !important;
+}
+.messagelogger-deleted [class*=nonVisualMediaItemContainer] [class*=waveform] {
+  filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='darker-red-tint-filter'><feColorMatrix type='matrix' values='1 0 0 0 0  0 0.1 0 0 0  0 0 0.1 0 0  0 0 0 2 0'/></filter></svg>#darker-red-tint-filter");
+}
+.messagelogger-deleted [class*=nonVisualMediaItemContainer] [class*=playButtonContainer] {
+  background: var(--status-danger, #f04747) !important;
+}
+
 /* Poll highlighting */
 .messagelogger-deleted [class*="pollContainer"] :is([class*=text]) {
   color: var(--status-danger, #f04747) !important;
