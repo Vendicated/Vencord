@@ -9,9 +9,10 @@ import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, Clickable, ContextMenuApi, FluxDispatcher, Forms, Menu, Text, Tooltip, useEffect, UserUtils, useState } from "@webpack/common";
+import { Button, Clickable, Forms, Text, Tooltip, useEffect, UserUtils, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
+import settings from "../settings";
 import { clearLoggedSounds, getLoggedSounds } from "../store";
 import { addListener, AvatarStyles, cl, downloadAudio, getEmojiUrl, playSound, removeListener, SoundLogEntry, UserSummaryItem } from "../utils";
 import { openMoreUsersModal } from "./MoreUsersModal";
@@ -92,17 +93,6 @@ export default function SoundBoardLog({ data, closeModal }) {
         openUserModal(item, user, sounds);
     }
 
-    function SoundContextMenu({ item }) {
-        const label = id => `soundboardlogger-${id}`;
-        return (
-            <Menu.Menu
-                navId="soundboardlogger-sound-menu"
-                onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-            >
-            </Menu.Menu>
-        );
-    }
-
     return (
         <>
             <ModalHeader className={cl("modal-header")}>
@@ -116,9 +106,6 @@ export default function SoundBoardLog({ data, closeModal }) {
                     return (
                         <div
                             className={cl("sound")}
-                            onContextMenu={e =>
-                                ContextMenuApi.openContextMenu(e, () => <SoundContextMenu item={item} />)
-                            }
                         >
                             <Flex flexDirection="row" className={cl("sound-info")}>
                                 <img
@@ -156,7 +143,7 @@ export default function SoundBoardLog({ data, closeModal }) {
                             <Flex flexDirection="row" className={cl("sound-buttons")}>
                                 <Button color={Button.Colors.PRIMARY} size={Button.Sizes.SMALL} onClick={() => downloadAudio(item.soundId)}>Download</Button>
                                 <Button color={Button.Colors.GREEN} size={Button.Sizes.SMALL} onClick={() => copyWithToast(item.soundId, "ID copied to clipboard!")}>Copy ID</Button>
-                                <Tooltip text={"Soundboard volume: currently broken"}>
+                                <Tooltip text={`Soundboard volume: ${Math.floor(settings.store.soundVolume * 100)}%`}>
                                     {({ onMouseEnter, onMouseLeave }) =>
                                         <Button color={Button.Colors.BRAND} size={Button.Sizes.SMALL} onClick={() => playSound(item.soundId)} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>Play Sound</Button>
                                     }

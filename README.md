@@ -54,7 +54,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - DoubleCounterBypass by nyx
 - EmojiDumper by Cortex, Samwich, Woosh
 - Encryptcord by Inbestigator
-- EquicordCSS by FoxStorm1 and thororen (and all respective css developers)
+- EquicordCSS by thororen (and all respective css developers)
 - ExportContacts by dat_insanity
 - FindReply by newwares
 - FrequentQuickSwitcher by Samwich
@@ -98,7 +98,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - OnePingPerDM by ProffDea
 - PlatformSpoofer by Drag
 - PurgeMessages by bhop and nyx
-- QuestCompleter by HappyEnderman, SerStars, thororen
+- QuestCompleter by HappyEnderman, SerStars (maintained by thororen)
 - QuestionMarkReplacement by nyx
 - Quoter by Samwich
 - RepeatMessage by Tolgchu
@@ -111,7 +111,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - ServerSearch by camila314
 - ShowBadgesInChat by Inbestigator and KrystalSkull
 - Slap by Korbo
-- SoundBoardLogger by Moxxie, fres, echo, thororen
+- SoundBoardLogger by Moxxie, fres, echo (maintained by thororen)
 - TalkInReverse by Tolgchu
 - TeX by Kyuuhachi
 - TextToSpeech by Samwich
@@ -119,8 +119,8 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - Title by Kyuuhachi
 - TosuRPC by AutumnVN
 - Translate+ by Prince527 (Using Translate by Ven)
-- UnlimitedAccounts by Balaclava and thororen
-- UserPFP by nexpid and thororen
+- UnlimitedAccounts by thororen
+- UserPFP by nexpid (maintained by thororen)
 - UwUifier by echo
 - VCSupport by thororen
 - VencordRPC by AutumnVN

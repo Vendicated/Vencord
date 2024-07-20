@@ -87,7 +87,13 @@ const settings = definePluginSettings({
         description: "show the logs",
         component: () =>
             <Button color={Button.Colors.LINK} size={Button.Sizes.SMALL} onClick={openSoundBoardLog}>Open Logs</Button>
-    }
+    },
+    soundVolume: {
+        description: "How loud the toggle sound is (0 to disable)",
+        type: OptionType.SLIDER,
+        default: 0.5,
+        markers: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+    },
 });
 
 export default settings;

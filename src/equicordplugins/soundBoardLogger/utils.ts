@@ -41,7 +41,7 @@ export function getEmojiUrl(emoji) {
 
 export const playSound = id => {
     const audio = new Audio(`https://cdn.discordapp.com/soundboard-sounds/${id}`);
-    audio.volume = 75 / 100;
+    audio.volume = settings.store.soundVolume;
     audio.play();
 };
 

@@ -32,7 +32,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "UnlimitedAccounts",
     description: "Increases the amount of accounts you can add.",
-    authors: [EquicordDevs.Balaclava, EquicordDevs.thororen],
+    authors: [EquicordDevs.thororen],
     settings,
     patches: [
         {

@@ -74,7 +74,7 @@ migratePluginSettings("EquicordCSS", "EquicordBuiltIn");
 export default definePlugin({
     name: "EquicordCSS",
     description: "CSS for Equicord users. You will need to look at the settings.",
-    authors: [EquicordDevs.FoxStorm1, EquicordDevs.thororen],
+    authors: [EquicordDevs.thororen],
     dependencies: ["ThemeAttributes"],
     settings,
     start() {
