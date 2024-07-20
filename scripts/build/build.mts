@@ -22,7 +22,6 @@ import { BuildOptions, Plugin } from "esbuild";
 import { existsSync, readdirSync } from "fs";
 import { readdir, rm, writeFile } from "fs/promises";
 import { join } from "path";
-import { pathToFileURL } from "url";
 
 import { addBuild, BUILD_TIMESTAMP, buildOrWatchAll, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, watch } from "@scripts/build/common.mts";
 
@@ -71,13 +70,13 @@ const globNativesPlugin: Plugin = {
             let natives = "\n";
             let i = 0;
             for (const dir of pluginDirs) {
-                const dirPath = pathToFileURL(join("src", dir));
+                const dirPath = join("src", dir);
                 if (!await exists(dirPath)) continue;
                 const plugins = await readdir(dirPath, { withFileTypes: true });
                 for (const file of plugins) {
                     const fileName = file.name;
-                    const nativePath = pathToFileURL(join(dirPath, fileName, "native.ts"));
-                    const indexNativePath = pathToFileURL(join(dirPath, fileName, "native/index.ts"));
+                    const nativePath = join(dirPath, fileName, "native.ts");
+                    const indexNativePath = join(dirPath, fileName, "native/index.ts");
 
                     if (!(await exists(nativePath)) && !(await exists(indexNativePath)))
                         continue;
