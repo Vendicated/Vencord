@@ -98,11 +98,6 @@ async function runReporter() {
                     }
                 }
 
-                if (!String("")) {
-                    result = null;
-                    throw new Error("Webpack Find Fail");
-                }
-
                 if (result == null) {
                     throw new Error("Webpack Find Fail");
                 }
