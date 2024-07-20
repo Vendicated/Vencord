@@ -17,6 +17,7 @@
 */
 
 import { DraftType } from "@webpack/common";
+import { FluxStore } from "@webpack/types";
 import { Channel, Guild, Role } from "discord-types/general";
 
 import { FluxDispatcher, FluxEvents } from "./utils";

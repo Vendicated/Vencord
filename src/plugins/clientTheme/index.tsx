@@ -11,8 +11,8 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Button, Forms, useStateFromStores } from "@webpack/common";
+import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
+import { Button, Forms, NitroThemeStore, ThemeStore, useStateFromStores } from "@webpack/common";
 
 const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
 
@@ -35,9 +35,6 @@ const saveClientTheme = findByCodeLazy('type:"UNSYNCED_USER_SETTINGS_UPDATE",set
 function setTheme(theme: string) {
     saveClientTheme({ theme });
 }
-
-const ThemeStore = findStoreLazy("ThemeStore");
-const NitroThemeStore = findStoreLazy("ClientThemesBackgroundStore");
 
 function ThemeSettings() {
     const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme);

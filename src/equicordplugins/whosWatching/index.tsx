@@ -13,8 +13,8 @@ import { openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Clickable, Forms, i18n, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { ApplicationStreamingStore, Clickable, Forms, i18n, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
 interface WatchingProps {
@@ -73,8 +73,6 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
     );
 }
 
-const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
-
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 
@@ -105,7 +103,7 @@ export default definePlugin({
 
         if (!stream) return <div {...props}>{props.children}</div>;
 
-        const userIds = ApplicationStreamingStore.getViewerIds(encodeStreamKey(stream));
+        const userIds = ApplicationStreamingStore.getViewerIds(stream);
 
         let missingUsers = 0;
         const users = userIds.map(id => UserStore.getUser(id)).filter(user => Boolean(user) ? true : (missingUsers += 1, false));
@@ -167,7 +165,7 @@ export default definePlugin({
     component: function ({ OriginalComponent }) {
         return ErrorBoundary.wrap((props: any) => {
             const stream = useStateFromStores([ApplicationStreamingStore], () => ApplicationStreamingStore.getCurrentUserActiveStream());
-            const viewers = ApplicationStreamingStore.getViewerIds(encodeStreamKey(stream));
+            const viewers = ApplicationStreamingStore.getViewerIds(stream);
             return <Tooltip text={<Watching userIds={viewers} guildId={stream.guildId} />}>
                 {({ onMouseEnter, onMouseLeave }) => (
                     <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>

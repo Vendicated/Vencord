@@ -19,19 +19,10 @@
 import { DataStore, Notices } from "@api/index";
 import { showNotification } from "@api/Notifications";
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
-import { findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
-import { FluxStore } from "@webpack/types";
+import { ChannelStore, GuildAvailabilityStore, GuildMemberStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
 
 import settings from "./settings";
 import { ChannelType, RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";
-
-export const GuildAvailabilityStore = findStoreLazy("GuildAvailabilityStore") as FluxStore & {
-    totalGuilds: number;
-    totalUnavailableGuilds: number;
-    unavailableGuilds: string[];
-    isUnavailable(guildId: string): boolean;
-};
 
 const guilds = new Map<string, SimpleGuild>();
 const groups = new Map<string, SimpleGroupChannel>();

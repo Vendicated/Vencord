@@ -6,13 +6,9 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findExportedComponentLazy, findStoreLazy } from "@webpack";
-import { useStateFromStores } from "@webpack/common";
+import { findExportedComponentLazy } from "@webpack";
+import { PrivateChannelSortStore, TypingStore, useStateFromStores } from "@webpack/common";
 const ThreeDots = findExportedComponentLazy("Dots", "AnimatedDots");
-
-const TypingStore = findStoreLazy("TypingStore");
-
-const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
 
 export default definePlugin({
     name: "HomeTyping",

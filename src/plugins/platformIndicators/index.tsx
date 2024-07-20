@@ -25,24 +25,9 @@ import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { PresenceStore, SessionsStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
-
-export interface Session {
-    sessionId: string;
-    status: string;
-    active: boolean;
-    clientInfo: {
-        version: number;
-        os: string;
-        client: string;
-    };
-}
-
-const SessionsStore = findStoreLazy("SessionsStore") as {
-    getSessions(): Record<string, Session>;
-};
 
 function Icon(path: string, opts?: { viewBox?: string; width?: number; height?: number; }) {
     return ({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) => (

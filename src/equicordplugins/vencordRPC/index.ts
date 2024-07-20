@@ -8,16 +8,10 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { ApplicationAssetUtils, ChannelStore, FluxDispatcher, GuildStore, PresenceStore, RelationshipStore, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
-import { FluxStore } from "@webpack/types";
+import { findByPropsLazy } from "@webpack";
+import { ApplicationAssetUtils, ChannelMemberStore, ChannelStore, FluxDispatcher, GuildMemberCountStore, GuildStore, PresenceStore, RelationshipStore, SelectedChannelStore, SelectedGuildStore, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
-const presenceStore = findByPropsLazy("getLocalPresence");
-const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId: string): number | null; };
-const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
-    getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
-};
 const VoiceStates = findByPropsLazy("getVoiceStatesForChannel");
 const chino = "https://i.imgur.com/Dsa2rQy.png";
 const wysi = "https://i.imgur.com/uKtXde9.gif";
@@ -412,7 +406,9 @@ async function createActivity(): Promise<Activity | undefined> {
 let timeout: NodeJS.Timeout | null = null;
 
 async function setRpc(disable?: boolean) {
-    const activities: any = presenceStore.getActivities();
+    const activities = useStateFromStores<Activity[]>(
+        [PresenceStore], () => PresenceStore.getActivities()
+    );
     const activity: Activity | undefined = !activities.length || (activities.length === 1 && activities[0].application_id === settings.store.appID) ? await createActivity() : undefined;
 
     FluxDispatcher.dispatch({

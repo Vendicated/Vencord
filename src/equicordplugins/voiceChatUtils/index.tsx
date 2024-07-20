@@ -9,11 +9,8 @@ import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { GuildChannelStore, Menu, React, RestAPI, UserStore } from "@webpack/common";
+import { GuildChannelStore, Menu, React, RestAPI, UserStore, VoiceStateStore } from "@webpack/common";
 import type { Channel } from "discord-types/general";
-
-const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
 async function runSequential<T>(promises: Promise<T>[]): Promise<T[]> {
     const results: T[] = [];

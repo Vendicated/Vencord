@@ -20,13 +20,10 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
+import { ChannelStore, GuildStore, UserStore, VoiceStateStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
-
-const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
 const settings = definePluginSettings({
     showInUserProfileModal: {

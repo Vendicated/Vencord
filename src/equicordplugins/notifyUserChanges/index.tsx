@@ -9,8 +9,8 @@ import { showNotification } from "@api/Notifications";
 import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { Menu, PresenceStore, React, SelectedChannelStore, Tooltip, UserStore } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { Menu, PresenceStore, React, SelectedChannelStore, SessionsStore, Tooltip, UserStore } from "@webpack/common";
 import type { Channel, User } from "discord-types/general";
 import { CSSProperties } from "react";
 
@@ -65,8 +65,6 @@ function shouldBeNative() {
     if (useNative === "not-focused") return !document.hasFocus();
     return false;
 }
-
-const SessionsStore = findStoreLazy("SessionsStore");
 
 const StatusUtils = findByPropsLazy("useStatusFillColor", "StatusTypes");
 

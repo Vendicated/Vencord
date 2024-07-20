@@ -22,15 +22,13 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findComponentByCodeLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, i18n, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { findComponentByCodeLazy, findExportedComponentLazy } from "@webpack";
+import { ChannelStore, GuildMemberStore, i18n, RelationshipStore, SelectedChannelStore, Tooltip, TypingStore, UserGuildSettingsStore, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "../typingTweaks";
 
 const ThreeDots = findExportedComponentLazy("Dots", "AnimatedDots");
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-const TypingStore = findStoreLazy("TypingStore");
-const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
 
 const enum IndicatorMode {
     Dots = 1 << 0,
