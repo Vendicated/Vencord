@@ -33,11 +33,11 @@ const GuidelinesModal = (props: ModalProps) => (
             scrollbarType="none"
         >
             <Forms.FormText>
-                By submitting a decoration, you agree to <Link
-                    href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
-                >
+                By submitting a decoration, you agree to{" "}
+                <Link href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md">
                     the guidelines
-                </Link>. Not reading these guidelines may get your account suspended from creating more decorations in the future.
+                </Link>
+                . Not reading these guidelines may get your account suspended from creating more decorations in the future.
             </Forms.FormText>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>

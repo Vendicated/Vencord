@@ -30,10 +30,13 @@ export default function ReviewBadge(badge: Badge & { onClick?: () => void; }) {
         );
 
     return (
-        <Tooltip
-            text={badge.name}>
+        <Tooltip text={badge.name}>
             {({ onMouseEnter, onMouseLeave }) => (
-                <Wrapper className={cl("blocked-badge")} href={badge.redirectURL!} onClick={badge.onClick}>
+                <Wrapper
+                    className={cl("blocked-badge")}
+                    href={badge.redirectURL!}
+                    onClick={badge.onClick}
+                >
                     <img
                         className={cl("badge")}
                         width="22px"

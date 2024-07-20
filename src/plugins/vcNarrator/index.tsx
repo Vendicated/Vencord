@@ -173,7 +173,8 @@ export default definePlugin({
             const currChanId = SelectedChannelStore.getVoiceChannelId()!;
             const meId = UserStore.getCurrentUser()!.id;
 
-            if (ChannelStore.getChannel(currChanId)?.isGuildStageVoice()) return;
+            const channel = ChannelStore.getChannel(currChanId);
+            if (!channel || channel.isGuildStageVoice()) return;
 
             for (const state of voiceStates) {
                 const { userId, channelId, oldChannelId } = state;
@@ -190,9 +191,9 @@ export default definePlugin({
                 const user = isMe && !Settings.plugins.VcNarrator!.sayOwnName ? "" : UserStore.getUser(userId)!.username;
                 const displayName = user && (UserStore.getUser(userId)!.globalName ?? user);
                 const nickname = user && (GuildMemberStore.getNick(currGuildId, userId) ?? user);
-                const channel = ChannelStore.getChannel(id)!.name;
+                const channelName = ChannelStore.getChannel(id)!.name;
 
-                speak(formatText(template, user, channel, displayName, nickname));
+                speak(formatText(template, user, channelName, displayName, nickname));
 
                 // updateStatuses(type, state, isMe);
             }
@@ -200,10 +201,10 @@ export default definePlugin({
 
         AUDIO_TOGGLE_SELF_MUTE() {
             const chanId = SelectedChannelStore.getVoiceChannelId()!;
-            const s: VoiceState | undefined = VoiceStateStore.getVoiceStateForChannel(chanId);
-            if (!s) return;
+            const state: VoiceState | undefined = VoiceStateStore.getVoiceStateForChannel(chanId);
+            if (!state) return;
 
-            const event = s.mute || s.selfMute ? "unmute" : "mute";
+            const event = state.mute || state.selfMute ? "unmute" : "mute";
             speak(formatText(
                 Settings.plugins.VcNarrator![event + "Message"], "",
                 ChannelStore.getChannel(chanId)!.name,
@@ -214,10 +215,10 @@ export default definePlugin({
 
         AUDIO_TOGGLE_SELF_DEAF() {
             const chanId = SelectedChannelStore.getVoiceChannelId()!;
-            const s: VoiceState | undefined = VoiceStateStore.getVoiceStateForChannel(chanId);
-            if (!s) return;
+            const state: VoiceState | undefined = VoiceStateStore.getVoiceStateForChannel(chanId);
+            if (!state) return;
 
-            const event = s.deaf || s.selfDeaf ? "undeafen" : "deafen";
+            const event = state.deaf || state.selfDeaf ? "undeafen" : "deafen";
             speak(formatText(
                 Settings.plugins.VcNarrator![event + "Message"],
                 "",
@@ -229,13 +230,11 @@ export default definePlugin({
     },
 
     start() {
-        if (typeof speechSynthesis === "undefined" || speechSynthesis.getVoices().length === 0) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (!speechSynthesis || speechSynthesis.getVoices().length <= 0)
             new Logger("VcNarrator").warn(
                 "SpeechSynthesis not supported or no Narrator voices found. Thus, this plugin will not work. Check my Settings for more info"
             );
-            return;
-        }
-
     },
 
     optionsCache: null as Record<string, PluginOptionsItem> | null,
@@ -369,7 +368,7 @@ export default definePlugin({
                                 gridTemplateColumns: "repeat(4, 1fr)",
                                 gap: "1rem",
                             }}
-                            className={"vc-narrator-buttons"}
+                            className="vc-narrator-buttons"
                         >
                             {types.map(t => (
                                 <Button key={t} onClick={() => { playSample(s, t); }}>

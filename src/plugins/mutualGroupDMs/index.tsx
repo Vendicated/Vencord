@@ -94,8 +94,7 @@ export default definePlugin({
                         src={IconUtils.getChannelIconURL({ id: channel.id, icon: channel.icon, size: 32 })}
                         size="SIZE_40"
                         className={ProfileListClasses.listAvatar}
-                    >
-                    </Avatar>
+                    />
                     <div className={ProfileListClasses.listRowContent}>
                         <div className={ProfileListClasses.listName}>{getGroupDMName(channel)}</div>
                         <div className={GuildLabelClasses.guildNick}>{channel.recipients.length + 1} Members</div>
@@ -113,7 +112,7 @@ export default definePlugin({
                     ? entries
                     : (
                         <div className={ProfileListClasses.empty}>
-                            <div className={ProfileListClasses.emptyIconFriends}></div>
+                            <div className={ProfileListClasses.emptyIconFriends} />
                             <div className={ProfileListClasses.emptyText}>No group dms in common</div>
                         </div>
                     )

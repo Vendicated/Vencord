@@ -121,10 +121,11 @@ const settings = definePluginSettings({
     clearMessageCache: {
         type: OptionType.COMPONENT,
         description: "Clear the linked message cache",
-        component: () =>
+        component: () => (
             <Button onClick={() => { messageCache.clear(); }}>
                 Clear the linked message cache
             </Button>
+        )
     }
 });
 
@@ -303,10 +304,12 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps) {
                 rawDescription: "",
                 color: "var(--background-secondary)",
                 author: {
-                    name: <Text variant="text-xs/medium" tag="span">
-                        <span>{channelLabel} - </span>
-                        {MarkupUtils.parse(channel.isDM() ? `<@${dmReceiver?.id ?? ""}>` : `<#${channel.id}>`)}
-                    </Text>,
+                    name: (
+                        <Text variant="text-xs/medium" tag="span">
+                            <span>{channelLabel} - </span>
+                            {MarkupUtils.parse(channel.isDM() ? `<@${dmReceiver?.id ?? ""}>` : `<#${channel.id}>`)}
+                        </Text>
+                    ),
                     iconProxyURL: iconUrl
                 }
             }}

@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType, type Patch } from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { DraftType, type Emoji, EmojiIntention, EmojiType, type FluxPersistedStore, type FluxStore, type MessageAttachment, type MessageEmbed, type MessageRecord, type Sticker, StickerFormat, UserPremiumType } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
 import { AlertActionCreators, ChannelStore, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, MarkupUtils, Permissions, PermissionStore, promptToUpload, UserSettingsProtoActionCreators, UserStore } from "@webpack/common";
@@ -230,7 +230,7 @@ export default definePlugin({
             ].map(func => ({
                 match: new RegExp(`${func}:function\\(\\i(?:,\\i)?\\){`, "g"),
                 replace: "$&return true;"
-            })) as Patch["replacement"]
+            }))
         },
         // Remove boost requirements to stream with high quality
         {
@@ -876,12 +876,14 @@ export default definePlugin({
                     if (!hasAttachmentPerms(channelId)) {
                         AlertActionCreators.show({
                             title: "Hold on!",
-                            body: <div>
-                                <Forms.FormText>
-                                    You cannot send this message because it contains an animated FakeNitro sticker,
-                                    and you do not have permissions to attach files in the current channel. Please remove the sticker to proceed.
-                                </Forms.FormText>
-                            </div>
+                            body: (
+                                <div>
+                                    <Forms.FormText>
+                                        You cannot send this message because it contains an animated FakeNitro sticker,
+                                        and you do not have permissions to attach files in the current channel. Please remove the sticker to proceed.
+                                    </Forms.FormText>
+                                </div>
+                            )
                         });
                     } else {
                         this.sendAnimatedSticker(link, sticker.id, channelId);

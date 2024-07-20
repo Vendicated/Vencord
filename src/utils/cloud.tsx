@@ -90,51 +90,52 @@ export async function authorizeCloud() {
         return;
     }
 
-    openModal((props: any) => <OAuth2AuthorizeModal
-        {...props}
-        scopes={["identify"]}
-        responseType="code"
-        redirectUri={redirectUri}
-        permissions={0n}
-        clientId={clientId}
-        cancelCompletesFlow={false}
-        callback={async ({ location }: any) => {
-            if (!location) {
-                Settings.cloud.authenticated = false;
-                return;
-            }
+    openModal(props => (
+        <OAuth2AuthorizeModal
+            {...props}
+            scopes={["identify"]}
+            responseType="code"
+            redirectUri={redirectUri}
+            permissions={0n}
+            clientId={clientId}
+            cancelCompletesFlow={false}
+            callback={async ({ location }: any) => {
+                if (!location) {
+                    Settings.cloud.authenticated = false;
+                    return;
+                }
 
-            try {
-                const res = await fetch(location, {
-                    headers: { Accept: "application/json" }
-                });
-                const { secret } = await res.json();
-                if (secret) {
-                    cloudLogger.info("Authorized with secret");
-                    await setAuthorization(secret);
-                    showNotification({
-                        title: "Cloud Integration",
-                        body: "Cloud integrations enabled!"
+                try {
+                    const res = await fetch(location, {
+                        headers: { Accept: "application/json" }
                     });
-                    Settings.cloud.authenticated = true;
-                } else {
+                    const { secret } = await res.json();
+                    if (secret) {
+                        cloudLogger.info("Authorized with secret");
+                        await setAuthorization(secret);
+                        showNotification({
+                            title: "Cloud Integration",
+                            body: "Cloud integrations enabled!"
+                        });
+                        Settings.cloud.authenticated = true;
+                    } else {
+                        showNotification({
+                            title: "Cloud Integration",
+                            body: "Setup failed (no secret returned?)."
+                        });
+                        Settings.cloud.authenticated = false;
+                    }
+                } catch (e: any) {
+                    cloudLogger.error("Failed to authorize", e);
                     showNotification({
                         title: "Cloud Integration",
-                        body: "Setup failed (no secret returned?)."
+                        body: `Setup failed (${e.toString()}).`
                     });
                     Settings.cloud.authenticated = false;
                 }
-            } catch (e: any) {
-                cloudLogger.error("Failed to authorize", e);
-                showNotification({
-                    title: "Cloud Integration",
-                    body: `Setup failed (${e.toString()}).`
-                });
-                Settings.cloud.authenticated = false;
-            }
-        }
-        }
-    />);
+            }}
+        />
+    ));
 }
 
 export async function getCloudAuth() {

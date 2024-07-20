@@ -105,11 +105,13 @@ function ConnectionsComponent({ id, theme, simplified }: { id: string; theme: st
         return null;
 
     const connectionsContainer = (
-        <Flex style={{
-            marginTop: !simplified ? "8px" : undefined,
-            gap: getSpacingPx(settings.store.iconSpacing),
-            flexWrap: "wrap"
-        }}>
+        <Flex
+            style={{
+                marginTop: !simplified ? "8px" : undefined,
+                gap: getSpacingPx(settings.store.iconSpacing),
+                flexWrap: "wrap"
+            }}
+        >
             {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
         </Flex>
     );
@@ -160,8 +162,8 @@ function CompactConnectionComponent({ connection, theme }: { connection: Profile
             key={connection.id}
         >
             {tooltipProps =>
-                url
-                    ? <a
+                url ? (
+                    <a
                         {...tooltipProps}
                         className="vc-user-connection"
                         href={url}
@@ -176,13 +178,15 @@ function CompactConnectionComponent({ connection, theme }: { connection: Profile
                     >
                         {img}
                     </a>
-                    : <button
+                ) : (
+                    <button
                         {...tooltipProps}
                         className="vc-user-connection"
                         onClick={() => { copyWithToast(connection.name); }}
                     >
                         {img}
                     </button>
+                )
 
             }
         </Tooltip>

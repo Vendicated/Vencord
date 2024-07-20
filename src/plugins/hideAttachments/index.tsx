@@ -71,7 +71,7 @@ export default definePlugin({
     },
 
     buildCss() {
-        const elements = [...hiddenMessages].map(id => `#message-accessories-${id}`).join(",");
+        const elements = Array.from(hiddenMessages, id => `#message-accessories-${id}`).join(",");
         style.textContent = `
         :is(${elements}) :is([class*="embedWrapper"], [class*="clickableSticker"]) {
             /* important is not necessary, but add it to make sure bad themes won't break it */

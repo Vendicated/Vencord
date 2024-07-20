@@ -76,16 +76,14 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
 
             if (instance.state.mouseOver && instance.state.mouseDown) {
                 const offset = size.current / 2;
-                const pos = { x: e.pageX, y: e.pageY };
-                const x = -((pos.x - element.current.getBoundingClientRect().left) * zoom.current - offset);
-                const y = -((pos.y - element.current.getBoundingClientRect().top) * zoom.current - offset);
+                const x = -((e.pageX - element.current.getBoundingClientRect().left) * zoom.current - offset);
+                const y = -((e.pageY - element.current.getBoundingClientRect().top) * zoom.current - offset);
                 setLensPosition({ x: e.x - offset, y: e.y - offset });
                 setImagePosition({ x, y });
                 setOpacity(1);
             } else {
                 setOpacity(0);
             }
-
         };
 
         const onMouseDown = (e: MouseEvent) => {
@@ -172,36 +170,35 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
                 transform: `translate(${lensPosition.x}px, ${lensPosition.y}px)`,
             }}
         >
-            {instance.props.animated ?
-                (
-                    <video
-                        ref={currentVideoElementRef}
-                        style={{
-                            position: "absolute",
-                            left: `${imagePosition.x}px`,
-                            top: `${imagePosition.y}px`
-                        }}
-                        width={`${box.width * zoom.current}px`}
-                        height={`${box.height * zoom.current}px`}
-                        poster={instance.props.src}
-                        src={originalVideoElementRef.current?.src ?? instance.props.src}
-                        autoPlay
-                        loop
-                        muted
-                    />
-                ) : (
-                    <img
-                        ref={imageRef}
-                        style={{
-                            position: "absolute",
-                            transform: `translate(${imagePosition.x}px, ${imagePosition.y}px)`
-                        }}
-                        width={`${box.width * zoom.current}px`}
-                        height={`${box.height * zoom.current}px`}
-                        src={instance.props.src}
-                        alt=""
-                    />
-                )}
+            {instance.props.animated ? (
+                <video
+                    ref={currentVideoElementRef}
+                    style={{
+                        position: "absolute",
+                        left: `${imagePosition.x}px`,
+                        top: `${imagePosition.y}px`
+                    }}
+                    width={`${box.width * zoom.current}px`}
+                    height={`${box.height * zoom.current}px`}
+                    poster={instance.props.src}
+                    src={originalVideoElementRef.current?.src ?? instance.props.src}
+                    autoPlay
+                    loop
+                    muted
+                />
+            ) : (
+                <img
+                    ref={imageRef}
+                    style={{
+                        position: "absolute",
+                        transform: `translate(${imagePosition.x}px, ${imagePosition.y}px)`
+                    }}
+                    width={`${box.width * zoom.current}px`}
+                    height={`${box.height * zoom.current}px`}
+                    src={instance.props.src}
+                    alt=""
+                />
+            )}
         </div>
     );
 }, { noop: true });

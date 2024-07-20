@@ -30,56 +30,38 @@ import { type ProfileThemeColors, UserPremiumType, type UserProfile, type UserRe
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Flex, Forms, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
 import type { ReactNode } from "react";
-// @ts-expect-error
-import virtualMerge from "virtual-merge";
 
-interface Colors {
-    primary: number;
-    accent: number;
-}
+function encode(primary: number, accent: number) {
+    // Decode only requires each color to have at least one character,
+    // so the colors can be left unpadded, saving About Me space.
+    let encoded = "";
+    for (const char of `[#${primary.toString(16)},#${accent.toString(16)}]`)
+        encoded += String.fromCodePoint(char.codePointAt(0)! + 0xE0000);
 
-function encode(primary: number, accent: number): string {
-    const message = `[#${primary.toString(16).padStart(6, "0")},#${accent.toString(16).padStart(6, "0")}]`;
-    const padding = "";
-    const encoded = Array.from(message)
-        .map(x => x.codePointAt(0))
-        .filter(x => x! >= 0x20 && x! <= 0x7f)
-        .map(x => String.fromCodePoint(x! + 0xe0000))
-        .join("");
-
-    return padding + " " + encoded;
+    return encoded;
 }
 
 // Courtesy of Cynthia.
-function decode(bio: string) {
-    const colorString = bio.match(
-        /\u{e005b}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e002c}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e005d}/u,
-    );
-    if (colorString != null) {
-        const parsed = [...colorString[0]]
-            .map(x => String.fromCodePoint(x.codePointAt(0)! - 0xe0000))
-            .join("");
-        const colors = parsed
-            .substring(1, parsed.length - 1)
-            .split(",")
-            .map(x => parseInt(x.replace("#", "0x"), 16));
+function decode(bio: string): ProfileThemeColors | null {
+    // /[#([0-9A-Fa-f]+),#([0-9A-Fa-f]+)]/u
+    const match = bio.match(/\u{E005B}\u{E0023}([\u{E0030}-\u{E0039}\u{E0041}-\u{E0046}\u{E0061}-\u{E0066}]+)\u{E002C}\u{E0023}([\u{E0030}-\u{E0039}\u{E0041}-\u{E0046}\u{E0061}-\u{E0066}]+)\u{E005D}/u);
 
-        return colors as ProfileThemeColors;
-    } else {
-        return null;
+    if (match) {
+        const [, primary, accent] = match;
+
+        let decodedPrimary = "";
+        for (const char of primary!)
+            decodedPrimary += String.fromCodePoint(char.codePointAt(0)! - 0xE0000);
+
+        let decodedAccent = "";
+        for (const char of accent!)
+            decodedAccent += String.fromCodePoint(char.codePointAt(0)! - 0xE0000);
+
+        return [parseInt(decodedPrimary, 16), parseInt(decodedAccent, 16)];
     }
+
+    return null;
 }
-
-const settings = definePluginSettings({
-    nitroFirst: {
-        description: "Default color source if both are present",
-        type: OptionType.SELECT,
-        options: [
-            { label: "Nitro colors", value: true, default: true },
-            { label: "Fake colors", value: false },
-        ]
-    }
-});
 
 interface ColorPickerProps {
     color: number | null;
@@ -88,6 +70,12 @@ interface ColorPickerProps {
     suggestedColors?: string[];
     onChange: (value: number) => void;
 }
+
+const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
+const requireColorPicker = extractAndLoadChunksLazy(
+    ["USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format"],
+    /createPromise:\(\)=>\i\.\i(\("?.+?"?\)).then\(\i\.bind\(\i,"?(.+?)"?\)\)/
+);
 
 // I can't be bothered to figure out the semantics of this component. The
 // functions surely get some event argument sent to them and they likely aren't
@@ -104,10 +92,18 @@ interface ProfileModalProps {
     isTryItOutFlow: boolean;
 }
 
-const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
 const ProfileModal = findComponentByCodeLazy<ProfileModalProps>("isTryItOutFlow:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
 
-const requireColorPicker = extractAndLoadChunksLazy(["USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format"], /createPromise:\(\)=>\i\.\i(\("?.+?"?\)).then\(\i\.bind\(\i,"?(.+?)"?\)\)/);
+const settings = definePluginSettings({
+    nitroFirst: {
+        description: "Default color source if both are present",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Nitro colors", value: true, default: true },
+            { label: "Fake colors", value: false },
+        ]
+    }
+});
 
 export default definePlugin({
     name: "FakeProfileThemes",
@@ -133,8 +129,8 @@ export default definePlugin({
         const existingColors = decode(
             UserProfileStore.getUserProfile(UserStore.getCurrentUser()!.id)!.bio
         ) ?? [0, 0];
-        const [color1, setColor1] = useState(existingColors[0]);
-        const [color2, setColor2] = useState(existingColors[1]);
+        const [primary, setPrimary] = useState(existingColors[0]);
+        const [accent, setAccent] = useState(existingColors[1]);
 
         const [, , loadingColorPickerChunk] = useAwaiter(requireColorPicker);
 
@@ -163,37 +159,32 @@ export default definePlugin({
                             style={{ gap: "1rem" }}
                         >
                             <ColorPicker
-                                color={color1}
+                                color={primary}
                                 label={
                                     <Text
-                                        variant={"text-xs/normal"}
+                                        variant="text-xs/normal"
                                         style={{ marginTop: "4px" }}
                                     >
                                         Primary
                                     </Text>
                                 }
-                                onChange={color => {
-                                    setColor1(color);
-                                }}
+                                onChange={setPrimary}
                             />
                             <ColorPicker
-                                color={color2}
+                                color={accent}
                                 label={
                                     <Text
-                                        variant={"text-xs/normal"}
+                                        variant="text-xs/normal"
                                         style={{ marginTop: "4px" }}
                                     >
                                         Accent
                                     </Text>
                                 }
-                                onChange={color => {
-                                    setColor2(color);
-                                }}
+                                onChange={setAccent}
                             />
                             <Button
                                 onClick={() => {
-                                    const colorString = encode(color1, color2);
-                                    copyWithToast(colorString);
+                                    copyWithToast(encode(primary, accent));
                                 }}
                                 color={Button.Colors.PRIMARY}
                                 size={Button.Sizes.XLARGE}
@@ -209,7 +200,7 @@ export default definePlugin({
                     <div className="vc-fpt-preview">
                         <ProfileModal
                             user={UserStore.getCurrentUser()!}
-                            pendingThemeColors={[color1, color2]}
+                            pendingThemeColors={[primary, accent]}
                             onAvatarChange={() => { }}
                             onBannerChange={() => { }}
                             canUsePremiumCustomization={true}
@@ -219,28 +210,27 @@ export default definePlugin({
                         />
                     </div>
                 </Forms.FormText>
-            </Forms.FormSection>);
+            </Forms.FormSection>
+        );
     },
     settings,
-    colorDecodeHook(profile?: UserProfile<false>) {
+    colorDecodeHook(profile?: UserProfile) {
         if (profile) {
             // don't replace colors if already set with nitro
             if (settings.store.nitroFirst && profile.themeColors) return profile;
+
             const colors = decode(profile.bio);
             if (colors) {
-                return virtualMerge(profile, {
-                    premiumType: UserPremiumType.TIER_2,
-                    themeColors: colors
-                });
+                profile.premiumType = UserPremiumType.TIER_2;
+                profile.themeColors = colors;
             }
         }
         return profile;
     },
-    addCopy3y3Button: ErrorBoundary.wrap(({ primary, accent }: Colors) => (
+    addCopy3y3Button: ErrorBoundary.wrap(({ primary, accent }: { primary: number; accent: number; }) => (
         <Button
             onClick={() => {
-                const colorString = encode(primary, accent);
-                copyWithToast(colorString);
+                copyWithToast(encode(primary, accent));
             }}
             color={Button.Colors.PRIMARY}
             size={Button.Sizes.XLARGE}

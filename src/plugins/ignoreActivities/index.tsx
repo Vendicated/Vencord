@@ -114,15 +114,13 @@ function AllowedIdsComponent(props: { setValue: (value: string) => void; }) {
     const [allowedIds, setAllowedIds] = useState<string>(settings.store.allowedIds ?? "");
 
     allowedIdsPushID = (id: string) => {
-        const currentIds = new Set(allowedIds.split(",").map(id => id.trim()).filter(Boolean));
-
-        const isAlreadyAdded = currentIds.has(id) || (currentIds.add(id), false);
-
-        const ids = Array.from(currentIds).join(", ");
-        setAllowedIds(ids);
-        props.setValue(ids);
-
-        return isAlreadyAdded;
+        if (!allowedIds.includes(id)) {
+            const ids = allowedIds + ", " + id;
+            setAllowedIds(ids);
+            props.setValue(ids);
+            return false;
+        }
+        return true;
     };
 
     useEffect(() => () => {
@@ -161,8 +159,8 @@ const settings = definePluginSettings({
         description: "",
         default: "",
         onChange(newValue: string) {
-            const ids = new Set(newValue.split(",").map(id => id.trim()).filter(Boolean));
-            settings.store.allowedIds = Array.from(ids).join(", ");
+            const ids = new Set(Array.from(newValue.matchAll(/[^,\s](?:[^,]*[^,\s])?/g), ([m]) => m));
+            settings.store.allowedIds = [...ids].join(", ");
         },
         component: props => <AllowedIdsComponent setValue={props.setValue} />
     },
@@ -268,8 +266,10 @@ export default definePlugin({
         const oldIgnoredActivitiesData = await DataStore.get<Map<IgnoredActivity["id"], IgnoredActivity>>("IgnoreActivities_ignoredActivities");
 
         if (oldIgnoredActivitiesData != null) {
-            settings.store.ignoredActivities = Array.from(oldIgnoredActivitiesData.values())
-                .map(activity => ({ ...activity, name: "Unknown Name" }));
+            settings.store.ignoredActivities = Array.from(
+                oldIgnoredActivitiesData.values(),
+                activity => ({ ...activity, name: "Unknown Name" })
+            );
 
             DataStore.del("IgnoreActivities_ignoredActivities");
         }

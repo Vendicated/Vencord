@@ -12,11 +12,11 @@ import type { ComponentType } from "react";
 import { GithubIcon, WebsiteIcon } from "..";
 
 export const GithubLinkIcon = () => (
-    <GithubIcon aria-hidden className={"vc-settings-modal-link-icon"} />
+    <GithubIcon aria-hidden className="vc-settings-modal-link-icon" />
 );
 
 export const WebsiteLinkIcon = () => (
-    <WebsiteIcon aria-hidden className={"vc-settings-modal-link-icon"} />
+    <WebsiteIcon aria-hidden className="vc-settings-modal-link-icon" />
 );
 
 interface Props {

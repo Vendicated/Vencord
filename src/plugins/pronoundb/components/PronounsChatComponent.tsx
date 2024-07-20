@@ -55,9 +55,9 @@ function PronounsChatComponent({ message }: { message: MessageRecord; }) {
 
     return result
         ? (
-            <span
-                className={classes(styles.timestampInline, styles.timestamp)}
-            >• {result}</span>
+            <span className={classes(styles.timestampInline, styles.timestamp)}>
+                • {result}
+            </span>
         )
         : null;
 }
@@ -67,9 +67,9 @@ export const CompactPronounsChatComponent = ErrorBoundary.wrap(({ message }: { m
 
     return result
         ? (
-            <span
-                className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact")}
-            >• {result}</span>
+            <span className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact")}>
+                • {result}
+            </span>
         )
         : null;
 }, { noop: true });

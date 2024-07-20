@@ -156,7 +156,7 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
     else
         editIdx = i = findNextNonDeleted(editIdx);
 
-    return i === - 1 ? undefined : messages[messages.length - i - 1];
+    return i === -1 ? undefined : messages[messages.length - i - 1];
 }
 
 function shouldMention(message: MessageRecord) {

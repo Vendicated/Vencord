@@ -59,43 +59,42 @@ function VencordSettings() {
         key: KeysOfType<typeof settings, boolean>;
         title: string;
         note: string;
-    } | false)[] =
-        [
-            {
-                key: "useQuickCss",
-                title: "Enable Custom CSS",
-                note: "Loads your Custom CSS"
-            },
-            !IS_WEB && {
-                key: "enableReactDevtools",
-                title: "Enable React Developer Tools",
-                note: "Requires a full restart"
-            },
-            !IS_WEB && (!IS_DISCORD_DESKTOP || !isWindows ? {
-                key: "frameless",
-                title: "Disable the window frame",
-                note: "Requires a full restart"
-            } : {
-                key: "winNativeTitleBar",
-                title: "Use Windows' native title bar instead of Discord's custom one",
-                note: "Requires a full restart"
-            }),
-            !IS_WEB && {
-                key: "transparent",
-                title: "Enable window transparency.",
-                note: "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart"
-            },
-            !IS_WEB && isWindows && {
-                key: "winCtrlQ",
-                title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
-                note: "Requires a full restart"
-            },
-            IS_DISCORD_DESKTOP && {
-                key: "disableMinSize",
-                title: "Disable minimum window size",
-                note: "Requires a full restart"
-            },
-        ];
+    } | false)[] = [
+        {
+            key: "useQuickCss",
+            title: "Enable Custom CSS",
+            note: "Loads your Custom CSS"
+        },
+        !IS_WEB && {
+            key: "enableReactDevtools",
+            title: "Enable React Developer Tools",
+            note: "Requires a full restart"
+        },
+        !IS_WEB && (!IS_DISCORD_DESKTOP || !isWindows ? {
+            key: "frameless",
+            title: "Disable the window frame",
+            note: "Requires a full restart"
+        } : {
+            key: "winNativeTitleBar",
+            title: "Use Windows' native title bar instead of Discord's custom one",
+            note: "Requires a full restart"
+        }),
+        !IS_WEB && {
+            key: "transparent",
+            title: "Enable window transparency.",
+            note: "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart"
+        },
+        !IS_WEB && isWindows && {
+            key: "winCtrlQ",
+            title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
+            note: "Requires a full restart"
+        },
+        IS_DISCORD_DESKTOP && {
+            key: "disableMinSize",
+            title: "Disable minimum window size",
+            note: "Requires a full restart"
+        },
+    ];
 
     return (
         <SettingsTab title="Vencord Settings">
@@ -139,13 +138,16 @@ function VencordSettings() {
             <Forms.FormSection className={Margins.top16} title="Settings" tag="h5">
                 <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
                     Hint: You can change the position of this settings section in the
-                    {" "}<Button
-                        look={Button.Looks.BLANK}
-                        style={{ color: "var(--text-link)", display: "inline-block" }}
+                    {" "}
+                    <Button
+                        look={Button.Looks.LINK}
+                        color={Button.Colors.LINK}
+                        size={Button.Sizes.MIN}
                         onClick={() => { openPluginModal(Vencord.Plugins.plugins.Settings!); }}
                     >
                         settings of the Settings plugin
-                    </Button>!
+                    </Button>
+                    !
                 </Forms.FormText>
 
                 {Switches.map(s => s && (
@@ -161,69 +163,73 @@ function VencordSettings() {
             </Forms.FormSection>
 
 
-            {needsVibrancySettings && <>
-                <Forms.FormTitle tag="h5">Window vibrancy style (requires restart)</Forms.FormTitle>
-                <Select
-                    className={Margins.bottom20}
-                    placeholder="Window vibrancy style"
-                    options={[
-                        // Sorted from most opaque to most transparent
-                        {
-                            label: "No vibrancy", value: undefined
-                        },
-                        {
-                            label: "Under Page (window tinting)",
-                            value: "under-page"
-                        },
-                        {
-                            label: "Content",
-                            value: "content"
-                        },
-                        {
-                            label: "Window",
-                            value: "window"
-                        },
-                        {
-                            label: "Selection",
-                            value: "selection"
-                        },
-                        {
-                            label: "Titlebar",
-                            value: "titlebar"
-                        },
-                        {
-                            label: "Header",
-                            value: "header"
-                        },
-                        {
-                            label: "Sidebar",
-                            value: "sidebar"
-                        },
-                        {
-                            label: "Tooltip",
-                            value: "tooltip"
-                        },
-                        {
-                            label: "Menu",
-                            value: "menu"
-                        },
-                        {
-                            label: "Popover",
-                            value: "popover"
-                        },
-                        {
-                            label: "Fullscreen UI (transparent but slightly muted)",
-                            value: "fullscreen-ui"
-                        },
-                        {
-                            label: "HUD (Most transparent)",
-                            value: "hud"
-                        },
-                    ]}
-                    select={v => { settings.macosVibrancyStyle = v; }}
-                    isSelected={v => settings.macosVibrancyStyle === v}
-                    serialize={identity} />
-            </>}
+            {needsVibrancySettings && (
+                <>
+                    <Forms.FormTitle tag="h5">Window vibrancy style (requires restart)</Forms.FormTitle>
+                    <Select
+                        className={Margins.bottom20}
+                        placeholder="Window vibrancy style"
+                        options={[
+                            // Sorted from most opaque to most transparent
+                            {
+                                label: "No vibrancy",
+                                value: undefined
+                            },
+                            {
+                                label: "Under Page (window tinting)",
+                                value: "under-page"
+                            },
+                            {
+                                label: "Content",
+                                value: "content"
+                            },
+                            {
+                                label: "Window",
+                                value: "window"
+                            },
+                            {
+                                label: "Selection",
+                                value: "selection"
+                            },
+                            {
+                                label: "Titlebar",
+                                value: "titlebar"
+                            },
+                            {
+                                label: "Header",
+                                value: "header"
+                            },
+                            {
+                                label: "Sidebar",
+                                value: "sidebar"
+                            },
+                            {
+                                label: "Tooltip",
+                                value: "tooltip"
+                            },
+                            {
+                                label: "Menu",
+                                value: "menu"
+                            },
+                            {
+                                label: "Popover",
+                                value: "popover"
+                            },
+                            {
+                                label: "Fullscreen UI (transparent but slightly muted)",
+                                value: "fullscreen-ui"
+                            },
+                            {
+                                label: "HUD (Most transparent)",
+                                value: "hud"
+                            },
+                        ]}
+                        select={v => { settings.macosVibrancyStyle = v; }}
+                        isSelected={v => settings.macosVibrancyStyle === v}
+                        serialize={identity}
+                    />
+                </>
+            )}
 
             <Forms.FormSection className={Margins.top16} title="Vencord Notifications" tag="h5">
                 <Flex>

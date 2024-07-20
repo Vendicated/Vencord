@@ -86,14 +86,18 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
             <Forms.FormText>This section will tell you whether your themes can successfully be loaded</Forms.FormText>
             <div>
                 {themeLinks.map(link => (
-                    <Card style={{
-                        padding: ".5em",
-                        marginBottom: ".5em",
-                        marginTop: ".5em"
-                    }} key={link}>
-                        <Forms.FormTitle tag="h5" style={{
-                            overflowWrap: "break-word"
-                        }}>
+                    <Card
+                        style={{
+                            padding: ".5em",
+                            marginBottom: ".5em",
+                            marginTop: ".5em"
+                        }}
+                        key={link}
+                    >
+                        <Forms.FormTitle
+                            tag="h5"
+                            style={{ overflowWrap: "break-word" }}
+                        >
                             {link}
                         </Forms.FormTitle>
                         <Validator link={link} />
@@ -222,30 +226,29 @@ function ThemesTab() {
             <Forms.FormSection title="Local Themes">
                 <QuickActionCard>
                     <>
-                        {IS_WEB ?
-                            (
-                                <QuickAction
-                                    text={
-                                        <span style={{ position: "relative" }}>
-                                            Upload Theme
-                                            <FileInput
-                                                ref={fileInputRef}
-                                                onChange={onFileUpload}
-                                                multiple={true}
-                                                filters={[{ extensions: ["css"] }]}
-                                            />
-                                        </span>
-                                    }
-                                    Icon={PlusIcon}
-                                />
-                            ) : (
-                                <QuickAction
-                                    text="Open Themes Folder"
-                                    action={() => { showItemInFolder(themeDir!); }}
-                                    disabled={themeDirPending}
-                                    Icon={FolderIcon}
-                                />
-                            )}
+                        {IS_WEB ? (
+                            <QuickAction
+                                text={
+                                    <span style={{ position: "relative" }}>
+                                        Upload Theme
+                                        <FileInput
+                                            ref={fileInputRef}
+                                            onChange={onFileUpload}
+                                            multiple={true}
+                                            filters={[{ extensions: ["css"] }]}
+                                        />
+                                    </span>
+                                }
+                                Icon={PlusIcon}
+                            />
+                        ) : (
+                            <QuickAction
+                                text="Open Themes Folder"
+                                action={() => { showItemInFolder(themeDir!); }}
+                                disabled={themeDirPending}
+                                Icon={FolderIcon}
+                            />
+                        )}
                         <QuickAction
                             text="Load missing Themes"
                             action={refreshLocalThemes}
@@ -290,7 +293,6 @@ function ThemesTab() {
     function onBlur() {
         settings.themeLinks = [...new Set(
             themeText
-                .trim()
                 .split(/\n+/)
                 .map(s => s.trim())
                 .filter(Boolean)

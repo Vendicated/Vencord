@@ -49,12 +49,14 @@ export function ExpandableHeader({
 
     return (
         <>
-            <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "8px"
-            }}>
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "8px"
+                }}
+            >
                 <Text
                     tag="h2"
                     variant="eyebrow"
@@ -76,7 +78,8 @@ export function ExpandableHeader({
                                 <button
                                     {...tooltipProps}
                                     className={cl("btn")}
-                                    onClick={onMoreClick}>
+                                    onClick={onMoreClick}
+                                >
                                     <svg
                                         width="24"
                                         height="24"

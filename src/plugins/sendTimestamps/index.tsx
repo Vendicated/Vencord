@@ -117,7 +117,9 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps; close: () =>
                         insertTextIntoChatInputBox(formatted + " ");
                         close();
                     }}
-                >Insert</Button>
+                >
+                    Insert
+                </Button>
             </ModalFooter>
         </ModalRoot>
     );

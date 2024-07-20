@@ -35,8 +35,10 @@ export async function loadLazyChunks() {
             // the chunk containing the component
             const shouldForceDefer = factoryCode.includes(".Messages.GUILD_FEED_UNFEATURE_BUTTON_TEXT");
 
-            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
-                const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Webpack.ChunkIdsRegex)).map(m => Number(m[1])) : [];
+            await Promise.all(Array.from(lazyChunks, async ([, rawChunkIds, entryPoint]) => {
+                const chunkIds = rawChunkIds
+                    ? Array.from(rawChunkIds.matchAll(Webpack.ChunkIdsRegex), m => Number(m[1]))
+                    : [];
 
                 if (chunkIds.length === 0) return;
 
@@ -63,12 +65,10 @@ export async function loadLazyChunks() {
             }));
 
             // Loads all found valid chunk groups
-            await Promise.all(
-                Array.from(validChunkGroups)
-                    .map(([chunkIds]) =>
-                        Promise.all(chunkIds.map(id => wreq.e(id).catch(() => { })))
-                    )
-            );
+            await Promise.all(Array.from(
+                validChunkGroups,
+                ([chunkIds]) => Promise.all(chunkIds.map(id => wreq.e(id).catch(() => { })))
+            ));
 
             // Requires the entry points for all valid chunk groups
             for (const [, entryPoint] of validChunkGroups) {
@@ -108,14 +108,14 @@ export async function loadLazyChunks() {
 
         Webpack.factoryListeners.add(factory => {
             let isResolved = false;
-            searchAndLoadLazyChunks(factory.toString()).then(() => isResolved = true);
+            searchAndLoadLazyChunks(factory.toString()).then(() => { isResolved = true; });
 
             chunksSearchPromises.push(() => isResolved);
         });
 
         for (const factoryId in wreq.m) {
             let isResolved = false;
-            searchAndLoadLazyChunks(wreq.m[factoryId].toString()).then(() => isResolved = true);
+            searchAndLoadLazyChunks(wreq.m[factoryId].toString()).then(() => { isResolved = true; });
 
             chunksSearchPromises.push(() => isResolved);
         }

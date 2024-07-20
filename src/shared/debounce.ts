@@ -24,6 +24,7 @@
  * @param delay The delay in milliseconds
  */
 export function debounce<T extends (...args: any[]) => unknown>(func: T, delay = 300): T {
+    // is number when this runs in the render process
     let timeout: NodeJS.Timeout;
     return function (...args: any[]) {
         clearTimeout(timeout);

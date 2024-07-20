@@ -191,7 +191,7 @@ function ChangeDecorationModal(props: ModalProps) {
                             } else {
                                 return (
                                     <Tooltip
-                                        text={"Pending review"}
+                                        text="Pending review"
                                         shouldShow={item.reviewed === false}
                                     >
                                         {tooltipProps => (

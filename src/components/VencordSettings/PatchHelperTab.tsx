@@ -130,8 +130,8 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
                 <>
                     <Forms.FormTitle>Match</Forms.FormTitle>
                     {renderMatch()}
-                </>)
-            }
+                </>
+            )}
 
             {!!diff?.length && (
                 <>
@@ -141,21 +141,26 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
             )}
 
             {!!diff?.length && (
-                <Button className={Margins.top20} onClick={() => {
-                    try {
-                        Function(patchedCode.replace(/^function\(/, "function patchedModule("));
-                        setCompileResult([true, "Compiled successfully"]);
-                    } catch (err) {
-                        setCompileResult([false, (err as Error).message]);
-                    }
-                }}>Compile</Button>
+                <Button
+                    className={Margins.top20}
+                    onClick={() => {
+                        try {
+                            new Function(patchedCode.replace(/^function\(/, "function patchedModule("));
+                            setCompileResult([true, "Compiled successfully"]);
+                        } catch (err) {
+                            setCompileResult([false, (err as Error).message]);
+                        }
+                    }}
+                >
+                    Compile
+                </Button>
             )}
 
-            {compileResult &&
-                <Forms.FormText style={{ color: compileResult[0] ? "var(--text-positive)" : "var(--text-danger)" }}>
+            {compileResult && (
+                <Forms.FormText style={{ color: `var(--text-${compileResult[0] ? "positive" : "danger"})` }}>
                     {compileResult[1]}
                 </Forms.FormText>
-            }
+            )}
         </>
     );
 }

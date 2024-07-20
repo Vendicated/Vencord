@@ -137,7 +137,8 @@ function UserPermissionsComponent({ forceOpen = false, guild, guildMember, showB
                         </button>
                     )}
                 </Tooltip>
-            ]}>
+            ]}
+        >
             {userPermissions.length > 0 && (
                 <div className={classes(root, roles)}>
                     {userPermissions.map(({ permission, roleColor }) => (

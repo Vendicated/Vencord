@@ -64,13 +64,10 @@ export default LazyComponent(() => {
                 confirmText: "Delete",
                 cancelText: "Nevermind",
                 onConfirm: async () => {
-                    if (!await getToken()) {
+                    if (!await getToken())
                         showToast("You must be logged in to delete reviews.");
-                        return;
-                    }
-                    if (await deleteReview(review.id))
+                    else if (await deleteReview(review.id))
                         refetch();
-
                 }
             });
         }
@@ -83,11 +80,10 @@ export default LazyComponent(() => {
                 cancelText: "Nevermind",
                 // confirmColor: "red", this just adds a class name and breaks the submit button guh
                 onConfirm: async () => {
-                    if (!await getToken()) {
+                    if (!await getToken())
                         showToast("You must be logged in to report reviews.");
-                        return;
-                    }
-                    reportReview(review.id);
+                    else
+                        reportReview(review.id);
                 }
             });
         }
@@ -105,11 +101,10 @@ export default LazyComponent(() => {
                 cancelText: "Nevermind",
                 // confirmColor: "red", this just adds a class name and breaks the submit button guh
                 onConfirm: async () => {
-                    if (!await getToken()) {
+                    if (!await getToken())
                         showToast("You must be logged in to block users.");
-                        return;
-                    }
-                    blockUser(review.sender.discordID);
+                    else
+                        blockUser(review.sender.discordID);
                 }
             });
         }
@@ -142,7 +137,8 @@ export default LazyComponent(() => {
                     {review.type === ReviewType.System && (
                         <span
                             className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.px, botTag.rem)}
-                            style={{ marginLeft: "4px" }}>
+                            style={{ marginLeft: "4px" }}
+                        >
                             <span className={botTag.botText}>
                                 System
                             </span>
@@ -161,7 +157,7 @@ export default LazyComponent(() => {
                 {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
 
                 {!settings.store.hideTimestamps && review.type !== ReviewType.System && (
-                    <Timestamp timestamp={new Date(review.timestamp * 1000)} >
+                    <Timestamp timestamp={new Date(review.timestamp * 1000)}>
                         {dateFormat.format(review.timestamp * 1000)}
                     </Timestamp>
                 )}
@@ -184,7 +180,7 @@ export default LazyComponent(() => {
                             padding: "0px",
                         }}
                     >
-                        <div className={classes(buttonClasses.wrapper, buttonsInner)} >
+                        <div className={classes(buttonClasses.wrapper, buttonsInner)}>
                             {canReportReview(review) && <ReportButton onClick={reportRev} />}
                             {canBlockReviewAuthor(profileId, review) && <BlockButton isBlocked={isAuthorBlocked} onClick={blockReviewSender} />}
                             {canDeleteReview(profileId, review) && <DeleteButton onClick={delReview} />}

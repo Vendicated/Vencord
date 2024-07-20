@@ -53,7 +53,6 @@ function withDispatcher(dispatcher: Dispatch<SetStateAction<boolean>>, action: (
                     err = `An error occurred while running \`${cmd}\`:\n`;
                     err += stderr || `Code \`${code}\`. See the console for more info`;
                 }
-
             } else {
                 err = "An unknown error occurred. See the console for more info.";
             }
@@ -86,15 +85,21 @@ const HashLink = ({ repo, hash, disabled = false }: { repo: string; hash: string
 const Changes = ({ updates, repo, repoPending }: CommonProps & { updates: typeof changes; }) => (
     <Card style={{ padding: "0 0.5em" }}>
         {updates.map(({ hash, author, message }) => (
-            <div style={{
-                marginTop: "0.5em",
-                marginBottom: "0.5em"
-            }}>
+            <div
+                style={{
+                    marginTop: "0.5em",
+                    marginBottom: "0.5em"
+                }}
+            >
                 <code><HashLink {...{ repo, hash }} disabled={repoPending} /></code>
-                <span style={{
-                    marginLeft: "0.5em",
-                    color: "var(--text-normal)"
-                }}>{message} - {author}</span>
+                <span
+                    style={{
+                        marginLeft: "0.5em",
+                        color: "var(--text-normal)"
+                    }}
+                >
+                    {message} - {author}
+                </span>
             </div>
         ))}
     </Card>
@@ -236,7 +241,8 @@ function Updater() {
                             </Link>
                         )
                 }
-                {" "}(<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
+                {" "}
+                <HashLink hash={gitHash} repo={repo} disabled={repoPending} />
             </Forms.FormText>
 
             <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />

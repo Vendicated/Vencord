@@ -27,6 +27,6 @@ export default function DecorationGridNone(props: DecorationGridNoneProps) {
             >
                 {i18n.Messages.NONE}
             </Text>
-        </DecorationGridItem >
+        </DecorationGridItem>
     );
 }

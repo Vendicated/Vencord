@@ -217,7 +217,6 @@ if (!process.argv.includes("--skip-extension")) {
 
     Zip.sync.zip("dist/firefox-unpacked").compress().save("dist/extension-firefox.zip");
     console.info("Packed Firefox Extension written to dist/extension-firefox.zip");
-
 } else {
     await appendCssRuntime;
 }

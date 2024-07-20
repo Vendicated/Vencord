@@ -27,8 +27,8 @@ import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
 import type { MessageRecord } from "@vencord/discord-types";
 import { ChannelStore, Constants, RestAPI, Tooltip } from "@webpack/common";
 
-import { buildDecModal } from "./components/DecryptionModal";
-import { buildEncModal } from "./components/EncryptionModal";
+import { openDecModal } from "./components/DecryptionModal";
+import { openEncModal } from "./components/EncryptionModal";
 
 let steggo: any;
 
@@ -65,7 +65,7 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
     return (
         <ChatBarButton
             tooltip="Encrypt Message"
-            onClick={() => { buildEncModal(); }}
+            onClick={() => { openEncModal(); }}
             buttonProps={{
                 "aria-haspopup": "dialog",
             }}
@@ -75,7 +75,7 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
                 role="img"
                 width="24"
                 height="24"
-                viewBox={"0 0 64 64"}
+                viewBox="0 0 64 64"
                 fill="currentColor"
                 style={{ scale: "1.39", translate: "0 -1px" }}
             >
@@ -130,7 +130,7 @@ export default definePlugin({
                         if (result)
                             this.buildEmbed(message, result);
                         else
-                            buildDecModal({ message });
+                            openDecModal({ message });
                     }
                 }
                 : null

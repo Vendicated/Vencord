@@ -89,6 +89,6 @@ export function RenameModal({ props, session, state }: { props: ModalProps; sess
                     Cancel
                 </Button>
             </ModalFooter>
-        </ModalRoot >
+        </ModalRoot>
     );
 }

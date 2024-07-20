@@ -557,8 +557,10 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher: RegExp = D
     }
 
     if (rawChunkIds) {
-        const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map((m: any) => Number(m[1]));
-        await Promise.all(chunkIds.map(id => wreq.e(id)));
+        await Promise.all(Array.from(
+            rawChunkIds.matchAll(ChunkIdsRegex),
+            (m: any) => wreq.e(Number(m[1]))
+        ));
     }
 
     if (wreq.m[entryPointId] == null) {

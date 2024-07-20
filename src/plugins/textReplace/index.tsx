@@ -154,49 +154,47 @@ function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) 
         <>
             <Forms.FormTitle tag="h4">{title}</Forms.FormTitle>
             <Flex flexDirection="column" style={{ gap: "0.5em" }}>
-                {
-                    rulesArray.map((rule, index) =>
-                        <React.Fragment key={`${rule.find}-${index}`}>
-                            <Flex flexDirection="row" style={{ gap: 0 }}>
-                                <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
-                                    <Input
-                                        placeholder="Find"
-                                        initialValue={rule.find}
-                                        onChange={e => { onChange(e, index, "find"); }}
-                                    />
-                                    <Input
-                                        placeholder="Replace"
-                                        initialValue={rule.replace}
-                                        onChange={e => { onChange(e, index, "replace"); }}
-                                    />
-                                    <Input
-                                        placeholder="Only if includes"
-                                        initialValue={rule.onlyIfIncludes}
-                                        onChange={e => { onChange(e, index, "onlyIfIncludes"); }}
-                                    />
-                                </Flex>
-                                <Button
-                                    size={Button.Sizes.MIN}
-                                    onClick={() => { onClickRemove(index); }}
-                                    style={{
-                                        background: "none",
-                                        color: "var(--status-danger)",
-                                        ...(index === rulesArray.length - 1
-                                            ? {
-                                                visibility: "hidden",
-                                                pointerEvents: "none"
-                                            }
-                                            : {}
-                                        )
-                                    }}
-                                >
-                                    <DeleteIcon />
-                                </Button>
+                {rulesArray.map((rule, index) => (
+                    <React.Fragment key={`${rule.find}-${index}`}>
+                        <Flex flexDirection="row" style={{ gap: 0 }}>
+                            <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
+                                <Input
+                                    placeholder="Find"
+                                    initialValue={rule.find}
+                                    onChange={e => { onChange(e, index, "find"); }}
+                                />
+                                <Input
+                                    placeholder="Replace"
+                                    initialValue={rule.replace}
+                                    onChange={e => { onChange(e, index, "replace"); }}
+                                />
+                                <Input
+                                    placeholder="Only if includes"
+                                    initialValue={rule.onlyIfIncludes}
+                                    onChange={e => { onChange(e, index, "onlyIfIncludes"); }}
+                                />
                             </Flex>
-                            {isRegexRules && renderFindError(rule.find)}
-                        </React.Fragment>
-                    )
-                }
+                            <Button
+                                size={Button.Sizes.MIN}
+                                onClick={() => { onClickRemove(index); }}
+                                style={{
+                                    background: "none",
+                                    color: "var(--status-danger)",
+                                    ...(index === rulesArray.length - 1
+                                        ? {
+                                            visibility: "hidden",
+                                            pointerEvents: "none"
+                                        }
+                                        : {}
+                                    )
+                                }}
+                            >
+                                <DeleteIcon />
+                            </Button>
+                        </Flex>
+                        {isRegexRules && renderFindError(rule.find)}
+                    </React.Fragment>
+                ))}
             </Flex>
         </>
     );
@@ -255,8 +253,8 @@ export default definePlugin({
 
         this.preSend = addPreSendListener((channelId, msg) => {
             // Channel used for sharing rules, applying rules here would be messy
-            if (channelId === TEXT_REPLACE_RULES_CHANNEL_ID) return;
-            msg.content = applyRules(msg.content);
+            if (channelId !== TEXT_REPLACE_RULES_CHANNEL_ID)
+                msg.content = applyRules(msg.content);
         });
     },
 

@@ -196,14 +196,16 @@ function CloneModal({ data }: { data: Data; }) {
                     || "Name must be between 2 and 32 characters and only contain alphanumeric characters"
                 }
             />
-            <div style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "1em",
-                padding: "1em 0.5em",
-                justifyContent: "center",
-                alignItems: "center"
-            }}>
+            <div
+                style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "1em",
+                    padding: "1em 0.5em",
+                    justifyContent: "center",
+                    alignItems: "center"
+                }}
+            >
                 {guilds.map(guild => (
                     <Tooltip text={guild.name}>
                         {({ onMouseLeave, onMouseEnter }) => (

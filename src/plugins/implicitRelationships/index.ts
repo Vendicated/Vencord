@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import type { FluxPersistedStore, UserRecord } from "@vencord/discord-types";
+import { type FluxPersistedStore, RelationshipType, type UserRecord } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
@@ -128,8 +128,8 @@ export default definePlugin({
         // 2. Do not have a relationship with // TODO: Check how this works with pending/blocked relationships
         // 3. Have a mutual guild with
         const userAffinities: Set<string> = UserAffinitiesStore.getUserAffinitiesUserIds();
-        const nonFriendAffinities = Array.from(userAffinities).filter(
-            id => !RelationshipStore.getRelationshipType(id)
+        const nonFriendAffinities = [...userAffinities].filter(
+            id => RelationshipStore.getRelationshipType(id) === RelationshipType.NONE
         );
 
         // I would love to just check user cache here (falling back to the gateway of course)
@@ -157,7 +157,7 @@ export default definePlugin({
 
                 nonFriendAffinities.map(id => UserStore.getUser(id))
                     .filter((user): user is UserRecord => !!user && !ignore.has(user.id))
-                    .forEach(user => { relationships[user.id] = 5; });
+                    .forEach(user => { relationships[user.id] = RelationshipType.IMPLICIT; });
                 RelationshipStore.emitChange();
                 if (--count === 0) {
                     FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);

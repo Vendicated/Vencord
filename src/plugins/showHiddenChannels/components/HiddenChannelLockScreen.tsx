@@ -136,7 +136,7 @@ function HiddenChannelLockScreen({ channel }: { channel: Exclude<GuildChannelRec
 
                 <div className={cl("heading-container")}>
                     <Text variant="heading-xxl/bold">This is a {!PermissionStore.can(Permissions.VIEW_CHANNEL, channel) ? "hidden" : "locked"} {ChannelTypeName[type]} channel.</Text>
-                    {channel.isNSFW() &&
+                    {channel.isNSFW() && (
                         <Tooltip text="NSFW">
                             {({ onMouseLeave, onMouseEnter }) => (
                                 <svg
@@ -154,7 +154,7 @@ function HiddenChannelLockScreen({ channel }: { channel: Exclude<GuildChannelRec
                                 </svg>
                             )}
                         </Tooltip>
-                    }
+                    )}
                 </div>
 
                 {channel.isGuildVoice() && (

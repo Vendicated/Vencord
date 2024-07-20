@@ -51,6 +51,7 @@ export default definePlugin({
     authors: [Devs.Ven],
 
     startTime: 0,
+    // actually number | undefined since this runs in the render process
     interval: undefined as NodeJS.Timeout | undefined,
 
     options: {

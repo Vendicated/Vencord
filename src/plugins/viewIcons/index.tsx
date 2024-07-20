@@ -140,7 +140,7 @@ const GuildContext = ((children, { guild }: GuildContextProps) => {
                 <Menu.MenuItem
                     id="view-banner"
                     label="View Banner"
-                    action={() =>{
+                    action={() => {
                         openImage(IconUtils.getGuildBannerURL(guild, true)!);
                     }}
                     icon={ImageIcon}

@@ -108,13 +108,14 @@ function ReviewList({ hideOwnReview, profileId, refetch, reviews }: ReviewListPr
     return (
         <div className={cl("view")}>
             {reviews.map(review =>
-                (review.sender.discordID !== meId || !hideOwnReview) &&
-                <ReviewComponent
-                    key={review.id}
-                    review={review}
-                    refetch={refetch}
-                    profileId={profileId}
-                />
+                (review.sender.discordID !== meId || !hideOwnReview) && (
+                    <ReviewComponent
+                        key={review.id}
+                        review={review}
+                        refetch={refetch}
+                        profileId={profileId}
+                    />
+                )
             )}
 
             {reviews.length === 0 && (
@@ -142,12 +143,14 @@ export function ReviewsInputComponent({ discordId, isAuthor, modalKey, name, ref
 
     return (
         <>
-            <div onClick={() => {
-                if (!token) {
-                    showToast("Opening authorization window...");
-                    authorize();
-                }
-            }}>
+            <div
+                onClick={() => {
+                    if (!token) {
+                        showToast("Opening authorization window...");
+                        authorize();
+                    }
+                }}
+            >
                 <InputComponent
                     className={cl("input")}
                     channel={channel}

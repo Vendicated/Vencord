@@ -27,6 +27,6 @@ export default function DecorationGridCreate(props: DecorationGridCreateProps) {
             >
                 {i18n.Messages.CREATE}
             </Text>
-        </DecorationGridItem >
+        </DecorationGridItem>
     );
 }

@@ -186,8 +186,8 @@ function ExcludedPluginsList({ search }: { search: string; }) {
 
     return (
         <Text variant="text-md/normal" className={Margins.top16}>
-            {matchingExcludedPlugins.length
-                ? <>
+            {matchingExcludedPlugins.length ? (
+                <>
                     <Forms.FormText>Are you looking for:</Forms.FormText>
                     <ul>
                         {matchingExcludedPlugins.map(([name, reason]) => (
@@ -197,7 +197,7 @@ function ExcludedPluginsList({ search }: { search: string; }) {
                         ))}
                     </ul>
                 </>
-                : "No plugins meet the search criteria."
+            ) : "No plugins meet the search criteria."
             }
         </Text>
     );
@@ -215,12 +215,14 @@ export default function PluginSettings() {
                     body: (
                         <>
                             <p>The following plugins require a restart:</p>
-                            <div>{changes.map((s, i) => (
-                                <>
-                                    {i > 0 && ", "}
-                                    {MarkupUtils.parse("`" + s + "`")}
-                                </>
-                            ))}</div>
+                            <div>
+                                {changes.map((s, i) => (
+                                    <>
+                                        {i > 0 && ", "}
+                                        {MarkupUtils.parse(`\`${s}\``)}
+                                    </>
+                                ))}
+                            </div>
                         </>
                     ),
                     confirmText: "Restart now",
@@ -358,17 +360,16 @@ export default function PluginSettings() {
 
             <Forms.FormTitle className={Margins.top20}>Plugins</Forms.FormTitle>
 
-            {plugins.length || requiredPlugins.length
-                ? (
-                    <div className={cl("grid")}>
-                        {plugins.length
-                            ? plugins
-                            : <Text variant="text-md/normal">No plugins meet the search criteria.</Text>
-                        }
-                    </div>
-                )
-                : <ExcludedPluginsList search={search} />
-            }
+            {plugins.length || requiredPlugins.length ? (
+                <div className={cl("grid")}>
+                    {plugins.length
+                        ? plugins
+                        : <Text variant="text-md/normal">No plugins meet the search criteria.</Text>
+                    }
+                </div>
+            ) : (
+                <ExcludedPluginsList search={search} />
+            )}
 
 
             <Forms.FormDivider className={Margins.top20} />
@@ -382,7 +383,7 @@ export default function PluginSettings() {
                     : <Text variant="text-md/normal">No plugins meet the search criteria.</Text>
                 }
             </div>
-        </SettingsTab >
+        </SettingsTab>
     );
 }
 

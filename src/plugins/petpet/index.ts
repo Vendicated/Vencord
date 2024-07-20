@@ -29,12 +29,12 @@ const DEFAULT_DELAY = 20;
 const DEFAULT_RESOLUTION = 128;
 const FRAMES = 10;
 
-const getFrames = makeLazy(() => Promise.all(
-    Array.from(
-        { length: FRAMES },
-        (_, i) => loadImage(`https://raw.githubusercontent.com/VenPlugs/petpet/main/frames/pet${i}.gif`)
-    ))
-);
+const getFrames = makeLazy(() => {
+    const frames: ReturnType<typeof loadImage>[] = [];
+    for (let i = 0; i < FRAMES; i++)
+        frames.push(loadImage(`https://raw.githubusercontent.com/VenPlugs/petpet/main/frames/pet${i}.gif`));
+    return Promise.all(frames);
+});
 
 const UploadAttachmentStore: FluxStore & Record<string, any> = findStoreLazy("UploadAttachmentStore");
 

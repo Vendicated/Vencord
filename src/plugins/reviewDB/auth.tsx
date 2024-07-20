@@ -46,7 +46,7 @@ export function updateAuth(newAuth: ReviewDBAuth) {
 }
 
 export function authorize() {
-    openModal(props =>
+    openModal(props => (
         <OAuth2AuthorizeModal
             {...props}
             scopes={["identify"]}
@@ -77,5 +77,5 @@ export function authorize() {
                 }
             }}
         />
-    );
+    ));
 }

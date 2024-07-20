@@ -35,7 +35,8 @@ function EncModal(props: ModalProps) {
     const [password, setPassword] = useState("password");
     const [noCover, setNoCover] = useState(false);
 
-    const isValid = secret && (noCover || (cover && cover.trim().split(" ").length > 1));
+    // cover must have at least 2 words
+    const isValid = secret && (noCover || /[^ ] +[^ ]/.test(cover));
 
     return (
         <ModalRoot {...props}>
@@ -56,7 +57,7 @@ function EncModal(props: ModalProps) {
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Password</Forms.FormTitle>
                 <TextInput
                     style={{ marginBottom: "20px" }}
-                    defaultValue={"password"}
+                    defaultValue="password"
                     onChange={setPassword}
                 />
                 <Switch
@@ -98,6 +99,6 @@ function EncModal(props: ModalProps) {
     );
 }
 
-export function buildEncModal() {
+export function openEncModal() {
     openModal(props => <EncModal {...props} />);
 }

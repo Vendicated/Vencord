@@ -22,7 +22,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { canonicalizeMatch } from "@utils/patches";
-import definePlugin, { OptionType, type Patch } from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import type { ChannelRecord, GuildCategoryChannelRecord, GuildChannel, GuildChannelRecord, Role } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { ChannelStore, Permissions, PermissionStore, Tooltip } from "@webpack/common";
@@ -133,7 +133,7 @@ export default definePlugin({
                     match: new RegExp(`(?<=${func}\\(\\){)`, "g"), // Global because Discord has multiple declarations of the same functions
                     replace: "if($self.isHiddenChannel(this.props.channel))return null;"
                 }))
-            ] as Patch["replacement"]
+            ]
         },
         {
             find: "VoiceChannel.renderPopout: There must always be something to render",

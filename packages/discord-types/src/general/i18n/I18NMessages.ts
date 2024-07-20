@@ -117,9 +117,9 @@ function mergeI18NMessages(oldMessages, newMessages) {
     const messageEntryRE = /(?<= )[^ ].*?: (?:FM<[^>]+>|string);/g;
     const messageKeyRE = /(?:^[^"]|^[^"].*[^"]|(?<=^").*(?="))(?="?: (?:FM<[^>]+>|string);$)/;
 
-    const oldMessageEntries = [...oldMessages.matchAll(messageEntryRE)].map(([m]) => m);
+    const oldMessageEntries = Array.from(oldMessages.matchAll(messageEntryRE), ([m]) => m));
     console.log("oldMessages.length: " + oldMessageEntries.length);
-    const newMessageEntries = [...newMessages.matchAll(messageEntryRE)].map(([m]) => m);
+    const newMessageEntries = Array.from(newMessages.matchAll(messageEntryRE), ([m]) => m));
     console.log("newMessages.length: " + newMessageEntries.length);
 
     const uniqueOldMessageEntries = oldMessageEntries.filter(oldEntry => {

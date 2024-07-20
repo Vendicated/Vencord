@@ -81,11 +81,11 @@ function CreateDecorationModal(props: ModalProps) {
             >
                 <ErrorBoundary>
                     <HelpMessage messageType={HelpMessageTypes.WARNING}>
-                        Make sure your decoration does not violate <Link
-                            href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
-                        >
+                        Make sure your decoration does not violate{" "}
+                        <Link href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md">
                             the guidelines
-                        </Link> before submitting it.
+                        </Link>
+                        {" "}before submitting it.
                     </HelpMessage>
                     <div className={cl("create-decoration-modal-form-preview-container")}>
                         <div className={cl("create-decoration-modal-form")}>
@@ -121,7 +121,8 @@ function CreateDecorationModal(props: ModalProps) {
                         </div>
                     </div>
                     <Forms.FormText type="description" className={Margins.bottom16}>
-                        <br />You can receive updates on your decoration's review by joining <Link
+                        <br />You can receive updates on your decoration's review by joining{" "}
+                        <Link
                             href={`https://discord.gg/${INVITE_KEY}`}
                             onClick={async e => {
                                 e.preventDefault();
@@ -139,7 +140,8 @@ function CreateDecorationModal(props: ModalProps) {
                             }}
                         >
                             Decor's Discord server
-                        </Link>.
+                        </Link>
+                        .
                     </Forms.FormText>
                 </ErrorBoundary>
             </ModalContent>

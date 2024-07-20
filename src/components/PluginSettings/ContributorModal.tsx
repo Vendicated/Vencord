@@ -100,14 +100,14 @@ function ContributorModal({ user }: { user: UserRecord; }) {
 
             {!!plugins.length && (
                 <div className={cl("plugins")}>
-                    {plugins.map(p =>
+                    {plugins.map(p => (
                         <PluginCard
                             key={p.name}
                             plugin={p}
                             disabled={p.required ?? false}
                             onRestartNeeded={() => { showToast("Restart to apply changes!"); }}
                         />
-                    )}
+                    ))}
                 </div>
             )}
         </>

@@ -171,10 +171,13 @@ export default definePlugin({
         },
         onClick() {
             const modalKey = openModal(props => (
-                <ErrorBoundary noop onError={() => {
-                    closeModal(modalKey);
-                    VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
-                }}>
+                <ErrorBoundary
+                    noop
+                    onError={() => {
+                        closeModal(modalKey);
+                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
+                    }}
+                >
                     <Modals.ModalRoot {...props}>
                         <Modals.ModalHeader>
                             <Flex style={{ width: "100%", justifyContent: "center" }}>

@@ -39,7 +39,7 @@ export function DecModal(props: any) {
 
             <ModalContent>
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Message with Encryption</Forms.FormTitle>
-                <TextInput defaultValue={encryptedMessage} disabled={true}></TextInput>
+                <TextInput defaultValue={encryptedMessage} disabled={true} />
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Password</Forms.FormTitle>
                 <TextInput
                     style={{ marginBottom: "20px" }}
@@ -56,7 +56,8 @@ export function DecModal(props: any) {
                             (Vencord.Plugins.plugins.InvisibleChat as any as typeof import("..").default).buildEmbed(props?.message, toSend);
                             props.onClose();
                         }
-                    }}>
+                    }}
+                >
                     Decrypt
                 </Button>
                 <Button
@@ -72,6 +73,6 @@ export function DecModal(props: any) {
     );
 }
 
-export function buildDecModal(msg: any) {
+export function openDecModal(msg: any) {
     openModal((props: any) => <DecModal {...props} {...msg} />);
 }

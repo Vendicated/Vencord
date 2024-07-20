@@ -223,16 +223,18 @@ export default definePlugin({
             if (!IS_STANDALONE && !settings.store.dismissedDevBuildWarning) {
                 AlertActionCreators.show({
                     title: "Hold on!",
-                    body: <div>
-                        <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
+                    body: (
+                        <div>
+                            <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
 
-                        <Forms.FormText className={Margins.top8}>
-                            We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
-                            Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
-                        </Forms.FormText>
+                            <Forms.FormText className={Margins.top8}>
+                                We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
+                                Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
+                            </Forms.FormText>
 
-                        <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
-                    </div>,
+                            <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
+                        </div>
+                    ),
                     confirmText: "Understood",
                     secondaryConfirmText: "Don't show again",
                     onConfirmSecondary: () => { settings.store.dismissedDevBuildWarning = true; }

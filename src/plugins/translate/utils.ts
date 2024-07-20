@@ -67,9 +67,6 @@ export async function translate(kind: "received" | "sent", text: string): Promis
 
     return {
         src,
-        text: sentences.
-            map(s => s.trans).
-            filter(Boolean).
-            join("")
+        text: sentences.map(s => s.trans).join("")
     };
 }

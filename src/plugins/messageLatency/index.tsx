@@ -160,7 +160,7 @@ export default definePlugin({
                 >
                     {props => (
                         <>
-                            {<this.Icon delta={d.delta} fill={d.fill} props={props} />}
+                            <this.Icon delta={d.delta} fill={d.fill} props={props} />
                             {/* Time Out indicator uses this, I think this is for a11y */}
                             <HiddenVisually>Delayed Message</HiddenVisually>
                         </>
@@ -170,7 +170,7 @@ export default definePlugin({
         });
     },
 
-    Icon({ delta, fill, props }: {
+    Icon: ({ delta, fill, props }: {
         delta: string | null;
         fill: Fill;
         props: {
@@ -182,32 +182,30 @@ export default definePlugin({
             onBlur: () => void;
             "aria-label"?: string;
         };
-    }) {
-        return (
-            <svg
-                width="12"
-                height="12"
-                viewBox="0 0 16 16"
-                role="img"
-                fill="none"
-                style={{ marginRight: "8px", verticalAlign: -1 }}
-                aria-label={delta ?? "Old Discord Android client"}
-                aria-hidden="false"
-                {...props}
-            >
-                <path
-                    fill={`var(--${fill[0]})`}
-                    d="M4.8001 12c0-.4424-.28666-.8-.63987-.8H2.23997c-.35321 0-.63987.3576-.63987.8v1.6c0 .4424.28666.8.63987.8h1.91962c.35321 0 .63987-.3576.63987-.8L4.8001 12Z"
-                />
-                <path
-                    fill={`var(--${fill[1]})`}
-                    d="M9.6001 7.12724c0-.4022-.28673-.72726-.64-.72726h-1.92c-.35326 0-.63999.32506-.63999.72726v6.54546c0 .4022.28673.7273.63999.7273h1.92c.35327 0 .64-.3251.64-.7273V7.12724Z"
-                />
-                <path
-                    fill={`var(--${fill[2]})`}
-                    d="M14.4001 2.31109c0-.39325-.2867-.71111-.64-.71111h-1.92c-.3533 0-.64.31786-.64.71111V13.6888c0 .3933.2867.7112.64.7112h1.92c.3533 0 .64-.3179.64-.7112V2.31109Z"
-                />
-            </svg>
-        );
-    }
+    }) => (
+        <svg
+            width="12"
+            height="12"
+            viewBox="0 0 16 16"
+            role="img"
+            fill="none"
+            style={{ marginRight: "8px", verticalAlign: -1 }}
+            aria-label={delta ?? "Old Discord Android client"}
+            aria-hidden="false"
+            {...props}
+        >
+            <path
+                fill={`var(--${fill[0]})`}
+                d="M4.8001 12c0-.4424-.28666-.8-.63987-.8H2.23997c-.35321 0-.63987.3576-.63987.8v1.6c0 .4424.28666.8.63987.8h1.91962c.35321 0 .63987-.3576.63987-.8L4.8001 12Z"
+            />
+            <path
+                fill={`var(--${fill[1]})`}
+                d="M9.6001 7.12724c0-.4022-.28673-.72726-.64-.72726h-1.92c-.35326 0-.63999.32506-.63999.72726v6.54546c0 .4022.28673.7273.63999.7273h1.92c.35327 0 .64-.3251.64-.7273V7.12724Z"
+            />
+            <path
+                fill={`var(--${fill[2]})`}
+                d="M14.4001 2.31109c0-.39325-.2867-.71111-.64-.71111h-1.92c-.3533 0-.64.31786-.64.71111V13.6888c0 .3933.2867.7112.64.7112h1.92c.3533 0 .64-.3179.64-.7112V2.31109Z"
+            />
+        </svg>
+    )
 });

@@ -140,21 +140,20 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                 />
                                             )}
                                             <Text variant="text-md/normal">
-                                                {
-                                                    permission.type === PermissionType.Role
-                                                        ? role?.name ?? "Unknown Role"
-                                                        : permission.type === PermissionType.User
-                                                            ? (user && getUniqueUsername(user)) ?? "Unknown User"
-                                                            : (
-                                                                <Flex style={{ gap: "0.2em", justifyItems: "center" }}>
-                                                                    @owner
-                                                                    <OwnerCrownIcon
-                                                                        height={18}
-                                                                        width={18}
-                                                                        aria-hidden="true"
-                                                                    />
-                                                                </Flex>
-                                                            )
+                                                {permission.type === PermissionType.Role
+                                                    ? role?.name ?? "Unknown Role"
+                                                    : permission.type === PermissionType.User
+                                                        ? (user && getUniqueUsername(user)) ?? "Unknown User"
+                                                        : (
+                                                            <Flex style={{ gap: "0.2em", justifyItems: "center" }}>
+                                                                @owner
+                                                                <OwnerCrownIcon
+                                                                    height={18}
+                                                                    width={18}
+                                                                    aria-hidden="true"
+                                                                />
+                                                            </Flex>
+                                                        )
                                                 }
                                             </Text>
                                         </div>
@@ -193,7 +192,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                     </div>
                 )}
             </ModalContent>
-        </ModalRoot >
+        </ModalRoot>
     );
 }
 

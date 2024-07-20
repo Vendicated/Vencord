@@ -124,10 +124,11 @@ export default definePlugin({
         switch (settings.store.method) {
             case Methods.Random:
                 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-                return Array.from(
-                    { length: settings.store.randomisedLength },
-                    () => chars[Math.floor(Math.random() * chars.length)]
-                ).join("") + ext;
+
+                let fileName = "";
+                for (let i = 0; i < settings.store.randomisedLength; i++)
+                    fileName += chars[Math.trunc(Math.random() * chars.length)];
+                return fileName + ext;
             case Methods.Consistent:
                 return settings.store.consistent + ext;
             case Methods.Timestamp:

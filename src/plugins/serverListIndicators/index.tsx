@@ -40,15 +40,18 @@ function FriendsIndicator() {
     forceUpdateFriendCount = useForceUpdater();
 
     return (
-        <span id="vc-friendcount" style={{
-            display: "inline-block",
-            width: "100%",
-            fontSize: "12px",
-            fontWeight: "600",
-            color: "var(--header-secondary)",
-            textTransform: "uppercase",
-            textAlign: "center",
-        }}>
+        <span
+            id="vc-friendcount"
+            style={{
+                display: "inline-block",
+                width: "100%",
+                fontSize: "12px",
+                fontWeight: "600",
+                color: "var(--header-secondary)",
+                textTransform: "uppercase",
+                textAlign: "center",
+            }}
+        >
             {onlineFriends} online
         </span>
     );
@@ -58,15 +61,18 @@ function ServersIndicator() {
     forceUpdateGuildCount = useForceUpdater();
 
     return (
-        <span id="vc-guildcount" style={{
-            display: "inline-block",
-            width: "100%",
-            fontSize: "12px",
-            fontWeight: "600",
-            color: "var(--header-secondary)",
-            textTransform: "uppercase",
-            textAlign: "center",
-        }}>
+        <span
+            id="vc-guildcount"
+            style={{
+                display: "inline-block",
+                width: "100%",
+                fontSize: "12px",
+                fontWeight: "600",
+                color: "var(--header-secondary)",
+                textTransform: "uppercase",
+                textAlign: "center",
+            }}
+        >
             {guildCount} servers
         </span>
     );

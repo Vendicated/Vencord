@@ -111,7 +111,8 @@ export const openImageModal = (url: string, props?: Partial<ComponentProps<Image
         <ModalRoot
             {...modalProps}
             className={ModalImageClasses.modal}
-            size={ModalSize.DYNAMIC}>
+            size={ModalSize.DYNAMIC}
+        >
             <ImageModal
                 className={ModalImageClasses.image}
                 original={url}

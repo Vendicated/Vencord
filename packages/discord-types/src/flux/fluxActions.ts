@@ -36,12 +36,12 @@ async function generateFluxActionType() {
     const { wreq } = Vencord.Webpack;
 
     // Load all chunks
-    await Promise.all(
-        [...wreq.u.toString().matchAll(/(?<=[{,])\d+(?=:")/g)].map(async ([id]) =>
+    await Promise.all(Array.from(
+        wreq.u.toString().matchAll(/(?<=[{,])\d+(?=:")/g),
+        async ([id]) =>
             !(await (await fetch(wreq.p + wreq.u(id))).text()).includes("importScripts(")
             && wreq.e(id)
-        )
-    );
+    ));
 
     // Import all modules
     await Promise.all(
@@ -78,9 +78,9 @@ async function generateFluxActionType() {
 function mergeFluxActionTypes(oldFluxActionType, newFluxActionType) {
     const actionTypeRE = /(?<=")[^"|]+(?=")/g;
 
-    const oldActionTypes = new Set([...oldFluxActionType.matchAll(actionTypeRE)].map(([m]) => m));
+    const oldActionTypes = new Set(Array.from(oldFluxActionType.matchAll(actionTypeRE), ([m]) => m));
     console.log("oldActionTypes.size: " + oldActionTypes.size);
-    const newActionTypes = new Set([...newFluxActionType.matchAll(actionTypeRE)].map(([m]) => m));
+    const newActionTypes = new Set(Array.from(newFluxActionType.matchAll(actionTypeRE), ([m]) => m));
     console.log("newActionTypes.size: " + newActionTypes.size);
 
     console.log("uniqueOldActionTypes.size: " + oldActionTypes.difference(newActionTypes).size);

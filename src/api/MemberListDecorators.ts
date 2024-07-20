@@ -52,7 +52,7 @@ export function removeDecorator(identifier: string) {
     decorators.delete(identifier);
 }
 
-export function __getDecorators(props: DecoratorProps): (JSX.Element | null)[] {
+export function __getDecorators(props: DecoratorProps) {
     const isInGuild = !!(props.guildId);
     return Array.from(decorators.values(), decoratorObj => {
         const { decorator, onlyIn } = decoratorObj;

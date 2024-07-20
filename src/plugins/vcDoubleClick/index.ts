@@ -17,10 +17,11 @@
 */
 
 import { Devs } from "@utils/constants";
-import definePlugin, { type Patch } from "@utils/types";
+import definePlugin from "@utils/types";
 import { ChannelStore, SelectedChannelStore } from "@webpack/common";
 
 const timers: Record<string, {
+    // actually number since this runs in the render process
     timeout?: NodeJS.Timeout;
     i: number;
 }> = {};
@@ -33,7 +34,7 @@ export default definePlugin({
         ...[
             ".handleVoiceStatusClick", // voice channels
             ".handleClickChat" // stage channels
-        ].map<Omit<Patch, "plugin">>(find => ({
+        ].map(find => ({
             find,
             // hack: these are not React onClick, it is a custom prop handled by Discord
             // thus, replacing this with onDoubleClick won't work, and you also cannot check

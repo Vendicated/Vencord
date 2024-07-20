@@ -46,8 +46,8 @@ const SessionsStore: FluxStore & {
 
 const Icon = (path: string, opts?: { viewBox?: string; width?: number; height?: number; }) =>
     ({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) => (
-        <Tooltip text={tooltip} >
-            {(tooltipProps: any) => (
+        <Tooltip text={tooltip}>
+            {tooltipProps => (
                 <svg
                     {...tooltipProps}
                     height={(opts?.height ?? 20) - (small ? 3 : 0)}
@@ -232,7 +232,7 @@ export default definePlugin({
     },
 
     stop() {
-        Object.entries(indicatorLocations).forEach(([_, value]) => {
+        Object.values(indicatorLocations).forEach(value => {
             value.onDisable();
         });
     },

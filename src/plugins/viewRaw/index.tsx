@@ -87,7 +87,7 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
                         <Forms.FormTitle tag="h5">{type} Data</Forms.FormTitle>
                         <CodeBlock content={json} lang="json" />
                     </div>
-                </ModalContent >
+                </ModalContent>
                 <ModalFooter>
                     <Flex cellSpacing={10}>
                         <Button onClick={() => { copyWithToast(json, `${type} data copied to clipboard!`); }}>
@@ -100,8 +100,8 @@ function openViewRawModal(json: string, type: string, msgContent?: string) {
                         )}
                     </Flex>
                 </ModalFooter>
-            </ModalRoot >
-        </ErrorBoundary >
+            </ModalRoot>
+        </ErrorBoundary>
     ));
 }
 

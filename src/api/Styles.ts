@@ -140,7 +140,8 @@ export const compileStyle = (style: Style) => {
  * @example
  * classNameToSelector("foo bar") // => ".foo.bar"
  */
-export const classNameToSelector = (name: string, prefix = "") => name.split(" ").map(n => `.${prefix}${n}`).join("");
+export const classNameToSelector = (name: string, prefix = "") =>
+    name.replaceAll(/ *([^ ]+) */g, `.${prefix}$1`);
 
 type ClassNameFactoryArg = string | string[] | Record<string, unknown> | false | null | undefined | 0 | "";
 /**
@@ -152,7 +153,7 @@ type ClassNameFactoryArg = string | string[] | Record<string, unknown> | false |
  * cl("base", ["item", "editable"], { selected: null, disabled: true })
  * // => "plugin-base plugin-item plugin-editable plugin-disabled"
  */
-export const classNameFactory = (prefix: string = "") => (...args: ClassNameFactoryArg[]) => {
+export const classNameFactory = (prefix = "") => (...args: ClassNameFactoryArg[]) => {
     const classNames = new Set<string>();
     for (const arg of args) {
         if (arg && typeof arg === "string")

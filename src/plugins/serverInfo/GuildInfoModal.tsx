@@ -86,12 +86,20 @@ function GuildInfoModal({ guild }: GuildProps) {
 
             <div className={cl("header")}>
                 {iconUrl
-                    ? <img
-                        src={iconUrl}
-                        alt=""
-                        onClick={() => { openImageModal(iconUrl); }}
-                    />
-                    : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{guild.acronym}</div>
+                    ? (
+                        <img
+                            src={iconUrl}
+                            alt=""
+                            onClick={() => { openImageModal(iconUrl); }}
+                        />
+                    ) : (
+                        <div
+                            aria-hidden
+                            className={classes(IconClasses.childWrapper, IconClasses.acronym)}
+                        >
+                            {guild.acronym}
+                        </div>
+                    )
                 }
 
                 <div className={cl("name-and-description")}>
@@ -174,12 +182,12 @@ function ServerInfoTab({ guild }: GuildProps) {
 
     return (
         <div className={cl("info")}>
-            {Object.entries(fields).map(([name, node]) =>
+            {Object.entries(fields).map(([name, node]) => (
                 <div className={cl("server-info-pair")} key={name}>
                     <Forms.FormTitle tag="h5">{name}</Forms.FormTitle>
                     {typeof node === "string" ? <span>{node}</span> : node}
                 </div>
-            )}
+            ))}
         </div>
     );
 }
@@ -228,14 +236,14 @@ function UserList(type: "friends" | "blocked", guild: GuildRecord, userIds: stri
 
     return (
         <ScrollerThin fade className={cl("scroller")}>
-            {members.map(userId =>
+            {members.map(userId => (
                 <FriendRow
                     user={UserStore.getUser(userId)}
                     status={PresenceStore.getStatus(userId)}
                     onSelect={() => { openUserProfile(userId); }}
                     onContextMenu={() => { }}
                 />
-            )}
+            ))}
         </ScrollerThin>
     );
 }

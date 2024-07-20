@@ -114,7 +114,6 @@ const PreviewButton: ChatBarButton = ({ isMainChat, isEmpty, type: { attachments
             </svg>
         </ChatBarButton>
     );
-
 };
 
 export default definePlugin({

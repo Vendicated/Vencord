@@ -67,7 +67,6 @@ export async function addChannelToCategory(channelId: string, categoryId: string
 
     category.channels.push(channelId);
     await saveCats(categories);
-
 }
 
 export async function removeChannelFromCategory(channelId: string) {

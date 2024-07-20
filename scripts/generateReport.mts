@@ -78,7 +78,7 @@ function toCodeBlock(s: string, indentation = 0, isDiscord = false) {
     s = s.replace(/```/g, "`\u200B`\u200B`");
 
     const indentationStr = " ".repeat(!isDiscord ? indentation : 0);
-    return `\`\`\`\n${s.split("\n").map(s => indentationStr + s).join("\n")}\n${indentationStr}\`\`\``;
+    return `\`\`\`\n${s.replaceAll(/^/gm, indentationStr)}\n${indentationStr}\`\`\``;
 }
 
 async function printReport() {

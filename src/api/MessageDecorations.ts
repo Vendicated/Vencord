@@ -57,8 +57,6 @@ export function removeDecoration(identifier: string) {
     decorations.delete(identifier);
 }
 
-export function __addDecorationsToMessage(props: DecorationProps): (JSX.Element | null)[] {
-    return [...decorations.values()].map(decoration => {
-        return decoration(props);
-    });
+export function __addDecorationsToMessage(props: DecorationProps) {
+    return Array.from(decorations.values(), decoration => decoration(props));
 }
