@@ -4,7 +4,7 @@ env:
     WORKFLOW_TOKEN: ${{ secrets.ETOKEN }}
     UPSTREAM_URL: "https://github.com/Vendicated/Vencord.git"
     UPSTREAM_BRANCH: "dev"
-    DOWNSTREAM_BRANCH: "main"
+    DOWNSTREAM_BRANCH: "dev"
 
 on:
     schedule:
