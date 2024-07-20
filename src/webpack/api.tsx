@@ -123,7 +123,7 @@ export const filters = {
             return false;
         };
 
-        filter.$$vencordProps = ["componentByCode", ...code];
+        filter.$$vencordProps = ["byComponentCode", ...code];
         filter.$$vencordIsComponentFilter = true;
         return filter;
     },
@@ -149,7 +149,9 @@ function printFilter(filter: FilterFn) {
     return String(filter);
 }
 
-function wrapWebpackComponent<T extends object = any>(errMsg: string | (() => string)): [WrapperComponent: LazyComponentType<T>, setInnerComponent: (rawComponent: any, parsedComponent: LazyComponentType<T>) => void] {
+function wrapWebpackComponent<T extends object = any>(
+    errMsg: string | (() => string)
+): [WrapperComponent: LazyComponentType<T>, setInnerComponent: (rawComponent: any, parsedComponent: LazyComponentType<T>) => void] {
     let InnerComponent = null as LazyComponentType<T> | null;
 
     let findFailedLogged = false;
@@ -258,9 +260,7 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
         throw new Error("Invalid component parse. Expected a function got " + typeof parse);
 
     const [WrapperComponent, setInnerComponent] = wrapWebpackComponent<T>(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
-    waitFor(filter, m => {
-        setInnerComponent(m, parse(m));
-    }, { isIndirect: true });
+    waitFor(filter, m => setInnerComponent(m, parse(m)), { isIndirect: true });
 
     if (IS_REPORTER && !isIndirect) {
         webpackSearchHistory.push(["findComponent", [WrapperComponent, filter]]);
@@ -288,9 +288,7 @@ export function findExportedComponent<T extends object = any>(...props: PropsFil
     const filter = filters.byProps(...newProps);
 
     const [WrapperComponent, setInnerComponent] = wrapWebpackComponent<T>(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
-    waitFor(filter, m => {
-        setInnerComponent(m[newProps[0]], parse(m[newProps[0]]));
-    }, { isIndirect: true });
+    waitFor(filter, m => setInnerComponent(m[newProps[0]], parse(m[newProps[0]])), { isIndirect: true });
 
     if (IS_REPORTER) {
         webpackSearchHistory.push(["findExportedComponent", [WrapperComponent, ...newProps]]);
