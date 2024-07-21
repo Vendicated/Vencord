@@ -27,11 +27,7 @@ import { IS_VANILLA } from "./utils/constants";
 console.log("[Vencord] Starting up...");
 
 // FIXME: remove at some point
-const isLegacyNonAsarVencord = IS_STANDALONE && !__dirname.endsWith(".asar");
-if (isLegacyNonAsarVencord) {
-    console.warn("This is a legacy non asar install! Migrating to asar and restarting...");
-    require("./updater/http").migrateLegacyToAsar();
-}
+export const isLegacyNonAsarVencord = IS_STANDALONE && !__dirname.endsWith(".asar");
 
 // Our injector file at app/index.js
 const injectorPath = require.main!.filename;
