@@ -38,7 +38,7 @@ import { patches, PMLogger, startAllPlugins } from "./plugins";
 import { localStorage } from "./utils/localStorage";
 import { relaunch } from "./utils/native";
 import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
-import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
+import { checkForUpdates, checkImportantUpdate, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
 
@@ -95,10 +95,11 @@ async function init() {
         try {
             const isOutdated = await checkForUpdates();
             if (!isOutdated) return;
+            const isImportant = await checkImportantUpdate();
 
-            if (Settings.autoUpdate) {
+            if (Settings.autoUpdate || isImportant) {
                 await update();
-                if (Settings.autoUpdateNotification)
+                if (Settings.autoUpdateNotification && !isImportant)
                     setTimeout(() => showNotification({
                         title: "Zoidcord has been updated!",
                         body: "Click here to restart",
@@ -106,6 +107,17 @@ async function init() {
                         noPersist: true,
                         onClick: relaunch
                     }), 10_000);
+                if (isImportant) {
+                    setTimeout(() => {
+                        showNotification({
+                            title: "Zoidcord has been updated!",
+                            body: "Important update prioritized, restarting in 10 seconds.",
+                            permanent: true,
+                            noPersist: true,
+                        });
+                        setTimeout(() => relaunch(), 10_000);
+                    }, 10_000);
+                }
                 return;
             }
 

@@ -46,6 +46,11 @@ export async function checkForUpdates() {
     return (isOutdated = changes.length > 0);
 }
 
+export async function checkImportantUpdate() {
+    changes = await Unwrap(VencordNative.updater.getUpdates());
+    return changes[0].message.includes("IMPORTANT");
+}
+
 export async function update() {
     if (!isOutdated) return true;
 
