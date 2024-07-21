@@ -256,6 +256,7 @@ export default definePlugin({
         // in profiles
         {
             find: ",overrideDiscriminator:",
+            group: true,
             replacement: [
                 {
                     // prevent channel id from getting ghosted
@@ -263,7 +264,7 @@ export default definePlugin({
                     match: /user:\i,nick:\i,/,
                     replace: "$&moreTags_channelId,"
                 }, {
-                    match: /,botType:(\i\((\i)\)),/g,
+                    match: /,botType:(\i),(?<=user:(\i).+?)/g,
                     replace: ",botType:$self.getTag({user:$2,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),"
                 }
             ]
