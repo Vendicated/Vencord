@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./utils/quickCss";
-import "./webpack/patchWebpack";
-
 import { showNotification } from "@api/Notifications";
 import { Settings } from "@api/Settings";
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
