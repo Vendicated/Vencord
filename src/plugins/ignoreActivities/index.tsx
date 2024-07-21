@@ -77,7 +77,7 @@ function handleActivityToggle(e: React.MouseEvent<HTMLButtonElement, MouseEvent>
 function ImportCustomRPCComponent() {
     return (
         <Flex flexDirection="column">
-            <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Import the application id of the CustomRPC plugin to the allowed list</Forms.FormText>
+            <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>Import the application id of the CustomRPC plugin to the filter list</Forms.FormText>
             <div>
                 <Button
                     onClick={() => {
@@ -86,7 +86,7 @@ function ImportCustomRPCComponent() {
                             return showToast("CustomRPC application ID is not set.", Toasts.Type.FAILURE);
                         }
 
-                        const isAlreadyAdded = allowedIdsPushID?.(id);
+                        const isAlreadyAdded = idsListPushID?.(id);
                         if (isAlreadyAdded) {
                             showToast("CustomRPC application ID is already added.", Toasts.Type.FAILURE);
                         }
@@ -99,39 +99,39 @@ function ImportCustomRPCComponent() {
     );
 }
 
-let allowedIdsPushID: ((id: string) => boolean) | null = null;
+let idsListPushID: ((id: string) => boolean) | null = null;
 
-function AllowedIdsComponent(props: { setValue: (value: string) => void; }) {
-    const [allowedIds, setAllowedIds] = useState<string>(settings.store.allowedIds ?? "");
+function IdsListComponent(props: { setValue: (value: string) => void; }) {
+    const [idsList, setIdsList] = useState<string>(settings.store.idsList ?? "");
 
-    allowedIdsPushID = (id: string) => {
-        const currentIds = new Set(allowedIds.split(",").map(id => id.trim()).filter(Boolean));
+    idsListPushID = (id: string) => {
+        const currentIds = new Set(idsList.split(",").map(id => id.trim()).filter(Boolean));
 
         const isAlreadyAdded = currentIds.has(id) || (currentIds.add(id), false);
 
         const ids = Array.from(currentIds).join(", ");
-        setAllowedIds(ids);
+        setIdsList(ids);
         props.setValue(ids);
 
         return isAlreadyAdded;
     };
 
     useEffect(() => () => {
-        allowedIdsPushID = null;
+        idsListPushID = null;
     }, []);
 
     function handleChange(newValue: string) {
-        setAllowedIds(newValue);
+        setIdsList(newValue);
         props.setValue(newValue);
     }
 
     return (
         <Forms.FormSection>
-            <Forms.FormTitle tag="h3">Allowed List</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom8} type={Forms.FormText.Types.DESCRIPTION}>Comma separated list of activity IDs to allow (Useful for allowing RPC activities and CustomRPC)</Forms.FormText>
+            <Forms.FormTitle tag="h3">Filter List</Forms.FormTitle>
+            <Forms.FormText className={Margins.bottom8} type={Forms.FormText.Types.DESCRIPTION}>Comma separated list of activity IDs to filter (Useful for filtering specific RPC activities and CustomRPC</Forms.FormText>
             <TextInput
                 type="text"
-                value={allowedIds}
+                value={idsList}
                 onChange={handleChange}
                 placeholder="235834946571337729, 343383572805058560"
             />
@@ -145,15 +145,30 @@ const settings = definePluginSettings({
         description: "",
         component: () => <ImportCustomRPCComponent />
     },
-    allowedIds: {
+    listMode: {
+        type: OptionType.SELECT,
+        description: "Change the mode of the filter list",
+        options: [
+            {
+                label: "Whitelist",
+                value: false,
+                default: true
+            },
+            {
+                label: "Blacklist",
+                value: true,
+            }
+        ]
+    },
+    idsList: {
         type: OptionType.COMPONENT,
         description: "",
         default: "",
         onChange(newValue: string) {
             const ids = new Set(newValue.split(",").map(id => id.trim()).filter(Boolean));
-            settings.store.allowedIds = Array.from(ids).join(", ");
+            settings.store.idsList = Array.from(ids).join(", ");
         },
-        component: props => <AllowedIdsComponent setValue={props.setValue} />
+        component: props => <IdsListComponent setValue={props.setValue} />
     },
     ignorePlaying: {
         type: OptionType.BOOLEAN,
@@ -189,8 +204,9 @@ function getIgnoredActivities() {
 }
 
 function isActivityTypeIgnored(type: number, id?: string) {
-    if (id && settings.store.allowedIds.includes(id)) {
-        return false;
+
+    if (id && settings.store.idsList.includes(id)) {
+        return settings.store.listMode;
     }
 
     switch (type) {
@@ -206,7 +222,7 @@ function isActivityTypeIgnored(type: number, id?: string) {
 
 export default definePlugin({
     name: "IgnoreActivities",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.Kylie],
     description: "Ignore activities from showing up on your status ONLY. You can configure which ones are specifically ignored from the Registered Games and Activities tabs, or use the general settings below.",
     dependencies: ["UserSettingsAPI"],
 
@@ -253,6 +269,13 @@ export default definePlugin({
     ],
 
     async start() {
+
+        // Migrate allowedIds
+        if (Settings.plugins.IgnoreActivities.allowedIds) {
+            settings.store.idsList = Settings.plugins.IgnoreActivities.allowedIds;
+            delete Settings.plugins.IgnoreActivities.allowedIds; // Remove allowedIds
+        }
+
         const oldIgnoredActivitiesData = await DataStore.get<Map<IgnoredActivity["id"], IgnoredActivity>>("IgnoreActivities_ignoredActivities");
 
         if (oldIgnoredActivitiesData != null) {
@@ -279,7 +302,7 @@ export default definePlugin({
         if (isActivityTypeIgnored(props.type, props.application_id)) return false;
 
         if (props.application_id != null) {
-            return !getIgnoredActivities().some(activity => activity.id === props.application_id) || settings.store.allowedIds.includes(props.application_id);
+            return !getIgnoredActivities().some(activity => activity.id === props.application_id) || settings.store.idsList.includes(props.application_id);
         } else {
             const exePath = RunningGameStore.getRunningGames().find(game => game.name === props.name)?.exePath;
             if (exePath) {
