@@ -25,20 +25,18 @@ import {
     Button,
     ChannelStore,
     MessageActions,
-    MessageStore,
-    UserStore
+    MessageStore, UserStore
 } from "@webpack/common";
 import { Message } from "discord-types/general";
 
+import { PKAPI } from "./api";
 import pluralKit from "./index";
-import { Member, PKAPI } from "./pkapi.js/lib";
 import {
-    Author,
     deleteMessage,
     getAuthorOfMessage,
     isOwnPkMessage,
     isPk,
-    loadAuthors,
+    loadAuthors, loadData,
     replaceTags,
 } from "./utils";
 
@@ -48,7 +46,7 @@ const EditIcon = () => {
     </svg>;
 };
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     colorNames: {
         type: OptionType.BOOLEAN,
         description: "Display member colors in their names in chat",
@@ -70,20 +68,7 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => {
             return <Button label={"Load"} onClick = {async () => {
-                const system = await pluralKit.api.getSystem({ system: UserStore.getCurrentUser().id });
-                const localSystem: Author[] = [];
-
-                (system.members??(await system.getMembers())).forEach((member: Member) => {
-                    localSystem.push({
-                        messageIds: [],
-                        member,
-                        system,
-                        guildSettings: new Map(),
-                        systemSettings: new Map()
-                    });
-                });
-
-                settings.store.data = JSON.stringify(localSystem);
+                await loadData();
             }}>LOAD</Button>;
         },
         description: "Load local system into memory"
@@ -136,7 +121,7 @@ export default definePlugin({
         },
     ],
 
-    isOwnMessage: (message: Message) => isOwnPkMessage(message, settings.store.data) || message.author.id === UserStore.getCurrentUser().id,
+    isOwnMessage: (message: Message) => isOwnPkMessage(message) || message.author.id === UserStore.getCurrentUser().id,
 
     renderUsername: ({ author, message, isRepliedMessage, withMentionPrefix }) => {
         const prefix = isRepliedMessage && withMentionPrefix ? "@" : "";
@@ -154,7 +139,7 @@ export default definePlugin({
                 color = pkAuthor.member.color??color;
             }
 
-            const display = isOwnPkMessage(message, settings.store.data) && settings.store.displayLocal !== "" ? settings.store.displayLocal : settings.store.displayOther;
+            const display = isOwnPkMessage(message) && settings.store.displayLocal !== "" ? settings.store.displayLocal : settings.store.displayOther;
             const resultText = replaceTags(display, message, settings.store.data);
 
             return <span style={{
@@ -168,11 +153,13 @@ export default definePlugin({
     api: new PKAPI({}),
 
     async start() {
-        await loadAuthors();
+        await loadData();
+        if (settings.store.data === "{}")
+            await loadAuthors();
 
         addButton("pk-edit", msg => {
             if (!msg) return null;
-            if (!isOwnPkMessage(msg, settings.store.data)) return null;
+            if (!isOwnPkMessage(msg)) return null;
 
             return {
                 label: "Edit",
@@ -188,7 +175,7 @@ export default definePlugin({
 
         addButton("pk-delete", msg => {
             if (!msg) return null;
-            if (!isOwnPkMessage(msg, settings.store.data)) return null;
+            if (!isOwnPkMessage(msg)) return null;
 
             return {
                 label: "Delete",
@@ -210,14 +197,13 @@ export default definePlugin({
                     reaction: false,
                     content: "pk;e https://discord.com/channels/" + guild_id + "/" + channelId + "/" + messageId + " " + messageObj.content
                 });
-                // return {cancel: true}
-                // note that presumably we're sending off invalid edit requests, hopefully that doesn't cause issues
-                // todo: look into closing the edit box without sending a bad edit request to discord
+                // return { cancel: true };
             }
         });
     },
     stop() {
         removeButton("pk-edit");
+        removeButton("pk-delete");
     },
 });
 

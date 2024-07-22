@@ -6,15 +6,21 @@
 
 import { DataStore } from "@api/index";
 import { insertTextIntoChatInputBox } from "@utils/discord";
-import { ChannelStore, FluxDispatcher, Toasts } from "@webpack/common";
+import { findByCode } from "@webpack";
+import { ChannelStore, FluxDispatcher, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-import { Member, MemberGuildSettings, PKAPI, System, SystemGuildSettings } from "./pkapi.js/lib";
+import { Member, MemberGuildSettings, PKAPI, System, SystemGuildSettings } from "./api";
+import pluralKit, { settings } from "./index";
 
 
 // I dont fully understand how to use datastores, if I used anything incorrectly please let me know
 export const DATASTORE_KEY = "pk";
 export let authors: Record<string, Author> = {};
+
+export let localSystemNames: string[] = [];
+export let localSystemJson: string = "";
+export let localSystem: Author[] = [];
 
 export interface Author {
     messageIds: string[];
@@ -28,12 +34,11 @@ export function isPk(msg: Message) {
     return (msg && msg.applicationId === "466378653216014359");
 }
 
-export function isOwnPkMessage(message: Message, localSystemData: string): boolean {
+export function isOwnPkMessage(message: Message): boolean {
     if (!isPk(message)) return false;
-    if (!localSystemData) return false;
-    if (["[]", "{}"].includes(localSystemData)) return false;
-    const localSystem: Author[] = JSON.parse(localSystemData);
-    return localSystem.map(author => author.member.id).some(id => id === getAuthorOfMessage(message, new PKAPI()).member.id);
+    if (["[]", "{}", undefined].includes(localSystemJson)) return false;
+
+    return (localSystem??[]).map(author => author.member.id).some(id => id === getAuthorOfMessage(message, new PKAPI()).member.id);
 }
 
 export function replaceTags(content: string, message: Message, localSystemData: string) {
@@ -46,7 +51,7 @@ export function replaceTags(content: string, message: Message, localSystemData: 
 
     // prioritize guild settings, then system/member settings
     const { tag } = systemSettings??system;
-    const name = memberSettings ? memberSettings.display_name : author.member.display_name??author.member.name;
+    const name = memberSettings.display_name || (author.member.display_name??author.member.name);
     const avatar = memberSettings ? memberSettings.avatar_url : author.member.avatar;
 
     return content
@@ -64,6 +69,31 @@ export function replaceTags(content: string, message: Message, localSystemData: 
 
 export async function loadAuthors() {
     authors = await DataStore.get<Record<string, Author>>(DATASTORE_KEY) ?? {};
+    localSystem = JSON.parse(localSystemJson = settings.store.data) ?? {};
+    localSystemNames = localSystem.map(author => author.member.display_name??author.member.name);
+}
+
+export async function loadData() {
+    const system = await pluralKit.api.getSystem({ system: UserStore.getCurrentUser().id });
+    if (!system) {
+        settings.store.data = "{}";
+        return;
+    }
+    const localSystem: Author[] = [];
+
+    (system.members??(await system.getMembers())).forEach((member: Member) => {
+        localSystem.push({
+            messageIds: [],
+            member,
+            system,
+            guildSettings: new Map(),
+            systemSettings: new Map()
+        });
+    });
+
+    settings.store.data = JSON.stringify(localSystem);
+
+    await loadAuthors();
 }
 
 export function replyToMessage(msg: Message, mention: boolean, hideMention: boolean, content?: string | undefined) {
@@ -80,20 +110,9 @@ export function replyToMessage(msg: Message, mention: boolean, hideMention: bool
 }
 
 export function deleteMessage(msg: Message) {
-    // todo: fix
-    FluxDispatcher.dispatch({
-        type: "MESSAGE_REACTION_ADD",
-        message: msg,
-        emoji: { name: "❌" },
-    });
-    Toasts.show({
-        message: "This needs to be fixed, use :x: to delete messages for now.",
-        id: Toasts.genId(),
-        type: Toasts.Type.FAILURE,
-        options: {
-            duration: 3000
-        }
-    });
+    const { addReaction } = findByCode(".userHasReactedWithEmoji");
+
+    addReaction(msg.channel_id, msg.id, { name: "❌" });
 }
 
 export function generateAuthorData(message: Message) {
