@@ -95,12 +95,6 @@ interface SpotifyDevice {
     volume_percent: number;
 }
 
-enum SpotifyShowOptions {
-    Title,
-    Artist,
-    Album
-}
-
 enum NonSpotifyShowOptions {
     Details,
     State,
@@ -128,14 +122,45 @@ const settings = definePluginSettings({
         default: true,
         description: "Force all music player activities to be \"Listening to\", instead of \"Playing\"",
     },
-    spotifyWhatToShow: {
-        type: OptionType.SELECT,
-        options: [
-            { label: "Title", value: SpotifyShowOptions.Title, default: true },
-            { label: "Artist", value: SpotifyShowOptions.Artist },
-            { label: "Album", value: SpotifyShowOptions.Album }
-        ],
-        description: "What to show (spotify)"
+    spotifyActivityName: {
+        type: OptionType.STRING,
+        default: "{{Title}}",
+        description: "The activity's name (spotify)"
+    },
+    spotifyActivityDetails: {
+        type: OptionType.STRING,
+        default: "{{Title}}",
+        description: "The activity's details field (first line) (spotify)"
+    },
+    spotifyActivityState: {
+        type: OptionType.STRING,
+        default: "by {{AllArtistsGrammarSeparated}}",
+        description: "The activity's state field (second line) (spotify)"
+    },
+    spotifyActivityLargeImageText: {
+        type: OptionType.STRING,
+        default: "on {{Album}}",
+        description: "The activity's large image text (third line and image hover text) (spotify)"
+    },
+    spotifyButtonOneText: {
+        type: OptionType.STRING,
+        default: "Open in Spotify",
+        description: "The activity's first button's text (spotify)"
+    },
+    spotifyButtonTwoText: {
+        type: OptionType.STRING,
+        default: "",
+        description: "The activity's second button's text (spotify)"
+    },
+    spotifyButtonOneLink: {
+        type: OptionType.STRING,
+        default: "https://open.spotify.com/track/{{Id}}",
+        description: "The activity's first button's link (spotify)"
+    },
+    spotifyButtonTwoLink: {
+        type: OptionType.STRING,
+        default: "",
+        description: "The activity's second button's link (spotify)"
     },
     nonSpotifyWhatToShow: {
         type: OptionType.SELECT,
@@ -244,7 +269,18 @@ export default definePlugin({
     },
 
     async handleSpotifySongChange(e: SpotifyEvent) {
-        const { applicationId: application_id, spotifyWhatToShow: what_to_show } = settings.store;
+        const {
+            applicationId: application_id,
+            spotifyActivityName: activity_name,
+            spotifyActivityState: activity_state,
+            spotifyActivityDetails: activity_details,
+            spotifyActivityLargeImageText: activity_large_image_text,
+            spotifyButtonOneText: activity_button_one_text,
+            spotifyButtonTwoText: activity_button_two_text,
+            spotifyButtonOneLink: activity_button_one_link,
+            spotifyButtonTwoLink: activity_button_two_link
+        } = settings.store;
+
         if (application_id === undefined) return;
 
         let large_image: string | undefined = undefined;
@@ -253,35 +289,32 @@ export default definePlugin({
         }
         const activity: Activity = {
             application_id,
-            name: "",
+            name: formatSpotifyString(activity_name, e.track),
             type: ActivityType.LISTENING,
             flags: 0,
-            details: e.track.name,
-            state: `by ${e.track.artists?.map(x => x.name)?.join(", ")}`,
+            details: formatSpotifyString(activity_details, e.track),
+            state: formatSpotifyString(activity_state, e.track),
             timestamps: {
                 start: Date.now(),
                 end: (Date.now() + (e.track.duration ?? 0))
             },
             assets: {
                 large_image,
-                large_text: `on ${e.track.album?.name}`
+                large_text: formatSpotifyString(activity_large_image_text, e.track)
             },
-            buttons: [
-                "Open in Spotify"
-            ],
+            buttons: [],
             metadata: {
-                button_urls: [
-                    `https://open.spotify.com/track/${e.track.id}`
-                ]
+                button_urls: []
             }
         };
 
-        if (what_to_show === SpotifyShowOptions.Title) {
-            activity.name = e.track.name;
-        } else if (what_to_show === SpotifyShowOptions.Artist && e.track.artists !== undefined) {
-            activity.name = e.track.artists[0].name;
-        } else if (what_to_show === SpotifyShowOptions.Album && e.track.album !== undefined) {
-            activity.name = e.track.album.name;
+        if (activity_button_one_text !== "") {
+            activity.buttons![0] = formatSpotifyString(activity_button_one_text, e.track);
+            activity.metadata!.button_urls![0] = formatSpotifyString(activity_button_one_link, e.track);
+        }
+        if (activity_button_two_text !== "") {
+            activity.buttons![1] = formatSpotifyString(activity_button_two_text, e.track);
+            activity.metadata!.button_urls![1] = formatSpotifyString(activity_button_two_link, e.track);
         }
 
         FluxDispatcher.dispatch({
@@ -320,6 +353,17 @@ export default definePlugin({
                     The new activity this plugin creates will be missing some features (time bar, play on spotify and listen along). This is a compromise, not a bug.
                 </Forms.FormText>
                 <br />
+                <Forms.FormText variant="text-md/normal">
+                    Text fields in settings for spotify users will have the following strings replaced:<br />
+                    <code>{"{{Title}}"}</code>: The song's title<br />
+                    <code>{"{{Album}}"}</code>: The song's album's name<br />
+                    <code>{"{{FirstArtist}}"}</code>: The first artist's name<br />
+                    <code>{"{{AllArtistsCommaSeparated}}"}</code>: Names of all artists, separated by commas (Artist1, Artist2, Artist3)<br />
+                    <code>{"{{AllArtistsGrammarSeparated}}"}</code>: Names of all artists, separated according to english grammar (Artist1, Artist2 and Artist3)<br />
+                    <code>{"{{Duration}}"}</code>: The song's duration (formatted mm:ss)<br />
+                    <code>{"{{Id}}"}</code>: The track id<br />
+                </Forms.FormText>
+                <br />
                 <Forms.FormTitle tag="h3">If you don't see the activity</Forms.FormTitle>
                 <Forms.FormText variant="text-md/normal">
                     Make sure you enabled <code>Settings</code> &gt; <code>Activity privacy</code> &gt; <code>Share your detected activities with others</code>.
@@ -329,3 +373,22 @@ export default definePlugin({
     },
 
 });
+
+function formatSpotifyString(input: string, song: SpotifyElement): string {
+    if (input === undefined) return "";
+
+    const durationMinutes: number = Math.trunc(song.duration! / 60000);
+    const durationSeconds: number = Math.trunc(song.duration! / 1000) - durationMinutes * 60;
+    return input
+        .replace("{{Title}}", song.name)
+        .replace("{{Album}}", song.album!.name)
+        .replace("{{FirstArtist}}", song.artists![0].name)
+        .replace("{{AllArtistsCommaSeparated}}", song.artists!.map(artist => artist.name).join(", "))
+        .replace("{{AllArtistsGrammarSeparated}}", song.artists!
+            .slice(0, song.artists!.length > 1 ? -1 : undefined)
+            .map(artist => artist.name)
+            .join(", ")
+            + (song.artists!.length > 1 ? ` and ${song.artists![song.artists!.length - 1].name}` : ""))
+        .replace("{{Duration}}", durationMinutes + ":" + ("00" + durationSeconds).slice(-2))
+        .replace("{{Id}}", song.id);
+}
