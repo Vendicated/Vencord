@@ -108,7 +108,6 @@ enum NonSpotifyShowOptions {
     SmallImageText
 }
 
-
 const settings = definePluginSettings({
     applicationId: {
         type: OptionType.STRING,
@@ -289,7 +288,7 @@ export default definePlugin({
             type: "LOCAL_ACTIVITY_UPDATE",
             activity: activity,
             socketId: "MusicTitleRPC:Spotify"
-        })
+        });
 
         if (playbackStoppedTimeout) clearTimeout(playbackStoppedTimeout);
         playbackStoppedTimeout = window.setTimeout(() => {
@@ -319,6 +318,11 @@ export default definePlugin({
                 <br />
                 <Forms.FormText variant="text-md/normal">
                     The new activity this plugin creates will be missing some features (time bar, play on spotify and listen along). This is a compromise, not a bug.
+                </Forms.FormText>
+                <br />
+                <Forms.FormTitle tag="h3">If you don't see the activity</Forms.FormTitle>
+                <Forms.FormText variant="text-md/normal">
+                    Make sure you enabled <code>Settings</code> &gt; <code>Activity privacy</code> &gt; <code>Share your detected activities with others</code>.
                 </Forms.FormText>
             </React.Fragment>
         );
