@@ -6,6 +6,9 @@
         "browser",
         "packages/vencord-types"
     ],
+    "ignores": [
+        "src/equicordplugins/loginWithQR/jsQR.js"
+    ],
     "plugins": [
         "@typescript-eslint",
         "simple-header",
