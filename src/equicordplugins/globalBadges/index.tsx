@@ -66,7 +66,11 @@ const BadgeComponent = ({ name, img }: { name: string, img: string; }) => {
                 <img
                     {...tooltipProps}
                     src={img}
-                    style={{ width: "22px", height: "22px", transform: name.includes("Replugged") ? null : "scale(0.9)", margin: "0 1px" }}
+                    style={{
+                        width: "20px",
+                        height: "20px",
+                        transform: name.includes("Replugged") ? "scale(0.9)" : null
+                    }}
                 />
             )}
         </Tooltip>
