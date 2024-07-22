@@ -27,10 +27,7 @@ import { Button, Clipboard, Forms, Parser, React, Switch, TextArea, TextInput } 
 
 import { SettingsTab, wrapTab } from "./shared";
 
-// Do not include diff in non dev builds (side effects import)
-if (IS_DEV) {
-    var differ = require("diff") as typeof import("diff");
-}
+var differ = require("diff") as typeof import("diff");
 
 const findCandidates = debounce(function ({ find, setModule, setError }) {
     const candidates = search(find);
