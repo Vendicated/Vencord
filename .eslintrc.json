@@ -5,7 +5,7 @@
         "dist",
         "browser",
         "packages/vencord-types",
-        "src/equicordplugins/loginWithQR"
+        "src/equicordplugins/loginWithQR/jsQR.js"
     ],
     "plugins": [
         "@typescript-eslint",
