@@ -1,0 +1,88 @@
+.qrlogin-modal-header {
+    padding: 16px;
+}
+
+.qrlogin-modal-filepaste {
+    width: 30rem;
+    height: 13rem;
+    border-radius: 1rem;
+    background-color: var(--background-secondary);
+    border-style: dashed;
+    border-color: var(--background-modifier-accent);
+    border-width: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: 200ms background-color ease-in-out, 200ms border-color ease-in-out,
+        200ms opacity ease-in-out;
+}
+
+.qrlogin-modal-filepaste * {
+    pointer-events: none;
+}
+
+.qrlogin-modal-filepaste-drop {
+    background-color: var(--mention-background);
+}
+
+.qrlogin-modal-filepaste-disabled {
+    background-color: var(--background-secondary) !important;
+    opacity: 0.5;
+    cursor: unset;
+}
+
+.qrlogin-modal-button {
+    margin: 1rem 0;
+    width: 100%;
+}
+
+.qrlogin-device-content {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+}
+
+.qrlogin-device-image {
+    height: 8rem;
+    user-select: none;
+}
+
+.qrlogin-device-header {
+    margin: 6px 0 12px;
+}
+
+.qrlogin-device-confirm {
+    margin-top: 18px;
+    width: 20rem;
+    background: linear-gradient(
+        to right,
+        var(--button-danger-background) calc(var(--progress) - 1%),
+        var(--button-danger-background-active) var(--progress)
+    ) !important;
+
+    --progress: 0%;
+}
+
+.qrlogin-device-footer {
+    justify-content: space-between;
+}
+
+.qrlogin-settings-btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+[data-tab-id="Scan QR Code"]::before {
+    /* stylelint-disable-next-line property-no-vendor-prefix */
+    -webkit-mask: var(--si-scan-qr-code) center/contain no-repeat !important;
+    mask: var(--si-scan-qr-code) center/contain no-repeat !important;
+
+    --si-scan-qr-code: url("data:image/svg+xml;base64,PHN2ZyBhcmlhLWhpZGRlbj0idHJ1ZSIgcm9sZT0iaW1nIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9Im5vbmUiIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0icmVkIiBkPSJNNCA2YzAtMS4xLjktMiAyLTJoM2ExIDEgMCAwIDAgMC0ySDZhNCA0IDAgMCAwLTQgNHYzYTEgMSAwIDAgMCAyIDBWNlpNNCAxOGMwIDEuMS45IDIgMiAyaDNhMSAxIDAgMSAxIDAgMkg2YTQgNCAwIDAgMS00LTR2LTNhMSAxIDAgMSAxIDIgMHYzWk0yMCA2YTIgMiAwIDAgMC0yLTJoLTNhMSAxIDAgMSAxIDAtMmgzYTQgNCAwIDAgMSA0IDR2M2ExIDEgMCAxIDEtMiAwVjZaIiBjbGFzcz0iIj48L3BhdGg+PHBhdGggZmlsbD0icmVkIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik01IDdjMC0xLjEuOS0yIDItMmgyYTIgMiAwIDAgMSAyIDJ2MmEyIDIgMCAwIDEtMiAySDdhMiAyIDAgMCAxLTItMlY3Wm0yIDBoMnYySDdWN1pNNSAxNWMwLTEuMS45LTIgMi0yaDJhMiAyIDAgMCAxIDIgMnYyYTIgMiAwIDAgMS0yIDJIN2EyIDIgMCAwIDEtMi0ydi0yWm0yIDBoMnYySDd2LTJaTTEzIDdjMC0xLjEuOS0yIDItMmgyYTIgMiAwIDAgMSAyIDJ2MmEyIDIgMCAwIDEtMiAyaC0yYTIgMiAwIDAgMS0yLTJWN1ptMiAwaDJ2MmgtMlY3Wk0xNy4wOCAxM2ExLjUgMS41IDAgMCAwLTEuNDIgMS4wM2MtLjA5LjI1LS4zLjQ3LS41Ni40N0gxNWEyIDIgMCAwIDAtMiAyVjIwYzAgMS4xLjkgMiAyIDJoNmEyIDIgMCAwIDAgMi0ydi0zLjVhMiAyIDAgMCAwLTItMmgtLjFjLS4yNiAwLS40Ny0uMjItLjU2LS40N0ExLjUgMS41IDAgMCAwIDE4LjkyIDEzaC0xLjg0Wk0yMCAxOGEyIDIgMCAxIDEtNCAwIDIgMiAwIDAgMSA0IDBaIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGNsYXNzPSIiPjwvcGF0aD48L3N2Zz4=")
+}
