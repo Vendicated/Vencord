@@ -4,10 +4,8 @@
     "ignorePatterns": [
         "dist",
         "browser",
-        "packages/vencord-types"
-    ],
-    "ignores": [
-        "src/equicordplugins/loginWithQR/jsQR.js"
+        "packages/vencord-types",
+        "src/equicordplugins/loginWithQR"
     ],
     "plugins": [
         "@typescript-eslint",
