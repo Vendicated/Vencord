@@ -14,16 +14,6 @@ import { ReactElement } from "react";
 import { cl, QrCodeCameraIcon } from "./ui";
 import openQrModal from "./ui/modals/QrModal";
 
-export let jsQR: (img: Uint8ClampedArray, width: number, height: number) => {
-    binaryData: number[];
-    data: string;
-    chunks: any[];
-    version: number;
-    location: object;
-};
-
-import("./jsQR.js").then(x => (jsQR = x.default));
-
 export default definePlugin({
     name: "LoginWithQR",
     description: "Allows you to login to another device by scanning a login QR code, just like on mobile!",
