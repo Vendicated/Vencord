@@ -30,7 +30,7 @@ export default definePlugin({
         {
             find: ".nonMediaMosaicItem]",
             replacement: {
-                match: /\.nonMediaMosaicItem\]:!(\i).{0,10}children:\[(\S)/,
+                match: /\.nonMediaMosaicItem\]:!(\i).{0,50}?children:\[(\S)/,
                 replace: "$&,$1&&$2&&$self.renderPiPButton(),"
             },
         },
