@@ -3,6 +3,7 @@
 {
     display: flex;
     flex-direction: row;
+    
     img
     {
         border-radius: 2vh;
@@ -33,7 +34,7 @@
         margin-right: 1vh;
         fill: var(--interactive-normal);
     }
-    
+
     flex-direction: row;
     align-items: center;
     display: flex;
