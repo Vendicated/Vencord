@@ -34,7 +34,7 @@ import { Forms, Toasts, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const CONTRIBUTOR_BADGE = "https://vencord.dev/assets/favicon.png";
-const EQUICORD_CONTRIBUTOR_BADGE = "https://i.imgur.com/rJDRtUB.png";
+const EQUICORD_CONTRIBUTOR_BADGE = "https://i.imgur.com/57ATLZu.png";
 const SUNCORD_CONTRIBUTOR_BADGE = "https://raw.githubusercontent.com/verticalsync/Suncord/main/src/assets/icon.png";
 
 const ContributorBadge: ProfileBadge = {
