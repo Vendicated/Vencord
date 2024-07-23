@@ -61,6 +61,6 @@ export default definePlugin({
                     UpdateLogger.error("Failed to check for updates", err);
                 }
             }
-        }, 1800000);
+        }, 300000);
     },
 });
