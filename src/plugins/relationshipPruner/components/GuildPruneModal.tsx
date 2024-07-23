@@ -1,12 +1,18 @@
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, GuildMemberStore, GuildStore, PermissionsBits, PermissionStore, RelationshipStore, RestAPI, SnowflakeUtils, Text, UserStore, useState } from "@webpack/common";
-import { useEffect } from "@webpack/common";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
-import { GuildMemberCountStore } from "plugins/memberCount";
-import { cl } from "../index";
-import { InfoWithIcon } from "./InfoWithIcon"
 import { findByPropsLazy } from "@webpack";
+import { Button, GuildMemberStore, GuildStore, PermissionsBits, PermissionStore, RelationshipStore, RestAPI, SnowflakeUtils, Text, useEffect,UserStore, useState } from "@webpack/common";
+import { GuildMemberCountStore } from "plugins/memberCount";
+
 import constants from "../constants";
+import { cl } from "../index";
+import { InfoWithIcon } from "./InfoWithIcon";
 
 const { leaveGuild } = findByPropsLazy("deleteGuild", "leaveGuild");
 
@@ -27,20 +33,20 @@ function ServerInfoComponent(props)
                 {PermissionStore.can(PermissionsBits.ADMINISTRATOR, server) && <InfoWithIcon svg={constants.crown}>You are an administrator in this server</InfoWithIcon>}
             </div>
         </div>
-    )
+    );
 }
 
 export function GuildPruneModal(props)
-{   
+{
 
     const joinedServers = Object.values(GuildStore.getGuilds()).filter(e => !e.isOwner(UserStore.getCurrentUser()));
 
-    let [index, setIndex] = useState(0);
+    const [index, setIndex] = useState(0);
 
-    let [messages, setMessages] = useState("");
-    let [recentMessages, setRecentMessages] = useState("");
+    const [messages, setMessages] = useState("");
+    const [recentMessages, setRecentMessages] = useState("");
 
-    let [waited, setWaited] = useState(false);
+    const [waited, setWaited] = useState(false);
     function ProcessNext(shouldLeave)
     {
         if(shouldLeave)
@@ -60,33 +66,33 @@ export function GuildPruneModal(props)
         }
     }
 
-    useEffect(() => 
+    useEffect(() =>
     {
-        const timer = setTimeout(() => 
+        const timer = setTimeout(() =>
         {
-          setWaited(true);
+            setWaited(true);
         }, 2000);
         return () => clearTimeout(timer);
-    }, [index]); 
+    }, [index]);
 
-      
-    useAwaiter(async () => 
+
+    useAwaiter(async () =>
     {
-        let response = await RestAPI.get(
-        {
-            url: `/guilds/${joinedServers[index].id}/messages/search?author_id=${UserStore.getCurrentUser().id}`
-        });
-        let recentResponse = await RestAPI.get(
-        {
-            url: `/guilds/${joinedServers[index].id}/messages/search?author_id=${UserStore.getCurrentUser().id}&min_id=${SnowflakeUtils.fromTimestamp(Date.now() - (7 * 24 * 60 * 60 * 1000))}`
-        });
+        const response = await RestAPI.get(
+            {
+                url: `/guilds/${joinedServers[index].id}/messages/search?author_id=${UserStore.getCurrentUser().id}`
+            });
+        const recentResponse = await RestAPI.get(
+            {
+                url: `/guilds/${joinedServers[index].id}/messages/search?author_id=${UserStore.getCurrentUser().id}&min_id=${SnowflakeUtils.fromTimestamp(Date.now() - (7 * 24 * 60 * 60 * 1000))}`
+            });
         setMessages(response.body.total_results.toString());
         setRecentMessages(recentResponse.body.total_results.toString());
     },
     {
         deps: [index],
         fallbackValue: null
-    })
+    });
 
     return (
         <ModalRoot {...props} size={ModalSize.MEDIUM}>

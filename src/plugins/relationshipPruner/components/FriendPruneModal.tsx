@@ -1,12 +1,19 @@
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Button, ChannelStore, GuildMemberStore, GuildStore, MessageStore, PermissionsBits, PermissionStore, RelationshipStore, RestAPI, SnowflakeUtils, Text, UserStore, useState } from "@webpack/common";
-import { findByPropsLazy } from "@webpack";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { ModalCloseButton, ModalContent, ModalHeader, ModalRoot, ModalSize } from "@utils/modal";
+import { findByCodeLazy,findByPropsLazy } from "@webpack";
+import { Button, ChannelStore, MessageStore, RelationshipStore, Text, UserStore, useState } from "@webpack/common";
+
 import { cl } from "../index";
-import { InfoWithIcon } from "./InfoWithIcon"
-import { findByCodeLazy } from "@webpack";
+import { InfoWithIcon } from "./InfoWithIcon";
 const getCreatedAtDate = findByCodeLazy('month:"short",day:"numeric"');
 const locale = findByPropsLazy("getLocale");
 import moment from "moment";
+
 import constants from "../constants";
 
 const { getMutualFriendsCount, getMutualGuilds } = findByPropsLazy("getMutualFriendsCount", "getMutualFriends");
@@ -22,7 +29,7 @@ function UserInfoComponent(props)
 
     const lastMessage = dmChannel ? MessageStore.getMessage(dmChannel?.id, dmChannel?.lastMessageId) : null;
 
-    const lastMessageTime = moment(lastMessage?.timestamp).format('MMM D, YYYY')
+    const lastMessageTime = moment(lastMessage?.timestamp).format("MMM D, YYYY");
 
     return (
         <div className={cl("modalparent")}>
@@ -35,22 +42,22 @@ function UserInfoComponent(props)
                 <InfoWithIcon svg={constants.house}>{getMutualGuilds(user.id)?.length ?? 0} mutual servers</InfoWithIcon>
             </div>
         </div>
-    )
+    );
 }
 
 export function FriendPruneModal(props)
-{   
+{
 
     const friends = RelationshipStore.getFriendIDs().map(e => UserStore.getUser(e));
 
-    let [index, setIndex] = useState(0);
+    const [index, setIndex] = useState(0);
 
     function ProcessNext(shouldLeave)
     {
         if(shouldLeave)
         {
-            //not sure if the second paramater matters
-            removeRelationship(friends[index].id, {location: "ContextMenu"})
+            // not sure if the second paramater matters
+            removeRelationship(friends[index].id, { location: "ContextMenu" });
         }
         if(friends[index + 1])
         {

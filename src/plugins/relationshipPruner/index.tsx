@@ -1,15 +1,20 @@
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
-import { openModal } from "@utils/modal";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { classNameFactory, disableStyle, enableStyle } from "@api/Styles";
-import { findByPropsLazy } from "@webpack";
+import { Devs } from "@utils/constants";
+import { openModal } from "@utils/modal";
+import definePlugin from "@utils/types";
+
+import { FriendPruneModal } from "./components/FriendPruneModal";
+import { GuildPruneModal } from "./components/GuildPruneModal";
 import style from "./style.css?managed";
 
-import { GuildPruneModal } from "./components/GuildPruneModal";
-import { FriendPruneModal } from "./components/FriendPruneModal";
 
-
-export const cl = classNameFactory("vc-relationshipPruner-")
+export const cl = classNameFactory("vc-relationshipPruner-");
 
 export default definePlugin({
     name: "RelationshipPruner",
@@ -20,7 +25,7 @@ export default definePlugin({
     ],
     onContextMenu(type)
     {
-        openModal(props => (type == "guild" ? <GuildPruneModal {...props}/> : <FriendPruneModal {...props}/>));
+        openModal(props => (type === "guild" ? <GuildPruneModal {...props}/> : <FriendPruneModal {...props}/>));
     },
     patches: [
         {
@@ -32,7 +37,7 @@ export default definePlugin({
         },
         {
             find: "friends_tab_no_track",
-            replacement: 
+            replacement:
             {
                 match: /text:\i.\i.Messages.FRIENDS,onClick:/,
                 replace: "onContextMenu:() => $self.onContextMenu(\"friend\"), $&"
