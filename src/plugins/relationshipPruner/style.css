@@ -1,3 +1,4 @@
+
 .vc-relationshipPruner-modalparent
 {
     display: flex;
@@ -32,6 +33,7 @@
         margin-right: 1vh;
         fill: var(--interactive-normal);
     }
+    
     flex-direction: row;
     align-items: center;
     display: flex;
