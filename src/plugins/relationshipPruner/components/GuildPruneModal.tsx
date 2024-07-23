@@ -16,8 +16,7 @@ import { InfoWithIcon } from "./InfoWithIcon";
 
 const { leaveGuild } = findByPropsLazy("deleteGuild", "leaveGuild");
 
-function ServerInfoComponent(props)
-{
+function ServerInfoComponent(props) {
     const { server, messages, recentMessages } = props;
     const serverIcon = server?.getIconSource("256", true)?.uri;
 
@@ -36,9 +35,7 @@ function ServerInfoComponent(props)
     );
 }
 
-export function GuildPruneModal(props)
-{
-
+export function GuildPruneModal(props) {
     const joinedServers = Object.values(GuildStore.getGuilds()).filter(e => !e.isOwner(UserStore.getCurrentUser()));
 
     const [index, setIndex] = useState(0);
@@ -47,8 +44,7 @@ export function GuildPruneModal(props)
     const [recentMessages, setRecentMessages] = useState("");
 
     const [waited, setWaited] = useState(false);
-    function ProcessNext(shouldLeave)
-    {
+    function ProcessNext(shouldLeave) {
         if(shouldLeave)
         {
             leaveGuild(joinedServers[index].id);
@@ -66,8 +62,7 @@ export function GuildPruneModal(props)
         }
     }
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         const timer = setTimeout(() =>
         {
             setWaited(true);
@@ -76,8 +71,7 @@ export function GuildPruneModal(props)
     }, [index]);
 
 
-    useAwaiter(async () =>
-    {
+    useAwaiter(async () => {
         const response = await RestAPI.get(
             {
                 url: `/guilds/${joinedServers[index].id}/messages/search?author_id=${UserStore.getCurrentUser().id}`

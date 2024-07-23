@@ -19,8 +19,7 @@ import constants from "../constants";
 const { getMutualFriendsCount, getMutualGuilds } = findByPropsLazy("getMutualFriendsCount", "getMutualFriends");
 const { removeRelationship } = findByPropsLazy("removeFriend", "unblockUser");
 
-function UserInfoComponent(props)
-{
+function UserInfoComponent(props) {
     const { user } = props;
 
     const userPicture = user.getAvatarURL();
@@ -45,8 +44,7 @@ function UserInfoComponent(props)
     );
 }
 
-export function FriendPruneModal(props)
-{
+export function FriendPruneModal(props) {
 
     const friends = RelationshipStore.getFriendIDs().map(e => UserStore.getUser(e));
 

@@ -8,8 +8,7 @@ import { Text } from "@webpack/common";
 
 import { cl } from "../index";
 
-export function InfoWithIcon(props)
-{
+export function InfoWithIcon(props) {
     const { svg, children } = props;
     return (
         <div className={cl("infowithicon")}>
