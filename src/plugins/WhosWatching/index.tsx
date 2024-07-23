@@ -91,7 +91,7 @@ export default definePlugin({
             }
         }
     ],
-    WrapperComponent: ErrorBoundary.wrap(({ ...props }) => {
+    WrapperComponent: ErrorBoundary.wrap(props => {
         const stream = useStateFromStores([ApplicationStreamingStore], () => ApplicationStreamingStore.getCurrentUserActiveStream());
         if (!stream) return <div {...props}>{props.children}</div>;
 
