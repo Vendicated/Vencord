@@ -10,7 +10,7 @@ import definePlugin from "@utils/types";
 /**
  * platforms that dont open natively
   * ! riot and leage (can't view profiles)
-  * ! epic (can't view profiles)
+  * * epic (Added)
   * ! psn (can't view profiles after sony removed My PlayStation)
   * * roblox (Added)
   * * xbox (Added)
@@ -23,16 +23,19 @@ import definePlugin from "@utils/types";
 enum contypes {
     Roblox = "Roblox",
     Xbox = "Xbox",
+    Epic = "Epic"
 }
 
 const uris = { // name (what shows up on connection on ui), id (an identifier thing)
     [contypes.Roblox]: "https://www.roblox.com/users/${id}/profile",
     [contypes.Xbox]: "https://www.xbox.com/play/user/${name}",
+    [contypes.Epic]: "https://store.epicgames.com/en-US/u/${id}",
 };
 
 const serviceNames = { // What the name part in the discord code calls it.
     [contypes.Roblox]: "Roblox",
     [contypes.Xbox]: "Xbox",
+    [contypes.Epic]: "Epic Games",
 };
 
 export default definePlugin({
