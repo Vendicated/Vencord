@@ -13,7 +13,6 @@ import { FriendPruneModal } from "./components/FriendPruneModal";
 import { GuildPruneModal } from "./components/GuildPruneModal";
 import style from "./style.css?managed";
 
-
 export const cl = classNameFactory("vc-relationshipPruner-");
 
 export default definePlugin({
@@ -44,12 +43,10 @@ export default definePlugin({
             }
         }
     ],
-    start()
-    {
+    start() {
         enableStyle(style);
     },
-    stop()
-    {
+    stop() {
         disableStyle(style);
     }
 });
