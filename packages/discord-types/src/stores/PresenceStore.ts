@@ -11,7 +11,9 @@ import type { FluxStore } from "./abstract/FluxStore";
 
 export type PresenceStoreAction = ExtractAction<FluxAction, "ACTIVITY_METADATA_UPDATE" | "CONNECTION_OPEN" | "CONNECTION_OPEN_SUPPLEMENTAL" | "GUILD_CREATE" | "GUILD_DELETE" | "GUILD_MEMBER_REMOVE" | "OVERLAY_INITIALIZE" | "PRESENCE_UPDATES" | "PRESENCES_REPLACE" | "SELF_PRESENCE_STORE_UPDATE" | "THREAD_MEMBER_LIST_UPDATE" | "THREAD_MEMBERS_UPDATE">;
 
-export declare class PresenceStore<Action extends FluxAction = PresenceStoreAction> extends FluxStore<Action> {
+export declare class PresenceStore<
+    Action extends FluxAction = PresenceStoreAction
+> extends FluxStore<Action> {
     static displayName: "PresenceStore";
 
     findActivity<T extends Activity>(

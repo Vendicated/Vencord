@@ -11,7 +11,7 @@ export declare class FluxActionLog<Action extends FluxAction = FluxAction> {
     constructor(actionType: Action["type"]);
 
     get name(): Action["type"];
-    toJSON(): Pick<this, "action" | "createdAt" | "traces"> & {
+    toJSON(): Pick<FluxActionLog<Action>, "action" | "createdAt" | "traces"> & {
         created_at: FluxActionLog["createdAt"];
     };
 

@@ -13,7 +13,7 @@ import type { Stringable } from "../../internal";
 
 type HookValue = (result: ReactNode, key: State["key"]) => ReactNode;
 type GenericValue = Stringable | HookValue;
-type GenericArgs = Record<string, GenericValue> | [stringableArgs: string, hookArgs: string] | string;
+type GenericArgs = Record<string, GenericValue> | readonly [stringableArgs: string, hookArgs: string] | string;
 
 export declare class FormattedMessage<
     Args extends GenericArgs = string,
@@ -27,7 +27,7 @@ export declare class FormattedMessage<
      */
     constructor(
         message: string,
-        locales?: string | string[] | undefined /* = MessageFormat.defaultLocale */,
+        locales?: string | readonly string[] | undefined /* = MessageFormat.defaultLocale */,
         hasMarkdown?: Markdown
     );
 
@@ -59,13 +59,13 @@ export declare class FormattedMessage<
 }
 
 type FormatValues<Args extends GenericArgs>
-    = [Args] extends [[never, never]]
+    = [Args] extends [readonly [never, never]]
         ? []
         : [Args] extends [string]
             ? [Args] extends [`${infer _}`]
                 ? [values: Record<Args, Stringable>]
                 : [values?: Record<string, GenericValue>]
-            : [Args] extends [[string, string]]
+            : [Args] extends [readonly [string, string]]
                 ? [values: Record<Args[0], Stringable> & Record<Args[1], HookValue>]
                 : [values: Args];
 
@@ -74,7 +74,7 @@ type ContextValues<Args extends GenericArgs>
         ? [Args] extends [`${infer _}`]
             ? Record<Args, Stringable>
             : Record<string, GenericValue>
-        : [Args] extends [[string, string]]
+        : [Args] extends [readonly [string, string]]
             ? Record<Args[0], Stringable> & Record<Args[1], HookValue>
             : Args;
 

@@ -5,12 +5,11 @@
  */
 
 import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
-import type { ChannelBaseProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
+import type { ChannelProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
 export type GuildTextualChannelRecord = GuildTextChannelRecord | GuildCategoryChannelRecord | GuildAnnouncementChannelRecord | GuildStoreChannelRecord | GuildDirectoryChannelRecord;
 
-// @ts-expect-error: https://github.com/microsoft/TypeScript/issues/59000
-export type GuildTextualChannelProperties<Channel extends GuildTextualChannelRecordBase> = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "permissionOverwrites_">;
+export type GuildTextualChannelProperties<Channel extends GuildTextualChannelRecordBase> = ChannelProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "permissionOverwrites_" & keyof PartialOnUndefined<ChannelRecordOwnProperties<Channel>>>;
 
 type GuildTextualChannelType = ChannelType.GUILD_TEXT | ChannelType.GUILD_CATEGORY | ChannelType.GUILD_ANNOUNCEMENT | ChannelType.GUILD_STORE | ChannelType.GUILD_DIRECTORY;
 

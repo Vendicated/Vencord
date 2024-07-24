@@ -5,9 +5,9 @@
  */
 
 import type { Defined, Nullish } from "../../internal";
-import type { ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
+import type { ChannelProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
-export type UnknownChannelProperties = ChannelRecordOwnProperties<UnknownChannelRecord>;
+export type UnknownChannelProperties = ChannelProperties & ChannelRecordOwnProperties<UnknownChannelRecord>;
 
 export declare class UnknownChannelRecord extends ChannelRecordBase {
     constructor(channelProperties: UnknownChannelProperties);

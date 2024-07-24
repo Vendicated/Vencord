@@ -10,13 +10,13 @@ import type { Nullish, Optional } from "../internal";
 import type { ImmutableRecord } from "./ImmutableRecord";
 import type { IconSource } from "./misc";
 
-export type UserRecordOwnProperties = Pick<UserRecord, "avatar" | "avatarDecorationData" | "banner" | "bot" | "desktop" | "discriminator" | "email" | "flags" | "globalName" | "guildMemberAvatars" | "hasAnyStaffLevel" | "hasBouncedEmail" | "hasFlag" | "id" | "isStaff" | "isStaffPersonal" | "mfaEnabled" | "mobile" | "nsfwAllowed" | "personalConnectionId" | "phone" | "premiumType" | "premiumUsageFlags" | "primaryGuild" | "publicFlags" | "purchasedFlags" | "system" | "username" | "verified">;
+export type UserRecordOwnProperties = Pick<UserRecord, "avatar" | "avatarDecorationData" | "banner" | "bot" | "clan" | "desktop" | "discriminator" | "email" | "flags" | "globalName" | "guildMemberAvatars" | "hasAnyStaffLevel" | "hasBouncedEmail" | "hasFlag" | "id" | "isStaff" | "isStaffPersonal" | "mfaEnabled" | "mobile" | "nsfwAllowed" | "personalConnectionId" | "phone" | "premiumType" | "premiumUsageFlags" | "publicFlags" | "purchasedFlags" | "system" | "username" | "verified">;
 
-export type UserProperties = Optional<Omit<UserRecordOwnProperties, "avatarDecorationData" | "premiumType" | "hasAnyStaffLevel" | "hasFlag" | "isStaff" | "isStaffPersonal" | "nsfwAllowed" | "primaryGuild">, Nullish, "id", true>
-    & SnakeCasedProperties<Optional<Pick<UserRecordOwnProperties, "globalName" | "hasBouncedEmail" | "mfaEnabled" | "personalConnectionId" | "publicFlags" | "purchasedFlags" | "premiumUsageFlags">, Nullish>>
+export type UserProperties = Optional<Omit<UserRecordOwnProperties, "avatarDecorationData" | "clan" | "hasAnyStaffLevel" | "hasFlag" | "isStaff" | "isStaffPersonal" | "nsfwAllowed" | "premiumType" | "primaryGuild">, Nullish, "id", true>
+    & SnakeCasedProperties<Optional<Pick<UserRecordOwnProperties, "globalName" | "hasBouncedEmail" | "mfaEnabled" | "personalConnectionId" | "premiumUsageFlags" | "publicFlags" | "purchasedFlags">, Nullish>>
     & Partial<Record<"avatar_decoration_data" | "avatarDecorationData", unknown>>
     & Partial<Record<"premium_type" | "premiumType", UserRecord["premiumType"] | 0>>
-    & Partial<Record<"clan" | "primary_guild", SnakeCasedProperties<UserClanData> | UserClanData | Nullish>>;
+    & { clan?: SnakeCasedProperties<UserClanData> | UserClanData | Nullish; };
 
 export declare class UserRecord<
     OwnProperties extends UserRecordOwnProperties = UserRecordOwnProperties
@@ -30,7 +30,6 @@ export declare class UserRecord<
         sku_id?: string;
         skuId?: string;
     } | null);
-    get clan(): this["primaryGuild"];
     get createdAt(): Date;
     getAvatarSource(
         guildId?: string | Nullish,
@@ -65,6 +64,7 @@ export declare class UserRecord<
     avatarDecorationData: AvatarDecorationData | null;
     banner: string | Nullish;
     bot: boolean;
+    clan: UserClanData | null;
     desktop: boolean;
     discriminator: string;
     email: string | null;
@@ -84,7 +84,6 @@ export declare class UserRecord<
     phone: string | null;
     premiumType: UserPremiumType | Nullish;
     premiumUsageFlags: number;
-    primaryGuild: UserClanData | null;
     publicFlags: UserFlags;
     purchasedFlags: number;
     system: boolean;

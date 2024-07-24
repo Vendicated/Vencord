@@ -9,7 +9,7 @@ import type { ExcludeAction, ExtractAction, FluxAction } from "../../flux/fluxAc
 import type { GenericConstructor } from "../../internal";
 import type { FluxStore } from "./FluxStore";
 
-export interface FluxSnapshot<SnapshotData = any> {
+export interface FluxSnapshot<SnapshotData = unknown> {
     data: SnapshotData;
     version: number;
 }

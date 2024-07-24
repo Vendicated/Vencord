@@ -9,7 +9,7 @@ import type { MessageRecord } from "./MessageRecord";
 export declare class MessageCache {
     constructor(isCacheBefore: boolean);
 
-    cache(messages: MessageRecord[], wasAtEdge?: boolean | undefined /* = false */): void;
+    cache(messages: readonly MessageRecord[], wasAtEdge?: boolean | undefined /* = false */): void;
     clear(): void;
     clone(): MessageCache;
     extract(count: number): MessageRecord[];
@@ -22,7 +22,7 @@ export declare class MessageCache {
     has(messageId: string): boolean;
     get length(): number;
     remove(messageId: string): void;
-    removeMany(messageIds: string[]): void;
+    removeMany(messageIds: readonly string[]): void;
     replace(messageId: string, message: MessageRecord): void;
     update(messageId: string, updater: (message: MessageRecord) => MessageRecord): void;
     get wasAtEdge(): boolean;

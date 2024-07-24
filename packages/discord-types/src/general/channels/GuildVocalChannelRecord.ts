@@ -5,12 +5,11 @@
  */
 
 import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
-import type { ChannelBaseProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
+import type { ChannelProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
 export type GuildVocalChannelRecord = GuildVoiceChannelRecord | GuildStageVoiceChannelRecord;
 
-// @ts-expect-error: https://github.com/microsoft/TypeScript/issues/59000
-export type GuildVocalChannelProperties<Channel extends GuildVocalChannelRecordBase> = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "permissionOverwrites_">;
+export type GuildVocalChannelProperties<Channel extends GuildVocalChannelRecordBase> = ChannelProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "permissionOverwrites_" & keyof PartialOnUndefined<ChannelRecordOwnProperties<Channel>>>;
 
 type GuildVocalChannelType = ChannelType.GUILD_VOICE | ChannelType.GUILD_STAGE_VOICE;
 

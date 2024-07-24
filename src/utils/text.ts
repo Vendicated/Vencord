@@ -55,7 +55,8 @@ function getUnitStr(unit: Units, isOne: boolean, short: boolean) {
 export function formatDuration(time: number, unit: Units, short: boolean = false) {
     const dur = moment.duration(time, unit);
 
-    let unitsAmounts = units.map(unit => ({ amount: dur[unit](), unit }));
+    let unitsAmounts: { amount: number; unit: Units; }[]
+        = units.map(unit => ({ amount: dur[unit](), unit }));
 
     let amountsToBeRemoved = 0;
 
@@ -79,7 +80,7 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
         else daysAmount!.amount = daysMod;
     }
 
-    let res: string = "";
+    let res = "";
     while (unitsAmounts.length) {
         const { amount, unit } = unitsAmounts.shift()!;
 

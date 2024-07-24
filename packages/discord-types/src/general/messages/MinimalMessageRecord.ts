@@ -352,6 +352,7 @@ export interface MessageEmbedField {
 
 export enum MessageEmbedFlags {
     CONTAINS_EXPLICIT_MEDIA = 1 << 4,
+    IS_CONTENT_INVENTORY_ENTRY = 1 << 5,
 }
 
 export interface MessageEmbedFooter {

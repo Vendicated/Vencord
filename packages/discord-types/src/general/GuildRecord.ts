@@ -12,7 +12,10 @@ import type { UserRecord } from "./UserRecord";
 
 export type GuildRecordOwnProperties = Pick<GuildRecord, "afkChannelId" | "afkTimeout" | "application_id" | "banner" | "clan" | "defaultMessageNotifications" | "description" | "discoverySplash" | "explicitContentFilter" | "features" | "homeHeader" | "hubType" | "icon" | "id" | "joinedAt" | "latestOnboardingQuestionId" | "maxMembers" | "maxStageVideoChannelUsers" | "maxVideoChannelUsers" | "mfaLevel" | "name" | "nsfwLevel" | "ownerId" | "preferredLocale" | "premiumProgressBarEnabled" | "premiumSubscriberCount" | "premiumTier" | "publicUpdatesChannelId" | "rulesChannelId" | "safetyAlertsChannelId" | "splash" | "systemChannelFlags" | "systemChannelId" | "vanityURLCode" | "verificationLevel">;
 
-export type GuildProperties = Optional<GuildRecordOwnProperties, Nullish, "afkTimeout" | "hubType" | "id" | "systemChannelFlags", true>;
+export type GuildProperties = Optional<Omit<GuildRecordOwnProperties, "features" | "joinedAt">, Nullish, "afkTimeout" | "hubType" | "id" | "systemChannelFlags", true> & {
+    features?: Iterable<GuildFeature> | ArrayLike<GuildFeature> | Nullish;
+    joinedAt: Date | string | number;
+};
 
 export declare class GuildRecord<
     OwnProperties extends GuildRecordOwnProperties = GuildRecordOwnProperties

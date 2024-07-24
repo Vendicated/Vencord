@@ -193,14 +193,15 @@ export default tseslint.config(
     {
         files: ["src/**"],
         rules: {
+            "@typescript-eslint/ban-ts-comment": ["error", { "ts-expect-error": true }],
             "@typescript-eslint/member-ordering": ["error", {
                 default: {
                     memberTypes: [
                         "call-signature",
-                        "signature",
                         "constructor",
                         ["static-accessor", "static-field", "static-get", "static-method", "static-set"],
                         ["accessor", "get", "method", "set"],
+                        "signature",
                         "field"
                     ],
                     order: "alphabetically-case-insensitive"
@@ -236,7 +237,7 @@ export default tseslint.config(
                 "[type=/^(TSAbstract)?AccessorProperty$/]",
                 // Disallow default exports
                 "ExportDefaultDeclaration",
-                // Disallow constructor definitions without parameters
+                // Disallow redundant constructor definitions
                 "ClassDeclaration[superClass=null] MethodDefinition[kind=constructor][value.params.length=0]",
                 // Disallow enums that are const or ambient since package consumers cannot use them
                 "TSEnumDeclaration:matches([const=true], [declare=true])",

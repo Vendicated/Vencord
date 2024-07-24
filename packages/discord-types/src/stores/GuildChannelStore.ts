@@ -13,7 +13,9 @@ import type { FluxStore } from "./abstract/FluxStore";
 
 export type GuildChannelStoreAction = ExtractAction<FluxAction, "BACKGROUND_SYNC" | "CACHE_LOADED_LAZY" | "CHANNEL_CREATE" | "CHANNEL_DELETE" | "CHANNEL_SELECT" | "CHANNEL_UPDATES" | "CONNECTION_OPEN" | "GUILD_CREATE" | "GUILD_DELETE" | "GUILD_MEMBER_UPDATE" | "GUILD_ROLE_CREATE" | "GUILD_ROLE_DELETE" | "GUILD_ROLE_UPDATE" | "GUILD_UPDATE" | "IMPERSONATE_STOP" | "IMPERSONATE_UPDATE" | "OVERLAY_INITIALIZE" | "VOICE_CHANNEL_SELECT" | "VOICE_CHANNEL_STATUS_UPDATE" | "VOICE_STATE_UPDATES">;
 
-export declare class GuildChannelStore<Action extends FluxAction = GuildChannelStoreAction> extends FluxStore<Action> {
+export declare class GuildChannelStore<
+    Action extends FluxAction = GuildChannelStoreAction
+> extends FluxStore<Action> {
     static displayName: "GuildChannelStore";
 
     getAllGuilds(): { [guildId: string]: GuildChannels | undefined; };

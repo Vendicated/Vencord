@@ -71,10 +71,13 @@ export default {
         "./general/channels/ChannelRecord.ts": {
             ChannelRecordBase: {
                 type: "class",
+            },
+            ChannelRecordProperties: {
+                type: "class",
                 find() {
                     const { findByCode } = this.Webpack;
                     const constructor = findByCode("}isGroupDM(") ?? findByCode("{isGroupDM(");
-                    return constructor && [Object.getPrototypeOf(constructor), constructor];
+                    return constructor && Object.getPrototypeOf(constructor);
                 },
                 includeOptional: true,
                 ignoredRemovals: {
@@ -515,6 +518,10 @@ export default {
         "./general/ImmutableRecord.ts": {
             ImmutableRecord: {
                 type: "class",
+                ignoredRemovals: {
+                    // Exists on type to enforce that subclasses have a valid constructor
+                    constructorDefinition: true,
+                },
             },
         },
         "./general/Permissions.ts": {

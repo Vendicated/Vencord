@@ -38,7 +38,6 @@ const asarPath = join(dirname(injectorPath), "..", asarName);
 const discordPkg = require(join(asarPath, "package.json"));
 require.main!.filename = join(asarPath, discordPkg.main);
 
-// @ts-ignore Untyped method? Dies from cringe
 app.setAppPath(asarPath);
 
 if (!IS_VANILLA) {
@@ -68,8 +67,7 @@ if (!IS_VANILLA) {
     }
 
     class BrowserWindow extends electron.BrowserWindow {
-        constructor(options: BrowserWindowConstructorOptions) {
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        constructor(options?: BrowserWindowConstructorOptions) {
             if (options?.webPreferences?.preload && options.title) {
                 const original = options.webPreferences.preload;
                 options.webPreferences.preload = join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js");
@@ -85,13 +83,13 @@ if (!IS_VANILLA) {
 
                 if (settings.transparent) {
                     options.transparent = true;
-                    options.backgroundColor = "#00000000";
+                    options.backgroundColor = "#0000";
                 }
 
                 const needsVibrancy = process.platform === "darwin" && settings.macosVibrancyStyle;
 
                 if (needsVibrancy) {
-                    options.backgroundColor = "#00000000";
+                    options.backgroundColor = "#0000";
                     if (settings.macosVibrancyStyle) {
                         options.vibrancy = settings.macosVibrancyStyle;
                     }

@@ -15,21 +15,12 @@ export type Defined<T> = Exclude<T, undefined>;
 /** @internal */
 export type GenericConstructor = new (...args: any[]) => unknown;
 
-type IsOptional<T, Key extends keyof T, True, False>
-    = T extends Record<Key, T[Key]> ? False : True;
-
-/** @internal */
-export type MergeUnion<T, U>
-    = Pick<T, Exclude<keyof T, keyof U>> & Pick<U, Exclude<keyof U, keyof T>>
-    & { [Key in keyof T & keyof U as IsOptional<T, Key, never, Key> & IsOptional<U, Key, never, Key>]: T[Key] | U[Key]; }
-    & { [Key in keyof T & keyof U as IsOptional<T, Key, Key, never> | IsOptional<U, Key, Key, never>]?: T[Key] | U[Key]; };
-
 /** @internal */
 export type Nullish = null | undefined;
 
 /** @internal */
 export type OmitOptional<T>
-    = { [Key in keyof T as IsOptional<T, Key, never, Key>]: T[Key]; };
+    = { [Key in keyof T as T extends Record<Key, T[Key]> ? Key : never]: T[Key]; };
 
 /** @internal */
 export type Optional<T, Value = undefined, Keys extends keyof T = keyof T, ExcludeKeys = false>
@@ -38,7 +29,7 @@ export type Optional<T, Value = undefined, Keys extends keyof T = keyof T, Exclu
         : Omit<T, Keys> & { [Key in Keys]?: T[Key] | Value; };
 
 /** @internal */
-export type OptionalTuple<T extends unknown[], Value = undefined>
+export type OptionalTuple<T extends readonly unknown[], Value = undefined>
     = { [Key in keyof T]?: T[Key] | Value; };
 
 /** @internal */

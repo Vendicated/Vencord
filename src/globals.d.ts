@@ -17,6 +17,7 @@
 */
 
 import type { LoDashStatic } from "lodash";
+import type { OmitIndexSignature } from "type-fest";
 
 declare global {
     /**
@@ -72,6 +73,30 @@ declare global {
         _: LoDashStatic;
         [k: string]: any;
     }
+
+    /* eslint-disable @typescript-eslint/method-signature-style */
+    // https://github.com/microsoft/TypeScript/issues/29841
+    interface Array<T> {
+        map<U>(callbackfn: (value: T, index: TupleKeys<this>, array: this) => U, thisArg?: any): MappedTuple<this, U>;
+    }
+    interface ReadonlyArray<T> {
+        map<U>(callbackfn: (value: T, index: TupleKeys<this>, array: this) => U, thisArg?: any): MappedTuple<this, U>;
+    }
+    /* eslint-enable @typescript-eslint/method-signature-style */
 }
+
+// Workaround for https://github.com/microsoft/TypeScript/issues/59260
+type MappedTuple<T extends readonly unknown[], U>
+    // Detect non-homomorphic instantiation
+    = { [Key in keyof T]: undefined; }["length"] extends undefined
+        // Extra properties with non-numeric keys need to be removed, since they will not be preserved by map.
+        ? { -readonly [Key in Extract<keyof OmitIndexSignature<T>, number | `${number}`>]: U; }
+            & U[] & { length: T["length"]; }
+        : { -readonly [Key in keyof T]: U; };
+
+type TupleKeys<T extends readonly unknown[]>
+    = number extends T["length"]
+        ? number
+        : Exclude<Partial<T>["length"], T["length"]>;
 
 export { };

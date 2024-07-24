@@ -8,9 +8,11 @@ import type { StringProperties } from "../internal";
 
 // Original name: Record
 // Renamed to avoid name conflicts with TypeScripts's Record utility type.
-export declare class ImmutableRecord<
+export declare abstract class ImmutableRecord<
     OwnProperties extends Record<PropertyKey, unknown> = Record<PropertyKey, unknown>
 > {
+    constructor(properties: OwnProperties);
+
     merge(collection: Partial<StringProperties<OwnProperties>>): this;
     set<Key extends keyof OwnProperties>(key: Key, value: OwnProperties[Key]): this;
     toJS(): OwnProperties;

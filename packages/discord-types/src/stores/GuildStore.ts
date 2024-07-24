@@ -12,7 +12,9 @@ import type { FluxStore } from "./abstract/FluxStore";
 
 export type GuildStoreAction = ExtractAction<FluxAction, "BACKGROUND_SYNC" | "CACHE_LOADED" | "CACHE_LOADED_LAZY" | "CONNECTION_OPEN" | "GUILD_CREATE" | "GUILD_DELETE" | "GUILD_GEO_RESTRICTED" | "GUILD_MEMBER_ADD" | "GUILD_ROLE_CREATE" | "GUILD_ROLE_DELETE" | "GUILD_ROLE_UPDATE" | "GUILD_SETTINGS_SUBMIT_SUCCESS" | "GUILD_UPDATE" | "OVERLAY_INITIALIZE">;
 
-export declare class GuildStore<Action extends FluxAction = GuildStoreAction> extends FluxStore<Action> {
+export declare class GuildStore<
+    Action extends FluxAction = GuildStoreAction
+> extends FluxStore<Action> {
     static displayName: "GuildStore";
 
     getAllGuildsRoles(): { [guildId: string]: { [roleId: string]: Role; }; };

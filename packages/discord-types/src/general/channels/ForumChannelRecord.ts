@@ -5,12 +5,11 @@
  */
 
 import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
-import type { ChannelBaseProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
+import type { ChannelProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
 export type ForumChannelRecord = GuildForumChannelRecord | GuildMediaChannelRecord;
 
-// @ts-expect-error: https://github.com/microsoft/TypeScript/issues/59000
-export type ForumChannelProperties<Channel extends ForumChannelRecordBase> = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "availableTags" | "permissionOverwrites_">;
+export type ForumChannelProperties<Channel extends ForumChannelRecordBase> = ChannelProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, ("availableTags" | "permissionOverwrites_") & keyof PartialOnUndefined<ChannelRecordOwnProperties<Channel>>>;
 
 type ForumChannelType = ChannelType.GUILD_FORUM | ChannelType.GUILD_MEDIA;
 

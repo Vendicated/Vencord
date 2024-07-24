@@ -5,9 +5,9 @@
  */
 
 import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
-import type { ChannelBaseProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
+import type { ChannelProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
-export type ThreadChannelProperties = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<ThreadChannelRecord>>>, Nullish, "appliedTags">;
+export type ThreadChannelProperties = ChannelProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<ThreadChannelRecord>>>, Nullish, "appliedTags">;
 
 type ThreadChannelType = ChannelType.ANNOUNCEMENT_THREAD | ChannelType.PUBLIC_THREAD | ChannelType.PRIVATE_THREAD;
 

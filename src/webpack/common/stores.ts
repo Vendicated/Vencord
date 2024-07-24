@@ -20,7 +20,7 @@ import type { FluxEmitter } from "@vencord/discord-types";
 import type * as Stores from "@vencord/discord-types/src/stores";
 
 // eslint-disable-next-line path-alias/no-relative
-import { findByCode, findByCodeLazy, findByPropsLazy, proxyLazyWebpack } from "../webpack";
+import { findByCodeLazy, findByPropsLazy } from "../webpack";
 import { waitForStore } from "./internal";
 
 export const Flux: {
@@ -42,18 +42,18 @@ export const Flux: {
 export const useStateFromStores: Stores.UseStateFromStoresHook = findByCodeLazy("useStateFromStores");
 
 // shallowEqual.tsx
-const areArraysShallowEqual = (a: unknown[], b?: unknown[] | null | undefined) =>
+const areArraysShallowEqual = (a: readonly unknown[], b?: readonly unknown[] | null | undefined) =>
     b != null && a.length === b.length && a.every((x, i) => x === b[i]);
 
 /** @see {@link useStateFromStores} */
 export const useStateFromStoresArray: Stores.UseStateFromStoresArrayHook
     = (a, b, c) => useStateFromStores(a, b, c, areArraysShallowEqual);
 
+const shallowEqual = findByCodeLazy('"shallowEqual: unequal key lengths "');
+
 /** @see {@link useStateFromStores} */
-export const useStateFromStoresObject = proxyLazyWebpack<Stores.UseStateFromStoresObjectHook>(() => {
-    const shallowEqual = findByCode('"shallowEqual: unequal key lengths "');
-    return (a, b, c) => useStateFromStores(a, b, c, shallowEqual);
-});
+export const useStateFromStoresObject: Stores.UseStateFromStoresObjectHook
+    = (a, b, c) => useStateFromStores(a, b, c, shallowEqual);
 
 export let ChannelStore: Stores.ChannelStore;
 waitForStore("ChannelStore", m => { ChannelStore = m; });

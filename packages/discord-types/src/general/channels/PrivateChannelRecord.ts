@@ -5,12 +5,12 @@
  */
 
 import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
-import type { ChannelBaseProperties, ChannelRecipient, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
+import type { ChannelProperties, ChannelRecipient, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
 export type PrivateChannelRecord = DMChannelRecord | GroupDMChannelRecord;
 
-// @ts-expect-error: https://github.com/microsoft/TypeScript/issues/59000
-export type PrivateChannelProperties<Channel extends PrivateChannelRecordBase> = ChannelBaseProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "rawRecipients" | "recipients" | "safetyWarnings">;
+export type PrivateChannelProperties<Channel extends PrivateChannelRecordBase> = ChannelProperties & Omit<Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "safetyWarnings" & keyof PartialOnUndefined<ChannelRecordOwnProperties<Channel>>>, "rawRecipients" | "recipients">
+    & { rawRecipients?: Readonly<Channel["rawRecipients"]> | Nullish; recipients?: Readonly<Channel["recipients"]> | Nullish; };
 
 type PrivateChannelType = ChannelType.DM | ChannelType.GROUP_DM;
 

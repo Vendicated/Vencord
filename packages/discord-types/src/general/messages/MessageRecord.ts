@@ -31,17 +31,22 @@ export declare class MessageRecord<
     addReaction(
         emoji: MessageReactionEmoji,
         me?: boolean | undefined /* = false */,
-        burstColors?: string[] | undefined /* = [] */,
+        deafultBurstColors?: string[] | undefined /* = [] */,
         type?: ReactionType | undefined /* = ReactionType.NORMAL */
     ): this;
-    addReactionBatch(reactions: { emoji: MessageReactionEmoji; users: string[]; }, meId: string): this;
+    addReactionBatch(
+        reactions: readonly {
+            emoji: MessageReactionEmoji;
+            users: readonly string[];
+        }[],
+        meId: string
+    ): this;
     canDeleteOwnMessage(userId: string): boolean;
     getChannelId(): string;
     getReaction(emoji: MessageReactionEmoji): MessageReaction | undefined;
     hasFlag(flag: MessageFlags): boolean;
     isCommandType(): boolean;
     isEdited(): boolean;
-    isEmptyInteractionMessage(): boolean;
     isFirstMessageInForumPost(channel: ChannelRecord): boolean;
     isInteractionPlaceholder(): boolean;
     isPoll(): boolean;

@@ -26,7 +26,7 @@ export declare class EmojiDisambiguations {
     getById(emojiId: string): GuildEmoji | undefined;
     getByName<Type extends EmojiType>(emojiName: string):
         (Type extends EmojiType.GUILD ? GuildEmoji : UnicodeEmoji) | undefined;
-    getCustomEmoji(): Defined<this["customEmojis"]>;
+    getCustomEmoji(): Defined<EmojiDisambiguations["customEmojis"]>;
     getCustomEmoticonRegex(): RegExp | null;
     getDisambiguatedEmoji(): Emoji[];
     getEmojiInPriorityOrderWithoutFetchingLatest(): Emoji[];
@@ -34,7 +34,7 @@ export declare class EmojiDisambiguations {
     getEscapedCustomEmoticonNames(): string;
     getFrequentlyUsedEmojisWithoutFetchingLatest(): Emoji[];
     getFrequentlyUsedReactionEmojisWithoutFetchingLatest(): Emoji[];
-    getGroupedCustomEmoji(): Defined<this["groupedCustomEmojis"]>;
+    getGroupedCustomEmoji(): Defined<EmojiDisambiguations["groupedCustomEmojis"]>;
     getNewlyAddedEmojiForGuild(guildId: string): GuildEmoji[];
     getTopEmojiWithoutFetchingLatest(guildId: string): GuildEmoji[];
     nameMatchesChain(predicate: (value: string, index: number, array: string[]) => unknown): CollectionChain<string>;

@@ -11,7 +11,7 @@ type GenericMessages<Key extends PropertyKey = PropertyKey> = Record<Key, string
 export declare class Provider<Messages extends GenericMessages<never> = GenericMessages> {
     constructor(getParsedMessages: ProviderParsedMessagesGetter<Messages>);
 
-    getMessages(): this["_parsedMessages"];
+    getMessages(): Messages & Record<PropertyKey, string>;
     refresh(context: ProviderContext<keyof Messages>): void;
 
     _context: ProviderContext<keyof Messages>;

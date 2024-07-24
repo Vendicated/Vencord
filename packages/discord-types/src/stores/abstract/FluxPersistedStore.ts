@@ -31,12 +31,15 @@ export declare abstract class FluxPersistedStore<
     /**
      * If {@link clearAll} has been called for the specified persist key, state in the returned object will be undefined.
      */
-    static migrateAndReadStoreState<NewestState = unknown, OldStates extends unknown[] = unknown[]>(
+    static migrateAndReadStoreState<NewestState = unknown, OldStates extends unknown[] = any[]>(
         persistKey: string,
         migrations?: FluxPersistedStoreMigrations<[...OldStates, NewestState]> | Nullish
     ): { requiresPersist: boolean; state: NewestState; } | { requiresPersist: false; state: undefined; };
     static migrations: ((oldState: any) => unknown)[] | undefined;
-    /** Not present on FluxPersistedStore's constructor. */
+    /**
+     * Not present on FluxPersistedStore's constructor.
+     * All subclasses are required to define their own.
+     */
     static persistKey: string;
     static shouldClear(options: FluxPersistedStoreClearOptions, persistKey: string): boolean;
     static throttleDelay: number;
@@ -60,21 +63,21 @@ export declare abstract class FluxPersistedStore<
 }
 
 export interface FluxPersistedStoreClearOptions {
-    /** Array of persist keys. */
-    omit?: string[] | Nullish;
+    /** Array of persist keys */
+    omit?: readonly string[] | Nullish;
     type: "all" | "user-data-only";
 }
 
-type MigrationsFromTuple<States extends unknown[]>
-    = States extends [infer OldState, infer NewState, ...infer NewerStates]
+type MigrationsFromTuple<States extends readonly unknown[]>
+    = States extends readonly [infer OldState, infer NewState, ...infer NewerStates]
         ? [(oldState: OldState) => NewState, ...MigrationsFromTuple<[NewState, ...NewerStates]>]
         : [];
 
-export type FluxPersistedStoreMigrations<States extends unknown[] = unknown[]>
-    = States extends [infer OldState, ...infer NewerStates]
+export type FluxPersistedStoreMigrations<States extends readonly unknown[] = any[]>
+    = States extends readonly [infer OldState, ...infer NewerStates]
         ? NewerStates extends []
             ? [(oldState: OldState) => unknown]
             : MigrationsFromTuple<States>
-        : States extends (infer T)[]
+        : States extends readonly (infer T)[]
             ? ((oldState: T) => T)[]
             : never;

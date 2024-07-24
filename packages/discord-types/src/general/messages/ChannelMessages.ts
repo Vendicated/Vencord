@@ -24,11 +24,12 @@ export declare class ChannelMessages {
 
     _clearMessages(): void;
     _merge(
-        messages: MessageRecord[],
+        messages: readonly MessageRecord[],
         isBefore?: boolean | undefined /* = false */,
         clearCache?: boolean | undefined /* = false */
     ): void;
-    addCachedMessages(messages: MessageRecord[], cached: boolean): ChannelMessages;
+    /** @throws {Error} `messages` must be sorted in descending order by ID. */
+    addCachedMessages(messages: readonly MessageRecord[], cached: boolean): ChannelMessages;
     filter<T extends MessageRecord>(
         predicate: (value: MessageRecord, index: number, array: MessageRecord[]) => value is T,
         thisArg?: unknown
@@ -57,7 +58,7 @@ export declare class ChannelMessages {
     ): void;
     forEach<BreakOnReturnFalse extends boolean | undefined = undefined>(
         callback: (value: MessageRecord, index: number, array: MessageRecord[]) =>
-        [BreakOnReturnFalse] extends [false | undefined]
+        true extends BreakOnReturnFalse
             // https://github.com/typescript-eslint/typescript-eslint/issues/8113
             // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
             ? void
@@ -108,14 +109,14 @@ export declare class ChannelMessages {
         thisArg?: unknown
     ): T[];
     merge(
-        messages: MessageRecord[],
+        messages: readonly MessageRecord[],
         isBefore?: boolean | undefined /* = false */,
         clearCache?: boolean | undefined /* = false */
     ): ChannelMessages;
     mergeDelta(
-        messages?: MessageRecord[] | undefined /* = [] */,
-        messageProperties?: MessageProperties[] | undefined /* = [] */,
-        excludedMessageIds?: string[] /* = [] */
+        messages?: readonly MessageRecord[] | undefined /* = [] */,
+        messageProperties?: readonly MessageProperties[] | undefined /* = [] */,
+        excludedMessageIds?: readonly string[] /* = [] */
     ): ChannelMessages;
     mutate(
         mutaterOrObject?: ((channelMessages: ChannelMessages) => void)
@@ -146,7 +147,7 @@ export declare class ChannelMessages {
         initialValue: T
     ): T;
     remove(messageId: string): ChannelMessages;
-    removeMany(messageIds: string[]): ChannelMessages | this;
+    removeMany(messageIds: readonly string[]): ChannelMessages | this;
     replace(messageId: string, message: MessageRecord): ChannelMessages | this;
     reset(messages: MessageRecord[]): ChannelMessages;
     some(

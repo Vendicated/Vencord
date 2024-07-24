@@ -30,7 +30,7 @@ export declare class I18N<
         locale: string,
         defaultMessages?: Record<keyof Messages, string> | undefined /* = this._findMessages() */
     ): void;
-    _fetchMessages(locale: string): ReturnType<this["_getMessages"]>;
+    _fetchMessages(locale: string): ReturnType<I18NMessagesGetter<keyof Messages, Async>>;
     /**
      * @throws {Error} The messages for the given locale must be loaded.
      */
@@ -38,8 +38,8 @@ export declare class I18N<
     _loadMessagesForLocale(locale: string): void;
     getAvailableLocales(): I18NLocale[];
     getDefaultLocale(): string;
-    getLanguages(): this["_languages"];
-    getLocale(): this["_chosenLocale"];
+    getLanguages(): I18NLanguage[];
+    getLocale(): string;
     getLocaleInfo(): I18NLanguage;
     setLocale(locale: string): void;
     setUpdateRules(updateRules: (rules: ReactRules) => ReactRules): void;

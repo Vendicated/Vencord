@@ -25,11 +25,7 @@ type ChannelRecordOwnPropertyKeys = "application_id" | "appliedTags" | "availabl
 
 export type ChannelRecordOwnProperties<Channel extends ChannelRecordBase> = Pick<Channel, ChannelRecordOwnPropertyKeys>;
 
-export type ChannelBaseProperties = Optional<Pick<ChannelRecordOwnProperties<ChannelRecordBase>, "guild_id" | "id" | "name" | "type">, Nullish, "id", true>;
-
-export declare abstract class ChannelRecordBase {
-    constructor(channelProperties: ChannelBaseProperties);
-
+export declare abstract class ChannelRecordBase extends ChannelRecordProperties {
     get accessPermissions(): /* Permissions */ bigint;
     get bitrate(): number;
     computeLurkerPermissionsAllowList(): /* Permissions */ bigint | undefined;
@@ -80,6 +76,12 @@ export declare abstract class ChannelRecordBase {
     toJS(): ChannelRecordOwnProperties<this>;
     get topic(): string;
     get userLimit(): number;
+}
+
+export type ChannelProperties = Optional<Pick<ChannelRecordOwnProperties<ChannelRecordBase>, "guild_id" | "id" | "name" | "type">, Nullish, "id", true>;
+
+export declare abstract class ChannelRecordProperties {
+    constructor(channelProperties: ChannelProperties);
 
     application_id?: string | undefined;
     appliedTags?: string[] | undefined;

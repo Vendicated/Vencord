@@ -8,20 +8,20 @@ import type { Nullish } from "../internal";
 import type { FluxStore } from "./abstract/FluxStore";
 
 export type UseStateFromStoresHook = <State>(
-    stores: FluxStore[],
+    stores: readonly FluxStore[],
     getStateFromStores: () => State,
-    dependencies?: unknown[] | Nullish,
+    dependencies?: readonly unknown[] | Nullish,
     areStatesEqual?: ((prevState: State, currState: State) => boolean) | undefined
 ) => State;
 
-export type UseStateFromStoresArrayHook = <State extends unknown[]>(
-    stores: FluxStore[],
+export type UseStateFromStoresArrayHook = <State extends readonly unknown[]>(
+    stores: readonly FluxStore[],
     getStateFromStores: () => State,
-    dependencies?: unknown[] | Nullish
+    dependencies?: readonly unknown[] | Nullish
 ) => State;
 
-export type UseStateFromStoresObjectHook = <State extends object>(
-    stores: FluxStore[],
+export type UseStateFromStoresObjectHook = <State extends {}>(
+    stores: readonly FluxStore[],
     getStateFromStores: () => State,
-    dependencies?: unknown[] | Nullish
+    dependencies?: readonly unknown[] | Nullish
 ) => State;

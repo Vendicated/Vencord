@@ -29,15 +29,16 @@ async function runReporter() {
         }
 
         for (const [searchType, args] of Webpack.lazyWebpackSearchHistory) {
-            let method = searchType;
+            let method: Exclude<typeof searchType, "findComponent">;
 
             if (searchType === "findComponent") method = "find";
-            if (searchType === "findExportedComponent") method = "findByProps";
-            if (searchType === "waitFor" || searchType === "waitForComponent") {
+            else if (searchType === "findExportedComponent") method = "findByProps";
+            else if (searchType === "waitFor" || searchType === "waitForComponent") {
                 if (typeof args[0] === "string") method = "findByProps";
                 else method = "find";
             }
-            if (searchType === "waitForStore") method = "findStore";
+            else if (searchType === "waitForStore") method = "findStore";
+            else method = searchType;
 
             let result: any;
             try {
@@ -55,7 +56,7 @@ async function runReporter() {
                     result = Webpack.mapMangledModule(code, mapper);
                     if (Object.keys(result).length !== Object.keys(mapper).length) throw new Error("Webpack Find Fail");
                 } else {
-                    // @ts-ignore
+                    // @ts-expect-error
                     result = Webpack[method](...args);
                 }
 

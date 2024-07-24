@@ -41,7 +41,7 @@ export let _resolveReady: () => void;
  * Fired once a gateway connection to Discord has been established.
  * This indicates that the core webpack modules have been initialised
  */
-export const onceReady = new Promise<void>(r => _resolveReady = r);
+export const onceReady = new Promise<void>(r => { _resolveReady = r; });
 
 export let wreq: WebpackInstance;
 export let cache: WebpackInstance["c"];
@@ -66,8 +66,7 @@ export const filters = {
             : m => props.every(p => m[p] !== undefined),
 
     byCode: (...code: CodeFilter): FilterFn => {
-        // https://github.com/microsoft/TypeScript/issues/29841
-        code = code.map(canonicalizeMatch) as CodeFilter;
+        code = code.map(canonicalizeMatch);
         return m => {
             if (typeof m !== "function") return false;
             return stringMatches(Function.prototype.toString.call(m), code);
@@ -107,7 +106,7 @@ let devToolsOpen = false;
 if (IS_DEV && IS_DISCORD_DESKTOP) {
     // At this point in time, DiscordNative has not been exposed yet, so setImmediate is needed
     setTimeout(() => {
-        DiscordNative/* just to make sure */?.window.setDevtoolsCallbacks(() => devToolsOpen = true, () => devToolsOpen = false);
+        DiscordNative/* just to make sure */?.window.setDevtoolsCallbacks(() => { devToolsOpen = true; }, () => { devToolsOpen = false; });
     }, 0);
 }
 
@@ -296,7 +295,7 @@ export function findModuleFactory(...code: CodeFilter) {
     return wreq.m[id];
 }
 
-export const lazyWebpackSearchHistory: ["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks" | "mapMangledModule", any[]][] = [];
+export const lazyWebpackSearchHistory: ["proxyLazyWebpack" | "LazyComponentWebpack" | "find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "mapMangledModule" | "extractAndLoadChunks" | "waitFor" | "waitForStore" | "waitForComponent", any[]][] = [];
 
 /**
  * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
@@ -464,8 +463,7 @@ export function findExportedComponentLazy<T extends object = any>(...props: Prop
  */
 export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>): Record<S, any> {
     if (!Array.isArray(code)) code = [code];
-    // https://github.com/microsoft/TypeScript/issues/29841
-    code = code.map(canonicalizeMatch) as CodeFilter;
+    code = code.map(canonicalizeMatch);
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const exports = {} as Record<S, any>;

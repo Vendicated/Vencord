@@ -28,7 +28,13 @@ export function autoFindEnum(this: typeof Vencord, source: CR.EnumSource) {
 
                 const changes = getEnumChanges(exp, source);
                 const { changedCount } = changes;
-                if (changedCount < lowestChangedCount) {
+                if (
+                    changedCount < lowestChangedCount
+                    // If changedCount is the same as lowestChangedCount, keep the match with the least removals.
+                    || changedCount === lowestChangedCount
+                    && bestMatch
+                    && Object.keys(changes.removals).length < Object.keys(bestMatch.removals).length
+                ) {
                     lowestChangedCount = changedCount;
                     bestMatch = changes;
                 }

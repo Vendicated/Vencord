@@ -11,7 +11,9 @@ import type { FluxStore } from "./abstract/FluxStore";
 
 export type RelationshipStoreAction = ExtractAction<FluxAction, "CONNECTION_OPEN" | "OVERLAY_INITIALIZE" | "RELATIONSHIP_ADD" | "RELATIONSHIP_PENDING_INCOMING_REMOVED" | "RELATIONSHIP_REMOVE" | "RELATIONSHIP_UPDATE">;
 
-export declare class RelationshipStore<Action extends FluxAction = RelationshipStoreAction> extends FluxStore<Action> {
+export declare class RelationshipStore<
+    Action extends FluxAction = RelationshipStoreAction
+> extends FluxStore<Action> {
     static displayName: "RelationshipStore";
 
     getFriendCount(): number;

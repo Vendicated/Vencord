@@ -140,10 +140,7 @@ export namespace CR {
          * Members expected to be removed.
          * If a category is `true`, all members in that category will be expected to be removed.
          */
-        ignoredRemovals?: {
-            [Key in keyof ClassMembers]?: ClassMembers[Key]
-                | (ClassMembers[Key] extends string[] ? boolean | undefined : never);
-        } | undefined;
+        ignoredRemovals?: { [Key in keyof ClassMembers]?: ClassMembers[Key] | boolean | undefined; } | undefined;
     }
 
     export interface EnumConfig extends DeclarationConfigBase {

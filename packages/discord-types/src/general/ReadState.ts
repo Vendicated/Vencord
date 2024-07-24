@@ -9,9 +9,9 @@ import type { BasicPermissionsObject } from "../stores/PermissionStore";
 import type { GuildChannelRecord } from "./channels/ChannelRecord";
 
 export declare class ReadState<Type extends ReadStateType = ReadStateType> {
-    constructor(channelId: string, type?: ChannelIdReadStateType | undefined);
-    constructor(userId: string, type: UserIdReadStateType);
-    constructor(guildId: string, type: GuildIdReadStateType);
+    constructor(channelId: string, type?: Type & ChannelIdReadStateType | undefined);
+    constructor(userId: string, type: Type & UserIdReadStateType);
+    constructor(guildId: string, type: Type & GuildIdReadStateType);
 
     static _guildReadStateSentinels: { [guildId: string]: { unreadsSentinel: number; }; };
     static _mentionChannels: Set<string>;
@@ -67,8 +67,8 @@ export declare class ReadState<Type extends ReadStateType = ReadStateType> {
         messageId?: string | Nullish /* = this.lastMessageId */;
         trackAnalytics?: boolean | undefined /* = true */;
     }): boolean;
-    get ackMessageId(): this["_ackMessageId"];
-    set ackMessageId(messageId: this["_ackMessageId"]);
+    get ackMessageId(): ReadState["_ackMessageId"];
+    set ackMessageId(messageId: ReadState["_ackMessageId"]);
     ackPins(isoTimestamp?: string | Nullish): boolean;
     canBeUnread(): boolean;
     canHaveMentions(): boolean;
@@ -101,13 +101,13 @@ export declare class ReadState<Type extends ReadStateType = ReadStateType> {
     incrementGuildUnreadsSentinel(): void;
     isForumPostUnread(): boolean;
     isPrivate(): boolean;
-    get lastMessageId(): this["_lastMessageId"];
-    set lastMessageId(messageId: this["_lastMessageId"] | Nullish);
-    get lastMessageTimestamp(): this["_lastMessageTimestamp"];
-    get mentionCount(): this["_mentionCount"];
-    set mentionCount(count: this["_mentionCount"]);
-    get oldestUnreadMessageId(): this["_oldestUnreadMessageId"];
-    set oldestUnreadMessageId(messageId: this["_oldestUnreadMessageId"]);
+    get lastMessageId(): ReadState["_lastMessageId"];
+    set lastMessageId(messageId: ReadState["_lastMessageId"] | Nullish);
+    get lastMessageTimestamp(): ReadState["_lastMessageTimestamp"];
+    get mentionCount(): ReadState["_mentionCount"];
+    set mentionCount(count: ReadState["_mentionCount"]);
+    get oldestUnreadMessageId(): ReadState["_oldestUnreadMessageId"];
+    set oldestUnreadMessageId(messageId: ReadState["_oldestUnreadMessageId"]);
     get oldestUnreadTimestamp(): number;
     rebuildChannelState(
         ackMessageId?: string | Nullish,

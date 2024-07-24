@@ -21,7 +21,7 @@ export declare class FluxActionHandlersGraph {
     _computeOrderedCallbackTokens(): string[];
     _invalidateCaches(): void;
     _validateDependencies(fromDispatchToken: string, toDispatchToken: string): void;
-    addDependencies(fromDispatchToken: string, toDispatchTokens: string[]): void;
+    addDependencies(fromDispatchToken: string, toDispatchTokens: readonly string[]): void;
     createToken(): string;
     getOrderedActionHandlers<ActionType extends FluxActionType>(partialAction: {
         type: ActionType;
@@ -54,9 +54,11 @@ export type FluxActionHandlerMap<Action extends FluxAction = FluxAction>
     // Workaround to avoid ts(2589)
     = UnionToIntersection<
         Action extends unknown
-            ? { type: never; } extends Action
-                ? { [ActionType in Action["type"]]: (action: any) => void; }
-                : { [ActionType in Action["type"]]: (action: { type: ActionType; } & Omit<Action, "type">) => void; }
+            ? PropertyKey extends keyof Action
+                ? 0 extends 1 & Action[PropertyKey]
+                    ? { [ActionType in Action["type"]]: (action: any) => void; }
+                    : { [ActionType in Action["type"]]: (action: Action & { type: ActionType; }) => void; }
+                : { [ActionType in Action["type"]]: (action: Action & { type: ActionType; }) => void; }
             : never
     >;
 

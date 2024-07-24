@@ -23,7 +23,7 @@ export declare class FluxDispatcher {
     ): boolean | undefined;
     _dispatchWithDevtools(action: FluxAction): void;
     _dispatchWithLogging(action: FluxAction): void;
-    addDependencies(fromDispatchToken: string, toDispatchTokens: string[]): void;
+    addDependencies(fromDispatchToken: string, toDispatchTokens: readonly string[]): void;
     addInterceptor(interceptor: FluxActionHandler): void;
     createToken(): string;
     dispatch(action: FluxAction): Promise<void>;
@@ -71,7 +71,7 @@ export enum FluxDispatchBand {
 export interface SentryUtils {
     addBreadcrumb: (breadcrumb: {
         category?: string | undefined;
-        data?: any;
+        data?: unknown;
         level?: string | undefined;
         message?: string | undefined;
         type?: string | undefined;

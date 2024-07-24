@@ -26,7 +26,7 @@ export declare class Frecency<Key extends PropertyKey = PropertyKey, Value = unk
     markDirty(): void;
     overwriteHistory(
         usageHistory?: Omit<FrecencyUsageHistory, "frecency"> | Nullish,
-        track?: {
+        track?: readonly {
             key?: Key | Nullish;
             timestamp?: number | Nullish;
         }[] | Nullish

@@ -37,7 +37,7 @@ export declare abstract class FluxStore<Action extends FluxAction = FluxAction> 
         dispatchBand?: FluxDispatchBand | Nullish /* = this._dispatcher._defaultBand */
     ): void;
     syncWith(
-        stores: FluxStore[],
+        stores: readonly FluxStore[],
         func: () => unknown,
         timeout?: number | Nullish
     ): void;
@@ -83,6 +83,6 @@ export declare class FluxChangeListeners {
 }
 
 export type FluxChangeListener<Conditional extends boolean = boolean>
-    = Conditional extends true
+    = true extends Conditional
         ? () => unknown
         : () => void;
