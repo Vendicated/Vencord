@@ -209,7 +209,7 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: WrappedModuleFacto
             },
             set(newFactory: AnyModuleFactory) {
                 if (factory.$$vencordOriginal != null) {
-                    factory.toString = newFactory.toString.bind(v);
+                    factory.toString = newFactory.toString.bind(newFactory);
                     factory.$$vencordOriginal = newFactory;
                 } else {
                     factory = newFactory;
