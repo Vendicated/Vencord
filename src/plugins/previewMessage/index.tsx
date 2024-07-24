@@ -20,14 +20,13 @@ import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatB
 import { generateId, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
-import { findByProps } from "@webpack";
+import { findStore } from "@webpack";
 import { DraftStore, DraftType, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
 import { MessageAttachment } from "discord-types/general";
 
-const UploadStore = findByProps("getUploads");
+const UploadAttachmentStore = findStore("UploadAttachmentStore");
 
 const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.ChannelMessage);
-
 
 const getImageBox = (url: string): Promise<{ width: number, height: number; } | null> =>
     new Promise(res => {
@@ -44,7 +43,7 @@ const getImageBox = (url: string): Promise<{ width: number, height: number; } | 
 
 const getAttachments = async (channelId: string) =>
     await Promise.all(
-        UploadStore.getUploads(channelId, DraftType.ChannelMessage)
+        UploadAttachmentStore.getUploads(channelId, DraftType.ChannelMessage)
             .map(async (upload: any) => {
                 const { isImage, filename, spoiler, item: { file } } = upload;
                 const url = URL.createObjectURL(file);
@@ -79,7 +78,7 @@ const PreviewButton: ChatBarButton = ({ isMainChat, isEmpty, type: { attachments
 
     if (!isMainChat) return null;
 
-    const hasAttachments = attachments && UploadStore.getUploads(channelId, DraftType.ChannelMessage).length > 0;
+    const hasAttachments = attachments && UploadAttachmentStore.getUploads(channelId, DraftType.ChannelMessage).length > 0;
     const hasContent = !isEmpty && draft?.length > 0;
 
     if (!hasContent && !hasAttachments) return null;

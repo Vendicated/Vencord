@@ -8,10 +8,10 @@ import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCode, findByProps } from "@webpack";
+import { findByCode, findStore } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
-const SummaryStore = findByProps("allSummaries", "findSummary");
+const SummaryStore = findStore("SummaryStore");
 const createSummaryFromServer = findByCode(".people)),startId:", ".type}");
 
 const settings = definePluginSettings({

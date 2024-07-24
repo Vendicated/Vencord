@@ -19,7 +19,7 @@
 import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByProps } from "@webpack";
+import { findStore } from "@webpack";
 import { FluxDispatcher, MessageActions } from "@webpack/common";
 
 interface Album {
@@ -52,8 +52,8 @@ interface Track {
     name: string;
 }
 
-const Spotify = findByProps("getPlayerState");
-const PendingReplyStore = findByProps("getPendingReply");
+const SpotifyStore = findStore("SpotifyStore");
+const PendingReplyStore = findStore("PendingReplyStore");
 
 function sendMessage(channelId, message) {
     message = {
@@ -84,7 +84,7 @@ export default definePlugin({
             inputType: ApplicationCommandInputType.BUILT_IN,
             options: [],
             execute: (_, ctx) => {
-                const track: Track | null = Spotify.getTrack();
+                const track: Track | null = SpotifyStore.getTrack();
                 if (track === null) {
                     sendBotMessage(ctx.channel.id, {
                         content: "You're not listening to any music."
@@ -103,7 +103,7 @@ export default definePlugin({
             inputType: ApplicationCommandInputType.BUILT_IN,
             options: [],
             execute: (_, ctx) => {
-                const track: Track | null = Spotify.getTrack();
+                const track: Track | null = SpotifyStore.getTrack();
                 if (track === null) {
                     sendBotMessage(ctx.channel.id, {
                         content: "You're not listening to any music."
@@ -121,7 +121,7 @@ export default definePlugin({
             inputType: ApplicationCommandInputType.BUILT_IN,
             options: [],
             execute: (_, ctx) => {
-                const track: Track | null = Spotify.getTrack();
+                const track: Track | null = SpotifyStore.getTrack();
                 if (track === null) {
                     sendBotMessage(ctx.channel.id, {
                         content: "You're not listening to any music."

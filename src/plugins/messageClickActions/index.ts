@@ -20,11 +20,11 @@ import { addClickListener, removeClickListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps } from "@webpack";
+import { findByProps, findStore } from "@webpack";
 import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
 
 const MessageActions = findByProps("deleteMessage", "startEditMessage");
-const EditStore = findByProps("isEditing", "isEditingAny");
+const EditMessageStore = findStore("EditMessageStore");
 
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
@@ -74,7 +74,7 @@ export default definePlugin({
                 if (msg.deleted === true) return;
 
                 if (isMe) {
-                    if (!settings.store.enableDoubleClickToEdit || EditStore.isEditing(channel.id, msg.id)) return;
+                    if (!settings.store.enableDoubleClickToEdit || EditMessageStore.isEditing(channel.id, msg.id)) return;
 
                     MessageActions.startEditMessage(channel.id, msg.id, msg.content);
                     event.preventDefault();

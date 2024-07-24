@@ -20,7 +20,7 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, Co
 import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
-import { findByProps } from "@webpack";
+import { findStore } from "@webpack";
 import { DraftType, UploadHandler, UploadManager, UserUtils } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
@@ -35,7 +35,7 @@ const getFrames = makeLazy(() => Promise.all(
     ))
 );
 
-const UploadStore = findByProps("getUploads");
+const UploadAttachmentStore = findStore("UploadAttachmentStore");
 
 function loadImage(source: File | string) {
     const isFile = source instanceof File;
@@ -58,7 +58,7 @@ async function resolveImage(options: Argument[], ctx: CommandContext, noServerPf
     for (const opt of options) {
         switch (opt.name) {
             case "image":
-                const upload = UploadStore.getUpload(ctx.channel.id, opt.name, DraftType.SlashCommand);
+                const upload = UploadAttachmentStore.getUpload(ctx.channel.id, opt.name, DraftType.SlashCommand);
                 if (upload) {
                     if (!upload.isImage) {
                         UploadManager.clearAll(ctx.channel.id, DraftType.SlashCommand);

@@ -20,8 +20,7 @@ import { proxyLazy } from "@utils/lazy";
 import { findByProps, webpackDependantLazy } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
-// Avoid circular dependency
-const SpotifyControls = proxyLazy(() => require(".")) as typeof import(".");
+import { settings } from ".";
 
 export interface Track {
     id: string;
@@ -91,7 +90,7 @@ export const SpotifyStore = webpackDependantLazy(() => {
         public isSettingPosition = false;
 
         public openExternal(path: string) {
-            const url = SpotifyControls.settings.store.useSpotifyUris || Vencord.Plugins.isPluginEnabled("OpenInApp")
+            const url = settings.store.useSpotifyUris || Vencord.Plugins.isPluginEnabled("OpenInApp")
                 ? "spotify:" + path.replaceAll("/", (_, idx) => idx === 0 ? "" : ":")
                 : "https://open.spotify.com" + path;
 

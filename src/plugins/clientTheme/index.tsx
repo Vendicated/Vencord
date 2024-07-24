@@ -37,14 +37,14 @@ function setTheme(theme: string) {
 }
 
 const ThemeStore = findStore("ThemeStore");
-const NitroThemeStore = findStore("ClientThemesBackgroundStore");
+const ClientThemesBackgroundStore = findStore("ClientThemesBackgroundStore");
 
 function ThemeSettings() {
     const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme);
     const isLightTheme = theme === "light";
     const oppositeTheme = isLightTheme ? "dark" : "light";
 
-    const nitroTheme = useStateFromStores([NitroThemeStore], () => NitroThemeStore.gradientPreset);
+    const nitroTheme = useStateFromStores([ClientThemesBackgroundStore], () => ClientThemesBackgroundStore.gradientPreset);
     const nitroThemeEnabled = nitroTheme !== undefined;
 
     const selectedLuminance = relativeLuminance(settings.store.color);

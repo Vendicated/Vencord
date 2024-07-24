@@ -97,12 +97,15 @@ async function runReporter() {
                                 result = findResult;
 
                                 for (const innerMap in result) {
-                                    if (result[innerMap][SYM_PROXY_INNER_GET] != null && result[innerMap][SYM_PROXY_INNER_VALUE] == null) {
-                                        throw new Error("Webpack Find Fail");
-                                    } else if (result[innerMap][SYM_LAZY_COMPONENT_INNER] != null && result[innerMap][SYM_LAZY_COMPONENT_INNER]() == null) {
+                                    if (
+                                        (result[innerMap][SYM_PROXY_INNER_GET] != null && result[innerMap][SYM_PROXY_INNER_VALUE] == null) ||
+                                        (result[innerMap][SYM_LAZY_COMPONENT_INNER] != null && result[innerMap][SYM_LAZY_COMPONENT_INNER]() == null)
+                                    ) {
                                         throw new Error("Webpack Find Fail");
                                     }
                                 }
+
+                                break;
                             }
 
                             // This can happen if a `find` was immediately found
@@ -125,9 +128,10 @@ async function runReporter() {
                 if (args[0].$$vencordProps != null) {
                     if (["find", "findComponent", "waitFor"].includes(searchType)) {
                         filterName = args[0].$$vencordProps[0];
+                        parsedArgs = args[0].$$vencordProps.slice(1);
+                    } else {
+                        parsedArgs = args[0].$$vencordProps;
                     }
-
-                    parsedArgs = args[0].$$vencordProps.slice(1);
                 }
 
                 function stringifyCodeFilter(code: string | RegExp | Webpack.CodeFilter) {

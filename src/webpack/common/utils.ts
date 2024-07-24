@@ -120,7 +120,7 @@ export const UserUtils: t.UserUtils = {
 
 export const UploadManager = findByProps("clearAll", "addFile");
 export const UploadHandler: t.UploadHandler = {
-    promptToUpload: findByCode(".ATTACHMENT_TOO_MANY_ERROR_TITLE,") as (files: File[], channel: Channel, draftType: Number) => void
+    promptToUpload: findByCode(".ATTACHMENT_TOO_MANY_ERROR_TITLE,")
 };
 
 export const ApplicationAssetUtils = findByProps<t.ApplicationAssetUtils>("fetchAssetIds", "getAssetImage");

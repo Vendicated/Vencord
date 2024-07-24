@@ -50,7 +50,7 @@ define(Function.prototype, "m", {
         // We may also catch Discord bundled libs, React Devtools or other extensions WebpackInstance here.
         // This ensures we actually got the right ones
         const { stack } = new Error();
-        if (!(stack?.includes("discord.com") || stack?.includes("discordapp.com")) || (stack != null ? /at \d+? \(/.test(stack) : true) || !String(this).includes("exports:{}")) {
+        if (!stack?.includes("/assets/") || stack?.match(/at \d+? \(/) || !String(this).includes("exports:{}")) {
             return;
         }
 
@@ -68,7 +68,7 @@ define(Function.prototype, "m", {
                 define(this, "p", { value: bundlePath });
                 clearTimeout(setterTimeout);
 
-                if (window.GLOBAL_ENV?.PUBLIC_PATH != null && bundlePath !== window.GLOBAL_ENV.PUBLIC_PATH) return;
+                if (bundlePath !== "/assets/") return;
 
                 logger.info("Main Webpack found" + interpolateIfDefined` in ${fileName}` + ", initializing internal references to WebpackRequire");
                 _initWebpack(this);
@@ -117,7 +117,7 @@ const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
     // Same thing as get
     has: (target, p) => {
         return false;
-    }
+    },
     */
 
     // The set trap for patching or defining getters for the module factories when new module factories are loaded
@@ -207,12 +207,12 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: WrappedModuleFacto
 
                 return (factory = wrapAndPatchFactory(id, factory));
             },
-            set(v: AnyModuleFactory) {
+            set(newFactory: AnyModuleFactory) {
                 if (factory.$$vencordOriginal != null) {
-                    factory.toString = v.toString.bind(v);
-                    factory.$$vencordOriginal = v;
+                    factory.toString = newFactory.toString.bind(v);
+                    factory.$$vencordOriginal = newFactory;
                 } else {
-                    factory = v;
+                    factory = newFactory;
                 }
             }
         });
@@ -229,141 +229,139 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: WrappedModuleFacto
 function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory) {
     const patchedFactory = patchFactory(id, originalFactory);
 
-    // The patched factory wrapper, define it in an object to preserve the name after minification
-    const wrappedFactory: WrappedModuleFactory = {
-        PatchedFactory(...args: Parameters<AnyModuleFactory>) {
-            // Restore the original factory in all the module factories objects. We want to make sure the original factory is restored properly, no matter what is the Webpack instance
-            for (const wreq of allWebpackInstances) {
-                define(wreq.m, id, { value: wrappedFactory.$$vencordOriginal });
-            }
+    const wrappedFactory: WrappedModuleFactory = function (...args) {
+        // Restore the original factory in all the module factories objects. We want to make sure the original factory is restored properly, no matter what is the Webpack instance
+        for (const wreq of allWebpackInstances) {
+            define(wreq.m, id, { value: wrappedFactory.$$vencordOriginal });
+        }
 
-            // eslint-disable-next-line prefer-const
-            let [module, exports, require] = args;
+        // eslint-disable-next-line prefer-const
+        let [module, exports, require] = args;
 
-            if (wreq == null) {
-                if (!wreqFallbackApplied) {
-                    wreqFallbackApplied = true;
+        if (wreq == null) {
+            if (!wreqFallbackApplied) {
+                wreqFallbackApplied = true;
 
-                    // Make sure the require argument is actually the WebpackRequire function
-                    if (typeof require === "function" && require.m != null) {
-                        const { stack } = new Error();
-                        const webpackInstanceFileName = stack?.match(/\/assets\/(.+?\.js)/)?.[1];
-                        logger.warn(
-                            "WebpackRequire was not initialized, falling back to WebpackRequire passed to the first called patched module factory (" +
-                            `id: ${String(id)}` + interpolateIfDefined`, WebpackInstance origin: ${webpackInstanceFileName}` +
-                            ")"
-                        );
-                        _initWebpack(require as WebpackRequire);
-                    } else if (IS_DEV) {
-                        logger.error("WebpackRequire was not initialized, running modules without patches instead.");
-                    }
-                }
+                // Make sure the require argument is actually the WebpackRequire function
+                if (typeof require === "function" && require.m != null) {
+                    const { stack } = new Error();
+                    const webpackInstanceFileName = stack?.match(/\/assets\/(.+?\.js)/)?.[1];
 
-                if (IS_DEV) {
+                    logger.warn(
+                        "WebpackRequire was not initialized, falling back to WebpackRequire passed to the first called patched module factory (" +
+                        `id: ${String(id)}` + interpolateIfDefined`, WebpackInstance origin: ${webpackInstanceFileName}` +
+                        ")"
+                    );
+                    
+                    _initWebpack(require as WebpackRequire);
+                } else if (IS_DEV) {
+                    logger.error("WebpackRequire was not initialized, running modules without patches instead.");
                     return wrappedFactory.$$vencordOriginal!.apply(this, args);
                 }
-            }
-
-            let factoryReturn: unknown;
-            try {
-                // Call the patched factory
-                factoryReturn = patchedFactory.apply(this, args);
-            } catch (err) {
-                // Just re-throw Discord errors
-                if (patchedFactory === originalFactory) {
-                    throw err;
-                }
-
-                logger.error("Error in patched module factory:\n", err);
+            } else if (IS_DEV) {
                 return wrappedFactory.$$vencordOriginal!.apply(this, args);
             }
+        }
 
-            exports = module.exports;
-            if (exports == null) return;
+        let factoryReturn: unknown;
+        try {
+            // Call the patched factory
+            factoryReturn = patchedFactory.apply(this, args);
+        } catch (err) {
+            // Just re-throw Discord errors
+            if (patchedFactory === originalFactory) {
+                throw err;
+            }
 
-            // There are (at the time of writing) 11 modules exporting the window
-            // Make these non enumerable to improve webpack search performance
-            if (typeof require === "function" && require.c != null) {
-                let foundWindow = false;
+            logger.error("Error in patched module factory:\n", err);
+            return wrappedFactory.$$vencordOriginal!.apply(this, args);
+        }
 
-                if (exports === window) {
+        exports = module.exports;
+        if (exports == null) return;
+
+        // There are (at the time of writing) 11 modules exporting the window
+        // Make these non enumerable to improve webpack search performance
+        if (typeof require === "function" && require.c != null) {
+            let foundWindow = false;
+
+            if (exports === window) {
+                foundWindow = true;
+            } else if (typeof exports === "object") {
+                if (exports.default === window) {
                     foundWindow = true;
-                } else if (typeof exports === "object") {
-                    if (exports.default === window) {
-                        foundWindow = true;
-                    } else {
-                        for (const exportKey in exports) if (exportKey.length <= 3) {
-                            if (exports[exportKey] === window) {
-                                foundWindow = true;
-                            }
+                } else {
+                    for (const exportKey in exports) if (exportKey.length <= 3) {
+                        if (exports[exportKey] === window) {
+                            foundWindow = true;
                         }
                     }
                 }
-
-                if (foundWindow) {
-                    Object.defineProperty(require.c, id, {
-                        value: require.c[id],
-                        enumerable: false,
-                        configurable: true,
-                        writable: true
-                    });
-
-                    return factoryReturn;
-                }
             }
 
-            for (const callback of moduleListeners) {
-                try {
-                    callback(exports, { id, factory: wrappedFactory.$$vencordOriginal! });
-                } catch (err) {
-                    logger.error("Error in Webpack module listener:\n", err, callback);
-                }
+            if (foundWindow) {
+                Object.defineProperty(require.c, id, {
+                    value: require.c[id],
+                    enumerable: false,
+                    configurable: true,
+                    writable: true
+                });
+
+                return factoryReturn;
             }
+        }
 
-            for (const [filter, callback] of waitForSubscriptions) {
-                try {
-                    if (filter.$$vencordIsFactoryFilter) {
-                        if (filter(wrappedFactory.$$vencordOriginal!)) {
-                            waitForSubscriptions.delete(filter);
-                            callback(exports, { id, exportKey: null, factory: wrappedFactory.$$vencordOriginal! });
-                        }
+        for (const callback of moduleListeners) {
+            try {
+                callback(exports, { id, factory: wrappedFactory.$$vencordOriginal! });
+            } catch (err) {
+                logger.error("Error in Webpack module listener:\n", err, callback);
+            }
+        }
 
-                        continue;
-                    }
-
-                    if (filter(exports)) {
+        for (const [filter, callback] of waitForSubscriptions) {
+            try {
+                if (filter.$$vencordIsFactoryFilter) {
+                    if (filter(wrappedFactory.$$vencordOriginal!)) {
                         waitForSubscriptions.delete(filter);
                         callback(exports, { id, exportKey: null, factory: wrappedFactory.$$vencordOriginal! });
-                        continue;
                     }
 
-                    if (typeof exports !== "object") {
-                        continue;
-                    }
-
-                    if (exports.default != null && filter(exports.default)) {
-                        waitForSubscriptions.delete(filter);
-                        callback(exports.default, { id, exportKey: "default", factory: wrappedFactory.$$vencordOriginal! });
-                        continue;
-                    }
-
-                    for (const exportKey in exports) if (exportKey.length <= 3) {
-                        const exportValue = exports[exportKey];
-
-                        if (exportValue != null && filter(exportValue)) {
-                            waitForSubscriptions.delete(filter);
-                            callback(exportValue, { id, exportKey, factory: wrappedFactory.$$vencordOriginal! });
-                            break;
-                        }
-                    }
-                } catch (err) {
-                    logger.error("Error while firing callback for Webpack waitFor subscription:\n", err, filter, callback);
+                    continue;
                 }
-            }
 
-            return factoryReturn;
+                if (filter(exports)) {
+                    waitForSubscriptions.delete(filter);
+                    callback(exports, { id, exportKey: null, factory: wrappedFactory.$$vencordOriginal! });
+                    continue;
+                }
+
+                if (typeof exports !== "object") {
+                    continue;
+                }
+
+                if (exports.default != null && filter(exports.default)) {
+                    waitForSubscriptions.delete(filter);
+                    callback(exports.default, { id, exportKey: "default", factory: wrappedFactory.$$vencordOriginal! });
+                    continue;
+                }
+
+                for (const exportKey in exports) if (exportKey.length <= 3) {
+                    const exportValue = exports[exportKey];
+
+                    if (exportValue != null && filter(exportValue)) {
+                        waitForSubscriptions.delete(filter);
+                        callback(exportValue, { id, exportKey, factory: wrappedFactory.$$vencordOriginal! });
+                        break;
+                    }
+                }
+            } catch (err) {
+                logger.error("Error while firing callback for Webpack waitFor subscription:\n", err, filter, callback);
+            }
         }
-    }.PatchedFactory;
+
+        return factoryReturn;
+    };
 
     wrappedFactory.toString = originalFactory.toString.bind(originalFactory);
     wrappedFactory.$$vencordOriginal = originalFactory;

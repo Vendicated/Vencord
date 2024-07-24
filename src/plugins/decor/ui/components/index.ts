@@ -19,9 +19,7 @@ type DecorationGridItemComponent = ComponentType<PropsWithChildren<HTMLProps<HTM
 export let DecorationGridItem: DecorationGridItemComponent = NoopComponent;
 export const setDecorationGridItem = v => DecorationGridItem = v;
 
-export const AvatarDecorationModalPreview = findComponentByCode(".shopPreviewBanner", component => {
-    return React.memo(component);
-});
+export const AvatarDecorationModalPreview = findComponentByCode(".shopPreviewBanner", component => React.memo(component));
 
 type DecorationGridDecorationComponent = React.ComponentType<HTMLProps<HTMLDivElement> & {
     avatarDecoration: AvatarDecoration;

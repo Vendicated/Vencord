@@ -113,7 +113,7 @@ export const filters = {
         return filter;
     },
 
-    byComponentCode: (...code: CodeFilter): FilterFn => {
+    componentByCode: (...code: CodeFilter): FilterFn => {
         const byCodeFilter = filters.byCode(...code);
         const filter: FilterFn = m => {
             let inner = m;
@@ -129,7 +129,7 @@ export const filters = {
             return false;
         };
 
-        filter.$$vencordProps = ["byComponentCode", ...code];
+        filter.$$vencordProps = ["componentByCode", ...code];
         filter.$$vencordIsComponentFilter = true;
         return filter;
     },
@@ -232,7 +232,7 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
  *
  * @param filter A function that takes an export or module exports and returns a boolean
  * @param parse A function that takes the find result as its first argument and returns something to use as the proxy inner value. Useful if you want to use a value from the find result, instead of all of it. Defaults to the find result itself
- * @returns A proxy that has the parse function return value as its true value, or the plain parse function return value if it was called immediately.
+ * @returns A proxy that has the parse function return value as its true value, or the plain parse function return value, if it was called immediately.
  */
 export function find<T = any>(filter: FilterFn, parse: (module: ModuleExports) => ModuleExports = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
     if (typeof filter !== "function")
@@ -306,7 +306,7 @@ export function findExportedComponent<T extends object = any>(...props: PropsFil
 }
 
 /**
- * Find the first component in an export that includes all the given code.
+ * Find the first exported component which when its code is stringified includes all the given code.
  *
  * @example findComponentByCode(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR")
  * @example findComponentByCode(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)", ColorPicker => React.memo(ColorPicker))
@@ -319,7 +319,7 @@ export function findComponentByCode<T extends object = any>(...code: CodeFilter 
     const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (component: ModuleExports) => LazyComponentType<T>;
     const newCode = code as CodeFilter;
 
-    const ComponentResult = findComponent<T>(filters.byComponentCode(...newCode), parse, { isIndirect: true });
+    const ComponentResult = findComponent<T>(filters.componentByCode(...newCode), parse, { isIndirect: true });
 
     if (IS_REPORTER) {
         webpackSearchHistory.push(["findComponentByCode", [ComponentResult, ...newCode]]);
@@ -369,7 +369,7 @@ export function findByPropsAndExtract<T = any>(...props: PropsFilter | [...Props
 }
 
 /**
- * Find the first export that includes all the given code.
+ * Find the first exported function which when stringified includes all the given code.
  *
  * @param code A list of code to search each export for
  * @param parse A function that takes the find result as its first argument and returns something. Useful if you want to use a value from the find result, instead of all of it. Defaults to the find result itself
@@ -403,7 +403,7 @@ export function findStore<T = GenericStore>(name: StoreNameFilter) {
 }
 
 /**
- * Find the module exports of the first module which the factory includes all the given code.
+ * Find the module exports of the first module which the factory when stringified includes all the given code.
  *
  * @param code A list of code to search each factory for
  * @param parse A function that takes the find result as its first argument and returns something. Useful if you want to use a value from the find result, instead of all of it. Defaults to the find result itself
@@ -422,7 +422,7 @@ export function findByFactoryCode<T = any>(...code: CodeFilter | [...CodeFilter,
 }
 
 /**
- * Find the module exports of the first module which the factory includes all the given code,
+ * Find the module exports of the first module which the factory when stringified includes all the given code,
  * then map them into an easily usable object via the specified mappers.
  *
  * IMPORTANT: You can destructure the properties of the returned object at top level as long as the property filter does not return a primitive value export.
@@ -465,6 +465,8 @@ export function mapMangledModule<S extends PropertyKey>(code: string | RegExp | 
     waitFor(factoryFilter, exports => {
         callbackCalled = true;
 
+        if (typeof exports !== "object") return;
+        
         for (const exportKey in exports) {
             const exportValue = exports[exportKey];
             if (exportValue == null) continue;
@@ -507,7 +509,7 @@ export function mapMangledModule<S extends PropertyKey>(code: string | RegExp | 
 }
 
 /**
- * Find the first module factory that includes all the given code.
+ * Find the first module factory which when stringified includes all the given code.
  */
 export function findModuleFactory(...code: CodeFilter) {
     const filter = filters.byFactoryCode(...code);

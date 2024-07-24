@@ -20,7 +20,7 @@ import { AvatarDecorationModalPreview } from "../components";
 const FileUpload = findComponentByCode("fileUploadInput,");
 
 const { HelpMessage, HelpMessageTypes } = mapMangledModule('POSITIVE=3]="POSITIVE', {
-    HelpMessage: filters.byComponentCode(".iconDiv,", "messageType"),
+    HelpMessage: filters.componentByCode(".iconDiv,", "messageType"),
     HelpMessageTypes: filters.byProps("POSITIVE", "WARNING"),
 });
 
