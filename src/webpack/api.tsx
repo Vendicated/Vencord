@@ -466,7 +466,7 @@ export function mapMangledModule<S extends PropertyKey>(code: string | RegExp | 
         callbackCalled = true;
 
         if (typeof exports !== "object") return;
-        
+
         for (const exportKey in exports) {
             const exportValue = exports[exportKey];
             if (exportValue == null) continue;
