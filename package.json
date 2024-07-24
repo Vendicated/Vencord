@@ -88,13 +88,6 @@
             "resolve-url": "*",
             "source-map-url": "*",
             "urix": "*"
-        },
-        "overrides": {
-            "jszip@<3.8.0": ">=3.8.0",
-            "decode-uri-component@<0.2.1": ">=0.2.1",
-            "postcss@<8.4.31": ">=8.4.31",
-            "semver@<5.7.2": ">=5.7.2",
-            "semver@>=7.0.0 <7.5.2": ">=7.5.2"
         }
     },
     "webExt": {
