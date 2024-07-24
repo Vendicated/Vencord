@@ -21,7 +21,6 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { RelationshipStore } from "@webpack/common";
-
 import { Message } from "discord-types/general";
 
 const settings = definePluginSettings({

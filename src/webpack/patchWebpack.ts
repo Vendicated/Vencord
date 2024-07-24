@@ -252,7 +252,7 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
                         `id: ${String(id)}` + interpolateIfDefined`, WebpackInstance origin: ${webpackInstanceFileName}` +
                         ")"
                     );
-       
+
                     _initWebpack(require as WebpackRequire);
                 } else if (IS_DEV) {
                     logger.error("WebpackRequire was not initialized, running modules without patches instead.");
