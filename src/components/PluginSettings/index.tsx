@@ -36,7 +36,7 @@ import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
 
-import Plugins, { ExcludedPlugins } from "~plugins";
+import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
 // Avoid circular dependency
 const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("../../plugins"));
@@ -327,9 +327,27 @@ export default function PluginSettings() {
         }
     }
 
+    // Code directly taken from supportHelper.tsx
+    const isApiPlugin = (plugin: string) => plugin.endsWith("API") || Plugins[plugin].required;
+
+    const totalPlugins = Object.keys(Plugins).filter(p => !isApiPlugin(p));
+    const enabledPlugins = Object.keys(Plugins).filter(p => Vencord.Plugins.isPluginEnabled(p) && !isApiPlugin(p));
+
+    const totalStockPlugins = totalPlugins.filter(p => !PluginMeta[p].userPlugin).length;
+    const totalUserPlugins = totalPlugins.filter(p => PluginMeta[p].userPlugin).length;
+    const enabledStockPlugins = enabledPlugins.filter(p => !PluginMeta[p].userPlugin).length;
+    const enabledUserPlugins = enabledPlugins.filter(p => PluginMeta[p].userPlugin).length;
+
     return (
         <SettingsTab title="Plugins">
+
             <ReloadRequiredCard required={changes.hasChanges} />
+
+            <Card className={cl("info-card")} style={{ marginTop: "12px" }}>
+                <Forms.FormTitle tag="h5">Plugins Information</Forms.FormTitle>
+                <Forms.FormText>Total Plugins: {totalStockPlugins}, Total User Plugins: {totalUserPlugins}</Forms.FormText>
+                <Forms.FormText>Enabled Plugins: {enabledStockPlugins}, Enabled User Plugins: {enabledUserPlugins}</Forms.FormText>
+            </Card>
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
                 Filters
