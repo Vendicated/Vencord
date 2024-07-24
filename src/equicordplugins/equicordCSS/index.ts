@@ -25,96 +25,93 @@ import definePlugin, { OptionType } from "@utils/types";
 // Importing the style managed fixes on and off switch
 import betterauthapps from "./css/betterauthapps.css?managed";
 import betterstatuspicker from "./css/betterstatuspicker.css?managed";
-import graidentbuttons from "./css/graidentbuttons.css?managed";
+import gradientbuttons from "./css/gradientbuttons.css?managed";
 import nitrothemesfix from "./css/nitrothemesfix.css?managed";
 import settingsicons from "./css/settingsicons.css?managed";
 import userreimagined from "./css/userreimagined.css?managed";
 
+// Forcing restartNeeded: true to not overcomplicate the live update of the settings using FluxDispatcher and making it complex
 const settings = definePluginSettings({
     betterAuthApps: {
         type: OptionType.BOOLEAN,
         description: "Enable Better Auth Apps CSS",
-        restartNeeded: false,
+        restartNeeded: true,
         default: false
     },
     betterStatusPicker: {
         type: OptionType.BOOLEAN,
         description: "Enable Better Status Picker CSS",
-        restartNeeded: false,
+        restartNeeded: true,
         default: false
     },
-    graidentButtons: {
+    gradientButtons: {
         type: OptionType.BOOLEAN,
-        description: "Enable Graident Buttons CSS",
-        restartNeeded: false,
+        description: "Enable Gradient Buttons CSS",
+        restartNeeded: true,
         default: false
     },
     nitroThemesFix: {
         type: OptionType.BOOLEAN,
         description: "Enable Fix Nitro Themes CSS",
-        restartNeeded: false,
+        restartNeeded: true,
         default: false
     },
     settingsIcons: {
         type: OptionType.BOOLEAN,
         description: "Enable Settings Icons CSS",
-        restartNeeded: false,
+        restartNeeded: true,
         default: false
     },
     userReimagined: {
         type: OptionType.BOOLEAN,
         description: "Enable User Reimagined CSS",
-        restartNeeded: false,
+        restartNeeded: true,
         default: false
     }
 });
+
+let settingsArray: Array<any> = [];
+let cssArray: Array<any> = [];
 
 // Define the Vencord plugin
 migratePluginSettings("EquicordCSS", "EquicordBuiltIn");
 export default definePlugin({
     name: "EquicordCSS",
     description: "CSS for Equicord users. You will need to look at the settings.",
-    authors: [EquicordDevs.thororen],
+    authors: [EquicordDevs.thororen, EquicordDevs.Panniku],
     dependencies: ["ThemeAttributes"],
     settings,
     start() {
-        if (settings.store.betterAuthApps) {
-            enableStyle(betterauthapps);
-        }
-        if (settings.store.betterStatusPicker) {
-            enableStyle(betterstatuspicker);
-        }
-        if (settings.store.graidentButtons) {
-            enableStyle(graidentbuttons);
-        }
-        if (settings.store.nitroThemesFix) {
-            enableStyle(nitrothemesfix);
-        }
-        if (settings.store.settingsIcons) {
-            enableStyle(settingsicons);
-        }
-        if (settings.store.userReimagined) {
-            enableStyle(userreimagined);
-        }
+
+        // Push variables to array to iterate on start() and stop()
+        settingsArray.push(
+            settings.store.betterAuthApps,
+            settings.store.betterStatusPicker,
+            settings.store.gradientButtons,
+            settings.store.nitroThemesFix,
+            settings.store.settingsIcons,
+            settings.store.userReimagined
+        );
+        cssArray.push(
+            betterauthapps,
+            betterstatuspicker,
+            gradientbuttons,
+            nitrothemesfix,
+            settingsicons,
+            userreimagined
+        );
+
+        settingsArray.forEach((s, i) => {
+            if (s) enableStyle(cssArray[i]);
+        });
     },
     stop() {
-        if (settings.store.betterAuthApps) {
-            disableStyle(betterauthapps);
-        }
-        if (settings.store.betterStatusPicker) {
-            disableStyle(betterstatuspicker);
-        }
-        if (settings.store.graidentButtons) {
-            disableStyle(graidentbuttons);
-        }
-        if (settings.store.nitroThemesFix) {
-            disableStyle(nitrothemesfix);
-        }
-        if (settings.store.settingsIcons) {
-            disableStyle(settingsicons);
-        }
-        if (settings.store.userReimagined) {
-            disableStyle(userreimagined);
-        }
+
+        settingsArray.forEach((s, i) => {
+            if (s) disableStyle(cssArray[i]);
+        });
+
+        settingsArray = [];
+        cssArray = [];
     }
 });
