@@ -53,7 +53,25 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show translate button in chat bar",
         default: true
-    }
+    },
+    ...(IS_DISCORD_DESKTOP ? { // Only show these options on desktop since DeepL is not supported on web
+        service: {
+            description: "Translation service",
+            type: OptionType.SELECT,
+            options: [
+                { label: "Google Translate", value: "google", default: true },
+                { label: "DeepL Free", value: "deepl" },
+                { label: "DeepL Pro", value: "deepl-pro" }
+            ]
+        },
+        deeplApiKey: {
+            description: "DeepL API key",
+            type: OptionType.STRING,
+            default: "",
+            placeholder: "Get your API key from https://deepl.com/your-account",
+            disabled: () => settings.store.service === "google"
+        }
+    } : {})
 }).withPrivateSettings<{
     showAutoTranslateAlert: boolean;
 }>();

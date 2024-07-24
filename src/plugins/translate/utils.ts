@@ -17,16 +17,27 @@
 */
 
 import { classNameFactory } from "@api/Styles";
+import { PluginNative } from "@utils/types";
+import { showToast, Toasts } from "@webpack/common";
 
 import { settings } from "./settings";
 
 export const cl = classNameFactory("vc-trans-");
 
-interface TranslationData {
+const Native = VencordNative.pluginHelpers.Translate as PluginNative<typeof import("./native")>;
+
+interface GoogleData {
     src: string;
     sentences: {
         // 🏳️‍⚧️
         trans: string;
+    }[];
+}
+
+interface DeepLData {
+    translations: {
+        detected_source_language: string;
+        text: string;
     }[];
 }
 
@@ -38,6 +49,46 @@ export interface TranslationValue {
 export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
     const sourceLang = settings.store[kind + "Input"];
     const targetLang = settings.store[kind + "Output"];
+    const { service } = settings.store;
+
+    // DeepL not supported on web due to CORS policy
+    if (IS_DISCORD_DESKTOP && service !== "google") {
+        if (!settings.store.deeplApiKey) {
+            showToast("DeepL API key is not set", Toasts.Type.FAILURE);
+            throw new Error("DeepL API key is not set");
+        }
+
+        try {
+            // CORS jumpscare
+            const { status, data } = await Native.makeRequest(service === "deepl-pro", settings.store.deeplApiKey, JSON.stringify({
+                text: [text],
+                target_lang: targetLang
+            }));
+
+            switch (status) {
+                case 200:
+                    break;
+                case 403:
+                    showToast("Invalid DeepL API key or version", Toasts.Type.FAILURE);
+                    throw new Error("Invalid DeepL API key");
+                case 456:
+                    showToast("DeepL API quota exceeded", Toasts.Type.FAILURE);
+                    throw new Error("DeepL API quota exceeded");
+                default:
+                    throw new Error(
+                        `Failed to translate "${text}" (${sourceLang} -> ${targetLang})`
+                        + `\n${status} ${data}`
+                    );
+            }
+
+            const { translations }: DeepLData = JSON.parse(data);
+
+            return { src: translations[0].detected_source_language, text: translations[0].text };
+        } catch (e) {
+            console.error(e);
+            throw new Error("Failed to translate text");
+        }
+    }
 
     const url = "https://translate.googleapis.com/translate_a/single?" + new URLSearchParams({
         // see https://stackoverflow.com/a/29537590 for more params
@@ -63,7 +114,7 @@ export async function translate(kind: "received" | "sent", text: string): Promis
             + `\n${res.status} ${res.statusText}`
         );
 
-    const { src, sentences }: TranslationData = await res.json();
+    const { src, sentences }: GoogleData = await res.json();
 
     return {
         src,
