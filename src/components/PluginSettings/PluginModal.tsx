@@ -52,7 +52,7 @@ const cl = classNameFactory("vc-plugin-modal-");
 
 const UserSummaryItem = findComponentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByProps("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
-const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
+const UserRecord = proxyLazy<Constructor<Partial<User>>>(() => UserStore.getCurrentUser().constructor);
 
 interface PluginModalProps extends ModalProps {
     plugin: Plugin;
