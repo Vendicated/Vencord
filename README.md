@@ -147,10 +147,11 @@ MacOS
 Linux
 - [CLI](https://github.com/Equicord/Equilotl/releases/latest/download/EquilotlCli-Linux)
 
+
+## Installing Equicord Devbuild
+
 ### Dependencies
 [Git](https://git-scm.com/download) and [Node.JS LTS](https://nodejs.dev/en/) are required.
-
-### Installing Equicord Devbuild
 
 Install `pnpm`:
 
