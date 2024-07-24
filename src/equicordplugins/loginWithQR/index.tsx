@@ -5,19 +5,22 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps } from "@webpack";
 import { Button, Forms, i18n, Menu, TabBar } from "@webpack/common";
 import { ReactElement } from "react";
 
+import { preload, unload } from "./images";
 import { cl, QrCodeCameraIcon } from "./ui";
 import openQrModal from "./ui/modals/QrModal";
+import { EquicordDevs } from "@utils/constants";
 
 export default definePlugin({
     name: "LoginWithQR",
-    description: "Allows you to login to another device by scanning a login QR code, just like on mobile!",
+    description:
+        "Allows you to login to another device by scanning a login QR code, just like on mobile!",
     authors: [EquicordDevs.nexpid],
+
     settings: definePluginSettings({
         scanQr: {
             type: OptionType.COMPONENT,
@@ -26,7 +29,7 @@ export default definePlugin({
                 if (!Vencord.Plugins.plugins.LoginWithQR.started)
                     return (
                         <Forms.FormText>
-                            Scan a login QR code
+                            Enable the plugin and restart your client to scan a login QR code
                         </Forms.FormText>
                     );
 
@@ -38,6 +41,7 @@ export default definePlugin({
             },
         },
     }),
+
     patches: [
         // Prevent paste event from firing when the QRModal is open
         {
@@ -80,7 +84,9 @@ export default definePlugin({
             },
         },
     ],
+
     qrModalOpen: false,
+
     insertScanQrButton: (button: ReactElement) => (
         <div className={cl("settings-btns")}>
             <Button size={Button.Sizes.SMALL} onClick={openQrModal}>
@@ -89,8 +95,11 @@ export default definePlugin({
             {button}
         </div>
     ),
+
     get ScanQrMenuItem() {
-        const { menuItemFocused, subMenuIcon } = findByProps("menuItemFocused") as Record<string, string>;
+        const { menuItemFocused, subMenuIcon } = findByProps(
+            "menuItemFocused"
+        ) as Record<string, string>;
 
         return (
             <Menu.MenuGroup>
@@ -106,9 +115,19 @@ export default definePlugin({
             </Menu.MenuGroup>
         );
     },
+
     ScanQrTabBarComponent: () => (
         <TabBar.Item id="Scan QR Code" onClick={openQrModal}>
             {i18n.Messages.USER_SETTINGS_SCAN_QR_CODE}
         </TabBar.Item>
     ),
+
+    start() {
+        // Preload images
+        preload();
+    },
+
+    stop() {
+        unload?.();
+    },
 });
