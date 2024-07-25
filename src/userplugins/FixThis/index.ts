@@ -23,9 +23,8 @@ export default definePlugin({
         if (typeof content !== "string") return content;
 
         const urlMap: { [key: string]: string } = {
-            "vm.tiktok.com": "vm.tnktok.com",
             "tiktok.com": "tnktok.com",
-            "instagram.com": "www.ddinstagram.com",
+            "instagram.com": "ddinstagram.com",
             "twitter.com": "vxtwitter.com",
             "x.com": "vxtwitter.com"
         };
@@ -38,9 +37,9 @@ export default definePlugin({
             }
 
             for (const [oldDomain, newDomain] of Object.entries(urlMap)) {
-                const regex = new RegExp(`https?://(www\\.)?${oldDomain.replace('.', '\\.')}`, 'i');
+                const regex = new RegExp(`https?://([a-zA-Z0-9-]+\\.)?${oldDomain.replace('.', '\\.')}`, 'i');
                 if (regex.test(lowerUrl)) {
-                    return url.replace(regex, `https://${newDomain}`);
+                    return url.replace(regex, (match, p1) => `https://${p1 || ''}${newDomain}`);
                 }
             }
 
