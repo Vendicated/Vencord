@@ -189,7 +189,8 @@ export default definePlugin({
             replacement: {
                 match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",{...\2,/,
                 replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openImage($1)},"
-            }
+            },
+            all: true
         },
         // Old Profiles Modal pfp
         {
