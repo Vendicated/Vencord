@@ -162,13 +162,13 @@ export default definePlugin({
         {
             name: "equicord-debug",
             description: "Send Equicord debug info",
-            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || AllowedChannelIds.includes(ctx.channel.id),
+            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id) || AllowedChannelIds.includes(ctx.channel.id),
             execute: async () => ({ content: await generateDebugInfoMessage() })
         },
         {
             name: "equicord-plugins",
             description: "Send Equicord plugin list",
-            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || AllowedChannelIds.includes(ctx.channel.id),
+            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id) || AllowedChannelIds.includes(ctx.channel.id),
             execute: () => ({ content: generatePluginList() })
         }
     ],
@@ -254,7 +254,7 @@ export default definePlugin({
 
     ContributorDmWarningCard: ErrorBoundary.wrap(({ userId }) => {
         if (!isPluginDev(userId) || !isEquicordPluginDev(userId)) return null;
-        if (RelationshipStore.isFriend(userId) || isPluginDev(UserStore.getCurrentUser()?.id)) return null;
+        if (RelationshipStore.isFriend(userId) || isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id)) return null;
 
         return (
             <Card className={`vc-plugins-restart-card ${Margins.top8}`}>
