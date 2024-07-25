@@ -67,8 +67,8 @@ function clean(str: string) {
         : /[^\p{Letter}\p{Number}\p{Punctuation}\s]/gu;
 
     return str.normalize("NFKC")
-        .replace(replacer, "")
-        .replace(/_{2,}/g, "_")
+        .replaceAll(replacer, "")
+        .replaceAll(/_{2,}/g, "_")
         .trim();
 }
 

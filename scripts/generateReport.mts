@@ -75,7 +75,7 @@ const IGNORED_DISCORD_ERRORS: (RegExp | string)[] = [
 ];
 
 function toCodeBlock(s: string, indentation = 0, isDiscord = false) {
-    s = s.replace(/```/g, "`\u200B`\u200B`");
+    s = s.replaceAll(/```/g, "`\u200B`\u200B`");
 
     const indentationStr = " ".repeat(!isDiscord ? indentation : 0);
     return `\`\`\`\n${s.replaceAll(/^/gm, indentationStr)}\n${indentationStr}\`\`\``;
@@ -223,7 +223,7 @@ page.on("console", async e => {
                     plugin: plugin!,
                     type: type!,
                     id: id!,
-                    match: regex!.replace(/\[A-Za-z_\$\]\[\\w\$\]\*/g, "\\i"),
+                    match: regex!.replaceAll(/\[A-Za-z_\$\]\[\\w\$\]\*/g, "\\i"),
                     error: await maybeGetError(e.args()[3]!)
                 });
 

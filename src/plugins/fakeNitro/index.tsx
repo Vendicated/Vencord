@@ -608,9 +608,9 @@ export default definePlugin({
         if (settings.store.transformCompoundSentence) itemsToMaybePush.push(...contentItems);
         else if (contentItems.length === 1) itemsToMaybePush.push(contentItems[0]!);
 
-        itemsToMaybePush.push(...message.attachments
-            .filter(attachment => attachment.content_type === "image/gif")
-            .map(attachment => attachment.url));
+        for (const a of message.attachments)
+            if (a.content_type === "image/gif")
+                itemsToMaybePush.push(a.url);
 
         for (const item of itemsToMaybePush) {
             if (

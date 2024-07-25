@@ -21,6 +21,11 @@ interface Call {
     ringing?: string[];
 }
 
+const pingDefaultColor = "7289da";
+const channelPingDefaultColor = "8a2be2";
+const colorRE = /[0-9A-Za-z]{8}|[0-9A-Za-z]{6}/;
+const isValid = (color: string) => colorRE.test(color);
+
 const settings = definePluginSettings({
     botNotifications: {
         type: OptionType.BOOLEAN,
@@ -50,12 +55,14 @@ const settings = definePluginSettings({
     pingColor: {
         type: OptionType.STRING,
         description: "User mention color",
-        default: "#7289da"
+        default: "#" + pingDefaultColor,
+        isValid
     },
     channelPingColor: {
         type: OptionType.STRING,
         description: "Channel mention color",
-        default: "#8a2be2"
+        default: "#" + channelPingDefaultColor,
+        isValid
     },
     soundPath: {
         type: OptionType.STRING,
@@ -106,10 +113,11 @@ export default definePlugin({
         MESSAGE_CREATE({ message, optimistic }: { message: MessageJSON; optimistic: boolean; }) {
             if (optimistic) return;
             const channel = ChannelStore.getChannel(message.channel_id)!;
-            if (!shouldNotify(message, message.channel_id)) return;
+            if (
+                shouldIgnoreForChannelType(channel) ||
+                !shouldNotify(message, message.channel_id)
+            ) return;
 
-            const pingColor = settings.store.pingColor.replaceAll("#", "").trim();
-            const channelPingColor = settings.store.channelPingColor.replaceAll("#", "").trim();
             let finalMsg = message.content;
             let titleString = "";
 
@@ -117,7 +125,6 @@ export default definePlugin({
                 const guild = GuildStore.getGuild(channel.guild_id)!;
                 titleString = `${message.author.username} (${guild.name}, #${channel.name})`;
             }
-
 
             switch (channel.type) {
                 case ChannelType.DM:
@@ -129,76 +136,60 @@ export default definePlugin({
                     break;
             }
 
-            if (message.referenced_message) {
+            if (message.referenced_message)
                 titleString += " (reply)";
-            }
 
             if (message.embeds.length > 0) {
                 finalMsg += " [embed] ";
-                if (message.content === "") {
+                if (message.content === "")
                     finalMsg = "sent message embed(s)";
-                }
             }
 
             if (message.sticker_items) {
                 finalMsg += " [sticker] ";
-                if (message.content === "") {
+                if (message.content === "")
                     finalMsg = "sent a sticker";
-                }
             }
 
-            const images = message.attachments.filter(e =>
-                typeof e.content_type === "string"
-                && e.content_type.startsWith("image")
-            );
-
-
-            images.forEach(img => {
-                finalMsg += ` [image: ${img.filename}] `;
-            });
-
-            message.attachments.filter(a => !a.content_type?.startsWith("image")).forEach(a => {
-                finalMsg += ` [attachment: ${a.filename}] `;
-            });
-
-            // make mentions readable
-            if (message.mentions.length > 0) {
-                finalMsg = finalMsg.replace(/<@!?(\d{17,20})>/g, (_, id) => `<color=#${pingColor}><b>@${UserStore.getUser(id)?.username || "unknown-user"}</color></b>`);
+            let images = "";
+            let attachments = "";
+            for (const a of message.attachments) {
+                if (a.content_type?.startsWith("image"))
+                    images += ` [image: ${a.filename}] `;
+                else
+                    attachments += ` [attachment: ${a.filename}] `;
             }
+            finalMsg += images + attachments;
+
+
+            const pingColor = settings.store.pingColor.match(colorRE)?.[0] ?? pingDefaultColor;
+
+            // make user mentions readable
+            if (message.mentions.length > 0)
+                finalMsg = finalMsg.replace(
+                    /(?<=<@!?)\d{17,20}(?=>)/g,
+                    id => `<color=#${pingColor}><b>@${UserStore.getUser(id)?.username || "unknown-user"}</color></b>`
+                );
 
             // color role mentions (unity styling btw lol)
-            if (message.mention_roles.length > 0) {
-                for (const roleId of message.mention_roles) {
-                    const role = channel.guild_id && GuildStore.getRole(channel.guild_id, roleId);
-                    if (!role) continue;
-                    const roleColor = role.colorString ?? `#${pingColor}`;
-                    finalMsg = finalMsg.replace(`<@&${roleId}>`, `<b><color=${roleColor}>@${role.name}</color></b>`);
-                }
+            for (const roleId of message.mention_roles) {
+                const role = channel.guild_id && GuildStore.getRole(channel.guild_id, roleId);
+                if (!role) continue;
+                const roleColor = role.colorString ?? `#${pingColor}`;
+                finalMsg = finalMsg.replace(`<@&${roleId}>`, `<b><color=${roleColor}>@${role.name}</color></b>`);
             }
 
-            // make emotes and channel mentions readable
-            const emoteMatches = finalMsg.match(new RegExp("(<a?:\\w+:\\d+>)", "g"));
-            const channelMatches = finalMsg.match(new RegExp("<(#\\d+)>", "g"));
+            // make emoji mentions readable
+            finalMsg = finalMsg.replaceAll(/<a?(:\w+:)\d+>/g, "$1");
 
-            if (emoteMatches) {
-                for (const eMatch of emoteMatches) {
-                    finalMsg = finalMsg.replace(new RegExp(`${eMatch}`, "g"), `:${eMatch.split(":")[1]}:`);
-                }
-            }
-
+            // make channel mentions readable
             // color channel mentions
-            if (channelMatches) {
-                for (const cMatch of channelMatches) {
-                    let channelId = cMatch.split("<#")[1]!;
-                    channelId = channelId.substring(0, channelId.length - 1);
-                    finalMsg = finalMsg.replace(
-                        new RegExp(`${cMatch}`, "g"),
-                        `<b><color=#${channelPingColor}>#${ChannelStore.getChannel(channelId)!.name}</color></b>`
-                    );
-                }
-            }
+            const channelPingColor = settings.store.channelPingColor.match(colorRE)?.[0] ?? channelPingDefaultColor;
+            finalMsg = finalMsg.replaceAll(
+                /<#(\d+)>/g,
+                id => `<b><color=#${channelPingColor}>#${ChannelStore.getChannel(id)?.name || "unknown-channel"}</color></b>`
+            );
 
-            if (shouldIgnoreForChannelType(channel)) return;
             sendMsgNotif(titleString, finalMsg, message);
         }
     }
@@ -207,7 +198,7 @@ export default definePlugin({
 function shouldIgnoreForChannelType(channel: ChannelRecord) {
     if (channel.isDM() && settings.store.dmNotifications) return false;
     if (channel.isGroupDM() && settings.store.groupDmNotifications) return false;
-    else return !settings.store.serverNotifications;
+    return !settings.store.serverNotifications;
 }
 
 async function sendMsgNotif(titleString: string, content: string, message: MessageJSON) {

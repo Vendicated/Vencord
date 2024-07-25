@@ -53,7 +53,7 @@ export class Queue {
      * If the queue exceeds the specified maxSize, the first task in queue will be removed.
      * @param func Task
      */
-    push<T>(func: () => Promisable<T>) {
+    push(func: () => Promisable<unknown>) {
         if (this.size >= this.maxSize)
             this.queue.shift();
 
@@ -66,7 +66,7 @@ export class Queue {
      * If the queue exceeds the specified maxSize, the last task in queue will be removed.
      * @param func Task
      */
-    unshift<T>(func: () => Promisable<T>) {
+    unshift(func: () => Promisable<unknown>) {
         if (this.size >= this.maxSize)
             this.queue.pop();
 

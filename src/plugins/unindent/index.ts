@@ -37,16 +37,16 @@ export default definePlugin({
 
     unindent(str: string) {
         // Users cannot send tabs, they get converted to spaces. However, a bot may send tabs, so convert them to 4 spaces first
-        str = str.replace(/\t/g, "    ");
+        str = str.replaceAll("\t", "    ");
         const minIndent = str.match(/^ *(?=\S)/gm)
             ?.reduce((prev, curr) => Math.min(prev, curr.length), Infinity) ?? 0;
 
         if (!minIndent) return str;
-        return str.replace(new RegExp(`^ {${minIndent}}`, "gm"), "");
+        return str.replaceAll(new RegExp(`^ {${minIndent}}`, "gm"), "");
     },
 
     unindentMsg(msg: MessageObject) {
-        msg.content = msg.content.replace(/```(.|\n)*?```/g, m => {
+        msg.content = msg.content.replaceAll(/```.*?```/gs, m => {
             const lines = m.split("\n");
             if (lines.length < 2) return m; // Do not affect inline codeblocks
             let suffix = "";

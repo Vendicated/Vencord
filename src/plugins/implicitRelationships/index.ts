@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { type FluxPersistedStore, RelationshipType, type UserRecord } from "@vencord/discord-types";
+import { type FluxPersistedStore, RelationshipType } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
@@ -151,13 +151,14 @@ export default definePlugin({
             for (const chunk of chunks) {
                 const { nonce, members } = chunk;
                 if (nonce !== sentNonce) return;
-                members.forEach((member: any) => {
+                for (const member of members)
                     ignore.delete(member.user.id);
-                });
 
-                nonFriendAffinities.map(id => UserStore.getUser(id))
-                    .filter((user): user is UserRecord => !!user && !ignore.has(user.id))
-                    .forEach(user => { relationships[user.id] = RelationshipType.IMPLICIT; });
+                for (const id of nonFriendAffinities) {
+                    const user = UserStore.getUser(id);
+                    if (user && !ignore.has(user.id))
+                        relationships[user.id] = RelationshipType.IMPLICIT;
+                }
                 RelationshipStore.emitChange();
                 if (--count === 0) {
                     FluxDispatcher.unsubscribe("GUILD_MEMBERS_CHUNK_BATCH", callback);

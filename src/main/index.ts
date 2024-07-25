@@ -72,7 +72,7 @@ if (IS_VESKTOP || !IS_VANILLA) {
         const parsePolicy = (policy: string): PolicyResult => {
             const result: PolicyResult = {};
             policy.split(";").forEach(directive => {
-                const [directiveKey, ...directiveValue] = directive.trim().split(/\s+/g);
+                const [directiveKey, ...directiveValue] = directive.trim().split(/\s+/);
                 if (directiveKey && !Object.prototype.hasOwnProperty.call(result, directiveKey)) {
                     result[directiveKey] = directiveValue;
                 }

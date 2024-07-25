@@ -157,7 +157,7 @@ export default definePlugin({
         }, [message.id]);
 
         const reactions = getReactionsWithQueue(message, emoji, type);
-        const users: UserRecord[] = Object.values(reactions).filter(Boolean);
+        const users = Object.values(reactions).filter(Boolean);
 
         return (
             <div

@@ -55,9 +55,9 @@ export default definePlugin({
 
         let name = url
             .slice(url.lastIndexOf("/") + 1)
-            .replace(/\d/g, "") // strip numbers
+            .replaceAll(/\d/g, "") // strip numbers
             .replace(/.gif$/, "") // strip extension
-            .split(/[,\-_ ]+/g)
+            .split(/[,\-_ ]+/)
             .slice(0, 20)
             .join(" ");
         if (name.length > 300) {

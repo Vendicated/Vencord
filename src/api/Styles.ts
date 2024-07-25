@@ -127,7 +127,7 @@ export const compileStyle = (style: Style) => {
     if (!style.dom) throw new Error("Style has no DOM element");
 
     style.dom.textContent = style.source
-        .replace(/\[--(\w+)\]/g, (match, name) => {
+        .replaceAll(/\[--(\w+)\]/g, (match, name) => {
             const className = style.classNames[name];
             return className ? classNameToSelector(className) : match;
         });

@@ -62,7 +62,7 @@ const ErrorBoundary = LazyComponent(() => {
                 const eolIdx = stack.indexOf("\n");
                 if (eolIdx !== -1) {
                     message = stack.slice(0, eolIdx);
-                    stack = stack.slice(eolIdx + 1).replace(/https:\/\/\S+\/assets\//g, "");
+                    stack = stack.slice(eolIdx + 1).replaceAll(/https:\/\/\S+\/assets\//g, "");
                 }
             }
 

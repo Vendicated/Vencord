@@ -162,8 +162,11 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         const result =
             props.favCopy
                 .map(gif => ({
-                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                    score: fuzzySearch(searchQuery.toLowerCase(), getTargetString(gif.url ?? gif.src).replace(/(%20|[_-])/g, " ").toLowerCase()),
+                    score: fuzzySearch(
+                        searchQuery.toLowerCase(),
+                        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                        getTargetString(gif.url ?? gif.src).replaceAll(/(%20|[_-])/g, " ").toLowerCase()
+                    ),
                     gif,
                 }))
                 .filter((m): m is { score: number; gif: Gif; } => m.score != null);

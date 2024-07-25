@@ -53,11 +53,11 @@ const settings = definePluginSettings({
     appID: {
         type: OptionType.STRING,
         description: "Application ID (required)",
-        onChange: onChange,
+        onChange,
         isValid(value: string) {
             if (!value)
                 return "Application ID is required.";
-            if (value && !/^\d+$/.test(value))
+            if (!/^\d+$/.test(value))
                 return "Application ID must be a number.";
             return true;
         }
@@ -65,7 +65,7 @@ const settings = definePluginSettings({
     appName: {
         type: OptionType.STRING,
         description: "Application name (required)",
-        onChange: onChange,
+        onChange,
         isValid(value: string) {
             if (!value)
                 return "Application name is required.";
@@ -77,9 +77,9 @@ const settings = definePluginSettings({
     details: {
         type: OptionType.STRING,
         description: "Details (line 1)",
-        onChange: onChange,
+        onChange,
         isValid(value: string) {
-            if (value && value.length > 128)
+            if (value.length > 128)
                 return "Details (line 1) must be not longer than 128 characters.";
             return true;
         }
@@ -87,9 +87,9 @@ const settings = definePluginSettings({
     state: {
         type: OptionType.STRING,
         description: "State (line 2)",
-        onChange: onChange,
+        onChange,
         isValid(value: string) {
-            if (value && value.length > 128)
+            if (value.length > 128)
                 return "State (line 2) must be not longer than 128 characters.";
             return true;
         }
@@ -97,7 +97,7 @@ const settings = definePluginSettings({
     type: {
         type: OptionType.SELECT,
         description: "Activity type",
-        onChange: onChange,
+        onChange,
         options: [
             {
                 label: "Playing",
@@ -125,14 +125,14 @@ const settings = definePluginSettings({
     streamLink: {
         type: OptionType.STRING,
         description: "Twitch.tv or Youtube.com link (only for Streaming activity type)",
-        onChange: onChange,
+        onChange,
         disabled: isStreamLinkDisabled,
         isValid: isStreamLinkValid
     },
     timestampMode: {
         type: OptionType.SELECT,
         description: "Timestamp mode",
-        onChange: onChange,
+        onChange,
         options: [
             {
                 label: "None",
@@ -156,10 +156,10 @@ const settings = definePluginSettings({
     startTime: {
         type: OptionType.NUMBER,
         description: "Start timestamp in milliseconds (only for custom timestamp mode)",
-        onChange: onChange,
+        onChange,
         disabled: isTimestampDisabled,
         isValid(value: number) {
-            if (value && value < 0)
+            if (value < 0)
                 return "Start timestamp must be greater than 0.";
             return true;
         }
@@ -167,10 +167,10 @@ const settings = definePluginSettings({
     endTime: {
         type: OptionType.NUMBER,
         description: "End timestamp in milliseconds (only for custom timestamp mode)",
-        onChange: onChange,
+        onChange,
         disabled: isTimestampDisabled,
         isValid(value: number) {
-            if (value && value < 0)
+            if (value < 0)
                 return "End timestamp must be greater than 0.";
             return true;
         }
@@ -178,15 +178,15 @@ const settings = definePluginSettings({
     imageBig: {
         type: OptionType.STRING,
         description: "Big image key/link",
-        onChange: onChange,
+        onChange,
         isValid: isImageKeyValid
     },
     imageBigTooltip: {
         type: OptionType.STRING,
         description: "Big image tooltip",
-        onChange: onChange,
+        onChange,
         isValid(value: string) {
-            if (value && value.length > 128)
+            if (value.length > 128)
                 return "Big image tooltip must be not longer than 128 characters.";
             return true;
         }
@@ -194,15 +194,15 @@ const settings = definePluginSettings({
     imageSmall: {
         type: OptionType.STRING,
         description: "Small image key/link",
-        onChange: onChange,
+        onChange,
         isValid: isImageKeyValid
     },
     imageSmallTooltip: {
         type: OptionType.STRING,
         description: "Small image tooltip",
-        onChange: onChange,
+        onChange,
         isValid(value: string) {
-            if (value && value.length > 128)
+            if (value.length > 128)
                 return "Small image tooltip must be not longer than 128 characters.";
             return true;
         }
@@ -210,9 +210,9 @@ const settings = definePluginSettings({
     buttonOneText: {
         type: OptionType.STRING,
         description: "Button 1 text",
-        onChange: onChange,
+        onChange,
         isValid(value: string) {
-            if (value && value.length > 31)
+            if (value.length > 31)
                 return "Button 1 text must be not longer than 31 characters.";
             return true;
         }
@@ -220,14 +220,14 @@ const settings = definePluginSettings({
     buttonOneURL: {
         type: OptionType.STRING,
         description: "Button 1 URL",
-        onChange: onChange
+        onChange
     },
     buttonTwoText: {
         type: OptionType.STRING,
         description: "Button 2 text",
-        onChange: onChange,
+        onChange,
         isValid(value: string) {
-            if (value && value.length > 31)
+            if (value.length > 31)
                 return "Button 2 text must be not longer than 31 characters.";
             return true;
         }
@@ -235,7 +235,7 @@ const settings = definePluginSettings({
     buttonTwoURL: {
         type: OptionType.STRING,
         description: "Button 2 URL",
-        onChange: onChange
+        onChange
     }
 });
 

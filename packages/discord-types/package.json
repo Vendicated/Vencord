@@ -33,7 +33,7 @@
         "@stylistic/eslint-plugin": "^2.3.0",
         "@types/node": "^20.14.12",
         "@types/semver": "^7.5.8",
-        "@typescript-eslint/typescript-estree": "^8.0.0-alpha.52",
+        "@typescript-eslint/typescript-estree": "^8.0.0-alpha.53",
         "eslint": "^9.7.0",
         "eslint-plugin-check-file": "^2.8.0",
         "eslint-plugin-headers": "^1.1.2",
@@ -45,6 +45,6 @@
         "semver": "^7.6.3",
         "tsx": "^4.16.2",
         "typescript": "^5.5.4",
-        "typescript-eslint": "^8.0.0-alpha.52"
+        "typescript-eslint": "^8.0.0-alpha.53"
     }
 }

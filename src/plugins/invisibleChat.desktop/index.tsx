@@ -113,10 +113,8 @@ export default definePlugin({
     ],
 
     EMBED_API_URL: "https://embed.sammcheese.net",
-    INV_REGEX: new RegExp(/( \u200c|\u200d |[\u2060-\u2064])[^\u200b]/),
-    URL_REGEX: new RegExp(
-        /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/,
-    ),
+    INV_REGEX: /(?: \u200c|\u200d |[\u2060-\u2064])[^\u200b]/,
+    URL_REGEX: /(?:https?:\/\/.)?(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_+.~#?&//=]*/,
     async start() {
         addButton("InvisibleChat", message =>
             this.INV_REGEX.test(message.content)
@@ -159,8 +157,6 @@ export default definePlugin({
     },
 
     async buildEmbed(message: any, revealed: string) {
-        const urlCheck = revealed.match(this.URL_REGEX);
-
         message.embeds.push({
             type: "rich",
             rawTitle: "Decrypted Message",
@@ -171,8 +167,8 @@ export default definePlugin({
             },
         });
 
-        if (urlCheck?.length) {
-            const embed = await this.getEmbed(new URL(urlCheck[0]));
+        if (this.URL_REGEX.test(revealed)) {
+            const embed = await this.getEmbed(new URL(revealed));
             if (embed)
                 message.embeds.push(embed);
         }

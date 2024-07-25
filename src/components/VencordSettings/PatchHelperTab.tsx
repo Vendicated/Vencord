@@ -322,7 +322,7 @@ function PatchHelper() {
 {
     find: ${parsedFind instanceof RegExp ? parsedFind.toString() : JSON.stringify(parsedFind)},
     replacement: {
-        match: /${match.replace(/(?<!\\)\//g, "\\/")}/,
+        match: /${match.replaceAll(/(?<!\\)\//g, "\\/")}/,
         replace: ${typeof replacement === "function" ? replacement.toString() : JSON.stringify(replacement)}
     }
 }

@@ -291,12 +291,7 @@ function ThemesTab() {
 
     // When the user leaves the online theme textbox, update the settings
     function onBlur() {
-        settings.themeLinks = [...new Set(
-            themeText
-                .split(/\n+/)
-                .map(s => s.trim())
-                .filter(Boolean)
-        )];
+        settings.themeLinks = [...new Set(themeText.match(/\S(?:.*\S)?/g))];
     }
 
     const renderOnlineThemes = () => (

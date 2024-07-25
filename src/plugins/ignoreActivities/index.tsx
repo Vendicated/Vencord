@@ -159,7 +159,7 @@ const settings = definePluginSettings({
         description: "",
         default: "",
         onChange(newValue: string) {
-            const ids = new Set(Array.from(newValue.matchAll(/[^,\s](?:[^,]*[^,\s])?/g), ([m]) => m));
+            const ids = new Set(newValue.match(/[^,\s](?:[^,]*[^,\s])?/g));
             settings.store.allowedIds = [...ids].join(", ");
         },
         component: props => <AllowedIdsComponent setValue={props.setValue} />

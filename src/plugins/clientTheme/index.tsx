@@ -7,6 +7,7 @@
 import "./clientTheme.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { isTruthy } from "@utils";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
@@ -158,7 +159,7 @@ const darkVariableRegex = /^--primary-[5-9]\d{2}-hsl/g;
 // - matching regex (so we can limit what variables are included in light/dark theme, otherwise text becomes unreadable)
 // - offset from specified center (light/dark theme get different offsets because light uses 100 for background-primary, while dark uses 600)
 function genThemeSpecificOffsets(variableLightness: Record<string, number>, regex: RegExp, centerVariable: string): string {
-    return Object.entries(variableLightness).filter(([key]) => key.search(regex) > -1)
+    return Object.entries(variableLightness).filter(([key]) => regex.test(key))
         .map(([key, lightness]) => {
             const lightnessOffset = lightness - variableLightness[centerVariable]!;
             const plusOrMinus = lightnessOffset >= 0 ? "+" : "-";
@@ -203,7 +204,7 @@ function generateLightModeFixes(styles: string) {
     const bgVarRegex = /^(--[^:]*(?:background|bg)[^:]*):var\(--white-500\)/m;
     // get all global variables used for backgrounds
     const lightVars = mapReject(relevantStyles, style => captureOne(style, groupBgVarRegex)!) // get the insides of capture groups that have at least one background var with w500
-        .map(str => str.split(";")).flat(); // captureGroupInsides[] -> cssRule[]
+        .flatMap(str => str.split(";")); // captureGroupInsides[] -> cssRule[]
     const lightBgVars = mapReject(lightVars, variable => captureOne(variable, bgVarRegex)!); // remove vars that aren't for backgrounds or w500
     // create css to reassign every var
     const reassignVariables = `.theme-light {\n ${lightBgVars.map(variable => `${variable}: var(--primary-100);`).join("\n")} \n}`;
@@ -221,7 +222,7 @@ function captureOne(str: string, regex: RegExp) {
 }
 
 function mapReject<T, U>(array: T[], callback: (value: T, index: number, array: T[]) => U) {
-    return array.map(callback).filter((v): v is Exclude<U, "" | 0n | 0 | false | null | undefined> => Boolean(v));
+    return array.map(callback).filter(isTruthy);
 }
 
 function updateColorVars(color: string) {
@@ -241,7 +242,7 @@ function updateColorVars(color: string) {
 function createStyleSheet(id: string, content = "") {
     const style = document.createElement("style");
     style.setAttribute("id", id);
-    style.textContent = content.split("\n").map(line => line.trim()).join("\n");
+    style.textContent = content.replaceAll(/^[^\S\n]+|[^\S\n]+$/gm, "");
     document.body.appendChild(style);
     return style;
 }
@@ -302,11 +303,11 @@ function hexToHSL(hexCode: string) {
     return { hue, saturation, lightness };
 }
 
+const normalize = (x: number) =>
+    x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+
 // https://www.w3.org/TR/WCAG21/#dfn-relative-luminance
 function relativeLuminance(hexCode: string) {
-    const normalize = (x: number) =>
-        x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
-
     const r = normalize(parseInt(hexCode.substring(0, 2), 16) / 255);
     const g = normalize(parseInt(hexCode.substring(2, 4), 16) / 255);
     const b = normalize(parseInt(hexCode.substring(4, 6), 16) / 255);

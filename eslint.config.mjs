@@ -160,7 +160,11 @@ export default tseslint.config(
                     message: "Use @vencord/discord-types instead."
                 }]
             }],
-            "no-restricted-syntax": ["error", "[operator=void]"],
+            "no-restricted-syntax": ["error",
+                "SequenceExpression[expressions.length!=2]",
+                "SequenceExpression > :first-child:not(Literal)",
+                "SequenceExpression > :nth-child(2):not(Identifier)",
+            ],
             "no-shadow-restricted-names": "error",
             "no-unexpected-multiline": "error",
             "no-unneeded-ternary": ["error", { defaultAssignment: false }],
@@ -169,6 +173,7 @@ export default tseslint.config(
             "no-useless-backreference": "error",
             "no-useless-computed-key": "error",
             "no-useless-escape": ["error", { extra: "i" }],
+            "no-void": "error",
             "operator-assignment": "error",
             "path-alias/no-relative": "error",
             "prefer-const": "error",

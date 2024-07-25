@@ -94,7 +94,7 @@ export function prepareOption<O extends Option | Command>(opt: O): O {
         // See comment above Placeholders
         if (opt === OptPlaceholder) opts[i] = OptionalMessageOption;
         else if (opt === ReqPlaceholder) opts[i] = RequiredMessageOption;
-        opt.choices?.forEach(x => x.displayName ||= x.name);
+        opt.choices?.forEach(x => { x.displayName ||= x.name; });
 
         prepareOption(opts[i]!);
     });

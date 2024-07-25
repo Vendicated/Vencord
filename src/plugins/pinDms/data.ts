@@ -109,37 +109,35 @@ export function getAllUncollapsedChannels() {
 }
 
 export function getSections() {
-    return categories.reduce<number[]>((acc, category) => {
-        acc.push(category.channels.length === 0 ? 1 : category.channels.length);
-        return acc;
-    }, []);
+    return categories.map(category =>
+        category.channels.length === 0 ? 1 : category.channels.length
+    );
 }
 
 // move categories
-export const canMoveArrayInDirection = (array: any[], index: number, direction: -1 | 1) => {
+export function canMoveArrayInDirection(array: unknown[], index: number, direction: -1 | 1) {
     const a = array[index];
     const b = array[index + direction];
 
-    return a && b;
-};
+    return !!(a && b);
+}
 
-export const canMoveCategoryInDirection = (id: string, direction: -1 | 1) => {
+export function canMoveCategoryInDirection(id: string, direction: -1 | 1) {
     const index = categories.findIndex(m => m.id === id);
     return canMoveArrayInDirection(categories, index, direction);
-};
+}
 
 export const canMoveCategory = (id: string) => canMoveCategoryInDirection(id, -1) || canMoveCategoryInDirection(id, 1);
 
-export const canMoveChannelInDirection = (channelId: string, direction: -1 | 1) => {
+export function canMoveChannelInDirection(channelId: string, direction: -1 | 1) {
     const category = categories.find(c => c.channels.includes(channelId));
     if (!category) return false;
 
     const index = category.channels.indexOf(channelId);
     return canMoveArrayInDirection(category.channels, index, direction);
-};
+}
 
-
-function swapElementsInArray(array: any[], index1: number, index2: number) {
+function swapElementsInArray(array: unknown[], index1: number, index2: number) {
     if (!array[index1] || !array[index2]) return;
     [array[index1], array[index2]] = [array[index2], array[index1]];
 }

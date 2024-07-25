@@ -77,15 +77,11 @@ const settings = definePluginSettings({
 });
 
 function stringToRegex(str: string) {
-    const match = str.match(/^(\/)?(.+?)(?:\/([gimsuyv]*))?$/); // Regex to match regex
+    const match = str.match(/^\/?(.+?)(?:\/([gimsuyv]*))?$/); // Regex to match regex
     return match
         ? new RegExp(
-            match[2]!, // Pattern
-            match[3]
-                ?.split("") // Remove duplicate flags
-                .filter((char, pos, flagArr) => flagArr.indexOf(char) === pos)
-                .join("")
-            ?? "g"
+            match[1]!, // Pattern
+            match[2] ? [...new Set(match[2])].join("") : "g" // Remove duplicate flags
         )
         : new RegExp(str); // Not a regex, return string
 }
@@ -219,7 +215,7 @@ function applyRules(content: string): string {
         if (!rule.find) continue;
         if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
 
-        content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replace(/^\s|\s$/g, "");
+        content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replaceAll(/^\s|\s$/g, "");
     }
 
     for (const rule of regexRules) {
