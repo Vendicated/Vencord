@@ -27,7 +27,8 @@ export default definePlugin({
             "instagram.com": "ddinstagram.com",
             "twitter.com": "vxtwitter.com",
             "x.com": "vxtwitter.com",
-            "pixiv.net": "phixiv.net"
+            "pixiv.net": "phixiv.net",
+            "reddit.com": "rxeddit.com"
         };
 
         const processUrl = (url: string): string => {
