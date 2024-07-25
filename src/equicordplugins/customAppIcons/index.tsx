@@ -4,95 +4,88 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Link } from "@components/Link";
+import { definePluginSettings } from "@api/Settings";
+import { CodeBlock } from "@components/CodeBlock";
 import { Devs, EquicordDevs } from "@utils/constants";
-import { localStorage } from "@utils/localStorage";
-import { closeAllModals, openModal } from "@utils/modal";
-import definePlugin from "@utils/types";
-import { findByProps } from "@webpack";
-import { Button, FluxDispatcher, Forms, React, showToast, Toasts } from "@webpack/common";
+import definePlugin, { OptionType, PluginSettingComponentDef } from "@utils/types";
+import { Forms, React, TextArea } from "@webpack/common";
 
-import AppIconModal from "./AppIconModal";
+type Icon = {
+    id: string,
+    iconSource: string,
+    isPremium: boolean,
+    name: string,
+};
 
-function removeAppIcon() {
-    const current_icon = findByProps("getCurrentDesktopIcon").getCurrentDesktopIcon();
-    let icons = JSON.parse(localStorage.getItem("vc_app_icons") || "[]");
-    const index = icons.findIndex(icon => current_icon === icon.id);
-    if (index !== -1) {
-        icons = icons.filter(e => e.id !== current_icon);
-        delete findByProps("M9", "UZ", "QA").QA[current_icon];
-        delete findByProps("M9", "UZ", "QA").UZ[findByProps("M9", "UZ", "QA").UZ.findIndex((icon => current_icon === icon?.id))];
-        localStorage.setItem("vc_app_icons", JSON.stringify(icons));
-        showToast("Icon successfully deleted!", Toasts.Type.SUCCESS);
-        FluxDispatcher.dispatch({
-            type: "APP_ICON_UPDATED",
-            id: "AppIcon"
-        });
-    } else {
-        showToast("Cannot delete native App Icons!", Toasts.Type.FAILURE);
-        return;
+const settings = definePluginSettings({
+    icons: {
+        description: "Icons to add",
+        type: OptionType.COMPONENT,
+        restartNeeded: true,
+        component: iconSettingsComponent
+    }
+});
+
+function iconSettingsComponent(props: Parameters<PluginSettingComponentDef["component"]>[0]) {
+    const [state, setState] = React.useState(settings.store.icons ?? "");
+
+    function handleChange(newValue: string) {
+        setState(newValue);
+        props.setValue(newValue);
     }
 
+    return <Forms.FormSection>
+        <Forms.FormTitle>Icons</Forms.FormTitle>
+        <Forms.FormText>The icons you want to add.</Forms.FormText>
+        <CodeBlock lang="yaml" content={"# Config Format - New Lines are separators\nName: Url"} />
+        <TextArea type="text" value={state} onChange={handleChange} />
+    </Forms.FormSection>;
 }
 
+function getCustomIcons(_match: string, original: string) {
+    var icons: Icon[] = [];
+    const settingsIcons = settings.store.icons?.split("\n") as string[];
+
+    let index = 0;
+    for (const icon of settingsIcons) {
+        const matched = /([^:]+):\s*(.+)/.exec(icon);
+        if (!matched || matched.length < 3) continue;
+
+        const name = matched[1].trim(),
+            iconSource = matched[2].trim();
+
+        const idName = name
+            .toLowerCase()
+            .replace(/\s/g, "_")
+            .replace(/\W/g, "#");
+
+        icons.push({
+            id: `CustomAppIcon-${index}:${idName}`,
+            iconSource,
+            isPremium: false,
+            name
+        });
+
+        index++;
+    }
+
+    const outIcons = icons.map(i => JSON.stringify(i)).join(",");
+
+    return `[${original}${icons.length > 0 ? "," : ""}${outIcons}]`;
+}
 
 export default definePlugin({
     name: "CustomAppIcons",
-    description: "Add/upload custom (In-)App Icons.",
-    authors: [Devs.HappyEnderman, EquicordDevs.SerStars],
+    description: "Allows you to add your own app icons to the list.",
+    authors: [Devs.nakoyasha, EquicordDevs.SimplyData],
+    settings,
     patches: [
         {
-            find: /\i\.\i\.APP_ICON_UPSELL/,
-            replacement: [
-                {
-                    match: /\w+\.jsx\)\(\w+,{markAsDismissed:\w+,isCoachmark:\w+}\)/,
-                    replace(str) {
-                        return str + ",$self.addButtons()";
-                    }
-                }
-            ]
+            find: "APP_ICON_HOLO_WAVES}",
+            replacement: {
+                match: /\[({[^]*?})\]/,
+                replace: getCustomIcons,
+            }
         }
     ],
-
-
-    start() {
-        const appIcons = JSON.parse(localStorage.getItem("vc_app_icons") ?? "[]");
-        for (const icon of appIcons) {
-            findByProps("M9", "UZ", "QA").UZ.push(icon);
-            findByProps("M9", "UZ", "QA").QA[icon.id] = icon;
-        }
-    },
-    stop() {
-
-    },
-    addButtons() {
-
-        const { editorFooter } = findByProps("editorFooter");
-        return (
-            <>
-                <Button color={Button.Colors.BRAND_NEW} size={Button.Sizes.MEDIUM} className={editorFooter} onClick={() => {
-                    openModal(props => <AppIconModal {...props} />);
-                }}>
-                    Add Custom App Icon
-                </Button>
-                <Button color={Button.Colors.RED} size={Button.Sizes.MEDIUM} className={editorFooter} onClick={removeAppIcon}>
-                    Remove Custom selected App Icon
-                </Button>
-            </>
-        );
-    },
-
-    settingsAboutComponent: () => {
-        return (
-            <><Forms.FormTitle>
-                <Forms.FormTitle>How to use?</Forms.FormTitle>
-            </Forms.FormTitle>
-            <Forms.FormText>
-                <Forms.FormText>Go to <Link href="/settings/appearance" onClick={e => { e.preventDefault(); closeAllModals(); FluxDispatcher.dispatch({ type: "USER_SETTINGS_MODAL_SET_SECTION", section: "Appearance" }); }}>Appearance Settings</Link> tab.</Forms.FormText>
-                <Forms.FormText>Scroll down to "In-app Icons" and click on "Preview App Icon".</Forms.FormText>
-                <Forms.FormText>And upload your own custom icon!</Forms.FormText>
-                <Forms.FormText>You can only use links when you are uploading your Custom Icon.</Forms.FormText>
-            </Forms.FormText></>
-        );
-    }
 });
