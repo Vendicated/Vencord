@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -39,30 +39,6 @@ const settings = definePluginSettings({
     }
 });
 
-export default definePlugin({
-    name: "StickerBlocker",
-    description: "Allows you to block stickers from being displayed.",
-    authors: [Devs.Samwich],
-    patches: [
-        {
-            find: /\i\.\i\.STICKER_MESSAGE/,
-            replacement: {
-                match: /}\),\(null!=\i\?\i:(\i)\)\.name]}\);/,
-                replace: "$& if(Vencord.Settings.plugins.StickerBlocker.blockedStickers.split(\", \").includes($1.id)) { return($self.blockedComponent($1)) }"
-            }
-        }
-    ],
-    start() {
-        addContextMenuPatch("message", messageContextMenuPatch);
-        DataStore.createStore("StickerBlocker", "data");
-    },
-    stop() {
-        removeContextMenuPatch("message", messageContextMenuPatch);
-    },
-    blockedComponent: ErrorBoundary.wrap(blockedComponentRender, { fallback: () => <p style={{ color: "red" }}>Failed to render :(</p> }),
-    settings,
-});
-
 function blockedComponentRender(sticker) {
     const { showGif, showMessage, showButton } = settings.store;
     const elements = [] as ReactNode[];
@@ -89,22 +65,40 @@ function blockedComponentRender(sticker) {
 }
 
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
-    const { favoriteableType, favoriteableId } = props ?? {};
-    if (favoriteableType !== "sticker") { return; }
-    if (favoriteableId === null) { return; }
-    const group = findGroupChildrenByChildId("reply", children);
-    if (!group) return;
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    const { favoriteableId, favoriteableType } = props ?? {};
 
-    group.splice(group.findIndex(c => c?.props?.id === "reply") + 1, 0, buttonThingy(favoriteableId));
+    if (!favoriteableId) return;
+
+    const menuItem = (() => {
+        switch (favoriteableType) {
+            case "sticker":
+                const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
+                if (sticker?.format_type === 3 /* LOTTIE */) return;
+
+                return buildMenuItem(favoriteableId);
+        }
+    })();
+
+    if (menuItem)
+        findGroupChildrenByChildId("copy-link", children)?.push(menuItem);
 };
 
-function buttonThingy(name) {
+const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
+    const { id, type } = props?.target?.dataset ?? {};
+    if (!id) return;
+
+    if (type === "sticker" && !props.target.className?.includes("lottieCanvas")) {
+        children.push(buildMenuItem(id));
+    }
+};
+
+function buildMenuItem(name) {
     return (
         <Menu.MenuItem
             id="add-sticker-block"
             key="add-sticker-block"
-            label={(isStickerBlocked(name)) ? "Unblock" : "Block"}
+            label={(isStickerBlocked(name)) ? "Unblock Sticker" : "Block Sticker"}
             action={() => toggleBlock(name)}
         />
     );
@@ -129,3 +123,27 @@ function isStickerBlocked(name) {
     }
     return settings.store.blockedStickers.split(", ").includes(name);
 }
+
+export default definePlugin({
+    name: "StickerBlocker",
+    description: "Allows you to block stickers from being displayed.",
+    authors: [Devs.Samwich],
+    patches: [
+        {
+            find: /\i\.\i\.STICKER_MESSAGE/,
+            replacement: {
+                match: /}\),\(null!=\i\?\i:(\i)\)\.name]}\);/,
+                replace: "$& if(Vencord.Settings.plugins.StickerBlocker.blockedStickers.split(\", \").includes($1.id)) { return($self.blockedComponent($1)) }"
+            }
+        }
+    ],
+    contextMenus: {
+        "message": messageContextMenuPatch,
+        "expression-picker": expressionPickerPatch,
+    },
+    start() {
+        DataStore.createStore("StickerBlocker", "data");
+    },
+    blockedComponent: ErrorBoundary.wrap(blockedComponentRender, { fallback: () => <p style={{ color: "red" }}>Failed to render :(</p> }),
+    settings,
+});
