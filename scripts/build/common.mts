@@ -262,6 +262,20 @@ export const stylePlugin: Plugin = {
     }
 };
 
+let buildsFinished = Promise.resolve();
+const buildsFinishedPlugin: Plugin = {
+    name: "builds-finished-plugin",
+    setup({ onEnd }) {
+        if (!watch) return;
+
+        let resolve: () => void;
+        const done = new Promise<void>(r => resolve = r);
+        buildsFinished = buildsFinished.then(() => done);
+
+        onEnd(() => resolve());
+    },
+};
+
 export const commonOpts = {
     logLevel: "info",
     bundle: true,
@@ -269,7 +283,7 @@ export const commonOpts = {
     sourcemap: watch ? "inline" : "external",
     legalComments: "linked",
     banner,
-    plugins: [fileUrlPlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
+    plugins: [fileUrlPlugin, gitHashPlugin, gitRemotePlugin, stylePlugin, buildsFinishedPlugin],
     external: ["~plugins", "~git-hash", "~git-remote", "/assets/*"],
     inject: ["./scripts/build/inject/react.mjs"],
     jsxFactory: "VencordCreateElement",
@@ -287,6 +301,8 @@ export async function buildOrWatchAll() {
     if (watch) {
         const contexts = await Promise.all(builds.map(context));
         await Promise.all(contexts.map(ctx => ctx.watch()));
+
+        await buildsFinished;
     } else {
         try {
             await Promise.all(builds.map(build));
