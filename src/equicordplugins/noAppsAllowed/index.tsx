@@ -4,11 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { migratePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+migratePluginSettings("NoAppsAllowed", "noAppsAllowed");
 export default definePlugin({
-    name: "noAppsAllowed",
+    name: "NoAppsAllowed",
     description: "returns the bot's tag :skulk:",
     authors: [EquicordDevs.kvba],
 
