@@ -21,6 +21,7 @@ import { IpcEvents } from "@shared/IpcEvents";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { app, dialog, ipcMain } from "electron";
 import {
+    chmodSync as originalChmodSync,
     existsSync as originalExistsSync,
     renameSync as originalRenameSync,
     writeFileSync as originalWriteFileSync,
@@ -122,6 +123,7 @@ async function migrateLegacyToAsar() {
 }
 
 function applyPreviousUpdate() {
+    originalChmodSync(join(__dirname, ".new"), 0o755);
     originalRenameSync(__dirname + ".new", __dirname);
 
     app.relaunch();
@@ -130,8 +132,10 @@ function applyPreviousUpdate() {
 
 
 app.on("will-quit", () => {
-    if (hasUpdateToApplyOnQuit)
+    if (hasUpdateToApplyOnQuit) {
+        originalChmodSync(join(__dirname, ".new"), 0o755);
         originalRenameSync(__dirname + ".new", __dirname);
+    }
 });
 
 if (isLegacyNonAsarVencord) {
