@@ -36,11 +36,27 @@ const enum Methods {
 
 const tarExtMatcher = /\.tar\.\w+$/;
 
+function shouldAnonymize(upload: AnonUpload) {
+    if (upload.anonymise != null) return upload.anonymise;
+
+    let anonymize = settings.store.anonymiseByDefault;
+    const ext = upload.filename.split(".").at(-1) ?? "";
+    const invertedExts = (settings.store.invertedBehaviorFileExtensions ?? "")
+        .split(",").map(s => s.trim()).filter(s => s !== "");
+    if (invertedExts.includes(ext)) anonymize = !anonymize;
+    return anonymize;
+}
+
 const settings = definePluginSettings({
     anonymiseByDefault: {
         description: "Whether to anonymise file names by default",
         type: OptionType.BOOLEAN,
         default: true,
+    },
+    invertedBehaviorFileExtensions: {
+        description: "File extensions for which to use the oppposite Anonymize by Default behavior",
+        type: OptionType.STRING,
+        placeholder: "pdf, zip"
     },
     method: {
         description: "Anonymising method",
@@ -96,7 +112,7 @@ export default definePlugin({
     settings,
 
     renderIcon: ErrorBoundary.wrap(({ upload, channelId, draftType }: { upload: AnonUpload; draftType: unknown; channelId: string; }) => {
-        const anonymise = upload.anonymise ?? settings.store.anonymiseByDefault;
+        const anonymise = shouldAnonymize(upload);
         return (
             <ActionBarIcon
                 tooltip={anonymise ? "Using anonymous file name" : "Using normal file name"}
@@ -114,7 +130,7 @@ export default definePlugin({
     }, { noop: true }),
 
     anonymise(upload: AnonUpload) {
-        if ((upload.anonymise ?? settings.store.anonymiseByDefault) === false) return upload.filename;
+        if (!shouldAnonymize(upload)) return upload.filename;
 
         const file = upload.filename;
         const tarMatch = tarExtMatcher.exec(file);
