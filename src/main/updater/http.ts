@@ -123,7 +123,7 @@ async function migrateLegacyToAsar() {
 }
 
 function applyPreviousUpdate() {
-    originalChmodSync(join(__dirname, ".new"), 0o775);
+    originalChmodSync(join(__dirname, ".new"), "777");
     originalRenameSync(__dirname + ".new", __dirname);
 
     app.relaunch();
@@ -133,7 +133,7 @@ function applyPreviousUpdate() {
 
 app.on("will-quit", () => {
     if (hasUpdateToApplyOnQuit) {
-        originalChmodSync(join(__dirname, ".new"), 0o775);
+        originalChmodSync(join(__dirname, ".new"), "777");
         originalRenameSync(__dirname + ".new", __dirname);
     }
 });
