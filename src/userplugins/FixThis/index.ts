@@ -1,50 +1,14 @@
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { MessageObject } from "@webpack/common";
 
 const MessageActions = findByPropsLazy("sendMessage");
 
-interface UrlSettings {
-    [key: string]: boolean;
-}
-
 export default definePlugin({
     name: "FixThis",
     description: "Fixes links for TikTok, Instagram, Twitter, X and Pixiv",
     authors: [Devs.Dawok],
-    options: {
-        enableTikTok: {
-            type: OptionType.BOOLEAN,
-            description: "Fix TikTok links",
-            default: true
-        },
-        enableInstagram: {
-            type: OptionType.BOOLEAN,
-            description: "Fix Instagram links",
-            default: true
-        },
-        enableTwitter: {
-            type: OptionType.BOOLEAN,
-            description: "Fix Twitter links",
-            default: true
-        },
-        enableX: {
-            type: OptionType.BOOLEAN,
-            description: "Fix X links",
-            default: true
-        },
-        enablePixiv: {
-            type: OptionType.BOOLEAN,
-            description: "Fix Pixiv links",
-            default: true
-        },
-        enableReddit: {
-            type: OptionType.BOOLEAN,
-            description: "Fix Reddit links",
-            default: true
-        }
-    },
     patches: [
         {
             find: "sendMessage",
@@ -64,16 +28,7 @@ export default definePlugin({
             "twitter.com": "vxtwitter.com",
             "x.com": "vxtwitter.com",
             "pixiv.net": "phixiv.net",
-            "reddit.com": "rxeddit.com"
-        };
-
-        const settings: UrlSettings = {
-            "tiktok.com": this.settings.get("enableTikTok", true),
-            "instagram.com": this.settings.get("enableInstagram", true),
-            "twitter.com": this.settings.get("enableTwitter", true),
-            "x.com": this.settings.get("enableX", true),
-            "pixiv.net": this.settings.get("enablePixiv", true),
-            "reddit.com": this.settings.get("enableReddit", true)
+            "reddit.com": "vxreddit.com"
         };
 
         const processUrl = (url: string): string => {
@@ -84,11 +39,9 @@ export default definePlugin({
             }
 
             for (const [oldDomain, newDomain] of Object.entries(urlMap)) {
-                if (settings[oldDomain]) {
-                    const regex = new RegExp(`https?://([a-zA-Z0-9-]+\\.)?${oldDomain.replace('.', '\\.')}`, 'i');
-                    if (regex.test(lowerUrl)) {
-                        return url.replace(regex, (match, p1) => `https://${p1 || ''}${newDomain}`);
-                    }
+                const regex = new RegExp(`https?://([a-zA-Z0-9-]+\\.)?${oldDomain.replace('.', '\\.')}`, 'i');
+                if (regex.test(lowerUrl)) {
+                    return url.replace(regex, (match, p1) => `https://${p1 || ''}${newDomain}`);
                 }
             }
 
