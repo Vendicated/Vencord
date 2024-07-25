@@ -85,6 +85,7 @@ async function applyUpdates() {
 
     const data = await get(PendingUpdate);
     originalWriteFileSync(__dirname + ".new", data);
+    originalChmodSync(__dirname + ".new", "777");
     hasUpdateToApplyOnQuit = true;
 
     PendingUpdate = null;
