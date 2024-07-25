@@ -68,12 +68,12 @@ export default definePlugin({
         };
 
         const settings: UrlSettings = {
-            "tiktok.com": this.settings.store.enableTikTok,
-            "instagram.com": this.settings.store.enableInstagram,
-            "twitter.com": this.settings.store.enableTwitter,
-            "x.com": this.settings.store.enableX,
-            "pixiv.net": this.settings.store.enablePixiv,
-            "reddit.com": this.settings.store.enableReddit
+            "tiktok.com": this.settings.get("enableTikTok", true),
+            "instagram.com": this.settings.get("enableInstagram", true),
+            "twitter.com": this.settings.get("enableTwitter", true),
+            "x.com": this.settings.get("enableX", true),
+            "pixiv.net": this.settings.get("enablePixiv", true),
+            "reddit.com": this.settings.get("enableReddit", true)
         };
 
         const processUrl = (url: string): string => {
