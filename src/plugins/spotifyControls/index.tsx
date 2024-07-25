@@ -48,7 +48,7 @@ export default definePlugin({
     },
     patches: [
         {
-            find: '"AccountConnected"',
+            find: '"account";',
             replacement: {
                 // react.jsx)(AccountPanel, { ..., showTaglessAccountPanel: blah })
                 match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?userTag:\i,hidePrivateData:)/,
