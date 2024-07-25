@@ -535,7 +535,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Antti: {
         name: "Antti",
         id: 312974985876471810n
-    }
+    },
+    Joona: {
+        name: "Joona",
+        id: 297410829589020673n
+    },
 } satisfies Record<string, Dev>);
 
 export const EquicordDevs = Object.freeze({
