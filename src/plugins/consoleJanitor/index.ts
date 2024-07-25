@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -105,7 +105,6 @@ export default definePlugin({
         },
         {
             find: "ProductCatalog",
-            predicate: () => Settings.plugins.NoNitroUpsell.enabled,
             replacement: {
                 match: /\i\.warn\("Cannot find the corresponding SKU to the user's premium type "\.concat\(\i\.premiumType\)\),/,
                 replace: ""
