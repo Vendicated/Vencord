@@ -171,7 +171,7 @@ export default definePlugin({
             find: ".handleImageLoad)",
             replacement: [
                 {
-                    match: /placeholderVersion:\i,/,
+                    match: /placeholderVersion:\i,(?<=Math\.round.*?)/,
                     replace: "...$self.makeProps(this),$&"
                 },
 
