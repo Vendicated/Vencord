@@ -344,6 +344,7 @@ function QrModal(props: ModalProps) {
                 stream = str;
                 video.srcObject = str;
                 video.addEventListener("loadedmetadata", () => {
+                    if (stopped) return stop(str);
                     video.play();
                     modalProps.current.setPreview(video);
                     snapshot();
