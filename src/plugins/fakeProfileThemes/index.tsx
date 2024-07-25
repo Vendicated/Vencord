@@ -43,8 +43,8 @@ function encode(primary: number, accent: number) {
 
 // Courtesy of Cynthia.
 function decode(bio: string): ProfileThemeColors | null {
-    // /[#([0-9A-Fa-f]+),#([0-9A-Fa-f]+)]/u
-    const match = bio.match(/\u{E005B}\u{E0023}([\u{E0030}-\u{E0039}\u{E0041}-\u{E0046}\u{E0061}-\u{E0066}]+)\u{E002C}\u{E0023}([\u{E0030}-\u{E0039}\u{E0041}-\u{E0046}\u{E0061}-\u{E0066}]+)\u{E005D}/u);
+    // /[#([0-9A-Fa-f]{0,6}),#([0-9A-Fa-f]{0,6})]/u
+    const match = bio.match(/\u{E005B}\u{E0023}([\u{E0030}-\u{E0039}\u{E0041}-\u{E0046}\u{E0061}-\u{E0066}]{0,6})\u{E002C}\u{E0023}([\u{E0030}-\u{E0039}\u{E0041}-\u{E0046}\u{E0061}-\u{E0066}]{0,6})\u{E005D}/u);
 
     if (match) {
         const [, primary, accent] = match;
