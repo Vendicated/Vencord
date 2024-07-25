@@ -6,8 +6,8 @@ import { MessageObject } from "@webpack/common";
 const MessageActions = findByPropsLazy("sendMessage");
 
 export default definePlugin({
-    name: "URL Domain Changer",
-    description: "Changes domains for TikTok, Instagram, Twitter, and X links",
+    name: "FixThis",
+    description: "Fixes links for TikTok, Instagram, Twitter, X and Pixiv",
     authors: [Devs.Dawok],
     patches: [
         {
@@ -26,7 +26,8 @@ export default definePlugin({
             "tiktok.com": "tnktok.com",
             "instagram.com": "ddinstagram.com",
             "twitter.com": "vxtwitter.com",
-            "x.com": "vxtwitter.com"
+            "x.com": "vxtwitter.com",
+            "pixiv.net": "phixiv.net"
         };
 
         const processUrl = (url: string): string => {
