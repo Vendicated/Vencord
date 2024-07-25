@@ -53,6 +53,31 @@ if (IS_VESKTOP || !IS_VANILLA) {
             }
         });
 
+        protocol.registerFileProtocol("equicord", ({ url: unsafeUrl }, cb) => {
+            let url = unsafeUrl.slice("equicord://".length);
+            if (url.endsWith("/")) url = url.slice(0, -1);
+            if (url.startsWith("/themes/")) {
+                const theme = url.slice("/themes/".length);
+                const safeUrl = ensureSafePath(THEMES_DIR, theme);
+                if (!safeUrl) {
+                    cb({ statusCode: 403 });
+                    return;
+                }
+                cb(safeUrl.replace(/\?v=\d+$/, ""));
+                return;
+            }
+            switch (url) {
+                case "renderer.js.map":
+                case "preload.js.map":
+                case "patcher.js.map":
+                case "main.js.map":
+                    cb(join(__dirname, url));
+                    break;
+                default:
+                    cb({ statusCode: 403 });
+            }
+        });
+
         try {
             if (RendererSettings.store.enableReactDevtools)
                 installExt("fmkadmapgofadopljbjfkapdkoienihi")

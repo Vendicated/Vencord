@@ -271,7 +271,7 @@ function sendMsgNotif(titleString: string, content: string, message: Message) {
             content: content,
             useBase64Icon: true,
             icon: result,
-            sourceApp: "Vencord"
+            sourceApp: "Equicord"
         };
         Native.sendToOverlay(msgData);
     });
@@ -290,7 +290,7 @@ function sendOtherNotif(content: string, titleString: string) {
         content: content,
         useBase64Icon: false,
         icon: null,
-        sourceApp: "Vencord"
+        sourceApp: "Equicord"
     };
     Native.sendToOverlay(msgData);
 }

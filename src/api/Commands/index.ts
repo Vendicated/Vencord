@@ -67,7 +67,7 @@ export const _handleCommand = function (cmd: Command, args: Argument[], ctx: Com
         sendBotMessage(ctx.channel.id, {
             content: `${msg}:\n${makeCodeblock(reason)}`,
             author: {
-                username: "Vencord"
+                username: "Equicord"
             }
         });
     };
