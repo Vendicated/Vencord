@@ -45,7 +45,7 @@ export default definePlugin({
     authors: [Devs.Samwich],
     patches: [
         {
-            find: "l.Z.STICKER_MESSAGE",
+            find: /\i\.\i\.STICKER_MESSAGE/,
             replacement: {
                 match: /}\),\(null!=\i\?\i:(\i)\)\.name]}\);/,
                 replace: "$& if(Vencord.Settings.plugins.StickerBlocker.blockedStickers.split(\", \").includes($1.id)) { return($self.blockedComponent($1)) }"
