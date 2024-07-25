@@ -27,7 +27,11 @@ import { IS_VANILLA } from "./utils/constants";
 console.log("[Equicord] Starting up...");
 
 // FIXME: remove at some point
-export const isLegacyNonAsarVencord = IS_STANDALONE && !__dirname.endsWith(".asar");
+const isLegacyNonAsarVencord = IS_STANDALONE && !__dirname.endsWith(".asar");
+if (isLegacyNonAsarVencord) {
+    console.warn("This is a legacy non asar install! Migrating to asar and restarting...");
+    require("./updater/http").migrateLegacyToAsar();
+}
 
 // Our injector file at app/index.js
 const injectorPath = require.main!.filename;

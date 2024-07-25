@@ -16,16 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { isLegacyNonAsarVencord } from "@main/patcher";
 import { IpcEvents } from "@shared/IpcEvents";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { app, dialog, ipcMain } from "electron";
-import {
-    chmodSync as originalChmodSync,
-    existsSync as originalExistsSync,
-    renameSync as originalRenameSync,
-    writeFileSync as originalWriteFileSync,
-} from "original-fs";
+import { writeFileSync as originalWriteFileSync } from "original-fs";
 import { join } from "path";
 
 import gitHash from "~git-hash";
@@ -36,8 +30,6 @@ import { ASAR_FILE, serializeErrors } from "./common";
 
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
 let PendingUpdate: string | null = null;
-
-let hasUpdateToApplyOnQuit = false;
 
 async function githubGet(endpoint: string) {
     return get(API_BASE + endpoint, {
@@ -84,9 +76,7 @@ async function applyUpdates() {
     if (!PendingUpdate) return true;
 
     const data = await get(PendingUpdate);
-    originalWriteFileSync(__dirname + ".new", data);
-    originalChmodSync(__dirname + ".new", "777");
-    hasUpdateToApplyOnQuit = true;
+    originalWriteFileSync(__dirname, data);
 
     PendingUpdate = null;
 
@@ -98,7 +88,7 @@ ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors(fetchUpdates));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));
 
-async function migrateLegacyToAsar() {
+export async function migrateLegacyToAsar() {
     try {
         const isFlatpak = process.platform === "linux" && !!process.env.FLATPAK_ID;
         if (isFlatpak) throw "Flatpak Discord can't automatically be migrated.";
@@ -121,30 +111,4 @@ async function migrateLegacyToAsar() {
             app.exit(1);
         });
     }
-}
-
-function applyPreviousUpdate() {
-    originalChmodSync(__dirname + ".new", "777");
-    originalRenameSync(__dirname + ".new", __dirname);
-
-    app.relaunch();
-    app.exit();
-}
-
-
-app.on("will-quit", () => {
-    if (hasUpdateToApplyOnQuit) {
-        originalChmodSync(__dirname + ".new", "777");
-        originalRenameSync(__dirname + ".new", __dirname);
-    }
-});
-
-if (isLegacyNonAsarVencord) {
-    console.warn("This is a legacy non asar install! Migrating to asar and restarting...");
-    migrateLegacyToAsar();
-}
-
-if (originalExistsSync(__dirname + ".new")) {
-    console.warn("Found previous not applied update, applying now and restarting...");
-    applyPreviousUpdate();
 }
