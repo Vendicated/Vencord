@@ -6,13 +6,20 @@
 
 import "./styles.css";
 
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { SelectedGuildStore, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
-import { settings } from "./settings";
+export const settings = definePluginSettings({
+    hideAtSymbol: {
+        type: OptionType.BOOLEAN,
+        description: "Whether the the @-symbol should be hidden.",
+        default: false
+    }
+});
 
 export default definePlugin({
     name: "MentionAvatars",
