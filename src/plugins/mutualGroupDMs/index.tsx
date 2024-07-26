@@ -42,14 +42,14 @@ function getGroupDMName(channel: Channel) {
 export default definePlugin({
     name: "MutualGroupDMs",
     description: "Shows mutual group dms in profiles",
-    authors: [Devs.amia],
+    authors: [Devs.amia, Devs.Scab],
 
     patches: [
         {
             find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Note: the module is lazy-loaded
             replacement: {
                 match: /(?<=\.tabBarItem.{0,50}MUTUAL_GUILDS.+?}\),)(?=.+?(\(0,\i\.jsxs?\)\(.{0,100}id:))/,
-                replace: '$self.isBotOrSelf(arguments[0].user)?null:$1"MUTUAL_GDMS",children:"Mutual Groups"}),'
+                replace: '$self.isBotOrSelf(arguments[0].user)?null:$1"MUTUAL_GDMS",children:`${$self.getMutualGDMCountText(arguments[0].user)}`}),'
             }
         },
         {
@@ -64,7 +64,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=onItemSelect:\i,children:)(\i)\.map/,
-                    replace: "[...$1, ...($self.isBotOrSelf(arguments[0].user) ? [] : [{section:'MUTUAL_GDMS',text:'Mutual Groups'}])].map"
+                    replace: "[...$1, ...($self.isBotOrSelf(arguments[0].user) ? [] : [{section:'MUTUAL_GDMS',text:`${$self.getMutualGDMCountText(arguments[0].user)}`}])].map"
                 },
                 {
                     match: /\(0,\i\.jsx\)\(\i,\{items:\i,section:(\i)/,
@@ -75,6 +75,13 @@ export default definePlugin({
     ],
 
     isBotOrSelf: (user: User) => user.bot || user.id === UserStore.getCurrentUser().id,
+
+    getMutualGDMCount: (user: User) => ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).length,
+
+    getMutualGDMCountText: (user: User) => {
+        const count = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).length;
+        return count === 0 ? "No Mutual Groups" : `${count} Mutual Groups`;
+    },
 
     renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: User, onClose: () => void; }) => {
         const entries = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).map(c => (
