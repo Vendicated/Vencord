@@ -94,14 +94,12 @@ export default definePlugin({
     start() {
         document.addEventListener("keydown", this.event);
 
-        if (IS_DEV) {
-            registerAction({
-                id: "openDevSettings",
-                label: "Open Dev tab",
-                callback: () => SettingsRouter.open("SuncordPatchHelper"),
-                registrar: "Suncord"
-            });
-        }
+        registerAction({
+            id: "openDevSettings",
+            label: "Open Dev tab",
+            callback: () => SettingsRouter.open("EquicordPatchHelper"),
+            registrar: "Equicord"
+        });
     },
 
     stop() {
