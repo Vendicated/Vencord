@@ -148,7 +148,8 @@ function playSample(tempSettings: any, type: string) {
     const currentUser = UserStore.getCurrentUser();
     const myGuildId = SelectedGuildStore.getGuildId();
 
-    speak(formatText(settings[type + "Message"], currentUser.username, "general", (currentUser as any).globalName ?? currentUser.username, GuildMemberStore.getNick(myGuildId, currentUser.id) ?? currentUser.username), settings);
+    const displayName = (currentUser as any).globalName ?? currentUser.username;
+    speak(formatText(settings[type + "Message"], currentUser.username, "general", displayName, GuildMemberStore.getNick(myGuildId, currentUser.id) ?? displayName), settings);
 }
 
 export default definePlugin({
@@ -179,7 +180,7 @@ export default definePlugin({
                 const template = Settings.plugins.VcNarrator[type + "Message"];
                 const user = isMe && !Settings.plugins.VcNarrator.sayOwnName ? "" : UserStore.getUser(userId).username;
                 const displayName = user && ((UserStore.getUser(userId) as any).globalName ?? user);
-                const nickname = user && (GuildMemberStore.getNick(myGuildId, userId) ?? user);
+                const nickname = user && (GuildMemberStore.getNick(myGuildId, userId) ?? displayName);
                 const channel = ChannelStore.getChannel(id).name;
 
                 speak(formatText(template, user, channel, displayName, nickname));
