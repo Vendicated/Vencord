@@ -13,7 +13,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { SelectedGuildStore, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
-export const settings = definePluginSettings({
+const settings = definePluginSettings({
     hideAtSymbol: {
         type: OptionType.BOOLEAN,
         description: "Whether the the @-symbol should be hidden.",
