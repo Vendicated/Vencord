@@ -56,13 +56,11 @@ export function CheckedTextInput({ value: initialValue, onChange, validate }: Te
     }
 
     return (
-        <>
-            <TextInput
-                type="text"
-                value={value}
-                onChange={handleChange}
-                error={error}
-            />
-        </>
+        <TextInput
+            type="text"
+            value={value}
+            onChange={handleChange}
+            error={error}
+        />
     );
 }

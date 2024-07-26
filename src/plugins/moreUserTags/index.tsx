@@ -313,7 +313,7 @@ export default definePlugin({
 
     getTagText(passedTagName: string, strings: Record<string, string>) {
         if (!passedTagName) return strings.APP_TAG;
-        const [tagName, variant] = passedTagName.split("-");
+        const [tagName, variant] = passedTagName.split("-", 2);
         const tag = tags.find(({ name }) => tagName === name);
         if (!tag) return strings.APP_TAG;
         if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return strings.APP_TAG;

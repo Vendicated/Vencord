@@ -102,7 +102,7 @@ async function cloneEmoji(guildId: string, emoji: Emoji) {
 
     return uploadEmoji({
         guildId,
-        name: emoji.name.split("~")[0],
+        name: emoji.name.match(/[^~]*/)![0],
         image: dataUrl
     });
 }

@@ -5,7 +5,6 @@ import checkFile from "eslint-plugin-check-file";
 import eslintPluginHeaders from "eslint-plugin-headers";
 import eslintPluginImport from "eslint-plugin-import-x";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
-// @ts-expect-error: No types
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
 // @ts-expect-error: No types
 import unusedImports from "eslint-plugin-unused-imports";

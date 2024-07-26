@@ -230,8 +230,7 @@ export default definePlugin({
     },
 
     start() {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (!speechSynthesis || speechSynthesis.getVoices().length <= 0)
+        if (typeof speechSynthesis === "undefined" || speechSynthesis.getVoices().length <= 0)
             new Logger("VcNarrator").warn(
                 "SpeechSynthesis not supported or no Narrator voices found. Thus, this plugin will not work. Check my Settings for more info"
             );

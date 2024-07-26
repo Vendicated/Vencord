@@ -59,7 +59,7 @@ async function initThemes() {
 
     const { themeLinks, enabledThemes } = Settings;
 
-    const links: string[] = [...themeLinks];
+    const links = [...themeLinks];
 
     if (IS_WEB) {
         for (const theme of enabledThemes) {

@@ -104,7 +104,7 @@ function GreetMenu({ channel, message }: { message: MessageRecord; channel: Chan
                     <Menu.MenuItem
                         key={sticker.id}
                         id={"greet-" + sticker.id}
-                        label={sticker.description.split(" ")[0]}
+                        label={sticker.description.match(/[^ ]*/)![0]}
                         action={() => { greet(channel, message, [sticker.id]); }}
                     />
                 ))}
@@ -125,7 +125,7 @@ function GreetMenu({ channel, message }: { message: MessageRecord; channel: Chan
                                 <Menu.MenuCheckboxItem
                                     key={sticker.id}
                                     id={"multi-greet-" + sticker.id}
-                                    label={sticker.description.split(" ")[0]!}
+                                    label={sticker.description.match(/[^ ]*/)![0]}
                                     checked={checked}
                                     disabled={!checked && multiGreetChoices.length >= 3}
                                     action={() => {

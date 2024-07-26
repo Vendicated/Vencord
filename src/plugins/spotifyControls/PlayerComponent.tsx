@@ -266,21 +266,17 @@ function Info({ track }: { track: Track; }) {
 
     const [coverExpanded, setCoverExpanded] = useState(false);
 
-    const i = (
-        <>
-            {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
-            {img && (
-                <img
-                    id={cl("album-image")}
-                    src={img.url}
-                    alt="Album Image"
-                    onClick={() => { setCoverExpanded(!coverExpanded); }}
-                    onContextMenu={e => {
-                        ContextMenuApi.openContextMenu(e, () => <AlbumContextMenu track={track} />);
-                    }}
-                />
-            )}
-        </>
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const i = img && (
+        <img
+            id={cl("album-image")}
+            src={img.url}
+            alt="Album Image"
+            onClick={() => { setCoverExpanded(!coverExpanded); }}
+            onContextMenu={e => {
+                ContextMenuApi.openContextMenu(e, () => <AlbumContextMenu track={track} />);
+            }}
+        />
     );
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition

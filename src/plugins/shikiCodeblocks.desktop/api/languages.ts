@@ -59,7 +59,7 @@ export async function loadLanguages() {
 
 export async function getGrammar(lang: Language): Promise<NonNullable<ILanguageRegistration["grammar"]>> {
     if (lang.grammar)
-        return Promise.resolve(lang.grammar);
+        return lang.grammar;
     return (await fetch(lang.grammarUrl)).json();
 }
 

@@ -136,7 +136,7 @@ if (!IS_VANILLA) {
     const originalAppend = app.commandLine.appendSwitch;
     app.commandLine.appendSwitch = function (...args) {
         if (args[0] === "disable-features") {
-            const disabledFeatures = new Set((args[1] ?? "").split(","));
+            const disabledFeatures = new Set(args[1]?.split(","));
             disabledFeatures.add("WidgetLayering");
             disabledFeatures.add("UseEcoQoSForBackgroundProcess");
             args[1] += [...disabledFeatures].join(",");

@@ -142,60 +142,58 @@ export function ReviewsInputComponent({ discordId, isAuthor, modalKey, name, ref
     const channel = createChannelRecordFromServer({ id: "0", type: ChannelType.DM });
 
     return (
-        <>
-            <div
-                onClick={() => {
-                    if (!token) {
-                        showToast("Opening authorization window...");
-                        authorize();
-                    }
-                }}
-            >
-                <InputComponent
-                    className={cl("input")}
-                    channel={channel}
-                    placeholder={
-                        !token
-                            ? "You need to authorize to review users!"
-                            : isAuthor
-                                ? `Update review for @${name}`
-                                : `Review @${name}`
-                    }
-                    type={inputType}
-                    disableThemedBackground={true}
-                    setEditorRef={(ref: any) => { editorRef.current = ref; }}
-                    parentModalKey={modalKey}
-                    textValue=""
-                    onSubmit={
-                        async (res: any) => {
-                            const response = await addReview({
-                                userid: discordId,
-                                comment: res.value,
+        <div
+            onClick={() => {
+                if (!token) {
+                    showToast("Opening authorization window...");
+                    authorize();
+                }
+            }}
+        >
+            <InputComponent
+                className={cl("input")}
+                channel={channel}
+                placeholder={
+                    !token
+                        ? "You need to authorize to review users!"
+                        : isAuthor
+                            ? `Update review for @${name}`
+                            : `Review @${name}`
+                }
+                type={inputType}
+                disableThemedBackground={true}
+                setEditorRef={(ref: any) => { editorRef.current = ref; }}
+                parentModalKey={modalKey}
+                textValue=""
+                onSubmit={
+                    async (res: any) => {
+                        const response = await addReview({
+                            userid: discordId,
+                            comment: res.value,
+                        });
+
+                        if (response) {
+                            refetch();
+
+                            const slateEditor = editorRef.current.ref.current.getSlateEditor();
+
+                            // clear editor
+                            Transforms.delete(slateEditor, {
+                                at: {
+                                    anchor: Editor.start(slateEditor, []),
+                                    focus: Editor.end(slateEditor, []),
+                                }
                             });
-
-                            if (response) {
-                                refetch();
-
-                                const slateEditor = editorRef.current.ref.current.getSlateEditor();
-
-                                // clear editor
-                                Transforms.delete(slateEditor, {
-                                    at: {
-                                        anchor: Editor.start(slateEditor, []),
-                                        focus: Editor.end(slateEditor, []),
-                                    }
-                                });
-                            }
-
-                            // even tho we need to return this, it doesnt do anything
-                            return {
-                                shouldClear: false,
-                                shouldRefocus: true,
-                            };
                         }
+
+                        // even tho we need to return this, it doesnt do anything
+                        return {
+                            shouldClear: false,
+                            shouldRefocus: true,
+                        };
                     }
-                />
-            </div>
-        </>
+                }
+            />
+        </div>
     );
 }

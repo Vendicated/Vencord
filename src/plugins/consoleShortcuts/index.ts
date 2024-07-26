@@ -119,7 +119,8 @@ function makeShortcuts() {
             if (!win.prepared) {
                 win.prepared = true;
 
-                [...document.querySelectorAll("style"), ...document.querySelectorAll("link[rel=stylesheet]")].forEach(s => {
+                for (const s of document.querySelectorAll("style, link[rel=stylesheet]")) {
+                    // https://github.com/microsoft/TypeScript/issues/283
                     const n = s.cloneNode(true) as HTMLStyleElement | HTMLLinkElement;
 
                     if (s.parentElement?.tagName === "HEAD")
@@ -128,7 +129,7 @@ function makeShortcuts() {
                         doc.documentElement.append(n);
                     else
                         doc.body.append(n);
-                });
+                }
             }
 
             Common.ReactDOM.render(Common.React.createElement(component, props), doc.body.appendChild(document.createElement("div")));

@@ -103,8 +103,7 @@ export class SettingsStore<T extends object> {
         if (pathToNotify) {
             let v = value;
 
-            const path = pathToNotify.split(".");
-            for (const p of path) {
+            for (const [p] of pathToNotify.matchAll(/[^.]*/g)) {
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 if (!v) {
                     console.warn(

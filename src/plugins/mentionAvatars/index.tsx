@@ -29,7 +29,7 @@ export default definePlugin({
         const { user, username } = props;
         const [isHovering, setIsHovering] = useState(false);
 
-        if (!user) return <>@{username}</>;
+        if (!user) return "@" + username;
 
         return (
             <span

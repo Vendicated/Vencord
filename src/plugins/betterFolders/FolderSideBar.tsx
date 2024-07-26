@@ -41,7 +41,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
     );
 
     const visible = !!expandedFolders.size;
-    const guilds = document.querySelector(guildsBarProps.className.split(" ").map((c: any) => `.${c}`).join(""));
+    const guilds = document.querySelector("." + guildsBarProps.className.replaceAll(" ", "."));
 
     // We need to display none if we are in fullscreen. Yes this seems horrible doing with css, but it's literally how Discord does it.
     // Also display flex otherwise to fix scrolling
