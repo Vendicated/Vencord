@@ -139,7 +139,6 @@ export const filters = {
 
         byCodeFilter.$$vencordProps = ["byFactoryCode", ...code];
         byCodeFilter.$$vencordIsFactoryFilter = true;
-
         return byCodeFilter;
     }
 };
