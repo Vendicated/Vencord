@@ -76,11 +76,15 @@ export default definePlugin({
 
     isBotOrSelf: (user: User) => user.bot || user.id === UserStore.getCurrentUser().id,
 
-    getMutualGDMCount: (user: User) => ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).length,
-
     getMutualGDMCountText: (user: User) => {
         const count = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).length;
-        return count === 0 ? "No Mutual Groups" : `${count} Mutual Groups`;
+        if (count === 0) {
+            return "No Mutual Groups";
+        } else if (count === 1) {
+            return "1 Mutual Group";
+        } else {
+            return `${count} Mutual Groups`;
+        }
     },
 
     renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: User, onClose: () => void; }) => {
