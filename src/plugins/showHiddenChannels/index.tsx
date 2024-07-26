@@ -307,7 +307,7 @@ export default definePlugin({
             ]
         },
         {
-            find: '+1]})},"overflow"))',
+            find: '})},"overflow"))',
             replacement: [
                 {
                     // Create a variable for the channel prop
