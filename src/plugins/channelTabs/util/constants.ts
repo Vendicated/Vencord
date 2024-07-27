@@ -65,6 +65,12 @@ export const settings = definePluginSettings({
         description: "Show notification dot for bookmarks",
         type: OptionType.BOOLEAN,
         default: true
+    },
+    widerTabsAndBookmarks: {
+        description: "Extend the length of tabs and bookmarks for larger monitors",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: false
     }
 });
 

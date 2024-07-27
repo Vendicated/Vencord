@@ -15,7 +15,7 @@
 }
 
 /* user avatars */
-.vc-channeltabs-tab [class^="wrapper-"] {
+.vc-channeltabs-tab [class^="wrapper_"] {
     min-width: 1.5rem;
 }
 
@@ -108,6 +108,10 @@
     border-radius: 0.25rem;
 }
 
+.vc-channeltabs-bookmark.vc-channeltabs-wider {
+    max-width: 12rem;
+}
+
 .vc-channeltabs-bookmark .vc-channeltabs-name-text {
     margin-left: 0.25rem;
     margin-right: 0.25rem;
@@ -142,6 +146,10 @@
     margin-right: 0.25rem;
 }
 
+.vc-channeltabs-tab.vc-channeltabs-wider:not(.vc-channeltabs-tab-compact) {
+    width: 16rem;
+}
+
 .vc-channeltabs-tab-compact {
     width: unset;
     min-width: unset;
@@ -150,6 +158,14 @@
 .vc-channeltabs-tab-selected {
     background: var(--bg-overlay-selected);
     background-color: var(--background-modifier-selected);
+}
+
+/* channel type container */
+.vc-channeltabs-container [class^="iconContainer_"] {
+    margin: 0 -0.25rem 0 0;
+    pointer-events: none;
+    height: 1rem;
+    transform: scale(0.8);
 }
 
 .vc-channeltabs-ghost-tab {

@@ -19,7 +19,7 @@
 import { classNameFactory } from "@api/Styles";
 import { getUniqueUsername } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Avatar, ChannelStore, ContextMenuApi, Dots, GuildStore, i18n, PresenceStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
@@ -30,6 +30,7 @@ const { getBadgeWidthForValue } = findByPropsLazy("getBadgeWidthForValue");
 const dotStyles = findByPropsLazy("numberBadge", "textBadge");
 
 const { FriendsIcon } = findByPropsLazy("FriendsIcon");
+const ChannelTypeIcon = findComponentByCodeLazy(".iconContainerWithGuildIcon,");
 
 const cl = classNameFactory("vc-channeltabs-");
 
@@ -117,7 +118,8 @@ function ChannelTabContent(props: ChannelTabsProps & {
             return (
                 <>
                     <GuildIcon guild={guild} />
-                    {!compact && <Text className={cl("name-text")}>#{channel.name}</Text>}
+                    <ChannelTypeIcon channel={channel} guild={guild} />
+                    {!compact && <Text className={cl("name-text")}>{channel.name}</Text>}
                     <NotificationDot channelIds={[channel.id]} />
                     <TypingIndicator isTyping={isTyping} />
                 </>
@@ -242,7 +244,7 @@ export default function ChannelTab(props: ChannelTabsProps & { index: number; })
     drag(drop(ref));
 
     return <div
-        className={cl("tab", { "tab-compact": compact, "tab-selected": isTabSelected(id) })}
+        className={cl("tab", { "tab-compact": compact, "tab-selected": isTabSelected(id), wider: settings.store.widerTabsAndBookmarks })}
         key={index}
         ref={ref}
         onAuxClick={e => {
