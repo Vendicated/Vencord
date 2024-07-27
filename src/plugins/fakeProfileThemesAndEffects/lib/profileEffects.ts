@@ -14,7 +14,7 @@ export const ProfileEffectStore: FluxStore & {
     hasFetched: () => boolean;
     readonly fetchError: Error | undefined;
     readonly isFetching: boolean;
-    readonly profileEffects: ProfileEffect[];
+    readonly profileEffects: readonly ProfileEffect[];
     readonly tryItOutId: string | null;
 } = findStoreLazy("ProfileEffectStore");
 

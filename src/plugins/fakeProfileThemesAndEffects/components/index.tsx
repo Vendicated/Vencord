@@ -5,7 +5,8 @@
  */
 
 import { type ModalProps, openModal } from "@utils/modal";
-import { extractAndLoadChunksLazy, findByCodeLazy, findComponentByCodeLazy } from "@webpack";
+import { extractAndLoadChunksLazy, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import type { useToken } from "@webpack/types";
 import type { Guild } from "discord-types/general";
 import type { ComponentType, FunctionComponent, PropsWithChildren, ReactNode } from "react";
 
@@ -17,7 +18,7 @@ export * from "./BuilderColorButton";
 export * from "./settingsAboutComponent";
 
 export interface CustomizationSectionProps extends PropsWithChildren {
-    borderType?: "limited" | "premium" | undefined;
+    borderType?: FeatureBorderType | undefined;
     className?: string | undefined;
     description?: ReactNode;
     disabled?: boolean | undefined /* = false */;
@@ -32,14 +33,24 @@ export interface CustomizationSectionProps extends PropsWithChildren {
     titleId?: string | undefined;
 }
 
+// Original name: FeatureBorderTypes
+export const enum FeatureBorderType {
+    LIMITED = "limited",
+    PREMIUM = "premium",
+}
+
 export const CustomizationSection: ComponentType<CustomizationSectionProps>
     = findByCodeLazy(".customizationSectionBackground");
 
+export const tokens: {
+    unsafe_rawColors: Record<string, Parameters<useToken>[0]>;
+} = findByPropsLazy("unsafe_rawColors", "modules");
+
 export const useAvatarColors: (
-    avatarURL: string,
-    fillerColor?: string | undefined,
+    avatarURL: string | null | undefined,
+    fallbackColor: string,
     desaturateColors?: boolean | undefined /* = true */
-) => string[] = findByCodeLazy(".palette[", ".desaturateUserColors");
+) => [string, string, ...string[]] = findByCodeLazy(".palette[", ".desaturateUserColors");
 
 export interface CustomColorPickerProps {
     className?: string | undefined;
@@ -48,8 +59,8 @@ export interface CustomColorPickerProps {
     middle?: ReactNode;
     onChange: (color: number) => void;
     onClose?: (() => void) | undefined;
-    showEyeDropper?: boolean | null | undefined /* = false */;
-    suggestedColors?: string[] | undefined;
+    showEyeDropper?: boolean | undefined /* = false */;
+    suggestedColors?: string[] | null | undefined;
     wrapperComponentType?: ComponentType | null | undefined;
     value?: string | number | null | undefined;
 }
@@ -69,7 +80,7 @@ export function setProfileEffectModal(comp: typeof ProfileEffectModal) {
     ProfileEffectModal = comp;
 }
 
-const requireProfileEffectModal = extractAndLoadChunksLazy([".openModalLazy", "initialSelectedEffectId:"]);
+const requireProfileEffectModal = extractAndLoadChunksLazy(["initialSelectedEffectId:", ".openModalLazy"]);
 
 export async function openProfileEffectModal(
     initialEffectId: ProfileEffectModalProps["initialSelectedEffectId"],

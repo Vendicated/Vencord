@@ -12,6 +12,8 @@ const DELIMITER = String.fromCodePoint(DELIMITER_CODEPOINT);
 const RADIX = 0x1000;
 /** The FPTE starting codepoint (first codepoint in the SSP plane). */
 const STARTING_CODEPOINT = 0xE0000;
+/** The FPTE starting character (first character in the SSP plane). */
+const STARTING = String.fromCodePoint(STARTING_CODEPOINT);
 /** The FPTE ending codepoint (last default-ignorable codepoint in the SSP plane). */
 const ENDING_CODEPOINT = STARTING_CODEPOINT + RADIX - 1;
 
@@ -23,8 +25,10 @@ const ENDING_CODEPOINT = STARTING_CODEPOINT + RADIX - 1;
  * @returns The built legacy-format theme color string.
  */
 export function encodeColorsLegacy(primary: number, accent: number) {
-    return String.fromCodePoint(...[...`[#${primary.toString(16)},#${accent.toString(16)}]`]
-        .map(c => c.codePointAt(0)! + STARTING_CODEPOINT));
+    let str = "";
+    for (const char of `[#${primary.toString(16)},#${accent.toString(16)}]`)
+        str += String.fromCodePoint(char.codePointAt(0)! + STARTING_CODEPOINT);
+    return str;
 }
 
 /**
@@ -44,7 +48,7 @@ export function decodeColorsLegacy(str: string): [primaryColor: number, accentCo
  * @returns The converted base-{@link RADIX} string with +{@link STARTING_CODEPOINT} offset.
  */
 export function encodeColor(color: number) {
-    if (color === 0) return String.fromCodePoint(STARTING_CODEPOINT);
+    if (color === 0) return STARTING;
     let str = "";
     for (; color > 0; color = Math.trunc(color / RADIX))
         str = String.fromCodePoint(color % RADIX + STARTING_CODEPOINT) + str;
@@ -58,7 +62,7 @@ export function encodeColor(color: number) {
  *          Will be -1 if `str` is empty and -2 if the color is greater than the maximum 24-bit color, 0xFFFFFF.
  */
 export function decodeColor(str: string) {
-    if (str === "") return -1;
+    if (!str) return -1;
     let color = 0;
     for (let i = 0; i < str.length; i++) {
         if (color > 0xFFF_FFF) return -2;
@@ -73,7 +77,7 @@ export function decodeColor(str: string) {
  * @returns The converted base-{@link RADIX} string with +{@link STARTING_CODEPOINT} offset.
  */
 export function encodeEffect(id: bigint) {
-    if (id === 0n) return String.fromCodePoint(STARTING_CODEPOINT);
+    if (id === 0n) return STARTING;
     let str = "";
     for (; id > 0n; id /= BigInt(RADIX))
         str = String.fromCodePoint(Number(id % BigInt(RADIX)) + STARTING_CODEPOINT) + str;
@@ -87,7 +91,7 @@ export function encodeEffect(id: bigint) {
  *          Will be -1n if `str` is empty and -2n if the color is greater than the maximum effect ID.
  */
 export function decodeEffect(str: string) {
-    if (str === "") return -1n;
+    if (!str) return -1n;
     let id = 0n;
     for (let i = 0; i < str.length; i++) {
         if (id >= 10_000_000_000_000_000_000n) return -2n;

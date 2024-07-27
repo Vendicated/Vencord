@@ -17,7 +17,7 @@ import { decodeAboutMeFPTEHook } from "./lib/userProfile";
 
 function replaceHelper(string: string, replaceArgs: [searchRegExp: RegExp, replaceString: string][]) {
     let result = string;
-    replaceArgs.forEach(([searchRegExp, replaceString]) => {
+    for (const [searchRegExp, replaceString] of replaceArgs) {
         const beforeReplace = result;
         result = result.replace(
             canonicalizeMatch(searchRegExp),
@@ -25,7 +25,7 @@ function replaceHelper(string: string, replaceArgs: [searchRegExp: RegExp, repla
         );
         if (beforeReplace === result)
             throw new Error("Replace had no effect: " + searchRegExp);
-    });
+    }
     return result;
 }
 
@@ -54,16 +54,16 @@ export default definePlugin({
         {
             find: '"UserProfileStore"',
             replacement: {
-                match: /(?<=getUserProfile\(\i\){return )\i\[\i](?=})/,
-                replace: "$self.decodeAboutMeFPTEHook($&)"
+                match: /([{}]getUserProfile\([^)]*\){return) ?([^}]+)/,
+                replace: "$1 $self.decodeAboutMeFPTEHook($2)"
             }
         },
         // Patches ProfileCustomizationPreview
         {
             find: '"ProfileCustomizationPreview"',
             replacement: {
-                match: /(?:var|let|const){(?=(?:[^}]+,)?pendingThemeColors:)(?:[^}]+,)?pendingProfileEffectId:[^}]+}=(\i)/,
-                replace: "$self.profilePreviewHook($1);$&"
+                match: /:function\(\){return (\i)}.+function \1\((\i)\){/,
+                replace: "$&$self.profilePreviewHook($2);"
             }
         },
         // Adds the FPTE Builder to the User Profile settings page
@@ -85,6 +85,7 @@ export default definePlugin({
         // ProfileEffectModal
         {
             find: "initialSelectedProfileEffectId",
+            group: true,
             replacement: [
                 // Modal root
                 {
@@ -94,7 +95,7 @@ export default definePlugin({
                             // Required for the profile preview to show profile effects
                             [
                                 /(?<=[{,]purchases:.+?}=).+?(?=,\i=|,{\i:|;)/,
-                                "{isFetching:!1,categories:new Map,purchases:$self.getPurchases()}"
+                                "{isFetching:!1,categories:new Map,purchases:$self.usePurchases()}"
                             ]
                         ])
                         + "}"
@@ -111,7 +112,7 @@ export default definePlugin({
                         // Replaces the profile effect list with the modified version
                         [
                             /(?<=\.jsxs?\)\()[^,]+(?=,{(?:(?:.(?!\.jsxs?\)))+,)?onSelect:)/,
-                            "$self.ProfileEffectModalList"
+                            "$self.ProfileEffectSection"
                         ],
                         // Replaces the apply profile effect function with the modified version
                         [
@@ -130,23 +131,31 @@ export default definePlugin({
                         ]
                     ])
                 }
-            ],
-            group: true
+            ]
         },
-        // ProfileEffectModalList
+        // ProfileEffectSection
         {
-            find: "selectedProfileEffectRef",
+            find: ".presetEffectBackground",
             replacement: {
                 match: /function\(\i,(\i),.+[,;}]\1\.\i=([^=].+?})(?=;|}$).*(?=}$)/,
-                replace: (match, _, func) => `${match};$self.ProfileEffectModalList=`
+                replace: (match, _, func) => `${match};$self.ProfileEffectSection=`
                     + replaceHelper(func, [
                         // Removes the "Exclusive to Nitro" and "Preview The Shop" sections
                         // Adds every profile effect to the "Your Decorations" section and removes the "Shop" button
                         [
                             /(?<=[ ,](\i)=).+?(?=(?:,\i=|,{\i:|;).+?:\1\.map\()/,
-                            "$self.getListSections($&)"
+                            "$self.useProfileEffectSections($&)"
                         ]
                     ])
+            }
+        },
+        // ProfileEffectPreview
+        {
+            find: ".effectDescriptionContainer",
+            replacement: {
+                // Add back removed "forProfileEffectModal" property
+                match: /(?<=[{,])(?=pendingProfileEffectId:)/,
+                replace: "forProfileEffectModal:!0,"
             }
         }
     ],
@@ -164,9 +173,9 @@ export default definePlugin({
         });
     },
 
-    ProfileEffectModalList: () => null,
+    ProfileEffectSection: () => null,
 
-    getPurchases: () => useMemo(
+    usePurchases: () => useMemo(
         () => new Map(ProfileEffectStore.profileEffects.map(effect => [
             effect.id,
             { items: new ProfileEffectRecord(effect) }
@@ -174,20 +183,19 @@ export default definePlugin({
         [ProfileEffectStore.profileEffects]
     ),
 
-    getListSections: (origSections: Record<string, any>[]) => useMemo(
+    useProfileEffectSections: (origSections: Record<string, any>[]) => useMemo(
         () => {
             origSections.splice(1);
             origSections[0].items.splice(1);
-            ProfileEffectStore.profileEffects.forEach(effect => {
+            for (const effect of ProfileEffectStore.profileEffects)
                 origSections[0].items.push(new ProfileEffectRecord(effect));
-            });
             return origSections;
         },
         [ProfileEffectStore.profileEffects]
     ),
 
-    settingsAboutComponent,
     settings,
+    settingsAboutComponent,
     decodeAboutMeFPTEHook,
     profilePreviewHook
 });

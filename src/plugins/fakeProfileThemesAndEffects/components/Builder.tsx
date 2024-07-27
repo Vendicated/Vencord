@@ -5,12 +5,12 @@
  */
 
 import { copyWithToast } from "@utils/misc";
-import { Button, showToast, Switch, UserStore, useState } from "@webpack/common";
+import { Button, showToast, Switch, UserStore, useState, useToken } from "@webpack/common";
 import type { Guild } from "discord-types/general";
 
 import { buildFPTE } from "../lib/fpte";
 import { useAccentColor, usePrimaryColor, useProfileEffect, useShowPreview } from "../lib/profilePreview";
-import { BuilderButton, BuilderColorButton, CustomizationSection, openProfileEffectModal, useAvatarColors } from ".";
+import { BuilderButton, BuilderColorButton, CustomizationSection, openProfileEffectModal, tokens, useAvatarColors } from ".";
 
 export interface BuilderProps {
     guild?: Guild | undefined;
@@ -23,7 +23,11 @@ export function Builder({ guild }: BuilderProps) {
     const [preview, setPreview] = useShowPreview(true);
     const [buildLegacy, setBuildLegacy] = useState(false);
 
-    const avatarColors = useAvatarColors(UserStore.getCurrentUser().getAvatarURL(guild?.id, 80));
+    const avatarColors = useAvatarColors(
+        UserStore.getCurrentUser()?.getAvatarURL(guild?.id, 80),
+        useToken(tokens.unsafe_rawColors.PRIMARY_530).hex(),
+        false
+    );
 
     return (
         <>
