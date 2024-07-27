@@ -90,7 +90,7 @@ const tags: Tag[] = [
         name: "MODERATOR",
         displayName: "Mod",
         description: "Can manage messages or kick/ban people",
-        permissions: ["MANAGE_MESSAGES", "KICK_MEMBERS", "BAN_MEMBERS"]
+        permissions: ["MODERATE_MEMBERS", "KICK_MEMBERS", "BAN_MEMBERS"]
     }, {
         name: "VOICE_MODERATOR",
         displayName: "VC Mod",
@@ -100,7 +100,7 @@ const tags: Tag[] = [
         name: "CHAT_MODERATOR",
         displayName: "Chat Mod",
         description: "Can timeout people",
-        permissions: ["MODERATE_MEMBERS"]
+        permissions: ["MANAGE_MESSAGES"]
     }
 ];
 const defaultSettings = Object.fromEntries(
