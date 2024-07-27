@@ -34,7 +34,7 @@ const settings = definePluginSettings({
 const shouldPatch = () => IS_WEB || IS_VESKTOP;
 export default definePlugin({
     name: "VolumeBooster",
-    authors: [Devs.Nuckyz,],
+    authors: [Devs.Nuckyz, Devs.sadan],
     description: "Allows you to set the user and stream volume above the default maximum.",
     settings,
 
