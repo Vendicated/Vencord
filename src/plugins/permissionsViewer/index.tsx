@@ -60,6 +60,12 @@ export const settings = definePluginSettings({
         description: "Whether the permissions dropdown on user popouts should be open by default",
         type: OptionType.BOOLEAN,
         default: false,
+    },
+    preferButtonOverDropdown: {
+        description: "Show a button next to the roles instead of dropdown",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true
     }
 });
 
@@ -178,10 +184,18 @@ export default definePlugin({
         },
         {
             find: ".VIEW_ALL_ROLES,",
-            replacement: {
-                match: /children:"\+"\.concat\(\i\.length-\i\.length\).{0,20}\}\),/,
-                replace: "$&$self.ViewPermissionsButton(arguments[0]),"
-            }
+            replacement: [
+                {
+                    match: /children:"\+"\.concat\(\i\.length-\i\.length\).{0,20}\}\),/,
+                    replace: "$&$self.ViewPermissionsButton(arguments[0]),",
+                    predicate: () => settings.store.preferButtonOverDropdown
+                },
+                {
+                    match: /\?(\(0,.+?guild:(\i),guildMember:(\i).+?\))(?=:)/,
+                    replace: "?[$1,$self.UserPermissions($2,$3)]",
+                    predicate: () => !settings.store.preferButtonOverDropdown
+                }
+            ]
         }
     ],
 

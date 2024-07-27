@@ -86,11 +86,20 @@ export default definePlugin({
             }
         },
         {
+            find: /inline:!1,profileViewedAnalytics:\i}\),/,
+            replacement: {
+                match: /currentUser:\i,guild:\i}\)(?<=user:(\i),bio:null==\i\?.+?)/,
+                replace: "$&,$self.getReviewsComponent($1)"
+            },
+            predicate: () => !settings.store.preferButtonOverDropdown
+        },
+        {
             find: ".BITE_SIZE,user:",
             replacement: {
                 match: /(?<=\.BITE_SIZE,children:\[)\(0,\i\.jsx\)\(\i\.\i,\{user:(\i),/,
                 replace: "$self.BiteSizeReviewsButton({user:$1}),$&"
-            }
+            },
+            predicate: () => settings.store.preferButtonOverDropdown
         }
     ],
 
