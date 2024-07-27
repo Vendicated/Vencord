@@ -62,7 +62,7 @@ function GM_fetch(url, opt) {
             resp.arrayBuffer = () => blobTo("arrayBuffer", blob);
             resp.text = () => blobTo("text", blob);
             resp.json = async () => JSON.parse(await blobTo("text", blob));
-            resp.headers = new Headers(parseHeaders(resp.responseHeaders));
+            resp.headers = parseHeaders(resp.responseHeaders);
             resp.ok = resp.status >= 200 && resp.status < 300;
             resolve(resp);
         };

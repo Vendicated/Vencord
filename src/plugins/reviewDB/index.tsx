@@ -18,14 +18,15 @@
 
 import "./style.css";
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
-import ExpandableHeader from "@components/ExpandableHeader";
-import { OpenExternalIcon } from "@components/Icons";
+import { ExpandableHeader } from "@components/ExpandableHeader";
+import { NotesIcon, OpenExternalIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
+import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { Alerts, Menu, Parser, useState } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { Alerts, Button, Menu, Parser, TooltipContainer, useState } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
 import { Auth, initAuth, updateAuth } from "./auth";
@@ -36,13 +37,28 @@ import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
 import { showToast } from "./utils";
 
-const guildPopoutPatch: NavContextMenuPatchCallback = (children, props: { guild: Guild, onClose(): void; }) => () => {
+const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
+
+const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild, onClose(): void; }) => {
+    if (!guild) return;
     children.push(
         <Menu.MenuItem
             label="View Reviews"
             id="vc-rdb-server-reviews"
             icon={OpenExternalIcon}
-            action={() => openReviewsModal(props.guild.id, props.guild.name)}
+            action={() => openReviewsModal(guild.id, guild.name)}
+        />
+    );
+};
+
+const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { user?: User, onClose(): void; }) => {
+    if (!user) return;
+    children.push(
+        <Menu.MenuItem
+            label="View Reviews"
+            id="vc-rdb-user-reviews"
+            icon={OpenExternalIcon}
+            action={() => openReviewsModal(user.id, user.username)}
         />
     );
 };
@@ -53,6 +69,13 @@ export default definePlugin({
     authors: [Devs.mantikafasi, Devs.Ven],
 
     settings,
+    contextMenus: {
+        "guild-header-popout": guildPopoutPatch,
+        "guild-context": guildPopoutPatch,
+        "user-context": userContextPatch,
+        "user-profile-actions": userContextPatch,
+        "user-profile-overflow-menu": userContextPatch
+    },
 
     patches: [
         {
@@ -60,6 +83,13 @@ export default definePlugin({
             replacement: {
                 match: /user:(\i),setNote:\i,canDM.+?\}\)/,
                 replace: "$&,$self.getReviewsComponent($1)"
+            }
+        },
+        {
+            find: ".BITE_SIZE,user:",
+            replacement: {
+                match: /(?<=\.BITE_SIZE,children:\[)\(0,\i\.jsx\)\(\i\.\i,\{user:(\i),/,
+                replace: "$self.BiteSizeReviewsButton({user:$1}),$&"
             }
         }
     ],
@@ -69,17 +99,8 @@ export default definePlugin({
     },
 
     async start() {
-        addContextMenuPatch("guild-header-popout", guildPopoutPatch);
-
         const s = settings.store;
         const { lastReviewId, notifyReviews } = s;
-
-        const legacy = s as any as { token?: string; };
-        if (legacy.token) {
-            await updateAuth({ token: legacy.token });
-            legacy.token = undefined;
-            new Logger("ReviewDB").info("Migrated legacy settings");
-        }
 
         await initAuth();
 
@@ -127,10 +148,6 @@ export default definePlugin({
         }, 4000);
     },
 
-    stop() {
-        removeContextMenuPatch("guild-header-popout", guildPopoutPatch);
-    },
-
     getReviewsComponent: ErrorBoundary.wrap((user: User) => {
         const [reviewCount, setReviewCount] = useState<number>();
 
@@ -154,5 +171,22 @@ export default definePlugin({
                 />
             </ExpandableHeader>
         );
-    }, { message: "Failed to render Reviews" })
+    }, { message: "Failed to render Reviews" }),
+
+    BiteSizeReviewsButton: ErrorBoundary.wrap(({ user }: { user: User; }) => {
+        return (
+            <TooltipContainer text="View Reviews">
+                <Button
+                    onClick={() => openReviewsModal(user.id, user.username)}
+                    look={Button.Looks.FILLED}
+                    size={Button.Sizes.NONE}
+                    color={RoleButtonClasses.bannerColor}
+                    className={classes(RoleButtonClasses.button, RoleButtonClasses.icon, RoleButtonClasses.banner)}
+                    innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.icon, RoleButtonClasses.banner)}
+                >
+                    <NotesIcon height={16} width={16} />
+                </Button>
+            </TooltipContainer>
+        );
+    }, { noop: true })
 });

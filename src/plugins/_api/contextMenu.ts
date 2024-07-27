@@ -22,15 +22,15 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "ContextMenuAPI",
     description: "API for adding/removing items to/from context menus.",
-    authors: [Devs.Nuckyz, Devs.Ven],
+    authors: [Devs.Nuckyz, Devs.Ven, Devs.Kyuuhachi],
     required: true,
 
     patches: [
         {
             find: "♫ (つ｡◕‿‿◕｡)つ ♪",
             replacement: {
-                match: /let{navId:/,
-                replace: "Vencord.Api.ContextMenu._patchContextMenu(arguments[0]);$&"
+                match: /(?=let{navId:)(?<=function \i\((\i)\).+?)/,
+                replace: "$1=Vencord.Api.ContextMenu._usePatchContextMenu($1);"
             }
         },
         {

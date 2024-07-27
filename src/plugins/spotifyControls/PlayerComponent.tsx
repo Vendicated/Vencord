@@ -18,10 +18,9 @@
 
 import "./spotifyStyles.css";
 
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
-import { debounce } from "@utils/debounce";
+import { debounce } from "@shared/debounce";
 import { openImageModal } from "@utils/discord";
 import { classes, copyWithToast } from "@utils/misc";
 import { ContextMenuApi, FluxDispatcher, Forms, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
@@ -371,18 +370,15 @@ export function Player() {
     if (!track || !device?.is_active || shouldHide)
         return null;
 
+    const exportTrackImageStyle = {
+        "--vc-spotify-track-image": `url(${track?.album?.image?.url || ""})`,
+    } as React.CSSProperties;
+
     return (
-        <ErrorBoundary fallback={() => (
-            <div className="vc-spotify-fallback">
-                <p>Failed to render Spotify Modal :(</p>
-                <p >Check the console for errors</p>
-            </div>
-        )}>
-            <div id={cl("player")}>
-                <Info track={track} />
-                <SeekBar />
-                <Controls />
-            </div>
-        </ErrorBoundary>
+        <div id={cl("player")} style={exportTrackImageStyle}>
+            <Info track={track} />
+            <SeekBar />
+            <Controls />
+        </div>
     );
 }

@@ -19,13 +19,14 @@
 /// <reference path="../src/modules.d.ts" />
 /// <reference path="../src/globals.d.ts" />
 
-import monacoHtmlLocal from "~fileContent/monacoWin.html";
-import monacoHtmlCdn from "~fileContent/../src/main/monacoWin.html";
+import monacoHtmlLocal from "file://monacoWin.html?minify";
+import monacoHtmlCdn from "file://../src/main/monacoWin.html?minify";
 import * as DataStore from "../src/api/DataStore";
 import { debounce } from "../src/utils";
 import { EXTENSION_BASE_URL } from "../src/utils/web-metadata";
 import { getTheme, Theme } from "../src/utils/discord";
 import { getThemeInfo } from "../src/main/themes";
+import { Settings } from "../src/Vencord";
 
 // Discord deletes this so need to store in variable
 const { localStorage } = window;
@@ -96,8 +97,15 @@ window.VencordNative = {
     },
 
     settings: {
-        get: () => localStorage.getItem("VencordSettings") || "{}",
-        set: async (s: string) => localStorage.setItem("VencordSettings", s),
+        get: () => {
+            try {
+                return JSON.parse(localStorage.getItem("VencordSettings") || "{}");
+            } catch (e) {
+                console.error("Failed to parse settings from localStorage: ", e);
+                return {};
+            }
+        },
+        set: async (s: Settings) => localStorage.setItem("VencordSettings", JSON.stringify(s)),
         getSettingsDir: async () => "LocalStorage"
     },
 

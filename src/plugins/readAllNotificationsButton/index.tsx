@@ -16,17 +16,40 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { findStoreLazy } from "@webpack";
 import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
+import { Channel } from "discord-types/general";
+
+interface ThreadJoined {
+    channel: Channel;
+    joinTimestamp: number;
+}
+
+type ThreadsJoined = Record<string, ThreadJoined>;
+type ThreadsJoinedByParent = Record<string, ThreadsJoined>;
+
+interface ActiveJoinedThreadsStore {
+    getActiveJoinedThreadsForGuild(guildId: string): ThreadsJoinedByParent;
+}
+
+const ActiveJoinedThreadsStore: ActiveJoinedThreadsStore = findStoreLazy("ActiveJoinedThreadsStore");
 
 function onClick() {
     const channels: Array<any> = [];
 
     Object.values(GuildStore.getGuilds()).forEach(guild => {
-        GuildChannelStore.getChannels(guild.id).SELECTABLE
-            .concat(GuildChannelStore.getChannels(guild.id).VOCAL)
+        GuildChannelStore.getChannels(guild.id).SELECTABLE // Array<{ channel, comparator }>
+            .concat(GuildChannelStore.getChannels(guild.id).VOCAL) // Array<{ channel, comparator }>
+            .concat(
+                Object.values(ActiveJoinedThreadsStore.getActiveJoinedThreadsForGuild(guild.id))
+                    .flatMap(threadChannels => Object.values(threadChannels))
+            )
             .forEach((c: { channel: { id: string; }; }) => {
                 if (!ReadStateStore.hasUnread(c.channel.id)) return;
 
@@ -49,9 +72,11 @@ const ReadAllButton = () => (
     <Button
         onClick={onClick}
         size={Button.Sizes.MIN}
-        color={Button.Colors.BRAND}
-        style={{ marginTop: "2px", marginBottom: "8px", marginLeft: "9px" }}
-    >Read all</Button>
+        color={Button.Colors.CUSTOM}
+        className="vc-ranb-button"
+    >
+        Read All
+    </Button>
 );
 
 export default definePlugin({
@@ -60,7 +85,7 @@ export default definePlugin({
     authors: [Devs.kemo],
     dependencies: ["ServerListAPI"],
 
-    renderReadAllButton: () => <ReadAllButton />,
+    renderReadAllButton: ErrorBoundary.wrap(ReadAllButton, { noop: true }),
 
     start() {
         addServerListElement(ServerListRenderPosition.Above, this.renderReadAllButton);

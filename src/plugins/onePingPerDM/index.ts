@@ -49,7 +49,7 @@ export default definePlugin({
             replace: "$&if(!$self.isPrivateChannelRead(arguments[0]?.message))return;else "
         },
         {
-            match: /sound:(\i\?\i:void 0,volume:\i,onClick)/,
+            match: /sound:(\i\?\i:void 0,soundpack:\i,volume:\i,onClick)/,
             replace: "sound:!$self.isPrivateChannelRead(arguments[0]?.message)?undefined:$1"
         }]
     }],

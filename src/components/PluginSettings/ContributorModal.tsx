@@ -9,20 +9,18 @@ import "./contributorModal.css";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Link } from "@components/Link";
 import { DevsById } from "@utils/constants";
-import { fetchUserProfile, getTheme, Theme } from "@utils/discord";
+import { fetchUserProfile } from "@utils/discord";
+import { classes, pluralise } from "@utils/misc";
 import { ModalContent, ModalRoot, openModal } from "@utils/modal";
-import { Forms, MaskedLink, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
+import { Forms, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import Plugins from "~plugins";
 
 import { PluginCard } from ".";
-
-const WebsiteIconDark = "/assets/e1e96d89e192de1997f73730db26e94f.svg";
-const WebsiteIconLight = "/assets/730f58bcfd5a57a5e22460c445a0c6cf.svg";
-const GithubIconLight = "/assets/3ff98ad75ac94fa883af5ed62d17c459.svg";
-const GithubIconDark = "/assets/6a853b4c87fce386cbfef4a2efbacb09.svg";
+import { GithubButton, WebsiteButton } from "./LinkIconButton";
 
 const cl = classNameFactory("vc-author-modal-");
 
@@ -36,16 +34,6 @@ export function openContributorModal(user: User) {
             </ErrorBoundary>
         </ModalRoot>
     );
-}
-
-function GithubIcon() {
-    const src = getTheme() === Theme.Light ? GithubIconLight : GithubIconDark;
-    return <img src={src} alt="GitHub" />;
-}
-
-function WebsiteIcon() {
-    const src = getTheme() === Theme.Light ? WebsiteIconLight : WebsiteIconDark;
-    return <img src={src} alt="Website" />;
 }
 
 function ContributorModal({ user }: { user: User; }) {
@@ -72,6 +60,8 @@ function ContributorModal({ user }: { user: User; }) {
             .sort((a, b) => Number(a.required ?? false) - Number(b.required ?? false));
     }, [user.id, user.username]);
 
+    const ContributedHyperLink = <Link href="https://vencord.dev/source">contributed</Link>;
+
     return (
         <>
             <div className={cl("header")}>
@@ -82,32 +72,44 @@ function ContributorModal({ user }: { user: User; }) {
                 />
                 <Forms.FormTitle tag="h2" className={cl("name")}>{user.username}</Forms.FormTitle>
 
-                <div className={cl("links")}>
+                <div className={classes("vc-settings-modal-links", cl("links"))}>
                     {website && (
-                        <MaskedLink
-                            href={"https://" + website}
-                        >
-                            <WebsiteIcon />
-                        </MaskedLink>
+                        <WebsiteButton
+                            text={website}
+                            href={`https://${website}`}
+                        />
                     )}
                     {githubName && (
-                        <MaskedLink href={`https://github.com/${githubName}`}>
-                            <GithubIcon />
-                        </MaskedLink>
+                        <GithubButton
+                            text={githubName}
+                            href={`https://github.com/${githubName}`}
+                        />
                     )}
                 </div>
             </div>
 
-            <div className={cl("plugins")}>
-                {plugins.map(p =>
-                    <PluginCard
-                        key={p.name}
-                        plugin={p}
-                        disabled={p.required ?? false}
-                        onRestartNeeded={() => showToast("Restart to apply changes!")}
-                    />
-                )}
-            </div>
+            {plugins.length ? (
+                <Forms.FormText>
+                    This person has {ContributedHyperLink} to {pluralise(plugins.length, "plugin")}!
+                </Forms.FormText>
+            ) : (
+                <Forms.FormText>
+                    This person has not made any plugins. They likely {ContributedHyperLink} to Vencord in other ways!
+                </Forms.FormText>
+            )}
+
+            {!!plugins.length && (
+                <div className={cl("plugins")}>
+                    {plugins.map(p =>
+                        <PluginCard
+                            key={p.name}
+                            plugin={p}
+                            disabled={p.required ?? false}
+                            onRestartNeeded={() => showToast("Restart to apply changes!")}
+                        />
+                    )}
+                </div>
+            )}
         </>
     );
 }

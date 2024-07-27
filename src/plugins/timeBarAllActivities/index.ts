@@ -22,7 +22,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "TimeBarAllActivities",
     description: "Adds the Spotify time bar to all activities if they have start and end timestamps",
-    authors: [Devs.obscurity],
+    authors: [Devs.fawn],
     patches: [
         {
             find: "}renderTimeBar(",

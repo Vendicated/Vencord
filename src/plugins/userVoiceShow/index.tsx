@@ -123,13 +123,12 @@ export default definePlugin({
         {
             find: ".popularApplicationCommandIds,",
             replacement: {
-                match: /\(0,\i\.jsx\)\(\i\.\i,{user:\i,setNote/,
-                // paste my fancy custom button above the message field
-                replace: "$self.patchPopout(arguments[0]),$&",
+                match: /(?<=,)(?=!\i&&!\i&&.{0,50}setNote:)/,
+                replace: "$self.patchPopout(arguments[0]),",
             }
         },
         {
-            find: ".USER_PROFILE_MODAL",
+            find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Lazy-loaded
             replacement: {
                 match: /\.body.+?displayProfile:\i}\),/,
                 // paste my fancy custom button below the username

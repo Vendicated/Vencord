@@ -25,14 +25,17 @@ export default definePlugin({
     authors: [Devs.Arjix, Devs.hunt, Devs.Ven],
     patches: [
         {
-            find: '"MessageActionCreators"',
+            find: ".Messages.EDIT_TEXTAREA_HELP",
             replacement: {
-                match: /async editMessage\(.+?\)\{/,
-                replace: "$&await Vencord.Api.MessageEvents._handlePreEdit(...arguments);"
+                match: /(?<=,channel:\i\}\)\.then\().+?(?=return \i\.content!==this\.props\.message\.content&&\i\((.+?)\))/,
+                replace: (match, args) => "" +
+                    `async ${match}` +
+                    `if(await Vencord.Api.MessageEvents._handlePreEdit(${args}))` +
+                    "return Promise.resolve({shoudClear:true,shouldRefocus:true});"
             }
         },
         {
-            find: ".handleSendMessage=",
+            find: ".handleSendMessage,onResize",
             replacement: {
                 // props.chatInputType...then((function(isMessageValid)... var parsedMessage = b.c.parse(channel,... var replyOptions = f.g.getSendMessageOptionsForReply(pendingReply);
                 // Lookbehind: validateMessage)({openWarningPopout:..., type: i.props.chatInputType, content: t, stickers: r, ...}).then((function(isMessageValid)

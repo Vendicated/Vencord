@@ -18,16 +18,23 @@
 
 import "./styles.css";
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { SafetyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, GuildMemberStore, GuildStore, Menu, PermissionsBits, UserStore } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { Button, ChannelStore, Dialog, GuildMemberStore, GuildStore, Menu, PermissionsBits, Popout, TooltipContainer, UserStore } from "@webpack/common";
 import type { Guild, GuildMember } from "discord-types/general";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
 import { getSortedRoles, sortPermissionOverwrites } from "./utils";
+
+const PopoutClasses = findByPropsLazy("container", "scroller", "list");
+const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
 
 export const enum PermissionsSortOrder {
     HighestRole,
@@ -107,7 +114,7 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                     }
 
                     default: {
-                        permissions = Object.values(guild.roles).map(role => ({
+                        permissions = Object.values(GuildStore.getRoles(guild.id)).map(role => ({
                             type: PermissionType.Role,
                             ...role
                         }));
@@ -125,10 +132,10 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
 }
 
 function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentType): NavContextMenuPatchCallback {
-    return (children, props) => () => {
+    return (children, props) => {
         if (!props) return;
         if ((type === MenuItemParentType.User && !props.user) || (type === MenuItemParentType.Guild && !props.guild) || (type === MenuItemParentType.Channel && (!props.channel || !props.guild)))
-            return children;
+            return;
 
         const group = findGroupChildrenByChildId(childId, children);
 
@@ -168,24 +175,50 @@ export default definePlugin({
                 match: /showBorder:(.{0,60})}\),(?<=guild:(\i),guildMember:(\i),.+?)/,
                 replace: (m, showBoder, guild, guildMember) => `${m}$self.UserPermissions(${guild},${guildMember},${showBoder}),`
             }
+        },
+        {
+            find: ".VIEW_ALL_ROLES,",
+            replacement: {
+                match: /children:"\+"\.concat\(\i\.length-\i\.length\).{0,20}\}\),/,
+                replace: "$&$self.ViewPermissionsButton(arguments[0]),"
+            }
         }
     ],
 
-    UserPermissions: (guild: Guild, guildMember: GuildMember | undefined, showBoder: boolean) => !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} showBorder={showBoder} />,
+    UserPermissions: (guild: Guild, guildMember: GuildMember | undefined, showBorder: boolean) =>
+        !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} showBorder={showBorder} />,
 
-    userContextMenuPatch: makeContextMenuPatch("roles", MenuItemParentType.User),
-    channelContextMenuPatch: makeContextMenuPatch(["mute-channel", "unmute-channel"], MenuItemParentType.Channel),
-    guildContextMenuPatch: makeContextMenuPatch("privacy", MenuItemParentType.Guild),
+    ViewPermissionsButton: ErrorBoundary.wrap(({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) => (
+        <Popout
+            position="bottom"
+            align="center"
+            renderPopout={() => (
+                <Dialog className={PopoutClasses.container} style={{ width: "500px" }}>
+                    <UserPermissions guild={guild} guildMember={guildMember} showBorder forceOpen />
+                </Dialog>
+            )}
+        >
+            {popoutProps => (
+                <TooltipContainer text="View Permissions">
+                    <Button
+                        {...popoutProps}
+                        color={Button.Colors.CUSTOM}
+                        look={Button.Looks.FILLED}
+                        size={Button.Sizes.NONE}
+                        innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.icon)}
+                        className={classes(RoleButtonClasses.button, RoleButtonClasses.icon, "vc-permviewer-role-button")}
+                    >
+                        <SafetyIcon height="16" width="16" />
+                    </Button>
+                </TooltipContainer>
+            )}
+        </Popout>
+    ), { noop: true }),
 
-    start() {
-        addContextMenuPatch("user-context", this.userContextMenuPatch);
-        addContextMenuPatch("channel-context", this.channelContextMenuPatch);
-        addContextMenuPatch(["guild-context", "guild-header-popout"], this.guildContextMenuPatch);
-    },
-
-    stop() {
-        removeContextMenuPatch("user-context", this.userContextMenuPatch);
-        removeContextMenuPatch("channel-context", this.channelContextMenuPatch);
-        removeContextMenuPatch(["guild-context", "guild-header-popout"], this.guildContextMenuPatch);
-    },
+    contextMenus: {
+        "user-context": makeContextMenuPatch("roles", MenuItemParentType.User),
+        "channel-context": makeContextMenuPatch(["mute-channel", "unmute-channel"], MenuItemParentType.Channel),
+        "guild-context": makeContextMenuPatch("privacy", MenuItemParentType.Guild),
+        "guild-header-popout": makeContextMenuPatch("privacy", MenuItemParentType.Guild)
+    }
 });

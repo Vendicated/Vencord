@@ -16,19 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const StickersStore = findStoreLazy("StickersStore");
-const EmojiManager = findByPropsLazy("fetchEmoji", "uploadEmoji", "deleteEmoji");
+const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
 
 interface Sticker {
     t: "Sticker";
@@ -54,9 +54,9 @@ const StickerExt = [, "png", "png", "json", "gif"] as const;
 
 function getUrl(data: Data) {
     if (data.t === "Emoji")
-        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}`;
+        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}?size=4096&lossless=true`;
 
-    return `${location.origin}/stickers/${data.id}.${StickerExt[data.format_type]}`;
+    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
 }
 
 async function fetchSticker(id: string) {
@@ -64,7 +64,7 @@ async function fetchSticker(id: string) {
     if (cached) return cached;
 
     const { body } = await RestAPI.get({
-        url: `/stickers/${id}`
+        url: Constants.Endpoints.STICKER(id)
     });
 
     FluxDispatcher.dispatch({
@@ -83,7 +83,7 @@ async function cloneSticker(guildId: string, sticker: Sticker) {
     data.append("file", await fetchBlob(getUrl(sticker)));
 
     const { body } = await RestAPI.post({
-        url: `/guilds/${guildId}/stickers`,
+        url: Constants.Endpoints.GUILD_STICKER_PACKS(guildId),
         body: data,
     });
 
@@ -106,7 +106,7 @@ async function cloneEmoji(guildId: string, emoji: Emoji) {
         reader.readAsDataURL(data);
     });
 
-    return EmojiManager.uploadEmoji({
+    return uploadEmoji({
         guildId,
         name: emoji.name.split("~")[0],
         image: dataUrl
@@ -130,7 +130,8 @@ function getGuildCandidates(data: Data) {
 
         let count = 0;
         for (const emoji of emojis)
-            if (emoji.animated === isAnimated) count++;
+            if (emoji.animated === isAnimated && !emoji.managed)
+                count++;
         return count < emojiSlots;
     }).sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -312,7 +313,7 @@ function isGifUrl(url: string) {
     return new URL(url).pathname.endsWith(".gif");
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => () => {
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
 
     if (!favoriteableId) return;
@@ -321,8 +322,9 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         switch (favoriteableType) {
             case "emoji":
                 const match = props.message.content.match(RegExp(`<a?:(\\w+)(?:~\\d+)?:${favoriteableId}>|https://cdn\\.discordapp\\.com/emojis/${favoriteableId}\\.`));
-                if (!match) return;
-                const name = match[1] ?? "FakeNitroEmoji";
+                const reaction = props.message.reactions.find(reaction => reaction.emoji.id === favoriteableId);
+                if (!match && !reaction) return;
+                const name = (match && match[1]) ?? reaction?.emoji.name ?? "FakeNitroEmoji";
 
                 return buildMenuItem("Emoji", () => ({
                     id: favoriteableId,
@@ -341,7 +343,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         findGroupChildrenByChildId("copy-link", children)?.push(menuItem);
 };
 
-const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => () => {
+const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
     const { id, name, type } = props?.target?.dataset ?? {};
     if (!id) return;
 
@@ -363,14 +365,8 @@ export default definePlugin({
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
     tags: ["StickerCloner"],
     authors: [Devs.Ven, Devs.Nuckyz],
-
-    start() {
-        addContextMenuPatch("message", messageContextMenuPatch);
-        addContextMenuPatch("expression-picker", expressionPickerPatch);
-    },
-
-    stop() {
-        removeContextMenuPatch("message", messageContextMenuPatch);
-        removeContextMenuPatch("expression-picker", expressionPickerPatch);
+    contextMenus: {
+        "message": messageContextMenuPatch,
+        "expression-picker": expressionPickerPatch
     }
 });
