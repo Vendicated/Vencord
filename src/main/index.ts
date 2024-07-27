@@ -101,7 +101,7 @@ if (IS_VESKTOP || !IS_VANILLA) {
                 // TODO: Restrict this to only imported packages with fixed version.
                 // Perhaps auto generate with esbuild
                 csp["script-src"] ??= [];
-                csp["script-src"].push("'unsafe-eval'", "https://unpkg.com", "https://cdnjs.cloudflare.com");
+                csp["script-src"].push("'unsafe-eval'", "https://unpkg.com", "https://cdnjs.cloudflare.com"); //We shouldn't be using cdns at all
                 headers[header] = [stringifyPolicy(csp)];
             }
         };

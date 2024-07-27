@@ -69,8 +69,11 @@ export interface ApngFrameData {
 // The below code is only used on the Desktop (electron) build of Vencord.
 // Browser (extension) builds do not contain these remote imports.
 
-export const shikiWorkerSrc = `https://unpkg.com/@vap/shiki-worker@0.0.8/dist/${IS_DEV ? "index.js" : "index.min.js"}`;
-export const shikiOnigasmSrc = "https://unpkg.com/@vap/shiki@0.10.3/dist/onig.wasm";
+//Hotlink
+export const shikiWorkerSrc = `https://raw.githubusercontent.com/Vendicated/Vencord/main/assets/@vap/shiki-worker@0.0.8/dist/${IS_DEV ? "index.js" : "index.min.js"}`;
+export const shikiOnigasmSrc = "https://raw.githubusercontent.com/Vendicated/Vencord/main/assets/@vap/shiki@0.10.3/dist/onig.wasm";
+//hotlink
 
 // @ts-expect-error
-export const getStegCloak = /* #__PURE__*/ makeLazy(() => import("https://unpkg.com/stegcloak-dist@1.0.0/index.js"));
+export const getStegCloak = /* #__PURE__*/ makeLazy(() => import("https://raw.githubusercontent.com/Vendicated/Vencord/main/assets/stegcloak-dist@1.0.0/index.js"));
+//hotlink

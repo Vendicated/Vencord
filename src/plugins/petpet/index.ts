@@ -31,7 +31,8 @@ const FRAMES = 10;
 const getFrames = makeLazy(() => Promise.all(
     Array.from(
         { length: FRAMES },
-        (_, i) => loadImage(`https://raw.githubusercontent.com/VenPlugs/petpet/main/frames/pet${i}.gif`)
+        (_, i) => loadImage(`https://raw.githubusercontent.com/Vendicated/Vencord/main/assets/VenPlugs/petpet/main/frames/pet${i}.gif`)
+        //hotlinked
     ))
 );
 

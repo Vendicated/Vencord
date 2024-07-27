@@ -27,6 +27,7 @@ import { type ComponentType, type ReactNode } from "react";
 
 // LYING to the type checker here
 const UserFlags = Constants.UserFlags as Record<string, number>;
+//Probably a hotlink here but to be quite honest i really want to finish this pr as fast as possible, someone else review this please.
 const badges: Record<string, ProfileBadge> = {
     active_developer: { id: "active_developer", description: "Active Developer", icon: "6bdc42827a38498929a4920da12695d9", link: "https://support-dev.discord.com/hc/en-us/articles/10113997751447" },
     bug_hunter_level_1: { id: "bug_hunter_level_1", description: "Discord Bug Hunter", icon: "2717692c7dca7289b35297368a940dd0", link: "https://support.discord.com/hc/en-us/articles/360046057772-Discord-Bugs" },

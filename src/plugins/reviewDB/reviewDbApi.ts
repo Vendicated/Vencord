@@ -81,7 +81,8 @@ export async function getReviews(id: string, offset = 0): Promise<Response> {
                     sender: {
                         id: 0,
                         username: "ReviewDB",
-                        profilePhoto: "https://cdn.discordapp.com/avatars/1134864775000629298/3f87ad315b32ee464d84f1270c8d1b37.png?size=256&format=webp&quality=lossless",
+                        //Hotlinked, but it's a broken file, still changing it anyways. This probably warrants a deeper look.
+                        profilePhoto: "https://raw.githubusercontent.com/Vendicated/Vencord/main/assets/3f87ad315b32ee464d84f1270c8d1b37.png",
                         discordID: "1134864775000629298",
                         badges: []
                     }

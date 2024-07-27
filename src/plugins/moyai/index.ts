@@ -52,10 +52,11 @@ interface IVoiceChannelEffectSendEvent {
 }
 
 const MOYAI = "🗿";
+//hotlink
 const MOYAI_URL =
-    "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai.mp3";
+    "https://raw.githubusercontent.com/Vendicated/Vencord/main/assets/MeguminSama/VencordPlugins/main/plugins/moyai/moyai.mp3";
 const MOYAI_URL_HD =
-    "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai_hd.wav";
+    "https://raw.githubusercontent.com/Vendicated/Vencord/main/assets/MeguminSama/VencordPlugins/main/plugins/moyai/moyai_hd.wav";
 
 const settings = definePluginSettings({
     volume: {

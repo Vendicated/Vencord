@@ -24,7 +24,7 @@ export default definePlugin({
     description: "cat follow mouse (real)",
     // Listing adryd here because this literally just evals her script
     authors: [Devs.Ven, Devs.adryd],
-
+    //holy shit hotlinked
     start() {
         fetch("https://raw.githubusercontent.com/adryd325/oneko.js/8fa8a1864aa71cd7a794d58bc139e755e96a236c/oneko.js")
             .then(x => x.text())

@@ -166,6 +166,7 @@ export default definePlugin({
                 }
             },
             onClick() {
+                //hotlink
                 const modalKey = openModal(props => (
                     <ErrorBoundary noop onError={() => {
                         closeModal(modalKey);
@@ -191,13 +192,13 @@ export default definePlugin({
                                 <Flex>
                                     <img
                                         role="presentation"
-                                        src="https://cdn.discordapp.com/emojis/1026533070955872337.png"
+                                        src="https://raw.githubusercontent.com/Vendicated/Vencord/main/assets/emojis/1026533070955872337.png"
                                         alt=""
                                         style={{ margin: "auto" }}
                                     />
                                     <img
                                         role="presentation"
-                                        src="https://cdn.discordapp.com/emojis/1026533090627174460.png"
+                                        src="https://raw.githubusercontent.com/Vendicated/Vencord/main/assets/emojis/1026533090627174460.png"
                                         alt=""
                                         style={{ margin: "auto" }}
                                     />

@@ -45,7 +45,7 @@ function PopOverIcon() {
     );
 }
 
-
+//Hotlink
 function Indicator() {
     return (
         <Tooltip text="This message has a hidden message! (InvisibleChat)">
@@ -54,7 +54,7 @@ function Indicator() {
                     aria-label="Hidden Message Indicator (InvisibleChat)"
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
-                    src="https://github.com/SammCheese/invisible-chat/raw/NewReplugged/src/assets/lock.png"
+                    src="https://raw.githubusercontent.com/Vendicated/Vencord/main/assets/invisible-chat/raw/NewReplugged/src/assets/lock.png"
                     width={20}
                     height={20}
                     style={{ transform: "translateY(4p)", paddingInline: 4 }}
@@ -118,7 +118,7 @@ export default definePlugin({
             }
         },
     ],
-
+    //Not the scope of this pr, but this violates plugin rules.
     EMBED_API_URL: "https://embed.sammcheese.net",
     INV_REGEX: new RegExp(/( \u200c|\u200d |[\u2060-\u2064])[^\u200b]/),
     URL_REGEX: new RegExp(

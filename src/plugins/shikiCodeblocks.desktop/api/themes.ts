@@ -25,9 +25,9 @@ export const shikiRepoTheme = (name: string) => `https://raw.githubusercontent.c
 export const themes = {
     // Default
     DarkPlus: shikiRepoTheme("dark-plus"),
-
+    //hotlinked
     // Dev Choices
-    MaterialCandy: "https://raw.githubusercontent.com/millsp/material-candy/master/material-candy.json",
+    MaterialCandy: "https://raw.githubusercontent.com/Vendicated/Vencord/main/assets/millsp/material-candy/master/material-candy.json",
 
     // More from Shiki repo
     DraculaSoft: shikiRepoTheme("dracula-soft"),
