@@ -129,13 +129,6 @@ function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: st
 
     return (
         <Section>
-            <Text
-                tag="h2"
-                variant="eyebrow"
-                style={{ color: "var(--header-primary)" }}
-            >
-                Connections
-            </Text>
             {connectionsContainer}
         </Section>
     );
