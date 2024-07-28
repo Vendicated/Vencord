@@ -484,6 +484,7 @@ export type Avatar = ComponentType<PropsWithChildren<{
     src?: string;
     size?: "SIZE_16" | "SIZE_20" | "SIZE_24" | "SIZE_32" | "SIZE_40" | "SIZE_48" | "SIZE_56" | "SIZE_80" | "SIZE_120";
 
+    status?: string;
     statusColor?: string;
     statusTooltip?: string;
     statusBackdropColor?: string;
@@ -500,4 +501,10 @@ export type Avatar = ComponentType<PropsWithChildren<{
 
 type FocusLock = ComponentType<PropsWithChildren<{
     containerRef: RefObject<HTMLElement>;
+}>>;
+
+export type Dots = ComponentType<PropsWithChildren<{
+    dotRadius: number;
+    themed?: boolean;
+    className?: string;
 }>>;

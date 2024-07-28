@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps } from "@webpack";
 import { Button, Forms, i18n, Menu, TabBar } from "@webpack/common";
@@ -13,7 +14,6 @@ import { ReactElement } from "react";
 import { preload, unload } from "./images";
 import { cl, QrCodeCameraIcon } from "./ui";
 import openQrModal from "./ui/modals/QrModal";
-import { EquicordDevs } from "@utils/constants";
 
 export default definePlugin({
     name: "LoginWithQR",

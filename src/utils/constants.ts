@@ -715,6 +715,10 @@ export const EquicordDevs = Object.freeze({
         name: "SimplyData",
         id: 301494563514613762n
     },
+    keifufu: {
+        name: "keifufu",
+        id: 469588398110146590n
+    },
 } satisfies Record<string, Dev>);
 
 export const SuncordDevs = /* #__PURE__*/ Object.freeze({
