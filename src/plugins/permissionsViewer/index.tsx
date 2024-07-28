@@ -191,8 +191,8 @@ export default definePlugin({
                     predicate: () => settings.store.preferButtonOverDropdown
                 },
                 {
-                    match: /\?(\(0,.+?guild:(\i),guildMember:(\i).+?\))(?=:)/,
-                    replace: "?[$1,$self.UserPermissions($2,$3)]",
+                    match: /0!==\i\.length\|\|\i\?\(0,.+?guild:(\i),guildMember:(\i).+?null/,
+                    replace: "[$&,$self.UserPermissions($1,$2)]",
                     predicate: () => !settings.store.preferButtonOverDropdown
                 }
             ]
