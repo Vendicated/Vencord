@@ -64,7 +64,7 @@ function NotesSection(props: NoteHook & NotesSectionProps) {
     }, []);
     if (!props.visible || !loaded) return null;
     return <Section
-        title={i18n.Messages.NOTE}
+        heading={i18n.Messages.NOTE}
         scrollIntoView={props.autoFocus}
         headingColor={props.headingColor}
     >
@@ -88,7 +88,7 @@ export default definePlugin({
             find: /\.BITE_SIZE,onOpenProfile:\i,/,
             all: true,
             replacement: {
-                match: /currentUser:\i,guild:\i,onOpenProfile:.+?}\)(?=])(?<=user:(\i),bio:null==(\i)\?.+?)/,
+                match: /onOpenProfile:.+?}\)(?=])(?<=user:(\i),bio:null==(\i)\?.+?)/,
                 replace: "$&,$self.NotesSection({ user: $1, ...vencordNotesHook })"
             }
         },
