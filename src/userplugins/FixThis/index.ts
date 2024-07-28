@@ -7,7 +7,7 @@ const MessageActions = findByPropsLazy("sendMessage");
 
 export default definePlugin({
     name: "FixThis",
-    description: "Fixes links for TikTok, Instagram, Twitter, X and Pixiv",
+    description: "Fixes the url for embed in discord for several sites",
     authors: [Devs.Dawok],
     patches: [
         {
@@ -37,6 +37,12 @@ export default definePlugin({
             
             if (lowerUrl.includes('twitter.com/i/spaces/') || lowerUrl.includes('x.com/i/spaces/')) {
                 return url;
+            }
+
+            const twitchClipRegex = /https?:\/\/(www\.)?twitch\.tv\/[^\/]+\/clip\/([^\/\s]+)/i;
+            const twitchClipMatch = url.match(twitchClipRegex);
+            if (twitchClipMatch) {
+                return `https://clips.fxtwitch.tv/${twitchClipMatch[2]}`;
             }
 
             for (const [oldDomain, newDomain] of Object.entries(urlMap)) {
