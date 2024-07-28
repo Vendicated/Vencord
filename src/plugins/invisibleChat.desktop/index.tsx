@@ -54,7 +54,7 @@ function Indicator() {
                     aria-label="Hidden Message Indicator (InvisibleChat)"
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
-                    src="https://github.com/SammCheese/invisible-chat/raw/NewReplugged/src/assets/lock.png"
+                    src="https://github.com/SammCheese/invisible-chat/blob/1c1a1111d5aed4ddd04bb76a8f10d138944e1d5a/src/assets/lock.png"
                     width={20}
                     height={20}
                     style={{ transform: "translateY(4p)", paddingInline: 4 }}
