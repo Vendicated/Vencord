@@ -99,7 +99,7 @@ const settings = definePluginSettings({
         description: "Websocket port",
         default: 42070,
         onChange() {
-            XSOverlay.start();
+            start();
         }
     },
     botNotifications: {
@@ -168,7 +168,12 @@ const settings = definePluginSettings({
 
 let socket: WebSocket;
 
-const XSOverlay = definePlugin({
+async function start() {
+    if (socket) socket.close();
+    socket = new WebSocket(`ws://127.0.0.1:${settings.store.webSocketPort ?? 42070}/?client=Vencord`);
+}
+
+export default definePlugin({
     name: "XSOverlay",
     description: "Forwards discord notifications to XSOverlay, for easy viewing in VR",
     authors: [Devs.Nyako],
@@ -280,19 +285,7 @@ const XSOverlay = definePlugin({
         }
     },
 
-    async start() {
-        if (socket) socket.close();
-        socket = new WebSocket(`ws://127.0.0.1:${settings.store.webSocketPort ?? 42070}/?client=Vencord`);
-
-        const connected = await new Promise(res => setTimeout(() => res(socket.readyState === WebSocket.OPEN), 3000));
-        if (!connected) {
-            logger.error("WebSocket connection failed, retrying after 3000ms.");
-            setTimeout(() => {
-                this.start();
-            }, 3000);
-            return;
-        }
-    },
+    start,
 
     stop() {
         socket.close();
@@ -351,22 +344,15 @@ function sendOtherNotif(content: string, titleString: string) {
 }
 
 function sendToOverlay(notif: NotificationObject) {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-        try {
-            const apiObject: ApiObject = {
-                sender: "Vencord",
-                target: "xsoverlay",
-                command: "SendNotification",
-                jsonData: JSON.stringify(notif),
-                rawData: null
-            };
-            socket.send(JSON.stringify(apiObject));
-        } catch (error) {
-            logger.error("Error sending to overlay:", error);
-        }
-    } else {
-        XSOverlay.start();
-    }
+    const apiObject: ApiObject = {
+        sender: "Vencord",
+        target: "xsoverlay",
+        command: "SendNotification",
+        jsonData: JSON.stringify(notif),
+        rawData: null
+    };
+    if (socket.readyState !== WebSocket.OPEN) start();
+    socket.send(JSON.stringify(apiObject));
 }
 
 function shouldNotify(message: Message, channel: string) {
@@ -389,5 +375,3 @@ function calculateTimeout(content: string) {
     if (content.length <= 300) return 5;
     return 6;
 }
-
-export default XSOverlay;
