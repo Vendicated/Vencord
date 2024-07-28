@@ -47,7 +47,10 @@ export default tseslint.config(
             "@stylistic/function-call-argument-newline": ["error", "consistent"],
             "@stylistic/function-call-spacing": "error",
             "@stylistic/function-paren-newline": ["error", "consistent"],
-            "@stylistic/indent": "error",
+            "@stylistic/indent": ["error", 4, {
+                SwitchCase: 1,
+                flatTernaryExpressions: true
+            }],
             "@stylistic/key-spacing": "error",
             "@stylistic/keyword-spacing": "error",
             "@stylistic/linebreak-style": "error",
@@ -110,7 +113,7 @@ export default tseslint.config(
             "@typescript-eslint/no-non-null-asserted-optional-chain": "error",
             "@typescript-eslint/no-redundant-type-constituents": "error",
             "@typescript-eslint/no-require-imports": "error",
-            "@typescript-eslint/no-unnecessary-condition": "error",
+            "@typescript-eslint/no-unnecessary-condition": ["error", { allowConstantLoopConditions: true }],
             "@typescript-eslint/no-unnecessary-qualifier": "error",
             "@typescript-eslint/no-unnecessary-type-arguments": "error",
             "@typescript-eslint/no-unnecessary-type-assertion": "error",

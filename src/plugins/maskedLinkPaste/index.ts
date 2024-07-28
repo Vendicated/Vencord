@@ -32,7 +32,6 @@ export default definePlugin({
                 editor,
                 `[${editor.operations[0].text}](${content})`
             );
-        }
-        else originalBehavior();
+        } else originalBehavior();
     }
 });

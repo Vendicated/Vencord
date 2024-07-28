@@ -74,8 +74,8 @@ export interface ApplicationCommandOptionChoice<
     OptionType extends ApplicationCommandChoiceOptionType = ApplicationCommandChoiceOptionType
 > extends Pick<ApplicationCommand, "name" | "name_localizations"> {
     value: OptionType extends ApplicationCommandOptionType.STRING ? string
-        : OptionType extends ApplicationCommandOptionType.INTEGER | ApplicationCommandOptionType.NUMBER ? number
-            : never;
+    : OptionType extends ApplicationCommandOptionType.INTEGER | ApplicationCommandOptionType.NUMBER ? number
+    : never;
 }
 
 export type ApplicationCommandStringOption = ApplicationCommandChoicesOptionBase & {

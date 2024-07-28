@@ -66,7 +66,7 @@ export async function getGrammar(lang: Language): Promise<NonNullable<ILanguageR
 const aliasCache = new Map<string, Language>();
 
 export function resolveLang(idOrAlias: string) {
-    if (Object.prototype.hasOwnProperty.call(languages, idOrAlias)) return languages[idOrAlias];
+    if (Object.hasOwn(languages, idOrAlias)) return languages[idOrAlias];
 
     const lang = Object.values(languages).find(lang => lang.aliases?.includes(idOrAlias));
 

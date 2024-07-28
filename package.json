@@ -44,7 +44,7 @@
         "nanoid": "^5.0.7"
     },
     "devDependencies": {
-        "@stylistic/eslint-plugin": "^2.3.0",
+        "@stylistic/eslint-plugin": "^2.4.0",
         "@stylistic/stylelint-config": "^1.0.1",
         "@stylistic/stylelint-plugin": "^2.1.2",
         "@types/chrome": "^0.0.269",
@@ -59,7 +59,7 @@
         "diff": "^5.2.0",
         "discord-types": "latest",
         "esbuild": "^0.23.0",
-        "eslint": "^9.7.0",
+        "eslint": "^9.8.0",
         "eslint-plugin-path-alias": "^2.1.0",
         "eslint-plugin-simple-header": "^1.1.1",
         "eslint-plugin-simple-import-sort": "^12.1.1",
@@ -82,8 +82,9 @@
     "packageManager": "pnpm@9.6.0",
     "pnpm": {
         "patchedDependencies": {
+            "@stylistic/eslint-plugin-js@2.4.0": "patches/@stylistic__eslint-plugin-js@2.4.0.patch",
             "eslint-plugin-path-alias@2.1.0": "patches/eslint-plugin-path-alias@2.1.0.patch",
-            "eslint@9.7.0": "patches/eslint@9.7.0.patch",
+            "eslint@9.8.0": "patches/eslint@9.8.0.patch",
             "standalone-electron-types@1.0.0": "patches/standalone-electron-types@1.0.0.patch"
         },
         "peerDependencyRules": {

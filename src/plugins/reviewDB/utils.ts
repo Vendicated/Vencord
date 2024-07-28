@@ -26,11 +26,9 @@ export const cl = classNameFactory("vc-rdb-");
 
 export function canDeleteReview(profileId: string, review: Review) {
     const meId = UserStore.getCurrentUser()!.id;
-    return (
-        meId === profileId
+    return meId === profileId
         || review.sender.discordID === meId
-        || Auth.user?.type === UserType.Admin
-    );
+        || Auth.user?.type === UserType.Admin;
 }
 
 export function canBlockReviewAuthor(profileId: string, review: Review) {

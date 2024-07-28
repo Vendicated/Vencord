@@ -70,8 +70,7 @@ export function getThemeInfo(css: string, fileName: string): UserThemeHeader {
             const l = line.indexOf(" ");
             field = line.substring(1, l);
             accum = line.substring(l + 1);
-        }
-        else {
+        } else {
             accum += " " + line.replace("\\n", "\n").replace(escapedAtRegex, "@");
         }
     }

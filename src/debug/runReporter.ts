@@ -36,8 +36,7 @@ async function runReporter() {
             else if (searchType === "waitFor" || searchType === "waitForComponent") {
                 if (typeof args[0] === "string") method = "findByProps";
                 else method = "find";
-            }
-            else if (searchType === "waitForStore") method = "findStore";
+            } else if (searchType === "waitForStore") method = "findStore";
             else method = searchType;
 
             let result: any;
@@ -69,8 +68,7 @@ async function runReporter() {
                     const failedMappings = Object.keys(args[1]).filter(key => result?.[key] == null);
 
                     logMessage += `("${args[0]}", {\n${failedMappings.map(mapping => `\t${mapping}: ${args[1][mapping].toString().slice(0, 147)}...`).join(",\n")}\n})`;
-                }
-                else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
+                } else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
 
                 ReporterLogger.log("Webpack Find Fail:", logMessage);
             }

@@ -145,8 +145,7 @@ export default definePlugin({
         }
         try {
             ExpressionPickerStore.closeExpressionPicker();
-        }
-        catch (err) {
+        } catch (err) {
             CrashHandlerLogger.debug("Failed to close expression picker.", err);
         }
         try {
