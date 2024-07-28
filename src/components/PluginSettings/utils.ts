@@ -73,3 +73,11 @@ export function togglePluginEnabled(isEnabled: boolean, plugin: Plugin,onRestart
 
     settings.enabled = !wasEnabled;
 }
+
+export const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop" | "desktop" | "dev", string> = {
+    desktop: "Discord Desktop app or Vesktop",
+    discordDesktop: "Discord Desktop app",
+    vencordDesktop: "Vesktop app",
+    web: "Vesktop app and the Web version of Discord",
+    dev: "Developer version of Vencord"
+};
