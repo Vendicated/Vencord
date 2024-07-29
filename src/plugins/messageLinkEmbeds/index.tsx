@@ -44,7 +44,7 @@ import {
 } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
-import { wrapMentionComponent, wrapReplyComponent } from "./tooltip.jsx";
+import { MessageTooltip } from "./tooltip.jsx";
 
 const messageCache = new Map<string, {
     message?: Message;
@@ -393,8 +393,8 @@ export default definePlugin({
         {
             find: ',className:"channelMention",children:[',
             replacement: {
-                match: /(?<=\.jsxs\)\()(\i\.\i)(?=,\{role:"link")/,
-                replace: "$self.wrapMentionComponent(arguments[0], $1)"
+                match: /(?<=\.jsxs\)\()(\i\.\i),\{(?=role:"link")/,
+                replace: "$self.MentionTooltip,{Component:$1,vcProps:arguments[0],"
             },
             predicate: () => settings.store.tooltip
         },
@@ -402,15 +402,25 @@ export default definePlugin({
             find: "Messages.REPLY_QUOTE_MESSAGE_NOT_LOADED",
             replacement: {
                 // Should match two places
-                match: /(\i\.Clickable)/g,
-                replace: "$self.wrapReplyComponent(arguments[0], $1)"
+                match: /(\i\.Clickable),\{/g,
+                replace: "$self.ReplyTooltip,{Component:$1,vcProps:arguments[0],"
             },
             predicate: () => settings.store.replyTooltip
         },
     ],
 
-    wrapMentionComponent,
-    wrapReplyComponent,
+    MentionTooltip({ Component, vcProps, ...props }) {
+        return <MessageTooltip messageId={vcProps.messageId} channelId={vcProps.channelId}>
+            {(p) => <Component {...props} {...p} />}
+        </MessageTooltip>;
+    },
+
+    ReplyTooltip({ Component, vcProps, ...props }) {
+        const ref = vcProps.baseMessage.messageReference;
+        return <MessageTooltip messageId={ref.message_id} channelId={ref.channel_id}>
+            {(p) => <Component {...props} {...p} />}
+        </MessageTooltip>;
+    },
 
     start() {
         addAccessory("messageLinkEmbed", props => {

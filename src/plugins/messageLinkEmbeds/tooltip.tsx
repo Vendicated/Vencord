@@ -26,24 +26,6 @@ import type { Message } from "discord-types/general";
 const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
 const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact")!;
 
-// TODO wrapping components like this probably makes react's equality check fail
-export function wrapMentionComponent({ messageId, channelId }, Component) {
-    return props => {
-        return <MessageTooltip messageId={messageId} channelId={channelId}>
-            <Component {...props} />
-        </MessageTooltip>;
-    };
-}
-
-export function wrapReplyComponent(p, Component) {
-    const { channel_id, message_id } = p.baseMessage.messageReference;
-    return props => {
-        return <MessageTooltip messageId={message_id} channelId={channel_id}>
-            <Component {...props} />
-        </MessageTooltip>;
-    };
-}
-
 export function MessageTooltip({ messageId, channelId, children }) {
     if(!messageId) return children;
     return <Tooltip
@@ -56,13 +38,8 @@ export function MessageTooltip({ messageId, channelId, children }) {
                 />
             </ErrorBoundary>
         }
-    >
-        {({ onMouseEnter, onMouseLeave }) =>
-            <Clickable onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-                {children}
-            </Clickable>
-        }
-    </Tooltip>;
+        children={({ onMouseEnter, onMouseLeave }) => children({ onMouseEnter, onMouseLeave })}
+    />;
 }
 
 function MessagePreview({ channelId, messageId }) {
