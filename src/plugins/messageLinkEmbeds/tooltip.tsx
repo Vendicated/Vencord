@@ -20,14 +20,12 @@ import {
     useState,
     useStateFromStores,
 } from "@webpack/common";
-import type { ComponentType } from "react";
 import type { Message } from "discord-types/general";
 
 const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
 const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact")!;
 
-export function wrapMentionComponent(p, Component: ComponentType) {
-    let { messageId, channelId } = p;
+export function wrapMentionComponent({ messageId, channelId }, Component) {
     return props => {
         if(!messageId) return <Component {...props} />;
         return <Tooltip
