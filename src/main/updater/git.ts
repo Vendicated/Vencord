@@ -75,7 +75,7 @@ async function build() {
     const opts = { cwd: VENCORD_SRC_DIR };
 
     const command = isFlatpak ? "flatpak-spawn" : "node";
-    const args = isFlatpak ? ["--host", "node", "scripts/build/build.mjs"] : ["scripts/build/build.mjs"];
+    const args = isFlatpak ? ["--host", "node", "../scripts/build/build.mts"] : ["../scripts/build/build.mts"];
 
     if (IS_DEV) args.push("--dev");
 
