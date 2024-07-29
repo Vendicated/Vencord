@@ -1,9 +1,9 @@
 import stylistic from "@stylistic/eslint-plugin";
 // @ts-expect-error: No types
 import checkFile from "eslint-plugin-check-file";
-// @ts-expect-error: No types
-import eslintPluginHeaders from "eslint-plugin-headers";
 import eslintPluginImport from "eslint-plugin-import-x";
+// @ts-expect-error: No types
+import simpleHeader from "eslint-plugin-simple-header";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
 // @ts-expect-error: No types
@@ -25,8 +25,8 @@ export default tseslint.config(
             "@stylistic": stylistic,
             "@typescript-eslint": tseslint.plugin,
             "check-file": checkFile,
-            headers: eslintPluginHeaders,
             import: eslintPluginImport,
+            "simple-header": simpleHeader,
             "simple-import-sort": simpleImportSort,
             unicorn: eslintPluginUnicorn,
             "unused-imports": unusedImports,
@@ -118,6 +118,7 @@ export default tseslint.config(
             "@typescript-eslint/no-unnecessary-type-arguments": "error",
             "@typescript-eslint/no-unnecessary-type-assertion": "error",
             "@typescript-eslint/no-unnecessary-type-constraint": "error",
+            "@typescript-eslint/no-unnecessary-type-parameters": "error",
             "@typescript-eslint/no-unsafe-declaration-merging": "error",
             "@typescript-eslint/no-unsafe-function-type": "error",
             "@typescript-eslint/no-unused-expressions": "error",
@@ -145,6 +146,7 @@ export default tseslint.config(
             "import/no-self-import": "error",
             "import/no-unassigned-import": "error",
             "import/no-useless-path-segments": "error",
+            "no-useless-computed-key": "error",
             "simple-import-sort/exports": "error",
             "simple-import-sort/imports": ["error", { groups: [["^[^.]"]] }],
             "unicorn/escape-case": "error",
@@ -176,18 +178,14 @@ export default tseslint.config(
     {
         files: ["scripts/**", "src/**"],
         rules: {
-            "headers/header-format": ["error", {
-                source: "string",
-                content: [
+            "simple-header/header": ["error", {
+                text: [
                     "discord-types",
-                    "Copyright (C) {year} {author}",
+                    "Copyright (C) {year} Vencord project contributors",
                     "SPDX-License-Identifier: GPL-3.0-or-later"
-                ].join("\n"),
-                blockPrefix: "\n",
-                trailingNewlines: 2,
-                variables: {
-                    year: "2024",
-                    author: "Vencord project contributors"
+                ],
+                templates: {
+                    year: ["\\d+(-\\d+)?(, \\d+(-\\d+)?)*", `${new Date().getFullYear()}`]
                 }
             }],
         }
@@ -228,8 +226,6 @@ export default tseslint.config(
                     "[declare=true] *",
                     // Allow enums, interfaces, and type aliases
                     "[type=/^TS/] *",
-                    // Allow re-exporting of all named exports
-                    "ExportAllDeclaration *",
                     // Allow imports
                     "ImportDeclaration *",
                 ].join(", ")})`,
@@ -243,6 +239,8 @@ export default tseslint.config(
                 "ClassDeclaration[superClass=null] MethodDefinition[kind=constructor][value.params.length=0]",
                 // Disallow enums that are const or ambient since package consumers cannot use them
                 "TSEnumDeclaration:matches([const=true], [declare=true])",
+                // Disallow variance annotations
+                "TSTypeParameter:matches([in=true], [out=true])",
             ],
             "unicorn/numeric-separators-style": ["error", { number: { minimumDigits: 0 } }],
         }
@@ -253,6 +251,17 @@ export default tseslint.config(
         ignores: ["src/**/index.ts"],
         rules: {
             "import/no-unused-modules": ["error", { missingExports: true }],
+        }
+    },
+    {
+        files: ["src/**/index.ts"],
+        rules: {
+            "no-restricted-syntax": [
+                "error",
+                // Only allow re-exporting of all named exports
+                "Program[comments.length!=1]",
+                "Program > :not(ExportAllDeclaration[exported=null])",
+            ],
         }
     },
 );

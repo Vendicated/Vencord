@@ -55,6 +55,7 @@ export function sendBotMessage(channelId: string, message: PartialDeep<MessageJS
  * @returns Value
  */
 export function findOption<T>(args: Argument[], name: string, fallbackValue: T): LiteralToPrimitive<T>;
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 export function findOption<T>(args: Argument[], name: string): T | undefined;
 export function findOption(args: Argument[], name: string, fallbackValue?: unknown) {
     return args.find(a => a.name === name)?.value || fallbackValue;

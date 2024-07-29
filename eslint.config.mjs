@@ -126,6 +126,7 @@ export default tseslint.config(
             "@typescript-eslint/no-non-null-asserted-optional-chain": "error",
             "@typescript-eslint/no-unnecessary-condition": ["error", { allowConstantLoopConditions: true }],
             "@typescript-eslint/no-unnecessary-type-assertion": "error",
+            "@typescript-eslint/no-unnecessary-type-parameters": "error",
             "@typescript-eslint/no-unsafe-function-type": "error",
             "@typescript-eslint/no-unused-expressions": ["error", { enforceForJSX: true }],
             "@typescript-eslint/no-wrapper-object-types": "error",

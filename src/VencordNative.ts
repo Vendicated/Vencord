@@ -15,6 +15,7 @@ function invoke<T = any>(event: IpcEvents, ...args: unknown[]): Promise<T> {
     return ipcRenderer.invoke(event, ...args);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 export function sendSync<T = any>(event: IpcEvents, ...args: unknown[]): T {
     return ipcRenderer.sendSync(event, ...args);
 }

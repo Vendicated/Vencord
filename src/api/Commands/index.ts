@@ -126,7 +126,7 @@ function registerSubCommands(cmd: Command, plugin: string) {
     });
 }
 
-export function registerCommand<C extends Command>(command: C, plugin: string) {
+export function registerCommand(command: Command, plugin: string) {
     if (!BUILT_IN) {
         console.warn(
             "[CommandsAPI]",

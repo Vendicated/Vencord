@@ -75,7 +75,7 @@
         "tsx": "^4.16.2",
         "type-fest": "^4.23.0",
         "typescript": "^5.5.4",
-        "typescript-eslint": "^8.0.0-alpha.53",
+        "typescript-eslint": "^8.0.0-alpha.55",
         "typescript-transform-paths": "^3.4.7",
         "zip-local": "^0.3.5"
     },
