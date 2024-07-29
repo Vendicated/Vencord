@@ -88,6 +88,7 @@ const GlobalBadges = ({ userId }: { userId: string; }) => {
     Object.keys(badges).forEach(mod => {
         if (mod.toLowerCase() === "vencord") return;
         if (mod.toLowerCase() === "equicord") return;
+        // RIP SUNCORD
         badges[mod].forEach(badge => {
             if (typeof badge === "string") {
                 const fullNames = { "hunter": "Bug Hunter", "early": "Early User" };
