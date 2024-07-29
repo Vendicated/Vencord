@@ -58,13 +58,17 @@ export default definePlugin({
     start() {
         addAccessory("ec-translation", props => <Accessory message={props.message} />);
 
-        addButton("ec-translate", message => ({
-            label: "Translate",
-            icon: Icon,
-            message: message,
-            channel: ChannelStore.getChannel(message.channel_id),
-            onClick: () => handleTranslate(message),
-        }));
+        addButton("ec-translate", message => {
+            if (!message.content) return null;
+
+            return {
+                label: "Translate",
+                icon: Icon,
+                message: message,
+                channel: ChannelStore.getChannel(message.channel_id),
+                onClick: () => handleTranslate(message),
+            };
+        });
     },
     stop() {
         removeButton("ec-translate");
