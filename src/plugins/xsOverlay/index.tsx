@@ -348,7 +348,7 @@ function sendOtherNotif(content: string, titleString: string) {
     sendToOverlay(msgData);
 }
 
-function sendToOverlay(notif: NotificationObject) {
+async function sendToOverlay(notif: NotificationObject) {
     const apiObject: ApiObject = {
         sender: "Vencord",
         target: "xsoverlay",
@@ -356,7 +356,7 @@ function sendToOverlay(notif: NotificationObject) {
         jsonData: JSON.stringify(notif),
         rawData: null
     };
-    if (socket.readyState !== WebSocket.OPEN) start();
+    await start();
     socket.send(JSON.stringify(apiObject));
 }
 
