@@ -74,7 +74,7 @@ function SectionHeader({ section, presets }: SectionHeaderProps) {
             try {
                 Clipboard.copy(presetID);
                 Toasts.show({
-                    message: "Copied to Clipboard!!",
+                    message: "Copied to Clipboard!",
                     type: Toasts.Type.SUCCESS,
                     id: Toasts.genId()
                 });
