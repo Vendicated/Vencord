@@ -411,14 +411,14 @@ export default definePlugin({
 
     MentionTooltip({ Component, vcProps, ...props }) {
         return <MessageTooltip messageId={vcProps.messageId} channelId={vcProps.channelId}>
-            {(p) => <Component {...props} {...p} />}
+            {p => <Component {...props} {...p} />}
         </MessageTooltip>;
     },
 
     ReplyTooltip({ Component, vcProps, ...props }) {
         const ref = vcProps.baseMessage.messageReference;
         return <MessageTooltip messageId={ref.message_id} channelId={ref.channel_id}>
-            {(p) => <Component {...props} {...p} />}
+            {p => <Component {...props} {...p} />}
         </MessageTooltip>;
     },
 

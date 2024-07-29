@@ -9,7 +9,6 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { findComponentByCodeLazy } from "@webpack";
 import {
     ChannelStore,
-    Clickable,
     Constants,
     MessageStore,
     PermissionsBits,
