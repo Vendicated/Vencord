@@ -18,22 +18,22 @@ export declare class ReadState<Type extends ReadStateType = ReadStateType> {
     static _readStates: { [T in ChannelIdReadStateType]?: { [channelId: string]: ReadState<T>; }; }
         & { [T in UserIdReadStateType]?: { [userId: string]: ReadState<T>; }; }
         & { [T in GuildIdReadStateType]?: { [guildId: string]: ReadState<T>; }; };
-    static clear<T extends ChannelIdReadStateType | undefined>(channelId: string, type?: T): boolean;
-    static clear<T extends UserIdReadStateType>(userId: string, type: T): boolean;
-    static clear<T extends GuildIdReadStateType>(guildId: string, type: T): boolean;
+    static clear(channelId: string, type?: ChannelIdReadStateType | undefined): boolean;
+    static clear(userId: string, type: UserIdReadStateType): boolean;
+    static clear(guildId: string, type: GuildIdReadStateType): boolean;
     static clearAll(): void;
     static forEach(callback: (value: ReadState) => unknown): void;
-    static get<T extends ChannelIdReadStateType | undefined>(channelId: string, type?: T): ReadState<ChannelIdReadStateType>;
+    static get(channelId: string, type?: ChannelIdReadStateType | undefined): ReadState<ChannelIdReadStateType>;
     static get<T extends UserIdReadStateType>(userId: string, type: T): ReadState<T>;
     static get<T extends GuildIdReadStateType>(guildId: string, type: T): ReadState<T>;
     static getGuildSentinels(guildId: string): typeof ReadState["_guildReadStateSentinels"];
-    static getIfExists<T extends ChannelIdReadStateType | undefined>(channelId: string, type?: T): ReadState<ChannelIdReadStateType> | undefined;
+    static getIfExists(channelId: string, type?: ChannelIdReadStateType | undefined): ReadState<ChannelIdReadStateType> | undefined;
     static getIfExists<T extends UserIdReadStateType>(userId: string, type: T): ReadState<T> | undefined;
     static getIfExists<T extends GuildIdReadStateType>(guildId: string, type: T): ReadState<T> | undefined;
     static getMentionChannelIds(): string[];
-    static getValue<T extends ChannelIdReadStateType | undefined, GetterReturn, DefaultValue = undefined>(
+    static getValue<GetterReturn, DefaultValue = undefined>(
         channelId: string,
-        type: T,
+        type: ChannelIdReadStateType | undefined,
         getter: (readState: ReadState<ChannelIdReadStateType> | undefined) => GetterReturn,
         defaultValue?: DefaultValue
     ): GetterReturn | DefaultValue;

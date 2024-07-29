@@ -21,7 +21,7 @@ export declare class ReadStateStore<
 
     ackMessageId(id: string, type?: ReadStateType | undefined /* = ReadStateType.CHANNEL */): string | null;
     getAllReadStates<ForCache extends boolean>(forCache: ForCache): SerializedReadState<ForCache>;
-    getForDebugging<Type extends ChannelIdReadStateType | undefined>(channelId: string, type?: Type): ReadState<ChannelIdReadStateType> | undefined;
+    getForDebugging(channelId: string, type?: ChannelIdReadStateType | undefined): ReadState<ChannelIdReadStateType> | undefined;
     getForDebugging<Type extends UserIdReadStateType>(userId: string, type: Type): ReadState<Type> | undefined;
     getForDebugging<Type extends GuildIdReadStateType>(guildId: string, type: Type): ReadState<Type> | undefined;
     getGuildChannelUnreadState(

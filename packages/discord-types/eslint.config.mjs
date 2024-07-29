@@ -118,7 +118,6 @@ export default tseslint.config(
             "@typescript-eslint/no-unnecessary-type-arguments": "error",
             "@typescript-eslint/no-unnecessary-type-assertion": "error",
             "@typescript-eslint/no-unnecessary-type-constraint": "error",
-            "@typescript-eslint/no-unnecessary-type-parameters": "error",
             "@typescript-eslint/no-unsafe-declaration-merging": "error",
             "@typescript-eslint/no-unsafe-function-type": "error",
             "@typescript-eslint/no-unused-expressions": "error",
@@ -167,6 +166,7 @@ export default tseslint.config(
         files: ["**/*"],
         ignores: ["src/**"],
         rules: {
+            "@typescript-eslint/no-unnecessary-type-parameters": "error",
             "simple-import-sort/imports": ["error", {
                 groups: [
                     ["^((node:)?(assert(/strict)?|async_hooks|buffer|child_process|cluster|console|constants|crypto|dgram|diagnostics_channel|dns(/promises)?|domain|events|fs(/promises)?|http|http2|https|module|net|os|path(/(posix|win32))?|perf_hooks|process|punycode|querystring|readline(/promises)?|repl|stream(/(consumers|promises|web))?|string_decoder|timers(/promises)?|tls|trace_events|tty|url|util(/types)?|v8|vm|wasi|worker_threads|zlib)|node:test(/reporters)?)$"],
