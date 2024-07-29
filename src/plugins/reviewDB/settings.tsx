@@ -57,7 +57,7 @@ export const settings = definePluginSettings({
     preferButtonOverDropdown: {
         description: "Show a button instead of dropdown to view reviews",
         type: OptionType.BOOLEAN,
-        default: false,
+        default: true,
         restartNeeded: true
     },
     buttons: {

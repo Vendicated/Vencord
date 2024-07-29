@@ -64,7 +64,7 @@ export const settings = definePluginSettings({
     preferButtonOverDropdown: {
         description: "Show a button next to the roles instead of dropdown",
         type: OptionType.BOOLEAN,
-        default: false,
+        default: true,
         restartNeeded: true
     }
 });
