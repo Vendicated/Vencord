@@ -112,7 +112,7 @@ async function fetchMessage(channelId, messageId): Promise<{ status: MessageStat
         const message = MessageStore.getMessages(channelId)
             .receiveMessage(res.body[0])
             .get(messageId);
-        return { status: MessageStatus.LOADED, message };
+        return message ? { status: MessageStatus.LOADED, message } : { status: MessageStatus.ERROR };
     } catch (e) {
         console.error("error fetching message", e);
         return { status: MessageStatus.ERROR };
