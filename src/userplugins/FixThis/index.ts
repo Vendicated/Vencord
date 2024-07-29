@@ -29,11 +29,10 @@ export default definePlugin({
             "x.com": "vxtwitter.com",
             "pixiv.net": "phixiv.net",
             "reddit.com": "vxreddit.com",
-            "old.reddit.com": "vxreddit.com",
-            "new.reddit.com": "vxreddit.com",
             "clips.twitch.tv": "clips.fxtwitch.tv"
         };
 
+    
         const processUrl = (url: string): string => {
             const lowerUrl = url.toLowerCase();
             
@@ -45,6 +44,12 @@ export default definePlugin({
             const twitchClipMatch = url.match(twitchClipRegex);
             if (twitchClipMatch) {
                 return `https://clips.fxtwitch.tv/${twitchClipMatch[2]}`;
+            }
+
+            const redditRegex = /https?:\/\/(old\.|new\.)?reddit\.com(.*)/i;
+            const redditMatch = url.match(redditRegex);
+            if (redditMatch) {
+                return `https://vxreddit.com${redditMatch[2]}`;
             }
 
             for (const [oldDomain, newDomain] of Object.entries(urlMap)) {
