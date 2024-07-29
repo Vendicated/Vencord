@@ -11,7 +11,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findComponentByCodeLazy } from "@webpack";
-import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
+import { Alerts, Button, Clipboard, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { Decoration, getPresets, Preset } from "../../lib/api";
@@ -45,7 +45,12 @@ interface Section {
     authorIds?: string[];
 }
 
-function SectionHeader({ section }: { section: Section; }) {
+interface SectionHeaderProps {
+    section: Section;
+    presets: Preset[];
+}
+
+function SectionHeader({ section, presets }: SectionHeaderProps) {
     const hasSubtitle = typeof section.subtitle !== "undefined";
     const hasAuthorIds = typeof section.authorIds !== "undefined";
 
@@ -62,9 +67,45 @@ function SectionHeader({ section }: { section: Section; }) {
         })();
     }, [section.authorIds]);
 
+    
+    const copyHash = async () => {
+        const presetID = section.sectionKey.replace('preset-','');; 
+        if (presetID) {
+            try {
+                Clipboard.copy(presetID);
+                Alerts.show({ title: "Success", body: `Copied preset hash: ${presetID}`});
+            } catch (err) {
+                Alerts.show({ title: "Error", body: `Failed to copy preset hash ${presetID}. ${err}`});
+            }
+        }
+    };
+
     return <div>
         <Flex>
             <Forms.FormTitle style={{ flexGrow: 1 }}>{section.title}</Forms.FormTitle>
+            {presets.some(p => `preset-${p.id}` === section.sectionKey) && (
+                <Tooltip text="Copy Preset Hash" shouldShow={true}>
+                {tooltipProps => (
+                    <Button
+                    {...tooltipProps}
+                    onClick={copyHash}
+                    size={Button.Sizes.SMALL}
+                    look={Button.Looks.LINK}
+                    >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                    >
+                        <path d="M16.32 14.72a1 1 0 0 1 0-1.41l2.51-2.51a3.98 3.98 0 0 0-5.62-5.63l-2.52 2.51a1 1 0 0 1-1.41-1.41l2.52-2.52a5.98 5.98 0 0 1 8.45 8.46l-2.52 2.51a1 1 0 0 1-1.41 0ZM7.68 9.29a1 1 0 0 1 0 1.41l-2.52 2.51a3.98 3.98 0 1 0 5.63 5.63l2.51-2.52a1 1 0 0 1 1.42 1.42l-2.52 2.51a5.98 5.98 0 0 1-8.45-8.45l2.51-2.51a1 1 0 0 1 1.42 0Z"></path>
+                        <path d="M14.7 10.7a1 1 0 0 0-1.4-1.4l-4 4a1 1 0 1 0 1.4 1.4l4-4Z"></path>
+                    </svg>
+                    </Button>
+                )}
+                </Tooltip>
+                )}
             {hasAuthorIds && <UserSummaryItem
                 users={authors}
                 guildId={undefined}
@@ -74,8 +115,7 @@ function SectionHeader({ section }: { section: Section; }) {
                 size={16}
                 showUserPopout
                 className={Margins.bottom8}
-            />
-            }
+            />}
         </Flex>
         {hasSubtitle &&
             <Forms.FormText type="description" className={Margins.bottom8}>
@@ -187,7 +227,7 @@ function ChangeDecorationModal(props: ModalProps) {
                     }}
                     getItemKey={item => typeof item === "string" ? item : item.hash}
                     getSectionKey={section => section.sectionKey}
-                    renderSectionHeader={section => <SectionHeader section={section} />}
+                    renderSectionHeader={section => <SectionHeader section={section} presets={presets} />}
                     sections={data}
                 />
                 <div className={cl("change-decoration-modal-preview")}>
