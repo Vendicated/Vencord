@@ -20,7 +20,6 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
 import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
@@ -106,13 +105,23 @@ function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: st
         return null;
 
     const connectionsContainer = (
-        <Flex style={{
+        <div style={{
             marginTop: !simplified ? "8px" : undefined,
             gap: getSpacingPx(settings.store.iconSpacing),
             flexWrap: "wrap"
         }}>
+            <Text
+                tag="h2"
+                variant="eyebrow"
+                style={{
+                    color: "var(--header-primary)",
+                    marginBottom: "4px"
+                }}
+            >
+                Connections
+            </Text>
             {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
-        </Flex>
+        </div>
     );
 
     if (simplified)
@@ -120,13 +129,6 @@ function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: st
 
     return (
         <Section>
-            <Text
-                tag="h2"
-                variant="eyebrow"
-                style={{ color: "var(--header-primary)" }}
-            >
-                Connections
-            </Text>
             {connectionsContainer}
         </Section>
     );
@@ -211,9 +213,9 @@ export default definePlugin({
             }
         },
         {
-            find: /\.bio,hidePersonalInformation:\i,onClose:/,
+            find: /inline:!1,profileViewedAnalytics:\i}\),/,
             replacement: {
-                match: /currentUser:\i,guild:\i,onOpenProfile:.+?}\)(?=])(?<=user:(\i),bio:null==(\i)\?.+?)/,
+                match: /currentUser:\i,guild:\i}\)(?<=user:(\i),bio:null==(\i)\?.+?)/,
                 replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, simplified: true })"
             }
         }
