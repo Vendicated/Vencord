@@ -18,6 +18,7 @@ const DefaultEngines = {
     Yahoo: "https://search.yahoo.com/search?p=",
     Yandex: "https://yandex.com/search/?text=",
     GitHub: "https://github.com/search?q=",
+    Poke: "https://poketube.fun/search?query=",
     Reddit: "https://www.reddit.com/search?q=",
     Wikipedia: "https://wikipedia.org/w/index.php?search=",
 } as const;
