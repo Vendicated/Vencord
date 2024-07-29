@@ -68,6 +68,7 @@ function createTagCommand(tag: Tag) {
                 });
             return { content: tag.message.replaceAll("\\n", "\n") };
         },
+        // @ts-expect-error
         [MessageTagsMarker]: true,
     }, "CustomTags");
 }
