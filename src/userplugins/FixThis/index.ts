@@ -29,6 +29,8 @@ export default definePlugin({
             "x.com": "vxtwitter.com",
             "pixiv.net": "phixiv.net",
             "reddit.com": "vxreddit.com",
+            "old.reddit.com": "vxreddit.com",
+            "new.reddit.com": "vxreddit.com",
             "clips.twitch.tv": "clips.fxtwitch.tv"
         };
 
