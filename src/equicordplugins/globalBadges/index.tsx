@@ -101,6 +101,10 @@ const GlobalBadges = ({ userId }: { userId: string; }) => {
             const cleanName = badge.name.replace(mod, "").trim();
             const prefix = showPrefix() ? mod : "";
             if (!badge.custom) badge.name = `${prefix} ${cleanName.charAt(0).toUpperCase() + cleanName.slice(1)}`;
+            if (badge.custom) {
+                if (cleanName.toLowerCase().includes(mod)) return;
+                else if (prefix) badge.name = `${cleanName} (${prefix})`.replaceAll(" ()", "");
+            }
             globalBadges.push(<BadgeComponent name={badge.name} img={badge.badge} />);
             badgeModal.push(<BadgeModalComponent name={badge.name} img={badge.badge} />);
         });
