@@ -127,17 +127,14 @@ export default definePlugin({
 
     renderIndicator: () => {
         const { mode } = Settings.plugins.ServerListIndicators;
-        let text: string = `${onlineFriends} Friends, ${guildCount} Servers`;
-        switch (mode) {
-            case (!!(mode & IndicatorType.FRIEND)):
-                text = `${onlineFriends} Friends`;
-                break;
-            case (!!(mode & IndicatorType.SERVER)):
-                text = `${guildCount} Servers`;
-                break;
-            case (!!(mode & IndicatorType.FRIEND)) && (!!(mode & IndicatorType.SERVER)):
-                text = `${onlineFriends} Friends, ${guildCount} Servers`;
-                break;
+        let text: string;
+
+        if (!!(mode & IndicatorType.FRIEND) && !!(mode & IndicatorType.SERVER)) {
+            text = `${onlineFriends} Friends, ${guildCount} Servers`;
+        } else if (!!(mode & IndicatorType.FRIEND)) {
+            text = `${onlineFriends} Friends`;
+        } else if (!!(mode & IndicatorType.SERVER)) {
+            text = `${guildCount} Servers`;
         }
 
         return <ErrorBoundary noop>
