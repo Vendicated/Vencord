@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByPropsLazy } from "@webpack";
+import { findByPropsLazy, findLazy } from "@webpack";
 import { ChannelStore } from "@webpack/common";
 import { FFmpegState, Sticker } from "./types";
 import { FFmpeg } from '@ffmpeg/ffmpeg';
@@ -24,7 +24,7 @@ import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
 
 const MessageUpload = findByPropsLazy("instantBatchUpload");
-const CloudUploadParent = findByPropsLazy("CloudUpload");
+const CloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
 const PendingReplyStore = findByPropsLazy("getPendingReply");
 const MessageUtils = findByPropsLazy("sendMessage");
 const DraftStore = findByPropsLazy("getDraft", "getState");
@@ -185,7 +185,7 @@ export async function sendSticker({
                 content: messageContent
             },
             uploads: [
-                new CloudUploadParent.CloudUpload({
+                new CloudUpload({
                     file,
                     platform: 1
                 }, channelId, false, 0)
