@@ -98,8 +98,8 @@ const settings = definePluginSettings({
         type: OptionType.NUMBER,
         description: "Websocket port",
         default: 42070,
-        onChange() {
-            start();
+        async onChange() {
+            await start();
         }
     },
     botNotifications: {
@@ -356,7 +356,7 @@ async function sendToOverlay(notif: NotificationObject) {
         jsonData: JSON.stringify(notif),
         rawData: null
     };
-    await start();
+    if (socket.readyState !== socket.OPEN) await start();
     socket.send(JSON.stringify(apiObject));
 }
 
