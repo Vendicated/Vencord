@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
@@ -41,6 +43,8 @@ import {
     UserStore
 } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
+
+import { wrapMentionComponent } from "./tooltip.jsx";
 
 const messageCache = new Map<string, {
     message?: Message;
@@ -74,6 +78,11 @@ interface MessageEmbedProps {
 const messageFetchQueue = new Queue();
 
 const settings = definePluginSettings({
+    tooltip: {
+        description: "Show message content as a tooltip",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
     messageBackgroundColor: {
         description: "Background color for messages in rich embeds",
         type: OptionType.BOOLEAN
@@ -94,6 +103,10 @@ const settings = definePluginSettings({
                 label: "Never use automod embeds",
                 value: "never",
                 default: true
+            },
+            {
+                label: "Disable embeds",
+                value: "disable"
             }
         ]
     },
@@ -371,9 +384,22 @@ export default definePlugin({
 
     settings,
 
+    patches: [
+        {
+            find: ',className:"channelMention",children:[',
+            replacement: {
+                match: /(?<=\.jsxs\)\()(\i\.\i)(?=,\{role:"link")/,
+                replace: "$self.wrapMentionComponent(arguments[0], $1)"
+            },
+            predicate: () => settings.store.tooltip
+        }
+    ],
+
+    wrapMentionComponent,
+
     start() {
         addAccessory("messageLinkEmbed", props => {
-            if (!messageLinkRegex.test(props.message.content))
+            if (settings.store.automodEmbeds === "disable" || !messageLinkRegex.test(props.message.content))
                 return null;
 
             // need to reset the regex because it's global
