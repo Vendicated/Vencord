@@ -12,8 +12,8 @@ import { Flex, Menu } from "@webpack/common";
 
 const DefaultEngines = {
     Google: "https://www.google.com/search?q=",
+    YouTube: "https://youtube.com/results?search_query=",
     DuckDuckGo: "https://duckduckgo.com/?q=",
-    DuckDuckGoLite: "https://lite.duckduckgo.com/lite/?q=",
     Brave: "https://search.brave.com/search?q=",
     Ecosia: "https://www.ecosia.org/search?q=",
     StartPage:"https://www.startpage.com/do/search?query=",
