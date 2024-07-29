@@ -26,7 +26,7 @@ import type { Message } from "discord-types/general";
 const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
 const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact")!;
 
-export function MessageTooltip({ messageId, channelId, children }) {
+export default function MessageTooltip({ messageId, channelId, children }) {
     if(!messageId) return children;
     return <Tooltip
         tooltipClassName="vc-message-link-tooltip"

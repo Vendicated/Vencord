@@ -44,7 +44,7 @@ import {
 } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
-import { MessageTooltip } from "./tooltip.jsx";
+import MessageTooltip from "./MessageTooltip.jsx";
 
 const messageCache = new Map<string, {
     message?: Message;
