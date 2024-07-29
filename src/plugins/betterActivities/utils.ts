@@ -19,6 +19,15 @@ const { fetchApplication }: {
 
 const fetchedApplications = new Map<string, Application | null>();
 
+export function getActivityApplication({ application_id }: Activity) {
+    if (!application_id) return undefined;
+    let application = ApplicationStore.getApplication(application_id);
+    if (!application && fetchedApplications.has(application_id)) {
+        application = fetchedApplications.get(application_id) ?? null;
+    }
+    return application ?? undefined;
+}
+
 // TODO: replace with "renderXboxImage"?
 const xboxUrl = "https://discord.com/assets/9a15d086141be29d9fcd.png";
 

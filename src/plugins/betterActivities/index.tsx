@@ -23,7 +23,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { PresenceStore, React, Tooltip, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { PresenceStore, React, Tooltip, useEffect, useMemo, useState, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import ActivityTooltip from "./components/ActivityTooltip";
@@ -39,6 +39,7 @@ import {
     IconCSSProperties
 } from "./types";
 import {
+    getActivityApplication,
     getApplicationIcons
 } from "./utils";
 
@@ -155,14 +156,31 @@ export default definePlugin({
 
         if (!activities.length) return null;
 
+        // we use these for other activities, it would be better to somehow get the corresponding activity props
+        const generalProps = useMemo(() => Object.keys(props).reduce((acc, key) => {
+            // exclude activity specific props to prevent copying them to all activities (e.g. buttons)
+            if (key !== "renderActions" && key !== "application") acc[key] = props[key];
+            return acc;
+        }, {} as Omit<typeof props, "renderActions" | "application">), [props]);
+
         if (settings.store.allActivitiesStyle === "carousel") {
             return (
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                    <ActivityView
-                        activity={currentActivity}
-                        user={user}
-                        {...props}
-                    />
+                    {currentActivity?.id === activity?.id ? (
+                        <ActivityView
+                            activity={currentActivity}
+                            user={user}
+                            {...props}
+                        />
+                    ) : (
+                        <ActivityView
+                            activity={currentActivity}
+                            user={user}
+                            // fetch optional application
+                            application={getActivityApplication(currentActivity!)}
+                            {...generalProps}
+                        />
+                    )}
                     <div
                         className={cl("controls")}
                         style={{
@@ -229,14 +247,22 @@ export default definePlugin({
                         gap: "5px",
                     }}
                 >
-                    {activities.map((activity, index) => (
-                        <ActivityView
-                            key={index}
-                            activity={activity}
-                            user={user}
-                            {...props}
-                        />
-                    ))}
+                    {activities.map((activity, index) =>
+                        index === 0 ? (
+                            <ActivityView
+                                key={index}
+                                activity={activity}
+                                user={user}
+                                {...props}
+                            />) : (
+                            <ActivityView
+                                key={index}
+                                activity={activity}
+                                user={user}
+                                application={getActivityApplication(activity)}
+                                {...generalProps}
+                            />
+                        ))}
                 </div>
             );
         }

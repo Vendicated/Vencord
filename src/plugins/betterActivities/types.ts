@@ -86,5 +86,6 @@ export interface ActivityViewProps {
     activity: Activity | null;
     user: User;
     application?: Application;
+    renderActions?: () => JSX.Element;
     type: string;
 }
