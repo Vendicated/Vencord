@@ -127,8 +127,7 @@ export default definePlugin({
 
     renderIndicator: () => {
         const { mode } = Settings.plugins.ServerListIndicators;
-        let text: string;
-
+        let text;
         if (!!(mode & IndicatorType.FRIEND) && !!(mode & IndicatorType.SERVER)) {
             text = `${onlineFriends} Friends, ${guildCount} Servers`;
         } else if (!!(mode & IndicatorType.FRIEND)) {
