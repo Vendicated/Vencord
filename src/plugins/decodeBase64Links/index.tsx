@@ -82,7 +82,7 @@ const openDecodedStrings = decodedContent => {
 export default definePlugin({
     name: "DecodeBase64Links",
     description: "Decode base64 content of any selected text in a message.",
-    authors: [{ name: "Nawelasg", id: 0n }],
+    authors: [Devs.Nawelasg],
     dependencies: ["MessagePopoverAPI"],
 
     start() {
