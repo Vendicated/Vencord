@@ -141,6 +141,8 @@ const settings = definePluginSettings({}).withPrivateSettings<{
     dismissedDevBuildWarning?: boolean;
 }>();
 
+let clicked = false;
+
 export default definePlugin({
     name: "SupportHelper",
     required: true,
@@ -177,18 +179,21 @@ export default definePlugin({
         async CHANNEL_SELECT({ channelId }) {
             if (!SUPPORT_CHANNEL_IDS.includes(channelId)) return;
 
-            if (channelId === VC_SUPPORT_CHANNEL_ID && Vencord.Plugins.isPluginEnabled("VCSupport")) return Alerts.show({
-                title: "You are entering the support channel!",
-                body: <div>
-                    <style>
-                        {'[class*="backdrop_"][style*="backdrop-filter"]{backdrop-filter:blur(16px) brightness(0.25) !important;}'}
-                    </style>
-                    <img src="https://media.tenor.com/QtGqjwBpRzwAAAAi/wumpus-dancing.gif" />
-                    <Forms.FormText>Before you ask for help,</Forms.FormText>
-                    <Forms.FormText>Check for updates and if this</Forms.FormText>
-                    <Forms.FormText>issue could be caused by Equicord!</Forms.FormText>
-                </div>
-            });
+            if (channelId === VC_SUPPORT_CHANNEL_ID && Vencord.Plugins.isPluginEnabled("VCSupport") && !clicked) {
+                clicked = true;
+                return Alerts.show({
+                    title: "You are entering the support channel!",
+                    body: <div>
+                        <style>
+                            {'[class*="backdrop_"][style*="backdrop-filter"]{backdrop-filter:blur(16px) brightness(0.25) !important;}'}
+                        </style>
+                        <img src="https://media.tenor.com/QtGqjwBpRzwAAAAi/wumpus-dancing.gif" />
+                        <Forms.FormText>Before you ask for help,</Forms.FormText>
+                        <Forms.FormText>Check for updates and if this</Forms.FormText>
+                        <Forms.FormText>issue could be caused by Equicord!</Forms.FormText>
+                    </div>
+                });
+            }
 
             const selfId = UserStore.getCurrentUser()?.id;
             if (!selfId || isPluginDev(selfId) || isEquicordPluginDev(selfId)) return;
