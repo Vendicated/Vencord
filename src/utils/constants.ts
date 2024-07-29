@@ -721,45 +721,6 @@ export const EquicordDevs = Object.freeze({
     },
 } satisfies Record<string, Dev>);
 
-export const SuncordDevs = /* #__PURE__*/ Object.freeze({
-    nyx: {
-        name: "verticalsync",
-        id: 328165170536775680n,
-    },
-    bhop: {
-        name: "femeie",
-        id: 442626774841556992n,
-    },
-    Drag: {
-        name: "dragalt_",
-        id: 1189903210564038697n,
-    },
-    Woosh: {
-        name: "w00shh.",
-        id: 689165844835860522n,
-    },
-    Cortex: {
-        name: "Cortex",
-        id: 825069530376044594n,
-    },
-    thororen: {
-        name: "thororen",
-        id: 848339671629299742n,
-    },
-    nexpid: {
-        name: "Nexpid",
-        id: 853550207039832084n,
-    },
-    KrystalSkull: {
-        name: "krystalskullofficial",
-        id: 929208515883569182n,
-    },
-    SerStars: {
-        name: "SerStars",
-        id: 861631850681729045n,
-    },
-} satisfies Record<string, Dev>);
-
 // iife so #__PURE__ works correctly
 export const VencordDevsById = /* #__PURE__*/ (() =>
     Object.freeze(Object.fromEntries(
@@ -772,14 +733,6 @@ export const VencordDevsById = /* #__PURE__*/ (() =>
 export const EquicordDevsById = /* #__PURE__*/ (() =>
     Object.freeze(Object.fromEntries(
         Object.entries(EquicordDevs)
-            .filter(d => d[1].id !== 0n)
-            .map(([_, v]) => [v.id, v] as const)
-    ))
-)() as Record<string, Dev>;
-
-export const SuncordDevsById = /* #__PURE__*/ (() =>
-    Object.freeze(Object.fromEntries(
-        Object.entries(SuncordDevs)
             .filter(d => d[1].id !== 0n)
             .map(([_, v]) => [v.id, v] as const)
     ))

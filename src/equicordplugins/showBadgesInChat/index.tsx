@@ -6,7 +6,7 @@
 
 import { addDecoration, removeDecoration } from "@api/MessageDecorations";
 import { Devs, EquicordDevs } from "@utils/constants";
-import { isEquicordPluginDev, isPluginDev, isSuncordPluginDev } from "@utils/misc";
+import { isEquicordPluginDev, isPluginDev } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import badges from "plugins/_api/badges";
@@ -57,30 +57,6 @@ function CheckBadge({ badge, author }: { badge: string; author: User; }): JSX.El
                         name="Equicord Contributor"
                         size={20}
                         src={"https://i.imgur.com/57ATLZu.png"}
-                    />
-                </span>
-            ) : null;
-        case "SuncordDonor":
-            return (
-                <span style={{ order: settings.store.SuncordDonorPosition }}>
-                    {badges.getSuncordDonorBadges(author.id)?.map((badge: any) => (
-                        <RoleIconComponent
-                            className={roleIconClassName}
-                            name={badge.description}
-                            size={20}
-                            src={badge.image}
-                        />
-                    ))}
-                </span>
-            );
-        case "SuncordContributer":
-            return isSuncordPluginDev(author.id) ? (
-                <span style={{ order: settings.store.SuncordContributorPosition }}>
-                    <RoleIconComponent
-                        className={roleIconClassName}
-                        name={"Suncord Contributor"}
-                        size={20}
-                        src={"https://raw.githubusercontent.com/verticalsync/Suncord/main/src/assets/icon.png"}
                     />
                 </span>
             ) : null;
@@ -150,8 +126,6 @@ function ChatBadges({ author }: { author: User; }) {
         <span className="vc-sbic-badge-row" style={{ margin: "2px" }}>
             {settings.store.showEquicordDonor && <CheckBadge badge={"EquicordDonor"} author={author} />}
             {settings.store.showEquicordContributor && <CheckBadge badge={"EquicordContributer"} author={author} />}
-            {settings.store.showSuncordDonor && <CheckBadge badge={"SuncordDonor"} author={author} />}
-            {settings.store.showSuncordContributor && <CheckBadge badge={"SuncordContributer"} author={author} />}
             {settings.store.showVencordDonor && <CheckBadge badge={"VencordDonor"} author={author} />}
             {settings.store.showVencordContributor && <CheckBadge badge={"VencordContributer"} author={author} />}
             {settings.store.showDiscordProfile && <CheckBadge badge={"DiscordProfile"} author={author} />}
