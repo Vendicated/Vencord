@@ -5,10 +5,9 @@
  */
 
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { moment } from "@webpack/common";
 
 import settings from "./settings";
-import { Activity, Application, ApplicationIcon, Timestamp } from "./types";
+import { Activity, Application, ApplicationIcon } from "./types";
 
 const ApplicationStore: {
     getApplication: (id: string) => Application | null;
@@ -17,27 +16,6 @@ const ApplicationStore: {
 const { fetchApplication }: {
     fetchApplication: (id: string) => Promise<Application | null>;
 } = findByPropsLazy("fetchApplication");
-
-export function getActivityImage(activity: Activity, application?: Application): string | undefined {
-    if (activity.type === 2 && activity.name === "Spotify") {
-        // get either from large or small image
-        const image = activity.assets?.large_image ?? activity.assets?.small_image;
-        // image needs to replace 'spotify:'
-        if (image?.startsWith("spotify:")) {
-            // spotify cover art is always https://i.scdn.co/image/ID
-            return image.replace("spotify:", "https://i.scdn.co/image/");
-        }
-    }
-    if (activity.type === 1 && activity.name === "Twitch") {
-        const image = activity.assets?.large_image;
-        // image needs to replace 'twitch:'
-        if (image?.startsWith("twitch:")) {
-            // twitch images are always https://static-cdn.jtvnw.net/previews-ttv/live_user_USERNAME-RESOLUTION.jpg
-            return `${image.replace("twitch:", "https://static-cdn.jtvnw.net/previews-ttv/live_user_")}-108x60.jpg`;
-        }
-    }
-    // TODO: we could support other assets here
-}
 
 const fetchedApplications = new Map<string, Application | null>();
 
@@ -132,29 +110,4 @@ export function getApplicationIcons(activities: Activity[], preferSmall = false)
     }
 
     return applicationIcons;
-}
-
-export function getValidTimestamps(activity: Activity): Required<Timestamp> | null {
-    if (activity.timestamps?.start !== undefined && activity.timestamps?.end !== undefined) {
-        return activity.timestamps as Required<Timestamp>;
-    }
-    return null;
-}
-
-export function getValidStartTimeStamp(activity: Activity): number | null {
-    if (activity.timestamps?.start !== undefined) {
-        return activity.timestamps.start;
-    }
-    return null;
-}
-
-const customFormat = (momentObj: moment.Moment): string => {
-    const hours = momentObj.hours();
-    const formattedTime = momentObj.format("mm:ss");
-    return hours > 0 ? `${momentObj.format("HH:")}${formattedTime}` : formattedTime;
-};
-
-export function formatElapsedTime(startTime: moment.Moment, endTime: moment.Moment): string {
-    const duration = moment.duration(endTime.diff(startTime));
-    return `${customFormat(moment.utc(duration.asMilliseconds()))} elapsed`;
 }
