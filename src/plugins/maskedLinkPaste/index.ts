@@ -34,7 +34,7 @@ export default definePlugin({
                 match: /(?<=\i.delete.{0,50})(\i)\.insertText\((\i)\)/,
                 replace: "$self.handlePaste($1, $2, () => $&)"
             }
-        },
+        }
     ],
 
     handlePaste(editor, content: string, originalBehavior: () => void) {
