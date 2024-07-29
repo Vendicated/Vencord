@@ -44,7 +44,7 @@ import {
 } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
-import { wrapMentionComponent } from "./tooltip.jsx";
+import { wrapMentionComponent, wrapReplyComponent } from "./tooltip.jsx";
 
 const messageCache = new Map<string, {
     message?: Message;
@@ -79,7 +79,12 @@ const messageFetchQueue = new Queue();
 
 const settings = definePluginSettings({
     tooltip: {
-        description: "Show message content as a tooltip",
+        description: "Show tooltip for linked messages",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    replyTooltip: {
+        description: "Show tooltip for replied messages",
         type: OptionType.BOOLEAN,
         default: true
     },
@@ -392,10 +397,20 @@ export default definePlugin({
                 replace: "$self.wrapMentionComponent(arguments[0], $1)"
             },
             predicate: () => settings.store.tooltip
-        }
+        },
+        {
+            find: "Messages.REPLY_QUOTE_MESSAGE_NOT_LOADED",
+            replacement: {
+                // Should match two places
+                match: /(\i\.Clickable)/g,
+                replace: "$self.wrapReplyComponent(arguments[0], $1)"
+            },
+            predicate: () => settings.store.replyTooltip
+        },
     ],
 
     wrapMentionComponent,
+    wrapReplyComponent,
 
     start() {
         addAccessory("messageLinkEmbed", props => {

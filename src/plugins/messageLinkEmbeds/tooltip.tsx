@@ -9,12 +9,13 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { findComponentByCodeLazy } from "@webpack";
 import {
     ChannelStore,
+    Clickable,
     Constants,
-    Spinner,
     MessageStore,
     PermissionsBits,
     PermissionStore,
     RestAPI,
+    Spinner,
     Tooltip,
     useEffect,
     useState,
@@ -25,29 +26,43 @@ import type { Message } from "discord-types/general";
 const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
 const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact")!;
 
+// TODO wrapping components like this probably makes react's equality check fail
 export function wrapMentionComponent({ messageId, channelId }, Component) {
     return props => {
-        if(!messageId) return <Component {...props} />;
-        return <Tooltip
-            tooltipClassName="vc-message-link-tooltip"
-            text={
-                <ErrorBoundary>
-                    <MessagePreview
-                        channelId={channelId}
-                        messageId={messageId}
-                    />
-                </ErrorBoundary>
-            }
-        >
-            {({ onMouseEnter, onMouseLeave }) =>
-                <Component
-                    {...props}
-                    onMouseEnter={onMouseEnter}
-                    onMouseLeave={onMouseLeave}
-                />
-            }
-        </Tooltip>;
+        return <MessageTooltip messageId={messageId} channelId={channelId}>
+            <Component {...props} />
+        </MessageTooltip>;
     };
+}
+
+export function wrapReplyComponent(p, Component) {
+    const { channel_id, message_id } = p.baseMessage.messageReference;
+    return props => {
+        return <MessageTooltip messageId={message_id} channelId={channel_id}>
+            <Component {...props} />
+        </MessageTooltip>;
+    };
+}
+
+export function MessageTooltip({ messageId, channelId, children }) {
+    if(!messageId) return children;
+    return <Tooltip
+        tooltipClassName="vc-message-link-tooltip"
+        text={
+            <ErrorBoundary>
+                <MessagePreview
+                    channelId={channelId}
+                    messageId={messageId}
+                />
+            </ErrorBoundary>
+        }
+    >
+        {({ onMouseEnter, onMouseLeave }) =>
+            <Clickable onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+                {children}
+            </Clickable>
+        }
+    </Tooltip>;
 }
 
 function MessagePreview({ channelId, messageId }) {
