@@ -28,7 +28,7 @@ interface URLReplacementRule {
     description: string;
     shortlinkMatch?: RegExp;
     accountViewReplace?: (userId: string) => string;
-};
+}
 
 // Do not forget to add protocols to the ALLOWED_PROTOCOLS constant
 const UrlReplacementRules: Record<string, URLReplacementRule> = {
@@ -58,13 +58,13 @@ const UrlReplacementRules: Record<string, URLReplacementRule> = {
     },
     itunes: {
         match: /^https:\/\/music\.apple\.com\/([a-z]{2}\/)?(album|artist|playlist|song|curator)\/([^/?#]+)\/?([^/?#]+)?(?:\?.*)?(?:#.*)?$/,
-        replace: (_, type, name, id) => id ? `itunes://music.apple.com/us/${type}/${name}/${id}` : `itunes://music.apple.com/us/${type}/${name}`,
+        replace: (_, lang, type, name, id) => id ? `itunes://music.apple.com/us/${type}/${name}/${id}` : `itunes://music.apple.com/us/${type}/${name}`,
         description: "Open Apple Music links in the iTunes app"
     },
 };
 
 const pluginSettings = definePluginSettings(
-    Object.entries(urlReplacementRules).reduce((acc, [key, rule]) => {
+    Object.entries(UrlReplacementRules).reduce((acc, [key, rule]) => {
         acc[key] = {
             type: OptionType.BOOLEAN,
             description: rule.description,
@@ -115,7 +115,7 @@ export default definePlugin({
         let url = data.href;
         if (!url) return false;
 
-        for (const [key, rule] of Object.entries(urlReplacementRules)) {
+        for (const [key, rule] of Object.entries(UrlReplacementRules)) {
             if (!pluginSettings.store[key]) continue;
 
             if (rule.shortlinkMatch?.test(url)) {
@@ -144,11 +144,10 @@ export default definePlugin({
     },
 
     handleAccountView(_, platformType: string, userId: string) {
-        const rule = urlReplacementRules[platformType];
+        const rule = UrlReplacementRules[platformType];
         if (rule?.accountViewReplace && pluginSettings.store[platformType]) {
-                VencordNative.native.openExternal(rule.accountViewReplace(userId));
-                return;
-            }
+            VencordNative.native.openExternal(rule.accountViewReplace(userId));
+            return;
         }
     }
 });
