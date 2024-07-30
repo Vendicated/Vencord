@@ -16,15 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { insertTextIntoChatInputBox } from "@utils/discord";
-import definePlugin from "@utils/types";
-import { ExpressionPickerStore } from "@webpack/common";
+import { insertTextIntoChatInputBox, sendMessage } from "@utils/discord";
+import definePlugin, { OptionType } from "@utils/types";
+import { ExpressionPickerStore, SelectedChannelStore } from "@webpack/common";
+
+let shiftHeld = false;
+
+export const settings = definePluginSettings({
+    shiftOverride: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to instantly send the gif when holding shift",
+        default: true,
+    }
+});
 
 export default definePlugin({
     name: "GifPaste",
+    authors: [Devs.Ven, Devs.iilwy],
     description: "Makes picking a gif in the gif picker insert a link into the chatbox instead of instantly sending it",
-    authors: [Devs.Ven],
+    settings,
 
     patches: [{
         find: '"handleSelectGIF",',
@@ -34,10 +46,27 @@ export default definePlugin({
         }
     }],
 
+    start() {
+        document.addEventListener("keyup", handleKeyEvent);
+        document.addEventListener("keydown", handleKeyEvent);
+    },
+
+    stop() {
+        document.removeEventListener("keyup", handleKeyEvent);
+        document.removeEventListener("keydown", handleKeyEvent);
+    },
+
     handleSelect(gif?: { url: string; }) {
-        if (gif) {
+        if (!gif) return;
+        if (shiftHeld && settings.store.shiftOverride) {
+            sendMessage(SelectedChannelStore.getChannelId(), { content: gif.url });
+        } else {
             insertTextIntoChatInputBox(gif.url + " ");
-            ExpressionPickerStore.closeExpressionPicker();
         }
+        ExpressionPickerStore.closeExpressionPicker();
     }
 });
+
+function handleKeyEvent(event: KeyboardEvent) {
+    shiftHeld = event.shiftKey;
+}
