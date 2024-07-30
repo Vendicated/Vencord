@@ -24,12 +24,25 @@ import { ExpressionPickerStore, SelectedChannelStore } from "@webpack/common";
 
 let shiftHeld = false;
 
+const enum PickBehavior {
+    InputBox,
+    Send,
+}
+
 export const settings = definePluginSettings({
+    behavior: {
+        description: "Modify the default behavior when selecting a gif",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Insert link into the chatbox", value: PickBehavior.InputBox, default: true },
+            { label: "Instantly send", value: PickBehavior.Send },
+        ],
+    },
     shiftOverride: {
+        description: "Use alternate behavior when holding shift",
         type: OptionType.BOOLEAN,
-        description: "Whether to instantly send the gif when holding shift",
-        default: true,
-    }
+        default: true
+    },
 });
 
 export default definePlugin({
@@ -58,7 +71,9 @@ export default definePlugin({
 
     handleSelect(gif?: { url: string; }) {
         if (!gif) return;
-        if (shiftHeld && settings.store.shiftOverride) {
+        const preferSend = settings.store.behavior === PickBehavior.Send;
+        const shouldSend = settings.store.shiftOverride ? preferSend !== shiftHeld : preferSend;
+        if (shouldSend) {
             sendMessage(SelectedChannelStore.getChannelId(), { content: gif.url });
         } else {
             insertTextIntoChatInputBox(gif.url + " ");
