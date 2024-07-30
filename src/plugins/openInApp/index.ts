@@ -27,6 +27,7 @@ const SpotifyMatcher = /^https:\/\/open\.spotify\.com\/(track|album|artist|playl
 const SteamMatcher = /^https:\/\/(steamcommunity\.com|(?:help|store)\.steampowered\.com)\/.+$/;
 const EpicMatcher = /^https:\/\/store\.epicgames\.com\/(.+)$/;
 const TidalMatcher = /^https:\/\/tidal\.com\/browse\/(track|album|artist|playlist|user|video|mix)\/(.+)(?:\?.+?)?$/;
+const ItunesMatcher = /^https:\/\/music\.apple\.com\/[a-z]{2}\/?(album|artist|playlist|song|curator)\/([^/?#]+)\/?([^/?#]+)?(?:\?.*)?(?:#.*)?$/;
 
 const settings = definePluginSettings({
     spotify: {
@@ -48,14 +49,19 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Open Tidal links in the Tidal app",
         default: true,
-    }
+    },
+    itunes: {
+        type: OptionType.BOOLEAN,
+        description: "Open Apple Music links in the iTunes app",
+        default: true,
+    },
 });
 
 const Native = VencordNative.pluginHelpers.OpenInApp as PluginNative<typeof import("./native")>;
 
 export default definePlugin({
     name: "OpenInApp",
-    description: "Open Spotify, Tidal, Steam and Epic Games URLs in their respective apps instead of your browser",
+    description: "Open Spotify, Apple Music, Tidal, Steam and Epic Games URLs in their respective apps instead of your browser",
     authors: [Devs.Ven],
     settings,
 
@@ -141,6 +147,24 @@ export default definePlugin({
 
             const [, type, id] = match;
             VencordNative.native.openExternal(`tidal://${type}/${id}`);
+
+            event?.preventDefault();
+            return true;
+        }
+
+        itunes: {
+            if (!settings.store.itunes) break itunes;
+
+            const match = ItunesMatcher.exec(url);
+            if (!match) break itunes;
+
+            const [, type, name, id] = match;
+
+            if (id) {
+                VencordNative.native.openExternal(`itunes://music.apple.com/us/${type}/${name}/${id}`);
+            } else {
+                VencordNative.native.openExternal(`itunes://music.apple.com/us/${type}/${name}`);
+            }
 
             event?.preventDefault();
             return true;
