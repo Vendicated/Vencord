@@ -22,7 +22,7 @@ import definePlugin, { OptionType, PluginNative, SettingsDefinition } from "@uti
 import { showToast, Toasts } from "@webpack/common";
 import type { MouseEvent } from "react";
 
-type URLReplacementRule = {
+interface URLReplacementRule {
     match: RegExp;
     replace: (...matches: string[]) => string;
     description: string;
@@ -31,7 +31,7 @@ type URLReplacementRule = {
 };
 
 // Do not forget to add protocols to the ALLOWED_PROTOCOLS constant
-const urlReplacementRules: Record<string, URLReplacementRule> = {
+const UrlReplacementRules: Record<string, URLReplacementRule> = {
     spotify: {
         match: /^https:\/\/open\.spotify\.com\/(track|album|artist|playlist|user|episode)\/(.+)(?:\?.+?)?$/,
         replace: (_, type, id) => `spotify://${type}/${id}`,
@@ -146,8 +146,8 @@ export default definePlugin({
     },
 
     handleAccountView(_, platformType: string, userId: string) {
-        for (const [key, rule] of Object.entries(urlReplacementRules)) {
-            if (key === platformType && rule.accountViewReplace && pluginSettings.store[key]) {
+        const rule = urlReplacementRules[platformType];
+        if (rule?.accountViewReplace && pluginSettings.store[platformType]) {
                 VencordNative.native.openExternal(rule.accountViewReplace(userId));
                 return;
             }
