@@ -73,18 +73,17 @@ export default new class Plugin implements PluginDef {
                 }
             },
             {
-                find: "getApplicationFramerate:function(){",
-                replacement: {
-                    match: /getApplicationFramerate:function\(\)\{return .{1,2}\}/,
-                    replace: "getApplicationFramerate:function(){return function(){return $self.getQuality().framerate;}}"
-                }
-            },
-            {
-                find: "getApplicationResolution:function(){",
-                replacement: {
-                    match: /getApplicationResolution:function\(\)\{return .{1,2}\}/,
-                    replace: "getApplicationResolution:function(){return function(){return $self.getQuality().height;}}"
-                }
+                find: "Unknown resolution:",
+                replacement: [
+                    {
+                        match: /throw Error\("Unknown resolution: ".concat\((\i)\)\)/,
+                        replace: "return $1;"
+                    },
+                    {
+                        match: /throw Error\("Unknown frame rate: ".concat\((\i)\)\)/,
+                        replace: "return $1;"
+                    }
+                ]
             },
         ];
         this.settings = definePluginSettings({
