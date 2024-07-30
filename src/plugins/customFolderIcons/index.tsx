@@ -9,11 +9,8 @@ import definePlugin from "@utils/types";
 
 import { makeContextItem } from "./components";
 import settings, { folderIconsData } from "./settings";
-import { int2rgba } from "./util";
-export interface folderProp {
-    folderId: string;
-    folderColor: number;
-}
+import { folderProp, int2rgba } from "./util";
+
 export default definePlugin({
     settings,
     name: "CustomFolderIcons",
@@ -46,7 +43,7 @@ export default definePlugin({
             return (
                 <div
                     style={{
-                        backgroundColor: int2rgba(props.folderNode.color, .4),
+                        backgroundColor: int2rgba(props.folderNode.color, +settings.store.solidIcon || .4),
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",

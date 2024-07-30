@@ -7,9 +7,8 @@
 import { closeModal, ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import { Button, Menu, Slider, TextInput, useState } from "@webpack/common";
 
-import { folderProp } from ".";
 import settings, { folderIconsData } from "./settings";
-import { int2rgba, setFolderData } from "./util";
+import { folderProp, int2rgba, setFolderData } from "./util";
 
 export function ImageModal(folderProps: folderProp) {
     const [data, setData] = useState(((settings.store.folderIcons ?? {}) as folderIconsData)[folderProps.folderId]?.url ?? "");
