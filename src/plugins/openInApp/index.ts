@@ -145,9 +145,7 @@ export default definePlugin({
 
     handleAccountView(_, platformType: string, userId: string) {
         const rule = UrlReplacementRules[platformType];
-        if (rule?.accountViewReplace && pluginSettings.store[platformType]) {
+        if (rule?.accountViewReplace && pluginSettings.store[platformType])
             VencordNative.native.openExternal(rule.accountViewReplace(userId));
-            return;
-        }
     }
 });
