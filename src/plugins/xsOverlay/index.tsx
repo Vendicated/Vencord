@@ -172,7 +172,7 @@ async function start() {
     if (socket) socket.close();
     socket = new WebSocket(`ws://127.0.0.1:${settings.store.webSocketPort ?? 42070}/?client=Vencord`);
     return new Promise<void>((resolve, reject) => {
-        socket.onopen = () => resolve;
+        socket.onopen = resolve;
         socket.onerror = reject;
         setTimeout(reject, 3000);
     });
