@@ -168,6 +168,7 @@ export default tseslint.config(
                 }]
             }],
             "no-restricted-syntax": ["error",
+                "JSXOpeningElement[name.name=svg] > JSXAttribute[name.name=xmlns]",
                 "SequenceExpression:not(.update):matches(:not(.callee), [expressions.length!=2])",
                 "SequenceExpression:not(.update) > :first-child:not(Literal)",
             ],

@@ -47,10 +47,10 @@ export function autoFindEnum(this: typeof Vencord, source: CR.EnumSource) {
     return bestMatch;
 }
 
-export function isValidEnum(obj: unknown): obj is CR.EnumMembers {
-    return typeof obj === "object"
-        && obj !== null
-        && !Array.isArray(obj);
+export function isValidEnum(value: unknown): value is CR.EnumMembers {
+    return typeof value === "object"
+        && value !== null
+        && !Array.isArray(value);
 }
 
 export function getEnumChanges(obj: CR.EnumMembers, source: CR.EnumSource): CR.EnumChanges {

@@ -21,7 +21,7 @@ import esbuild from "esbuild";
 import { readFileSync } from "fs";
 import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
 import { join } from "path";
-// @ts-expect-error
+// @ts-expect-error: No types
 import Zip from "zip-local";
 
 import { BUILD_TIMESTAMP, commonOpts, disposeAll, globPlugins, IS_DEV, IS_REPORTER, rebuildAll, VERSION, watch, watchAll } from "./common.mjs";
@@ -38,7 +38,6 @@ const commonOptions = {
         ...commonOpts.plugins,
     ],
     target: ["esnext"],
-    // https://github.com/evanw/esbuild/releases/tag/v0.16.0#:~:text=esbuild%20now,parameter
     define: {
         IS_WEB: "true",
         IS_EXTENSION: "false",
@@ -118,7 +117,6 @@ const contexts = await Promise.all([
 
 await rebuildAll(contexts);
 
-// https://github.com/evanw/esbuild/releases/tag/v0.17.0
 if (watch)
     await watchAll(contexts);
 else

@@ -64,10 +64,10 @@ export function autoFindClass(this: typeof Vencord, source: CR.ClassMembers) {
     return bestMatch;
 }
 
-export function isValidClass(constructor: unknown): constructor is CR.Class {
-    if (typeof constructor !== "function")
+export function isValidClass(value: unknown): value is CR.Class {
+    if (typeof value !== "function")
         return false;
-    const { prototype } = constructor;
+    const { prototype } = value;
     return typeof prototype === "object" && prototype !== null;
 }
 

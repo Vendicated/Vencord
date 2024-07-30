@@ -25,24 +25,20 @@ import { BUILD_TIMESTAMP, commonOpts, disposeAll, exists, globPlugins, IS_DEV, I
 
 /** @type {Record<string, any>} */
 const defines = {
-    IS_STANDALONE,
-    IS_DEV,
-    IS_REPORTER,
-    IS_UPDATER_DISABLED,
-    IS_WEB: false,
-    IS_EXTENSION: false,
+    IS_STANDALONE: IS_STANDALONE.toString(),
+    IS_DEV: IS_DEV.toString(),
+    IS_REPORTER: IS_REPORTER.toString(),
+    IS_UPDATER_DISABLED: IS_UPDATER_DISABLED.toString(),
+    IS_WEB: "false",
+    IS_EXTENSION: "false",
     VERSION: JSON.stringify(VERSION),
-    BUILD_TIMESTAMP
+    BUILD_TIMESTAMP: BUILD_TIMESTAMP.toString()
 };
 
 if (defines.IS_STANDALONE === false)
     // If this is a local build (not standalone), optimize
     // for the specific platform we're on
     defines["process.platform"] = JSON.stringify(process.platform);
-
-// https://github.com/evanw/esbuild/releases/tag/v0.16.0#:~:text=esbuild%20now,parameter
-for (const key in defines)
-    defines[key] = defines[key].toString();
 
 /** @satisfies {esbuild.BuildOptions} */
 const nodeCommonOpts = {
@@ -205,7 +201,6 @@ const contexts = await Promise.all([
 
 await rebuildAll(contexts);
 
-// https://github.com/evanw/esbuild/releases/tag/v0.17.0
 if (watch)
     await watchAll(contexts);
 else

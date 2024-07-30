@@ -8,6 +8,7 @@ import { AST_NODE_TYPES, type TSESTree } from "@typescript-eslint/typescript-est
 import type { Page } from "puppeteer-core";
 
 import type { autoFindEnum } from "../finds/enums.mts";
+import { formatValue } from "../logging/utils.mjs";
 import type { CR } from "../types.mts";
 import { funcToString, getErrorStack, getSanitizedConfig, pageAsyncFunction, pageFunction } from "./utils.mjs";
 
@@ -161,12 +162,12 @@ function checkEnumIgnores(
     if (ignoredAdditions)
         for (const [key, value] of ignoredAdditions)
             if (removals[key] === value)
-                report.warns.push(`Ignored addition '${key} = ${JSON.stringify(value)}' in config for enum '${report.identifier}' had no effect.`);
+                report.warns.push(`Ignored addition '${key} = ${formatValue(value)}' in config for enum '${report.identifier}' had no effect.`);
 
     if (ignoredRemovals)
         for (const [key, value] of ignoredRemovals)
             if (value === undefined ? key in additions : additions[key] === value)
-                report.warns.push(`Ignored removal '${key}${value === undefined ? "" : " = " + JSON.stringify(value)}' in config for enum '${report.identifier}' had no effect.`);
+                report.warns.push(`Ignored removal '${key}${value === undefined ? "" : " = " + formatValue(value)}' in config for enum '${report.identifier}' had no effect.`);
 
     return changes;
 }

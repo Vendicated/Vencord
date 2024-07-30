@@ -35,7 +35,7 @@ const functionDeclarationOrArrowFunctionDefinitionRE = /^(?:async(?:[\t\v\f\uFEF
 
 /**
  * Makes the result of `func.toString()` a callable expression when evaled.
- * Does not support accessors, static methods, private methods/accessors,
+ * Does not support getters, setters, static methods, private methods/getters/setters,
  * or method definitions with symbol keys.
  */
 export function funcToString(func: (...args: never[]) => unknown) {

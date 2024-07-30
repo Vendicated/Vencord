@@ -8,9 +8,31 @@ export function capitalize(string: string) {
     return string.replace(/^./, c => c.toUpperCase());
 }
 
-export function codeBlock(content: unknown, indentLevel = 0) {
+export function codeBlock(content?: unknown, indentLevel = 0) {
     const indent = "  ".repeat(indentLevel);
     return `\`\`\`\n${content}\n\`\`\``.replaceAll(/^/gm, indent) + "\n";
+}
+
+export function formatWarnList(warns: string[], indentLevel = 0) {
+    return warns.reduce((list, warn) => list + codeBlock(warn, indentLevel), "");
+}
+
+export function formatKeyList(keys: string[], indentLevel = 0) {
+    const indent = "  ".repeat(indentLevel);
+    return keys.reduce((list, key) => list + indent + `* \`${key}\`\n`, "");
+}
+
+export function formatValue(value?: unknown) {
+    if (typeof value === "string")
+        return JSON.stringify(value);
+    if (typeof value === "bigint")
+        return value.toString() + "n";
+    return String(value);
+}
+
+export function formatEnumEntryList(entries: [key: string, value: unknown][], indentLevel = 0) {
+    const indent = "  ".repeat(indentLevel);
+    return entries.reduce((list, [key, value]) => list + indent + `* \`${key} = ${formatValue(value)}\`\n`, "");
 }
 
 export function formatChannel(channel?: string | undefined) {
@@ -23,20 +45,6 @@ export function formatChannel(channel?: string | undefined) {
         default:
             return "Unknown";
     }
-}
-
-export function formatWarnList(warns: string[], indentLevel = 0) {
-    return warns.map(warn => codeBlock(warn, indentLevel)).join("");
-}
-
-export function formatKeyList(keys: string[], indentLevel = 0) {
-    const indent = "  ".repeat(indentLevel);
-    return keys.map(key => indent + `* \`${key}\`\n`).join("");
-}
-
-export function formatEnumEntryList(entries: [key: string, value: unknown][], indentLevel = 0) {
-    const indent = "  ".repeat(indentLevel);
-    return entries.map(([key, value]) => indent + `* \`${key} = ${JSON.stringify(value)}\`\n`).join("");
 }
 
 export function getSummaryURL(channel?: string | undefined) {

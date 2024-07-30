@@ -20,8 +20,6 @@ import { type Dirent, readdirSync, readFileSync, writeFileSync } from "fs";
 import { access, readFile } from "fs/promises";
 import { join, sep } from "path";
 import { normalize as posixNormalize, sep as posixSep } from "path/posix";
-// import { type BigIntLiteral, createSourceFile, type Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, type NamedDeclaration, type NodeArray, type ObjectLiteralExpression, ScriptTarget, type StringLiteral, SyntaxKind } from "typescript";
-// Workaround to avoid `The requested module 'typescript' does not provide an export named *`
 import ts from "typescript";
 
 import { getPluginTarget } from "./utils.mjs";

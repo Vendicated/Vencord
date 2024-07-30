@@ -54,7 +54,7 @@ function generateI18NMessages() {
                             values[arg] = 1;
                             continue;
                         }
-                        if (/^[$A-Z_a-z][\w$]*\.render is not a function$/.test(error.message))
+                        if (/^[$A-Z_a-z][$\w]*\.render is not a function$/.test(error.message))
                             continue;
                     }
                     // Return if an unexpected error is encountered to prevent an infinite loop

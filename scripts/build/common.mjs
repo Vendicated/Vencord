@@ -294,8 +294,7 @@ export const disposeAll = contexts => Promise.all(contexts.map(ctx => ctx.dispos
 export const rebuildAll = contexts =>
     Promise.all(contexts.map(ctx => ctx.rebuild().catch(error => {
         disposeAll(contexts);
-        console.error("Build failed:");
-        console.error(error.message);
+        console.error("Build failed:\n" + error.stack);
         process.exitCode = 1;
     })));
 
@@ -305,7 +304,7 @@ export const watchAll = contexts => Promise.all(contexts.map(ctx => ctx.watch())
 /** @satisfies {esbuild.BuildOptions} */
 export const commonOpts = {
     // Does not work with esbuild.BuildContext.rebuild: https://github.com/evanw/esbuild/issues/2886#issuecomment-1416397046
-    // Errors will still get logged
+    // Warnings and errors should still get logged
     logLevel: "info",
     bundle: true,
     minify: !watch,
