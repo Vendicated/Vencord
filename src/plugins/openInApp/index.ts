@@ -103,8 +103,8 @@ export default definePlugin({
         {
             find: ".CONNECTED_ACCOUNT_VIEWED,",
             replacement: {
-                match: /(?<=href:\i,onClick:\i=>\{)(?=.{0,10}\i=(\i)\.type,.{0,100}CONNECTED_ACCOUNT_VIEWED)/,
-                replace: "$self.handleAccountView(arguments[0],$1.type,$1.id);"
+                match: /(?<=href:\i,onClick:(\i)=>\{)(?=.{0,10}\i=(\i)\.type,.{0,100}CONNECTED_ACCOUNT_VIEWED)/,
+                replace: "if($self.handleAccountView($1,$2.type,$2.id)) return;"
             }
         }
     ],
@@ -143,9 +143,12 @@ export default definePlugin({
         return false;
     },
 
-    handleAccountView(_, platformType: string, userId: string) {
+    handleAccountView(e: MouseEvent, platformType: string, userId: string) {
         const rule = UrlReplacementRules[platformType];
-        if (rule?.accountViewReplace && pluginSettings.store[platformType])
+        if (rule?.accountViewReplace && pluginSettings.store[platformType]) {
             VencordNative.native.openExternal(rule.accountViewReplace(userId));
+            e.preventDefault();
+            return true;
+        }
     }
 });
