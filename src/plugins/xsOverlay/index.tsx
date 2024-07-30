@@ -8,9 +8,9 @@ import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
+import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
 import { findByCodeLazy, findLazy } from "@webpack";
-import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
+import { Button, ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import type { Channel, Embed, GuildMember, MessageAttachment, User } from "discord-types/general";
 
 const ChannelTypes = findLazy(m => m.ANNOUNCEMENT_THREAD === 10);
@@ -68,10 +68,40 @@ interface Call {
     ringing: string[];
 }
 
+interface ApiObject {
+    sender: string,
+    target: string,
+    command: string,
+    jsonData: string,
+    rawData: string | null,
+}
+
+interface NotificationObject {
+    type: number;
+    timeout: number;
+    height: number;
+    opacity: number;
+    volume: number;
+    audioPath: string;
+    title: string;
+    content: string;
+    useBase64Icon: boolean;
+    icon: ArrayBuffer | string;
+    sourceApp: string;
+}
+
 const notificationsShouldNotify = findByCodeLazy(".SUPPRESS_NOTIFICATIONS))return!1");
-const XSLog = new Logger("XSOverlay");
+const logger = new Logger("XSOverlay");
 
 const settings = definePluginSettings({
+    webSocketPort: {
+        type: OptionType.NUMBER,
+        description: "Websocket port",
+        default: 42070,
+        async onChange() {
+            await start();
+        }
+    },
     botNotifications: {
         type: OptionType.BOOLEAN,
         description: "Allow bot notifications",
@@ -136,7 +166,17 @@ const settings = definePluginSettings({
     },
 });
 
-const Native = VencordNative.pluginHelpers.XSOverlay as PluginNative<typeof import("./native")>;
+let socket: WebSocket;
+
+async function start() {
+    if (socket) socket.close();
+    socket = new WebSocket(`ws://127.0.0.1:${settings.store.webSocketPort ?? 42070}/?client=Vencord`);
+    return new Promise((resolve, reject) => {
+        socket.onopen = resolve;
+        socket.onerror = reject;
+        setTimeout(reject, 3000);
+    });
+}
 
 export default definePlugin({
     name: "XSOverlay",
@@ -248,7 +288,21 @@ export default definePlugin({
             if (shouldIgnoreForChannelType(channel)) return;
             sendMsgNotif(titleString, finalMsg, message);
         }
-    }
+    },
+
+    start,
+
+    stop() {
+        socket.close();
+    },
+
+    settingsAboutComponent: () => (
+        <>
+            <Button onClick={() => sendOtherNotif("This is a test notification! explode", "Hello from Vendor!")}>
+                Send test notification
+            </Button>
+        </>
+    )
 });
 
 function shouldIgnoreForChannelType(channel: Channel) {
@@ -259,9 +313,8 @@ function shouldIgnoreForChannelType(channel: Channel) {
 
 function sendMsgNotif(titleString: string, content: string, message: Message) {
     fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`).then(response => response.arrayBuffer()).then(result => {
-        const msgData = {
-            messageType: 1,
-            index: 0,
+        const msgData: NotificationObject = {
+            type: 1,
             timeout: settings.store.lengthBasedTimeout ? calculateTimeout(content) : settings.store.timeout,
             height: calculateHeight(content),
             opacity: settings.store.opacity,
@@ -270,17 +323,17 @@ function sendMsgNotif(titleString: string, content: string, message: Message) {
             title: titleString,
             content: content,
             useBase64Icon: true,
-            icon: result,
+            icon: new TextDecoder().decode(result),
             sourceApp: "Vencord"
         };
-        Native.sendToOverlay(msgData);
+
+        sendToOverlay(msgData);
     });
 }
 
 function sendOtherNotif(content: string, titleString: string) {
-    const msgData = {
-        messageType: 1,
-        index: 0,
+    const msgData: NotificationObject = {
+        type: 1,
         timeout: settings.store.lengthBasedTimeout ? calculateTimeout(content) : settings.store.timeout,
         height: calculateHeight(content),
         opacity: settings.store.opacity,
@@ -289,10 +342,22 @@ function sendOtherNotif(content: string, titleString: string) {
         title: titleString,
         content: content,
         useBase64Icon: false,
-        icon: null,
+        icon: "default",
         sourceApp: "Vencord"
     };
-    Native.sendToOverlay(msgData);
+    sendToOverlay(msgData);
+}
+
+async function sendToOverlay(notif: NotificationObject) {
+    const apiObject: ApiObject = {
+        sender: "Vencord",
+        target: "xsoverlay",
+        command: "SendNotification",
+        jsonData: JSON.stringify(notif),
+        rawData: null
+    };
+    if (socket.readyState !== socket.OPEN) await start();
+    socket.send(JSON.stringify(apiObject));
 }
 
 function shouldNotify(message: Message, channel: string) {
