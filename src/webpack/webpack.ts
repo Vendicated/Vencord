@@ -544,7 +544,7 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher: RegExp = D
     }
 
     if (rawChunkIds) {
-        const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map((m: any) => m[1]);
+        const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map((m: any) => Number(m[1]));
         await Promise.all(chunkIds.map(id => wreq.e(id)));
     }
 
@@ -559,7 +559,7 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher: RegExp = D
         return false;
     }
 
-    wreq(entryPointId);
+    wreq(Number(entryPointId));
     return true;
 }
 
