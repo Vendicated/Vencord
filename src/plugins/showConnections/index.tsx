@@ -213,7 +213,7 @@ export default definePlugin({
             }
         },
         {
-            find: /inline:!1,profileViewedAnalytics:\i}\),/,
+            find: '"BiteSizeProfileBody"',
             replacement: {
                 match: /currentUser:\i,guild:\i}\)(?<=user:(\i),bio:null==(\i)\?.+?)/,
                 replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, simplified: true })"
