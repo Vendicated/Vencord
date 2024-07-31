@@ -64,7 +64,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=onItemSelect:\i,children:)(\i)\.map/,
-                    replace: "[...$1, ...($self.isBotOrSelf(arguments[0].user) ? [] : [{section:'MUTUAL_GDMS',text:`${$self.getMutualGDMCountText(arguments[0].user)}`}])].map"
+                    replace: "[...$1, ...($self.isBotOrSelf(arguments[0].user) ? [] : [{section:'MUTUAL_GDMS',text:$self.getMutualGDMCountText(arguments[0].user)}])].map"
                 },
                 {
                     match: /\(0,\i\.jsx\)\(\i,\{items:\i,section:(\i)/,
