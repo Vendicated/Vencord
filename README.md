@@ -126,6 +126,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - Title by Kyuuhachi
 - TosuRPC by AutumnVN
 - Translate+ by Prince527 (Using Translate by Ven)
+- UnitConverter by sadan
 - UnlimitedAccounts by thororen
 - UserPFP by nexpid (maintained by thororen)
 - UwUifier by echo
