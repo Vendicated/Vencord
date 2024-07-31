@@ -542,7 +542,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Cookie",
         id: 721853658941227088n
     },
-
+    surgedevs: {
+        name: "Chloe",
+        id: 1084592643784331324n
+    }
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
