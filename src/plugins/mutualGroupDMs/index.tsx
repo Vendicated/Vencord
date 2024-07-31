@@ -42,7 +42,7 @@ function getGroupDMName(channel: Channel) {
 export default definePlugin({
     name: "MutualGroupDMs",
     description: "Shows mutual group dms in profiles",
-    authors: [Devs.amia, Devs.Scab],
+    authors: [Devs.amia],
 
     patches: [
         {
