@@ -1,4 +1,4 @@
-name: Sync Vencord Dev
+name: Sync Vencord Main
 
 env:
     WORKFLOW_TOKEN: ${{ secrets.ETOKEN }}
@@ -15,7 +15,7 @@ jobs:
     build:
         runs-on: ubuntu-latest
         steps:
-            - name: Sync Vencord Dev
+            - name: Sync Vencord Main
               id: sync
               uses: verticalsync/sync-upstream-repo@master
               with:
