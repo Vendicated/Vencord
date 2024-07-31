@@ -79,7 +79,7 @@ function SectionHeader({ section, presets }: SectionHeaderProps) {
         <Flex>
             <Forms.FormTitle style={{ flexGrow: 1 }}>{section.title}</Forms.FormTitle>
             {presets.some(p => `preset-${p.id}` === section.sectionKey) && (
-                <Tooltip text="Copy Preset Hash" shouldShow={true}>
+                <Tooltip text="Copy Preset Hash">
                     {tooltipProps => (
                         <Button
                             {...tooltipProps}
