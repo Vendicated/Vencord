@@ -78,13 +78,7 @@ export default definePlugin({
 
     getMutualGDMCountText: (user: User) => {
         const count = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).length;
-        if (count === 0) {
-            return "No Mutual Groups";
-        } else if (count === 1) {
-            return "1 Mutual Group";
-        } else {
-            return `${count} Mutual Groups`;
-        }
+        return `${count} Mutual Group${count!==1?"s":""}`
     },
 
     renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: User, onClose: () => void; }) => {
