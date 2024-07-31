@@ -128,6 +128,7 @@ export default tseslint.config(
             "@typescript-eslint/prefer-find": "error",
             "@typescript-eslint/prefer-function-type": "error",
             "@typescript-eslint/prefer-includes": "error",
+            "@typescript-eslint/prefer-reduce-type-parameter": "error",
             "@typescript-eslint/require-await": "error",
             "@typescript-eslint/return-await": "error",
             "@typescript-eslint/triple-slash-reference": "error",
