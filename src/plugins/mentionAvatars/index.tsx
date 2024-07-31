@@ -14,10 +14,10 @@ import { SelectedGuildStore, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const settings = definePluginSettings({
-    hideAtSymbol: {
+    showAtSymbol: {
         type: OptionType.BOOLEAN,
-        description: "Whether the the @-symbol should be hidden.",
-        default: false
+        description: "Whether the the @ symbol should be displayed",
+        default: true
     }
 });
 
