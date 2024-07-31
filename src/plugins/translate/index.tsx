@@ -30,7 +30,7 @@ import { ChannelStore, Menu } from "@webpack/common";
 import { settings } from "./settings";
 import { TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
-import { translate } from "./utils";
+import { deeplTranslate, googleTranslate } from "./utils";
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => {
     if (!message.content) return;
@@ -44,7 +44,9 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
             label="Translate"
             icon={TranslateIcon}
             action={async () => {
-                const trans = await translate("received", message.content);
+                const trans = settings.store.service === "google"
+                    ? await googleTranslate("received", message.content)
+                    : await deeplTranslate("received", message.content);
                 handleTranslate(message.id, trans);
             }}
         />
@@ -61,7 +63,8 @@ export default definePlugin({
         "message": messageCtxPatch
     },
     // not used, just here in case some other plugin wants it or w/e
-    translate,
+    translate: googleTranslate,
+    deeplTranslate,
 
     start() {
         addAccessory("vc-translation", props => <TranslationAccessory message={props.message} />);
@@ -77,7 +80,9 @@ export default definePlugin({
                 message,
                 channel: ChannelStore.getChannel(message.channel_id),
                 onClick: async () => {
-                    const trans = await translate("received", message.content);
+                    const trans = settings.store.service === "google"
+                        ? await googleTranslate("received", message.content)
+                        : await deeplTranslate("received", message.content);
                     handleTranslate(message.id, trans);
                 }
             };
@@ -87,7 +92,9 @@ export default definePlugin({
             if (!settings.store.autoTranslate) return;
             if (!message.content) return;
 
-            message.content = (await translate("sent", message.content)).text;
+            message.content = settings.store.service === "google"
+                ? (await googleTranslate("sent", message.content)).text
+                : (await deeplTranslate("sent", message.content)).text;
         });
     },
 

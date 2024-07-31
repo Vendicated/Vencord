@@ -46,49 +46,9 @@ export interface TranslationValue {
     text: string;
 }
 
-export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
+export async function googleTranslate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
     const sourceLang = settings.store[kind + "Input"];
     const targetLang = settings.store[kind + "Output"];
-    const { service } = settings.store;
-
-    // DeepL not supported on web due to CORS policy
-    if (IS_DISCORD_DESKTOP && service !== "google") {
-        if (!settings.store.deeplApiKey) {
-            showToast("DeepL API key is not set", Toasts.Type.FAILURE);
-            throw new Error("DeepL API key is not set");
-        }
-
-        try {
-            // CORS jumpscare
-            const { status, data } = await Native.makeRequest(service === "deepl-pro", settings.store.deeplApiKey, JSON.stringify({
-                text: [text],
-                target_lang: targetLang
-            }));
-
-            switch (status) {
-                case 200:
-                    break;
-                case 403:
-                    showToast("Invalid DeepL API key or version", Toasts.Type.FAILURE);
-                    throw new Error("Invalid DeepL API key");
-                case 456:
-                    showToast("DeepL API quota exceeded", Toasts.Type.FAILURE);
-                    throw new Error("DeepL API quota exceeded");
-                default:
-                    throw new Error(
-                        `Failed to translate "${text}" (${sourceLang} -> ${targetLang})`
-                        + `\n${status} ${data}`
-                    );
-            }
-
-            const { translations }: DeepLData = JSON.parse(data);
-
-            return { src: translations[0].detected_source_language, text: translations[0].text };
-        } catch (e) {
-            console.error(e);
-            throw new Error("Failed to translate text");
-        }
-    }
 
     const url = "https://translate.googleapis.com/translate_a/single?" + new URLSearchParams({
         // see https://stackoverflow.com/a/29537590 for more params
@@ -123,4 +83,44 @@ export async function translate(kind: "received" | "sent", text: string): Promis
             filter(Boolean).
             join("")
     };
+}
+
+export async function deeplTranslate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
+    const sourceLang = settings.store[kind + "Input"];
+    const targetLang = settings.store[kind + "Output"];
+
+    if (!settings.store.deeplApiKey) {
+        showToast("DeepL API key is not set", Toasts.Type.FAILURE);
+        throw new Error("DeepL API key is not set");
+    }
+
+    try {
+        // CORS jumpscare
+        const { status, data } = await Native.makeRequest(settings.store.service === "deepl-pro", settings.store.deeplApiKey, JSON.stringify({
+            text: [text],
+            target_lang: targetLang
+        }));
+
+        switch (status) {
+            case 200:
+                break;
+            case 403:
+                showToast("Invalid DeepL API key or version", Toasts.Type.FAILURE);
+                throw new Error("Invalid DeepL API key");
+            case 456:
+                showToast("DeepL API quota exceeded", Toasts.Type.FAILURE);
+                throw new Error("DeepL API quota exceeded");
+            default:
+                throw new Error(
+                    `Failed to translate "${text}" (${sourceLang} -> ${targetLang})`
+                    + `\n${status} ${data}`
+                );
+        }
+
+        const { translations }: DeepLData = JSON.parse(data);
+        return { src: translations[0].detected_source_language, text: translations[0].text };
+    } catch (e) {
+        console.error(e);
+        throw new Error("Failed to translate text");
+    }
 }
