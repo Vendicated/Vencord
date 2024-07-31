@@ -71,20 +71,7 @@ function SectionHeader({ section, presets }: SectionHeaderProps) {
     const copyHash = async () => {
         const presetID = section.sectionKey.replace("preset-", "");
         if (presetID) {
-            try {
-                Clipboard.copy(presetID);
-                Toasts.show({
-                    message: "Copied to Clipboard!",
-                    type: Toasts.Type.SUCCESS,
-                    id: Toasts.genId()
-                });
-            } catch (err) {
-                Toasts.show({
-                    message: "Failed to copy.",
-                    type: Toasts.Type.FAILURE,
-                    id: Toasts.genId()
-                });
-            }
+            copyWithToast(presetID);
         }
     };
 
