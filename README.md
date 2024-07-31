@@ -27,6 +27,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - AltKrispSwitch by newwares
 - AmITyping by MrDiamond
 - Anammox by Kyuuhachi
+- atSomeone by Joona
 - DecodeBase64 by ThePirateStoner
 - BetterActivities by D3SOX, Arjix, AutumnVN
 - BetterBanReasons by Inbestigator
@@ -35,12 +36,12 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - BlockKeywords by catcraft
 - BlockKrsip by D3SOX
 - BypassDND by Inbestigator
+- ChannelTabs by TheSun, TheKodeToad, keifufu, Nickyux
 - CleanChannelName by AutumnVN
 - ClientSideBlock by Samwich
 - ColorMessage by Kyuuhachi
 - CommandPalette by Ethan
 - CopyUserMention by Cortex and castdrian
-- CustomAppIcons by Happy Enderman and SerStars
 - CustomSounds by ScattrdBlade
 - CuteAnimeBoys by ShadyGoat
 - CuteNekos by echo
@@ -65,6 +66,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - Glide by Samwich
 - GlobalBadges by HypedDomi and Hosted by Wolfie
 - GodMode by Tolgchu
+- GoodPerson by nin0dev
 - GoogleThat by Samwich
 - Grammar by Samwich
 - GrammarFix by unstream
@@ -72,19 +74,22 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - HolyNotes by Wolfie
 - HomeTyping by Samwich
 - HopOn by ImLvna
+- Husk by nin0dev
 - Identity by Samwich
 - IgnoreTerms by D3SOX
+- InRole by nin0dev
 - IrcColors by Grzesiek11
 - IRememberYou by zoodogood
 - JumpToStart by Samwich
 - KeyboardSounds by HypedDomi
-- KeywordNotify by camila314
+- LoginWithQR by nexpid
 - MediaDownloader by Colorman
 - Meow by Samwich
 - MessageLinkTooltip by Kyuuhachi
 - MessageLoggerEnhanced by Aria
 - MessageTranslate by Samwich
 - ModalFade by Kyuuhachi
+- MusicTitleRPC by Blackilykay
 - NewPluginsManager by Sqaaakoi
 - noAppsAllowed by kvba
 - NoBulletPoints by Samwich
@@ -112,6 +117,8 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - ShowBadgesInChat by Inbestigator and KrystalSkull
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo (maintained by thororen)
+- SteamStatusSync by niko
+- StickerBlocker by Samwich
 - TalkInReverse by Tolgchu
 - TeX by Kyuuhachi
 - TextToSpeech by Samwich
@@ -129,6 +136,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - VoiceChatUtilities by Dams and D3SOX
 - WebpackTarball by Kyuuhachi
 - WhosWatching by fres
+- WigglyText by nexpid
 - Woof by Samwich
 - YoutubeDescription by arHSM
 

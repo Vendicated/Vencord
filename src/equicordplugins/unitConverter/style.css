@@ -1,0 +1,24 @@
+.vc-converter-dismiss {
+    all: unset;
+    cursor: pointer;
+    color: var(--text-link);
+}
+
+.vc-converter-dismiss:is(:hover, :focus) {
+    text-decoration: underline;
+}
+
+.vc-converter-accessory {
+    color: var(--text-muted);
+    margin-top: 0.5em;
+    font-style: italic;
+    font-weight: 400;
+}
+
+.vc-converter-accessory svg {
+    margin-right: 0.25em;
+}
+
+.vc-converter-chat-button {
+    scale: 1.085;
+}
