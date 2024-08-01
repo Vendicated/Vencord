@@ -19,14 +19,14 @@ export default definePlugin({
 
     patches: [
         {
-            find: '"AccountConnected"',
+            find: "this.isCopiedStreakGodlike",
             replacement: {
                 // react.jsx)(AccountPanel, { ..., showTaglessAccountPanel: blah })
                 match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?userTag:\i,hidePrivateData:)/,
                 // react.jsx(WrapperComponent, { VencordOriginal: AccountPanel, ...
                 replace: "$self.PanelWrapper,{VencordOriginal:$1,"
             }
-        }
+        },
     ],
 
     PanelWrapper({ VencordOriginal, ...props }) {
