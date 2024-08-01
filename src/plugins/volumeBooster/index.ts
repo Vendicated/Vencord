@@ -29,7 +29,7 @@ const settings = definePluginSettings({
         markers: makeRange(1, 5, 1),
         default: 2,
         stickToMarkers: true,
-    }
+    },
 });
 // for some godforsaken reason, the volume is ran through this formula before its stored. pathcing it out does not work.
 const VolumeEncoder = {
@@ -137,8 +137,8 @@ export default definePlugin({
             data.gainNode.gain.value = VolumeEncoder.decode(data._volume)/100 * +!data._mute;
             return;
         }
-        const source = data.streamSourceNode as MediaStreamAudioSourceNode;
-        const gn = (data.audioContext as AudioContext).createGain();
+        const source = data.streamSourceNode;
+        const gn = data.audioContext.createGain();
         data.gainNode = gn;
         source.connect(gn);
         gn.connect(data.audioContext.destination);
