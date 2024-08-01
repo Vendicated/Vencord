@@ -23,6 +23,10 @@ import { saveFile } from "@utils/web";
 import { findByPropsLazy } from "@webpack";
 import { Clipboard, ComponentDispatch } from "@webpack/common";
 
+let required = false;
+if (IS_VESKTOP || IS_EQUIBOP) {
+    required = true;
+}
 const ctxMenuCallbacks = findByPropsLazy("contextMenuCallbackNative");
 
 async function fetchImage(url: string) {
@@ -73,7 +77,7 @@ export default definePlugin({
     description: "Re-adds context menus missing in the web version of Discord: Links & Images (Copy/Open Link/Image), Text Area (Copy, Cut, Paste, SpellCheck)",
     authors: [Devs.Ven],
     enabledByDefault: true,
-    required: IS_VESKTOP || IS_EQUIBOP,
+    required,
 
     settings,
 
