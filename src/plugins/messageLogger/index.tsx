@@ -151,6 +151,7 @@ export default definePlugin({
     contextMenus: {
         "message": patchMessageContextMenu,
         "channel-context": patchChannelContextMenu,
+        "thread-context": patchChannelContextMenu,
         "user-context": patchChannelContextMenu,
         "gdm-context": patchChannelContextMenu
     },
