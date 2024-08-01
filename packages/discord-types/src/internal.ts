@@ -16,6 +16,9 @@ export type Defined<T> = Exclude<T, undefined>;
 export type GenericConstructor = new (...args: any[]) => unknown;
 
 /** @internal */
+export type IsAny<T> = 0 extends 1 & T ? unknown : never;
+
+/** @internal */
 export type Nullish = null | undefined;
 
 /** @internal */

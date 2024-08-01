@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { DisplayProfile, GuildMember, GuildRecord, UserProfileStore, UserRecord, UserStore } from "@vencord/discord-types";
+import type { UserJSON } from "@api/Commands";
+import type { ChannelRecord, DisplayProfile, DMChannelRecord, GuildMember, GuildRecord, StatusType, UserProfileStore, UserRecord, UserStore } from "@vencord/discord-types";
+import type { ExpressionPickerViewType } from "@webpack/common";
 import type { ReactNode } from "react";
-import type { LiteralUnion } from "type-fest";
 
 export type MarkupUtils = Record<
     | "parse"
@@ -102,7 +103,7 @@ export interface IconUtils {
     getGuildIconURL: (data: { id: string; icon?: string; size?: number; canAnimate?: boolean; }) => string | undefined;
     getGuildBannerURL: (guild: GuildRecord, canAnimate?: boolean) => string | null;
 
-    getChannelIconURL: (data: { id: string; icon?: string | null | undefined; applicationId?: string; size?: number; }) => string | undefined;
+    getChannelIconURL: (data: { id: string; icon?: string | null; applicationId?: string; size?: number; }) => string | undefined;
     getEmojiURL: (data: { id: string; animated: boolean; size: number; forcePNG?: boolean; }) => string;
 
     hasAnimatedGuildIcon: (guild: GuildRecord) => boolean;
@@ -141,8 +142,11 @@ export interface Constants {
 
 // zustand store
 export interface ExpressionPickerStore {
-    closeExpressionPicker: (activeViewType?: any) => void;
-    openExpressionPicker: (activeView: LiteralUnion<"emoji" | "gif" | "sticker", string>, activeViewType?: any) => void;
+    closeExpressionPicker: (activeViewType?: Record<string, any> | null) => void;
+    openExpressionPicker: (
+        activeView: ExpressionPickerViewType | null,
+        activeViewType: Record<string, any> | null
+    ) => void;
 }
 
 export interface BrowserWindowFeatures {
@@ -178,34 +182,40 @@ export interface PopoutWindowActionCreators {
     setAlwaysOnTop: (key: string, alwaysOnTop: boolean) => Promise<void>;
 }
 
-export type UserUtilsTagInclude = LiteralUnion<"auto" | "always" | "never", string>;
+export type UserUtilsTagInclude = "always" | "auto" | "never";
 export interface UserUtilsTagOptions {
-    forcePomelo?: boolean;
-    identifiable?: UserUtilsTagInclude;
-    decoration?: UserUtilsTagInclude;
-    mode?: "full" | "username";
+    decoration?: UserUtilsTagInclude | undefined;
+    forcePomelo?: boolean | undefined;
+    identifiable?: UserUtilsTagInclude | undefined;
+    mode?: "full" | "username" | undefined;
 }
 
 export interface UserUtils {
-    getGlobalName: (user: UserRecord) => string;
-    getFormattedName: (user: UserRecord, useTagInsteadOfUsername?: boolean) => string;
-    getName: (user: UserRecord) => string;
-    useName: (user: UserRecord) => string;
-    getUserTag: (user: UserRecord, options?: UserUtilsTagOptions) => string;
-    useUserTag: (user: UserRecord, options?: UserUtilsTagOptions) => string;
-
-    useDirectMessageRecipient: any;
-    humanizeStatus: any;
+    getFormattedName: (
+        user?: UserRecord | UserJSON | null,
+        useTagInsteadOfUsername?: boolean /* = false */
+    ) => string;
+    getGlobalName: (user?: UserRecord | UserJSON | null) => string | undefined;
+    getName: <User extends UserRecord | UserJSON | null | undefined>(user: User) => User extends {} ? string : undefined;
+    getUserTag: (user?: UserRecord | UserJSON | null, options?: UserUtilsTagOptions) => string;
+    humanizeStatus: <Status extends string>(
+        status: Status,
+        mobile?: boolean /* = false */
+    ) => Status extends Exclude<StatusType, StatusType.UNKNOWN> ? string : null;
+    useDirectMessageRecipient: <Channel extends ChannelRecord | null | undefined>(channel: Channel) => Channel extends {}
+        ? Channel extends DMChannelRecord ? UserRecord | undefined : null : undefined;
+    useName: <User extends UserRecord | UserJSON | null | undefined>(user: User) => User extends {} ? string : undefined;
+    useUserTag: (user?: UserRecord | UserJSON | null, options?: UserUtilsTagOptions) => string;
 }
 
 export interface DisplayProfileUtils {
     getDisplayProfile: (
         userId: string,
-        guildId?: string | null | undefined,
+        guildId?: string | null,
         stores?: [
             Pick<UserStore, "getUser">,
-            Pick<UserProfileStore, "getUserProfile" | "getGuildMemberProfile">
-        ] | undefined /* = [UserStore, UserProfileStore] */
+            Pick<UserProfileStore, "getGuildMemberProfile" | "getUserProfile">
+        ] /* = [UserStore, UserProfileStore] */
     ) => DisplayProfile | null;
-    useDisplayProfile: (userId: string, guildId?: string | null | undefined) => DisplayProfile | null;
+    useDisplayProfile: (userId: string, guildId?: string | null) => DisplayProfile | null;
 }

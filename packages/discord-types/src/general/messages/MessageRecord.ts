@@ -164,6 +164,13 @@ export interface MessageReference {
     channel_id: string;
     guild_id?: string;
     message_id?: string;
+    type: MessageReferenceType;
+}
+
+// Original name: MessageReferenceTypes
+export enum MessageReferenceType {
+    DEFAULT = 0,
+    FORWARD = 1,
 }
 
 export interface MessagePoll {

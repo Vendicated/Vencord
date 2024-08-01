@@ -136,6 +136,13 @@ export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModuleLa
     openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(m.toString()),
 });
 
+export enum ExpressionPickerViewType {
+    EMOJI = "emoji",
+    GIF = "gif",
+    SOUNDBOARD = "soundboard",
+    STICKER = "sticker",
+}
+
 export const FormattedMessage: typeof $FormattedMessage = findByCodeLazy('(this,"intlMessage",');
 
 export const hljs: typeof import("highlight.js").default = findByPropsLazy("highlight", "registerLanguage");

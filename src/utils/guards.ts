@@ -20,6 +20,6 @@ export function isTruthy<T>(value: T): value is Exclude<T, "" | 0n | 0 | false |
     return Boolean(value);
 }
 
-export function isNonNullish<T>(value: T): value is Exclude<T, null | undefined> {
+export function isNonNullish<T>(value: T) {
     return value != null;
 }

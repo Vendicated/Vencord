@@ -18,25 +18,28 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
 import type { GroupDMChannelRecord, UserRecord } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, UserStore, UserUtils } from "@webpack/common";
+import type { ReactElement } from "react";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
-const UserUtils = findByPropsLazy("getGlobalName");
 
 const ProfileListClasses: Record<string, string> = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
 const GuildLabelClasses: Record<string, string> = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
 
 function getGroupDMName(channel: GroupDMChannelRecord) {
-    return channel.name ||
-        channel.recipients
-            .map(UserStore.getUser)
-            .filter(isNonNullish)
-            .map(channel => RelationshipStore.getNickname(channel.id) || UserUtils.getName(channel))
-            .join(", ");
+    if (channel.name) return channel.name;
+
+    const names: string[] = [];
+    for (const userId of channel.recipients) {
+        const user = UserStore.getUser(userId);
+        if (user)
+            names.push(RelationshipStore.getNickname(userId) || UserUtils.getName(user));
+    }
+
+    return names.join(", ");
 }
 
 export default definePlugin({
@@ -77,30 +80,28 @@ export default definePlugin({
     isBotOrMe: (user: UserRecord) => user.bot || user.id === UserStore.getCurrentUser()!.id,
 
     renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: UserRecord; onClose: () => void; }) => {
-        const entries = ChannelStore.getSortedPrivateChannels()
-            .filter((channel): channel is GroupDMChannelRecord =>
-                channel.isGroupDM()
-                && channel.recipients.includes(user.id)
-            )
-            .map(channel => (
-                <Clickable
-                    className={ProfileListClasses.listRow}
-                    onClick={() => {
-                        onClose();
-                        SelectedChannelActionCreators.selectPrivateChannel(channel.id);
-                    }}
-                >
-                    <Avatar
-                        src={IconUtils.getChannelIconURL({ id: channel.id, icon: channel.icon, size: 32 })}
-                        size="SIZE_40"
-                        className={ProfileListClasses.listAvatar}
-                    />
-                    <div className={ProfileListClasses.listRowContent}>
-                        <div className={ProfileListClasses.listName}>{getGroupDMName(channel)}</div>
-                        <div className={GuildLabelClasses.guildNick}>{channel.recipients.length + 1} Members</div>
-                    </div>
-                </Clickable>
-            ));
+        const entries: ReactElement[] = [];
+        for (const channel of ChannelStore.getSortedPrivateChannels())
+            if (channel.isGroupDM() && channel.recipients.includes(user.id))
+                entries.push(
+                    <Clickable
+                        className={ProfileListClasses.listRow}
+                        onClick={() => {
+                            onClose();
+                            SelectedChannelActionCreators.selectPrivateChannel(channel.id);
+                        }}
+                    >
+                        <Avatar
+                            src={IconUtils.getChannelIconURL({ id: channel.id, icon: channel.icon, size: 32 })}
+                            size="SIZE_40"
+                            className={ProfileListClasses.listAvatar}
+                        />
+                        <div className={ProfileListClasses.listRowContent}>
+                            <div className={ProfileListClasses.listName}>{getGroupDMName(channel)}</div>
+                            <div className={GuildLabelClasses.guildNick}>{channel.recipients.length + 1} Members</div>
+                        </div>
+                    </Clickable>
+                );
 
         return (
             <ScrollerThin

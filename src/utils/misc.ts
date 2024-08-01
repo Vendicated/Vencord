@@ -32,16 +32,20 @@ export const classes = (...classes: (string | false | null | undefined)[]) =>
  */
 export const sleep = (ms: number) => new Promise<void>(r => { setTimeout(r, ms); });
 
-export function copyWithToast(text: string, toastMessage = "Copied to clipboard!") {
+export function copyWithToast(text: string, toastMessage?: string) {
+    let type: number;
     if (ClipboardUtils.SUPPORTS_COPY) {
         ClipboardUtils.copy(text);
+        toastMessage ??= "Copied to clipboard!";
+        type = Toasts.Type.SUCCESS;
     } else {
         toastMessage = "Your browser does not support copying to clipboard";
+        type = Toasts.Type.FAILURE;
     }
     Toasts.show({
         message: toastMessage,
         id: Toasts.genId(),
-        type: Toasts.Type.SUCCESS
+        type
     });
 }
 
@@ -53,7 +57,7 @@ export function isObject(obj: unknown): obj is object {
 }
 
 /**
- * Check if an object is empty or in other words has no own properties
+ * Checks if an object has no own enumerable non-symbol properties
  */
 export function isObjectEmpty(obj: object) {
     for (const k in obj)

@@ -72,7 +72,7 @@ function toastSuccess() {
     toast(Toasts.Type.SUCCESS, "Settings successfully imported. Restart to apply changes!");
 }
 
-function toastFailure(err: any) {
+function toastFailure(err: unknown) {
     toast(Toasts.Type.FAILURE, `Failed to import settings: ${String(err)}`);
 }
 

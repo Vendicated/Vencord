@@ -17,10 +17,10 @@
 */
 
 import { mergeDefaults } from "@utils/mergeDefaults";
-import type { ChannelType, InteractionType, MessageActivity, MessageAttachment, MessageEmbedType, MessageFlags, MessageInteractionMetadata, MessagePoll, MessageRoleSubscriptionData, MessageType, Sticker, StickerItem, UserFlags, UserPremiumType } from "@vencord/discord-types";
+import type { ChannelType, InteractionType, MessageActivity, MessageAttachment, MessageEmbedType, MessageFlags, MessageInteractionMetadata, MessagePoll, MessageReference, MessageRoleSubscriptionData, MessageType, Sticker, StickerItem, UserClanData, UserFlags, UserPremiumType } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { MessageActionCreators, SnowflakeUtils } from "@webpack/common";
-import type { LiteralToPrimitive, PartialDeep } from "type-fest";
+import type { LiteralToPrimitive, PartialDeep, SnakeCasedProperties } from "type-fest";
 
 import type { Argument } from "./types";
 
@@ -39,7 +39,7 @@ export const generateId = () => `-${SnowflakeUtils.fromTimestamp(Date.now())}`;
  * @param channelId ID of the channel to send the message to
  * @param message The message to send
  */
-export function sendBotMessage(channelId: string, message: PartialDeep<MessageJSON, { recurseIntoArrays: true; }>) {
+export function sendBotMessage(channelId: string, message: PartialDeep<MessageJSON>) {
     const botMessage = createBotMessage({ channelId, content: "" });
 
     MessageActionCreators.receiveMessage(channelId, mergeDefaults(message, botMessage));
@@ -96,12 +96,7 @@ export interface MessageJSON {
     mention_everyone: boolean;
     mention_roles: string[];
     mentions: UserJSON[];
-    message_reference?: {
-        channel_id?: string;
-        fail_if_not_exists?: boolean;
-        guild_id?: string;
-        message_id?: string;
-    };
+    message_reference?: MessageReference;
     nonce?: string | number;
     pinned: boolean;
     poll?: Omit<MessagePoll, "expiry"> & { expiry: string | null; };
@@ -150,6 +145,7 @@ export interface UserJSON {
     };
     banner?: string | null;
     bot?: boolean;
+    clan: SnakeCasedProperties<UserClanData> | null;
     discriminator: string;
     email?: string | null;
     flags?: UserFlags;

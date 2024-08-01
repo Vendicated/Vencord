@@ -42,7 +42,7 @@ export const Flux: {
 export const useStateFromStores: Stores.UseStateFromStoresHook = findByCodeLazy("useStateFromStores");
 
 // shallowEqual.tsx
-const areArraysShallowEqual = (a: readonly unknown[], b?: readonly unknown[] | null | undefined) =>
+const areArraysShallowEqual = (a: readonly unknown[], b?: readonly unknown[] | null) =>
     b != null && a.length === b.length && a.every((x, i) => x === b[i]);
 
 /** @see {@link useStateFromStores} */

@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { IsAny } from "../internal";
+
 export type FluxActionHandler<Action extends FluxAction = FluxAction, Return = void>
     = Action extends unknown
         ? PropertyKey extends keyof Action
-            ? 0 extends 1 & Action[PropertyKey]
+            ? IsAny<Action[string]> & IsAny<Action[number]> & IsAny<Action[symbol]> extends unknown
                 ? (action: any) => Return
                 : (action: Action) => Return
             : (action: Action) => Return

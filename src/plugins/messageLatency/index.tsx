@@ -7,7 +7,6 @@
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { isNonNullish } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
 import type { MessageRecord } from "@vencord/discord-types";
 import { findExportedComponentLazy } from "@webpack";
@@ -77,7 +76,7 @@ export default definePlugin({
             const s = str(k);
 
             return prev + (
-                isNonNullish(s)
+                s !== null
                     ? (prev !== ""
                         ? (showMillis ? k === "milliseconds" : k === "seconds")
                             ? " and "
@@ -95,7 +94,7 @@ export default definePlugin({
         const { id, nonce } = message;
 
         // Message wasn't received through gateway
-        if (!isNonNullish(nonce)) return null;
+        if (nonce == null) return null;
 
         // Bots basically never send a nonce, and if someone does do it then it's usually not a snowflake
         if (message.bot) return null;
@@ -143,7 +142,7 @@ export default definePlugin({
         return ErrorBoundary.wrap(({ message }: { message: MessageRecord; }) => {
             const d = this.latencyTooltipData(message);
 
-            if (!isNonNullish(d)) return null;
+            if (d == null) return null;
 
             let text: string;
             if (!d.delta) {

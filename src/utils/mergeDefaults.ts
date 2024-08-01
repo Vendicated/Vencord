@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { isObject } from "./misc";
+
 /**
  * Recursively merges defaults into an object and returns the same object
  * @param obj Object
@@ -13,7 +15,7 @@
 export function mergeDefaults<T>(obj: T, defaults: T): T {
     for (const key in defaults) {
         const v = defaults[key];
-        if (typeof v === "object" && v !== null && !Array.isArray(v)) {
+        if (isObject(v)) {
             obj[key] ??= {} as any;
             mergeDefaults(obj[key], v);
         } else {

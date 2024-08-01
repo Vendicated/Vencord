@@ -31,10 +31,12 @@ function createStyle(id: string) {
 
 async function initSystemValues() {
     const values = await VencordNative.themes.getSystemValues();
-    const variables = Object.entries(values)
-        .filter(([, v]) => v !== "#")
-        .map(([k, v]) => `--${k}: ${v};`)
-        .join("");
+    let variables = "";
+    for (const k in values) {
+        const v = values[k];
+        if (v !== "#")
+            variables += `--${k}: ${v};`;
+    }
 
     createStyle("vencord-os-theme-values").textContent = `:root{${variables}}`;
 }

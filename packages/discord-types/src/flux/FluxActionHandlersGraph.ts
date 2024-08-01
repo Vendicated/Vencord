@@ -7,7 +7,7 @@
 import type { DepGraph } from "dependency-graph";
 import type { UnionToIntersection } from "type-fest";
 
-import type { Nullish } from "../internal";
+import type { IsAny, Nullish } from "../internal";
 import type { ExtractAction, FluxAction, FluxActionHandler, FluxActionType } from "./fluxActions";
 import type { FluxDispatchBand } from "./FluxDispatcher";
 
@@ -55,7 +55,7 @@ export type FluxActionHandlerMap<Action extends FluxAction = FluxAction>
     = UnionToIntersection<
         Action extends unknown
             ? PropertyKey extends keyof Action
-                ? 0 extends 1 & Action[PropertyKey]
+                ? IsAny<Action[string]> & IsAny<Action[number]> & IsAny<Action[symbol]> extends unknown
                     ? { [ActionType in Action["type"]]: (action: any) => void; }
                     : { [ActionType in Action["type"]]: (action: Action & { type: ActionType; }) => void; }
                 : { [ActionType in Action["type"]]: (action: Action & { type: ActionType; }) => void; }
