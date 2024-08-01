@@ -32,10 +32,26 @@ const settings = definePluginSettings({
     }
 });
 // for some godforsaken reason, the volume is ran through this formula before its stored. pathcing it out does not work.
-export const VolumeEncoder = {
+const VolumeEncoder = {
     decode: findByCodeLazy("6+1:"),
     encode: findByCodeLazy("50+50"),
 };
+interface StreamData{
+    audioContext: AudioContext,
+    audioElement: HTMLAudioElement,
+    emitter: any,
+    // added by this plugin
+    gainNode?: GainNode,
+    id: string,
+    levelNode: AudioWorkletNode,
+    sinkId: string,
+    stream: MediaStream,
+    streamSourceNode?: MediaStreamAudioSourceNode,
+    videoStreamId: string,
+    _mute: boolean,
+    _speakingFlags: number,
+    _volume: number
+}
 export default definePlugin({
     name: "VolumeBooster",
     authors: [Devs.Nuckyz, Devs.sadan],
@@ -75,7 +91,7 @@ export default definePlugin({
                 // to actually patch the volume
                 {
                     match: /volume=t.*?;/,
-                    replace: "volume=0.00;$self.patchVolume.call(this);"
+                    replace: "volume=0.00;$self.patchVolume(this);"
                 }
             ]
         },
@@ -111,23 +127,20 @@ export default definePlugin({
             ]
         }
     ],
-    patchVolume(){
-        console.log(this);
-        if(!this.streamSourceNode)
-            this.streamSourceNode = this.audioContext.createMediaStreamSource(this.stream);
+    patchVolume(data: StreamData){
+        // if we dont have any audio to patch, do nothing
+        if(data.stream.getAudioTracks().length === 0) return;
+        if(!data.streamSourceNode)
+            data.streamSourceNode = data.audioContext.createMediaStreamSource(data.stream);
         // only create one per stream
-        if(this.gainNode) {
-            console.log(this._mute);
-            this.gainNode.gain.value = VolumeEncoder.decode(this._volume)/100 * +!this._mute;
-            if (!FIX) this.gainNode.gain.value = this._volume/100;
-            console.log(`TRY_FIX: ${FIX}\nVolume recived: ${this._volume}\nGainNode: ${this.gainNode.gain.value}`);
+        if(data.gainNode) {
+            data.gainNode.gain.value = VolumeEncoder.decode(data._volume)/100 * +!data._mute;
             return;
         }
-        const source = this.streamSourceNode as MediaStreamAudioSourceNode;
-        const gn = (this.audioContext as AudioContext).createGain();
-        this.gainNode = gn;
+        const source = data.streamSourceNode as MediaStreamAudioSourceNode;
+        const gn = (data.audioContext as AudioContext).createGain();
+        data.gainNode = gn;
         source.connect(gn);
-        gn.connect(this.audioContext.destination);
+        gn.connect(data.audioContext.destination);
     }
 });
-const FIX = true;
