@@ -55,8 +55,8 @@ export const settings = definePluginSettings({
         default: true
     },
     service: {
-        description: IS_WEB ? "Translation service (Not supported on Web!)" : "Translation service",
         type: OptionType.SELECT,
+        description: IS_WEB ? "Translation service (Not supported on Web!)" : "Translation service",
         disabled: () => IS_WEB,
         options: [
             { label: "Google Translate", value: "google", default: true },
@@ -65,8 +65,8 @@ export const settings = definePluginSettings({
         ] as const
     },
     deeplApiKey: {
-        description: "DeepL API key",
         type: OptionType.STRING,
+        description: "DeepL API key",
         default: "",
         placeholder: "Get your API key from https://deepl.com/your-account",
         disabled: () => settings.store.service === "google"
