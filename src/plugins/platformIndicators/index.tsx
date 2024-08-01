@@ -108,7 +108,7 @@ function ensureOwnStatus(user: User) {
 function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
     const user = UserStore.getUser(userId);
 
-    if (!user || user.bot) return [];
+    if (!user || (user.bot && !Settings.plugins.PlatformIndicators.showBots)) return [];
 
     ensureOwnStatus(user);
 
@@ -131,7 +131,7 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
 }
 
 const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; small?: boolean; }) => {
-    if (!user || user.bot) return null;
+    if (!user || (user.bot && !Settings.plugins.PlatformIndicators.showBots)) return null;
 
     ensureOwnStatus(user);
 
@@ -292,6 +292,12 @@ export default definePlugin({
             description: "Whether to make the mobile indicator match the color of the user status.",
             default: true,
             restartNeeded: true
+        },
+        showBots: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to show platform indicators on bots",
+            default: false,
+            restartNeeded: false
         }
     }
 });
