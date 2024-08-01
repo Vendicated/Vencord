@@ -31,9 +31,10 @@ copy(Object.fromEntries(
 ))
 */
 
-export type Language = keyof typeof Languages;
+export type GoogleLanguage = keyof typeof GoogleLanguages;
+export type DeeplLanguage = keyof typeof DeeplLanguages;
 
-export const Languages = {
+export const GoogleLanguages = {
     "auto": "Detect language",
     "af": "Afrikaans",
     "sq": "Albanian",
@@ -169,3 +170,57 @@ export const Languages = {
     "yo": "Yoruba",
     "zu": "Zulu"
 } as const;
+
+export const DeeplLanguages = {
+    "": "Detect language",
+    "ar": "Arabic",
+    "bg": "Bulgarian",
+    "zh-hans": "Chinese (Simplified)",
+    "zh-hant": "Chinese (Traditional)",
+    "cs": "Czech",
+    "da": "Danish",
+    "nl": "Dutch",
+    "en-us": "English (American)",
+    "en-gb": "English (British)",
+    "et": "Estonian",
+    "fi": "Finnish",
+    "fr": "French",
+    "de": "German",
+    "el": "Greek",
+    "hu": "Hungarian",
+    "id": "Indonesian",
+    "it": "Italian",
+    "ja": "Japanese",
+    "ko": "Korean",
+    "lv": "Latvian",
+    "lt": "Lithuanian",
+    "nb": "Norwegian",
+    "pl": "Polish",
+    "pt-br": "Portuguese (Brazilian)",
+    "pt-pt": "Portuguese (European)",
+    "ro": "Romanian",
+    "ru": "Russian",
+    "sk": "Slovak",
+    "sl": "Slovenian",
+    "es": "Spanish",
+    "sv": "Swedish",
+    "tr": "Turkish",
+    "uk": "Ukrainian"
+} as const;
+
+export function deeplLanguageToGoogleLanguage(language: string) {
+    switch (language) {
+        case "": return "auto";
+        case "nb": return "no";
+        case "zh-hans": return "zh-CN";
+        case "zh-hant": return "zh-TW";
+        case "en-us":
+        case "en-gb":
+            return "en";
+        case "pt-br":
+        case "pt-pt":
+            return "pt";
+        default:
+            return language;
+    }
+}
