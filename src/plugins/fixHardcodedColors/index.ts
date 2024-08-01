@@ -4,22 +4,35 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Styles } from "@api/index";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
-import { createStyleSheet, getStyles, newStyleListener } from "plugins/clientTheme/cssUtil";
+import { createStyle } from "plugins/clientTheme";
 
 export default definePlugin({
     name: "Fix hardcoded colors",
     description: "replace hardcoded colors with color variables",
     authors: [Devs.F53],
-    startAt: StartAt.DOMContentLoaded,
+    startAt: StartAt.Init,
+    dependencies: ["StyleListenerAPI"],
 
     async start() {
-        const styles = await getStyles();
-        const colorVariables = getColorVariables(styles);
+        let colorVariables: ColorVariable[];
+        const stylesToParse: string[] = [];
+        const fixes = createStyle("hardcodedColorFixes");
+        Styles.styleListeners.add((styles, initial) => {
+            // we can't generate fixes before getting colorVariables from the initial stylesheet
+            if (colorVariables) // gen fixes if we already have colorVariables
+                return fixes.innerText += generateFixes(colorVariables, styles);
+            else // queue fix generation if we don't have colorVariables
+                stylesToParse.push(styles);
 
-        const fixSheet = createStyleSheet("hardcodedColorFixes", generateFixes(colorVariables, styles));
-        newStyleListener(styles => fixSheet.innerText += generateFixes(colorVariables, styles));
+            if (!initial) return;
+
+            colorVariables = getColorVariables(styles);
+            while (stylesToParse.length > 0) // gen fixes for queue now that we have them (and remove them from memory)
+                fixes.innerText += generateFixes(colorVariables, stylesToParse.shift()!);
+        });
     },
     stop() {
         document.getElementById("hardcodedColorFixes")?.remove();

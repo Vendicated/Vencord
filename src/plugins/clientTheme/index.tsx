@@ -224,7 +224,7 @@ function updateColorVars(color: string) {
     }`;
 }
 
-function createStyle(id: string) {
+export function createStyle(id: string) {
     const style = document.createElement("style");
     style.id = id;
     if (document.documentElement) document.documentElement.append(style);
