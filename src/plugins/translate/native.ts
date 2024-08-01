@@ -11,20 +11,24 @@ interface DeepLResponse {
     data: string;
 }
 
-export async function makeRequest(_: IpcMainInvokeEvent, pro: boolean, apiKey: string, payload: string): Promise<DeepLResponse> {
+export async function makeDeeplTranslateRequest(_: IpcMainInvokeEvent, pro: boolean, apiKey: string, payload: string): Promise<DeepLResponse> {
     const url = pro
         ? "https://api.deepl.com/v2/translate"
         : "https://api-free.deepl.com/v2/translate";
 
-    const res = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `DeepL-Auth-Key ${apiKey}`
-        },
-        body: payload
-    });
+    try {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `DeepL-Auth-Key ${apiKey}`
+            },
+            body: payload
+        });
 
-    const data = await res.text();
-    return { status: res.status, data };
+        const data = await res.text();
+        return { status: res.status, data };
+    } catch (e) {
+        return { status: -1, data: String(e) };
+    }
 }

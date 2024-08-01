@@ -62,7 +62,7 @@ export const settings = definePluginSettings({
             { label: "Google Translate", value: "google", default: true },
             { label: "DeepL Free", value: "deepl" },
             { label: "DeepL Pro", value: "deepl-pro" }
-        ]
+        ] as const
     },
     deeplApiKey: {
         description: "DeepL API key",

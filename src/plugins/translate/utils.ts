@@ -17,6 +17,7 @@
 */
 
 import { classNameFactory } from "@api/Styles";
+import { Logger } from "@utils/Logger";
 import { PluginNative } from "@utils/types";
 import { showToast, Toasts } from "@webpack/common";
 
@@ -46,7 +47,13 @@ export interface TranslationValue {
     text: string;
 }
 
-export async function googleTranslate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
+export function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
+    return IS_WEB || settings.store.service === "google"
+        ? googleTranslate(kind, text)
+        : deeplTranslate(kind, text);
+}
+
+async function googleTranslate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
     const sourceLang = settings.store[kind + "Input"];
     const targetLang = settings.store[kind + "Output"];
 
@@ -85,7 +92,7 @@ export async function googleTranslate(kind: "received" | "sent", text: string): 
     };
 }
 
-export async function deeplTranslate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
+async function deeplTranslate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
     const sourceLang = settings.store[kind + "Input"];
     const targetLang = settings.store[kind + "Output"];
 
@@ -96,7 +103,7 @@ export async function deeplTranslate(kind: "received" | "sent", text: string): P
 
     try {
         // CORS jumpscare
-        const { status, data } = await Native.makeRequest(settings.store.service === "deepl-pro", settings.store.deeplApiKey, JSON.stringify({
+        const { status, data } = await Native.makeDeeplTranslateRequest(settings.store.service === "deepl-pro", settings.store.deeplApiKey, JSON.stringify({
             text: [text],
             target_lang: targetLang
         }));
@@ -104,23 +111,29 @@ export async function deeplTranslate(kind: "received" | "sent", text: string): P
         switch (status) {
             case 200:
                 break;
+            case -1:
+                throw "Failed to connect to DeepL API: " + data;
             case 403:
-                showToast("Invalid DeepL API key or version", Toasts.Type.FAILURE);
-                throw new Error("Invalid DeepL API key");
+                throw "Invalid DeepL API key or version";
             case 456:
-                showToast("DeepL API quota exceeded", Toasts.Type.FAILURE);
-                throw new Error("DeepL API quota exceeded");
+                throw "DeepL API quota exceeded";
             default:
-                throw new Error(
-                    `Failed to translate "${text}" (${sourceLang} -> ${targetLang})`
-                    + `\n${status} ${data}`
-                );
+                throw new Error(`Failed to translate "${text}" (${sourceLang} -> ${targetLang})\n${status} ${data}`);
         }
 
         const { translations }: DeepLData = JSON.parse(data);
         return { src: translations[0].detected_source_language, text: translations[0].text };
     } catch (e) {
-        console.error(e);
-        throw new Error("Failed to translate text");
+        const userMessage = typeof e === "string"
+            ? e
+            : "Something went wrong. If this issue persists, please check the console or ask for help in the support server.";
+
+        showToast(userMessage, Toasts.Type.FAILURE);
+
+        new Logger("Translate").error("Failed to translate text:", e);
+
+        throw e instanceof Error
+            ? e
+            : new Error(userMessage);
     }
 }
