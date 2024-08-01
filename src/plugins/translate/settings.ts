@@ -22,25 +22,25 @@ import { OptionType } from "@utils/types";
 export const settings = definePluginSettings({
     receivedInput: {
         type: OptionType.STRING,
-        description: "Input language for received messages",
+        description: "Language that received messages should be translated from",
         default: "auto",
         hidden: true
     },
     receivedOutput: {
         type: OptionType.STRING,
-        description: "Output language for received messages",
+        description: "Language that received messages should be translated to",
         default: "en",
         hidden: true
     },
     sentInput: {
         type: OptionType.STRING,
-        description: "Input language for sent messages",
+        description: "Language that your own messages should be translated from",
         default: "auto",
         hidden: true
     },
     sentOutput: {
         type: OptionType.STRING,
-        description: "Output language for sent messages",
+        description: "Language that your own messages should be translated to",
         default: "en",
         hidden: true
     },
