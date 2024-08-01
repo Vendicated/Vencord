@@ -40,9 +40,28 @@ jobs:
             - name: Generate plugin list
               run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
 
-            - name: Clean up obsolete files
+            - name: Collect files to be released
               run: |
-                  rm -rf dist/*-unpacked dist/monaco Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
+                  cd dist
+                  mkdir release
+
+                  cp browser/browser.* release
+                  cp Vencord.user.{js,js.LEGAL.txt} release
+
+                  # copy the plugin data jsons, the extension zips and the desktop/vesktop asars
+                  cp *.{json,zip,asar} release
+
+                  # legacy un-asared files
+                  # FIXME: remove at some point
+                  cp desktop/* release
+                  for file in vesktop/*; do
+                    filename=$(basename "$file")
+                    cp "$file" "release/vencordDesktop${filename^}"
+                  done
+
+                  find release -size 0 -delete
+                  rm release/package.json
+                  rm release/*.map
 
             - name: Get some values needed for the release
               id: release_values
@@ -50,16 +69,14 @@ jobs:
                   echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
             - name: Upload DevBuild as release
-              if: github.repository == 'Vendicated/Vencord'
               run: |
-                  gh release upload devbuild --clobber dist/*
+                  gh release upload devbuild --clobber dist/release/*
                   gh release edit devbuild --title "DevBuild $RELEASE_TAG"
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   RELEASE_TAG: ${{ env.release_tag }}
 
             - name: Upload DevBuild to builds repo
-              if: github.repository == 'Vendicated/Vencord'
               run: |
                   git config --global user.name "$USERNAME"
                   git config --global user.email actions@github.com
@@ -69,7 +86,7 @@ jobs:
 
                   GLOBIGNORE=.git:.gitignore:README.md:LICENSE
                   rm -rf *
-                  cp -r ../dist/* .
+                  cp -r ../dist/release/* .
 
                   git add -A
                   git commit -m "Builds for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"

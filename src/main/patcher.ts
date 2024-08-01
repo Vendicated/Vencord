@@ -26,14 +26,14 @@ import { IS_VANILLA } from "./utils/constants";
 
 console.log("[Vencord] Starting up...");
 
+// FIXME: remove at some point
+export const isLegacyNonAsarVencord = IS_STANDALONE && !__dirname.endsWith(".asar");
+
 // Our injector file at app/index.js
 const injectorPath = require.main!.filename;
 
-// special discord_arch_electron injection method
-const asarName = require.main!.path.endsWith("app.asar") ? "_app.asar" : "app.asar";
-
 // The original app.asar
-const asarPath = join(dirname(injectorPath), "..", asarName);
+const asarPath = join(dirname(injectorPath), "..", "_app.asar");
 
 const discordPkg = require(join(asarPath, "package.json"));
 require.main!.filename = join(asarPath, discordPkg.main);
@@ -41,7 +41,7 @@ require.main!.filename = join(asarPath, discordPkg.main);
 // @ts-ignore Untyped method? Dies from cringe
 app.setAppPath(asarPath);
 
-if (!IS_VANILLA) {
+if (!IS_VANILLA && !isLegacyNonAsarVencord) {
     const settings = RendererSettings.store;
     // Repatch after host updates on Windows
     if (process.platform === "win32") {
@@ -71,7 +71,7 @@ if (!IS_VANILLA) {
         constructor(options: BrowserWindowConstructorOptions) {
             if (options?.webPreferences?.preload && options.title) {
                 const original = options.webPreferences.preload;
-                options.webPreferences.preload = join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js");
+                options.webPreferences.preload = join(__dirname, "preload.js");
                 options.webPreferences.sandbox = false;
                 // work around discord unloading when in background
                 options.webPreferences.backgroundThrottling = false;
@@ -157,5 +157,7 @@ if (!IS_VANILLA) {
     console.log("[Vencord] Running in vanilla mode. Not loading Vencord");
 }
 
-console.log("[Vencord] Loading original Discord app.asar");
-require(require.main!.filename);
+if (!isLegacyNonAsarVencord) {
+    console.log("[Vencord] Loading original Discord app.asar");
+    require(require.main!.filename);
+}

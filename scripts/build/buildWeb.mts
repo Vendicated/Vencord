@@ -23,12 +23,12 @@ import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises
 import { join } from "path";
 import Zip from "zip-local";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION } from "./common.mjs";
+import { addBuild, BUILD_TIMESTAMP, buildOrWatchAll, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION } from "./common.mjs";
 
 /**
  * @type {esbuild.BuildOptions}
  */
-const commonOptions = {
+const commonOptions: esbuild.BuildOptions = {
     ...commonOpts,
     entryPoints: ["browser/Vencord.ts"],
     globalName: "Vencord",
@@ -40,16 +40,16 @@ const commonOptions = {
     ],
     target: ["esnext"],
     define: {
-        IS_WEB: true,
-        IS_EXTENSION: false,
-        IS_STANDALONE: true,
-        IS_DEV,
-        IS_REPORTER,
-        IS_DISCORD_DESKTOP: false,
-        IS_VESKTOP: false,
-        IS_UPDATER_DISABLED: true,
+        IS_WEB: "true",
+        IS_EXTENSION: "false",
+        IS_STANDALONE: "true",
+        IS_DEV: String(IS_DEV),
+        IS_REPORTER: String(IS_REPORTER),
+        IS_DISCORD_DESKTOP: "false",
+        IS_VESKTOP: "false",
+        IS_UPDATER_DISABLED: "true",
         VERSION: JSON.stringify(VERSION),
-        BUILD_TIMESTAMP
+        BUILD_TIMESTAMP: String(BUILD_TIMESTAMP)
     }
 };
 
@@ -67,39 +67,39 @@ const RnNoiseFiles = [
 
 await Promise.all(
     [
-        esbuild.build({
+        addBuild({
             entryPoints: MonacoWorkerEntryPoints.map(entry => `node_modules/monaco-editor/esm/${entry}`),
             bundle: true,
             minify: true,
             format: "iife",
             outbase: "node_modules/monaco-editor/esm/",
-            outdir: "dist/monaco"
+            outdir: "dist/browser/monaco"
         }),
-        esbuild.build({
+        addBuild({
             entryPoints: ["browser/monaco.ts"],
             bundle: true,
             minify: true,
             format: "iife",
-            outfile: "dist/monaco/index.js",
+            outfile: "dist/browser/monaco/index.js",
             loader: {
                 ".ttf": "file"
             }
         }),
-        esbuild.build({
+        addBuild({
             ...commonOptions,
-            outfile: "dist/browser.js",
+            outfile: "dist/browser/browser.js",
             footer: { js: "//# sourceURL=VencordWeb" }
         }),
-        esbuild.build({
+        addBuild({
             ...commonOptions,
-            outfile: "dist/extension.js",
+            outfile: "dist/browser/extension.js",
             define: {
                 ...commonOptions?.define,
-                IS_EXTENSION: true,
+                IS_EXTENSION: "true",
             },
             footer: { js: "//# sourceURL=VencordWeb" }
         }),
-        esbuild.build({
+        addBuild({
             ...commonOptions,
             inject: ["browser/GMPolyfill.js", ...(commonOptions?.inject || [])],
             define: {
@@ -118,11 +118,10 @@ await Promise.all(
     ]
 );
 
-/**
- * @type {(dir: string) => Promise<string[]>}
- */
-async function globDir(dir) {
-    const files = [];
+await buildOrWatchAll();
+
+async function globDir(dir: string): Promise<string[]> {
+    const files = [] as string[];
 
     for (const child of await readdir(dir, { withFileTypes: true })) {
         const p = join(dir, child.name);
@@ -135,27 +134,23 @@ async function globDir(dir) {
     return files;
 }
 
-/**
- * @type {(dir: string, basePath?: string) => Promise<Record<string, string>>}
- */
-async function loadDir(dir, basePath = "") {
+async function loadDir(dir: string, basePath = "") {
     const files = await globDir(dir);
-    return Object.fromEntries(await Promise.all(files.map(async f => [f.slice(basePath.length), await readFile(f)])));
+    return Object.fromEntries(await Promise.all(files.map(async f =>
+        [f.slice(basePath.length), await readFile(f)] as const
+    )));
 }
 
-/**
-  * @type {(target: string, files: string[]) => Promise<void>}
- */
-async function buildExtension(target, files) {
-    const entries = {
-        "dist/Vencord.js": await readFile("dist/extension.js"),
-        "dist/Vencord.css": await readFile("dist/extension.css"),
-        ...await loadDir("dist/monaco"),
+async function buildExtension(target: string, files: string[]): Promise<void> {
+    const entries: Record<string, Buffer> = {
+        "dist/Vencord.js": await readFile("dist/browser/extension.js"),
+        "dist/Vencord.css": await readFile("dist/browser/extension.css"),
+        ...await loadDir("dist/browser/monaco"),
         ...Object.fromEntries(await Promise.all(RnNoiseFiles.map(async file =>
-            [`third-party/rnnoise/${file.replace(/^dist\//, "")}`, await readFile(`node_modules/@sapphi-red/web-noise-suppressor/${file}`)]
+            [`third-party/rnnoise/${file.replace(/^dist\//, "")}`, await readFile(`node_modules/@sapphi-red/web-noise-suppressor/${file}`)] as const
         ))),
         ...Object.fromEntries(await Promise.all(files.map(async f => {
-            let content = await readFile(join("browser", f));
+            let content: Uint8Array | Buffer = await readFile(join("browser", f));
             if (f.startsWith("manifest")) {
                 const json = JSON.parse(content.toString("utf-8"));
                 json.version = VERSION;
@@ -165,19 +160,19 @@ async function buildExtension(target, files) {
             return [
                 f.startsWith("manifest") ? "manifest.json" : f,
                 content
-            ];
+            ] as const;
         })))
     };
 
     await rm(target, { recursive: true, force: true });
     await Promise.all(Object.entries(entries).map(async ([file, content]) => {
-        const dest = join("dist", target, file);
+        const dest = join("dist/browser", target, file);
         const parentDirectory = join(dest, "..");
         await mkdir(parentDirectory, { recursive: true });
         await writeFile(dest, content);
     }));
 
-    console.info("Unpacked Extension written to dist/" + target);
+    console.info("Unpacked Extension written to dist/browser/" + target);
 }
 
 const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content => {
@@ -200,12 +195,14 @@ if (!process.argv.includes("--skip-extension")) {
         buildExtension("firefox-unpacked", ["background.js", "content.js", "manifestv2.json", "icon.png"]),
     ]);
 
-    Zip.sync.zip("dist/chromium-unpacked").compress().save("dist/extension-chrome.zip");
-    console.info("Packed Chromium Extension written to dist/extension-chrome.zip");
-
-    Zip.sync.zip("dist/firefox-unpacked").compress().save("dist/extension-firefox.zip");
-    console.info("Packed Firefox Extension written to dist/extension-firefox.zip");
-
+    Zip.zip("dist/browser/chromium-unpacked", (_err, zip) => {
+        zip.compress().save("dist/extension-chrome.zip");
+        console.info("Packed Chromium Extension written to dist/extension-chrome.zip");
+    });
+    Zip.zip("dist/browser/firefox-unpacked", (_err, zip) => {
+        zip.compress().save("dist/extension-firefox.zip");
+        console.info("Packed Firefox Extension written to dist/extension-firefox.zip");
+    });
 } else {
     await appendCssRuntime;
 }

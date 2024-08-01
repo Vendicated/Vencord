@@ -22,7 +22,7 @@ jobs:
 
             - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
 
-            - name: Use Node.js 19
+            - name: Use Node.js 20
               uses: actions/setup-node@v4
               with:
                   node-version: 20
@@ -36,7 +36,7 @@ jobs:
 
             - name: Publish extension
               run: |
-                  cd dist/chromium-unpacked
+                  cd dist/browser/chromium-unpacked
                   pnpx chrome-webstore-upload-cli@2.1.0 upload --auto-publish
               env:
                   EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
