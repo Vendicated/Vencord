@@ -47,10 +47,9 @@ interface Section {
 
 interface SectionHeaderProps {
     section: Section;
-    activePreset: Preset | undefined;
 }
 
-function SectionHeader({ section, activePreset }: SectionHeaderProps) {
+function SectionHeader({ section }: SectionHeaderProps) {
     const hasSubtitle = typeof section.subtitle !== "undefined";
     const hasAuthorIds = typeof section.authorIds !== "undefined";
 
@@ -71,29 +70,6 @@ function SectionHeader({ section, activePreset }: SectionHeaderProps) {
     return <div>
         <Flex>
             <Forms.FormTitle style={{ flexGrow: 1 }}>{section.title}</Forms.FormTitle>
-            {activePreset && (
-                <Tooltip text="Copy Preset Hash">
-                    {tooltipProps => (
-                        <Button
-                            {...tooltipProps}
-                            onClick={() => copyWithToast(activePreset.id)}
-                            size={Button.Sizes.SMALL}
-                            look={Button.Looks.BLANK}
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                width="16"
-                                height="16"
-                                fill="var(--header-primary)"
-                            >
-                                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1z"></path>
-                                <path d="M15 5H8c-1.1 0-1.99.9-1.99 2L6 21c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V11l-6-6zM8 21V7h6v5h5v9H8z"></path>
-                            </svg>
-                        </Button>
-                    )}
-                </Tooltip>
-            )}
             {hasAuthorIds && <UserSummaryItem
                 users={authors}
                 guildId={undefined}
@@ -215,7 +191,7 @@ function ChangeDecorationModal(props: ModalProps) {
                     }}
                     getItemKey={item => typeof item === "string" ? item : item.hash}
                     getSectionKey={section => section.sectionKey}
-                    renderSectionHeader={section => <SectionHeader section={section} activePreset={activeDecorationPreset} />}
+                    renderSectionHeader={section => <SectionHeader section={section} />}
                     sections={data}
                 />
                 <div className={cl("change-decoration-modal-preview")}>
@@ -232,7 +208,16 @@ function ChangeDecorationModal(props: ModalProps) {
                             {activeSelectedDecoration?.alt}
                         </Text>
                     }
-                    {activeDecorationHasAuthor && <Text key={`createdBy-${activeSelectedDecoration.authorId}`}>Created by {Parser.parse(`<@${activeSelectedDecoration.authorId}>`)}</Text>}
+                    {activeDecorationHasAuthor && (
+                        <Text key={`createdBy-${activeSelectedDecoration.authorId}`}>
+                            Created by {Parser.parse(`<@${activeSelectedDecoration.authorId}>`)}
+                        </Text>
+                    )}
+                    {isActiveDecorationPreset && (
+                        <Button onClick={() => copyWithToast(activeDecorationPreset.id)}>
+                            Copy Preset ID
+                        </Button>
+                    )}
                 </div>
             </ErrorBoundary>
         </ModalContent>
