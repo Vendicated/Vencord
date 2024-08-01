@@ -41,7 +41,7 @@ const settings = definePluginSettings({
         description: "Add back the Discord context menus for images, links and the chat input bar",
         // Web slate menu has proper spellcheck suggestions and image context menu is also pretty good,
         // so disable this by default. Vesktop just doesn't, so enable by default
-        default: IS_VESKTOP,
+        default: IS_VESKTOP || IS_EQUIBOP,
         restartNeeded: true
     }
 });
