@@ -28,7 +28,7 @@ import definePlugin from "@utils/types";
 import { ChannelStore, Menu } from "@webpack/common";
 
 import { settings } from "./settings";
-import { TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
+import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
 
@@ -53,8 +53,8 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
 
 export default definePlugin({
     name: "Translate",
-    description: "Translate messages with Google Translate",
-    authors: [Devs.Ven],
+    description: "Translate messages with Google Translate or DeepL",
+    authors: [Devs.Ven, Devs.AshtonMemer],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
     contextMenus: {
@@ -83,11 +83,18 @@ export default definePlugin({
             };
         });
 
+        let tooltipTimeout: any;
         this.preSend = addPreSendListener(async (_, message) => {
             if (!settings.store.autoTranslate) return;
             if (!message.content) return;
 
-            message.content = (await translate("sent", message.content)).text;
+            setShouldShowTranslateEnabledTooltip?.(true);
+            clearTimeout(tooltipTimeout);
+            tooltipTimeout = setTimeout(() => setShouldShowTranslateEnabledTooltip?.(false), 2000);
+
+            const trans = await translate("sent", message.content);
+            message.content = trans.text;
+
         });
     },
 
