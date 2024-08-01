@@ -32,7 +32,7 @@ copy(Object.fromEntries(
 */
 
 export type GoogleLanguage = keyof typeof GoogleLanguages;
-export type DeepLLanguage = keyof typeof DeepLLanguages;
+export type DeeplLanguage = keyof typeof DeeplLanguages;
 
 export const GoogleLanguages = {
     "auto": "Detect language",
@@ -171,7 +171,7 @@ export const GoogleLanguages = {
     "zu": "Zulu"
 } as const;
 
-export const DeepLLanguages = {
+export const DeeplLanguages = {
     "": "Detect language",
     "ar": "Arabic",
     "bg": "Bulgarian",

@@ -6,12 +6,7 @@
 
 import { IpcMainInvokeEvent } from "electron";
 
-interface DeepLResponse {
-    status?: number;
-    data: string;
-}
-
-export async function makeDeeplTranslateRequest(_: IpcMainInvokeEvent, pro: boolean, apiKey: string, payload: string): Promise<DeepLResponse> {
+export async function makeDeeplTranslateRequest(_: IpcMainInvokeEvent, pro: boolean, apiKey: string, payload: string) {
     const url = pro
         ? "https://api.deepl.com/v2/translate"
         : "https://api-free.deepl.com/v2/translate";

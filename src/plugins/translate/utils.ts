@@ -20,6 +20,7 @@ import { classNameFactory } from "@api/Styles";
 import { PluginNative } from "@utils/types";
 import { showToast, Toasts } from "@webpack/common";
 
+import { DeeplLanguages, GoogleLanguages } from "./languages";
 import { settings } from "./settings";
 
 export const cl = classNameFactory("vc-trans-");
@@ -34,7 +35,7 @@ interface GoogleData {
     }[];
 }
 
-interface DeepLData {
+interface DeeplData {
     translations: {
         detected_source_language: string;
         text: string;
@@ -45,6 +46,10 @@ export interface TranslationValue {
     src: string;
     text: string;
 }
+
+export const getLanguages = () => IS_WEB || settings.store.service === "google"
+    ? GoogleLanguages
+    : DeeplLanguages;
 
 export function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
     const translate = IS_WEB || settings.store.service === "google"
@@ -132,6 +137,6 @@ async function deeplTranslate(text: string, sourceLang: string, targetLang: stri
             throw new Error(`Failed to translate "${text}" (${sourceLang} -> ${targetLang})\n${status} ${data}`);
     }
 
-    const { translations }: DeepLData = JSON.parse(data);
+    const { translations }: DeeplData = JSON.parse(data);
     return { src: translations[0].detected_source_language, text: translations[0].text };
 }

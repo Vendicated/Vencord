@@ -20,19 +20,17 @@ import { Margins } from "@utils/margins";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 import { Forms, SearchableSelect, Switch, useMemo } from "@webpack/common";
 
-import { DeepLLanguages, GoogleLanguages } from "./languages";
 import { settings } from "./settings";
-import { cl } from "./utils";
+import { cl, getLanguages } from "./utils";
 
 const LanguageSettingKeys = ["receivedInput", "receivedOutput", "sentInput", "sentOutput"] as const;
 
 function LanguageSelect({ settingsKey, includeAuto }: { settingsKey: typeof LanguageSettingKeys[number]; includeAuto: boolean; }) {
     const currentValue = settings.use([settingsKey])[settingsKey];
-    const langs = settings.store.service === "google" ? GoogleLanguages : DeepLLanguages;
 
     const options = useMemo(
         () => {
-            const options = Object.entries(langs).map(([value, label]) => ({ value, label }));
+            const options = Object.entries(getLanguages()).map(([value, label]) => ({ value, label }));
             if (!includeAuto)
                 options.shift();
 

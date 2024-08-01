@@ -19,10 +19,8 @@
 import { Parser, useEffect, useState } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-import { DeepLLanguages, GoogleLanguages } from "./languages";
-import { settings } from "./settings";
 import { TranslateIcon } from "./TranslateIcon";
-import { cl, TranslationValue } from "./utils";
+import { cl, getLanguages, TranslationValue } from "./utils";
 
 const TranslationSetters = new Map<string, (v: TranslationValue) => void>();
 
@@ -43,7 +41,6 @@ function Dismiss({ onDismiss }: { onDismiss: () => void; }) {
 
 export function TranslationAccessory({ message }: { message: Message; }) {
     const [translation, setTranslation] = useState<TranslationValue>();
-    const lang = settings.store.service === "google" ? GoogleLanguages : DeepLLanguages;
 
     useEffect(() => {
         // Ignore MessageLinkEmbeds messages
@@ -56,12 +53,14 @@ export function TranslationAccessory({ message }: { message: Message; }) {
 
     if (!translation) return null;
 
+    const languages = getLanguages();
+
     return (
         <span className={cl("accessory")}>
             <TranslateIcon width={16} height={16} />
             {Parser.parse(translation.text)}
             {" "}
-            (translated from {lang[translation.src] ?? translation.src} - <Dismiss onDismiss={() => setTranslation(undefined)} />)
+            (translated from {languages[translation.src] ?? translation.src} - <Dismiss onDismiss={() => setTranslation(undefined)} />)
         </span>
     );
 }
