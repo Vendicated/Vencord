@@ -34,7 +34,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "UnreadCountBadge",
     authors: [Devs.Joona],
-    description: "Show unread message count badges on channels in the channel list",
+    description: "Shows unread message count badges on channels in the channel list",
     settings,
 
     patches: [
