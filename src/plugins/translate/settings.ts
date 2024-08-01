@@ -62,7 +62,20 @@ export const settings = definePluginSettings({
             { label: "Google Translate", value: "google", default: true },
             { label: "DeepL Free", value: "deepl" },
             { label: "DeepL Pro", value: "deepl-pro" }
-        ] as const
+        ] as const,
+        onChange: () => {
+            if (settings.store.service === "google") {
+                settings.store.receivedInput = "auto";
+                settings.store.receivedOutput = "en";
+                settings.store.sentInput = "auto";
+                settings.store.sentOutput = "en";
+            } else {
+                settings.store.receivedInput = "";
+                settings.store.receivedOutput = "en-us";
+                settings.store.sentInput = "";
+                settings.store.sentOutput = "en-us";
+            }
+        }
     },
     deeplApiKey: {
         type: OptionType.STRING,
