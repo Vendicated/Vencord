@@ -17,10 +17,11 @@
 */
 
 import { classNameFactory } from "@api/Styles";
+import { onlyOnce } from "@utils/onlyOnce";
 import { PluginNative } from "@utils/types";
 import { showToast, Toasts } from "@webpack/common";
 
-import { DeeplLanguages, GoogleLanguages } from "./languages";
+import { DeeplLanguages, deeplLanguageToGoogleLanguage, GoogleLanguages } from "./languages";
 import { settings } from "./settings";
 
 export const cl = classNameFactory("vc-trans-");
@@ -111,10 +112,23 @@ async function googleTranslate(text: string, sourceLang: string, targetLang: str
     };
 }
 
+function fallbackToGoogle(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
+    return googleTranslate(
+        text,
+        deeplLanguageToGoogleLanguage(sourceLang),
+        deeplLanguageToGoogleLanguage(targetLang)
+    );
+}
+
+const showDeeplApiQuotaToast = onlyOnce(
+    () => showToast("Deepl API quota exceeded. Falling back to Google Translate", Toasts.Type.FAILURE)
+);
+
 async function deeplTranslate(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
     if (!settings.store.deeplApiKey) {
-        showToast("DeepL API key is not set", Toasts.Type.FAILURE);
-        throw new Error("DeepL API key is not set");
+        showToast("DeepL API key is not set. Resetting to Google", Toasts.Type.FAILURE);
+        settings.store.service = "google";
+        return fallbackToGoogle(text, sourceLang, targetLang);
     }
 
     // CORS jumpscare
@@ -132,7 +146,8 @@ async function deeplTranslate(text: string, sourceLang: string, targetLang: stri
         case 403:
             throw "Invalid DeepL API key or version";
         case 456:
-            throw "DeepL API quota exceeded";
+            showDeeplApiQuotaToast();
+            return fallbackToGoogle(text, sourceLang, targetLang);
         default:
             throw new Error(`Failed to translate "${text}" (${sourceLang} -> ${targetLang})\n${status} ${data}`);
     }

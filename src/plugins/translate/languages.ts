@@ -207,3 +207,20 @@ export const DeeplLanguages = {
     "tr": "Turkish",
     "uk": "Ukrainian"
 } as const;
+
+export function deeplLanguageToGoogleLanguage(language: string) {
+    switch (language) {
+        case "": return "auto";
+        case "nb": return "no";
+        case "zh-hans": return "zh-CN";
+        case "zh-hant": return "zh-TW";
+        case "en-us":
+        case "en-gb":
+            return "en";
+        case "pt-br":
+        case "pt-pt":
+            return "pt";
+        default:
+            return language;
+    }
+}
