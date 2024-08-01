@@ -19,12 +19,12 @@ const JoinedThreadsStore = findStoreLazy("JoinedThreadsStore");
 const { NumberBadge } = findByPropsLazy("NumberBadge");
 
 const settings = definePluginSettings({
-    ShowOnMutedChannels: {
+    showOnMutedChannels: {
         description: "Show unread count on muted channels",
         type: OptionType.BOOLEAN,
         default: false,
     },
-    NotificationCountLimit: {
+    notificationCountLimit: {
         description: "Show +99 instead of true amount",
         type: OptionType.BOOLEAN,
         default: false,
@@ -34,7 +34,9 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "UnreadCountBadge",
     authors: [Devs.Joona],
-    description: "Show unread count in the channel list",
+    description: "Show unread message count badges on channels in the channel list",
+    settings,
+
     patches: [
         // Kanged from typingindicators
         {
@@ -56,11 +58,24 @@ export default definePlugin({
 
         },
     ],
-    settings,
+
     CountBadge: ErrorBoundary.wrap(({ channel }: { channel: Channel; }) => {
-        let unreadCount = useStateFromStores([ReadStateStore], () => ReadStateStore.getUnreadCount(channel.id));
-        if (!unreadCount || (!settings.store.ShowOnMutedChannels && (UserGuildSettingsStore.isChannelMuted(channel.guild_id, channel.id) || JoinedThreadsStore.isMuted(channel.id)))) return null;
-        if (settings.store.NotificationCountLimit && unreadCount > 99) unreadCount = "+99";
-        return <NumberBadge count={unreadCount} color="var(--brand-500)" className="vc-unreadCountBadge" />;
+        const unreadCount = useStateFromStores([ReadStateStore], () => ReadStateStore.getUnreadCount(channel.id));
+        if (!unreadCount) return null;
+
+        if (!settings.store.showOnMutedChannels && (UserGuildSettingsStore.isChannelMuted(channel.guild_id, channel.id) || JoinedThreadsStore.isMuted(channel.id)))
+            return null;
+
+        return (
+            <NumberBadge
+                color="var(--brand-500)"
+                className="vc-unreadCountBadge"
+                count={
+                    unreadCount > 99 && settings.store.notificationCountLimit
+                        ? "+99"
+                        : unreadCount
+                }
+            />
+        );
     }, { noop: true }),
 });
