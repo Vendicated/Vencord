@@ -8,10 +8,10 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
+import { classes, copyWithToast } from "@utils/misc";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findComponentByCodeLazy } from "@webpack";
-import { Alerts, Button, Clipboard, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Toasts, Tooltip, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
+import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { Decoration, getPresets, Preset } from "../../lib/api";
@@ -47,10 +47,10 @@ interface Section {
 
 interface SectionHeaderProps {
     section: Section;
-    presets: Preset[];
+    activePreset: Preset | undefined;
 }
 
-function SectionHeader({ section, presets }: SectionHeaderProps) {
+function SectionHeader({ section, activePreset }: SectionHeaderProps) {
     const hasSubtitle = typeof section.subtitle !== "undefined";
     const hasAuthorIds = typeof section.authorIds !== "undefined";
 
@@ -68,22 +68,15 @@ function SectionHeader({ section, presets }: SectionHeaderProps) {
     }, [section.authorIds]);
 
 
-    const copyHash = async () => {
-        const presetID = section.sectionKey.replace("preset-", "");
-        if (presetID) {
-            copyWithToast(presetID);
-        }
-    };
-
     return <div>
         <Flex>
             <Forms.FormTitle style={{ flexGrow: 1 }}>{section.title}</Forms.FormTitle>
-            {presets.some(p => `preset-${p.id}` === section.sectionKey) && (
+            {activePreset && (
                 <Tooltip text="Copy Preset Hash">
                     {tooltipProps => (
                         <Button
                             {...tooltipProps}
-                            onClick={copyHash}
+                            onClick={() => copyWithToast(activePreset.id)}
                             size={Button.Sizes.SMALL}
                             look={Button.Looks.BLANK}
                         >
@@ -222,7 +215,7 @@ function ChangeDecorationModal(props: ModalProps) {
                     }}
                     getItemKey={item => typeof item === "string" ? item : item.hash}
                     getSectionKey={section => section.sectionKey}
-                    renderSectionHeader={section => <SectionHeader section={section} presets={presets} />}
+                    renderSectionHeader={section => <SectionHeader section={section} activePreset={activeDecorationPreset} />}
                     sections={data}
                 />
                 <div className={cl("change-decoration-modal-preview")}>
