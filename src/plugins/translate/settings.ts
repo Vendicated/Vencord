@@ -44,11 +44,7 @@ export const settings = definePluginSettings({
         default: "en",
         hidden: true
     },
-    autoTranslate: {
-        type: OptionType.BOOLEAN,
-        description: "Automatically translate your messages before sending. You can also shift/right click the translate button to toggle this",
-        default: false
-    },
+
     showChatBarButton: {
         type: OptionType.BOOLEAN,
         description: "Show translate button in chat bar",
@@ -71,7 +67,17 @@ export const settings = definePluginSettings({
         default: "",
         placeholder: "Get your API key from https://deepl.com/your-account",
         disabled: () => IS_WEB
-    }
+    },
+    autoTranslate: {
+        type: OptionType.BOOLEAN,
+        description: "Automatically translate your messages before sending. You can also shift/right click the translate button to toggle this",
+        default: false
+    },
+    showAutoTranslateTooltip: {
+        type: OptionType.BOOLEAN,
+        description: "Show a tooltip on the ChatBar button whenever a message is automatically translated",
+        default: true
+    },
 }).withPrivateSettings<{
     showAutoTranslateAlert: boolean;
 }>();
