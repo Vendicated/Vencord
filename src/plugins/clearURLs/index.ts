@@ -26,7 +26,7 @@ import {
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-import { defaultRules } from "./defaultRules";
+import { defaultRules, urlMap } from "./defaultRules";
 
 // From lodash
 const reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
@@ -34,7 +34,7 @@ const reHasRegExpChar = RegExp(reRegExpChar.source);
 
 export default definePlugin({
     name: "ClearURLs",
-    description: "Removes tracking garbage from URLs",
+    description: "Removes tracking garbage from URLs and replaces URLs with improved ones to fix embeds",
     authors: [Devs.adryd],
     dependencies: ["MessageEventsAPI"],
 
@@ -90,6 +90,13 @@ export default definePlugin({
     },
 
     replacer(match: string) {
+        for (const [oldUrl, newUrl] of Object.entries(urlMap)) {
+            if (match.startsWith(oldUrl)) {
+                match = match.replace(oldUrl, newUrl);
+                break;
+            }
+        }
+
         // Parse URL without throwing errors
         try {
             var url = new URL(match);

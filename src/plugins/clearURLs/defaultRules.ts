@@ -16,6 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+export const urlMap = {
+    "https://twitter.com/": "https://fxtwitter.com/",
+    "https://x.com/": "https://fxtwitter.com/",
+    "https://www.tiktok.com/": "https://tiktok.com.xdd.moe/",
+    "https://vm.tiktok.com/": "https://tiktok.com.xdd.moe/",
+    "https://tiktok.com/": "http://tiktok.com.xdd.moe/",
+    "https://www.instagram.com/": "https://www.instagram.com.xdd.moe/",
+    "https://www.reddit.com/": "https://www.rxddit.com/",
+};
+
 export const defaultRules = [
     "action_object_map",
     "action_type_map",
