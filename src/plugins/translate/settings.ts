@@ -63,27 +63,29 @@ export const settings = definePluginSettings({
             { label: "DeepL Free", value: "deepl" },
             { label: "DeepL Pro", value: "deepl-pro" }
         ] as const,
-        onChange: () => {
-            if (settings.store.service === "google") {
-                settings.store.receivedInput = "auto";
-                settings.store.receivedOutput = "en";
-                settings.store.sentInput = "auto";
-                settings.store.sentOutput = "en";
-            } else {
-                settings.store.receivedInput = "";
-                settings.store.receivedOutput = "en-us";
-                settings.store.sentInput = "";
-                settings.store.sentOutput = "en-us";
-            }
-        }
+        onChange: resetLanguageDefaults
     },
     deeplApiKey: {
         type: OptionType.STRING,
         description: "DeepL API key",
         default: "",
         placeholder: "Get your API key from https://deepl.com/your-account",
-        disabled: () => settings.store.service === "google"
+        disabled: () => IS_WEB
     }
 }).withPrivateSettings<{
     showAutoTranslateAlert: boolean;
 }>();
+
+export function resetLanguageDefaults() {
+    if (IS_WEB || settings.store.service === "google") {
+        settings.store.receivedInput = "auto";
+        settings.store.receivedOutput = "en";
+        settings.store.sentInput = "auto";
+        settings.store.sentOutput = "en";
+    } else {
+        settings.store.receivedInput = "";
+        settings.store.receivedOutput = "en-us";
+        settings.store.sentInput = "";
+        settings.store.sentOutput = "en-us";
+    }
+}

@@ -22,7 +22,7 @@ import { PluginNative } from "@utils/types";
 import { showToast, Toasts } from "@webpack/common";
 
 import { DeeplLanguages, deeplLanguageToGoogleLanguage, GoogleLanguages } from "./languages";
-import { settings } from "./settings";
+import { resetLanguageDefaults, settings } from "./settings";
 
 export const cl = classNameFactory("vc-trans-");
 
@@ -44,7 +44,7 @@ interface DeeplData {
 }
 
 export interface TranslationValue {
-    src: string;
+    sourceLanguage: string;
     text: string;
 }
 
@@ -52,13 +52,13 @@ export const getLanguages = () => IS_WEB || settings.store.service === "google"
     ? GoogleLanguages
     : DeeplLanguages;
 
-export function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
+export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
     const translate = IS_WEB || settings.store.service === "google"
         ? googleTranslate
         : deeplTranslate;
 
     try {
-        return translate(
+        return await translate(
             text,
             settings.store[`${kind}Input`],
             settings.store[`${kind}Output`]
@@ -104,7 +104,7 @@ async function googleTranslate(text: string, sourceLang: string, targetLang: str
     const { src, sentences }: GoogleData = await res.json();
 
     return {
-        src,
+        sourceLanguage: GoogleLanguages[src] ?? src,
         text: sentences.
             map(s => s?.trans).
             filter(Boolean).
@@ -127,7 +127,10 @@ const showDeeplApiQuotaToast = onlyOnce(
 async function deeplTranslate(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
     if (!settings.store.deeplApiKey) {
         showToast("DeepL API key is not set. Resetting to Google", Toasts.Type.FAILURE);
+
         settings.store.service = "google";
+        resetLanguageDefaults();
+
         return fallbackToGoogle(text, sourceLang, targetLang);
     }
 
@@ -153,5 +156,10 @@ async function deeplTranslate(text: string, sourceLang: string, targetLang: stri
     }
 
     const { translations }: DeeplData = JSON.parse(data);
-    return { src: translations[0].detected_source_language, text: translations[0].text };
+    const src = translations[0].detected_source_language;
+
+    return {
+        sourceLanguage: DeeplLanguages[src] ?? src,
+        text: translations[0].text
+    };
 }
