@@ -57,6 +57,6 @@ export default definePlugin({
 
 function getUsernameString(username: string) {
     return settings.store.showAtSymbol
-        ? `${username}`
+        ? `@${username}`
         : username;
 }
