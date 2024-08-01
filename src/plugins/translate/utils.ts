@@ -115,7 +115,8 @@ async function deeplTranslate(text: string, sourceLang: string, targetLang: stri
     // CORS jumpscare
     const { status, data } = await Native.makeDeeplTranslateRequest(settings.store.service === "deepl-pro", settings.store.deeplApiKey, JSON.stringify({
         text: [text],
-        target_lang: targetLang
+        target_lang: targetLang,
+        source_lang: sourceLang.split("-")[0]
     }));
 
     switch (status) {

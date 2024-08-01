@@ -31,9 +31,10 @@ copy(Object.fromEntries(
 ))
 */
 
-export type Language = keyof typeof Languages;
+export type GoogleLanguage = keyof typeof GoogleLanguages;
+export type DeepLLanguage = keyof typeof DeepLLanguages;
 
-export const Languages = {
+export const GoogleLanguages = {
     "auto": "Detect language",
     "af": "Afrikaans",
     "sq": "Albanian",
@@ -168,4 +169,41 @@ export const Languages = {
     "yi": "Yiddish",
     "yo": "Yoruba",
     "zu": "Zulu"
+} as const;
+
+export const DeepLLanguages = {
+    "": "Detect language",
+    "ar": "Arabic",
+    "bg": "Bulgarian",
+    "cs": "Czech",
+    "da": "Danish",
+    "de": "German",
+    "el": "Greek",
+    "en-us": "English (American)",
+    "en-gb": "English (British)",
+    "es": "Spanish",
+    "et": "Estonian",
+    "fi": "Finnish",
+    "fr": "French",
+    "hu": "Hungarian",
+    "id": "Indonesian",
+    "it": "Italian",
+    "ja": "Japanese",
+    "ko": "Korean",
+    "lt": "Lithuanian",
+    "lv": "Latvian",
+    "nb": "Norwegian",
+    "nl": "Dutch",
+    "pl": "Polish",
+    "pt-br": "Portuguese (Brazilian)",
+    "pt-pt": "Portuguese (European)",
+    "ro": "Romanian",
+    "ru": "Russian",
+    "sk": "Slovak",
+    "sl": "Slovenian",
+    "sv": "Swedish",
+    "tr": "Turkish",
+    "uk": "Ukrainian",
+    "zh-hans": "Chinese (Simplified)",
+    "zh-hant": "Chinese (Traditional)"
 } as const;
