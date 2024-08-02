@@ -32,9 +32,9 @@ const settings = definePluginSettings({
     },
 });
 // for some godforsaken reason, the volume is ran through this formula before its stored. pathcing it out does not work.
-const VolumeEncoder = {
-    decode: findByCodeLazy("6+1:"),
-    encode: findByCodeLazy("50+50"),
+const PerceptualVolume = {
+    amplitudeToPerceptual: findByCodeLazy("6+1:"),
+    perceptualToAmplitude: findByCodeLazy("50-50"),
 };
 interface StreamData{
     audioContext: AudioContext,
@@ -134,7 +134,7 @@ export default definePlugin({
             data.streamSourceNode = data.audioContext.createMediaStreamSource(data.stream);
         // only create one per stream
         if(data.gainNode) {
-            data.gainNode.gain.value = VolumeEncoder.decode(data._volume)/100 * +!data._mute;
+            data.gainNode.gain.value = PerceptualVolume.amplitudeToPerceptual(data._volume)/100 * +!data._mute;
             return;
         }
         const source = data.streamSourceNode;
