@@ -90,8 +90,8 @@ export default definePlugin({
                 },
                 // to actually patch the volume
                 {
-                    match: /volume=t.*?;/,
-                    replace: "volume=0.00;$self.patchVolume(this);"
+                    match: /\.volume=this\._volume\/100;/,
+                    replace: ".volume=0.00;$self.patchVolume(this);"
                 }
             ]
         },
