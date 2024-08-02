@@ -36,7 +36,7 @@ function hash(data: ArrayBuffer) {
 
 // Calculate a CSS color string based on the user ID
 function calculateNameColorForUser(id: bigint) {
-    const idBuffer = new ArrayBuffer(16);
+    const idBuffer = new ArrayBuffer(8);
     {
         const idView = new DataView(idBuffer);
         idView.setBigUint64(0, id);
