@@ -105,7 +105,8 @@ const settings = definePluginSettings({
     preferUDP: {
         type: OptionType.BOOLEAN,
         description: "Enable if you use an older build of XSOverlay unable to connect through websockets. This setting is ignored on web.",
-        default: false
+        default: false,
+        disabled: () => IS_WEB
     },
     botNotifications: {
         type: OptionType.BOOLEAN,
@@ -183,7 +184,7 @@ async function start() {
     });
 }
 
-const Native = VencordNative.pluginHelpers.XsOverlay as PluginNative<typeof import("./native")>;
+const Native = VencordNative.pluginHelpers.XSOverlay as PluginNative<typeof import("./native")>;
 
 export default definePlugin({
     name: "XSOverlay",
