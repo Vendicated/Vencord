@@ -39,7 +39,7 @@ export default tseslint.config(
         languageOptions: {
             parser: tseslint.parser,
             parserOptions: {
-                project: true,
+                project: ["./tsconfig.json"],
                 tsconfigRootDir: import.meta.dirname
             }
         },
@@ -75,7 +75,7 @@ export default tseslint.config(
             "@stylistic/no-extra-semi": "error",
 
             // TS Rules
-            "@stylistic/ts/func-call-spacing": ["error", "never"],
+            "@stylistic/func-call-spacing": ["error", "never"],
 
             // ESLint Rules
             "yoda": "error",
