@@ -17,7 +17,7 @@
 */
 
 import type { ChannelRecord, UserRecord } from "@vencord/discord-types";
-import type { JSX } from "react";
+import type { FunctionComponent } from "react";
 
 interface DecoratorProps {
     activities: any[];
@@ -39,7 +39,7 @@ interface DecoratorProps {
     user: UserRecord;
     [key: string]: any;
 }
-export type Decorator = (props: DecoratorProps) => JSX.Element | null;
+export type Decorator = FunctionComponent<DecoratorProps>;
 type OnlyIn = "guilds" | "dms";
 
 export const decorators = new Map<string, { decorator: Decorator; onlyIn?: OnlyIn; }>();

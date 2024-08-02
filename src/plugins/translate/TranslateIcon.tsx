@@ -45,7 +45,7 @@ export const TranslateChatBarIcon: ChatBarButton = ({ isMainChat }) => {
     const [showTooltip, $setShowTooltip] = useState(false);
     useEffect(() => {
         setShowTooltip = $setShowTooltip;
-        return () => setShowTooltip = undefined;
+        return () => { setShowTooltip = undefined; };
     }, []);
 
     if (!isMainChat || !showChatBarButton) return null;

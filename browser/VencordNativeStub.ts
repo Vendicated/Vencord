@@ -108,5 +108,5 @@ window.VencordNative = {
         getSettingsDir: async () => "LocalStorage"
     },
 
-    pluginHelpers: {} as any,
+    pluginHelpers: {},
 };

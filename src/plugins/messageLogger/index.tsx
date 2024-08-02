@@ -176,22 +176,18 @@ export default definePlugin({
             (oldMsg, newMsg) => oldMsg?.editHistory === newMsg?.editHistory
         )!;
 
-        return Settings.plugins.MessageLogger!.inlineEdits && (
-            <>
-                {message.editHistory?.map(edit => (
-                    <div className="messagelogger-edited">
-                        {parseEditContent(edit.content, message)}
-                        <Timestamp
-                            timestamp={edit.timestamp}
-                            isEdited={true}
-                            isInline={false}
-                        >
-                            <span className={styles.edited}>{" "}({i18n.Messages.MESSAGE_EDITED})</span>
-                        </Timestamp>
-                    </div>
-                ))}
-            </>
-        );
+        return Settings.plugins.MessageLogger!.inlineEdits && message.editHistory?.map(edit => (
+            <div className="messagelogger-edited">
+                {parseEditContent(edit.content, message)}
+                <Timestamp
+                    timestamp={edit.timestamp}
+                    isEdited={true}
+                    isInline={false}
+                >
+                    <span className={styles.edited}>{" "}({i18n.Messages.MESSAGE_EDITED})</span>
+                </Timestamp>
+            </div>
+        ));
     }, { noop: true }),
 
     makeEdit: (newMessage: MessageJSON, oldMessage: MessageJSON) => ({

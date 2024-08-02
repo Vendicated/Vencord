@@ -1,6 +1,8 @@
 import stylistic from "@stylistic/eslint-plugin";
 // @ts-expect-error: No types
 import pathAlias from "eslint-plugin-path-alias";
+// @ts-expect-error: https://github.com/jsx-eslint/eslint-plugin-react/issues/3776
+import eslintPluginReact from "eslint-plugin-react";
 // @ts-expect-error: No types
 import simpleHeader from "eslint-plugin-simple-header";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
@@ -24,9 +26,13 @@ export default tseslint.config(
             "@stylistic": stylistic,
             "@typescript-eslint": tseslint.plugin,
             "path-alias": pathAlias,
+            "react": eslintPluginReact,
             "simple-header": simpleHeader,
             "simple-import-sort": simpleImportSort,
             "unused-imports": unusedImports,
+        },
+        settings: {
+            react: { version: "18.2" },
         },
         rules: {
             // Since it's only been a month and Vencord has already been stolen
@@ -47,7 +53,7 @@ export default tseslint.config(
             "@stylistic/dot-location": ["error", "property"],
             "@stylistic/eol-last": "error",
             "@stylistic/func-call-spacing": "error",
-            "@stylistic/generator-star-spacing": "error",
+            "@stylistic/generator-star-spacing": ["error", { before: false, after: true }],
             "@stylistic/indent": ["error", 4, {
                 SwitchCase: 1,
                 flatTernaryExpressions: true
@@ -169,7 +175,6 @@ export default tseslint.config(
                 }]
             }],
             "no-restricted-syntax": ["error",
-                "JSXOpeningElement[name.name=svg] > JSXAttribute[name.name=xmlns]",
                 "SequenceExpression:not(.update):matches(:not(.callee), [expressions.length!=2])",
                 "SequenceExpression:not(.update) > :first-child:not(Literal)",
             ],
@@ -193,6 +198,11 @@ export default tseslint.config(
             "prefer-object-spread": "error",
             "prefer-regex-literals": ["error", { disallowRedundantWrapping: true }],
             "prefer-spread": "error",
+            "react/forbid-dom-props": ["error", {
+                forbid: ["version", "xlinkActuate", "xlinkArcrole", "xlinkHref", "xlinkRole", "xlinkShow", "xlinkTitle", "xlinkType", "xmlBase", "xmlLang", "xmlns", "xmlnsXlink", "xmlSpace"]
+            }],
+            "react/jsx-fragments": "error",
+            "react/jsx-no-useless-fragment": "error",
             "simple-import-sort/exports": "error",
             "simple-import-sort/imports": "error",
             "unused-imports/no-unused-imports": "error",

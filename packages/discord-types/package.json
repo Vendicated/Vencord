@@ -30,7 +30,7 @@
         "type-fest": "^4.23.0"
     },
     "devDependencies": {
-        "@stylistic/eslint-plugin": "^2.6.0",
+        "@stylistic/eslint-plugin": "^2.6.1",
         "@types/node": "^20.14.13",
         "@types/semver": "^7.5.8",
         "@typescript-eslint/typescript-estree": "^8.0.0",
@@ -43,7 +43,7 @@
         "eslint-plugin-unused-imports": "^4.0.1",
         "puppeteer-core": "^22.15.0",
         "semver": "^7.6.3",
-        "tsx": "^4.16.3",
+        "tsx": "^4.16.5",
         "typescript": "^5.5.4",
         "typescript-eslint": "^8.0.0"
     }

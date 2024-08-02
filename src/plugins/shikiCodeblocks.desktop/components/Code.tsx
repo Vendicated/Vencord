@@ -18,7 +18,7 @@
 
 import type { IThemedToken } from "@vap/shiki";
 import { hljs } from "@webpack/common";
-import type { JSX } from "react";
+import type { ReactElement } from "react";
 
 import { cl } from "../utils/misc";
 import type { ThemeBase } from "./Highlighter";
@@ -38,7 +38,7 @@ export function Code({
     content,
     tokens,
 }: CodeProps) {
-    let lines: JSX.Element[];
+    let lines: ReactElement[];
 
     if (useHljs) {
         try {

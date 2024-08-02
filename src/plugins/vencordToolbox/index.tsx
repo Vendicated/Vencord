@@ -134,7 +134,7 @@ function ToolboxFragmentWrapper({ children }: { children: ReactNode[]; }) {
         </ErrorBoundary>
     );
 
-    return <>{children}</>;
+    return children;
 }
 
 export default definePlugin({

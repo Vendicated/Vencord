@@ -34,7 +34,7 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { AlertActionCreators, Button, Card, ChannelStore, Forms, GuildMemberStore, MarkupUtils, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
-import type { JSX } from "react";
+import type { ReactElement } from "react";
 
 import gitHash from "~git-hash";
 import plugins, { PluginMeta } from "~plugins";
@@ -260,7 +260,7 @@ export default definePlugin({
 
     start() {
         addAccessory("vencord-debug", props => {
-            const buttons: JSX.Element[] = [];
+            const buttons: ReactElement[] = [];
 
             const shouldAddUpdateButton =
                 !IS_UPDATER_DISABLED

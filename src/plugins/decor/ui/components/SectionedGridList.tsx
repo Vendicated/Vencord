@@ -6,7 +6,7 @@
 
 import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
-import type { JSX } from "react";
+import type { ReactElement } from "react";
 
 import { cl } from "../";
 import Grid, { type GridProps } from "./Grid";
@@ -18,7 +18,7 @@ type Section<SectionT, ItemT> = SectionT & {
 };
 
 interface SectionedGridListProps<ItemT, SectionT, SectionU = Section<SectionT, ItemT>> extends Omit<GridProps<ItemT>, "items"> {
-    renderSectionHeader: (section: SectionU) => JSX.Element;
+    renderSectionHeader: (section: SectionU) => ReactElement;
     getSectionKey: (section: SectionU) => string;
     sections: SectionU[];
 }

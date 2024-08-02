@@ -17,7 +17,7 @@
 */
 
 import type { ChannelRecord, MessageRecord } from "@vencord/discord-types";
-import type { JSX } from "react";
+import type { FunctionComponent, ReactNode } from "react";
 
 interface DecorationProps {
     author: {
@@ -36,16 +36,16 @@ interface DecorationProps {
         /**
          * Element for the [BOT] tag if there is one
          */
-        0: JSX.Element | null;
+        0: ReactNode;
         /**
          * Other decorations (including ones added with this api)
          */
-        1: JSX.Element[];
+        1: ReactNode[];
     };
     message: MessageRecord;
     [key: string]: any;
 }
-export type Decoration = (props: DecorationProps) => JSX.Element | null;
+export type Decoration = FunctionComponent<DecorationProps>;
 
 export const decorations = new Map<string, Decoration>();
 

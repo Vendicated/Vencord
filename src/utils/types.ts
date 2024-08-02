@@ -19,7 +19,7 @@
 import type { Command } from "@api/Commands";
 import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import type { FluxActionHandlerMap } from "@vencord/discord-types";
-import type { ComponentType, JSX } from "react";
+import type { ComponentType, FunctionComponent } from "react";
 import type Electron from "standalone-electron-types";
 import type { Promisable } from "type-fest";
 
@@ -284,7 +284,7 @@ export interface IPluginOptionComponentProps {
 
 export interface PluginSettingComponentDef {
     type: OptionType.COMPONENT;
-    component: (props: IPluginOptionComponentProps) => JSX.Element;
+    component: FunctionComponent<IPluginOptionComponentProps>;
 }
 
 /** Maps a `PluginSettingDef` to its value type */

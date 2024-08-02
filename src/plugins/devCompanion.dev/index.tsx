@@ -176,9 +176,9 @@ function initWs(isManual = false) {
 
                     try {
                         const matcher = canonicalizeMatch(parseNode(match));
-                        const replacement = canonicalizeReplace(parseNode(replace), "PlaceHolderPluginName");
+                        const replacement = canonicalizeReplace<string>(parseNode(replace), "PlaceHolderPluginName");
 
-                        const newSource = src.replace(matcher, replacement as string);
+                        const newSource = src.replace(matcher, replacement);
 
                         if (src === newSource) throw "Had no effect";
                         Function(newSource);
@@ -195,7 +195,7 @@ function initWs(isManual = false) {
             }
             case "testFind": {
                 const { type, args } = data as FindData;
-                let parsedArgs: any;
+                let parsedArgs: any[];
                 try {
                     parsedArgs = args.map(parseNode);
                 } catch (err) {

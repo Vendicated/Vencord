@@ -51,8 +51,7 @@ Object.defineProperty(window, WEBPACK_CHUNK, {
                 logger.info(`Patching ${WEBPACK_CHUNK}.push`);
                 patchPush(v);
 
-                // @ts-expect-error
-                delete window[WEBPACK_CHUNK];
+                delete (window as any)[WEBPACK_CHUNK];
                 window[WEBPACK_CHUNK] = v;
             }
         }

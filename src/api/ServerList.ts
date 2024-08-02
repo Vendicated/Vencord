@@ -17,7 +17,7 @@
 */
 
 import { Logger } from "@utils/Logger";
-import type { JSX } from "react";
+import type { ReactNode } from "react";
 
 const logger = new Logger("ServerListAPI");
 
@@ -26,23 +26,23 @@ export const enum ServerListRenderPosition {
     In,
 }
 
-const renderFunctionsAbove = new Set<(...args: unknown[]) => any>();
-const renderFunctionsIn = new Set<(...args: unknown[]) => any>();
+const renderFunctionsAbove = new Set<(...args: any[]) => ReactNode>();
+const renderFunctionsIn = new Set<(...args: any[]) => ReactNode>();
 
 function getRenderFunctions(position: ServerListRenderPosition) {
     return position === ServerListRenderPosition.Above ? renderFunctionsAbove : renderFunctionsIn;
 }
 
-export function addServerListElement(position: ServerListRenderPosition, renderFunction: (...args: unknown[]) => any) {
+export function addServerListElement(position: ServerListRenderPosition, renderFunction: (...args: any[]) => ReactNode) {
     getRenderFunctions(position).add(renderFunction);
 }
 
-export function removeServerListElement(position: ServerListRenderPosition, renderFunction: (...args: unknown[]) => any) {
+export function removeServerListElement(position: ServerListRenderPosition, renderFunction: (...args: any[]) => ReactNode) {
     getRenderFunctions(position).delete(renderFunction);
 }
 
 export const renderAll = (position: ServerListRenderPosition) => {
-    const ret: JSX.Element[] = [];
+    const ret: ReactNode[] = [];
 
     for (const renderFunction of getRenderFunctions(position)) {
         try {

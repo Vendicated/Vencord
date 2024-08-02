@@ -148,12 +148,10 @@ export default definePlugin({
     reporterTestable: ReporterTestable.None,
 
     settingsAboutComponent: () => (
-        <>
-            <Forms.FormText>
-                For the customizable activity format strings, you can use several special strings to include track data in activities!{" "}
-                <code>{"{name}"}</code> is replaced with the track name; <code>{"{artist}"}</code> is replaced with the artist(s)' name(s); and <code>{"{album}"}</code> is replaced with the album name.
-            </Forms.FormText>
-        </>
+        <Forms.FormText>
+            For the customizable activity format strings, you can use several special strings to include track data in activities!{" "}
+            <code>{"{name}"}</code> is replaced with the track name; <code>{"{artist}"}</code> is replaced with the artist(s)' name(s); and <code>{"{album}"}</code> is replaced with the album name.
+        </Forms.FormText>
     ),
 
     settings,

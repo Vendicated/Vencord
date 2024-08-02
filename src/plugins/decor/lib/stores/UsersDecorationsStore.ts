@@ -20,7 +20,7 @@ interface UserDecorationData {
 interface UsersDecorationsState {
     usersDecorations: Map<string, UserDecorationData>;
     fetchQueue: Set<string>;
-    bulkFetch: () => Promise<void>;
+    bulkFetch: () => void;
     fetch: (userId: string, force?: boolean) => void;
     fetchMany: (userIds: string[]) => void;
     get: (userId: string) => UserDecorationData | undefined;

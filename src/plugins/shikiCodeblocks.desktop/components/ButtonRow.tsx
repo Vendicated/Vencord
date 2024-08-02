@@ -17,7 +17,7 @@
 */
 
 import { ClipboardUtils } from "@webpack/common";
-import type { JSX } from "react";
+import type { ReactElement } from "react";
 
 import { cl } from "../utils/misc";
 import { CopyButton } from "./CopyButton";
@@ -28,7 +28,7 @@ export interface ButtonRowProps {
 }
 
 export function ButtonRow({ content, theme }: ButtonRowProps) {
-    const buttons: JSX.Element[] = [];
+    const buttons: ReactElement[] = [];
 
     if (ClipboardUtils.SUPPORTS_COPY) {
         buttons.push(

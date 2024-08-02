@@ -124,8 +124,7 @@ function MentionWrapper({ data, UserMention, RoleMention, parse, props }: Mentio
         >
             <span
                 onMouseEnter={() => {
-                    // @ts-expect-error
-                    const mention = children?.[0]?.props?.children;
+                    const mention = (children as any)?.[0]?.props?.children;
                     if (typeof mention !== "string") return;
 
                     const id = mention.match(/<@!?(\d+)>/)?.[1];

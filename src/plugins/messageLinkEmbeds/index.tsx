@@ -41,7 +41,7 @@ import {
     Text,
     UserStore
 } from "@webpack/common";
-import type { JSX } from "react";
+import type { ReactElement } from "react";
 
 const messageCache = new Map<string, {
     message?: MessageRecord;
@@ -221,8 +221,8 @@ function withEmbeddedBy(message: MessageRecord, embeddedBy: string[]) {
     return new Proxy(message, {
         get(_, prop) {
             if (prop === "vencordEmbeddedBy") return embeddedBy;
-            // @ts-ignore ts so bad
-            return Reflect.get(...arguments);
+            // https://github.com/microsoft/TypeScript/issues/29055
+            return Reflect.get(...arguments as any as Parameters<ProxyHandler<MessageRecord>["get"] & {}>);
         }
     });
 }
@@ -230,7 +230,7 @@ function withEmbeddedBy(message: MessageRecord, embeddedBy: string[]) {
 function MessageEmbedAccessory({ message }: { message: MessageRecord & { vencordEmbeddedBy?: string[]; }; }) {
     const embeddedBy: string[] = message.vencordEmbeddedBy ?? [];
 
-    const accessories: (JSX.Element | null)[] = [];
+    const accessories: ReactElement[] = [];
 
     for (const [_, channelId, messageId] of message.content.matchAll(messageLinkRegex)) {
         if (embeddedBy.includes(messageId!) || embeddedBy.length > 2) {
@@ -276,7 +276,7 @@ function MessageEmbedAccessory({ message }: { message: MessageRecord & { vencord
         );
     }
 
-    return accessories.length ? <>{accessories}</> : null;
+    return accessories;
 }
 
 function getChannelLabelAndIconUrl(channel: ChannelRecord) {

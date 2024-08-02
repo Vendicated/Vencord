@@ -297,6 +297,9 @@ export default {
                 // From the API documentation
                 ignoredRemovals: [["SPECTATE"]],
             },
+            MessageReferenceType: {
+                type: "enum",
+            },
             PollLayoutType: {
                 type: "enum",
             },

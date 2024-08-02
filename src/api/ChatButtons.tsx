@@ -11,7 +11,7 @@ import { Logger } from "@utils/Logger";
 import type { ChannelRecord } from "@vencord/discord-types";
 import { waitFor } from "@webpack";
 import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
-import type { HTMLProps, JSX, MouseEventHandler, ReactNode } from "react";
+import type { ComponentType, HTMLProps, MouseEventHandler, ReactNode } from "react";
 
 let ChannelTextAreaClasses: Record<"button" | "buttonContainer", string> | undefined;
 waitFor(["buttonContainer", "channelTextArea"], m => { ChannelTextAreaClasses = m; });
@@ -74,7 +74,7 @@ export interface ChatBarProps {
     };
 }
 
-export type ChatBarButton = (props: ChatBarProps & { isMainChat: boolean; }) => JSX.Element | null;
+export type ChatBarButton = ComponentType<ChatBarProps & { isMainChat: boolean; }>;
 
 const buttonFactories = new Map<string, ChatBarButton>();
 const logger = new Logger("ChatButtons");

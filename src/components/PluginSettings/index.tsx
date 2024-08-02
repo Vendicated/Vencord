@@ -35,7 +35,7 @@ import { useAwaiter } from "@utils/react";
 import type { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { AlertActionCreators, Button, Card, Forms, lodash, MarkupUtils, Select, Text, TextInput, Toasts, Tooltip, useEffect, useMemo, useState } from "@webpack/common";
-import type { HTMLProps, JSX } from "react";
+import type { HTMLProps, ReactElement } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
 
@@ -287,8 +287,8 @@ export default function PluginSettings() {
         return lodash.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
     }));
 
-    const plugins: JSX.Element[] = [];
-    const requiredPlugins: JSX.Element[] = [];
+    const plugins: ReactElement[] = [];
+    const requiredPlugins: ReactElement[] = [];
 
     const showApi = searchValue.value.includes("API");
     for (const p of sortedPlugins) {

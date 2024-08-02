@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { JSX } from "react";
+import type { ReactNode } from "react";
 
-export type AccessoryCallback = (props: Record<string, any>) => (JSX.Element | null)[] | JSX.Element | null;
+export type AccessoryCallback = (props: Record<string, any>) => ReactNode;
 export type Accessory = {
     callback: AccessoryCallback;
     position?: number;
@@ -42,17 +42,13 @@ export function removeAccessory(identifier: string) {
 }
 
 export function _modifyAccessories(
-    elements: JSX.Element[],
+    elements: ReactNode[],
     props: Record<string, any>
 ) {
     for (const accessory of accessories.values()) {
-        let accessories = accessory.callback(props);
-        if (accessories == null)
-            continue;
-
-        if (!Array.isArray(accessories))
-            accessories = [accessories];
-        else if (accessories.length === 0)
+        const accessories = accessory.callback(props);
+        // Exclude accessories that won't be rendered
+        if (accessories == null || typeof accessories === "boolean")
             continue;
 
         elements.splice(
@@ -62,9 +58,23 @@ export function _modifyAccessories(
                     : accessory.position
                 : elements.length,
             0,
-            ...accessories.filter(e => e != null)
+            // Don't iterate over strings
+            ...typeof accessories === "object" && Symbol.iterator in accessories
+                // Exclude accessories that won't be rendered
+                ? filterIterable(accessories, a => a != null && typeof a !== "boolean")
+                : [accessories]
         );
     }
 
     return elements;
+}
+
+type Values<T extends Iterable<unknown>> = T extends Iterable<infer U> ? U : never;
+
+function filterIterable<T extends Iterable<unknown>, S extends Values<T>>(iterable: T, predicate: (value: Values<T>) => value is S): T & Iterable<S>;
+function filterIterable<T extends Iterable<unknown>>(iterable: T, predicate: (value: Values<T>) => unknown): T;
+function* filterIterable<T>(iterable: Iterable<T>, predicate: (value: T) => unknown) {
+    for (const value of iterable)
+        if (predicate(value))
+            yield value;
 }

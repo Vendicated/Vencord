@@ -44,7 +44,7 @@
         "nanoid": "^5.0.7"
     },
     "devDependencies": {
-        "@stylistic/eslint-plugin": "^2.6.0",
+        "@stylistic/eslint-plugin": "^2.6.1",
         "@stylistic/stylelint-config": "^2.0.0",
         "@stylistic/stylelint-plugin": "^3.0.0",
         "@types/chrome": "^0.0.269",
@@ -61,6 +61,7 @@
         "esbuild": "^0.23.0",
         "eslint": "^9.8.0",
         "eslint-plugin-path-alias": "^2.1.0",
+        "eslint-plugin-react": "^7.35.0",
         "eslint-plugin-simple-header": "^1.1.1",
         "eslint-plugin-simple-import-sort": "^12.1.1",
         "eslint-plugin-unused-imports": "^4.0.1",
@@ -72,7 +73,7 @@
         "stylelint": "^16.8.1",
         "stylelint-config-standard": "^36.0.1",
         "ts-patch": "^3.2.1",
-        "tsx": "^4.16.3",
+        "tsx": "^4.16.5",
         "type-fest": "^4.23.0",
         "typescript": "^5.5.4",
         "typescript-eslint": "^8.0.0",
@@ -82,7 +83,7 @@
     "packageManager": "pnpm@9.6.0",
     "pnpm": {
         "patchedDependencies": {
-            "@stylistic/eslint-plugin-js@2.6.0": "patches/@stylistic__eslint-plugin-js@2.6.0.patch",
+            "@stylistic/eslint-plugin-js@2.6.1": "patches/@stylistic__eslint-plugin-js@2.6.1.patch",
             "eslint-plugin-path-alias@2.1.0": "patches/eslint-plugin-path-alias@2.1.0.patch",
             "eslint@9.8.0": "patches/eslint@9.8.0.patch",
             "standalone-electron-types@1.0.0": "patches/standalone-electron-types@1.0.0.patch"
@@ -97,6 +98,23 @@
             "resolve-url": "*",
             "source-map-url": "*",
             "urix": "*"
+        },
+        "overrides": {
+            "array-includes": "npm:@nolyfill/array-includes@^1",
+            "array.prototype.findlast": "npm:@nolyfill/array.prototype.findlast@^1",
+            "array.prototype.flat": "npm:@nolyfill/array.prototype.flat@^1",
+            "array.prototype.flatmap": "npm:@nolyfill/array.prototype.flatmap@^1",
+            "array.prototype.tosorted": "npm:@nolyfill/array.prototype.tosorted@^1",
+            "es-iterator-helpers": "npm:@nolyfill/es-iterator-helpers@^1",
+            "hasown": "npm:@nolyfill/hasown@^1",
+            "is-core-module": "npm:@nolyfill/is-core-module@^1",
+            "isarray": "npm:@nolyfill/isarray@^1",
+            "object.assign": "npm:@nolyfill/object.assign@^1",
+            "object.entries": "npm:@nolyfill/object.entries@^1",
+            "object.fromentries": "npm:@nolyfill/object.fromentries@^1",
+            "object.values": "npm:@nolyfill/object.values@^1",
+            "string.prototype.matchall": "npm:@nolyfill/string.prototype.matchall@^1",
+            "string.prototype.repeat": "npm:@nolyfill/string.prototype.repeat@^1"
         }
     },
     "webExt": {

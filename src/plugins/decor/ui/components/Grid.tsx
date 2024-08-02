@@ -5,12 +5,12 @@
  */
 
 import { React } from "@webpack/common";
-import type { JSX } from "react";
+import type { ReactElement } from "react";
 
 import { cl } from "../";
 
 export interface GridProps<ItemT> {
-    renderItem: (item: ItemT) => JSX.Element;
+    renderItem: (item: ItemT) => ReactElement;
     getItemKey: (item: ItemT) => string;
     itemKeyPrefix?: string;
     items: ItemT[];
