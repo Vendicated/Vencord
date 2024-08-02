@@ -9,22 +9,14 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Menu, NavigationRouter } from "@webpack/common";
 
-function jumpToFirstMessage(props)
-{
-    const guildid = props.guild_id !== null ? props.guild_id : "@me";
-    const channelid = props.id;
-    const url = `/channels/${guildid}/${channelid}/0`;
-    NavigationRouter.transitionTo(url);
-}
-
 const MenuPatch: NavContextMenuPatchCallback = (children, { channel }) => {
+    if (!channel) return;
+
     children.push(
         <Menu.MenuItem
             id="vc-jump-to-first"
             label="Jump To First Message"
-            action={() => {
-                jumpToFirstMessage(channel);
-            }}
+            action={() => NavigationRouter.transitionTo(`/channels/${channel.guild_id ?? "@me"}/${channel.id}/0`)}
         />
     );
 };
@@ -32,9 +24,8 @@ const MenuPatch: NavContextMenuPatchCallback = (children, { channel }) => {
 export default definePlugin({
     name: "JumpToStart",
     description: "Adds a context menu option to jump to the start of a channel/DM",
-    authors: [ Devs.Samwich ],
-    contextMenus:
-    {
+    authors: [Devs.Samwich],
+    contextMenus: {
         "channel-context": MenuPatch,
         "user-context": MenuPatch,
         "thread-context": MenuPatch
