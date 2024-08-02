@@ -36,7 +36,7 @@ for (const variable of ["DISCORD_TOKEN", "CHROMIUM_BIN"]) {
 const CANARY = process.env.USE_CANARY === "true";
 
 const browser = await pup.launch({
-    headless: "new",
+    headless: true,
     executablePath: process.env.CHROMIUM_BIN
 });
 

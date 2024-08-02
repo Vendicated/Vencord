@@ -101,9 +101,8 @@
     display: flex;
     flex-direction: column;
     padding: 0.2rem;
-    justify-content: center;
     align-items: flex-start;
-    align-content: flex-start;
+    place-content: flex-start center;
     overflow: hidden;
 }
 

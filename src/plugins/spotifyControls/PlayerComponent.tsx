@@ -165,7 +165,6 @@ function SeekBar() {
 
     const [position, setPosition] = useState(storePosition);
 
-    // eslint-disable-next-line consistent-return
     useEffect(() => {
         if (isPlaying && !isSettingPosition) {
             setPosition(SpotifyStore.position);
@@ -358,7 +357,7 @@ export function Player() {
     const [shouldHide, setShouldHide] = useState(false);
 
     // Hide player after 5 minutes of inactivity
-    // eslint-disable-next-line consistent-return
+
     React.useEffect(() => {
         setShouldHide(false);
         if (!isPlaying) {

@@ -66,7 +66,6 @@ export let DraftStore: t.DraftStore;
  *
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
-// eslint-disable-next-line prefer-destructuring
 export const useStateFromStores: t.useStateFromStores = findByCodeLazy("useStateFromStores");
 
 waitForStore("DraftStore", s => DraftStore = s);
