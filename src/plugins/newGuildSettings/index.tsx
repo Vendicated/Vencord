@@ -24,11 +24,11 @@ import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { CogWheel } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCode, findByPropsAndExtract, mapMangledModule } from "@webpack";
+import { findByCode, findProp, mapMangledModule } from "@webpack";
 import { Menu } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
-const updateGuildNotificationSettings = findByPropsAndExtract("updateGuildNotificationSettings");
+const updateGuildNotificationSettings = findProp("updateGuildNotificationSettings");
 const { toggleShowAllChannels } = mapMangledModule(".onboardExistingMember(", {
     toggleShowAllChannels: m => {
         const s = String(m);

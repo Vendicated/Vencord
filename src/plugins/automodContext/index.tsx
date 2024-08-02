@@ -7,10 +7,10 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsAndExtract } from "@webpack";
+import { findProp } from "@webpack";
 import { Button, ChannelStore, Text } from "@webpack/common";
 
-const selectChannel = findByPropsAndExtract("selectChannel", "selectVoiceChannel");
+const selectChannel = findProp("selectChannel", "selectVoiceChannel");
 
 function jumpToMessage(channelId: string, messageId: string) {
     const guildId = ChannelStore.getChannel(channelId)?.guild_id;

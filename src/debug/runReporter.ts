@@ -84,7 +84,6 @@ async function runReporter() {
 
                             if (findResult[SYM_PROXY_INNER_GET] != null) {
                                 result = findResult[SYM_PROXY_INNER_VALUE];
-
                                 break;
                             }
 

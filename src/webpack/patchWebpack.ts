@@ -47,36 +47,34 @@ define(Function.prototype, "m", {
     set(this: AnyWebpackRequire, originalModules: AnyWebpackRequire["m"]) {
         define(this, "m", { value: originalModules });
 
-        // We may also catch Discord bundled libs, React Devtools or other extensions WebpackInstance here.
-        // This ensures we actually got the right ones
+        // Ensure this is one of Discord main WebpackInstances.
+        // We may catch Discord bundled libs, React Devtools or other extensions WebpackInstances here.
         const { stack } = new Error();
-        if (!stack?.includes("/assets/") || stack?.match(/at \d+? \(/) || !String(this).includes("exports:{}")) {
+        if (!stack?.includes("http") || stack.match(/at \d+? \(/) || !String(this).includes("exports:{}")) {
             return;
         }
 
-        const fileName = stack?.match(/\/assets\/(.+?\.js)/)?.[1];
+        const fileName = stack.match(/\/assets\/(.+?\.js)/)?.[1];
         logger.info("Found Webpack module factories" + interpolateIfDefined` in ${fileName}`);
 
         allWebpackInstances.add(this);
 
-        // Define a setter for the bundlePath property of WebpackRequire. Only the main Webpack has this property.
+        // Define a setter for the ensureChunk property of WebpackRequire. Only the main Webpack (which is the only that includes chunk loading) has this property.
         // So if the setter is called, this means we can initialize the internal references to WebpackRequire.
-        define(this, "p", {
+        define(this, "e", {
             enumerable: false,
 
-            set(this: WebpackRequire, bundlePath: WebpackRequire["p"]) {
-                define(this, "p", { value: bundlePath });
+            set(this: WebpackRequire, ensureChunk: WebpackRequire["e"]) {
+                define(this, "e", { value: ensureChunk });
                 clearTimeout(setterTimeout);
-
-                if (bundlePath !== "/assets/") return;
 
                 logger.info("Main Webpack found" + interpolateIfDefined` in ${fileName}` + ", initializing internal references to WebpackRequire");
                 _initWebpack(this);
             }
         });
         // setImmediate to clear this property setter if this is not the main Webpack.
-        // If this is the main Webpack, wreq.p will always be set before the timeout runs.
-        const setterTimeout = setTimeout(() => Reflect.deleteProperty(this, "p"), 0);
+        // If this is the main Webpack, wreq.e will always be set before the timeout runs.
+        const setterTimeout = setTimeout(() => Reflect.deleteProperty(this, "e"), 0);
 
         // Patch the pre-populated factories
         for (const id in originalModules) {
@@ -278,7 +276,7 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
         }
 
         exports = module.exports;
-        if (exports == null) return;
+        if (exports == null) return factoryReturn;
 
         // There are (at the time of writing) 11 modules exporting the window
         // Make these non enumerable to improve webpack search performance
@@ -394,7 +392,13 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
 
         patchedBy.add(patch.plugin);
 
-        const executePatch = traceFunctionWithResults(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => code.replace(match, replace));
+        const executePatch = traceFunctionWithResults(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => {
+            if (match instanceof RegExp && match.global) {
+                match.lastIndex = 0;
+            }
+
+            return code.replace(match, replace);
+        });
         const previousCode = code;
         const previousFactory = factory;
 

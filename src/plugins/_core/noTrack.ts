@@ -93,11 +93,11 @@ export default definePlugin({
                 // Ensure this is most likely the Sentry WebpackInstance.
                 // Function.g is a very generic property and is not uncommon for another WebpackInstance (or even a React component: <g></g>) to include it
                 const { stack } = new Error();
-                if (!stack?.includes("/assets/") || !String(this).includes("exports:{}") || this.c != null) {
+                if (this.c != null || !stack?.includes("http") || !String(this).includes("exports:{}")) {
                     return;
                 }
 
-                const assetPath = stack?.match(/\/assets\/.+?\.js/)?.[0];
+                const assetPath = stack.match(/\/assets\/.+?\.js/)?.[0];
                 if (!assetPath) {
                     return;
                 }

@@ -107,7 +107,7 @@ export const filters = {
     },
 
     byStoreName: (name: StoreNameFilter): FilterFn => {
-        const filter: FilterFn = m => m?.constructor?.displayName === name;
+        const filter: FilterFn = m => m?.constructor?.displayName === name || m?.constructor?.persistKey === name;
 
         filter.$$vencordProps = ["byStoreName", name];
         return filter;
@@ -143,7 +143,7 @@ export const filters = {
     }
 };
 
-export const webpackSearchHistory = [] as Array<["waitFor" | "find" | "findComponent" | "findExportedComponent" | "findComponentByCode" | "findByProps" | "findByPropsAndExtract" | "findByCode" | "findStore" | "findByFactoryCode" | "mapMangledModule" | "extractAndLoadChunks" | "webpackDependantLazy" | "webpackDependantLazyComponent", any[]]>;
+export const webpackSearchHistory = [] as Array<["waitFor" | "find" | "findComponent" | "findExportedComponent" | "findComponentByCode" | "findByProps" | "findProp" | "findByCode" | "findStore" | "findByFactoryCode" | "mapMangledModule" | "extractAndLoadChunks" | "webpackDependantLazy" | "webpackDependantLazyComponent", any[]]>;
 
 function printFilter(filter: FilterFn) {
     if (filter.$$vencordProps != null) {
@@ -349,19 +349,20 @@ export function findByProps<T = any>(...props: PropsFilter | [...PropsFilter, (m
 /**
  * Find the first prop value defined by the first prop name, which is in a module exports or export including all the given props.
  *
- * @example const getUser = findByPropsAndExtract("getUser", "fetchUser")
+ * @example const getUser = findProp("getUser", "fetchUser")
+ * // An object which contains the getUser and fetchUser props is found and the value of getUser is returned
  *
  * @param props A list of props to search the module or exports for
  * @param parse A function that takes the find result as its first argument and returns something. Useful if you want to use a value from the find result, instead of all of it. Defaults to the find result itself
  */
-export function findByPropsAndExtract<T = any>(...props: PropsFilter | [...PropsFilter, (module: ModuleExports) => T]) {
+export function findProp<T = any>(...props: PropsFilter | [...PropsFilter, (module: ModuleExports) => T]) {
     const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (module: ModuleExports) => T;
     const newProps = props as PropsFilter;
 
     const result = find<T>(filters.byProps(...newProps), m => parse(m[newProps[0]]), { isIndirect: true });
 
     if (IS_REPORTER) {
-        webpackSearchHistory.push(["findByPropsAndExtract", [result, ...newProps]]);
+        webpackSearchHistory.push(["findProp", [result, ...newProps]]);
     }
 
     return result;
