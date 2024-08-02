@@ -91,7 +91,7 @@ export default definePlugin({
 
         /* new profiles */
         {
-            find: ".PANEL]:14",
+            find: ".FULL_SIZE]:26",
             replacement: {
                 match: /(?<=(\i)=\(0,\i\.\i\)\(\i\);)return 0===\i.length\?/,
                 replace: "$1.unshift(...$self.getBadges(arguments[0].displayProfile));$&"
@@ -136,6 +136,8 @@ export default definePlugin({
     },
 
     getBadges(props: { userId: string; user?: User; guildId: string; }) {
+        if (!props) return [];
+
         try {
             props.userId ??= props.user?.id!;
 

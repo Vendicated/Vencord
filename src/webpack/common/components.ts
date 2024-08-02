@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line path-alias/no-relative
 import { filters, findByPropsLazy, waitFor } from "@webpack";
 
 import { waitForComponent } from "./internal";
@@ -33,6 +32,7 @@ export let Card: t.Card;
 export let Button: t.Button;
 export let Switch: t.Switch;
 export let Tooltip: t.Tooltip;
+export let TooltipContainer: t.TooltipContainer;
 export let TextInput: t.TextInput;
 export let TextArea: t.TextArea;
 export let Text: t.Text;
@@ -66,6 +66,7 @@ waitFor(["FormItem", "Button"], m => {
         Button,
         FormSwitch: Switch,
         Tooltip,
+        TooltipContainer,
         TextInput,
         TextArea,
         Text,

@@ -119,7 +119,9 @@ function ReviewList({ refetch, reviews, hideOwnReview, profileId }: { refetch():
 }
 
 
-export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; }) {
+export function ReviewsInputComponent(
+    { discordId, isAuthor, refetch, name, modalKey }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; modalKey?: string; }
+) {
     const { token } = Auth;
     const editorRef = useRef<any>(null);
     const inputType = ChatInputTypes.FORM;
@@ -148,6 +150,7 @@ export function ReviewsInputComponent({ discordId, isAuthor, refetch, name }: { 
                     type={inputType}
                     disableThemedBackground={true}
                     setEditorRef={ref => editorRef.current = ref}
+                    parentModalKey={modalKey}
                     textValue=""
                     onSubmit={
                         async res => {
