@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line path-alias/no-relative
-import { _resolveDiscordLoaded, filters, find, findByCode, findByProps, mapMangledModule, waitFor } from "../api";
+import { _resolveDiscordLoaded, filters, find, findByCode, findByProps, mapMangledModule, waitFor } from "@webpack";
+
 import type * as t from "./types/utils";
 
 export const FluxDispatcher = findByProps<t.FluxDispatcher>("dispatch", "subscribe", (m: t.FluxDispatcher) => {

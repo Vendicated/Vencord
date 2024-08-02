@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// eslint-disable-next-line path-alias/no-relative
-import { find } from "../api";
+import { find } from "@webpack";
 
 export const UserSettingsActionCreators = {
     FrecencyUserSettingsActionCreators: find(m => m.ProtoClass?.typeName?.endsWith(".FrecencyUserSettings")),

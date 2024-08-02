@@ -17,9 +17,8 @@
 */
 
 import { NoopComponent } from "@utils/react";
+import { filters, findByProps, findComponent, findComponentByCode, findExportedComponent } from "@webpack";
 
-// eslint-disable-next-line path-alias/no-relative
-import { filters, findByProps, findComponent, findComponentByCode, findExportedComponent } from "../api";
 import * as t from "./types/components";
 
 export let Card: t.Card = NoopComponent as any;

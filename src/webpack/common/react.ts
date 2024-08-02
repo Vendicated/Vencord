@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line path-alias/no-relative
-import { findByProps } from "../api";
+import { findByProps } from "@webpack";
 
 export let useState: typeof React.useState;
 export let useEffect: typeof React.useEffect;

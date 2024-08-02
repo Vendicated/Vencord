@@ -30,7 +30,7 @@ function onPickColor(color: number) {
     updateColorVars(hexColor);
 }
 
-const saveClientTheme = findByCode('type:"UNSYNCED_USER_SETTINGS_UPDATE",settings:{useSystemTheme:"system"===');
+const saveClientTheme = findByCode('type:"UNSYNCED_USER_SETTINGS_UPDATE', '"system"===');
 
 function setTheme(theme: string) {
     saveClientTheme({ theme });

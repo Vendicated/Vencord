@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line path-alias/no-relative
-import { findByCode, findByProps, findStore } from "../api";
+import { findByCode, findByProps, findStore } from "@webpack";
+
 import * as t from "./types/stores";
 
 export const Flux = findByProps<t.Flux>("connectStores");
