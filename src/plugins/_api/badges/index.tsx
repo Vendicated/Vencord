@@ -91,19 +91,15 @@ export default definePlugin({
 
         /* new profiles */
         {
-            find: ".PANEL]:14",
+            find: ".FULL_SIZE]:26",
             replacement: {
-                match: /(?<=\i=\(0,\i\.default\)\(\i\);)return 0===\i.length/,
-                replace: "$& && $self.getBadges(arguments[0]?.displayProfile).length===0"
+                match: /(?<=(\i)=\(0,\i\.\i\)\(\i\);)return 0===\i.length\?/,
+                replace: "$1.unshift(...$self.getBadges(arguments[0].displayProfile));$&"
             }
         },
         {
             find: ".description,delay:",
             replacement: [
-                {
-                    match: /...(\i)\}=\(0,\i\.useUserProfileAnalyticsContext\)\(\);/,
-                    replace: "$&arguments[0].badges?.unshift(...$self.getBadges($1));"
-                },
                 {
                     // alt: "", aria-hidden: false, src: originalSrc
                     match: /alt:" ","aria-hidden":!0,src:(?=.{0,20}(\i)\.icon)/,
@@ -140,6 +136,8 @@ export default definePlugin({
     },
 
     getBadges(props: { userId: string; user?: User; guildId: string; }) {
+        if (!props) return [];
+
         try {
             props.userId ??= props.user?.id!;
 
