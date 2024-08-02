@@ -83,9 +83,17 @@ export default definePlugin({
     ],
     settings,
     calculateNameColorForMessageContext(context: any) {
-        return calculateNameColorForUser(BigInt(context.message.author.id));
+        const id = context?.message?.author?.id;
+        if (id == null) {
+            return null;
+        }
+        return calculateNameColorForUser(BigInt(id));
     },
     calculateNameColorForListContext(context: any) {
-        return calculateNameColorForUser(BigInt(context.user.id));
+        const id = context?.user?.id;
+        if (id == null) {
+            return null;
+        }
+        return calculateNameColorForUser(BigInt(id));
     },
 });
