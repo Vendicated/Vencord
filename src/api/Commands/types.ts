@@ -59,7 +59,7 @@ export interface Option {
 
 export interface ChoicesOption {
     label: string;
-    value: string;
+    value: any;
     name: string;
     displayName?: string;
 }
