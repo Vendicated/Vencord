@@ -59,7 +59,7 @@ export interface Option {
 
 export interface ChoicesOption {
     label: string;
-    value: any;
+    value: string;
     name: string;
     displayName?: string;
 }
@@ -79,7 +79,7 @@ export interface CommandReturnValue {
 export interface Argument {
     type: ApplicationCommandOptionType;
     name: string;
-    value: string | number | boolean;
+    value: any;
     focused: undefined;
     options: Argument[];
 }
