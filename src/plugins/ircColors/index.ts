@@ -48,8 +48,7 @@ function calculateNameColorForUser(id: bigint) {
 
 const settings = definePluginSettings({
     lightness: {
-        description: "Lightness, in %. Change if the colors are too light or too dark.",
-        restartNeeded: true,
+        description: "Lightness, in %. Change if the colors are too light or too dark. Reopen the chat to apply.",
         type: OptionType.NUMBER,
         default: 70,
     },
