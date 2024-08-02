@@ -56,7 +56,7 @@ const settings = definePluginSettings({
         description: "Replace role colors in the member list",
         restartNeeded: true,
         type: OptionType.BOOLEAN,
-        default: false,
+        default: true,
     },
 });
 
