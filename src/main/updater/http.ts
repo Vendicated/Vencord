@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { get } from "@main/utils/simpleGet";
 import { IpcEvents } from "@shared/IpcEvents";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { ipcMain } from "electron";
@@ -25,8 +26,6 @@ import { join } from "path";
 import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 
-// eslint-disable-next-line path-alias/no-relative
-import { get } from "../utils/simpleGet";
 import { serializeErrors, VENCORD_FILES } from "./common";
 
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;

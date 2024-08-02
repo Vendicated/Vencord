@@ -165,11 +165,9 @@ const overrideObject = (obj, propertyName, overrideValue) => {
     }
     let overriden = false;
     for (const key in obj) {
-        // eslint-disable-next-line no-prototype-builtins
         if (obj.hasOwnProperty(key) && key === propertyName) {
             obj[key] = overrideValue;
             overriden = true;
-            // eslint-disable-next-line no-prototype-builtins
         } else if (obj.hasOwnProperty(key) && typeof obj[key] === "object") {
             if (overrideObject(obj[key], propertyName, overrideValue)) {
                 overriden = true;
