@@ -19,7 +19,6 @@
 import type { MessageRecord } from "@vencord/discord-types";
 import { MarkupUtils, useEffect, useState } from "@webpack/common";
 
-import { Languages } from "./languages";
 import { TranslateIcon } from "./TranslateIcon";
 import { cl, type TranslationValue } from "./utils";
 
@@ -57,8 +56,7 @@ export function TranslationAccessory({ message }: { message: MessageRecord & { v
             <TranslateIcon width={16} height={16} />
             {MarkupUtils.parse(translation.text)}
             {" "}
-            {/* @ts-expect-error */}
-            (translated from {Languages[translation.src] ?? translation.src} - <Dismiss onDismiss={() => { setTranslation(undefined); }} />)
+            translated from {translation.sourceLanguage} - <Dismiss onDismiss={() => { setTranslation(undefined); }} />
         </span>
     );
 }

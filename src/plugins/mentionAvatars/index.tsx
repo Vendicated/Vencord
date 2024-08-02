@@ -6,11 +6,20 @@
 
 import "./styles.css";
 
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import type { UserRecord } from "@vencord/discord-types";
 import { SelectedGuildStore, useState } from "@webpack/common";
+
+const settings = definePluginSettings({
+    showAtSymbol: {
+        type: OptionType.BOOLEAN,
+        description: "Whether the the @ symbol should be displayed",
+        default: true
+    }
+});
 
 export default definePlugin({
     name: "MentionAvatars",
@@ -29,16 +38,26 @@ export default definePlugin({
         const { user, username } = props;
         const [isHovering, setIsHovering] = useState(false);
 
-        if (!user) return "@" + username;
+        if (!user) return getUsernameString(username);
 
         return (
             <span
                 onMouseEnter={() => { setIsHovering(true); }}
                 onMouseLeave={() => { setIsHovering(false); }}
             >
-                <img src={user.getAvatarURL(SelectedGuildStore.getGuildId(), 16, isHovering)} className="vc-mentionAvatars-avatar" />
-                @{username}
+                <img
+                    src={user.getAvatarURL(SelectedGuildStore.getGuildId(), 16, isHovering)}
+                    className="vc-mentionAvatars-avatar"
+                />
+                {getUsernameString(username)}
             </span>
         );
     }, { noop: true })
+
 });
+
+function getUsernameString(username: string) {
+    return settings.store.showAtSymbol
+        ? `@${username}`
+        : username;
+}

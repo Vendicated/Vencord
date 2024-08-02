@@ -8,7 +8,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
+import { classes, copyWithToast } from "@utils/misc";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, type ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import type { UserRecord } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
@@ -45,7 +45,11 @@ interface Section {
     authorIds?: string[];
 }
 
-function SectionHeader({ section }: { section: Section; }) {
+interface SectionHeaderProps {
+    section: Section;
+}
+
+function SectionHeader({ section }: SectionHeaderProps) {
     const hasSubtitle = typeof section.subtitle !== "undefined";
     const hasAuthorIds = typeof section.authorIds !== "undefined";
 
@@ -224,12 +228,17 @@ function ChangeDecorationModal(props: ModalProps) {
                                 Part of the {activeDecorationPreset.name} Preset
                             </Forms.FormTitle>
                         )}
-                        {typeof activeSelectedDecoration === "object" && (
+                        {isActiveDecorationPreset && (
+                            <Button onClick={() => { copyWithToast(activeDecorationPreset.id); }}>
+                                Copy Preset ID
+                            </Button>
+                        )}
+                        {activeSelectedDecoration && (
                             <Text
                                 variant="text-sm/semibold"
                                 color="header-primary"
                             >
-                                {activeSelectedDecoration?.alt}
+                                {activeSelectedDecoration.alt}
                             </Text>
                         )}
                         {activeDecorationHasAuthor && (

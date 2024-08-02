@@ -17,10 +17,9 @@
 */
 
 import { ChatBarButton } from "@api/ChatButtons";
-import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
-import { AlertActionCreators, Forms } from "@webpack/common";
+import { AlertActionCreators, Forms, Tooltip, useEffect, useState } from "@webpack/common";
 
 import { settings } from "./settings";
 import { TranslateModal } from "./TranslateModal";
@@ -38,49 +37,50 @@ export const TranslateIcon = ({ height = 24, width = 24, className }: { height?:
     </svg>
 );
 
+export let setShowTooltip: ((show: boolean) => void) | undefined;
+
 export const TranslateChatBarIcon: ChatBarButton = ({ isMainChat }) => {
     const { autoTranslate, showChatBarButton } = settings.use(["autoTranslate", "showChatBarButton"]);
+
+    const [showTooltip, $setShowTooltip] = useState(false);
+    useEffect(() => {
+        setShowTooltip = $setShowTooltip;
+        return () => setShowTooltip = undefined;
+    }, []);
 
     if (!isMainChat || !showChatBarButton) return null;
 
     function toggle() {
         const newState = !autoTranslate;
         settings.store.autoTranslate = newState;
-        if (newState && settings.store.showAutoTranslateAlert !== false)
+        if (newState && settings.store.showAutoTranslateAlert)
             AlertActionCreators.show({
                 title: "Vencord Auto-Translate Enabled",
                 body: (
-                    <>
-                        <Forms.FormText>
-                            You just enabled auto translate (by right clicking the Translate icon). Any message you send will automatically be translated before being sent.
-                        </Forms.FormText>
-                        <Forms.FormText className={Margins.top16}>
-                            If this was an accident, disable it again, or it will change your message content before sending.
-                        </Forms.FormText>
-                    </>
+                    <Forms.FormText>
+                        You just enabled Auto Translate! Any message <b>will automatically be translated</b> before being sent.
+                    </Forms.FormText>
                 ),
-                cancelText: "Disable Auto-Translate",
-                confirmText: "Got it",
+                confirmText: "Disable Auto-Translate",
+                cancelText: "Got it",
                 secondaryConfirmText: "Don't show again",
-                onConfirmSecondary() { settings.store.showAutoTranslateAlert = false; },
-                onCancel() { settings.store.autoTranslate = false; }
+                onConfirmSecondary: () => { settings.store.showAutoTranslateAlert = false; },
+                onConfirm: () => { settings.store.autoTranslate = false; },
+                // troll
+                confirmColor: "vc-notification-log-danger-btn",
             });
     }
 
-    return (
+    const button = (
         <ChatBarButton
             tooltip="Open Translate Modal"
             onClick={e => {
-                if (e.shiftKey) {
+                if (e.shiftKey)
                     toggle();
-                    return;
-                }
-
-                openModal(props => (
-                    <TranslateModal rootProps={props} />
-                ));
+                else
+                    openModal(props => <TranslateModal rootProps={props} />);
             }}
-            onContextMenu={() => { toggle(); }}
+            onContextMenu={toggle}
             buttonProps={{
                 "aria-haspopup": "dialog"
             }}
@@ -88,4 +88,13 @@ export const TranslateChatBarIcon: ChatBarButton = ({ isMainChat }) => {
             <TranslateIcon className={cl({ "auto-translate": autoTranslate, "chat-button": true })} />
         </ChatBarButton>
     );
+
+    if (showTooltip && settings.store.showAutoTranslateTooltip)
+        return (
+            <Tooltip text="Auto Translate Enabled" forceOpen>
+                {() => button}
+            </Tooltip>
+        );
+
+    return button;
 };

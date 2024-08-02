@@ -29,7 +29,7 @@ import type { MessageRecord } from "@vencord/discord-types";
 import { ChannelStore, Menu } from "@webpack/common";
 
 import { settings } from "./settings";
-import { TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
+import { setShowTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
 
@@ -54,8 +54,8 @@ const messageCtxPatch = ((children, { message }: { message: MessageRecord; }) =>
 
 export default definePlugin({
     name: "Translate",
-    description: "Translate messages with Google Translate",
-    authors: [Devs.Ven],
+    description: "Translate messages with Google Translate or DeepL",
+    authors: [Devs.Ven, Devs.AshtonMemer],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
     contextMenus: {
@@ -84,11 +84,17 @@ export default definePlugin({
             };
         });
 
+        let tooltipTimeout: ReturnType<typeof setTimeout>;
         this.preSend = addPreSendListener(async (_, message) => {
             if (!settings.store.autoTranslate) return;
             if (!message.content) return;
 
-            message.content = (await translate("sent", message.content)).text;
+            setShowTooltip?.(true);
+            clearTimeout(tooltipTimeout);
+            tooltipTimeout = setTimeout(() => { setShowTooltip?.(false); }, 2000);
+
+            const trans = await translate("sent", message.content);
+            message.content = trans.text;
         });
     },
 

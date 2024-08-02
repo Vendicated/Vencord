@@ -158,6 +158,7 @@ export default definePlugin({
     contextMenus: {
         "guild-context": MakeContextCallback("Guild"),
         "channel-context": MakeContextCallback("Channel"),
+        "thread-context": MakeContextCallback("Channel"),
         "user-context": MakeContextCallback("User")
     },
 

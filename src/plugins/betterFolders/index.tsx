@@ -250,6 +250,10 @@ export default definePlugin({
                     dispatchingFoldersClose = false;
                 });
             }
+        },
+
+        LOGOUT() {
+            closeFolders();
         }
     },
 

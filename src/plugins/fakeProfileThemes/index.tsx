@@ -26,7 +26,7 @@ import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { type ProfileThemeColors, UserPremiumType, type UserProfile, type UserRecord } from "@vencord/discord-types";
+import { type GuildRecord, type ProfileThemeColors, UserPremiumType, type UserProfile, type UserRecord } from "@vencord/discord-types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Flex, Forms, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
 import type { ReactNode } from "react";
@@ -46,53 +46,64 @@ function decode(bio: string): ProfileThemeColors | null {
     // /[#([0-9A-Fa-f]{1,6}),#([0-9A-Fa-f]{1,6})]/u
     const match = bio.match(/\u{E005B}\u{E0023}([\u{E0030}-\u{E0039}\u{E0041}-\u{E0046}\u{E0061}-\u{E0066}]{1,6})\u{E002C}\u{E0023}([\u{E0030}-\u{E0039}\u{E0041}-\u{E0046}\u{E0061}-\u{E0066}]{1,6})\u{E005D}/u);
 
-    if (match) {
-        const [, primary, accent] = match;
+    if (!match) return null;
 
-        let decodedPrimary = "";
-        for (const char of primary!)
-            decodedPrimary += String.fromCodePoint(char.codePointAt(0)! - 0xE0000);
+    const [, primary, accent] = match;
 
-        let decodedAccent = "";
-        for (const char of accent!)
-            decodedAccent += String.fromCodePoint(char.codePointAt(0)! - 0xE0000);
+    let decodedPrimary = "";
+    for (const char of primary!)
+        decodedPrimary += String.fromCodePoint(char.codePointAt(0)! - 0xE0000);
 
-        return [parseInt(decodedPrimary, 16), parseInt(decodedAccent, 16)];
-    }
+    let decodedAccent = "";
+    for (const char of accent!)
+        decodedAccent += String.fromCodePoint(char.codePointAt(0)! - 0xE0000);
 
-    return null;
+    return [parseInt(decodedPrimary, 16), parseInt(decodedAccent, 16)];
 }
 
-interface ColorPickerProps {
-    color: number | null;
-    label: ReactNode;
-    showEyeDropper?: boolean;
-    suggestedColors?: string[];
-    onChange: (value: number) => void;
+interface ColorSwatchProps {
+    color?: string | number | null | undefined;
+    colorPickerFooter?: ReactNode;
+    colorPickerMiddle?: ReactNode;
+    disabled?: boolean | undefined /* = false */;
+    label?: ReactNode;
+    onChange: (color: number) => void;
+    onClose?: (() => void) | undefined;
+    showEyeDropper?: boolean | undefined /* = false */;
+    suggestedColors?: string[] | null | undefined;
 }
 
-const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
-const requireColorPicker = extractAndLoadChunksLazy(
-    ["USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format"],
-    /createPromise:\(\)=>\i\.\i(\("?.+?"?\)).then\(\i\.bind\(\i,"?(.+?)"?\)\)/
-);
+const ColorSwatch = findComponentByCodeLazy<ColorSwatchProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
+const requireColorSwatch = extractAndLoadChunksLazy(["USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format"], /createPromise:\(\)=>\i\.\i(\("?.+?"?\)).then\(\i\.bind\(\i,"?(.+?)"?\)\)/);
 
 // I can't be bothered to figure out the semantics of this component. The
 // functions surely get some event argument sent to them and they likely aren't
 // all required. If anyone who wants to use this component stumbles across this
 // code, you'll have to do the research yourself.
-interface ProfileModalProps {
+interface ProfileCustomizationPreviewProps {
+    avatarClassName?: string | undefined;
+    canUsePremiumCustomization?: boolean | undefined /* = false */;
+    disabledInputs?: boolean | undefined /* = false */;
+    guild?: GuildRecord | null | undefined;
+    hideBioSection?: boolean | undefined /* = false */;
+    hideCustomStatus?: boolean | undefined /* = false */;
+    hideExampleButton?: boolean | undefined /* = false */;
+    hideMessageInput?: boolean | undefined /* = false */;
+    isTryItOutFlow?: boolean | undefined /* = false */;
+    onUpsellClick?: ((analyticsLocation: { object: /* AnalyticsObjects */ string; }) => void) | null | undefined;
+    pendingAvatar?: string | null | undefined;
+    pendingAvatarDecoration?: string | null | undefined;
+    pendingBanner?: string | null | undefined;
+    pendingBio?: string | null | undefined;
+    pendingGlobalName?: string | null | undefined;
+    pendingNickname?: string | null | undefined;
+    pendingProfileEffectId?: string | null | undefined;
+    pendingPronouns?: string | null | undefined;
+    pendingThemeColors?: [primaryColor?: number | null | undefined, accentColor?: number | null | undefined] | null | undefined;
     user: UserRecord;
-    pendingThemeColors: ProfileThemeColors;
-    onAvatarChange: () => void;
-    onBannerChange: () => void;
-    canUsePremiumCustomization: boolean;
-    hideExampleButton: boolean;
-    hideFakeActivity: boolean;
-    isTryItOutFlow: boolean;
 }
 
-const ProfileModal = findComponentByCodeLazy<ProfileModalProps>("isTryItOutFlow:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
+const ProfileCustomizationPreview = findComponentByCodeLazy<ProfileCustomizationPreviewProps>("isTryItOutFlow:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
 
 const settings = definePluginSettings({
     nitroFirst: {
@@ -132,7 +143,7 @@ export default definePlugin({
         const [primary, setPrimary] = useState(existingColors[0]);
         const [accent, setAccent] = useState(existingColors[1]);
 
-        const [, , loadingColorPickerChunk] = useAwaiter(requireColorPicker);
+        const [, , loadingColorPickerChunk] = useAwaiter(requireColorSwatch);
 
         return (
             <Forms.FormSection>
@@ -158,7 +169,7 @@ export default definePlugin({
                             direction={Flex.Direction.HORIZONTAL}
                             style={{ gap: "1rem" }}
                         >
-                            <ColorPicker
+                            <ColorSwatch
                                 color={primary}
                                 label={
                                     <Text
@@ -170,7 +181,7 @@ export default definePlugin({
                                 }
                                 onChange={setPrimary}
                             />
-                            <ColorPicker
+                            <ColorSwatch
                                 color={accent}
                                 label={
                                     <Text
@@ -198,14 +209,11 @@ export default definePlugin({
                     />
                     <Forms.FormTitle tag="h3">Preview</Forms.FormTitle>
                     <div className="vc-fpt-preview">
-                        <ProfileModal
+                        <ProfileCustomizationPreview
                             user={UserStore.getCurrentUser()!}
                             pendingThemeColors={[primary, accent]}
-                            onAvatarChange={() => { }}
-                            onBannerChange={() => { }}
                             canUsePremiumCustomization={true}
                             hideExampleButton={true}
-                            hideFakeActivity={true}
                             isTryItOutFlow={true}
                         />
                     </div>
