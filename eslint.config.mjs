@@ -36,7 +36,7 @@ export default tseslint.config(
                 ]
             }
         },
-        languageOptions:{
+        languageOptions: {
             parser: tseslint.parser,
             parserOptions: {
                 project: true,
@@ -58,10 +58,9 @@ export default tseslint.config(
             ],
 
             // Style Rules
-            "@stylistic/quotes":["error", "double", { "avoidEscape": true }],
             "@stylistic/jsx-quotes": ["error", "prefer-double"],
+            "@stylistic/quotes": ["error", "double", { "avoidEscape": true }],
             "@stylistic/no-mixed-spaces-and-tabs": "error",
-            "@stylistic/indent": ["error", 4, { "SwitchCase": 1 }],
             "@stylistic/arrow-parens": ["error", "as-needed"],
             "@stylistic/eol-last": ["error", "always"],
             "@stylistic/no-multi-spaces": "error",
@@ -76,7 +75,7 @@ export default tseslint.config(
             "@stylistic/no-extra-semi": "error",
 
             // TS Rules
-            "@typescript-eslint/func-call-spacing": ["error", "never"],
+            "@stylistic/ts/func-call-spacing": ["error", "never"],
 
             // ESLint Rules
             "yoda": "error",
