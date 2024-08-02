@@ -75,7 +75,7 @@ export default definePlugin({
         // PATCHES NEEDED FOR WEB/VESKTOP
         {
             find: "streamSourceNode",
-            predicate: () => IS_WEB || IS_VESKTOP,
+            predicate: () => !IS_DISCORD_DESKTOP,
             group: true,
             replacement: [
                 // to pervent the cap of 100
