@@ -66,7 +66,7 @@ export default definePlugin({
     authors: [Devs.Grzesiek11],
     patches: [
         {
-            find: "=\"SYSTEM_TAG\"",
+            find: '="SYSTEM_TAG"',
             replacement: {
                 match: /(?<=className:\i\.username,style:.{0,50}:void 0,)/,
                 replace: "style:{color:$self.calculateNameColorForMessageContext(arguments[0])},",
