@@ -161,7 +161,6 @@ export default definePlugin({
             return acc;
         }, {} as Omit<typeof props, "renderActions" | "application">), [props]);
 
-        
         if (!activities.length) return null;
 
         if (settings.store.allActivitiesStyle === "carousel") {
