@@ -183,14 +183,23 @@ export default definePlugin({
     },
 
     patches: [
-        // Profiles Modal pfp
-        ...["User Profile Modal - Context Menu", ".UserProfileTypes.FULL_SIZE,hasProfileEffect:"].map(find => ({
-            find,
+        // Avatar component used in User DMs "User Profile" popup in the right and Profiles Modal pfp
+        {
+            find: ".overlay:void 0,status:",
+            replacement: {
+                match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",{...\2,/,
+                replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openImage($1)},"
+            },
+            all: true
+        },
+        // Old Profiles Modal pfp
+        {
+            find: ".MODAL,hasProfileEffect",
             replacement: {
                 match: /\{src:(\i)(?=,avatarDecoration)/,
                 replace: "{src:$1,onClick:()=>$self.openImage($1)"
             }
-        })),
+        },
         // Banners
         ...[".NITRO_BANNER,", "=!1,canUsePremiumCustomization:"].map(find => ({
             find,
@@ -202,7 +211,7 @@ export default definePlugin({
                     'onClick:ev=>$1&&ev.target.style.backgroundImage&&$self.openImage($2),style:{cursor:$1?"pointer":void 0,'
             }
         })),
-        // User DMs "User Profile" popup in the right
+        // Old User DMs "User Profile" popup in the right
         {
             find: ".avatarPositionPanel",
             replacement: {
@@ -210,19 +219,11 @@ export default definePlugin({
                 replace: "$1style:($2)?{cursor:\"pointer\"}:{},onClick:$2?()=>{$self.openImage($3)}"
             }
         },
-        {
-            find: ".canUsePremiumProfileCustomization,{avatarSrc:",
-            replacement: {
-                match: /children:\(0,\i\.jsx\)\(\i,{src:(\i)/,
-                replace: "style:{cursor:\"pointer\"},onClick:()=>{$self.openImage($1)},$&"
-
-            }
-        },
         // Group DMs top small & large icon
         {
             find: /\.recipients\.length>=2(?!<isMultiUserDM.{0,50})/,
             replacement: {
-                match: /null==\i\.icon\?.+?src:(\(0,\i\.getChannelIconURL\).+?\))(?=[,}])/,
+                match: /null==\i\.icon\?.+?src:(\(0,\i\.\i\).+?\))(?=[,}])/,
                 replace: (m, iconUrl) => `${m},onClick:()=>$self.openImage(${iconUrl})`
             }
         },

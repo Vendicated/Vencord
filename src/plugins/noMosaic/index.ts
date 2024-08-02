@@ -27,7 +27,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "isGroupableMedia:function()",
+            find: '=>"IMAGE"===',
             replacement: {
                 match: /=>"IMAGE"===\i\|\|"VIDEO"===\i;/,
                 replace: "=>false;"
