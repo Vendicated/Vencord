@@ -427,3 +427,8 @@ export function WebsiteIcon(props: ImageProps) {
 
     return <img {...props} src={src} />;
 }
+
+export function soggyIcon(props: ImageProps) {
+    const src = "https://raw.githubusercontent.com/Zoidcord/assets/main/soggycat.webp";
+    return <img {...props} src={src} />;
+}

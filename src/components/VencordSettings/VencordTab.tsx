@@ -27,7 +27,7 @@ import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { Button, Card, Forms, React, Select, Switch } from "@webpack/common";
 
-import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "..";
+import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon, soggyIcon } from "..";
 import { openNotificationSettingsModal } from "./NotificationSettings";
 import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
@@ -129,6 +129,16 @@ function VencordSettings() {
                         Icon={GithubIcon}
                         text="View Source Code"
                         action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
+                    />
+                    <QuickAction
+                        Icon={soggyIcon}
+                        text="THE SOG"
+                        action={function () {
+                            const audioElement = document.createElement("audio");
+                            audioElement.src = "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai.mp3";
+                            audioElement.volume = 0.2;
+                            audioElement.play();
+                        }}
                     />
                 </QuickActionCard>
             </Forms.FormSection>
