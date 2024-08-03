@@ -132,7 +132,7 @@ export default definePlugin({
 
         data.streamSourceNode ??= data.audioContext.createMediaStreamSource(data.stream);
 
-        if(!data.gainNode){
+        if (!data.gainNode){
             const gain = data.gainNode = data.audioContext.createGain();
             data.streamSourceNode.connect(gain);
             gain.connect(data.audioContext.destination);
