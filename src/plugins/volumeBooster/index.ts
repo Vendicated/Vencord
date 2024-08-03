@@ -128,7 +128,7 @@ export default definePlugin({
         }
     ],
     patchVolume(data: StreamData){
-        if(data.stream.getAudioTracks().length === 0) return;
+        if (data.stream.getAudioTracks().length === 0) return;
 
         data.streamSourceNode ??= data.audioContext.createMediaStreamSource(data.stream);
 
