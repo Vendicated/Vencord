@@ -10,9 +10,9 @@ import * as Webpack from "@webpack";
 import { wreq } from "@webpack";
 import { AnyModuleFactory, ModuleFactory } from "webpack";
 
-const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
-
 export async function loadLazyChunks() {
+    const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
+
     try {
         LazyChunkLoaderLogger.log("Loading all chunks...");
 

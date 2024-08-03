@@ -69,10 +69,21 @@ const handler: ProxyHandler<any> = {
  *
  * @param factory Factory returning the result
  * @param attempts How many times to try to evaluate the factory before giving up
+ * @param errMsg The error message to throw when the factory fails
+ * @param primitiveErrMsg The error message to throw when factory result is a primitive
  * @returns Result of factory function
  */
-export function proxyLazy<T = any>(factory: () => T, attempts = 5): T {
+export function proxyLazy<T = any>(
+    factory: () => T,
+    attempts = 5,
+    errMsg: string | (() => string) = `proxyLazy factory failed:\n\n${factory}`,
+    primitiveErrMsg = "proxyLazy called on a primitive value.",
+    isChild = false
+): T {
     const get = makeLazy(factory, attempts, { isIndirect: true });
+
+    let isSameTick = true;
+    if (!isChild) setTimeout(() => isSameTick = false, 0);
 
     const proxyDummy = Object.assign(function () { }, {
         [SYM_LAZY_GET]() {
@@ -82,7 +93,7 @@ export function proxyLazy<T = any>(factory: () => T, attempts = 5): T {
                 }
 
                 if (!proxyDummy[SYM_LAZY_CACHED]) {
-                    throw new Error(`proxyLazy factory failed:\n\n${factory}`);
+                    throw new Error(typeof errMsg === "string" ? errMsg : errMsg());
                 } else {
                     if (typeof proxyDummy[SYM_LAZY_CACHED] === "function") {
                         proxy.toString = proxyDummy[SYM_LAZY_CACHED].toString.bind(proxyDummy[SYM_LAZY_CACHED]);
@@ -102,12 +113,34 @@ export function proxyLazy<T = any>(factory: () => T, attempts = 5): T {
                 return Reflect.get(target, p, receiver);
             }
 
+            // If we're still in the same tick, it means the lazy was immediately used.
+            // thus, we lazy proxy the get access to make things like destructuring work as expected
+            // meow here will also be a lazy
+            // `const { meow } = proxyLazy(() => ({ meow: [] }));`
+            if (!isChild && isSameTick) {
+                console.warn(
+                    "Destructuring webpack finds/proxyInner/proxyLazy at top level is deprecated. For more information read https://github.com/Vendicated/Vencord/pull/2409#issue-2277161516" +
+                    "\nConsider not destructuring, using findProp or if you really need to destructure, using mapMangledModule instead."
+                );
+
+                return proxyLazy(
+                    () => {
+                        const lazyTarget = target[SYM_LAZY_GET]();
+                        return Reflect.get(lazyTarget, p, lazyTarget);
+                    },
+                    attempts,
+                    errMsg,
+                    primitiveErrMsg,
+                    true
+                );
+            }
+
             const lazyTarget = target[SYM_LAZY_GET]();
             if (typeof lazyTarget === "object" || typeof lazyTarget === "function") {
                 return Reflect.get(lazyTarget, p, lazyTarget);
             }
 
-            throw new Error("proxyLazy called on a primitive value.");
+            throw new Error(primitiveErrMsg);
         }
     });
 

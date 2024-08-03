@@ -254,7 +254,7 @@ export function find<T = any>(filter: FilterFn, parse: (module: ModuleExports) =
     if (typeof parse !== "function")
         throw new Error("Invalid find parse. Expected a function got " + typeof parse);
 
-    const [proxy, setInnerValue] = proxyInner<T>(`Webpack find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value.");
+    const [proxy, setInnerValue] = proxyInner<T>(`Webpack find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
     waitFor(filter, m => setInnerValue(parse(m)), { isIndirect: true });
 
     if (IS_REPORTER && !isIndirect) {
@@ -552,7 +552,7 @@ export function mapMangledModule<S extends PropertyKey>(code: string | RegExp | 
 export function findModuleFactory(...code: CodeFilter) {
     const filter = filters.byFactoryCode(...code);
 
-    const [proxy, setInnerValue] = proxyInner<AnyModuleFactory>(`Webpack module factory find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value.");
+    const [proxy, setInnerValue] = proxyInner<AnyModuleFactory>(`Webpack module factory find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
     waitFor(filter, (_, { factory }) => setInnerValue(factory));
 
     if (proxy[SYM_PROXY_INNER_VALUE] != null) return proxy[SYM_PROXY_INNER_VALUE] as AnyModuleFactory;
@@ -573,7 +573,7 @@ export function findModuleFactory(...code: CodeFilter) {
 export function webpackDependantLazy<T = any>(factory: () => T, attempts?: number) {
     if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazy", [factory]]);
 
-    return proxyLazy<T>(factory, attempts);
+    return proxyLazy<T>(factory, attempts, `Webpack dependant lazy factory failed:\n\n${factory}`, "Webpack dependant lazy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the lazy.");
 }
 
 /**

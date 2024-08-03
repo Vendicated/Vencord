@@ -12,9 +12,9 @@ import { addPatch, patches } from "plugins";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 
-const ReporterLogger = new Logger("Reporter");
-
 async function runReporter() {
+    const ReporterLogger = new Logger("Reporter");
+
     try {
         ReporterLogger.log("Starting test...");
 
