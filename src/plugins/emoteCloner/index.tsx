@@ -360,13 +360,58 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
     }
 };
 
+const emojiRegex = /https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.([a-zA-Z]{3,4}).*/;
+const imageContextPatch: NavContextMenuPatchCallback = (children, props: {
+    src: string
+}) => {
+    // this context menu is called on normal images, as well as stock emojis.
+    const matches = [...props.src.match(emojiRegex) ?? []];
+    if(matches.length === 0) return;
+    children.push(buildMenuItem("Emoji", () => ({
+        id: matches[1],
+        isAnimated: (matches[2] === "gif"),
+        name: "ProfileEmoji"
+    })));
+};
+interface HangStatus {
+    emoji?: {
+        // used for unicode emojis and custom emojis
+        name: string
+        // used for custom emojis
+        id?: string,
+        animated?: boolean
+    }
+}
+const vcHangStatusContextPatch: NavContextMenuPatchCallback =(children, props: {
+        hangStatusActivity?: HangStatus
+}) => {
+    if(props.hangStatusActivity?.emoji?.id){
+        const e = props.hangStatusActivity.emoji as Emoji;
+        e.isAnimated = props.hangStatusActivity.emoji.animated ?? false;
+        children.push(buildMenuItem("Emoji", () => {
+            return e;
+        }));
+    }
+};
 export default definePlugin({
     name: "EmoteCloner",
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
     tags: ["StickerCloner"],
-    authors: [Devs.Ven, Devs.Nuckyz],
+    authors: [Devs.Ven, Devs.Nuckyz, Devs.sadan],
     contextMenus: {
         "message": messageContextMenuPatch,
-        "expression-picker": expressionPickerPatch
-    }
+        "expression-picker": expressionPickerPatch,
+        "user-context": vcHangStatusContextPatch,
+        "image-context": imageContextPatch,
+    },
+    patches: [
+        // needed to pass the HangStatus to the context menu
+        {
+            find: "canWatchStream",
+            replacement: {
+                match: /Menu".*?\.\.\.\i,/,
+                replace: "$&hangStatusActivity:this.props.hangStatusActivity,"
+            }
+        }
+    ],
 });
