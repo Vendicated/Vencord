@@ -21,7 +21,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 -   Request for plugins from Discord.
 
 <details>
-<summary>Extra included plugins (107 additional plugins)</summary>
+<summary>Extra included plugins (118 additional plugins)</summary>
 
 - AllCallTimers by MaxHerbold and D3SOX
 - AltKrispSwitch by newwares
@@ -114,6 +114,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - SearchFix by Jaxx
 - SekaiStickers by MaiKokain
 - ServerSearch by camila314
+- Shakespearean by vmohammad
 - ShowBadgesInChat by Inbestigator and KrystalSkull
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo (maintained by thororen)
