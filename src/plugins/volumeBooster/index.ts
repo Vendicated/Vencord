@@ -29,7 +29,7 @@ const settings = definePluginSettings({
         markers: makeRange(1, 5, 1),
         default: 2,
         stickToMarkers: true,
-    },
+    }
 });
 // for some godforsaken reason, the volume is ran through this formula before its stored. pathcing it out does not work.
 const PerceptualVolume = {
