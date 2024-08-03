@@ -1,13 +1,12 @@
 /*
-* Vencord, a Discord client mod
-* Copyright (c) 2024 Vendicated and contributors
-* SPDX-License-Identifier: GPL-3.0-or-later
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
-import { findByPropsLazy } from "@webpack";
 import { Card, Forms, PresenceStore, React, Select, SnowflakeUtils, Switch, TextInput, UserStore } from "@webpack/common";
 
 import { Activity, ActivityType, AppIdSetting, makeEmptyAppId } from ".";
@@ -120,7 +119,7 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
                                         <Forms.FormTitle className={`${Margins.top8} ${Margins.bottom8}`}>Stream URL (must be YouTube or Twitch)</Forms.FormTitle>
                                         <CheckedTextInput
                                             value={setting.newStreamUrl}
-                                            onChange={async (v) => {
+                                            onChange={async v => {
                                                 onChange(v, i, "newStreamUrl");
                                             }}
                                             validate={v => {
