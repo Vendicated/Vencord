@@ -115,6 +115,7 @@ const fakeNitroEmojiRegex = /\/emojis\/(\d+?)\.(png|webp|gif)/;
 const fakeNitroStickerRegex = /\/stickers\/(\d+?)\./;
 const fakeNitroGifStickerRegex = /\/attachments\/\d+?\/\d+?\/(\d+?)\.gif/;
 const hyperLinkRegex = /\[.+?\]\((https?:\/\/.+?)\)/;
+const ghostModeString = '||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​|| _ _ _ _ _';
 
 const settings = definePluginSettings({
     enableEmojiBypass: {
@@ -173,6 +174,12 @@ const settings = definePluginSettings({
         description: "What text the hyperlink should use. {{NAME}} will be replaced with the emoji/sticker name.",
         type: OptionType.STRING,
         default: "{{NAME}}"
+    },
+    ghostMode: {
+        description: "Utilizes ghost message bug to hide emoji URLs. Overrides the hyperlink option. Note that this is only possible due to a bug and is not guaranteed to work properly on all clients, though the offical clients do not seem to be planning a fix anytime soon.",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: false
     },
     disableEmbedPermissionCheck: {
         description: "Whether to disable the embed permission check when sending fake emojis and stickers",
@@ -869,10 +876,15 @@ export default definePlugin({
             });
         }
 
+        function messageIsOnlyEmote(content) {
+            return !content.replace(/(?<!\\)<a?:\w+:\d+>/, "").trim().length;
+        }
+
         this.preSend = addPreSendListener(async (channelId, messageObj, extra) => {
             const { guildId } = this;
 
             let hasBypass = false;
+            let doGhost = s.ghostMode && !messageIsOnlyEmote(messageObj.content);
 
             stickerBypass: {
                 if (!s.enableStickerBypass)
@@ -929,6 +941,8 @@ export default definePlugin({
             }
 
             if (s.enableEmojiBypass) {
+                let urls = [];
+
                 for (const emoji of messageObj.validNonShortcutEmojis) {
                     if (this.canUseEmote(emoji, channelId)) continue;
 
@@ -942,10 +956,18 @@ export default definePlugin({
 
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
-                    messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
-                        return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
-                    });
+                    if (doGhost)
+                        messageObj.content = messageObj.content.replace(emojiString, "");
+                    else
+                        messageObj.content = messageObj.content.replace(emojiString, (match, offset, origStr) => {
+                            return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + match.length)}`;
+                        });
+
+                    urls.push(url);
                 }
+
+                if (doGhost)
+                    messageObj.content += ghostModeString + urls.join(" ");
             }
 
             if (hasBypass && !s.disableEmbedPermissionCheck && !hasEmbedPerms(channelId)) {
@@ -961,8 +983,19 @@ export default definePlugin({
             if (!s.enableEmojiBypass) return;
 
             let hasBypass = false;
+            let doGhost = s.ghostMode && !messageIsOnlyEmote(messageObj.content);
 
-            messageObj.content = messageObj.content.replace(/(?<!\\)<a?:(?:\w+):(\d+)>/ig, (emojiStr, emojiId, offset, origStr) => {
+            let urls = [];
+
+            let pattern = /(?<!\\)<a?:(?:\w+):(\d+)>/ig;
+            let content = messageObj.content;
+            let match;
+            while ((match = pattern.exec(content))) {
+                let emojiStr = match[0];
+                let emojiId = match[1];
+                let offset = match.index;
+                let origStr = messageObj.content;
+
                 const emoji = EmojiStore.getCustomEmojiById(emojiId);
                 if (emoji == null) return emojiStr;
                 if (this.canUseEmote(emoji, channelId)) return emojiStr;
@@ -972,11 +1005,23 @@ export default definePlugin({
                 const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
                 url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
+                urls.push(url);
 
                 const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
-                return `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
-            });
+                let replacement;
+                if (doGhost)
+                    replacement = "";
+                else
+                    replacement = `${getWordBoundary(origStr, offset - 1)}${s.useHyperLinks ? `[${linkText}](${url})` : url}${getWordBoundary(origStr, offset + emojiStr.length)}`;
+
+                content = content.slice(0,offset) + replacement + content.slice(offset + emojiStr.length, content.length);
+            }
+
+            if (doGhost)
+                content += content.includes(ghostModeString) ? " " + urls.join(" ") : ghostModeString + urls.join(" ");
+
+            messageObj.content = content;
 
             if (hasBypass && !s.disableEmbedPermissionCheck && !hasEmbedPerms(channelId)) {
                 if (!await cannotEmbedNotice()) {
