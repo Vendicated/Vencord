@@ -160,3 +160,6 @@ export const classNameFactory = (prefix: string = "") => (...args: ClassNameFact
     }
     return Array.from(classNames, name => prefix + name).join(" ");
 };
+
+// items are run every time a new style is loaded by webpack, with `styles` being the content of the new file
+export const styleListeners = new Set<(styles: string, initial: boolean) => void>();
