@@ -29,7 +29,7 @@ interface ActivityTooltipProps {
     activity: Activity;
     application?: Application;
     user: User;
-    cl: ReturnType<typeof classNameFactory>;
+    cl: ReturnType<typeof import("@api/Styles").classNameFactory>;
 }
 
 export default function ActivityTooltip({ activity, application, user, cl }: Readonly<ActivityTooltipProps>) {
