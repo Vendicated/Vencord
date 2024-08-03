@@ -12,12 +12,16 @@ import { Flex, Menu } from "@webpack/common";
 
 const DefaultEngines = {
     Google: "https://www.google.com/search?q=",
-    DuckDuckGo: "https://duckduckgo.com/",
+    YouTube: "https://youtube.com/results?search_query=",
+    DuckDuckGo: "https://duckduckgo.com/?q=",
     Brave: "https://search.brave.com/search?q=",
+    Ecosia: "https://www.ecosia.org/search?q=",
+    StartPage:"https://www.startpage.com/do/search?query=",
     Bing: "https://www.bing.com/search?q=",
     Yahoo: "https://search.yahoo.com/search?p=",
     Yandex: "https://yandex.com/search/?text=",
     GitHub: "https://github.com/search?q=",
+    Poke: "https://poketube.fun/search?query=",
     Reddit: "https://www.reddit.com/search?q=",
     Wikipedia: "https://wikipedia.org/w/index.php?search=",
 } as const;
@@ -96,7 +100,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, _props) 
 export default definePlugin({
     name: "ReplaceGoogleSearch",
     description: "Replaces the Google search with different Engines",
-    authors: [Devs.Moxxie, Devs.Ethan],
+    authors: [Devs.Moxxie, Devs.Ethan, Devs.Ashley],
 
     settings,
 
