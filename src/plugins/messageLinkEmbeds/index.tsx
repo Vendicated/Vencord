@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
@@ -41,6 +43,8 @@ import {
     UserStore
 } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
+
+import MessageTooltip from "./MessageTooltip.jsx";
 
 const messageCache = new Map<string, {
     message?: Message;
@@ -74,6 +78,16 @@ interface MessageEmbedProps {
 const messageFetchQueue = new Queue();
 
 const settings = definePluginSettings({
+    tooltip: {
+        description: "Show tooltip for linked messages",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    replyTooltip: {
+        description: "Show tooltip for replied messages",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
     messageBackgroundColor: {
         description: "Background color for messages in rich embeds",
         type: OptionType.BOOLEAN
@@ -94,6 +108,10 @@ const settings = definePluginSettings({
                 label: "Never use automod embeds",
                 value: "never",
                 default: true
+            },
+            {
+                label: "Disable embeds",
+                value: "disable"
             }
         ]
     },
@@ -366,14 +384,47 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
 export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
-    authors: [Devs.TheSun, Devs.Ven, Devs.RyanCaoDev],
+    authors: [Devs.TheSun, Devs.Ven, Devs.RyanCaoDev, Devs.Kyuuhachi],
     dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI", "UserSettingsAPI"],
 
     settings,
 
+    patches: [
+        {
+            find: ',className:"channelMention",children:[',
+            replacement: {
+                match: /(?<=\.jsxs\)\()(\i\.\i),\{(?=role:"link")/,
+                replace: "$self.MentionTooltip,{Component:$1,vcProps:arguments[0],"
+            },
+            predicate: () => settings.store.tooltip
+        },
+        {
+            find: "Messages.REPLY_QUOTE_MESSAGE_NOT_LOADED",
+            replacement: {
+                // Should match two places
+                match: /(\i\.Clickable),\{/g,
+                replace: "$self.ReplyTooltip,{Component:$1,vcProps:arguments[0],"
+            },
+            predicate: () => settings.store.replyTooltip
+        },
+    ],
+
+    MentionTooltip({ Component, vcProps, ...props }) {
+        return <MessageTooltip messageId={vcProps.messageId} channelId={vcProps.channelId}>
+            {p => <Component {...props} {...p} />}
+        </MessageTooltip>;
+    },
+
+    ReplyTooltip({ Component, vcProps, ...props }) {
+        const ref = vcProps.baseMessage.messageReference;
+        return <MessageTooltip messageId={ref.message_id} channelId={ref.channel_id}>
+            {p => <Component {...props} {...p} />}
+        </MessageTooltip>;
+    },
+
     start() {
         addAccessory("messageLinkEmbed", props => {
-            if (!messageLinkRegex.test(props.message.content))
+            if (settings.store.automodEmbeds === "disable" || !messageLinkRegex.test(props.message.content))
                 return null;
 
             // need to reset the regex because it's global
