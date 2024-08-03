@@ -97,7 +97,7 @@ export default definePlugin({
                     return;
                 }
 
-                const assetPath = stack.match(/\/assets\/.+?\.js/)?.[0];
+                const assetPath = stack.match(/http.+?\.js/)?.[0];
                 if (!assetPath) {
                     return;
                 }

@@ -68,7 +68,7 @@ define(Function.prototype, "m", {
                 define(this, "e", { value: ensureChunk });
                 clearTimeout(setterTimeout);
 
-                logger.info("Main Webpack found" + interpolateIfDefined` in ${fileName}` + ", initializing internal references to WebpackRequire");
+                logger.info("Main WebpackInstance found" + interpolateIfDefined` in ${fileName}` + ", initializing internal references to WebpackRequire");
                 _initWebpack(this);
             }
         });
@@ -280,7 +280,7 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
 
         // There are (at the time of writing) 11 modules exporting the window
         // Make these non enumerable to improve webpack search performance
-        if (typeof require === "function" && require.c != null) {
+        if (typeof require === "function") {
             let foundWindow = false;
 
             if (exports === window) {
@@ -298,12 +298,14 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
             }
 
             if (foundWindow) {
-                Object.defineProperty(require.c, id, {
-                    value: require.c[id],
-                    enumerable: false,
-                    configurable: true,
-                    writable: true
-                });
+                if (require.c != null) {
+                    Object.defineProperty(require.c, id, {
+                        value: require.c[id],
+                        enumerable: false,
+                        configurable: true,
+                        writable: true
+                    });
+                }
 
                 return factoryReturn;
             }
