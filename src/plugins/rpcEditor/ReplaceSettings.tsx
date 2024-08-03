@@ -32,7 +32,7 @@ export function ReplaceTutorial() {
             }
             <Forms.FormTitle tag="h3" className={Margins.top8}>Available variables</Forms.FormTitle>
             <Forms.FormText>
-                In all fields, you can put in variables that'll automatically be replaced by their content:
+                In all fields (except stream URL), you can put in variables that'll automatically be replaced by their original content:
                 <pre style={{ fontFamily: "monospace" }}>
                     :name:, :details:, :state:
                     <br />
@@ -44,6 +44,8 @@ export function ReplaceTutorial() {
                 Leave a field empty to leave it as is.
                 <br />
                 Set a field to "null" to hide it on the presence.
+                <br />
+                You may need to reload Discord for changes to apply.
             </Forms.FormText>
         </>
     );

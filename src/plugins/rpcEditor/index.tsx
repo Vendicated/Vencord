@@ -12,6 +12,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 
 import { ReplaceSettings, ReplaceTutorial } from "./ReplaceSettings";
+import { parse } from "path";
 
 const APP_IDS_KEY = "ReplaceActivityType_appids";
 export type AppIdSetting = {
@@ -118,17 +119,32 @@ export default definePlugin({
     async start() {
         appIds = await DataStore.get(APP_IDS_KEY) ?? [makeEmptyAppId()];
     },
-
+    parseField(text: string, originalActivity: Activity): string {
+        if (text === "null") return "";
+        return text
+            .replaceAll(":name:", originalActivity.name)
+            .replaceAll(":details:", originalActivity.details)
+            .replaceAll(":state:", originalActivity.state)
+            .replaceAll(":large_image:", originalActivity.assets.large_image)
+            .replaceAll(":large_text:", originalActivity.assets.large_text)
+            .replaceAll(":small_image:", originalActivity.assets.small_image)
+            .replaceAll(":small_text:", originalActivity.assets.small_text);
+    },
     patchActivity(activity: Activity) {
         if (!activity) return;
         appIds.forEach(app => {
             if (app.enabled && app.appId === activity.application_id) {
+                const oldActivity = { ...activity };
                 activity.type = app.newActivityType;
-
-                if (app.newActivityType === ActivityType.STREAMING && app.newStreamUrl) {
-                    activity.url = app.newStreamUrl;
-                }
-
+                if (app.newName) activity.name = this.parseField(app.newName, oldActivity);
+                if (app.newActivityType === ActivityType.STREAMING && app.newStreamUrl) activity.url = app.newStreamUrl;
+                if (app.newDetails) activity.details = this.parseField(app.newDetails, oldActivity);
+                if (app.newState) activity.state = this.parseField(app.newState, oldActivity);
+                if (app.newLargeImageText) activity.assets.large_text = this.parseField(app.newLargeImageText, oldActivity);
+                if (app.newLargeImageUrl) activity.assets.large_image = this.parseField(app.newLargeImageUrl, oldActivity);
+                if (app.newSmallImageText) activity.assets.small_text = this.parseField(app.newSmallImageText, oldActivity);
+                if (app.newSmallImageUrl) activity.assets.small_image = this.parseField(app.newSmallImageUrl, oldActivity);
+                if (app.disableTimestamps) activity.timestamps = {};
             }
         });
     },
