@@ -33,14 +33,16 @@ const settings = definePluginSettings({
     showModView: opt("Show the member mod view context menu item in all servers."),
     disableDiscoveryFilters: opt("Disable filters in Server Discovery search that hide servers that don't meet discovery criteria."),
     disableDisallowedDiscoveryFilters: opt("Disable filters in Server Discovery search that hide NSFW & disallowed servers."),
+    showMembersPageInSettings: opt("Shows the member page in the settings of non-community servers even if Show Members in Channel List is enabled, and disable the redirect to the sidebar in community servers."),
+    showMembersPageInSidebar: opt("Shows the member page in sidebar of non-community servers regardless of the Show Members in Channel List setting."),
 });
 
 migratePluginSettings("ShowHiddenThings", "ShowTimeouts");
 export default definePlugin({
     name: "ShowHiddenThings",
-    tags: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters"],
+    tags: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters", "ShowMembersPage"],
     description: "Displays various hidden & moderator-only things regardless of permissions.",
-    authors: [Devs.Dolfies],
+    authors: [Devs.Dolfies, Devs.Sqaaakoi],
     patches: [
         {
             find: "showCommunicationDisabledStyles",
@@ -119,7 +121,41 @@ export default definePlugin({
                 match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\);/g,
                 replace: "Promise.resolve({ body: { valid: true } });"
             }
-        }
+        },
+        {
+            find: ".GUILD_SETTINGS_SAFETY_MODERATION_EXPERIENCE_ENABLED",
+            predicate: () => settings.store.showMembersPageInSettings,
+            replacement: {
+                match: /\i\.hasFeature\(\i\.\i\.ENABLED_MODERATION_EXPERIENCE_FOR_NON_COMMUNITY\)/,
+                replace: "false"
+            }
+        },
+        // disable redirect to sidebar
+        {
+            find: /\i\.isCommunity\(\).{0,300}WindowLaunchIcon/,
+            predicate: () => settings.store.showMembersPageInSettings,
+            replacement: {
+                match: /\i\.isCommunity\(\)/,
+                replace: "false"
+            }
+        },
+        {
+            find: /ENABLED_MODERATION_EXPERIENCE_FOR_NON_COMMUNITY.{0,500}GUILD_MOD_DASH_MEMBER_SAFETY/,
+            predicate: () => settings.store.showMembersPageInSidebar,
+            replacement: {
+                match: /\i\.hasFeature\(\i\.\i\.ENABLED_MODERATION_EXPERIENCE_FOR_NON_COMMUNITY\)/,
+                replace: "true"
+            }
+        },
+        // discord, why does this check have to exist?
+        {
+            find: 'type:"INITIALIZE_MEMBER_SAFETY_STORE"',
+            predicate: () => settings.store.showMembersPageInSidebar,
+            replacement: {
+                match: /\i\.hasFeature\(\i\.\i\.ENABLED_MODERATION_EXPERIENCE_FOR_NON_COMMUNITY\)/,
+                replace: "true"
+            }
+        },
     ],
     settings,
 });
