@@ -36,7 +36,7 @@ const PerceptualVolume = {
     amplitudeToPerceptual: findByCodeLazy("6+1:"),
     // perceptualToAmplitude: findByCodeLazy("50-50"),
 };
-interface StreamData{
+interface StreamData {
     audioContext: AudioContext,
     audioElement: HTMLAudioElement,
     emitter: any,
