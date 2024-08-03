@@ -17,13 +17,6 @@ interface SettingsProps {
     save: () => void;
 }
 
-interface RpcApp {
-    id: string;
-    name: string;
-    icon: string;
-    flags: number;
-}
-
 function isValidSnowflake(v: string) {
     const regex = /^\d{17,20}$/;
     return regex.test(v) && !Number.isNaN(SnowflakeUtils.extractTimestamp(v));
