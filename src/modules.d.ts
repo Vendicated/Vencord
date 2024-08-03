@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line spaced-comment
 /// <reference types="standalone-electron-types"/>
 
 declare module "~plugins" {

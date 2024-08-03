@@ -1,6 +1,6 @@
 .vc-expandableheader-center-flex {
     display: flex;
-    place-content: center;
+    place-items: center;
 }
 
 .vc-expandableheader-btn {
