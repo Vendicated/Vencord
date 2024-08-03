@@ -153,40 +153,56 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
                                         onChange(v, i, "newState");
                                     }}
                                 />
-                                <Forms.FormText style={{ fontSize: "1.05rem", fontWeight: "500" }} className={Margins.top8}>Large image</Forms.FormText>
-                                <Forms.FormTitle className={Margins.top8}>Text {setting.newActivityType !== ActivityType.PLAYING && "(also third line)"}</Forms.FormTitle>
-                                <TextInput
-                                    className={Margins.top8}
-                                    value={setting.newLargeImageText}
-                                    onChange={async v => {
-                                        onChange(v, i, "newLargeImageText");
+                                {
+                                    !setting.disableAssets &&
+                                    <>
+                                        <Forms.FormText style={{ fontSize: "1.05rem", fontWeight: "500" }} className={Margins.top8}>Large image</Forms.FormText>
+                                        <Forms.FormTitle className={Margins.top8}>Text {setting.newActivityType !== ActivityType.PLAYING && "(also third line)"}</Forms.FormTitle>
+                                        <TextInput
+                                            className={Margins.top8}
+                                            value={setting.newLargeImageText}
+                                            onChange={async v => {
+                                                onChange(v, i, "newLargeImageText");
+                                            }}
+                                        />
+                                        <Forms.FormTitle className={Margins.top8}>URL</Forms.FormTitle>
+                                        <TextInput
+                                            className={Margins.top8}
+                                            value={setting.newLargeImageUrl}
+                                            onChange={async v => {
+                                                onChange(v, i, "newLargeImageUrl");
+                                            }}
+                                        />
+                                        <Forms.FormText style={{ fontSize: "1.05rem", fontWeight: "500" }} className={Margins.top8}>Small image</Forms.FormText>
+                                        <Forms.FormTitle className={Margins.top8}>Text</Forms.FormTitle>
+                                        <TextInput
+                                            className={Margins.top8}
+                                            value={setting.newSmallImageText}
+                                            onChange={async v => {
+                                                onChange(v, i, "newSmallImageText");
+                                            }}
+                                        />
+                                        <Forms.FormTitle className={Margins.top8}>URL</Forms.FormTitle>
+                                        <TextInput
+                                            className={Margins.top8}
+                                            value={setting.newSmallImageUrl}
+                                            onChange={async v => {
+                                                onChange(v, i, "newSmallImageUrl");
+                                            }}
+                                        />
+                                    </>
+                                }
+                                <Switch
+                                    value={setting.disableAssets}
+                                    onChange={value => {
+                                        onChange(value, i, "disableAssets");
                                     }}
-                                />
-                                <Forms.FormTitle className={Margins.top8}>URL</Forms.FormTitle>
-                                <TextInput
                                     className={Margins.top8}
-                                    value={setting.newLargeImageUrl}
-                                    onChange={async v => {
-                                        onChange(v, i, "newLargeImageUrl");
-                                    }}
-                                />
-                                <Forms.FormText style={{ fontSize: "1.05rem", fontWeight: "500" }} className={Margins.top8}>Small image</Forms.FormText>
-                                <Forms.FormTitle className={Margins.top8}>Text</Forms.FormTitle>
-                                <TextInput
-                                    className={Margins.top8}
-                                    value={setting.newSmallImageText}
-                                    onChange={async v => {
-                                        onChange(v, i, "newSmallImageText");
-                                    }}
-                                />
-                                <Forms.FormTitle className={Margins.top8}>URL</Forms.FormTitle>
-                                <TextInput
-                                    className={Margins.top8}
-                                    value={setting.newSmallImageUrl}
-                                    onChange={async v => {
-                                        onChange(v, i, "newSmallImageUrl");
-                                    }}
-                                />
+                                    hideBorder={true}
+                                    style={{ marginBottom: "0" }}
+                                >
+                                    Hide assets (large & small images)
+                                </Switch>
                                 <Switch
                                     value={setting.disableTimestamps}
                                     onChange={value => {

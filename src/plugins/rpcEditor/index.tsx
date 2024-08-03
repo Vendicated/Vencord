@@ -16,6 +16,7 @@ import { parse } from "path";
 
 const APP_IDS_KEY = "ReplaceActivityType_appids";
 export type AppIdSetting = {
+    disableAssets: boolean;
     disableTimestamps: boolean;
     appId: string;
     enabled: boolean;
@@ -76,7 +77,8 @@ export const makeEmptyAppId: () => AppIdSetting = () => ({
     newSmallImageUrl: "",
     newSmallImageText: "",
     newStreamUrl: "",
-    disableTimestamps: false
+    disableTimestamps: false,
+    disableAssets: false
 });
 
 let appIds = [makeEmptyAppId()];
@@ -144,6 +146,8 @@ export default definePlugin({
                 if (app.newLargeImageUrl) activity.assets.large_image = this.parseField(app.newLargeImageUrl, oldActivity);
                 if (app.newSmallImageText) activity.assets.small_text = this.parseField(app.newSmallImageText, oldActivity);
                 if (app.newSmallImageUrl) activity.assets.small_image = this.parseField(app.newSmallImageUrl, oldActivity);
+                // @ts-ignore here we are intentionally nulling assets
+                if (app.disableAssets) activity.assets = {};
                 if (app.disableTimestamps) activity.timestamps = {};
             }
         });
