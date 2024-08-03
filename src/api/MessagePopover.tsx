@@ -50,18 +50,18 @@ export function removeButton(identifier: string) {
 
 export function _buildPopoverElements(
     Component: React.ComponentType<ButtonItem>,
-    props: { message: Message; }
+    message: Message
 ) {
     const items: React.ReactNode[] = [];
 
     for (const [identifier, getItem] of buttons.entries()) {
         try {
-            const item = getItem(props.message);
+            const item = getItem(message);
             if (item) {
                 item.key ??= identifier;
                 items.push(
                     <ErrorBoundary noop>
-                        <Component {...item} {...props} />
+                        <Component {...item} />
                     </ErrorBoundary>
                 );
             }
