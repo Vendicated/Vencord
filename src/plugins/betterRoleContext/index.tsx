@@ -15,7 +15,7 @@ import { Clipboard, GuildStore, Menu, PermissionStore } from "@webpack/common";
 
 const GuildSettingsActions = findByProps("open", "selectRole", "updateGuild");
 
-const DeveloperMode = getUserSettingLazy("appearance", "developerMode")!;
+const DeveloperMode = getUserSettingLazy("appearance", "developerMode");
 
 function PencilIcon() {
     return (

@@ -28,7 +28,7 @@ interface IgnoredActivity {
 
 const RunningGameStore = findStore("RunningGameStore");
 
-const ShowCurrentGame = getUserSettingLazy("status", "showCurrentGame")!;
+const ShowCurrentGame = getUserSettingLazy("status", "showCurrentGame");
 
 function ToggleIcon(activity: IgnoredActivity, tooltipText: string, path: string, fill: string) {
     return (

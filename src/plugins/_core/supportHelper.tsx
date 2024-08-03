@@ -59,7 +59,7 @@ const TrustedRolesIds = [
 
 const AsyncFunction = async function () { }.constructor;
 
-const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
+const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame");
 
 async function forceUpdate() {
     const outdated = await checkForUpdates();

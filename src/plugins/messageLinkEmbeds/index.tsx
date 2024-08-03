@@ -54,7 +54,7 @@ const ChannelMessage = findComponentByCode("childrenExecutedCommand:", ".hideAcc
 const SearchResultClasses = findByProps("message", "searchResult");
 const EmbedClasses = findByProps("embedAuthorIcon", "embedAuthor", "embedAuthor");
 
-const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact")!;
+const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact");
 
 const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(?:\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
 const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;

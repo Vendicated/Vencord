@@ -28,7 +28,7 @@ import style from "./style.css?managed";
 
 const Button = findComponentByCode("Button.Sizes.NONE,disabled:");
 
-const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
+const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame");
 
 function makeIcon(showCurrentGame?: boolean) {
     const { oldIcon } = settings.use(["oldIcon"]);

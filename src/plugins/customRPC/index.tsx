@@ -33,7 +33,7 @@ const useProfileThemeStyle = findByCode("profileThemeStyle:", "--profile-gradien
 const ActivityComponent = findComponentByCode("onOpenGameProfile");
 const ActivityClassName = findByProps("activity", "buttonColor");
 
-const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
+const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame");
 
 async function getApplicationAsset(key: string): Promise<string> {
     if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");

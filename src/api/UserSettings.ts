@@ -50,7 +50,7 @@ export const UserSettings = findByFactoryCode<Record<PropertyKey, UserSettingDef
  * @param group The setting group
  * @param name The name of the setting
  */
-export function getUserSetting<T = any>(group: string, name: string): UserSettingDefinition<T> | undefined {
+export function getUserSetting<T = any>(group: string, name: string): UserSettingDefinition<T> {
     if (!Vencord.Plugins.isPluginEnabled("UserSettingsAPI")) throw new Error("Cannot use UserSettingsAPI without setting as dependency.");
 
     for (const key in UserSettings) {
@@ -60,6 +60,8 @@ export function getUserSetting<T = any>(group: string, name: string): UserSettin
             return userSetting;
         }
     }
+
+    throw new Error(`UserSettingsAPI: Setting ${group}.${name} not found.`);
 }
 
 /**
