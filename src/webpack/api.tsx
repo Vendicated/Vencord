@@ -8,7 +8,7 @@ import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent, LazyComponentType, SYM_LAZY_COMPONENT_INNER } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
-import { proxyInner, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
+import { proxyInner, SYM_PROXY_INNER_GET, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
 
 import { traceFunction } from "../debug/Tracer";
 import { GenericStore } from "./common";
@@ -605,7 +605,7 @@ export function extractAndLoadChunksLazy(code: string | RegExp | CodeFilter, mat
     const module = findModuleFactory(...Array.isArray(code) ? code : [code]);
 
     const extractAndLoadChunks = makeLazy(async () => {
-        if (module[SYM_PROXY_INNER_VALUE] == null) {
+        if (module[SYM_PROXY_INNER_GET] != null && module[SYM_PROXY_INNER_VALUE] == null) {
             const err = new Error("extractAndLoadChunks: Couldn't find module factory");
 
             if (!IS_DEV || devToolsOpen) {
