@@ -44,7 +44,7 @@ function searchProtoClassField(localName: string, protoClass: any) {
     const field = protoClass?.fields?.find((field: any) => field.localName === localName);
     if (!field) return;
 
-    const fieldGetter = Object.values(field).find(value => typeof value === "function") as any;
+    const fieldGetter = Object.values<any>(field).find(value => typeof value === "function");
     return fieldGetter?.();
 }
 
