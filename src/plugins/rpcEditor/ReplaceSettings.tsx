@@ -1,8 +1,8 @@
 /*
- * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
+* Vencord, a Discord client mod
+* Copyright (c) 2024 Vendicated and contributors
+* SPDX-License-Identifier: GPL-3.0-or-later
+*/
 
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Margins } from "@utils/margins";
@@ -25,23 +25,6 @@ interface RpcApp {
     flags: number;
 }
 
-const RPCUtils = findByPropsLazy("fetchApplicationsRPC", "getRemoteIconURL");
-
-const cachedApps: any = {};
-async function lookupApp(appId: string): Promise<RpcApp | null> {
-    if (cachedApps[appId]) return cachedApps[appId];
-    const socket: any = {};
-    try {
-        await RPCUtils.fetchApplicationsRPC(socket, appId);
-        console.log(`Lookup finished for ${socket.application.name}`);
-        cachedApps[appId] = socket.application;
-        return socket.application;
-    } catch {
-        console.log(`Lookup failed for ${appId}`);
-        return null;
-    }
-}
-
 function isValidSnowflake(v: string) {
     const regex = /^\d{17,20}$/;
     return regex.test(v) && !Number.isNaN(SnowflakeUtils.extractTimestamp(v));
@@ -49,7 +32,6 @@ function isValidSnowflake(v: string) {
 
 export function ReplaceTutorial() {
     const activities: Activity[] = PresenceStore.getActivities(UserStore.getCurrentUser().id);
-    console.log(activities);
     return (
         <>
             <Forms.FormTitle tag="h3">IDs of currently running activities</Forms.FormTitle>
@@ -77,8 +59,7 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
         appIds[index][key] = val;
 
         if (val && key === "appId") {
-            const tempApp = await lookupApp(val.toString());
-            appIds[index].appName = tempApp?.name || "Unknown";
+            appIds[index].appName = "Unknown";
         }
 
         if (appIds[index].appId === "" && index !== appIds.length - 1)
@@ -92,9 +73,9 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
         <>
             {
                 appIds.map((setting, i) =>
-                    <Card style={{ padding: "1em 1em 0" }}>
+                    <Card style={{ padding: "1em" }}>
                         {
-                            setting.appName !== "Unknown" ?
+                            setting.appId ?
                                 <Switch
                                     value={setting.enabled}
                                     onChange={value => {
@@ -103,10 +84,10 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
                                     className={Margins.bottom8}
                                     hideBorder={true}
                                 >
-                                    Edit the {setting.appName} app
-                                </Switch> : <Forms.FormTitle tag="h3" className={Margins.bottom8}>Add new application</Forms.FormTitle>
+                                    Edit the app
+                                </Switch> : <Forms.FormTitle tag="h3">Add new application</Forms.FormTitle>
                         }
-                        <Forms.FormTitle>Application ID</Forms.FormTitle>
+                        <Forms.FormTitle className={Margins.top8}>Application ID</Forms.FormTitle>
                         <CheckedTextInput
                             value={setting.appId}
                             onChange={async v => {
@@ -117,25 +98,24 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
                             }
                         />
                         {
-                            setting.appName !== "Unknown" ?
-                                <>
-                                    <Forms.FormTitle className={Margins.top8}>New activity type</Forms.FormTitle>
-                                    <Select
-                                        options={[
-                                            { label: "Playing", value: ActivityType.PLAYING },
-                                            { label: "Watching", value: ActivityType.WATCHING },
-                                            { label: "Listening", value: ActivityType.LISTENING },
-                                            { label: "Competing", value: ActivityType.COMPETING },
-                                            { label: "Streaming", value: ActivityType.STREAMING }
-                                        ]}
-                                        select={value => {
-                                            onChange(value, i, "activityType");
-                                        }}
-                                        className={Margins.top8}
-                                        isSelected={value => setting.newActivityType === value}
-                                        serialize={identity}
-                                    />
-                                </> : null
+                            setting.appId && <>
+                                <Forms.FormTitle className={Margins.top8}>New activity type</Forms.FormTitle>
+                                <Select
+                                    options={[
+                                        { label: "Playing", value: ActivityType.PLAYING },
+                                        { label: "Watching", value: ActivityType.WATCHING },
+                                        { label: "Listening", value: ActivityType.LISTENING },
+                                        { label: "Competing", value: ActivityType.COMPETING },
+                                        { label: "Streaming", value: ActivityType.STREAMING }
+                                    ]}
+                                    select={value => {
+                                        onChange(value, i, "activityType");
+                                    }}
+                                    className={Margins.top8}
+                                    isSelected={value => setting.newActivityType === value}
+                                    serialize={identity}
+                                />
+                            </>
                         }
                     </Card>
                 )
