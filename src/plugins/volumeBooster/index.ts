@@ -50,7 +50,7 @@ interface StreamData {
     videoStreamId: string,
     _mute: boolean,
     _speakingFlags: number,
-    _volume: number
+    _volume: number;
 }
 export default definePlugin({
     name: "VolumeBooster",
@@ -67,9 +67,7 @@ export default definePlugin({
             find,
             replacement: {
                 match: /(?<=maxValue:\i\.\i)\?(\d+?):(\d+?)(?=,)/,
-                replace: (_, higherMaxVolume, minorMaxVolume) => ""
-                      + `?${higherMaxVolume}*$self.settings.store.multiplier`
-                      + `:${minorMaxVolume}*$self.settings.store.multiplier`
+                replace: (_, higherMaxVolume, minorMaxVolume) => `${higherMaxVolume}*$self.settings.store.multiplier`
             }
         })),
         // PATCHES NEEDED FOR WEB/VESKTOP
@@ -132,12 +130,12 @@ export default definePlugin({
 
         data.streamSourceNode ??= data.audioContext.createMediaStreamSource(data.stream);
 
-        if (!data.gainNode){
+        if (!data.gainNode) {
             const gain = data.gainNode = data.audioContext.createGain();
             data.streamSourceNode.connect(gain);
             gain.connect(data.audioContext.destination);
         }
 
-        data.gainNode.gain.value = data._mute ? 0 : PerceptualVolume.amplitudeToPerceptual(data._volume)/100;
+        data.gainNode.gain.value = data._mute ? 0 : PerceptualVolume.amplitudeToPerceptual(data._volume) / 100;
     }
 });
