@@ -28,8 +28,8 @@ import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
-import { findByProps, findComponentByCode, webpackDependantLazy } from "@webpack";
-import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
+import { find, findByProps, findComponentByCode } from "@webpack";
+import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, UserUtils } from "@webpack/common";
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
 
@@ -51,7 +51,7 @@ const cl = classNameFactory("vc-plugin-modal-");
 
 const UserSummaryItem = findComponentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByProps("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
-const UserRecord = webpackDependantLazy<Constructor<Partial<User>>>(() => UserStore.getCurrentUser().constructor as any);
+const UserRecord = find<Constructor<Partial<User>>>(m => m?.prototype?.getAvatarURL && m?.prototype?.hasHadPremium);
 
 interface PluginModalProps extends ModalProps {
     plugin: Plugin;
