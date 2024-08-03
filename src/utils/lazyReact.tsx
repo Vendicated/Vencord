@@ -17,7 +17,7 @@ export const SYM_LAZY_COMPONENT_INNER = Symbol.for("vencord.lazyComponent.inner"
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
  */
-export function LazyComponent<T extends object = any>(factory: () => LazyComponentType<T>, attempts = 5) {
+export function LazyComponent<T extends object = any>(factory: () => LazyComponentType<T>, attempts = 5, errMsg: string | (() => string) = `LazyComponent factory failed:\n\n${factory}`) {
     const get = makeLazy(factory, attempts, { isIndirect: true });
 
     let InnerComponent = null as LazyComponentType<T> | null;
@@ -37,7 +37,7 @@ export function LazyComponent<T extends object = any>(factory: () => LazyCompone
                 lazyFailedLogged = true;
             }
 
-            console.error(`LazyComponent factory failed:\n\n${factory}`);
+            console.error(typeof errMsg === "string" ? errMsg : errMsg());
         }
 
         return InnerComponent && <InnerComponent {...props} />;

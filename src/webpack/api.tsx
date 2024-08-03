@@ -588,7 +588,7 @@ export function webpackDependantLazy<T = any>(factory: () => T, attempts?: numbe
 export function webpackDependantLazyComponent<T extends object = any>(factory: () => any, attempts?: number) {
     if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazyComponent", [factory]]);
 
-    return LazyComponent<T>(factory, attempts);
+    return LazyComponent<T>(factory, attempts, `Webpack dependant LazyComponent factory failed:\n\n${factory}`);
 }
 
 export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/;
