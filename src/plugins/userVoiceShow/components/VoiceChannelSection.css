@@ -13,12 +13,12 @@
     margin-bottom: 6px;
 }
 
-.vc-uvs-modal-margin {
-    margin: 0 12px;
-}
-
 .vc-uvs-modal-margin div {
     margin-bottom: 0 !important;
+}
+
+.vc-uvs-popout-margin-self {
+    padding-right: 8px;
 }
 
 .vc-uvs-popout-margin-self>[class^="section"] {

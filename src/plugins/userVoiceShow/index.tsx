@@ -102,11 +102,27 @@ export default definePlugin({
                 replace: "$self.patchPopout(arguments[0]),",
             }
         },
+        // simplified profiles
+        {
+            find: /\.BITE_SIZE,onOpenProfile:\i,usernameIcon:/,
+            replacement: {
+                match: /currentUser:\i,guild:\i,onOpenProfile:.+?}\)}\)/,
+                replace: "$&,$self.patchPopout(arguments[0])",
+            }
+        },
         // below username
         {
             find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Lazy-loaded
             replacement: {
                 match: /\.body.+?displayProfile:\i}\),/,
+                replace: "$&$self.patchModal(arguments[0]),",
+            }
+        },
+        // simplified profiles
+        {
+            find: "action:\"PRESS_APP_CONNECTION\"", // Lazy-loaded
+            replacement: {
+                match: /.Messages.CONNECTIONS,.+?}\)}\),/,
                 replace: "$&$self.patchModal(arguments[0]),",
             }
         }
