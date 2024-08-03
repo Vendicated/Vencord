@@ -8,7 +8,7 @@ import type { MessageJSON } from "@api/Commands";
 import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
+import definePlugin, { OptionType, type PluginNative, ReporterTestable } from "@utils/types";
 import { type ChannelRecord, ChannelType } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { Button, ChannelStore, GuildStore, UserStore } from "@webpack/common";
@@ -56,6 +56,12 @@ const settings = definePluginSettings({
         onChange() {
             start();
         }
+    },
+    preferUDP: {
+        type: OptionType.BOOLEAN,
+        description: "Enable if you use an older build of XSOverlay unable to connect through websockets. This setting is ignored on web.",
+        default: false,
+        disabled: () => IS_WEB
     },
     botNotifications: {
         type: OptionType.BOOLEAN,
@@ -134,6 +140,8 @@ function start() {
         setTimeout(reject, 3000);
     });
 }
+
+const Native = VencordNative.pluginHelpers.XSOverlay as PluginNative<typeof import("./native")>;
 
 export default definePlugin({
     name: "XSOverlay",
@@ -288,6 +296,10 @@ function sendOtherNotif(content: string, titleString: string) {
 }
 
 async function sendToOverlay(notif: NotificationObject) {
+    if (!IS_WEB && settings.store.preferUDP) {
+        Native.sendToOverlay(notif);
+        return;
+    }
     if (!socket || socket.readyState !== socket.OPEN) await start();
     socket!.send(JSON.stringify({
         sender: "Vencord",

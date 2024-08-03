@@ -18,7 +18,7 @@
 
 import { Logger } from "@utils/Logger";
 import type { ChannelRecord, MessageRecord } from "@vencord/discord-types";
-import type { ComponentType, MouseEventHandler } from "react";
+import type { ComponentType, MouseEventHandler, ReactElement } from "react";
 
 const logger = new Logger("MessagePopover");
 
@@ -49,16 +49,16 @@ export function removeButton(identifier: string) {
 
 export function _buildPopoverElements(
     msg: MessageRecord,
-    makeButton: (item: ButtonItem) => ComponentType
+    PopoverButton: ComponentType<ButtonItem>
 ) {
-    const items: ComponentType[] = [];
+    const items: ReactElement[] = [];
 
     for (const [identifier, getItem] of buttons.entries()) {
         try {
             const item = getItem(msg);
             if (item) {
                 item.key ??= identifier;
-                items.push(makeButton(item));
+                items.push(<PopoverButton {...item} />);
             }
         } catch (err) {
             logger.error(`[${identifier}]`, err);
