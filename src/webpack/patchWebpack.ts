@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { patches } from "@plugins";
 import { WEBPACK_CHUNK } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { canonicalizeReplacement } from "@utils/patches";
@@ -23,7 +24,6 @@ import { PatchReplacement } from "@utils/types";
 import { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
-import { patches } from "../plugins";
 import { _initWebpack, beforeInitListeners, factoryListeners, moduleListeners, subscriptions, wreq } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");

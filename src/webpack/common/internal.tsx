@@ -17,8 +17,7 @@
 */
 
 import { LazyComponent } from "@utils/react";
-
-import { FilterFn, filters, lazyWebpackSearchHistory, waitFor } from "../webpack";
+import { FilterFn, filters, lazyWebpackSearchHistory, waitFor } from "@webpack";
 
 export function waitForComponent<T extends React.ComponentType<any> = React.ComponentType<any> & Record<string, any>>(name: string, filter: FilterFn | string | string[]): T {
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["waitForComponent", Array.isArray(filter) ? filter : [filter]]);

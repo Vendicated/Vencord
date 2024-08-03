@@ -7,7 +7,6 @@
 // @ts-check
 
 import stylistic from "@stylistic/eslint-plugin";
-import pathAlias from "eslint-plugin-path-alias";
 import header from "eslint-plugin-simple-header";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import unusedImports from "eslint-plugin-unused-imports";
@@ -23,7 +22,6 @@ export default tseslint.config(
             "@typescript-eslint": tseslint.plugin,
             "simple-import-sort": simpleImportSort,
             "unused-imports": unusedImports,
-            "path-alias": pathAlias,
         },
         settings: {
             "import/resolver": {
@@ -120,7 +118,6 @@ export default tseslint.config(
             "simple-import-sort/imports": "error",
             "simple-import-sort/exports": "error",
             "unused-imports/no-unused-imports": "error",
-            "path-alias/no-relative": "error"
         }
     }
 );

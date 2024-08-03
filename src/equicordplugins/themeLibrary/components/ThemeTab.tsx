@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/* eslint-disable indent */
 import "./styles.css";
 
 import { generateId } from "@api/Commands";

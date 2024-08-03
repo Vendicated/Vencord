@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import type * as Stores from "discord-types/stores";
 
-import { findByCodeLazy, findByPropsLazy } from "../webpack";
 import { waitForStore } from "./internal";
 import * as t from "./types/stores";
 

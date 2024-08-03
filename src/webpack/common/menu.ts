@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, mapMangledModuleLazy, waitFor } from "../webpack";
+import { filters, mapMangledModuleLazy, waitFor } from "@webpack";
+
 import type * as t from "./types/menu";
 
 export let Menu = {} as t.Menu;
