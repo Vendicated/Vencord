@@ -186,9 +186,9 @@ function wrapWebpackComponent<T extends object = any>(
 
     WrapperComponent[SYM_LAZY_COMPONENT_INNER] = () => InnerComponent;
 
-    function setInnerComponent(rawComponent: any, parsedComponent: LazyComponentType<T>) {
-        InnerComponent = parsedComponent;
-        Object.assign(WrapperComponent, rawComponent);
+    function setInnerComponent(RawComponent: any, ParsedComponent: LazyComponentType<T>) {
+        InnerComponent = ParsedComponent;
+        Object.assign(WrapperComponent, RawComponent);
     }
 
     return [WrapperComponent, setInnerComponent];
