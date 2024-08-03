@@ -78,7 +78,7 @@ export default definePlugin({
             predicate: () => !IS_DISCORD_DESKTOP,
             group: true,
             replacement: [
-                // to pervent the cap of 100
+                // remove the cap of 100%
                 {
                     match: /Math\.max.{0,30}\)\)/,
                     replace: "Math.round(arguments[0])"
