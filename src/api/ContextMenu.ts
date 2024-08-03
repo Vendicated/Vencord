@@ -69,9 +69,8 @@ export function addGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallback)
  * @param patch The patch to be removed
  * @returns Whether the patch was successfully removed from the context menu(s)
  */
-export function removeContextMenuPatch<T extends string[] | string>(navId: T, patch: NavContextMenuPatchCallback): T extends string ? boolean : boolean[] {
-    // https://github.com/microsoft/TypeScript/issues/33700
-    const navIds: string[] = Array.isArray(navId) ? navId : [navId];
+export function removeContextMenuPatch<T extends [string, ...string[]] | string>(navId: T, patch: NavContextMenuPatchCallback): T extends string ? boolean : boolean[] {
+    const navIds: [string, ...string[]] = Array.isArray(navId) ? navId : [navId];
 
     const results = navIds.map(id => navPatches.get(id)?.delete(patch) ?? false);
 

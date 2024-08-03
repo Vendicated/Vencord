@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { readFile } from "fs/promises";
-import { basename } from "path";
+import { readFile } from "node:fs/promises";
+import { basename } from "node:path";
 
 import { AST_NODE_TYPES, parse, type TSESTree } from "@typescript-eslint/typescript-estree";
 import type { Page } from "puppeteer-core";

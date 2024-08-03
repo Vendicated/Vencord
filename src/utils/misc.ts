@@ -17,6 +17,7 @@
 */
 
 import { ClipboardUtils, Toasts } from "@webpack/common";
+import type { IsAny } from "type-fest";
 
 import { DevsById } from "./constants";
 
@@ -52,7 +53,7 @@ export function copyWithToast(text: string, toastMessage?: string) {
 /**
  * Check if obj is a true object: of type "object" and not null or array
  */
-export function isObject(obj: unknown): obj is object {
+export function isObject<T>(obj: T): obj is IsAny<T> extends true ? any : unknown extends T ? Extract<object, T> : Exclude<T & object, readonly unknown[]> {
     return typeof obj === "object" && obj !== null && !Array.isArray(obj);
 }
 

@@ -143,7 +143,7 @@ export const compileStyle = (style: Style) => {
 export const classNameToSelector = (name: string, prefix = "") =>
     name.replaceAll(/ *([^ ]+) */g, `.${prefix}$1`);
 
-type ClassNameFactoryArg = string | string[] | Record<string, unknown> | false | null | undefined | 0 | "";
+type ClassNameFactoryArg = string | string[] | Record<string, unknown> | false | null | undefined | 0n | 0 | "";
 /**
  * @param prefix The prefix to add to each class, defaults to `""`
  * @returns A classname generator function
@@ -156,14 +156,15 @@ type ClassNameFactoryArg = string | string[] | Record<string, unknown> | false |
 export const classNameFactory = (prefix = "") => (...args: ClassNameFactoryArg[]) => {
     const classNames = new Set<string>();
     for (const arg of args) {
-        if (arg && typeof arg === "string")
-            classNames.add(arg);
-        else if (Array.isArray(arg))
-            arg.forEach(name => { classNames.add(name); });
-        else if (arg && typeof arg === "object")
-            Object.entries(arg).forEach(([name, value]) => {
-                if (value) classNames.add(name);
-            });
+        if (typeof arg === "string") {
+            if (arg) classNames.add(arg);
+        } else if (Array.isArray(arg)) {
+            for (const name of arg)
+                classNames.add(name);
+        } else if (typeof arg === "object" && arg !== null) {
+            for (const name in arg)
+                if (arg[name]) classNames.add(name);
+        }
     }
     return Array.from(classNames, name => prefix + name).join(" ");
 };

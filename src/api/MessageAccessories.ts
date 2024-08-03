@@ -69,10 +69,8 @@ export function _modifyAccessories(
     return elements;
 }
 
-type Values<T extends Iterable<unknown>> = T extends Iterable<infer U> ? U : never;
-
-function filterIterable<T extends Iterable<unknown>, S extends Values<T>>(iterable: T, predicate: (value: Values<T>) => value is S): T & Iterable<S>;
-function filterIterable<T extends Iterable<unknown>>(iterable: T, predicate: (value: Values<T>) => unknown): T;
+function filterIterable<T, S extends T>(iterable: Iterable<T>, predicate: (value: T) => value is S): Iterable<S>;
+function filterIterable<T>(iterable: Iterable<T>, predicate: (value: T) => unknown): Iterable<T>;
 function* filterIterable<T>(iterable: Iterable<T>, predicate: (value: T) => unknown) {
     for (const value of iterable)
         if (predicate(value))

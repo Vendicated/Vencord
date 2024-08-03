@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { isObject } from "@utils";
 import type { LiteralUnion } from "type-fest";
 
 // Resolves a possibly nested prop in the form of "some.nested.prop" to type of T.some.nested.prop
@@ -67,7 +68,7 @@ export class SettingsStore<T extends object> {
                     });
                 }
 
-                if (typeof v === "object" && v !== null && !Array.isArray(v))
+                if (isObject(v))
                     return self.makeProxy(v, root, `${path}${path && "."}${key}`);
 
                 return v;

@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { readFile } from "fs/promises";
-import { basename } from "path";
+import { readFile } from "node:fs/promises";
+import { basename } from "node:path";
 
 import type { Page } from "puppeteer-core";
 import { satisfies, subset, valid, validRange } from "semver";

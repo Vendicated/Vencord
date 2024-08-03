@@ -62,7 +62,7 @@ async function ensureBinary() {
 
     const headers = new Headers();
     headers.append("User-Agent", "Vencord (https://github.com/Vendicated/Vencord)");
-    if (etag != null)
+    if (etag !== null)
         headers.append("If-None-Match", etag);
 
     const res = await fetch(BASE_URL + filename, {

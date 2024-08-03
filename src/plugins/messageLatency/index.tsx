@@ -76,7 +76,7 @@ export default definePlugin({
             const s = str(k);
 
             return prev + (
-                s != null
+                s !== null
                     ? (prev !== ""
                         ? (showMillis ? k === "milliseconds" : k === "seconds")
                             ? " and "

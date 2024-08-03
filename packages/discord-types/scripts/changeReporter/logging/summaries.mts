@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { writeFile } from "fs/promises";
+import { writeFile } from "node:fs/promises";
 
 import type { CR } from "../types.mts";
 import { capitalize, codeBlock, formatChannel, formatEnumEntryList, formatKeyList, formatWarnList } from "./utils.mjs";

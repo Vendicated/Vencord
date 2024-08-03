@@ -708,7 +708,7 @@ export default definePlugin({
     addFakeNotice(type: FakeNoticeType, node: ReactNode, fake: boolean) {
         if (!fake) return node;
 
-        const nodeArray: ReactNode[] = Array.isArray(node) ? node : [node];
+        const nodeArray = Array.isArray(node) ? node : [node];
 
         switch (type) {
             case FakeNoticeType.Sticker: {

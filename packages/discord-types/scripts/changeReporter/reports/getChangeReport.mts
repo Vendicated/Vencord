@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { join } from "path";
+import { join } from "node:path";
 
 import type { Page } from "puppeteer-core";
 
