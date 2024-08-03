@@ -19,7 +19,6 @@
 import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
-import { showNotice } from "@api/Notices";
 import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { CogWheel, InfoIcon } from "@components/Icons";
@@ -27,37 +26,23 @@ import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab } from "@components/VencordSettings/shared";
 import { ChangeList } from "@utils/ChangeList";
-import { proxyLazy } from "@utils/lazy";
-import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
+import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useMemo } from "@webpack/common";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
 
-// Avoid circular dependency
-const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("../../plugins"));
+import { ExcludedReasons, togglePluginEnabled } from "./utils";
+
 
 const cl = classNameFactory("vc-plugins-");
-const logger = new Logger("PluginSettings", "#a6d189");
 
 const InputStyles = findByPropsLazy("inputWrapper", "inputDefault", "error");
 const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
-
-function showErrorToast(message: string) {
-    Toasts.show({
-        message,
-        type: Toasts.Type.FAILURE,
-        id: Toasts.genId(),
-        options: {
-            position: Toasts.Position.BOTTOM
-        }
-    });
-}
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
@@ -91,54 +76,9 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 }
 
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
-    const settings = Settings.plugins[plugin.name];
+    const isEnabled = () => Settings.plugins[plugin.name].enabled ?? false;
 
-    const isEnabled = () => settings.enabled ?? false;
-
-    function toggleEnabled() {
-        const wasEnabled = isEnabled();
-
-        // If we're enabling a plugin, make sure all deps are enabled recursively.
-        if (!wasEnabled) {
-            const { restartNeeded, failures } = startDependenciesRecursive(plugin);
-            if (failures.length) {
-                logger.error(`Failed to start dependencies for ${plugin.name}: ${failures.join(", ")}`);
-                showNotice("Failed to start dependencies: " + failures.join(", "), "Close", () => null);
-                return;
-            } else if (restartNeeded) {
-                // If any dependencies have patches, don't start the plugin yet.
-                settings.enabled = true;
-                onRestartNeeded(plugin.name);
-                return;
-            }
-        }
-
-        // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
-        if (plugin.patches?.length) {
-            settings.enabled = !wasEnabled;
-            onRestartNeeded(plugin.name);
-            return;
-        }
-
-        // If the plugin is enabled, but hasn't been started, then we can just toggle it off.
-        if (wasEnabled && !plugin.started) {
-            settings.enabled = !wasEnabled;
-            return;
-        }
-
-        const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
-
-        if (!result) {
-            settings.enabled = false;
-
-            const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
-            logger.error(msg);
-            showErrorToast(msg);
-            return;
-        }
-
-        settings.enabled = !wasEnabled;
-    }
+    const togglePlugin = () => togglePluginEnabled(isEnabled(), plugin, onRestartNeeded);
 
     return (
         <AddonCard
@@ -146,7 +86,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             description={plugin.description}
             isNew={isNew}
             enabled={isEnabled()}
-            setEnabled={toggleEnabled}
+            setEnabled={togglePlugin}
             disabled={disabled}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
@@ -175,14 +115,6 @@ const enum SearchStatus {
 function ExcludedPluginsList({ search }: { search: string; }) {
     const matchingExcludedPlugins = Object.entries(ExcludedPlugins)
         .filter(([name]) => name.toLowerCase().includes(search));
-
-    const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop" | "desktop" | "dev", string> = {
-        desktop: "Discord Desktop app or Vesktop",
-        discordDesktop: "Discord Desktop app",
-        vencordDesktop: "Vesktop app",
-        web: "Vesktop app and the Web version of Discord",
-        dev: "Developer version of Vencord"
-    };
 
     return (
         <Text variant="text-md/normal" className={Margins.top16}>
