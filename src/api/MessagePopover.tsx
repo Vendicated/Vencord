@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import type { ChannelRecord, MessageRecord } from "@vencord/discord-types";
-import type { ComponentType, MouseEventHandler, ReactElement } from "react";
+import type { ComponentType, MouseEventHandler, ReactNode } from "react";
 
 const logger = new Logger("MessagePopover");
 
@@ -48,17 +49,21 @@ export function removeButton(identifier: string) {
 }
 
 export function _buildPopoverElements(
-    msg: MessageRecord,
-    PopoverButton: ComponentType<ButtonItem>
+    Component: ComponentType<ButtonItem>,
+    message: MessageRecord
 ) {
-    const items: ReactElement[] = [];
+    const items: ReactNode[] = [];
 
     for (const [identifier, getItem] of buttons.entries()) {
         try {
-            const item = getItem(msg);
+            const item = getItem(message);
             if (item) {
                 item.key ??= identifier;
-                items.push(<PopoverButton {...item} />);
+                items.push(
+                    <ErrorBoundary noop>
+                        <Component {...item} />
+                    </ErrorBoundary>
+                );
             }
         } catch (err) {
             logger.error(`[${identifier}]`, err);
