@@ -26,8 +26,8 @@ const badVerbsReplacements = ["love", "eat", "deconstruct", "marry", "fart", "te
 const badNounsReplacements = ["pasta", "kebab", "cake", "potato", "woman", "computer", "java", "hamburger", "monster truck", "osu!", "Ukrainian ball in search of gas game", "Anime", "Anime girl", "good", "keyboard", "NVIDIA RTX 3090 Graphics Card", "storm", "queen", "single", "umbrella", "mosque", "physics", "bath", "virus", "bathroom", "mom", "owner", "airport", "Avast Antivirus Free"];
 
 function replaceBadNouns(content) {
-    // eslint-disable-next-line quotes
-    const regex = new RegExp('\\b(' + badNouns.join('|') + ')\\b', 'gi');
+
+    const regex = new RegExp("\\b(" + badNouns.join("|") + ")\\b", "gi");
 
     return content.replace(regex, function (match) {
         const randomIndex = Math.floor(Math.random() * badNounsReplacements.length);
@@ -36,8 +36,8 @@ function replaceBadNouns(content) {
 }
 
 function replaceBadVerbs(content) {
-    // eslint-disable-next-line quotes
-    const regex = new RegExp('\\b(' + badVerbs.join('|') + ')\\b', 'gi');
+
+    const regex = new RegExp("\\b(" + badVerbs.join("|") + ")\\b", "gi");
 
     return content.replace(regex, function (match) {
         const randomIndex = Math.floor(Math.random() * badVerbsReplacements.length);

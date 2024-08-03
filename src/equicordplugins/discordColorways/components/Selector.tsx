@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/* eslint-disable arrow-parens */
-
 import * as DataStore from "@api/DataStore";
 import { Flex } from "@components/Flex";
 import { DeleteIcon, PlusIcon } from "@components/Icons";
@@ -107,12 +105,12 @@ export default function ({
             id: "all",
             sources: [...colorwayData, ...customColorwayData]
         },
-        ...colorwayData.map((source) => ({
+        ...colorwayData.map(source => ({
             name: source.source,
             id: source.source.toLowerCase().replaceAll(" ", "-"),
             sources: [source]
         })),
-        ...customColorwayData.map((source) => ({
+        ...customColorwayData.map(source => ({
             name: source.source,
             id: source.source.toLowerCase().replaceAll(" ", "-"),
             sources: [source]
@@ -147,7 +145,7 @@ export default function ({
             const onlineSources: { name: string, url: string; }[] = await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[];
 
             const responses: Response[] = await Promise.all(
-                onlineSources.map((source) =>
+                onlineSources.map(source =>
                     fetch(source.url, force ? { cache: "no-store" } : {})
                 )
             );
@@ -309,7 +307,7 @@ export default function ({
                             style={{ marginLeft: "8px" }}
                             onMouseEnter={onMouseEnter}
                             onMouseLeave={onMouseLeave}
-                            onClick={() => openModal((props) => <CreatorModal
+                            onClick={() => openModal(props => <CreatorModal
                                 modalProps={props}
                                 loadUIProps={loadUI}
                             />)}
@@ -350,7 +348,7 @@ export default function ({
                             id="colorway-opencolorstealer"
                             onMouseEnter={onMouseEnter}
                             onMouseLeave={onMouseLeave}
-                            onClick={() => openModal((props) => <ColorPickerModal modalProps={props} />)}
+                            onClick={() => openModal(props => <ColorPickerModal modalProps={props} />)}
                         >
                             <PalleteIcon width={20} height={20} style={{ padding: "6px", boxSizing: "content-box" }} />
                         </Button>}
@@ -469,7 +467,7 @@ export default function ({
                             {(showLabelsInSelectorGridView || viewMode === "list") && <Text className={"colorwayLabel" + ((showLabelsInSelectorGridView && viewMode === "grid") ? " labelInGrid" : "")}>Auto</Text>}
                             <div
                                 className="colorwayInfoIconContainer"
-                                onClick={async (e) => {
+                                onClick={async e => {
                                     e.stopPropagation();
                                     const activeAutoPreset = await DataStore.get("activeAutoPreset");
                                     openModal((props: ModalProps) => <AutoColorwaySelector autoColorwayId={activeAutoPreset} modalProps={props} onChange={autoPresetId => {
@@ -591,7 +589,7 @@ export default function ({
                                                         {activeColorwayObject.id === color.name && activeColorwayObject.source === color.source && <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" />}
                                                     </svg>}
                                                     <div className="discordColorwayPreviewColorContainer">
-                                                        {!color.isGradient ? colors.map((colorItm) => <div
+                                                        {!color.isGradient ? colors.map(colorItm => <div
                                                             className="discordColorwayPreviewColor"
                                                             style={{
                                                                 backgroundColor: color[colorItm],
@@ -609,9 +607,9 @@ export default function ({
                                                     {(showLabelsInSelectorGridView || viewMode === "list") && <Text className={"colorwayLabel" + ((showLabelsInSelectorGridView && viewMode === "grid") ? " labelInGrid" : "")}>{color.name}</Text>}
                                                     {settings.selectorType === "normal" && <div
                                                         className="colorwayInfoIconContainer"
-                                                        onClick={(e) => {
+                                                        onClick={e => {
                                                             e.stopPropagation();
-                                                            openModal((props) => <ColorwayInfoModal
+                                                            openModal(props => <ColorwayInfoModal
                                                                 modalProps={props}
                                                                 colorway={color}
                                                                 loadUIProps={loadUI}
@@ -733,7 +731,7 @@ export default function ({
                                                 {activeColorwayObject.id === color.name && activeColorwayObject.source === color.source && <circle cx="12" cy="12" r="5" className="radioIconForeground-3wH3aU" fill="currentColor" />}
                                             </svg>}
                                             <div className="discordColorwayPreviewColorContainer">
-                                                {!color.isGradient ? colors.map((colorItm) => <div
+                                                {!color.isGradient ? colors.map(colorItm => <div
                                                     className="discordColorwayPreviewColor"
                                                     style={{
                                                         backgroundColor: color[colorItm],
