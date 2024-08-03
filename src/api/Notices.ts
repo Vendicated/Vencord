@@ -18,20 +18,20 @@
 
 import { find } from "@webpack";
 
-const NoticesModule = find(m => m.show && m.dismiss && !m.suppressAll);
+const Notices = find(m => m.show && m.dismiss && !m.suppressAll);
 
 export const noticesQueue = [] as any[];
 export let currentNotice: any = null;
 
 export function popNotice() {
-    NoticesModule.dismiss();
+    Notices.dismiss();
 }
 
 export function nextNotice() {
     currentNotice = noticesQueue.shift();
 
     if (currentNotice) {
-        NoticesModule.show(...currentNotice, "VencordNotice");
+        Notices.show(...currentNotice, "VencordNotice");
     }
 }
 
