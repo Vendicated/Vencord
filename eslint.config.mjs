@@ -11,7 +11,7 @@ import unusedImports from "eslint-plugin-unused-imports";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-    { ignores: ["browser", "dist", "packages", "src/**/*.?(c|m)js?(x)", "eslint.config.mjs"] },
+    { ignores: ["browser", "dist", "packages", "src/**/*.?(c|m)js?(x)", "*.*"] },
     {
         files: ["**/*.?(c|m)[jt]s?(x)"],
         languageOptions: {
