@@ -26,8 +26,8 @@ export default definePlugin({
     patches: [{
         find: "Messages.MESSAGE_UTILITIES_A11Y_LABEL",
         replacement: {
-            match: /"reply-self".+?Fragment,{children:\[(?=.+?\((\i\.\i),{label:)(?<=message:(\i).+?)/,
-            replace: (m, PopoverButton, msg) => `${m}...Vencord.Api.MessagePopover._buildPopoverElements(${msg},${PopoverButton}),`
+            match: /\.jsx\)\((\i\.\i),\{label:\i\.\i\.Messages\.MESSAGE_ACTION_REPLY.{0,200}?"reply-self".{0,50}?\}\):null(?=,.+?message:(\i))/,
+            replace: "$&,Vencord.Api.MessagePopover._buildPopoverElements($1,$2)"
         }
     }],
 });
