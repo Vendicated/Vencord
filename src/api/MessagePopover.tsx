@@ -18,14 +18,14 @@
 
 import { Logger } from "@utils/Logger";
 import { Channel, Message } from "discord-types/general";
-import type { MouseEventHandler } from "react";
+import type { ComponentType, MouseEventHandler, ReactElement } from "react";
 
 const logger = new Logger("MessagePopover");
 
 export interface ButtonItem {
     key?: string,
     label: string,
-    icon: React.ComponentType<any>,
+    icon: ComponentType<any>,
     message: Message,
     channel: Channel,
     onClick?: MouseEventHandler<HTMLButtonElement>,
@@ -49,16 +49,16 @@ export function removeButton(identifier: string) {
 
 export function _buildPopoverElements(
     msg: Message,
-    makeButton: (item: ButtonItem) => React.ComponentType
+    PopoverButton: ComponentType<ButtonItem>,
 ) {
-    const items = [] as React.ComponentType[];
+    const items = [] as ReactElement[];
 
     for (const [identifier, getItem] of buttons.entries()) {
         try {
             const item = getItem(msg);
             if (item) {
                 item.key ??= identifier;
-                items.push(makeButton(item));
+                items.push(<PopoverButton {...item} />);
             }
         } catch (err) {
             logger.error(`[${identifier}]`, err);
