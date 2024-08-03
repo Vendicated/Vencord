@@ -113,6 +113,12 @@ export const filters = {
         return filter;
     },
 
+    // For use inside mapMangledModule
+    componentByFilter: (filter: FilterFn): FilterFn => {
+        filter.$$vencordIsComponentFilter = true;
+        return filter;
+    },
+
     componentByCode: (...code: CodeFilter): FilterFn => {
         const byCodeFilter = filters.byCode(...code);
         const filter: FilterFn = m => {
@@ -134,6 +140,15 @@ export const filters = {
         return filter;
     },
 
+    componentByFields: (...fields: PropsFilter): FilterFn => {
+        const byPropsFilter = filters.byProps(...fields);
+        const filter: FilterFn = m => m?.prototype?.render && byPropsFilter(m.prototype);
+
+        filter.$$vencordProps = ["componentByFields", ...fields];
+        filter.$$vencordIsComponentFilter = true;
+        return filter;
+    },
+
     byFactoryCode: (...code: CodeFilter): FilterFn => {
         const byCodeFilter = filters.byCode(...code);
 
@@ -143,7 +158,7 @@ export const filters = {
     }
 };
 
-export const webpackSearchHistory = [] as Array<["waitFor" | "find" | "findComponent" | "findExportedComponent" | "findComponentByCode" | "findByProps" | "findProp" | "findByCode" | "findStore" | "findByFactoryCode" | "mapMangledModule" | "extractAndLoadChunks" | "webpackDependantLazy" | "webpackDependantLazyComponent", any[]]>;
+export const webpackSearchHistory = [] as Array<["waitFor" | "find" | "findComponent" | "findExportedComponent" | "findComponentByCode" | "findComponentByFields" | "findByProps" | "findProp" | "findByCode" | "findStore" | "findByFactoryCode" | "mapMangledModule" | "extractAndLoadChunks" | "webpackDependantLazy" | "webpackDependantLazyComponent", any[]]>;
 
 function printFilter(filter: FilterFn) {
     if (filter.$$vencordProps != null) {
@@ -322,6 +337,29 @@ export function findComponentByCode<T extends object = any>(...code: CodeFilter 
 
     if (IS_REPORTER) {
         webpackSearchHistory.push(["findComponentByCode", [ComponentResult, ...newCode]]);
+    }
+
+    return ComponentResult;
+}
+
+/**
+ * Find the first exported class component which includes all the given fields in its prototype.
+ *
+ * @example findComponentByFields("renderTooltip", "shouldShowTooltip")
+ * @example findComponentByFields("renderTooltip", "shouldShowTooltip", Tooltip => Tooltip)
+ *
+ * @param code A list of fields to search each exported class component for
+ * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
+ * @returns The component if found, or a noop component
+ */
+export function findComponentByFields<T extends object = any>(...fields: PropsFilter | [...PropsFilter, (component: ModuleExports) => LazyComponentType<T>]) {
+    const parse = (typeof fields.at(-1) === "function" ? fields.pop() : m => m) as (component: ModuleExports) => LazyComponentType<T>;
+    const newFields = fields as PropsFilter;
+
+    const ComponentResult = findComponent<T>(filters.componentByFields(...newFields), parse, { isIndirect: true });
+
+    if (IS_REPORTER) {
+        webpackSearchHistory.push(["findComponentByCode", [ComponentResult, ...newFields]]);
     }
 
     return ComponentResult;
