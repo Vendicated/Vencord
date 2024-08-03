@@ -28,7 +28,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { findByProps, findComponent } from "@webpack";
+import { findByProps, findComponentByFields } from "@webpack";
 import { Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { Ref, SyntheticEvent } from "react";
 
@@ -45,7 +45,7 @@ type FileInputProps = {
     filters?: { name?: string; extensions: string[]; }[];
 };
 
-const FileInput = findComponent<FileInputProps>(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
+const FileInput = findComponentByFields<FileInputProps>("activateUploadDialogue", "setRef");
 const TextAreaProps = findByProps("textarea");
 
 const cl = classNameFactory("vc-settings-theme-");
