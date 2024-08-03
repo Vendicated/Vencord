@@ -15,7 +15,7 @@ import { ReplaceSettings, ReplaceTutorial } from "./ReplaceSettings";
 
 const APP_IDS_KEY = "ReplaceActivityType_appids";
 export type AppIdSetting = {
-    appName: string;
+    disableTimestamps: boolean;
     appId: string;
     enabled: boolean;
     newActivityType: ActivityType;
@@ -64,7 +64,6 @@ export const enum ActivityType {
 }
 
 export const makeEmptyAppId: () => AppIdSetting = () => ({
-    appName: "Unknown",
     appId: "",
     enabled: true,
     newActivityType: ActivityType.PLAYING,
@@ -76,6 +75,7 @@ export const makeEmptyAppId: () => AppIdSetting = () => ({
     newSmallImageUrl: "",
     newSmallImageText: "",
     newStreamUrl: "",
+    disableTimestamps: false
 });
 
 let appIds = [makeEmptyAppId()];
@@ -121,7 +121,6 @@ export default definePlugin({
 
     patchActivity(activity: Activity) {
         if (!activity) return;
-        console.log(activity);
         appIds.forEach(app => {
             if (app.enabled && app.appId === activity.application_id) {
                 activity.type = app.newActivityType;
