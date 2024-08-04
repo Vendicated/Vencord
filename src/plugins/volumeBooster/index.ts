@@ -132,7 +132,7 @@ export default definePlugin({
         }
 
         data.gainNode.gain.value = data._mute
-            ? 0 
+            ? 0
             : amplitudeToPerceptual(data._volume) / 100;
     }
 });
