@@ -45,13 +45,11 @@ export default definePlugin({
     settings,
     flux: {
     	RUNNING_GAMES_CHANGE(event) {
-	        let savedStatus = "";
+	        const status = PresenceStore.getStatus(UserStore.getCurrentUser().id);
 	        if (event.games.length > 0) {
-	            const status = PresenceStore.getStatus(UserStore.getCurrentUser().id);
-	            savedStatus = status;
 	            updateAsync(settings.store.statusToSet);
 	        } else if (event.games.length === 0) {
-	            updateAsync(savedStatus);
+	            updateAsync(status);
 	        }
     	},
     }
