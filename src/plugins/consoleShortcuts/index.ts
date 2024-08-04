@@ -187,8 +187,9 @@ function loadAndCacheShortcut(key: string, val: any, forceLoad: boolean) {
 
             const descriptor = descriptors[propKey];
             if (descriptor.writable === true || descriptor.set != null) {
-                const newValue = unwrapProxy(value[propKey]);
-                if (newValue != null) {
+                const currentValue = value[propKey];
+                const newValue = unwrapProxy(currentValue);
+                if (newValue != null && currentValue !== newValue) {
                     value[propKey] = newValue;
                 }
             }

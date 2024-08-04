@@ -118,7 +118,6 @@ const saveSettingsOnFrequentAction = debounce(async () => {
     }
 }, 60_000);
 
-
 export const SettingsStore = new SettingsStoreClass(settings, {
     readOnly: true,
     getDefaultValue({
