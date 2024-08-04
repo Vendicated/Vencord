@@ -32,10 +32,8 @@ const settings = definePluginSettings({
     }
 });
 // for some godforsaken reason, the volume is ran through this formula before its stored. pathcing it out does not work.
-const PerceptualVolume = {
-    amplitudeToPerceptual: findByCodeLazy("6+1:"),
-    // perceptualToAmplitude: findByCodeLazy("50-50"),
-};
+const amplitudeToPerceptual = findByCodeLazy("6+1:");
+
 interface StreamData {
     audioContext: AudioContext,
     audioElement: HTMLAudioElement,
@@ -70,7 +68,7 @@ export default definePlugin({
                 replace: (_, higherMaxVolume, minorMaxVolume) => `${higherMaxVolume}*$self.settings.store.multiplier`
             }
         })),
-        // PATCHES NEEDED FOR WEB/VESKTOP
+        // patches needed for web/vesktop
         {
             find: "streamSourceNode",
             predicate: () => !IS_DISCORD_DESKTOP,
@@ -80,11 +78,6 @@ export default definePlugin({
                 {
                     match: /Math\.max.{0,30}\)\)/,
                     replace: "Math.round(arguments[0])"
-                },
-                // to update the volume on user join
-                {
-                    match: /,this\.stream\.getTracks\(\)\.length/,
-                    replace: ",this.updateAudioElement()$&"
                 },
                 // to actually patch the volume
                 {
@@ -125,6 +118,7 @@ export default definePlugin({
             ]
         }
     ],
+
     patchVolume(data: StreamData) {
         if (data.stream.getAudioTracks().length === 0) return;
 
@@ -136,6 +130,6 @@ export default definePlugin({
             gain.connect(data.audioContext.destination);
         }
 
-        data.gainNode.gain.value = data._mute ? 0 : PerceptualVolume.amplitudeToPerceptual(data._volume) / 100;
+        data.gainNode.gain.value = data._mute ? 0 : amplitudeToPerceptual(data._volume) / 100;
     }
 });
