@@ -40,23 +40,19 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "StatusWhilePlaying",
-    description: "Automatically updates your status when playing games",
+    description: "Automatically updates your online status (online, idle, dnd) when launching games",
     authors: [Devs.thororen],
     settings,
-    runningGamesChange(event) {
-        let savedStatus = "";
-        if (event.games.length > 0) {
-            const status = PresenceStore.getStatus(UserStore.getCurrentUser().id);
-            savedStatus = status;
-            updateAsync(settings.store.statusToSet);
-        } else if (event.games.length === 0) {
-            updateAsync(savedStatus);
-        }
-    },
-    start() {
-        FluxDispatcher.subscribe("RUNNING_GAMES_CHANGE", this.runningGamesChange);
-    },
-    stop() {
-        FluxDispatcher.unsubscribe("RUNNING_GAMES_CHANGE", this.runningGamesChange);
+    flux: {
+    	RUNNING_GAMES_CHANGE(event) {
+	        let savedStatus = "";
+	        if (event.games.length > 0) {
+	            const status = PresenceStore.getStatus(UserStore.getCurrentUser().id);
+	            savedStatus = status;
+	            updateAsync(settings.store.statusToSet);
+	        } else if (event.games.length === 0) {
+	            updateAsync(savedStatus);
+	        }
+    	},
     }
 });
