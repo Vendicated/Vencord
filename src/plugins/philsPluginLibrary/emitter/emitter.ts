@@ -55,19 +55,27 @@ export class Emitter {
         plugin?: string
     ): () => void {
         emitter[type](event, fn);
-        const emitterEvenet: EmitterEvent = {
+        const emitterEvent: EmitterEvent = {
             emitter,
             event,
             fn,
             plugin: plugin
         };
-        this.events.push(emitterEvenet);
+        this.events.push(emitterEvent);
 
-        return () => this.removeListener(emitterEvenet);
+        return () => this.removeListener(emitterEvent);
+    }
+
+    private static isTypedEmitter(emitter: any): emitter is TypedEmitter<any> {
+        return typeof emitter.off === "function";
     }
 
     public static removeListener(emitterEvent: EmitterEvent) {
-        emitterEvent.emitter.removeListener(emitterEvent.event, emitterEvent.fn);
+        if (this.isTypedEmitter(emitterEvent.emitter)) {
+            emitterEvent.emitter.off(emitterEvent.event, emitterEvent.fn);
+        } else {
+            (emitterEvent.emitter as EventEmitter).removeListener(emitterEvent.event, emitterEvent.fn);
+        }
         this.events = this.events.filter(
             emitterEvent_ => emitterEvent_ !== emitterEvent
         );
@@ -78,9 +86,10 @@ export class Emitter {
             this.events.forEach(emitterEvent =>
                 this.removeListener(emitterEvent)
             );
-        } else
+        } else {
             this.events.forEach(emitterEvent =>
                 plugin === emitterEvent.plugin && this.removeListener(emitterEvent)
             );
+        }
     }
 }
