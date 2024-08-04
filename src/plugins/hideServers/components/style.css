@@ -1,0 +1,47 @@
+.vc-hideservers-button-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 0 0 8px;
+}
+
+.vc-hideservers-button {
+    max-width: 48px;
+    font-size: 60%;
+    background-color: var(--background-primary);
+    color: var(--header-secondary);
+}
+
+.vc-hideservers-list {
+    flex: 1 1 auto;
+}
+
+/* copied from blocked row */
+.vc-hideservers-row {
+    height: 62px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    margin-left: 20px;
+    margin-right: 20px;
+    border-top: 1px solid var(--background-modifier-accent);
+    border-bottom: 1px solid transparent;
+    justify-content: space-between;
+}
+
+.vc-hideservers-guildicon {
+    display: flex;
+    align-items: center;
+    margin-right: 1em;
+}
+
+.vc-hideservers-guildicon img {
+    border-radius: 50%;
+}
+
+.vc-hideservers-name {
+    flex-grow: 1;
+}
+
+.vc-hideservers-row-button {
+    margin-left: auto;
+}
