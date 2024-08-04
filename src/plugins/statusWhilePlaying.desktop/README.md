@@ -1,5 +1,6 @@
 # StatusWhilePlaying
 
-This plugin automatically updates your status when playing games.
+This plugin automatically updates your online status (online, idle, dnd) when launching games.
 
-It can set your status to any of the current statuses. It will revert your status back when the game is closed.
+It will change your status back to the prior status when the game is closed.
+
