@@ -48,11 +48,14 @@ export default definePlugin({
             const status = PresenceStore.getStatus(UserStore.getCurrentUser().id);
             switch (event.games.length) {
                 case 0:
-                    updateAsync(savedStatus);
+                    if (savedStatus !== "" && savedStatus !== settings.store.statusToSet)
+                        updateAsync(savedStatus);
                     break;
                 default:
-                    savedStatus = status;
-                    updateAsync(settings.store.statusToSet);
+                    if (status !== settings.store.statusToSet) {
+                        savedStatus = status;
+                        updateAsync(settings.store.statusToSet);
+                    }
                     break;
             }
         },
