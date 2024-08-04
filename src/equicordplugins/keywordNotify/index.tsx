@@ -7,6 +7,7 @@
 import "./style.css";
 
 import { DataStore } from "@api/index";
+import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
@@ -15,22 +16,14 @@ import { EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, Forms, Select, SelectedChannelStore, Switch, TabBar, TextInput, UserStore, useState } from "@webpack/common";
-import { Message, User } from "discord-types/general/index.js";
+import { Button, ChannelStore, Forms, NavigationRouter, Select, Switch, TextInput, useState } from "@webpack/common";
+import { Message } from "discord-types/general/index.js";
 
 type KeywordEntry = { regex: string, listIds: Array<string>, listType: ListType, ignoreCase: boolean; };
 
 let keywordEntries: Array<KeywordEntry> = [];
-let currentUser: User;
-let keywordLog: Array<any> = [];
 
-const MenuHeader = findByCodeLazy(".sv)()?(0,");
-const Popout = findByCodeLazy(".loadingMore&&null==");
-const recentMentionsPopoutClass = findByPropsLazy("recentMentionsPopout");
-const createMessageRecord = findByCodeLazy("THREAD_CREATED?[]:(0,");
 const KEYWORD_ENTRIES_KEY = "KeywordNotify_keywordEntries";
-const KEYWORD_LOG_KEY = "KeywordNotify_log";
 
 const cl = classNameFactory("vc-keywordnotify-");
 
@@ -57,28 +50,6 @@ function safeMatchesRegex(str: string, regex: string, flags: string) {
 enum ListType {
     BlackList = "BlackList",
     Whitelist = "Whitelist"
-}
-
-function highlightKeywords(str: string, entries: Array<KeywordEntry>) {
-    let regexes: Array<RegExp>;
-    try {
-        regexes = entries.map(e => new RegExp(e.regex, "g" + (e.ignoreCase ? "i" : "")));
-    } catch (err) {
-        return [str];
-    }
-
-    const matches = regexes.map(r => str.match(r)).flat().filter(e => e != null);
-    if (matches.length === 0) {
-        return [str];
-    }
-
-    const idx = str.indexOf(matches[0]);
-
-    return [
-        <span>{str.substring(0, idx)}</span>,
-        <span className="highlight">{matches[0]}</span>,
-        <span>{str.substring(idx + matches[0].length)}</span>
-    ];
 }
 
 function Collapsible({ title, children }) {
@@ -269,49 +240,16 @@ export default definePlugin({
                 match: /}_dispatch\((\i),\i\){/,
                 replace: "$&$1=$self.modify($1);"
             }
-        },
-        {
-            find: "Messages.UNREADS_TAB_LABEL}",
-            replacement: {
-                match: /\i\?\(0,\i\.jsxs\)\(\i\.TabBar\.Item/,
-                replace: "$self.keywordTabBar(),$&"
-            }
-        },
-        {
-            find: "location:\"RecentsPopout\"})",
-            replacement: {
-                match: /:(\i)===\i\.\i\.MENTIONS\?\(0,.+?setTab:(\i),onJump:(\i),badgeState:\i,closePopout:(\i)/,
-                replace: ": $1 === 5 ? $self.tryKeywordMenu($2, $3, $4) $&"
-            }
-        },
-        {
-            find: ".guildFilter:null",
-            replacement: {
-                match: /function (\i)\(\i\){let{message:\i,gotoMessage/,
-                replace: "$self.renderMsg = $1; $&"
-            }
-        },
-        {
-            find: ".guildFilter:null",
-            replacement: {
-                match: /onClick:\(\)=>(\i\.\i\.deleteRecentMention\((\i)\.id\))/,
-                replace: "onClick: () => $2._keyword ? $self.deleteKeyword($2.id) : $1"
-            }
         }
     ],
 
     async start() {
         keywordEntries = await DataStore.get(KEYWORD_ENTRIES_KEY) ?? [];
-        currentUser = UserStore.getCurrentUser();
-        this.onUpdate = () => null;
-
-        (await DataStore.get(KEYWORD_LOG_KEY) ?? []).map(e => JSON.parse(e)).forEach(e => {
-            this.addToLog(e);
-        });
     },
 
     applyKeywordEntries(m: Message) {
         let matches = false;
+        let match = "";
 
         for (const entry of keywordEntries) {
             if (entry.regex === "") {
@@ -342,15 +280,18 @@ export default definePlugin({
             const flags = entry.ignoreCase ? "i" : "";
             if (safeMatchesRegex(m.content, entry.regex, flags)) {
                 matches = true;
+                match = m.content;
             }
 
             for (const embed of m.embeds as any) {
                 if (safeMatchesRegex(embed.description, entry.regex, flags) || safeMatchesRegex(embed.title, entry.regex, flags)) {
                     matches = true;
+                    match = m.content;
                 } else if (embed.fields != null) {
                     for (const field of embed.fields as Array<{ name: string, value: string; }>) {
                         if (safeMatchesRegex(field.value, entry.regex, flags) || safeMatchesRegex(field.name, entry.regex, flags)) {
                             matches = true;
+                            match = m.content;
                         }
                     }
                 }
@@ -358,89 +299,12 @@ export default definePlugin({
         }
 
         if (matches) {
-            m.mentions.push(currentUser.username);
-
-            if (m.author.id !== currentUser.id)
-                this.addToLog(m);
-        }
-    },
-
-    addToLog(m: Message) {
-        if (m == null || keywordLog.some(e => e.id === m.id))
-            return;
-
-        DataStore.get(KEYWORD_LOG_KEY).then(log => {
-            DataStore.set(KEYWORD_LOG_KEY, [...log, JSON.stringify(m)]);
-        });
-
-        const thing = createMessageRecord(m);
-        keywordLog.push(thing);
-        keywordLog.sort((a, b) => b.timestamp - a.timestamp);
-
-        if (keywordLog.length > 50)
-            keywordLog.pop();
-
-        this.onUpdate();
-    },
-
-    deleteKeyword(id) {
-        keywordLog = keywordLog.filter(e => e.id !== id);
-        this.onUpdate();
-    },
-
-    keywordTabBar() {
-        return (
-            <TabBar.Item className="vc-settings-tab-bar-item" id={5}>
-                Keywords
-            </TabBar.Item>
-        );
-    },
-
-    tryKeywordMenu(setTab, onJump, closePopout) {
-        const header = (
-            <MenuHeader tab={5} setTab={setTab} closePopout={closePopout} badgeState={{ badgeForYou: false }} />
-        );
-
-        const channel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
-
-        const [tempLogs, setKeywordLog] = useState(keywordLog);
-        this.onUpdate = () => {
-            const newLog = Array.from(keywordLog);
-            setKeywordLog(newLog);
-        };
-
-        const messageRender = (e, t) => {
-            e._keyword = true;
-
-            e.customRenderedContent = {
-                content: highlightKeywords(e.content, keywordEntries)
-            };
-
-            const msg = this.renderMsg({
-                message: e,
-                gotoMessage: t,
-                dismissible: true
+            showNotification({
+                title: "Keyword Notify",
+                body: `${m.author.username} matched the keyword ${match}`,
+                onClick: () => NavigationRouter.transitionTo(`/channels/${ChannelStore.getChannel(m.channel_id)?.guild_id ?? "@me"}/${m.channel_id}${m.id ? "/" + m.id : ""}`)
             });
-
-            return [msg];
-        };
-
-        return (
-            <>
-                <Popout
-                    className={recentMentionsPopoutClass.recentMentionsPopout}
-                    renderHeader={() => header}
-                    renderMessage={messageRender}
-                    channel={channel}
-                    onJump={onJump}
-                    onFetch={() => null}
-                    onCloseMessage={this.deleteKeyword}
-                    loadMore={() => null}
-                    messages={tempLogs}
-                    renderEmptyState={() => null}
-                />
-            </>
-        );
+        }
     },
 
     modify(e) {
