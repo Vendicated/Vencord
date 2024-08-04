@@ -31,7 +31,7 @@ const settings = definePluginSettings({
         stickToMarkers: true,
     }
 });
-// for some godforsaken reason, the volume is ran through this formula before its stored. pathcing it out does not work.
+
 const amplitudeToPerceptual = findByCodeLazy("6+1:");
 
 interface StreamData {
@@ -50,6 +50,7 @@ interface StreamData {
     _speakingFlags: number,
     _volume: number;
 }
+
 export default definePlugin({
     name: "VolumeBooster",
     authors: [Devs.Nuckyz, Devs.sadan],
@@ -130,6 +131,8 @@ export default definePlugin({
             gain.connect(data.audioContext.destination);
         }
 
-        data.gainNode.gain.value = data._mute ? 0 : amplitudeToPerceptual(data._volume) / 100;
+        data.gainNode.gain.value = data._mute
+            ? 0 
+            : amplitudeToPerceptual(data._volume) / 100;
     }
 });
