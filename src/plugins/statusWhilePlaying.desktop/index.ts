@@ -29,6 +29,10 @@ const settings = definePluginSettings({
                 label: "Do Not Disturb",
                 value: "dnd",
                 default: true
+            },
+            {
+                label: "Invisible",
+                value: "invisible",
             }
         ]
     }
@@ -42,7 +46,6 @@ export default definePlugin({
     flux: {
         RUNNING_GAMES_CHANGE(event) {
             const status = PresenceStore.getStatus(UserStore.getCurrentUser().id);
-            if (status === "offline") return;
             switch (event.games.length) {
                 case 0:
                     updateAsync(savedStatus);
