@@ -8,10 +8,10 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { FluxDispatcher, PresenceStore, UserStore } from "@webpack/common";
+import { PresenceStore, UserStore } from "@webpack/common";
 
+let savedStatus = "";
 const updateAsync = findByCodeLazy("updateAsync", "status");
-
 const settings = definePluginSettings({
     statusToSet: {
         type: OptionType.SELECT,
@@ -29,10 +29,6 @@ const settings = definePluginSettings({
                 label: "Do Not Disturb",
                 value: "dnd",
                 default: true
-            },
-            {
-                label: "Invisible",
-                value: "invisible",
             }
         ]
     }
@@ -44,13 +40,18 @@ export default definePlugin({
     authors: [Devs.thororen],
     settings,
     flux: {
-    	RUNNING_GAMES_CHANGE(event) {
-	        const status = PresenceStore.getStatus(UserStore.getCurrentUser().id);
-	        if (event.games.length > 0) {
-	            updateAsync(settings.store.statusToSet);
-	        } else if (event.games.length === 0) {
-	            updateAsync(status);
-	        }
-    	},
+        RUNNING_GAMES_CHANGE(event) {
+            const status = PresenceStore.getStatus(UserStore.getCurrentUser().id);
+            if (status === "offline") return;
+            switch (event.games.length) {
+                case 0:
+                    updateAsync(savedStatus);
+                    break;
+                default:
+                    savedStatus = status;
+                    updateAsync(settings.store.statusToSet);
+                    break;
+            }
+        },
     }
 });
