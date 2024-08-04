@@ -12,7 +12,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 
 import { ReplaceSettings, ReplaceTutorial } from "./ReplaceSettings";
-import { parse } from "path";
 
 const APP_IDS_KEY = "ReplaceActivityType_appids";
 export type AppIdSetting = {
