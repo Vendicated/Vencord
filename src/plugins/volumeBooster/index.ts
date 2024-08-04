@@ -20,6 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { findByCodeLazy } from "@webpack";
 
 const settings = definePluginSettings({
     multiplier: {
@@ -31,9 +32,28 @@ const settings = definePluginSettings({
     }
 });
 
+const amplitudeToPerceptual = findByCodeLazy("6+1:");
+
+interface StreamData {
+    audioContext: AudioContext,
+    audioElement: HTMLAudioElement,
+    emitter: any,
+    // added by this plugin
+    gainNode?: GainNode,
+    id: string,
+    levelNode: AudioWorkletNode,
+    sinkId: string,
+    stream: MediaStream,
+    streamSourceNode?: MediaStreamAudioSourceNode,
+    videoStreamId: string,
+    _mute: boolean,
+    _speakingFlags: number,
+    _volume: number;
+}
+
 export default definePlugin({
     name: "VolumeBooster",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.sadan],
     description: "Allows you to set the user and stream volume above the default maximum.",
     settings,
 
@@ -45,12 +65,28 @@ export default definePlugin({
         ].map(find => ({
             find,
             replacement: {
-                match: /(?<=maxValue:\i\.\i)\?(\d+?):(\d+?)(?=,)/,
-                replace: (_, higherMaxVolume, minorMaxVolume) => ""
-                    + `?${higherMaxVolume}*$self.settings.store.multiplier`
-                    + `:${minorMaxVolume}*$self.settings.store.multiplier`
+                match: /(?<=maxValue:)\i\.\i\?(\d+?):(\d+?)(?=,)/,
+                replace: (_, higherMaxVolume, minorMaxVolume) => `${higherMaxVolume}*$self.settings.store.multiplier`
             }
         })),
+        // patches needed for web/vesktop
+        {
+            find: "streamSourceNode",
+            predicate: () => !IS_DISCORD_DESKTOP,
+            group: true,
+            replacement: [
+                // remove the cap of 100%
+                {
+                    match: /Math\.max.{0,30}\)\)/,
+                    replace: "Math.round(arguments[0])"
+                },
+                // to actually patch the volume
+                {
+                    match: /\.volume=this\._volume\/100;/,
+                    replace: ".volume=0.00;$self.patchVolume(this);"
+                }
+            ]
+        },
         // Prevent Audio Context Settings sync from trying to sync with values above 200, changing them to 200 before we send to Discord
         {
             find: "AudioContextSettingsMigrated",
@@ -83,4 +119,20 @@ export default definePlugin({
             ]
         }
     ],
+
+    patchVolume(data: StreamData) {
+        if (data.stream.getAudioTracks().length === 0) return;
+
+        data.streamSourceNode ??= data.audioContext.createMediaStreamSource(data.stream);
+
+        if (!data.gainNode) {
+            const gain = data.gainNode = data.audioContext.createGain();
+            data.streamSourceNode.connect(gain);
+            gain.connect(data.audioContext.destination);
+        }
+
+        data.gainNode.gain.value = data._mute
+            ? 0
+            : amplitudeToPerceptual(data._volume) / 100;
+    }
 });
