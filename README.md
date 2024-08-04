@@ -82,6 +82,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - IRememberYou by zoodogood
 - JumpToStart by Samwich
 - KeyboardSounds by HypedDomi
+- KeywordNotify by camila314 (maintained by thororen)
 - LoginWithQR by nexpid
 - MediaDownloader by Colorman
 - Meow by Samwich
