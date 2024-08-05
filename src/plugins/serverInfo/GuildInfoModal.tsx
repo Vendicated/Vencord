@@ -14,6 +14,7 @@ import { useAwaiter } from "@utils/react";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
+import { Settings } from "Vencord";
 
 const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
 const FriendRow = findComponentByCodeLazy(".listName,discriminatorClass");
@@ -151,7 +152,7 @@ function Owner(guildId: string, owner: User) {
 
     return (
         <div className={cl("owner")}>
-            <img src={ownerAvatarUrl} alt="" onClick={() => openImageModal(ownerAvatarUrl)} />
+            {!Settings.plugins.MentionAvatars.enabled && <img src={ownerAvatarUrl} alt="" onClick={() => openImageModal(ownerAvatarUrl)} />}
             {Parser.parse(`<@${owner.id}>`)}
         </div>
     );
