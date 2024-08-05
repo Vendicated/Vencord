@@ -42,7 +42,6 @@ export const VoiceChannelSection = ({ channel, label, showHeader }: VoiceChannel
             size={Button.Sizes.SMALL}
 
             onClick={() => {
-                console.log(channel.id);
                 if (PermissionStore.can(CONNECT, channel))
                     ChannelActions.selectVoiceChannel(channel.id);
                 else
