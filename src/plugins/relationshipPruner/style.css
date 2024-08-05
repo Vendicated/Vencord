@@ -1,0 +1,41 @@
+
+.vc-relationshipPruner-modalparent
+{
+    display: flex;
+    flex-direction: row;
+    
+    img
+    {
+        border-radius: 2vh;
+        height: 20vh;
+        width: 20vh;
+        margin-right: 1vh;
+    }
+}
+
+.vc-relationshipPruner-buttongroup
+{
+    margin-top: 2vh;
+    display: flex;
+    gap: 10px;
+}
+
+.vc-relationshipPruner-info
+{
+    flex-direction: row !important;
+}
+
+.vc-relationshipPruner-infowithicon
+{
+    svg
+    {
+        height: 1.5vh;
+        width: 1.5vh;
+        margin-right: 1vh;
+        fill: var(--interactive-normal);
+    }
+
+    flex-direction: row;
+    align-items: center;
+    display: flex;
+}
