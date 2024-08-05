@@ -12,8 +12,6 @@ Allows you to open more connections in browser!
 * Xbox
 * Roblox
 * Epic Games
-### Planned Platforms
-* None as of currently
 ### Platforms that will never be supported
 * Riot Games (Nothing made by Riot Games to view profiles online)
 * League of Legends (Same as above since it's the same company)
