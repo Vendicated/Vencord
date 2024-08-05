@@ -154,7 +154,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
 
 export default definePlugin({
     name: "VCNotifier",
-    description: "allows you to bind notification to diffrent vc events",
+    description: "allows you to bind notification to diffrent vc events \n just right click a voice channel and press the notification button",
     authors: [Devs.Koxek],
     dependencies: ["MessageEventsAPI", "ChatInputButtonAPI"],
     contextMenus: {
