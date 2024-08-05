@@ -257,7 +257,7 @@ export default definePlugin({
         {
             find: '"alt+shift+down"',
             replacement: {
-                match: /(?<=getChannel\(\i\);return null!=(\i))(?=.{0,150}?>0\)&&\(0,\i\.\i\)\(\i\))/,
+                match: /(?<=getChannel\(\i\);return null!=(\i))(?=.{0,200}?>0\)&&\(0,\i\.\i\)\(\i\))/,
                 replace: (_, channel) => `&&!$self.isHiddenChannel(${channel})`
             }
         },
@@ -265,8 +265,8 @@ export default definePlugin({
         {
             find: ".APPLICATION_STORE&&null!=",
             replacement: {
-                match: /(?<=getState\(\)\.channelId.{0,30}?\(0,\i\.\i\)\(\i\))(?=\.map\()/,
-                replace: ".filter(e=>!$self.isHiddenChannel(e))"
+                match: /getState\(\)\.channelId.+?(?=\.map\(\i=>\i\.id)/,
+                replace: "$&.filter(e=>!$self.isHiddenChannel(e))"
             }
         },
         {
@@ -307,11 +307,11 @@ export default definePlugin({
             ]
         },
         {
-            find: '+1]})},"overflow"))',
+            find: '})},"overflow"))',
             replacement: [
                 {
                     // Create a variable for the channel prop
-                    match: /maxUsers:\i,users:\i.+?}=(\i).*?;/,
+                    match: /users:\i,maxUsers:\i.+?}=(\i).*?;/,
                     replace: (m, props) => `${m}let{shcChannel}=${props};`
                 },
                 {

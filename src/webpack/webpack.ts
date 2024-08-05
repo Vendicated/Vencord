@@ -299,7 +299,7 @@ export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "f
  * Note that the example below exists already as an api, see {@link findByPropsLazy}
  * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
-export function proxyLazyWebpack<T = any>(factory: () => any, attempts?: number) {
+export function proxyLazyWebpack<T = any>(factory: () => T, attempts?: number) {
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["proxyLazyWebpack", [factory]]);
 
     return proxyLazy<T>(factory, attempts);
@@ -544,7 +544,7 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher: RegExp = D
     }
 
     if (rawChunkIds) {
-        const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map((m: any) => m[1]);
+        const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map((m: any) => Number(m[1]));
         await Promise.all(chunkIds.map(id => wreq.e(id)));
     }
 
@@ -559,7 +559,7 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher: RegExp = D
         return false;
     }
 
-    wreq(entryPointId);
+    wreq(Number(entryPointId));
     return true;
 }
 
