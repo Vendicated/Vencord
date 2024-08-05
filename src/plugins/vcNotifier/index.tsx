@@ -1,80 +1,113 @@
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { User } from "discord-types/general";
-import { findStoreLazy } from "@webpack";
-import { NavContextMenuPatchCallback, navPatches } from "@api/ContextMenu";
-import { ChannelStore, React, Forms, Menu, Switch } from "@webpack/common";
-import { ModalContent, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import "./styles.css";
-import { Channel } from "discord-types/general";
-import { definePluginSettings } from "@api/Settings";
+
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { Devs } from "@utils/constants";
+import { ModalContent, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
+import definePlugin from "@utils/types";
+import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { ChannelStore, Forms, Menu, React, Switch } from "@webpack/common";
+import { ReactElement } from "react";
 
 
 
+interface notification {
+    slotavailable: boolean;
+}
 
 
-const vcmenu = "gdm-context";
+const notificationstore = new Map<String, notification>();
+let currenctchannelid = "";
+
+
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
-const store = findStoreLazy("VoiceStateStore");
+
 const ChannelActions = findByPropsLazy("selectVoiceChannel");
-function init() {
-    const channelid = "1232073542942851107";
-    const channelobj = ChannelStore.getChannel(channelid);
-    console.log();
-
-
-};
 
 
 
 
 
-    function spawnNotification() {
-        const notification = new Notification("join vc");
-        const channelId= "1232073542942851107";
-        console.log(channelId);
-        notification.onclick = (event) => {
-            ChannelActions.selectVoiceChannel(channelId);
-        };
 
+function spawnNotification(channelid: string, Title: string, Body?: string) {
+    const notification = new Notification(Title, { body: Body });
+    notification.onclick = event => {
+        ChannelActions.selectVoiceChannel(channelid);
     };
 
-interface UserProps {
-    user: User;
 }
+
 
 
 
 const vcContextPatch: NavContextMenuPatchCallback = (children, props) => {
     if (props.channel.bitrate_ === undefined) return;
-    //this part only runs when the channel context menu is a voice channel
+    // this part only runs when the channel context menu is a voice channel
 
     children.push(
         <Menu.MenuItem
             id="vc-notifier"
             label="Notifications"
-            action={ () => {
-                console.log("clicked")
-                openModal(modalProps => <Modal modalProps={modalProps}/>);
+            action={() => {
+                currenctchannelid = props.channel.id;
+                openModal(modalProps => <Modal modalProps={modalProps} />);
             }}
         />
-    )
+    );
 };
 
+function checkChannel(channelid: string) {
+    const usersVoice = VoiceStateStore.getVoiceStatesForChannel(channelid);
+    const channel = ChannelStore.getChannel(channelid);
+    const maxusers = channel.userLimit;
+    var size = Object.keys(usersVoice).length;
+    if (size < maxusers) {
+        spawnNotification(channelid, "The channel " + channel.name + " is now not full", "Click the notification to join the channel");
+        notificationstore.set(channelid, { slotavailable: false });
+        bindSlotsNotification(false);
+    }
+
+}
+
+
+const intervals = new Map<String, NodeJS.Timer>();
 
 
 
+function bindSlotsNotification(state: boolean) {
+    const id = currenctchannelid;
+    if (state) {
+        intervals.set(currenctchannelid, setInterval(() => checkChannel(id), 5000));
+    } else {
+        clearInterval(intervals.get(id));
+        intervals.delete(id);
+    }
+
+
+
+}
 
 
 
 function Modal({ modalProps }: { modalProps: ModalProps; }) {
-    const [state, setState] = React.useState(false);
 
-    let cv = false;
-  return (
+    const dataset = notificationstore.get(currenctchannelid);
+    const slotavailable = dataset?.slotavailable ?? false;
+    let disabled = false;
+    let tooltip: ReactElement;
+    tooltip = <Forms.FormText>Toggle the notification</Forms.FormText>;
+    if (ChannelStore.getChannel(currenctchannelid)?.userLimit === 0) {
+        disabled = true;
+        tooltip = <Forms.FormText>This channel does not have a limit to how many users can join</Forms.FormText>;
+    }
+    const [state, setState] = React.useState(slotavailable);
+    return (
         <ModalRoot {...modalProps}>
             <ModalHeader>
                 <Forms.FormTitle>Notifications</Forms.FormTitle>
@@ -87,14 +120,14 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                     <Switch
 
                         note={<Forms.FormText>Gives a notification when the channel has atleast one empty slot available</Forms.FormText>}
-
-
+                        tooltipNote={tooltip}
+                        disabled={disabled}
                         value={state}
 
 
-                        onChange={(newstate) => {
-                            console.log("test");
-
+                        onChange={newstate => {
+                            bindSlotsNotification(newstate);
+                            notificationstore.set(currenctchannelid, { slotavailable: newstate });
                             setState(newstate);
                         }}>
                         Slot available
@@ -113,13 +146,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
 
 
 
-const settings = definePluginSettings({
-    oneTimeNotifications: {
-        type: OptionType.BOOLEAN,
-        description: "Make the notification work only once after the first trigger it will be disabled and will have to be manually re-enabled",
-        default: true,
-    },
-});
+
 
 
 
@@ -130,14 +157,10 @@ export default definePlugin({
     description: "allows you to bind notification to diffrent vc events",
     authors: [Devs.Koxek],
     dependencies: ["MessageEventsAPI", "ChatInputButtonAPI"],
-    settings,
     contextMenus: {
         "channel-context": vcContextPatch
     },
 
-
-    start: () => init(),
-    stop: () => removeChatBarButton("NotificationTest")
 });
 
 
