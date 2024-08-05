@@ -1,0 +1,8 @@
+/* Fix verification check marks not matching the foreground colo r*/
+span[class*="botTagCozy"][data-moreTags-darkFg="true"]>svg>path {
+    fill: #000000;
+}
+
+span[class*="botTagCozy"][data-moreTags-darkFg="false"]>svg>path {
+    fill: #ffffff;
+}
