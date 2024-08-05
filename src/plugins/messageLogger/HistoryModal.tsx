@@ -9,13 +9,13 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { TabBar, Text, Timestamp, TooltipContainer, useState } from "@webpack/common";
 
 import { parseEditContent } from ".";
 
-const CodeContainerClasses = findByPropsLazy("markup", "codeContainer");
-const MiscClasses = findByPropsLazy("messageContent", "markupRtl");
+const CodeContainerClasses = findByProps("markup", "codeContainer");
+const MiscClasses = findByProps("messageContent", "markupRtl");
 
 const cl = classNameFactory("vc-ml-modal-");
 

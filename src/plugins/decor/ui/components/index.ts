@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findComponentByCode, LazyComponentWebpack } from "@webpack";
+import { NoopComponent } from "@utils/react";
+import { findComponentByCode } from "@webpack";
 import { React } from "@webpack/common";
 import type { ComponentType, HTMLProps, PropsWithChildren } from "react";
 
@@ -15,13 +16,10 @@ type DecorationGridItemComponent = ComponentType<PropsWithChildren<HTMLProps<HTM
     isSelected: boolean,
 }>;
 
-export let DecorationGridItem: DecorationGridItemComponent;
+export let DecorationGridItem: DecorationGridItemComponent = NoopComponent;
 export const setDecorationGridItem = v => DecorationGridItem = v;
 
-export const AvatarDecorationModalPreview = LazyComponentWebpack(() => {
-    const component = findComponentByCode(".shopPreviewBanner");
-    return React.memo(component);
-});
+export const AvatarDecorationModalPreview = findComponentByCode<any>(".shopPreviewBanner", component => React.memo(component));
 
 type DecorationGridDecorationComponent = React.ComponentType<HTMLProps<HTMLDivElement> & {
     avatarDecoration: AvatarDecoration;
@@ -29,5 +27,5 @@ type DecorationGridDecorationComponent = React.ComponentType<HTMLProps<HTMLDivEl
     isSelected: boolean,
 }>;
 
-export let DecorationGridDecoration: DecorationGridDecorationComponent;
+export let DecorationGridDecoration: DecorationGridDecorationComponent = NoopComponent;
 export const setDecorationGridDecoration = v => DecorationGridDecoration = v;

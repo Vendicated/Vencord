@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -26,7 +26,7 @@ function setCss() {
     style.textContent = `
         .vc-nsfw-img [class^=imageWrapper] img,
         .vc-nsfw-img [class^=wrapperPaused] video {
-            filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
+            filter: blur(${settings.store.blurAmount}px);
             transition: filter 0.2s;
         }
         .vc-nsfw-img [class^=imageWrapper]:hover img,
@@ -36,10 +36,20 @@ function setCss() {
         `;
 }
 
+const settings = definePluginSettings({
+    blurAmount: {
+        type: OptionType.NUMBER,
+        description: "Blur Amount",
+        default: 10,
+        onChange: setCss
+    }
+});
+
 export default definePlugin({
     name: "BlurNSFW",
     description: "Blur attachments in NSFW channels until hovered",
     authors: [Devs.Ven],
+    settings,
 
     patches: [
         {
@@ -50,15 +60,6 @@ export default definePlugin({
             }]
         }
     ],
-
-    options: {
-        blurAmount: {
-            type: OptionType.NUMBER,
-            description: "Blur Amount",
-            default: 10,
-            onChange: setCss
-        }
-    },
 
     start() {
         style = document.createElement("style");

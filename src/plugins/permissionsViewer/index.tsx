@@ -25,7 +25,7 @@ import { SafetyIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { Button, ChannelStore, Dialog, GuildMemberStore, GuildStore, Menu, PermissionsBits, Popout, TooltipContainer, UserStore } from "@webpack/common";
 import type { Guild, GuildMember } from "discord-types/general";
 
@@ -33,8 +33,8 @@ import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission
 import UserPermissions from "./components/UserPermissions";
 import { getSortedRoles, sortPermissionOverwrites } from "./utils";
 
-const PopoutClasses = findByPropsLazy("container", "scroller", "list");
-const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
+const PopoutClasses = findByProps("container", "scroller", "list");
+const RoleButtonClasses = findByProps("button", "buttonInner", "icon", "banner");
 
 export const enum PermissionsSortOrder {
     HighestRole,

@@ -68,6 +68,13 @@ export type FormText = ComponentType<PropsWithChildren<{
     type?: string;
 }> & TextProps> & { Types: FormTextTypes; };
 
+export type Forms = {
+    FormTitle: t.FormTitle,
+    FormSection: t.FormSection,
+    FormDivider: t.FormDivider,
+    FormText: t.FormText,
+};
+
 export type Tooltip = ComponentType<{
     text: ReactNode;
     children: FunctionComponent<{
@@ -195,7 +202,7 @@ export type Switch = ComponentType<PropsWithChildren<{
     tooltipNote?: ReactNode;
 }>>;
 
-export type Timestamp = ComponentType<PropsWithChildren<{
+export type TimestampProps = PropsWithChildren<{
     timestamp: Date;
     isEdited?: boolean;
 
@@ -206,7 +213,7 @@ export type Timestamp = ComponentType<PropsWithChildren<{
     compact?: boolean;
     isInline?: boolean;
     isVisibleOnlyOnHover?: boolean;
-}>>;
+}>;
 
 export type TextInput = ComponentType<PropsWithChildren<{
     name?: string;
@@ -419,6 +426,13 @@ export type Popout = ComponentType<{
 
 export type Dialog = ComponentType<JSX.IntrinsicElements["div"]>;
 
+export type TabBar = ComponentType<PropsWithChildren<any>> & {
+    Header: ComponentType<PropsWithChildren<any>>;
+    Item: ComponentType<PropsWithChildren<any>>;
+    Separator: ComponentType<PropsWithChildren<any>>;
+    Panel: ComponentType<PropsWithChildren<any>>;
+};
+
 type Resolve = (data: { theme: "light" | "dark", saturation: number; }) => {
     hex(): string;
     hsl(): string;
@@ -441,7 +455,7 @@ export type Paginator = ComponentType<{
     hideMaxPage?: boolean;
 }>;
 
-export type MaskedLink = ComponentType<PropsWithChildren<{
+export type MaskedLinkProps = PropsWithChildren<{
     href: string;
     rel?: string;
     target?: string;
@@ -452,7 +466,7 @@ export type MaskedLink = ComponentType<PropsWithChildren<{
     trusted?: boolean;
     messageId?: string;
     channelId?: string;
-}>>;
+}>;
 
 export type ScrollerThin = ComponentType<PropsWithChildren<{
     className?: string;

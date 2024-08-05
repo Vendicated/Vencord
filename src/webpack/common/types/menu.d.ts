@@ -18,7 +18,7 @@
 
 import type { ComponentType, CSSProperties, MouseEvent, PropsWithChildren, ReactNode, UIEvent } from "react";
 
-type RC<C> = ComponentType<PropsWithChildren<C & Record<string, any>>>;
+type RC<C> = ComponentType<PropsWithChildren<C & Record<PropertyKey, any>>>;
 
 export interface Menu {
     Menu: RC<{

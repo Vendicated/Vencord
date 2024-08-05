@@ -19,11 +19,13 @@
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, getCurrentGuild } from "@utils/discord";
 import { SYM_LAZY_CACHED, SYM_LAZY_GET } from "@utils/lazy";
+import { SYM_LAZY_COMPONENT_INNER } from "@utils/lazyReact";
 import { relaunch } from "@utils/native";
 import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from "@utils/patches";
+import { SYM_PROXY_INNER_GET, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
 import definePlugin, { PluginNative, StartAt } from "@utils/types";
 import * as Webpack from "@webpack";
-import { extract, filters, findAll, findModuleId, search } from "@webpack";
+import { cacheFindAll, cacheFindModuleId, extract, filters, search } from "@webpack";
 import * as Common from "@webpack/common";
 import { loadLazyChunks } from "debug/loadLazyChunks";
 import type { ComponentType } from "react";
@@ -52,7 +54,7 @@ function makeShortcuts() {
             const cacheKey = String(filterProps);
             if (cache.has(cacheKey)) return cache.get(cacheKey);
 
-            const matches = findAll(filterFactory(...filterProps));
+            const matches = cacheFindAll(filterFactory(...filterProps));
 
             const result = (() => {
                 switch (matches.length) {
@@ -80,20 +82,27 @@ function makeShortcuts() {
         wp: Webpack,
         wpc: { getter: () => Webpack.cache },
         wreq: { getter: () => Webpack.wreq },
+        WebpackInstances: { getter: () => Vencord.WebpackPatcher.allWebpackInstances },
         wpsearch: search,
         wpex: extract,
-        wpexs: (code: string) => extract(findModuleId(code)!),
+        wpexs: (code: string) => extract(cacheFindModuleId(code)!),
         loadLazyChunks: IS_DEV ? loadLazyChunks : () => { throw new Error("loadLazyChunks is dev only."); },
+        filters,
         find,
-        findAll: findAll,
+        findAll: cacheFindAll,
         findByProps,
-        findAllByProps: (...props: string[]) => findAll(filters.byProps(...props)),
+        findAllByProps: (...props: string[]) => cacheFindAll(filters.byProps(...props)),
+        findProp: (...props: string[]) => findByProps(...props)[props[0]],
         findByCode: newFindWrapper(filters.byCode),
-        findAllByCode: (code: string) => findAll(filters.byCode(code)),
+        findAllByCode: (code: string) => cacheFindAll(filters.byCode(code)),
         findComponentByCode: newFindWrapper(filters.componentByCode),
-        findAllComponentsByCode: (...code: string[]) => findAll(filters.componentByCode(...code)),
+        findAllComponentsByCode: (...code: string[]) => cacheFindAll(filters.componentByCode(...code)),
+        findComponentByFields: newFindWrapper(filters.componentByFields),
+        findAllComponentsByFields: (...fields: string[]) => cacheFindAll(filters.componentByFields(...fields)),
         findExportedComponent: (...props: string[]) => findByProps(...props)[props[0]],
         findStore: newFindWrapper(filters.byStoreName),
+        findByFactoryCode: newFindWrapper(filters.byFactoryCode),
+        findAllByFactoryCode: (...code: string[]) => cacheFindAll(filters.byFactoryCode(...code)),
         PluginsApi: { getter: () => Vencord.Plugins },
         plugins: { getter: () => Vencord.Plugins.plugins },
         Settings: { getter: () => Vencord.Settings },
@@ -157,11 +166,39 @@ function loadAndCacheShortcut(key: string, val: any, forceLoad: boolean) {
     const currentVal = val.getter();
     if (!currentVal || val.preload === false) return currentVal;
 
-    const value = currentVal[SYM_LAZY_GET]
-        ? forceLoad ? currentVal[SYM_LAZY_GET]() : currentVal[SYM_LAZY_CACHED]
-        : currentVal;
+    function unwrapProxy(value: any) {
+        if (value[SYM_LAZY_GET]) {
+            return forceLoad ? value[SYM_LAZY_GET]() : value[SYM_LAZY_CACHED];
+        } else if (value[SYM_PROXY_INNER_GET]) {
+            return forceLoad ? value[SYM_PROXY_INNER_GET]() : value[SYM_PROXY_INNER_VALUE];
+        } else if (value[SYM_LAZY_COMPONENT_INNER]) {
+            return value[SYM_LAZY_COMPONENT_INNER]() != null ? value[SYM_LAZY_COMPONENT_INNER]() : value;
+        }
 
-    if (value) define(window.shortcutList, key, { value });
+        return value;
+    }
+
+    const value = unwrapProxy(currentVal);
+    if (value != null && typeof value === "object") {
+        const descriptors = Object.getOwnPropertyDescriptors(value);
+
+        for (const propKey in descriptors) {
+            if (value[propKey] == null) continue;
+
+            const descriptor = descriptors[propKey];
+            if (descriptor.writable === true || descriptor.set != null) {
+                const currentValue = value[propKey];
+                const newValue = unwrapProxy(currentValue);
+                if (newValue != null && currentValue !== newValue) {
+                    value[propKey] = newValue;
+                }
+            }
+        }
+    }
+
+    if (value != null) {
+        define(window.shortcutList, key, { value });
+    }
 
     return value;
 }
@@ -192,7 +229,7 @@ export default definePlugin({
         }
 
         // unproxy loaded modules
-        Webpack.onceReady.then(() => {
+        Webpack.onceDiscordLoaded.then(() => {
             setTimeout(() => this.eagerLoad(false), 1000);
 
             if (!IS_WEB) {
@@ -203,7 +240,7 @@ export default definePlugin({
     },
 
     async eagerLoad(forceLoad: boolean) {
-        await Webpack.onceReady;
+        await Webpack.onceDiscordLoaded;
 
         const shortcuts = makeShortcuts();
 

@@ -16,50 +16,41 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, findByPropsLazy, waitFor } from "@webpack";
+import { NoopComponent } from "@utils/react";
+import { filters, findByProps, findComponent, findComponentByCode, findExportedComponent } from "@webpack";
 
-import { waitForComponent } from "./internal";
 import * as t from "./types/components";
 
-export let Forms = {} as {
-    FormTitle: t.FormTitle,
-    FormSection: t.FormSection,
-    FormDivider: t.FormDivider,
-    FormText: t.FormText,
-};
-
-export let Card: t.Card;
-export let Button: t.Button;
-export let Switch: t.Switch;
-export let Tooltip: t.Tooltip;
-export let TooltipContainer: t.TooltipContainer;
-export let TextInput: t.TextInput;
-export let TextArea: t.TextArea;
-export let Text: t.Text;
-export let Heading: t.Heading;
-export let Select: t.Select;
-export let SearchableSelect: t.SearchableSelect;
-export let Slider: t.Slider;
+export let Card: t.Card = NoopComponent as any;
+export let Button: t.Button = NoopComponent as any;
+export let Switch: t.Switch = NoopComponent;
+export let Tooltip: t.Tooltip = NoopComponent as any;
+export let TooltipContainer: t.TooltipContainer = NoopComponent as any;
+export let TextInput: t.TextInput = NoopComponent as any;
+export let TextArea: t.TextArea = NoopComponent;
+export let Text: t.Text = NoopComponent;
+export let Heading: t.Heading = NoopComponent;
+export let Select: t.Select = NoopComponent;
+export let SearchableSelect: t.SearchableSelect = NoopComponent;
+export let Slider: t.Slider = NoopComponent;
 export let ButtonLooks: t.ButtonLooks;
-export let Popout: t.Popout;
-export let Dialog: t.Dialog;
-export let TabBar: any;
-export let Paginator: t.Paginator;
-export let ScrollerThin: t.ScrollerThin;
-export let Clickable: t.Clickable;
-export let Avatar: t.Avatar;
-export let FocusLock: t.FocusLock;
-// token lagger real
-/** css colour resolver stuff, no clue what exactly this does, just copied usage from Discord */
+export let Popout: t.Popout = NoopComponent as any;
+export let Dialog: t.Dialog = NoopComponent;
+export let TabBar: t.TabBar = NoopComponent as any;
+export let Paginator: t.Paginator = NoopComponent;
+export let ScrollerThin: t.ScrollerThin = NoopComponent;
+export let Clickable: t.Clickable = NoopComponent;
+export let Avatar: t.Avatar = NoopComponent;
+export let FocusLock: t.FocusLock = NoopComponent;
 export let useToken: t.useToken;
 
-export const MaskedLink = waitForComponent<t.MaskedLink>("MaskedLink", filters.componentByCode("MASKED_LINK)"));
-export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
-export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
+export const MaskedLink = findComponentByCode<t.MaskedLinkProps>("MASKED_LINK)");
+export const Timestamp = findComponentByCode<t.TimestampProps>(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format");
+export const Flex = findComponent(filters.byProps("Justify", "Align", "Wrap")) as t.Flex;
 
-export const { OAuth2AuthorizeModal } = findByPropsLazy("OAuth2AuthorizeModal");
+export const OAuth2AuthorizeModal = findExportedComponent("OAuth2AuthorizeModal");
 
-waitFor(["FormItem", "Button"], m => {
+export const Forms = findByProps<t.Forms>("FormItem", "Button", m => {
     ({
         useToken,
         Card,
@@ -84,5 +75,6 @@ waitFor(["FormItem", "Button"], m => {
         FocusLock,
         Heading
     } = m);
-    Forms = m;
+
+    return m;
 });

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings, useSettings } from "@api/Settings";
+import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { DeleteIcon, FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
@@ -28,9 +28,9 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { findByPropsLazy, findLazy } from "@webpack";
+import { findByProps, findComponentByFields } from "@webpack";
 import { Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
-import type { ComponentType, Ref, SyntheticEvent } from "react";
+import type { Ref, SyntheticEvent } from "react";
 
 import Plugins from "~plugins";
 
@@ -38,16 +38,15 @@ import { AddonCard } from "./AddonCard";
 import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
 
-type FileInput = ComponentType<{
+type FileInputProps = {
     ref: Ref<HTMLInputElement>;
     onChange: (e: SyntheticEvent<HTMLInputElement>) => void;
     multiple?: boolean;
     filters?: { name?: string; extensions: string[]; }[];
-}>;
+};
 
-const InviteActions = findByPropsLazy("resolveInvite");
-const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
-const TextAreaProps = findLazy(m => typeof m.textarea === "string");
+const FileInput = findComponentByFields<FileInputProps>("activateUploadDialogue", "setRef");
+const TextAreaProps = findByProps("textarea");
 
 const cl = classNameFactory("vc-settings-theme-");
 
@@ -252,7 +251,7 @@ function ThemesTab() {
                                 Icon={PaintbrushIcon}
                             />
 
-                            {Settings.plugins.ClientTheme.enabled && (
+                            {Vencord.Plugins.isPluginEnabled("ClientTheme") && (
                                 <QuickAction
                                     text="Edit ClientTheme"
                                     action={() => openPluginModal(Plugins.ClientTheme)}

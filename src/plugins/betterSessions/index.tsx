@@ -21,20 +21,20 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
+import { findByProps, findExportedComponent, findStore } from "@webpack";
 import { Constants, React, RestAPI, Tooltip } from "@webpack/common";
 
 import { RenameButton } from "./components/RenameButton";
 import { Session, SessionInfo } from "./types";
 import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, savedSessionsCache, saveSessionsToDataStore } from "./utils";
 
-const AuthSessionsStore = findStoreLazy("AuthSessionsStore");
-const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
+const AuthSessionsStore = findStore("AuthSessionsStore");
+const UserSettingsModal = findByProps("saveAccountChanges", "open");
 
-const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
-const SessionIconClasses = findByPropsLazy("sessionIcon");
+const TimestampClasses = findByProps("timestampTooltip", "blockquoteContainer");
+const SessionIconClasses = findByProps("sessionIcon");
 
-const BlobMask = findExportedComponentLazy("BlobMask");
+const BlobMask = findExportedComponent("BlobMask");
 
 const settings = definePluginSettings({
     backgroundCheck: {

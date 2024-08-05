@@ -23,13 +23,13 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { ChannelStore, PermissionsBits, PermissionStore, Tooltip } from "@webpack/common";
 import type { Channel, Role } from "discord-types/general";
 
 import HiddenChannelLockScreen from "./components/HiddenChannelLockScreen";
 
-const ChannelListClasses = findByPropsLazy("modeMuted", "modeSelected", "unread", "icon");
+const ChannelListClasses = findByProps("modeMuted", "modeSelected", "unread", "icon");
 
 const enum ShowMode {
     LockIcon,

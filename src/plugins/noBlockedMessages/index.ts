@@ -16,19 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { RelationshipStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
+const settings = definePluginSettings({
+    ignoreBlockedMessages: {
+        description: "Completely ignores (recent) incoming messages from blocked users (locally).",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true,
+    },
+});
 
 export default definePlugin({
     name: "NoBlockedMessages",
     description: "Hides all blocked messages from chat completely.",
     authors: [Devs.rushii, Devs.Samu],
+    settings,
+
     patches: [
         {
             find: "Messages.BLOCKED_MESSAGES_HIDE",
@@ -44,7 +53,7 @@ export default definePlugin({
             '"displayName","ReadStateStore")'
         ].map(find => ({
             find,
-            predicate: () => Settings.plugins.NoBlockedMessages.ignoreBlockedMessages === true,
+            predicate: () => settings.store.ignoreBlockedMessages === true,
             replacement: [
                 {
                     match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,

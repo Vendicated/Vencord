@@ -89,8 +89,8 @@ export const isStyleEnabled = (name: string) => requireStyle(name).dom?.isConnec
  * // -- plugin.ts --
  * import pluginStyle from "./plugin.css?managed";
  * import { setStyleVars } from "@api/Styles";
- * import { findByPropsLazy } from "@webpack";
- * const classNames = findByPropsLazy("thin", "scrollerBase"); // { thin: "thin-31rlnD scrollerBase-_bVAAt", ... }
+ * import { findByProps } from "@webpack";
+ * const classNames = findByProps("thin", "scrollerBase"); // { thin: "thin-31rlnD scrollerBase-_bVAAt", ... }
  *
  * // Inside some plugin method like "start()"
  * setStyleClassNames(pluginStyle, classNames);

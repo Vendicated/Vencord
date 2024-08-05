@@ -19,9 +19,9 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findStore } from "@webpack";
 
-const MessageRequestStore = findByPropsLazy("getMessageRequestsCount");
+const MessageRequestStore = findStore("MessageRequestStore");
 
 const settings = definePluginSettings({
     hideFriendRequestsCount: {

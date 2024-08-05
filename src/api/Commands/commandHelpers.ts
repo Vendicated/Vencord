@@ -17,14 +17,14 @@
 */
 
 import { mergeDefaults } from "@utils/mergeDefaults";
-import { findByCodeLazy } from "@webpack";
+import { findByCode } from "@webpack";
 import { MessageActions, SnowflakeUtils } from "@webpack/common";
 import { Message } from "discord-types/general";
 import type { PartialDeep } from "type-fest";
 
 import { Argument } from "./types";
 
-const createBotMessage = findByCodeLazy('username:"Clyde"');
+const createBotMessage = findByCode('username:"Clyde"');
 
 export function generateId() {
     return `-${SnowflakeUtils.fromTimestamp(Date.now())}`;

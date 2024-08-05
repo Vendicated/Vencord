@@ -21,11 +21,11 @@ import "./style.css";
 import { addBadge, BadgePosition, BadgeUserArgs, ProfileBadge, removeBadge } from "@api/Badges";
 import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
 import { addDecoration, removeDecoration } from "@api/MessageDecorations";
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { findByProps, findStore } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -40,7 +40,7 @@ export interface Session {
     };
 }
 
-const SessionsStore = findStoreLazy("SessionsStore") as {
+const SessionsStore = findStore("SessionsStore") as {
     getSessions(): Record<string, Session>;
 };
 
@@ -70,7 +70,7 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const StatusUtils = findByPropsLazy("useStatusFillColor", "StatusTypes");
+const StatusUtils = findByProps("useStatusFillColor", "StatusTypes");
 
 const PlatformIcon = ({ platform, status, small }: { platform: Platform, status: string; small: boolean; }) => {
     const tooltip = platform === "embedded"
@@ -195,29 +195,36 @@ const indicatorLocations = {
     }
 };
 
+const settings = definePluginSettings({
+    ...Object.fromEntries(
+        Object.entries(indicatorLocations).map(([key, value]) => {
+            return [key, {
+                type: OptionType.BOOLEAN,
+                description: `Show indicators ${value.description.toLowerCase()}`,
+                // onChange doesn't give any way to know which setting was changed, so restart required
+                restartNeeded: true,
+                default: true
+            }];
+        })
+    ) as Record<"list" | "badges" | "messages", { type: OptionType.BOOLEAN; description: string; restartNeeded: boolean; default: boolean; }>,
+    colorMobileIndicator: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to make the mobile indicator match the color of the user status.",
+        default: true,
+        restartNeeded: true
+    }
+});
+
 export default definePlugin({
     name: "PlatformIndicators",
     description: "Adds platform indicators (Desktop, Mobile, Web...) to users",
     authors: [Devs.kemo, Devs.TheSun, Devs.Nuckyz, Devs.Ven],
     dependencies: ["MessageDecorationsAPI", "MemberListDecoratorsAPI"],
+    settings,
 
     start() {
-        const settings = Settings.plugins.PlatformIndicators;
-        const { displayMode } = settings;
-
-        // transfer settings from the old ones, which had a select menu instead of booleans
-        if (displayMode) {
-            if (displayMode !== "both") settings[displayMode] = true;
-            else {
-                settings.list = true;
-                settings.badges = true;
-            }
-            settings.messages = true;
-            delete settings.displayMode;
-        }
-
         Object.entries(indicatorLocations).forEach(([key, value]) => {
-            if (settings[key]) value.onEnable();
+            if (settings.store[key]) value.onEnable();
         });
     },
 
@@ -230,7 +237,7 @@ export default definePlugin({
     patches: [
         {
             find: ".Masks.STATUS_ONLINE_MOBILE",
-            predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
+            predicate: () => settings.store.colorMobileIndicator,
             replacement: [
                 {
                     // Return the STATUS_ONLINE_MOBILE mask if the user is on mobile, no matter the status
@@ -246,7 +253,7 @@ export default definePlugin({
         },
         {
             find: ".AVATAR_STATUS_MOBILE_16;",
-            predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
+            predicate: () => settings.store.colorMobileIndicator,
             replacement: [
                 {
                     // Return the AVATAR_STATUS_MOBILE size mask if the user is on mobile, no matter the status
@@ -267,32 +274,12 @@ export default definePlugin({
         },
         {
             find: "}isMobileOnline(",
-            predicate: () => Settings.plugins.PlatformIndicators.colorMobileIndicator,
+            predicate: () => settings.store.colorMobileIndicator,
             replacement: {
                 // Make isMobileOnline return true no matter what is the user status
                 match: /(?<=\i\[\i\.\i\.MOBILE\])===\i\.\i\.ONLINE/,
                 replace: "!= null"
             }
         }
-    ],
-
-    options: {
-        ...Object.fromEntries(
-            Object.entries(indicatorLocations).map(([key, value]) => {
-                return [key, {
-                    type: OptionType.BOOLEAN,
-                    description: `Show indicators ${value.description.toLowerCase()}`,
-                    // onChange doesn't give any way to know which setting was changed, so restart required
-                    restartNeeded: true,
-                    default: true
-                }];
-            })
-        ),
-        colorMobileIndicator: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to make the mobile indicator match the color of the user status.",
-            default: true,
-            restartNeeded: true
-        }
-    }
+    ]
 });

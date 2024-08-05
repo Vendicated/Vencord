@@ -23,10 +23,10 @@ export * as Util from "./utils";
 export * as QuickCss from "./utils/quickCss";
 export * as Updater from "./utils/updater";
 export * as Webpack from "./webpack";
+export * as WebpackPatcher from "./webpack/patchWebpack";
 export { PlainSettings, Settings };
 
 import "./utils/quickCss";
-import "./webpack/patchWebpack";
 
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
 import { StartAt } from "@utils/types";
@@ -39,7 +39,7 @@ import { localStorage } from "./utils/localStorage";
 import { relaunch } from "./utils/native";
 import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
-import { onceReady } from "./webpack";
+import { onceDiscordLoaded } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
 
 if (IS_REPORTER) {
@@ -86,7 +86,7 @@ async function syncSettings() {
 }
 
 async function init() {
-    await onceReady;
+    await onceDiscordLoaded;
     startAllPlugins(StartAt.WebpackReady);
 
     syncSettings();
@@ -125,7 +125,7 @@ async function init() {
         const pendingPatches = patches.filter(p => !p.all && p.predicate?.() !== false);
         if (pendingPatches.length)
             PMLogger.warn(
-                "Webpack has finished initialising, but some patches haven't been applied yet.",
+                "Webpack has finished initializing, but some patches haven't been applied yet.",
                 "This might be expected since some Modules are lazy loaded, but please verify",
                 "that all plugins are working as intended.",
                 "You are seeing this warning because this is a Development build of Vencord.",

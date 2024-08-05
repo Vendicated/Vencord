@@ -24,13 +24,12 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { gitRemote } from "@shared/vencordUserAgent";
-import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
+import { find, findByProps, findComponentByCode } from "@webpack";
+import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, UserUtils } from "@webpack/common";
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
 
@@ -50,9 +49,9 @@ import { GithubButton, WebsiteButton } from "./LinkIconButton";
 
 const cl = classNameFactory("vc-plugin-modal-");
 
-const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
-const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
+const UserSummaryItem = findComponentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers");
+const AvatarStyles = findByProps("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
+const UserRecord = find<Constructor<Partial<User>>>(m => m?.prototype?.getAvatarURL && m?.prototype?.hasHadPremium);
 
 interface PluginModalProps extends ModalProps {
     plugin: Plugin;

@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 
-const UserPopoutSectionCssClasses = findByPropsLazy("section", "lastSection");
+const UserPopoutSectionCssClasses = findByProps("section", "lastSection");
 
 const settings = definePluginSettings({
     hide: {
@@ -35,7 +35,7 @@ const settings = definePluginSettings({
     noSpellCheck: {
         type: OptionType.BOOLEAN,
         description: "Disable spellcheck in notes",
-        disabled: () => Settings.plugins.BetterNotesBox.hide,
+        disabled: () => settings.store.hide,
         default: false
     }
 });

@@ -23,12 +23,12 @@ import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { Forms, React } from "@webpack/common";
 
 import hideBugReport from "./hideBugReport.css?managed";
 
-const KbdStyles = findByPropsLazy("key", "combo");
+const KbdStyles = findByProps("key", "combo");
 
 const settings = definePluginSettings({
     toolbarDevMenu: {

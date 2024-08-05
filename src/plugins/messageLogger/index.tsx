@@ -20,7 +20,7 @@ import "./messageLogger.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { updateMessage } from "@api/MessageUpdater";
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
@@ -28,7 +28,7 @@ import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByCode, findByProps } from "@webpack";
 import { ChannelStore, FluxDispatcher, i18n, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 import { Message } from "discord-types/general";
 
@@ -42,11 +42,11 @@ interface MLMessage extends Message {
     firstEditTimestamp?: Date;
 }
 
-const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
-const getMessage = findByCodeLazy('replace(/^\\n+|\\n+$/g,"")');
+const styles = findByProps("edited", "communicationDisabled", "isSystemMessage");
+const getMessage = findByCode('replace(/^\\n+|\\n+$/g,"")');
 
 function addDeleteStyle() {
-    if (Settings.plugins.MessageLogger.deleteStyle === "text") {
+    if (settings.store.deleteStyle === "text") {
         enableStyle(textStyle);
         disableStyle(overlayStyle);
     } else {
@@ -142,11 +142,70 @@ export function parseEditContent(content: string, message: Message) {
     });
 }
 
+const settings = definePluginSettings({
+    deleteStyle: {
+        type: OptionType.SELECT,
+        description: "The style of deleted messages",
+        default: "text",
+        options: [
+            { label: "Red text", value: "text", default: true },
+            { label: "Red overlay", value: "overlay" }
+        ],
+        onChange: () => addDeleteStyle()
+    },
+    logDeletes: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to log deleted messages",
+        default: true,
+    },
+    collapseDeleted: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to collapse deleted messages, similar to blocked messages",
+        default: false
+    },
+    logEdits: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to log edited messages",
+        default: true,
+    },
+    inlineEdits: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to display edit history as part of message content",
+        default: true
+    },
+    ignoreBots: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to ignore messages by bots",
+        default: false
+    },
+    ignoreSelf: {
+        type: OptionType.BOOLEAN,
+        description: "Whether to ignore messages by yourself",
+        default: false
+    },
+    ignoreUsers: {
+        type: OptionType.STRING,
+        description: "Comma-separated list of user IDs to ignore",
+        default: ""
+    },
+    ignoreChannels: {
+        type: OptionType.STRING,
+        description: "Comma-separated list of channel IDs to ignore",
+        default: ""
+    },
+    ignoreGuilds: {
+        type: OptionType.STRING,
+        description: "Comma-separated list of guild IDs to ignore",
+        default: ""
+    },
+});
+
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi],
     dependencies: ["MessageUpdaterAPI"],
+    settings,
 
     contextMenus: {
         "message": patchMessageContextMenu,
@@ -168,7 +227,7 @@ export default definePlugin({
             (oldMsg, newMsg) => oldMsg?.editHistory === newMsg?.editHistory
         );
 
-        return Settings.plugins.MessageLogger.inlineEdits && (
+        return settings.store.inlineEdits && (
             <>
                 {message.editHistory?.map(edit => (
                     <div className="messagelogger-edited">
@@ -191,64 +250,6 @@ export default definePlugin({
             timestamp: new Date(newMessage.edited_timestamp),
             content: oldMessage.content
         };
-    },
-
-    options: {
-        deleteStyle: {
-            type: OptionType.SELECT,
-            description: "The style of deleted messages",
-            default: "text",
-            options: [
-                { label: "Red text", value: "text", default: true },
-                { label: "Red overlay", value: "overlay" }
-            ],
-            onChange: () => addDeleteStyle()
-        },
-        logDeletes: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to log deleted messages",
-            default: true,
-        },
-        collapseDeleted: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to collapse deleted messages, similar to blocked messages",
-            default: false
-        },
-        logEdits: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to log edited messages",
-            default: true,
-        },
-        inlineEdits: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to display edit history as part of message content",
-            default: true
-        },
-        ignoreBots: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to ignore messages by bots",
-            default: false
-        },
-        ignoreSelf: {
-            type: OptionType.BOOLEAN,
-            description: "Whether to ignore messages by yourself",
-            default: false
-        },
-        ignoreUsers: {
-            type: OptionType.STRING,
-            description: "Comma-separated list of user IDs to ignore",
-            default: ""
-        },
-        ignoreChannels: {
-            type: OptionType.STRING,
-            description: "Comma-separated list of channel IDs to ignore",
-            default: ""
-        },
-        ignoreGuilds: {
-            type: OptionType.STRING,
-            description: "Comma-separated list of guild IDs to ignore",
-            default: ""
-        },
     },
 
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
@@ -285,7 +286,7 @@ export default definePlugin({
     },
 
     shouldIgnore(message: any, isEdit = false) {
-        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
+        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = settings.store;
         const myId = UserStore.getCurrentUser().id;
 
         return ignoreBots && message.author?.bot ||
@@ -493,7 +494,7 @@ export default definePlugin({
                 match: /if\((\i)\.blocked\)return \i\.\i\.MESSAGE_GROUP_BLOCKED;/,
                 replace: '$&else if($1.deleted) return"MESSAGE_GROUP_DELETED";',
             },
-            predicate: () => Settings.plugins.MessageLogger.collapseDeleted
+            predicate: () => settings.store.collapseDeleted
         },
         {
             // Message group rendering
@@ -508,7 +509,7 @@ export default definePlugin({
                     replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$self.Messages.DELETED_MESSAGE_COUNT:',
                 },
             ],
-            predicate: () => Settings.plugins.MessageLogger.collapseDeleted
+            predicate: () => settings.store.collapseDeleted
         }
     ]
 });

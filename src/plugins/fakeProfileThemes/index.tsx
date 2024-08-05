@@ -26,7 +26,7 @@ import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
+import { extractAndLoadChunksLazy, findComponentByCode } from "@webpack";
 import { Button, Flex, Forms, React, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 import virtualMerge from "virtual-merge";
@@ -108,10 +108,10 @@ interface ProfileModalProps {
     isTryItOutFlow: boolean;
 }
 
-const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
-const ProfileModal = findComponentByCodeLazy<ProfileModalProps>("isTryItOutFlow:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
+const ColorPicker = findComponentByCode<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
+const ProfileModal = findComponentByCode<ProfileModalProps>("isTryItOutFlow:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
 
-const requireColorPicker = extractAndLoadChunksLazy(["USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format"], /createPromise:\(\)=>\i\.\i(\("?.+?"?\)).then\(\i\.bind\(\i,"?(.+?)"?\)\)/);
+const requireColorPicker = extractAndLoadChunksLazy("USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format");
 
 export default definePlugin({
     name: "FakeProfileThemes",

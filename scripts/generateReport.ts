@@ -214,7 +214,7 @@ page.on("console", async e => {
 
         switch (tag) {
             case "WebpackInterceptor:":
-                const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
+                const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module|took [\d.]+?ms) \(Module id is (.+?)\): (.+)/)!;
                 if (!patchFailMatch) break;
 
                 console.error(await getText());
@@ -301,7 +301,7 @@ page.on("pageerror", e => {
 
 async function reporterRuntime(token: string) {
     Vencord.Webpack.waitFor(
-        "loginToken",
+        Vencord.Webpack.filters.byProps("loginToken"),
         m => {
             console.log("[PUP_DEBUG]", "Logging in with token...");
             m.loginToken(token);

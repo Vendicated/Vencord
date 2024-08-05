@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
-import { filters, findAll, search } from "@webpack";
+import { cacheFindAll, filters, search } from "@webpack";
 
 const PORT = 8485;
 const NAV_ID = "dev-companion-reconnect";
@@ -160,7 +160,7 @@ function initWs(isManual = false) {
                     return reply("Expected exactly one 'find' matches, found " + keys.length);
 
                 const mod = candidates[keys[0]];
-                let src = String(mod.original ?? mod).replaceAll("\n", "");
+                let src = String(mod).replaceAll("\n", "");
 
                 if (src.startsWith("function(")) {
                     src = "0," + src;
@@ -201,22 +201,22 @@ function initWs(isManual = false) {
                     let results: any[];
                     switch (type.replace("find", "").replace("Lazy", "")) {
                         case "":
-                            results = findAll(parsedArgs[0]);
+                            results = cacheFindAll(parsedArgs[0]);
                             break;
                         case "ByProps":
-                            results = findAll(filters.byProps(...parsedArgs));
+                            results = cacheFindAll(filters.byProps(...parsedArgs));
                             break;
                         case "Store":
-                            results = findAll(filters.byStoreName(parsedArgs[0]));
+                            results = cacheFindAll(filters.byStoreName(parsedArgs[0]));
                             break;
                         case "ByCode":
-                            results = findAll(filters.byCode(...parsedArgs));
+                            results = cacheFindAll(filters.byCode(...parsedArgs));
                             break;
                         case "ModuleId":
                             results = Object.keys(search(parsedArgs[0]));
                             break;
                         case "ComponentByCode":
-                            results = findAll(filters.componentByCode(...parsedArgs));
+                            results = cacheFindAll(filters.componentByCode(...parsedArgs));
                             break;
                         default:
                             return reply("Unknown Find Type " + type);

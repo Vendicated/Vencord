@@ -32,9 +32,10 @@ export interface Settings {
     autoUpdate: boolean;
     autoUpdateNotification: boolean,
     useQuickCss: boolean;
-    enableReactDevtools: boolean;
     themeLinks: string[];
+    eagerPatches: boolean;
     enabledThemes: string[];
+    enableReactDevtools: boolean;
     frameless: boolean;
     transparent: boolean;
     winCtrlQ: boolean;
@@ -81,6 +82,7 @@ const DefaultSettings: Settings = {
     autoUpdateNotification: true,
     useQuickCss: true,
     themeLinks: [],
+    eagerPatches: IS_REPORTER,
     enabledThemes: [],
     enableReactDevtools: false,
     frameless: false,
@@ -115,7 +117,6 @@ const saveSettingsOnFrequentAction = debounce(async () => {
         delete localStorage.Vencord_settingsDirty;
     }
 }, 60_000);
-
 
 export const SettingsStore = new SettingsStoreClass(settings, {
     readOnly: true,

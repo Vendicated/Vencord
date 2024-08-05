@@ -18,10 +18,10 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { ComponentDispatch, FluxDispatcher, NavigationRouter, SelectedGuildStore, SettingsRouter } from "@webpack/common";
 
-const KeyBinds = findByPropsLazy("JUMP_TO_GUILD", "SERVER_NEXT");
+const KeyBinds = findByProps("JUMP_TO_GUILD", "SERVER_NEXT");
 
 export default definePlugin({
     name: "WebKeybinds",

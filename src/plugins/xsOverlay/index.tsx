@@ -7,13 +7,12 @@
 import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
-import { findByCodeLazy, findLazy } from "@webpack";
+import { find, findByCode } from "@webpack";
 import { Button, ChannelStore, GuildStore, UserStore } from "@webpack/common";
 import type { Channel, Embed, GuildMember, MessageAttachment, User } from "discord-types/general";
 
-const ChannelTypes = findLazy(m => m.ANNOUNCEMENT_THREAD === 10);
+const ChannelTypes = find(m => m.ANNOUNCEMENT_THREAD === 10);
 
 interface Message {
     guild_id: string,
@@ -90,8 +89,7 @@ interface NotificationObject {
     sourceApp: string;
 }
 
-const notificationsShouldNotify = findByCodeLazy(".SUPPRESS_NOTIFICATIONS))return!1");
-const logger = new Logger("XSOverlay");
+const notificationsShouldNotify = findByCode(".SUPPRESS_NOTIFICATIONS))return!1");
 
 const settings = definePluginSettings({
     webSocketPort: {

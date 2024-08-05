@@ -8,10 +8,10 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findProp } from "@webpack";
 import { Menu } from "@webpack/common";
 
-const { convertNameToSurrogate } = findByPropsLazy("convertNameToSurrogate");
+const convertNameToSurrogate = findProp("convertNameToSurrogate");
 
 interface Emoji {
     type: string;
@@ -55,7 +55,7 @@ export default definePlugin({
     settings,
 
     contextMenus: {
-        "expression-picker"(children, { target }: { target: Target }) {
+        "expression-picker"(children, { target }: { target: Target; }) {
             if (target.dataset.type !== "emoji") return;
 
             children.push(

@@ -19,9 +19,9 @@
 import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 
-const FriendInvites = findByPropsLazy("createFriendInvite");
+const FriendInvites = findByProps("createFriendInvite");
 
 export default definePlugin({
     name: "FriendInvites",

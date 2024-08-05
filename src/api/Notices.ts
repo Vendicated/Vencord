@@ -16,23 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { waitFor } from "@webpack";
+import { find } from "@webpack";
 
-let NoticesModule: any;
-waitFor(m => m.show && m.dismiss && !m.suppressAll, m => NoticesModule = m);
+const Notices = find(m => m.show && m.dismiss && !m.suppressAll);
 
 export const noticesQueue = [] as any[];
 export let currentNotice: any = null;
 
 export function popNotice() {
-    NoticesModule.dismiss();
+    Notices.dismiss();
 }
 
 export function nextNotice() {
     currentNotice = noticesQueue.shift();
 
     if (currentNotice) {
-        NoticesModule.show(...currentNotice, "VencordNotice");
+        Notices.show(...currentNotice, "VencordNotice");
     }
 }
 

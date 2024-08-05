@@ -18,20 +18,20 @@
 
 import "./style.css";
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findComponentByCodeLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
+import { findComponentByCode, findExportedComponent, findStore } from "@webpack";
 import { ChannelStore, GuildMemberStore, i18n, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "../typingTweaks";
 
-const ThreeDots = findExportedComponentLazy("Dots", "AnimatedDots");
-const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
+const ThreeDots = findExportedComponent("Dots", "AnimatedDots");
+const UserSummaryItem = findComponentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 
-const TypingStore = findStoreLazy("TypingStore");
-const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
+const TypingStore = findStore("TypingStore");
+const UserGuildSettingsStore = findStore("UserGuildSettingsStore");
 
 const enum IndicatorMode {
     Dots = 1 << 0,
@@ -87,7 +87,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
             break;
         }
         default: {
-            tooltipText = Settings.plugins.TypingTweaks.enabled
+            tooltipText = Vencord.Plugins.isPluginEnabled("TypingTweaks")
                 ? buildSeveralUsers({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), count: typingUsersArray.length - 2 })
                 : i18n.Messages.SEVERAL_USERS_TYPING;
             break;

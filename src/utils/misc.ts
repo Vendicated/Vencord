@@ -100,6 +100,14 @@ export function pluralise(amount: number, singular: string, plural = singular + 
     return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`;
 }
 
+/** Proxies which have an internal target but use a function as the main target require these properties to be unconfigurable */
+export const UNCONFIGURABLE_PROPERTIES = ["arguments", "caller", "prototype"];
+
+export function interpolateIfDefined(strings: TemplateStringsArray, ...args: any[]) {
+    if (args.some(arg => arg == null)) return "";
+    return strings.reduce((acc, str, i) => `${acc}${str}${args[i] ?? ""}`, "");
+}
+
 export function tryOrElse<T>(func: () => T, fallback: T): T {
     try {
         const res = func();

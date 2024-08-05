@@ -11,10 +11,10 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
+import { findByCode, findComponentByCode, findStore } from "@webpack";
 import { Button, Forms, useStateFromStores } from "@webpack/common";
 
-const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
+const ColorPicker = findComponentByCode(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
 
 const colorPresets = [
     "#1E1514", "#172019", "#13171B", "#1C1C28", "#402D2D",
@@ -30,21 +30,21 @@ function onPickColor(color: number) {
     updateColorVars(hexColor);
 }
 
-const saveClientTheme = findByCodeLazy('type:"UNSYNCED_USER_SETTINGS_UPDATE', '"system"===');
+const saveClientTheme = findByCode('type:"UNSYNCED_USER_SETTINGS_UPDATE', '"system"===');
 
 function setTheme(theme: string) {
     saveClientTheme({ theme });
 }
 
-const ThemeStore = findStoreLazy("ThemeStore");
-const NitroThemeStore = findStoreLazy("ClientThemesBackgroundStore");
+const ThemeStore = findStore("ThemeStore");
+const ClientThemesBackgroundStore = findStore("ClientThemesBackgroundStore");
 
 function ThemeSettings() {
     const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme);
     const isLightTheme = theme === "light";
     const oppositeTheme = isLightTheme ? "dark" : "light";
 
-    const nitroTheme = useStateFromStores([NitroThemeStore], () => NitroThemeStore.gradientPreset);
+    const nitroTheme = useStateFromStores([ClientThemesBackgroundStore], () => ClientThemesBackgroundStore.gradientPreset);
     const nitroThemeEnabled = nitroTheme !== undefined;
 
     const selectedLuminance = relativeLuminance(settings.store.color);
