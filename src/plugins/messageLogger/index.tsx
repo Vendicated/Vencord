@@ -29,7 +29,7 @@ import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, i18n, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, i18n, Menu, MessageStore, Parser, SelectedChannelStore, SnowflakeUtils, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
@@ -145,7 +145,7 @@ export function parseEditContent(content: string, message: Message) {
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
-    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi],
+    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi, Devs.meadowsys],
     dependencies: ["MessageUpdaterAPI"],
 
     contextMenus: {
@@ -249,6 +249,11 @@ export default definePlugin({
             description: "Comma-separated list of guild IDs to ignore",
             default: ""
         },
+        ignoreQuickDelete: {
+            type: OptionType.NUMBER,
+            description: "Ignore messages younger than this many seconds",
+            default: 0
+        },
     },
 
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
@@ -285,8 +290,10 @@ export default definePlugin({
     },
 
     shouldIgnore(message: any, isEdit = false) {
-        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes } = Settings.plugins.MessageLogger;
+        const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds, logEdits, logDeletes, ignoreQuickDelete } = Settings.plugins.MessageLogger;
         const myId = UserStore.getCurrentUser().id;
+        const timeNow = Date.now();
+        const timeMessage = SnowflakeUtils.extractTimestamp(message.id);
 
         return ignoreBots && message.author?.bot ||
             ignoreSelf && message.author?.id === myId ||
@@ -296,7 +303,8 @@ export default definePlugin({
             (isEdit ? !logEdits : !logDeletes) ||
             ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
             // Ignore Venbot in the support channel
-            (message.channel_id === "1026515880080842772" && message.author?.id === "1017176847865352332");
+            (message.channel_id === "1026515880080842772" && message.author?.id === "1017176847865352332") ||
+            timeNow - timeMessage <= ignoreQuickDelete * 1000;
     },
 
     EditMarker({ message, className, children, ...props }: any) {
