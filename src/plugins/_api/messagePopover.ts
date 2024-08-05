@@ -26,9 +26,8 @@ export default definePlugin({
     patches: [{
         find: "Messages.MESSAGE_UTILITIES_A11Y_LABEL",
         replacement: {
-            // foo && !bar ? createElement(reactionStuffs)... createElement(blah,...makeElement(reply-other))
-            match: /\i&&!\i\?\(0,\i\.jsxs?\)\(.{0,200}renderEmojiPicker:.{0,500}\?(\i)\(\{key:"reply-other"(?<=message:(\i).+?)/,
-            replace: (m, makeElement, msg) => `...Vencord.Api.MessagePopover._buildPopoverElements(${msg},${makeElement}),${m}`
+            match: /\.jsx\)\((\i\.\i),\{label:\i\.\i\.Messages\.MESSAGE_ACTION_REPLY.{0,200}?"reply-self".{0,50}?\}\):null(?=,.+?message:(\i))/,
+            replace: "$&,Vencord.Api.MessagePopover._buildPopoverElements($1,$2)"
         }
     }],
 });
