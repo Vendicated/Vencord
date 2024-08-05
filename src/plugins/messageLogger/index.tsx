@@ -227,7 +227,7 @@ export default definePlugin({
             (oldMsg, newMsg) => oldMsg?.editHistory === newMsg?.editHistory
         );
 
-        return !settings.store.inlineEdits ? null : (
+        return settings.store.inlineEdits && (
             <>
                 {message.editHistory?.map(edit => (
                     <div className="messagelogger-edited">
