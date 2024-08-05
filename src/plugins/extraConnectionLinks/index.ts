@@ -7,20 +7,6 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-/**
- * platforms that dont open natively (and the status of them)
-  * * Roblox (Added)
-  * * Xbox/Xbox Live (Added)
-  * * Epic Games (Added)
-  * ! Riot Games (can't view profiles)
-  * ! Leage of Legends (can't view profiles) (same as Riot Games)
-  * ! PSN (no other known way to view profiles after Sony removed My PlayStation)
-  * ! Battle.net (can't view profiles)
-  * ! Bungie.net (can't view profiles)
-  * ! Facebook (don't have discord's token for facebook apis)
-  * ! Crunchyroll (can't view other peoples profiles nor your own profile)
-  * ! Amazon Music (the id that discord shows is "amzn1.<something>.<random letters and numbers thats not the actual user id>")
- **/
 
 /**
  * All the connection types implemented into this plugin
