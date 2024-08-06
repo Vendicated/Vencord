@@ -151,7 +151,7 @@ function Owner(guildId: string, owner: User) {
 
     return (
         <div className={cl("owner")}>
-            <img src={ownerAvatarUrl} alt="" onClick={() => openImageModal(ownerAvatarUrl)} />
+            {!Vencord.Plugins.isPluginEnabled("MentionAvatars") && <img src={ownerAvatarUrl} alt="" onClick={() => openImageModal(ownerAvatarUrl)} />}
             {Parser.parse(`<@${owner.id}>`)}
         </div>
     );
