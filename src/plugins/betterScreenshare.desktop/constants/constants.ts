@@ -33,6 +33,11 @@ export const PluginInfo = {
             id: 305317288775778306n,
             name: "walrus"
         },
+        Loukios: {
+            github: "https://github.com/loukious",
+            id: 211461918127292416n,
+            name: "Loukios"
+        }
     },
     README: "https://github.com/Vendicated/Vencord/tree/main/src/plugins/betterScreenshare"
 } as const satisfies types.PluginInfo;

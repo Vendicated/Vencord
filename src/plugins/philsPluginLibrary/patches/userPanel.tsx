@@ -88,10 +88,8 @@ export function replacedUserPanelComponent(oldComponent: (...args: any[]) => any
 
     const { children } = componentResult.props;
 
-    const userPanel = children.at(-2);
-    const userPanelChildren = userPanel.props.children;
 
-    userPanelChildren.splice(userPanelChildren.length - 1, 0,
+    children.splice(children.length - 1, 0,
         <ButtonsSettingsPanel />
     );
 
