@@ -1,0 +1,7 @@
+.unreadCountBadge {
+    margin-left: 4px;
+}
+
+[class*="modeMuted_"] .unreadCountBadge {
+    display: none;
+}
