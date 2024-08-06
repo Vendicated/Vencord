@@ -188,13 +188,13 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         || blob.type.includes("codecs") && !blob.type.includes("opus")
     );
 
-    const handleDrop = async (event) => {
+    const handleDrop = async event => {
         event.preventDefault();
         const file = event.dataTransfer.files[0];
         if (file) setAudioBlob(file);
     };
 
-    const handleDragOver = (event) => {
+    const handleDragOver = event => {
         event.preventDefault();
     };
 
