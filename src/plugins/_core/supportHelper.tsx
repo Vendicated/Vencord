@@ -17,7 +17,6 @@
 */
 
 import { addAccessory } from "@api/MessageAccessories";
-import { MessageObject } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -25,10 +24,10 @@ import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
 import { Devs, EquicordDevs, SUPPORT_CHANNEL_ID, SUPPORT_CHANNEL_IDS, VC_SUPPORT_CHANNEL_ID } from "@utils/constants";
-import { getCurrentChannel, sendMessage } from "@utils/discord";
+import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { isEquicordPluginDev, isPluginDev, sleep, tryOrElse } from "@utils/misc";
+import { isEquicordPluginDev, isPluginDev, tryOrElse } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
@@ -136,26 +135,6 @@ function generatePluginList() {
     return content;
 }
 
-function intoChunks(): string[] {
-    const messageContent: string = generatePluginList();
-    if (messageContent.length <= 2000) return [messageContent];
-
-    let chunks: string[] = [];
-    for (let idx = 0; idx < messageContent.length; idx += 2000) {
-        chunks.push(messageContent.slice(idx, idx + 2000));
-    }
-    chunks = chunks.map(e => e.trimStart().trimEnd());
-    return chunks;
-}
-
-async function sendMessages(channelId: string, messageContents: string[], delay: number) {
-    for (const messageContent of messageContents) {
-        const messageObject: Partial<MessageObject> = { content: messageContent };
-        sendMessage(channelId, messageObject);
-        await sleep(delay);
-    }
-}
-
 const checkForUpdatesOnce = onlyOnce(checkForUpdates);
 
 const settings = definePluginSettings({}).withPrivateSettings<{
@@ -192,9 +171,7 @@ export default definePlugin({
             name: "equicord-plugins",
             description: "Send Equicord plugin list",
             predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id) || AllowedChannelIds.includes(ctx.channel.id),
-            execute: (_, ctx) => {
-                sendMessages(ctx.channel.id, intoChunks(), Math.max(2000, getCurrentChannel().rateLimitPerUser ?? 0));
-            }
+            execute: () => ({ content: generatePluginList() })
         }
     ],
 
