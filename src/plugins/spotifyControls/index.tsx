@@ -75,7 +75,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Discord doesn't give you shuffle state and the repeat kind, only a boolean
-                    match: /repeat:"off"!==(.{1,3}),/,
+                    match: /repeat:"off"!==(\i),/,
                     replace: "shuffle:arguments[2].shuffle_state,actual_repeat:$1,$&"
                 },
                 {
