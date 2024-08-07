@@ -34,7 +34,7 @@ const tabClass = findByPropsLazy("tab");
 const buttonClass = findByPropsLazy("size36");
 
 const MenuHeader = findByCodeLazy(".getMessageReminders()).length");
-const Popout = findByCodeLazy("e.get(e.jumpTargetId");
+const Popout = findByCodeLazy(".Messages.UNBLOCK_TO_JUMP_TITLE", "canCloseAllMessages:");
 const createMessageRecord = findByCodeLazy(".createFromServer(", ".isBlockedForMessage", "messageReference:");
 const KEYWORD_ENTRIES_KEY = "KeywordNotify_keywordEntries";
 const KEYWORD_LOG_KEY = "KeywordNotify_log";
