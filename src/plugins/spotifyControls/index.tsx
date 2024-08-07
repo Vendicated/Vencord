@@ -76,7 +76,7 @@ export default definePlugin({
                 {
                     // Discord doesn't give you shuffle state and the repeat kind, only a boolean
                     match: /repeat:"off"!==(\i),/,
-                    replace: "shuffle:arguments[2].shuffle_state,actual_repeat:$1,$&"
+                    replace: "shuffle:arguments[2]?.shuffle_state??false,actual_repeat:$1,$&"
                 },
                 {
                     match: /(?<=artists.filter\(\i=>).{0,10}\i\.id\)&&/,
