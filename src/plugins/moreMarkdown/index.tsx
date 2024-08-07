@@ -15,7 +15,6 @@ const dirMap = {
 
 let styles: HTMLStyleElement;
 const updateStyles = () => {
-    const inten = "4px";
     const dir = "xy";
     styles.textContent = `
         .wiggly-inner {
@@ -27,11 +26,11 @@ const updateStyles = () => {
 
         @keyframes wiggle-wavy-x {
             from {
-                left: -${inten};
+                left: -4px;
             }
 
             to {
-                left: ${inten};
+                left: 4px;
             }
         }
 
@@ -42,7 +41,7 @@ const updateStyles = () => {
             }
 
             25% {
-                top: -${inten};
+                top: -4px;
                 animation-timing-function: ease-in;
             }
 
@@ -52,8 +51,30 @@ const updateStyles = () => {
             }
 
             75% {
-                top: ${inten};
+                top: 4px;
                 animation-timing-function: ease-in;
+            }
+        }
+
+        .boing-inner {
+            display: inline-block;
+            animation-name: boing-text;
+            animation-duration: 1s;
+            animation-iteration-count: infinite;
+            animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+        }
+
+        @keyframes boing-text {
+            0% {
+                transform: translateY(-4px);
+            }
+
+            50% {
+                transform: translateY(4px);
+            }
+
+            100% {
+                transform: translateY(-4px);
             }
         }`;
 };
@@ -69,7 +90,7 @@ export default definePlugin({
             find: "parseToAST:",
             replacement: {
                 match: /(parse[\w]*):(.*?)\((\i)\),/g,
-                replace: "$1:$2({...$3,wiggly:$self.wigglyRule}),",
+                replace: "$1:$2({...$3,wiggly:$self.wigglyRule,boing:$self.boingRule}),",
             },
         },
     ],
@@ -121,9 +142,47 @@ export default definePlugin({
         },
     },
 
+    boingRule: {
+        order: 25,
+        match: (source: string) => source.match(/^\^([\s\S]+?)\^(?!_)/),
+        parse: (
+            capture: RegExpMatchArray,
+            transform: (...args: any[]) => any,
+            state: any
+        ) => ({
+            content: transform(capture[1], state),
+        }),
+        react: (
+            data: { content: any[]; },
+            output: (...args: any[]) => ReactNode[]
+        ) => {
+            const traverse = (raw: any) => {
+                const children = !Array.isArray(raw) ? [raw] : raw;
+                let modified = false;
+
+                for (const child of children) {
+                    if (typeof child === "string") {
+                        modified = true;
+                        return (
+                            <span className="boing-inner">
+                                {child}
+                            </span>
+                        );
+                    } else if (child?.props?.children) {
+                        child.props.children = traverse(child.props.children);
+                    }
+                }
+
+                return modified ? children : raw;
+            };
+
+            return traverse(output(data.content));
+        },
+    },
+
     start: () => {
         styles = document.createElement("style");
-        styles.id = "WigglyText";
+        styles.id = "MoreMarkdown";
         document.head.appendChild(styles);
 
         updateStyles();
