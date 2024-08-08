@@ -30,7 +30,7 @@ export const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "Language that received messages should be translated to",
         default: "en",
-        hidden: false
+        hidden: true
     },
     sentInput: {
         type: OptionType.STRING,
@@ -42,7 +42,7 @@ export const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "Language that your own messages should be translated to",
         default: "en",
-        hidden: false
+        hidden: true
     },
 
     showChatBarButton: {
