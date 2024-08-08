@@ -5,17 +5,17 @@
  */
 
 import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
-import type { ChannelProperties, ChannelRecipient, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
+import type { ChannelRecipient, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
 export type PrivateChannelRecord = DMChannelRecord | GroupDMChannelRecord;
 
-export type PrivateChannelProperties<Channel extends PrivateChannelRecordBase> = ChannelProperties & Omit<Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "safetyWarnings" & keyof PartialOnUndefined<ChannelRecordOwnProperties<Channel>>>, "rawRecipients" | "recipients">
-    & { rawRecipients?: Readonly<Channel["rawRecipients"]> | Nullish; recipients?: Readonly<Channel["recipients"]> | Nullish; };
+export type PrivateChannelProperties = Omit<Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<PrivateChannelRecordBase>>>, Nullish, "guild_id" | "name" | "safetyWarnings">, "rawRecipients" | "recipients">
+    & { rawRecipients?: Readonly<PrivateChannelRecordBase["rawRecipients"]> | Nullish; recipients?: Readonly<PrivateChannelRecordBase["recipients"]> | Nullish; };
 
 type PrivateChannelType = ChannelType.DM | ChannelType.GROUP_DM;
 
 export declare abstract class PrivateChannelRecordBase extends ChannelRecordBase {
-    constructor(channelProperties: PrivateChannelProperties<PrivateChannelRecordBase>);
+    constructor(channelProperties: PrivateChannelProperties);
 
     static fromServer<Type extends PrivateChannelType | Nullish = undefined>(
         /** @todo */
@@ -49,6 +49,7 @@ export declare abstract class PrivateChannelRecordBase extends ChannelRecordBase
     isSpam: Defined<ChannelRecordBase["isSpam"]>;
     lastMessageId: ChannelRecordBase["lastMessageId"];
     lastPinTimestamp: ChannelRecordBase["lastPinTimestamp"];
+    linkedLobby?: undefined;
     member?: undefined;
     memberCount?: undefined;
     memberIdsPreview?: undefined;
@@ -79,8 +80,11 @@ export declare abstract class PrivateChannelRecordBase extends ChannelRecordBase
     voiceBackgroundDisplay?: undefined;
 }
 
+export type DMChannelProperties = Omit<Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<DMChannelRecord>>>, Nullish, "guild_id" | "name" | "safetyWarnings">, "rawRecipients" | "recipients">
+    & { rawRecipients?: Readonly<DMChannelRecord["rawRecipients"]> | Nullish; recipients?: Readonly<DMChannelRecord["recipients"]> | Nullish; };
+
 export declare class DMChannelRecord extends PrivateChannelRecordBase {
-    constructor(channelProperties: PrivateChannelProperties<DMChannelRecord>);
+    constructor(channelProperties: DMChannelProperties);
 
     application_id: undefined;
     icon: undefined;
@@ -89,8 +93,11 @@ export declare class DMChannelRecord extends PrivateChannelRecordBase {
     type: ChannelType.DM;
 }
 
+export type GroupDMChannelProperties = Omit<Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<GroupDMChannelRecord>>>, Nullish, "guild_id" | "name" | "safetyWarnings">, "rawRecipients" | "recipients">
+    & { rawRecipients?: Readonly<GroupDMChannelRecord["rawRecipients"]> | Nullish; recipients?: Readonly<GroupDMChannelRecord["recipients"]> | Nullish; };
+
 export declare class GroupDMChannelRecord extends PrivateChannelRecordBase {
-    constructor(channelProperties: PrivateChannelProperties<GroupDMChannelRecord>);
+    constructor(channelProperties: GroupDMChannelProperties);
 
     isMessageRequest: undefined;
     isMessageRequestTimestamp: undefined;

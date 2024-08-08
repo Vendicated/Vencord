@@ -5,9 +5,9 @@
  */
 
 import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
-import type { ChannelProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
+import type { ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
-export type ThreadChannelProperties = ChannelProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<ThreadChannelRecord>>>, Nullish, "appliedTags">;
+export type ThreadChannelProperties = Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<ThreadChannelRecord>>>, Nullish, "appliedTags" | "guild_id" | "name">;
 
 type ThreadChannelType = ChannelType.ANNOUNCEMENT_THREAD | ChannelType.PUBLIC_THREAD | ChannelType.PRIVATE_THREAD;
 
@@ -38,6 +38,7 @@ export declare class ThreadChannelRecord<ChannelType extends ThreadChannelType =
     isSpam?: undefined;
     lastMessageId: ChannelRecordBase["lastMessageId"];
     lastPinTimestamp: ChannelRecordBase["lastMessageId"];
+    linkedLobby?: undefined;
     member: ChannelRecordBase["member"];
     memberCount: Defined<ChannelRecordBase["memberCount"]>;
     memberIdsPreview: Defined<ChannelRecordBase["memberIdsPreview"]>;

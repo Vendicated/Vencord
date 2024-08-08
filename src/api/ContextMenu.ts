@@ -74,6 +74,7 @@ export function removeContextMenuPatch<T extends [string, ...string[]] | string>
 
     const results = navIds.map(id => navPatches.get(id)?.delete(patch) ?? false);
 
+    // https://github.com/microsoft/TypeScript/issues/33912
     return (Array.isArray(navId) ? results : results[0]) as T extends string ? boolean : boolean[];
 }
 

@@ -99,7 +99,7 @@ interface ProfileCustomizationPreviewProps {
     pendingNickname?: string | null | undefined;
     pendingProfileEffectId?: string | null | undefined;
     pendingPronouns?: string | null | undefined;
-    pendingThemeColors?: [primaryColor?: number | null | undefined, accentColor?: number | null | undefined] | null | undefined;
+    pendingThemeColors?: [primaryColor?: number | null, accentColor?: number | null] | null | undefined;
     user: UserRecord;
 }
 

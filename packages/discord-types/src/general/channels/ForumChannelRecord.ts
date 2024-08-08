@@ -5,25 +5,20 @@
  */
 
 import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
-import type { ChannelProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
+import type { ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
-export type ForumChannelRecord = GuildForumChannelRecord | GuildMediaChannelRecord;
-
-export type ForumChannelProperties<Channel extends ForumChannelRecordBase> = ChannelProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, ("availableTags" | "permissionOverwrites_") & keyof PartialOnUndefined<ChannelRecordOwnProperties<Channel>>>;
+export type ForumChannelProperties = Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<ForumChannelRecord>>>, Nullish, "availableTags" | "guild_id" | "name" | "permissionOverwrites_">;
 
 type ForumChannelType = ChannelType.GUILD_FORUM | ChannelType.GUILD_MEDIA;
 
-export declare abstract class ForumChannelRecordBase extends ChannelRecordBase {
-    constructor(channelProperties: ForumChannelProperties<ForumChannelRecordBase>);
+export declare class ForumChannelRecord<ChannelType extends ForumChannelType = ForumChannelType> extends ChannelRecordBase {
+    constructor(channelProperties: ForumChannelProperties);
 
     static fromServer<Type extends ForumChannelType>(
         /** @todo */
         channelFromServer: { type: Type; } & Record<string, any>,
         guildId?: string | Nullish
-    ): {
-        [ChannelType.GUILD_FORUM]: GuildForumChannelRecord;
-        [ChannelType.GUILD_MEDIA]: GuildMediaChannelRecord;
-    }[Type];
+    ): ForumChannelRecord<Type>;
 
     application_id?: undefined;
     appliedTags?: undefined;
@@ -43,6 +38,7 @@ export declare abstract class ForumChannelRecordBase extends ChannelRecordBase {
     isSpam?: undefined;
     lastMessageId: ChannelRecordBase["lastMessageId"];
     lastPinTimestamp: ChannelRecordBase["lastPinTimestamp"];
+    linkedLobby?: undefined;
     member?: undefined;
     memberCount?: undefined;
     memberIdsPreview?: undefined;
@@ -67,21 +63,9 @@ export declare abstract class ForumChannelRecordBase extends ChannelRecordBase {
     threadMetadata?: undefined;
     topic_: ChannelRecordBase["topic_"];
     totalMessageSent?: undefined;
-    type: ForumChannelType;
+    type: ChannelType;
     userLimit_?: undefined;
     version: ChannelRecordBase["version"];
     videoQualityMode?: undefined;
     voiceBackgroundDisplay?: undefined;
-}
-
-export declare class GuildForumChannelRecord extends ForumChannelRecordBase {
-    constructor(channelProperties: ForumChannelProperties<GuildForumChannelRecord>);
-
-    type: ChannelType.GUILD_FORUM;
-}
-
-export declare class GuildMediaChannelRecord extends ForumChannelRecordBase {
-    constructor(channelProperties: ForumChannelProperties<GuildMediaChannelRecord>);
-
-    type: ChannelType.GUILD_MEDIA;
 }

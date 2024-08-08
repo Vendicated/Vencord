@@ -5,16 +5,16 @@
  */
 
 import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
-import type { ChannelProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
+import type { ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
 export type GuildTextualChannelRecord = GuildTextChannelRecord | GuildCategoryChannelRecord | GuildAnnouncementChannelRecord | GuildStoreChannelRecord | GuildDirectoryChannelRecord;
 
-export type GuildTextualChannelProperties<Channel extends GuildTextualChannelRecordBase> = ChannelProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "permissionOverwrites_" & keyof PartialOnUndefined<ChannelRecordOwnProperties<Channel>>>;
+export type GuildTextualChannelProperties = Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<GuildTextualChannelRecordBase>>>, Nullish, "guild_id" | "name" | "permissionOverwrites_" | "type">;
 
 type GuildTextualChannelType = ChannelType.GUILD_TEXT | ChannelType.GUILD_CATEGORY | ChannelType.GUILD_ANNOUNCEMENT | ChannelType.GUILD_STORE | ChannelType.GUILD_DIRECTORY;
 
 export declare abstract class GuildTextualChannelRecordBase extends ChannelRecordBase {
-    constructor(channelProperties: GuildTextualChannelProperties<GuildTextualChannelRecordBase>);
+    constructor(channelProperties: GuildTextualChannelProperties);
 
     static fromServer<Type extends GuildTextualChannelType | Nullish = undefined>(
         /** @todo */
@@ -46,6 +46,8 @@ export declare abstract class GuildTextualChannelRecordBase extends ChannelRecor
     isSpam?: undefined;
     lastMessageId: ChannelRecordBase["lastMessageId"];
     lastPinTimestamp: ChannelRecordBase["lastPinTimestamp"];
+    /** @todo */
+    linkedLobby: ChannelRecordBase["linkedLobby"];
     member?: undefined;
     memberCount?: undefined;
     memberIdsPreview?: undefined;
@@ -77,14 +79,18 @@ export declare abstract class GuildTextualChannelRecordBase extends ChannelRecor
     voiceBackgroundDisplay?: undefined;
 }
 
+export type GuildTextChannelProperties = Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<GuildTextChannelRecord>>>, Nullish, "guild_id" | "name" | "permissionOverwrites_" | "type">;
+
 export declare class GuildTextChannelRecord extends GuildTextualChannelRecordBase {
-    constructor(channelProperties: GuildTextualChannelProperties<GuildTextChannelRecord>);
+    constructor(channelProperties: GuildTextChannelProperties);
 
     type: ChannelType.GUILD_TEXT;
 }
 
+export type GuildCategoryChannelProperties = Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<GuildCategoryChannelRecord>>>, Nullish, "guild_id" | "name" | "permissionOverwrites_">;
+
 export declare class GuildCategoryChannelRecord extends GuildTextualChannelRecordBase {
-    constructor(channelProperties: GuildTextualChannelProperties<GuildCategoryChannelRecord>);
+    constructor(channelProperties: GuildCategoryChannelProperties);
 
     defaultAutoArchiveDuration: undefined;
     defaultThreadRateLimitPerUser: undefined;
@@ -97,20 +103,26 @@ export declare class GuildCategoryChannelRecord extends GuildTextualChannelRecor
     type: ChannelType.GUILD_CATEGORY;
 }
 
+export type GuildAnnouncementChannelProperties = Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<GuildAnnouncementChannelRecord>>>, Nullish, "guild_id" | "name" | "permissionOverwrites_">;
+
 export declare class GuildAnnouncementChannelRecord extends GuildTextualChannelRecordBase {
-    constructor(channelProperties: GuildTextualChannelProperties<GuildAnnouncementChannelRecord>);
+    constructor(channelProperties: GuildAnnouncementChannelProperties);
 
     type: ChannelType.GUILD_ANNOUNCEMENT;
 }
 
+export type GuildStoreChannelProperties = Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<GuildStoreChannelRecord>>>, Nullish, "guild_id" | "name" | "permissionOverwrites_">;
+
 export declare class GuildStoreChannelRecord extends GuildTextualChannelRecordBase {
-    constructor(channelProperties: GuildTextualChannelProperties<GuildAnnouncementChannelRecord>);
+    constructor(channelProperties: GuildStoreChannelProperties);
 
     type: ChannelType.GUILD_STORE;
 }
 
+export type GuildDirectoryChannelProperties = Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<GuildDirectoryChannelRecord>>>, Nullish, "guild_id" | "name" | "permissionOverwrites_">;
+
 export declare class GuildDirectoryChannelRecord extends GuildTextualChannelRecordBase {
-    constructor(channelProperties: GuildTextualChannelProperties<GuildDirectoryChannelRecord>);
+    constructor(channelProperties: GuildDirectoryChannelProperties);
 
     type: ChannelType.GUILD_DIRECTORY;
 }

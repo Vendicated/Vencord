@@ -33,7 +33,7 @@
         "@stylistic/eslint-plugin": "^2.6.1",
         "@types/node": "^20.14.14",
         "@types/semver": "^7.5.8",
-        "@typescript-eslint/typescript-estree": "^8.0.0",
+        "@typescript-eslint/typescript-estree": "^8.0.1",
         "eslint": "^9.8.0",
         "eslint-plugin-check-file": "^2.8.0",
         "eslint-plugin-import-x": "^3.1.0",
@@ -41,10 +41,10 @@
         "eslint-plugin-simple-import-sort": "^12.1.1",
         "eslint-plugin-unicorn": "^55.0.0",
         "eslint-plugin-unused-imports": "^4.0.1",
-        "puppeteer-core": "^22.15.0",
+        "puppeteer-core": "^23.0.1",
         "semver": "^7.6.3",
         "tsx": "^4.16.5",
         "typescript": "^5.5.4",
-        "typescript-eslint": "^8.0.0"
+        "typescript-eslint": "^8.0.1"
     }
 }

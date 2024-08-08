@@ -5,16 +5,16 @@
  */
 
 import type { Defined, Nullish, OmitOptional, Optional, PartialOnUndefined } from "../../internal";
-import type { ChannelProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
+import type { ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
 export type GuildVocalChannelRecord = GuildVoiceChannelRecord | GuildStageVoiceChannelRecord;
 
-export type GuildVocalChannelProperties<Channel extends GuildVocalChannelRecordBase> = ChannelProperties & Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<Channel>>>, Nullish, "permissionOverwrites_" & keyof PartialOnUndefined<ChannelRecordOwnProperties<Channel>>>;
+export type GuildVocalChannelProperties = Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<GuildVocalChannelRecordBase>>>, Nullish, "guild_id" | "name" | "permissionOverwrites_">;
 
 type GuildVocalChannelType = ChannelType.GUILD_VOICE | ChannelType.GUILD_STAGE_VOICE;
 
 export declare abstract class GuildVocalChannelRecordBase extends ChannelRecordBase {
-    constructor(channelProperties: GuildVocalChannelProperties<GuildVocalChannelRecordBase>);
+    constructor(channelProperties: GuildVocalChannelProperties);
 
     static fromServer<Type extends GuildVocalChannelType | Nullish = undefined>(
         /** @todo */
@@ -43,6 +43,7 @@ export declare abstract class GuildVocalChannelRecordBase extends ChannelRecordB
     isSpam?: undefined;
     lastMessageId: ChannelRecordBase["lastMessageId"];
     lastPinTimestamp: undefined;
+    linkedLobby?: undefined;
     member?: undefined;
     memberCount?: undefined;
     memberIdsPreview?: undefined;
@@ -75,14 +76,18 @@ export declare abstract class GuildVocalChannelRecordBase extends ChannelRecordB
     voiceBackgroundDisplay: Defined<ChannelRecordBase["voiceBackgroundDisplay"]>;
 }
 
+export type GuildVoiceChannelProperties = Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<GuildVoiceChannelRecord>>>, Nullish, "guild_id" | "name" | "permissionOverwrites_">;
+
 export declare class GuildVoiceChannelRecord extends GuildVocalChannelRecordBase {
-    constructor(channelProperties: GuildVocalChannelProperties<GuildVoiceChannelRecord>);
+    constructor(channelProperties: GuildVoiceChannelProperties);
 
     type: ChannelType.GUILD_VOICE;
 }
 
+export type GuildStageVoiceChannelProperties = Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<GuildStageVoiceChannelRecord>>>, Nullish, "guild_id" | "name" | "permissionOverwrites_">;
+
 export declare class GuildStageVoiceChannelRecord extends GuildVocalChannelRecordBase {
-    constructor(channelProperties: GuildVocalChannelProperties<GuildStageVoiceChannelRecord>);
+    constructor(channelProperties: GuildStageVoiceChannelProperties);
 
     type: ChannelType.GUILD_STAGE_VOICE;
 }

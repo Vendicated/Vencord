@@ -101,8 +101,8 @@ export default {
                 type: "enum",
                 find() {
                     let key: string;
-                    return new Promise<Record<string, unknown>>(res => {
-                        this.Webpack.waitFor((exps: any) => {
+                    return new Promise<CR.EnumMembers>(res => {
+                        this.Webpack.waitFor(exps => {
                             for (const k in exps) {
                                 try {
                                     if (typeof exps[k]?.STRANGER_DANGER === "number") {
@@ -130,7 +130,7 @@ export default {
             */
         },
         "./general/channels/ForumChannelRecord.ts": {
-            ForumChannelRecordBase: {
+            ForumChannelRecord: {
                 type: "class",
                 find() {
                     const castChannelRecord = this.Webpack.findByCode(".GUILD_TEXT]", "return(");
@@ -338,8 +338,8 @@ export default {
                 type: "enum",
                 find() {
                     let key: string;
-                    return new Promise<Record<string, unknown>>(res => {
-                        this.Webpack.waitFor((exps: any) => {
+                    return new Promise<CR.EnumMembers>(res => {
+                        this.Webpack.waitFor(exps => {
                             for (const k in exps) {
                                 try {
                                     if (exps[k]?.ROLE === "role") {

@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { Defined, Nullish } from "../../internal";
-import type { ChannelProperties, ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
+import type { Defined, Nullish, Optional } from "../../internal";
+import type { ChannelRecordBase, ChannelRecordOwnProperties, ChannelType } from "./ChannelRecord";
 
-export type UnknownChannelProperties = ChannelProperties & ChannelRecordOwnProperties<UnknownChannelRecord>;
+export type UnknownChannelProperties = Optional<ChannelRecordOwnProperties<UnknownChannelRecord>, Nullish, "guild_id" | "name">;
 
 export declare class UnknownChannelRecord extends ChannelRecordBase {
     constructor(channelProperties: UnknownChannelProperties);
@@ -36,6 +36,7 @@ export declare class UnknownChannelRecord extends ChannelRecordBase {
     isSpam: ChannelRecordBase["isSpam"];
     lastMessageId: ChannelRecordBase["lastMessageId"];
     lastPinTimestamp: ChannelRecordBase["lastPinTimestamp"];
+    linkedLobby: ChannelRecordBase["linkedLobby"];
     member: ChannelRecordBase["member"];
     memberCount: ChannelRecordBase["memberCount"];
     memberIdsPreview: ChannelRecordBase["memberIdsPreview"];

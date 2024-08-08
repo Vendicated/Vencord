@@ -7,16 +7,11 @@
 import type MessageFormat from "intl-messageformat";
 import type { ReactElement, ReactNode } from "react";
 import type { State } from "simple-markdown";
-import type { ValueOf } from "type-fest";
 
-import type { Stringable } from "../../internal";
-
-type HookValue = (result: ReactNode, key: State["key"]) => ReactNode;
-type GenericValue = Stringable | HookValue;
-type GenericArgs = Record<string, GenericValue> | readonly [stringableArgs: string, hookArgs: string] | string;
+import type { IsAny, OmitOptional, Stringable, UnionToIntersection } from "../../internal";
 
 export declare class FormattedMessage<
-    Args extends GenericArgs = string,
+    Args extends GenericArgs = never,
     Markdown extends boolean | undefined = boolean
 > {
     /**
@@ -35,48 +30,60 @@ export declare class FormattedMessage<
      * @throws {RangeError | TypeError}
      * @see {@link format}
      */
-    astFormat(...values: FormatValues<Args>): ASTNode;
+    astFormat(...args: FormatArgs<Args>): ASTNode;
     /**
      * @throws {RangeError} Values provided to arguments with type date or time must be valid time values.
      * @throws {TypeError} Values provided to arguments with type plural, select, or selectordinal must match one of their matches.
      */
-    format(...values: FormatValues<Args>): Markdown extends true
+    format(...args: FormatArgs<Args>): Markdown extends true
         ? (string | ReactElement)[]
         : string;
     getContext(values: ContextValues<Args>): [
-        { [Key in keyof ContextValues<Args>]: ContextValues<Args>[Key] | number; },
-        Record<number, ValueOf<ContextValues<Args>>>
+        { [Key in keyof typeof values]: typeof values[Key] | number; },
+        Record<number, typeof values[keyof typeof values]>
     ];
     /**
      * @throws {RangeError | TypeError}
      * @see {@link format}
      */
-    plainFormat(...values: FormatValues<Args>): string;
+    plainFormat(...args: FormatArgs<Args>): string;
 
     hasMarkdown: Markdown;
     intlMessage: MessageFormat;
     message: string;
 }
 
-type FormatValues<Args extends GenericArgs>
-    = [Args] extends [readonly [never, never]]
-        ? []
-        : [Args] extends [string]
-            ? [Args] extends [`${infer _}`]
-                ? [values: Record<Args, Stringable>]
-                : [values?: Record<string, GenericValue>]
-            : [Args] extends [readonly [string, string]]
-                ? [values: Record<Args[0], Stringable> & Record<Args[1], HookValue>]
-                : [values: Args];
+type GenericArgs = RecordArgs | TupleArgs | string;
+type RecordArgs = Record<string, GenericValue>;
+type TupleArgs = readonly [stringableArgs: string, hookArgs: string];
+
+type GenericValue = Stringable | HookValue;
+type HookValue = (result: ReactNode, key: State["key"]) => ReactNode;
+
+type FormatArgs<Args extends GenericArgs>
+    = unknown extends IsAny<Args>
+        ? [values?: RecordArgs]
+        : [Args] extends [never]
+            ? []
+            : keyof FormatValues<Args> extends never
+                ? []
+                : [values: FormatValues<Args>];
+
+type FormatValues<Args extends GenericArgs> = UnionToIntersection<MessageValues<Args>>;
 
 type ContextValues<Args extends GenericArgs>
-    = [Args] extends [string]
-        ? [Args] extends [`${infer _}`]
-            ? Record<Args, Stringable>
-            : Record<string, GenericValue>
-        : [Args] extends [readonly [string, string]]
+    = unknown extends IsAny<Args>
+        ? RecordArgs
+        : [Args] extends [never]
+            ? {}
+            : MessageValues<Args>;
+
+type MessageValues<Args extends GenericArgs>
+    = Args extends string
+        ? Record<string extends Args ? never : Args, Stringable>
+        : Args extends readonly [string, string]
             ? Record<Args[0], Stringable> & Record<Args[1], HookValue>
-            : Args;
+            : OmitOptional<Args>;
 
 /** @todo Add types for every type of ASTNode. */
 export interface ASTNode<Type extends ASTNodeType = ASTNodeType> extends Record<string, any> {

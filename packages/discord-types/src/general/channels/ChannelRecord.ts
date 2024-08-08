@@ -9,7 +9,7 @@ import type { SnakeCasedProperties } from "type-fest";
 import type { Nullish, Optional } from "../../internal";
 import type { PermissionOverwriteMap } from "../Permissions";
 import type { AvatarDecorationData, UserClanData, UserFlags } from "../UserRecord";
-import type { ForumChannelRecord, GuildForumChannelRecord, GuildMediaChannelRecord } from "./ForumChannelRecord";
+import type { ForumChannelRecord } from "./ForumChannelRecord";
 import type { GuildCategoryChannelRecord, GuildDirectoryChannelRecord, GuildTextualChannelRecord } from "./GuildTextualChannelRecord";
 import type { GuildStageVoiceChannelRecord, GuildVocalChannelRecord, GuildVoiceChannelRecord } from "./GuildVocalChannelRecord";
 import type { DMChannelRecord, GroupDMChannelRecord, PrivateChannelRecord } from "./PrivateChannelRecord";
@@ -21,7 +21,7 @@ export type GuildChannelRecord = GuildTextualChannelRecord | GuildVocalChannelRe
 
 export type GuildSelectableChannelRecord = Exclude<GuildChannelRecord, GuildCategoryChannelRecord | GuildVocalChannelRecord>;
 
-type ChannelRecordOwnPropertyKeys = "application_id" | "appliedTags" | "availableTags" | "bitrate_" | "blockedUserWarningDismissed" | "defaultAutoArchiveDuration" | "defaultForumLayout" | "defaultReactionEmoji" | "defaultSortOrder" | "defaultThreadRateLimitPerUser" | "flags_" | "guild_id" | "icon" | "iconEmoji" | "id" | "isMessageRequest" | "isMessageRequestTimestamp" | "isSpam" | "lastMessageId" | "lastPinTimestamp" | "member" | "memberCount" | "memberIdsPreview" | "memberListId" | "messageCount" | "name" | "nicks" | "nsfw_" | "originChannelId" | "ownerId" | "parentChannelThreadType" | "parent_id" | "permissionOverwrites_" | "position_" | "rateLimitPerUser_" | "rawRecipients" | "recipients" | "rtcRegion" | "safetyWarnings" | "template" | "themeColor" | "threadMetadata" | "topic_" | "totalMessageSent" | "type" | "userLimit_" | "version" | "videoQualityMode";
+type ChannelRecordOwnPropertyKeys = "application_id" | "appliedTags" | "availableTags" | "bitrate_" | "blockedUserWarningDismissed" | "defaultAutoArchiveDuration" | "defaultForumLayout" | "defaultReactionEmoji" | "defaultSortOrder" | "defaultThreadRateLimitPerUser" | "flags_" | "guild_id" | "icon" | "iconEmoji" | "id" | "isMessageRequest" | "isMessageRequestTimestamp" | "isSpam" | "lastMessageId" | "lastPinTimestamp" | "linkedLobby" | "member" | "memberCount" | "memberIdsPreview" | "memberListId" | "messageCount" | "name" | "nicks" | "nsfw_" | "originChannelId" | "ownerId" | "parentChannelThreadType" | "parent_id" | "permissionOverwrites_" | "position_" | "rateLimitPerUser_" | "rawRecipients" | "recipients" | "rtcRegion" | "safetyWarnings" | "template" | "themeColor" | "threadMetadata" | "topic_" | "totalMessageSent" | "type" | "userLimit_" | "version" | "videoQualityMode";
 
 export type ChannelRecordOwnProperties<Channel extends ChannelRecordBase> = Pick<Channel, ChannelRecordOwnPropertyKeys>;
 
@@ -43,7 +43,7 @@ export declare abstract class ChannelRecordBase extends ChannelRecordProperties 
     isCategory(): this is GuildCategoryChannelRecord;
     isDirectory(): this is GuildDirectoryChannelRecord;
     isDM(): this is DMChannelRecord;
-    isForumChannel(): this is GuildForumChannelRecord;
+    isForumChannel(): this is ForumChannelRecord<ChannelType.GUILD_FORUM>;
     isForumLikeChannel(): this is ForumChannelRecord;
     isForumPost(): boolean;
     isGroupDM(): this is GroupDMChannelRecord;
@@ -54,7 +54,7 @@ export declare abstract class ChannelRecordBase extends ChannelRecordProperties 
     isListenModeCapable(): this is GuildStageVoiceChannelRecord;
     isLockedThread(): boolean;
     isManaged(): boolean;
-    isMediaChannel(): this is GuildMediaChannelRecord;
+    isMediaChannel(): this is ForumChannelRecord<ChannelType.GUILD_MEDIA>;
     isMediaPost(): boolean;
     /** This method is functionally the same as {@link isGroupDM}. */
     isMultiUserDM(): this is GroupDMChannelRecord;
@@ -106,6 +106,8 @@ export declare abstract class ChannelRecordProperties {
     isSpam?: boolean | undefined;
     lastMessageId: string | Nullish;
     lastPinTimestamp: string | Nullish;
+    /** @todo */
+    linkedLobby?: any;
     member?: ThreadMember | undefined;
     memberCount?: number | undefined;
     memberIdsPreview?: string[] | undefined;
