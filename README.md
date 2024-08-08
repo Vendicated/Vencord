@@ -87,7 +87,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - LoginWithQR by nexpid
 - MediaDownloader by Colorman
 - Meow by Samwich
-- MessageColors by hen
+- MessageColors by Hen
 - MessageLinkTooltip by Kyuuhachi
 - MessageLoggerEnhanced by Aria
 - MessageTranslate by Samwich

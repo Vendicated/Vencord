@@ -34,7 +34,7 @@ const requiredFirstCharacters = ["r", "h", "#"].flatMap(v => [
 ]);
 
 export default definePlugin({
-    authors: [EquicordDevs.hen],
+    authors: [EquicordDevs.Hen],
     name: "MessageColors",
     description: "Displays color codes like #FF0042 inside of messages",
     settings,

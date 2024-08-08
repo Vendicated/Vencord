@@ -747,9 +747,9 @@ export const EquicordDevs = Object.freeze({
         name: "x3rt",
         id: 131602100332396544n
     },
-    hen: {
-        id: 279266228151779329n,
+    Hen: {
         name: "Hen",
+        id: 279266228151779329n
     },
 } satisfies Record<string, Dev>);
 
