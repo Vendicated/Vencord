@@ -60,7 +60,7 @@ jobs:
             - name: Upload branch release
               if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && github.ref_name != 'main' && github.event.created
               run: |
-                  gh release create branch-$GITHUB_REF_NAME --latest=false --prerelease --title "PreBuild $GITHUB_REF_NAME" || true
+                  gh release create branch-$GITHUB_REF_NAME --latest=false --prerelease --target $GITHUB_REF_NAME --title "PreBuild $GITHUB_REF_NAME" || true
                   gh release upload branch-$GITHUB_REF_NAME --clobber dist/*
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -69,7 +69,7 @@ jobs:
               if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && github.event.created
               continue-on-error: true
               run: |
-                  gh release create commit-$COMMIT_SHORT --latest=false --prerelease --title "PreBuild $COMMIT_SHORT"
+                  gh release create commit-$COMMIT_SHORT --latest=false --prerelease --target $GITHUB_SHA --title "PreBuild $COMMIT_SHORT"
                   gh release upload commit-$COMMIT_SHORT --clobber dist/*
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
