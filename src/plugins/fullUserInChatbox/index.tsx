@@ -7,7 +7,9 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByCodeLazy } from "@webpack";
+
 const normalMessageComponent = findByCodeLazy(".USER_MENTION)");
+
 export default definePlugin({
     name: "FullUserInChatbox",
     description: "",
