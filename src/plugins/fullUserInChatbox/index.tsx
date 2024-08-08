@@ -12,7 +12,7 @@ const normalMessageComponent = findByCodeLazy(".USER_MENTION)");
 
 export default definePlugin({
     name: "FullUserInChatbox",
-    description: "",
+    description: "Adds the normal mention to the user chatbox, see the readme for more details and a full list of benefits.",
     authors: [Devs.sadan],
 
     patches: [
@@ -25,7 +25,7 @@ export default definePlugin({
         }
     ],
 
-    patchChatboxMention(props) {
+    patchChatboxMention (props) {
         return normalMessageComponent({
             className: "mention",
             userId: props.id,
