@@ -29,7 +29,7 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "Authorize with ReviewDB",
         component: () => (
-            <Button onClick={() => authorize()}>
+            <Button onClick={() => { authorize(); }}>
                 Authorize with ReviewDB
             </Button>
         )
@@ -58,7 +58,7 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         description: "ReviewDB buttons",
         component: () => (
-            <div className={cl("button-grid")} >
+            <div className={cl("button-grid")}>
                 <Button onClick={openBlockModal}>Manage Blocked Users</Button>
 
                 <Button
@@ -70,24 +70,28 @@ export const settings = definePluginSettings({
                     Support ReviewDB development
                 </Button>
 
-                <Button onClick={async () => {
-                    let url = "https://reviewdb.mantikafasi.dev";
-                    const token = await getToken();
-                    if (token)
-                        url += "/api/redirect?token=" + encodeURIComponent(token);
+                <Button
+                    onClick={async () => {
+                        let url = "https://reviewdb.mantikafasi.dev";
+                        const token = await getToken();
+                        if (token)
+                            url += "/api/redirect?token=" + encodeURIComponent(token);
 
-                    VencordNative.native.openExternal(url);
-                }}>
+                        VencordNative.native.openExternal(url);
+                    }}
+                >
                     ReviewDB website
                 </Button>
 
 
-                <Button onClick={() => {
-                    VencordNative.native.openExternal("https://discord.gg/eWPBSbvznt");
-                }}>
+                <Button
+                    onClick={() => {
+                        VencordNative.native.openExternal("https://discord.gg/eWPBSbvznt");
+                    }}
+                >
                     ReviewDB Support Server
                 </Button>
-            </div >
+            </div>
         )
     }
 }).withPrivateSettings<{

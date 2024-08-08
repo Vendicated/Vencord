@@ -8,29 +8,38 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalHeader, type ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import type { MessageRecord, MessageRecordOwnProperties } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { TabBar, Text, Timestamp, TooltipContainer, useState } from "@webpack/common";
 
 import { parseEditContent } from ".";
 
-const CodeContainerClasses = findByPropsLazy("markup", "codeContainer");
-const MiscClasses = findByPropsLazy("messageContent", "markupRtl");
+type MLMessageRecordOwnProperties = MessageRecordOwnProperties & Pick<MLMessageRecord, "deleted" | "editHistory">;
+
+interface MLMessageRecord extends MessageRecord<MLMessageRecordOwnProperties> {
+    deleted: boolean;
+    editHistory: { timestamp: Date; content: string; }[];
+    firstEditTimestamp: Date;
+}
+
+const CodeContainerClasses: Record<string, string> = findByPropsLazy("markup", "codeContainer");
+const MiscClasses: Record<string, string> = findByPropsLazy("messageContent", "markupRtl");
 
 const cl = classNameFactory("vc-ml-modal-");
 
-export function openHistoryModal(message: any) {
-    openModal(props =>
+export function openHistoryModal(message: MLMessageRecord) {
+    openModal(props => (
         <ErrorBoundary>
             <HistoryModal
                 modalProps={props}
                 message={message}
             />
         </ErrorBoundary>
-    );
+    ));
 }
 
-export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; message: any; }) {
+export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; message: MLMessageRecord; }) {
     const [currentTab, setCurrentTab] = useState(message.editHistory.length);
     const timestamps = [message.firstEditTimestamp, ...message.editHistory.map(m => m.timestamp)];
     const contents = [...message.editHistory.map(m => m.content), message.content];
@@ -83,7 +92,7 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
                 </TabBar>
 
                 <div className={classes(CodeContainerClasses.markup, MiscClasses.messageContent, Margins.top20)}>
-                    {parseEditContent(contents[currentTab], message)}
+                    {parseEditContent(contents[currentTab]!, message)}
                 </div>
             </ModalContent>
         </ModalRoot>

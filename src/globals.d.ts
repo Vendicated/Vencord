@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { LoDashStatic } from "lodash";
+import type { LoDashStatic } from "lodash";
+import type { OmitIndexSignature } from "type-fest";
 
 declare global {
     /**
@@ -52,7 +53,7 @@ declare global {
         dom: HTMLStyleElement | null;
     }>;
     export var appSettings: {
-        set(setting: string, v: any): void;
+        set: (setting: string, v: any) => void;
     };
     /**
      * Only available when running in Electron, undefined on web.
@@ -66,12 +67,52 @@ declare global {
 
     interface Window {
         webpackChunkdiscord_app: {
-            push(chunk: any): any;
-            pop(): any;
+            push: (chunk: any) => any;
+            pop: () => any;
         };
         _: LoDashStatic;
         [k: string]: any;
     }
+
+    /* eslint-disable @typescript-eslint/method-signature-style */
+    // https://github.com/microsoft/TypeScript/issues/33700
+    // https://github.com/microsoft/TypeScript/issues/17002
+    interface ArrayConstructor {
+        // If 'any' or a generic type parameter that cannot be determined to satisfy
+        // the constraint is assigned to 'T', the default overload will be used.
+        isArray<T>(arg: 0 extends 1 & T ? never : T): arg is unknown extends typeof arg
+            ? Extract<unknown[], typeof arg>
+            : ToArray<typeof arg>;
+    }
+    // https://github.com/microsoft/TypeScript/issues/29841
+    interface Array<T> {
+        map<U>(callbackfn: (value: T, index: TupleKeys<this>, array: this) => U, thisArg?: any): MappedTuple<this, U>;
+    }
+    interface ReadonlyArray<T> {
+        map<U>(callbackfn: (value: T, index: TupleKeys<this>, array: this) => U, thisArg?: any): MappedTuple<this, U>;
+    }
+    /* eslint-enable @typescript-eslint/method-signature-style */
 }
+
+type ToArray<T>
+    = T extends readonly unknown[]
+        ? T
+        : T extends (ArrayLike<infer U> | Iterable<infer U>) & object
+            ? Extract<U[], T>
+            : never;
+
+// Workaround for https://github.com/microsoft/TypeScript/issues/59260
+type MappedTuple<T extends readonly unknown[], U>
+    // Detect non-homomorphic instantiation
+    = { [Key in keyof T]: undefined; }["length"] extends undefined
+        // Extra properties with non-numeric keys need to be removed, since they will not be preserved by map.
+        ? { -readonly [Key in Extract<keyof OmitIndexSignature<T>, number | `${number}`>]: U; }
+            & U[] & { length: T["length"]; }
+        : { -readonly [Key in keyof T]: U; };
+
+type TupleKeys<T extends readonly unknown[]>
+    = number extends T["length"]
+        ? number
+        : Exclude<Partial<T>["length"], T["length"]>;
 
 export { };

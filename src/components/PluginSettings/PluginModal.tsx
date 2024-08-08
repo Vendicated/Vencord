@@ -27,17 +27,17 @@ import { gitRemote } from "@shared/vencordUserAgent";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { OptionType, Plugin } from "@utils/types";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, type ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { OptionType, type Plugin } from "@utils/types";
+import type { UserRecord as $UserRecord } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
-import { User } from "discord-types/general";
-import { Constructor } from "type-fest";
+import { Button, Clickable, FluxDispatcher, Forms, Text, Tooltip, useEffect, UserActionCreators, UserStore, useState } from "@webpack/common";
+import type { ComponentType } from "react";
 
 import { PluginMeta } from "~plugins";
 
 import {
-    ISettingElementProps,
+    type ISettingElementProps,
     SettingBooleanComponent,
     SettingCustomComponent,
     SettingNumericComponent,
@@ -51,12 +51,12 @@ import { GithubButton, WebsiteButton } from "./LinkIconButton";
 const cl = classNameFactory("vc-plugin-modal-");
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
-const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
+const AvatarStyles: Record<string, string> = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
+const UserRecord: typeof $UserRecord = proxyLazy<any>(() => UserStore.getCurrentUser()!.constructor);
 
 interface PluginModalProps extends ModalProps {
     plugin: Plugin;
-    onRestartNeeded(): void;
+    onRestartNeeded: () => void;
 }
 
 function makeDummyUser(user: { username: string; id?: string; avatar?: string; }) {
@@ -74,7 +74,7 @@ function makeDummyUser(user: { username: string; id?: string; avatar?: string; }
     return newUser;
 }
 
-const Components: Record<OptionType, React.ComponentType<ISettingElementProps<any>>> = {
+const Components: Record<OptionType, ComponentType<ISettingElementProps<any>>> = {
     [OptionType.STRING]: SettingTextComponent,
     [OptionType.NUMBER]: SettingNumericComponent,
     [OptionType.BIGINT]: SettingNumericComponent,
@@ -85,25 +85,25 @@ const Components: Record<OptionType, React.ComponentType<ISettingElementProps<an
 };
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
-    const [authors, setAuthors] = React.useState<Partial<User>[]>([]);
+    const [authors, setAuthors] = useState<Partial<$UserRecord>[]>([]);
 
     const pluginSettings = useSettings().plugins[plugin.name];
 
-    const [tempSettings, setTempSettings] = React.useState<Record<string, any>>({});
+    const [tempSettings, setTempSettings] = useState<Record<string, any>>({});
 
-    const [errors, setErrors] = React.useState<Record<string, boolean>>({});
-    const [saveError, setSaveError] = React.useState<string | null>(null);
+    const [errors, setErrors] = useState<Record<string, boolean>>({});
+    const [saveError, setSaveError] = useState<string | null>(null);
 
     const canSubmit = () => Object.values(errors).every(e => !e);
 
     const hasSettings = Boolean(pluginSettings && plugin.options && !isObjectEmpty(plugin.options));
 
-    React.useEffect(() => {
+    useEffect(() => {
         (async () => {
             for (const user of plugin.authors.slice(0, 6)) {
                 const author = user.id
-                    ? await UserUtils.getUser(`${user.id}`)
-                        .catch(() => makeDummyUser({ username: user.name }))
+                    ? (await UserActionCreators.getUser(`${user.id}`)
+                        .catch(() => makeDummyUser({ username: user.name })))!
                     : makeDummyUser({ username: user.name });
 
                 setAuthors(a => [...a, author]);
@@ -118,7 +118,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         }
 
         if (plugin.beforeSave) {
-            const result = await Promise.resolve(plugin.beforeSave(tempSettings));
+            const result = await plugin.beforeSave(tempSettings);
             if (result !== true) {
                 setSaveError(result);
                 return;
@@ -128,7 +128,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         let restartNeeded = false;
         for (const [key, value] of Object.entries(tempSettings)) {
             const option = plugin.options[key];
-            pluginSettings[key] = value;
+            pluginSettings![key] = value;
             option?.onChange?.(value);
             if (option?.restartNeeded) restartNeeded = true;
         }
@@ -159,7 +159,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         option={setting}
                         onChange={onChange}
                         onError={onError}
-                        pluginSettings={pluginSettings}
+                        pluginSettings={pluginSettings!}
                         definedSettings={plugin.settings}
                     />
                 );
@@ -206,7 +206,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     }
     */
 
-    const pluginMeta = PluginMeta[plugin.name];
+    const pluginMeta = PluginMeta[plugin.name]!;
 
     return (
         <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM} className="vc-text-selectable">
@@ -248,14 +248,14 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             showDefaultAvatarsForNullUsers
                             showUserPopout
                             renderMoreUsers={renderMoreUsers}
-                            renderUser={(user: User) => (
+                            renderUser={(user: $UserRecord) => (
                                 <Clickable
                                     className={AvatarStyles.clickableAvatar}
-                                    onClick={() => openContributorModal(user)}
+                                    onClick={() => { openContributorModal(user); }}
                                 >
                                     <img
                                         className={AvatarStyles.avatar}
-                                        src={user.getAvatarURL(void 0, 80, true)}
+                                        src={user.getAvatarURL(undefined, 80, true)}
                                         alt={user.username}
                                         title={user.username}
                                     />
@@ -278,35 +278,41 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     {renderSettings()}
                 </Forms.FormSection>
             </ModalContent>
-            {hasSettings && <ModalFooter>
-                <Flex flexDirection="column" style={{ width: "100%" }}>
-                    <Flex style={{ marginLeft: "auto" }}>
-                        <Button
-                            onClick={onClose}
-                            size={Button.Sizes.SMALL}
-                            color={Button.Colors.PRIMARY}
-                            look={Button.Looks.LINK}
-                        >
-                            Cancel
-                        </Button>
-                        <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
-                            {({ onMouseEnter, onMouseLeave }) => (
-                                <Button
-                                    size={Button.Sizes.SMALL}
-                                    color={Button.Colors.BRAND}
-                                    onClick={saveAndClose}
-                                    onMouseEnter={onMouseEnter}
-                                    onMouseLeave={onMouseLeave}
-                                    disabled={!canSubmit()}
-                                >
-                                    Save & Close
-                                </Button>
-                            )}
-                        </Tooltip>
+            {hasSettings && (
+                <ModalFooter>
+                    <Flex flexDirection="column" style={{ width: "100%" }}>
+                        <Flex style={{ marginLeft: "auto" }}>
+                            <Button
+                                onClick={onClose}
+                                size={Button.Sizes.SMALL}
+                                color={Button.Colors.PRIMARY}
+                                look={Button.Looks.LINK}
+                            >
+                                Cancel
+                            </Button>
+                            <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
+                                {({ onMouseEnter, onMouseLeave }) => (
+                                    <Button
+                                        size={Button.Sizes.SMALL}
+                                        color={Button.Colors.BRAND}
+                                        onClick={saveAndClose}
+                                        onMouseEnter={onMouseEnter}
+                                        onMouseLeave={onMouseLeave}
+                                        disabled={!canSubmit()}
+                                    >
+                                        Save & Close
+                                    </Button>
+                                )}
+                            </Tooltip>
+                        </Flex>
+                        {saveError && (
+                            <Text variant="text-md/semibold" style={{ color: "var(--text-danger)" }}>
+                                Error while saving: {saveError}
+                            </Text>
+                        )}
                     </Flex>
-                    {saveError && <Text variant="text-md/semibold" style={{ color: "var(--text-danger)" }}>Error while saving: {saveError}</Text>}
-                </Flex>
-            </ModalFooter>}
+                </ModalFooter>
+            )}
         </ModalRoot>
     );
 }

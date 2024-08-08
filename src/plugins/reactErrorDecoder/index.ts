@@ -40,9 +40,11 @@ export default definePlugin({
     async start() {
         const CODES_URL = `https://raw.githubusercontent.com/facebook/react/v${React.version}/scripts/error-codes/codes.json`;
 
-        ERROR_CODES = await fetch(CODES_URL)
-            .then(res => res.json())
-            .catch(e => console.error("[ReactErrorDecoder] Failed to fetch React error codes\n", e));
+        try {
+            ERROR_CODES = await (await fetch(CODES_URL)).json();
+        } catch (e) {
+            console.error("[ReactErrorDecoder] Failed to fetch React error codes\n", e);
+        }
     },
 
     stop() {
@@ -51,7 +53,7 @@ export default definePlugin({
 
     decodeError(code: number, ...args: any) {
         let index = 0;
-        return ERROR_CODES?.[code]?.replace(/%s/g, () => {
+        return ERROR_CODES?.[code]?.replaceAll(/%s/g, () => {
             const arg = args[index];
             index++;
             return arg;

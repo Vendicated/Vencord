@@ -38,7 +38,7 @@ export default definePlugin({
             description: "Show controls on hover",
             type: OptionType.BOOLEAN,
             default: false,
-            onChange: v => toggleHoverControls(v)
+            onChange(v) { toggleHoverControls(v); }
         },
         useSpotifyUris: {
             type: OptionType.BOOLEAN,
@@ -87,24 +87,22 @@ export default definePlugin({
         }
     ],
 
-    start: () => toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls),
+    start() { toggleHoverControls(Settings.plugins.SpotifyControls!.hoverControls); },
 
-    PanelWrapper({ VencordOriginal, ...props }) {
-        return (
-            <>
-                <ErrorBoundary
-                    fallback={() => (
-                        <div className="vc-spotify-fallback">
-                            <p>Failed to render Spotify Modal :(</p>
-                            <p >Check the console for errors</p>
-                        </div>
-                    )}
-                >
-                    <Player />
-                </ErrorBoundary>
+    PanelWrapper: ({ VencordOriginal, ...props }: any) => (
+        <>
+            <ErrorBoundary
+                fallback={() => (
+                    <div className="vc-spotify-fallback">
+                        <p>Failed to render Spotify Modal :(</p>
+                        <p>Check the console for errors</p>
+                    </div>
+                )}
+            >
+                <Player />
+            </ErrorBoundary>
 
-                <VencordOriginal {...props} />
-            </>
-        );
-    }
+            <VencordOriginal {...props} />
+        </>
+    )
 });

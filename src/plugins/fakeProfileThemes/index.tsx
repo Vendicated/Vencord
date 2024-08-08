@@ -26,53 +26,84 @@ import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
+import { type GuildRecord, type ProfileThemeColors, UserPremiumType, type UserProfile, type UserRecord } from "@vencord/discord-types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Flex, Forms, React, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
-import { User } from "discord-types/general";
-import virtualMerge from "virtual-merge";
+import { Button, Flex, Forms, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
+import type { ReactNode } from "react";
 
-interface UserProfile extends User {
-    themeColors?: Array<number>;
-}
+function encode(primary: number, accent: number) {
+    // Decode only requires each color to have at least one character,
+    // so the colors can be left unpadded, saving About Me space.
+    let encoded = "";
+    for (const char of `[#${primary.toString(16)},#${accent.toString(16)}]`)
+        encoded += String.fromCodePoint(char.codePointAt(0)! + 0xE0000);
 
-interface Colors {
-    primary: number;
-    accent: number;
-}
-
-function encode(primary: number, accent: number): string {
-    const message = `[#${primary.toString(16).padStart(6, "0")},#${accent.toString(16).padStart(6, "0")}]`;
-    const padding = "";
-    const encoded = Array.from(message)
-        .map(x => x.codePointAt(0))
-        .filter(x => x! >= 0x20 && x! <= 0x7f)
-        .map(x => String.fromCodePoint(x! + 0xe0000))
-        .join("");
-
-    return (padding || "") + " " + encoded;
+    return encoded;
 }
 
 // Courtesy of Cynthia.
-function decode(bio: string): Array<number> | null {
-    if (bio == null) return null;
+function decode(bio: string): ProfileThemeColors | null {
+    // /[#([0-9A-Fa-f]{1,6}),#([0-9A-Fa-f]{1,6})]/u
+    const match = bio.match(/\u{E005B}\u{E0023}([\u{E0030}-\u{E0039}\u{E0041}-\u{E0046}\u{E0061}-\u{E0066}]{1,6})\u{E002C}\u{E0023}([\u{E0030}-\u{E0039}\u{E0041}-\u{E0046}\u{E0061}-\u{E0066}]{1,6})\u{E005D}/u);
 
-    const colorString = bio.match(
-        /\u{e005b}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]{1,6})\u{e002c}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]{1,6})\u{e005d}/u,
-    );
-    if (colorString != null) {
-        const parsed = [...colorString[0]]
-            .map(x => String.fromCodePoint(x.codePointAt(0)! - 0xe0000))
-            .join("");
-        const colors = parsed
-            .substring(1, parsed.length - 1)
-            .split(",")
-            .map(x => parseInt(x.replace("#", "0x"), 16));
+    if (!match) return null;
 
-        return colors;
-    } else {
-        return null;
-    }
+    const [, primary, accent] = match;
+
+    let decodedPrimary = "";
+    for (const char of primary!)
+        decodedPrimary += String.fromCodePoint(char.codePointAt(0)! - 0xE0000);
+
+    let decodedAccent = "";
+    for (const char of accent!)
+        decodedAccent += String.fromCodePoint(char.codePointAt(0)! - 0xE0000);
+
+    return [parseInt(decodedPrimary, 16), parseInt(decodedAccent, 16)];
 }
+
+interface ColorSwatchProps {
+    color?: string | number | null | undefined;
+    colorPickerFooter?: ReactNode;
+    colorPickerMiddle?: ReactNode;
+    disabled?: boolean | undefined /* = false */;
+    label?: ReactNode;
+    onChange: (color: number) => void;
+    onClose?: (() => void) | undefined;
+    showEyeDropper?: boolean | undefined /* = false */;
+    suggestedColors?: string[] | null | undefined;
+}
+
+const ColorSwatch = findComponentByCodeLazy<ColorSwatchProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
+const requireColorSwatch = extractAndLoadChunksLazy(["USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format"], /createPromise:\(\)=>\i\.\i(\("?.+?"?\)).then\(\i\.bind\(\i,"?(.+?)"?\)\)/);
+
+// I can't be bothered to figure out the semantics of this component. The
+// functions surely get some event argument sent to them and they likely aren't
+// all required. If anyone who wants to use this component stumbles across this
+// code, you'll have to do the research yourself.
+interface ProfileCustomizationPreviewProps {
+    avatarClassName?: string | undefined;
+    canUsePremiumCustomization?: boolean | undefined /* = false */;
+    disabledInputs?: boolean | undefined /* = false */;
+    guild?: GuildRecord | null | undefined;
+    hideBioSection?: boolean | undefined /* = false */;
+    hideCustomStatus?: boolean | undefined /* = false */;
+    hideExampleButton?: boolean | undefined /* = false */;
+    hideMessageInput?: boolean | undefined /* = false */;
+    isTryItOutFlow?: boolean | undefined /* = false */;
+    onUpsellClick?: ((analyticsLocation: { object: /* AnalyticsObjects */ string; }) => void) | null | undefined;
+    pendingAvatar?: string | null | undefined;
+    pendingAvatarDecoration?: string | null | undefined;
+    pendingBanner?: string | null | undefined;
+    pendingBio?: string | null | undefined;
+    pendingGlobalName?: string | null | undefined;
+    pendingNickname?: string | null | undefined;
+    pendingProfileEffectId?: string | null | undefined;
+    pendingPronouns?: string | null | undefined;
+    pendingThemeColors?: [primaryColor?: number | null, accentColor?: number | null] | null | undefined;
+    user: UserRecord;
+}
+
+const ProfileCustomizationPreview = findComponentByCodeLazy<ProfileCustomizationPreviewProps>("isTryItOutFlow:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
 
 const settings = definePluginSettings({
     nitroFirst: {
@@ -84,34 +115,6 @@ const settings = definePluginSettings({
         ]
     }
 });
-
-interface ColorPickerProps {
-    color: number | null;
-    label: React.ReactElement;
-    showEyeDropper?: boolean;
-    suggestedColors?: string[];
-    onChange(value: number | null): void;
-}
-
-// I can't be bothered to figure out the semantics of this component. The
-// functions surely get some event argument sent to them and they likely aren't
-// all required. If anyone who wants to use this component stumbles across this
-// code, you'll have to do the research yourself.
-interface ProfileModalProps {
-    user: User;
-    pendingThemeColors: [number, number];
-    onAvatarChange: () => void;
-    onBannerChange: () => void;
-    canUsePremiumCustomization: boolean;
-    hideExampleButton: boolean;
-    hideFakeActivity: boolean;
-    isTryItOutFlow: boolean;
-}
-
-const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
-const ProfileModal = findComponentByCodeLazy<ProfileModalProps>("isTryItOutFlow:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
-
-const requireColorPicker = extractAndLoadChunksLazy(["USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format"], /createPromise:\(\)=>\i\.\i(\("?.+?"?\)).then\(\i\.bind\(\i,"?(.+?)"?\)\)/);
 
 export default definePlugin({
     name: "FakeProfileThemes",
@@ -135,12 +138,12 @@ export default definePlugin({
     ],
     settingsAboutComponent: () => {
         const existingColors = decode(
-            UserProfileStore.getUserProfile(UserStore.getCurrentUser().id).bio
+            UserProfileStore.getUserProfile(UserStore.getCurrentUser()!.id)!.bio
         ) ?? [0, 0];
-        const [color1, setColor1] = useState(existingColors[0]);
-        const [color2, setColor2] = useState(existingColors[1]);
+        const [primary, setPrimary] = useState(existingColors[0]);
+        const [accent, setAccent] = useState(existingColors[1]);
 
-        const [, , loadingColorPickerChunk] = useAwaiter(requireColorPicker);
+        const [, , loadingColorPickerChunk] = useAwaiter(requireColorSwatch);
 
         return (
             <Forms.FormSection>
@@ -166,38 +169,33 @@ export default definePlugin({
                             direction={Flex.Direction.HORIZONTAL}
                             style={{ gap: "1rem" }}
                         >
-                            <ColorPicker
-                                color={color1}
+                            <ColorSwatch
+                                color={primary}
                                 label={
                                     <Text
-                                        variant={"text-xs/normal"}
+                                        variant="text-xs/normal"
                                         style={{ marginTop: "4px" }}
                                     >
                                         Primary
                                     </Text>
                                 }
-                                onChange={(color: number) => {
-                                    setColor1(color);
-                                }}
+                                onChange={setPrimary}
                             />
-                            <ColorPicker
-                                color={color2}
+                            <ColorSwatch
+                                color={accent}
                                 label={
                                     <Text
-                                        variant={"text-xs/normal"}
+                                        variant="text-xs/normal"
                                         style={{ marginTop: "4px" }}
                                     >
                                         Accent
                                     </Text>
                                 }
-                                onChange={(color: number) => {
-                                    setColor2(color);
-                                }}
+                                onChange={setAccent}
                             />
                             <Button
                                 onClick={() => {
-                                    const colorString = encode(color1, color2);
-                                    copyWithToast(colorString);
+                                    copyWithToast(encode(primary, accent));
                                 }}
                                 color={Button.Colors.PRIMARY}
                                 size={Button.Sizes.XLARGE}
@@ -211,45 +209,42 @@ export default definePlugin({
                     />
                     <Forms.FormTitle tag="h3">Preview</Forms.FormTitle>
                     <div className="vc-fpt-preview">
-                        <ProfileModal
-                            user={UserStore.getCurrentUser()}
-                            pendingThemeColors={[color1, color2]}
-                            onAvatarChange={() => { }}
-                            onBannerChange={() => { }}
+                        <ProfileCustomizationPreview
+                            user={UserStore.getCurrentUser()!}
+                            pendingThemeColors={[primary, accent]}
                             canUsePremiumCustomization={true}
                             hideExampleButton={true}
-                            hideFakeActivity={true}
                             isTryItOutFlow={true}
                         />
                     </div>
                 </Forms.FormText>
-            </Forms.FormSection>);
+            </Forms.FormSection>
+        );
     },
     settings,
-    colorDecodeHook(user: UserProfile) {
-        if (user) {
+    colorDecodeHook(profile?: UserProfile) {
+        if (profile) {
             // don't replace colors if already set with nitro
-            if (settings.store.nitroFirst && user.themeColors) return user;
-            const colors = decode(user.bio);
+            if (settings.store.nitroFirst && profile.themeColors) return profile;
+
+            const colors = decode(profile.bio);
             if (colors) {
-                return virtualMerge(user, {
-                    premiumType: 2,
-                    themeColors: colors
-                });
+                profile.premiumType = UserPremiumType.TIER_2;
+                profile.themeColors = colors;
             }
         }
-        return user;
+        return profile;
     },
-    addCopy3y3Button: ErrorBoundary.wrap(function ({ primary, accent }: Colors) {
-        return <Button
+    addCopy3y3Button: ErrorBoundary.wrap(({ primary, accent }: { primary: number; accent: number; }) => (
+        <Button
             onClick={() => {
-                const colorString = encode(primary, accent);
-                copyWithToast(colorString);
+                copyWithToast(encode(primary, accent));
             }}
             color={Button.Colors.PRIMARY}
             size={Button.Sizes.XLARGE}
             className={Margins.left16}
-        >Copy 3y3
-        </Button >;
-    }, { noop: true }),
+        >
+            Copy 3y3
+        </Button>
+    ), { noop: true }),
 });

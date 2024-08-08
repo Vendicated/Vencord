@@ -18,7 +18,7 @@
 
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType, PluginSettingDef } from "@utils/types";
+import definePlugin, { OptionType, type PluginSettingDef } from "@utils/types";
 
 const opt = (description: string) => ({
     type: OptionType.BOOLEAN,

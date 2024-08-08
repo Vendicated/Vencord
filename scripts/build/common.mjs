@@ -30,7 +30,7 @@ import { promisify } from "util";
 import { getPluginTarget } from "../utils.mjs";
 
 /** @type {import("../../package.json")} */
-const PackageJSON = JSON.parse(readFileSync("package.json"));
+const PackageJSON = JSON.parse(readFileSync("package.json", "utf-8"));
 
 export const VERSION = PackageJSON.version;
 // https://reproducible-builds.org/docs/source-date-epoch/
@@ -79,16 +79,18 @@ export async function resolvePluginName(base, dirent) {
         })();
 }
 
+/** @param {string} path */
 export async function exists(path) {
-    return await access(path, FsConstants.F_OK)
-        .then(() => true)
-        .catch(() => false);
+    try {
+        await access(path, FsConstants.F_OK);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
-/**
- * @type {import("esbuild").Plugin}
- */
+/** @satisfies {esbuild.Plugin} */
 export const makeAllPackagesExternalPlugin = {
     name: "make-all-packages-external",
     setup(build) {
@@ -98,18 +100,17 @@ export const makeAllPackagesExternalPlugin = {
 };
 
 /**
- * @type {(kind: "web" | "discordDesktop" | "vencordDesktop") => import("esbuild").Plugin}
+ * @param {"web" | "discordDesktop" | "vencordDesktop"} kind
+ * @returns {esbuild.Plugin}
  */
 export const globPlugins = kind => ({
     name: "glob-plugins",
     setup: build => {
         const filter = /^~plugins$/;
-        build.onResolve({ filter }, args => {
-            return {
-                namespace: "import-plugins",
-                path: args.path
-            };
-        });
+        build.onResolve({ filter }, args => ({
+            namespace: "import-plugins",
+            path: args.path
+        }));
 
         build.onLoad({ filter, namespace: "import-plugins" }, async () => {
             const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "userplugins"];
@@ -164,9 +165,7 @@ export const globPlugins = kind => ({
     }
 });
 
-/**
- * @type {import("esbuild").Plugin}
- */
+/** @satisfies {esbuild.Plugin} */
 export const gitHashPlugin = {
     name: "git-hash-plugin",
     setup: build => {
@@ -180,9 +179,7 @@ export const gitHashPlugin = {
     }
 };
 
-/**
- * @type {import("esbuild").Plugin}
- */
+/** @satisfies {esbuild.Plugin} */
 export const gitRemotePlugin = {
     name: "git-remote-plugin",
     setup: build => {
@@ -205,9 +202,7 @@ export const gitRemotePlugin = {
     }
 };
 
-/**
- * @type {import("esbuild").Plugin}
- */
+/** @satisfies {esbuild.Plugin} */
 export const fileUrlPlugin = {
     name: "file-uri-plugin",
     setup: build => {
@@ -217,6 +212,7 @@ export const fileUrlPlugin = {
             path: args.path,
             pluginData: {
                 uri: args.path,
+                // @ts-expect-error
                 path: join(args.resolveDir, args.path.slice("file://".length).split("?")[0])
             }
         }));
@@ -251,6 +247,7 @@ export const fileUrlPlugin = {
                         write: false,
                         minify: true
                     });
+                    // @ts-expect-error
                     content = res.outputFiles[0].text;
                 } else {
                     throw new Error(`Don't know how to minify file type: ${path}`);
@@ -268,9 +265,7 @@ export const fileUrlPlugin = {
 };
 
 const styleModule = readFileSync("./scripts/build/module/style.js", "utf-8");
-/**
- * @type {import("esbuild").Plugin}
- */
+/** @satisfies {esbuild.Plugin} */
 export const stylePlugin = {
     name: "style-plugin",
     setup: ({ onResolve, onLoad }) => {
@@ -292,15 +287,28 @@ export const stylePlugin = {
     }
 };
 
-/**
- * @type {import("esbuild").BuildOptions}
- */
+/** @param {esbuild.BuildContext[]} contexts */
+export const disposeAll = contexts => Promise.all(contexts.map(ctx => ctx.dispose()));
+
+/** @param {esbuild.BuildContext[]} contexts */
+export const rebuildAll = contexts =>
+    Promise.all(contexts.map(ctx => ctx.rebuild().catch(error => {
+        disposeAll(contexts);
+        console.error("Build failed:\n" + error.stack);
+        process.exitCode = 1;
+    })));
+
+/** @param {esbuild.BuildContext[]} contexts */
+export const watchAll = contexts => Promise.all(contexts.map(ctx => ctx.watch()));
+
+/** @satisfies {esbuild.BuildOptions} */
 export const commonOpts = {
+    // Does not work with esbuild.BuildContext.rebuild: https://github.com/evanw/esbuild/issues/2886#issuecomment-1416397046
+    // Warnings and errors should still get logged
     logLevel: "info",
     bundle: true,
-    watch,
     minify: !watch,
-    sourcemap: watch ? "inline" : "",
+    sourcemap: watch ? "inline" : undefined,
     legalComments: "linked",
     banner,
     plugins: [fileUrlPlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],

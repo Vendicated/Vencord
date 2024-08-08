@@ -27,7 +27,7 @@ import { persistNotification } from "./notificationLog";
 
 const NotificationQueue = new Queue();
 
-let reactRoot: Root;
+let reactRoot: Root | undefined;
 let id = 42;
 
 function getRoot() {
@@ -52,8 +52,8 @@ export interface NotificationData {
     icon?: string;
     /** Large image. Optimally, this should be around 16x9 but it doesn't matter much. Desktop Notifications might not support this */
     image?: string;
-    onClick?(): void;
-    onClose?(): void;
+    onClick?: () => void;
+    onClose?: () => void;
     color?: string;
     /** Whether this notification should not have a timeout */
     permanent?: boolean;
@@ -67,11 +67,15 @@ function _showNotification(notification: NotificationData, id: number) {
     const root = getRoot();
     return new Promise<void>(resolve => {
         root.render(
-            <NotificationComponent key={id} {...notification} onClose={() => {
-                notification.onClose?.();
-                root.render(null);
-                resolve();
-            }} />,
+            <NotificationComponent
+                {...notification}
+                key={id}
+                onClose={() => {
+                    notification.onClose?.();
+                    root.render(null);
+                    resolve();
+                }}
+            />
         );
     });
 }
@@ -100,9 +104,8 @@ export async function showNotification(data: NotificationData) {
         const n = new Notification(title, {
             body,
             icon,
-            // @ts-expect-error ts is drunk
             image
-        });
+        } as NotificationOptions);
         n.onclick = onClick;
         n.onclose = onClose;
     } else {

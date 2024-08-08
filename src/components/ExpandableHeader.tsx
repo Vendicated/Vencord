@@ -20,6 +20,7 @@ import "./ExpandableHeader.css";
 
 import { classNameFactory } from "@api/Styles";
 import { Text, Tooltip, useState } from "@webpack/common";
+import type { ReactNode } from "react";
 
 const cl = classNameFactory("vc-expandableheader-");
 
@@ -29,8 +30,8 @@ export interface ExpandableHeaderProps {
     onDropDownClick?: (state: boolean) => void;
     defaultState?: boolean;
     headerText: string;
-    children: React.ReactNode;
-    buttons?: React.ReactNode[];
+    children: ReactNode;
+    buttons?: ReactNode[];
     forceOpen?: boolean;
 }
 
@@ -48,12 +49,14 @@ export function ExpandableHeader({
 
     return (
         <>
-            <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "8px"
-            }}>
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "8px"
+                }}
+            >
                 <Text
                     tag="h2"
                     variant="eyebrow"
@@ -66,29 +69,29 @@ export function ExpandableHeader({
                 </Text>
 
                 <div className={cl("center-flex")}>
-                    {
-                        buttons ?? null
-                    }
+                    {buttons ?? null}
 
-                    {
-                        onMoreClick && // only show more button if callback is provided
+                    {/* only show more button if callback is provided */}
+                    {onMoreClick && (
                         <Tooltip text={moreTooltipText}>
                             {tooltipProps => (
                                 <button
                                     {...tooltipProps}
                                     className={cl("btn")}
-                                    onClick={onMoreClick}>
+                                    onClick={onMoreClick}
+                                >
                                     <svg
                                         width="24"
                                         height="24"
                                         viewBox="0 0 24 24"
+                                        fill="var(--text-normal)"
                                     >
-                                        <path fill="var(--text-normal)" d="M7 12.001C7 10.8964 6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 12.001C17 10.8964 17.8954 10.001 19 10.001Z" />
+                                        <path d="M7 12.001c0-1.1046-.89543-2-2-2s-2 .8954-2 2c0 1.1045.89543 2 2 2s2-.8955 2-2Zm7 0c0-1.1046-.8954-2-2-2s-2 .8954-2 2c0 1.1045.8954 2 2 2s2-.8955 2-2Zm5-2c1.1046 0 2 .8954 2 2 0 1.1045-.8954 2-2 2s-2-.8955-2-2c0-1.1046.8954-2 2-2Z" />
                                     </svg>
                                 </button>
                             )}
                         </Tooltip>
-                    }
+                    )}
 
 
                     <Tooltip text={showContent ? "Hide " + headerText : "Show " + headerText}>
@@ -106,9 +109,10 @@ export function ExpandableHeader({
                                     width="24"
                                     height="24"
                                     viewBox="0 0 24 24"
+                                    fill="var(--text-normal)"
                                     transform={showContent ? "scale(1 -1)" : "scale(1 1)"}
                                 >
-                                    <path fill="var(--text-normal)" d="M16.59 8.59003L12 13.17L7.41 8.59003L6 10L12 16L18 10L16.59 8.59003Z" />
+                                    <path d="M16.59 8.59003 12 13.17 7.41 8.59003 6 10l6 6 6-6-1.41-1.40997Z" />
                                 </svg>
                             </button>
                         )}

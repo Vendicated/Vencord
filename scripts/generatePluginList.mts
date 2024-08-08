@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Dirent, readdirSync, readFileSync, writeFileSync } from "fs";
+import { type Dirent, readdirSync, readFileSync, writeFileSync } from "fs";
 import { access, readFile } from "fs/promises";
 import { join, sep } from "path";
 import { normalize as posixNormalize, sep as posixSep } from "path/posix";
-import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
+import ts from "typescript";
 
 import { getPluginTarget } from "./utils.mjs";
 
@@ -43,44 +43,50 @@ interface PluginData {
     filePath: string;
 }
 
-const devs = {} as Record<string, Dev>;
+const devs: Record<string, Dev> = {};
 
-function getName(node: NamedDeclaration) {
-    return node.name && isIdentifier(node.name) ? node.name.text : undefined;
+function getName(node: ts.NamedDeclaration) {
+    return node.name && ts.isIdentifier(node.name) ? node.name.text : undefined;
 }
 
-function hasName(node: NamedDeclaration, name: string) {
+function hasName(node: ts.NamedDeclaration, name: string) {
     return getName(node) === name;
 }
 
-function getObjectProp(node: ObjectLiteralExpression, name: string) {
+function getObjectProp(node: ts.ObjectLiteralExpression, name: string) {
     const prop = node.properties.find(p => hasName(p, name));
-    if (prop && isPropertyAssignment(prop)) return prop.initializer;
+    if (prop && ts.isPropertyAssignment(prop)) return prop.initializer;
     return prop;
 }
 
 function parseDevs() {
-    const file = createSourceFile("constants.ts", readFileSync("src/utils/constants.ts", "utf8"), ScriptTarget.Latest);
+    const file = ts.createSourceFile(
+        "constants.ts",
+        readFileSync("src/utils/constants.ts", "utf8"),
+        ts.ScriptTarget.Latest
+    );
 
     for (const child of file.getChildAt(0).getChildren()) {
-        if (!isVariableStatement(child)) continue;
+        if (!ts.isVariableStatement(child)) continue;
 
         const devsDeclaration = child.declarationList.declarations.find(d => hasName(d, "Devs"));
-        if (!devsDeclaration?.initializer || !isCallExpression(devsDeclaration.initializer)) continue;
+        if (!devsDeclaration?.initializer || !ts.isCallExpression(devsDeclaration.initializer)) continue;
 
-        const value = devsDeclaration.initializer.arguments[0];
+        const value = devsDeclaration.initializer.arguments[0]!;
 
-        if (!isSatisfiesExpression(value) || !isObjectLiteralExpression(value.expression)) throw new Error("Failed to parse devs: not an object literal");
+        if (!ts.isSatisfiesExpression(value) || !ts.isObjectLiteralExpression(value.expression))
+            throw new Error("Failed to parse devs: not an object literal");
 
         for (const prop of value.expression.properties) {
-            const name = (prop.name as Identifier).text;
-            const value = isPropertyAssignment(prop) ? prop.initializer : prop;
+            const name = (prop.name as ts.Identifier).text;
+            const value = ts.isPropertyAssignment(prop) ? prop.initializer : prop;
 
-            if (!isObjectLiteralExpression(value)) throw new Error(`Failed to parse devs: ${name} is not an object literal`);
+            if (!ts.isObjectLiteralExpression(value))
+                throw new Error(`Failed to parse devs: ${name} is not an object literal`);
 
             devs[name] = {
-                name: (getObjectProp(value, "name") as StringLiteral).text,
-                id: (getObjectProp(value, "id") as BigIntLiteral).text.slice(0, -1)
+                name: (getObjectProp(value, "name") as ts.StringLiteral).text,
+                id: (getObjectProp(value, "id") as ts.BigIntLiteral).text.slice(0, -1)
             };
         }
 
@@ -91,21 +97,22 @@ function parseDevs() {
 }
 
 async function parseFile(fileName: string) {
-    const file = createSourceFile(fileName, await readFile(fileName, "utf8"), ScriptTarget.Latest);
+    const file = ts.createSourceFile(fileName, await readFile(fileName, "utf8"), ts.ScriptTarget.Latest);
 
-    const fail = (reason: string) => {
-        return new Error(`Invalid plugin ${fileName}, because ${reason}`);
-    };
+    const fail = (reason: string) =>
+        new Error(`Invalid plugin ${fileName}, because ${reason}`);
 
     for (const node of file.getChildAt(0).getChildren()) {
-        if (!isExportAssignment(node) || !isCallExpression(node.expression)) continue;
+        if (!ts.isExportAssignment(node) || !ts.isCallExpression(node.expression)) continue;
 
         const call = node.expression;
-        if (!isIdentifier(call.expression) || call.expression.text !== "definePlugin") continue;
+        if (!ts.isIdentifier(call.expression) || call.expression.text !== "definePlugin") continue;
 
-        const pluginObj = node.expression.arguments[0];
-        if (!isObjectLiteralExpression(pluginObj)) throw fail("no object literal passed to definePlugin");
+        const pluginObj = node.expression.arguments[0]!;
+        if (!ts.isObjectLiteralExpression(pluginObj))
+            throw fail("no object literal passed to definePlugin");
 
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const data = {
             hasPatches: false,
             hasCommands: false,
@@ -116,12 +123,13 @@ async function parseFile(fileName: string) {
 
         for (const prop of pluginObj.properties) {
             const key = getName(prop);
-            const value = isPropertyAssignment(prop) ? prop.initializer : prop;
+            const value = ts.isPropertyAssignment(prop) ? prop.initializer : prop;
 
             switch (key) {
                 case "name":
                 case "description":
-                    if (!isStringLiteral(value)) throw fail(`${key} is not a string literal`);
+                    if (!ts.isStringLiteral(value))
+                        throw fail(`${key} is not a string literal`);
                     data[key] = value.text;
                     break;
                 case "patches":
@@ -131,39 +139,48 @@ async function parseFile(fileName: string) {
                     data.hasCommands = true;
                     break;
                 case "authors":
-                    if (!isArrayLiteralExpression(value)) throw fail("authors is not an array literal");
+                    if (!ts.isArrayLiteralExpression(value))
+                        throw fail("authors is not an array literal");
                     data.authors = value.elements.map(e => {
-                        if (!isPropertyAccessExpression(e)) throw fail("authors array contains non-property access expressions");
+                        if (!ts.isPropertyAccessExpression(e))
+                            throw fail("authors array contains non-property access expressions");
                         const d = devs[getName(e)!];
                         if (!d) throw fail(`couldn't look up author ${getName(e)}`);
                         return d;
                     });
                     break;
                 case "tags":
-                    if (!isArrayLiteralExpression(value)) throw fail("tags is not an array literal");
+                    if (!ts.isArrayLiteralExpression(value))
+                        throw fail("tags is not an array literal");
                     data.tags = value.elements.map(e => {
-                        if (!isStringLiteral(e)) throw fail("tags array contains non-string literals");
+                        if (!ts.isStringLiteral(e))
+                            throw fail("tags array contains non-string literals");
                         return e.text;
                     });
                     break;
                 case "dependencies":
-                    if (!isArrayLiteralExpression(value)) throw fail("dependencies is not an array literal");
+                    if (!ts.isArrayLiteralExpression(value))
+                        throw fail("dependencies is not an array literal");
                     const { elements } = value;
-                    if (elements.some(e => !isStringLiteral(e))) throw fail("dependencies array contains non-string elements");
-                    data.dependencies = (elements as NodeArray<StringLiteral>).map(e => e.text);
+                    if (elements.some(e => !ts.isStringLiteral(e)))
+                        throw fail("dependencies array contains non-string elements");
+                    data.dependencies = (elements as ts.NodeArray<ts.StringLiteral>).map(e => e.text);
                     break;
                 case "required":
                 case "enabledByDefault":
-                    data[key] = value.kind === SyntaxKind.TrueKeyword;
+                    data[key] = value.kind === ts.SyntaxKind.TrueKeyword;
                     break;
             }
         }
 
-        if (!data.name || !data.description || !data.authors) throw fail("name, description or authors are missing");
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (!data.name || !data.description || !data.authors)
+            throw fail("name, description or authors are missing");
 
         const target = getPluginTarget(fileName);
         if (target) {
-            if (!["web", "discordDesktop", "vencordDesktop", "desktop", "dev"].includes(target)) throw fail(`invalid target ${target}`);
+            if (!["web", "discordDesktop", "vencordDesktop", "desktop", "dev"].includes(target))
+                throw fail(`invalid target ${target}`);
             data.target = target as any;
         }
 
@@ -203,28 +220,26 @@ function isPluginFile({ name }: { name: string; }) {
     return !name.startsWith("_") && !name.startsWith(".");
 }
 
-(async () => {
-    parseDevs();
+parseDevs();
 
-    const plugins = [] as PluginData[];
-    const readmes = {} as Record<string, string>;
+const plugins: PluginData[] = [];
+const readmes: Record<string, string> = {};
 
-    await Promise.all(["src/plugins", "src/plugins/_core"].flatMap(dir =>
-        readdirSync(dir, { withFileTypes: true })
-            .filter(isPluginFile)
-            .map(async dirent => {
-                const [data, readme] = await parseFile(await getEntryPoint(dir, dirent));
-                plugins.push(data);
-                if (readme) readmes[data.name] = readme;
-            })
-    ));
+await Promise.all(["src/plugins", "src/plugins/_core"].flatMap(dir =>
+    readdirSync(dir, { withFileTypes: true })
+        .filter(isPluginFile)
+        .map(async dirent => {
+            const [data, readme] = await parseFile(await getEntryPoint(dir, dirent));
+            plugins.push(data);
+            if (readme) readmes[data.name] = readme;
+        })
+));
 
-    const data = JSON.stringify(plugins);
+const data = JSON.stringify(plugins);
 
-    if (process.argv.length > 3) {
-        writeFileSync(process.argv[2], data);
-        writeFileSync(process.argv[3], JSON.stringify(readmes));
-    } else {
-        console.log(data);
-    }
-})();
+if (process.argv.length > 3) {
+    writeFileSync(process.argv[2]!, data);
+    writeFileSync(process.argv[3]!, JSON.stringify(readmes));
+} else {
+    console.log(data);
+}

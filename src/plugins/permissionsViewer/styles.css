@@ -160,10 +160,10 @@
     width: -moz-fit-content;
     width: fit-content;
     height: 24px;
-    padding: 4px
+    padding: 4px;
 }
 
 .custom-profile-theme .vc-permviewer-role-button {
-    background: rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-6));
-    border-color: var(--profile-body-border-color)
+    background: rgb(var(--bg-overlay-color) / var(--bg-overlay-opacity-6));
+    border-color: var(--profile-body-border-color);
 }

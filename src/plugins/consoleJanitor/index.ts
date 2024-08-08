@@ -120,7 +120,7 @@ export default definePlugin({
             predicate: () => settings.store.disableNoisyLoggers,
             all: true,
             replacement: {
-                match: new RegExp(String.raw`new \i\.\i${logger.replace(/([()])/g, "\\$1")}`),
+                match: new RegExp(String.raw`new \i\.\i${logger.replaceAll(/[()]/g, "\\$&")}`),
                 replace: `$self.NoopLogger${logger}`
             }
         })),

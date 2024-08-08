@@ -13,13 +13,13 @@ import { Menu } from "@webpack/common";
 
 const { convertNameToSurrogate } = findByPropsLazy("convertNameToSurrogate");
 
-interface Emoji {
+interface Emoji extends DOMStringMap {
     type: string;
     id: string;
     name: string;
 }
 
-interface Target {
+interface Target extends HTMLButtonElement {
     dataset: Emoji;
     firstChild: HTMLImageElement;
 }
@@ -33,7 +33,7 @@ function getEmojiMarkdown(target: Target, copyUnicode: boolean): string {
             : `:${emojiName}:`;
     }
 
-    const extension = target?.firstChild.src.match(
+    const extension = target.firstChild.src.match(
         /https:\/\/cdn\.discordapp\.com\/emojis\/\d+\.(\w+)/
     )?.[1];
 
@@ -55,7 +55,7 @@ export default definePlugin({
     settings,
 
     contextMenus: {
-        "expression-picker"(children, { target }: { target: Target }) {
+        "expression-picker"(children, { target }: { target: Target; }) {
             if (target.dataset.type !== "emoji") return;
 
             children.push(

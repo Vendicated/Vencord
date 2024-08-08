@@ -17,8 +17,8 @@
 */
 
 export interface ImageModalClasses {
-    image: string,
-    modal: string,
+    image: string;
+    modal: string;
 }
 
 export interface ButtonWrapperClasses {

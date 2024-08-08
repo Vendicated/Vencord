@@ -5,15 +5,15 @@
  */
 
 import { Link } from "@components/Link";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, type ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Button, Forms, Text } from "@webpack/common";
 
 import { settings } from "../../settings";
 import { cl, DecorationModalStyles, requireAvatarDecorationModal } from "../";
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 
-function GuidelinesModal(props: ModalProps) {
-    return <ModalRoot
+const GuidelinesModal = (props: ModalProps) => (
+    <ModalRoot
         {...props}
         size={ModalSize.SMALL}
         className={DecorationModalStyles.modal}
@@ -33,11 +33,11 @@ function GuidelinesModal(props: ModalProps) {
             scrollbarType="none"
         >
             <Forms.FormText>
-                By submitting a decoration, you agree to <Link
-                    href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md"
-                >
+                By submitting a decoration, you agree to{" "}
+                <Link href="https://github.com/decor-discord/.github/blob/main/GUIDELINES.md">
                     the guidelines
-                </Link>. Not reading these guidelines may get your account suspended from creating more decorations in the future.
+                </Link>
+                . Not reading these guidelines may get your account suspended from creating more decorations in the future.
             </Forms.FormText>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>
@@ -58,8 +58,10 @@ function GuidelinesModal(props: ModalProps) {
                 Go Back
             </Button>
         </ModalFooter>
-    </ModalRoot>;
-}
+    </ModalRoot>
+);
 
-export const openGuidelinesModal = () =>
-    requireAvatarDecorationModal().then(() => openModal(props => <GuidelinesModal {...props} />));
+export async function openGuidelinesModal() {
+    await requireAvatarDecorationModal();
+    return openModal(props => <GuidelinesModal {...props} />);
+}

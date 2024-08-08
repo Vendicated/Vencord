@@ -29,9 +29,9 @@ import gitRemote from "~git-remote";
 import { serializeErrors, VENCORD_FILES } from "./common";
 
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
-let PendingUpdates = [] as [string, string][];
+let PendingUpdates: [string, string][] = [];
 
-async function githubGet(endpoint: string) {
+function githubGet(endpoint: string) {
     return get(API_BASE + endpoint, {
         headers: {
             Accept: "application/vnd.github+json",
@@ -65,7 +65,7 @@ async function fetchUpdates() {
     if (hash === gitHash)
         return false;
 
-    data.assets.forEach(({ name, browser_download_url }) => {
+    data.assets.forEach(({ name, browser_download_url }: any) => {
         if (VENCORD_FILES.some(s => name.startsWith(s))) {
             PendingUpdates.push([name, browser_download_url]);
         }

@@ -24,47 +24,40 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
 import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
+import type { MessageRecord } from "@vencord/discord-types";
 import { ChannelStore, Constants, RestAPI, Tooltip } from "@webpack/common";
-import { Message } from "discord-types/general";
 
-import { buildDecModal } from "./components/DecryptionModal";
-import { buildEncModal } from "./components/EncryptionModal";
+import { openDecModal } from "./components/DecryptionModal";
+import { openEncModal } from "./components/EncryptionModal";
 
 let steggo: any;
 
-function PopOverIcon() {
-    return (
+const PopOverIcon = () => (
+    <svg
+        width="24"
+        height="24"
+        viewBox="0 0 64 64"
+        fill="var(--header-secondary)"
+    >
+        <path d="M32 9c-7.168 0-13 5.832-13 13v5.347656c-2.329341.824206-4 3.04047-4 5.652344v16c0 3.314 2.686 6 6 6h22c3.314 0 6-2.686 6-6V33c0-2.611874-1.670659-4.828138-4-5.652344V22c0-7.168-5.832-13-13-13zm0 4c4.963 0 9 4.038 9 9v5H23v-5c0-4.962 4.037-9 9-9z" />
+    </svg>
+);
 
-        <svg
-            fill="var(--header-secondary)"
-            width={24} height={24}
-            viewBox={"0 0 64 64"}
-        >
-            <path d="M 32 9 C 24.832 9 19 14.832 19 22 L 19 27.347656 C 16.670659 28.171862 15 30.388126 15 33 L 15 49 C 15 52.314 17.686 55 21 55 L 43 55 C 46.314 55 49 52.314 49 49 L 49 33 C 49 30.388126 47.329341 28.171862 45 27.347656 L 45 22 C 45 14.832 39.168 9 32 9 z M 32 13 C 36.963 13 41 17.038 41 22 L 41 27 L 23 27 L 23 22 C 23 17.038 27.037 13 32 13 z" />
-        </svg>
-    );
-}
-
-
-function Indicator() {
-    return (
-        <Tooltip text="This message has a hidden message! (InvisibleChat)">
-            {({ onMouseEnter, onMouseLeave }) => (
-                <img
-                    aria-label="Hidden Message Indicator (InvisibleChat)"
-                    onMouseEnter={onMouseEnter}
-                    onMouseLeave={onMouseLeave}
-                    src="https://github.com/SammCheese/invisible-chat/raw/NewReplugged/src/assets/lock.png"
-                    width={20}
-                    height={20}
-                    style={{ transform: "translateY(4p)", paddingInline: 4 }}
-                />
-            )}
-        </Tooltip>
-
-    );
-
-}
+const Indicator = () => (
+    <Tooltip text="This message has a hidden message! (InvisibleChat)">
+        {({ onMouseEnter, onMouseLeave }) => (
+            <img
+                aria-label="Hidden Message Indicator (InvisibleChat)"
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
+                src="https://github.com/SammCheese/invisible-chat/raw/NewReplugged/src/assets/lock.png"
+                width={20}
+                height={20}
+                style={{ transform: "translateY(4p)", paddingInline: 4 }}
+            />
+        )}
+    </Tooltip>
+);
 
 const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
     if (!isMainChat) return null;
@@ -72,8 +65,7 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
     return (
         <ChatBarButton
             tooltip="Encrypt Message"
-            onClick={() => buildEncModal()}
-
+            onClick={() => { openEncModal(); }}
             buttonProps={{
                 "aria-haspopup": "dialog",
             }}
@@ -83,10 +75,11 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
                 role="img"
                 width="24"
                 height="24"
-                viewBox={"0 0 64 64"}
+                viewBox="0 0 64 64"
+                fill="currentColor"
                 style={{ scale: "1.39", translate: "0 -1px" }}
             >
-                <path fill="currentColor" d="M 32 9 C 24.832 9 19 14.832 19 22 L 19 27.347656 C 16.670659 28.171862 15 30.388126 15 33 L 15 49 C 15 52.314 17.686 55 21 55 L 43 55 C 46.314 55 49 52.314 49 49 L 49 33 C 49 30.388126 47.329341 28.171862 45 27.347656 L 45 22 C 45 14.832 39.168 9 32 9 z M 32 13 C 36.963 13 41 17.038 41 22 L 41 27 L 23 27 L 23 22 C 23 17.038 27.037 13 32 13 z" />
+                <path d="M 32 9 C 24.832 9 19 14.832 19 22 L 19 27.347656 C 16.670659 28.171862 15 30.388126 15 33 L 15 49 C 15 52.314 17.686 55 21 55 L 43 55 C 46.314 55 49 52.314 49 49 L 49 33 C 49 30.388126 47.329341 28.171862 45 27.347656 L 45 22 C 45 14.832 39.168 9 32 9 z M 32 13 C 36.963 13 41 17.038 41 22 L 41 27 L 23 27 L 23 22 C 23 17.038 27.037 13 32 13 z" />
             </svg>
         </ChatBarButton>
     );
@@ -120,29 +113,26 @@ export default definePlugin({
     ],
 
     EMBED_API_URL: "https://embed.sammcheese.net",
-    INV_REGEX: new RegExp(/( \u200c|\u200d |[\u2060-\u2064])[^\u200b]/),
-    URL_REGEX: new RegExp(
-        /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/,
-    ),
+    INV_REGEX: /(?: \u200c|\u200d |[\u2060-\u2064])[^\u200b]/,
+    URL_REGEX: /(?:https?:\/\/.)?(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_+.~#?&//=]*/,
     async start() {
-        addButton("InvisibleChat", message => {
-            return this.INV_REGEX.test(message?.content)
+        addButton("InvisibleChat", message =>
+            this.INV_REGEX.test(message.content)
                 ? {
                     label: "Decrypt Message",
                     icon: this.popOverIcon,
                     message: message,
-                    channel: ChannelStore.getChannel(message.channel_id),
-                    onClick: async () => {
-                        const res = await iteratePasswords(message);
-
-                        if (res)
-                            this.buildEmbed(message, res);
+                    channel: ChannelStore.getChannel(message.channel_id)!,
+                    onClick: () => {
+                        const result = iteratePasswords(message);
+                        if (result)
+                            this.buildEmbed(message, result);
                         else
-                            buildDecModal({ message });
+                            openDecModal({ message });
                     }
                 }
-                : null;
-        });
+                : null
+        );
 
         addChatBarButton("InvisibleChat", ChatBarIcon);
 
@@ -156,19 +146,17 @@ export default definePlugin({
     },
 
     // Gets the Embed of a Link
-    async getEmbed(url: URL): Promise<Object | {}> {
+    async getEmbed(url: URL): Promise<object | undefined> {
         const { body } = await RestAPI.post({
             url: Constants.Endpoints.UNFURL_EMBED_URLS,
             body: {
                 urls: [url]
             }
         });
-        return await body.embeds[0];
+        return body.embeds[0];
     },
 
-    async buildEmbed(message: any, revealed: string): Promise<void> {
-        const urlCheck = revealed.match(this.URL_REGEX);
-
+    async buildEmbed(message: any, revealed: string) {
         message.embeds.push({
             type: "rich",
             rawTitle: "Decrypted Message",
@@ -179,8 +167,8 @@ export default definePlugin({
             },
         });
 
-        if (urlCheck?.length) {
-            const embed = await this.getEmbed(new URL(urlCheck[0]));
+        if (this.URL_REGEX.test(revealed)) {
+            const embed = await this.getEmbed(new URL(revealed));
             if (embed)
                 message.embeds.push(embed);
         }
@@ -192,34 +180,30 @@ export default definePlugin({
     indicator: ErrorBoundary.wrap(Indicator, { noop: true })
 });
 
-export function encrypt(secret: string, password: string, cover: string): string {
-    return steggo.hide(secret + "\u200b", password, cover);
-}
+export const encrypt = (secret: string, password: string, cover: string) =>
+    steggo.hide(secret + "\u200b", password, cover);
 
 export function decrypt(encrypted: string, password: string, removeIndicator: boolean): string {
     const decrypted = steggo.reveal(encrypted, password);
     return removeIndicator ? decrypted.replace("\u200b", "") : decrypted;
 }
 
-export function isCorrectPassword(result: string): boolean {
-    return result.endsWith("\u200b");
-}
+export const isCorrectPassword = (result: string) => result.endsWith("\u200b");
 
-export async function iteratePasswords(message: Message): Promise<string | false> {
+export function iteratePasswords(message: MessageRecord) {
     const passwords = settings.store.savedPasswords.split(",").map(s => s.trim());
 
-    if (!message?.content || !passwords?.length) return false;
+    if (!message.content || !passwords.length) return false;
 
     let { content } = message;
 
     // we use an extra variable so we dont have to edit the message content directly
     if (/^\W/.test(message.content)) content = `d ${message.content}d`;
 
-    for (let i = 0; i < passwords.length; i++) {
-        const result = decrypt(content, passwords[i], false);
-        if (isCorrectPassword(result)) {
+    for (const password of passwords) {
+        const result = decrypt(content, password, false);
+        if (isCorrectPassword(result))
             return result;
-        }
     }
 
     return false;

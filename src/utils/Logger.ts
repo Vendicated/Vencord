@@ -25,13 +25,13 @@ export class Logger {
      *
      * @example logger.errorCustomFmt(...Logger.makeTitleElements("white", "Hello"), "World");
      */
-    static makeTitle(color: string, title: string): [string, ...string[]] {
+    static makeTitle(color: string, title: string): [string, string, string, string] {
         return ["%c %c %s ", "", `background: ${color}; color: black; font-weight: bold; border-radius: 5px;`, title];
     }
 
     constructor(public name: string, public color: string = "white") { }
 
-    private _log(level: "log" | "error" | "warn" | "info" | "debug", levelColor: string, args: any[], customFmt = "") {
+    private _log(level: "log" | "error" | "warn" | "info" | "debug", levelColor: string, args: unknown[], customFmt = "") {
         if (IS_REPORTER && IS_WEB) {
             console[level]("[Vencord]", this.name + ":", ...args);
             return;
@@ -46,27 +46,27 @@ export class Logger {
         );
     }
 
-    public log(...args: any[]) {
+    public log(...args: unknown[]) {
         this._log("log", "#a6d189", args);
     }
 
-    public info(...args: any[]) {
+    public info(...args: unknown[]) {
         this._log("info", "#a6d189", args);
     }
 
-    public error(...args: any[]) {
+    public error(...args: unknown[]) {
         this._log("error", "#e78284", args);
     }
 
-    public errorCustomFmt(fmt: string, ...args: any[]) {
+    public errorCustomFmt(fmt: string, ...args: unknown[]) {
         this._log("error", "#e78284", args, fmt);
     }
 
-    public warn(...args: any[]) {
+    public warn(...args: unknown[]) {
         this._log("warn", "#e5c890", args);
     }
 
-    public debug(...args: any[]) {
+    public debug(...args: unknown[]) {
         this._log("debug", "#eebebe", args);
     }
 }

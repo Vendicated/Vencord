@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { OptionType, PluginOptionNumber } from "@utils/types";
-import { Forms, React, TextInput } from "@webpack/common";
+import { OptionType, type PluginOptionNumber } from "@utils/types";
+import { Forms, TextInput, useEffect, useState } from "@webpack/common";
 
-import { ISettingElementProps } from ".";
+import type { ISettingElementProps } from ".";
 
 const MAX_SAFE_NUMBER = BigInt(Number.MAX_SAFE_INTEGER);
 
@@ -29,14 +29,14 @@ export function SettingNumericComponent({ option, pluginSettings, definedSetting
         return Number(value);
     }
 
-    const [state, setState] = React.useState<any>(`${pluginSettings[id] ?? option.default ?? 0}`);
-    const [error, setError] = React.useState<string | null>(null);
+    const [state, setState] = useState<any>(`${pluginSettings[id] ?? option.default ?? 0}`);
+    const [error, setError] = useState<string | null>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         onError(error !== null);
     }, [error]);
 
-    function handleChange(newValue) {
+    function handleChange(newValue: any) {
         const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
 
         setError(null);

@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Channel, User } from "discord-types/general/index.js";
+import type { ChannelRecord, UserRecord } from "@vencord/discord-types";
+import type { FunctionComponent } from "react";
 
 interface DecoratorProps {
     activities: any[];
-    channel: Channel;
+    channel: ChannelRecord;
     /**
      * Only for DM members
      */
@@ -28,20 +29,20 @@ interface DecoratorProps {
     /**
      * Only for server members
      */
-    currentUser?: User;
+    currentUser?: UserRecord;
     guildId?: string;
     isMobile: boolean;
     isOwner?: boolean;
     isTyping: boolean;
     selected: boolean;
     status: string;
-    user: User;
+    user: UserRecord;
     [key: string]: any;
 }
-export type Decorator = (props: DecoratorProps) => JSX.Element | null;
+export type Decorator = FunctionComponent<DecoratorProps>;
 type OnlyIn = "guilds" | "dms";
 
-export const decorators = new Map<string, { decorator: Decorator, onlyIn?: OnlyIn; }>();
+export const decorators = new Map<string, { decorator: Decorator; onlyIn?: OnlyIn; }>();
 
 export function addDecorator(identifier: string, decorator: Decorator, onlyIn?: OnlyIn) {
     decorators.set(identifier, { decorator, onlyIn });
@@ -51,7 +52,7 @@ export function removeDecorator(identifier: string) {
     decorators.delete(identifier);
 }
 
-export function __getDecorators(props: DecoratorProps): (JSX.Element | null)[] {
+export function __getDecorators(props: DecoratorProps) {
     const isInGuild = !!(props.guildId);
     return Array.from(decorators.values(), decoratorObj => {
         const { decorator, onlyIn } = decoratorObj;

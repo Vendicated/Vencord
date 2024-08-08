@@ -22,78 +22,80 @@ import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
+import type { GuildEmoji, MessageReactionEmoji, MessageRecord, ReactionType, UserRecord } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
-import { CustomEmoji } from "@webpack/types";
-import { Message, ReactionEmoji, User } from "discord-types/general";
+import { ChannelStore, Constants, FluxDispatcher, RestAPI, Tooltip, useEffect, useLayoutEffect } from "@webpack/common";
+import type { MouseEvent } from "react";
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
+const AvatarClasses: Record<string, string> = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 let Scroll: any = null;
 const queue = new Queue();
 let reactions: Record<string, ReactionCacheEntry>;
 
-function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
+async function fetchReactions(message: MessageRecord, emoji: MessageReactionEmoji, type: ReactionType) {
     const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
-    return RestAPI.get({
-        url: Constants.Endpoints.REACTIONS(msg.channel_id, msg.id, key),
-        query: {
-            limit: 100,
-            type
-        },
-        oldFormErrors: true
-    })
-        .then(res => {
-            for (const user of res.body) {
-                FluxDispatcher.dispatch({
-                    type: "USER_UPDATE",
-                    user
-                });
-            }
+    try {
+        const res = await RestAPI.get({
+            url: Constants.Endpoints.REACTIONS(message.channel_id, message.id, key),
+            query: {
+                limit: 100,
+                type
+            },
+            oldFormErrors: true
+        });
 
+        for (const user of res.body)
             FluxDispatcher.dispatch({
-                type: "MESSAGE_REACTION_ADD_USERS",
-                channelId: msg.channel_id,
-                messageId: msg.id,
-                users: res.body,
-                emoji,
-                reactionType: type
+                type: "USER_UPDATE",
+                user
             });
-        })
-        .catch(console.error)
-        .finally(() => sleep(250));
+
+        FluxDispatcher.dispatch({
+            type: "MESSAGE_REACTION_ADD_USERS",
+            channelId: message.channel_id,
+            messageId: message.id,
+            users: res.body,
+            emoji,
+            reactionType: type
+        });
+    } catch (e) {
+        console.error(e);
+    } finally {
+        await sleep(250);
+    }
 }
 
-function getReactionsWithQueue(msg: Message, e: ReactionEmoji, type: number) {
-    const key = `${msg.id}:${e.name}:${e.id ?? ""}:${type}`;
+function getReactionsWithQueue(message: MessageRecord, emoji: MessageReactionEmoji, type: ReactionType) {
+    const key = `${message.id}:${emoji.name}:${emoji.id ?? ""}:${type}`;
     const cache = reactions[key] ??= { fetched: false, users: {} };
     if (!cache.fetched) {
-        queue.unshift(() => fetchReactions(msg, e, type));
+        queue.unshift(() => fetchReactions(message, emoji, type));
         cache.fetched = true;
     }
 
     return cache.users;
 }
 
-function makeRenderMoreUsers(users: User[]) {
+function makeRenderMoreUsers(users: UserRecord[]) {
     return function renderMoreUsers(_label: string, _count: number) {
         return (
-            <Tooltip text={users.slice(4).map(u => u.username).join(", ")} >
+            <Tooltip text={users.slice(4).map(u => u.username).join(", ")}>
                 {({ onMouseEnter, onMouseLeave }) => (
                     <div
-                        className={AvatarStyles.moreUsers}
+                        className={AvatarClasses.moreUsers}
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
                     >
                         +{users.length - 4}
                     </div>
                 )}
-            </Tooltip >
+            </Tooltip>
         );
     };
 }
 
-function handleClickAvatar(event: React.MouseEvent<HTMLElement, MouseEvent>) {
+function handleClickAvatar(event: MouseEvent<HTMLDivElement>) {
     event.stopPropagation();
 }
 
@@ -139,23 +141,23 @@ export default definePlugin({
     },
     _renderUsers({ message, emoji, type }: RootObject) {
         const forceUpdate = useForceUpdater();
-        React.useLayoutEffect(() => { // bc need to prevent autoscrolling
+        useLayoutEffect(() => { // bc need to prevent autoscrolling
             if (Scroll?.scrollCounter > 0) {
                 Scroll.setAutomaticAnchor(null);
             }
         });
-        React.useEffect(() => {
-            const cb = (e: any) => {
-                if (e.messageId === message.id)
+        useEffect(() => {
+            const callback = (action: any) => {
+                if (action.messageId === message.id)
                     forceUpdate();
             };
-            FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", cb);
+            FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", callback);
 
-            return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
+            return () => { FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", callback); };
         }, [message.id]);
 
         const reactions = getReactionsWithQueue(message, emoji, type);
-        const users = Object.values(reactions).filter(Boolean) as User[];
+        const users = Object.values(reactions).filter(Boolean);
 
         return (
             <div
@@ -183,23 +185,23 @@ export default definePlugin({
 
 interface ReactionCacheEntry {
     fetched: boolean;
-    users: Record<string, User>;
+    users: { [userId: string]: UserRecord; };
 }
 
 interface RootObject {
-    message: Message;
+    message: MessageRecord;
     readOnly: boolean;
     isLurking: boolean;
     isPendingMember: boolean;
     useChatFontScaling: boolean;
-    emoji: CustomEmoji;
+    emoji: GuildEmoji;
     count: number;
-    burst_user_ids: any[];
+    burst_user_ids: string[];
     burst_count: number;
-    burst_colors: any[];
+    burst_colors: string[];
     burst_me: boolean;
     me: boolean;
-    type: number;
+    type: ReactionType;
     hideEmoji: boolean;
     remainingBurstCurrency: number;
 }

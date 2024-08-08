@@ -17,12 +17,13 @@
 */
 
 import { useAwaiter, useForceUpdater } from "@utils/react";
+import { ChannelType } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
+import { Forms, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
 import { Auth, authorize } from "../auth";
-import { Review } from "../entities";
-import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
+import type { Review } from "../entities";
+import { addReview, getReviews, type Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { settings } from "../settings";
 import { cl, showToast } from "../utils";
 import ReviewComponent from "./ReviewComponent";
@@ -38,13 +39,13 @@ interface UserProps {
     name: string;
 }
 
-interface Props extends UserProps {
-    onFetchReviews(data: Response): void;
-    refetchSignal?: unknown;
-    showInput?: boolean;
-    page?: number;
-    scrollToTop?(): void;
+interface ReviewsViewProps extends UserProps {
     hideOwnReview?: boolean;
+    onFetchReviews: (data: Response) => void;
+    page?: number;
+    refetchSignal?: unknown;
+    scrollToTop?: () => void;
+    showInput?: boolean;
 }
 
 export default function ReviewsView({
@@ -56,7 +57,7 @@ export default function ReviewsView({
     page = 1,
     showInput = false,
     hideOwnReview = false,
-}: Props) {
+}: ReviewsViewProps) {
     const [signal, refetch] = useForceUpdater(true);
 
     const [reviewData] = useAwaiter(() => getReviews(discordId, (page - 1) * REVIEWS_PER_PAGE), {
@@ -64,7 +65,7 @@ export default function ReviewsView({
         deps: [refetchSignal, signal, page],
         onSuccess: data => {
             if (settings.store.hideBlockedUsers)
-                data!.reviews = data!.reviews?.filter(r => !RelationshipStore.isBlocked(r.sender.discordID));
+                data!.reviews = data!.reviews.filter(r => !RelationshipStore.isBlocked(r.sender.discordID));
 
             scrollToTop?.();
             onFetchReviews(data!);
@@ -77,7 +78,7 @@ export default function ReviewsView({
         <>
             <ReviewList
                 refetch={refetch}
-                reviews={reviewData!.reviews}
+                reviews={reviewData.reviews}
                 hideOwnReview={hideOwnReview}
                 profileId={discordId}
             />
@@ -87,29 +88,37 @@ export default function ReviewsView({
                     name={name}
                     discordId={discordId}
                     refetch={refetch}
-                    isAuthor={reviewData!.reviews?.some(r => r.sender.discordID === UserStore.getCurrentUser().id)}
+                    isAuthor={reviewData.reviews.some(r => r.sender.discordID === UserStore.getCurrentUser()!.id)}
                 />
             )}
         </>
     );
 }
 
-function ReviewList({ refetch, reviews, hideOwnReview, profileId }: { refetch(): void; reviews: Review[]; hideOwnReview: boolean; profileId: string; }) {
-    const myId = UserStore.getCurrentUser().id;
+interface ReviewListProps {
+    hideOwnReview: boolean;
+    profileId: string;
+    refetch: () => void;
+    reviews: Review[];
+}
+
+function ReviewList({ hideOwnReview, profileId, refetch, reviews }: ReviewListProps) {
+    const meId = UserStore.getCurrentUser()!.id;
 
     return (
         <div className={cl("view")}>
-            {reviews?.map(review =>
-                (review.sender.discordID !== myId || !hideOwnReview) &&
-                <ReviewComponent
-                    key={review.id}
-                    review={review}
-                    refetch={refetch}
-                    profileId={profileId}
-                />
+            {reviews.map(review =>
+                (review.sender.discordID !== meId || !hideOwnReview) && (
+                    <ReviewComponent
+                        key={review.id}
+                        review={review}
+                        refetch={refetch}
+                        profileId={profileId}
+                    />
+                )
             )}
 
-            {reviews?.length === 0 && (
+            {reviews.length === 0 && (
                 <Forms.FormText className={cl("placeholder")}>
                     Looks like nobody reviewed this user yet. You could be the first!
                 </Forms.FormText>
@@ -118,71 +127,73 @@ function ReviewList({ refetch, reviews, hideOwnReview, profileId }: { refetch():
     );
 }
 
+interface ReviewsInputComponentProps extends UserProps {
+    isAuthor: boolean;
+    modalKey?: string;
+    refetch: () => void;
+}
 
-export function ReviewsInputComponent(
-    { discordId, isAuthor, refetch, name, modalKey }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; modalKey?: string; }
-) {
+export function ReviewsInputComponent({ discordId, isAuthor, modalKey, name, refetch }: ReviewsInputComponentProps) {
     const { token } = Auth;
     const editorRef = useRef<any>(null);
     const inputType = ChatInputTypes.FORM;
     inputType.disableAutoFocus = true;
 
-    const channel = createChannelRecordFromServer({ id: "0", type: 1 });
+    const channel = createChannelRecordFromServer({ id: "0", type: ChannelType.DM });
 
     return (
-        <>
-            <div onClick={() => {
+        <div
+            onClick={() => {
                 if (!token) {
                     showToast("Opening authorization window...");
                     authorize();
                 }
-            }}>
-                <InputComponent
-                    className={cl("input")}
-                    channel={channel}
-                    placeholder={
-                        !token
-                            ? "You need to authorize to review users!"
-                            : isAuthor
-                                ? `Update review for @${name}`
-                                : `Review @${name}`
-                    }
-                    type={inputType}
-                    disableThemedBackground={true}
-                    setEditorRef={ref => editorRef.current = ref}
-                    parentModalKey={modalKey}
-                    textValue=""
-                    onSubmit={
-                        async res => {
-                            const response = await addReview({
-                                userid: discordId,
-                                comment: res.value,
+            }}
+        >
+            <InputComponent
+                className={cl("input")}
+                channel={channel}
+                placeholder={
+                    !token
+                        ? "You need to authorize to review users!"
+                        : isAuthor
+                            ? `Update review for @${name}`
+                            : `Review @${name}`
+                }
+                type={inputType}
+                disableThemedBackground={true}
+                setEditorRef={(ref: any) => { editorRef.current = ref; }}
+                parentModalKey={modalKey}
+                textValue=""
+                onSubmit={
+                    async (res: any) => {
+                        const response = await addReview({
+                            userid: discordId,
+                            comment: res.value,
+                        });
+
+                        if (response) {
+                            refetch();
+
+                            const slateEditor = editorRef.current.ref.current.getSlateEditor();
+
+                            // clear editor
+                            Transforms.delete(slateEditor, {
+                                at: {
+                                    anchor: Editor.start(slateEditor, []),
+                                    focus: Editor.end(slateEditor, []),
+                                }
                             });
-
-                            if (response) {
-                                refetch();
-
-                                const slateEditor = editorRef.current.ref.current.getSlateEditor();
-
-                                // clear editor
-                                Transforms.delete(slateEditor, {
-                                    at: {
-                                        anchor: Editor.start(slateEditor, []),
-                                        focus: Editor.end(slateEditor, []),
-                                    }
-                                });
-                            }
-
-                            // even tho we need to return this, it doesnt do anything
-                            return {
-                                shouldClear: false,
-                                shouldRefocus: true,
-                            };
                         }
-                    }
-                />
-            </div>
 
-        </>
+                        // even tho we need to return this, it doesnt do anything
+                        return {
+                            shouldClear: false,
+                            shouldRefocus: true,
+                        };
+                    }
+                }
+            />
+        </div>
     );
 }

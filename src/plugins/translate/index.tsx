@@ -19,20 +19,21 @@
 import "./styles.css";
 
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, type NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import type { MessageRecord } from "@vencord/discord-types";
 import { ChannelStore, Menu } from "@webpack/common";
 
 import { settings } from "./settings";
-import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
+import { setShowTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
 
-const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => {
+const messageCtxPatch = ((children, { message }: { message: MessageRecord; }) => {
     if (!message.content) return;
 
     const group = findGroupChildrenByChildId("copy-text", children);
@@ -49,7 +50,7 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
             }}
         />
     ));
-};
+}) satisfies NavContextMenuPatchCallback;
 
 export default definePlugin({
     name: "Translate",
@@ -75,7 +76,7 @@ export default definePlugin({
                 label: "Translate",
                 icon: TranslateIcon,
                 message,
-                channel: ChannelStore.getChannel(message.channel_id),
+                channel: ChannelStore.getChannel(message.channel_id)!,
                 onClick: async () => {
                     const trans = await translate("received", message.content);
                     handleTranslate(message.id, trans);
@@ -83,18 +84,17 @@ export default definePlugin({
             };
         });
 
-        let tooltipTimeout: any;
+        let tooltipTimeout: ReturnType<typeof setTimeout>;
         this.preSend = addPreSendListener(async (_, message) => {
             if (!settings.store.autoTranslate) return;
             if (!message.content) return;
 
-            setShouldShowTranslateEnabledTooltip?.(true);
+            setShowTooltip?.(true);
             clearTimeout(tooltipTimeout);
-            tooltipTimeout = setTimeout(() => setShouldShowTranslateEnabledTooltip?.(false), 2000);
+            tooltipTimeout = setTimeout(() => { setShowTooltip?.(false); }, 2000);
 
             const trans = await translate("sent", message.content);
             message.content = trans.text;
-
         });
     },
 

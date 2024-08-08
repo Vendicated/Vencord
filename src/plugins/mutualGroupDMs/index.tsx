@@ -18,25 +18,28 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
+import type { GroupDMChannelRecord, UserRecord } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, UserStore } from "@webpack/common";
-import { Channel, User } from "discord-types/general";
+import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, UserStore, UserUtils } from "@webpack/common";
+import type { ReactElement } from "react";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
-const UserUtils = findByPropsLazy("getGlobalName");
 
-const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
-const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
+const ProfileListClasses: Record<string, string> = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
+const GuildLabelClasses: Record<string, string> = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
 
-function getGroupDMName(channel: Channel) {
-    return channel.name ||
-        channel.recipients
-            .map(UserStore.getUser)
-            .filter(isNonNullish)
-            .map(c => RelationshipStore.getNickname(c.id) || UserUtils.getName(c))
-            .join(", ");
+function getGroupDMName(channel: GroupDMChannelRecord) {
+    if (channel.name) return channel.name;
+
+    const names: string[] = [];
+    for (const userId of channel.recipients) {
+        const user = UserStore.getUser(userId);
+        if (user)
+            names.push(RelationshipStore.getNickname(userId) || UserUtils.getName(user));
+    }
+
+    return names.join(", ");
 }
 
 export default definePlugin({
@@ -49,7 +52,7 @@ export default definePlugin({
             find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Note: the module is lazy-loaded
             replacement: {
                 match: /(?<=\.tabBarItem.{0,50}MUTUAL_GUILDS.+?}\),)(?=.+?(\(0,\i\.jsxs?\)\(.{0,100}id:))/,
-                replace: '$self.isBotOrSelf(arguments[0].user)?null:$1"MUTUAL_GDMS",children:$self.getMutualGDMCountText(arguments[0].user)}),'
+                replace: '$self.isBotOrMe(arguments[0].user)?null:$1"MUTUAL_GDMS",children:$self.getMutualGDMCountText(arguments[0].user)}),'
             }
         },
         {
@@ -64,7 +67,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=onItemSelect:\i,children:)(\i)\.map/,
-                    replace: "[...$1, ...($self.isBotOrSelf(arguments[0].user) ? [] : [{section:'MUTUAL_GDMS',text:$self.getMutualGDMCountText(arguments[0].user)}])].map"
+                    replace: "[...$1, ...($self.isBotOrMe(arguments[0].user) ? [] : [{section:'MUTUAL_GDMS',text:$self.getMutualGDMCountText(arguments[0].user)}])].map"
                 },
                 {
                     match: /\(0,\i\.jsx\)\(\i,\{items:\i,section:(\i)/,
@@ -74,34 +77,39 @@ export default definePlugin({
         }
     ],
 
-    isBotOrSelf: (user: User) => user.bot || user.id === UserStore.getCurrentUser().id,
+    isBotOrMe: (user: UserRecord) => user.bot || user.id === UserStore.getCurrentUser()!.id,
 
-    getMutualGDMCountText: (user: User) => {
-        const count = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).length;
-        return `${count === 0 ? "No" : count} Mutual Group${count !== 1 ? "s" : ""}`;
+    getMutualGDMCountText(user: UserRecord) {
+        let count = 0;
+        for (const channel of Object.values(ChannelStore.getMutablePrivateChannels()))
+            if (channel.isGroupDM() && channel.recipients.includes(user.id))
+                count++;
+        return `${count === 0 ? "No" : count} Mutual Group${count === 1 ? "" : "s"}`;
     },
 
-    renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: User, onClose: () => void; }) => {
-        const entries = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).map(c => (
-            <Clickable
-                className={ProfileListClasses.listRow}
-                onClick={() => {
-                    onClose();
-                    SelectedChannelActionCreators.selectPrivateChannel(c.id);
-                }}
-            >
-                <Avatar
-                    src={IconUtils.getChannelIconURL({ id: c.id, icon: c.icon, size: 32 })}
-                    size="SIZE_40"
-                    className={ProfileListClasses.listAvatar}
-                >
-                </Avatar>
-                <div className={ProfileListClasses.listRowContent}>
-                    <div className={ProfileListClasses.listName}>{getGroupDMName(c)}</div>
-                    <div className={GuildLabelClasses.guildNick}>{c.recipients.length + 1} Members</div>
-                </div>
-            </Clickable>
-        ));
+    renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: UserRecord; onClose: () => void; }) => {
+        const entries: ReactElement[] = [];
+        for (const channel of ChannelStore.getSortedPrivateChannels())
+            if (channel.isGroupDM() && channel.recipients.includes(user.id))
+                entries.push(
+                    <Clickable
+                        className={ProfileListClasses.listRow}
+                        onClick={() => {
+                            onClose();
+                            SelectedChannelActionCreators.selectPrivateChannel(channel.id);
+                        }}
+                    >
+                        <Avatar
+                            src={IconUtils.getChannelIconURL({ id: channel.id, icon: channel.icon, size: 32 })}
+                            size="SIZE_40"
+                            className={ProfileListClasses.listAvatar}
+                        />
+                        <div className={ProfileListClasses.listRowContent}>
+                            <div className={ProfileListClasses.listName}>{getGroupDMName(channel)}</div>
+                            <div className={GuildLabelClasses.guildNick}>{channel.recipients.length + 1} Members</div>
+                        </div>
+                    </Clickable>
+                );
 
         return (
             <ScrollerThin
@@ -113,7 +121,7 @@ export default definePlugin({
                     ? entries
                     : (
                         <div className={ProfileListClasses.empty}>
-                            <div className={ProfileListClasses.emptyIconFriends}></div>
+                            <div className={ProfileListClasses.emptyIconFriends} />
                             <div className={ProfileListClasses.emptyText}>No group dms in common</div>
                         </div>
                     )

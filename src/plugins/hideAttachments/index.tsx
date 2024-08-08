@@ -27,11 +27,12 @@ let style: HTMLStyleElement;
 
 const KEY = "HideAttachments_HiddenIds";
 
-let hiddenMessages: Set<string> = new Set();
-const getHiddenMessages = () => get(KEY).then(set => {
+let hiddenMessages = new Set<string>();
+async function getHiddenMessages() {
+    const set = await get(KEY);
     hiddenMessages = set ?? new Set<string>();
     return hiddenMessages;
-});
+}
 const saveHiddenMessages = (ids: Set<string>) => set(KEY, ids);
 
 export default definePlugin({
@@ -46,7 +47,7 @@ export default definePlugin({
         document.head.appendChild(style);
 
         await getHiddenMessages();
-        await this.buildCss();
+        this.buildCss();
 
         addButton("HideAttachments", msg => {
             if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length) return null;
@@ -57,7 +58,7 @@ export default definePlugin({
                 label: isHidden ? "Show Attachments" : "Hide Attachments",
                 icon: isHidden ? ImageVisible : ImageInvisible,
                 message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
+                channel: ChannelStore.getChannel(msg.channel_id)!,
                 onClick: () => this.toggleHide(msg.id)
             };
         });
@@ -69,8 +70,8 @@ export default definePlugin({
         removeButton("HideAttachments");
     },
 
-    async buildCss() {
-        const elements = [...hiddenMessages].map(id => `#message-accessories-${id}`).join(",");
+    buildCss() {
+        const elements = Array.from(hiddenMessages, id => `#message-accessories-${id}`).join(",");
         style.textContent = `
         :is(${elements}) :is([class*="embedWrapper"], [class*="clickableSticker"]) {
             /* important is not necessary, but add it to make sure bad themes won't break it */
@@ -90,6 +91,6 @@ export default definePlugin({
             ids.add(id);
 
         await saveHiddenMessages(ids);
-        await this.buildCss();
+        this.buildCss();
     }
 });

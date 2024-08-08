@@ -20,13 +20,13 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import type { FluxStore, UserRecord } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
-import { User } from "discord-types/general";
 
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
 
-const VoiceStateStore = findStoreLazy("VoiceStateStore");
+const VoiceStateStore: FluxStore & Record<string, any> = findStoreLazy("VoiceStateStore");
 
 const settings = definePluginSettings({
     showInUserProfileModal: {
@@ -42,7 +42,7 @@ const settings = definePluginSettings({
 });
 
 interface UserProps {
-    user: User;
+    user: UserRecord;
 }
 
 const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
@@ -85,9 +85,9 @@ export default definePlugin({
     },
 
     patchPopout: ({ user }: UserProps) => {
-        const isSelfUser = user.id === UserStore.getCurrentUser().id;
+        const isMe = user.id === UserStore.getCurrentUser()!.id;
         return (
-            <div className={isSelfUser ? "vc-uvs-popout-margin-self" : ""}>
+            <div className={isMe ? "vc-uvs-popout-margin-self" : ""}>
                 <VoiceChannelField user={user} />
             </div>
         );

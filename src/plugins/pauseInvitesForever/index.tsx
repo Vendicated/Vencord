@@ -19,6 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { GuildFeature } from "@vencord/discord-types";
 import { findLazy } from "@webpack";
 import { Constants, GuildStore, i18n, RestAPI } from "@webpack/common";
 
@@ -26,14 +27,14 @@ const InvitesDisabledExperiment = findLazy(m => m.definition?.id === "2022-07_in
 
 function showDisableInvites(guildId: string) {
     // Once the experiment is removed, this should keep working
-    const { enableInvitesDisabled } = InvitesDisabledExperiment?.getCurrentConfig?.({ guildId }) ?? { enableInvitesDisabled: true };
-    // @ts-ignore
-    return enableInvitesDisabled && !GuildStore.getGuild(guildId).hasFeature("INVITES_DISABLED");
+    const { enableInvitesDisabled } = InvitesDisabledExperiment?.getCurrentConfig?.({ guildId })
+        ?? { enableInvitesDisabled: true };
+    return enableInvitesDisabled && !GuildStore.getGuild(guildId)!.hasFeature(GuildFeature.INVITES_DISABLED);
 }
 
 function disableInvites(guildId: string) {
-    const guild = GuildStore.getGuild(guildId);
-    const features = [...guild.features, "INVITES_DISABLED"];
+    const guild = GuildStore.getGuild(guildId)!;
+    const features = [...guild.features, GuildFeature.INVITES_DISABLED];
     RestAPI.patch({
         url: Constants.Endpoints.GUILD(guildId),
         body: { features },
@@ -63,15 +64,20 @@ export default definePlugin({
         }
     ],
 
-    renderInvitesLabel: ErrorBoundary.wrap(({ guildId, setChecked }) => {
-        return (
-            <div>
-                {i18n.Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}
-                {showDisableInvites(guildId) && <a role="button" onClick={() => {
-                    setChecked(true);
-                    disableInvites(guildId);
-                }}> Pause Indefinitely.</a>}
-            </div>
-        );
-    })
+    renderInvitesLabel: ErrorBoundary.wrap(({ guildId, setChecked }) => (
+        <div>
+            {i18n.Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}
+            {showDisableInvites(guildId) && (
+                <a
+                    role="button"
+                    onClick={() => {
+                        setChecked(true);
+                        disableInvites(guildId);
+                    }}
+                >
+                    Pause Indefinitely.
+                </a>
+            )}
+        </div>
+    ))
 });

@@ -20,9 +20,10 @@
 import { filters, mapMangledModuleLazy, waitFor } from "../webpack";
 import type * as t from "./types/menu";
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 export let Menu = {} as t.Menu;
 
-waitFor(["MenuItem", "MenuSliderControl"], m => Menu = m);
+waitFor(["MenuItem", "MenuSliderControl"], m => { Menu = m; });
 
 export const ContextMenuApi: t.ContextMenuApi = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN', {
     closeContextMenu: filters.byCode("CONTEXT_MENU_CLOSE"),

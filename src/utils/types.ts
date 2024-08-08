@@ -16,10 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Command } from "@api/Commands";
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { FluxEvents } from "@webpack/types";
-import { Promisable } from "type-fest";
+import type { Command } from "@api/Commands";
+import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import type { FluxActionHandlerMap } from "@vencord/discord-types";
+import type { ComponentType, FunctionComponent } from "react";
+import type Electron from "standalone-electron-types";
+import type { Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
 export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {
@@ -34,7 +36,7 @@ export interface PatchReplacement {
     /** The replacement string or function which returns the string for the patch replacement */
     replace: string | ReplaceFn;
     /** A function which returns whether this patch replacement should be applied */
-    predicate?(): boolean;
+    predicate?: () => boolean;
 }
 
 export interface Patch {
@@ -50,12 +52,12 @@ export interface Patch {
     /** Only apply this set of replacements if all of them succeed. Use this if your replacements depend on each other */
     group?: boolean;
     /** A function which returns whether this patch should be applied */
-    predicate?(): boolean;
+    predicate?: () => boolean;
 }
 
 export interface PluginAuthor {
     name: string;
-    id: BigInt;
+    id: bigint;
 }
 
 export interface Plugin extends PluginDef {
@@ -68,8 +70,8 @@ export interface PluginDef {
     name: string;
     description: string;
     authors: PluginAuthor[];
-    start?(): void;
-    stop?(): void;
+    start?: () => void;
+    stop?: () => void;
     patches?: Omit<Patch, "plugin">[];
     /**
      * List of commands. If you specify these, you must add CommandsAPI to dependencies
@@ -80,7 +82,7 @@ export interface PluginDef {
      * These will automatically be enabled and loaded before your plugin
      * Common examples are CommandsAPI, MessageEventsAPI...
      */
-    dependencies?: string[],
+    dependencies?: string[];
     /**
      * Whether this plugin is required and forcefully enabled
      */
@@ -97,7 +99,7 @@ export interface PluginDef {
      * When to call the start() method
      * @default StartAt.WebpackReady
      */
-    startAt?: StartAt,
+    startAt?: StartAt;
     /**
      * Which parts of the plugin can be tested by the reporter. Defaults to all parts
      */
@@ -116,20 +118,18 @@ export interface PluginDef {
      * Check that this returns true before allowing a save to complete.
      * If a string is returned, show the error to the user.
      */
-    beforeSave?(options: Record<string, any>): Promisable<true | string>;
+    beforeSave?: (options: Record<string, any>) => Promisable<true | string>;
     /**
      * Allows you to specify a custom Component that will be rendered in your
      * plugin's settings page
      */
-    settingsAboutComponent?: React.ComponentType<{
+    settingsAboutComponent?: ComponentType<{
         tempSettings?: Record<string, any>;
     }>;
     /**
-     * Allows you to subscribe to Flux events
+     * Allows you to subscribe to Flux actions
      */
-    flux?: {
-        [E in FluxEvents]?: (event: any) => void | Promise<void>;
-    };
+    flux?: Partial<FluxActionHandlerMap>;
     /**
      * Allows you to manipulate context menus
      */
@@ -156,7 +156,7 @@ export const enum ReporterTestable {
     None = 1 << 1,
     Start = 1 << 2,
     Patches = 1 << 3,
-    FluxEvents = 1 << 4
+    FluxActions = 1 << 4
 }
 
 export const enum OptionType {
@@ -171,8 +171,9 @@ export const enum OptionType {
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
 export type SettingsChecks<D extends SettingsDefinition> = {
-    [K in keyof D]?: D[K] extends PluginSettingComponentDef ? IsDisabled<DefinedSettings<D>> :
-    (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
+    [K in keyof D]?: D[K] extends PluginSettingComponentDef
+        ? IsDisabled<DefinedSettings<D>>
+        : (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
 };
 
 export type PluginSettingDef = (
@@ -188,7 +189,7 @@ export type PluginSettingDef = (
 export interface PluginSettingCommon {
     description: string;
     placeholder?: string;
-    onChange?(newValue: any): void;
+    onChange?: (newValue: any) => void;
     /**
      * Whether changing this setting requires a restart
      */
@@ -207,12 +208,14 @@ interface IsDisabled<D = unknown> {
     /**
      * Checks if this setting should be disabled
      */
+    // eslint-disable-next-line @typescript-eslint/method-signature-style
     disabled?(this: D): boolean;
 }
 interface IsValid<T, D = unknown> {
     /**
      * Prevents the user from saving settings if this is false or a string
      */
+    // eslint-disable-next-line @typescript-eslint/method-signature-style
     isValid?(this: D, value: T): boolean | string;
 }
 
@@ -226,7 +229,7 @@ export interface PluginSettingNumberDef {
 }
 export interface PluginSettingBigIntDef {
     type: OptionType.BIGINT;
-    default?: BigInt;
+    default?: bigint;
 }
 export interface PluginSettingBooleanDef {
     type: OptionType.BOOLEAN;
@@ -265,14 +268,14 @@ export interface IPluginOptionComponentProps {
      *
      * NOTE: The user will still need to click save to apply these changes.
      */
-    setValue(newValue: any): void;
+    setValue: (newValue: any) => void;
     /**
      * Set to true to prevent the user from saving.
      *
      * NOTE: This will not show the error to the user. It will only stop them saving.
      * Make sure to show the error in your component.
      */
-    setError(error: boolean): void;
+    setError: (error: boolean) => void;
     /**
      * The options object
      */
@@ -281,13 +284,13 @@ export interface IPluginOptionComponentProps {
 
 export interface PluginSettingComponentDef {
     type: OptionType.COMPONENT;
-    component: (props: IPluginOptionComponentProps) => JSX.Element;
+    component: FunctionComponent<IPluginOptionComponentProps>;
 }
 
 /** Maps a `PluginSettingDef` to its value type */
 type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStringDef ? string :
     O extends PluginSettingNumberDef ? number :
-    O extends PluginSettingBigIntDef ? BigInt :
+    O extends PluginSettingBigIntDef ? bigint :
     O extends PluginSettingBooleanDef ? boolean :
     O extends PluginSettingSelectDef ? O["options"][number]["value"] :
     O extends PluginSettingSliderDef ? number :
@@ -304,8 +307,8 @@ type SettingsStore<D extends SettingsDefinition> = {
 /** An instance of defined plugin settings */
 export interface DefinedSettings<
     Def extends SettingsDefinition = SettingsDefinition,
-    Checks extends SettingsChecks<Def> = {},
-    PrivateSettings extends object = {}
+    Checks extends SettingsChecks<Def> = SettingsChecks<Def>,
+    PrivateSettings extends object = object
 > {
     /** Shorthand for `Vencord.Settings.plugins.PluginName`, but with typings */
     store: SettingsStore<Def> & PrivateSettings;
@@ -313,7 +316,7 @@ export interface DefinedSettings<
      * React hook for getting the settings for this plugin
      * @param filter optional filter to avoid rerenders for irrelevent settings
      */
-    use<F extends Extract<keyof Def | keyof PrivateSettings, string>>(filter?: F[]): Pick<SettingsStore<Def> & PrivateSettings, F>;
+    use: <F extends Extract<keyof Def | keyof PrivateSettings, string>>(filter?: F[]) => Pick<SettingsStore<Def> & PrivateSettings, F>;
     /** Definitions of each setting */
     def: Def;
     /** Setting methods with return values that could rely on other settings */
@@ -324,12 +327,12 @@ export interface DefinedSettings<
      */
     pluginName: string;
 
-    withPrivateSettings<T extends object>(): DefinedSettings<Def, Checks, T>;
+    withPrivateSettings: <T extends object>() => DefinedSettings<Def, Checks, T>;
 }
 
 export type PartialExcept<T, R extends keyof T> = Partial<T> & Required<Pick<T, R>>;
 
-export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false, error: any; };
+export type IpcRes<V = any> = { ok: true; value: V; } | { ok: false; error: any; };
 
 /* -------------------------------------------- */
 /*             Legacy Options Types             */
@@ -344,7 +347,7 @@ export type PluginOptionsItem =
     | PluginOptionSlider
     | PluginOptionComponent;
 export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
-export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | BigInt>;
+export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | bigint>;
 export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
@@ -353,6 +356,8 @@ export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCom
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
     [key in keyof PluginExports]:
     PluginExports[key] extends (event: Electron.IpcMainInvokeEvent, ...args: infer Args) => infer Return
-    ? (...args: Args) => Return extends Promise<any> ? Return : Promise<Return>
-    : never;
+        ? (...args: Args) => Return extends Promise<any>
+            ? Return
+            : Promise<Return>
+        : never;
 };

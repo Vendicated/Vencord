@@ -25,8 +25,8 @@ function isNewer($new: string, old: string) {
     const oldParts = old.slice(4).split(".").map(Number);
 
     for (let i = 0; i < oldParts.length; i++) {
-        if (newParts[i] > oldParts[i]) return true;
-        if (newParts[i] < oldParts[i]) return false;
+        if (newParts[i]! > oldParts[i]!) return true;
+        if (newParts[i]! < oldParts[i]!) return false;
     }
     return false;
 }
@@ -43,7 +43,7 @@ function patchLatest() {
             return (curr.startsWith("app-") && isNewer(curr, prev))
                 ? curr
                 : prev;
-        }, currentVersion as string);
+        }, currentVersion);
 
         if (latestVersion === currentVersion) return;
 

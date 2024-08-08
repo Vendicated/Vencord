@@ -7,37 +7,42 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
+import type { ChannelRecord, FluxStore } from "@vencord/discord-types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { ContextMenuApi, FluxDispatcher, Menu, React } from "@webpack/common";
-import { Channel } from "discord-types/general";
+import { ContextMenuApi, FluxDispatcher, Menu } from "@webpack/common";
+import type { ComponentType, ReactNode } from "react";
 
 import { contextMenus } from "./components/contextMenu";
 import { openCategoryModal, requireSettingsMenu } from "./components/CreateCategoryModal";
 import { DEFAULT_CHUNK_SIZE } from "./constants";
-import { canMoveCategory, canMoveCategoryInDirection, categories, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getSections, init, isPinned, moveCategory, removeCategory } from "./data";
+import { canMoveCategory, canMoveCategoryInDirection, categories, type Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getSections, init, isPinned, moveCategory, removeCategory } from "./data";
 
 interface ChannelComponentProps {
-    children: React.ReactNode,
-    channel: Channel,
+    children: ReactNode;
+    channel: ChannelRecord;
     selected: boolean;
 }
 
+const headerClasses: Record<string, string> = findByPropsLazy("privateChannelsHeaderContainer");
 
-const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
-
-export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
+export const PrivateChannelSortStore: FluxStore & {
+    getPrivateChannelIds: () => string[];
+} = findStoreLazy("PrivateChannelSortStore");
 
 export let instance: any;
-export const forceUpdate = () => instance?.props?._forceUpdate?.();
+export const forceUpdate = () => { instance?.props?._forceUpdate?.(); };
 
 export const enum PinOrder {
     LastMessage,
     Custom
 }
+
+const cl = classNameFactory("vc-pindms-");
 
 export const settings = definePluginSettings({
     pinOrder: {
@@ -47,14 +52,14 @@ export const settings = definePluginSettings({
             { label: "Most recent message", value: PinOrder.LastMessage, default: true },
             { label: "Custom (right click channels to reorder)", value: PinOrder.Custom }
         ],
-        onChange: () => forceUpdate()
+        onChange: () => { forceUpdate(); }
     },
 
     dmSectioncollapsed: {
         type: OptionType.BOOLEAN,
         description: "Collapse DM sections",
         default: false,
-        onChange: () => forceUpdate()
+        onChange: () => { forceUpdate(); }
     }
 });
 
@@ -164,15 +169,14 @@ export default definePlugin({
 
     isPinned,
     categoryLen,
-    getSections,
     getAllUncollapsedChannels,
     requireSettingsMenu,
 
-    makeProps(instance, { sections }: { sections: number[]; }) {
+    makeProps(instance: any, { sections }: { sections: number[]; }) {
         this._instance = instance;
         this.sections = sections;
 
-        this.sections.splice(1, 0, ...this.getSections());
+        this.sections.splice(1, 0, ...getSections());
 
         if (this.instance?.props?.privateChannelIds?.length === 0) {
             // dont render direct messages header
@@ -187,7 +191,7 @@ export default definePlugin({
 
     makeSpanProps() {
         return {
-            onClick: () => this.collapseDMList(),
+            onClick: () => { this.collapseDMList(); },
             role: "button",
             style: { cursor: "pointer" }
         };
@@ -198,11 +202,11 @@ export default definePlugin({
         // the higher the chunk size, the more rows are rendered at once
         // also if the chunk size is 0 it will render everything at once
 
-        const sections = this.getSections();
+        const sections = getSections();
         const sectionHeaderSizePx = sections.length * 40;
         // (header heights + DM heights + DEFAULT_CHUNK_SIZE) * 1.5
         // we multiply everything by 1.5 so it only gets unmounted after the entire list is off screen
-        return (sectionHeaderSizePx + sections.reduce((acc, v) => acc += v + 44, 0) + DEFAULT_CHUNK_SIZE) * 1.5;
+        return (sectionHeaderSizePx + sections.reduce((acc, v) => acc + v + 44, 0) + DEFAULT_CHUNK_SIZE) * 1.5;
     },
 
     isCategoryIndex(sectionIndex: number) {
@@ -213,6 +217,7 @@ export default definePlugin({
         if (settings.store.dmSectioncollapsed && sectionIndex !== 0)
             return true;
         const cat = categories[sectionIndex - 1];
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         return this.isCategoryIndex(sectionIndex) && (cat?.channels?.length === 0 || cat?.channels[channelIndex]);
     },
 
@@ -228,7 +233,7 @@ export default definePlugin({
     isChannelHidden(categoryIndex: number, channelIndex: number) {
         if (categoryIndex === 0) return false;
 
-        if (settings.store.dmSectioncollapsed && this.getSections().length + 1 === categoryIndex)
+        if (settings.store.dmSectioncollapsed && getSections().length + 1 === categoryIndex)
             return true;
 
         if (!this.instance || !this.isChannelIndex(categoryIndex, channelIndex)) return false;
@@ -257,7 +262,7 @@ export default definePlugin({
 
         return (
             <h2
-                className={classes(headerClasses.privateChannelsHeaderContainer, "vc-pindms-section-container", category.collapsed ? "vc-pindms-collapsed" : "")}
+                className={classes(headerClasses.privateChannelsHeaderContainer, cl("section-container"), category.collapsed ? cl("collapsed") : "")}
                 style={{ color: `#${category.color.toString(16).padStart(6, "0")}` }}
                 onClick={async () => {
                     await collapseCategory(category.id, !category.collapsed);
@@ -266,67 +271,81 @@ export default definePlugin({
                 onContextMenu={e => {
                     ContextMenuApi.openContextMenu(e, () => (
                         <Menu.Menu
-                            navId="vc-pindms-header-menu"
-                            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+                            navId={cl("header-menu")}
+                            onClose={() => { FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" }); }}
                             color="danger"
                             aria-label="Pin DMs Category Menu"
                         >
                             <Menu.MenuItem
-                                id="vc-pindms-edit-category"
+                                id={cl("edit-category")}
                                 label="Edit Category"
-                                action={() => openCategoryModal(category.id, null)}
+                                action={() => { openCategoryModal(category.id, null); }}
                             />
 
-                            {
-                                canMoveCategory(category.id) && (
-                                    <>
-                                        {
-                                            canMoveCategoryInDirection(category.id, -1) && <Menu.MenuItem
-                                                id="vc-pindms-move-category-up"
-                                                label="Move Up"
-                                                action={() => moveCategory(category.id, -1).then(() => forceUpdate())}
-                                            />
-                                        }
-                                        {
-                                            canMoveCategoryInDirection(category.id, 1) && <Menu.MenuItem
-                                                id="vc-pindms-move-category-down"
-                                                label="Move Down"
-                                                action={() => moveCategory(category.id, 1).then(() => forceUpdate())}
-                                            />
-                                        }
-                                    </>
-
-                                )
-                            }
+                            {canMoveCategory(category.id) && (
+                                <>
+                                    {canMoveCategoryInDirection(category.id, -1) && (
+                                        <Menu.MenuItem
+                                            id={cl("move-category-up")}
+                                            label="Move Up"
+                                            action={async () => {
+                                                await moveCategory(category.id, -1);
+                                                forceUpdate();
+                                            }}
+                                        />
+                                    )}
+                                    {canMoveCategoryInDirection(category.id, 1) && (
+                                        <Menu.MenuItem
+                                            id={cl("move-category-down")}
+                                            label="Move Down"
+                                            action={async () => {
+                                                await moveCategory(category.id, 1);
+                                                forceUpdate();
+                                            }}
+                                        />
+                                    )}
+                                </>
+                            )}
 
                             <Menu.MenuSeparator />
                             <Menu.MenuItem
-                                id="vc-pindms-delete-category"
+                                id={cl("delete-category")}
                                 color="danger"
                                 label="Delete Category"
-                                action={() => removeCategory(category.id).then(() => forceUpdate())}
+                                action={async () => {
+                                    await removeCategory(category.id);
+                                    forceUpdate();
+                                }}
                             />
-
 
                         </Menu.Menu>
                     ));
                 }}
             >
                 <span className={headerClasses.headerText}>
+                    {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
                     {category?.name ?? "uh oh"}
                 </span>
-                <svg className="vc-pindms-collapse-icon" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M9.3 5.3a1 1 0 0 0 0 1.4l5.29 5.3-5.3 5.3a1 1 0 1 0 1.42 1.4l6-6a1 1 0 0 0 0-1.4l-6-6a1 1 0 0 0-1.42 0Z"></path>
+                <svg
+                    className={cl("collapse-icon")}
+                    fill="currentColor"
+                    aria-hidden="true"
+                    role="img"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                >
+                    <path d="M9.3 5.3a1 1 0 0 0 0 1.4l5.29 5.3-5.3 5.3a1 1 0 1 0 1.42 1.4l6-6a1 1 0 0 0 0-1.4l-6-6a1 1 0 0 0-1.42 0Z" />
                 </svg>
             </h2>
         );
     }, { noop: true }),
 
-    renderChannel(sectionIndex: number, index: number, ChannelComponent: React.ComponentType<ChannelComponentProps>) {
+    renderChannel(sectionIndex: number, index: number, ChannelComponent: ComponentType<ChannelComponentProps>) {
         return ErrorBoundary.wrap(() => {
-            const { channel, category } = this.getChannel(sectionIndex, index, this.instance.props.channels);
+            const channel = this.getChannel(sectionIndex, index, this.instance.props.channels);
 
-            if (!channel || !category) return null;
+            if (!channel) return null;
             if (this.isChannelHidden(sectionIndex, index)) return null;
 
             return (
@@ -340,22 +359,22 @@ export default definePlugin({
         }, { noop: true });
     },
 
-    getChannel(sectionIndex: number, index: number, channels: Record<string, Channel>) {
+    getChannel(sectionIndex: number, index: number, channels: Record<string, ChannelRecord>) {
         const category = categories[sectionIndex - 1];
-        if (!category) return { channel: null, category: null };
+        if (!category) return null;
 
-        const channelId = this.getCategoryChannels(category)[index];
+        const channelId = this.getCategoryChannels(category)[index]!;
 
-        return { channel: channels[channelId], category };
+        return channels[channelId];
     },
 
     getCategoryChannels(category: Category) {
         if (category.channels.length === 0) return [];
 
-        if (settings.store.pinOrder === PinOrder.LastMessage) {
-            return PrivateChannelSortStore.getPrivateChannelIds().filter(c => category.channels.includes(c));
-        }
+        if (settings.store.pinOrder === PinOrder.LastMessage)
+            return PrivateChannelSortStore.getPrivateChannelIds()
+                .filter(c => category.channels.includes(c));
 
-        return category?.channels ?? [];
+        return category.channels;
     }
 });

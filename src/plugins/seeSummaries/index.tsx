@@ -8,10 +8,11 @@ import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { type FluxPersistedStore, GuildFeature } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildStore } from "@webpack/common";
 
-const SummaryStore = findByPropsLazy("allSummaries", "findSummary");
+const SummaryStore: FluxPersistedStore & Record<string, any> = findByPropsLazy("allSummaries", "findSummary");
 const createSummaryFromServer = findByCodeLazy(".people)),startId:", ".type}");
 
 const settings = definePluginSettings({
@@ -71,12 +72,16 @@ export default definePlugin({
     ],
     flux: {
         CONVERSATION_SUMMARY_UPDATE(data) {
-            const incomingSummaries: ChannelSummaries[] = data.summaries.map((summary: any) => ({ ...createSummaryFromServer(summary), time: Date.now() }));
+            const incomingSummaries: ChannelSummaries[] = data.summaries
+                .map((summary: any) => ({ ...createSummaryFromServer(summary), time: Date.now() }));
 
             // idk if this is good for performance but it doesnt seem to be a problem in my experience
             DataStore.update("summaries-data", summaries => {
                 summaries ??= {};
-                summaries[data.channel_id] ? summaries[data.channel_id].unshift(...incomingSummaries) : (summaries[data.channel_id] = incomingSummaries);
+                if (summaries[data.channel_id])
+                    summaries[data.channel_id].unshift(...incomingSummaries);
+                else
+                    summaries[data.channel_id] = incomingSummaries;
                 if (summaries[data.channel_id].length > 50)
                     summaries[data.channel_id] = summaries[data.channel_id].slice(0, 50);
 
@@ -85,8 +90,8 @@ export default definePlugin({
         }
     },
 
-    async start() {
-        await DataStore.update("summaries-data", summaries => {
+    start() {
+        DataStore.update("summaries-data", summaries => {
             summaries ??= {};
             for (const key of Object.keys(summaries)) {
                 for (let i = summaries[key].length - 1; i >= 0; i--) {
@@ -106,10 +111,8 @@ export default definePlugin({
     },
 
     shouldFetch(channelId: string) {
-        const channel = ChannelStore.getChannel(channelId);
-        // SUMMARIES_ENABLED feature is not in discord-types
-        const guild = GuildStore.getGuild(channel.guild_id);
-        // @ts-ignore
-        return guild.hasFeature("SUMMARIES_ENABLED_GA");
+        const channel = ChannelStore.getChannel(channelId)!;
+        const guild = GuildStore.getGuild(channel.guild_id)!;
+        return guild.hasFeature(GuildFeature.SUMMARIES_ENABLED_GA);
     }
 });

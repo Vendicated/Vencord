@@ -20,82 +20,82 @@ import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatB
 import { generateId, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { DraftStore, DraftType, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
-import { MessageAttachment } from "discord-types/general";
+import { DraftType, type FluxStore, type MessageAttachment } from "@vencord/discord-types";
+import { findStoreLazy } from "@webpack";
+import { DraftStore, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
 
-const UploadStore = findByPropsLazy("getUploads");
+const UploadAttachmentStore: FluxStore & Record<string, any> = findStoreLazy("UploadAttachmentStore");
 
-const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.ChannelMessage);
+const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.CHANNEL_MESSAGE);
 
-
-const getImageBox = (url: string): Promise<{ width: number, height: number; } | null> =>
+const getImageBox = (url: string): Promise<{ width: number; height: number; } | null> =>
     new Promise(res => {
         const img = new Image();
-        img.onload = () =>
+        img.onload = () => {
             res({ width: img.width, height: img.height });
+        };
 
-        img.onerror = () =>
+        img.onerror = () => {
             res(null);
+        };
 
         img.src = url;
     });
 
+const getAttachments = (channelId: string) => Promise.all(
+    UploadAttachmentStore.getUploads(channelId, DraftType.CHANNEL_MESSAGE)
+        .map(async (upload: any) => {
+            const { isImage, filename, spoiler, item: { file } } = upload;
+            const url = URL.createObjectURL(file);
+            const attachment: MessageAttachment = {
+                id: generateId(),
+                filename: spoiler ? "SPOILER_" + filename : filename,
+                // weird eh? if i give it the normal content type the preview doenst work
+                content_type: undefined,
+                size: await upload.getSize(),
+                spoiler,
+                // discord adds query params to the url, so we need to add a hash to prevent that
+                url: url + "#",
+                proxy_url: url + "#",
+            };
 
-const getAttachments = async (channelId: string) =>
-    await Promise.all(
-        UploadStore.getUploads(channelId, DraftType.ChannelMessage)
-            .map(async (upload: any) => {
-                const { isImage, filename, spoiler, item: { file } } = upload;
-                const url = URL.createObjectURL(file);
-                const attachment: MessageAttachment = {
-                    id: generateId(),
-                    filename: spoiler ? "SPOILER_" + filename : filename,
-                    // weird eh? if i give it the normal content type the preview doenst work
-                    content_type: undefined,
-                    size: await upload.getSize(),
-                    spoiler,
-                    // discord adds query params to the url, so we need to add a hash to prevent that
-                    url: url + "#",
-                    proxy_url: url + "#",
-                };
+            if (isImage) {
+                const box = await getImageBox(url);
+                if (!box) return attachment;
 
-                if (isImage) {
-                    const box = await getImageBox(url);
-                    if (!box) return attachment;
+                attachment.width = box.width;
+                attachment.height = box.height;
+            }
 
-                    attachment.width = box.width;
-                    attachment.height = box.height;
-                }
-
-                return attachment;
-            })
-    );
-
+            return attachment;
+        })
+);
 
 const PreviewButton: ChatBarButton = ({ isMainChat, isEmpty, type: { attachments } }) => {
-    const channelId = SelectedChannelStore.getChannelId();
+    const channelId = SelectedChannelStore.getChannelId()!;
     const draft = useStateFromStores([DraftStore], () => getDraft(channelId));
 
     if (!isMainChat) return null;
 
-    const hasAttachments = attachments && UploadStore.getUploads(channelId, DraftType.ChannelMessage).length > 0;
-    const hasContent = !isEmpty && draft?.length > 0;
+    const hasAttachments = attachments && UploadAttachmentStore.getUploads(channelId, DraftType.CHANNEL_MESSAGE).length > 0;
+    const hasContent = !isEmpty && draft.length > 0;
 
     if (!hasContent && !hasAttachments) return null;
 
     return (
         <ChatBarButton
             tooltip="Preview Message"
-            onClick={async () =>
+            onClick={async () => {
+                const { id } = UserStore.getCurrentUser()!;
                 sendBotMessage(
                     channelId,
                     {
                         content: getDraft(channelId),
-                        author: UserStore.getCurrentUser(),
+                        author: { id },
                         attachments: hasAttachments ? await getAttachments(channelId) : undefined,
                     }
-                )}
+                );
+            }}
             buttonProps={{
                 style: {
                     translate: "0 2px"
@@ -114,7 +114,6 @@ const PreviewButton: ChatBarButton = ({ isMainChat, isEmpty, type: { attachments
             </svg>
         </ChatBarButton>
     );
-
 };
 
 export default definePlugin({
@@ -126,6 +125,6 @@ export default definePlugin({
     // This makes the popping in less awkward
     startAt: StartAt.Init,
 
-    start: () => addChatBarButton("previewMessage", PreviewButton),
-    stop: () => removeChatBarButton("previewMessage"),
+    start() { addChatBarButton("previewMessage", PreviewButton); },
+    stop() { removeChatBarButton("previewMessage"); },
 });

@@ -31,10 +31,9 @@ copy(Object.fromEntries(
 ))
 */
 
-export type GoogleLanguage = keyof typeof GoogleLanguages;
-export type DeeplLanguage = keyof typeof DeeplLanguages;
+export type GoogleLanguage = keyof typeof $GoogleLanguages;
 
-export const GoogleLanguages = {
+const $GoogleLanguages = {
     "auto": "Detect language",
     "af": "Afrikaans",
     "sq": "Albanian",
@@ -171,7 +170,11 @@ export const GoogleLanguages = {
     "zu": "Zulu"
 } as const;
 
-export const DeeplLanguages = {
+export const GoogleLanguages: Readonly<Record<string, string>> = $GoogleLanguages;
+
+export type DeeplLanguage = keyof typeof $DeeplLanguages;
+
+export const $DeeplLanguages = {
     "": "Detect language",
     "ar": "Arabic",
     "bg": "Bulgarian",
@@ -207,6 +210,8 @@ export const DeeplLanguages = {
     "tr": "Turkish",
     "uk": "Ukrainian"
 } as const;
+
+export const DeeplLanguages: Readonly<Record<string, string>> = $DeeplLanguages;
 
 export function deeplLanguageToGoogleLanguage(language: string) {
     switch (language) {

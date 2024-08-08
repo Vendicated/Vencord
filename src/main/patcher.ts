@@ -17,7 +17,7 @@
 */
 
 import { onceDefined } from "@shared/onceDefined";
-import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
+import electron, { app, type BrowserWindowConstructorOptions, Menu } from "electron";
 import { dirname, join } from "path";
 
 import { initIpc } from "./ipcMain";
@@ -38,7 +38,6 @@ const asarPath = join(dirname(injectorPath), "..", asarName);
 const discordPkg = require(join(asarPath, "package.json"));
 require.main!.filename = join(asarPath, discordPkg.main);
 
-// @ts-ignore Untyped method? Dies from cringe
 app.setAppPath(asarPath);
 
 if (!IS_VANILLA) {
@@ -51,14 +50,14 @@ if (!IS_VANILLA) {
             const originalBuild = Menu.buildFromTemplate;
             Menu.buildFromTemplate = function (template) {
                 if (template[0]?.label === "&File") {
-                    const { submenu } = template[0];
+                    const [{ submenu }] = template;
                     if (Array.isArray(submenu)) {
                         submenu.push({
                             label: "Quit (Hidden)",
                             visible: false,
                             acceleratorWorksWhenHidden: true,
                             accelerator: "Control+Q",
-                            click: () => app.quit()
+                            click: () => { app.quit(); }
                         });
                     }
                 }
@@ -68,7 +67,7 @@ if (!IS_VANILLA) {
     }
 
     class BrowserWindow extends electron.BrowserWindow {
-        constructor(options: BrowserWindowConstructorOptions) {
+        constructor(options?: BrowserWindowConstructorOptions) {
             if (options?.webPreferences?.preload && options.title) {
                 const original = options.webPreferences.preload;
                 options.webPreferences.preload = join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js");
@@ -84,13 +83,13 @@ if (!IS_VANILLA) {
 
                 if (settings.transparent) {
                     options.transparent = true;
-                    options.backgroundColor = "#00000000";
+                    options.backgroundColor = "#0000";
                 }
 
                 const needsVibrancy = process.platform === "darwin" && settings.macosVibrancyStyle;
 
                 if (needsVibrancy) {
-                    options.backgroundColor = "#00000000";
+                    options.backgroundColor = "#0000";
                     if (settings.macosVibrancyStyle) {
                         options.vibrancy = settings.macosVibrancyStyle;
                     }
@@ -137,12 +136,12 @@ if (!IS_VANILLA) {
     const originalAppend = app.commandLine.appendSwitch;
     app.commandLine.appendSwitch = function (...args) {
         if (args[0] === "disable-features") {
-            const disabledFeatures = new Set((args[1] ?? "").split(","));
+            const disabledFeatures = new Set(args[1]?.split(","));
             disabledFeatures.add("WidgetLayering");
             disabledFeatures.add("UseEcoQoSForBackgroundProcess");
             args[1] += [...disabledFeatures].join(",");
         }
-        return originalAppend.apply(this, args);
+        originalAppend.apply(this, args);
     };
 
     // disable renderer backgrounding to prevent the app from unloading when in the background

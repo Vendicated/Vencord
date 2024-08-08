@@ -22,56 +22,54 @@ import { findModuleId, proxyLazyWebpack, wreq } from "@webpack";
 
 interface UserSettingDefinition<T> {
     /**
-     * Get the setting value
+     * Gets the setting value
      */
-    getSetting(): T;
+    getSetting: () => T;
     /**
-     * Update the setting value
+     * Updates the setting value
      * @param value The new value
      */
-    updateSetting(value: T): Promise<void>;
-    /**
-     * Update the setting value
-     * @param value A callback that accepts the old value as the first argument, and returns the new value
-     */
-    updateSetting(value: (old: T) => T): Promise<void>;
+    updateSetting: ((value: T) => Promise<void>) & ((value: (old: T) => T) => Promise<void>);
     /**
      * Stateful React hook for this setting value
      */
-    useSetting(): T;
+    useSetting: () => T;
     userSettingsAPIGroup: string;
     userSettingsAPIName: string;
 }
 
 export const UserSettings: Record<PropertyKey, UserSettingDefinition<any>> | undefined = proxyLazyWebpack(() => {
     const modId = findModuleId('"textAndImages","renderSpoilers"');
-    if (modId == null) return new Logger("UserSettingsAPI ").error("Didn't find settings module.");
+    if (modId == null) {
+        new Logger("UserSettingsAPI").error("Didn't find settings module.");
+        return;
+    }
 
     return wreq(modId as any);
 });
 
 /**
- * Get the setting with the given setting group and name.
+ * Gets the setting with the given setting group and name.
  *
  * @param group The setting group
  * @param name The name of the setting
  */
 export function getUserSetting<T = any>(group: string, name: string): UserSettingDefinition<T> | undefined {
-    if (!Vencord.Plugins.isPluginEnabled("UserSettingsAPI")) throw new Error("Cannot use UserSettingsAPI without setting as dependency.");
+    if (!Vencord.Plugins.isPluginEnabled("UserSettingsAPI"))
+        throw new Error("Cannot use UserSettingsAPI without setting as dependency.");
 
     for (const key in UserSettings) {
         const userSetting = UserSettings[key];
 
-        if (userSetting.userSettingsAPIGroup === group && userSetting.userSettingsAPIName === name) {
+        if (userSetting!.userSettingsAPIGroup === group && userSetting!.userSettingsAPIName === name)
             return userSetting;
-        }
     }
 }
 
 /**
- * {@link getUserSettingDefinition}, lazy.
+ * {@link getUserSetting}, lazy.
  *
- * Get the setting with the given setting group and name.
+ * Gets the setting with the given setting group and name.
  *
  * @param group The setting group
  * @param name The name of the setting

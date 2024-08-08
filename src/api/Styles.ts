@@ -20,6 +20,7 @@ import type { MapValue } from "type-fest/source/entry";
 
 export type Style = MapValue<typeof VencordStyles>;
 
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 export const styleMap = window.VencordStyles ??= new Map();
 
 export function requireStyle(name: string) {
@@ -126,7 +127,7 @@ export const compileStyle = (style: Style) => {
     if (!style.dom) throw new Error("Style has no DOM element");
 
     style.dom.textContent = style.source
-        .replace(/\[--(\w+)\]/g, (match, name) => {
+        .replaceAll(/\[--(\w+)\]/g, (match, name) => {
             const className = style.classNames[name];
             return className ? classNameToSelector(className) : match;
         });
@@ -139,9 +140,10 @@ export const compileStyle = (style: Style) => {
  * @example
  * classNameToSelector("foo bar") // => ".foo.bar"
  */
-export const classNameToSelector = (name: string, prefix = "") => name.split(" ").map(n => `.${prefix}${n}`).join("");
+export const classNameToSelector = (name: string, prefix = "") =>
+    name.replaceAll(/ *([^ ]+) */g, `.${prefix}$1`);
 
-type ClassNameFactoryArg = string | string[] | Record<string, unknown> | false | null | undefined | 0 | "";
+type ClassNameFactoryArg = string | string[] | Record<string, unknown> | false | null | undefined | 0n | 0 | "";
 /**
  * @param prefix The prefix to add to each class, defaults to `""`
  * @returns A classname generator function
@@ -151,12 +153,18 @@ type ClassNameFactoryArg = string | string[] | Record<string, unknown> | false |
  * cl("base", ["item", "editable"], { selected: null, disabled: true })
  * // => "plugin-base plugin-item plugin-editable plugin-disabled"
  */
-export const classNameFactory = (prefix: string = "") => (...args: ClassNameFactoryArg[]) => {
+export const classNameFactory = (prefix = "") => (...args: ClassNameFactoryArg[]) => {
     const classNames = new Set<string>();
     for (const arg of args) {
-        if (arg && typeof arg === "string") classNames.add(arg);
-        else if (Array.isArray(arg)) arg.forEach(name => classNames.add(name));
-        else if (arg && typeof arg === "object") Object.entries(arg).forEach(([name, value]) => value && classNames.add(name));
+        if (typeof arg === "string") {
+            if (arg) classNames.add(arg);
+        } else if (Array.isArray(arg)) {
+            for (const name of arg)
+                classNames.add(name);
+        } else if (typeof arg === "object" && arg !== null) {
+            for (const name in arg)
+                if (arg[name]) classNames.add(name);
+        }
     }
     return Array.from(classNames, name => prefix + name).join(" ");
 };

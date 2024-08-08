@@ -16,17 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DefinedSettings, PluginOptionBase } from "@utils/types";
+import type { DefinedSettings, PluginOptionBase } from "@utils/types";
 
 export interface ISettingElementProps<T extends PluginOptionBase> {
     option: T;
-    onChange(newValue: any): void;
+    onChange: (newValue: any) => void;
     pluginSettings: {
         [setting: string]: any;
         enabled: boolean;
     };
     id: string;
-    onError(hasError: boolean): void;
+    onError: (hasError: boolean) => void;
     definedSettings?: DefinedSettings;
 }
 

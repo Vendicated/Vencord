@@ -19,16 +19,10 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import type { ChannelRecord, MessageRecord, StickerItem } from "@vencord/discord-types";
 import { findLazy } from "@webpack";
-import { ContextMenuApi, FluxDispatcher, Menu, MessageActions } from "@webpack/common";
-import { Channel, Message } from "discord-types/general";
-
-interface Sticker {
-    id: string;
-    format_type: number;
-    description: string;
-    name: string;
-}
+import { ContextMenuApi, FluxDispatcher, Menu, MessageActionCreators } from "@webpack/common";
+import type { UIEvent } from "react";
 
 enum GreetMode {
     Greet = "Greet",
@@ -49,10 +43,11 @@ const settings = definePluginSettings({
     unholyMultiGreetEnabled?: boolean;
 }>();
 
-const WELCOME_STICKERS = findLazy(m => Array.isArray(m) && m[0]?.name === "Wave");
+const WELCOME_STICKERS: (StickerItem & { description: string; })[]
+    = findLazy(m => Array.isArray(m) && m[0]?.name === "Wave");
 
-function greet(channel: Channel, message: Message, stickers: string[]) {
-    const options = MessageActions.getSendMessageOptionsForReply({
+function greet(channel: ChannelRecord, message: MessageRecord, stickers: string[]) {
+    const options = MessageActionCreators.getSendMessageOptionsForReply({
         channel,
         message,
         shouldMention: true,
@@ -68,21 +63,21 @@ function greet(channel: Channel, message: Message, stickers: string[]) {
             validNonShortcutEmojis: []
         };
 
-        MessageActions._sendMessage(channel.id, msg, options);
+        MessageActionCreators._sendMessage(channel.id, msg, options);
     } else {
-        MessageActions.sendGreetMessage(channel.id, stickers[0], options);
+        MessageActionCreators.sendGreetMessage(channel.id, stickers[0], options);
     }
 }
 
 
-function GreetMenu({ channel, message }: { message: Message, channel: Channel; }) {
+function GreetMenu({ channel, message }: { message: MessageRecord; channel: ChannelRecord; }) {
     const s = settings.use(["greetMode", "multiGreetChoices"]);
     const { greetMode, multiGreetChoices = [] } = s;
 
     return (
         <Menu.Menu
             navId="greet-sticker-picker"
-            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+            onClose={() => { FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" }); }}
             aria-label="Greet Sticker Picker"
         >
             <Menu.MenuGroup
@@ -95,7 +90,7 @@ function GreetMenu({ channel, message }: { message: Message, channel: Channel; }
                         id={"greet-mode-" + mode}
                         label={mode}
                         checked={mode === greetMode}
-                        action={() => s.greetMode = mode}
+                        action={() => { s.greetMode = mode; }}
                     />
                 ))}
             </Menu.MenuGroup>
@@ -109,8 +104,8 @@ function GreetMenu({ channel, message }: { message: Message, channel: Channel; }
                     <Menu.MenuItem
                         key={sticker.id}
                         id={"greet-" + sticker.id}
-                        label={sticker.description.split(" ")[0]}
-                        action={() => greet(channel, message, [sticker.id])}
+                        label={sticker.description.match(/[^ ]*/)![0]}
+                        action={() => { greet(channel, message, [sticker.id]); }}
                     />
                 ))}
             </Menu.MenuGroup>
@@ -130,7 +125,7 @@ function GreetMenu({ channel, message }: { message: Message, channel: Channel; }
                                 <Menu.MenuCheckboxItem
                                     key={sticker.id}
                                     id={"multi-greet-" + sticker.id}
-                                    label={sticker.description.split(" ")[0]}
+                                    label={sticker.description.match(/[^ ]*/)![0]}
                                     checked={checked}
                                     disabled={!checked && multiGreetChoices.length >= 3}
                                     action={() => {
@@ -146,7 +141,7 @@ function GreetMenu({ channel, message }: { message: Message, channel: Channel; }
                         <Menu.MenuItem
                             id="multi-greet-submit"
                             label="Send Greets"
-                            action={() => greet(channel, message, multiGreetChoices!)}
+                            action={() => { greet(channel, message, multiGreetChoices); }}
                             disabled={multiGreetChoices.length === 0}
                         />
 
@@ -175,13 +170,13 @@ export default definePlugin({
     ],
 
     pickSticker(
-        event: React.UIEvent,
+        event: UIEvent,
         props: {
-            channel: Channel,
-            message: Message;
+            channel: ChannelRecord;
+            message: MessageRecord & { deleted?: boolean; };
         }
     ) {
-        if (!(props.message as any).deleted)
+        if (!props.message.deleted)
             ContextMenuApi.openContextMenu(event, () => <GreetMenu {...props} />);
     }
 });

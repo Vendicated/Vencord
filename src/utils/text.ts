@@ -29,13 +29,13 @@ export const wordsFromTitle = (text: string) => text.toLowerCase().split(" ");
 
 // Words to case style
 export const wordsToCamel = (words: string[]) =>
-    words.map((w, i) => (i ? w[0].toUpperCase() + w.slice(1) : w)).join("");
+    words.map((w, i) => (i ? w[0]!.toUpperCase() + w.slice(1) : w)).join("");
 export const wordsToSnake = (words: string[]) => words.join("_").toUpperCase();
 export const wordsToKebab = (words: string[]) => words.join("-").toLowerCase();
 export const wordsToPascal = (words: string[]) =>
-    words.map(w => w[0].toUpperCase() + w.slice(1)).join("");
+    words.map(w => w[0]!.toUpperCase() + w.slice(1)).join("");
 export const wordsToTitle = (words: string[]) =>
-    words.map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
+    words.map(w => w[0]!.toUpperCase() + w.slice(1)).join(" ");
 
 const units = ["years", "months", "weeks", "days", "hours", "minutes", "seconds"] as const;
 type Units = typeof units[number];
@@ -55,15 +55,16 @@ function getUnitStr(unit: Units, isOne: boolean, short: boolean) {
 export function formatDuration(time: number, unit: Units, short: boolean = false) {
     const dur = moment.duration(time, unit);
 
-    let unitsAmounts = units.map(unit => ({ amount: dur[unit](), unit }));
+    let unitsAmounts: { amount: number; unit: Units; }[]
+        = units.map(unit => ({ amount: dur[unit](), unit }));
 
     let amountsToBeRemoved = 0;
 
     outer:
     for (let i = 0; i < unitsAmounts.length; i++) {
-        if (unitsAmounts[i].amount === 0 || !(i + 1 < unitsAmounts.length)) continue;
+        if (unitsAmounts[i]!.amount === 0 || !(i + 1 < unitsAmounts.length)) continue;
         for (let v = i + 1; v < unitsAmounts.length; v++) {
-            if (unitsAmounts[v].amount !== 0) continue outer;
+            if (unitsAmounts[v]!.amount !== 0) continue outer;
         }
 
         amountsToBeRemoved = unitsAmounts.length - (i + 1);
@@ -74,12 +75,12 @@ export function formatDuration(time: number, unit: Units, short: boolean = false
     if (daysAmountIndex !== -1) {
         const daysAmount = unitsAmounts[daysAmountIndex];
 
-        const daysMod = daysAmount.amount % 7;
+        const daysMod = daysAmount!.amount % 7;
         if (daysMod === 0) unitsAmounts.splice(daysAmountIndex, 1);
-        else daysAmount.amount = daysMod;
+        else daysAmount!.amount = daysMod;
     }
 
-    let res: string = "";
+    let res = "";
     while (unitsAmounts.length) {
         const { amount, unit } = unitsAmounts.shift()!;
 
@@ -139,7 +140,7 @@ export function stripIndent(strings: TemplateStringsArray, ...values: any[]) {
     if (!match) return string.trim();
 
     const minIndent = match.reduce((r, a) => Math.min(r, a.length), Infinity);
-    return string.replace(new RegExp(`^[ \\t]{${minIndent}}`, "gm"), "").trim();
+    return string.replaceAll(new RegExp(`^[ \\t]{${minIndent}}`, "gm"), "").trim();
 }
 
 export const ZWSP = "\u200b";

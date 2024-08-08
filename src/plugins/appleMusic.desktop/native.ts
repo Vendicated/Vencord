@@ -26,7 +26,7 @@ const exec = promisify(execFile);
 // }
 
 async function applescript(cmds: string[]) {
-    const { stdout } = await exec("osascript", cmds.map(c => ["-e", c]).flat());
+    const { stdout } = await exec("osascript", cmds.flatMap(c => ["-e", c]));
     return stdout;
 }
 
@@ -43,15 +43,15 @@ const requestOptions: RequestInit = {
 };
 
 interface RemoteData {
-    appleMusicLink?: string,
-    songLink?: string,
-    albumArtwork?: string,
+    appleMusicLink?: string;
+    songLink?: string;
+    albumArtwork?: string;
     artistArtwork?: string;
 }
 
-let cachedRemoteData: { id: string, data: RemoteData; } | { id: string, failures: number; } | null = null;
+let cachedRemoteData: { id: string; data: RemoteData; } | { id: string; failures: number; } | null = null;
 
-async function fetchRemoteData({ id, name, artist, album }: { id: string, name: string, artist: string, album: string; }) {
+async function fetchRemoteData({ id, name, artist, album }: { id: string; name: string; artist: string; album: string; }) {
     if (id === cachedRemoteData?.id) {
         if ("data" in cachedRemoteData) return cachedRemoteData.data;
         if ("failures" in cachedRemoteData && cachedRemoteData.failures >= 5) return null;
@@ -60,7 +60,7 @@ async function fetchRemoteData({ id, name, artist, album }: { id: string, name: 
     try {
         const [songData, artistData] = await Promise.all([
             fetch(makeSearchUrl("songs", artist + " " + album + " " + name), requestOptions).then(r => r.json()),
-            fetch(makeSearchUrl("artists", artist.split(/ *[,&] */)[0]), requestOptions).then(r => r.json())
+            fetch(makeSearchUrl("artists", artist.split(/ *[,&] */)[0]!), requestOptions).then(r => r.json())
         ]);
 
         const appleMusicLink = songData?.songs?.data[0]?.attributes.url;
@@ -91,12 +91,12 @@ export async function fetchTrackData(): Promise<TrackData | null> {
         return null;
     }
 
-    const playerState = await applescript(['tell application "Music"', "get player state", "end tell"])
-        .then(out => out.trim());
+    const playerState = (await applescript(['tell application "Music"', "get player state", "end tell"])).trim();
     if (playerState !== "playing") return null;
 
-    const playerPosition = await applescript(['tell application "Music"', "get player position", "end tell"])
-        .then(text => Number.parseFloat(text.trim()));
+    const playerPosition = parseFloat(
+        await applescript(['tell application "Music"', "get player position", "end tell"])
+    );
 
     const stdout = await applescript([
         'set output to ""',
@@ -111,10 +111,10 @@ export async function fetchTrackData(): Promise<TrackData | null> {
         "return output"
     ]);
 
-    const [id, name, album, artist, durationStr] = stdout.split("\n").filter(k => !!k);
-    const duration = Number.parseFloat(durationStr);
+    const [id, name, album, artist, durationStr] = stdout.split("\n").filter(Boolean);
+    const duration = Number.parseFloat(durationStr!);
 
-    const remoteData = await fetchRemoteData({ id, name, artist, album });
+    const remoteData = await fetchRemoteData({ id: id!, name: name!, artist: artist!, album: album! });
 
-    return { name, album, artist, playerPosition, duration, ...remoteData };
+    return { name: name!, album: album!, artist: artist!, playerPosition, duration, ...remoteData };
 }

@@ -17,7 +17,8 @@
 */
 
 import { Settings } from "@api/Settings";
-import { findByProps, findByPropsLazy, proxyLazyWebpack } from "@webpack";
+import type { ExtractAction, FluxAction, FluxStore } from "@vencord/discord-types";
+import { findByPropsLazy, findStore, proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
 export interface Track {
@@ -46,15 +47,15 @@ export interface Track {
 interface PlayerState {
     accountId: string;
     track: Track | null;
-    volumePercent: number,
-    isPlaying: boolean,
-    repeat: boolean,
-    position: number,
+    volumePercent?: number;
+    isPlaying?: boolean;
+    repeat: boolean;
+    position?: number;
     context?: any;
     device?: Device;
 
     // added by patch
-    actual_repeat: Repeat;
+    actual_repeat?: Repeat;
 }
 
 interface Device {
@@ -66,17 +67,17 @@ type Repeat = "off" | "track" | "context";
 
 // Don't wanna run before Flux and Dispatcher are ready!
 export const SpotifyStore = proxyLazyWebpack(() => {
-    // For some reason ts hates extends Flux.Store
-    const { Store } = Flux;
-
-    const SpotifySocket = findByProps("getActiveSocketAndDevice");
+    const $SpotifyStore: FluxStore & Record<string, any> = findStore("SpotifyStore");
     const SpotifyAPI = findByPropsLazy("vcSpotifyMarker");
 
     const API_BASE = "https://api.spotify.com/v1/me/player";
 
-    class SpotifyStore extends Store {
+    type SpotifyStoreAction = ExtractAction<FluxAction, "SPOTIFY_PLAYER_STATE" | "SPOTIFY_SET_DEVICES">;
+
+    class SpotifyStore extends Flux.Store<SpotifyStoreAction> {
         public mPosition = 0;
-        private start = 0;
+        // https://github.com/microsoft/TypeScript/issues/36060
+        /* private */ start = 0;
 
         public track: Track | null = null;
         public device: Device | null = null;
@@ -88,7 +89,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
         public isSettingPosition = false;
 
         public openExternal(path: string) {
-            const url = Settings.plugins.SpotifyControls.useSpotifyUris || Vencord.Plugins.isPluginEnabled("OpenInApp")
+            const url = Settings.plugins.SpotifyControls!.useSpotifyUris || Vencord.Plugins.isPluginEnabled("OpenInApp")
                 ? "spotify:" + path.replaceAll("/", (_, idx) => idx === 0 ? "" : ":")
                 : "https://open.spotify.com" + path;
 
@@ -117,16 +118,14 @@ export const SpotifyStore = proxyLazyWebpack(() => {
             this.req("post", "/next");
         }
 
-        setVolume(percent: number) {
-            this.req("put", "/volume", {
+        async setVolume(percent: number) {
+            await this.req("put", "/volume", {
                 query: {
                     volume_percent: Math.round(percent)
                 }
-
-            }).then(() => {
-                this.volume = percent;
-                this.emitChange();
             });
+            this.volume = percent;
+            this.emitChange();
         }
 
         setPlaying(playing: boolean) {
@@ -139,35 +138,37 @@ export const SpotifyStore = proxyLazyWebpack(() => {
             });
         }
 
-        setShuffle(state: boolean) {
-            this.req("put", "/shuffle", {
+        async setShuffle(state: boolean) {
+            await this.req("put", "/shuffle", {
                 query: { state }
-            }).then(() => {
-                this.shuffle = state;
-                this.emitChange();
             });
+            this.shuffle = state;
+            this.emitChange();
         }
 
-        seek(ms: number) {
-            if (this.isSettingPosition) return Promise.resolve();
+        async seek(ms: number) {
+            if (this.isSettingPosition) return;
 
             this.isSettingPosition = true;
 
-            return this.req("put", "/seek", {
-                query: {
-                    position_ms: Math.round(ms)
-                }
-            }).catch((e: any) => {
+            try {
+                return await this.req("put", "/seek", {
+                    query: {
+                        position_ms: Math.round(ms)
+                    }
+                });
+            } catch (e) {
                 console.error("[VencordSpotifyControls] Failed to seek", e);
                 this.isSettingPosition = false;
-            });
+            }
         }
 
-        private req(method: "post" | "get" | "put", route: string, data: any = {}) {
+        // https://github.com/microsoft/TypeScript/issues/36060
+        /* private */ req(method: "post" | "get" | "put", route: string, data: any = {}): Promise<any> {
             if (this.device?.is_active)
                 (data.query ??= {}).device_id = this.device.id;
 
-            const { socket } = SpotifySocket.getActiveSocketAndDevice();
+            const { socket } = $SpotifyStore.getActiveSocketAndDevice();
             return SpotifyAPI[method](socket.accountId, socket.accessToken, {
                 url: API_BASE + route,
                 ...data
@@ -176,13 +177,13 @@ export const SpotifyStore = proxyLazyWebpack(() => {
     }
 
     const store = new SpotifyStore(FluxDispatcher, {
-        SPOTIFY_PLAYER_STATE(e: PlayerState) {
-            store.track = e.track;
-            store.device = e.device ?? null;
-            store.isPlaying = e.isPlaying ?? false;
-            store.volume = e.volumePercent ?? 0;
-            store.repeat = e.actual_repeat || "off";
-            store.position = e.position ?? 0;
+        SPOTIFY_PLAYER_STATE(a: PlayerState) {
+            store.track = a.track;
+            store.device = a.device ?? null;
+            store.isPlaying = a.isPlaying ?? false;
+            store.volume = a.volumePercent ?? 0;
+            store.repeat = a.actual_repeat || "off";
+            store.position = a.position ?? 0;
             store.isSettingPosition = false;
             store.emitChange();
         },

@@ -1,0 +1,33 @@
+name: Test scripts
+on:
+    pull_request:
+        paths:
+            - scripts/**
+            - eslint.config.mjs
+    push:
+        paths:
+            - scripts/**
+            - eslint.config.mjs
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: pnpm/action-setup@v4 # Install pnpm using packageManager key in package.json
+
+            - name: Use Node.js 20
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ^20.9.0
+                  cache: pnpm
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Check scripts for TypeScript errors
+              run: | # https://github.com/microsoft/TypeScript/issues/40431
+                  tsc --emitDeclarationOnly
+                  cd scripts
+                  tsc --noEmit

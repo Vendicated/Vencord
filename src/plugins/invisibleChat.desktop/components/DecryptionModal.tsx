@@ -23,13 +23,13 @@ import {
     ModalRoot,
     openModal,
 } from "@utils/modal";
-import { Button, Forms, React, TextInput } from "@webpack/common";
+import { Button, Forms, TextInput, useState } from "@webpack/common";
 
 import { decrypt } from "../index";
 
 export function DecModal(props: any) {
     const encryptedMessage: string = props?.message?.content;
-    const [password, setPassword] = React.useState("password");
+    const [password, setPassword] = useState("password");
 
     return (
         <ModalRoot {...props}>
@@ -39,7 +39,7 @@ export function DecModal(props: any) {
 
             <ModalContent>
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Message with Encryption</Forms.FormTitle>
-                <TextInput defaultValue={encryptedMessage} disabled={true}></TextInput>
+                <TextInput defaultValue={encryptedMessage} disabled={true} />
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Password</Forms.FormTitle>
                 <TextInput
                     style={{ marginBottom: "20px" }}
@@ -52,11 +52,12 @@ export function DecModal(props: any) {
                     color={Button.Colors.GREEN}
                     onClick={() => {
                         const toSend = decrypt(encryptedMessage, password, true);
-                        if (!toSend || !props?.message) return;
-                        // @ts-expect-error
-                        Vencord.Plugins.plugins.InvisibleChat.buildEmbed(props?.message, toSend);
-                        props.onClose();
-                    }}>
+                        if (toSend && props?.message) {
+                            (Vencord.Plugins.plugins.InvisibleChat as any as typeof import("..").default).buildEmbed(props?.message, toSend);
+                            props.onClose();
+                        }
+                    }}
+                >
                     Decrypt
                 </Button>
                 <Button
@@ -72,6 +73,6 @@ export function DecModal(props: any) {
     );
 }
 
-export function buildDecModal(msg: any): any {
+export function openDecModal(msg: any) {
     openModal((props: any) => <DecModal {...props} {...msg} />);
 }

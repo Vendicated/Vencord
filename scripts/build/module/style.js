@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+// @ts-nocheck
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 (window.VencordStyles ??= new Map()).set(STYLE_NAME, {
     name: STYLE_NAME,
     source: STYLE_SOURCE,

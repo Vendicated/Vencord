@@ -4,16 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { MessageJSON } from "@api/Commands";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, ReadStateStore, UserStore } from "@webpack/common";
-import { MessageJSON } from "discord-types/general";
-
-const enum ChannelType {
-    DM = 1,
-    GROUP_DM = 3
-}
 
 const settings = definePluginSettings({
     channelToAffect: {
@@ -54,12 +49,12 @@ export default definePlugin({
         }]
     }],
     isPrivateChannelRead(message: MessageJSON) {
-        const channelType = ChannelStore.getChannel(message.channel_id)?.type;
+        const channel = ChannelStore.getChannel(message.channel_id);
         if (
-            (channelType !== ChannelType.DM && channelType !== ChannelType.GROUP_DM) ||
-            (channelType === ChannelType.DM && settings.store.channelToAffect === "group_dm") ||
-            (channelType === ChannelType.GROUP_DM && settings.store.channelToAffect === "user_dm") ||
-            (settings.store.allowMentions && message.mentions.some(m => m.id === UserStore.getCurrentUser().id)) ||
+            (!channel || !channel.isPrivate()) ||
+            (channel.isDM() && settings.store.channelToAffect === "group_dm") ||
+            (channel.isGroupDM() && settings.store.channelToAffect === "user_dm") ||
+            (settings.store.allowMentions && message.mentions.some(m => m.id === UserStore.getCurrentUser()!.id)) ||
             (settings.store.allowEveryone && message.mention_everyone)
         ) {
             return true;

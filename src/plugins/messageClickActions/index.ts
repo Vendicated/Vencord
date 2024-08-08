@@ -20,11 +20,11 @@ import { addClickListener, removeClickListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore } from "@webpack/common";
+import { type FluxStore, MessageFlags, type MessageRecord } from "@vencord/discord-types";
+import { findStoreLazy } from "@webpack";
+import { FluxDispatcher, MessageActionCreators, Permissions, PermissionStore, UserStore } from "@webpack/common";
 
-const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
-const EditStore = findByPropsLazy("isEditing", "isEditingAny");
+const EditMessageStore: FluxStore & Record<string, any> = findStoreLazy("EditMessageStore");
 
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
@@ -65,24 +65,23 @@ export default definePlugin({
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
 
-        this.onClick = addClickListener((msg: any, channel, event) => {
-            const isMe = msg.author.id === UserStore.getCurrentUser().id;
+        this.onClick = addClickListener((msg: MessageRecord & { deleted?: boolean; }, channel, event) => {
+            const isMe = msg.author.id === UserStore.getCurrentUser()!.id;
             if (!isDeletePressed) {
                 if (event.detail < 2) return;
                 if (settings.store.requireModifier && !event.ctrlKey && !event.shiftKey) return;
-                if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return;
+                if (channel.guild_id && !PermissionStore.can(Permissions.SEND_MESSAGES, channel)) return;
                 if (msg.deleted === true) return;
 
                 if (isMe) {
-                    if (!settings.store.enableDoubleClickToEdit || EditStore.isEditing(channel.id, msg.id)) return;
+                    if (!settings.store.enableDoubleClickToEdit || EditMessageStore.isEditing(channel.id, msg.id)) return;
 
-                    MessageActions.startEditMessage(channel.id, msg.id, msg.content);
+                    MessageActionCreators.startEditMessage(channel.id, msg.id, msg.content);
                     event.preventDefault();
                 } else {
                     if (!settings.store.enableDoubleClickToReply) return;
 
-                    const EPHEMERAL = 64;
-                    if (msg.hasFlag(EPHEMERAL)) return;
+                    if (msg.hasFlag(MessageFlags.EPHEMERAL)) return;
 
                     const isShiftPress = event.shiftKey && !settings.store.requireModifier;
                     const NoReplyMention = Vencord.Plugins.plugins.NoReplyMention as any as typeof import("../noReplyMention").default;
@@ -98,7 +97,7 @@ export default definePlugin({
                         showMentionToggle: channel.guild_id !== null
                     });
                 }
-            } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(PermissionsBits.MANAGE_MESSAGES, channel))) {
+            } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(Permissions.MANAGE_MESSAGES, channel))) {
                 if (msg.deleted) {
                     FluxDispatcher.dispatch({
                         type: "MESSAGE_DELETE",
@@ -107,7 +106,7 @@ export default definePlugin({
                         mlDeleted: true
                     });
                 } else {
-                    MessageActions.deleteMessage(channel.id, msg.id);
+                    MessageActionCreators.deleteMessage(channel.id, msg.id);
                 }
                 event.preventDefault();
             }

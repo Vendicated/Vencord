@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, type NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -40,7 +40,7 @@ function search(src: string, engine: string) {
 }
 
 function makeSearchItem(src: string) {
-    let Engines = {};
+    let Engines: Record<string, string> = {};
 
     if (settings.store.customEngineName && settings.store.customEngineURL) {
         Engines[settings.store.customEngineName] = settings.store.customEngineURL;
@@ -74,7 +74,7 @@ function makeSearchItem(src: string) {
                                 {engine}
                             </Flex>
                         }
-                        action={() => search(src, Engines[engine])}
+                        action={() => { search(src, Engines[engine]!); }}
                     />
                 );
             })}
@@ -82,7 +82,7 @@ function makeSearchItem(src: string) {
     );
 }
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, _props) => {
+const messageContextMenuPatch = ((children, _props) => {
     const selection = document.getSelection()?.toString();
     if (!selection) return;
 
@@ -91,7 +91,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, _props) 
         const idx = group.findIndex(c => c?.props?.id === "search-google");
         if (idx !== -1) group[idx] = makeSearchItem(selection);
     }
-};
+}) satisfies NavContextMenuPatchCallback;
 
 export default definePlugin({
     name: "ReplaceGoogleSearch",

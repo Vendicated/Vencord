@@ -18,22 +18,22 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
-import { Channel, Message } from "discord-types/general";
-import type { ComponentType, MouseEventHandler } from "react";
+import type { ChannelRecord, MessageRecord } from "@vencord/discord-types";
+import type { ComponentType, MouseEventHandler, ReactNode } from "react";
 
 const logger = new Logger("MessagePopover");
 
 export interface ButtonItem {
-    key?: string,
-    label: string,
-    icon: ComponentType<any>,
-    message: Message,
-    channel: Channel,
-    onClick?: MouseEventHandler<HTMLButtonElement>,
+    key?: string;
+    label: string;
+    icon: ComponentType<any>;
+    message: MessageRecord;
+    channel: ChannelRecord;
+    onClick?: MouseEventHandler<HTMLButtonElement>;
     onContextMenu?: MouseEventHandler<HTMLButtonElement>;
 }
 
-export type getButtonItem = (message: Message) => ButtonItem | null;
+export type getButtonItem = (message: MessageRecord) => ButtonItem | null;
 
 export const buttons = new Map<string, getButtonItem>();
 
@@ -49,10 +49,10 @@ export function removeButton(identifier: string) {
 }
 
 export function _buildPopoverElements(
-    Component: React.ComponentType<ButtonItem>,
-    message: Message
+    Component: ComponentType<ButtonItem>,
+    message: MessageRecord
 ) {
-    const items: React.ReactNode[] = [];
+    const items: ReactNode[] = [];
 
     for (const [identifier, getItem] of buttons.entries()) {
         try {
@@ -70,5 +70,5 @@ export function _buildPopoverElements(
         }
     }
 
-    return <>{items}</>;
+    return items;
 }

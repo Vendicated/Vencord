@@ -118,8 +118,9 @@ export default definePlugin({
     ],
     settings,
 
-    getColor(userId: string, { channelId, guildId }: { channelId?: string; guildId?: string; }) {
-        if (!(guildId ??= ChannelStore.getChannel(channelId!)?.guild_id)) return null;
+    getColor(userId: string, { channelId, guildId }: { channelId?: string; guildId?: string | null; }) {
+        guildId ??= ChannelStore.getChannel(channelId)?.guild_id;
+        if (!guildId) return null;
         return GuildMemberStore.getMember(guildId, userId)?.colorString ?? null;
     },
 
@@ -128,19 +129,17 @@ export default definePlugin({
         return colorString && parseInt(colorString.slice(1), 16);
     },
 
-    roleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
-        const role = GuildStore.getRole(guildId, id);
-
-        return (
-            <span style={{
-                color: role?.colorString,
+    roleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title?: string; guildId: string; label: string; }) => (
+        <span
+            style={{
+                color: GuildStore.getRole(guildId, id)?.colorString ?? undefined,
                 fontWeight: "unset",
                 letterSpacing: ".05em"
-            }}>
-                {title ?? label} &mdash; {count}
-            </span>
-        );
-    }, { noop: true }),
+            }}
+        >
+            {title ?? label} &mdash; {count}
+        </span>
+    ), { noop: true }),
 
     getVoiceProps({ user: { id: userId }, guildId }: { user: { id: string; }; guildId: string; }) {
         return {

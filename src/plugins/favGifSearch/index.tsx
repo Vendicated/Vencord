@@ -22,9 +22,10 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { useCallback, useEffect, useRef, useState } from "@webpack/common";
+import type { FunctionComponent, MutableRefObject } from "react";
 
 interface SearchBarComponentProps {
-    ref?: React.MutableRefObject<any>;
+    ref?: MutableRefObject<any>;
     autoFocus: boolean;
     className: string;
     size: string;
@@ -34,8 +35,8 @@ interface SearchBarComponentProps {
     placeholder: string;
 }
 
-type TSearchBarComponent =
-    React.FC<SearchBarComponentProps> & { Sizes: Record<"SMALL" | "MEDIUM" | "LARGE", string>; };
+type TSearchBarComponent = FunctionComponent<SearchBarComponentProps>
+    & { Sizes: Record<"SMALL" | "MEDIUM" | "LARGE", string>; };
 
 interface Gif {
     format: number;
@@ -52,10 +53,10 @@ interface Instance {
         resultType?: string;
     };
     props: {
-        favCopy: Gif[],
+        favCopy: Gif[];
 
-        favorites: Gif[],
-    },
+        favorites?: Gif[] | null;
+    };
     forceUpdate: () => void;
 }
 
@@ -128,15 +129,16 @@ export default definePlugin({
         if (!this.instance || this.instance.dead) return favorites;
         const { favorites: filteredFavorites } = this.instance.props;
 
-        return filteredFavorites != null && filteredFavorites?.length !== favorites.length ? filteredFavorites : favorites;
-
+        return filteredFavorites != null && filteredFavorites.length !== favorites.length
+            ? filteredFavorites
+            : favorites;
     }
 });
 
 
 function SearchBar({ instance, SearchBarComponent }: { instance: Instance; SearchBarComponent: TSearchBarComponent; }) {
     const [query, setQuery] = useState("");
-    const ref = useRef<{ containerRef?: React.MutableRefObject<HTMLDivElement>; } | null>(null);
+    const ref = useRef<{ containerRef?: MutableRefObject<HTMLDivElement>; } | null>(null);
 
     const onChange = useCallback((searchQuery: string) => {
         setQuery(searchQuery);
@@ -160,10 +162,14 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         const result =
             props.favCopy
                 .map(gif => ({
-                    score: fuzzySearch(searchQuery.toLowerCase(), getTargetString(gif.url ?? gif.src).replace(/(%20|[_-])/g, " ").toLowerCase()),
+                    score: fuzzySearch(
+                        searchQuery.toLowerCase(),
+                        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                        getTargetString(gif.url ?? gif.src).replaceAll(/(%20|[_-])/g, " ").toLowerCase()
+                    ),
                     gif,
                 }))
-                .filter(m => m.score != null) as { score: number; gif: Gif; }[];
+                .filter((m): m is { score: number; gif: Gif; } => m.score != null);
 
         result.sort((a, b) => b.score - a.score);
         props.favorites = result.map(e => e.gif);
@@ -171,11 +177,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
         instance.forceUpdate();
     }, [instance.state]);
 
-    useEffect(() => {
-        return () => {
-            instance.dead = true;
-        };
-    }, []);
+    useEffect(() => () => { instance.dead = true; }, []);
 
     return (
         <SearchBarComponent
@@ -186,6 +188,7 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
             onChange={onChange}
             onClear={() => {
                 setQuery("");
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 if (instance.props.favCopy != null) {
                     instance.props.favorites = instance.props.favCopy;
                     instance.forceUpdate();
@@ -215,11 +218,11 @@ export function getTargetString(urlStr: string) {
             if (url.host === "media.discordapp.net" || url.host === "tenor.com")
                 // /attachments/899763415290097664/1095711736461537381/attachment-1.gif -> attachment-1.gif
                 // /view/some-gif-hi-24248063 -> some-gif-hi-24248063
-                return url.pathname.split("/").at(-1) ?? url.pathname;
+                return url.pathname.match(/(?:.*\/)?(.*)/)![1]!;
             return url.pathname;
         case "hostandpath":
             if (url.host === "media.discordapp.net" || url.host === "tenor.com")
-                return `${url.host} ${url.pathname.split("/").at(-1) ?? url.pathname}`;
+                return `${url.host} ${url.pathname.match(/(?:.*\/)?(.*)/)![1]}`;
             return `${url.host} ${url.pathname}`;
 
         default:

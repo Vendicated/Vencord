@@ -16,17 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {
-    findGroupChildrenByChildId,
-    NavContextMenuPatchCallback
-} from "@api/ContextMenu";
+import { findGroupChildrenByChildId, type NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { CogWheel } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import type { GuildRecord } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import { Menu } from "@webpack/common";
-import { Guild } from "discord-types/general";
 
 const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
 const { toggleShowAllChannels } = mapMangledModuleLazy(".onboardExistingMember(", {
@@ -80,35 +77,34 @@ const settings = definePluginSettings({
     }
 });
 
-const makeContextMenuPatch: (shouldAddIcon: boolean) => NavContextMenuPatchCallback = (shouldAddIcon: boolean) => (children, { guild }: { guild: Guild, onClose(): void; }) => {
-    if (!guild) return;
+const makeContextMenuPatch = (shouldAddIcon: boolean) =>
+    ((children, { guild }: { guild?: GuildRecord; onClose: () => void; }) => {
+        if (!guild) return;
 
-    const group = findGroupChildrenByChildId("privacy", children);
-    group?.push(
-        <Menu.MenuItem
-            label="Apply NewGuildSettings"
-            id="vc-newguildsettings-apply"
-            icon={shouldAddIcon ? CogWheel : void 0}
-            action={() => applyDefaultSettings(guild.id)}
-        />
-    );
-};
+        const group = findGroupChildrenByChildId("privacy", children);
+        group?.push(
+            <Menu.MenuItem
+                label="Apply NewGuildSettings"
+                id="vc-newguildsettings-apply"
+                icon={shouldAddIcon ? CogWheel : undefined}
+                action={() => { applyDefaultSettings(guild.id); }}
+            />
+        );
+    }) satisfies NavContextMenuPatchCallback;
 
 function applyDefaultSettings(guildId: string | null) {
     if (guildId === "@me" || guildId === "null" || guildId == null) return;
-    updateGuildNotificationSettings(guildId,
-        {
-            muted: settings.store.guild,
-            suppress_everyone: settings.store.everyone,
-            suppress_roles: settings.store.role,
-            mute_scheduled_events: settings.store.events,
-            notify_highlights: settings.store.highlights ? 1 : 0
-        });
+    updateGuildNotificationSettings(guildId, {
+        muted: settings.store.guild,
+        suppress_everyone: settings.store.everyone,
+        suppress_roles: settings.store.role,
+        mute_scheduled_events: settings.store.events,
+        notify_highlights: settings.store.highlights ? 1 : 0
+    });
     if (settings.store.messages !== 3) {
-        updateGuildNotificationSettings(guildId,
-            {
-                message_notifications: settings.store.messages,
-            });
+        updateGuildNotificationSettings(guildId, {
+            message_notifications: settings.store.messages,
+        });
     }
     if (settings.store.showAllChannels && isOptInEnabledForGuild(guildId)) {
         toggleShowAllChannels(guildId);

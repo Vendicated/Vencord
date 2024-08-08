@@ -2,8 +2,9 @@
     display: none;
 }
 
-.messagelogger-deleted
-:is(
+/* https://github.com/stylelint-stylistic/stylelint-stylistic/issues/30 */
+/* stylelint-disable @stylistic/indentation */
+.messagelogger-deleted:is(
     video,
     .emoji,
     [data-type="sticker"],
@@ -11,6 +12,7 @@
     .messagelogger-deleted-attachment,
     [class|="inlineMediaEmbed"]
 ) {
+/* stylelint-enable @stylistic/indentation */
     filter: grayscale(1) !important;
     transition: 150ms filter ease-in-out;
 
@@ -19,8 +21,9 @@
     }
 }
 
-.messagelogger-deleted
-:is(
+/* https://github.com/stylelint-stylistic/stylelint-stylistic/issues/30 */
+/* stylelint-disable @stylistic/indentation */
+.messagelogger-deleted:is(
     video,
     .emoji,
     [data-type="sticker"],
@@ -28,6 +31,7 @@
     .messagelogger-deleted-attachment,
     [class|="inlineMediaEmbed"]
 ):hover {
+/* stylelint-enable @stylistic/indentation */
     filter: grayscale(0) !important;
 }
 

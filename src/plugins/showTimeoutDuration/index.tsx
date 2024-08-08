@@ -10,10 +10,10 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import type { MessageRecord } from "@vencord/discord-types";
 import { findComponentLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, i18n, Text, Tooltip } from "@webpack/common";
-import { Message } from "discord-types/general";
-import { FunctionComponent, ReactNode } from "react";
+import type { FunctionComponent, ReactNode } from "react";
 
 const CountDown = findComponentLazy(m => m.prototype?.render?.toString().includes(".MAX_AGE_NEVER"));
 
@@ -33,7 +33,7 @@ const settings = definePluginSettings({
     }
 });
 
-function renderTimeout(message: Message, inline: boolean) {
+function renderTimeout(message: MessageRecord, inline: boolean) {
     const guildId = ChannelStore.getChannel(message.channel_id)?.guild_id;
     if (!guildId) return null;
 
@@ -75,11 +75,14 @@ export default definePlugin({
         }
     ],
 
-    TooltipWrapper: ErrorBoundary.wrap(({ message, children, text }: { message: Message; children: FunctionComponent<any>; text: ReactNode; }) => {
-        if (settings.store.displayStyle === DisplayStyle.Tooltip) return <Tooltip
-            children={children}
-            text={renderTimeout(message, false)}
-        />;
+    TooltipWrapper: ErrorBoundary.wrap(({ message, children, text }: { message: MessageRecord; children: FunctionComponent<any>; text: ReactNode; }) => {
+        if (settings.store.displayStyle === DisplayStyle.Tooltip)
+            return (
+                <Tooltip
+                    children={children}
+                    text={renderTimeout(message, false)}
+                />
+            );
         return (
             <div className="vc-std-wrapper">
                 <Tooltip text={text} children={children} />

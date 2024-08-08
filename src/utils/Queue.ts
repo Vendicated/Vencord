@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Promisable } from "type-fest";
+import type { Promisable } from "type-fest";
 
 /**
  * A queue that can be used to run tasks consecutively.
@@ -29,7 +29,7 @@ export class Queue {
      */
     constructor(public readonly maxSize = Infinity) { }
 
-    private queue = [] as Array<() => Promisable<unknown>>;
+    private queue: (() => Promisable<unknown>)[] = [];
 
     private promise?: Promise<any>;
 
@@ -38,7 +38,7 @@ export class Queue {
         if (func)
             this.promise = Promise.resolve()
                 .then(func)
-                .finally(() => this.next());
+                .finally(() => { this.next(); });
         else
             this.promise = undefined;
     }
@@ -53,7 +53,7 @@ export class Queue {
      * If the queue exceeds the specified maxSize, the first task in queue will be removed.
      * @param func Task
      */
-    push<T>(func: () => Promisable<T>) {
+    push(func: () => Promisable<unknown>) {
         if (this.size >= this.maxSize)
             this.queue.shift();
 
@@ -66,7 +66,7 @@ export class Queue {
      * If the queue exceeds the specified maxSize, the last task in queue will be removed.
      * @param func Task
      */
-    unshift<T>(func: () => Promisable<T>) {
+    unshift(func: () => Promisable<unknown>) {
         if (this.size >= this.maxSize)
             this.queue.pop();
 

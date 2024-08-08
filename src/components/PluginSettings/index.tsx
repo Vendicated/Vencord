@@ -32,9 +32,10 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
-import { Plugin } from "@utils/types";
+import type { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
+import { AlertActionCreators, Button, Card, Forms, lodash, MarkupUtils, Select, Text, TextInput, Toasts, Tooltip, useEffect, useMemo, useState } from "@webpack/common";
+import type { HTMLProps, ReactElement } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
 
@@ -44,8 +45,8 @@ const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => 
 const cl = classNameFactory("vc-plugins-");
 const logger = new Logger("PluginSettings", "#a6d189");
 
-const InputStyles = findByPropsLazy("inputWrapper", "inputDefault", "error");
-const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
+const InputStyles: Record<string, string> = findByPropsLazy("inputWrapper", "inputDefault", "error");
+const ButtonClasses: Record<string, string> = findByPropsLazy("button", "disabled", "enabled");
 
 
 function showErrorToast(message: string) {
@@ -59,40 +60,39 @@ function showErrorToast(message: string) {
     });
 }
 
-function ReloadRequiredCard({ required }: { required: boolean; }) {
-    return (
-        <Card className={cl("info-card", { "restart-card": required })}>
-            {required ? (
-                <>
-                    <Forms.FormTitle tag="h5">Restart required!</Forms.FormTitle>
-                    <Forms.FormText className={cl("dep-text")}>
-                        Restart now to apply new plugins and their settings
-                    </Forms.FormText>
-                    <Button onClick={() => location.reload()}>
-                        Restart
-                    </Button>
-                </>
-            ) : (
-                <>
-                    <Forms.FormTitle tag="h5">Plugin Management</Forms.FormTitle>
-                    <Forms.FormText>Press the cog wheel or info icon to get more info on a plugin</Forms.FormText>
-                    <Forms.FormText>Plugins with a cog wheel have settings you can modify!</Forms.FormText>
-                </>
-            )}
-        </Card>
-    );
-}
+const ReloadRequiredCard = ({ required }: { required: boolean; }) => (
+    <Card className={cl("info-card", { "restart-card": required })}>
+        {required ? (
+            <>
+                <Forms.FormTitle tag="h5">Restart required!</Forms.FormTitle>
+                <Forms.FormText className={cl("dep-text")}>
+                    Restart now to apply new plugins and their settings
+                </Forms.FormText>
+                <Button onClick={() => { location.reload(); }}>
+                    Restart
+                </Button>
+            </>
+        ) : (
+            <>
+                <Forms.FormTitle tag="h5">Plugin Management</Forms.FormTitle>
+                <Forms.FormText>Press the cog wheel or info icon to get more info on a plugin</Forms.FormText>
+                <Forms.FormText>Plugins with a cog wheel have settings you can modify!</Forms.FormText>
+            </>
+        )}
+    </Card>
+);
 
-interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
+interface PluginCardProps extends HTMLProps<HTMLDivElement> {
     plugin: Plugin;
     disabled: boolean;
-    onRestartNeeded(name: string): void;
+    onRestartNeeded: (name: string) => void;
     isNew?: boolean;
 }
 
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
-    const settings = Settings.plugins[plugin.name];
+    const settings = Settings.plugins[plugin.name]!;
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const isEnabled = () => settings.enabled ?? false;
 
     function toggleEnabled() {
@@ -153,7 +153,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             infoButton={
                 <button
                     role="switch"
-                    onClick={() => openPluginModal(plugin, onRestartNeeded)}
+                    onClick={() => { openPluginModal(plugin, onRestartNeeded); }}
                     className={classes(ButtonClasses.button, cl("info-button"))}
                 >
                     {plugin.options && !isObjectEmpty(plugin.options)
@@ -186,8 +186,8 @@ function ExcludedPluginsList({ search }: { search: string; }) {
 
     return (
         <Text variant="text-md/normal" className={Margins.top16}>
-            {matchingExcludedPlugins.length
-                ? <>
+            {matchingExcludedPlugins.length ? (
+                <>
                     <Forms.FormText>Are you looking for:</Forms.FormText>
                     <ul>
                         {matchingExcludedPlugins.map(([name, reason]) => (
@@ -197,7 +197,7 @@ function ExcludedPluginsList({ search }: { search: string; }) {
                         ))}
                     </ul>
                 </>
-                : "No plugins meet the search criteria."
+            ) : "No plugins meet the search criteria."
             }
         </Text>
     );
@@ -205,32 +205,37 @@ function ExcludedPluginsList({ search }: { search: string; }) {
 
 export default function PluginSettings() {
     const settings = useSettings();
-    const changes = React.useMemo(() => new ChangeList<string>(), []);
+    const changes = useMemo(() => new ChangeList<string>(), []);
 
-    React.useEffect(() => {
-        return () => void (changes.hasChanges && Alerts.show({
-            title: "Restart required",
-            body: (
-                <>
-                    <p>The following plugins require a restart:</p>
-                    <div>{changes.map((s, i) => (
+    useEffect(() => {
+        return () => {
+            if (changes.hasChanges)
+                AlertActionCreators.show({
+                    title: "Restart required",
+                    body: (
                         <>
-                            {i > 0 && ", "}
-                            {Parser.parse("`" + s + "`")}
+                            <p>The following plugins require a restart:</p>
+                            <div>
+                                {changes.map((s, i) => (
+                                    <>
+                                        {i > 0 && ", "}
+                                        {MarkupUtils.parse(`\`${s}\``)}
+                                    </>
+                                ))}
+                            </div>
                         </>
-                    ))}</div>
-                </>
-            ),
-            confirmText: "Restart now",
-            cancelText: "Later!",
-            onConfirm: () => location.reload()
-        }));
+                    ),
+                    confirmText: "Restart now",
+                    cancelText: "Later!",
+                    onConfirm: () => { location.reload(); }
+                });
+        };
     }, []);
 
-    const depMap = React.useMemo(() => {
-        const o = {} as Record<string, string[]>;
+    const depMap = useMemo(() => {
+        const o: Record<string, string[]> = {};
         for (const plugin in Plugins) {
-            const deps = Plugins[plugin].dependencies;
+            const deps = Plugins[plugin]!.dependencies;
             if (deps) {
                 for (const dep of deps) {
                     o[dep] ??= [];
@@ -244,13 +249,13 @@ export default function PluginSettings() {
     const sortedPlugins = useMemo(() => Object.values(Plugins)
         .sort((a, b) => a.name.localeCompare(b.name)), []);
 
-    const [searchValue, setSearchValue] = React.useState({ value: "", status: SearchStatus.ALL });
+    const [searchValue, setSearchValue] = useState({ value: "", status: SearchStatus.ALL });
 
     const search = searchValue.value.toLowerCase();
-    const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
-    const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
+    const onSearch = (query: string) => { setSearchValue(prev => ({ ...prev, value: query })); };
+    const onStatusChange = (status: SearchStatus) => { setSearchValue(prev => ({ ...prev, status })); };
 
-    const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
+    function pluginFilter(plugin: Plugin) {
         const { status } = searchValue;
         const enabled = Vencord.Plugins.isPluginEnabled(plugin.name);
         if (enabled && status === SearchStatus.DISABLED) return false;
@@ -263,7 +268,7 @@ export default function PluginSettings() {
             plugin.description.toLowerCase().includes(search) ||
             plugin.tags?.some(t => t.toLowerCase().includes(search))
         );
-    };
+    }
 
     const [newPlugins] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((cachedPlugins: Record<string, number> | undefined) => {
         const now = Date.now() / 1000;
@@ -282,8 +287,8 @@ export default function PluginSettings() {
         return lodash.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
     }));
 
-    const plugins = [] as JSX.Element[];
-    const requiredPlugins = [] as JSX.Element[];
+    const plugins: ReactElement[] = [];
+    const requiredPlugins: ReactElement[] = [];
 
     const showApi = searchValue.value.includes("API");
     for (const p of sortedPlugins) {
@@ -292,12 +297,12 @@ export default function PluginSettings() {
 
         if (!pluginFilter(p)) continue;
 
-        const isRequired = p.required || depMap[p.name]?.some(d => settings.plugins[d].enabled);
+        const isRequired = p.required || depMap[p.name]?.some(d => settings.plugins[d]!.enabled);
 
         if (isRequired) {
             const tooltipText = p.required
                 ? "This plugin is required for Vencord to function."
-                : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
+                : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d]!.enabled));
 
             requiredPlugins.push(
                 <Tooltip text={tooltipText} key={p.name}>
@@ -305,7 +310,7 @@ export default function PluginSettings() {
                         <PluginCard
                             onMouseLeave={onMouseLeave}
                             onMouseEnter={onMouseEnter}
-                            onRestartNeeded={name => changes.handleChange(name)}
+                            onRestartNeeded={name => { changes.handleChange(name); }}
                             disabled={true}
                             plugin={p}
                             key={p.name}
@@ -316,7 +321,7 @@ export default function PluginSettings() {
         } else {
             plugins.push(
                 <PluginCard
-                    onRestartNeeded={name => changes.handleChange(name)}
+                    onRestartNeeded={name => { changes.handleChange(name); }}
                     disabled={false}
                     plugin={p}
                     isNew={newPlugins?.includes(p.name)}
@@ -355,17 +360,16 @@ export default function PluginSettings() {
 
             <Forms.FormTitle className={Margins.top20}>Plugins</Forms.FormTitle>
 
-            {plugins.length || requiredPlugins.length
-                ? (
-                    <div className={cl("grid")}>
-                        {plugins.length
-                            ? plugins
-                            : <Text variant="text-md/normal">No plugins meet the search criteria.</Text>
-                        }
-                    </div>
-                )
-                : <ExcludedPluginsList search={search} />
-            }
+            {plugins.length || requiredPlugins.length ? (
+                <div className={cl("grid")}>
+                    {plugins.length
+                        ? plugins
+                        : <Text variant="text-md/normal">No plugins meet the search criteria.</Text>
+                    }
+                </div>
+            ) : (
+                <ExcludedPluginsList search={search} />
+            )}
 
 
             <Forms.FormDivider className={Margins.top20} />
@@ -379,15 +383,13 @@ export default function PluginSettings() {
                     : <Text variant="text-md/normal">No plugins meet the search criteria.</Text>
                 }
             </div>
-        </SettingsTab >
+        </SettingsTab>
     );
 }
 
-function makeDependencyList(deps: string[]) {
-    return (
-        <React.Fragment>
-            <Forms.FormText>This plugin is required by:</Forms.FormText>
-            {deps.map((dep: string) => <Forms.FormText className={cl("dep-text")}>{dep}</Forms.FormText>)}
-        </React.Fragment>
-    );
-}
+const makeDependencyList = (deps?: string[]) => (
+    <>
+        <Forms.FormText>This plugin is required by:</Forms.FormText>
+        {deps?.map((dep: string) => <Forms.FormText className={cl("dep-text")}>{dep}</Forms.FormText>)}
+    </>
+);

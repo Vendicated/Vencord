@@ -20,9 +20,19 @@ import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
-import type { WebpackInstance } from "discord-types/other";
+// Can be removed when #2485 gets merged.
+// eslint-disable-next-line no-restricted-imports
+import type { WebpackInstance as $WebpackInstance } from "discord-types/other";
+import type { ComponentType } from "react";
 
 import { traceFunction } from "../debug/Tracer";
+
+interface WebpackInstance extends Omit<$WebpackInstance, "c" | "m"> {
+    // Omit removes call signatures
+    (id: number): any;
+    c?: $WebpackInstance["c"] & Record<string | number, any>;
+    m: $WebpackInstance["m"] & Record<string | number, any>;
+}
 
 const logger = new Logger("Webpack");
 
@@ -31,15 +41,15 @@ export let _resolveReady: () => void;
  * Fired once a gateway connection to Discord has been established.
  * This indicates that the core webpack modules have been initialised
  */
-export const onceReady = new Promise<void>(r => _resolveReady = r);
+export const onceReady = new Promise<void>(r => { _resolveReady = r; });
 
 export let wreq: WebpackInstance;
 export let cache: WebpackInstance["c"];
 
 export type FilterFn = (mod: any) => boolean;
 
-type PropsFilter = Array<string>;
-type CodeFilter = Array<string | RegExp>;
+type PropsFilter = [string, ...string[]];
+type CodeFilter = [string | RegExp, ...(string | RegExp)[]];
 type StoreNameFilter = string;
 
 const stringMatches = (s: string, filter: CodeFilter) =>
@@ -52,8 +62,8 @@ const stringMatches = (s: string, filter: CodeFilter) =>
 export const filters = {
     byProps: (...props: PropsFilter): FilterFn =>
         props.length === 1
-            ? m => m[props[0]] !== void 0
-            : m => props.every(p => m[p] !== void 0),
+            ? m => m[props[0]] !== undefined
+            : m => props.every(p => m[p] !== undefined),
 
     byCode: (...code: CodeFilter): FilterFn => {
         code = code.map(canonicalizeMatch);
@@ -96,7 +106,7 @@ let devToolsOpen = false;
 if (IS_DEV && IS_DISCORD_DESKTOP) {
     // At this point in time, DiscordNative has not been exposed yet, so setImmediate is needed
     setTimeout(() => {
-        DiscordNative/* just to make sure */?.window.setDevtoolsCallbacks(() => devToolsOpen = true, () => devToolsOpen = false);
+        DiscordNative/* just to make sure */?.window.setDevtoolsCallbacks(() => { devToolsOpen = true; }, () => { devToolsOpen = false; });
     }, 0);
 }
 
@@ -118,7 +128,7 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
 
     for (const key in cache) {
         const mod = cache[key];
-        if (!mod.loaded || !mod?.exports) continue;
+        if (!mod?.loaded || !mod.exports) continue;
 
         if (filter(mod.exports)) {
             return isWaitFor ? [mod.exports, key] : mod.exports;
@@ -151,10 +161,10 @@ export function findAll(filter: FilterFn) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
-    const ret = [] as any[];
+    const ret: any[] = [];
     for (const key in cache) {
         const mod = cache[key];
-        if (!mod.loaded || !mod?.exports) continue;
+        if (!mod?.loaded || !mod.exports) continue;
 
         if (filter(mod.exports))
             ret.push(mod.exports);
@@ -178,7 +188,7 @@ export function findAll(filter: FilterFn) {
  *                need it afterwards, pass a copy.
  * @returns Array of results in the same order as the passed filters
  */
-export const findBulk = traceFunction("findBulk", function findBulk(...filterFns: FilterFn[]) {
+export const findBulk = traceFunction("findBulk", function findBulk(...filterFns: [FilterFn, FilterFn, ...FilterFn[]]) {
     if (!Array.isArray(filterFns))
         throw new Error("Invalid filters. Expected function[] got " + typeof filterFns);
 
@@ -194,7 +204,7 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
         return find(filterFns[0]);
     }
 
-    const filters = filterFns as Array<FilterFn | undefined>;
+    const filters: (FilterFn | undefined)[] = filterFns;
 
     let found = 0;
     const results = Array(length);
@@ -202,7 +212,7 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
     outer:
     for (const key in cache) {
         const mod = cache[key];
-        if (!mod.loaded || !mod?.exports) continue;
+        if (!mod?.loaded || !mod.exports) continue;
 
         for (let j = 0; j < length; j++) {
             const filter = filters[j];
@@ -285,7 +295,7 @@ export function findModuleFactory(...code: CodeFilter) {
     return wreq.m[id];
 }
 
-export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks" | "mapMangledModule", any[]]>;
+export const lazyWebpackSearchHistory: ["proxyLazyWebpack" | "LazyComponentWebpack" | "find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "mapMangledModule" | "extractAndLoadChunks" | "waitFor" | "waitForStore" | "waitForComponent", any[]][] = [];
 
 /**
  * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
@@ -313,7 +323,7 @@ export function proxyLazyWebpack<T = any>(factory: () => T, attempts?: number) {
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
  */
-export function LazyComponentWebpack<T extends object = any>(factory: () => any, attempts?: number) {
+export function LazyComponentWebpack<T extends object = any>(factory: () => ComponentType<T>, attempts?: number) {
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["LazyComponentWebpack", [factory]]);
 
     return LazyComponent<T>(factory, attempts);
@@ -455,6 +465,7 @@ export const mapMangledModule = traceFunction("mapMangledModule", function mapMa
     if (!Array.isArray(code)) code = [code];
     code = code.map(canonicalizeMatch);
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const exports = {} as Record<S, any>;
 
     const id = findModuleId(...code);
@@ -544,8 +555,10 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher: RegExp = D
     }
 
     if (rawChunkIds) {
-        const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map((m: any) => Number(m[1]));
-        await Promise.all(chunkIds.map(id => wreq.e(id)));
+        await Promise.all(Array.from(
+            rawChunkIds.matchAll(ChunkIdsRegex),
+            (m: any) => wreq.e(Number(m[1]))
+        ));
     }
 
     if (wreq.m[entryPointId] == null) {
@@ -591,9 +604,13 @@ export function waitFor(filter: string | PropsFilter | FilterFn, callback: Callb
     else if (typeof filter !== "function")
         throw new Error("filter must be a string, string[] or function, got " + typeof filter);
 
+
     if (cache != null) {
         const [existing, id] = find(filter, { isIndirect: true, isWaitFor: true });
-        if (existing) return void callback(existing, id);
+        if (existing) {
+            callback(existing, id);
+            return;
+        }
     }
 
     subscriptions.set(filter, callback);
@@ -606,7 +623,7 @@ export function waitFor(filter: string | PropsFilter | FilterFn, callback: Callb
  * @returns Mapping of found modules
  */
 export function search(...code: CodeFilter) {
-    const results = {} as Record<number, Function>;
+    const results: Record<string | number, (...args: any) => any> = {};
     const factories = wreq.m;
 
     for (const id in factories) {
@@ -628,7 +645,7 @@ export function search(...code: CodeFilter) {
  * @param id The id of the module to extract
  */
 export function extract(id: string | number) {
-    const mod = wreq.m[id] as Function;
+    const mod: ((...args: any) => any) | undefined = wreq.m[id];
     if (!mod) return null;
 
     const code = `
@@ -640,5 +657,5 @@ export function extract(id: string | number) {
 //# sourceURL=ExtractedWebpackModule${id}
 `;
     const extracted = (0, eval)(code);
-    return extracted as Function;
+    return extracted as (...args: any) => any;
 }

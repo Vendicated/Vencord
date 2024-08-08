@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Parser, useEffect, useState } from "@webpack/common";
-import { Message } from "discord-types/general";
+import type { MessageRecord } from "@vencord/discord-types";
+import { MarkupUtils, useEffect, useState } from "@webpack/common";
 
 import { TranslateIcon } from "./TranslateIcon";
-import { cl, TranslationValue } from "./utils";
+import { cl, type TranslationValue } from "./utils";
 
 const TranslationSetters = new Map<string, (v: TranslationValue) => void>();
 
@@ -28,27 +28,25 @@ export function handleTranslate(messageId: string, data: TranslationValue) {
     TranslationSetters.get(messageId)!(data);
 }
 
-function Dismiss({ onDismiss }: { onDismiss: () => void; }) {
-    return (
-        <button
-            onClick={onDismiss}
-            className={cl("dismiss")}
-        >
-            Dismiss
-        </button>
-    );
-}
+const Dismiss = ({ onDismiss }: { onDismiss: () => void; }) => (
+    <button
+        onClick={onDismiss}
+        className={cl("dismiss")}
+    >
+        Dismiss
+    </button>
+);
 
-export function TranslationAccessory({ message }: { message: Message; }) {
+export function TranslationAccessory({ message }: { message: MessageRecord & { vencordEmbeddedBy?: string[]; }; }) {
     const [translation, setTranslation] = useState<TranslationValue>();
 
     useEffect(() => {
         // Ignore MessageLinkEmbeds messages
-        if ((message as any).vencordEmbeddedBy) return;
+        if (message.vencordEmbeddedBy) return;
 
         TranslationSetters.set(message.id, setTranslation);
 
-        return () => void TranslationSetters.delete(message.id);
+        return () => { TranslationSetters.delete(message.id); };
     }, []);
 
     if (!translation) return null;
@@ -56,9 +54,9 @@ export function TranslationAccessory({ message }: { message: Message; }) {
     return (
         <span className={cl("accessory")}>
             <TranslateIcon width={16} height={16} />
-            {Parser.parse(translation.text)}
+            {MarkupUtils.parse(translation.text)}
             {" "}
-            (translated from {translation.sourceLanguage} - <Dismiss onDismiss={() => setTranslation(undefined)} />)
+            translated from {translation.sourceLanguage} - <Dismiss onDismiss={() => { setTranslation(undefined); }} />
         </span>
     );
 }

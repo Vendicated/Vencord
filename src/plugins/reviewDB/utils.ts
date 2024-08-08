@@ -20,26 +20,24 @@ import { classNameFactory } from "@api/Styles";
 import { Toasts, UserStore } from "@webpack/common";
 
 import { Auth } from "./auth";
-import { Review, UserType } from "./entities";
+import { type Review, UserType } from "./entities";
 
 export const cl = classNameFactory("vc-rdb-");
 
 export function canDeleteReview(profileId: string, review: Review) {
-    const myId = UserStore.getCurrentUser().id;
-    return (
-        myId === profileId
-        || review.sender.discordID === myId
-        || Auth.user?.type === UserType.Admin
-    );
+    const meId = UserStore.getCurrentUser()!.id;
+    return meId === profileId
+        || review.sender.discordID === meId
+        || Auth.user?.type === UserType.Admin;
 }
 
 export function canBlockReviewAuthor(profileId: string, review: Review) {
-    const myId = UserStore.getCurrentUser().id;
-    return profileId === myId && review.sender.discordID !== myId;
+    const meId = UserStore.getCurrentUser()!.id;
+    return profileId === meId && review.sender.discordID !== meId;
 }
 
 export function canReportReview(review: Review) {
-    return review.sender.discordID !== UserStore.getCurrentUser().id;
+    return review.sender.discordID !== UserStore.getCurrentUser()!.id;
 }
 
 export function showToast(message: string, type = Toasts.Type.MESSAGE) {

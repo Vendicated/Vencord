@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export class ChangeList<T>{
+export class ChangeList<T> {
     private set = new Set<T>();
 
     public get changeCount() {

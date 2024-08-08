@@ -18,6 +18,7 @@ export function NotificationSettings() {
     return (
         <div style={{ padding: "1em 0" }}>
             <Forms.FormTitle tag="h5">Notification Style</Forms.FormTitle>
+            {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
             {settings.useNative !== "never" && Notification?.permission === "denied" && (
                 <ErrorCard style={{ padding: "1em" }} className={Margins.bottom8}>
                     <Forms.FormTitle tag="h5">Desktop Notification Permission denied</Forms.FormTitle>
@@ -37,7 +38,7 @@ export function NotificationSettings() {
                     { label: "Only use Desktop notifications when Discord is not focused", value: "not-focused", default: true },
                     { label: "Always use Desktop notifications", value: "always" },
                     { label: "Always use Vencord notifications", value: "never" },
-                ] satisfies Array<{ value: typeof settings["useNative"]; } & Record<string, any>>}
+                ] satisfies ({ value: typeof settings["useNative"]; } & Record<string, any>)[]}
                 closeOnSelect={true}
                 select={v => settings.useNative = v}
                 isSelected={v => v === settings.useNative}
@@ -51,7 +52,7 @@ export function NotificationSettings() {
                 options={[
                     { label: "Bottom Right", value: "bottom-right", default: true },
                     { label: "Top Right", value: "top-right" },
-                ] satisfies Array<{ value: typeof settings["position"]; } & Record<string, any>>}
+                ] satisfies ({ value: typeof settings["position"]; } & Record<string, any>)[]}
                 select={v => settings.position = v}
                 isSelected={v => v === settings.position}
                 serialize={identity}

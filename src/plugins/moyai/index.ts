@@ -21,15 +21,15 @@ import { makeRange } from "@components/PluginSettings/components/SettingSliderCo
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
+import { type MessageReactionEmoji, type MessageRecord, MessageState } from "@vencord/discord-types";
 import { RelationshipStore, SelectedChannelStore, UserStore } from "@webpack/common";
-import { Message, ReactionEmoji } from "discord-types/general";
 
 interface IMessageCreate {
     type: "MESSAGE_CREATE";
     optimistic: boolean;
     isPushNotification: boolean;
     channelId: string;
-    message: Message;
+    message: MessageRecord;
 }
 
 interface IReactionAdd {
@@ -38,13 +38,13 @@ interface IReactionAdd {
     channelId: string;
     messageId: string;
     messageAuthorId: string;
-    userId: "195136840355807232";
-    emoji: ReactionEmoji;
+    userId: string;
+    emoji: MessageReactionEmoji;
 }
 
 interface IVoiceChannelEffectSendEvent {
     type: string;
-    emoji?: ReactionEmoji; // Just in case...
+    emoji?: MessageReactionEmoji; // Just in case...
     channelId: string;
     userId: string;
     animationType: number;
@@ -97,11 +97,11 @@ export default definePlugin({
     settings,
 
     flux: {
-        async MESSAGE_CREATE({ optimistic, type, message, channelId }: IMessageCreate) {
-            if (optimistic || type !== "MESSAGE_CREATE") return;
-            if (message.state === "SENDING") return;
-            if (settings.store.ignoreBots && message.author?.bot) return;
-            if (settings.store.ignoreBlocked && RelationshipStore.isBlocked(message.author?.id)) return;
+        async MESSAGE_CREATE({ optimistic, message, channelId }: IMessageCreate) {
+            if (optimistic) return;
+            if (message.state === MessageState.SENDING) return;
+            if (settings.store.ignoreBots && message.author.bot) return;
+            if (settings.store.ignoreBlocked && RelationshipStore.isBlocked(message.author.id)) return;
             if (!message.content) return;
             if (channelId !== SelectedChannelStore.getChannelId()) return;
 
@@ -113,8 +113,8 @@ export default definePlugin({
             }
         },
 
-        MESSAGE_REACTION_ADD({ optimistic, type, channelId, userId, messageAuthorId, emoji }: IReactionAdd) {
-            if (optimistic || type !== "MESSAGE_REACTION_ADD") return;
+        MESSAGE_REACTION_ADD({ optimistic, channelId, userId, messageAuthorId, emoji }: IReactionAdd) {
+            if (optimistic) return;
             if (settings.store.ignoreBots && UserStore.getUser(userId)?.bot) return;
             if (settings.store.ignoreBlocked && RelationshipStore.isBlocked(messageAuthorId)) return;
             if (channelId !== SelectedChannelStore.getChannelId()) return;

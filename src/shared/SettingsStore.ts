@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { LiteralUnion } from "type-fest";
+import type { LiteralUnion } from "type-fest";
 
 // Resolves a possibly nested prop in the form of "some.nested.prop" to type of T.some.nested.prop
 type ResolvePropDeep<T, P> = P extends `${infer Pre}.${infer Suf}`
     ? Pre extends keyof T
-    ? ResolvePropDeep<T[Pre], Suf>
-    : any
+        ? ResolvePropDeep<T[Pre], Suf>
+        : any
     : P extends keyof T
-    ? T[P]
-    : any;
+        ? T[P]
+        : any;
 
 interface SettingsStoreOptions {
     readOnly?: boolean;
@@ -51,7 +51,7 @@ export class SettingsStore<T extends object> {
         Object.assign(this, options);
     }
 
-    private makeProxy(object: any, root: T = object, path: string = "") {
+    private makeProxy(object: any, root: T = object, path: string = ""): any {
         const self = this;
 
         return new Proxy(object, {
@@ -67,6 +67,8 @@ export class SettingsStore<T extends object> {
                     });
                 }
 
+                // This cannot be replaced with a call to 'isObject' from '@utils/misc'.
+                // '@utils/misc' will error when imported in the main process.
                 if (typeof v === "object" && v !== null && !Array.isArray(v))
                     return self.makeProxy(v, root, `${path}${path && "."}${key}`);
 
@@ -78,8 +80,8 @@ export class SettingsStore<T extends object> {
                 Reflect.set(target, key, value);
                 const setPath = `${path}${path && "."}${key}`;
 
-                self.globalListeners.forEach(cb => cb(value, setPath));
-                self.pathListeners.get(setPath)?.forEach(cb => cb(value));
+                self.globalListeners.forEach(cb => { cb(value, setPath); });
+                self.pathListeners.get(setPath)?.forEach(cb => { cb(value); });
 
                 return true;
             }
@@ -103,18 +105,19 @@ export class SettingsStore<T extends object> {
         if (pathToNotify) {
             let v = value;
 
-            const path = pathToNotify.split(".");
-            for (const p of path) {
+            for (const [p] of pathToNotify.matchAll(/[^.]*/g)) {
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 if (!v) {
                     console.warn(
                         `Settings#setData: Path ${pathToNotify} does not exist in new data. Not dispatching update`
                     );
                     return;
                 }
+                // @ts-expect-error
                 v = v[p];
             }
 
-            this.pathListeners.get(pathToNotify)?.forEach(cb => cb(v));
+            this.pathListeners.get(pathToNotify)?.forEach(cb => { cb(v); });
         }
 
         this.markAsChanged();
@@ -177,6 +180,6 @@ export class SettingsStore<T extends object> {
      * Call all global change listeners
      */
     public markAsChanged() {
-        this.globalListeners.forEach(cb => cb(this.plain, ""));
+        this.globalListeners.forEach(cb => { cb(this.plain, ""); });
     }
 }

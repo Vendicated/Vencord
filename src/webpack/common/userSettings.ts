@@ -6,7 +6,7 @@
 
 import { findLazy } from "@webpack";
 
-export const UserSettingsActionCreators = {
+export const UserSettingsProtoActionCreators = {
     FrecencyUserSettingsActionCreators: findLazy(m => m.ProtoClass?.typeName?.endsWith(".FrecencyUserSettings")),
     PreloadedUserSettingsActionCreators: findLazy(m => m.ProtoClass?.typeName?.endsWith(".PreloadedUserSettings")),
 };

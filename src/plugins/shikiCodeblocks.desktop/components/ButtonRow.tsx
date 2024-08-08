@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Clipboard } from "@webpack/common";
+import { ClipboardUtils } from "@webpack/common";
+import type { ReactElement } from "react";
 
 import { cl } from "../utils/misc";
 import { CopyButton } from "./CopyButton";
@@ -27,9 +28,9 @@ export interface ButtonRowProps {
 }
 
 export function ButtonRow({ content, theme }: ButtonRowProps) {
-    const buttons: JSX.Element[] = [];
+    const buttons: ReactElement[] = [];
 
-    if (Clipboard.SUPPORTS_COPY) {
+    if (ClipboardUtils.SUPPORTS_COPY) {
         buttons.push(
             <CopyButton
                 content={content}

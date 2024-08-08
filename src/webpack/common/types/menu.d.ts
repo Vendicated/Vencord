@@ -23,11 +23,11 @@ type RC<C> = ComponentType<PropsWithChildren<C & Record<string, any>>>;
 export interface Menu {
     Menu: RC<{
         navId: string;
-        onClose(): void;
+        onClose: () => void;
         className?: string;
         style?: CSSProperties;
         hideScroller?: boolean;
-        onSelect?(): void;
+        onSelect?: () => void;
     }>;
     MenuSeparator: ComponentType;
     MenuGroup: RC<{
@@ -36,12 +36,12 @@ export interface Menu {
     MenuItem: RC<{
         id: string;
         label: ReactNode;
-        action?(e: MouseEvent): void;
+        action?: (e: MouseEvent) => void;
         icon?: ComponentType<any>;
 
         color?: string;
         render?: ComponentType<any>;
-        onChildrenScroll?: Function;
+        onChildrenScroll?: (...args: any[]) => unknown;
         childRowHeight?: number;
         listClassName?: string;
         disabled?: boolean;
@@ -50,7 +50,7 @@ export interface Menu {
         id: string;
         label: string;
         checked: boolean;
-        action?(e: MouseEvent): void;
+        action?: (e: MouseEvent) => void;
         disabled?: boolean;
     }>;
     MenuRadioItem: RC<{
@@ -58,7 +58,7 @@ export interface Menu {
         group: string;
         label: string;
         checked: boolean;
-        action?(e: MouseEvent): void;
+        action?: (e: MouseEvent) => void;
         disabled?: boolean;
     }>;
     MenuControlItem: RC<{
@@ -66,26 +66,25 @@ export interface Menu {
         interactive?: boolean;
     }>;
     MenuSliderControl: RC<{
-        minValue: number,
-        maxValue: number,
-        value: number,
-        onChange(value: number): void,
-        renderValue?(value: number): string,
+        minValue: number;
+        maxValue: number;
+        value: number;
+        onChange: (value: number) => void;
+        renderValue?: (value: number) => string;
     }>;
 }
 
 export interface ContextMenuApi {
-    closeContextMenu(): void;
-    openContextMenu(
+    closeContextMenu: () => void;
+    openContextMenu: (
         event: UIEvent,
         render?: Menu["Menu"],
         options?: { enableSpellCheck?: boolean; },
         renderLazy?: () => Promise<Menu["Menu"]>
-    ): void;
-    openContextMenuLazy(
+    ) => void;
+    openContextMenuLazy: (
         event: UIEvent,
         renderLazy?: () => Promise<Menu["Menu"]>,
         options?: { enableSpellCheck?: boolean; }
-    ): void;
+    ) => void;
 }
-

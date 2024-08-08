@@ -18,13 +18,11 @@
 
 /* eslint-disable no-fallthrough */
 
-// eslint-disable-next-line spaced-comment
-/// <reference types="../src/globals" />
-// eslint-disable-next-line spaced-comment
-/// <reference types="../src/modules" />
+/// <reference types="../src/globals.d.ts" />
+/// <reference types="../src/modules.d.ts" />
 
 import { readFileSync } from "fs";
-import pup, { JSHandle } from "puppeteer-core";
+import pup, { type JSHandle } from "puppeteer-core";
 
 for (const variable of ["DISCORD_TOKEN", "CHROMIUM_BIN"]) {
     if (!process.env[variable]) {
@@ -44,9 +42,9 @@ const page = await browser.newPage();
 await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36");
 await page.setBypassCSP(true);
 
-async function maybeGetError(handle: JSHandle): Promise<string | undefined> {
-    return await (handle as JSHandle<Error>)?.getProperty("message")
-        .then(m => m?.jsonValue())
+async function maybeGetError(handle: JSHandle) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    return (await (handle as JSHandle<Error>)?.getProperty("message"))?.jsonValue()
         .catch(() => undefined);
 }
 
@@ -67,20 +65,20 @@ const report = {
     badWebpackFinds: [] as string[]
 };
 
-const IGNORED_DISCORD_ERRORS = [
+const IGNORED_DISCORD_ERRORS: (RegExp | string)[] = [
     "KeybindStore: Looking for callback action",
     "Unable to process domain list delta: Client revision number is null",
     "Downloading the full bad domains file",
     /\[GatewaySocket\].{0,110}Cannot access '/,
     "search for 'name' in undefined",
     "Attempting to set fast connect zstd when unsupported"
-] as Array<string | RegExp>;
+];
 
 function toCodeBlock(s: string, indentation = 0, isDiscord = false) {
-    s = s.replace(/```/g, "`\u200B`\u200B`");
+    s = s.replaceAll(/```/g, "`\u200B`\u200B`");
 
-    const indentationStr = Array(!isDiscord ? indentation : 0).fill(" ").join("");
-    return `\`\`\`\n${s.split("\n").map(s => indentationStr + s).join("\n")}\n${indentationStr}\`\`\``;
+    const indentationStr = " ".repeat(!isDiscord ? indentation : 0);
+    return `\`\`\`\n${s.replaceAll(/^/gm, indentationStr)}\n${indentationStr}\`\`\``;
 }
 
 async function printReport() {
@@ -101,7 +99,7 @@ async function printReport() {
     console.log();
 
     console.log("## Bad Webpack Finds");
-    report.badWebpackFinds.forEach(p => console.log("- " + toCodeBlock(p, "- ".length)));
+    report.badWebpackFinds.forEach(p => { console.log("- " + toCodeBlock(p, "- ".length)); });
 
     console.log();
 
@@ -128,7 +126,7 @@ async function printReport() {
     console.log();
 
     if (process.env.DISCORD_WEBHOOK) {
-        await fetch(process.env.DISCORD_WEBHOOK, {
+        const res = await fetch(process.env.DISCORD_WEBHOOK, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -174,10 +172,11 @@ async function printReport() {
                     }
                 ]
             })
-        }).then(res => {
-            if (!res.ok) console.error(`Webhook failed with status ${res.status}`);
-            else console.error("Posted to Discord Webhook successfully");
         });
+        if (res.ok)
+            console.error("Posted to Discord Webhook successfully");
+        else
+            console.error(`Webhook failed with status ${res.status}`);
     }
 }
 
@@ -187,11 +186,9 @@ page.on("console", async e => {
 
     async function getText() {
         try {
-            return await Promise.all(
-                e.args().map(async a => {
-                    return await maybeGetError(a) || await a.jsonValue();
-                })
-            ).then(a => a.join(" ").trim());
+            return (await Promise.all(
+                e.args().map(async a => await maybeGetError(a) || await a.jsonValue())
+            )).join(" ").trim();
         } catch {
             return e.text();
         }
@@ -204,17 +201,18 @@ page.on("console", async e => {
 
     outer:
     if (isVencord) {
+        let args: string[];
         try {
-            var args = await Promise.all(e.args().map(a => a.jsonValue()));
+            args = await Promise.all<any[]>(e.args().map(a => a.jsonValue()));
         } catch {
             break outer;
         }
 
-        const [, tag, message, otherMessage] = args as Array<string>;
+        const [, tag, message, otherMessage] = args;
 
         switch (tag) {
             case "WebpackInterceptor:":
-                const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
+                const patchFailMatch = message!.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/);
                 if (!patchFailMatch) break;
 
                 console.error(await getText());
@@ -222,16 +220,16 @@ page.on("console", async e => {
 
                 const [, plugin, type, id, regex] = patchFailMatch;
                 report.badPatches.push({
-                    plugin,
-                    type,
-                    id,
-                    match: regex.replace(/\[A-Za-z_\$\]\[\\w\$\]\*/g, "\\i"),
-                    error: await maybeGetError(e.args()[3])
+                    plugin: plugin!,
+                    type: type!,
+                    id: id!,
+                    match: regex!.replaceAll(/\[A-Za-z_\$\]\[\\w\$\]\*/g, "\\i"),
+                    error: await maybeGetError(e.args()[3]!)
                 });
 
                 break;
             case "PluginManager:":
-                const failedToStartMatch = message.match(/Failed to start (.+)/);
+                const failedToStartMatch = message!.match(/Failed to start (.+)/);
                 if (!failedToStartMatch) break;
 
                 console.error(await getText());
@@ -239,8 +237,8 @@ page.on("console", async e => {
 
                 const [, name] = failedToStartMatch;
                 report.badStarts.push({
-                    plugin: name,
-                    error: await maybeGetError(e.args()[3]) ?? "Unknown error"
+                    plugin: name!,
+                    error: await maybeGetError(e.args()[3]!) ?? "Unknown error"
                 });
 
                 break;
@@ -261,7 +259,7 @@ page.on("console", async e => {
                         process.exit(1);
                     case "Webpack Find Fail:":
                         process.exitCode = 1;
-                        report.badWebpackFinds.push(otherMessage);
+                        report.badWebpackFinds.push(otherMessage!);
                         break;
                     case "Finished test":
                         await browser.close();
@@ -287,7 +285,7 @@ page.on("console", async e => {
     }
 });
 
-page.on("error", e => console.error("[Error]", e.message));
+page.on("error", e => { console.error("[Error]", e.message); });
 page.on("pageerror", e => {
     if (e.message.includes("Sentry successfully disabled")) return;
 
@@ -299,7 +297,7 @@ page.on("pageerror", e => {
     }
 });
 
-async function reporterRuntime(token: string) {
+function reporterRuntime(token: string) {
     Vencord.Webpack.waitFor(
         "loginToken",
         m => {
@@ -310,7 +308,7 @@ async function reporterRuntime(token: string) {
 }
 
 await page.evaluateOnNewDocument(`
-    if (location.host.endsWith("discord.com")) {
+    if (/(?:^|\\.)discord\\.com$/.test(location.hostname)) {
         ${readFileSync("./dist/browser.js", "utf-8")};
         (${reporterRuntime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
     }

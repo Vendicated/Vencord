@@ -18,7 +18,8 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType, PluginNative, SettingsDefinition } from "@utils/types";
+import definePlugin, { OptionType, type PluginNative, type SettingsDefinition } from "@utils/types";
+import type { PlatformType } from "@vencord/discord-types";
 import { showToast, Toasts } from "@webpack/common";
 import type { MouseEvent } from "react";
 
@@ -64,14 +65,14 @@ const UrlReplacementRules: Record<string, URLReplacementRule> = {
 };
 
 const pluginSettings = definePluginSettings(
-    Object.entries(UrlReplacementRules).reduce((acc, [key, rule]) => {
+    Object.entries(UrlReplacementRules).reduce<SettingsDefinition>((acc, [key, rule]) => {
         acc[key] = {
             type: OptionType.BOOLEAN,
             description: rule.description,
             default: true,
         };
         return acc;
-    }, {} as SettingsDefinition)
+    }, {})
 );
 
 
@@ -109,7 +110,7 @@ export default definePlugin({
         }
     ],
 
-    async handleLink(data: { href: string; }, event?: MouseEvent) {
+    async handleLink(data?: { href: string; }, event?: MouseEvent) {
         if (!data) return false;
 
         let url = data.href;
@@ -143,7 +144,7 @@ export default definePlugin({
         return false;
     },
 
-    handleAccountView(e: MouseEvent, platformType: string, userId: string) {
+    handleAccountView(e: MouseEvent, platformType: PlatformType, userId: string) {
         const rule = UrlReplacementRules[platformType];
         if (rule?.accountViewReplace && pluginSettings.store[platformType]) {
             VencordNative.native.openExternal(rule.accountViewReplace(userId));

@@ -24,7 +24,7 @@ import { Link } from "@components/Link";
 import { authorizeCloud, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
 import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
-import { Alerts, Button, Forms, Switch, Tooltip } from "@webpack/common";
+import { AlertActionCreators, Button, Forms, Switch, Tooltip } from "@webpack/common";
 
 import { SettingsTab, wrapTab } from "./shared";
 
@@ -85,7 +85,7 @@ function SettingsSyncSection() {
                 <Button
                     size={Button.Sizes.SMALL}
                     disabled={!sectionEnabled}
-                    onClick={() => putCloudSettings(true)}
+                    onClick={() => { putCloudSettings(true); }}
                 >
                     Sync to Cloud
                 </Button>
@@ -97,7 +97,7 @@ function SettingsSyncSection() {
                             size={Button.Sizes.SMALL}
                             color={Button.Colors.RED}
                             disabled={!sectionEnabled}
-                            onClick={() => getCloudSettings(true, true)}
+                            onClick={() => { getCloudSettings(true, true); }}
                         >
                             Sync from Cloud
                         </Button>
@@ -107,7 +107,7 @@ function SettingsSyncSection() {
                     size={Button.Sizes.SMALL}
                     color={Button.Colors.RED}
                     disabled={!sectionEnabled}
-                    onClick={() => deleteCloudSettings()}
+                    onClick={() => { deleteCloudSettings(); }}
                 >
                     Delete Cloud Settings
                 </Button>
@@ -148,7 +148,7 @@ function CloudTab() {
                 <CheckedTextInput
                     key="backendUrl"
                     value={settings.cloud.url}
-                    onChange={async v => {
+                    onChange={v => {
                         settings.cloud.url = v;
                         settings.cloud.authenticated = false;
                         deauthorizeCloud();
@@ -172,21 +172,23 @@ function CloudTab() {
                         size={Button.Sizes.MEDIUM}
                         color={Button.Colors.RED}
                         disabled={!settings.cloud.authenticated}
-                        onClick={() => Alerts.show({
-                            title: "Are you sure?",
-                            body: "Once your data is erased, we cannot recover it. There's no going back!",
-                            onConfirm: eraseAllData,
-                            confirmText: "Erase it!",
-                            confirmColor: "vc-cloud-erase-data-danger-btn",
-                            cancelText: "Nevermind"
-                        })}
+                        onClick={() => {
+                            AlertActionCreators.show({
+                                title: "Are you sure?",
+                                body: "Once your data is erased, we cannot recover it. There's no going back!",
+                                onConfirm: eraseAllData,
+                                confirmText: "Erase it!",
+                                confirmColor: "vc-cloud-erase-data-danger-btn",
+                                cancelText: "Nevermind"
+                            });
+                        }}
                     >
                         Erase All Data
                     </Button>
                 </Grid>
 
                 <Forms.FormDivider className={Margins.top16} />
-            </Forms.FormSection >
+            </Forms.FormSection>
             <SettingsSyncSection />
         </SettingsTab>
     );

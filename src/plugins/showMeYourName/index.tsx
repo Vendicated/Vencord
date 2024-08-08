@@ -10,14 +10,14 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message, User } from "discord-types/general";
+import type { MessageRecord, UserRecord } from "@vencord/discord-types";
 
 interface UsernameProps {
     author: { nick: string; };
-    message: Message;
+    message: MessageRecord;
     withMentionPrefix?: boolean;
     isRepliedMessage: boolean;
-    userOverride?: User;
+    userOverride?: UserRecord;
 }
 
 const settings = definePluginSettings({
@@ -62,13 +62,13 @@ export default definePlugin({
             const user = userOverride ?? message.author;
             let { username } = user;
             if (settings.store.displayNames)
-                username = (user as any).globalName || username;
+                username = user.globalName || username;
 
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
 
             if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
-                return <>{prefix}{nick}</>;
+                return prefix + nick;
 
             if (settings.store.mode === "user-nick")
                 return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
@@ -76,9 +76,9 @@ export default definePlugin({
             if (settings.store.mode === "nick-user")
                 return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
 
-            return <>{prefix}{username}</>;
+            return prefix + username;
         } catch {
-            return <>{author?.nick}</>;
+            return author.nick;
         }
     }, { noop: true }),
 });

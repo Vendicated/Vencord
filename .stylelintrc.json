@@ -1,6 +1,13 @@
 {
-    "extends": "stylelint-config-standard",
+    "extends": [
+        "stylelint-config-standard",
+        "@stylistic/stylelint-config"
+    ],
+    "plugins": [
+        "@stylistic/stylelint-plugin"
+    ],
     "rules": {
+        "@stylistic/indentation": 4,
         "selector-class-pattern": [
             "^[a-z][a-zA-Z0-9]*(-[a-z0-9][a-zA-Z0-9]*)*$",
             {

@@ -20,10 +20,11 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, SelectedChannelStore } from "@webpack/common";
 
-const timers = {} as Record<string, {
+const timers: Record<string, {
+    // actually number since this runs in the render process
     timeout?: NodeJS.Timeout;
     i: number;
-}>;
+}> = {};
 
 export default definePlugin({
     name: "VoiceChatDoubleClick",
@@ -57,20 +58,20 @@ export default definePlugin({
         }
     ],
 
-    shouldRunOnClick(e: MouseEvent, { channelId }) {
+    shouldRunOnClick(e: MouseEvent, { channelId }: { channelId: string; }) {
         const channel = ChannelStore.getChannel(channelId);
-        if (!channel || ![2, 13].includes(channel.type)) return true;
+        if (!channel || !channel.isGuildVocal()) return true;
         return e.detail >= 2;
     },
 
     schedule(cb: () => void, e: any) {
-        const id = e.props.channel.id as string;
+        const { id }: { id: string; } = e.props.channel;
         if (SelectedChannelStore.getVoiceChannelId() === id) {
             cb();
             return;
         }
         // use a different counter for each channel
-        const data = (timers[id] ??= { timeout: void 0, i: 0 });
+        const data = (timers[id] ??= { timeout: undefined, i: 0 });
         // clear any existing timer
         clearTimeout(data.timeout);
 

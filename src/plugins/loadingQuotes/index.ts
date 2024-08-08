@@ -17,12 +17,13 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { isTruthy } from "@utils";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import presetQuotesText from "file://quotes.txt";
 
-const presetQuotes = presetQuotesText.split("\n").map(quote => /^\s*[^#\s]/.test(quote) && quote.trim()).filter(Boolean) as string[];
+const presetQuotes = presetQuotesText.split("\n").map(quote => /^\s*[^#\s]/.test(quote) && quote.trim()).filter(isTruthy);
 const noQuotesQuote = "Did you really disable all loading quotes? What a buffoon you are...";
 
 const settings = definePluginSettings({
@@ -83,7 +84,6 @@ export default definePlugin({
 
             if (!enableDiscordPresetQuotes)
                 quotes.length = 0;
-
 
             if (enablePluginPresetQuotes)
                 quotes.push(...presetQuotes);

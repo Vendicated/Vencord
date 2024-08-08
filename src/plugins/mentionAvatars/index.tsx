@@ -10,8 +10,8 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import type { UserRecord } from "@vencord/discord-types";
 import { SelectedGuildStore, useState } from "@webpack/common";
-import { User } from "discord-types/general";
 
 const settings = definePluginSettings({
     showAtSymbol: {
@@ -34,20 +34,21 @@ export default definePlugin({
         }
     }],
 
-    settings,
-
-    renderUsername: ErrorBoundary.wrap((props: { user: User, username: string; }) => {
+    renderUsername: ErrorBoundary.wrap((props: { user?: UserRecord; username: string; }) => {
         const { user, username } = props;
         const [isHovering, setIsHovering] = useState(false);
 
-        if (!user) return <>{getUsernameString(username)}</>;
+        if (!user) return getUsernameString(username);
 
         return (
             <span
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
+                onMouseEnter={() => { setIsHovering(true); }}
+                onMouseLeave={() => { setIsHovering(false); }}
             >
-                <img src={user.getAvatarURL(SelectedGuildStore.getGuildId(), 16, isHovering)} className="vc-mentionAvatars-avatar" />
+                <img
+                    src={user.getAvatarURL(SelectedGuildStore.getGuildId(), 16, isHovering)}
+                    className="vc-mentionAvatars-avatar"
+                />
                 {getUsernameString(username)}
             </span>
         );

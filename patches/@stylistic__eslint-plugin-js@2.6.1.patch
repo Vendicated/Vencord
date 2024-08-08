@@ -1,0 +1,55 @@
+diff --git a/dist/brace-style.js b/dist/brace-style.js
+index 902b38461fd7339d0c93a5cd2d7da0250c09952b..084c44dfa38816c6a446e146f30d7b1971994696 100644
+--- a/dist/brace-style.js
++++ b/dist/brace-style.js
+@@ -2,6 +2,41 @@
+ 
+ var utils = require('./utils.js');
+ 
++function* getAllCommentRanges(sourceCode) {
++  for (const { loc } of sourceCode.getAllComments()) {
++    if (!loc) continue;
++    yield [loc.start.line, loc.end.line];
++  }
++}
++
++function createLineSet(length) {
++  return (1n << BigInt(length)) - 1n;
++}
++
++function isTokenOnSameLine(left, right, sourceCode) {
++  const leftEnd = left?.loc?.end.line;
++  const rightStart = right?.loc?.start.line;
++  if (leftEnd === rightStart) return true;
++  if (leftEnd !== undefined && rightStart !== undefined) {
++    if (rightStart - leftEnd <= 1) {
++      for (const [start, end] of getAllCommentRanges(sourceCode))
++        if (start === leftEnd || end === rightStart) return true;
++    } else {
++      const targetLines = createLineSet(rightStart - leftEnd - 1);
++      let totalLines = 0n;
++      for (let [start, end] of getAllCommentRanges(sourceCode)) {
++        if (start < rightStart && end > leftEnd) {
++          start = Math.max(start, leftEnd + 1);
++          end = Math.min(rightStart - 1, end);
++        } else continue;
++        totalLines |= createLineSet(end - start + 1) << BigInt(start - leftEnd - 1);
++        if (totalLines === targetLines) return true;
++      }
++    }
++  }
++  return false;
++}
++
+ var braceStyle = utils.createRule({
+   meta: {
+     type: "layout",
+@@ -85,7 +120,7 @@ var braceStyle = utils.createRule({
+     }
+     function validateCurlyBeforeKeyword(curlyToken) {
+       const keywordToken = sourceCode.getTokenAfter(curlyToken);
+-      if (style === "1tbs" && !utils.isTokenOnSameLine(curlyToken, keywordToken)) {
++      if (style === "1tbs" && !isTokenOnSameLine(curlyToken, keywordToken, sourceCode)) {
+         context.report({
+           node: curlyToken,
+           messageId: "nextLineClose",

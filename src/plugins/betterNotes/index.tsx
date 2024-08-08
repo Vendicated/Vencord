@@ -23,7 +23,7 @@ import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
-const UserPopoutSectionCssClasses = findByPropsLazy("section", "lastSection");
+const UserPopoutSectionCssClasses: Record<string, string> = findByPropsLazy("section", "lastSection");
 
 const settings = definePluginSettings({
     hide: {
@@ -35,7 +35,7 @@ const settings = definePluginSettings({
     noSpellCheck: {
         type: OptionType.BOOLEAN,
         description: "Disable spellcheck in notes",
-        disabled: () => Settings.plugins.BetterNotesBox.hide,
+        disabled: () => Settings.plugins.BetterNotesBox!.hide,
         default: false
     }
 });
@@ -84,9 +84,7 @@ export default definePlugin({
 
     patchPadding: ErrorBoundary.wrap(({ lastSection }) => {
         if (!lastSection) return null;
-        return (
-            <div className={UserPopoutSectionCssClasses.lastSection} ></div>
-        );
+        return <div className={UserPopoutSectionCssClasses.lastSection} />;
     }),
 
     get noSpellCheck() {

@@ -16,26 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Guild, GuildMember, User } from "discord-types/general";
+import type { UserJSON } from "@api/Commands";
+import type { ChannelRecord, DisplayProfile, DMChannelRecord, GuildMember, GuildRecord, StatusType, UserProfileStore, UserRecord, UserStore } from "@vencord/discord-types";
+import type { ExpressionPickerViewType } from "@webpack/common";
 import type { ReactNode } from "react";
-import { LiteralUnion } from "type-fest";
 
-import type { FluxEvents } from "./fluxEvents";
-import { i18nMessages } from "./i18nMessages";
-
-export { FluxEvents };
-
-export interface FluxDispatcher {
-    _actionHandlers: any;
-    _subscriptions: any;
-    dispatch(event: { [key: string]: unknown; type: FluxEvents; }): Promise<void>;
-    isDispatching(): boolean;
-    subscribe(event: FluxEvents, callback: (data: any) => void): void;
-    unsubscribe(event: FluxEvents, callback: (data: any) => void): void;
-    wait(callback: () => void): void;
-}
-
-export type Parser = Record<
+export type MarkupUtils = Record<
     | "parse"
     | "parseTopic"
     | "parseEmbedTitle"
@@ -48,30 +34,34 @@ export type Parser = Record<
     (content: string, inline?: boolean, state?: Record<string, any>) => ReactNode[]
 > & Record<"defaultRules" | "guildEventRules", Record<string, Record<"react" | "html" | "parse" | "match" | "order", any>>>;
 
-export interface Alerts {
-    show(alert: {
-        title: any;
-        body: React.ReactNode;
-        className?: string;
-        confirmColor?: string;
-        cancelText?: string;
-        confirmText?: string;
-        secondaryConfirmText?: string;
-        onCancel?(): void;
-        onConfirm?(): void;
-        onConfirmSecondary?(): void;
-        onCloseCallback?(): void;
-    }): void;
-    /** This is a noop, it does nothing. */
-    close(): void;
+export interface Alert {
+    body: ReactNode;
+    cancelText?: string;
+    className?: string;
+    confirmColor?: string;
+    confirmText?: string;
+    onCancel?: () => void;
+    onCloseCallback?: () => void;
+    onConfirm?: () => void;
+    onConfirmSecondary?: () => void;
+    secondaryConfirmText?: string;
+    title?: string;
+    titleClassName?: string;
+}
+
+export interface AlertActionCreators {
+    /** This is a noop; it does nothing. */
+    close: () => void;
+    confirm: (alert: Alert) => Promise<boolean>;
+    show: (alert: Alert) => void;
 }
 
 export interface SnowflakeUtils {
-    fromTimestamp(timestamp: number): string;
-    extractTimestamp(snowflake: string): number;
-    age(snowflake: string): number;
-    atPreviousMillisecond(snowflake: string): string;
-    compare(snowflake1?: string, snowflake2?: string): number;
+    fromTimestamp: (timestamp: number) => string;
+    extractTimestamp: (snowflake: string) => number;
+    age: (snowflake: string) => number;
+    atPreviousMillisecond: (snowflake: string) => string;
+    compare: (snowflake1?: string, snowflake2?: string) => number;
 }
 
 interface RestRequestData {
@@ -84,113 +74,40 @@ interface RestRequestData {
 
 export type RestAPI = Record<"del" | "get" | "patch" | "post" | "put", (data: RestRequestData) => Promise<any>>;
 
-export type Permissions = "CREATE_INSTANT_INVITE"
-    | "KICK_MEMBERS"
-    | "BAN_MEMBERS"
-    | "ADMINISTRATOR"
-    | "MANAGE_CHANNELS"
-    | "MANAGE_GUILD"
-    | "CHANGE_NICKNAME"
-    | "MANAGE_NICKNAMES"
-    | "MANAGE_ROLES"
-    | "MANAGE_WEBHOOKS"
-    | "MANAGE_GUILD_EXPRESSIONS"
-    | "CREATE_GUILD_EXPRESSIONS"
-    | "VIEW_AUDIT_LOG"
-    | "VIEW_CHANNEL"
-    | "VIEW_GUILD_ANALYTICS"
-    | "VIEW_CREATOR_MONETIZATION_ANALYTICS"
-    | "MODERATE_MEMBERS"
-    | "SEND_MESSAGES"
-    | "SEND_TTS_MESSAGES"
-    | "MANAGE_MESSAGES"
-    | "EMBED_LINKS"
-    | "ATTACH_FILES"
-    | "READ_MESSAGE_HISTORY"
-    | "MENTION_EVERYONE"
-    | "USE_EXTERNAL_EMOJIS"
-    | "ADD_REACTIONS"
-    | "USE_APPLICATION_COMMANDS"
-    | "MANAGE_THREADS"
-    | "CREATE_PUBLIC_THREADS"
-    | "CREATE_PRIVATE_THREADS"
-    | "USE_EXTERNAL_STICKERS"
-    | "SEND_MESSAGES_IN_THREADS"
-    | "SEND_VOICE_MESSAGES"
-    | "CONNECT"
-    | "SPEAK"
-    | "MUTE_MEMBERS"
-    | "DEAFEN_MEMBERS"
-    | "MOVE_MEMBERS"
-    | "USE_VAD"
-    | "PRIORITY_SPEAKER"
-    | "STREAM"
-    | "USE_EMBEDDED_ACTIVITIES"
-    | "USE_SOUNDBOARD"
-    | "USE_EXTERNAL_SOUNDS"
-    | "REQUEST_TO_SPEAK"
-    | "MANAGE_EVENTS"
-    | "CREATE_EVENTS";
+export type PermissionsKeys = "CREATE_INSTANT_INVITE" | "KICK_MEMBERS" | "BAN_MEMBERS" | "ADMINISTRATOR" | "MANAGE_CHANNELS" | "MANAGE_GUILD" | "ADD_REACTIONS" | "VIEW_AUDIT_LOG" | "PRIORITY_SPEAKER" | "STREAM" | "VIEW_CHANNEL" | "SEND_MESSAGES" | "SEND_TTS_MESSAGES" | "MANAGE_MESSAGES" | "EMBED_LINKS" | "ATTACH_FILES" | "READ_MESSAGE_HISTORY" | "MENTION_EVERYONE" | "USE_EXTERNAL_EMOJIS" | "VIEW_GUILD_ANALYTICS" | "CONNECT" | "SPEAK" | "MUTE_MEMBERS" | "DEAFEN_MEMBERS" | "MOVE_MEMBERS" | "USE_VAD" | "CHANGE_NICKNAME" | "MANAGE_NICKNAMES" | "MANAGE_ROLES" | "MANAGE_WEBHOOKS" | "MANAGE_GUILD_EXPRESSIONS" | "USE_APPLICATION_COMMANDS" | "REQUEST_TO_SPEAK" | "MANAGE_EVENTS" | "MANAGE_THREADS" | "CREATE_PUBLIC_THREADS" | "CREATE_PRIVATE_THREADS" | "USE_EXTERNAL_STICKERS" | "SEND_MESSAGES_IN_THREADS" | "USE_EMBEDDED_ACTIVITIES" | "MODERATE_MEMBERS" | "VIEW_CREATOR_MONETIZATION_ANALYTICS" | "USE_SOUNDBOARD" | "CREATE_GUILD_EXPRESSIONS" | "CREATE_EVENTS" | "USE_EXTERNAL_SOUNDS" | "SEND_VOICE_MESSAGES" | "USE_CLYDE_AI" | "SET_VOICE_CHANNEL_STATUS" | "SEND_POLLS" | "USE_EXTERNAL_APPS";
 
-export type PermissionsBits = Record<Permissions, bigint>;
+export type Permissions = Record<PermissionsKeys, bigint>;
 
-export interface Locale {
-    name: string;
-    value: string;
-    localizedName: string;
-}
-
-export interface LocaleInfo {
-    code: string;
-    enabled: boolean;
-    name: string;
-    englishName: string;
-    postgresLang: string;
-}
-
-export interface i18n {
-    getAvailableLocales(): Locale[];
-    getLanguages(): LocaleInfo[];
-    getDefaultLocale(): string;
-    getLocale(): string;
-    getLocaleInfo(): LocaleInfo;
-    setLocale(locale: string): void;
-
-    loadPromise: Promise<void>;
-
-    Messages: Record<i18nMessages, any>;
-}
-
-export interface Clipboard {
-    copy(text: string): void;
+export interface ClipboardUtils {
+    copy: (text: string) => void;
     SUPPORTS_COPY: boolean;
 }
 
-export interface NavigationRouter {
-    back(): void;
-    forward(): void;
-    transitionTo(path: string, ...args: unknown[]): void;
-    transitionToGuild(guildId: string, ...args: unknown[]): void;
+export interface RouterUtils {
+    back: () => void;
+    forward: () => void;
+    transitionTo: (path: string, ...args: unknown[]) => void;
+    transitionToGuild: (guildId: string, ...args: unknown[]) => void;
 }
 
 export interface IconUtils {
-    getUserAvatarURL(user: User, canAnimate?: boolean, size?: number, format?: string): string;
-    getDefaultAvatarURL(id: string, discriminator?: string): string;
-    getUserBannerURL(data: { id: string, banner: string, canAnimate?: boolean, size: number; }): string | undefined;
-    getAvatarDecorationURL(dara: { avatarDecoration: string, size: number; canCanimate?: boolean; }): string | undefined;
+    getUserAvatarURL: (user: UserRecord, canAnimate?: boolean, size?: number, format?: string) => string;
+    getDefaultAvatarURL: (id: string, discriminator?: string) => string;
+    getUserBannerURL: (data: { id: string; banner: string; canAnimate?: boolean; size: number; }) => string | undefined;
+    getAvatarDecorationURL: (data: { avatarDecoration: string; size: number; canCanimate?: boolean; }) => string | undefined;
 
-    getGuildMemberAvatarURL(member: GuildMember, canAnimate?: string): string | null;
-    getGuildMemberAvatarURLSimple(data: { guildId: string, userId: string, avatar: string, canAnimate?: boolean; size?: number; }): string;
-    getGuildMemberBannerURL(data: { id: string, guildId: string, banner: string, canAnimate?: boolean, size: number; }): string | undefined;
+    getGuildMemberAvatarURL: (member: GuildMember, canAnimate?: string) => string | null;
+    getGuildMemberAvatarURLSimple: (data: { guildId: string; userId: string; avatar: string; canAnimate?: boolean; size?: number; }) => string;
+    getGuildMemberBannerURL: (data: { id: string; guildId: string; banner: string; canAnimate?: boolean; size: number; }) => string | undefined;
 
-    getGuildIconURL(data: { id: string, icon?: string, size?: number, canAnimate?: boolean; }): string | undefined;
-    getGuildBannerURL(guild: Guild, canAnimate?: boolean): string | null;
+    getGuildIconURL: (data: { id: string; icon?: string; size?: number; canAnimate?: boolean; }) => string | undefined;
+    getGuildBannerURL: (guild: GuildRecord, canAnimate?: boolean) => string | null;
 
-    getChannelIconURL(data: { id: string; icon?: string; applicationId?: string; size?: number; }): string | undefined;
-    getEmojiURL(data: { id: string, animated: boolean, size: number, forcePNG?: boolean; }): string;
+    getChannelIconURL: (data: { id: string; icon?: string | null; applicationId?: string; size?: number; }) => string | undefined;
+    getEmojiURL: (data: { id: string; animated: boolean; size: number; forcePNG?: boolean; }) => string;
 
-    hasAnimatedGuildIcon(guild: Guild): boolean;
-    isAnimatedIconHash(hash: string): boolean;
+    hasAnimatedGuildIcon: (guild: GuildRecord) => boolean;
+    isAnimatedIconHash: (hash: string) => boolean;
 
     getGuildSplashURL: any;
     getGuildDiscoverySplashURL: any;
@@ -223,9 +140,13 @@ export interface Constants {
     FriendsSections: Record<string, string>;
 }
 
+// zustand store
 export interface ExpressionPickerStore {
-    closeExpressionPicker(activeViewType?: any): void;
-    openExpressionPicker(activeView: LiteralUnion<"emoji" | "gif" | "sticker", string>, activeViewType?: any): void;
+    closeExpressionPicker: (activeViewType?: Record<string, any> | null) => void;
+    openExpressionPicker: (
+        activeView: ExpressionPickerViewType | null,
+        activeViewType: Record<string, any> | null
+    ) => void;
 }
 
 export interface BrowserWindowFeatures {
@@ -251,68 +172,50 @@ export interface BrowserWindowFeatures {
     backgroundColor?: string;
 }
 
-export interface PopoutActions {
-    open(key: string, render: (windowKey: string) => ReactNode, features?: BrowserWindowFeatures);
-    close(key: string): void;
-    setAlwaysOnTop(key: string, alwaysOnTop: boolean): void;
+export interface PopoutWindowActionCreators {
+    close: (key: string) => Promise<void>;
+    open: (
+        key: string,
+        render: (windowKey: string) => ReactNode,
+        features?: BrowserWindowFeatures
+    ) => Promise<void>;
+    setAlwaysOnTop: (key: string, alwaysOnTop: boolean) => Promise<void>;
 }
 
-export type UserNameUtilsTagInclude = LiteralUnion<"auto" | "always" | "never", string>;
-export interface UserNameUtilsTagOptions {
-    forcePomelo?: boolean;
-    identifiable?: UserNameUtilsTagInclude;
-    decoration?: UserNameUtilsTagInclude;
-    mode?: "full" | "username";
+export type UserUtilsTagInclude = "always" | "auto" | "never";
+export interface UserUtilsTagOptions {
+    decoration?: UserUtilsTagInclude | undefined;
+    forcePomelo?: boolean | undefined;
+    identifiable?: UserUtilsTagInclude | undefined;
+    mode?: "full" | "username" | undefined;
 }
 
-export interface UsernameUtils {
-    getGlobalName(user: User): string;
-    getFormattedName(user: User, useTagInsteadOfUsername?: boolean): string;
-    getName(user: User): string;
-    useName(user: User): string;
-    getUserTag(user: User, options?: UserNameUtilsTagOptions): string;
-    useUserTag(user: User, options?: UserNameUtilsTagOptions): string;
-
-
-    useDirectMessageRecipient: any;
-    humanizeStatus: any;
-}
-
-export class DisplayProfile {
-    userId: string;
-    banner?: string;
-    bio?: string;
-    pronouns?: string;
-    accentColor?: number;
-    themeColors?: number[];
-    popoutAnimationParticleType?: any;
-    profileEffectId?: string;
-    _userProfile?: any;
-    _guildMemberProfile?: any;
-    canUsePremiumProfileCustomization: boolean;
-    canEditThemes: boolean;
-    premiumGuildSince: Date | null;
-    premiumSince: Date | null;
-    premiumType?: number;
-    primaryColor?: number;
-
-    getBadges(): Array<{
-        id: string;
-        description: string;
-        icon: string;
-        link?: string;
-    }>;
-    getBannerURL(options: { canAnimate: boolean; size: number; }): string;
-    getLegacyUsername(): string | null;
-    hasFullProfile(): boolean;
-    hasPremiumCustomization(): boolean;
-    hasThemeColors(): boolean;
-    isUsingGuildMemberBanner(): boolean;
-    isUsingGuildMemberBio(): boolean;
-    isUsingGuildMemberPronouns(): boolean;
+export interface UserUtils {
+    getFormattedName: (
+        user?: UserRecord | UserJSON | null,
+        useTagInsteadOfUsername?: boolean /* = false */
+    ) => string;
+    getGlobalName: (user?: UserRecord | UserJSON | null) => string | undefined;
+    getName: <User extends UserRecord | UserJSON | null | undefined>(user: User) => User extends {} ? string : undefined;
+    getUserTag: (user?: UserRecord | UserJSON | null, options?: UserUtilsTagOptions) => string;
+    humanizeStatus: <Status extends string>(
+        status: Status,
+        mobile?: boolean /* = false */
+    ) => Status extends Exclude<StatusType, StatusType.UNKNOWN> ? string : null;
+    useDirectMessageRecipient: <Channel extends ChannelRecord | null | undefined>(channel: Channel) => Channel extends {}
+        ? Channel extends DMChannelRecord ? UserRecord | undefined : null : undefined;
+    useName: <User extends UserRecord | UserJSON | null | undefined>(user: User) => User extends {} ? string : undefined;
+    useUserTag: (user?: UserRecord | UserJSON | null, options?: UserUtilsTagOptions) => string;
 }
 
 export interface DisplayProfileUtils {
-    getDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
-    useDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
+    getDisplayProfile: (
+        userId: string,
+        guildId?: string | null,
+        stores?: [
+            Pick<UserStore, "getUser">,
+            Pick<UserProfileStore, "getGuildMemberProfile" | "getUserProfile">
+        ] /* = [UserStore, UserProfileStore] */
+    ) => DisplayProfile | null;
+    useDisplayProfile: (userId: string, guildId?: string | null) => DisplayProfile | null;
 }

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { CSSProperties } from "react";
+import type { CSSProperties, JSX } from "react";
 
 interface Props {
     columns: number;

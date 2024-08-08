@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Clipboard, Toasts } from "@webpack/common";
+import { ClipboardUtils, Toasts } from "@webpack/common";
+import type { IsAny } from "type-fest";
 
 import { DevsById } from "./constants";
 
@@ -24,39 +25,40 @@ import { DevsById } from "./constants";
  * Calls .join(" ") on the arguments
  * classes("one", "two") => "one two"
  */
-export function classes(...classes: Array<string | null | undefined | false>) {
-    return classes.filter(Boolean).join(" ");
-}
+export const classes = (...classes: (string | false | null | undefined)[]) =>
+    classes.filter(Boolean).join(" ");
 
 /**
  * Returns a promise that resolves after the specified amount of time
  */
-export function sleep(ms: number): Promise<void> {
-    return new Promise(r => setTimeout(r, ms));
-}
+export const sleep = (ms: number) => new Promise<void>(r => { setTimeout(r, ms); });
 
-export function copyWithToast(text: string, toastMessage = "Copied to clipboard!") {
-    if (Clipboard.SUPPORTS_COPY) {
-        Clipboard.copy(text);
+export function copyWithToast(text: string, toastMessage?: string) {
+    let type: number;
+    if (ClipboardUtils.SUPPORTS_COPY) {
+        ClipboardUtils.copy(text);
+        toastMessage ??= "Copied to clipboard!";
+        type = Toasts.Type.SUCCESS;
     } else {
         toastMessage = "Your browser does not support copying to clipboard";
+        type = Toasts.Type.FAILURE;
     }
     Toasts.show({
         message: toastMessage,
         id: Toasts.genId(),
-        type: Toasts.Type.SUCCESS
+        type
     });
 }
 
 /**
  * Check if obj is a true object: of type "object" and not null or array
  */
-export function isObject(obj: unknown): obj is object {
+export function isObject<T>(obj: T): obj is IsAny<T> extends true ? any : unknown extends T ? Extract<object, T> : Exclude<T & object, readonly unknown[]> {
     return typeof obj === "object" && obj !== null && !Array.isArray(obj);
 }
 
 /**
- * Check if an object is empty or in other words has no own properties
+ * Checks if an object has no own enumerable non-symbol properties
  */
 export function isObjectEmpty(obj: object) {
     for (const k in obj)
@@ -80,13 +82,13 @@ export function parseUrl(urlString: string): URL | null {
 /**
  * Checks whether an element is on screen
  */
-export const checkIntersecting = (el: Element) => {
+export function checkIntersecting(el: Element) {
     const elementBox = el.getBoundingClientRect();
     const documentHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
     return !(elementBox.bottom < 0 || elementBox.top - documentHeight >= 0);
-};
+}
 
-export function identity<T>(value: T): T {
+export function identity<T>(value: T) {
     return value;
 }
 
@@ -94,7 +96,7 @@ export function identity<T>(value: T): T {
 // "In summary, we recommend looking for the string Mobi anywhere in the User Agent to detect a mobile device."
 export const isMobile = navigator.userAgent.includes("Mobi");
 
-export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);
+export const isPluginDev = (id?: string | null) => id != null && Object.hasOwn(DevsById, id);
 
 export function pluralise(amount: number, singular: string, plural = singular + "s") {
     return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`;

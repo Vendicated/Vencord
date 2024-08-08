@@ -9,21 +9,27 @@ import "./style.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import type { MessageRecord } from "@vencord/discord-types";
 import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
 import { Timestamp } from "@webpack/common";
-import type { Message } from "discord-types/general";
-import type { HTMLAttributes } from "react";
+import type { PropsWithChildren } from "react";
 
 const { calendarFormat, dateFormat, isSameDay } = mapMangledModuleLazy("millisecondsInUnit:", {
     calendarFormat: filters.byCode("sameElse"),
     dateFormat: filters.byCode('":'),
     isSameDay: filters.byCode("Math.abs(+"),
 });
-const MessageClasses = findByPropsLazy("separator", "latin24CompactTimeStamp");
 
-function Sep(props: HTMLAttributes<HTMLElement>) {
-    return <i className={MessageClasses.separator} aria-hidden={true} {...props} />;
-}
+const MessageClasses: Record<string, string> = findByPropsLazy("separator", "latin24CompactTimeStamp");
+
+const Sep = ({ children }: PropsWithChildren) => (
+    <i
+        className={MessageClasses.separator}
+        aria-hidden={true}
+    >
+        {children}
+    </i>
+);
 
 const enum ReferencedMessageState {
     LOADED = 0,
@@ -31,18 +37,19 @@ const enum ReferencedMessageState {
     DELETED = 2,
 }
 
-type ReferencedMessage = { state: ReferencedMessageState.LOADED; message: Message; } | { state: ReferencedMessageState.NOT_LOADED | ReferencedMessageState.DELETED; };
+type ReferencedMessage = { state: ReferencedMessageState.LOADED; message: MessageRecord; }
+    | { state: ReferencedMessageState.NOT_LOADED | ReferencedMessageState.DELETED; };
 
 function ReplyTimestamp({
     referencedMessage,
     baseMessage,
 }: {
-    referencedMessage: ReferencedMessage,
-    baseMessage: Message;
+    referencedMessage: ReferencedMessage;
+    baseMessage: MessageRecord;
 }) {
     if (referencedMessage.state !== ReferencedMessageState.LOADED) return null;
-    const refTimestamp = referencedMessage.message.timestamp as any;
-    const baseTimestamp = baseMessage.timestamp as any;
+    const refTimestamp = referencedMessage.message.timestamp;
+    const baseTimestamp = baseMessage.timestamp;
     return (
         <Timestamp
             className="vc-reply-timestamp"

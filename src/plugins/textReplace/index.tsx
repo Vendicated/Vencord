@@ -77,15 +77,11 @@ const settings = definePluginSettings({
 });
 
 function stringToRegex(str: string) {
-    const match = str.match(/^(\/)?(.+?)(?:\/([gimsuyv]*))?$/); // Regex to match regex
+    const match = str.match(/^\/?(.+?)(?:\/([gimsuyv]*))?$/); // Regex to match regex
     return match
         ? new RegExp(
-            match[2], // Pattern
-            match[3]
-                ?.split("") // Remove duplicate flags
-                .filter((char, pos, flagArr) => flagArr.indexOf(char) === pos)
-                .join("")
-            ?? "g"
+            match[1]!, // Pattern
+            match[2] ? [...new Set(match[2])].join("") : "g" // Remove duplicate flags
         )
         : new RegExp(str); // Not a regex, return string
 }
@@ -106,7 +102,7 @@ function renderFindError(find: string) {
 function Input({ initialValue, onChange, placeholder }: {
     placeholder: string;
     initialValue: string;
-    onChange(value: string): void;
+    onChange: (value: string) => void;
 }) {
     const [value, setValue] = useState(initialValue);
     return (
@@ -115,7 +111,9 @@ function Input({ initialValue, onChange, placeholder }: {
             value={value}
             onChange={setValue}
             spellCheck={false}
-            onBlur={() => value !== initialValue && onChange(value)}
+            onBlur={() => {
+                if (value !== initialValue) onChange(value);
+            }}
         />
     );
 }
@@ -131,14 +129,18 @@ function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) 
         update();
     }
 
-    async function onChange(e: string, index: number, key: string) {
+    async function onChange(e: string, index: number, key: keyof Rule) {
         if (index === rulesArray.length - 1)
             rulesArray.push(makeEmptyRule());
 
-        rulesArray[index][key] = e;
+        rulesArray[index]![key] = e;
 
-        if (rulesArray[index].find === "" && rulesArray[index].replace === "" && rulesArray[index].onlyIfIncludes === "" && index !== rulesArray.length - 1)
-            rulesArray.splice(index, 1);
+        if (
+            rulesArray[index]!.find === ""
+            && rulesArray[index]!.replace === ""
+            && rulesArray[index]!.onlyIfIncludes === ""
+            && index !== rulesArray.length - 1
+        ) rulesArray.splice(index, 1);
 
         await DataStore.set(rulesKey, rulesArray);
         update();
@@ -148,49 +150,47 @@ function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) 
         <>
             <Forms.FormTitle tag="h4">{title}</Forms.FormTitle>
             <Flex flexDirection="column" style={{ gap: "0.5em" }}>
-                {
-                    rulesArray.map((rule, index) =>
-                        <React.Fragment key={`${rule.find}-${index}`}>
-                            <Flex flexDirection="row" style={{ gap: 0 }}>
-                                <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
-                                    <Input
-                                        placeholder="Find"
-                                        initialValue={rule.find}
-                                        onChange={e => onChange(e, index, "find")}
-                                    />
-                                    <Input
-                                        placeholder="Replace"
-                                        initialValue={rule.replace}
-                                        onChange={e => onChange(e, index, "replace")}
-                                    />
-                                    <Input
-                                        placeholder="Only if includes"
-                                        initialValue={rule.onlyIfIncludes}
-                                        onChange={e => onChange(e, index, "onlyIfIncludes")}
-                                    />
-                                </Flex>
-                                <Button
-                                    size={Button.Sizes.MIN}
-                                    onClick={() => onClickRemove(index)}
-                                    style={{
-                                        background: "none",
-                                        color: "var(--status-danger)",
-                                        ...(index === rulesArray.length - 1
-                                            ? {
-                                                visibility: "hidden",
-                                                pointerEvents: "none"
-                                            }
-                                            : {}
-                                        )
-                                    }}
-                                >
-                                    <DeleteIcon />
-                                </Button>
+                {rulesArray.map((rule, index) => (
+                    <React.Fragment key={`${rule.find}-${index}`}>
+                        <Flex flexDirection="row" style={{ gap: 0 }}>
+                            <Flex flexDirection="row" style={{ flexGrow: 1, gap: "0.5em" }}>
+                                <Input
+                                    placeholder="Find"
+                                    initialValue={rule.find}
+                                    onChange={e => { onChange(e, index, "find"); }}
+                                />
+                                <Input
+                                    placeholder="Replace"
+                                    initialValue={rule.replace}
+                                    onChange={e => { onChange(e, index, "replace"); }}
+                                />
+                                <Input
+                                    placeholder="Only if includes"
+                                    initialValue={rule.onlyIfIncludes}
+                                    onChange={e => { onChange(e, index, "onlyIfIncludes"); }}
+                                />
                             </Flex>
-                            {isRegexRules && renderFindError(rule.find)}
-                        </React.Fragment>
-                    )
-                }
+                            <Button
+                                size={Button.Sizes.MIN}
+                                onClick={() => { onClickRemove(index); }}
+                                style={{
+                                    background: "none",
+                                    color: "var(--status-danger)",
+                                    ...(index === rulesArray.length - 1
+                                        ? {
+                                            visibility: "hidden",
+                                            pointerEvents: "none"
+                                        }
+                                        : {}
+                                    )
+                                }}
+                            >
+                                <DeleteIcon />
+                            </Button>
+                        </Flex>
+                        {isRegexRules && renderFindError(rule.find)}
+                    </React.Fragment>
+                ))}
             </Flex>
         </>
     );
@@ -211,31 +211,26 @@ function applyRules(content: string): string {
     if (content.length === 0)
         return content;
 
-    if (stringRules) {
-        for (const rule of stringRules) {
-            if (!rule.find) continue;
-            if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
+    for (const rule of stringRules) {
+        if (!rule.find) continue;
+        if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
 
-            content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replace(/^\s|\s$/g, "");
+        content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replaceAll(/^\s|\s$/g, "");
+    }
+
+    for (const rule of regexRules) {
+        if (!rule.find) continue;
+        if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
+
+        try {
+            const regex = stringToRegex(rule.find);
+            content = content.replace(regex, rule.replace.replaceAll("\\n", "\n"));
+        } catch (e) {
+            new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
         }
     }
 
-    if (regexRules) {
-        for (const rule of regexRules) {
-            if (!rule.find) continue;
-            if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
-
-            try {
-                const regex = stringToRegex(rule.find);
-                content = content.replace(regex, rule.replace.replaceAll("\\n", "\n"));
-            } catch (e) {
-                new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
-            }
-        }
-    }
-
-    content = content.trim();
-    return content;
+    return content.trim();
 }
 
 const TEXT_REPLACE_RULES_CHANNEL_ID = "1102784112584040479";
@@ -254,8 +249,8 @@ export default definePlugin({
 
         this.preSend = addPreSendListener((channelId, msg) => {
             // Channel used for sharing rules, applying rules here would be messy
-            if (channelId === TEXT_REPLACE_RULES_CHANNEL_ID) return;
-            msg.content = applyRules(msg.content);
+            if (channelId !== TEXT_REPLACE_RULES_CHANNEL_ID)
+                msg.content = applyRules(msg.content);
         });
     },
 

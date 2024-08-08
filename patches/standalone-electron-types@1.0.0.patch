@@ -1,0 +1,64 @@
+diff --git a/electron.d.ts b/electron.d.ts
+index 492b758a13de744b5ddc47ef55e701b993f9aa32..4b571dd945eb1a222c061e93fd7db72314dd89b6 100644
+--- a/electron.d.ts
++++ b/electron.d.ts
+@@ -5,7 +5,12 @@
+ 
+ /// <reference types="node" />
+ 
++declare module "standalone-electron-types" {
++  export = Electron;
++  global {
+ type GlobalEvent = Event & { returnValue: any };
++  }
++}
+ 
+ declare namespace Electron {
+   const NodeEventEmitter: typeof import('events').EventEmitter;
+@@ -1199,6 +1204,7 @@ declare namespace Electron {
+      * `userData` directory on _Linux_ and _Windows_.
+      */
+     setAppLogsPath(path?: string): void;
++    setAppPath(path: string | null): void;
+     /**
+      * Changes the Application User Model ID to `id`.
+      *
+@@ -17599,6 +17605,8 @@ declare module 'electron/renderer' {
+   export = Electron.Renderer
+ }
+ 
++declare module "standalone-electron-types" {
++  global {
+ interface NodeRequireFunction {
+   (moduleName: 'electron'): typeof Electron.CrossProcessExports;
+   (moduleName: 'electron/main'): typeof Electron.Main;
+@@ -17619,17 +17627,21 @@ interface File {
+   */
+   path: string;
+ }
++  }
++}
+ 
+ declare module 'original-fs' {
+   import * as fs from 'fs';
+   export = fs;
+ }
+ 
++declare module "standalone-electron-types" {
++  global {
+ interface Document {
+   createElement(tagName: 'webview'): Electron.WebviewTag;
+ }
+ 
+-declare namespace NodeJS {
++namespace NodeJS {
+   interface Process extends NodeJS.EventEmitter {
+ 
+     // Docs: https://electronjs.org/docs/api/process
+@@ -17840,4 +17852,6 @@ declare namespace NodeJS {
+     readonly electron: string;
+     readonly chrome: string;
+   }
++}
++  }
+ }

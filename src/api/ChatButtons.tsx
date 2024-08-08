@@ -8,73 +8,73 @@ import "./ChatButton.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
+import type { ChannelRecord } from "@vencord/discord-types";
 import { waitFor } from "@webpack";
 import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
-import { Channel } from "discord-types/general";
-import { HTMLProps, MouseEventHandler, ReactNode } from "react";
+import type { ComponentType, HTMLProps, MouseEventHandler, ReactNode } from "react";
 
-let ChannelTextAreaClasses: Record<"button" | "buttonContainer", string>;
-waitFor(["buttonContainer", "channelTextArea"], m => ChannelTextAreaClasses = m);
+let ChannelTextAreaClasses: Record<"button" | "buttonContainer", string> | undefined;
+waitFor(["buttonContainer", "channelTextArea"], m => { ChannelTextAreaClasses = m; });
 
 export interface ChatBarProps {
-    channel: Channel;
+    channel: ChannelRecord;
     disabled: boolean;
     isEmpty: boolean;
     type: {
         analyticsName: string;
         attachments: boolean;
         autocomplete: {
-            addReactionShortcut: boolean,
-            forceChatLayer: boolean,
+            addReactionShortcut: boolean;
+            forceChatLayer: boolean;
             reactions: boolean;
-        },
+        };
         commands: {
             enabled: boolean;
-        },
+        };
         drafts: {
-            type: number,
-            commandType: number,
+            type: number;
+            commandType: number;
             autoSave: boolean;
-        },
+        };
         emojis: {
             button: boolean;
-        },
+        };
         gifs: {
-            button: boolean,
+            button: boolean;
             allowSending: boolean;
-        },
+        };
         gifts: {
             button: boolean;
-        },
+        };
         permissions: {
             requireSendMessages: boolean;
-        },
-        showThreadPromptOnReply: boolean,
+        };
+        showThreadPromptOnReply: boolean;
         stickers: {
-            button: boolean,
-            allowSending: boolean,
+            button: boolean;
+            allowSending: boolean;
             autoSuggest: boolean;
-        },
+        };
         users: {
             allowMentioning: boolean;
-        },
+        };
         submit: {
-            button: boolean,
-            ignorePreference: boolean,
-            disableEnterToSubmit: boolean,
-            clearOnSubmit: boolean,
+            button: boolean;
+            ignorePreference: boolean;
+            disableEnterToSubmit: boolean;
+            clearOnSubmit: boolean;
             useDisabledStylesOnSubmit: boolean;
-        },
-        uploadLongMessages: boolean,
+        };
+        uploadLongMessages: boolean;
         upsellLongMessages: {
             iconOnly: boolean;
-        },
-        showCharacterCount: boolean,
+        };
+        showCharacterCount: boolean;
         sedReplace: boolean;
     };
 }
 
-export type ChatBarButton = (props: ChatBarProps & { isMainChat: boolean; }) => JSX.Element | null;
+export type ChatBarButton = ComponentType<ChatBarProps & { isMainChat: boolean; }>;
 
 const buttonFactories = new Map<string, ChatBarButton>();
 const logger = new Logger("ChatButtons");
@@ -84,7 +84,11 @@ export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
 
     for (const [key, Button] of buttonFactories) {
         buttons.push(
-            <ErrorBoundary noop key={key} onError={e => logger.error(`Failed to render ${key}`, e.error)}>
+            <ErrorBoundary
+                noop
+                key={key}
+                onError={e => { logger.error(`Failed to render ${key}`, e.error); }}
+            >
                 <Button {...props} isMainChat={props.type.analyticsName === "normal"} />
             </ErrorBoundary>
         );

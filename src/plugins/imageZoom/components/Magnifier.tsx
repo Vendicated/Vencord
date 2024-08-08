@@ -18,20 +18,20 @@
 
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { FluxDispatcher, React, useRef, useState } from "@webpack/common";
+import { FluxDispatcher, useLayoutEffect, useRef, useState } from "@webpack/common";
 
 import { ELEMENT_ID } from "../constants";
 import { settings } from "../index";
 import { waitFor } from "../utils/waitFor";
 
 interface Vec2 {
-    x: number,
+    x: number;
     y: number;
 }
 
 export interface MagnifierProps {
     zoom: number;
-    size: number,
+    size: number;
     instance: any;
 }
 
@@ -55,7 +55,7 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
     const imageRef = useRef<HTMLImageElement | null>(null);
 
     // since we accessing document im gonna use useLayoutEffect
-    React.useLayoutEffect(() => {
+    useLayoutEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Shift") {
                 isShiftDown.current = true;
@@ -76,16 +76,14 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
 
             if (instance.state.mouseOver && instance.state.mouseDown) {
                 const offset = size.current / 2;
-                const pos = { x: e.pageX, y: e.pageY };
-                const x = -((pos.x - element.current.getBoundingClientRect().left) * zoom.current - offset);
-                const y = -((pos.y - element.current.getBoundingClientRect().top) * zoom.current - offset);
+                const x = -((e.pageX - element.current.getBoundingClientRect().left) * zoom.current - offset);
+                const y = -((e.pageY - element.current.getBoundingClientRect().top) * zoom.current - offset);
                 setLensPosition({ x: e.x - offset, y: e.y - offset });
                 setImagePosition({ x, y });
                 setOpacity(1);
             } else {
                 setOpacity(0);
             }
-
         };
 
         const onMouseDown = (e: MouseEvent) => {
@@ -111,7 +109,7 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
             }
         };
 
-        const onWheel = async (e: WheelEvent) => {
+        function onWheel(e: WheelEvent) {
             if (instance.state.mouseOver && instance.state.mouseDown && !isShiftDown.current) {
                 const val = zoom.current + ((e.deltaY / 100) * (settings.store.invertScroll ? -1 : 1)) * settings.store.zoomSpeed;
                 zoom.current = val <= 1 ? 1 : val;
@@ -122,14 +120,14 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
                 size.current = val <= 50 ? 50 : val;
                 updateMousePosition(e);
             }
-        };
+        }
 
         waitFor(() => instance.state.readyState === "READY", () => {
             const elem = document.getElementById(ELEMENT_ID) as HTMLDivElement;
             element.current = elem;
             elem.querySelector("img,video")?.setAttribute("draggable", "false");
             if (instance.props.animated) {
-                originalVideoElementRef.current = elem!.querySelector("video")!;
+                originalVideoElementRef.current = elem.querySelector("video")!;
                 originalVideoElementRef.current.addEventListener("timeupdate", syncVideos);
             }
 
@@ -172,36 +170,35 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
                 transform: `translate(${lensPosition.x}px, ${lensPosition.y}px)`,
             }}
         >
-            {instance.props.animated ?
-                (
-                    <video
-                        ref={currentVideoElementRef}
-                        style={{
-                            position: "absolute",
-                            left: `${imagePosition.x}px`,
-                            top: `${imagePosition.y}px`
-                        }}
-                        width={`${box.width * zoom.current}px`}
-                        height={`${box.height * zoom.current}px`}
-                        poster={instance.props.src}
-                        src={originalVideoElementRef.current?.src ?? instance.props.src}
-                        autoPlay
-                        loop
-                        muted
-                    />
-                ) : (
-                    <img
-                        ref={imageRef}
-                        style={{
-                            position: "absolute",
-                            transform: `translate(${imagePosition.x}px, ${imagePosition.y}px)`
-                        }}
-                        width={`${box.width * zoom.current}px`}
-                        height={`${box.height * zoom.current}px`}
-                        src={instance.props.src}
-                        alt=""
-                    />
-                )}
+            {instance.props.animated ? (
+                <video
+                    ref={currentVideoElementRef}
+                    style={{
+                        position: "absolute",
+                        left: `${imagePosition.x}px`,
+                        top: `${imagePosition.y}px`
+                    }}
+                    width={`${box.width * zoom.current}px`}
+                    height={`${box.height * zoom.current}px`}
+                    poster={instance.props.src}
+                    src={originalVideoElementRef.current?.src ?? instance.props.src}
+                    autoPlay
+                    loop
+                    muted
+                />
+            ) : (
+                <img
+                    ref={imageRef}
+                    style={{
+                        position: "absolute",
+                        transform: `translate(${imagePosition.x}px, ${imagePosition.y}px)`
+                    }}
+                    width={`${box.width * zoom.current}px`}
+                    height={`${box.height * zoom.current}px`}
+                    src={instance.props.src}
+                    alt=""
+                />
+            )}
         </div>
     );
 }, { noop: true });

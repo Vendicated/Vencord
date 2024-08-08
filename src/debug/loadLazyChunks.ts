@@ -20,10 +20,10 @@ export async function loadLazyChunks() {
         const deferredRequires = new Set<number>();
 
         let chunksSearchingResolve: (value: void | PromiseLike<void>) => void;
-        const chunksSearchingDone = new Promise<void>(r => chunksSearchingResolve = r);
+        const chunksSearchingDone = new Promise<void>(r => { chunksSearchingResolve = r; });
 
         // True if resolved, false otherwise
-        const chunksSearchPromises = [] as Array<() => boolean>;
+        const chunksSearchPromises: (() => boolean)[] = [];
 
         const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?)\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/g);
 
@@ -35,21 +35,20 @@ export async function loadLazyChunks() {
             // the chunk containing the component
             const shouldForceDefer = factoryCode.includes(".Messages.GUILD_FEED_UNFEATURE_BUTTON_TEXT");
 
-            await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
-                const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Webpack.ChunkIdsRegex)).map(m => Number(m[1])) : [];
+            await Promise.all(Array.from(lazyChunks, async ([, rawChunkIds, entryPoint]) => {
+                const chunkIds = rawChunkIds
+                    ? Array.from(rawChunkIds.matchAll(Webpack.ChunkIdsRegex), m => Number(m[1]))
+                    : [];
 
-                if (chunkIds.length === 0) {
-                    return;
-                }
+                if (chunkIds.length === 0) return;
 
                 let invalidChunkGroup = false;
 
                 for (const id of chunkIds) {
                     if (wreq.u(id) == null || wreq.u(id) === "undefined.js") continue;
 
-                    const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
-                        .then(r => r.text())
-                        .then(t => t.includes("importScripts("));
+                    const isWorkerAsset = (await (await fetch(wreq.p + wreq.u(id))).text())
+                        .includes("importScripts(");
 
                     if (isWorkerAsset) {
                         invalidChunks.add(id);
@@ -66,12 +65,10 @@ export async function loadLazyChunks() {
             }));
 
             // Loads all found valid chunk groups
-            await Promise.all(
-                Array.from(validChunkGroups)
-                    .map(([chunkIds]) =>
-                        Promise.all(chunkIds.map(id => wreq.e(id as any).catch(() => { })))
-                    )
-            );
+            await Promise.all(Array.from(
+                validChunkGroups,
+                ([chunkIds]) => Promise.all(chunkIds.map(id => wreq.e(id).catch(() => { })))
+            ));
 
             // Requires the entry points for all valid chunk groups
             for (const [, entryPoint] of validChunkGroups) {
@@ -81,7 +78,7 @@ export async function loadLazyChunks() {
                         continue;
                     }
 
-                    if (wreq.m[entryPoint]) wreq(entryPoint as any);
+                    if (wreq.m[entryPoint]) wreq(entryPoint);
                 } catch (err) {
                     console.error(err);
                 }
@@ -95,7 +92,7 @@ export async function loadLazyChunks() {
                 let allResolved = true;
 
                 for (let i = 0; i < chunksSearchPromises.length; i++) {
-                    const isResolved = chunksSearchPromises[i]();
+                    const isResolved = chunksSearchPromises[i]!();
 
                     if (isResolved) {
                         // Remove finished promises to avoid having to iterate through a huge array everytime
@@ -111,14 +108,14 @@ export async function loadLazyChunks() {
 
         Webpack.factoryListeners.add(factory => {
             let isResolved = false;
-            searchAndLoadLazyChunks(factory.toString()).then(() => isResolved = true);
+            searchAndLoadLazyChunks(factory.toString()).then(() => { isResolved = true; });
 
             chunksSearchPromises.push(() => isResolved);
         });
 
         for (const factoryId in wreq.m) {
             let isResolved = false;
-            searchAndLoadLazyChunks(wreq.m[factoryId].toString()).then(() => isResolved = true);
+            searchAndLoadLazyChunks(wreq.m[factoryId].toString()).then(() => { isResolved = true; });
 
             chunksSearchPromises.push(() => isResolved);
         }
@@ -127,14 +124,14 @@ export async function loadLazyChunks() {
 
         // Require deferred entry points
         for (const deferredRequire of deferredRequires) {
-            wreq!(deferredRequire as any);
+            wreq(deferredRequire);
         }
 
         // All chunks Discord has mapped to asset files, even if they are not used anymore
-        const allChunks = [] as number[];
+        const allChunks: number[] = [];
 
         // Matches "id" or id:
-        for (const currentMatch of wreq!.u.toString().matchAll(/(?:"([\deE]+?)")|(?:([\deE]+?):)/g)) {
+        for (const currentMatch of wreq.u.toString().matchAll(/(?:"([\deE]+?)")|(?:([\deE]+?):)/g)) {
             const id = currentMatch[1] ?? currentMatch[2];
             if (id == null) continue;
 
@@ -144,21 +141,18 @@ export async function loadLazyChunks() {
         if (allChunks.length === 0) throw new Error("Failed to get all chunks");
 
         // Chunks that are not loaded (not used) by Discord code anymore
-        const chunksLeft = allChunks.filter(id => {
-            return !(validChunks.has(id) || invalidChunks.has(id));
-        });
+        const chunksLeft = allChunks.filter(id => !(validChunks.has(id) || invalidChunks.has(id)));
 
         await Promise.all(chunksLeft.map(async id => {
-            const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
-                .then(r => r.text())
-                .then(t => t.includes("importScripts("));
+            const isWorkerAsset = (await (await fetch(wreq.p + wreq.u(id))).text())
+                .includes("importScripts(");
 
             // Loads and requires a chunk
             if (!isWorkerAsset) {
-                await wreq.e(id as any);
+                await wreq.e(id);
                 // Technically, the id of the chunk does not match the entry point
                 // But, still try it because we have no way to get the actual entry point
-                if (wreq.m[id]) wreq(id as any);
+                if (wreq.m[id]) wreq(id);
             }
         }));
 

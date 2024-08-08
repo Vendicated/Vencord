@@ -21,7 +21,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
 import { findByPropsLazy } from "@webpack";
-import { Clipboard, ComponentDispatch } from "@webpack/common";
+import { ClipboardUtils, ComponentDispatch } from "@webpack/common";
 
 const ctxMenuCallbacks = findByPropsLazy("contextMenuCallbackNative");
 
@@ -29,9 +29,8 @@ async function fetchImage(url: string) {
     const res = await fetch(url);
     if (res.status !== 200) return;
 
-    return await res.blob();
+    return res.blob();
 }
-
 
 const settings = definePluginSettings({
     // This needs to be all in one setting because to enable any of these, we need to make Discord use their desktop context
@@ -108,7 +107,7 @@ export default definePlugin({
                 // Fix silly Discord calling the non web support copy
                 {
                     match: /\i\.\i\.copy/,
-                    replace: "Vencord.Webpack.Common.Clipboard.copy"
+                    replace: "Vencord.Webpack.Common.ClipboardUtils.copy"
                 }
             ]
         },
@@ -234,7 +233,7 @@ export default definePlugin({
     async copyImage(url: string) {
         url = fixImageUrl(url);
 
-        let imageData = await fetch(url).then(r => r.blob());
+        let imageData = await (await fetch(url)).blob();
         if (imageData.type !== "image/png") {
             const bitmap = await createImageBitmap(imageData);
 
@@ -253,7 +252,6 @@ export default definePlugin({
 
         if (IS_VESKTOP && VesktopNative.clipboard) {
             VesktopNative.clipboard.copyImage(await imageData.arrayBuffer(), url);
-            return;
         } else {
             navigator.clipboard.write([
                 new ClipboardItem({
@@ -269,8 +267,8 @@ export default definePlugin({
         const data = await fetchImage(url);
         if (!data) return;
 
-        const name = new URL(url).pathname.split("/").pop()!;
-        const file = new File([data], name, { type: data.type });
+        const [, name] = new URL(url).pathname.match(/(?:.*\/)?(.*)/)!;
+        const file = new File([data], name!, { type: data.type });
 
         saveFile(file);
     },
@@ -279,7 +277,7 @@ export default definePlugin({
         const selection = document.getSelection();
         if (!selection) return;
 
-        Clipboard.copy(selection.toString());
+        ClipboardUtils.copy(selection.toString());
     },
 
     cut() {
@@ -288,7 +286,7 @@ export default definePlugin({
     },
 
     async paste() {
-        const clip = (await navigator.clipboard.read())[0];
+        const [clip] = await navigator.clipboard.read();
         if (!clip) return;
 
         const data = new DataTransfer();

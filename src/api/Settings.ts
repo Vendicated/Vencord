@@ -22,15 +22,15 @@ import { localStorage } from "@utils/localStorage";
 import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/mergeDefaults";
 import { putCloudSettings } from "@utils/settingsSync";
-import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
-import { React } from "@webpack/common";
+import { type DefinedSettings, OptionType, type SettingsChecks, type SettingsDefinition } from "@utils/types";
+import { useEffect, useReducer } from "@webpack/common";
 
 import plugins from "~plugins";
 
 const logger = new Logger("Settings");
 export interface Settings {
     autoUpdate: boolean;
-    autoUpdateNotification: boolean,
+    autoUpdateNotification: boolean;
     useQuickCss: boolean;
     enableReactDevtools: boolean;
     themeLinks: string[];
@@ -106,6 +106,7 @@ const DefaultSettings: Settings = {
     }
 };
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;
 mergeDefaults(settings, DefaultSettings);
 
@@ -125,11 +126,12 @@ export const SettingsStore = new SettingsStoreClass(settings, {
         path
     }) {
         const v = target[key];
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!plugins) return v; // plugins not initialised yet. this means this path was reached by being called on the top level
 
         if (path === "plugins" && key in plugins)
             return target[key] = {
-                enabled: IS_REPORTER || plugins[key].required || plugins[key].enabledByDefault || false
+                enabled: IS_REPORTER || plugins[key]!.required || (plugins[key]!.enabledByDefault ?? false)
             };
 
         // Since the property is not set, check if this is a plugin's setting and if so, try to resolve
@@ -137,7 +139,7 @@ export const SettingsStore = new SettingsStoreClass(settings, {
         if (path.startsWith("plugins.")) {
             const plugin = path.slice("plugins.".length);
             if (plugin in plugins) {
-                const setting = plugins[plugin].options?.[key];
+                const setting = plugins[plugin]!.options?.[key];
                 if (!setting) return v;
 
                 if ("default" in setting)
@@ -190,15 +192,15 @@ export const Settings = SettingsStore.store;
  */
 // TODO: Representing paths as essentially "string[].join('.')" wont allow dots in paths, change to "paths?: string[][]" later
 export function useSettings(paths?: UseSettings<Settings>[]) {
-    const [, forceUpdate] = React.useReducer(() => ({}), {});
+    const [, forceUpdate] = useReducer(() => ({}), {});
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (paths) {
-            paths.forEach(p => SettingsStore.addChangeListener(p, forceUpdate));
-            return () => paths.forEach(p => SettingsStore.removeChangeListener(p, forceUpdate));
+            paths.forEach(p => { SettingsStore.addChangeListener(p, forceUpdate); });
+            return () => { paths.forEach(p => { SettingsStore.removeChangeListener(p, forceUpdate); }); };
         } else {
             SettingsStore.addGlobalChangeListener(forceUpdate);
-            return () => SettingsStore.removeGlobalChangeListener(forceUpdate);
+            return () => { SettingsStore.removeGlobalChangeListener(forceUpdate); };
         }
     }, []);
 
@@ -212,7 +214,7 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
     for (const oldName of oldNames) {
         if (oldName in plugins) {
             logger.info(`Migrating settings from old name ${oldName} to ${name}`);
-            plugins[name] = plugins[oldName];
+            plugins[name] = plugins[oldName]!;
             delete plugins[oldName];
             SettingsStore.markAsChanged();
             break;
@@ -223,7 +225,7 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
 export function definePluginSettings<
     Def extends SettingsDefinition,
     Checks extends SettingsChecks<Def>,
-    PrivateSettings extends object = {}
+    PrivateSettings extends object = object
 >(def: Def, checks?: Checks) {
     const definedSettings: DefinedSettings<Def, Checks, PrivateSettings> = {
         get store() {
@@ -248,11 +250,11 @@ export function definePluginSettings<
 type UseSettings<T extends object> = ResolveUseSettings<T>[keyof T];
 
 type ResolveUseSettings<T extends object> = {
-    [Key in keyof T]:
-    Key extends string
-    ? T[Key] extends Record<string, unknown>
-    // @ts-ignore "Type instantiation is excessively deep and possibly infinite"
-    ? UseSettings<T[Key]> extends string ? `${Key}.${UseSettings<T[Key]>}` : never
-    : Key
-    : never;
+    [Key in keyof T]: Key extends `${infer Key1}`
+        ? T[Key] extends Record<string, unknown>
+            ? UseSettings<T[Key]> extends `${infer Key2}`
+                ? `${Key1}.${Key2}`
+                : never
+            : Key
+        : never;
 };

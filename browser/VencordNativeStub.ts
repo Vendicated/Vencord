@@ -36,7 +36,7 @@ const cssListeners = new Set<(css: string) => void>();
 const NOOP = () => { };
 const NOOP_ASYNC = async () => { };
 
-const setCssDebounced = debounce((css: string) => VencordNative.quickCss.set(css));
+const setCssDebounced = debounce((css: string) => { VencordNative.quickCss.set(css); });
 
 const themeStore = DataStore.createStore("VencordThemes", "VencordThemeData");
 
@@ -46,9 +46,8 @@ window.VencordNative = {
         uploadTheme: (fileName: string, fileData: string) => DataStore.set(fileName, fileData, themeStore),
         deleteTheme: (fileName: string) => DataStore.del(fileName, themeStore),
         getThemesDir: async () => "",
-        getThemesList: () => DataStore.entries(themeStore).then(entries =>
-            entries.map(([name, css]) => getThemeInfo(css, name.toString()))
-        ),
+        getThemesList: async () => (await DataStore.entries(themeStore))
+            .map(([name, css]) => getThemeInfo(css, name.toString())),
         getThemeData: (fileName: string) => DataStore.get(fileName, themeStore),
         getSystemValues: async () => ({}),
     },
@@ -66,10 +65,10 @@ window.VencordNative = {
     },
 
     quickCss: {
-        get: () => DataStore.get("VencordQuickCss").then(s => s ?? ""),
+        get: async () => await DataStore.get("VencordQuickCss") ?? "",
         set: async (css: string) => {
             await DataStore.set("VencordQuickCss", css);
-            cssListeners.forEach(l => l(css));
+            cssListeners.forEach(l => { l(css); });
         },
         addChangeListener(cb) {
             cssListeners.add(cb);
@@ -109,5 +108,5 @@ window.VencordNative = {
         getSettingsDir: async () => "LocalStorage"
     },
 
-    pluginHelpers: {} as any,
+    pluginHelpers: {},
 };

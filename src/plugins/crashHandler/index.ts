@@ -23,20 +23,21 @@ import { Logger } from "@utils/Logger";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
+import { DraftType } from "@vencord/discord-types";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
-import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
+import { ExpressionPickerStore, FluxDispatcher, RouterUtils, SelectedChannelStore } from "@webpack/common";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 
-const { ModalStack, DraftManager } = proxyLazyWebpack(() => {
-    const [ModalStack, DraftManager] = findBulk(
+const { ModalActionCreators, DraftActionCreators } = proxyLazyWebpack(() => {
+    const [ModalActionCreators, DraftActionCreators] = findBulk(
         filters.byProps("pushLazy", "popAll"),
         filters.byProps("clearDraft", "saveDraft"),
     );
 
     return {
-        ModalStack,
-        DraftManager
+        ModalActionCreators,
+        DraftActionCreators
     };
 });
 
@@ -137,15 +138,14 @@ export default definePlugin({
             for (const key in DraftType) {
                 if (!Number.isNaN(Number(key))) continue;
 
-                DraftManager.clearDraft(channelId, DraftType[key]);
+                DraftActionCreators.clearDraft(channelId, DraftType[key]);
             }
         } catch (err) {
             CrashHandlerLogger.debug("Failed to clear drafts.", err);
         }
         try {
             ExpressionPickerStore.closeExpressionPicker();
-        }
-        catch (err) {
+        } catch (err) {
             CrashHandlerLogger.debug("Failed to close expression picker.", err);
         }
         try {
@@ -154,7 +154,7 @@ export default definePlugin({
             CrashHandlerLogger.debug("Failed to close open context menu.", err);
         }
         try {
-            ModalStack.popAll();
+            ModalActionCreators.popAll();
         } catch (err) {
             CrashHandlerLogger.debug("Failed to close old modals.", err);
         }
@@ -175,7 +175,7 @@ export default definePlugin({
         }
         if (settings.store.attemptToNavigateToHome) {
             try {
-                NavigationRouter.transitionTo("/channels/@me");
+                RouterUtils.transitionTo("/channels/@me");
             } catch (err) {
                 CrashHandlerLogger.debug("Failed to navigate to home", err);
             }

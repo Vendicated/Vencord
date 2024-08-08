@@ -19,9 +19,7 @@
 import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-
-const FriendInvites = findByPropsLazy("createFriendInvite");
+import { InstantInviteActionCreators } from "@webpack/common";
 
 export default definePlugin({
     name: "FriendInvites",
@@ -34,15 +32,15 @@ export default definePlugin({
             description: "Generates a friend invite link.",
             inputType: ApplicationCommandInputType.BOT,
 
-            execute: async (args, ctx) => {
-                const invite = await FriendInvites.createFriendInvite();
+            execute: async (_, ctx) => {
+                const invite = await InstantInviteActionCreators.createFriendInvite();
 
                 sendBotMessage(ctx.channel.id, {
                     content: `
                         discord.gg/${invite.code} ·
                         Expires: <t:${new Date(invite.expires_at).getTime() / 1000}:R> ·
                         Max uses: \`${invite.max_uses}\`
-                    `.trim().replace(/\s+/g, " ")
+                    `.trim().replaceAll(/\s+/g, " ")
                 });
             }
         },
@@ -51,13 +49,13 @@ export default definePlugin({
             description: "View a list of all generated friend invites.",
             inputType: ApplicationCommandInputType.BOT,
             execute: async (_, ctx) => {
-                const invites = await FriendInvites.getAllFriendInvites();
-                const friendInviteList = invites.map(i =>
+                const invites = await InstantInviteActionCreators.getAllFriendInvites();
+                const friendInviteList = invites.map((i: any) =>
                     `
                     _discord.gg/${i.code}_ ·
                     Expires: <t:${new Date(i.expires_at).getTime() / 1000}:R> ·
                     Times used: \`${i.uses}/${i.max_uses}\`
-                    `.trim().replace(/\s+/g, " ")
+                    `.trim().replaceAll(/\s+/g, " ")
                 );
 
                 sendBotMessage(ctx.channel.id, {
@@ -70,7 +68,7 @@ export default definePlugin({
             description: "Revokes all generated friend invites.",
             inputType: ApplicationCommandInputType.BOT,
             execute: async (_, ctx) => {
-                await FriendInvites.revokeFriendInvites();
+                await InstantInviteActionCreators.revokeFriendInvites();
 
                 sendBotMessage(ctx.channel.id, {
                     content: "All friend invites have been revoked."

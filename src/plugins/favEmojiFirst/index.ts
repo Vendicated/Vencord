@@ -18,17 +18,17 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import type { Emoji } from "@vencord/discord-types";
 import { EmojiStore } from "@webpack/common";
-import { Emoji } from "@webpack/types";
 
 interface EmojiAutocompleteState {
     query?: {
         type: string;
-        typeInfo: {
+        typeInfo?: {
             sentinel: string;
         };
-        results: {
-            emojis: Emoji[] & { sliceTo?: number; };
+        results?: {
+            emojis?: Emoji[] & { sliceTo?: number; };
         };
     };
 }
