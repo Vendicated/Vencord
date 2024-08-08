@@ -47,7 +47,7 @@ export const settings = definePluginSettings({
 
     showChatBarButton: {
         type: OptionType.BOOLEAN,
-        description: "Show translate modal button (allows to change translation language) in chat bar",
+        description: "Show translate modal button in chat bar",
         default: true
     },
     service: {
