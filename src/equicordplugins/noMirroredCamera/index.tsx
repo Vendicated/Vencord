@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "NoMirroredCamera",
     description: "Prevents the camera from being mirrored on your screen",
-    authors: [EquicordDevs.nyx],
+    authors: [Devs.nyx],
 
     patches: [
         // When focused on voice channel or group chat voice call

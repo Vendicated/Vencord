@@ -21,7 +21,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 -   Request for plugins from Discord.
 
 <details>
-<summary>Extra included plugins (120 additional plugins)</summary>
+<summary>Extra included plugins (122 additional plugins)</summary>
 
 - AllCallTimers by MaxHerbold and D3SOX
 - AltKrispSwitch by newwares
@@ -87,6 +87,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - LoginWithQR by nexpid
 - MediaDownloader by Colorman
 - Meow by Samwich
+- MessageColors by hen
 - MessageLinkTooltip by Kyuuhachi
 - MessageLoggerEnhanced by Aria
 - MessageTranslate by Samwich
@@ -96,6 +97,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - NoBulletPoints by Samwich
 - NoDefaultEmojis by Samwich
 - NoDeleteSafety by Samwich
+- NoMirroredCamera by Nyx
 - NoModalAnimation by AutumnVN
 - NoNitroUpsell by thororen
 - NoRoleHeaders by Samwich
