@@ -30,6 +30,7 @@ import { serializeErrors, VENCORD_FILES } from "./common";
 
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
 let PendingUpdates = [] as [string, string][];
+let UpdateSource = { release: "latest", ref: "HEAD" };
 
 async function githubGet(endpoint: string) {
     return get(API_BASE + endpoint, {
@@ -84,7 +85,14 @@ async function applyUpdates() {
     return true;
 }
 
+async function setUpdateSource(source: "latest" | "branch" | "commit", name: string) {
+    if (source === "latest") UpdateSource = { release: "latest", ref: "HEAD" };
+    else if (source === "branch") UpdateSource = { release: `/tags/branch-${name}`, ref: `refs/heads/${name}` };
+    else if (source === "commit") UpdateSource = { release: `/tags/commit-${name}`, ref: name };
+}
+
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${gitRemote}`));
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors(fetchUpdates));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(applyUpdates));
+ipcMain.handle(IpcEvents.SET_UPDATE_SOURCE, serializeErrors(setUpdateSource));

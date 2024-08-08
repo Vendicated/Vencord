@@ -25,6 +25,7 @@ import { promisify } from "util";
 import { serializeErrors } from "./common";
 
 const VENCORD_SRC_DIR = join(__dirname, "..");
+const REMOTE_NAME = "origin";
 
 const execFile = promisify(cpExecFile);
 
@@ -40,7 +41,7 @@ function git(...args: string[]) {
 }
 
 async function getRepo() {
-    const res = await git("remote", "get-url", "origin");
+    const res = await git("remote", "get-url", REMOTE_NAME);
     return res.stdout.trim()
         .replace(/git@(.+):/, "https://$1/")
         .replace(/\.git$/, "");
@@ -51,10 +52,10 @@ async function calculateGitChanges() {
 
     const branch = (await git("branch", "--show-current")).stdout.trim();
 
-    const existsOnOrigin = (await git("ls-remote", "origin", branch)).stdout.length > 0;
-    if (!existsOnOrigin) return [];
+    const existsOnRemote = (await git("ls-remote", REMOTE_NAME, branch)).stdout.length > 0;
+    if (!existsOnRemote) return [];
 
-    const res = await git("log", `HEAD...origin/${branch}`, "--pretty=format:%an/%h/%s");
+    const res = await git("log", `HEAD...${REMOTE_NAME}/${branch}`, "--pretty=format:%an/%h/%s");
 
     const commits = res.stdout.trim();
     return commits ? commits.split("\n").map(line => {
@@ -84,7 +85,12 @@ async function build() {
     return !res.stderr.includes("Build failed");
 }
 
+async function setUpdateSource() {
+    // noop
+}
+
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(getRepo));
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
 ipcMain.handle(IpcEvents.UPDATE, serializeErrors(pull));
 ipcMain.handle(IpcEvents.BUILD, serializeErrors(build));
+ipcMain.handle(IpcEvents.SET_UPDATE_SOURCE, serializeErrors(setUpdateSource));

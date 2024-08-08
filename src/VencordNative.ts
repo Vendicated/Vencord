@@ -40,6 +40,7 @@ export default {
     },
 
     updater: {
+        setUpdateSource: (source: "latest" | "branch" | "commit", name: string) => invoke<void>(IpcEvents.SET_UPDATE_SOURCE, source, name),
         getUpdates: () => invoke<IpcRes<Record<"hash" | "author" | "message", string>[]>>(IpcEvents.GET_UPDATES),
         update: () => invoke<IpcRes<boolean>>(IpcEvents.UPDATE),
         rebuild: () => invoke<IpcRes<boolean>>(IpcEvents.BUILD),
