@@ -59,6 +59,7 @@ window.VencordNative = {
     },
 
     updater: {
+        setUpdateSource: async () => void 0,
         getRepo: async () => ({ ok: true, value: "https://github.com/Vendicated/Vencord" }),
         getUpdates: async () => ({ ok: true, value: [] }),
         update: async () => ({ ok: true, value: false }),
