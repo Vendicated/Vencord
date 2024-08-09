@@ -48,6 +48,8 @@ jobs:
                   gh release view devbuild &> /dev/null \
                     && echo "devbuild_exists=true" >> $GITHUB_ENV \
                     || echo "devbuild_exists=false" >> $GITHUB_ENV
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Upload latest release (devbuild)
               if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && github.ref_name == 'main' && github.event.created
