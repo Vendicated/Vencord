@@ -80,7 +80,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - InRole by nin0dev
 - IrcColors by Grzesiek11
 - IRememberYou by zoodogood
-- Jumpscare by Joona
+- Jumpscare by Surgedevs
 - JumpToStart by Samwich
 - KeyboardSounds by HypedDomi
 - KeywordNotify by camila314 (maintained by thororen)
