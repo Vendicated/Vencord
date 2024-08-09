@@ -20,7 +20,6 @@ import { classNameFactory } from "@api/Styles";
 import { wordsToTitle } from "@utils/text";
 import type { FormattedMessage, GuildMember, GuildRecord, Role } from "@vencord/discord-types";
 import { GuildStore, i18n } from "@webpack/common";
-import type { ReactNode } from "react";
 
 import { PermissionsSortOrder, settings } from ".";
 import { PermissionType } from "./components/RolesAndUsersPermissions";
@@ -49,7 +48,7 @@ export function getPermissionString(permission: string) {
         formatPermissionWithoutMatchingString(permission);
 }
 
-export function getPermissionDescription(permission: string): ReactNode {
+export function getPermissionDescription(permission: string) {
     // DISCORD PLEEEEEEEEAAAAASE IM BEGGING YOU :(
     if (permission === "USE_APPLICATION_COMMANDS")
         permission = "USE_APPLICATION_COMMANDS_GUILD";
@@ -58,7 +57,7 @@ export function getPermissionDescription(permission: string): ReactNode {
     else if (permission !== "STREAM")
         permission = PermissionKeyMap[permission] || permission;
 
-    const msg = i18n.Messages[`ROLE_PERMISSIONS_${permission}_DESCRIPTION`] as string | FormattedMessage;
+    const msg = i18n.Messages[`ROLE_PERMISSIONS_${permission}_DESCRIPTION`] as string | FormattedMessage<never>;
 
     return typeof msg === "string" ? msg : msg.format();
 }
