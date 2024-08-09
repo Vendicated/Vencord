@@ -12,7 +12,7 @@ import { Button, Forms, i18n, Menu, TabBar } from "@webpack/common";
 import { ReactElement } from "react";
 
 import { preload, unload } from "./images";
-import { cl, QrCodeCameraIcon } from "./ui";
+import { cl, QrCodeIcon } from "./ui";
 import openQrModal from "./ui/modals/QrModal";
 
 export default definePlugin({
@@ -106,7 +106,7 @@ export default definePlugin({
                 <Menu.MenuItem
                     id="scan-qr"
                     label={i18n.Messages.USER_SETTINGS_SCAN_QR_CODE}
-                    icon={QrCodeCameraIcon}
+                    icon={QrCodeIcon}
                     action={openQrModal}
                     showIconFirst
                     focusedClassName={menuItemFocused}

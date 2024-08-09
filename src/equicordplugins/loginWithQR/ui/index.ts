@@ -37,11 +37,10 @@ export const { Spinner } = proxyLazy(() => Forms as any as {
     SpinnerTypes: typeof SpinnerTypes;
 });
 
-export const { QrCodeCameraIcon } = findByPropsLazy("QrCodeCameraIcon") as {
-    QrCodeCameraIcon: ComponentType<{
-        size: number;
-    }>;
-};
+const icons = findByPropsLazy("PencilIcon");
+export const QrCodeIcon = proxyLazy(() => icons.QrCodeCameraIcon ?? icons.QrCodeIcon) as ComponentType<{
+    size: number;
+}>;
 
 export const cl = classNameFactory("qrlogin-");
 
