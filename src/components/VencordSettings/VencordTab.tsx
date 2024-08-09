@@ -27,7 +27,7 @@ import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { Button, Card, Forms, React, Select, Switch } from "@webpack/common";
 
-import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon, soggyIcon } from "..";
+import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon, boykisserIcon } from "..";
 import { openNotificationSettingsModal } from "./NotificationSettings";
 import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
@@ -131,13 +131,24 @@ function VencordSettings() {
                         action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
                     />
                     <QuickAction
-                        Icon={soggyIcon}
-                        text="THE SOG"
+                        Icon={boykisserIcon}
+                        text="Play theme song"
                         action={function () {
-                            const audioElement = document.createElement("audio");
-                            audioElement.src = "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai.mp3";
-                            audioElement.volume = 0.2;
-                            audioElement.play();
+                            const video = document.createElement('video');
+                            video.src = 'https://github.com/Zoidcord/assets/raw/main/zoidcord.mp4';
+                            video.autoplay = true;
+                            video.loop = false;
+                            video.style.width = '100%';
+                            video.style.height = '100%';
+                            video.style.objectFit = 'cover';
+                            video.style.position = 'fixed';
+                            video.style.top = '0';
+                            video.style.left = '0';
+                            video.style.zIndex = '1000000000';
+                            document.body.appendChild(video);
+                            video.addEventListener('ended', () => {
+                                document.body.removeChild(video);
+                            });
                         }}
                     />
                 </QuickActionCard>

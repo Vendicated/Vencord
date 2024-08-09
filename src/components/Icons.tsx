@@ -428,7 +428,7 @@ export function WebsiteIcon(props: ImageProps) {
     return <img {...props} src={src} />;
 }
 
-export function soggyIcon(props: ImageProps) {
-    const src = "https://raw.githubusercontent.com/Zoidcord/assets/main/soggycat.webp";
+export function boykisserIcon(props: ImageProps) {
+    const src = "https://cdn.discordapp.com/emojis/1258290490961559633.png";
     return <img {...props} src={src} />;
 }
