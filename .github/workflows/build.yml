@@ -52,7 +52,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Upload latest release (devbuild)
-              if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && github.ref_name == 'main' && github.event.created
+              if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && github.ref_name == 'main' && !github.event.deleted
               run: |
                   gh release upload devbuild --clobber dist/*
                   gh release edit devbuild --title "DevBuild $COMMIT_SHORT"
@@ -60,7 +60,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Upload branch release
-              if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && github.ref_name != 'main' && github.event.created
+              if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && github.ref_name != 'main' && !github.event.deleted
               run: |
                   gh release create branch-$GITHUB_REF_NAME --latest=false --prerelease --target $GITHUB_REF_NAME --title "PreBuild $GITHUB_REF_NAME" || true
                   gh release upload branch-$GITHUB_REF_NAME --clobber dist/*
@@ -68,7 +68,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Upload commit release
-              if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && github.event.created
+              if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && !github.event.deleted
               continue-on-error: true
               run: |
                   gh release create commit-$COMMIT_SHORT --latest=false --prerelease --target $GITHUB_SHA --title "PreBuild $COMMIT_SHORT"
@@ -77,7 +77,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Upload DevBuild to builds repo
-              if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && github.ref_name == 'main' && github.event.created
+              if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && github.ref_name == 'main' && !github.event.deleted
               run: |
                   git config --global user.name "$USERNAME"
                   git config --global user.email actions@github.com
