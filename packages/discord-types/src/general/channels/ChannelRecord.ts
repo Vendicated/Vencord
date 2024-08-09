@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { SnakeCasedProperties } from "type-fest";
-
-import type { Nullish, Optional } from "../../internal";
+import type { Nullish, Optional, SnakeCasedProperties } from "../../internal";
 import type { PermissionOverwriteMap } from "../Permissions";
 import type { AvatarDecorationData, UserClanData, UserFlags } from "../UserRecord";
 import type { ForumChannelRecord } from "./ForumChannelRecord";

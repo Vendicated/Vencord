@@ -38,7 +38,7 @@ const functionDeclarationOrArrowFunctionDefinitionRE = /^(?:async(?:[\t\v\f\uFEF
  * Does not support getters, setters, static methods, private methods/getters/setters,
  * or method definitions with symbol keys.
  */
-export function funcToString(func: (...args: never[]) => unknown) {
+export function funcToString(func: (...args: never) => unknown) {
     const funcString = func.toString();
     if (functionDeclarationOrArrowFunctionDefinitionRE.test(funcString))
         return `(${funcString})`;

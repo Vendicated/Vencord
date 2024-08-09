@@ -5,7 +5,7 @@
  */
 
 /** @internal */
-export type Bivariant<T extends (...args: never[]) => unknown>
+export type Bivariant<T extends (...args: never) => unknown>
     // eslint-disable-next-line @typescript-eslint/method-signature-style
     = { _(...args: Parameters<T>): ReturnType<T>; }["_"];
 
@@ -19,20 +19,22 @@ export type GenericConstructor = new (...args: any[]) => unknown;
 export type IsAny<T> = 0 extends 1 & T ? unknown : never;
 
 /** @internal */
+export type IsStringLiteral<T extends string>
+    = T extends unknown
+        ? {} extends Record<T, unknown>
+            ? false
+            : true
+        : never;
+
+/** @internal */
 export type Nullish = null | undefined;
 
 /** @internal */
-export type OmitOptional<T> = {
-    [Key in keyof T as {} extends Record<Key, unknown>
-        ? never
-        : T extends Record<Key, unknown>
-            ? Key
-            : never
-    ]: T[Key];
-};
+export type OmitOptional<T>
+    = { [Key in keyof T as T extends Record<Key, unknown> ? Key : never]: T[Key]; };
 
 /** @internal */
-export type Optional<T, Value = undefined, Keys extends keyof T = keyof T, ExcludeKeys = false>
+export type Optional<T, Value = undefined, Keys extends keyof T = keyof T, ExcludeKeys extends boolean = false>
     = ExcludeKeys extends true
         ? Pick<T, Keys> & { [Key in Exclude<keyof T, Keys>]?: T[Key] | Value; }
         : Omit<T, Keys> & { [Key in Keys]?: T[Key] | Value; };
@@ -45,6 +47,25 @@ export type OptionalTuple<T extends readonly unknown[], Value = undefined>
 export type PartialOnUndefined<T> = Partial<T>
     & { [Key in keyof T as undefined extends T[Key] ? never : Key]: T[Key]; };
 
+type SnakeCase<T extends string, InAcronym extends boolean = false>
+    = T extends `${infer First}${infer Second}${infer Rest}`
+        ? InAcronym extends true
+            ? Second extends Uppercase<string>
+                ? `${Lowercase<First>}${SnakeCase<`${Second}${Rest}`, true>}`
+                : `_${Lowercase<First>}${SnakeCase<`${Second}${Rest}`>}`
+            : First extends Lowercase<string>
+                ? Second extends Lowercase<string>
+                    ? `${First}${SnakeCase<`${Second}${Rest}`>}`
+                    : `${First}_${SnakeCase<`${Second}${Rest}`>}`
+                : Second extends Uppercase<string>
+                    ? `${Lowercase<First>}${SnakeCase<`${Second}${Rest}`, true>}`
+                    : `${Lowercase<First>}${SnakeCase<`${Second}${Rest}`>}`
+        : Lowercase<T>;
+
+/** @internal */
+export type SnakeCasedProperties<T>
+    = { [Key in keyof T as Key extends string ? SnakeCase<Key> : Key]: T[Key]; };
+
 type StringablePrimitive = string | bigint | number | boolean | Nullish;
 
 /** @internal */
@@ -52,9 +73,6 @@ export type Stringable
     = { [Symbol.toPrimitive]: (hint: "default" | "string") => StringablePrimitive; }
     | ({ toString: () => StringablePrimitive; } | { valueOf: () => StringablePrimitive; })
     & { [Symbol.toPrimitive]?: Nullish; };
-
-/** @internal */
-export type StringProperties<T> = { [Key in Exclude<keyof T, symbol>]: T[Key]; };
 
 /** @internal */
 export type UnionToIntersection<Union> = (

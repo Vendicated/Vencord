@@ -8,11 +8,11 @@ import type MessageFormat from "intl-messageformat";
 import type { ReactElement, ReactNode } from "react";
 import type { State } from "simple-markdown";
 
-import type { IsAny, OmitOptional, Stringable, UnionToIntersection } from "../../internal";
+import type { IsAny, IsStringLiteral, Stringable, UnionToIntersection } from "../../internal";
 
 export declare class FormattedMessage<
-    Args extends GenericArgs = never,
-    Markdown extends boolean | undefined = boolean
+    Args extends GenericArgs = GenericArgs,
+    Markdown extends boolean | undefined = boolean | undefined
 > {
     /**
      * @throws {SyntaxError} Argument `message` must be syntactically valid.
@@ -23,7 +23,9 @@ export declare class FormattedMessage<
     constructor(
         message: string,
         locales?: string | readonly string[] | undefined /* = MessageFormat.defaultLocale */,
-        hasMarkdown?: Markdown
+        ...hasMarkdown: undefined extends Markdown
+            ? [hasMarkdown?: Markdown]
+            : [hasMarkdown: Markdown]
     );
 
     /**
@@ -38,9 +40,9 @@ export declare class FormattedMessage<
     format(...args: FormatArgs<Args>): Markdown extends true
         ? (string | ReactElement)[]
         : string;
-    getContext(values: ContextValues<Args>): [
-        { [Key in keyof typeof values]: typeof values[Key] | number; },
-        Record<number, typeof values[keyof typeof values]>
+    getContext<Values extends RecordArgs>(values: Values): [
+        { [Key in keyof Values]: Values[Key] | (Key & keyof MessageValues<Args> extends never ? never : number); },
+        Record<number, Values[keyof Values & keyof MessageValues<Args>]>
     ];
     /**
      * @throws {RangeError | TypeError}
@@ -65,25 +67,19 @@ type FormatArgs<Args extends GenericArgs>
         ? [values?: RecordArgs]
         : [Args] extends [never]
             ? []
-            : keyof FormatValues<Args> extends never
+            : keyof MessageValues<Args> extends never
                 ? []
-                : [values: FormatValues<Args>];
+                : false extends IsStringLiteral<keyof MessageValues<Args> & string>
+                    ? [values: never]
+                    : [values: MessageValues<Args>];
 
-type FormatValues<Args extends GenericArgs> = UnionToIntersection<MessageValues<Args>>;
-
-type ContextValues<Args extends GenericArgs>
-    = unknown extends IsAny<Args>
-        ? RecordArgs
-        : [Args] extends [never]
-            ? {}
-            : MessageValues<Args>;
-
-type MessageValues<Args extends GenericArgs>
-    = Args extends string
-        ? Record<string extends Args ? never : Args, Stringable>
-        : Args extends readonly [string, string]
+type MessageValues<Args extends GenericArgs> = UnionToIntersection<
+    Args extends string
+        ? Record<Args, Stringable>
+        : Args extends TupleArgs
             ? Record<Args[0], Stringable> & Record<Args[1], HookValue>
-            : OmitOptional<Args>;
+            : Required<Pick<Args, keyof Args & string>>
+>;
 
 /** @todo Add types for every type of ASTNode. */
 export interface ASTNode<Type extends ASTNodeType = ASTNodeType> extends Record<string, any> {

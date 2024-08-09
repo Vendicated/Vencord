@@ -5,9 +5,8 @@
  */
 
 import type { Moment } from "moment";
-import type { SnakeCasedProperties } from "type-fest";
 
-import type { Nullish, Optional } from "../../internal";
+import type { Nullish, Optional, SnakeCasedProperties } from "../../internal";
 import type { ChannelType } from "../channels/ChannelRecord";
 import type { ImmutableRecord } from "../ImmutableRecord";
 

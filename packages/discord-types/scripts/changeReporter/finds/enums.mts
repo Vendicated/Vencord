@@ -13,7 +13,7 @@ export function autoFindEnum(this: typeof Vencord, source: CR.EnumSource) {
     let lowestChangedCount = Infinity;
 
     const checked = new WeakSet();
-    this.Webpack.find((exps: any) => {
+    this.Webpack.find(exps => {
         for (const name in exps) {
             let exp: unknown;
             // Some getters throw errors

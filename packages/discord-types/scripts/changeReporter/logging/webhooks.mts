@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import console from "node:console";
+
 import type { CR } from "../types.mts";
 import { codeBlock, formatChannel, getSummaryURL } from "./utils.mjs";
 

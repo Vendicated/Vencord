@@ -6,9 +6,8 @@
 
 import type { Duration, Moment } from "moment";
 import type { ReactNode } from "react";
-import type { SnakeCasedProperties } from "type-fest";
 
-import type { Nullish, Optional, PartialOnUndefined } from "../../internal";
+import type { Nullish, Optional, PartialOnUndefined, SnakeCasedProperties } from "../../internal";
 import type { ApplicationCommand, ApplicationCommandType } from "../ApplicationCommand";
 import type { ApplicationIntegrationType } from "../ApplicationRecord";
 import type { ChannelRecord, ChannelType } from "../channels/ChannelRecord";

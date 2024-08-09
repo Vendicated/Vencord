@@ -11,7 +11,7 @@ import type { CR } from "../types.mts";
 export function autoFindStore(this: typeof Vencord, name: string, source: CR.ClassMembers) {
     const persistKeyRE = new RegExp(`^${name}(?:V\\d+)?$`);
 
-    const store: { constructor: CR.Class; } | undefined = this.Webpack.find((exp: any) => {
+    const store: { constructor: CR.Class; } | undefined = this.Webpack.find(exp => {
         // Find stores from exported instances
         const { constructor } = exp;
         return typeof constructor === "function" && (
@@ -29,7 +29,7 @@ export function autoFindClass(this: typeof Vencord, source: CR.ClassMembers) {
     let lowestChangedCount = Infinity;
 
     const checked = new WeakSet<CR.Class>();
-    this.Webpack.find((exps: any) => {
+    this.Webpack.find(exps => {
         for (const name in exps) {
             let constructor: CR.Class;
             // Some getters throw errors

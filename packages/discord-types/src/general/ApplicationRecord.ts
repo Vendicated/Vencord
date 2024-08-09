@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { SnakeCasedProperties } from "type-fest";
-
-import type { Nullish, Optional, PartialOnUndefined } from "../internal";
+import type { Nullish, Optional, PartialOnUndefined, SnakeCasedProperties } from "../internal";
 import type { CompanyRecord } from "./CompanyRecord";
 import type { ImmutableRecord } from "./ImmutableRecord";
 import type { IconSource } from "./misc";

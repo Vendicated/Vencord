@@ -196,7 +196,7 @@ export namespace CR {
 
     export interface Class {
         /** Constructor function */
-        new (...args: never[]): unknown;
+        new (...args: never): unknown;
         /** Static members */
         [key: PropertyKey]: unknown;
         /** Instance methods and accessors */

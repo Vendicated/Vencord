@@ -6,7 +6,6 @@ import eslintPluginImport from "eslint-plugin-import-x";
 import simpleHeader from "eslint-plugin-simple-header";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
-// @ts-expect-error: No types
 import unusedImports from "eslint-plugin-unused-imports";
 import tseslint from "typescript-eslint";
 

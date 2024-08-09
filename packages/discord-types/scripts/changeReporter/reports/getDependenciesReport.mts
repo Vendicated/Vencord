@@ -28,7 +28,7 @@ export async function getDependenciesReport(page: Page, filePath: string, config
 
     let dependencies: JsonValue | undefined;
     try {
-        ({ dependencies } = JSON.parse(await readFile(filePath, "utf-8")));
+        dependencies = JSON.parse(await readFile(filePath, "utf-8"))?.dependencies;
     } catch (error) {
         fileReport.fileError = `Failed to read and parse file '${fileName}':\n` + error;
         return fileReport;
