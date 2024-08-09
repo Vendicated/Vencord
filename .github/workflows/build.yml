@@ -71,8 +71,8 @@ jobs:
               if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && !github.event.deleted
               continue-on-error: true
               run: |
-                  gh release create commit-$COMMIT_SHORT --latest=false --prerelease --target $GITHUB_SHA --title "PreBuild $COMMIT_SHORT"
-                  gh release upload commit-$COMMIT_SHORT --clobber dist/*
+                  gh release create "commit-$COMMIT_SHORT" --latest=false --prerelease --target $GITHUB_SHA --title "PreBuild $COMMIT_SHORT"
+                  gh release upload "commit-$COMMIT_SHORT" --clobber dist/*
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
