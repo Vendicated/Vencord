@@ -1,0 +1,8 @@
+:root {
+    --custom-theme: black;
+}
+
+.custom-theme-background {
+    --custom-theme-background: var(--custom-theme) !important;
+    filter: none !important;
+}
