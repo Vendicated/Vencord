@@ -47,7 +47,7 @@ async function calculateGitChanges() {
     const isOutdated = await fetchUpdates();
     if (!isOutdated) return [];
 
-    const res = await githubGet(`/compare/${gitHash}...HEAD`);
+    const res = await githubGet(`/compare/${gitHash}...${UpdateSource.ref}`);
 
     const data = JSON.parse(res.toString("utf-8"));
     return data.commits.map((c: any) => ({
@@ -59,7 +59,7 @@ async function calculateGitChanges() {
 }
 
 async function fetchUpdates() {
-    const release = await githubGet("/releases/latest");
+    const release = await githubGet(`/releases${UpdateSource.release}`);
 
     const data = JSON.parse(release.toString());
     const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
@@ -86,7 +86,7 @@ async function applyUpdates() {
 }
 
 async function setUpdateSource(source: "latest" | "branch" | "commit", name: string) {
-    if (source === "latest") UpdateSource = { release: "latest", ref: "HEAD" };
+    if (source === "latest") UpdateSource = { release: "/latest", ref: "HEAD" };
     else if (source === "branch") UpdateSource = { release: `/tags/branch-${name}`, ref: `refs/heads/${name}` };
     else if (source === "commit") UpdateSource = { release: `/tags/commit-${name}`, ref: name };
 }
