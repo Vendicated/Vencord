@@ -24,7 +24,7 @@ import { join } from "path";
 // @ts-expect-error: No types
 import Zip from "zip-local";
 
-import { BUILD_TIMESTAMP, commonOpts, disposeAll, globPlugins, IS_DEV, IS_REPORTER, rebuildAll, VERSION, watch, watchAll } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, commonRendererPlugins, disposeAll, globPlugins, IS_DEV, IS_REPORTER, rebuildAll, VERSION, watch, watchAll } from "./common.mjs";
 
 /** @satisfies {esbuild.BuildOptions} */
 const commonOptions = {
@@ -35,7 +35,7 @@ const commonOptions = {
     external: ["~plugins", "~git-hash", "/assets/*"],
     plugins: [
         globPlugins("web"),
-        ...commonOpts.plugins,
+        ...commonRendererPlugins
     ],
     target: ["esnext"],
     define: {

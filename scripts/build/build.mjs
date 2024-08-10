@@ -21,9 +21,9 @@ import esbuild from "esbuild";
 import { readdir } from "fs/promises";
 import { join } from "path";
 
-import { BUILD_TIMESTAMP, commonOpts, disposeAll, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, rebuildAll, resolvePluginName, VERSION, watch, watchAll } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, commonRendererPlugins, disposeAll, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, rebuildAll, resolvePluginName, VERSION, watch, watchAll } from "./common.mjs";
 
-/** @type {Record<string, any>} */
+/** @type {Record<string, string>} */
 const defines = {
     IS_STANDALONE: IS_STANDALONE.toString(),
     IS_DEV: IS_DEV.toString(),
@@ -35,7 +35,7 @@ const defines = {
     BUILD_TIMESTAMP: BUILD_TIMESTAMP.toString()
 };
 
-if (defines.IS_STANDALONE === false)
+if (defines.IS_STANDALONE === "false")
     // If this is a local build (not standalone), optimize
     // for the specific platform we're on
     defines["process.platform"] = JSON.stringify(process.platform);
@@ -129,7 +129,7 @@ const contexts = await Promise.all([
         sourcemap,
         plugins: [
             globPlugins("discordDesktop"),
-            ...commonOpts.plugins
+            ...commonRendererPlugins
         ],
         define: {
             ...defines,
@@ -177,7 +177,7 @@ const contexts = await Promise.all([
         sourcemap,
         plugins: [
             globPlugins("vencordDesktop"),
-            ...commonOpts.plugins
+            ...commonRendererPlugins
         ],
         define: {
             ...defines,

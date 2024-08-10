@@ -24,6 +24,7 @@ import esbuild from "esbuild";
 import { constants as FsConstants, readFileSync } from "fs";
 import { access, readdir, readFile } from "fs/promises";
 import { minify as minifyHtml } from "html-minifier-terser";
+import { builtinModules } from "module";
 import { join, relative } from "path";
 import { promisify } from "util";
 
@@ -301,6 +302,20 @@ export const rebuildAll = contexts =>
 /** @param {esbuild.BuildContext[]} contexts */
 export const watchAll = contexts => Promise.all(contexts.map(ctx => ctx.watch()));
 
+/**
+ * @param {RegExp} filter
+ * @param {string} message
+ * @returns {esbuild.Plugin}
+ */
+export const banImportPlugin = (filter, message) => ({
+    name: "ban-imports",
+    setup: build => {
+        build.onResolve({ filter }, () => {
+            return { errors: [{ text: message }] };
+        });
+    }
+});
+
 /** @satisfies {esbuild.BuildOptions} */
 export const commonOpts = {
     // Does not work with esbuild.BuildContext.rebuild: https://github.com/evanw/esbuild/issues/2886#issuecomment-1416397046
@@ -319,3 +334,15 @@ export const commonOpts = {
     // Work around https://github.com/evanw/esbuild/issues/2460
     tsconfig: "./scripts/build/tsconfig.esbuild.json"
 };
+
+const escapedBuiltinModules = builtinModules
+    .map(m => m.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"))
+    .join("|");
+const builtinModuleRegex = new RegExp(`^(node:)?(${escapedBuiltinModules})$`);
+
+export const commonRendererPlugins = [
+    banImportPlugin(builtinModuleRegex, "Cannot import node inbuilt modules in browser code. You need to use a native.ts file"),
+    banImportPlugin(/^react$/, "Cannot import from react. React and hooks should be imported from @webpack/common"),
+    banImportPlugin(/^electron(\/.*)?$/, "Cannot import electron in browser code. You need to use a native.ts file"),
+    ...commonOpts.plugins
+];
