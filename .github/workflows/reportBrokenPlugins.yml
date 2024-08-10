@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   schedule:
     # Every day at midnight
-    - cron: 0 5 * * *
+    - cron: 0 0 * * *
 
 jobs:
   TestPlugins:

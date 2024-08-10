@@ -269,6 +269,7 @@ await Promise.all([
                             report.badWebpackFinds.push(otherMessage);
                             break;
                         case "Finished test":
+                            await page.close();
                             await browser.close();
                             await printReport();
                             process.exit();
