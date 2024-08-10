@@ -125,7 +125,6 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
     }));
 }
 
-
 const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; small?: boolean; }) => {
     if (!user || user.bot) return null;
 
