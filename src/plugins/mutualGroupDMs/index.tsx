@@ -21,7 +21,7 @@ import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, useMemo, UserStore } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
@@ -38,6 +38,19 @@ function getGroupDMName(channel: Channel) {
             .map(c => RelationshipStore.getNickname(c.id) || UserUtils.getName(c))
             .join(", ");
 }
+
+const getMutualGroupDms = (userId: string) =>
+    ChannelStore.getSortedPrivateChannels()
+        .filter(c => c.isGroupDM() && c.recipients.includes(userId));
+
+const isBotOrSelf = (user: User) => user.bot || user.id === UserStore.getCurrentUser().id;
+
+function getMutualGDMCountText(user: User) {
+    const count = getMutualGroupDms(user.id).length;
+    return `${count === 0 ? "No" : count} Mutual Group${count !== 1 ? "s" : ""}`;
+}
+
+const IS_PATCHED = Symbol("MutualGroupDMs.Patched");
 
 export default definePlugin({
     name: "MutualGroupDMs",
@@ -63,8 +76,8 @@ export default definePlugin({
             find: ".MUTUAL_FRIENDS?(",
             replacement: [
                 {
-                    match: /(?<=onItemSelect:\i,children:)(\i)\.map/,
-                    replace: "[...$1, ...($self.isBotOrSelf(arguments[0].user) ? [] : [{section:'MUTUAL_GDMS',text:$self.getMutualGDMCountText(arguments[0].user)}])].map"
+                    match: /\i\.useEffect.{0,100}(\i)\[0\]\.section/,
+                    replace: "$self.pushSection($1, arguments[0].user);$&"
                 },
                 {
                     match: /\(0,\i\.jsx\)\(\i,\{items:\i,section:(\i)/,
@@ -74,15 +87,23 @@ export default definePlugin({
         }
     ],
 
-    isBotOrSelf: (user: User) => user.bot || user.id === UserStore.getCurrentUser().id,
+    isBotOrSelf,
+    getMutualGDMCountText,
 
-    getMutualGDMCountText: (user: User) => {
-        const count = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).length;
-        return `${count === 0 ? "No" : count} Mutual Group${count !== 1 ? "s" : ""}`;
+    pushSection(sections: any[], user: User) {
+        if (isBotOrSelf(user) || sections[IS_PATCHED]) return;
+
+        sections[IS_PATCHED] = true;
+        sections.push({
+            section: "MUTUAL_GDMS",
+            text: getMutualGDMCountText(user)
+        });
     },
 
     renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: User, onClose: () => void; }) => {
-        const entries = ChannelStore.getSortedPrivateChannels().filter(c => c.isGroupDM() && c.recipients.includes(user.id)).map(c => (
+        const mutualDms = useMemo(() => getMutualGroupDms(user.id), [user.id]);
+
+        const entries = mutualDms.map(c => (
             <Clickable
                 className={ProfileListClasses.listRow}
                 onClick={() => {
