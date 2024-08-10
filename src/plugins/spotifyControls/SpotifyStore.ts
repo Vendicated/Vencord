@@ -45,6 +45,7 @@ export interface Track {
 }
 
 interface PlayerState {
+    type: "SPOTIFY_PLAYER_STATE";
     accountId: string;
     track: Track | null;
     volumePercent?: number;
@@ -56,6 +57,7 @@ interface PlayerState {
 
     // added by patch
     actual_repeat?: Repeat;
+    shuffle?: boolean;
 }
 
 interface Device {
@@ -183,6 +185,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
             store.isPlaying = a.isPlaying ?? false;
             store.volume = a.volumePercent ?? 0;
             store.repeat = a.actual_repeat || "off";
+            store.shuffle = a.shuffle ?? false;
             store.position = a.position ?? 0;
             store.isSettingPosition = false;
             store.emitChange();
