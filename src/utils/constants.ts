@@ -33,10 +33,6 @@ export interface Dev {
  * If you are fine with attribution but don't want the badge, add badge: false
  */
 export const Devs = /* #__PURE__*/ Object.freeze({
-    Nobody: {
-        name: "Nobody",
-        id: 0n,
-    },
     Ven: {
         name: "Vee",
         id: 343383572805058560n
@@ -545,7 +541,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     surgedevs: {
         name: "Chloe",
         id: 1084592643784331324n
-    }
+    },
+    Lumap: {
+        name: "Lumap",
+        id: 585278686291427338n,
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly

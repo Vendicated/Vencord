@@ -24,13 +24,13 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "PictureInPicture",
     description: "Adds picture in picture to videos (next to the Download button)",
-    authors: [Devs.Nobody],
+    authors: [Devs.Lumap],
     settings,
     patches: [
         {
-            find: ".nonMediaMosaicItem]",
+            find: ".removeMosaicItemHoverButton),",
             replacement: {
-                match: /\.nonMediaMosaicItem\]:!(\i).{0,50}?children:\[(\S)/,
+                match: /\.nonMediaMosaicItem\]:!(\i).{0,50}?children:\[\S,(\S)/,
                 replace: "$&,$1&&$2&&$self.renderPiPButton(),"
             },
         },
