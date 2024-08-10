@@ -183,124 +183,126 @@ async function printReport() {
         });
     }
 }
+await Promise.all([
+    page.on("console", async e => {
+        const level = e.type();
+        const rawArgs = e.args();
 
-page.on("console", async e => {
-    const level = e.type();
-    const rawArgs = e.args();
-
-    async function getText() {
-        try {
-            return await Promise.all(
-                e.args().map(async a => {
-                    return await maybeGetError(a) || await a.jsonValue();
-                })
-            ).then(a => a.join(" ").trim());
-        } catch {
-            return e.text();
-        }
-    }
-
-    const firstArg = await rawArgs[0]?.jsonValue();
-
-    const isEquicord = firstArg === "[Equicord]";
-    const isDebug = firstArg === "[PUP_DEBUG]";
-
-    outer:
-    if (isEquicord) {
-        try {
-            var args = await Promise.all(e.args().map(a => a.jsonValue()));
-        } catch {
-            break outer;
-        }
-
-        const [, tag, message, otherMessage] = args as Array<string>;
-
-        switch (tag) {
-            case "WebpackInterceptor:":
-                const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
-                if (!patchFailMatch) break;
-
-                console.error(await getText());
-                process.exitCode = 1;
-
-                const [, plugin, type, id, regex] = patchFailMatch;
-                report.badPatches.push({
-                    plugin,
-                    type,
-                    id,
-                    match: regex.replace(/\[A-Za-z_\$\]\[\\w\$\]\*/g, "\\i"),
-                    error: await maybeGetError(e.args()[3])
-                });
-
-                break;
-            case "PluginManager:":
-                const failedToStartMatch = message.match(/Failed to start (.+)/);
-                if (!failedToStartMatch) break;
-
-                console.error(await getText());
-                process.exitCode = 1;
-
-                const [, name] = failedToStartMatch;
-                report.badStarts.push({
-                    plugin: name,
-                    error: await maybeGetError(e.args()[3]) ?? "Unknown error"
-                });
-
-                break;
-            case "LazyChunkLoader:":
-                console.error(await getText());
-
-                switch (message) {
-                    case "A fatal error occurred:":
-                        process.exit(1);
-                }
-
-                break;
-            case "Reporter:":
-                console.error(await getText());
-
-                switch (message) {
-                    case "A fatal error occurred:":
-                        process.exit(1);
-                    case "Webpack Find Fail:":
-                        process.exitCode = 1;
-                        report.badWebpackFinds.push(otherMessage);
-                        break;
-                    case "Finished test":
-                        await browser.close();
-                        await printReport();
-                        process.exit();
-                }
-        }
-    }
-
-    if (isDebug) {
-        console.error(await getText());
-    } else if (level === "error") {
-        const text = await getText();
-
-        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("Webpack")) {
-            if (IGNORED_DISCORD_ERRORS.some(regex => text.match(regex))) {
-                report.ignoredErrors.push(text);
-            } else {
-                console.error("[Unexpected Error]", text);
-                report.otherErrors.push(text);
+        async function getText() {
+            try {
+                return await Promise.all(
+                    e.args().map(async a => {
+                        return await maybeGetError(a) || await a.jsonValue();
+                    })
+                ).then(a => a.join(" ").trim());
+            } catch {
+                return e.text();
             }
         }
-    }
-});
 
-page.on("error", e => console.error("[Error]", e.message));
-page.on("pageerror", e => {
-    if (e.message.includes("Sentry successfully disabled")) return;
+        const firstArg = await rawArgs[0]?.jsonValue();
 
-    if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module")) {
-        console.error("[Page Error]", e.message);
-        report.otherErrors.push(e.message);
-    } else {
-        report.ignoredErrors.push(e.message);
-    }
-});
+        const isEquicord = firstArg === "[Equicord]";
+        const isDebug = firstArg === "[PUP_DEBUG]";
+
+        outer:
+        if (isEquicord) {
+            try {
+                var args = await Promise.all(e.args().map(a => a.jsonValue()));
+            } catch {
+                break outer;
+            }
+
+            const [, tag, message, otherMessage] = args as Array<string>;
+
+            switch (tag) {
+                case "WebpackInterceptor:":
+                    const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
+                    if (!patchFailMatch) break;
+
+                    console.error(await getText());
+                    process.exitCode = 1;
+
+                    const [, plugin, type, id, regex] = patchFailMatch;
+                    report.badPatches.push({
+                        plugin,
+                        type,
+                        id,
+                        match: regex.replace(/\[A-Za-z_\$\]\[\\w\$\]\*/g, "\\i"),
+                        error: await maybeGetError(e.args()[3])
+                    });
+
+                    break;
+                case "PluginManager:":
+                    const failedToStartMatch = message.match(/Failed to start (.+)/);
+                    if (!failedToStartMatch) break;
+
+                    console.error(await getText());
+                    process.exitCode = 1;
+
+                    const [, name] = failedToStartMatch;
+                    report.badStarts.push({
+                        plugin: name,
+                        error: await maybeGetError(e.args()[3]) ?? "Unknown error"
+                    });
+
+                    break;
+                case "LazyChunkLoader:":
+                    console.error(await getText());
+
+                    switch (message) {
+                        case "A fatal error occurred:":
+                            process.exit(1);
+                    }
+
+                    break;
+                case "Reporter:":
+                    console.error(await getText());
+
+                    switch (message) {
+                        case "A fatal error occurred:":
+                            process.exit(1);
+                        case "Webpack Find Fail:":
+                            process.exitCode = 1;
+                            report.badWebpackFinds.push(otherMessage);
+                            break;
+                        case "Finished test":
+                            await browser.close();
+                            await printReport();
+                            process.exit();
+                    }
+            }
+        }
+
+        if (isDebug) {
+            console.error(await getText());
+        } else if (level === "error") {
+            const text = await getText();
+
+            if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("Webpack")) {
+                if (IGNORED_DISCORD_ERRORS.some(regex => text.match(regex))) {
+                    report.ignoredErrors.push(text);
+                } else {
+                    console.error("[Unexpected Error]", text);
+                    report.otherErrors.push(text);
+                }
+            }
+        }
+    }),
+
+    page.on("error", e => console.error("[Error]", e.message)),
+
+    page.on("pageerror", e => {
+        if (e.message.includes("Sentry successfully disabled")) return;
+
+        if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module")) {
+            console.error("[Page Error]", e.message);
+            report.otherErrors.push(e.message);
+        } else {
+            report.ignoredErrors.push(e.message);
+        }
+    })
+]);
 
 async function reporterRuntime(token: string) {
     Vencord.Webpack.waitFor(
