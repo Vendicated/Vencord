@@ -37,7 +37,10 @@ const CANARY = process.env.USE_CANARY === "true";
 
 const browser = await pup.launch({
     headless: true,
-    executablePath: process.env.CHROMIUM_BIN
+    executablePath: process.env.CHROMIUM_BIN,
+    args: [
+        '--shm-size=5gb' // Testing Value
+    ]
 });
 
 const page = await browser.newPage();
