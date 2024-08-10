@@ -39,7 +39,7 @@ const browser = await pup.launch({
     headless: true,
     executablePath: process.env.CHROMIUM_BIN,
     args: [
-        '--shm-size=5gb' // Testing Value
+        '--shm-size=4gb'
     ]
 });
 
