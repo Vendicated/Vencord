@@ -105,7 +105,7 @@ export declare abstract class ChannelRecordProperties {
     lastMessageId: string | Nullish;
     lastPinTimestamp: string | Nullish;
     /** @todo */
-    linkedLobby?: any;
+    linkedLobby?: { application_id?: string | null; } & Record<string, any> | Nullish;
     member?: ThreadMember | undefined;
     memberCount?: number | undefined;
     memberIdsPreview?: string[] | undefined;

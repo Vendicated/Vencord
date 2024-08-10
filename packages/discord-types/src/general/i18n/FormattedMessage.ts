@@ -8,7 +8,7 @@ import type MessageFormat from "intl-messageformat";
 import type { ReactElement, ReactNode } from "react";
 import type { State } from "simple-markdown";
 
-import type { IsAny, IsStringLiteral, Stringable, UnionToIntersection } from "../../internal";
+import type { IsAny, IsDomainFinite, Stringable, StringProperties, UnionToIntersection } from "../../internal";
 
 export declare class FormattedMessage<
     Args extends GenericArgs = GenericArgs,
@@ -55,9 +55,9 @@ export declare class FormattedMessage<
     message: string;
 }
 
-type GenericArgs = RecordArgs | TupleArgs | string;
-type RecordArgs = Record<string, GenericValue>;
-type TupleArgs = readonly [stringableArgs: string, hookArgs: string];
+type GenericArgs = RecordArgs | TupleArgs | string | number;
+type RecordArgs = Record<string | number, GenericValue>;
+type TupleArgs = readonly [stringableArgs: string | number, hookArgs: string | number];
 
 type GenericValue = Stringable | HookValue;
 type HookValue = (result: ReactNode, key: State["key"]) => ReactNode;
@@ -69,16 +69,16 @@ type FormatArgs<Args extends GenericArgs>
             ? []
             : keyof MessageValues<Args> extends never
                 ? []
-                : false extends IsStringLiteral<keyof MessageValues<Args> & string>
-                    ? [values: never]
-                    : [values: MessageValues<Args>];
+                : unknown extends IsDomainFinite<keyof MessageValues<Args>>
+                    ? [values: MessageValues<Args>]
+                    : [values: never];
 
 type MessageValues<Args extends GenericArgs> = UnionToIntersection<
-    Args extends string
+    Args extends string | number
         ? Record<Args, Stringable>
         : Args extends TupleArgs
             ? Record<Args[0], Stringable> & Record<Args[1], HookValue>
-            : Required<Pick<Args, keyof Args & string>>
+            : Required<StringProperties<Args>>
 >;
 
 /** @todo Add types for every type of ASTNode. */

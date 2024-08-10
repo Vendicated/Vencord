@@ -8,6 +8,7 @@ import type { FormattedMessage } from "./FormattedMessage";
 
 type GenericMessages<Key extends PropertyKey = PropertyKey> = Record<Key, string | FormattedMessage>;
 
+// Original name: ProxyProvider
 export declare class Provider<Messages extends GenericMessages<never> = GenericMessages> {
     constructor(getParsedMessages: ProviderParsedMessagesGetter<Messages>);
 

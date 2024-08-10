@@ -19,12 +19,16 @@ export type GenericConstructor = new (...args: any[]) => unknown;
 export type IsAny<T> = 0 extends 1 & T ? unknown : never;
 
 /** @internal */
-export type IsStringLiteral<T extends string>
-    = T extends unknown
-        ? {} extends Record<T, unknown>
-            ? false
-            : true
-        : never;
+export type IsDomainFinite<T extends PropertyKey>
+    = unknown extends (
+        T extends unknown
+            ? {} extends Record<T, unknown>
+                ? unknown
+                : never
+            : never
+    )
+        ? never
+        : unknown;
 
 /** @internal */
 export type Nullish = null | undefined;
@@ -73,6 +77,10 @@ export type Stringable
     = { [Symbol.toPrimitive]: (hint: "default" | "string") => StringablePrimitive; }
     | ({ toString: () => StringablePrimitive; } | { valueOf: () => StringablePrimitive; })
     & { [Symbol.toPrimitive]?: Nullish; };
+
+/** @internal */
+export type StringProperties<T>
+    = { [Key in keyof T as Exclude<Key, symbol>]: T[Key]; };
 
 /** @internal */
 export type UnionToIntersection<Union> = (
