@@ -23,7 +23,7 @@ import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises
 import { join } from "path";
 import Zip from "zip-local";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION, commonRendererPlugins } from "./common.mjs";
 
 /**
  * @type {esbuild.BuildOptions}
@@ -36,7 +36,7 @@ const commonOptions = {
     external: ["~plugins", "~git-hash", "/assets/*"],
     plugins: [
         globPlugins("web"),
-        ...commonOpts.plugins,
+        ...commonRendererPlugins
     ],
     target: ["esnext"],
     define: {
@@ -116,7 +116,12 @@ await Promise.all(
             }
         })
     ]
-);
+).catch(err => {
+    console.error("Build failed");
+    console.error(err.message);
+    if (!commonOpts.watch)
+        process.exit(1);
+});;
 
 /**
  * @type {(dir: string) => Promise<string[]>}
