@@ -366,10 +366,9 @@ export default definePlugin({
                                         key="vc-plugin-settings"
                                         onClick={() => openPluginModal(plugin, onRestartNeeded)}
                                     >
-                                        Open {pluginName} Settings
+                                        Open plugin Settings
                                     </Button>
                                 );
-                                // Should it be Open {pluginName} Settings or just Open Settings? "Open Settings Settings" is dumb
                             }
                         }
                     }
