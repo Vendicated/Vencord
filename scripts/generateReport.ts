@@ -39,11 +39,14 @@ const browser = await pup.launch({
     headless: true,
     executablePath: process.env.CHROMIUM_BIN,
     args: [
+        '--disable-dev-shm-usage',
         '--shm-size=4gb'
     ]
 });
 
 const page = await browser.newPage();
+await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36");
+await page.setBypassCSP(true);
 
 async function maybeGetError(handle: JSHandle): Promise<string | undefined> {
     return await (handle as JSHandle<Error>)?.getProperty("message")
@@ -182,10 +185,6 @@ async function printReport() {
     }
 }
 await Promise.all([
-    page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"),
-
-    page.setBypassCSP(true),
-
     page.on("console", async e => {
         const level = e.type();
         const rawArgs = e.args();
@@ -269,7 +268,6 @@ await Promise.all([
                             report.badWebpackFinds.push(otherMessage);
                             break;
                         case "Finished test":
-                            await page.close();
                             await browser.close();
                             await printReport();
                             process.exit();
@@ -304,16 +302,7 @@ await Promise.all([
         } else {
             report.ignoredErrors.push(e.message);
         }
-    }),
-
-    page.evaluateOnNewDocument(`
-        if (location.host.endsWith("discord.com")) {
-            ${readFileSync("./dist/browser/browser.js", "utf-8")};
-            (${reporterRuntime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
-        }
-    `),
-
-    page.goto(CANARY ? "https://canary.discord.com/login" : "https://discord.com/login")
+    })
 ]);
 
 async function reporterRuntime(token: string) {
@@ -325,3 +314,12 @@ async function reporterRuntime(token: string) {
         }
     );
 }
+
+await page.evaluateOnNewDocument(`
+    if (location.host.endsWith("discord.com")) {
+        ${readFileSync("./dist/browser/browser.js", "utf-8")};
+        (${reporterRuntime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
+    }
+`);
+
+await page.goto(CANARY ? "https://canary.discord.com/login" : "https://discord.com/login");
