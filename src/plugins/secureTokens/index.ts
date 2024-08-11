@@ -49,7 +49,7 @@ function setToken(t: string) {
         settings.store.token = settings.store.token;
     }
     tokenUtils.setToken("secured", undefined);
-};
+}
 
 function handleGetToken(res: any) {
     if (res() !== "secured" && res()) {
@@ -64,12 +64,12 @@ function handleGetToken(res: any) {
     } else {
         return undefined;
     }
-};
+}
 
 function handleSetToken(v: any, res: any) {
     if (v === "secured") { res(); } else { setToken(v); }
     localStorage.setItem("tokens", "{}");
-};
+}
 
 const settings = definePluginSettings({
     encrypted: {
@@ -86,7 +86,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "SecureToken",
+    name: "SecureTokens",
     description: "Stores your Discord token safely.",
     authors: [Devs.Inbestigator],
     handleGetToken,

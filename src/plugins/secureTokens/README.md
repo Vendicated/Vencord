@@ -1,4 +1,4 @@
-# SecureToken
+# SecureTokens
 
 Stores your Discord token safely. This is meant to combat hackers from simply stealing your token from the traditional location.
 
