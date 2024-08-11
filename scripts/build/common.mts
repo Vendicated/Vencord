@@ -28,6 +28,7 @@ import { join, relative } from "path";
 import { promisify } from "util";
 
 import { getPluginTarget } from "../utils.mjs";
+import { builtinModules } from "module";
 
 const PackageJSON: typeof import("../../package.json") = JSON.parse(readFileSync("package.json", "utf-8"));
 
@@ -262,6 +263,15 @@ export const stylePlugin: Plugin = {
     }
 };
 
+export const banImportPlugin = (filter: RegExp, message: string) => ({
+    name: "ban-imports",
+    setup: build => {
+        build.onResolve({ filter }, () => {
+            return { errors: [{ text: message }] };
+        });
+    }
+});
+
 export const commonOpts = {
     logLevel: "info",
     bundle: true,
@@ -302,3 +312,15 @@ export async function buildOrWatchAll() {
         }
     }
 }
+
+const escapedBuiltinModules = builtinModules
+    .map(m => m.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"))
+    .join("|");
+const builtinModuleRegex = new RegExp(`^(node:)?(${escapedBuiltinModules})$`);
+
+export const commonRendererPlugins = [
+    banImportPlugin(builtinModuleRegex, "Cannot import node inbuilt modules in browser code. You need to use a native.ts file"),
+    banImportPlugin(/^react$/, "Cannot import from react. React and hooks should be imported from @webpack/common"),
+    banImportPlugin(/^electron(\/.*)?$/, "Cannot import electron in browser code. You need to use a native.ts file"),
+    ...commonOpts.plugins
+];

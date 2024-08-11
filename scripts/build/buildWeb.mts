@@ -23,7 +23,7 @@ import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises
 import { join } from "path";
 import Zip from "zip-local";
 
-import { addBuild, BUILD_TIMESTAMP, buildOrWatchAll, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION } from "./common.mjs";
+import { addBuild, BUILD_TIMESTAMP, buildOrWatchAll, commonOpts, commonRendererPlugins, globPlugins, IS_DEV, IS_REPORTER, VERSION } from "./common.mjs";
 
 /**
  * @type {esbuild.BuildOptions}
@@ -36,7 +36,7 @@ const commonOptions: esbuild.BuildOptions = {
     external: ["~plugins", "~git-hash", "/assets/*"],
     plugins: [
         globPlugins("web"),
-        ...commonOpts.plugins,
+        ...commonRendererPlugins
     ],
     target: ["esnext"],
     define: {
