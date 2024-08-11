@@ -23,7 +23,7 @@ import { existsSync, readdirSync } from "fs";
 import { readdir, rm, writeFile } from "fs/promises";
 import { join } from "path";
 
-import { addBuild, BUILD_TIMESTAMP, buildOrWatchAll, commonOpts, commonRendererPlugins, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, watch } from "./common.mjs";
+import { addBuild, BUILD_TIMESTAMP, buildOrWatchAll, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, watch } from "./common.mjs";
 
 const defines = {
     IS_STANDALONE: String(IS_STANDALONE),
@@ -128,7 +128,7 @@ await Promise.all([
         sourcemap,
         plugins: [
             globPlugins("discordDesktop"),
-            ...commonRendererPlugins
+            ...commonOpts.plugins
         ],
         define: {
             ...defines,
@@ -180,7 +180,7 @@ await Promise.all([
         sourcemap,
         plugins: [
             globPlugins("vencordDesktop"),
-            ...commonRendererPlugins
+            ...commonOpts.plugins
         ],
         define: {
             ...defines,
@@ -232,7 +232,7 @@ await Promise.all([
         sourcemap,
         plugins: [
             globPlugins("equicordDesktop"),
-            ...commonRendererPlugins
+            ...commonOpts.plugins
         ],
         define: {
             ...defines,
