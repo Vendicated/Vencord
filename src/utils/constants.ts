@@ -546,6 +546,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Lumap",
         id: 585278686291427338n,
     },
+    vxray: {
+        name: "Ray",
+        id: 205834013926096899n
+    }
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
