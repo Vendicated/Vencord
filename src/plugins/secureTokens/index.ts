@@ -10,22 +10,43 @@ import { localStorage } from "@utils/localStorage";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
-const tokenUtils = findByPropsLazy("getToken");
-
-function generateEncryptionKey() {
-    let key: any;
-    async function generateKeyAsync() {
-        const keyGenParams = {
-            name: "AES-GCM",
-            length: 256
-        };
-        key = await crypto.subtle.generateKey(keyGenParams, true, ["encrypt", "decrypt"]);
+const settings = definePluginSettings({
+    encrypted: {
+        type: OptionType.BOOLEAN,
+        description: "Whether the token should be encrypted, will require a login every restart (enable storeKey to stop that)",
+        restartNeeded: true,
+        default: true
+    },
+    storeKey: {
+        type: OptionType.BOOLEAN,
+        description: "Whether the encryption key should be stored and not regenerated on restart",
+        restartNeeded: true,
+        default: false
+    },
+    key: {
+        type: OptionType.STRING,
+        hidden: true,
+        description: "Key"
+    },
+    token: {
+        type: OptionType.STRING,
+        hidden: true,
+        description: "Discord token"
     }
-    generateKeyAsync();
-    return key;
+});
+
+const tokenUtils = findByPropsLazy("getToken");
+const uuid = crypto.randomUUID();
+
+function key() {
+    if (settings.store.storeKey) {
+        if (!settings.store.key) settings.store.key = uuid;
+        return settings.store.key;
+    } else {
+        return uuid;
+    }
 }
 
-const key = generateEncryptionKey();
 
 function xorEncryptDecrypt(input: string, key: string): string {
     const encoder = new TextEncoder();
@@ -44,7 +65,7 @@ function xorEncryptDecrypt(input: string, key: string): string {
 
 function setToken(t: string) {
     if (settings.store.encrypted) {
-        settings.store.token = xorEncryptDecrypt(t, key);
+        settings.store.token = xorEncryptDecrypt(t, key());
     } else {
         settings.store.token = settings.store.token;
     }
@@ -57,7 +78,7 @@ function handleGetToken(res: any) {
         return res();
     } else if (settings.store.token && res()) {
         if (settings.store.encrypted) {
-            return xorEncryptDecrypt(settings.store.token, key);
+            return xorEncryptDecrypt(settings.store.token, key());
         } else {
             return settings.store.token;
         }
@@ -71,20 +92,6 @@ function handleSetToken(v: any, res: any) {
     localStorage.setItem("tokens", "{}");
 }
 
-const settings = definePluginSettings({
-    encrypted: {
-        type: OptionType.BOOLEAN,
-        description: "Whether the token should be encrypted, will require a login every restart",
-        restartNeeded: true,
-        default: true
-    },
-    token: {
-        type: OptionType.STRING,
-        hidden: true,
-        description: "Discord token"
-    }
-});
-
 export default definePlugin({
     name: "SecureTokens",
     description: "Stores your Discord token safely.",
@@ -97,11 +104,11 @@ export default definePlugin({
             find: "decryptedToken",
             replacement: [
                 {
-                    match: /return\((\i)\(\),null!=(\i)\)\?_\[(\i)\]:(\i)/,
-                    replace: "return $self.handleGetToken((()=>($1(),null!=$2)?_[$3]:$4))"
+                    match: /return(\(\i\(\),null!=\i\)\?_\[\i\]:\i)/,
+                    replace: "return $self.handleGetToken((()=>$1))"
                 },
                 {
-                    match: /if\(null==(\i)\)\{\i\(\i\);return\}\i=\i,null!=\i&&\(_\[\i\]=\i\),\i\?\i\(\):\(\i=\i,\i=_,\i\(\)\)/,
+                    match: /if\(null==(\i)\).{0,55}\i\(\)\)/,
                     replace: "$self.handleSetToken($1,()=>{$&})"
                 }
             ]
