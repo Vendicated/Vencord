@@ -6,34 +6,26 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { localStorage } from "@utils/localStorage";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
 const tokenUtils = findByPropsLazy("getToken");
-const key = crypto.randomUUID();
 
-const settings = definePluginSettings({
-    encrypted: {
-        type: OptionType.BOOLEAN,
-        description: "Whether the token should be encrypted, will require a login every restart",
-        restartNeeded: true,
-        default: true
-    },
-    token: {
-        type: OptionType.STRING,
-        hidden: true,
-        description: "Discord token"
+function generateEncryptionKey() {
+    let key: any;
+    async function generateKeyAsync() {
+        const keyGenParams = {
+            name: "AES-GCM",
+            length: 256
+        };
+        key = await crypto.subtle.generateKey(keyGenParams, true, ["encrypt", "decrypt"]);
     }
-});
+    generateKeyAsync();
+    return key;
+}
 
-function setToken(t: string) {
-    if (settings.store.encrypted) {
-        settings.store.token = xorEncryptDecrypt(t, key);
-    } else {
-        settings.store.token = settings.store.token;
-    }
-    tokenUtils.setToken("secured", undefined);
-};
+const key = generateEncryptionKey();
 
 function xorEncryptDecrypt(input: string, key: string): string {
     const encoder = new TextEncoder();
@@ -49,6 +41,15 @@ function xorEncryptDecrypt(input: string, key: string): string {
     const decoder = new TextDecoder();
     return decoder.decode(outputBytes);
 }
+
+function setToken(t: string) {
+    if (settings.store.encrypted) {
+        settings.store.token = xorEncryptDecrypt(t, key);
+    } else {
+        settings.store.token = settings.store.token;
+    }
+    tokenUtils.setToken("secured", undefined);
+};
 
 function handleGetToken(res: any) {
     if (res() !== "secured" && res()) {
@@ -67,7 +68,22 @@ function handleGetToken(res: any) {
 
 function handleSetToken(v: any, res: any) {
     if (v === "secured") { res(); } else { setToken(v); }
+    localStorage.setItem("tokens", "{}");
 };
+
+const settings = definePluginSettings({
+    encrypted: {
+        type: OptionType.BOOLEAN,
+        description: "Whether the token should be encrypted, will require a login every restart",
+        restartNeeded: true,
+        default: true
+    },
+    token: {
+        type: OptionType.STRING,
+        hidden: true,
+        description: "Discord token"
+    }
+});
 
 export default definePlugin({
     name: "SecureToken",
