@@ -56,6 +56,7 @@ interface PlayerState {
 
     // added by patch
     actual_repeat: Repeat;
+    shuffle: boolean;
 }
 
 interface Device {
@@ -183,6 +184,7 @@ export const SpotifyStore = webpackDependantLazy(() => {
             store.isPlaying = e.isPlaying ?? false;
             store.volume = e.volumePercent ?? 0;
             store.repeat = e.actual_repeat || "off";
+            store.shuffle = e.shuffle ?? false;
             store.position = e.position ?? 0;
             store.isSettingPosition = false;
             store.emitChange();
