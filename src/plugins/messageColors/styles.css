@@ -3,10 +3,11 @@
     background: var(--color);
     height: 1rem;
     vertical-align: middle;
+    margin-bottom: 0.2rem;
     border-radius: 4px;
     display: inline-block;
     user-select: none;
-    margin-left: 2px;
+    box-sizing: border-box;
 }
 
 .vc-color-bg {
