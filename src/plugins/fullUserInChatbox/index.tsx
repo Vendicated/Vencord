@@ -25,7 +25,7 @@ export default definePlugin({
         }
     ],
 
-    patchChatboxMention (props) {
+    patchChatboxMention(props) {
         return normalMessageComponent({
             className: "mention",
             userId: props.id,
