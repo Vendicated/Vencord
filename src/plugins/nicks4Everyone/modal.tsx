@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import {
     ModalContent,
     ModalFooter,
@@ -7,6 +13,7 @@ import {
     openModal,
 } from "@utils/modal";
 import { Button, Forms, React, TextInput, useState } from "@webpack/common";
+
 import { setUsername } from "./index";
 
 function Modal({ user, props: modalProps }: { user: any, props: ModalProps; }) {
@@ -16,7 +23,7 @@ function Modal({ user, props: modalProps }: { user: any, props: ModalProps; }) {
         <ModalRoot {...modalProps}>
             <ModalHeader>
                 <Forms.FormTitle tag="h4">
-                    {user.customNick ? 'Change' : 'Add'} Custom Nickname
+                    {user.customNick ? "Change" : "Add"} Custom Nickname
                 </Forms.FormTitle>
             </ModalHeader>
 

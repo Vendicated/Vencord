@@ -5,13 +5,13 @@
  */
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher, Menu, UserStore } from "@webpack/common";
 import type { User as DiscordUser } from "discord-types/general";
 
 import { buildModal } from "./modal";
-import { definePluginSettings } from "@api/Settings";
 
 interface User extends DiscordUser {
     globalName?: string;
@@ -43,7 +43,7 @@ function UserContext(): NavContextMenuPatchCallback {
             </Menu.MenuGroup>
         ));
     };
-};
+}
 
 export default definePlugin({
     name: "Nicks4Everyone",
