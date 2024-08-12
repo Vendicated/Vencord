@@ -10,7 +10,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { React } from "@webpack/common";
 
-import { ColorType, regex, RenderType, replaceRegexp, settings } from "./constants";
+import { BlockDisplayType, ColorType, regex, RenderType, replaceRegexp, settings } from "./constants";
 
 const source = regex.map(r => r.reg.source).join("|");
 const matchAllRegExp = new RegExp(`^(${source})`, "i");
@@ -117,7 +117,27 @@ export default definePlugin({
                     return <span className={className} style={styles}>{text}</span>;
                 }
 
-                return <>{text}<span className="vc-color-block" style={styles}></span></>;
+                // Only block display left
+                const margin = "2px";
+
+                switch (settings.store.blockView) {
+                    case BlockDisplayType.LEFT:
+                        styles.marginRight = margin;
+                        return <><span className="vc-color-block" style={styles} />{text}</>;
+
+                    case BlockDisplayType.RIGHT:
+                        styles.marginLeft = margin;
+                        return <>{text}<span className="vc-color-block" style={styles} /></>;
+
+                    case BlockDisplayType.BOTH:
+                        styles.marginLeft = margin;
+                        styles.marginRight = margin;
+                        return <>
+                            <span className="vc-color-block" style={styles} />
+                            {text}
+                            <span className="vc-color-block" style={styles} />
+                        </>;
+                }
             }
         };
     }

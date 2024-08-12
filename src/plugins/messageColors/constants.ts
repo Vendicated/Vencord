@@ -13,6 +13,12 @@ export const enum RenderType {
     BACKGROUND,
 }
 
+export const enum BlockDisplayType {
+    LEFT,
+    RIGHT,
+    BOTH
+}
+
 export const settings = definePluginSettings({
     renderType: {
         type: OptionType.SELECT,
@@ -31,6 +37,26 @@ export const settings = definePluginSettings({
                 label: "Background color",
                 value: RenderType.BACKGROUND
             },
+        ]
+    },
+    blockView: {
+        type: OptionType.SELECT,
+        disabled: () => settings.store.renderType !== RenderType.BLOCK,
+        description: "Where to display colored block",
+        options: [
+            {
+                label: "Right side",
+                value: BlockDisplayType.RIGHT,
+                default: true
+            },
+            {
+                label: "Left side",
+                value: BlockDisplayType.LEFT
+            },
+            {
+                label: "Both sides",
+                value: BlockDisplayType.BOTH
+            }
         ]
     }
 });
