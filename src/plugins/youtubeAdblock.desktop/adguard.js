@@ -19,7 +19,6 @@
  * along with AdGuard's Block YouTube Ads.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const LOGO_ID = "block-youtube-ads-logo";
 const hiddenCSS = [
     "#__ffYoutube1",
     "#__ffYoutube2",
@@ -98,7 +97,7 @@ const hideElements = () => {
     }
     const rule = selectors.join(", ") + " { display: none!important; }";
     const style = document.createElement("style");
-    style.innerHTML = rule;
+    style.textContent = rule;
     document.head.appendChild(style);
 };
 /**
@@ -165,11 +164,9 @@ const overrideObject = (obj, propertyName, overrideValue) => {
     }
     let overriden = false;
     for (const key in obj) {
-        // eslint-disable-next-line no-prototype-builtins
         if (obj.hasOwnProperty(key) && key === propertyName) {
             obj[key] = overrideValue;
             overriden = true;
-            // eslint-disable-next-line no-prototype-builtins
         } else if (obj.hasOwnProperty(key) && typeof obj[key] === "object") {
             if (overrideObject(obj[key], propertyName, overrideValue)) {
                 overriden = true;
@@ -195,56 +192,15 @@ const jsonOverride = (propertyName, overrideValue) => {
         return obj;
     };
     // Override Response.prototype.json
-    const nativeResponseJson = Response.prototype.json;
-    Response.prototype.json = new Proxy(nativeResponseJson, {
-        apply(...args) {
+    Response.prototype.json = new Proxy(Response.prototype.json, {
+        async apply(...args) {
             // Call the target function, get the original Promise
-            const promise = Reflect.apply(...args);
+            const result = await Reflect.apply(...args);
             // Create a new one and override the JSON inside
-            return new Promise((resolve, reject) => {
-                promise.then(data => {
-                    overrideObject(data, propertyName, overrideValue);
-                    resolve(data);
-                }).catch(error => reject(error));
-            });
+            overrideObject(result, propertyName, overrideValue);
+            return result;
         },
     });
-};
-const addAdGuardLogoStyle = () => { };
-const addAdGuardLogo = () => {
-    if (document.getElementById(LOGO_ID)) {
-        return;
-    }
-    const logo = document.createElement("span");
-    logo.innerHTML = "__logo_text__";
-    logo.setAttribute("id", LOGO_ID);
-    if (window.location.hostname === "m.youtube.com") {
-        const btn = document.querySelector("header.mobile-topbar-header > button");
-        if (btn) {
-            btn.parentNode?.insertBefore(logo, btn.nextSibling);
-            addAdGuardLogoStyle();
-        }
-    } else if (window.location.hostname === "www.youtube.com") {
-        const code = document.getElementById("country-code");
-        if (code) {
-            code.innerHTML = "";
-            code.appendChild(logo);
-            addAdGuardLogoStyle();
-        }
-    } else if (window.location.hostname === "music.youtube.com") {
-        const el = document.querySelector(".ytmusic-nav-bar#left-content");
-        if (el) {
-            el.appendChild(logo);
-            addAdGuardLogoStyle();
-        }
-    } else if (window.location.hostname === "www.youtube-nocookie.com") {
-        const code = document.querySelector("#yt-masthead #logo-container .content-region");
-        if (code) {
-            code.innerHTML = "";
-            code.appendChild(logo);
-            addAdGuardLogoStyle();
-        }
-    }
 };
 // Removes ads metadata from YouTube XHR requests
 jsonOverride("adPlacements", []);
@@ -252,11 +208,9 @@ jsonOverride("playerAds", []);
 // Applies CSS that hides YouTube ad elements
 hideElements();
 // Some changes should be re-evaluated on every page change
-addAdGuardLogo();
 hideDynamicAds();
 autoSkipAds();
 observeDomChanges(() => {
-    addAdGuardLogo();
     hideDynamicAds();
     autoSkipAds();
 });
