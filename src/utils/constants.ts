@@ -545,6 +545,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     surgedevs: {
         name: "Chloe",
         id: 1084592643784331324n
+    },
+    redbaron2k7: {
+        name: "redbaron2k7",
+        id: 1142923640778797157n
     }
 } satisfies Record<string, Dev>);
 
