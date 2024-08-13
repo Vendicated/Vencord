@@ -340,7 +340,7 @@ export default definePlugin({
         if (settings.store.allActivitiesStyle === "carousel") {
             return (
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                    {currentActivity?.id === activity.id ? (
+                    {currentActivity?.id === activity?.id ? (
                         <ActivityView
                             activity={currentActivity}
                             user={user}
