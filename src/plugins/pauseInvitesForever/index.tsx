@@ -20,16 +20,10 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { GuildFeature } from "@vencord/discord-types";
-import { findLazy } from "@webpack";
 import { Constants, GuildStore, i18n, RestAPI } from "@webpack/common";
 
-const InvitesDisabledExperiment = findLazy(m => m.definition?.id === "2022-07_invites_disabled");
-
 function showDisableInvites(guildId: string) {
-    // Once the experiment is removed, this should keep working
-    const { enableInvitesDisabled } = InvitesDisabledExperiment?.getCurrentConfig?.({ guildId })
-        ?? { enableInvitesDisabled: true };
-    return enableInvitesDisabled && !GuildStore.getGuild(guildId)!.hasFeature(GuildFeature.INVITES_DISABLED);
+    return !GuildStore.getGuild(guildId)!.hasFeature(GuildFeature.INVITES_DISABLED);
 }
 
 function disableInvites(guildId: string) {
