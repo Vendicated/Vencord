@@ -8,8 +8,8 @@ import definePlugin from "@utils/types";
 import { SelectedChannelStore } from "@webpack/common";
 import { Devs } from "@utils/constants";
 
-const startSound = "https://raw.githubusercontent.com/redbaron2k7/videoStartNotifier//main/start.mp3";
-const stopSound = "https://raw.githubusercontent.com/redbaron2k7/videoStartNotifier/main/stop.mp3";
+const startSound = "https://raw.githubusercontent.com/redbaron2k7/videoStartNotifier/117738bff76699a89531a067e321b6406bffbc88/start.mp3";
+const stopSound = "https://raw.githubusercontent.com/redbaron2k7/videoStartNotifier/117738bff76699a89531a067e321b6406bffbc88/stop.mp3";
 
 const videoStates = new Map<string, boolean>();
 
