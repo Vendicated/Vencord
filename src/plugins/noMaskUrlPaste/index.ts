@@ -15,7 +15,7 @@ export default definePlugin({
         {
             find: ".selection,preventEmojiSurrogates:",
             replacement: {
-                match: /if\(null!=\i.selection&&\i.M8.isExpanded\(e.selection\)\)/,
+                match: /if\(null!=\i.selection&&\i.M8.isExpanded\(\i.selection\)\)/,
                 replace: "if(false)"
             }
         }
