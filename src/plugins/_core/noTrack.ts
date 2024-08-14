@@ -107,7 +107,8 @@ export default definePlugin({
                 srcRequest.send();
 
                 // Final condition to see if this is the Sentry WebpackInstance
-                if (!srcRequest.responseText.includes("window.DiscordSentry=")) {
+                // This is matching window.DiscordSentry=, but without `window` to avoid issues on some proxies
+                if (!srcRequest.responseText.includes(".DiscordSentry=")) {
                     return;
                 }
 
