@@ -10,7 +10,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "NoMaskUrlPaste",
     authors: [Devs.CatNoir],
-    description: "Pasting a link while having text selected will paste a hyperlink",
+    description: "Pasting a link while having text selected will not paste a hyperlink.",
     patches: [
         {
             find: ".selection,preventEmojiSurrogates:",
