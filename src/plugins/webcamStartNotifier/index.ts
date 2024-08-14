@@ -11,6 +11,8 @@ import { Devs } from "@utils/constants";
 const startSound = "https://raw.githubusercontent.com/redbaron2k7/videoStartNotifier//main/start.mp3";
 const stopSound = "https://raw.githubusercontent.com/redbaron2k7/videoStartNotifier/main/stop.mp3";
 
+const videoStates = new Map<string, boolean>();
+
 function playNotification(isVideoOn: boolean) {
     new Audio(isVideoOn ? startSound : stopSound).play();
 }
@@ -21,8 +23,6 @@ export default definePlugin({
     authors: [Devs.redbaron2k7],
 
     flux: (() => {
-        const videoStates = new Map<string, boolean>();
-
         return {
             VOICE_STATE_UPDATES: ({ voiceStates }: { voiceStates: Array<{ userId: string, channelId: string, selfVideo?: boolean; }>; }) => {
                 const currentChannelId = SelectedChannelStore.getVoiceChannelId();
