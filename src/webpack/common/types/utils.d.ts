@@ -226,6 +226,7 @@ export interface Constants {
 export interface ExpressionPickerStore {
     closeExpressionPicker(activeViewType?: any): void;
     openExpressionPicker(activeView: LiteralUnion<"emoji" | "gif" | "sticker", string>, activeViewType?: any): void;
+    toggleExpressionPicker(activeView: LiteralUnion<"emoji" | "gif" | "sticker", string>, activeViewType?: any): void;
 }
 
 export interface BrowserWindowFeatures {
