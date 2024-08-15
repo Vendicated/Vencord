@@ -35,24 +35,6 @@ for (const variable of ["DISCORD_TOKEN", "CHROMIUM_BIN"]) {
 
 const CANARY = process.env.USE_CANARY === "true";
 
-const browser = await pup.launch({
-    headless: true,
-    executablePath: process.env.CHROMIUM_BIN,
-    args: [
-        '--disable-dev-shm-usage',
-        '--shm-size=4gb'
-    ]
-});
-const page = await browser.newPage();
-await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36");
-await page.setBypassCSP(true);
-
-async function maybeGetError(handle: JSHandle): Promise<string | undefined> {
-    return await (handle as JSHandle<Error>)?.getProperty("message")
-        .then(m => m?.jsonValue())
-        .catch(() => undefined);
-}
-
 const report = {
     badPatches: [] as {
         plugin: string;
@@ -184,123 +166,11 @@ async function printReport() {
     }
 }
 
-page.on("console", async e => {
-    const level = e.type();
-    const rawArgs = e.args();
-
-    async function getText() {
-        try {
-            return await Promise.all(
-                e.args().map(async a => {
-                    return await maybeGetError(a) || await a.jsonValue();
-                })
-            ).then(a => a.join(" ").trim());
-        } catch {
-            return e.text();
-        }
-    }
-
-    const firstArg = await rawArgs[0]?.jsonValue();
-
-    const isEquicord = firstArg === "[Equicord]";
-    const isDebug = firstArg === "[PUP_DEBUG]";
-
-    outer:
-    if (isEquicord) {
-        try {
-            var args = await Promise.all(e.args().map(a => a.jsonValue()));
-        } catch {
-            break outer;
-        }
-
-        const [, tag, message, otherMessage] = args as Array<string>;
-
-        switch (tag) {
-            case "WebpackInterceptor:":
-                const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
-                if (!patchFailMatch) break;
-
-                console.error(await getText());
-                process.exitCode = 1;
-
-                const [, plugin, type, id, regex] = patchFailMatch;
-                report.badPatches.push({
-                    plugin,
-                    type,
-                    id,
-                    match: regex.replace(/\[A-Za-z_\$\]\[\\w\$\]\*/g, "\\i"),
-                    error: await maybeGetError(e.args()[3])
-                });
-
-                break;
-            case "PluginManager:":
-                const failedToStartMatch = message.match(/Failed to start (.+)/);
-                if (!failedToStartMatch) break;
-
-                console.error(await getText());
-                process.exitCode = 1;
-
-                const [, name] = failedToStartMatch;
-                report.badStarts.push({
-                    plugin: name,
-                    error: await maybeGetError(e.args()[3]) ?? "Unknown error"
-                });
-
-                break;
-            case "LazyChunkLoader:":
-                console.error(await getText());
-
-                switch (message) {
-                    case "A fatal error occurred:":
-                        process.exit(1);
-                }
-
-                break;
-            case "Reporter:":
-                console.error(await getText());
-
-                switch (message) {
-                    case "A fatal error occurred:":
-                        process.exit(1);
-                    case "Webpack Find Fail:":
-                        process.exitCode = 1;
-                        report.badWebpackFinds.push(otherMessage);
-                        break;
-                    case "Finished test":
-                        await browser.close();
-                        await printReport();
-                        process.exit();
-                }
-        }
-    }
-
-    if (isDebug) {
-        console.error(await getText());
-    } else if (level === "error") {
-        const text = await getText();
-
-        if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("Webpack")) {
-            if (IGNORED_DISCORD_ERRORS.some(regex => text.match(regex))) {
-                report.ignoredErrors.push(text);
-            } else {
-                console.error("[Unexpected Error]", text);
-                report.otherErrors.push(text);
-            }
-        }
-    }
-});
-
-page.on("error", e => console.error("[Error]", e.message));
-page.on("pageerror", e => {
-    if (e.message.includes("Sentry successfully disabled")) return;
-
-    if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module")) {
-        console.error("[Page Error]", e.message);
-        report.otherErrors.push(e.message);
-    } else {
-        report.ignoredErrors.push(e.message);
-    }
-});
+async function maybeGetError(handle: JSHandle): Promise<string | undefined> {
+    return await (handle as JSHandle<Error>)?.getProperty("message")
+        .then(m => m?.jsonValue())
+        .catch(() => undefined);
+}
 
 async function reporterRuntime(token: string) {
     Vencord.Webpack.waitFor(
@@ -312,11 +182,147 @@ async function reporterRuntime(token: string) {
     );
 }
 
-await page.evaluateOnNewDocument(`
-    if (location.host.endsWith("discord.com")) {
-        ${readFileSync("./dist/browser/browser.js", "utf-8")};
-        (${reporterRuntime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
-    }
-`);
+try {
+    const browser = await pup.launch({
+        headless: true,
+        executablePath: process.env.CHROMIUM_BIN,
+        args: [
+            '--disable-dev-shm-usage',
+            '--shm-size=4gb'
+        ]
+    });
+    const page = await browser.newPage();
+    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36");
+    await page.setBypassCSP(true);
 
-await page.goto(CANARY ? "https://canary.discord.com/login" : "https://discord.com/login");
+    page.on("console", async e => {
+        const level = e.type();
+        const rawArgs = e.args();
+
+        async function getText() {
+            try {
+                return await Promise.all(
+                    e.args().map(async a => {
+                        return await maybeGetError(a) || await a.jsonValue();
+                    })
+                ).then(a => a.join(" ").trim());
+            } catch {
+                return e.text();
+            }
+        }
+
+        const firstArg = await rawArgs[0]?.jsonValue();
+
+        const isEquicord = firstArg === "[Equicord]";
+        const isDebug = firstArg === "[PUP_DEBUG]";
+
+        outer:
+        if (isEquicord) {
+            try {
+                var args = await Promise.all(e.args().map(a => a.jsonValue()));
+            } catch {
+                break outer;
+            }
+
+            const [, tag, message, otherMessage] = args as Array<string>;
+
+            switch (tag) {
+                case "WebpackInterceptor:":
+                    const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
+                    if (!patchFailMatch) break;
+
+                    console.error(await getText());
+                    process.exitCode = 1;
+
+                    const [, plugin, type, id, regex] = patchFailMatch;
+                    report.badPatches.push({
+                        plugin,
+                        type,
+                        id,
+                        match: regex.replace(/\[A-Za-z_\$\]\[\\w\$\]\*/g, "\\i"),
+                        error: await maybeGetError(e.args()[3])
+                    });
+
+                    break;
+                case "PluginManager:":
+                    const failedToStartMatch = message.match(/Failed to start (.+)/);
+                    if (!failedToStartMatch) break;
+
+                    console.error(await getText());
+                    process.exitCode = 1;
+
+                    const [, name] = failedToStartMatch;
+                    report.badStarts.push({
+                        plugin: name,
+                        error: await maybeGetError(e.args()[3]) ?? "Unknown error"
+                    });
+
+                    break;
+                case "LazyChunkLoader:":
+                    console.error(await getText());
+
+                    switch (message) {
+                        case "A fatal error occurred:":
+                            process.exit(1);
+                    }
+
+                    break;
+                case "Reporter:":
+                    console.error(await getText());
+
+                    switch (message) {
+                        case "A fatal error occurred:":
+                            process.exit(1);
+                        case "Webpack Find Fail:":
+                            process.exitCode = 1;
+                            report.badWebpackFinds.push(otherMessage);
+                            break;
+                        case "Finished test":
+                            await browser.close();
+                            await printReport();
+                            process.exit();
+                    }
+            }
+        }
+
+        if (isDebug) {
+            console.error(await getText());
+        } else if (level === "error") {
+            const text = await getText();
+
+            if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("Webpack")) {
+                if (IGNORED_DISCORD_ERRORS.some(regex => text.match(regex))) {
+                    report.ignoredErrors.push(text);
+                } else {
+                    console.error("[Unexpected Error]", text);
+                    report.otherErrors.push(text);
+                }
+            }
+        }
+    });
+
+    page.on("error", e => console.error("[Error]", e.message));
+    page.on("pageerror", e => {
+        if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module")) {
+            console.error("[Page Error]", e.message);
+            report.otherErrors.push(e.message);
+        } else {
+            report.ignoredErrors.push(e.message);
+        }
+    });
+
+    await page.evaluateOnNewDocument(`
+        if (location.host.endsWith("discord.com")) {
+            ${readFileSync("./dist/browser/browser.js", "utf-8")};
+            (${reporterRuntime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
+        }
+    `);
+
+    await page.goto(CANARY ? "https://canary.discord.com/login" : "https://discord.com/login");
+
+    await printReport();
+    await browser.close();
+} catch (error) {
+    console.error("An error occurred:", error);
+    process.exit(1);
+}
