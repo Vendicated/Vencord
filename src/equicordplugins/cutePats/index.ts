@@ -8,7 +8,6 @@ import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 async function getcutepats(): Promise<string> {
-    // Empty Without Me
     const res = await fetch("https://api.waifu.pics/sfw/pat");
     const url = (await res.json()).url as string;
     return url;
