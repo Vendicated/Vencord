@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
-import { filters, findAll, search } from "@webpack";
+import { filters, findAll, search, wreq } from "@webpack";
 
 const PORT = 8485;
 const NAV_ID = "dev-companion-reconnect";
@@ -50,7 +50,23 @@ interface FunctionNode {
     type: "function";
     value: string;
 }
-
+interface ExtractFindData {
+    extractType: string,
+    findType: string,
+    findArgs: string[];
+}
+interface ExtractData {
+    idOrSearch: string | number;
+    extractType: string;
+}
+enum ExtractResponseType {
+    OK,
+    ERROR,
+    NOT_FOUND
+}
+interface ReloadData {
+    native: boolean;
+}
 interface PatchData {
     find: string;
     replacement: {
@@ -87,16 +103,51 @@ function parseNode(node: Node) {
             throw new Error("Unknown Node Type " + (node as any).type);
     }
 }
-
+type CodeFilter = Array<string | RegExp>;
+const stringMatches = (s: string, filter: CodeFilter) =>
+    filter.every(f =>
+        typeof f === "string"
+            ? s.includes(f)
+            : f.test(s)
+    );
+function findModuleId(find: CodeFilter) {
+    const matches: string[] = [];
+    for (const id in wreq.m) {
+        if (stringMatches(wreq.m[id].toString(), find)) matches.push(id);
+    }
+    if (matches.length === 0) {
+        throw new Error("No Matches Found");
+    }
+    if (matches.length !== 1) {
+        throw new Error("More than one match");
+    }
+    return matches[0];
+}
+interface SendData {
+    type: string,
+    data?: any,
+    status?: number,
+}
 function initWs(isManual = false) {
     let wasConnected = isManual;
     let hasErrored = false;
     const ws = socket = new WebSocket(`ws://localhost:${PORT}`);
 
+    function replyData<T extends SendData>(data: T) {
+        ws.send(JSON.stringify(data));
+    }
+
     ws.addEventListener("open", () => {
         wasConnected = true;
 
         logger.info("Connected to WebSocket");
+
+        // send module cache to vscode
+
+        replyData({
+            type: "moduleList",
+            data: JSON.stringify(Object.keys(wreq.m))
+        });
 
         (settings.store.notifyOnAutoConnect || isManual) && showNotification({
             title: "Dev Companion Connected",
@@ -116,7 +167,7 @@ function initWs(isManual = false) {
             title: "Dev Companion Error",
             body: (e as ErrorEvent).message || "No Error Message",
             color: "var(--status-danger, red)",
-            noPersist: true,
+            noPersist: true
         });
     });
 
@@ -130,6 +181,12 @@ function initWs(isManual = false) {
             body: e.reason || "No Reason provided",
             color: "var(--status-danger, red)",
             noPersist: true,
+            onClick() {
+                setTimeout(() => {
+                    socket?.close(1000, "Reconnecting");
+                    initWs(true);
+                }, 2500);
+            }
         });
     });
 
@@ -140,7 +197,6 @@ function initWs(isManual = false) {
             logger.error("Invalid JSON:", err, "\n" + e.data);
             return;
         }
-
         function reply(error?: string) {
             const data = { nonce, ok: !error } as Record<string, unknown>;
             if (error) data.error = error;
@@ -151,6 +207,121 @@ function initWs(isManual = false) {
         logger.info("Received Message:", type, "\n", data);
 
         switch (type) {
+            case "extract": {
+                const { extractType, idOrSearch } = data as ExtractData;
+                switch (extractType) {
+                    case "id": {
+                        console.log("ID!");
+                        let data;
+                        if (typeof idOrSearch === "number")
+                            data = wreq.m[idOrSearch]?.toString() || null;
+                        else {
+                            throw "fun times";
+                        }
+                        if (!data)
+                            replyData({
+                                type: "extract",
+                                status: ExtractResponseType.NOT_FOUND
+                            });
+                        else
+                            replyData({
+                                type: "extract",
+                                status: ExtractResponseType.OK,
+                                data,
+                                moduleNumber: idOrSearch
+                            });
+
+                        break;
+                    }
+                    case "search": {
+                        try {
+                            const moduleId = findModuleId([idOrSearch.toString()]);
+                            const data = wreq.m[moduleId].toString();
+                            replyData({
+                                type: "extract",
+                                status: ExtractResponseType.OK,
+                                data,
+                                moduleNumber: moduleId
+                            });
+                        } catch (e) {
+                            if (e instanceof Error)
+                                return void replyData({
+                                    type: "extract",
+                                    status: ExtractResponseType.ERROR,
+                                    data: e.message
+                                });
+                            console.error(e);
+                        }
+                        break;
+                    }
+                    case "find": {
+                        const { findType, findArgs } = data;
+                        try {
+                            var parsedArgs = findArgs.map(parseNode);
+                        } catch (err) {
+                            return reply("Failed to parse args: " + err);
+                        }
+
+                        try {
+                            let results: any[];
+                            switch (findType.replace("find", "").replace("Lazy", "")) {
+                                case "":
+                                    results = findAll(parsedArgs[0]);
+                                    break;
+                                case "ByProps":
+                                    results = findAll(filters.byProps(...parsedArgs));
+                                    break;
+                                case "Store":
+                                    results = findAll(filters.byStoreName(parsedArgs[0]));
+                                    break;
+                                case "ByCode":
+                                    results = findAll(filters.byCode(...parsedArgs));
+                                    break;
+                                case "ModuleId":
+                                    results = Object.keys(search(parsedArgs[0]));
+                                    break;
+                                case "ComponentByCode":
+                                    results = findAll(filters.componentByCode(...parsedArgs));
+                                    break;
+                                default:
+                                    return reply("Unknown Find Type " + findType);
+                            }
+
+                            const uniqueResultsCount = new Set(results).size;
+                            if (uniqueResultsCount === 0) throw "No results";
+                            if (uniqueResultsCount > 1) throw "Found more than one result! Make this filter more specific";
+                            // best name ever
+                            const foundFind = [...results][0].toString();
+                            replyData({
+                                type: "extract",
+                                find: true,
+                                data: foundFind,
+                                moduleNumber: findModuleId([foundFind])
+                            });
+                        } catch (err) {
+                            return reply("Failed to find: " + err);
+                        }
+                        break;
+                    }
+                    default:
+                        replyData({
+                            type: "extract",
+                            status: ExtractResponseType.ERROR,
+                            data: `Unknown Type: ${extractType}`
+                        });
+                        break;
+                }
+                break;
+            }
+            case "reload": {
+                const { native } = data as ReloadData;
+                if (native) {
+                    VesktopNative;
+                } else {
+                    window.location.reload();
+                }
+                break;
+            }
             case "testPatch": {
                 const { find, replacement } = data as PatchData;
 
@@ -191,8 +362,9 @@ function initWs(isManual = false) {
             }
             case "testFind": {
                 const { type, args } = data as FindData;
+                let parsedArgs;
                 try {
-                    var parsedArgs = args.map(parseNode);
+                    parsedArgs = args.map(parseNode);
                 } catch (err) {
                     return reply("Failed to parse args: " + err);
                 }
@@ -242,7 +414,7 @@ function initWs(isManual = false) {
 export default definePlugin({
     name: "DevCompanion",
     description: "Dev Companion Plugin",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.sadan],
     reporterTestable: ReporterTestable.None,
     settings,
 
