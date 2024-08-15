@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { FluxDispatcher, PresenceStore, UserStore } from "@webpack/common";
+import { PresenceStore, UserStore } from "@webpack/common";
 
+let savedStatus = "";
 const updateAsync = findByCodeLazy("updateAsync", "status");
-
 const settings = definePluginSettings({
     statusToSet: {
         type: OptionType.SELECT,
@@ -38,26 +38,23 @@ const settings = definePluginSettings({
     }
 });
 
-migratePluginSettings("StatusWhilePlaying", "DNDWhilePlaying");
 export default definePlugin({
     name: "StatusWhilePlaying",
-    description: "Automatically updates your status when playing games",
+    description: "Automatically updates your online status (online, idle, dnd) when launching games",
     authors: [EquicordDevs.thororen],
     settings,
-    runningGamesChange(event) {
-        let savedStatus = "";
-        if (event.games.length > 0) {
+    flux: {
+        RUNNING_GAMES_CHANGE(event) {
             const status = PresenceStore.getStatus(UserStore.getCurrentUser().id);
-            savedStatus = status;
-            updateAsync(settings.store.statusToSet);
-        } else if (event.games.length === 0) {
-            updateAsync(savedStatus);
-        }
-    },
-    start() {
-        FluxDispatcher.subscribe("RUNNING_GAMES_CHANGE", this.runningGamesChange);
-    },
-    stop() {
-        FluxDispatcher.unsubscribe("RUNNING_GAMES_CHANGE", this.runningGamesChange);
+            if (event.games.length > 0) {
+                if (savedStatus !== "" && savedStatus !== settings.store.statusToSet)
+                    updateAsync(savedStatus);
+            } else {
+                if (status !== settings.store.statusToSet) {
+                    savedStatus = status;
+                    updateAsync(settings.store.statusToSet);
+                }
+            }
+        },
     }
 });
