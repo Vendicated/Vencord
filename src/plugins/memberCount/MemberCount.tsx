@@ -7,7 +7,7 @@
 import { getCurrentChannel } from "@utils/discord";
 import { SelectedChannelStore, Tooltip, useEffect, useStateFromStores } from "@webpack/common";
 
-import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat } from ".";
+import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat, ThreadMemberListStore } from ".";
 import { OnlineMemberCountStore } from "./OnlineMemberCountStore";
 
 export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; tooltipGuildId?: string; }) {
@@ -30,8 +30,17 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
         () => ChannelMemberStore.getProps(guildId, currentChannel?.id)
     );
 
+    const threads = useStateFromStores(
+        [ThreadMemberListStore],
+        () => ThreadMemberListStore.getMemberListSections(currentChannel.id)
+    );
+
     if (!isTooltip && (groups.length >= 1 || groups[0].id !== "unknown")) {
         onlineCount = groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count), 0);
+    }
+
+    if (!isTooltip && threads && (Object.values(threads).length >= 1)) {
+        onlineCount = Object.values(threads).reduce((total, curr) => total + (curr.sectionId === "offline" ? 0 : curr.userIds.length), 0);
     }
 
     useEffect(() => {
