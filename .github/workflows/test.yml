@@ -10,29 +10,10 @@ on:
       - dev
 
 jobs:
-  DetermineRunner:
-    name: Determine Runner
-    if: ${{ github.event_name == 'push' }}
-    runs-on: ubuntu-latest
-    outputs:
-      runner: ${{ steps.set-runner.outputs.runner }}
-    steps:
-      - name: Determine which runner to use
-        id: set-runner
-        uses: benjaminmichaelis/get-soonest-available-runner@v1.1.0
-        with:
-          primary-runner: "self-hosted"
-          fallback-runner: "ubuntu-latest"
-          min-available-runners: 1
-          github-token: ${{ env.GITHUB_TOKEN }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.ETOKEN }}
-
   Test:
     name: Test For Pushes
-    needs: DetermineRunner
     if: ${{ github.event_name == 'push' }}
-    runs-on: ${{ needs.DetermineRunner.outputs.runner}}
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4

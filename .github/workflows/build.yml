@@ -15,25 +15,9 @@ env:
     GITHUB_TOKEN: ${{ secrets.ETOKEN }}
 
 jobs:
-    DetermineRunner:
-        name: Determine Runner
-        runs-on: ubuntu-latest
-        outputs:
-            runner: ${{ steps.set-runner.outputs.runner }}
-        steps:
-        - name: Determine which runner to use
-          id: set-runner
-          uses: benjaminmichaelis/get-soonest-available-runner@v1.1.0
-          with:
-            primary-runner: "self-hosted"
-            fallback-runner: "ubuntu-latest"
-            min-available-runners: 1
-            github-token: ${{ env.GITHUB_TOKEN }}
-
     Build:
         name: Build Equicord
-        needs: DetermineRunner
-        runs-on: ${{ needs.DetermineRunner.outputs.runner}}
+        runs-on: ubuntu-latest
 
         steps:
             - uses: actions/checkout@v4
@@ -89,12 +73,10 @@ jobs:
                   rm release/*.map
 
             - name: Upload Equicord
-              if: github.repository == 'Equicord/Equicord'
               run: |
                 gh release upload latest --clobber dist/release/*
 
             - name: Upload Plugins JSON to Ignore repo
-              if: github.repository == 'Equicord/Equicord'
               run: |
                 git config --global user.name "$USERNAME"
                 git config --global user.email "78185467+thororen1234@users.noreply.github.com"
