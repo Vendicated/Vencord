@@ -185,11 +185,7 @@ async function reporterRuntime(token: string) {
 try {
     const browser = await pup.launch({
         headless: true,
-        executablePath: process.env.CHROMIUM_BIN,
-        args: [
-            '--disable-dev-shm-usage',
-            '--shm-size=4gb'
-        ]
+        executablePath: process.env.CHROMIUM_BIN
     });
     const page = await browser.newPage();
     await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36");
