@@ -76,7 +76,7 @@ jobs:
               run: |
                 gh release upload latest --clobber dist/release/*
 
-            - name: Upload Plugins JSON to Ignore repo
+            - name: Upload Plugins JSON to Equibored repo
               run: |
                 git config --global user.name "$USERNAME"
                 git config --global user.email "78185467+thororen1234@users.noreply.github.com"
