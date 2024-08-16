@@ -315,5 +315,3 @@ await page.evaluateOnNewDocument(`
         (${reporterRuntime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
     }
 `);
-
-await page.goto(CANARY ? "https://canary.discord.com/login" : "https://discord.com/login");
