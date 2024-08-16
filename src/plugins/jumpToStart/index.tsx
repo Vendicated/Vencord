@@ -72,7 +72,7 @@ export default definePlugin({
             replacement:
             {
                 match: /let{isAuthenticated:/,
-                replace: "arguments[0]?.toolbar?.unshift($self.headerButton(arguments[0]));$&"
+                replace: "if(Array.isArray(arguments[0]?.toolbar))arguments[0].toolbar.unshift($self.headerButton(arguments[0]));$&"
             }
         }
     ]
