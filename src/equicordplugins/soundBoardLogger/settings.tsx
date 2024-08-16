@@ -73,15 +73,6 @@ const settings = definePluginSettings({
             { label: ".wav", value: ".wav" },
         ],
     },
-    IconLocation: {
-        description: "choose where to show the SoundBoard Log icon (requires restart)",
-        type: OptionType.SELECT,
-        options: [
-            { label: "Toolbar", value: "toolbar", default: true },
-            { label: "Chat input", value: "chat" }
-        ],
-        restartNeeded: true
-    },
     OpenLogs: {
         type: OptionType.COMPONENT,
         description: "show the logs",
