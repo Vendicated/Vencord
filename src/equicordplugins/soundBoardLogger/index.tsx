@@ -42,7 +42,7 @@ export default definePlugin({
             find: "toolbar:function",
             replacement: {
                 match: /(function \i\(\i\){)(.{1,200}toolbar.{1,100}mobileToolbar)/,
-                replace: "$1$self.addIconToToolBar(arguments[0]);$2"
+                replace: "$1$self.addSBIconToToolBar(arguments[0]);$2"
             }
         }
     ],
@@ -60,7 +60,7 @@ export default definePlugin({
         disableStyle(styles);
         if (settings.store.IconLocation === "chat") removeChatBarButton("vc-soundlog-button");
     },
-    addIconToToolBar(e: { toolbar: React.ReactNode[] | React.ReactNode; }) {
+    addSBIconToToolBar(e: { toolbar: React.ReactNode[] | React.ReactNode; }) {
         if (Array.isArray(e.toolbar))
             return e.toolbar.push(
                 <ErrorBoundary noop={true}>
