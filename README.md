@@ -23,7 +23,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 -   Request for plugins from Discord.
 
 <details>
-<summary>Extra included plugins (119 additional plugins)</summary>
+<summary>Extra included plugins (122 additional plugins)</summary>
 
 - AllCallTimers by MaxHerbold and D3SOX
 - AltKrispSwitch by newwares
@@ -82,27 +82,29 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - InRole by nin0dev
 - IrcColors by Grzesiek11
 - IRememberYou by zoodogood
+- Jumpscare by Surgedevs
 - JumpToStart by Samwich
 - KeyboardSounds by HypedDomi
 - KeywordNotify by camila314 (maintained by thororen)
 - LoginWithQR by nexpid
 - MediaDownloader by Colorman
+- MediaPlaybackSpeed by D3SOX
 - Meow by Samwich
+- MessageColors by Hen
 - MessageLinkTooltip by Kyuuhachi
 - MessageLoggerEnhanced by Aria
 - MessageTranslate by Samwich
 - ModalFade by Kyuuhachi
-- MusicTitleRPC by Blackilykay
 - NewPluginsManager by Sqaaakoi
 - noAppsAllowed by kvba
 - NoBulletPoints by Samwich
 - NoDefaultEmojis by Samwich
 - NoDeleteSafety by Samwich
+- NoMirroredCamera by Nyx
 - NoModalAnimation by AutumnVN
 - NoNitroUpsell by thororen
 - NoRoleHeaders by Samwich
 - NotificationTitle by Kyuuhachi
-- NotifyUserChanges by D3SOX
 - OnePingPerDM by ProffDea
 - PlatformSpoofer by Drag
 - PurgeMessages by bhop and nyx
@@ -117,7 +119,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - SearchFix by Jaxx
 - SekaiStickers by MaiKokain
 - ServerSearch by camila314
-- Shakespearean by vmohammad
+- Shakespearean by vmohammad (Dev build only)
 - ShowBadgesInChat by Inbestigator and KrystalSkull
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo (maintained by thororen)
@@ -132,13 +134,14 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - Translate+ by Prince527 (Using Translate by Ven)
 - UnitConverter by sadan
 - UnlimitedAccounts by thororen
+- UnreadCountBadge by Joona
 - UserPFP by nexpid (maintained by thororen)
 - UwUifier by echo
 - VCSupport by thororen
 - VencordRPC by AutumnVN
 - VideoSpeed by Samwich
 - ViewRaw2 by Kyuuhachi
-- VoiceChatUtilities by Dams and D3SOX
+- VoiceChatUtilities by D3SOX
 - WebpackTarball by Kyuuhachi
 - WhosWatching by fres
 - WigglyText by nexpid

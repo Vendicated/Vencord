@@ -35,10 +35,6 @@ export interface Dev {
  * If you are fine with attribution but don't want the badge, add badge: false
  */
 export const Devs = /* #__PURE__*/ Object.freeze({
-    Nobody: {
-        name: "Nobody",
-        id: 0n,
-    },
     Ven: {
         name: "Vee",
         id: 343383572805058560n
@@ -547,13 +543,33 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     surgedevs: {
         name: "Chloe",
         id: 1084592643784331324n
-    }
+    },
+    Lumap: {
+        name: "Lumap",
+        id: 585278686291427338n,
+    },
 } satisfies Record<string, Dev>);
 
 export const EquicordDevs = Object.freeze({
-    vmohammad: {
-        name: "vMohammad",
-        id: 921098159348924457n
+    thororen: {
+        name: "thororen",
+        id: 848339671629299742n
+    },
+    nyx: {
+        name: "verticalsync",
+        id: 328165170536775680n,
+    },
+    Cortex: {
+        name: "Cortex",
+        id: 825069530376044594n,
+    },
+    KrystalSkull: {
+        name: "krystalskullofficial",
+        id: 929208515883569182n
+    },
+    Naibuu: {
+        name: "hs50",
+        id: 1120045713867423835n,
     },
     nexpid: {
         name: "Nexpid",
@@ -574,10 +590,6 @@ export const EquicordDevs = Object.freeze({
     ryan: {
         name: "ryan",
         id: 479403382994632704n
-    },
-    thororen: {
-        name: "thororen",
-        id: 848339671629299742n
     },
     MrDiamond: {
         name: "MrDiamond",
@@ -615,17 +627,9 @@ export const EquicordDevs = Object.freeze({
         name: "cooles",
         id: 406084422308331522n,
     },
-    KrystalSkull: {
-        name: "krystalskullofficial",
-        id: 929208515883569182n
-    },
     SerStars: {
         name: "SerStars",
         id: 861631850681729045n
-    },
-    nyx: {
-        name: "verticalsync",
-        id: 328165170536775680n,
     },
     MaxHerbold: {
         name: "MaxHerbold",
@@ -639,13 +643,9 @@ export const EquicordDevs = Object.freeze({
         name: "Megal",
         id: 387790666484285441n
     },
-    Cortex: {
-        name: "Cortex",
-        id: 825069530376044594n,
-    },
     Woosh: {
         name: "w00shh.",
-        id: 689165844835860522n,
+        id: 919239894327521361n,
     },
     Hanzy: {
         name: "hanzydev",
@@ -682,10 +682,6 @@ export const EquicordDevs = Object.freeze({
     Fafa: {
         name: "Fafa",
         id: 428188716641812481n,
-    },
-    Naibuu: {
-        name: "hs50",
-        id: 1120045713867423835n,
     },
     Colorman: {
         name: "colorman",
@@ -742,6 +738,18 @@ export const EquicordDevs = Object.freeze({
     sadan: {
         name: "sadan",
         id: 521819891141967883n
+    },
+    x3rt: {
+        name: "x3rt",
+        id: 131602100332396544n
+    },
+    Hen: {
+        name: "Hen",
+        id: 279266228151779329n
+    },
+    vmohammad: {
+        name: "vMohammad",
+        id: 921098159348924457n
     },
 } satisfies Record<string, Dev>);
 

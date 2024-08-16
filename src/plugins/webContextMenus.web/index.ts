@@ -22,7 +22,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
 import { findByPropsLazy } from "@webpack";
 import { Clipboard, ComponentDispatch } from "@webpack/common";
-
 const ctxMenuCallbacks = findByPropsLazy("contextMenuCallbackNative");
 
 async function fetchImage(url: string) {
@@ -41,7 +40,7 @@ const settings = definePluginSettings({
         description: "Add back the Discord context menus for images, links and the chat input bar",
         // Web slate menu has proper spellcheck suggestions and image context menu is also pretty good,
         // so disable this by default. Vesktop just doesn't, so enable by default
-        default: IS_VESKTOP || IS_EQUIBOP,
+        default: IS_VESKTOP && !IS_EQUIBOP || !IS_VESKTOP && IS_EQUIBOP,
         restartNeeded: true
     }
 });

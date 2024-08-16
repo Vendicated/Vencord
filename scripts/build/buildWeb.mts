@@ -36,7 +36,7 @@ const commonOptions: esbuild.BuildOptions = {
     external: ["~plugins", "~git-hash", "/assets/*"],
     plugins: [
         globPlugins("web"),
-        ...commonOpts.plugins,
+        ...commonOpts.plugins
     ],
     target: ["esnext"],
     define: {
