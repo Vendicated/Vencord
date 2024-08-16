@@ -51,28 +51,6 @@ export default definePlugin({
                     replace: "[$1, $self.PronounsChatComponentWrapper(arguments[0])]"
                 }
             ]
-        },
-        // Patch the profile popout username header to use our pronoun hook instead of Discord's pronouns
-        {
-            find: ".pronouns,children",
-            replacement: [
-                {
-                    match: /{user:(\i),[^}]*,pronouns:(\i),[^}]*}=\i.*?;(?=return)/,
-                    replace: "$&let vcPronounSource;[$2,vcPronounSource]=$self.useProfilePronouns($1.id);"
-                },
-                PRONOUN_TOOLTIP_PATCH
-            ]
-        },
-        // Patch the profile modal username header to use our pronoun hook instead of Discord's pronouns
-        {
-            find: ".nameTagSmall)",
-            replacement: [
-                {
-                    match: /\.getName\(\i\);(?<=displayProfile.{0,200})/,
-                    replace: "$&const [vcPronounce,vcPronounSource]=$self.useProfilePronouns(arguments[0].user.id,true);if(arguments[0].displayProfile&&vcPronounce)arguments[0].displayProfile.pronouns=vcPronounce;"
-                },
-                PRONOUN_TOOLTIP_PATCH
-            ]
         }
     ],
 

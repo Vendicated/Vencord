@@ -79,13 +79,6 @@ export default definePlugin({
 
     patches: [
         {
-            find: "showBorder:null",
-            replacement: {
-                match: /user:(\i),setNote:\i,canDM.+?\}\)/,
-                replace: "$&,$self.getReviewsComponent($1)"
-            }
-        },
-        {
             find: /inline:!1,profileViewedAnalytics:\i}\),/,
             replacement: {
                 match: /currentUser:\i,guild:\i}\)(?<=user:(\i),bio:null==\i\?.+?)/,

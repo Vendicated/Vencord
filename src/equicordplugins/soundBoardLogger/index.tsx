@@ -6,16 +6,34 @@
 
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { disableStyle, enableStyle } from "@api/Styles";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { findExportedComponentLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
 
-import { ChatBarIcon, IconWithTooltip, LogIcon } from "./components/Icons";
+import { ChatBarIcon, LogIcon } from "./components/Icons";
 import { openSoundBoardLog } from "./components/SoundBoardLog";
 import settings from "./settings";
 import { updateLoggedSounds } from "./store";
 import styles from "./styles.css?managed";
 import { getListeners } from "./utils";
+
+const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
+
+function ToolBarHeader() {
+    return (
+        <ErrorBoundary noop={true}>
+            <HeaderBarIcon
+                tooltip="Open SoundBoard Log"
+                position="bottom"
+                className="vc-soundboard-logger"
+                icon={<LogIcon className="chatBarLogIcon" />}
+                onClick={openSoundBoardLog}
+            />
+        </ErrorBoundary>
+    );
+}
 
 export default definePlugin({
     name: "SoundBoardLogger",
@@ -24,10 +42,10 @@ export default definePlugin({
     patches: [
         {
             predicate: () => settings.store.IconLocation === "toolbar",
-            find: ".iconBadge}):null",
+            find: "toolbar:function",
             replacement: {
-                match: /className:(\i).toolbar,children:(\i)/,
-                replace: "className:$1.toolbar,children:$self.toolbarPatch($2)"
+                match: /(function \i\(\i\){)(.{1,200}toolbar.{1,100}mobileToolbar)/,
+                replace: "$1$self.toolbarAction(arguments[0]);$2"
             }
         }
     ],
@@ -45,9 +63,19 @@ export default definePlugin({
         disableStyle(styles);
         if (settings.store.IconLocation === "chat") removeChatBarButton("vc-soundlog-button");
     },
-    toolbarPatch: obj => {
-        if (!obj?.props?.children) return obj;
-        obj.props.children = [<IconWithTooltip text="Open SoundBoard Log" icon={<LogIcon className="chatBarLogIcon" />} onClick={openSoundBoardLog} />, ...obj.props.children];
-        return obj;
-    }
+    toolbarAction(e) {
+        if (Array.isArray(e.toolbar))
+            return e.toolbar.push(
+                <ErrorBoundary noop={true}>
+                    <ToolBarHeader />
+                </ErrorBoundary>
+            );
+
+        e.toolbar = [
+            <ErrorBoundary noop={true}>
+                <ToolBarHeader />
+            </ErrorBoundary>,
+            e.toolbar,
+        ];
+    },
 });
