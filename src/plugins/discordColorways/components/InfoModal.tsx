@@ -4,55 +4,43 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import * as DataStore from "@api/DataStore";
-import { CodeBlock } from "@components/CodeBlock";
-import { Flex } from "@components/Flex";
-import {
-    ModalCloseButton,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    ModalProps,
-    ModalRoot,
-    openModal,
-} from "@utils/modal";
-import { saveFile } from "@utils/web";
-import { findComponentByCodeLazy } from "@webpack";
-import { Button, Clipboard, Forms, Text, TextInput, Toasts, UserStore, useState, useStateFromStores } from "@webpack/common";
-import { Plugins } from "Vencord";
-
-import { ColorwayCSS } from "..";
 import { generateCss, pureGradientBase } from "../css";
-import { Colorway } from "../types";
-import { colorToHex, stringToHex } from "../utils";
+import { Colorway, ModalProps } from "../types";
+import { colorToHex, stringToHex, saveFile } from "../utils";
 import SaveColorwayModal from "./SaveColorwayModal";
 import ThemePreview from "./ThemePreview";
-
-const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
+import { ColorwayCSS } from "../colorwaysAPI";
+import { PluginProps, useState, UserStore, useStateFromStores, DataStore, useEffect, openModal, Toasts } from "..";
 
 function RenameColorwayModal({ modalProps, ogName, onFinish, colorwayList }: { modalProps: ModalProps, ogName: string, onFinish: (name: string) => void, colorwayList: Colorway[]; }) {
     const [error, setError] = useState<string>("");
     const [newName, setNewName] = useState<string>(ogName);
-    return <ModalRoot {...modalProps}>
-        <ModalHeader separator={false}>
-            <Text variant="heading-lg/semibold" tag="h1" style={{ marginRight: "auto" }}>
-                Rename Colorway...
-            </Text>
-            <ModalCloseButton onClick={() => modalProps.onClose()} />
-        </ModalHeader>
-        <ModalContent>
-            <TextInput
+    const [theme, setTheme] = useState("discord");
+
+    useEffect(() => {
+        async function load() {
+            setTheme(await DataStore.get("colorwaysPluginTheme") as string);
+        }
+        load();
+    }, []);
+
+    return <div className={`colorwaysModal ${modalProps.transitionState == 2 ? "closing" : ""} ${modalProps.transitionState == 4 ? "hidden" : ""}`} data-theme={theme}>
+        <h2 className="colorwaysModalHeader">
+            Rename Colorway...
+        </h2>
+        <div className="colorwaysModalContent">
+            <input
+                type="text"
+                className="colorwaySelector-search"
                 value={newName}
-                error={error}
-                onChange={setNewName}
+                onInput={({ currentTarget: { value } }) => {
+                    setNewName(value);
+                }}
             />
-        </ModalContent>
-        <ModalFooter>
-            <Button
-                style={{ marginLeft: 8 }}
-                color={Button.Colors.BRAND}
-                size={Button.Sizes.MEDIUM}
-                look={Button.Looks.FILLED}
+        </div>
+        <div className="colorwaysModalFooter">
+            <button
+                className="colorwaysPillButton colorwaysPillButton-onSurface"
                 onClick={async () => {
                     if (!newName) {
                         return setError("Error: Please enter a valid name");
@@ -65,18 +53,15 @@ function RenameColorwayModal({ modalProps, ogName, onFinish, colorwayList }: { m
                 }}
             >
                 Finish
-            </Button>
-            <Button
-                style={{ marginLeft: 8 }}
-                color={Button.Colors.PRIMARY}
-                size={Button.Sizes.MEDIUM}
-                look={Button.Looks.FILLED}
+            </button>
+            <button
+                className="colorwaysPillButton"
                 onClick={() => modalProps.onClose()}
             >
                 Cancel
-            </Button>
-        </ModalFooter>
-    </ModalRoot>;
+            </button>
+        </div>
+    </div>;
 }
 
 export default function ({
@@ -95,42 +80,48 @@ export default function ({
         "tertiary",
     ];
     const profile = useStateFromStores([UserStore], () => UserStore.getUser(colorway.authorID));
-    return <ModalRoot {...modalProps}>
-        <ModalHeader separator={false}>
-            <Text variant="heading-lg/semibold" tag="h1" style={{ marginRight: "auto" }}>
-                Colorway: {colorway.name}
-            </Text>
-            <ModalCloseButton onClick={() => modalProps.onClose()} />
-        </ModalHeader>
-        <ModalContent>
-            <Flex style={{ gap: "8px", width: "100%" }} flexDirection="column">
-                <Forms.FormTitle style={{ marginBottom: 0, width: "100%" }}>Creator:</Forms.FormTitle>
-                <Flex style={{ gap: ".5rem" }}>
-                    <UserSummaryItem
-                        users={[profile]}
-                        guildId={undefined}
-                        renderIcon={false}
-                        showDefaultAvatarsForNullUsers
-                        size={32}
-                        showUserPopout
-                    />
-                    <Text style={{ lineHeight: "32px" }}>{colorway.author}</Text>
-                </Flex>
-                <Forms.FormTitle style={{ marginBottom: 0, width: "100%" }}>Colors:</Forms.FormTitle>
-                <Flex style={{ gap: "8px" }}>
+    const [theme, setTheme] = useState("discord");
+
+    useEffect(() => {
+        async function load() {
+            setTheme(await DataStore.get("colorwaysPluginTheme") as string);
+        }
+        load();
+    }, []);
+
+    return <div className={`colorwaysModal ${modalProps.transitionState == 2 ? "closing" : ""} ${modalProps.transitionState == 4 ? "hidden" : ""}`} data-theme={theme}>
+        <h2 className="colorwaysModalHeader">
+            Colorway: {colorway.name}
+        </h2>
+        <div className="colorwaysModalContent">
+            <div style={{ gap: "8px", width: "100%", display: "flex", flexDirection: "column" }}>
+                <span className="colorwaysModalSectionHeader">Creator:</span>
+                <div style={{ gap: ".5rem", display: "flex" }}>
+                    {<img src={`https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.webp?size=32`} width={32} height={32} style={{
+                        borderRadius: "32px"
+                    }} />}
+                    <span className="colorwaysModalSectionHeader" style={{ lineHeight: "32px" }} onClick={() => {
+                        navigator.clipboard.writeText(profile.username);
+                        Toasts.show({
+                            message: "Copied Colorway Author Username Successfully",
+                            type: 1,
+                            id: "copy-colorway-author-username-notify",
+                        });
+                    }}>{colorway.author}</span>
+                </div>
+                <span className="colorwaysModalSectionHeader">Colors:</span>
+                <div style={{ gap: "8px", display: "flex" }}>
                     {colors.map(color => <div className="colorwayInfo-colorSwatch" style={{ backgroundColor: colorway[color] }} />)}
-                </Flex>
-                <Forms.FormTitle style={{ marginBottom: 0, width: "100%" }}>Actions:</Forms.FormTitle>
-                <Flex style={{ gap: "8px" }} flexDirection="column">
-                    <Button
-                        color={Button.Colors.PRIMARY}
-                        size={Button.Sizes.MEDIUM}
-                        look={Button.Looks.OUTLINED}
+                </div>
+                <span className="colorwaysModalSectionHeader">Actions:</span>
+                <div style={{ gap: "8px", flexDirection: "column", display: "flex" }}>
+                    <button
+                        className="colorwaysPillButton"
                         style={{ width: "100%" }}
                         onClick={() => {
                             const colorwayIDArray = `${colorway.accent},${colorway.primary},${colorway.secondary},${colorway.tertiary}|n:${colorway.name}${colorway.preset ? `|p:${colorway.preset}` : ""}`;
                             const colorwayID = stringToHex(colorwayIDArray);
-                            Clipboard.copy(colorwayID);
+                            navigator.clipboard.writeText(colorwayID);
                             Toasts.show({
                                 message: "Copied Colorway ID Successfully",
                                 type: 1,
@@ -139,14 +130,12 @@ export default function ({
                         }}
                     >
                         Copy Colorway ID
-                    </Button>
-                    <Button
-                        color={Button.Colors.PRIMARY}
-                        size={Button.Sizes.MEDIUM}
-                        look={Button.Looks.OUTLINED}
+                    </button>
+                    <button
+                        className="colorwaysPillButton"
                         style={{ width: "100%" }}
                         onClick={() => {
-                            Clipboard.copy(colorway["dc-import"]);
+                            navigator.clipboard.writeText(colorway["dc-import"]);
                             Toasts.show({
                                 message: "Copied CSS to Clipboard",
                                 type: 1,
@@ -155,11 +144,9 @@ export default function ({
                         }}
                     >
                         Copy CSS
-                    </Button>
-                    <Button
-                        color={Button.Colors.PRIMARY}
-                        size={Button.Sizes.MEDIUM}
-                        look={Button.Looks.OUTLINED}
+                    </button>
+                    <button
+                        className="colorwaysPillButton"
                         style={{ width: "100%" }}
                         onClick={async () => {
                             const newColorway = {
@@ -170,11 +157,9 @@ export default function ({
                         }}
                     >
                         Update CSS
-                    </Button>
-                    {colorway.sourceType === "offline" && <Button
-                        color={Button.Colors.PRIMARY}
-                        size={Button.Sizes.MEDIUM}
-                        look={Button.Looks.OUTLINED}
+                    </button>
+                    {colorway.sourceType === "offline" && <button
+                        className="colorwaysPillButton"
                         style={{ width: "100%" }}
                         onClick={async () => {
                             const offlineSources = (await DataStore.get("customColorways") as { name: string, colorways: Colorway[], id?: string; }[]).map(o => o.colorways).filter(colorArr => colorArr.map(color => color.name).includes(colorway.name))[0];
@@ -200,64 +185,32 @@ export default function ({
                         }}
                     >
                         Rename
-                    </Button>}
-                    <Button
-                        color={Button.Colors.PRIMARY}
-                        size={Button.Sizes.MEDIUM}
-                        look={Button.Looks.OUTLINED}
-                        style={{ width: "100%" }}
-                        onClick={() => {
-                            openModal(props => <ModalRoot {...props} className="colorwayInfo-cssModal">
-                                <ModalContent><CodeBlock lang="css" content={colorway["dc-import"]} /></ModalContent>
-                            </ModalRoot>);
-                        }}
-                    >
-                        Show CSS
-                    </Button>
-                    <Button
-                        color={Button.Colors.PRIMARY}
-                        size={Button.Sizes.MEDIUM}
-                        look={Button.Looks.OUTLINED}
+                    </button>}
+                    <button
+                        className="colorwaysPillButton"
                         style={{ width: "100%" }}
                         onClick={() => {
                             if (!colorway["dc-import"].includes("@name")) {
-                                if (IS_DISCORD_DESKTOP) {
-                                    DiscordNative.fileManager.saveWithDialog(`/**
+                                saveFile(new File([`/**
                                     * @name ${colorway.name || "Colorway"}
-                                    * @version ${(Plugins.plugins.DiscordColorways as any).creatorVersion}
-                                    * @description Automatically generated Colorway.
-                                    * @author ${UserStore.getCurrentUser().username}
-                                    * @authorId ${UserStore.getCurrentUser().id}
-                                    */
-                                   ${colorway["dc-import"].replace((colorway["dc-import"].match(/\/\*.+\*\//) || [""])[0], "").replaceAll("url(//", "url(https://").replaceAll("url(\"//", "url(\"https://")}`, `${colorway.name.replaceAll(" ", "-").toLowerCase()}.theme.css`);
-                                } else {
-                                    saveFile(new File([`/**
-                                    * @name ${colorway.name || "Colorway"}
-                                    * @version ${(Plugins.plugins.DiscordColorways as any).creatorVersion}
+                                    * @version ${PluginProps.creatorVersion}
                                     * @description Automatically generated Colorway.
                                     * @author ${UserStore.getCurrentUser().username}
                                     * @authorId ${UserStore.getCurrentUser().id}
                                     */
                                    ${colorway["dc-import"].replace((colorway["dc-import"].match(/\/\*.+\*\//) || [""])[0], "").replaceAll("url(//", "url(https://").replaceAll("url(\"//", "url(\"https://")}`], `${colorway.name.replaceAll(" ", "-").toLowerCase()}.theme.css`, { type: "text/plain" }));
-                                }
                             } else {
-                                if (IS_DISCORD_DESKTOP) {
-                                    DiscordNative.fileManager.saveWithDialog(colorway["dc-import"], `${colorway.name.replaceAll(" ", "-").toLowerCase()}.theme.css`);
-                                } else {
-                                    saveFile(new File([colorway["dc-import"]], `${colorway.name.replaceAll(" ", "-").toLowerCase()}.theme.css`, { type: "text/plain" }));
-                                }
+                                saveFile(new File([colorway["dc-import"]], `${colorway.name.replaceAll(" ", "-").toLowerCase()}.theme.css`, { type: "text/plain" }));
                             }
                         }}
                     >
                         Download CSS
-                    </Button>
-                    <Button
-                        color={Button.Colors.PRIMARY}
-                        size={Button.Sizes.MEDIUM}
-                        look={Button.Looks.OUTLINED}
+                    </button>
+                    <button
+                        className="colorwaysPillButton"
                         style={{ width: "100%" }}
                         onClick={() => {
-                            openModal((props: ModalProps) => <ModalRoot className="colorwaysPreview-modal" {...props}>
+                            openModal((props: ModalProps) => <div className={`colorwaysPreview-modal ${props.transitionState == 2 ? "closing" : ""} ${props.transitionState == 4 ? "hidden" : ""}`}>
                                 <style>
                                     {colorway.isGradient ? pureGradientBase + `.colorwaysPreview-modal,.colorwaysPreview-wrapper {--gradient-theme-bg: linear-gradient(${colorway.linearGradient})}` : ""}
                                 </style>
@@ -269,15 +222,13 @@ export default function ({
                                     isModal
                                     modalProps={props}
                                 />
-                            </ModalRoot>);
+                            </div>);
                         }}
                     >
                         Show preview
-                    </Button>
-                    {colorway.sourceType === "offline" && <Button
-                        color={Button.Colors.RED}
-                        size={Button.Sizes.MEDIUM}
-                        look={Button.Looks.FILLED}
+                    </button>
+                    {colorway.sourceType === "offline" && <button
+                        className="colorwaysPillButton"
                         style={{ width: "100%" }}
                         onClick={async () => {
                             const oldStores = (await DataStore.get("customColorways") as { name: string, colorways: Colorway[], id?: string; }[]).filter(source => source.name !== colorway.source);
@@ -293,10 +244,9 @@ export default function ({
                         }}
                     >
                         Delete
-                    </Button>}
-                </Flex>
-            </Flex>
-            <div style={{ width: "100%", height: "20px" }} />
-        </ModalContent>
-    </ModalRoot>;
+                    </button>}
+                </div>
+            </div>
+        </div>
+    </div>;
 }

@@ -4,31 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import {
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    ModalProps,
-    ModalRoot,
-    openModal,
-} from "@utils/modal";
-import {
-    Button,
-    Forms,
-    Slider,
-    Text,
-    TextInput,
-    useEffect,
-    useReducer,
-    UserStore,
-    useState,
-} from "@webpack/common";
-import { Plugins } from "Vencord";
-
-import { ColorPicker } from "..";
+import { ColorPicker, openModal, useEffect, useState, useReducer, UserStore, PluginProps, DataStore, Slider } from "..";
 import { knownThemeVars } from "../constants";
 import { generateCss, getPreset, gradientPresetIds, PrimarySatDiffs, pureGradientBase } from "../css";
-import { Colorway } from "../types";
+import { Colorway, ModalProps } from "../types";
 import { colorToHex, getHex, HexToHSL, hexToString } from "../utils";
 import ColorwayCreatorSettingsModal from "./ColorwayCreatorSettingsModal";
 import ConflictingColorsModal from "./ConflictingColorsModal";
@@ -86,6 +65,14 @@ export default function ({
     const [preset, setPreset] = useState<string>("default");
     const [presetColorArray, setPresetColorArray] = useState<string[]>(["accent", "primary", "secondary", "tertiary"]);
     const [mutedTextBrightness, setMutedTextBrightness] = useState<number>(Math.min(HexToHSL("#" + colors.primary)[2] + (3.6 * 3), 100));
+    const [theme, setTheme] = useState("discord");
+
+    useEffect(() => {
+        async function load() {
+            setTheme(await DataStore.get("colorwaysPluginTheme") as string);
+        }
+        load();
+    }, []);
 
     const setColor = [
         "accent",
@@ -146,29 +133,23 @@ export default function ({
     };
 
     return (
-        <ModalRoot {...modalProps} className="colorwayCreator-modal">
-            <ModalHeader>
-                <Text variant="heading-lg/semibold" tag="h1">
-                    Create Colorway
-                </Text>
-            </ModalHeader>
-            <ModalContent className="colorwayCreator-menuWrapper">
-                <Forms.FormTitle style={{ marginBottom: 0 }}>
-                    Name:
-                </Forms.FormTitle>
-                <TextInput
+        <div className={`colorwaysModal ${modalProps.transitionState == 2 ? "closing" : ""} ${modalProps.transitionState == 4 ? "hidden" : ""}`} data-theme={theme}>
+            <h2 className="colorwaysModalHeader">Create a Colorway</h2>
+            <div className="colorwaysModalContent" style={{ minWidth: 500 }}>
+                <span className="colorwaysModalSectionHeader">Name:</span>
+                <input
+                    type="text"
+                    className="colorwaySelector-search"
                     placeholder="Give your Colorway a name"
                     value={colorwayName}
-                    onChange={setColorwayName}
+                    onInput={e => setColorwayName(e.currentTarget.value)}
                 />
                 <div className="colorwaysCreator-settingCat">
-                    <Forms.FormTitle style={{ marginBottom: "0" }}>
-                        Colors & Values:
-                    </Forms.FormTitle>
+                    <span className="colorwaysModalSectionHeader">Colors & Values:</span>
                     <div className="colorwayCreator-colorPreviews">
                         {colorProps.filter(color => presetColorArray.includes(color.id) || Object.keys(getPreset()[preset].calculated! || {}).includes(color.id)).map(presetColor => {
                             return <ColorPicker
-                                label={<Text className="colorwaysPicker-colorLabel">{Object.keys(getPreset()[preset].calculated! || {}).includes(presetColor.id) ? (presetColor.name + " (Calculated)") : presetColor.name}</Text>}
+                                label={<span className="colorwaysPicker-colorLabel">{Object.keys(getPreset()[preset].calculated! || {}).includes(presetColor.id) ? (presetColor.name + " (Calculated)") : presetColor.name}</span>}
                                 color={!Object.keys(
                                     getPreset()[preset].calculated! || {}
                                 ).includes(presetColor.id) ?
@@ -198,8 +179,8 @@ export default function ({
                             />;
                         })}
                     </div>
-                    <Forms.FormDivider style={{ margin: "10px 0" }} />
-                    <Forms.FormTitle>Muted Text Brightness:</Forms.FormTitle>
+                    <div className="colorwaysSettingsDivider" style={{ margin: "10px 0" }} />
+                    <span className="colorwaysModalSectionHeader">Muted Text Brightness:</span>
                     <Slider
                         minValue={0}
                         maxValue={100}
@@ -220,7 +201,7 @@ export default function ({
                             setDiscordSaturation(discordSaturation);
                             setTintedText(tintedText);
                         }} />)}>
-                    <Forms.FormTitle style={{ marginBottom: 0 }}>Settings & Presets</Forms.FormTitle>
+                    <span className="colorwaysModalSectionHeader">Settings & Presets</span>
                     <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img" style={{ rotate: "-90deg" }}>
                         <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true" />
                     </svg>
@@ -240,13 +221,10 @@ export default function ({
                         --primary-360: hsl(${HexToHSL("#" + colors.secondary)[0]} calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + colors.primary)[1] / 100) * (100 + PrimarySatDiffs[360])) * 10) / 10 : HexToHSL("#" + colors.primary)[1]}%) 90%);
                 }` : "")}
                 />
-            </ModalContent>
-            <ModalFooter>
-                <Button
-                    style={{ marginLeft: 8 }}
-                    color={Button.Colors.BRAND}
-                    size={Button.Sizes.MEDIUM}
-                    look={Button.Looks.FILLED}
+            </div>
+            <div className="colorwaysModalFooter">
+                <button
+                    className="colorwaysPillButton colorwaysPillButton-onSurface"
                     onClick={async () => {
                         var customColorwayCSS: string = "";
                         if (preset === "default") {
@@ -264,7 +242,7 @@ export default function ({
                             gradientPresetIds.includes(getPreset()[preset].id) ?
                                 customColorwayCSS = `/**
                                 * @name ${colorwayName || "Colorway"}
-                                * @version ${(Plugins.plugins.DiscordColorways as any).creatorVersion}
+                                * @version ${PluginProps.creatorVersion}
                                 * @description Automatically generated Colorway.
                                 * @author ${UserStore.getCurrentUser().username}
                                 * @authorId ${UserStore.getCurrentUser().id}
@@ -272,7 +250,7 @@ export default function ({
                                 */
                                ${(getPreset(colors.primary, colors.secondary, colors.tertiary, colors.accent)[preset].preset(discordSaturation) as { full: string; }).full}` : customColorwayCSS = `/**
                                * @name ${colorwayName || "Colorway"}
-                               * @version ${(Plugins.plugins.DiscordColorways as any).creatorVersion}
+                               * @version ${PluginProps.creatorVersion}
                                * @description Automatically generated Colorway.
                                * @author ${UserStore.getCurrentUser().username}
                                * @authorId ${UserStore.getCurrentUser().id}
@@ -298,7 +276,7 @@ export default function ({
                                 colors.accent
                             )[preset].preset(discordSaturation) as { base: string; }).base : "",
                             preset: getPreset()[preset].id,
-                            creatorVersion: (Plugins.plugins.DiscordColorways as any).creatorVersion
+                            creatorVersion: PluginProps.creatorVersion
                         };
                         openModal(props => <SaveColorwayModal modalProps={props} colorways={[customColorway]} onFinish={() => {
                             modalProps.onClose();
@@ -307,12 +285,9 @@ export default function ({
                     }}
                 >
                     Finish
-                </Button>
-                <Button
-                    style={{ marginLeft: 8 }}
-                    color={Button.Colors.PRIMARY}
-                    size={Button.Sizes.MEDIUM}
-                    look={Button.Looks.OUTLINED}
+                </button>
+                <button
+                    className="colorwaysPillButton"
                     onClick={() => {
                         function setAllColors({ accent, primary, secondary, tertiary }: { accent: string, primary: string, secondary: string, tertiary: string; }) {
                             updateColors({
@@ -362,31 +337,25 @@ export default function ({
                     }}
                 >
                     Copy Current Colors
-                </Button>
-                <Button
-                    style={{ marginLeft: 8 }}
-                    color={Button.Colors.PRIMARY}
-                    size={Button.Sizes.MEDIUM}
-                    look={Button.Looks.OUTLINED}
+                </button>
+                <button
+                    className="colorwaysPillButton"
                     onClick={() => openModal((props: any) => <InputColorwayIdModal modalProps={props} onColorwayId={colorwayID => {
                         hexToString(colorwayID).split(/,#/).forEach((color: string, i: number) => updateColors({ task: setColor[i], color: colorToHex(color) }));
                     }} />)}
                 >
                     Enter Colorway ID
-                </Button>
-                <Button
-                    style={{ marginLeft: 8 }}
-                    color={Button.Colors.PRIMARY}
-                    size={Button.Sizes.MEDIUM}
-                    look={Button.Looks.OUTLINED}
+                </button>
+                <button
+                    className="colorwaysPillButton"
                     onClick={() => {
                         modalProps.onClose();
                     }}
                 >
                     Cancel
-                </Button>
-            </ModalFooter>
-        </ModalRoot>
+                </button>
+            </div>
+        </div>
     );
 }
 

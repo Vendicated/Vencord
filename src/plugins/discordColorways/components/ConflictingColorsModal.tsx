@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
-import { Button, Forms, ScrollerThin, Text, useState } from "@webpack/common";
-
 import { knownThemeVars } from "../constants";
 import { getFontOnBg, getHex } from "../utils";
+import { DataStore, useState, useEffect } from "..";
+import { ModalProps } from "../types";
 
 export default function ({
     modalProps,
@@ -37,15 +36,22 @@ export default function ({
             document.body
         ).getPropertyValue("--background-tertiary")
     ));
-    return <ModalRoot {...modalProps} className="colorwayCreator-modal">
-        <ModalHeader>
-            <Text variant="heading-lg/semibold" tag="h1">
-                Conflicting Colors Found
-            </Text>
-        </ModalHeader>
-        <ModalContent className="colorwayCreator-menuWrapper">
-            <Text className="colorwaysConflictingColors-warning">Multiple known themes have been found, select the colors you want to copy from below:</Text>
-            <Forms.FormTitle style={{ marginBottom: 0 }}>Colors to copy:</Forms.FormTitle>
+    const [theme, setTheme] = useState("discord");
+
+    useEffect(() => {
+        async function load() {
+            setTheme(await DataStore.get("colorwaysPluginTheme") as string);
+        }
+        load();
+    }, []);
+
+    return <div className={`colorwaysModal ${modalProps.transitionState == 2 ? "closing" : ""} ${modalProps.transitionState == 4 ? "hidden" : ""}`} data-theme={theme}>
+        <h2 className="colorwaysModalHeader">
+            Conflicting Colors Found
+        </h2>
+        <div className="colorwaysModalContent">
+            <span className="colorwaysConflictingColors-warning">Multiple known themes have been found, select the colors you want to copy from below:</span>
+            <span className="colorwaysModalSectionHeader">Colors to copy:</span>
             <div className="colorwayCreator-colorPreviews">
                 <div className="colorwayCreator-colorPreview" style={{ backgroundColor: primaryColor, color: getFontOnBg(primaryColor) }} >Primary</div>
                 <div className="colorwayCreator-colorPreview" style={{ backgroundColor: secondaryColor, color: getFontOnBg(secondaryColor) }} >Secondary</div>
@@ -53,12 +59,12 @@ export default function ({
                 <div className="colorwayCreator-colorPreview" style={{ backgroundColor: accentColor, color: getFontOnBg(accentColor) }} >Accent</div>
             </div>
             <div className="colorwaysCreator-settingCat">
-                <ScrollerThin orientation="vertical" className="colorwaysCreator-settingsList" paddingFix>
+                <div className="colorwaysCreator-settingsList">
                     <div
                         id="colorways-colorstealer-item_Default"
                         className="colorwaysCreator-settingItm colorwaysCreator-colorPreviewItm"
                     >
-                        <Forms.FormTitle>Discord</Forms.FormTitle>
+                        <span className="colorwaysModalSectionHeader">Discord</span>
                         <div className="colorwayCreator-colorPreviews">
                             <div
                                 className="colorwayCreator-colorPreview" style={{
@@ -164,7 +170,7 @@ export default function ({
                                     }
                                     className="colorwaysCreator-settingItm colorwaysCreator-colorPreviewItm"
                                 >
-                                    <Forms.FormTitle>{Object.keys(knownThemeVars)[i] + (theme.alt ? " (Main)" : "")}</Forms.FormTitle>
+                                    <span className="colorwaysModalSectionHeader">{Object.keys(knownThemeVars)[i] + (theme.alt ? " (Main)" : "")}</span>
                                     <div className="colorwayCreator-colorPreviews">
                                         {theme.primary && getComputedStyle(document.body).getPropertyValue(theme.primary).match(/^\d.*%$/)
                                             ? <div
@@ -294,15 +300,12 @@ export default function ({
                             );
                         }
                     })}
-                </ScrollerThin>
+                </div>
             </div>
-        </ModalContent>
-        <ModalFooter>
-            <Button
-                style={{ marginLeft: 8 }}
-                color={Button.Colors.BRAND}
-                size={Button.Sizes.MEDIUM}
-                look={Button.Looks.FILLED}
+        </div>
+        <div className="colorwaysModalFooter">
+            <button
+                className="colorwaysPillButton colorwaysPillButton-onSurface"
                 onClick={() => {
                     onFinished({
                         accent: accentColor,
@@ -312,7 +315,7 @@ export default function ({
                     });
                     modalProps.onClose();
                 }}
-            >Finish</Button>
-        </ModalFooter>
-    </ModalRoot >;
+            >Finish</button>
+        </div>
+    </div >;
 }

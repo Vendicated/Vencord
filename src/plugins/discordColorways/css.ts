@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { UserStore } from "@webpack/common";
-import { Plugins } from "Vencord";
+
+import { PluginProps, UserStore } from "./";
 
 import { HexToHSL } from "./utils";
 
@@ -398,31 +398,31 @@ export function gradientBase(accentColor?: string, discordSaturation = false) {
     --bg-overlay-opacity-home-card: 0.9;
     --bg-overlay-opacity-app-frame: var(--bg-overlay-opacity-5);
 }
-.children_cde9af:after, .form_d8a4a1:before {
+.children_fc4f04:after, .form_a7d72e:before {
     content: none;
 }
-.scroller_de945b {
+.scroller_fea3ef {
     background: var(--bg-overlay-app-frame,var(--background-tertiary));
 }
-.expandedFolderBackground_b1385f {
+.expandedFolderBackground_bc7085 {
     background: rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-6));
 }
 .wrapper__8436d:not(:hover):not(.selected_ae80f7) .childWrapper_a6ce15 {
     background: rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-6));
 }
-.folder__17546:has(.expandedFolderIconWrapper__324c1) {
+.folder_bc7085:has(.expandedFolderIconWrapper_bc7085) {
     background: var(--bg-overlay-6,var(--background-secondary));
 }
-.circleIconButton__05cf2:not(.selected_aded59) {
+.circleIconButton_db6521:not(.selected_db6521) {
     background: rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-6));
 }
-.auto_a3c0bd::-webkit-scrollbar-thumb,
-.thin_b1c063::-webkit-scrollbar-thumb {
+.auto_eed6a8::-webkit-scrollbar-thumb,
+.thin_eed6a8::-webkit-scrollbar-thumb {
     background-size: 200vh;
     background-image: -webkit-gradient(linear,left top,left bottom,from(rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-4))),to(rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-4)))),var(--custom-theme-background);
     background-image: linear-gradient(rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-4)),rgb(var(--bg-overlay-color-inverse)/var(--bg-overlay-opacity-4))),var(--custom-theme-background);
 }
-.auto_a3c0bd::-webkit-scrollbar-track {
+.auto_eed6a8::-webkit-scrollbar-track {
     background-size: 200vh;
     background-image: -webkit-gradient(linear,left top,left bottom,from(rgb(var(--bg-overlay-color)/.4)),to(rgb(var(--bg-overlay-color)/.4))),var(--custom-theme-background);
     background-image: linear-gradient(rgb(var(--bg-overlay-color)/.4),rgb(var(--bg-overlay-color)/.4)),var(--custom-theme-background);
@@ -473,7 +473,7 @@ export function gradientBase(accentColor?: string, discordSaturation = false) {
 export function generateCss(primaryColor: string, secondaryColor: string, tertiaryColor: string, accentColor: string, tintedText: boolean = true, discordSaturation: boolean = true, mutedTextBrightness?: number, name?: string) {
     return `/**
  * @name ${name}
- * @version ${(Plugins.plugins.DiscordColorways as any).creatorVersion}
+ * @version ${PluginProps.creatorVersion}
  * @description Automatically generated Colorway.
  * @author ${UserStore.getCurrentUser().username}
  * @authorId ${UserStore.getCurrentUser().id}
@@ -529,30 +529,30 @@ export function generateCss(primaryColor: string, secondaryColor: string, tertia
     --primary-160-hsl: ${HexToHSL("#" + secondaryColor)[0]} calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + secondaryColor)[1] / 100) * (100 + PrimarySatDiffs[660])) * 10) / 10 : HexToHSL("#" + secondaryColor)[1]}%) ${Math.min(HexToHSL("#" + secondaryColor)[2] + 76.4, 82.5)}%;
     --primary-200-hsl: ${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.min(HexToHSL("#" + tertiaryColor)[2] + 80, 80)}%;
 }
-.emptyPage_feb902,
-.scrollerContainer_dda72c,
-.container__03ec9,
-.header__71942 {
+.emptyPage_c6b11b,
+.scrollerContainer_c6b11b,
+.container_f1fd9c,
+.header_f1fd9c {
     background-color: unset !important;
 }
-.container__6b2e5,
-.container__03ec9,
-.header__71942 {
+.container_c2efea,
+.container_f1fd9c,
+.header_f1fd9c {
     background: transparent !important;
 }${(Math.round(HexToHSL("#" + primaryColor)[2]) > 80) ? `\n\n/*Primary*/
-.theme-dark .container_bd15da,
-.theme-dark .body__616e6,
-.theme-dark .toolbar__62fb5,
-.theme-dark .container_e1387b,
-.theme-dark .messageContent_abea64,
-.theme-dark .attachButtonPlus_fd0021,
-.theme-dark .username__0b0e7:not([style]),
-.theme-dark .children_cde9af,
-.theme-dark .buttonContainer__6de7e,
-.theme-dark .listItem__48528,
-.theme-dark .body__616e6 .caret__33d19,
-.theme-dark .body__616e6 .titleWrapper_d6133e > h1,
-.theme-dark .body__616e6 .icon_ae0b42 {
+.theme-dark .container_c2739c,
+.theme-dark .body_cd82a7,
+.theme-dark .toolbar_fc4f04,
+.theme-dark .container_f0fccd,
+.theme-dark .messageContent_f9f2ca,
+.theme-dark .attachButtonPlus_f298d4,
+.theme-dark .username_f9f2ca:not([style]),
+.theme-dark .children_fc4f04,
+.theme-dark .buttonContainer_f9f2ca,
+.theme-dark .listItem_c96c45,
+.theme-dark .body_cd82a7 .caret_fc4f04,
+.theme-dark .body_cd82a7 .titleWrapper_fc4f04 > h1,
+.theme-dark .body_cd82a7 .icon_fc4f04 {
     --white-500: black !important;
     --interactive-normal: black !important;
     --text-normal: black !important;
@@ -561,23 +561,23 @@ export function generateCss(primaryColor: string, secondaryColor: string, tertia
     --header-secondary: black !important;
 }
 
-.theme-dark .contentRegionScroller__9ae20 :not(.mtk1,.mtk2,.mtk3,.mtk4,.mtk5,.mtk6,.mtk7,.mtk8,.mtk9,.monaco-editor .line-numbers) {
+.theme-dark .contentRegionScroller_c25c6d :not(.mtk1,.mtk2,.mtk3,.mtk4,.mtk5,.mtk6,.mtk7,.mtk8,.mtk9,.monaco-editor .line-numbers) {
     --white-500: black !important;
 }
 
-.theme-dark .container__26baa {
+.theme-dark .container_fc4f04 {
     --channel-icon: black;
 }
 
-.theme-dark .callContainer__1477d {
+.theme-dark .callContainer_d880dc {
     --white-500: ${(HexToHSL("#" + tertiaryColor)[2] > 80) ? "black" : "white"} !important;
 }
 
-.theme-dark .channelTextArea_c2094b {
+.theme-dark .channelTextArea_a7d72e {
     --text-normal: ${(HexToHSL("#" + primaryColor)[2] + 3.6 > 80) ? "black" : "white"};
 }
 
-.theme-dark .placeholder_dec8c7 {
+.theme-dark .placeholder_a552a6 {
     --channel-text-area-placeholder: ${(HexToHSL("#" + primaryColor)[2] + 3.6 > 80) ? "black" : "white"};
     opacity: .6;
 }
@@ -586,16 +586,16 @@ export function generateCss(primaryColor: string, secondaryColor: string, tertia
     background-color: black;
 }
 
-.theme-dark .root_a28985 > .header__5e5a6 > h1 {
+.theme-dark .root_f9a4c9 > .header_f9a4c9 > h1 {
     color: black;
 }
 /*End Primary*/`: ""}${(HexToHSL("#" + secondaryColor)[2] > 80) ? `\n\n/*Secondary*/
-.theme-dark .wrapper__3c6d5 *,
-.theme-dark .sidebar_e031be *:not(.hasBanner__04337 *),
-.theme-dark .members__573eb *:not([style]),
-.theme-dark .sidebarRegionScroller__8113e *,
-.theme-dark .header__8e271,
-.theme-dark .lookFilled__950dd.colorPrimary_ebe632 {
+.theme-dark .wrapper_cd82a7 *,
+.theme-dark .sidebar_a4d4d9 *:not(.hasBanner_fd6364 *),
+.theme-dark .members_cbd271 *:not([style]),
+.theme-dark .sidebarRegionScroller_c25c6d *,
+.theme-dark .header_e06857,
+.theme-dark .lookFilled_dd4f85.colorPrimary_dd4f85 {
     --white-500: black !important;
     --channels-default: black !important;
     --channel-icon: black !important;
@@ -604,36 +604,36 @@ export function generateCss(primaryColor: string, secondaryColor: string, tertia
     --interactive-active: var(--white-500);
 }
 
-.theme-dark .channelRow__538ef {
+.theme-dark .channelRow_f04d06 {
     background-color: var(--background-secondary);
 }
 
-.theme-dark .channelRow__538ef * {
+.theme-dark .channelRow_f04d06 * {
     --channel-icon: black;
 }
 
-.theme-dark #app-mount .activity_bafb94 {
+.theme-dark #app-mount .activity_a31c43 {
     --channels-default: var(--white-500) !important;
 }
 
-.theme-dark .nameTag__77ab2 {
+.theme-dark .nameTag_b2ca13 {
     --header-primary: black !important;
     --header-secondary: ${HexToHSL("#" + secondaryColor)[0] === 0 ? "gray" : ((HexToHSL("#" + secondaryColor)[2] < 80) ? "hsl(" + HexToHSL("#" + secondaryColor)[0] + ", calc(var(--saturation-factor, 1)*100%), 90%)" : "hsl(" + HexToHSL("#" + secondaryColor)[0] + ", calc(var(--saturation-factor, 1)*100%), 20%)")} !important;
 }
 
-.theme-dark .bannerVisible_ef30fe .headerContent__6fcc7 {
+.theme-dark .bannerVisible_fd6364 .headerContent_fd6364 {
     color: #fff;
 }
 
-.theme-dark .embedFull__14919 {
+.theme-dark .embedFull_b0068a {
     --text-normal: black;
 }
 /*End Secondary*/`: ""}${HexToHSL("#" + tertiaryColor)[2] > 80 ? `\n\n/*Tertiary*/
-.theme-dark .winButton_f17fb6,
-.theme-dark .searchBar__310d8 *,
-.theme-dark .wordmarkWindows_ffbc5e,
-.theme-dark .searchBar__5a20a *,
-.theme-dark .searchBarComponent__8f95f {
+.theme-dark .winButton_a934d8,
+.theme-dark .searchBar_e0840f *,
+.theme-dark .wordmarkWindows_a934d8,
+.theme-dark .searchBar_a46bef *,
+.theme-dark .searchBarComponent_f0963d {
     --white-500: black !important;
 }
 
@@ -641,25 +641,25 @@ export function generateCss(primaryColor: string, secondaryColor: string, tertia
     color: ${HexToHSL("#" + secondaryColor)[2] > 80 ? "black" : "white"};
 }
 
-.theme-dark .popout__24e32 > * {
+.theme-dark .popout_c5b389 > * {
     --interactive-normal: black !important;
     --header-secondary: black !important;
 }
 
-.theme-dark .tooltip__7b090 {
+.theme-dark .tooltip_b6c360 {
     --text-normal: black !important;
 }
-.theme-dark .children_cde9af .icon_ae0b42 {
+.theme-dark .children_fc4f04 .icon_fc4f04 {
     color: var(--interactive-active) !important;
 }
 /*End Tertiary*/`: ""}${HexToHSL("#" + accentColor)[2] > 80 ? `\n\n/*Accent*/
-.selected_aded59 *,
+.selected_db6521 *,
 .selected_ae80f7 *,
-#app-mount .lookFilled__950dd.colorBrand__27d57:not(.buttonColor__7bad9),
-.colorDefault_e361cf.focused_dcafb9,
-.row__9e25f:hover,
+#app-mount .lookFilled_dd4f85.colorBrand_dd4f85:not(.buttonColor_adcaac),
+.colorDefault_d90b3d.focused_d90b3d,
+.row_c5b389:hover,
 .colorwayInfoIcon,
-.checkmarkCircle_b1b1cc > circle {
+.checkmarkCircle_cb7c27 > circle {
     --white-500: black !important;
 }
 
@@ -789,10 +789,10 @@ export function getAutoPresets(accentColor?: string) {
     --primary-400: hsl(${HexToHSL("#" + accentColor)[0]}, calc(var(--saturation-factor, 1)*12%), 90%);
     --primary-360: hsl(${HexToHSL("#" + accentColor)[0]}, calc(var(--saturation-factor, 1)*12%), 90%);
 }
-.emptyPage_feb902,
-.scrollerContainer_dda72c,
-.container__03ec9,
-.header__71942 {
+.emptyPage_c6b11b,
+.scrollerContainer_c6b11b,
+.container_f1fd9c,
+.header_f1fd9c {
     background-color: unset !important;
 }`;
     }

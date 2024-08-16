@@ -187,3 +187,45 @@ export async function getRepainterTheme(link: string): Promise<{ status: "succes
     const { pageProps: { fallback: { a: { name, colors } } } } = { "pageProps": { "initialId": "01G5PMR5G9H76H1R2RET4A0ZHY", "fallback": { a: { "id": "01G5PMR5G9H76H1R2RET4A0ZHY", "name": "Midwinter Fire", "description": "Very red", "createdAt": "2022-06-16T16:15:11.881Z", "updatedAt": "2022-07-12T08:37:13.141Z", "settingsLines": ["Colorful", "Bright", "Vibrant style"], "voteCount": 309, "colors": [-1426063361, 4294901760, 4294901760, -1426071591, -1426080078, -1426089335, 4294901760, -1426119398, -1428615936, -1431629312, -1434644480, 4294901760, 4294901760, 4294901760, 4294901760, -1426067223, -1426071086, -1426079070, -1426088082, 4294901760, -1428201216, -1430761216, -1433255936, 4294901760, 4294901760, 4294901760, 4294901760, 4294901760, 4294901760, -1426070330, 4294901760, -1426086346, 4294901760, -1430030080, 4294901760, -1434431744, 4294901760, 4294901760, 4294901760, 4294901760, -1426064133, 4294901760, -1426071591, 4294901760, -1426874223, 4294901760, -1430359452, 4294901760, -1433845194, 4294901760, -1437922816, 4294901760, 4294901760, 4294901760, 4294901760, -1426071591, -1426080078, -1426089335, -1427799438, -1429640356, 4294901760, -1433191891, 4294901760, 4294901760, 4294901760] } } }, "__N_SSP": true } as any;
     return { status: "success", id: name, colors: colors.filter(c => c !== 4294901760).map(c => "#" + parseClr(c)) };
 }
+
+/**
+ * Prompts the user to choose a file from their system
+ * @param mimeTypes A comma separated list of mime types to accept, see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept#unique_file_type_specifiers
+ * @returns A promise that resolves to the chosen file or null if the user cancels
+ */
+export function chooseFile(mimeTypes: string) {
+    return new Promise<File | null>(resolve => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.style.display = "none";
+        input.accept = mimeTypes;
+        input.onchange = async () => {
+            resolve(input.files?.[0] ?? null);
+        };
+
+        document.body.appendChild(input);
+        input.click();
+        setImmediate(() => document.body.removeChild(input));
+    });
+}
+
+/**
+ * Prompts the user to save a file to their system
+ * @param file The file to save
+ */
+export function saveFile(file: File) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(file);
+    a.download = file.name;
+
+    document.body.appendChild(a);
+    a.click();
+    setImmediate(() => {
+        URL.revokeObjectURL(a.href);
+        document.body.removeChild(a);
+    });
+}
+
+export function classes(...classes: Array<string | null | undefined | false>) {
+    return classes.filter(Boolean).join(" ");
+}

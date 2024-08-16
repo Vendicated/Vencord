@@ -1,15 +1,10 @@
-/*
- * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
-
-import { hexToString } from "../utils";
+import { DataStore, useEffect, useState } from "..";
 import { ModalProps } from "../types";
-import { DataStore, useState, useEffect } from "..";
+import { getRepainterTheme } from "../utils";
 
-export default function ({ modalProps, onColorwayId }: { modalProps: ModalProps, onColorwayId: (colorwayID: string) => void; }) {
-    const [colorwayID, setColorwayID] = useState<string>("");
+export default function ({ modalProps, onFinish }: { modalProps: ModalProps, onFinish: ({ id, colors }: { id: string, colors: string[]; }) => void; }) {
+    const [colorwaySourceURL, setColorwaySourceURL] = useState<string>("");
+    const [URLError, setURLError] = useState<string>("");
     const [theme, setTheme] = useState("discord");
 
     useEffect(() => {
@@ -18,28 +13,29 @@ export default function ({ modalProps, onColorwayId }: { modalProps: ModalProps,
         }
         load();
     }, []);
+
     return <div className={`colorwaysModal ${modalProps.transitionState == 2 ? "closing" : ""} ${modalProps.transitionState == 4 ? "hidden" : ""}`} data-theme={theme}>
+        <h2 className="colorwaysModalHeader">Use Repainter theme</h2>
         <div className="colorwaysModalContent">
-            <span className="colorwaysModalSectionHeader">Colorway ID:</span>
+            <span className="colorwaysModalSectionHeader">URL: {URLError ? <span className="colorwaysModalSectionError">{URLError}</span> : <></>}</span>
             <input
                 type="text"
+                placeholder="Enter a valid URL..."
+                onInput={e => {
+                    setColorwaySourceURL(e.currentTarget.value);
+                }}
+                value={colorwaySourceURL}
                 className="colorwaySelector-search"
-                placeholder="Enter Colorway ID"
-                onInput={({ currentTarget: { value } }) => setColorwayID(value)}
             />
         </div>
         <div className="colorwaysModalFooter">
             <button
                 className="colorwaysPillButton colorwaysPillButton-onSurface"
-                onClick={() => {
-                    if (!colorwayID) {
-                        throw new Error("Please enter a Colorway ID");
-                    } else if (!hexToString(colorwayID).includes(",")) {
-                        throw new Error("Invalid Colorway ID");
-                    } else {
-                        onColorwayId(colorwayID);
+                onClick={async () => {
+                    getRepainterTheme(colorwaySourceURL).then(data => {
+                        onFinish({ id: data.id as any, colors: data.colors as any });
                         modalProps.onClose();
-                    }
+                    }).catch(e => setURLError("Error: " + e));
                 }}
             >
                 Finish

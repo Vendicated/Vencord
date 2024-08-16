@@ -21,7 +21,8 @@ export interface Colorway {
     source?: string,
     linearGradient?: string,
     preset?: string,
-    creatorVersion: string;
+    creatorVersion: string,
+    colorObj?: { accent?: string, primary?: string, secondary?: string, tertiary?: string; };
 }
 
 export interface ColorPickerProps {
@@ -34,7 +35,7 @@ export interface ColorPickerProps {
 
 export interface ColorwayObject {
     id: string | null,
-    css: string | null,
+    css?: string | null,
     sourceType: "online" | "offline" | "temporary" | null,
     source: string | null | undefined,
     colors?: {
@@ -68,4 +69,9 @@ export interface StoreItem {
     description: string,
     url: string,
     authorGh: string;
+}
+
+export interface ModalProps {
+    transitionState: 0 | 1 | 2 | 3 | 4;
+    onClose(): void;
 }
