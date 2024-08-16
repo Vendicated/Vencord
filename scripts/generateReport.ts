@@ -76,8 +76,6 @@ const IGNORED_DISCORD_ERRORS = [
     "Attempting to set fast connect zstd when unsupported"
 ] as Array<string | RegExp>;
 
-let done: boolean = false;
-
 function toCodeBlock(s: string, indentation = 0, isDiscord = false) {
     s = s.replace(/```/g, "`\u200B`\u200B`");
 
@@ -266,8 +264,11 @@ page.on("console", async e => {
                         report.badWebpackFinds.push(otherMessage);
                         break;
                     case "Finished test":
-                        done = true;
                         await printReport();
+                        setTimeout(async () => {
+                            await browser.close();
+                            process.exit();
+                        }, 10000);
                 }
         }
     }
@@ -318,8 +319,3 @@ await page.evaluateOnNewDocument(`
 `);
 
 await page.goto(CANARY ? "https://canary.discord.com/login" : "https://discord.com/login");
-
-if (done) {
-    await browser.close();
-    process.exit();
-}
