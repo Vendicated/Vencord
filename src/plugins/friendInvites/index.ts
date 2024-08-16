@@ -47,7 +47,7 @@ export default definePlugin({
         },
         {
             name: "fvite list",
-            description: "Lists all friend invite link.",
+            description: "Lists all friend invite links.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             execute: async (_, ctx) => {
                 const invites = await FriendInvites.getAllFriendInvites();
@@ -66,7 +66,7 @@ export default definePlugin({
         },
         {
             name: "fvite revoke",
-            description: "Revokes all friend invite link.",
+            description: "Revokes all friend invite links.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             execute: async (_, ctx) => {
                 await FriendInvites.revokeFriendInvites();
