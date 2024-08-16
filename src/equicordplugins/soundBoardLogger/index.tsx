@@ -27,7 +27,7 @@ function OpenLogsButton() {
             className="chatBarLogIcon"
             onClick={() => openSoundBoardLog()}
             tooltip={"Open SoundBoard Log"}
-            icon={<LogIcon className="chatBarLogIcon" />}
+            icon={LogIcon}
         />
     );
 }
