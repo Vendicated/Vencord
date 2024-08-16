@@ -331,7 +331,7 @@ function sendMsgNotif(titleString: string, content: string, message: Message) {
             title: titleString,
             content: content,
             useBase64Icon: true,
-            icon: new TextDecoder().decode(result),
+            icon: Buffer.from(result).toString("base64"),
             sourceApp: "Vencord"
         };
 
