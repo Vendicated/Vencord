@@ -21,7 +21,7 @@ import { getListeners } from "./utils";
 
 const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
 
-function OpenLogsButton() {
+function OpenSBLogsButton() {
     return (
         <HeaderBarIcon
             className="chatBarLogIcon"
@@ -64,13 +64,13 @@ export default definePlugin({
         if (Array.isArray(e.toolbar))
             return e.toolbar.push(
                 <ErrorBoundary noop={true}>
-                    <OpenLogsButton />
+                    <OpenSBLogsButton />
                 </ErrorBoundary>
             );
 
         e.toolbar = [
             <ErrorBoundary noop={true}>
-                <OpenLogsButton />
+                <OpenSBLogsButton />
             </ErrorBoundary>,
             e.toolbar,
         ];
