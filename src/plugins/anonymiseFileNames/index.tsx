@@ -127,12 +127,12 @@ export default definePlugin({
         );
     }, { noop: true }),
     anonymise(upload: AnonUpload) {
+        if ((upload.anonymise ?? settings.store.anonymiseByDefault) === false) return upload.filename;
+        
         const file = upload.filename;
         const tarMatch = tarExtMatcher.exec(file);
         const extIdx = tarMatch?.index ?? file.lastIndexOf(".");
         const ext = extIdx !== -1 ? file.substring(extIdx) : "";
-        
-        if ((upload.anonymise ?? settings.store.anonymiseByDefault) === false) return upload.filename;
         
         switch (settings.store.method) {
             case Methods.Random:
