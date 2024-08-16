@@ -35,15 +35,10 @@
     max-height: unset;
     background-color: transparent;
     box-sizing: border-box;
-    color: var(--text-normal);
     font-size: 12px;
     line-height: 14px;
     resize: none;
     width: 100%;
-}
-
-.vc-settings-theme-links::-moz-placeholder {
-    color: var(--header-secondary);
 }
 
 .vc-settings-theme-links::placeholder {
