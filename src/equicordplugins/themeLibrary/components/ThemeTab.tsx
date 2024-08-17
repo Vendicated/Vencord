@@ -18,7 +18,7 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
-import { findByPropsLazy, findLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { Button, Card, FluxDispatcher, Forms, React, SearchableSelect, TabBar, TextArea, TextInput, Toasts, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
@@ -30,7 +30,6 @@ import { ThemeInfoModal } from "./ThemeInfoModal";
 
 const InputStyles = findByPropsLazy("inputDefault", "inputWrapper", "error");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
-const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
 const API_URL = "https://themes-delta.vercel.app/api";
 
@@ -124,7 +123,7 @@ function ThemeTab() {
         return (
             theme.name.toLowerCase().includes(v) ||
             theme.description.toLowerCase().includes(v) ||
-            theme.author.discord_name.toLowerCase().includes(v) ||
+            (Array.isArray(theme.author) ? theme.author.some(author => author.discord_name.toLowerCase().includes(v)) : theme.author.discord_name.toLowerCase().includes(v)) ||
             tags.has(v)
         );
     };
@@ -281,8 +280,11 @@ function ThemeTab() {
                                                 )}
                                                 <Button
                                                     onClick={async () => {
-                                                        const author = await getUser(theme.author.discord_snowflake, theme.author.discord_name);
-                                                        openModal(props => <ThemeInfoModal {...props} author={author} theme={theme} />);
+                                                        const authors = Array.isArray(theme.author)
+                                                            ? await Promise.all(theme.author.map(author => getUser(author.discord_snowflake, author.discord_name)))
+                                                            : [await getUser(theme.author.discord_snowflake, theme.author.discord_name)];
+
+                                                        openModal(props => <ThemeInfoModal {...props} author={authors} theme={theme} />);
                                                     }}
                                                     size={Button.Sizes.MEDIUM}
                                                     color={Button.Colors.BRAND}
@@ -417,8 +419,11 @@ function ThemeTab() {
                                                 )}
                                                 <Button
                                                     onClick={async () => {
-                                                        const author = await getUser(theme.author.discord_snowflake, theme.author.discord_name);
-                                                        openModal(props => <ThemeInfoModal {...props} author={author} theme={theme} />);
+                                                        const authors = Array.isArray(theme.author)
+                                                            ? await Promise.all(theme.author.map(author => getUser(author.discord_snowflake, author.discord_name)))
+                                                            : [await getUser(theme.author.discord_snowflake, theme.author.discord_name)];
+
+                                                        openModal(props => <ThemeInfoModal {...props} author={authors} theme={theme} />);
                                                     }}
                                                     size={Button.Sizes.MEDIUM}
                                                     color={Button.Colors.BRAND}
@@ -492,7 +497,7 @@ function SubmitThemes() {
                 <TextArea
                     content={themeTemplate}
                     onChange={handleChange}
-                    className={classes(TextAreaProps.textarea, "vce-text-input")}
+                    className={"vce-text-input"}
                     placeholder={themeTemplate}
                     spellCheck={false}
                     rows={35}
