@@ -26,11 +26,11 @@ const FriendInvites = findByPropsLazy("createFriendInvite");
 export default definePlugin({
     name: "FriendInvites",
     description: "Create and manage friend invite links via slash commands (/fvite create, /fvite list, /fvite revoke).",
-    authors: [ Devs.afn, Devs.Dziurwa, Devs.TheMasterKitty ],
+    authors: [ Devs.afn, Devs.Dziurwa ],
     dependencies: ["CommandsAPI"],
     commands: [
         {
-            name: "fvite create",
+            name: "friendinvite create",
             description: "Generates a friend invite link.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             execute: async (_, ctx) => {
@@ -46,7 +46,7 @@ export default definePlugin({
             }
         },
         {
-            name: "fvite list",
+            name: "friendinvite list",
             description: "Lists all friend invite links.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             execute: async (_, ctx) => {
@@ -65,7 +65,7 @@ export default definePlugin({
             }
         },
         {
-            name: "fvite revoke",
+            name: "friendinvite revoke",
             description: "Revokes all friend invite links.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             execute: async (_, ctx) => {
