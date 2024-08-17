@@ -7,6 +7,12 @@
 import { ModalProps } from "@utils/modal";
 import { User } from "discord-types/general";
 
+type Author = {
+    github_name?: string;
+    discord_name: string;
+    discord_snowflake: string;
+};
+
 export interface Theme {
     id: string;
     name: string;
@@ -14,11 +20,7 @@ export interface Theme {
     type: string | "theme" | "snippet";
     description: string;
     version: string;
-    author: {
-        github_name?: string;
-        discord_name: string;
-        discord_snowflake: string;
-    };
+    author: Author | Author[];
     likes: number;
     tags: string[];
     thumbnail_url: string;
@@ -32,7 +34,7 @@ export interface Theme {
 }
 
 export interface ThemeInfoModalProps extends ModalProps {
-    author: User;
+    author: User | User[];
     theme: Theme;
 }
 

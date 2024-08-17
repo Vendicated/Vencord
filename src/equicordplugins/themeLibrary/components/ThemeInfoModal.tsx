@@ -11,7 +11,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import type { PluginNative } from "@utils/types";
-import { findComponentByCodeLazy } from "@webpack";
+import { findComponentByCodeLazy, findByPropsLazy } from "@webpack";
 import { Button, Clipboard, Forms, React, showToast, Toasts } from "@webpack/common";
 
 import { Theme, ThemeInfoModalProps } from "../types";
@@ -32,36 +32,40 @@ async function downloadTheme(themesDir: string, theme: Theme) {
 }
 
 export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, ...props }) => {
-    const content = window.atob(theme.content);
-    const metadata = content.match(/\/\*\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g)?.[0] || "";
+    const { type, content, likes, guild, tags } = theme;
+
+    const themeContent = window.atob(content);
+    const metadata = themeContent.match(/\/\*\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g)?.[0] || "";
     const donate = metadata.match(/@donate\s+(.+)/)?.[1] || "";
     const version = metadata.match(/@version\s+(.+)/)?.[1] || "";
 
-    const { likes, guild, tags } = theme;
+
+    const authors = Array.isArray(author) ? author : [author];
 
     return (
         <ModalRoot {...props}>
             <ModalHeader>
-                <Forms.FormTitle tag="h4">Theme Details</Forms.FormTitle>
+                <Forms.FormTitle tag="h4">{type} Details</Forms.FormTitle>
             </ModalHeader>
 
             <ModalContent>
-                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Author</Forms.FormTitle>
+                <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>{authors.length > 1 ? "Authors" : "Author"}</Forms.FormTitle>
                 <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
                     <div>
                         <div style={{ display: "flex", alignItems: "center" }}>
                             <UserSummaryItem
-                                users={[author]}
+                                users={authors}
+                                count={authors.length}
                                 guildId={undefined}
                                 renderIcon={false}
-                                showDefaultAvatarsForNullUsers
+                                max={4}
                                 size={32}
+                                showDefaultAvatarsForNullUsers
                                 showUserPopout
                                 className={Margins.right8}
                             />
-
-                            <Forms.FormText>
-                                {author.username}
+                            <Forms.FormText style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                {authors.map(author => author.username).join(", ")}
                             </Forms.FormText>
                         </div>
                         {version && (
@@ -74,7 +78,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                         )}
                         <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Likes</Forms.FormTitle>
                         <Forms.FormText>
-                            {likes === 0 ? `Nobody liked this ${theme.type} yet.` : `${likes} users liked this ${theme.type}!`}
+                            {likes === 0 ? `Nobody liked this ${type} yet.` : `${likes} users liked this ${type}!`}
                         </Forms.FormText>
                         {donate && (
                             <>
@@ -122,7 +126,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                         <Forms.FormText style={{
                                             padding: "8px",
                                         }}>
-                                            <CodeBlock lang="css" content={content} />
+                                            <CodeBlock lang="css" content={themeContent} />
                                         </Forms.FormText>
                                     </ModalContent>
                                     <ModalFooter>
@@ -135,7 +139,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                         </Button>
                                         <Button className={Margins.right8}
                                             onClick={() => {
-                                                Clipboard.copy(content);
+                                                Clipboard.copy(themeContent);
                                                 showToast("Copied to Clipboard", Toasts.Type.SUCCESS);
                                             }}>Copy to Clipboard</Button>
                                     </ModalFooter>
