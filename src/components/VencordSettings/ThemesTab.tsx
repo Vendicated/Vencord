@@ -27,7 +27,7 @@ import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { findByPropsLazy, findLazy } from "@webpack";
+import { findLazy } from "@webpack";
 import { Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
@@ -44,7 +44,6 @@ type FileInput = ComponentType<{
     filters?: { name?: string; extensions: string[]; }[];
 }>;
 
-const InviteActions = findByPropsLazy("resolveInvite");
 const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
 
 const cl = classNameFactory("vc-settings-theme-");
