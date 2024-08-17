@@ -1,10 +1,16 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import "./style.css";
 
-import definePlugin from "@utils/types";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Clipboard, showToast, Toasts, Tooltip, useState } from "@webpack/common";
 import { CopyIcon, NoEntrySignIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
+import { Clipboard, Tooltip, useState } from "@webpack/common";
 
 const CheckMarkIcon = () => {
     return <svg aria-hidden="true" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -29,7 +35,7 @@ export default definePlugin({
         const [recentlyCopied, setRecentlyCopied] = useState(false);
         return (
             <Tooltip text={recentlyCopied ? "Copied!" : bytesLeft > 0 ? "File too large to copy" : "Copy File Contents"}>
-                {(tooltipProps) => (
+                {tooltipProps => (
                     <div
                         {...tooltipProps}
                         className="vc-cfc-button"
