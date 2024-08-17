@@ -33,6 +33,20 @@
     padding: 0.5em;
     border: 1px solid var(--background-modifier-accent);
     max-height: unset;
+    background-color: transparent;
+    box-sizing: border-box;
+    font-size: 12px;
+    line-height: 14px;
+    resize: none;
+    width: 100%;
+}
+
+.vc-settings-theme-links::placeholder {
+    color: var(--header-secondary);
+}
+
+.vc-settings-theme-links:focus {
+    background-color: var(--background-tertiary);
 }
 
 .vc-cloud-settings-sync-grid {
