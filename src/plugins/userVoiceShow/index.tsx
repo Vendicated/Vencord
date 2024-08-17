@@ -95,14 +95,6 @@ export default definePlugin({
 
     patches: [
         // @TODO Maybe patch UserVoiceShow in simplified profile popout
-
-        // below username
-        {
-            find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Lazy-loaded
-            replacement: {
-                match: /\.body.+?displayProfile:\i}\),/,
-                replace: "$&$self.patchModal(arguments[0]),",
-            }
-        }
+        // @TODO Patch new profile modal
     ],
 });
