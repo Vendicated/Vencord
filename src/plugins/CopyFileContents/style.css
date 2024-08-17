@@ -1,0 +1,8 @@
+.vc-cfc-button {
+    color: var(--interactive-normal);
+    cursor: pointer;
+}
+
+.vc-cfc-button:hover {
+    color: var(--interactive-hover);
+}
