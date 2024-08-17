@@ -25,10 +25,9 @@ import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import type { UserThemeHeader } from "@main/themes";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { findByProps, findComponentByFields } from "@webpack";
+import { findComponentByFields } from "@webpack";
 import { Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { Ref, SyntheticEvent } from "react";
 
@@ -46,7 +45,6 @@ type FileInputProps = {
 };
 
 const FileInput = findComponentByFields<FileInputProps>("activateUploadDialogue", "setRef");
-const TextAreaProps = findByProps("textarea");
 
 const cl = classNameFactory("vc-settings-theme-");
 
@@ -305,7 +303,7 @@ function ThemesTab() {
                     <TextArea
                         value={themeText}
                         onChange={setThemeText}
-                        className={classes(TextAreaProps.textarea, "vc-settings-theme-links")}
+                        className={"vc-settings-theme-links"}
                         placeholder="Theme Links"
                         spellCheck={false}
                         onBlur={onBlur}
