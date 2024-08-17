@@ -86,20 +86,14 @@ function ensureOwnStatus(user: User) {
     if (user.id === UserStore.getCurrentUser().id) {
         const sessions = SessionsStore.getSessions();
         if (typeof sessions !== "object") return null;
-        const sortedSessions = Object.values(sessions).sort(({ status: a }, { status: b }) => {
-            if (a === b) return 0;
-            if (a === "online") return 1;
-            if (b === "online") return -1;
-            if (a === "idle") return 1;
-            if (b === "idle") return -1;
-            return 0;
-        });
 
-        const ownStatus = Object.values(sortedSessions).reduce((acc, curr) => {
-            if (curr.clientInfo.client !== "unknown")
-                acc[curr.clientInfo.client] = curr.status;
+        const ownStatus = Object.values(sessions).reduce((acc, curr) => {
+            const platform = curr.clientInfo.client;
+            if (platform !== "unknown") {
+                acc[platform] = curr.clientInfo.client === "mobile" ? "online" : curr.status;
+            }
             return acc;
-        }, {});
+        }, {} as Record<string, string>);
 
         const { clientStatuses } = PresenceStore.getState();
         clientStatuses[UserStore.getCurrentUser().id] = ownStatus;
