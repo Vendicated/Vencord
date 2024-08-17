@@ -73,7 +73,7 @@ interface ConnectionPlatform {
 }
 
 const profilePopoutComponent = ErrorBoundary.wrap(
-    (props: { user: User; displayProfile?: any; simplified?: boolean; }) => (
+    (props: { user: User; displayProfile?: any; }) => (
         <ConnectionsComponent
             {...props}
             id={props.user.id}
@@ -171,7 +171,7 @@ export default definePlugin({
             find: '"BiteSizeProfileBody"',
             replacement: {
                 match: /currentUser:\i,guild:\i}\)(?<=user:(\i),bio:null==(\i)\?.+?)/,
-                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, simplified: true })"
+                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2 })"
             }
         }
     ],

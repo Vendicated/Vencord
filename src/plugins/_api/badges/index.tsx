@@ -62,7 +62,6 @@ export default definePlugin({
     authors: [Devs.Megu, Devs.Ven, Devs.TheSun],
     required: true,
     patches: [
-        /* new profiles */
         {
             find: ".FULL_SIZE]:26",
             replacement: {

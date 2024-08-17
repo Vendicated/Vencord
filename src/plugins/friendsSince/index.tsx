@@ -23,7 +23,7 @@ export default definePlugin({
     description: "Shows when you became friends with someone in the user popout",
     authors: [Devs.Elvyra, Devs.Antti],
     patches: [
-        // DM User Sidebar - new layout
+        // DM User Sidebar
         {
             find: ".PANEL}),nicknameIcons",
             replacement: {
@@ -31,7 +31,7 @@ export default definePlugin({
                 replace: "$&,$self.friendsSinceNew({userId:$1,isSidebar:true})"
             }
         },
-        // User Profile Modal - new layout
+        // User Profile Modal
         {
             find: "action:\"PRESS_APP_CONNECTION\"",
             replacement: {
