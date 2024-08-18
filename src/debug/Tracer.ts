@@ -23,9 +23,7 @@ if (IS_DEV || IS_REPORTER) {
     var logger = new Logger("Tracer", "#FFD166");
 }
 
-const Noop = () => { };
-
-export const beginTrace = !(IS_DEV || IS_REPORTER) ? Noop :
+export const beginTrace = !(IS_DEV || IS_REPORTER) ? () => { } :
     function beginTrace(name: string, ...args: any[]) {
         if (name in traces) {
             throw new Error(`Trace ${name} already exists!`);
