@@ -28,7 +28,7 @@ import { Margins } from "@utils/margins";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findLazy } from "@webpack";
-import { Card, Forms, React, showToast, TabBar, TextArea, ThemeStore, useEffect, useRef, useState } from "@webpack/common";
+import { Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import Plugins from "~plugins";
