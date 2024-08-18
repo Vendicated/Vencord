@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
-import { filters, findAll, search, wreq } from "@webpack";
+import { CodeFilter, filters, findAll, search, stringMatches, wreq } from "@webpack";
 
 const PORT = 8485;
 const NAV_ID = "dev-companion-reconnect";
@@ -87,13 +87,7 @@ function parseNode(node: Node) {
             throw new Error("Unknown Node Type " + (node as any).type);
     }
 }
-type CodeFilter = Array<string | RegExp>;
-const stringMatches = (s: string, filter: CodeFilter) =>
-    filter.every(f =>
-        typeof f === "string"
-            ? s.includes(f)
-            : f.test(s)
-    );
+// we need to have our own because the one in webpack returns the first with no handling of more than one module
 function findModuleId(find: CodeFilter) {
     const matches: string[] = [];
     for (const id in wreq.m) {
