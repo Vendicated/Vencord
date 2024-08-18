@@ -78,7 +78,7 @@ export type FilterFn = ((module: ModuleExports) => boolean) & {
     $$vencordIsFactoryFilter?: boolean;
 };
 
-const stringMatches = (s: string, filter: CodeFilter) =>
+export const stringMatches = (s: string, filter: CodeFilter) =>
     filter.every(f =>
         typeof f === "string"
             ? s.includes(f)
@@ -885,8 +885,10 @@ export const cacheFindBulk = traceFunction("cacheFindBulk", function cacheFindBu
  * Find the id of the first already loaded module factory that includes all the given code.
  */
 export const cacheFindModuleId = traceFunction("cacheFindModuleId", function cacheFindModuleId(...code: CodeFilter) {
+    const parsedCode = code.map(canonicalizeMatch);
+
     for (const id in wreq.m) {
-        if (stringMatches(String(wreq.m[id]), code)) return id;
+        if (stringMatches(String(wreq.m[id]), parsedCode)) return id;
     }
 
     const err = new Error("Didn't find module with code(s):\n" + code.join("\n"));
@@ -916,6 +918,8 @@ export const cacheFindModuleFactory = traceFunction("cacheFindModuleFactory", fu
  * @returns Mapping of found modules
  */
 export function search(...code: CodeFilter) {
+    code = code.map(canonicalizeMatch);
+
     const results: WebpackRequire["m"] = {};
     const factories = wreq.m;
 
