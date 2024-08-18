@@ -49,8 +49,8 @@ export default definePlugin({
         const [isHovering, setIsHovering] = useState(false);
 
         const avatar = (
-        <img src={user.getAvatarURL(SelectedGuildStore.getGuildId(), 16, isHovering)} className="vc-mentionAvatars-avatar" />
-    );
+            <img src={user.getAvatarURL(SelectedGuildStore.getGuildId(), 16, isHovering)} className="vc-mentionAvatars-avatar" />
+        );
 
         if (!user) return <>{getUsernameString(username)}</>;
 
