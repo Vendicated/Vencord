@@ -9,7 +9,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "StickerPaste",
-    description: "When picking a sticker, it inserts it into the chatpox instead of sending it instantly.",
+    description: "When picking a sticker, it inserts it into the chatbox instead of sending it instantly.",
     authors: [Devs.ImBanana],
 
     patches: [{
