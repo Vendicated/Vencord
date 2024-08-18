@@ -127,7 +127,9 @@ const ActivityTooltip = ({ activity, application, user }: Readonly<{ activity: A
     );
 };
 
-function getActivityApplication({ application_id }: Activity) {
+function getActivityApplication(activity: Activity | null) {
+    if (!activity) return undefined;
+    const { application_id } = activity;
     if (!application_id) return undefined;
     let application = ApplicationStore.getApplication(application_id);
     if (!application && fetchedApplications.has(application_id)) {
@@ -309,7 +311,7 @@ export default definePlugin({
         return null;
     },
 
-    showAllActivitiesComponent({ activity, user, ...props }: Readonly<{ activity: Activity; user: User; application: Application; type: string; }>) {
+    showAllActivitiesComponent({ activity, user, ...props }: Readonly<{ activity: Activity | null; user: User; application: Application; type: string; }>) {
         const [currentActivity, setCurrentActivity] = useState<Activity | null>(
             activity?.type !== 4 ? activity! : null
         );
@@ -340,7 +342,7 @@ export default definePlugin({
         if (settings.store.allActivitiesStyle === "carousel") {
             return (
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                    {currentActivity?.id === activity?.id ? (
+                    {activity && currentActivity?.id === activity?.id ? (
                         <ActivityView
                             activity={currentActivity}
                             user={user}
