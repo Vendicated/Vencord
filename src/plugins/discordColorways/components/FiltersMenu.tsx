@@ -1,10 +1,9 @@
 import { SortIcon } from "./Icons";
-import { useRef, useState, useEffect } from "..";
+import { useState, useEffect } from "..";
 import { SortOptions } from "../types";
 import { MouseEvent } from "react";
 
 export default function ({ sort, onSortChange }: { sort: SortOptions, onSortChange: (newSort: SortOptions) => void; }) {
-    const menuProps = useRef(null);
     const [pos, setPos] = useState({ x: 0, y: 0 });
     const [showMenu, setShowMenu] = useState(false);
 
@@ -34,7 +33,7 @@ export default function ({ sort, onSortChange }: { sort: SortOptions, onSortChan
     }
 
     return <>
-        {showMenu ? <nav className="colorwaysContextMenu" ref={menuProps} style={{
+        {showMenu ? <nav className="colorwaysContextMenu" style={{
             position: "fixed",
             top: `${pos.y}px`,
             left: `${pos.x}px`

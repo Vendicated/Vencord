@@ -4,6 +4,8 @@ import { colorToHex, hexToString } from "../utils";
 import CreatorModal from "./CreatorModal";
 import { ColorwayCSS } from "../colorwaysAPI";
 
+export let changeThemeIDCard: (theme: string) => void = () => { };
+
 export default function ({ props }) {
     const [theme, setTheme] = useState("discord");
 
@@ -11,7 +13,11 @@ export default function ({ props }) {
         async function load() {
             setTheme(await DataStore.get("colorwaysPluginTheme") as string);
         }
+        changeThemeIDCard = (theme) => setTheme(theme);
         load();
+        return () => {
+            changeThemeIDCard = () => { };
+        };
     }, []);
     if (String(props.message.content).match(/colorway:[0-9a-f]{0,100}/)) {
         return <div className="colorwayIDCard" data-theme={theme}>

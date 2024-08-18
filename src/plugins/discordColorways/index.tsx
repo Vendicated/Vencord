@@ -5,8 +5,6 @@
  */
 
 // Plugin Imports
-import AutoColorwaySelector from "./components/AutoColorwaySelector";
-import ColorPickerModal from "./components/ColorPicker";
 import ColorwaysButton from "./components/ColorwaysButton";
 import CreatorModal from "./components/CreatorModal";
 import Selector from "./components/Selector";
@@ -15,12 +13,10 @@ import SettingsPage from "./components/SettingsTabs/SettingsPage";
 import SourceManager from "./components/SettingsTabs/SourceManager";
 import Store from "./components/SettingsTabs/Store";
 import Spinner from "./components/Spinner";
-import { defaultColorwaySource, nullColorwayObj } from "./constants";
-import { getAutoPresets } from "./css";
+import { defaultColorwaySource } from "./constants";
 import style from "./style.css?managed";
 import discordTheme from "./theme.discord.css?managed";
-import { ColorPickerProps, ColorwayObject, ModalProps } from "./types";
-import { colorToHex } from "./utils";
+import { ColorPickerProps, ColorwayObject } from "./types";
 
 // Mod-specific imports
 
@@ -44,6 +40,7 @@ import { connect } from "./wsClient";
 import { ColorwayCSS } from "./colorwaysAPI";
 import { FluxEvents as $FluxEvents } from "@webpack/types";
 import PCSMigrationModal from "./components/PCSMigrationModal";
+import defaultsLoader from "./defaultsLoader";
 
 export const DataStore = $DataStore;
 export type ReactNode = $ReactNode;
@@ -71,103 +68,10 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
     return <Spinner className="colorways-creator-module-warning" />;
 };
 
-(async function () {
-    const [
-        customColorways,
-        colorwaySourceFiles,
-        showColorwaysButton,
-        onDemandWays,
-        onDemandWaysTintedText,
-        onDemandWaysDiscordSaturation,
-        onDemandWaysOsAccentColor,
-        activeColorwayObject,
-        colorwaysPluginTheme,
-        colorwaysBoundManagers
-    ] = await DataStore.getMany([
-        "customColorways",
-        "colorwaySourceFiles",
-        "showColorwaysButton",
-        "onDemandWays",
-        "onDemandWaysTintedText",
-        "onDemandWaysDiscordSaturation",
-        "onDemandWaysOsAccentColor",
-        "activeColorwayObject",
-        "colorwaysPluginTheme",
-        "colorwaysBoundManagers"
-    ]);
-
-    const defaults = [
-        {
-            name: "showColorwaysButton",
-            value: showColorwaysButton,
-            default: false
-        },
-        {
-            name: "onDemandWays",
-            value: onDemandWays,
-            default: false
-        },
-        {
-            name: "onDemandWaysTintedText",
-            value: onDemandWaysTintedText,
-            default: true
-        },
-        {
-            name: "onDemandWaysDiscordSaturation",
-            value: onDemandWaysDiscordSaturation,
-            default: false
-        },
-        {
-            name: "onDemandWaysOsAccentColor",
-            value: onDemandWaysOsAccentColor,
-            default: false
-        },
-        {
-            name: "colorwaysBoundManagers",
-            value: colorwaysBoundManagers,
-            default: []
-        },
-        {
-            name: "activeColorwayObject",
-            value: activeColorwayObject,
-            default: nullColorwayObj
-        },
-        {
-            name: "colorwaysPluginTheme",
-            value: colorwaysPluginTheme,
-            default: "discord"
-        }
-    ];
-
-    defaults.forEach(({ name, value, default: def }) => {
-        if (!value) DataStore.set(name, def);
-    });
-
-    if (customColorways) {
-        if (!customColorways[0].colorways) {
-            DataStore.set("customColorways", [{ name: "Custom", colorways: customColorways }]);
-        }
-    } else {
-        DataStore.set("customColorways", []);
-    }
-
-    if (colorwaySourceFiles) {
-        if (typeof colorwaySourceFiles[0] === "string") {
-            DataStore.set("colorwaySourceFiles", colorwaySourceFiles.map((sourceURL: string, i: number) => {
-                return { name: sourceURL === defaultColorwaySource ? "Project Colorway" : `Source #${i}`, url: sourceURL === "https://raw.githubusercontent.com/DaBluLite/ProjectColorway/master/index.json" ? defaultColorwaySource : sourceURL };
-            }));
-        }
-    } else {
-        DataStore.set("colorwaySourceFiles", [{
-            name: "Project Colorway",
-            url: defaultColorwaySource
-        }]);
-    }
-
-})();
+defaultsLoader();
 
 export const PluginProps = {
-    pluginVersion: "6.0.0",
+    pluginVersion: "6.1.0",
     clientMod: "Vencord",
     UIVersion: "2.0.0",
     creatorVersion: "1.20"
@@ -182,26 +86,7 @@ export default definePlugin({
     pluginVersion: PluginProps.pluginVersion,
     toolboxActions: {
         "Open Colorway Creator": () => openModal(props => <CreatorModal modalProps={props} />),
-        "Open Color Stealer": () => openModal(props => <ColorPickerModal modalProps={props} />),
         "Open Settings": () => SettingsRouter.open("ColorwaysSettings"),
-        "Open On-Demand Settings": () => SettingsRouter.open("ColorwaysOnDemand"),
-        "Manage Colorways...": () => SettingsRouter.open("ColorwaysManagement"),
-        "Change Auto Colorway Preset": async () => {
-            const [
-                activeAutoPreset,
-                actveColorwayID
-            ] = await DataStore.getMany([
-                "activeAutoPreset",
-                "actveColorwayID"
-            ]);
-            openModal((props: ModalProps) => <AutoColorwaySelector autoColorwayId={activeAutoPreset} modalProps={props} onChange={autoPresetId => {
-                if (actveColorwayID === "Auto") {
-                    const demandedColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")))[autoPresetId].preset();
-                    DataStore.set("actveColorway", demandedColorway);
-                    ColorwayCSS.set(demandedColorway);
-                }
-            }} />);
-        }
     },
     patches: [
         // Credits to Kyuuhachi for the BetterSettings plugin patches

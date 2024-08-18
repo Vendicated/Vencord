@@ -297,3 +297,38 @@
 [data-theme="discord"] .colorwaysConflictingColors-warning {
     color: var(--text-normal);
 }
+
+[data-theme="discord"] .colorwaysManagerConnectionMenu {
+    transition:
+        transform 0.1s ease,
+        opacity 0.1s ease !important;
+    transform: scale(0.95);
+    transform-origin: 0% 50%;
+    background-color: var(--background-floating);
+    box-shadow: var(--shadow-high);
+    color: var(--text-normal);
+    border: none;
+    border-radius: 5px;
+}
+
+.colorwayIDCard[data-theme="discord"] > .colorwayMessage {
+    border-radius: 5px;
+    border: none;
+    background-color: var(--background-secondary);
+}
+
+.theme-dark .colorwayIDCard[data-theme="discord"] .colorwayMessage {
+    background: hsl(var(--primary-630-hsl) / 60%);
+}
+
+.theme-light .colorwayIDCard[data-theme="discord"] .colorwayMessage {
+    background: hsl(var(--primary-100-hsl) / 60%);
+}
+
+[data-theme="discord"] .colorwaysManagerConnectionValue {
+    color: var(--text-muted);
+}
+
+[data-theme="discord"] .colorwaysManagerConnectionValue > b {
+    color: var(--text-normal);
+}

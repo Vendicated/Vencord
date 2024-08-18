@@ -9,6 +9,7 @@ import { knownThemeVars } from "../constants";
 import { generateCss, getPreset, gradientPresetIds, PrimarySatDiffs, pureGradientBase } from "../css";
 import { Colorway, ModalProps } from "../types";
 import { colorToHex, getHex, HexToHSL, hexToString } from "../utils";
+import { updateRemoteSources } from "../wsClient";
 import ColorwayCreatorSettingsModal from "./ColorwayCreatorSettingsModal";
 import ConflictingColorsModal from "./ConflictingColorsModal";
 import InputColorwayIdModal from "./InputColorwayIdModal";
@@ -16,7 +17,7 @@ import SaveColorwayModal from "./SaveColorwayModal";
 import ThemePreviewCategory from "./ThemePreview";
 export default function ({
     modalProps,
-    loadUIProps,
+    loadUIProps = () => new Promise(() => { }),
     colorwayID
 }: {
     modalProps: ModalProps;
@@ -280,7 +281,8 @@ export default function ({
                         };
                         openModal(props => <SaveColorwayModal modalProps={props} colorways={[customColorway]} onFinish={() => {
                             modalProps.onClose();
-                            loadUIProps!();
+                            loadUIProps();
+                            updateRemoteSources();
                         }} />);
                     }}
                 >

@@ -1,28 +1,50 @@
 import { DataStore } from ".";
 import { ColorwayCSS } from "./colorwaysAPI";
-import { updateWS } from "./components/Selector";
+import { updateBoundKeyMain, updateWSMain } from "./components/MainModal";
+import { updateActiveColorway, updateManagerRole, updateWS as updateWSSelector } from "./components/Selector";
 import { nullColorwayObj } from "./constants";
 import { generateCss } from "./css";
 import { ColorwayObject } from "./types";
 import { colorToHex } from "./utils";
 
 export let wsOpen = false;
-
 export let boundKey: { [managerKey: string]: string; } | null = null;
-
 export let hasManagerRole: boolean = false;
 
 export let sendColorway: (obj: ColorwayObject) => void = () => { };
-
 export let requestManagerRole: () => void = () => { };
+export let updateRemoteSources: () => void = () => { };
+export let closeWS: () => void = () => { };
+export let restartWS: () => void = () => connect();
+export let updateShouldAutoconnect: (shouldAutoconnect: boolean) => void = () => connect();
+
+function updateWS(status: boolean) {
+    updateWSSelector(status);
+    updateWSMain(status);
+}
+
+function updateBoundKey(bound: { [managerKey: string]: string; }) {
+    updateBoundKeyMain(bound);
+}
 
 export function connect() {
     var ws: WebSocket | null = new WebSocket('ws://localhost:6124');
+
+    updateShouldAutoconnect = (shouldAutoconnect) => {
+        if (shouldAutoconnect && ws?.readyState == ws?.CLOSED) connect();
+    };
+
     ws.onopen = function () {
         wsOpen = true;
         hasManagerRole = false;
         updateWS(true);
     };
+
+    restartWS = () => {
+        ws?.close();
+        connect();
+    };
+    closeWS = () => ws?.close();
 
     ws.onmessage = function (e) {
         const data: {
@@ -36,6 +58,7 @@ export function connect() {
                     if (data.active.id == null) {
                         DataStore.set("activeColorwayObject", nullColorwayObj);
                         ColorwayCSS.remove();
+                        updateActiveColorway(nullColorwayObj);
                     } else {
                         const demandedColorway = generateCss(
                             colorToHex("#" + data.active.colors.primary || "#313338").replace("#", ""),
@@ -45,11 +68,13 @@ export function connect() {
                         );
                         ColorwayCSS.set(demandedColorway);
                         DataStore.set("activeColorwayObject", { ...data.active, css: demandedColorway });
+                        updateActiveColorway({ ...data.active, css: demandedColorway });
                     }
                     return;
                 case "remove-colorway":
                     DataStore.set("activeColorwayObject", nullColorwayObj);
                     ColorwayCSS.remove();
+                    updateActiveColorway(nullColorwayObj);
                     return;
                 case "manager-connection-established":
                     DataStore.get("colorwaysBoundManagers").then((boundManagers: { [managerKey: string]: string; }[]) => {
@@ -64,6 +89,7 @@ export function connect() {
                                 DataStore.set("colorwaysBoundManagers", [...boundManagers, id]);
                                 boundKey = id;
                             }
+                            updateBoundKey(typeof boundKey == "string" ? JSON.parse(boundKey) : boundKey);
                             ws?.send(JSON.stringify({
                                 type: "client-sync-established",
                                 boundKey,
@@ -95,14 +121,30 @@ export function connect() {
                                 type: "complication:manager-role:request",
                                 boundKey
                             }));
+                            updateRemoteSources = () => DataStore.getMany([
+                                "colorwaySourceFiles",
+                                "customColorways"
+                            ]).then(([
+                                colorwaySourceFiles,
+                                customColorways
+                            ]) => {
+                                ws?.send(JSON.stringify({
+                                    type: "complication:remote-sources:init",
+                                    boundKey,
+                                    online: colorwaySourceFiles,
+                                    offline: customColorways
+                                }));
+                            });
                         }
                     });
                     return;
                 case "complication:manager-role:granted":
                     hasManagerRole = true;
+                    updateManagerRole(true);
                     return;
                 case "complication:manager-role:revoked":
                     hasManagerRole = false;
+                    updateManagerRole(false);
                     return;
                 case "complication:remote-sources:update-request":
                     DataStore.getMany([
@@ -131,6 +173,9 @@ export function connect() {
         hasManagerRole = false;
         sendColorway = () => { };
         requestManagerRole = () => { };
+        updateRemoteSources = () => { };
+        restartWS = () => connect();
+        closeWS = () => { };
         try {
             ws.close();
         } catch (e) {
@@ -139,7 +184,15 @@ export function connect() {
         ws = null;
         wsOpen = false;
         updateWS(false);
-        setTimeout(() => connect(), 3000);
+        DataStore.getMany([
+            "colorwaysManagerAutoconnectPeriod",
+            "colorwaysManagerDoAutoconnect"
+        ]).then(([
+            colorwaysManagerAutoconnectPeriod,
+            colorwaysManagerDoAutoconnect
+        ]) => {
+            if (colorwaysManagerDoAutoconnect || true) setTimeout(() => connect(), colorwaysManagerAutoconnectPeriod || 3000);
+        });
     };
 
     ws.onerror = function (e) {
@@ -147,11 +200,22 @@ export function connect() {
         boundKey = null;
         sendColorway = () => { };
         requestManagerRole = () => { };
+        updateRemoteSources = () => { };
+        restartWS = () => connect();
+        closeWS = () => { };
         hasManagerRole = false;
         ws.close();
         ws = null;
         wsOpen = false;
         updateWS(false);
-        setTimeout(() => connect(), 3000);
+        DataStore.getMany([
+            "colorwaysManagerAutoconnectPeriod",
+            "colorwaysManagerDoAutoconnect"
+        ]).then(([
+            colorwaysManagerAutoconnectPeriod,
+            colorwaysManagerDoAutoconnect
+        ]) => {
+            if (colorwaysManagerDoAutoconnect || true) setTimeout(() => connect(), colorwaysManagerAutoconnectPeriod || 3000);
+        });
     };
 }

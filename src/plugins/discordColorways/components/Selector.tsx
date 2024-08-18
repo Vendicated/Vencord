@@ -7,7 +7,7 @@ import { colorToHex, getHex, stringToHex } from "../utils";
 import AutoColorwaySelector from "./AutoColorwaySelector";
 import CreatorModal from "./CreatorModal";
 import InfoModal from "./InfoModal";
-import { wsOpen, sendColorway, hasManagerRole, requestManagerRole } from "../wsClient";
+import { wsOpen, sendColorway, hasManagerRole, requestManagerRole, updateRemoteSources } from "../wsClient";
 import { ColorwayCSS } from "../colorwaysAPI";
 import { useState, useEffect, openModal } from "../";
 import UseRepainterThemeModal from "./UseRepainterThemeModal";
@@ -15,11 +15,9 @@ import FiltersMenu from "./FiltersMenu";
 import SourcesMenu from "./SourcesMenu";
 import ReloadButton from "./ReloadButton";
 
-export function updateWS(status: boolean) {
-    if (updateWS_internal) updateWS_internal(status);
-}
-
-let updateWS_internal: (status: boolean) => void | undefined;
+export let updateWS: (status: boolean) => void = () => { };
+export let updateManagerRole: (hasManager: boolean) => void = () => { };
+export let updateActiveColorway: (active: ColorwayObject) => void = () => { };
 
 export default function ({
     settings = { selectorType: "normal" },
@@ -39,17 +37,28 @@ export default function ({
     const [errorCode, setErrorCode] = useState<number>(0);
     const [wsConnected, setWsConnected] = useState(wsOpen);
     const [theme, setTheme] = useState("discord");
+    const [isManager, setManager] = useState<boolean>(hasManagerRole);
 
     useEffect(() => {
         async function load() {
             setTheme(await DataStore.get("colorwaysPluginTheme") as string);
         }
         load();
-    }, []);
-
-    updateWS_internal = (status) => {
-        setWsConnected(status);
-    };
+        updateWS = (status) => {
+            setWsConnected(status);
+        };
+        console.log(hasManagerRole);
+        updateManagerRole = (hasManager) => {
+            setManager(hasManager);
+            console.log(hasManager);
+        };
+        updateActiveColorway = setActiveColorwayObject;
+        return () => {
+            updateWS = () => { };
+            updateManagerRole = () => { };
+            updateActiveColorway = () => { };
+        };
+    }, [isManager]);
 
     const filters = [
         {
@@ -112,10 +121,8 @@ export default function ({
     useEffect(() => { loadUI(); }, [searchValue]);
 
     function Header({ children }: { children: ReactNode; }) {
-        if (!wsConnected) {
-            if (hasTheme) return <div className="colorwayModal-selectorHeader" data-theme={theme}>{children}</div>;
-            else return <div className="colorwayModal-selectorHeader">{children}</div>;
-        } else return null;
+        if (hasTheme) return <div className="colorwayModal-selectorHeader" data-theme={theme}>{children}</div>;
+        else return <div className="colorwayModal-selectorHeader">{children}</div>;
     }
 
     function Container({ children }: { children: ReactNode; }) {
@@ -123,14 +130,14 @@ export default function ({
         else return <div style={{ maxHeight: settings.selectorType === "multiple-selection" ? "50%" : "unset" }} className="ColorwaySelectorWrapper">{children}</div>;
     }
 
-    return <>{settings.selectorType !== "preview" ? <Header>
+    return <>{(settings.selectorType !== "preview" && (!wsConnected || (wsConnected && isManager))) ? <Header>
         <input
             type="text"
             className="colorwaySelector-search"
             placeholder="Search for Colorways..."
             value={searchValue}
             autoFocus
-            onInput={(e) => setSearchValue(e.currentTarget.value)}
+            onInput={({ currentTarget: { value } }) => setSearchValue(value)}
         />
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <ReloadButton onClick={() => {
@@ -187,7 +194,7 @@ export default function ({
             }} />
         </div>
     </Header> : <></>}
-        {(wsConnected && settings.selectorType == "normal" && !hasManagerRole) ? <span style={{
+        {(wsConnected && settings.selectorType == "normal" && !isManager) ? <span style={{
             color: "#fff",
             margin: "auto",
             fontWeight: "bold",
@@ -250,7 +257,7 @@ export default function ({
                     id="colorway-Auto"
                     aria-checked={activeColorwayObject.id === "Auto" && activeColorwayObject.source === null}
                     onClick={async () => {
-                        if (hasManagerRole) {
+                        if (isManager) {
                             Toasts.show({
                                 message: "Cannot use Auto colorway while on manager mode",
                                 type: 2,
@@ -394,7 +401,7 @@ export default function ({
                                                 "onDemandWaysOsAccentColor"
                                             ]);
                                             if (activeColorwayObject.id === color.name && activeColorwayObject.source === color.source) {
-                                                if (hasManagerRole) {
+                                                if (isManager) {
                                                     sendColorway(nullColorwayObj);
                                                 } else {
                                                     DataStore.set("activeColorwayObject", nullColorwayObj);
@@ -402,7 +409,7 @@ export default function ({
                                                     ColorwayCSS.remove();
                                                 }
                                             } else {
-                                                if (hasManagerRole) {
+                                                if (isManager) {
                                                     const newObj: ColorwayObject = {
                                                         id: color.name,
                                                         sourceType: color.type,
@@ -536,6 +543,7 @@ export default function ({
                                                 setActiveColorwayObject(nullColorwayObj);
                                                 ColorwayCSS.remove();
                                             }
+                                            updateRemoteSources();
                                         }}
                                     >
                                         <DeleteIcon width={20} height={20} />

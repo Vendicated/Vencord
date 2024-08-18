@@ -1517,24 +1517,15 @@
 
 .colorwayMessage {
     padding: 20px;
-    border: 1px solid;
-    border-radius: 5px;
+    border: 1px solid #a6a6a6f0;
+    border-radius: 8px;
+    background-color: #090909;
     display: flex;
 }
 
 .colorwayMessage-contents {
     display: flex;
     flex-direction: column;
-}
-
-.theme-dark .colorwayMessage {
-    background: hsl(var(--primary-630-hsl) / 60%);
-    border-color: hsl(var(--primary-630-hsl) / 90%);
-}
-
-.theme-light .colorwayMessage {
-    background: hsl(var(--primary-100-hsl) / 60%);
-    border-color: hsl(var(--primary-200-hsl) / 30%);
 }
 
 .colorwaysLoadingModal,
@@ -1719,9 +1710,6 @@
 }
 
 .colorwayIDCard {
-    background-color: #090909;
-    border-radius: 8px;
-    border: 1px solid #a6a6a6f0;
     display: flex;
     flex-direction: column;
     gap: 1em;
@@ -1817,4 +1805,39 @@
     line-height: 20px;
     display: flex;
     flex-direction: column;
+}
+
+.colorwaysManagerConnectionMenu {
+    transform: translateX(-20px);
+    opacity: 0;
+    border: 1px solid #a6a6a6f0;
+    background-color: #090909;
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 12px;
+    color: #fff;
+    pointer-events: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+.colorwaysManagerConnectionMenu.visible {
+    opacity: 1;
+    transform: none;
+    pointer-events: all;
+}
+
+.colorwaysManagerConnectionValue {
+    color: #80868e;
+    font-weight: 500;
+    font-size: 12;
+}
+
+.colorwaysManagerConnectionValue > b {
+    color: #a0a6ae;
 }

@@ -10,7 +10,14 @@ import { defaultColorwaySource, fallbackColorways, nullColorwayObj } from "../..
 import { Colorway } from "../../types";
 import Setting from "../Setting";
 import Switch from "../Switch";
-import { changeTheme } from "../MainModal";
+import { changeTheme as changeThemeMain } from "../MainModal";
+import { connect, updateShouldAutoconnect } from "../../wsClient";
+import { changeThemeIDCard } from "../ColorwayID";
+
+function changeTheme(theme: string) {
+    changeThemeMain(theme);
+    changeThemeIDCard(theme);
+}
 
 export default function ({
     hasTheme = false
@@ -21,10 +28,12 @@ export default function ({
     const [customColorways, setCustomColorways] = useState<Colorway[]>([]);
     const [colorsButtonVisibility, setColorsButtonVisibility] = useState<boolean>(false);
     const [theme, setTheme] = useState("discord");
+    const [shouldAutoconnect, setShouldAutoconnect] = useState<"1" | "2">("1");
 
     useEffect(() => {
         async function load() {
             setTheme(await DataStore.get("colorwaysPluginTheme") as string);
+            setShouldAutoconnect(await DataStore.get("colorwaysManagerDoAutoconnect") as "1" | "2");
         }
         load();
     }, []);
@@ -78,6 +87,7 @@ export default function ({
                 }} />
             <span className="colorwaysNote">Shows a button on the top of the servers list that opens a colorway selector modal.</span>
         </Setting>
+        <span className="colorwaysModalSectionHeader">Appearance</span>
         <Setting divider>
             <div style={{
                 display: "flex",
@@ -100,6 +110,53 @@ export default function ({
                     <option value="discord">Discord (Default)</option>
                     <option value="colorish">Colorish</option>
                 </select>
+            </div>
+        </Setting>
+        <span className="colorwaysModalSectionHeader">Manager</span>
+        <Setting>
+            <div style={{
+                display: "flex",
+                flexDirection: "row",
+                width: "100%",
+                alignItems: "center",
+                cursor: "pointer"
+            }}>
+                <label className="colorwaySwitch-label">Automatically retry to connect to Manager</label>
+                <select
+                    className="colorwaysPillButton"
+                    style={{ border: "none" }}
+                    onChange={({ currentTarget: { value } }) => {
+                        if (value == "1") {
+                            DataStore.set("colorwaysManagerDoAutoconnect", true);
+                            updateShouldAutoconnect(true);
+                        } else {
+                            DataStore.set("colorwaysManagerDoAutoconnect", false);
+                            updateShouldAutoconnect(false);
+                        }
+                    }}
+                    value={shouldAutoconnect}
+                >
+                    <option value="1">On (Default)</option>
+                    <option value="2">Off</option>
+                </select>
+            </div>
+        </Setting>
+        <Setting divider>
+            <div style={{
+                display: "flex",
+                flexDirection: "row",
+                width: "100%",
+                alignItems: "center",
+                cursor: "pointer"
+            }}>
+                <label className="colorwaySwitch-label">Try to connect to Manager manually</label>
+                <button
+                    className="colorwaysPillButton"
+                    onClick={() => connect()}
+                    value={shouldAutoconnect}
+                >
+                    Try to connect...
+                </button>
             </div>
         </Setting>
         <Setting divider>
@@ -127,7 +184,9 @@ export default function ({
                             ["onDemandWaysOsAccentColor", false],
                             ["activeColorwayObject", nullColorwayObj],
                             ["colorwaysPluginTheme", "discord"],
-                            ["colorwaysBoundManagers", []]
+                            ["colorwaysBoundManagers", []],
+                            ["colorwaysManagerAutoconnectPeriod", 3000],
+                            ["colorwaysManagerDoAutoconnect", true]
                         ]);
                     }}
                 >

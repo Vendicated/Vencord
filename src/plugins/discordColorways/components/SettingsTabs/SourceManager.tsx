@@ -11,6 +11,7 @@ import { defaultColorwaySource } from "../../constants";
 import { Colorway, ModalProps } from "../../types";
 import TabBar from "../TabBar";
 import { chooseFile, saveFile } from "../../utils";
+import { updateRemoteSources } from "../../wsClient";
 
 export function StoreNameModal({ modalProps, originalName, onFinish, conflicting }: { modalProps: ModalProps, originalName: string, onFinish: (newName: string) => Promise<void>, conflicting: boolean; }) {
     const [error, setError] = useState<string>("");
@@ -176,6 +177,7 @@ function OfflineTab() {
     useEffect(() => {
         (async function () {
             setCustomColorwayStores(await DataStore.get("customColorways") as { name: string, colorways: Colorway[]; }[]);
+            updateRemoteSources();
         })();
     }, []);
     return <div className="colorwaySourceTab">
@@ -197,16 +199,19 @@ function OfflineTab() {
                                 openModal(props => <StoreNameModal conflicting modalProps={props} originalName={JSON.parse(reader.result as string).name} onFinish={async e => {
                                     await DataStore.set("customColorways", [...await DataStore.get("customColorways"), { name: e, colorways: JSON.parse(reader.result as string).colorways }]);
                                     setCustomColorwayStores(await DataStore.get("customColorways") as { name: string, colorways: Colorway[]; }[]);
+                                    updateRemoteSources();
                                 }} />);
                             } else {
                                 await DataStore.set("customColorways", [...await DataStore.get("customColorways"), JSON.parse(reader.result as string)]);
                                 setCustomColorwayStores(await DataStore.get("customColorways") as { name: string, colorways: Colorway[]; }[]);
+                                updateRemoteSources();
                             }
                         } catch (err) {
                             console.error("DiscordColorways: " + err);
                         }
                     };
                     reader.readAsText(file);
+                    updateRemoteSources();
                 }}
             >
                 <ImportIcon width={14} height={14} />
@@ -220,6 +225,7 @@ function OfflineTab() {
                         await DataStore.set("customColorways", [...await DataStore.get("customColorways"), { name: e, colorways: [] }]);
                         setCustomColorwayStores(await DataStore.get("customColorways") as { name: string, colorways: Colorway[]; }[]);
                         props.onClose();
+                        updateRemoteSources();
                     }} />);
                 }}>
                 <svg
@@ -270,6 +276,7 @@ function OfflineTab() {
                             });
                             DataStore.set("customColorways", sourcesArr);
                             setCustomColorwayStores(sourcesArr);
+                            updateRemoteSources();
                         }}
                     >
                         <DeleteIcon width={20} height={20} /> Remove
@@ -286,6 +293,7 @@ function OnlineTab() {
     useEffect(() => {
         (async function () {
             setColorwaySourceFiles(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]);
+            updateRemoteSources();
         })();
     }, []);
     return <div className="colorwaySourceTab">
@@ -300,6 +308,7 @@ function OnlineTab() {
                     openModal(props => <AddOnlineStoreModal modalProps={props} onFinish={async (name, url) => {
                         await DataStore.set("colorwaySourceFiles", [...await DataStore.get("colorwaySourceFiles"), { name: name, url: url }]);
                         setColorwaySourceFiles([...await DataStore.get("colorwaySourceFiles"), { name: name, url: url }]);
+                        updateRemoteSources();
                     }} />);
                 }}>
                 <svg
@@ -382,6 +391,7 @@ function OnlineTab() {
                                         const res = await fetch(colorwaySourceFile.url);
                                         const data = await res.json();
                                         DataStore.set("customColorways", [...await DataStore.get("customColorways"), { name: e, colorways: data.colorways || [] }]);
+                                        updateRemoteSources();
                                     }} />);
                                 }}
                             >
@@ -392,6 +402,7 @@ function OnlineTab() {
                                 onClick={async () => {
                                     DataStore.set("colorwaySourceFiles", (await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).filter((src, ii) => ii !== i));
                                     setColorwaySourceFiles((await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).filter((src, ii) => ii !== i));
+                                    updateRemoteSources();
                                 }}
                             >
                                 <DeleteIcon width={14} height={14} /> Remove
