@@ -17,7 +17,7 @@
 */
 
 // Import required modules and components
-import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -73,8 +73,6 @@ const settings = definePluginSettings({
 let settingsArray: Array<any> = [];
 let cssArray: Array<any> = [];
 
-// Define the Vencord plugin
-migratePluginSettings("EquicordCSS", "EquicordBuiltIn");
 export default definePlugin({
     name: "EquicordCSS",
     description: "CSS for Equicord users. You will need to look at the settings.",

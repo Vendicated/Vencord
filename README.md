@@ -37,7 +37,7 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - BetterUserArea by Samwich
 - BlockKeywords by catcraft
 - BlockKrsip by D3SOX
-- BypassDND by Inbestigator
+- BypassStatus by Inbestigator and thororen
 - ChannelTabs by TheSun, TheKodeToad, keifufu, Nickyux
 - CleanChannelName by AutumnVN
 - ClientSideBlock by Samwich

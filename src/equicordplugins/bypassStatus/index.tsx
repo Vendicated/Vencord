@@ -6,7 +6,7 @@
 
 import { type NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Notifications } from "@api/index";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -119,11 +119,35 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Whether the notification sound should be played",
         default: true,
+    },
+    statusToUse: {
+        type: OptionType.SELECT,
+        description: "Status to use for whitelist",
+        options: [
+            {
+                label: "Online",
+                value: "online",
+            },
+            {
+                label: "Idle",
+                value: "idle",
+            },
+            {
+                label: "Do Not Disturb",
+                value: "dnd",
+                default: true
+            },
+            {
+                label: "Invisible",
+                value: "invisible",
+            }
+        ]
     }
 });
 
+migratePluginSettings("BypassStatus", "BypassDND");
 export default definePlugin({
-    name: "BypassDND",
+    name: "BypassStatus",
     description: "Still get notifications from specific sources when in do not disturb mode. Right-click on users/channels/guilds to set them to bypass do not disturb mode.",
     authors: [Devs.Inbestigator],
     flux: {
@@ -132,7 +156,7 @@ export default definePlugin({
                 const currentUser = UserStore.getCurrentUser();
                 const userStatus = await PresenceStore.getStatus(currentUser.id);
                 const currentChannelId = getCurrentChannel()?.id ?? "0";
-                if (message.state === "SENDING" || message.content === "" || message.author.id === currentUser.id || (channelId === currentChannelId && WindowStore.isFocused()) || userStatus !== "dnd") {
+                if (message.state === "SENDING" || message.content === "" || message.author.id === currentUser.id || (channelId === currentChannelId && WindowStore.isFocused()) || userStatus !== settings.store.statusToUse) {
                     return;
                 }
                 const mentioned = MessageStore.getMessage(channelId, message.id)?.mentioned;

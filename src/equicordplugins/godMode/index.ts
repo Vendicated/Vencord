@@ -16,12 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { migratePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { PermissionStore } from "@webpack/common";
 
-migratePluginSettings("GodMode", "God Mode");
 export default definePlugin({
     name: "GodMode",
     description: "Get all permissions (client-side).",
