@@ -50,23 +50,7 @@ interface FunctionNode {
     type: "function";
     value: string;
 }
-interface ExtractFindData {
-    extractType: string,
-    findType: string,
-    findArgs: string[];
-}
-interface ExtractData {
-    idOrSearch: string | number;
-    extractType: string;
-}
-enum ExtractResponseType {
-    OK,
-    ERROR,
-    NOT_FOUND
-}
-interface ReloadData {
-    native: boolean;
-}
+
 interface PatchData {
     find: string;
     replacement: {
@@ -125,8 +109,9 @@ function findModuleId(find: CodeFilter) {
 }
 interface SendData {
     type: string,
-    data?: any,
-    status?: number,
+    data: any,
+    ok: boolean;
+    nonce?: number;
 }
 function initWs(isManual = false) {
     let wasConnected = isManual;
@@ -146,7 +131,8 @@ function initWs(isManual = false) {
 
         replyData({
             type: "moduleList",
-            data: JSON.stringify(Object.keys(wreq.m))
+            data: Object.keys(wreq.m),
+            ok: true,
         });
 
         (settings.store.notifyOnAutoConnect || isManual) && showNotification({
@@ -203,12 +189,16 @@ function initWs(isManual = false) {
 
             ws.send(JSON.stringify(data));
         }
+        function replyData<T extends SendData>(data: T) {
+            data.nonce = nonce;
+            ws.send(JSON.stringify(data));
+        }
 
         logger.info("Received Message:", type, "\n", data);
 
         switch (type) {
             case "extract": {
-                const { extractType, idOrSearch } = data as ExtractData;
+                const { extractType, idOrSearch } = data;
                 switch (extractType) {
                     case "id": {
                         console.log("ID!");
@@ -216,17 +206,14 @@ function initWs(isManual = false) {
                         if (typeof idOrSearch === "number")
                             data = wreq.m[idOrSearch]?.toString() || null;
                         else {
-                            throw "fun times";
+                            return reply(`the provided moduleID is not a number. Got: ${typeof idOrSearch}`);
                         }
                         if (!data)
-                            replyData({
-                                type: "extract",
-                                status: ExtractResponseType.NOT_FOUND
-                            });
+                            return reply(`Module(${idOrSearch}) not found`);
                         else
                             replyData({
                                 type: "extract",
-                                status: ExtractResponseType.OK,
+                                ok: true,
                                 data,
                                 moduleNumber: idOrSearch
                             });
@@ -239,18 +226,12 @@ function initWs(isManual = false) {
                             const data = wreq.m[moduleId].toString();
                             replyData({
                                 type: "extract",
-                                status: ExtractResponseType.OK,
+                                ok: true,
                                 data,
-                                moduleNumber: moduleId
+                                moduleNumber: +moduleId
                             });
                         } catch (e) {
-                            if (e instanceof Error)
-                                return void replyData({
-                                    type: "extract",
-                                    status: ExtractResponseType.ERROR,
-                                    data: e.message
-                                });
-                            console.error(e);
+                            reply("Error: " + String(e));
                         }
                         break;
                     }
@@ -291,12 +272,13 @@ function initWs(isManual = false) {
                             if (uniqueResultsCount === 0) throw "No results";
                             if (uniqueResultsCount > 1) throw "Found more than one result! Make this filter more specific";
                             // best name ever
-                            const foundFind = [...results][0].toString();
+                            const foundFind: string = [...results][0].toString();
                             replyData({
                                 type: "extract",
+                                ok: true,
                                 find: true,
                                 data: foundFind,
-                                moduleNumber: findModuleId([foundFind])
+                                moduleNumber: +findModuleId([foundFind])
                             });
                         } catch (err) {
                             return reply("Failed to find: " + err);
@@ -304,21 +286,8 @@ function initWs(isManual = false) {
                         break;
                     }
                     default:
-                        replyData({
-                            type: "extract",
-                            status: ExtractResponseType.ERROR,
-                            data: `Unknown Type: ${extractType}`
-                        });
+                        reply(`Unknown Extract type. Got: ${extractType}`);
                         break;
-                }
-                break;
-            }
-            case "reload": {
-                const { native } = data as ReloadData;
-                if (native) {
-                    VesktopNative;
-                } else {
-                    window.location.reload();
                 }
                 break;
             }
