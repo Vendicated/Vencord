@@ -573,7 +573,7 @@ export function findModuleFactory(...code: CodeFilter) {
 export function webpackDependantLazy<T = any>(factory: () => T, attempts?: number) {
     if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazy", [factory]]);
 
-    return proxyLazy<T>(factory, attempts, `Webpack dependant lazy factory failed:\n\n${factory}`, "Webpack dependant lazy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the lazy.");
+    return proxyLazy<T>(factory, attempts, `Webpack dependant lazy factory failed:\n${factory}`, "Webpack dependant lazy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the lazy.");
 }
 
 /**
@@ -588,11 +588,20 @@ export function webpackDependantLazy<T = any>(factory: () => T, attempts?: numbe
 export function webpackDependantLazyComponent<T extends object = any>(factory: () => any, attempts?: number) {
     if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazyComponent", [factory]]);
 
-    return LazyComponent<T>(factory, attempts, `Webpack dependant LazyComponent factory failed:\n\n${factory}`);
+    return LazyComponent<T>(factory, attempts, `Webpack dependant LazyComponent factory failed:\n${factory}`);
 }
 
 export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/;
 export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
+
+function handleExtractAndLoadChunksError(err: string, code: string | RegExp | CodeFilter, matcher: RegExp) {
+    if (!IS_DEV || devToolsOpen) {
+        logger.warn(err, "Code:", code, "Matcher:", matcher);
+        return false;
+    } else {
+        throw new Error(err);
+    }
+}
 
 /**
  * Extract and load chunks using their entry point.
@@ -606,38 +615,17 @@ export function extractAndLoadChunksLazy(code: string | RegExp | CodeFilter, mat
 
     const extractAndLoadChunks = makeLazy(async () => {
         if (module[SYM_PROXY_INNER_GET] != null && module[SYM_PROXY_INNER_VALUE] == null) {
-            const err = new Error("extractAndLoadChunks: Couldn't find module factory");
-
-            if (!IS_DEV || devToolsOpen) {
-                logger.warn(err, "Code:", code, "Matcher:", matcher);
-                return false;
-            } else {
-                throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-            }
+            return handleExtractAndLoadChunksError("extractAndLoadChunks: Couldn't find module factory", code, matcher);
         }
 
         const match = String(module).match(canonicalizeMatch(matcher));
         if (!match) {
-            const err = new Error("extractAndLoadChunks: Couldn't find chunk loading in module factory code");
-
-            if (!IS_DEV || devToolsOpen) {
-                logger.warn(err, "Code:", code, "Matcher:", matcher);
-                return false;
-            } else {
-                throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-            }
+            return handleExtractAndLoadChunksError("extractAndLoadChunks: Couldn't find chunk loading in module factory code", code, matcher);
         }
 
         const [, rawChunkIds, entryPointId] = match;
         if (Number.isNaN(Number(entryPointId))) {
-            const err = new Error("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array, or the entry point id returned as the second group wasn't a number");
-
-            if (!IS_DEV || devToolsOpen) {
-                logger.warn(err, "Code:", code, "Matcher:", matcher);
-                return false;
-            } else {
-                throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-            }
+            return handleExtractAndLoadChunksError("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array, or the entry point id returned as the second group wasn't a number", code, matcher);
         }
 
         if (rawChunkIds) {
@@ -646,14 +634,7 @@ export function extractAndLoadChunksLazy(code: string | RegExp | CodeFilter, mat
         }
 
         if (wreq.m[entryPointId] == null) {
-            const err = new Error("extractAndLoadChunks: Entry point is not loaded in the module factories, perhaps one of the chunks failed to load");
-
-            if (!IS_DEV || devToolsOpen) {
-                logger.warn(err, "Code:", code, "Matcher:", matcher);
-                return false;
-            } else {
-                throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-            }
+            return handleExtractAndLoadChunksError("extractAndLoadChunks: Entry point is not loaded in the module factories, perhaps one of the chunks failed to load", code, matcher);
         }
 
         wreq(Number(entryPointId));

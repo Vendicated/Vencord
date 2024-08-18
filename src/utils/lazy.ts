@@ -22,7 +22,7 @@ export function makeLazy<T>(factory: () => T, attempts = 5, { isIndirect = false
             tries++;
             cache = factory();
             if (!cache && attempts === tries && !isIndirect) {
-                console.error(`makeLazy factory failed:\n\n${factory}`);
+                console.error(`makeLazy factory failed:\n${factory}`);
             }
         }
 
@@ -76,7 +76,7 @@ const handler: ProxyHandler<any> = {
 export function proxyLazy<T = any>(
     factory: () => T,
     attempts = 5,
-    errMsg: string | (() => string) = `proxyLazy factory failed:\n\n${factory}`,
+    errMsg: string | (() => string) = `proxyLazy factory failed:\n${factory}`,
     primitiveErrMsg = "proxyLazy called on a primitive value.",
     isChild = false
 ): T {
