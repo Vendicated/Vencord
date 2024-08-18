@@ -23,7 +23,7 @@ export const Native = getNative();
 import "./styles.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { definePluginSettings, migratePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
@@ -564,7 +564,6 @@ const contextMenuPath: NavContextMenuPatchCallback = (children, props) => {
     }
 };
 
-migratePluginSettings("MessageLoggerEnhanced", "MLEnhanced");
 export default definePlugin({
     name: "MessageLoggerEnhanced",
     authors: [Devs.Aria],

@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -43,7 +42,6 @@ const keydown = (e: KeyboardEvent) => {
     }
 };
 
-migratePluginSettings("KeyboardSounds", "Keyboard Sounds");
 export default definePlugin({
     name: "KeyboardSounds",
     description: "Adds the Opera GX Keyboard Sounds to Discord",

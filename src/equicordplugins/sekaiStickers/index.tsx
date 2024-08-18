@@ -5,7 +5,7 @@
  */
 
 import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
-import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
@@ -30,7 +30,6 @@ const SekaiStickerChatButton: ChatBarButton = () => {
 };
 
 let IS_FONTS_LOADED = false;
-migratePluginSettings("SekaiStickers", "Sekai Stickers");
 export default definePlugin({
     name: "SekaiStickers",
     description: "Sekai Stickers built in discord originally from github.com/TheOriginalAyaka",

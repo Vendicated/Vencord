@@ -5,7 +5,6 @@
  */
 
 import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { migratePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Menu } from "@webpack/common";
@@ -23,7 +22,6 @@ const Patch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild;
     }
 };
 
-migratePluginSettings("EmojiDumper", "emojiDumper");
 export default definePlugin({
     name: "EmojiDumper",
     description: "Context menu to dump and download a server's emojis.",
