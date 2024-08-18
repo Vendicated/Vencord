@@ -115,7 +115,7 @@ export function proxyInner<T = any>(
 
         // Avoid binding toString if the inner value is null.
         // This can happen if we are setting the inner value as another instance of proxyInner, which will cause that proxy to instantly evaluate and throw an error
-        if (typeof innerValue === "function" && innerValue[SYM_PROXY_INNER_VALUE] != null) {
+        if (typeof innerValue === "function" && (innerValue[SYM_PROXY_INNER_GET] == null || innerValue[SYM_PROXY_INNER_VALUE] != null)) {
             proxy.toString = innerValue.toString.bind(innerValue);
         }
     }
