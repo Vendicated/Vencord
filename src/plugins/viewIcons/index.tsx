@@ -203,14 +203,6 @@ export default definePlugin({
                     'onClick:ev=>$1&&ev.target.style.backgroundImage&&$self.openImage($2),style:{cursor:$1?"pointer":void 0,'
             }
         })),
-        // Old User DMs "User Profile" popup in the right
-        {
-            find: ".avatarPositionPanel",
-            replacement: {
-                match: /(avatarWrapperNonUserBot.{0,50})onClick:(\i\|\|\i)\?void 0(?<=,avatarSrc:(\i).+?)/,
-                replace: "$1style:($2)?{cursor:\"pointer\"}:{},onClick:$2?()=>{$self.openImage($3)}"
-            }
-        },
         // Group DMs top small & large icon
         {
             find: /\.recipients\.length>=2(?!<isMultiUserDM.{0,50})/,
