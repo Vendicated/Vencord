@@ -370,7 +370,7 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
     wrappedFactory.toString = originalFactory.toString.bind(originalFactory);
     wrappedFactory.$$vencordOriginal = originalFactory;
 
-    if (patchedFactory !== originalFactory) {
+    if (IS_DEV && patchedFactory !== originalFactory) {
         const patchedSource = String(patchedFactory);
 
         wrappedFactory.$$vencordPatchedSource = patchedSource;
