@@ -211,7 +211,7 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: WrappedModuleFacto
                     factory.$$vencordOriginal = newFactory;
 
                     if (factory.$$vencordPatchedSource != null) {
-                        newFactory.$$vencordPatchedSource = newFactory.$$vencordPatchedSource;
+                        newFactory.$$vencordPatchedSource = factory.$$vencordPatchedSource;
                     }
                 } else {
                     factory = newFactory;
