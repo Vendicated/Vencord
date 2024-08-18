@@ -193,10 +193,13 @@ export type AnyWebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & Par
 };
 
 /** exports can be anything, however initially it is always an empty object */
-export type AnyModuleFactory = (this: ModuleExports, module: Module, exports: ModuleExports, require: AnyWebpackRequire) => void;
+export type AnyModuleFactory = ((this: ModuleExports, module: Module, exports: ModuleExports, require: AnyWebpackRequire) => void) & {
+    $$vencordPatchedSource?: string;
+};
 
 export type WrappedModuleFactory = AnyModuleFactory & {
     $$vencordOriginal?: AnyModuleFactory;
+    $$vencordPatchedSource?: string;
 };
 
 export type WrappedModuleFactories = Record<PropertyKey, WrappedModuleFactory>;

@@ -209,6 +209,10 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: WrappedModuleFacto
                 if (factory.$$vencordOriginal != null) {
                     factory.toString = newFactory.toString.bind(newFactory);
                     factory.$$vencordOriginal = newFactory;
+
+                    if (factory.$$vencordPatchedSource != null) {
+                        newFactory.$$vencordPatchedSource = newFactory.$$vencordPatchedSource;
+                    }
                 } else {
                     factory = newFactory;
                 }
@@ -365,6 +369,13 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
 
     wrappedFactory.toString = originalFactory.toString.bind(originalFactory);
     wrappedFactory.$$vencordOriginal = originalFactory;
+
+    if (patchedFactory !== originalFactory) {
+        const patchedSource = String(patchedFactory);
+
+        wrappedFactory.$$vencordPatchedSource = patchedSource;
+        originalFactory.$$vencordPatchedSource = patchedSource;
+    }
 
     return wrappedFactory;
 }
