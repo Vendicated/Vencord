@@ -594,13 +594,13 @@ export function webpackDependantLazyComponent<T extends object = any>(factory: (
 export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/;
 export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
 
-function handleExtractAndLoadChunksError(err: string, code: string | RegExp | CodeFilter, matcher: RegExp) {
+function handleWebpackError(err: string, ...args: any[]) {
     if (!IS_DEV || devToolsOpen) {
-        logger.warn(err, "Code:", code, "Matcher:", matcher);
+        logger.warn(err, ...args);
         return false;
-    } else {
-        throw new Error(err);
     }
+
+    throw new Error(err); // Throw the error in development if devtools are closed
 }
 
 /**
@@ -615,17 +615,17 @@ export function extractAndLoadChunksLazy(code: string | RegExp | CodeFilter, mat
 
     const extractAndLoadChunks = makeLazy(async () => {
         if (module[SYM_PROXY_INNER_GET] != null && module[SYM_PROXY_INNER_VALUE] == null) {
-            return handleExtractAndLoadChunksError("extractAndLoadChunks: Couldn't find module factory", code, matcher);
+            return handleWebpackError("extractAndLoadChunks: Couldn't find module factory", "Code:", code, "Matcher:", matcher);
         }
 
         const match = String(module).match(canonicalizeMatch(matcher));
         if (!match) {
-            return handleExtractAndLoadChunksError("extractAndLoadChunks: Couldn't find chunk loading in module factory code", code, matcher);
+            return handleWebpackError("extractAndLoadChunks: Couldn't find chunk loading in module factory code", "Code:", code, "Matcher:", matcher);
         }
 
         const [, rawChunkIds, entryPointId] = match;
         if (Number.isNaN(Number(entryPointId))) {
-            return handleExtractAndLoadChunksError("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array, or the entry point id returned as the second group wasn't a number", code, matcher);
+            return handleWebpackError("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array, or the entry point id returned as the second group wasn't a number", "Code:", code, "Matcher:", matcher);
         }
 
         if (rawChunkIds) {
@@ -634,7 +634,7 @@ export function extractAndLoadChunksLazy(code: string | RegExp | CodeFilter, mat
         }
 
         if (wreq.m[entryPointId] == null) {
-            return handleExtractAndLoadChunksError("extractAndLoadChunks: Entry point is not loaded in the module factories, perhaps one of the chunks failed to load", code, matcher);
+            return handleWebpackError("extractAndLoadChunks: Entry point is not loaded in the module factories, perhaps one of the chunks failed to load", "Code:", code, "Matcher:", matcher);
         }
 
         wreq(Number(entryPointId));
