@@ -6,9 +6,11 @@
 
 import "./styles.css";
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { React } from "@webpack/common";
+import { ReactElement } from "react";
 
 import { BlockDisplayType, ColorType, regex, RenderType, replaceRegexp, settings } from "./constants";
 
@@ -103,7 +105,7 @@ export default definePlugin({
                 }
             },
             // react(args: ReturnType<typeof this.parse>)
-            react({ text, colorType, color }: ParsedColorInfo) {
+            react: ErrorBoundary.wrap(({ text, colorType, color }: ParsedColorInfo) => {
                 if (settings.store.renderType === RenderType.FOREGROUND) {
                     return <span style={{ color: color }}>{text}</span>;
                 }
@@ -138,7 +140,12 @@ export default definePlugin({
                             <span className="vc-color-block" style={styles} />
                         </>;
                 }
-            }
+            }, {
+                fallback: data => {
+                    const child = data.children as ReactElement<any>;
+                    return <>{child.props?.text}</>;
+                }
+            })
         };
     }
 });
@@ -148,25 +155,32 @@ const calcRGBLightness = (r: number, g: number, b: number) => {
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 };
 const isColorDark = (color: string, type: ColorType): boolean => {
+    const border = 115;
     switch (type) {
         case ColorType.RGBA:
         case ColorType.RGB: {
             const match = color.match(/\d+/g)!;
             const lightness = calcRGBLightness(+match[0], +match[1], +match[2]);
-            return lightness < 140;
+            return lightness < border;
         }
         case ColorType.HEX: {
-            var rgb = parseInt(color.substring(1), 16);
+            color = color.substring(1);
+            if (color.length === 3) {
+                color = color.split("").flatMap(v => [v, v]).join("");
+            }
+
+            const rgb = parseInt(color, 16);
             const r = (rgb >> 16) & 0xff;
             const g = (rgb >> 8) & 0xff;
             const b = (rgb >> 0) & 0xff;
+
             const lightness = calcRGBLightness(r, g, b);
-            return lightness < 140;
+            return lightness < border;
         }
         case ColorType.HSL: {
             const match = color.match(/\d+/g)!;
             const lightness = +match[2];
-            return lightness < 50;
+            return lightness < (border / 255 * 100);
         }
     }
 };
