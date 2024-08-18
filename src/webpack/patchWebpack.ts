@@ -355,7 +355,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
             if (!patch.all) patches.splice(i--, 1);
         }
 
-        if (IS_DEV && mod !== originalMod) {
+        if (mod !== originalMod) {
             factory.$$vencordPatchedSource = String(mod);
         }
     }
