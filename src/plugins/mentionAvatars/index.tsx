@@ -14,9 +14,17 @@ import { SelectedGuildStore, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const settings = definePluginSettings({
+    where: {
+        type: OptionType.SELECT,
+        description: "Where to display the Avatar",
+        options: [
+            { label: "Avatar then name", value: "Avatar-name", default: true },
+            { label: "Name then avatar", value: "Name-Avatar" },
+        ],
+    },
     showAtSymbol: {
         type: OptionType.BOOLEAN,
-        description: "Whether the the @ symbol should be displayed",
+        description: "Whether the @ symbol should be displayed",
         default: true
     }
 });
@@ -40,6 +48,10 @@ export default definePlugin({
         const { user, username } = props;
         const [isHovering, setIsHovering] = useState(false);
 
+        const avatar = (
+        <img src={user.getAvatarURL(SelectedGuildStore.getGuildId(), 16, isHovering)} className="vc-mentionAvatars-avatar" />
+    );
+
         if (!user) return <>{getUsernameString(username)}</>;
 
         return (
@@ -47,8 +59,7 @@ export default definePlugin({
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
             >
-                <img src={user.getAvatarURL(SelectedGuildStore.getGuildId(), 16, isHovering)} className="vc-mentionAvatars-avatar" />
-                {getUsernameString(username)}
+                {settings.store.where === "Avatar-name" ? <>{avatar}{getUsernameString(username)}</> : <>{getUsernameString(username)} {avatar}</>}
             </span>
         );
     }, { noop: true })
