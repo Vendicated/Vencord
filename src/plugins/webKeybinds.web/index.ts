@@ -35,6 +35,7 @@ export default definePlugin({
         if (hasCtrl) switch (e.key) {
             case "t":
             case "T":
+                if (!IS_VESKTOP) return;
                 e.preventDefault();
                 if (e.shiftKey) {
                     if (SelectedGuildStore.getGuildId()) NavigationRouter.transitionToGuild("@me");
@@ -47,13 +48,14 @@ export default definePlugin({
                     });
                 }
                 break;
+            case "Tab":
+                if (!IS_VESKTOP) return;
+                const handler = e.shiftKey ? KeyBinds.SERVER_PREV : KeyBinds.SERVER_NEXT;
+                handler.action(e);
+                break;
             case ",":
                 e.preventDefault();
                 SettingsRouter.open("My Account");
-                break;
-            case "Tab":
-                const handler = e.shiftKey ? KeyBinds.SERVER_PREV : KeyBinds.SERVER_NEXT;
-                handler.action(e);
                 break;
             default:
                 if (e.key >= "1" && e.key <= "9") {
