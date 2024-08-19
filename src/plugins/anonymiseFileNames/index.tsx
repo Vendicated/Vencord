@@ -42,11 +42,6 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
     },
-    anonymiseByDefaultExts: {
-        description: "File extensions to anonymise names by default (list split by ', ')",
-        type: OptionType.STRING,
-        default: "",
-    },
     method: {
         description: "Anonymising method",
         type: OptionType.SELECT,
@@ -72,7 +67,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "AnonymiseFileNames",
-    authors: [ Devs.fawn, Devs.TheMasterKitty ],
+    authors: [Devs.fawn],
     description: "Anonymise uploaded file names",
     patches: [
         {
@@ -99,24 +94,15 @@ export default definePlugin({
         },
     ],
     settings,
-    renderIcon: ErrorBoundary.wrap(({ upload, channelId, draftType }: { upload: AnonUpload; draftType: unknown; channelId: string; }) => {
-        const file = upload.filename;
-        const tarMatch = tarExtMatcher.exec(file);
-        const extIdx = tarMatch?.index ?? file.lastIndexOf(".");
-        const ext = extIdx !== -1 ? file.substring(extIdx) : "";
-        
-        if (upload.anonymise == null && settings.store.anonymiseByDefaultExts.split(", ").map(ext => ext.trim().replaceAll("\.", "")).includes(ext.substring(1))) {
-            upload.anonymise = true;
-        }
 
+    renderIcon: ErrorBoundary.wrap(({ upload, channelId, draftType }: { upload: AnonUpload; draftType: unknown; channelId: string; }) => {
         const anonymise = upload.anonymise ?? settings.store.anonymiseByDefault;
-        
         return (
             <ActionBarIcon
                 tooltip={anonymise ? "Using anonymous file name" : "Using normal file name"}
                 onClick={() => {
                     upload.anonymise = !anonymise;
-                    UploadDraft.update(channelId, upload.id, draftType, {});
+                    UploadDraft.update(channelId, upload.id, draftType, {}); // dummy update so component rerenders
                 }}
             >
                 {anonymise
@@ -126,14 +112,15 @@ export default definePlugin({
             </ActionBarIcon>
         );
     }, { noop: true }),
+
     anonymise(upload: AnonUpload) {
         if ((upload.anonymise ?? settings.store.anonymiseByDefault) === false) return upload.filename;
-        
+
         const file = upload.filename;
         const tarMatch = tarExtMatcher.exec(file);
         const extIdx = tarMatch?.index ?? file.lastIndexOf(".");
-        const ext = extIdx !== -1 ? file.substring(extIdx) : "";
-        
+        const ext = extIdx !== -1 ? file.slice(extIdx) : "";
+
         switch (settings.store.method) {
             case Methods.Random:
                 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
