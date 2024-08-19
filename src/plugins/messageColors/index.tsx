@@ -8,14 +8,12 @@ import "./styles.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { StartAt } from "@utils/types";
 import { React } from "@webpack/common";
 import type { ReactElement } from "react";
 
 import { BlockDisplayType, ColorType, regex, RenderType, replaceRegexp, settings } from "./constants";
 
-const source = regex.map(r => r.reg.source).join("|");
-const matchAllRegExp = new RegExp(`^(${source})`, "i");
 
 interface ParsedColorInfo {
     type: "color";
@@ -65,7 +63,19 @@ export default definePlugin({
             }
         },
     ],
+    start() {
+        const amount = settings.store.enable3CharHex ? "{1,2}" : "{2}";
+        regex.push({
+            reg: new RegExp("#(?:[0-9a-fA-F]{3})" + amount, "g"),
+            type: ColorType.HEX
+        });
+    },
+    // Needed to load all regex before patching
+    startAt: StartAt.Init,
     getColor(order: number) {
+        const source = regex.map(r => r.reg.source).join("|");
+        const matchAllRegExp = new RegExp(`^(${source})`, "i");
+
         return {
             order,
             // Don't even try to match if the message chunk doesn't start with...
@@ -104,7 +114,6 @@ export default definePlugin({
                     };
                 }
             },
-            // react(args: ReturnType<typeof this.parse>)
             react: ErrorBoundary.wrap(({ text, colorType, color }: ParsedColorInfo) => {
                 if (settings.store.renderType === RenderType.FOREGROUND) {
                     return <span style={{ color: color }}>{text}</span>;

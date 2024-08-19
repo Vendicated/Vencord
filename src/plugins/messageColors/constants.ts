@@ -39,6 +39,13 @@ export const settings = definePluginSettings({
             },
         ]
     },
+    enable3CharHex: {
+        type: OptionType.BOOLEAN,
+        description: "Enable 3 char hex-code like #39f",
+        default: true,
+        // Regex are created on the start, so without restart nothing would change
+        restartNeeded: true
+    },
     blockView: {
         type: OptionType.SELECT,
         disabled: () => settings.store.renderType !== RenderType.BLOCK,
@@ -85,5 +92,4 @@ export const regex = [
     { reg: /rgb\(\v\c\v\c\v\)/g, type: ColorType.RGB },
     { reg: /rgba\(\v\c\v\c\v(\c|\/?)\s*\f\)/g, type: ColorType.RGBA },
     { reg: /hsl\(\v°?\c\s*?\d+%?\s*?\c\s*?\d+%?\s*?\)/g, type: ColorType.HSL },
-    { reg: /#(?:[0-9a-fA-F]{3}){1,2}/g, type: ColorType.HEX }
 ].map(v => { v.reg = replaceRegexp(v.reg.source); return v; });
