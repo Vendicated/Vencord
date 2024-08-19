@@ -84,7 +84,8 @@ export default definePlugin({
     ],
 
     patch: ({ user }: UserProps, needContainer: boolean, inProfile: boolean) => {
-        if (!settings.store.showVoiceActivityIcons || !user) return null;
+        if (!settings.store.showVoiceActivityIconsInLists || !user) return null;
+        if (inProfile && !settings.store.showVoiceActivityIconInUserProfile) return null;
 
         return (
             <ErrorBoundary>

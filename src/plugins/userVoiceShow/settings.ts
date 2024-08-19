@@ -8,12 +8,12 @@ import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
 export const settings = definePluginSettings({
-    showVoiceActivityInUserProfile: {
+    showVoiceActivityIconInUserProfile: {
         type: OptionType.BOOLEAN,
-        description: "Show user's voice activity in their profile (Icon on users banner)",
+        description: "Show user's voice activity icon in their profile",
         default: true,
     },
-    showVoiceActivityIcons: {
+    showVoiceActivityIconsInLists: {
         type: OptionType.BOOLEAN,
         description: "Show user's voice activity in direct messages list and server members list",
         default: true,
@@ -22,6 +22,6 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Whether to show a list of users connected to a channel",
         default: true,
-        disabled: () => !settings.store.showVoiceActivityIcons
+        disabled: () => !settings.store.showVoiceActivityIconsInLists
     },
 });
