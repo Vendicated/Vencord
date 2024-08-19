@@ -47,7 +47,7 @@ const settings = definePluginSettings({
 		type: OptionType.STRING,
 		default: "png,jpg",
         isValid: (value: string) => {
-            if (value.split(",").map(ext => ext.trim().find(ext => !/^\.?[a-zA-Z0-9]+$/.test(ext))) return "Invalid List! Example: 'png,jpg'";
+            if (value.split(",").map(ext => ext.trim()).find(ext => !/^\.?[a-zA-Z0-9]+$/.test(ext))) return "Invalid List! Example: 'png,jpg'";
             return true;
         }
 	},
