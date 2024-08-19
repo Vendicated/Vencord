@@ -8,7 +8,6 @@ import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findExportedComponentLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
 
 import { ChatBarIcon } from "./components/Icons";
@@ -16,8 +15,6 @@ import settings from "./settings";
 import { updateLoggedSounds } from "./store";
 import styles from "./styles.css?managed";
 import { getListeners } from "./utils";
-
-const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
 
 export default definePlugin({
     name: "SoundBoardLogger",
