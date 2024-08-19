@@ -39,7 +39,7 @@ export const settings = definePluginSettings({
             },
         ]
     },
-    enable3CharHex: {
+    enableShortHexCodes: {
         type: OptionType.BOOLEAN,
         description: "Enable 3 char hex-code like #39f",
         default: true,

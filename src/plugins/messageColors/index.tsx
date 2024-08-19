@@ -64,7 +64,7 @@ export default definePlugin({
         },
     ],
     start() {
-        const amount = settings.store.enable3CharHex ? "{1,2}" : "{2}";
+        const amount = settings.store.enableShortHexCodes ? "{1,2}" : "{2}";
         regex.push({
             reg: new RegExp("#(?:[0-9a-fA-F]{3})" + amount, "g"),
             type: ColorType.HEX
