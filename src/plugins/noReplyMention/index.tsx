@@ -70,11 +70,13 @@ export default definePlugin({
         if (channel) {
             const roles = GuildMemberStore.getMember(channel.guild_id, message.author.id)?.roles;
 
-            roles.forEach(role => {
-                if (settings.store.roleList.includes(role)) {
-                    isListed = true;
-                }
-            });
+            if (roles) {
+                roles.forEach(role => {
+                    if (settings.store.roleList.includes(role)) {
+                        isListed = true;
+                    }
+                });
+            }
         }
 
         const isExempt = settings.store.shouldPingListed ? isListed : !isListed;
