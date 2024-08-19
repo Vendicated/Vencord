@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import definePlugin, { OptionType } from "@utils/types";
-import { SelectedChannelStore, ChannelStore } from "@webpack/common";
-import { Devs } from "@utils/constants";
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
+import { ChannelStore, SelectedChannelStore } from "@webpack/common";
 
 const startSound = "https://raw.githubusercontent.com/redbaron2k7/videoStartNotifier/117738bff76699a89531a067e321b6406bffbc88/start.mp3";
 const stopSound = "https://raw.githubusercontent.com/redbaron2k7/videoStartNotifier/117738bff76699a89531a067e321b6406bffbc88/stop.mp3";
