@@ -1,0 +1,7 @@
+.vc-jumptostart-btn>svg {
+    color: var(--interactive-normal);
+}
+
+.vc-jumptostart-btn:hover>svg {
+    color: var(--interactive-hover);
+}
