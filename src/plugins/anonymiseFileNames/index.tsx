@@ -45,7 +45,11 @@ const settings = definePluginSettings({
 	anonymiseByDefaultExts: {
 		description: "File extensions to anonymise names by default (comma seperated list)",
 		type: OptionType.STRING,
-		default: "png, .jpg",
+		default: "png,jpg",
+        isValid: (value: string) => {
+            if (value.split(",").map(ext => ext.trim().find(ext => !/^\.?[a-zA-Z0-9]+$/.test(ext))) return "Invalid List! Example: 'png,jpg'";
+            return true;
+        }
 	},
 	method: {
 		description: "Anonymising method",
