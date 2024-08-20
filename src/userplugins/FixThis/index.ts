@@ -40,11 +40,11 @@ export default definePlugin({
                 return url;
             }
 
-            const twitchClipRegex = /https?:\/\/(www\.)?twitch\.tv\/[^\/]+\/clip\/([^\/\s]+)/i;
+            const twitchClipRegex = /https?:\/\/(www\.)?twitch\.tv\/[^\/]+\/clip\/([^\/\s]+)\/?/i;
             const twitchClipMatch = url.match(twitchClipRegex);
             if (twitchClipMatch) {
             // Remove trailing slash if present
-            const clipId = twitchClipMatch[2].replace(/\/$/, '');
+            const clipId = twitchClipMatch[2];
             return `https://clips.fxtwitch.tv/${clipId}`;
             }
 
