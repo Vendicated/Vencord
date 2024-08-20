@@ -24,7 +24,7 @@ import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
 import { filters, findAll, search, wreq } from "@webpack";
 
-import { extractModule, extractOrThrow, FindData, findModuleId, parseNode, PatchData, SendData } from "./util";
+import { extractModule, extractOrThrow, FindData, findModuleId, FindType, mkRegexFind, parseNode, PatchData, SendData } from "./util";
 
 const PORT = 8485;
 const NAV_ID = "dev-companion-reconnect";
@@ -149,7 +149,11 @@ function initWs(isManual = false) {
                             break;
                         }
                         case "search": {
-                            const moduleId = +findModuleId([idOrSearch.toString()]);
+                            let moduleId;
+                            if (data.findType === FindType.STRING)
+                                moduleId = +findModuleId([idOrSearch.toString()]);
+                            else
+                                moduleId = +findModuleId(mkRegexFind(idOrSearch));
                             const p = extractOrThrow(moduleId);
                             const p2 = extractModule(moduleId, false);
                             console.log(p, p2, "done");
@@ -188,7 +192,11 @@ function initWs(isManual = false) {
                             break;
                         }
                         case "search": {
-                            const moduleId = +findModuleId([idOrSearch.toString()]);
+                            let moduleId;
+                            if (data.findType === FindType.STRING)
+                                moduleId = +findModuleId([idOrSearch.toString()]);
+                            else
+                                moduleId = +findModuleId(mkRegexFind(idOrSearch));
                             replyData({
                                 type: "extract",
                                 ok: true,
@@ -259,7 +267,13 @@ function initWs(isManual = false) {
             case "testPatch": {
                 const { find, replacement } = data as PatchData;
 
-                const candidates = search(find);
+                let candidates;
+                if (data.findType === FindType.STRING)
+                    candidates = search(find.toString());
+                else
+                    candidates = search(...mkRegexFind(find));
+
+                // const candidates = search(find);
                 const keys = Object.keys(candidates);
                 if (keys.length !== 1)
                     return reply("Expected exactly one 'find' matches, found " + keys.length);
@@ -368,3 +382,4 @@ export default definePlugin({
         socket = void 0;
     }
 });
+

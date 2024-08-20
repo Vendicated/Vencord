@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { canonicalizeMatch } from "@utils/patches";
 import { CodeFilter, stringMatches, wreq } from "@webpack";
 
 import { settings } from ".";
@@ -20,6 +21,10 @@ export interface RegexNode {
         pattern: string;
         flags: string;
     };
+}
+export enum FindType {
+    STRING,
+    REGEX
 }
 export interface FunctionNode {
     type: "function";
@@ -92,5 +97,10 @@ export function findModuleId(find: CodeFilter) {
         throw new Error("More than one match");
     }
     return matches[0];
+}
+export function mkRegexFind(idOrSearch: string): RegExp[] {
+    const regex = idOrSearch.substring(1, idOrSearch.lastIndexOf("/"));
+    const flags = idOrSearch.substring(idOrSearch.lastIndexOf("/") + 1);
+    return [canonicalizeMatch(RegExp(regex, flags))];
 }
 

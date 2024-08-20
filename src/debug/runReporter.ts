@@ -5,24 +5,31 @@
  */
 
 import { Logger } from "@utils/Logger";
+import { Patch } from "@utils/types";
 import * as Webpack from "@webpack";
 import { patches } from "plugins";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 
 const ReporterLogger = new Logger("Reporter");
+interface EvaledPatch extends Patch {
+    id: number | string;
+}
 interface ReporterData {
     failedPatches: {
-        /**
-         * pluginName > array of failed modules
-         */
-        foundNoModule: Record<string, string[]>;
+        foundNoModule: Patch[];
+        hadNoEffect: EvaledPatch[];
+        undoingPatchGroup: EvaledPatch[];
+        erroredPatch: EvaledPatch[];
     };
     failedWebpack: Record<Webpack.TypeWebpackSearchHistory, string[][]>;
 }
-const reporterData: ReporterData = {
+export const reporterData: ReporterData = {
     failedPatches: {
-        foundNoModule: {}
+        foundNoModule: [],
+        hadNoEffect: [],
+        undoingPatchGroup: [],
+        erroredPatch: []
     },
     failedWebpack: {
         find: [[]],
@@ -54,6 +61,8 @@ async function runReporter() {
         for (const patch of patches) {
             if (!patch.all) {
                 new Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
+                if (IS_COMPANION_TEST)
+                    reporterData.failedPatches.foundNoModule[patch.plugin].push(String(patch.find));
             }
         }
 
@@ -99,7 +108,8 @@ async function runReporter() {
                     logMessage += `("${args[0]}", {\n${failedMappings.map(mapping => `\t${mapping}: ${args[1][mapping].toString().slice(0, 147)}...`).join(",\n")}\n})`;
                 }
                 else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
-                reporterData.failedWebpack[method].push(args.map(a => String(a)));
+                if (IS_COMPANION_TEST)
+                    reporterData.failedWebpack[method].push(args.map(a => String(a)));
                 ReporterLogger.log("Webpack Find Fail:", logMessage);
             }
         }
@@ -108,7 +118,9 @@ async function runReporter() {
     } catch (e) {
         ReporterLogger.log("A fatal error occurred:", e);
     }
+    console.log(reporterData);
 }
 
-runReporter();
-console.log(reporterData);
+// imported in webpack for reporterData, wrap to avoid running reporter
+if (IS_REPORTER)
+    runReporter();
