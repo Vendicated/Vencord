@@ -167,6 +167,11 @@ function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], id
             Reflect.defineProperty(moduleFactoriesTarget, id, existingFactory);
         }
 
+        // Persist $$vencordPatchedSource in the new original factory, if the patched one has already been required
+        if (existingFactory.value != null) {
+            newFactory.$$vencordPatchedSource = existingFactory.value.$$vencordPatchedSource;
+        }
+
         return Reflect.set(moduleFactoriesTarget, id, newFactory, moduleFactoriesTarget);
     }
 
@@ -189,21 +194,19 @@ function notifyFactoryListeners(factory: AnyModuleFactory) {
 }
 
 /**
- * Define the getter for returning the patched or original version of the module factory.
- * This properly handles patching the factory and also making sure $$vencordPatchedSource is persisted in the original factory, if it was later loaded again.
+ * Define the getter for returning the patched version of the module factory.
  *
  * If eagerPatches is enabled, the factory argument should already be the patched version, else it will be the original
  * and only be patched when accessed for the first time.
  *
  * @param id The id of the module
  * @param factory The original or patched module factory
- * @param isFactoryRestore Whether we are restoring the original factory after it has been required
  */
-function defineModulesFactoryGetter(id: PropertyKey, factory: WrappedModuleFactory, isFactoryRestore: boolean = false) {
+function defineModulesFactoryGetter(id: PropertyKey, factory: WrappedModuleFactory) {
     const descriptor: PropertyDescriptor = {
         get() {
             // $$vencordOriginal means the factory is already patched
-            if (factory.$$vencordOriginal != null || isFactoryRestore) {
+            if (factory.$$vencordOriginal != null) {
                 return factory;
             }
 
@@ -241,8 +244,10 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
     const patchedFactory = patchFactory(id, originalFactory);
 
     const wrappedFactory: WrappedModuleFactory = function (...args) {
-        // Restore the original factory
-        defineModulesFactoryGetter(id, wrappedFactory.$$vencordOriginal!, true);
+        // Restore the original factory in all the module factories objects. We want to make sure the original factory is restored properly, no matter what is the Webpack instance
+        for (const wreq of allWebpackInstances) {
+            define(wreq.m, id, { value: wrappedFactory.$$vencordOriginal });
+        }
 
         // eslint-disable-next-line prefer-const
         let [module, exports, require] = args;
