@@ -6,7 +6,7 @@
 
 import "./style.css";
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -38,6 +38,10 @@ export default definePlugin({
     description: "Group your commonly visited channels in tabs, like a browser",
     authors: [Devs.TheSun, Devs.TheKodeToad, EquicordDevs.keifufu, Devs.Nickyux],
     dependencies: ["ContextMenuAPI"],
+    contextMenus: {
+        "channel-mention-context": contextMenuPatch,
+        "channel-context": contextMenuPatch
+    },
     patches: [
         // add the channel tab container at the top
         {
@@ -90,16 +94,6 @@ export default definePlugin({
     ],
 
     settings,
-
-    start() {
-        addContextMenuPatch("channel-mention-context", contextMenuPatch);
-        addContextMenuPatch("channel-context", contextMenuPatch);
-    },
-
-    stop() {
-        removeContextMenuPatch("channel-mention-context", contextMenuPatch);
-        removeContextMenuPatch("channel-context", contextMenuPatch);
-    },
 
     containerHeight: 0,
 
