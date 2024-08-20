@@ -1,11 +1,11 @@
-import { DataStore } from ".";
+import { DataStore, openModal } from ".";
 import { ColorwayCSS } from "./colorwaysAPI";
-import { updateBoundKeyMain, updateWSMain } from "./components/MainModal";
+import MainModal, { updateBoundKeyMain, updateWSMain } from "./components/MainModal";
 import { updateActiveColorway, updateManagerRole, updateWS as updateWSSelector } from "./components/Selector";
 import { nullColorwayObj } from "./constants";
 import { generateCss } from "./css";
 import { ColorwayObject } from "./types";
-import { colorToHex } from "./utils";
+import { colorToHex, getWsClientIdentity } from "./utils";
 
 export let wsOpen = false;
 export let boundKey: { [managerKey: string]: string; } | null = null;
@@ -85,7 +85,7 @@ export function connect() {
                             if (boundSearch.length) {
                                 boundKey = boundSearch[0];
                             } else {
-                                const id = { [data.MID]: `vencord.${Math.random().toString(16).slice(2)}.${new Date().getUTCMilliseconds()}` };
+                                const id = { [data.MID]: `${getWsClientIdentity()}.${Math.random().toString(16).slice(2)}.${new Date().getUTCMilliseconds()}` };
                                 DataStore.set("colorwaysBoundManagers", [...boundManagers, id]);
                                 boundKey = id;
                             }
@@ -95,7 +95,8 @@ export function connect() {
                                 boundKey,
                                 complications: [
                                     "remote-sources",
-                                    "manager-role"
+                                    "manager-role",
+                                    "ui-summon"
                                 ]
                             }));
                             DataStore.getMany([
@@ -146,6 +147,9 @@ export function connect() {
                     hasManagerRole = false;
                     updateManagerRole(false);
                     return;
+                case "complication:ui-summon:summon":
+                    openModal((props: any) => <MainModal modalProps={props} />);
+                    return;
                 case "complication:remote-sources:update-request":
                     DataStore.getMany([
                         "colorwaySourceFiles",
@@ -177,7 +181,7 @@ export function connect() {
         restartWS = () => connect();
         closeWS = () => { };
         try {
-            ws.close();
+            (ws as WebSocket).close();
         } catch (e) {
             return;
         }
@@ -204,7 +208,7 @@ export function connect() {
         restartWS = () => connect();
         closeWS = () => { };
         hasManagerRole = false;
-        ws.close();
+        (ws as WebSocket).close();
         ws = null;
         wsOpen = false;
         updateWS(false);

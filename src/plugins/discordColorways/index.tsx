@@ -71,7 +71,7 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
 defaultsLoader();
 
 export const PluginProps = {
-    pluginVersion: "6.1.0",
+    pluginVersion: "6.2.0",
     clientMod: "Vencord",
     UIVersion: "2.0.0",
     creatorVersion: "1.20"

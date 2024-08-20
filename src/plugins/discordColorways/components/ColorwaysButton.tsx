@@ -9,7 +9,7 @@ import { PalleteIcon } from "./Icons";
 import { getAutoPresets } from "../css";
 import { ColorwayObject } from "../types";
 import Selector from "./MainModal";
-import { DataStore, useEffect, useState, FluxDispatcher, FluxEvents, openModal } from "..";
+import { DataStore, useEffect, useState, FluxDispatcher, FluxEvents, openModal, PluginProps } from "..";
 import Tooltip from "./Tooltip";
 
 export default function () {
@@ -43,7 +43,7 @@ export default function () {
         </>
     } position="right"
     >
-        {({ onMouseEnter, onMouseLeave, onClick }) => visibility ? <div className="ColorwaySelectorBtnContainer">
+        {({ onMouseEnter, onMouseLeave, onClick }) => (visibility || PluginProps.clientMod === "BetterDiscord") ? <div className="ColorwaySelectorBtnContainer">
             <div
                 className={"ColorwaySelectorBtn" + (isThin ? " ColorwaySelectorBtn_thin" : "")}
                 onMouseEnter={async () => {
