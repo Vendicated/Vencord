@@ -32,20 +32,20 @@ export const reporterData: ReporterData = {
         erroredPatch: []
     },
     failedWebpack: {
-        find: [[]],
-        findByProps: [[]],
-        findByCode: [[]],
-        findStore: [[]],
-        findComponent: [[]],
-        findComponentByCode: [[]],
-        findExportedComponent: [[]],
-        waitFor: [[]],
-        waitForComponent: [[]],
-        waitForStore: [[]],
-        proxyLazyWebpack: [[]],
-        LazyComponentWebpack: [[]],
-        extractAndLoadChunks: [[]],
-        mapMangledModule: [[]]
+        find: [],
+        findByProps: [],
+        findByCode: [],
+        findStore: [],
+        findComponent: [],
+        findComponentByCode: [],
+        findExportedComponent: [],
+        waitFor: [],
+        waitForComponent: [],
+        waitForStore: [],
+        proxyLazyWebpack: [],
+        LazyComponentWebpack: [],
+        extractAndLoadChunks: [],
+        mapMangledModule: []
     }
 };
 async function runReporter() {
@@ -62,7 +62,7 @@ async function runReporter() {
             if (!patch.all) {
                 new Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
                 if (IS_COMPANION_TEST)
-                    reporterData.failedPatches.foundNoModule[patch.plugin].push(String(patch.find));
+                    reporterData.failedPatches.foundNoModule.push(patch);
             }
         }
 
