@@ -133,7 +133,7 @@ async function runReporter() {
                     }
                 }
 
-                function stringifyCodeFilter(code: string | RegExp | Webpack.CodeFilter) {
+                function stringifyFilter(code: Webpack.CodeFilterWithSingle) {
                     if (Array.isArray(code)) {
                         return `[${code.map(arg => arg instanceof RegExp ? String(arg) : JSON.stringify(arg)).join(", ")}]`;
                     }
@@ -163,7 +163,7 @@ async function runReporter() {
                         regexStr = String(matcher);
                     }
 
-                    logMessage += `(${stringifyCodeFilter(code)}, ${regexStr})`;
+                    logMessage += `(${stringifyFilter(code)}, ${regexStr})`;
                 } else if (searchType === "mapMangledModule") {
                     const [code, mappers] = parsedArgs;
 
@@ -189,9 +189,9 @@ async function runReporter() {
                             return [key, parsedFilter];
                         });
 
-                    logMessage += `(${stringifyCodeFilter(code)}, {\n${parsedFailedMappers.map(([key, parsedFilter]) => `\t${key}: ${parsedFilter}`).join(",\n")}\n})`;
+                    logMessage += `(${stringifyFilter(code)}, {\n${parsedFailedMappers.map(([key, parsedFilter]) => `\t${key}: ${parsedFilter}`).join(",\n")}\n})`;
                 } else {
-                    logMessage += `(${filterName.length ? `${filterName}(` : ""}${parsedArgs.map(arg => arg instanceof RegExp ? String(arg) : JSON.stringify(arg)).join(", ")})${filterName.length ? ")" : ""}`;
+                    logMessage += `(${filterName.length ? `${filterName}(` : ""}${parsedArgs.map(stringifyFilter).join(", ")})${filterName.length ? ")" : ""}`;
                 }
 
                 ReporterLogger.log("Webpack Find Fail:", logMessage);

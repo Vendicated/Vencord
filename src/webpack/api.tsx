@@ -70,6 +70,7 @@ if (IS_DEV && IS_DISCORD_DESKTOP) {
 
 export type PropsFilter = Array<string>;
 export type CodeFilter = Array<string | RegExp>;
+export type CodeFilterWithSingle = string | RegExp | CodeFilter;
 export type StoreNameFilter = string;
 
 export type FilterFn = ((module: ModuleExports) => boolean) & {
@@ -158,7 +159,7 @@ export const filters = {
     }
 };
 
-export const webpackSearchHistory = [] as Array<["waitFor" | "find" | "findComponent" | "findExportedComponent" | "findComponentByCode" | "findComponentByFields" | "findByProps" | "findProp" | "findByCode" | "findStore" | "findByFactoryCode" | "mapMangledModule" | "extractAndLoadChunks" | "webpackDependantLazy" | "webpackDependantLazyComponent", any[]]>;
+export const webpackSearchHistory = [] as Array<["waitFor" | "find" | "findComponent" | "findExportedComponent" | "findComponentByCode" | "findComponentByFields" | "findByProps" | "findProp" | "findByCode" | "findStore" | "findByFactoryCode" | "mapMangledModule" | "findModuleFactory" | "extractAndLoadChunks" | "webpackDependantLazy" | "webpackDependantLazyComponent", any[]]>;
 
 function printFilter(filter: FilterFn) {
     if (filter.$$vencordProps != null) {
@@ -475,7 +476,7 @@ export function findByFactoryCode<T = any>(...code: CodeFilter | [...CodeFilter,
  * @param mappers Mappers to create the non mangled exports object
  * @returns Unmangled exports as specified in mappers
  */
-export function mapMangledModule<S extends PropertyKey>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>) {
+export function mapMangledModule<S extends PropertyKey>(code: CodeFilterWithSingle, mappers: Record<S, FilterFn>) {
     const mapping = {} as Record<S, any>;
     const proxyInnerSetters = {} as Record<S, ReturnType<typeof proxyInner>[1]>;
     const wrapperComponentSetters = {} as Record<S, ReturnType<typeof wrapWebpackComponent>[1]>;
@@ -549,11 +550,15 @@ export function mapMangledModule<S extends PropertyKey>(code: string | RegExp | 
 /**
  * Find the first module factory which when stringified includes all the given code.
  */
-export function findModuleFactory(...code: CodeFilter) {
-    const filter = filters.byFactoryCode(...code);
+export function findModuleFactory(code: CodeFilterWithSingle, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+    const filter = filters.byFactoryCode(...Array.isArray(code) ? code : [code]);
 
     const [proxy, setInnerValue] = proxyInner<AnyModuleFactory>(`Webpack module factory find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
     waitFor(filter, (_, { factory }) => setInnerValue(factory));
+
+    if (IS_REPORTER && !isIndirect) {
+        webpackSearchHistory.push(["findModuleFactory", [proxy, code]]);
+    }
 
     if (proxy[SYM_PROXY_INNER_VALUE] != null) return proxy[SYM_PROXY_INNER_VALUE] as AnyModuleFactory;
 
@@ -594,10 +599,10 @@ export function webpackDependantLazyComponent<T extends object = any>(factory: (
 export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/;
 export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
 
-function handleWebpackError(err: string, ...args: any[]) {
+function handleWebpackError(err: string, returnValue: any, ...args: any[]) {
     if (!IS_DEV || devToolsOpen) {
         logger.warn(err, ...args);
-        return false;
+        return returnValue;
     }
 
     throw new Error(err); // Throw the error in development if devtools are closed
@@ -610,22 +615,22 @@ function handleWebpackError(err: string, ...args: any[]) {
  * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the first lazy chunk loading found in the module factory
  * @returns A function that returns a promise that resolves with a boolean whether the chunks were loaded, on first call
  */
-export function extractAndLoadChunksLazy(code: string | RegExp | CodeFilter, matcher: RegExp = DefaultExtractAndLoadChunksRegex) {
-    const module = findModuleFactory(...Array.isArray(code) ? code : [code]);
+export function extractAndLoadChunksLazy(code: CodeFilterWithSingle, matcher: RegExp = DefaultExtractAndLoadChunksRegex) {
+    const module = findModuleFactory(code);
 
     const extractAndLoadChunks = makeLazy(async () => {
         if (module[SYM_PROXY_INNER_GET] != null && module[SYM_PROXY_INNER_VALUE] == null) {
-            return handleWebpackError("extractAndLoadChunks: Couldn't find module factory", "Code:", code, "Matcher:", matcher);
+            return handleWebpackError("extractAndLoadChunks: Couldn't find module factory", false, "Code:", code, "Matcher:", matcher);
         }
 
         const match = String(module).match(canonicalizeMatch(matcher));
         if (!match) {
-            return handleWebpackError("extractAndLoadChunks: Couldn't find chunk loading in module factory code", "Code:", code, "Matcher:", matcher);
+            return handleWebpackError("extractAndLoadChunks: Couldn't find chunk loading in module factory code", false, "Code:", code, "Matcher:", matcher);
         }
 
         const [, rawChunkIds, entryPointId] = match;
         if (Number.isNaN(Number(entryPointId))) {
-            return handleWebpackError("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array, or the entry point id returned as the second group wasn't a number", "Code:", code, "Matcher:", matcher);
+            return handleWebpackError("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array, or the entry point id returned as the second group wasn't a number", false, "Code:", code, "Matcher:", matcher);
         }
 
         if (rawChunkIds) {
@@ -634,7 +639,7 @@ export function extractAndLoadChunksLazy(code: string | RegExp | CodeFilter, mat
         }
 
         if (wreq.m[entryPointId] == null) {
-            return handleWebpackError("extractAndLoadChunks: Entry point is not loaded in the module factories, perhaps one of the chunks failed to load", "Code:", code, "Matcher:", matcher);
+            return handleWebpackError("extractAndLoadChunks: Entry point is not loaded in the module factories, perhaps one of the chunks failed to load", false, "Code:", code, "Matcher:", matcher);
         }
 
         wreq(Number(entryPointId));
