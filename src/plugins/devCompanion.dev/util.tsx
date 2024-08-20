@@ -63,7 +63,7 @@ export function extractModule(id: number, patched = settings.store.usePatchedMod
     const module = wreq.m[id];
     if (!module)
         throw new Error("No module found for module id:" + id);
-    return patched ? module.$$vencordPatchedSource ?? module.original : module.original;
+    return patched ? module.$$vencordPatchedSource ?? module.original.toString() : module.original.toString();
 } export function parseNode(node: Node) {
     switch (node.type) {
         case "string":

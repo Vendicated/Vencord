@@ -131,35 +131,42 @@ function initWs(isManual = false) {
 
         switch (type) {
             case "diff": {
-                const { extractType, idOrSearch } = data;
-                switch (extractType) {
-                    case "id": {
-                        if (typeof idOrSearch !== "number")
-                            throw new Error("Id is not a number, got :" + typeof idOrSearch);
-                        replyData({
-                            type: "diff",
-                            ok: true,
-                            data: {
-                                patched: extractOrThrow(idOrSearch),
-                                source: extractModule(idOrSearch, false)
-                            },
-                            moduleNumber: idOrSearch
-                        });
-                        break;
+                try {
+                    const { extractType, idOrSearch } = data;
+                    switch (extractType) {
+                        case "id": {
+                            if (typeof idOrSearch !== "number")
+                                throw new Error("Id is not a number, got :" + typeof idOrSearch);
+                            replyData({
+                                type: "diff",
+                                ok: true,
+                                data: {
+                                    patched: extractOrThrow(idOrSearch),
+                                    source: extractModule(idOrSearch, false)
+                                },
+                                moduleNumber: idOrSearch
+                            });
+                            break;
+                        }
+                        case "search": {
+                            const moduleId = +findModuleId([idOrSearch.toString()]);
+                            const p = extractOrThrow(moduleId);
+                            const p2 = extractModule(moduleId, false);
+                            console.log(p, p2, "done");
+                            replyData({
+                                type: "diff",
+                                ok: true,
+                                data: {
+                                    patched: p,
+                                    source: p2
+                                },
+                                moduleNumber: moduleId
+                            });
+                            break;
+                        }
                     }
-                    case "search": {
-                        const moduleId = +findModuleId([idOrSearch.toString()]);
-                        replyData({
-                            type: "diff",
-                            ok: true,
-                            data: {
-                                patched: extractOrThrow(moduleId),
-                                source: extractModule(moduleId, false)
-                            },
-                            moduleNumber: moduleId
-                        });
-                        break;
-                    }
+                } catch (error) {
+                    reply(String(error));
                 }
                 break;
             }

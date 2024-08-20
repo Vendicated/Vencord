@@ -11,7 +11,36 @@ import { patches } from "plugins";
 import { loadLazyChunks } from "./loadLazyChunks";
 
 const ReporterLogger = new Logger("Reporter");
-
+interface ReporterData {
+    failedPatches: {
+        /**
+         * pluginName > array of failed modules
+         */
+        foundNoModule: Record<string, string[]>;
+    };
+    failedWebpack: Record<Webpack.TypeWebpackSearchHistory, string[][]>;
+}
+const reporterData: ReporterData = {
+    failedPatches: {
+        foundNoModule: {}
+    },
+    failedWebpack: {
+        find: [[]],
+        findByProps: [[]],
+        findByCode: [[]],
+        findStore: [[]],
+        findComponent: [[]],
+        findComponentByCode: [[]],
+        findExportedComponent: [[]],
+        waitFor: [[]],
+        waitForComponent: [[]],
+        waitForStore: [[]],
+        proxyLazyWebpack: [[]],
+        LazyComponentWebpack: [[]],
+        extractAndLoadChunks: [[]],
+        mapMangledModule: [[]]
+    }
+};
 async function runReporter() {
     try {
         ReporterLogger.log("Starting test...");
@@ -70,7 +99,7 @@ async function runReporter() {
                     logMessage += `("${args[0]}", {\n${failedMappings.map(mapping => `\t${mapping}: ${args[1][mapping].toString().slice(0, 147)}...`).join(",\n")}\n})`;
                 }
                 else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
-
+                reporterData.failedWebpack[method].push(args.map(a => String(a)));
                 ReporterLogger.log("Webpack Find Fail:", logMessage);
             }
         }
@@ -82,3 +111,4 @@ async function runReporter() {
 }
 
 runReporter();
+console.log(reporterData);
