@@ -43,7 +43,9 @@ export default definePlugin({
             const twitchClipRegex = /https?:\/\/(www\.)?twitch\.tv\/[^\/]+\/clip\/([^\/\s]+)/i;
             const twitchClipMatch = url.match(twitchClipRegex);
             if (twitchClipMatch) {
-                return `https://clips.fxtwitch.tv/${twitchClipMatch[2]}`;
+            // Remove trailing slash if present
+            const clipId = twitchClipMatch[2].replace(/\/$/, '');
+            return `https://clips.fxtwitch.tv/${clipId}`;
             }
 
             const redditRegex = /https?:\/\/(old\.|new\.)?reddit\.com(.*)/i;
