@@ -4,8 +4,6 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 
 ![image](https://github.com/Equicord/Equicord/assets/78185467/81707ad9-3a04-4f76-88a0-60ee70684f81)
 
-## WOMP WOMP
-
 ## Features
 
 -   Third-party plugins implemented into the main build.
