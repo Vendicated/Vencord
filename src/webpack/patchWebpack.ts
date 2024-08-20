@@ -47,8 +47,8 @@ define(Function.prototype, "m", {
     set(this: AnyWebpackRequire, originalModules: AnyWebpackRequire["m"]) {
         define(this, "m", { value: originalModules });
 
-        // Ensure this is one of Discord main WebpackInstances.
-        // We may catch Discord bundled libs, React Devtools or other extensions WebpackInstances here.
+        // Ensure this is one of Discord main Webpack instances.
+        // We may catch Discord bundled libs, React Devtools or other extensions Webpack instances here.
         const { stack } = new Error();
         if (!stack?.includes("http") || stack.match(/at \d+? \(/) || !String(this).includes("exports:{}")) {
             return;
@@ -147,21 +147,26 @@ const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
  */
 function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], id: PropertyKey, newFactory: AnyModuleFactory, ignoreExistingInTarget: boolean = false) {
     let existingFactory: TypedPropertyDescriptor<AnyModuleFactory> | undefined;
+    let moduleFactoriesWithFactory: AnyWebpackRequire["m"] | undefined;
     for (const wreq of allWebpackInstances) {
         if (ignoreExistingInTarget && wreq.m === moduleFactoriesTarget) continue;
 
         if (Reflect.getOwnPropertyDescriptor(wreq.m, id) != null) {
             existingFactory = Reflect.getOwnPropertyDescriptor(wreq.m, id);
+            moduleFactoriesWithFactory = wreq.m;
             break;
         }
     }
 
     if (existingFactory != null) {
         // If existingFactory exists in any Webpack instance, it's either wrapped in defineModuleFactoryGetter, or it has already been required.
-        // So define the descriptor of it on this current Webpack instance, call Reflect.set with the new original,
+        // So define the descriptor of it on this current Webpack instance (if it doesn't exist already), call Reflect.set with the new original,
         // and let the correct logic apply (normal set, or defineModuleFactoryGetter setter)
 
-        Reflect.defineProperty(moduleFactoriesTarget, id, existingFactory);
+        if (moduleFactoriesWithFactory !== moduleFactoriesTarget) {
+            Reflect.defineProperty(moduleFactoriesTarget, id, existingFactory);
+        }
+
         return Reflect.set(moduleFactoriesTarget, id, newFactory, moduleFactoriesTarget);
     }
 
@@ -184,40 +189,44 @@ function notifyFactoryListeners(factory: AnyModuleFactory) {
 }
 
 /**
- * Define the getter for returning the patched version of the module factory.
+ * Define the getter for returning the patched or original version of the module factory.
+ * This properly handles patching the factory and also making sure $$vencordPatchedSource is persisted in the original factory, if it was later loaded again.
  *
  * If eagerPatches is enabled, the factory argument should already be the patched version, else it will be the original
  * and only be patched when accessed for the first time.
  *
  * @param id The id of the module
  * @param factory The original or patched module factory
+ * @param isFactoryRestore Whether we are restoring the original factory after it has been required
  */
-function defineModulesFactoryGetter(id: PropertyKey, factory: WrappedModuleFactory) {
+function defineModulesFactoryGetter(id: PropertyKey, factory: WrappedModuleFactory, isFactoryRestore: boolean = false) {
+    const descriptor: PropertyDescriptor = {
+        get() {
+            // $$vencordOriginal means the factory is already patched
+            if (factory.$$vencordOriginal != null || isFactoryRestore) {
+                return factory;
+            }
+
+            return (factory = wrapAndPatchFactory(id, factory));
+        },
+        set(newFactory: AnyModuleFactory) {
+            if (factory.$$vencordPatchedSource != null) {
+                newFactory.$$vencordPatchedSource = factory.$$vencordPatchedSource;
+            }
+
+            if (factory.$$vencordOriginal != null) {
+                factory.toString = newFactory.toString.bind(newFactory);
+                factory.$$vencordOriginal = newFactory;
+            } else {
+                factory = newFactory;
+            }
+        }
+    };
+
     // Define the getter in all the module factories objects. Patches are only executed once, so make sure all module factories object
     // have the patched version
     for (const wreq of allWebpackInstances) {
-        define(wreq.m, id, {
-            get() {
-                // $$vencordOriginal means the factory is already patched
-                if (factory.$$vencordOriginal != null) {
-                    return factory;
-                }
-
-                return (factory = wrapAndPatchFactory(id, factory));
-            },
-            set(newFactory: AnyModuleFactory) {
-                if (factory.$$vencordOriginal != null) {
-                    factory.toString = newFactory.toString.bind(newFactory);
-                    factory.$$vencordOriginal = newFactory;
-
-                    if (factory.$$vencordPatchedSource != null) {
-                        newFactory.$$vencordPatchedSource = factory.$$vencordPatchedSource;
-                    }
-                } else {
-                    factory = newFactory;
-                }
-            }
-        });
+        define(wreq.m, id, descriptor);
     }
 }
 
@@ -232,10 +241,8 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
     const patchedFactory = patchFactory(id, originalFactory);
 
     const wrappedFactory: WrappedModuleFactory = function (...args) {
-        // Restore the original factory in all the module factories objects. We want to make sure the original factory is restored properly, no matter what is the Webpack instance
-        for (const wreq of allWebpackInstances) {
-            define(wreq.m, id, { value: wrappedFactory.$$vencordOriginal });
-        }
+        // Restore the original factory
+        defineModulesFactoryGetter(id, wrappedFactory.$$vencordOriginal!, true);
 
         // eslint-disable-next-line prefer-const
         let [module, exports, require] = args;
