@@ -616,7 +616,7 @@ function handleWebpackError(err: string, returnValue: any, ...args: any[]) {
  * @returns A function that returns a promise that resolves with a boolean whether the chunks were loaded, on first call
  */
 export function extractAndLoadChunksLazy(code: CodeFilterWithSingle, matcher: RegExp = DefaultExtractAndLoadChunksRegex) {
-    const module = findModuleFactory(code);
+    const module = findModuleFactory(code, { isIndirect: true });
 
     const extractAndLoadChunks = makeLazy(async () => {
         if (module[SYM_PROXY_INNER_GET] != null && module[SYM_PROXY_INNER_VALUE] == null) {
