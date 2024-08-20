@@ -168,7 +168,7 @@ function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], id
         }
 
         // Persist $$vencordPatchedSource in the new original factory, if the patched one has already been required
-        if (existingFactory.value != null) {
+        if (IS_DEV && existingFactory.value != null) {
             newFactory.$$vencordPatchedSource = existingFactory.value.$$vencordPatchedSource;
         }
 
@@ -213,7 +213,7 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: WrappedModuleFacto
             return (factory = wrapAndPatchFactory(id, factory));
         },
         set(newFactory: AnyModuleFactory) {
-            if (factory.$$vencordPatchedSource != null) {
+            if (IS_DEV && factory.$$vencordPatchedSource != null) {
                 newFactory.$$vencordPatchedSource = factory.$$vencordPatchedSource;
             }
 
