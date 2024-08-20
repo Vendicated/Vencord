@@ -54,21 +54,17 @@ export default definePlugin({
             replacement: [
                 {
                     match: /maxAge:null!==\(\i=null!=\i\?\i:\i\)&&void 0!==\i\?\i:\i.value/,
-                    replace: "maxAge:$self.getDuration()"
+                    replace: "maxAge:$self.settings.store.inviteDuration"
                 },
                 {
                     match: /maxUses:null!=\i&&0!==\i\?\i:\i.value/,
-                    replace: "maxUses:$self.getMaxUses()"
+                    replace: "maxUses:$self.settings.store.maxUses"
                 },
                 {
                     match: /temporary:null!=\i&&\i/,
-                    replace: "temporary:$self.getTemporary()"
+                    replace: "temporary:$self.settings.store.temporaryMembership"
                 }
             ]
         }
-    ],
-
-    getDuration: () => settings.store.inviteDuration,
-    getMaxUses: () => settings.store.maxUses,
-    getTemporary: () => settings.store.temporaryMembership
+    ]
 });
