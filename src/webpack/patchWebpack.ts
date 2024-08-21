@@ -20,7 +20,7 @@ import { WEBPACK_CHUNK } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
-import { reporterData } from "debug/runReporter";
+import { reporterData } from "debug/reporterData";
 import { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
@@ -357,10 +357,11 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
                     if (patch.group) {
                         logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
-                        reporterData.failedPatches.undoingPatchGroup.push({
-                            ...patch,
-                            id
-                        });
+                        if (IS_COMPANION_TEST)
+                            reporterData.failedPatches.undoingPatchGroup.push({
+                                ...patch,
+                                id
+                            });
                         mod = previousMod;
                         code = previousCode;
                         break;

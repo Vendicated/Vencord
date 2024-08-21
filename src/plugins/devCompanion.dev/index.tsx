@@ -23,7 +23,7 @@ import { Logger } from "@utils/Logger";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
 import { filters, findAll, search, wreq } from "@webpack";
-import { reporterData } from "debug/runReporter";
+import { reporterData } from "debug/reporterData";
 
 import { extractModule, extractOrThrow, FindData, findModuleId, FindType, mkRegexFind, parseNode, PatchData, SendData } from "./util";
 
@@ -69,11 +69,13 @@ function initWs(isManual = false) {
             ok: true,
         });
         // if we are running the reporter with companion integration, send the list to vscode as soon as we can
-        replyData({
-            type: "report",
-            data: reporterData,
-            ok: true
-        });
+        if (IS_COMPANION_TEST) {
+            replyData({
+                type: "report",
+                data: reporterData,
+                ok: true
+            });
+        }
 
         (settings.store.notifyOnAutoConnect || isManual) && showNotification({
             title: "Dev Companion Connected",

@@ -5,49 +5,13 @@
  */
 
 import { Logger } from "@utils/Logger";
-import { Patch } from "@utils/types";
 import * as Webpack from "@webpack";
 import { patches } from "plugins";
 
 import { loadLazyChunks } from "./loadLazyChunks";
+import { reporterData } from "./reporterData";
 
 const ReporterLogger = new Logger("Reporter");
-interface EvaledPatch extends Patch {
-    id: number | string;
-}
-interface ReporterData {
-    failedPatches: {
-        foundNoModule: Patch[];
-        hadNoEffect: EvaledPatch[];
-        undoingPatchGroup: EvaledPatch[];
-        erroredPatch: EvaledPatch[];
-    };
-    failedWebpack: Record<Webpack.TypeWebpackSearchHistory, string[][]>;
-}
-export const reporterData: ReporterData = {
-    failedPatches: {
-        foundNoModule: [],
-        hadNoEffect: [],
-        undoingPatchGroup: [],
-        erroredPatch: []
-    },
-    failedWebpack: {
-        find: [],
-        findByProps: [],
-        findByCode: [],
-        findStore: [],
-        findComponent: [],
-        findComponentByCode: [],
-        findExportedComponent: [],
-        waitFor: [],
-        waitForComponent: [],
-        waitForStore: [],
-        proxyLazyWebpack: [],
-        LazyComponentWebpack: [],
-        extractAndLoadChunks: [],
-        mapMangledModule: []
-    }
-};
 async function runReporter() {
     try {
         ReporterLogger.log("Starting test...");
