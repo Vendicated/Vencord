@@ -9,7 +9,7 @@ import * as $DataStore from "@api/DataStore";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { disableStyle, enableStyle } from "@api/Styles";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import {
@@ -78,12 +78,8 @@ export const PluginProps = {
 
 export default definePlugin({
     name: "DiscordColorways",
-    description:
-        "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
-    authors: [{
-        name: "DaBluLite",
-        id: 582170007505731594n
-    }, Devs.ImLvna],
+    description: "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
+    authors: [EquicordDevs.DaBluLite, Devs.ImLvna],
     dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
     pluginVersion: PluginProps.pluginVersion,
     toolboxActions: {
@@ -115,27 +111,6 @@ export default definePlugin({
                 match: /function (\i).{0,200}colorPickerFooter:/,
                 replace: "$self.ColorPicker=$1;$&",
             },
-        },
-        {
-            find: "Messages.ACTIVITY_SETTINGS",
-            replacement: {
-                match: /\{section:(\i\.\i)\.HEADER,\s*label:(\i)\.\i\.Messages\.APP_SETTINGS/,
-                replace: "...$self.makeSettingsCategories($1),$&"
-            }
-        },
-        {
-            find: "Messages.ACTIVITY_SETTINGS",
-            replacement: {
-                match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
-                replace: (_, sectionTypes, commaOrSemi, elements, element) => `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`
-            }
-        },
-        {
-            find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
-            replacement: {
-                match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.UserSettingsSections\).*?(\i)\.default\.open\()/,
-                replace: "$2.default.open($1);return;"
-            }
         }
     ],
 
@@ -217,7 +192,46 @@ export default definePlugin({
     ColorwaysButton: () => <ColorwaysButton />,
 
     async start() {
-        addServerListElement(ServerListRenderPosition.In, this.ColorwaysButton);
+        const customSettingsSections = (
+            Vencord.Plugins.plugins.Settings as any as {
+                customSections: ((ID: Record<string, unknown>) => any)[];
+            }
+        ).customSections;
+
+        const ColorwaysSelector = () => ({
+            section: "ColorwaysSelector",
+            label: "Colorways Selector",
+            element: () => <Selector hasTheme />,
+            className: "dc-colorway-selector"
+        });
+        const ColorwaysSettings = () => ({
+            section: "ColorwaysSettings",
+            label: "Colorways Settings",
+            element: () => <SettingsPage hasTheme />,
+            className: "dc-colorway-settings"
+        });
+        const ColorwaysSourceManager = () => ({
+            section: "ColorwaysSourceManager",
+            label: "Colorways Sources",
+            element: () => <SourceManager hasTheme />,
+            className: "dc-colorway-sources-manager"
+        });
+        const ColorwaysOnDemand = () => ({
+            section: "ColorwaysOnDemand",
+            label: "Colorways On-Demand",
+            element: () => <OnDemandWaysPage hasTheme />,
+            className: "dc-colorway-ondemand"
+        });
+        const ColorwaysStore = () => ({
+            section: "ColorwaysStore",
+            label: "Colorways Store",
+            element: () => <Store hasTheme />,
+            className: "dc-colorway-store"
+        });
+
+        customSettingsSections.push(ColorwaysSelector, ColorwaysSettings, ColorwaysSourceManager, ColorwaysOnDemand, ColorwaysStore);
+
+        addServerListElement(ServerListRenderPosition.Above, this.ColorwaysButton);
 
         connect();
 
@@ -233,10 +247,21 @@ export default definePlugin({
         addAccessory("colorway-id-card", props => <ColorwayID props={props} />);
     },
     stop() {
-        removeServerListElement(ServerListRenderPosition.In, this.ColorwaysButton);
+        removeServerListElement(ServerListRenderPosition.Above, this.ColorwaysButton);
         disableStyle(style);
         disableStyle(discordTheme);
         ColorwayCSS.remove();
         removeAccessory("colorway-id-card");
+        const customSettingsSections = (
+            Vencord.Plugins.plugins.Settings as any as {
+                customSections: ((ID: Record<string, unknown>) => any)[];
+            }
+        ).customSections;
+
+        const i = customSettingsSections.findIndex(
+            section => section({}).id === ("ColorwaysSelector" || "ColorwaysSettings" || "ColorwaysSourceManager" || "ColorwaysOnDemand" || "ColorwaysStore")
+        );
+
+        if (i !== -1) customSettingsSections.splice(i, 1);
     },
 });
