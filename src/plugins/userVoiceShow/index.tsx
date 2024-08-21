@@ -18,7 +18,6 @@
 
 import "./styles.css";
 
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -34,32 +33,33 @@ export default definePlugin({
     settings,
 
     patches: [
+        // Small Profile
         {
-            find: "u.Z.BITE_SIZE_PROFILE_POPOUT",
+            find: ".BITE_SIZE,user:",
             replacement: {
-                match: /Z,{profileType:b.y0.BITE_SIZE,children:\[/,
-                replace: "$&$self.patch(arguments[0], false, true),",
-            }
-        },
-        // Full Size Profile
-        {
-            find: "O.Z.Messages.USER_PROFILE_MODAL",
-            replacement: {
-                match: /C.y0.FULL_SIZE,children:\[/,
+                match: /,{profileType:.+?.BITE_SIZE,children:\[/,
                 replace: "$&$self.patch(arguments[0], false, true),",
             }
         },
         // Direct Messages Side Profile
         {
-            find: "let{user:t,currentUser:n,channel:P}",
+            find: /location:"SimplifiedProfilePanel",.+?displayProfile:/,
             replacement: {
                 match: /PANEL,children:\[/,
                 replace: "$&$self.patch(arguments[0], false, true),",
             }
         },
+        // Full Size Profile
+        {
+            find: ":\"SimplifiedUserProfileModalHeader\"}",
+            replacement: {
+                match: /.FULL_SIZE,children:\[/,
+                replace: "$&$self.patch(arguments[0], false, true),",
+            }
+        },
         // Guild Members List
         {
-            find: "y.Z.Messages.PREMIUM_GUILD",
+            find: "(\"member_list_item\")",
             replacement: {
                 match: /avatar:(\i){1,2}/,
                 replace: "children:[$self.patch(arguments[0], false, false)],$&",
@@ -75,9 +75,9 @@ export default definePlugin({
         },
         // Friends list
         {
-            find: "let{user:t,hovered",
+            find: /.alignPomelo]:.+?.isPomelo()/,
             replacement: {
-                match: /children:a}\)]}\)/,
+                match: /children:.+?}\)]}\)/,
                 replace: "$&,$self.patch(arguments[0], true, false)",
             }
         }
@@ -88,9 +88,7 @@ export default definePlugin({
         if (inProfile && !settings.store.showVoiceActivityIconInUserProfile) return null;
 
         return (
-            <ErrorBoundary>
-                <VoiceActivityIcon user={user} needContainer={needContainer} inProfile={inProfile} />
-            </ErrorBoundary>
+            <VoiceActivityIcon user={user} needContainer={needContainer} inProfile={inProfile} />
         );
     },
 });
