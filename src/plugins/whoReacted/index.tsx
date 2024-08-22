@@ -21,18 +21,26 @@ import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
+import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip, RelationshipStore } from "@webpack/common";
 import { CustomEmoji } from "@webpack/types";
 import { Message, ReactionEmoji, User } from "discord-types/general";
+import { definePluginSettings } from "@api/Settings";
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
-const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 let Scroll: any = null;
 const queue = new Queue();
 let reactions: Record<string, ReactionCacheEntry>;
+
+const settings = definePluginSettings({
+    hideBlockedUsers: {
+        description: "Hide blocked users from showing up in the avatar list",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
+});
 
 function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
     const key = emoji.name + (emoji.id ? `:${emoji.id}` : "");
@@ -101,7 +109,8 @@ function handleClickAvatar(event: React.MouseEvent<HTMLElement, MouseEvent>) {
 export default definePlugin({
     name: "WhoReacted",
     description: "Renders the avatars of users who reacted to a message",
-    authors: [Devs.Ven, Devs.KannaDev, Devs.newwares, Devs.lannoene],
+    authors: [Devs.Ven, Devs.KannaDev, Devs.newwares],
+    settings,
 
     patches: [
         {
@@ -156,7 +165,7 @@ export default definePlugin({
         }, [message.id]);
 
         const reactions = getReactionsWithQueue(message, emoji, type);
-        const users = Object.values(reactions).filter((v) => {return v && !RelationshipStore.isBlocked(v.id)}) as User[];
+        const users = Object.values(reactions).filter((v) => v && (!RelationshipStore.isBlocked(v.id) || !settings.store.hideBlockedUsers)) as User[];
 
         return (
             <div
