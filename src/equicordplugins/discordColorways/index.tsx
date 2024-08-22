@@ -91,7 +91,7 @@ export default definePlugin({
         {
             find: "this.renderArtisanalHack()",
             replacement: {
-                match: /createPromise:\(\)=>([^:}]*?),webpackId:"\d+",name:(?!="CollectiblesShop")"[^"]+"/g,
+                match: /createPromise:\(\)=>([^:}]*?),webpackId:"?\d+"?,name:(?!="CollectiblesShop")"[^"]+"/g,
                 replace: "$&,_:$1",
                 predicate: () => true
             }
@@ -100,8 +100,8 @@ export default definePlugin({
         {
             find: "Messages.USER_SETTINGS_WITH_BUILD_OVERRIDE.format",
             replacement: {
-                match: /(?<=(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?openContextMenuLazy.{0,100}?(await Promise\.all[^};]*?\)\)).*?,)(?=\1\(this)/,
-                replace: "(async ()=>$2)(),"
+                match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?null!=\i&&.{0,100}?(await Promise\.all[^};]*?\)\)).*?,(?=\1\(this)/,
+                replace: "$&(async ()=>$2)(),"
             },
             predicate: () => true
         },

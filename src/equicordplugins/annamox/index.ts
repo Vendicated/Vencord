@@ -87,7 +87,7 @@ export default definePlugin({
         { // Gift button
             find: 'Messages.PREMIUM_GIFT_BUTTON_LABEL,"aria-haspopup":"dialog",onClick:',
             replacement: {
-                match: /if\(\w+\)return null;/,
+                match: /if\(\i\)return null;/,
                 replace: "return null;",
             },
             predicate: () => settings.store.gift,
@@ -95,7 +95,7 @@ export default definePlugin({
         { // Emoji list
             find: "Messages.EMOJI_PICKER_CREATE_EMOJI_TITLE,size:",
             replacement: {
-                match: /(\w+)=!\w+&&\w+.\i.isEmojiCategoryNitroLocked\(\{[^}]*\}\);/,
+                match: /(\i)=\i\|\|!\i&&\i.\i\i.isEmojiCategoryNitroLocked\(\{[^}]*\}\);/,
                 replace: "$&$1||"
             },
             predicate: () => settings.store.emojiList,
