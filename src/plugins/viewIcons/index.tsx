@@ -192,6 +192,14 @@ export default definePlugin({
             },
             all: true
         },
+        // Old Profiles Modal pfp
+        {
+            find: ".MODAL,hasProfileEffect",
+            replacement: {
+                match: /\{src:(\i)(?=,avatarDecoration)/,
+                replace: "{src:$1,onClick:()=>$self.openImage($1)"
+            }
+        },
         // Banners
         ...[".NITRO_BANNER,", "=!1,canUsePremiumCustomization:"].map(find => ({
             find,

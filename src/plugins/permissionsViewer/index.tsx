@@ -176,6 +176,13 @@ export default definePlugin({
 
     patches: [
         {
+            find: ".popularApplicationCommandIds,",
+            replacement: {
+                match: /showBorder:(.{0,60})}\),(?<=guild:(\i),guildMember:(\i),.+?)/,
+                replace: (m, showBoder, guild, guildMember) => `${m}$self.UserPermissions(${guild},${guildMember},${showBoder}),`
+            }
+        },
+        {
             find: ".VIEW_ALL_ROLES,",
             replacement: [
                 {

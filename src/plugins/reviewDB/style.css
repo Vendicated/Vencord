@@ -3,6 +3,10 @@
     --vc-rdb-spacing-size: 8px;
 }
 
+[class|="section"]:not([class|="lastSection"])+.vc-rdb-view {
+    margin-top: 12px;
+}
+
 .vc-rdb-badge {
     vertical-align: middle;
     margin-left: 4px;
