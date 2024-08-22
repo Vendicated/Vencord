@@ -39,7 +39,7 @@ export default definePlugin({
             find: ".BITE_SIZE,user:",
             replacement: {
                 match: /,{profileType:.{0,30}\.BITE_SIZE,children:\[/,
-                replace: "$&$self.patch(arguments[0], false, true),",
+                replace: "$&$self.renderVoiceActivityIcon(arguments[0], false, true),",
             }
         },
         // Direct Messages Side Profile
@@ -47,7 +47,7 @@ export default definePlugin({
             find: /location:"SimplifiedProfilePanel",.+?displayProfile:/,
             replacement: {
                 match: /PANEL,children:\[/,
-                replace: "$&$self.patch(arguments[0], false, true),",
+                replace: "$&$self.renderVoiceActivityIcon(arguments[0], false, true),",
             }
         },
         // Full Size Profile
@@ -55,7 +55,7 @@ export default definePlugin({
             find: ':"SimplifiedUserProfileModalHeader"}',
             replacement: {
                 match: /.FULL_SIZE,children:\[/,
-                replace: "$&$self.patch(arguments[0], false, true),",
+                replace: "$&$self.renderVoiceActivityIcon(arguments[0], false, true),",
             }
         },
         // Guild Members List
@@ -63,7 +63,7 @@ export default definePlugin({
             find: '("member_list_item")',
             replacement: {
                 match: /avatar:\i\(/,
-                replace: "children:[$self.patch(arguments[0], false, false)],$&",
+                replace: "children:[$self.renderVoiceActivityIcon(arguments[0], false, false)],$&",
             }
         },
         // Direct Messages List
@@ -71,7 +71,7 @@ export default definePlugin({
             find: "PrivateChannel.renderAvatar",
             replacement: {
                 match: /highlighted:.+?name:.+?decorators.+?\}\)\}\),/,
-                replace: "$&$self.patch(arguments[0], true, false),",
+                replace: "$&$self.renderVoiceActivityIcon(arguments[0], true, false),",
             }
         },
         // Friends list
@@ -79,7 +79,7 @@ export default definePlugin({
             find: /.alignPomelo]:.+?.isPomelo()/,
             replacement: {
                 match: /\.subtext,children:\i}/,
-                replace: "$&,$self.patch(arguments[0], true, false)",
+                replace: "$&,$self.renderVoiceActivityIcon(arguments[0], true, false)",
             }
         }
     ],
