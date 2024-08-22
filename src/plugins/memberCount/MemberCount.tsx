@@ -9,6 +9,7 @@ import { SelectedChannelStore, Tooltip, useEffect, useStateFromStores } from "@w
 
 import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat, ThreadMemberListStore } from ".";
 import { OnlineMemberCountStore } from "./OnlineMemberCountStore";
+import { isObjectEmpty } from "@utils/misc";
 
 export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; tooltipGuildId?: string; }) {
     const currentChannel = useStateFromStores([SelectedChannelStore], () => getCurrentChannel());
@@ -39,8 +40,8 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
         onlineCount = groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count), 0);
     }
 
-    if (!isTooltip && threads && !isObjectEmpty(threads)) {
-        onlineCount = Object.values(threads).reduce((total, curr) => total + (curr.sectionId === "offline" ? 0 : curr.userIds.length), 0);
+    if (!isTooltip && threadGroups && !isObjectEmpty(threadGroups)) {
+        onlineCount = Object.values(threadGroups).reduce((total, curr) => total + (curr.sectionId === "offline" ? 0 : curr.userIds.length), 0);
     }
 
     useEffect(() => {
