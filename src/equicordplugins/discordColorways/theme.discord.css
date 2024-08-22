@@ -1,4 +1,4 @@
-/* stylelint-disable color-function-notation */
+/* stylelint-disable property-no-vendor-prefix */
 .colorwaySelectorModal[data-theme="discord"],
 .colorwayModal[data-theme="discord"] {
     border: none;
@@ -20,7 +20,7 @@
 }
 
 [data-theme="discord"] .colorwaysSettings-switch {
-    background-color: rgb(128, 132, 142);
+    background-color: rgb(128 132 142);
 }
 
 [data-theme="discord"] .colorwaysSettings-switch.checked {
@@ -62,6 +62,7 @@
     font-weight: 500;
     line-height: 16px;
     padding: 2px 16px;
+    -moz-user-select: none;
     user-select: none;
 }
 
@@ -134,7 +135,7 @@
     align-items: center;
     text-indent: 0;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 0.625rem;
     line-height: 16px;
 }
 

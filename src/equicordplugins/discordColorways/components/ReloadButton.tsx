@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { MouseEvent } from "react";
+
 import { useEffect, useRef, useState } from "..";
 
 export default function ({ onClick, onForceReload }: { onClick: () => void, onForceReload: () => void; }) {
@@ -11,7 +13,7 @@ export default function ({ onClick, onForceReload }: { onClick: () => void, onFo
     const [pos, setPos] = useState({ x: 0, y: 0 });
     const [showMenu, setShowMenu] = useState(false);
 
-    function rightClickContextMenu(e) {
+    function rightClickContextMenu(e: MouseEvent<HTMLButtonElement, MouseEvent>) {
         e.stopPropagation();
         window.dispatchEvent(new Event("click"));
         setShowMenu(!showMenu);
@@ -69,7 +71,7 @@ export default function ({ onClick, onForceReload }: { onClick: () => void, onFo
                 </svg>
             </button>
         </nav> : null}
-        <button className="colorwaysPillButton" onContextMenu={rightClickContextMenu} onClick={onClick}>
+        <button className="colorwaysPillButton" onContextMenu={() => rightClickContextMenu} onClick={onClick}>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 x="0px"

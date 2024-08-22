@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { MouseEvent } from "react";
+
 import { useEffect, useRef, useState } from "..";
 
 export default function ({ source, sources, onSourceChange }: { source: { name: string, id: string; }, sources: { name: string, id: string; }[], onSourceChange: (sourceId: string) => void; }) {
@@ -12,7 +14,7 @@ export default function ({ source, sources, onSourceChange }: { source: { name: 
     const [showMenu, setShowMenu] = useState(false);
     const [current, setCurrent] = useState(source);
 
-    function rightClickContextMenu(e) {
+    function rightClickContextMenu(e: MouseEvent<HTMLButtonElement, MouseEvent>) {
         e.stopPropagation();
         window.dispatchEvent(new Event("click"));
         setShowMenu(!showMenu);
@@ -56,6 +58,6 @@ export default function ({ source, sources, onSourceChange }: { source: { name: 
                 </button>;
             })}
         </nav> : null}
-        <button className="colorwaysPillButton" onClick={rightClickContextMenu}>Source: {current.name}</button>
+        <button className="colorwaysPillButton" onClick={() => rightClickContextMenu}>Source: {current.name}</button>
     </>;
 }
