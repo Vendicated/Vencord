@@ -17,13 +17,9 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps } from "@webpack";
-
-const UserPopoutSectionCssClasses = findByProps("section", "lastSection");
 
 const settings = definePluginSettings({
     hide: {
@@ -72,22 +68,8 @@ export default definePlugin({
                 match: /\.NOTE_PLACEHOLDER,/,
                 replace: "$&spellCheck:!$self.noSpellCheck,"
             }
-        },
-        {
-            find: ".popularApplicationCommandIds,",
-            replacement: {
-                match: /lastSection:(!?\i)}\),/,
-                replace: "$&$self.patchPadding({lastSection:$1}),"
-            }
         }
     ],
-
-    patchPadding: ErrorBoundary.wrap(({ lastSection }) => {
-        if (!lastSection) return null;
-        return (
-            <div className={UserPopoutSectionCssClasses.lastSection} ></div>
-        );
-    }),
 
     get noSpellCheck() {
         return settings.store.noSpellCheck;

@@ -84,7 +84,7 @@ export default definePlugin({
         );
     },
 
-    patchPopout: ({ user }: UserProps) => {
+    patchProfilePopout: ({ user }: UserProps) => {
         const isSelfUser = user.id === UserStore.getCurrentUser().id;
         return (
             <div className={isSelfUser ? "vc-uvs-popout-margin-self" : ""}>
@@ -94,21 +94,7 @@ export default definePlugin({
     },
 
     patches: [
-        // above message box
-        {
-            find: ".popularApplicationCommandIds,",
-            replacement: {
-                match: /(?<=,)(?=!\i&&!\i&&.{0,50}setNote:)/,
-                replace: "$self.patchPopout(arguments[0]),",
-            }
-        },
-        // below username
-        {
-            find: ".Messages.MUTUAL_GUILDS_WITH_END_COUNT", // Lazy-loaded
-            replacement: {
-                match: /\.body.+?displayProfile:\i}\),/,
-                replace: "$&$self.patchModal(arguments[0]),",
-            }
-        }
+        // @TODO Maybe patch UserVoiceShow in simplified profile popout
+        // @TODO Patch new profile modal
     ],
 });
