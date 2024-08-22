@@ -20,18 +20,16 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
 import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Text, Tooltip, UserProfileStore } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { Tooltip, UserProfileStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
-
-const Section = findComponentByCodeLazy(".lastSection", "children:");
-const ThemeStore = findStoreLazy("ThemeStore");
 
 const useLegacyPlatformType: (platform: string) => string = findByCodeLazy(".TWITTER_LEGACY:");
 const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
@@ -75,7 +73,7 @@ interface ConnectionPlatform {
 }
 
 const profilePopoutComponent = ErrorBoundary.wrap(
-    (props: { user: User; displayProfile?: any; simplified?: boolean; }) => (
+    (props: { user: User; displayProfile?: any; }) => (
         <ConnectionsComponent
             {...props}
             id={props.user.id}
@@ -85,17 +83,7 @@ const profilePopoutComponent = ErrorBoundary.wrap(
     { noop: true }
 );
 
-const profilePanelComponent = ErrorBoundary.wrap(
-    (props: { id: string; simplified?: boolean; }) => (
-        <ConnectionsComponent
-            {...props}
-            theme={ThemeStore.theme}
-        />
-    ),
-    { noop: true }
-);
-
-function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: string, simplified?: boolean; }) {
+function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
@@ -104,33 +92,13 @@ function ConnectionsComponent({ id, theme, simplified }: { id: string, theme: st
     if (!connections?.length)
         return null;
 
-    const connectionsContainer = (
-        <div style={{
-            marginTop: !simplified ? "8px" : undefined,
+    return (
+        <Flex style={{
             gap: getSpacingPx(settings.store.iconSpacing),
             flexWrap: "wrap"
         }}>
-            <Text
-                tag="h2"
-                variant="eyebrow"
-                style={{
-                    color: "var(--header-primary)",
-                    marginBottom: "4px"
-                }}
-            >
-                Connections
-            </Text>
             {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
-        </div>
-    );
-
-    if (simplified)
-        return connectionsContainer;
-
-    return (
-        <Section>
-            {connectionsContainer}
-        </Section>
+        </Flex>
     );
 }
 
@@ -196,31 +164,17 @@ export default definePlugin({
     name: "ShowConnections",
     description: "Show connected accounts in user popouts",
     authors: [Devs.TheKodeToad],
+    settings,
+
     patches: [
-        {
-            find: "{isUsingGuildBio:null!==(",
-            replacement: {
-                match: /,theme:\i\}\)(?=,.{0,150}setNote:)/,
-                replace: "$&,$self.profilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile })"
-            }
-        },
-        {
-            find: ".PROFILE_PANEL,",
-            replacement: {
-                // createElement(Divider, {}), createElement(NoteComponent)
-                match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:(?=.+?channelId:(\i).id)/,
-                replace: "$self.profilePanelComponent({ id: $1.recipients[0] }),$&"
-            }
-        },
         {
             find: '"BiteSizeProfileBody"',
             replacement: {
                 match: /currentUser:\i,guild:\i}\)(?<=user:(\i),bio:null==(\i)\?.+?)/,
-                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, simplified: true })"
+                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2 })"
             }
         }
     ],
-    settings,
+
     profilePopoutComponent,
-    profilePanelComponent
 });
