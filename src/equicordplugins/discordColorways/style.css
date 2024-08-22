@@ -1,4 +1,3 @@
-/* stylelint-disable color-function-notation */
 /* stylelint-disable no-descending-specificity */
 /* stylelint-disable declaration-block-no-redundant-longhand-properties */
 /* stylelint-disable selector-id-pattern */
@@ -40,16 +39,19 @@
     height: 50%;
 }
 
-.discordColorwayPreviewColorContainer:not(:has(> .discordColorwayPreviewColor:nth-child(2)))>.discordColorwayPreviewColor {
+.discordColorwayPreviewColorContainer:not(:has(> .discordColorwayPreviewColor:nth-child(2)))
+    > .discordColorwayPreviewColor {
     height: 100%;
     width: 100%;
 }
 
-.discordColorwayPreviewColorContainer:not(:has(> .discordColorwayPreviewColor:nth-child(3)))>.discordColorwayPreviewColor {
+.discordColorwayPreviewColorContainer:not(:has(> .discordColorwayPreviewColor:nth-child(3)))
+    > .discordColorwayPreviewColor {
     height: 100%;
 }
 
-.discordColorwayPreviewColorContainer:not(:has(> .discordColorwayPreviewColor:nth-child(4)))>.discordColorwayPreviewColor:nth-child(3) {
+.discordColorwayPreviewColorContainer:not(:has(> .discordColorwayPreviewColor:nth-child(4)))
+    > .discordColorwayPreviewColor:nth-child(3) {
     width: 100%;
 }
 
@@ -177,7 +179,7 @@
 }
 
 .colorwaysSettings-switch {
-    background-color: rgb(85, 87, 94);
+    background-color: rgb(85 87 94);
     flex: 0 0 auto;
     position: relative;
     border-radius: 14px;
@@ -389,8 +391,8 @@
     color: var(--brand-500);
 }
 
-.colorwayCreator-colorPreviews>[class^="colorSwatch"],
-.colorwayCreator-colorPreviews>[class^="colorSwatch"]>[class^="swatch"] {
+.colorwayCreator-colorPreviews > [class^="colorSwatch"],
+.colorwayCreator-colorPreviews > [class^="colorSwatch"] > [class^="swatch"] {
     width: 100%;
     border: none;
     position: relative;
@@ -408,7 +410,7 @@
     pointer-events: none;
 }
 
-.colorwayCreator-colorPreviews>.colorSwatch-2UxEuG:has([fill="var(--primary-530)"])>.colorwaysPicker-colorLabel {
+.colorwayCreator-colorPreviews > .colorSwatch-2UxEuG:has([fill="var(--primary-530)"]) > .colorwaysPicker-colorLabel {
     color: var(--primary-530);
 }
 
@@ -553,7 +555,7 @@
     max-height: 185px;
 }
 
-.colorwaysCreator-settingCat-collapsed> :is(.colorwaysCreator-settingsList, .colorwayInfo-cssCodeblock),
+.colorwaysCreator-settingCat-collapsed > :is(.colorwaysCreator-settingsList, .colorwayInfo-cssCodeblock),
 .colorwaysColorpicker-collapsed {
     display: none !important;
 }
@@ -594,7 +596,7 @@
     pointer-events: all;
 }
 
-.colorwaysPreview-modal>.colorwaysPreview-wrapper {
+.colorwaysPreview-modal > .colorwaysPreview-wrapper {
     height: 100%;
 }
 
@@ -792,11 +794,11 @@
     flex: 1 0 auto;
 }
 
-.colorwayPreview-channels>.colorwayPreview-topShadow {
+.colorwayPreview-channels > .colorwayPreview-topShadow {
     border-top-left-radius: 8px;
 }
 
-.colorwayPreview-channels>.colorwayPreview-topShadow:hover {
+.colorwayPreview-channels > .colorwayPreview-topShadow:hover {
     background-color: hsl(var(--primary-500-hsl) / 30%);
 }
 
@@ -1035,14 +1037,14 @@
     align-items: end;
 }
 
-.is-mobile .colorwaySelector-doublePillBar>.colorwaySelector-pillWrapper:first-child {
+.is-mobile .colorwaySelector-doublePillBar > .colorwaySelector-pillWrapper:first-child {
     width: 100%;
     gap: 4px;
     overflow-x: auto;
     justify-content: space-between;
 }
 
-.is-mobile .colorwaySelector-doublePillBar>.colorwaySelector-pillWrapper:first-child>.colorwaySelector-pill {
+.is-mobile .colorwaySelector-doublePillBar > .colorwaySelector-pillWrapper:first-child > .colorwaySelector-pill {
     border-radius: 0;
     border-top: none;
     border-left: none;
@@ -1053,7 +1055,10 @@
     flex: 0 0 min-content;
 }
 
-.is-mobile .colorwaySelector-doublePillBar>.colorwaySelector-pillWrapper:first-child>.colorwaySelector-pillSeparator {
+.is-mobile
+    .colorwaySelector-doublePillBar
+    > .colorwaySelector-pillWrapper:first-child
+    > .colorwaySelector-pillSeparator {
     display: none;
 }
 
@@ -1310,10 +1315,10 @@
     background-color: var(--brand-experiment) !important;
 }
 
-.colorwayCreator-colorPreview_primary+.colorwayCreator-colorPreview_primary,
-.colorwayCreator-colorPreview_secondary+.colorwayCreator-colorPreview_secondary,
-.colorwayCreator-colorPreview_tertiary+.colorwayCreator-colorPreview_tertiary,
-.colorwayCreator-colorPreview_accent+.colorwayCreator-colorPreview_accent {
+.colorwayCreator-colorPreview_primary + .colorwayCreator-colorPreview_primary,
+.colorwayCreator-colorPreview_secondary + .colorwayCreator-colorPreview_secondary,
+.colorwayCreator-colorPreview_tertiary + .colorwayCreator-colorPreview_tertiary,
+.colorwayCreator-colorPreview_accent + .colorwayCreator-colorPreview_accent {
     display: none;
 }
 
@@ -1455,14 +1460,14 @@
 
 .dc-colorway-settings::before {
     /* stylelint-disable-next-line property-no-vendor-prefix */
-    -webkit-mask: var(--si-vencordsettings) center/contain no-repeat !important;
-    mask: var(--si-vencordsettings) center/contain no-repeat !important;
+    -webkit-mask: var(--si-equicordsettings) center/contain no-repeat !important;
+    mask: var(--si-equicordsettings) center/contain no-repeat !important;
 }
 
 .dc-colorway-ondemand::before {
     /* stylelint-disable-next-line property-no-vendor-prefix */
-    -webkit-mask: var(--si-vencordupdater) center/contain no-repeat !important;
-    mask: var(--si-vencordupdater) center/contain no-repeat !important;
+    -webkit-mask: var(--si-equicordupdater) center/contain no-repeat !important;
+    mask: var(--si-equicordupdater) center/contain no-repeat !important;
 }
 
 .dc-colorway-sources-manager::before {
@@ -1687,7 +1692,7 @@
     gap: 8px;
 }
 
-.colorwaysModalFooter>.colorwaysPillButton {
+.colorwaysModalFooter > .colorwaysPillButton {
     width: 100%;
 }
 
@@ -1787,7 +1792,7 @@
     border-top-color: var(--background-floating);
 }
 
-.colorwaysTooltip-right>.colorwaysTooltipPointer {
+.colorwaysTooltip-right > .colorwaysTooltipPointer {
     position: absolute;
     right: 100%;
     top: 50%;
@@ -1837,6 +1842,6 @@
     font-size: 12;
 }
 
-.colorwaysManagerConnectionValue>b {
+.colorwaysManagerConnectionValue > b {
     color: #a0a6ae;
 }

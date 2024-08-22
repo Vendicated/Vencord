@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { MouseEvent } from "react";
+
 import { useEffect, useState } from "..";
 import { SortOptions } from "../types";
 import { SortIcon } from "./Icons";
@@ -12,7 +14,7 @@ export default function ({ sort, onSortChange }: { sort: SortOptions, onSortChan
     const [pos, setPos] = useState({ x: 0, y: 0 });
     const [showMenu, setShowMenu] = useState(false);
 
-    function rightClickContextMenu(e) {
+    function rightClickContextMenu(e: MouseEvent<HTMLButtonElement, MouseEvent>) {
         e.stopPropagation();
         window.dispatchEvent(new Event("click"));
         setShowMenu(!showMenu);
@@ -80,6 +82,6 @@ export default function ({ sort, onSortChange }: { sort: SortOptions, onSortChan
                 </svg>
             </button>
         </nav> : null}
-        <button className="colorwaysPillButton" onClick={rightClickContextMenu}><SortIcon width={14} height={14} /> Sort By...</button>
+        <button className="colorwaysPillButton" onClick={() => rightClickContextMenu}><SortIcon width={14} height={14} /> Sort By...</button>
     </>;
 }
