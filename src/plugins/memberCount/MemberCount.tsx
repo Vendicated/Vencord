@@ -30,7 +30,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
         () => ChannelMemberStore.getProps(guildId, currentChannel?.id)
     );
 
-    const threads = useStateFromStores(
+    const threadGroups = useStateFromStores(
         [ThreadMemberListStore],
         () => ThreadMemberListStore.getMemberListSections(currentChannel.id)
     );
