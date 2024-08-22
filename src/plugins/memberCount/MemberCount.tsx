@@ -39,7 +39,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
         onlineCount = groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count), 0);
     }
 
-    if (!isTooltip && threads && (Object.values(threads).length >= 1)) {
+    if (!isTooltip && threads && !isObjectEmpty(threads)) {
         onlineCount = Object.values(threads).reduce((total, curr) => total + (curr.sectionId === "offline" ? 0 : curr.userIds.length), 0);
     }
 
