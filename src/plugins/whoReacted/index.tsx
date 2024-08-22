@@ -29,6 +29,7 @@ import { Message, ReactionEmoji, User } from "discord-types/general";
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
+const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 let Scroll: any = null;
 const queue = new Queue();
 let reactions: Record<string, ReactionCacheEntry>;
@@ -100,7 +101,7 @@ function handleClickAvatar(event: React.MouseEvent<HTMLElement, MouseEvent>) {
 export default definePlugin({
     name: "WhoReacted",
     description: "Renders the avatars of users who reacted to a message",
-    authors: [Devs.Ven, Devs.KannaDev, Devs.newwares],
+    authors: [Devs.Ven, Devs.KannaDev, Devs.newwares, Devs.lannoene],
 
     patches: [
         {
@@ -155,7 +156,7 @@ export default definePlugin({
         }, [message.id]);
 
         const reactions = getReactionsWithQueue(message, emoji, type);
-        const users = Object.values(reactions).filter(Boolean) as User[];
+        const users = Object.values(reactions).filter((v) => {return v && !RelationshipStore.isBlocked(v.id)}) as User[];
 
         return (
             <div
