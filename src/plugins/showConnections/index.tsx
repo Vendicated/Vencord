@@ -189,6 +189,14 @@ export default definePlugin({
     authors: [Devs.TheKodeToad],
     patches: [
         {
+            find: ".PROFILE_PANEL,",
+            replacement: {
+                // createElement(Divider, {}), createElement(NoteComponent)
+                match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:(?=.+?channelId:(\i).id)/,
+                replace: "$self.profilePanelComponent({ id: $1.recipients[0] }),$&"
+            }
+        },
+        {
             find: '"BiteSizeProfileBody"',
             replacement: {
                 match: /currentUser:\i,guild:\i}\)(?<=user:(\i),bio:null==(\i)\?.+?)/,
