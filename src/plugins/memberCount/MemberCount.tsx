@@ -5,9 +5,9 @@
  */
 
 import { getCurrentChannel } from "@utils/discord";
+import { isObjectEmpty } from "@utils/misc";
 import { SelectedChannelStore, Tooltip, useEffect, useStateFromStores } from "@webpack/common";
 
-import { isObjectEmpty } from "@utils/misc";
 import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat, ThreadMemberListStore } from ".";
 import { OnlineMemberCountStore } from "./OnlineMemberCountStore";
 
