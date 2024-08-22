@@ -47,13 +47,13 @@ export default definePlugin({
         RUNNING_GAMES_CHANGE(event) {
             const status = PresenceStore.getStatus(UserStore.getCurrentUser().id);
             if (event.games.length > 0) {
-                if (savedStatus !== "" && savedStatus !== settings.store.statusToSet)
-                    updateAsync(savedStatus);
-            } else {
                 if (status !== settings.store.statusToSet) {
                     savedStatus = status;
                     updateAsync(settings.store.statusToSet);
                 }
+            } else {
+                if (savedStatus !== "" && savedStatus !== settings.store.statusToSet)
+                    updateAsync(savedStatus);
             }
         },
     }
