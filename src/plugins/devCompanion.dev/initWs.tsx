@@ -6,6 +6,7 @@
 
 import { showNotification } from "@api/Notifications";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
+import { Patch } from "@utils/types";
 import { filters, findAll, search, wreq } from "@webpack";
 import { reporterData } from "debug/reporterData";
 
@@ -41,12 +42,29 @@ export function initWs(isManual = false) {
         });
         // if we are running the reporter with companion integration, send the list to vscode as soon as we can
         if (IS_COMPANION_TEST) {
+            const toSend = reporterData;
+            for (const i in toSend.failedPatches) {
+                for (const j in toSend.failedPatches[i]) {
+                    const patch: Patch = toSend.failedPatches[i][j];
+                    if (patch.find instanceof RegExp)
+                        patch.find = String(patch.find);
+                    if (!Array.isArray(patch.replacement))
+                        patch.replacement = [patch.replacement];
+                    patch.replacement = patch.replacement.map(v => {
+                        return {
+                            match: String(v.match),
+                            replace: String(v.replace)
+                        };
+                    });
+                }
+            }
             replyData({
                 type: "report",
-                data: reporterData,
+                data: toSend,
                 ok: true
             });
         }
+
 
         (settings.store.notifyOnAutoConnect || isManual) && showNotification({
             title: "Dev Companion Connected",
