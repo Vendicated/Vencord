@@ -34,15 +34,6 @@ export default definePlugin({
             }
         },
         {
-            find: ".avatarPositionPremiumNoBanner,default:",
-            replacement: {
-                // premiumUserWithoutBanner: foo().avatarPositionPremiumNoBanner, default: foo().avatarPositionNormal
-                match: /\.avatarPositionPremiumNoBanner(?=,default:\i\.(\i))/,
-                // premiumUserWithoutBanner: foo().avatarPositionNormal...
-                replace: ".$1"
-            }
-        },
-        {
             find: "hasThemeColors(){",
             replacement: {
                 match: /get canUsePremiumProfileCustomization\(\){return /,

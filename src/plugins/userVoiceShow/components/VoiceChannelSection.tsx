@@ -18,12 +18,11 @@
 
 import "./VoiceChannelSection.css";
 
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { Button, Forms, PermissionStore, Toasts } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 const ChannelActions = findByPropsLazy("selectChannel", "selectVoiceChannel");
-const UserPopoutSection = findByCodeLazy(".lastSection", "children:");
 
 const CONNECT = 1n << 20n;
 
@@ -34,7 +33,8 @@ interface VoiceChannelFieldProps {
 }
 
 export const VoiceChannelSection = ({ channel, label, showHeader }: VoiceChannelFieldProps) => (
-    <UserPopoutSection>
+    // @TODO The div is supposed to be a UserPopoutSection
+    <div>
         {showHeader && <Forms.FormTitle className="vc-uvs-header">In a voice channel</Forms.FormTitle>}
         <Button
             className="vc-uvs-button"
@@ -57,5 +57,5 @@ export const VoiceChannelSection = ({ channel, label, showHeader }: VoiceChannel
         >
             {label}
         </Button>
-    </UserPopoutSection>
+    </div>
 );

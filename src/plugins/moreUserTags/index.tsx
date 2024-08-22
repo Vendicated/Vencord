@@ -247,9 +247,9 @@ export default definePlugin({
             }
         },
         {
-            find: 'copyMetaData:"User Tag"',
+            find: ".Messages.USER_PROFILE_PRONOUNS",
             replacement: {
-                match: /(?=,botClass:)/,
+                match: /(?=,hideBotTag:!0)/,
                 replace: ",moreTags_channelId:arguments[0].moreTags_channelId"
             }
         },
