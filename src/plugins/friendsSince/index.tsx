@@ -23,20 +23,20 @@ export default definePlugin({
     description: "Shows when you became friends with someone in the user popout",
     authors: [Devs.Elvyra, Devs.Antti],
     patches: [
-        // DM User Sidebar - new layout
+        // DM User Sidebar
         {
             find: ".PANEL}),nicknameIcons",
             replacement: {
                 match: /USER_PROFILE_MEMBER_SINCE,.{0,100}userId:(\i\.id)}\)}\)/,
-                replace: "$&,$self.friendsSince({userId:$1,isSidebar:true})"
+                replace: "$&,$self.friendsSinceNew({userId:$1,isSidebar:true})"
             }
         },
-        // User Profile Modal - new layout
+        // User Profile Modal
         {
             find: "action:\"PRESS_APP_CONNECTION\"",
             replacement: {
                 match: /USER_PROFILE_MEMBER_SINCE,.{0,100}userId:(\i\.id),.{0,100}}\)}\),/,
-                replace: "$&,$self.friendsSince({userId:$1,isSidebar:false}),"
+                replace: "$&,$self.friendsSinceNew({userId:$1,isSidebar:false}),"
             }
         }
     ],
@@ -52,7 +52,7 @@ export default definePlugin({
         }
     },
 
-    friendsSince: ErrorBoundary.wrap(({ userId, isSidebar }: { userId: string; isSidebar: boolean; }) => {
+    friendsSinceNew: ErrorBoundary.wrap(({ userId, isSidebar }: { userId: string; isSidebar: boolean; }) => {
         if (!RelationshipStore.isFriend(userId)) return null;
 
         const friendsSince = RelationshipStore.getSince(userId);

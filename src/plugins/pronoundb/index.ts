@@ -51,7 +51,9 @@ export default definePlugin({
                     replace: "[$1, $self.PronounsChatComponentWrapper(arguments[0])]"
                 }
             ]
-        }
+        },
+
+        // @TODO Patch discord pronoun hook in user profiles (useProfilePronouns)
     ],
 
     settings,

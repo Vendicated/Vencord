@@ -192,9 +192,6 @@ export default definePlugin({
         }
     ],
 
-    UserPermissions: (guild: Guild, guildMember: GuildMember | undefined, showBorder: boolean) =>
-        !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} showBorder={showBorder} />,
-
     ViewPermissionsButton: ErrorBoundary.wrap(({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) => (
         <Popout
             position="bottom"

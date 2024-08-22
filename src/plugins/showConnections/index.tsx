@@ -20,17 +20,16 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
 import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
-import { Text, Tooltip, UserProfileStore } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { Tooltip, UserProfileStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
-
-const ThemeStore = findStoreLazy("ThemeStore");
 
 const useLegacyPlatformType: (platform: string) => string = findByCodeLazy(".TWITTER_LEGACY:");
 const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
@@ -84,16 +83,6 @@ const profilePopoutComponent = ErrorBoundary.wrap(
     { noop: true }
 );
 
-const profilePanelComponent = ErrorBoundary.wrap(
-    (props: { id: string; }) => (
-        <ConnectionsComponent
-            {...props}
-            theme={ThemeStore.theme}
-        />
-    ),
-    { noop: true }
-);
-
 function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
@@ -103,26 +92,14 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     if (!connections?.length)
         return null;
 
-    const connectionsContainer = (
-        <div style={{
+    return (
+        <Flex style={{
             gap: getSpacingPx(settings.store.iconSpacing),
             flexWrap: "wrap"
         }}>
-            <Text
-                tag="h2"
-                variant="eyebrow"
-                style={{
-                    color: "var(--header-primary)",
-                    marginBottom: "4px"
-                }}
-            >
-                Connections
-            </Text>
             {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
-        </div>
+        </Flex>
     );
-
-    return connectionsContainer;
 }
 
 function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
@@ -187,6 +164,8 @@ export default definePlugin({
     name: "ShowConnections",
     description: "Show connected accounts in user popouts",
     authors: [Devs.TheKodeToad],
+    settings,
+
     patches: [
         {
             find: '"BiteSizeProfileBody"',
@@ -196,7 +175,6 @@ export default definePlugin({
             }
         }
     ],
-    settings,
+
     profilePopoutComponent,
-    profilePanelComponent
 });

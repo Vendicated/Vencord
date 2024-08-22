@@ -73,9 +73,6 @@ export default definePlugin({
         }
     ],
 
-    isBotOrSelf,
-    getMutualGDMCountText,
-
     pushSection(sections: any[], user: User) {
         if (isBotOrSelf(user) || sections[IS_PATCHED]) return;
 
