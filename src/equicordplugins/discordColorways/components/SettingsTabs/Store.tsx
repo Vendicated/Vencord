@@ -4,32 +4,27 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore } from "@api/index";
-import { Flex } from "@components/Flex";
-import { DeleteIcon } from "@components/Icons";
-import { Link } from "@components/Link";
-import { SettingsTab } from "@components/VencordSettings/shared";
-import { getTheme, Theme } from "@utils/discord";
-import { openModal } from "@utils/modal";
-import { findByProps } from "@webpack";
-import { Button, ScrollerThin, Text, TextInput, Tooltip, useEffect, useState } from "@webpack/common";
-
+import { DataStore, openModal, ReactNode, useEffect, useState } from "../../";
 import { StoreItem } from "../../types";
-import { DownloadIcon, PalleteIcon } from "../Icons";
+import { DeleteIcon, DownloadIcon, PalleteIcon } from "../Icons";
 import Selector from "../Selector";
 
-const GithubIconLight = "/assets/3ff98ad75ac94fa883af5ed62d17c459.svg";
-const GithubIconDark = "/assets/6a853b4c87fce386cbfef4a2efbacb09.svg";
-
-function GithubIcon() {
-    const src = getTheme() === Theme.Light ? GithubIconLight : GithubIconDark;
-    return <img src={src} alt="GitHub" />;
-}
-
-export default function () {
+export default function ({
+    hasTheme = false
+}: {
+    hasTheme?: boolean;
+}) {
     const [storeObject, setStoreObject] = useState<StoreItem[]>([]);
     const [colorwaySourceFiles, setColorwaySourceFiles] = useState<{ name: string, url: string; }[]>([]);
     const [searchValue, setSearchValue] = useState<string>("");
+    const [theme, setTheme] = useState("discord");
+
+    useEffect(() => {
+        async function load() {
+            setTheme(await DataStore.get("colorwaysPluginTheme") as string);
+        }
+        load();
+    }, []);
 
     useEffect(() => {
         if (!searchValue) {
@@ -42,79 +37,76 @@ export default function () {
         }
     }, []);
 
-    const { item: radioBarItem, itemFilled: radioBarItemFilled } = findByProps("radioBar");
+    function Container({ children }: { children: ReactNode; }) {
+        if (hasTheme) return <div className="colorwaysModalTab" data-theme={theme}>{children}</div>;
+        else return <div className="colorwaysModalTab">{children}</div>;
+    }
 
-    return <SettingsTab title="Colorway Store">
-        <Flex style={{ gap: "0", marginBottom: "8px" }}>
-            <TextInput
+    return <Container>
+        <div style={{ display: "flex", marginBottom: "8px" }}>
+            <input
+                type="text"
                 className="colorwaySelector-search"
                 placeholder="Search for sources..."
                 value={searchValue}
-                onChange={setSearchValue}
+                onChange={e => setSearchValue(e.currentTarget.value)}
             />
-            <Tooltip text="Refresh...">
-                {({ onMouseEnter, onMouseLeave }) => <Button
-                    innerClassName="colorwaysSettings-iconButtonInner"
-                    size={Button.Sizes.ICON}
-                    color={Button.Colors.PRIMARY}
-                    look={Button.Looks.OUTLINED}
-                    style={{ marginLeft: "8px" }}
-                    onMouseEnter={onMouseEnter}
-                    onMouseLeave={onMouseLeave}
-                    onClick={async function () {
-                        const res: Response = await fetch("https://dablulite.vercel.app/");
-                        const data = await res.json();
-                        setStoreObject(data.sources);
-                        setColorwaySourceFiles(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]);
-                    }}
+            <button
+                className="colorwaysPillButton"
+                style={{ marginLeft: "8px", marginTop: "auto", marginBottom: "auto" }}
+                onClick={async function () {
+                    const res: Response = await fetch("https://dablulite.vercel.app/");
+                    const data = await res.json();
+                    setStoreObject(data.sources);
+                    setColorwaySourceFiles(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]);
+                }}
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    x="0px"
+                    y="0px"
+                    width="14"
+                    height="14"
+                    style={{ boxSizing: "content-box", flexShrink: 0 }}
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
                 >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        x="0px"
-                        y="0px"
-                        width="20"
-                        height="20"
-                        style={{ padding: "6px", boxSizing: "content-box" }}
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                    >
-                        <rect
-                            y="0"
-                            fill="none"
-                            width="24"
-                            height="24"
-                        />
-                        <path
-                            d="M6.351,6.351C7.824,4.871,9.828,4,12,4c4.411,0,8,3.589,8,8h2c0-5.515-4.486-10-10-10 C9.285,2,6.779,3.089,4.938,4.938L3,3v6h6L6.351,6.351z"
-                        />
-                        <path
-                            d="M17.649,17.649C16.176,19.129,14.173,20,12,20c-4.411,0-8-3.589-8-8H2c0,5.515,4.486,10,10,10 c2.716,0,5.221-1.089,7.062-2.938L21,21v-6h-6L17.649,17.649z"
-                        />
-                    </svg>
-                </Button>}
-            </Tooltip>
-        </Flex>
-        <ScrollerThin orientation="vertical" className="colorwaysSettings-sourceScroller">
+                    <rect
+                        y="0"
+                        fill="none"
+                        width="24"
+                        height="24"
+                    />
+                    <path
+                        d="M6.351,6.351C7.824,4.871,9.828,4,12,4c4.411,0,8,3.589,8,8h2c0-5.515-4.486-10-10-10 C9.285,2,6.779,3.089,4.938,4.938L3,3v6h6L6.351,6.351z"
+                    />
+                    <path
+                        d="M17.649,17.649C16.176,19.129,14.173,20,12,20c-4.411,0-8-3.589-8-8H2c0,5.515,4.486,10,10,10 c2.716,0,5.221-1.089,7.062-2.938L21,21v-6h-6L17.649,17.649z"
+                    />
+                </svg>
+                Refresh
+            </button>
+        </div>
+        <div className="colorwaysSettings-sourceScroller">
             {storeObject.map((item: StoreItem) =>
-                item.name.toLowerCase().includes(searchValue.toLowerCase()) ? <div className={`${radioBarItem} ${radioBarItemFilled} colorwaysSettings-colorwaySource`} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }}>
-                    <Flex flexDirection="column" style={{ gap: ".5rem", marginBottom: "8px" }}>
-                        <Text className="colorwaysSettings-colorwaySourceLabelHeader">
+                item.name.toLowerCase().includes(searchValue.toLowerCase()) ? <div className={"colorwaysSettings-colorwaySource"} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }}>
+                    <div style={{ gap: ".5rem", display: "flex", marginBottom: "8px", flexDirection: "column" }}>
+                        <span className="colorwaysSettings-colorwaySourceLabelHeader">
                             {item.name}
-                        </Text>
-                        <Text className="colorwaysSettings-colorwaySourceDesc">
+                        </span>
+                        <span className="colorwaysSettings-colorwaySourceDesc">
                             {item.description}
-                        </Text>
-                        <Text className="colorwaysSettings-colorwaySourceDesc" style={{ opacity: ".8" }}>
+                        </span>
+                        <span className="colorwaysSettings-colorwaySourceDesc" style={{ opacity: ".8" }}>
                             by {item.authorGh}
-                        </Text>
-                    </Flex>
-                    <Flex style={{ gap: "8px", alignItems: "center", width: "100%" }}>
-                        <Link href={"https://github.com/" + item.authorGh}><GithubIcon /></Link>
-                        <Button
-                            innerClassName="colorwaysSettings-iconButtonInner"
-                            size={Button.Sizes.SMALL}
-                            color={colorwaySourceFiles.map(source => source.name).includes(item.name) ? Button.Colors.RED : Button.Colors.PRIMARY}
-                            look={Button.Looks.OUTLINED}
+                        </span>
+                    </div>
+                    <div style={{ gap: "8px", alignItems: "center", width: "100%", display: "flex" }}>
+                        <a role="link" target="_blank" href={"https://github.com/" + item.authorGh}>
+                            <img src="/assets/6a853b4c87fce386cbfef4a2efbacb09.svg" alt="GitHub" />
+                        </a>
+                        <button
+                            className="colorwaysPillButton colorwaysPillButton-onSurface"
                             style={{ marginLeft: "auto" }}
                             onClick={async () => {
                                 if (colorwaySourceFiles.map(source => source.name).includes(item.name)) {
@@ -129,21 +121,26 @@ export default function () {
                             }}
                         >
                             {colorwaySourceFiles.map(source => source.name).includes(item.name) ? <><DeleteIcon width={14} height={14} /> Remove</> : <><DownloadIcon width={14} height={14} /> Add to Sources</>}
-                        </Button>
-                        <Button
-                            innerClassName="colorwaysSettings-iconButtonInner"
-                            size={Button.Sizes.SMALL}
-                            color={Button.Colors.PRIMARY}
-                            look={Button.Looks.OUTLINED}
+                        </button>
+                        <button
+                            className="colorwaysPillButton colorwaysPillButton-onSurface"
                             onClick={async () => {
-                                openModal(props => <Selector modalProps={props} settings={{ selectorType: "preview", previewSource: item.url }} />);
+                                openModal(props => <div className={`colorwaysModal ${props.transitionState === 2 ? "closing" : ""} ${props.transitionState === 4 ? "hidden" : ""}`} data-theme={theme}>
+                                    <h2 className="colorwaysModalHeader">
+                                        Previewing colorways for {item.name}
+                                    </h2>
+                                    <div className="colorwaysModalContent colorwaysModalContent-sourcePreview">
+                                        <Selector settings={{ selectorType: "preview", previewSource: item.url }} />
+                                    </div>
+                                </div>);
                             }}
                         >
-                            <PalleteIcon width={14} height={14} />{" "}Preview
-                        </Button>
-                    </Flex>
+                            <PalleteIcon width={14} height={14} />
+                            Preview
+                        </button>
+                    </div>
                 </div> : <></>
             )}
-        </ScrollerThin>
-    </SettingsTab>;
+        </div>
+    </Container>;
 }

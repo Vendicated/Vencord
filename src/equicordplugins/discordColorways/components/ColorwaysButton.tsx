@@ -4,15 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import * as DataStore from "@api/DataStore";
-import { openModal } from "@utils/modal";
-import { FluxDispatcher, Text, Tooltip, useEffect, useState } from "@webpack/common";
-import { FluxEvents } from "@webpack/types";
-
+import { DataStore, FluxDispatcher, FluxEvents, openModal, useEffect, useState } from "..";
 import { getAutoPresets } from "../css";
 import { ColorwayObject } from "../types";
 import { PalleteIcon } from "./Icons";
-import Selector from "./Selector";
+import Selector from "./MainModal";
+import Tooltip from "./Tooltip";
 
 export default function () {
     const [activeColorway, setActiveColorway] = useState<string>("None");
@@ -39,11 +36,11 @@ export default function () {
         <>
             {!isThin ? <>
                 <span>Colorways</span>
-                <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500 }}>{"Active Colorway: " + activeColorway}</Text>
+                <span style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: 12 }}>{"Active Colorway: " + activeColorway}</span>
             </> : <span>{"Active Colorway: " + activeColorway}</span>}
-            {activeColorway === "Auto" ? <Text variant="text-xs/normal" style={{ color: "var(--text-muted)", fontWeight: 500 }}>{"Auto Preset: " + (getAutoPresets()[autoPreset].name || "None")}</Text> : <></>}
+            {activeColorway === "Auto" ? <span style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: 12 }}>{"Auto Preset: " + (getAutoPresets()[autoPreset].name || "None")}</span> : <></>}
         </>
-    } position="right" tooltipContentClassName="colorwaysBtn-tooltipContent"
+    } position="right"
     >
         {({ onMouseEnter, onMouseLeave, onClick }) => visibility ? <div className="ColorwaySelectorBtnContainer">
             <div
@@ -58,7 +55,7 @@ export default function () {
                     onClick();
                     openModal((props: any) => <Selector modalProps={props} />);
                 }}
-            >{isThin ? <Text variant="text-xs/normal" style={{ color: "var(--header-primary)", fontWeight: 700, fontSize: 9 }}>Colorways</Text> : <PalleteIcon />}</div>
+            >{isThin ? <span style={{ color: "var(--header-primary)", fontWeight: 700, fontSize: 9 }}>Colorways</span> : <PalleteIcon />}</div>
         </div> : <></>}
     </Tooltip>;
 }

@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export const defaultColorwaySource = "https://raw.githubusercontent.com/DaBluLite/ProjectColorway/master/index.json";
+import { ColorwayObject } from "./types";
+
+export const defaultColorwaySource = "https://raw.githubusercontent.com/ProjectColorway/ProjectColorway/master/index.json";
 
 export const fallbackColorways = [
     {
@@ -311,3 +313,5 @@ export const mainColors = [
     { name: "secondary", title: "Secondary", var: "--background-secondary" },
     { name: "tertiary", title: "Tertiary", var: "--background-tertiary" }
 ];
+
+export const nullColorwayObj: ColorwayObject = { id: null, css: null, sourceType: null, source: null };
