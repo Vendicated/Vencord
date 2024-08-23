@@ -299,20 +299,9 @@ page.on("pageerror", e => {
     }
 });
 
-async function reporterRuntime(token: string) {
-    Vencord.Webpack.waitFor(
-        Vencord.Webpack.filters.byProps("loginToken"),
-        m => {
-            console.log("[PUP_DEBUG]", "Logging in with token...");
-            m.loginToken(token);
-        }
-    );
-}
-
 await page.evaluateOnNewDocument(`
     if (location.host.endsWith("discord.com")) {
         ${readFileSync("./dist/browser.js", "utf-8")};
-        (${reporterRuntime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
     }
 `);
 
