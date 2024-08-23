@@ -26,7 +26,7 @@ export async function loadLazyChunks() {
         // True if resolved, false otherwise
         const chunksSearchPromises = [] as Array<() => boolean>;
 
-        const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?)\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/g);
+        const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?)\.then\(\i(?:\.\i)?\.bind\(\i,"?([^)]+?)"?(?:,[^)]+?)?\)\)/g);
 
         async function searchAndLoadLazyChunks(factoryCode: string) {
             const lazyChunks = factoryCode.matchAll(LazyChunkRegex);
@@ -136,7 +136,8 @@ export async function loadLazyChunks() {
 
         if (allChunks.length === 0) throw new Error("Failed to get all chunks");
 
-        // Chunks that are not loaded (not used) by Discord code anymore
+        // Chunks which our regex could not catch to load
+        // It will always contain WebWorker assets, and also currently contains some language packs which are loaded differently
         const chunksLeft = allChunks.filter(id => {
             return !(validChunks.has(id) || invalidChunks.has(id));
         });
@@ -146,12 +147,9 @@ export async function loadLazyChunks() {
                 .then(r => r.text())
                 .then(t => t.includes("importScripts("));
 
-            // Loads and requires a chunk
+            // Loads the chunk. Currently this only happens with the language packs which are loaded differently
             if (!isWorkerAsset) {
                 await wreq.e(id);
-                // Technically, the id of the chunk does not match the entry point
-                // But, still try it because we have no way to get the actual entry point
-                if (wreq.m[id]) wreq(id);
             }
         }));
 
