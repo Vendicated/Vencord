@@ -230,6 +230,10 @@ export function definePluginSettings<
             if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
             return Settings.plugins[definedSettings.pluginName] as any;
         },
+        get plain() {
+            if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
+            return PlainSettings.plugins[definedSettings.pluginName] as any;
+        },
         use: settings => useSettings(
             settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`) as UseSettings<Settings>[]
         ).plugins[definedSettings.pluginName] as any,
