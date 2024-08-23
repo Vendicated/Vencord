@@ -16,16 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { Channel, Message } from "discord-types/general";
-import type { MouseEventHandler } from "react";
+import type { ComponentType, MouseEventHandler } from "react";
 
 const logger = new Logger("MessagePopover");
 
 export interface ButtonItem {
     key?: string,
     label: string,
-    icon: React.ComponentType<any>,
+    icon: ComponentType<any>,
     message: Message,
     channel: Channel,
     onClick?: MouseEventHandler<HTMLButtonElement>,
@@ -48,22 +49,26 @@ export function removeButton(identifier: string) {
 }
 
 export function _buildPopoverElements(
-    msg: Message,
-    makeButton: (item: ButtonItem) => React.ComponentType
+    Component: React.ComponentType<ButtonItem>,
+    message: Message
 ) {
-    const items = [] as React.ComponentType[];
+    const items: React.ReactNode[] = [];
 
     for (const [identifier, getItem] of buttons.entries()) {
         try {
-            const item = getItem(msg);
+            const item = getItem(message);
             if (item) {
                 item.key ??= identifier;
-                items.push(makeButton(item));
+                items.push(
+                    <ErrorBoundary noop>
+                        <Component {...item} />
+                    </ErrorBoundary>
+                );
             }
         } catch (err) {
             logger.error(`[${identifier}]`, err);
         }
     }
 
-    return items;
+    return <>{items}</>;
 }
