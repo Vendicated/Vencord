@@ -193,16 +193,13 @@ export default definePlugin({
             all: true
         },
         // Banners
-        ...[".NITRO_BANNER,", "=!1,canUsePremiumCustomization:"].map(find => ({
-            find,
+        {
+            find: 'backgroundColor:"COMPLETE"',
             replacement: {
-                // style: { backgroundImage: shouldShowBanner ? "url(".concat(bannerUrl,
-                match: /style:\{(?=backgroundImage:(null!=\i)\?"url\("\.concat\((\i),)/,
-                replace:
-                    // onClick: () => shouldShowBanner && ev.target.style.backgroundImage && openImage(bannerUrl), style: { cursor: shouldShowBanner ? "pointer" : void 0,
-                    'onClick:ev=>$1&&ev.target.style.backgroundImage&&$self.openImage($2),style:{cursor:$1?"pointer":void 0,'
+                match: /(\.banner,.+?),style:{(?=.+?backgroundImage:null!=(\i)\?"url\("\.concat\(\2,)/,
+                replace: (_, rest, bannerSrc) => `${rest},onClick:()=>${bannerSrc}!=null&&$self.openImage(${bannerSrc}),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
             }
-        })),
+        },
         // Group DMs top small & large icon
         {
             find: /\.recipients\.length>=2(?!<isMultiUserDM.{0,50})/,

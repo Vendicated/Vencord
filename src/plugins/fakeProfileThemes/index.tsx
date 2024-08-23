@@ -121,7 +121,7 @@ export default definePlugin({
         {
             find: "UserProfileStore",
             replacement: {
-                match: /(?<=getUserProfile\(\i\){return )(\i\[\i\])/,
+                match: /(?<=getUserProfile\(\i\){return )(.+?)(?=})/,
                 replace: "$self.colorDecodeHook($1)"
             }
         },
