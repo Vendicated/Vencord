@@ -19,7 +19,6 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { UserStore } from "@webpack/common";
-import virtualMerge from "virtual-merge";
 
 export default definePlugin({
     name: "NoProfileThemes",
@@ -33,21 +32,7 @@ export default definePlugin({
                 replace: "$&$self.isCurrentUser(this.userId)&&"
             }
         },
-        {
-            find: "UserProfileStore",
-            replacement: {
-                match: /(?<=getUserProfile\(\i\){return )(.+?)(?=})/,
-                replace: "$self.removeProfileThemes($1)"
-            }
-        }
     ],
 
     isCurrentUser: (userId: string) => userId === UserStore.getCurrentUser()?.id,
-    removeProfileThemes: (displayProfile: any) => {
-        if (displayProfile == null) return displayProfile;
-
-        return displayProfile.userId === UserStore.getCurrentUser()?.id
-            ? displayProfile
-            : virtualMerge(displayProfile, { banner: undefined, profileEffectId: undefined });
-    }
 });

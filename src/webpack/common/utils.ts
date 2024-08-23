@@ -149,10 +149,14 @@ export const InviteActions = findByProps("resolveInvite");
 
 export const IconUtils = findByProps<t.IconUtils>("getGuildBannerURL", "getUserAvatarURL");
 
-// TODO: type
 export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModule("expression-picker-last-active-view", {
+    openExpressionPicker: filters.byCode(/setState\({activeView:(?:(?!null)\i),activeViewType:/),
     closeExpressionPicker: filters.byCode("setState({activeView:null"),
-    openExpressionPicker: filters.byCode(/setState\({activeView:\i,activeViewType:/),
+    toggleMultiExpressionPicker: filters.byCode(".EMOJI,"),
+    toggleExpressionPicker: filters.byCode(/getState\(\)\.activeView===\i\?\i\(\):\i\(/),
+    setExpressionPickerView: filters.byCode(/setState\({activeView:\i,lastActiveView:/),
+    setSearchQuery: filters.byCode("searchQuery:"),
+    useExpressionPickerStore: filters.byCode("Object.is")
 });
 
 export const PopoutActions: t.PopoutActions = mapMangledModule('type:"POPOUT_WINDOW_OPEN"', {

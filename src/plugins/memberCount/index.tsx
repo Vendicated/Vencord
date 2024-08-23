@@ -32,6 +32,10 @@ export const GuildMemberCountStore = findStore("GuildMemberCountStore") as FluxS
 export const ChannelMemberStore = findStore("ChannelMemberStore") as FluxStore & {
     getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
 };
+export const ThreadMemberListStore = findStore("ThreadMemberListStore") as FluxStore & {
+    getMemberListSections(channelId: string): { [sectionId: string]: { sectionId: string; userIds: string[]; }; };
+};
+
 
 const settings = definePluginSettings({
     toolTip: {
