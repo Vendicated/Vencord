@@ -20,7 +20,6 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
-import { reporterData } from "debug/reporterData";
 
 import { initWs, socket, stopWs } from "./initWs";
 console.log("imported");
@@ -58,9 +57,9 @@ export default definePlugin({
     },
 
     start() {
-        console.log(123);
-        console.log(reporterData);
-        initWs();
+        // if were running the reporter, we need to initws in the reporter file to avoid a race condition
+        if (!IS_COMPANION_TEST)
+            initWs();
     },
 
     stop: stopWs,

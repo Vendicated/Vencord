@@ -7,6 +7,7 @@
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
 import { patches } from "plugins";
+import { initWs } from "plugins/devCompanion.dev/initWs";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 import { reporterData } from "./reporterData";
@@ -78,11 +79,13 @@ async function runReporter() {
             }
         }
 
+        // if we are running the reporter with companion integration, send the list to vscode as soon as we can
+        if(IS_COMPANION_TEST)
+            initWs();
         ReporterLogger.log("Finished test");
     } catch (e) {
         ReporterLogger.log("A fatal error occurred:", e);
     }
-    console.log(reporterData);
 }
 
 // imported in webpack for reporterData, wrap to avoid running reporter
