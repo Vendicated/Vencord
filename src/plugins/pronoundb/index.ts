@@ -26,11 +26,6 @@ import { CompactPronounsChatComponentWrapper, PronounsChatComponentWrapper } fro
 import { useProfilePronouns } from "./pronoundbUtils";
 import { settings } from "./settings";
 
-const PRONOUN_TOOLTIP_PATCH = {
-    match: /text:(.{0,10}.Messages\.USER_PROFILE_PRONOUNS)(?=,)/,
-    replace: '$& + (typeof vcPronounSource !== "undefined" ? ` (${vcPronounSource})` : "")'
-};
-
 export default definePlugin({
     name: "PronounDB",
     authors: [Devs.Tyman, Devs.TheKodeToad, Devs.Ven, Devs.Elvyra],
@@ -52,7 +47,24 @@ export default definePlugin({
             ]
         },
 
-        // @TODO Patch discord pronoun hook in user profiles (useProfilePronouns)
+        {
+            find: ".Messages.USER_PROFILE_PRONOUNS",
+            group: true,
+            replacement: [
+                {
+                    match: /\.PANEL},/,
+                    replace: "$&[vcPronoun,vcPronounSource,vcHasPendingPronouns]=$self.useProfilePronouns(arguments[0].user?.id),"
+                },
+                {
+                    match: /text:\i\.\i.Messages.USER_PROFILE_PRONOUNS/,
+                    replace: '$&+vcHasPendingPronouns?"":` (${vcPronounSource})`'
+                },
+                {
+                    match: /(\.pronounsText.+?children:)(\i)/,
+                    replace: "$1vcHasPendingPronouns?$2:vcPronoun"
+                }
+            ]
+        }
     ],
 
     settings,
