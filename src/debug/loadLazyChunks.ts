@@ -127,7 +127,7 @@ export async function loadLazyChunks() {
         const allChunks = [] as number[];
 
         // Matches "id" or id:
-        for (const currentMatch of String(wreq.u).matchAll(/(?:"([\deE]+?)")|(?:([\deE]+?):)/g)) {
+        for (const currentMatch of String(wreq.u).matchAll(/(?:"([\deE]+?)"(?![,}]))|(?:([\deE]+?):)/g)) {
             const id = currentMatch[1] ?? currentMatch[2];
             if (id == null) continue;
 

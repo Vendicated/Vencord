@@ -18,7 +18,6 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ExpandableHeader } from "@components/ExpandableHeader";
-import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
 import { findByProps } from "@webpack";
 import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
@@ -36,13 +35,11 @@ interface UserPermission {
 
 type UserPermissions = Array<UserPermission>;
 
-const RoleClasses1 = findByProps("roles", "rolePill", "rolePillBorder");
-const RoleClasses2 = findByProps("roleCircle", "dotBorderBase", "dotBorderColor");
-const RoleClasses3 = findByProps("roleNameOverflow", "root", "roleName", "roleRemoveButton");
+const RoleRootClasses = findByProps("root", "showMoreButton", "collapseButton");
+const RoleClasses = findByProps("role", "roleCircle", "roleName");
+const RoleBorderClasses = findByProps("roleCircle", "dot", "dotBorderColor");
 
-const Classes = proxyLazy(() => Object.assign({}, RoleClasses1, RoleClasses2, RoleClasses3));
-
-function UserPermissionsComponent({ guild, guildMember, showBorder, forceOpen = false }: { guild: Guild; guildMember: GuildMember; showBorder: boolean; forceOpen?: boolean; }) {
+function UserPermissionsComponent({ guild, guildMember, forceOpen = false }: { guild: Guild; guildMember: GuildMember; forceOpen?: boolean; }) {
     const stns = settings.use(["permissionsSortOrder"]);
 
     const [rolePermissions, userPermissions] = useMemo(() => {
@@ -90,8 +87,6 @@ function UserPermissionsComponent({ guild, guildMember, showBorder, forceOpen = 
         return [rolePermissions, userPermissions];
     }, [stns.permissionsSortOrder]);
 
-    const { root, role, roleRemoveButton, roleNameOverflow, roles, rolePill, rolePillBorder, roleCircle, roleName } = Classes;
-
     return (
         <ExpandableHeader
             forceOpen={forceOpen}
@@ -129,18 +124,18 @@ function UserPermissionsComponent({ guild, guildMember, showBorder, forceOpen = 
                 </Tooltip>)
             ]}>
             {userPermissions.length > 0 && (
-                <div className={classes(root, roles)}>
+                <div className={classes(RoleRootClasses.root)}>
                     {userPermissions.map(({ permission, roleColor }) => (
-                        <div className={classes(role, rolePill, showBorder ? rolePillBorder : null)}>
-                            <div className={roleRemoveButton}>
+                        <div className={classes(RoleClasses.role)}>
+                            <div className={RoleClasses.roleRemoveButton}>
                                 <span
-                                    className={roleCircle}
+                                    className={classes(RoleBorderClasses.roleCircle, RoleClasses.roleCircle)}
                                     style={{ backgroundColor: roleColor }}
                                 />
                             </div>
-                            <div className={roleName}>
+                            <div className={RoleClasses.roleName}>
                                 <Text
-                                    className={roleNameOverflow}
+                                    className={RoleClasses.roleNameOverflow}
                                     variant="text-xs/medium"
                                 >
                                     {permission}
