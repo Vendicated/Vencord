@@ -716,10 +716,11 @@ export const _cacheFind = traceFunction("cacheFind", function _cacheFind(filter:
  * Find the first export or module exports from an already required module that matches the filter.
  *
  * @param filter A function that takes an export or module exports and returns a boolean
- * @returns The found export or module exports, or undefined
+ * @returns The found export, module exports, module factory, or undefined
  */
-export function cacheFind(filter: FilterFn) {
-    return _cacheFind(filter).result;
+export function cacheFind(filter: FilterFn, shouldReturnFactory: boolean = false) {
+    const { result, factory } = _cacheFind(filter);
+    return shouldReturnFactory ? factory : result;
 }
 
 /**
@@ -777,10 +778,11 @@ export function _cacheFindAll(filter: FilterFn): Required<CacheFindResult>[] {
  * Find the the export or module exports from an all the required modules that match the filter.
  *
  * @param filter A function that takes an export or module exports and returns a boolean
- * @returns An array of found exports or module exports
+ * @returns An array of found exports, module exports, or module factories
  */
-export function cacheFindAll(filter: FilterFn) {
-    return _cacheFindAll(filter).map(({ result }) => result);
+export function cacheFindAll(filter: FilterFn, shouldReturnFactories: boolean = false) {
+    const cacheFindAllResults = _cacheFindAll(filter);
+    return cacheFindAllResults.map(({ result, factory }) => shouldReturnFactories ? factory : result);
 }
 
 /**

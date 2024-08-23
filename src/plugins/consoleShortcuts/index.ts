@@ -25,7 +25,7 @@ import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from 
 import { SYM_PROXY_INNER_GET, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
 import definePlugin, { PluginNative, StartAt } from "@utils/types";
 import * as Webpack from "@webpack";
-import { _cacheFindAll, cacheFindAll, cacheFindModuleId, extract, filters, searchFactories } from "@webpack";
+import { cacheFindAll, cacheFindModuleId, extract, filters, searchFactories } from "@webpack";
 import * as Common from "@webpack/common";
 import { loadLazyChunks } from "debug/loadLazyChunks";
 import type { ComponentType } from "react";
@@ -56,14 +56,14 @@ function makeShortcuts() {
             const cacheKey = String(filterProps);
             if (cache.has(cacheKey)) return cache.get(cacheKey);
 
-            const matches = _cacheFindAll(filterFactory(...filterProps));
+            const matches = cacheFindAll(filterFactory(...filterProps), shouldReturnFactory);
 
             const result = (() => {
                 switch (matches.length) {
                     case 0: return null;
-                    case 1: return shouldReturnFactory ? matches[0].factory : matches[0].result;
+                    case 1: return matches[0];
                     default:
-                        const uniqueMatches = [...new Set(shouldReturnFactory ? matches.map(m => m.factory) : matches.map(m => m.result))];
+                        const uniqueMatches = [...new Set(matches)];
                         if (uniqueMatches.length > 1) {
                             console.warn(`Warning: This filter matches ${matches.length} modules. Make it more specific!\n`, uniqueMatches);
                         }
@@ -113,7 +113,7 @@ function makeShortcuts() {
         findByFactoryCode: newFindWrapper(filters.byFactoryCode),
         findAllByFactoryCode: (...code: Webpack.CodeFilter) => cacheFindAll(filters.byFactoryCode(...code)),
         findModuleFactory: newFindWrapper(filters.byFactoryCode, true),
-        findAllModuleFactories: (...code: Webpack.CodeFilter) => _cacheFindAll(filters.byFactoryCode(...code)).map(m => m.factory),
+        findAllModuleFactories: (...code: Webpack.CodeFilter) => cacheFindAll(filters.byFactoryCode(...code), true),
 
         plugins: { getter: () => Vencord.Plugins.plugins },
         PluginsApi: { getter: () => Vencord.Plugins },
