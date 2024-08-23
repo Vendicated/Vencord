@@ -184,7 +184,7 @@ export default definePlugin({
             align="center"
             renderPopout={() => (
                 <Dialog className={PopoutClasses.container} style={{ width: "500px" }}>
-                    <UserPermissions guild={guild} guildMember={guildMember} showBorder forceOpen />
+                    <UserPermissions guild={guild} guildMember={guildMember} forceOpen />
                 </Dialog>
             )}
         >
