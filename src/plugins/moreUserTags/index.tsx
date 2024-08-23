@@ -23,7 +23,7 @@ import { LazyComponentType } from "@utils/lazyReact";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findComponentByCode } from "@webpack";
-import { Card, ChannelStore, Forms, GuildStore, PermissionsBits, Switch, TextInput, Tooltip, useState } from "@webpack/common";
+import { Card, ChannelStore, Forms, GuildStore, PermissionsBits, Switch, TextInput, Tooltip } from "@webpack/common";
 import type { Permissions } from "@webpack/types";
 import type { Channel, Guild, Message, User } from "discord-types/general";
 
@@ -108,14 +108,8 @@ const defaultSettings = Object.fromEntries(
     tags.map(({ name, displayName }) => [name, { text: displayName, showInChat: true, showInNotChat: true }])
 ) as TagSettings;
 
-function SettingsComponent(props: { setValue(v: any): void; }) {
-    settings.store.tagSettings ??= defaultSettings;
-
-    const [tagSettings, setTagSettings] = useState(settings.store.tagSettings as TagSettings);
-    const setValue = (v: TagSettings) => {
-        setTagSettings(v);
-        props.setValue(v);
-    };
+function SettingsComponent() {
+    const tagSettings = settings.store.tagSettings ??= defaultSettings;
 
     return (
         <Flex flexDirection="column">
@@ -138,19 +132,13 @@ function SettingsComponent(props: { setValue(v: any): void; }) {
                         type="text"
                         value={tagSettings[t.name]?.text ?? t.displayName}
                         placeholder={`Text on tag (default: ${t.displayName})`}
-                        onChange={v => {
-                            tagSettings[t.name].text = v;
-                            setValue(tagSettings);
-                        }}
+                        onChange={v => tagSettings[t.name].text = v}
                         className={Margins.bottom16}
                     />
 
                     <Switch
                         value={tagSettings[t.name]?.showInChat ?? true}
-                        onChange={v => {
-                            tagSettings[t.name].showInChat = v;
-                            setValue(tagSettings);
-                        }}
+                        onChange={v => tagSettings[t.name].showInChat = v}
                         hideBorder
                     >
                         Show in messages
@@ -158,10 +146,7 @@ function SettingsComponent(props: { setValue(v: any): void; }) {
 
                     <Switch
                         value={tagSettings[t.name]?.showInNotChat ?? true}
-                        onChange={v => {
-                            tagSettings[t.name].showInNotChat = v;
-                            setValue(tagSettings);
-                        }}
+                        onChange={v => tagSettings[t.name].showInNotChat = v}
                         hideBorder
                     >
                         Show in member list and profiles
@@ -184,7 +169,7 @@ const settings = definePluginSettings({
     tagSettings: {
         type: OptionType.COMPONENT,
         component: SettingsComponent,
-        description: "fill me",
+        description: "fill me"
     }
 });
 
