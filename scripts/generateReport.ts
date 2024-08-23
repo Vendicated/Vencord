@@ -26,7 +26,7 @@
 import { readFileSync } from "fs";
 import pup, { JSHandle } from "puppeteer-core";
 
-for (const variable of ["DISCORD_TOKEN", "CHROMIUM_BIN"]) {
+for (const variable of ["CHROMIUM_BIN"]) {
     if (!process.env[variable]) {
         console.error(`Missing environment variable ${variable}`);
         process.exit(1);
