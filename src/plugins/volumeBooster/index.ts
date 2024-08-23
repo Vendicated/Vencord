@@ -78,7 +78,7 @@ export default definePlugin({
                 // remove the cap of 100%
                 {
                     match: /Math\.max.{0,30}\)\)/,
-                    replace: "Math.round(arguments[0])"
+                    replace: "arguments[0]"
                 },
                 // to actually patch the volume
                 {
