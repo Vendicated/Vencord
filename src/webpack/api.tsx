@@ -678,16 +678,18 @@ export const _cacheFind = traceFunction("cacheFind", function _cacheFind(filter:
         const mod = cache[key];
         if (!mod?.loaded || mod?.exports == null) continue;
 
+        const factory = wreq.m[key] as AnyModuleFactory;
+
         if (filter.$$vencordIsFactoryFilter) {
             if (filter(wreq.m[key])) {
-                return { result: mod.exports, id: key, exportKey: null, factory: wreq.m[key] as AnyModuleFactory };
+                return { result: mod.exports, id: key, exportKey: null, factory };
             }
 
             continue;
         }
 
         if (filter(mod.exports)) {
-            return { result: mod.exports, id: key, exportKey: null, factory: wreq.m[key] as AnyModuleFactory };
+            return { result: mod.exports, id: key, exportKey: null, factory };
         }
 
         if (typeof mod.exports !== "object") {
@@ -695,14 +697,14 @@ export const _cacheFind = traceFunction("cacheFind", function _cacheFind(filter:
         }
 
         if (mod.exports.default != null && filter(mod.exports.default)) {
-            return { result: mod.exports.default, id: key, exportKey: "default ", factory: wreq.m[key] as AnyModuleFactory };
+            return { result: mod.exports.default, id: key, exportKey: "default ", factory };
         }
 
         for (const exportKey in mod.exports) if (exportKey.length <= 3) {
             const exportValue = mod.exports[exportKey];
 
             if (exportValue != null && filter(exportValue)) {
-                return { result: exportValue, id: key, exportKey, factory: wreq.m[key] as AnyModuleFactory };
+                return { result: exportValue, id: key, exportKey, factory };
             }
         }
     }
@@ -717,37 +719,37 @@ export const _cacheFind = traceFunction("cacheFind", function _cacheFind(filter:
  * @returns The found export or module exports, or undefined
  */
 export function cacheFind(filter: FilterFn) {
-    const cacheFindResult = _cacheFind(filter);
-
-    return cacheFindResult.result;
+    return _cacheFind(filter).result;
 }
 
 /**
  * Find the the export or module exports from an all the required modules that match the filter.
  *
  * @param filter A function that takes an export or module exports and returns a boolean
- * @returns An array of all the found export or module exports
  */
-export function cacheFindAll(filter: FilterFn) {
+export function _cacheFindAll(filter: FilterFn): Required<CacheFindResult>[] {
     if (typeof filter !== "function") {
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
     }
 
-    const ret: ModuleExports[] = [];
+    const results: Required<CacheFindResult>[] = [];
+
     for (const key in cache) {
         const mod = cache[key];
         if (!mod?.loaded || mod?.exports == null) continue;
 
+        const factory = wreq.m[key] as AnyModuleFactory;
+
         if (filter.$$vencordIsFactoryFilter) {
             if (filter(wreq.m[key])) {
-                ret.push(mod.exports);
+                results.push({ result: mod.exports, id: key, exportKey: null, factory });
             }
 
             continue;
         }
 
         if (filter(mod.exports)) {
-            ret.push(mod.exports);
+            results.push({ result: mod.exports, id: key, exportKey: null, factory });
         }
 
         if (typeof mod.exports !== "object") {
@@ -755,57 +757,54 @@ export function cacheFindAll(filter: FilterFn) {
         }
 
         if (mod.exports.default != null && filter(mod.exports.default)) {
-            ret.push(mod.exports.default);
+            results.push({ result: mod.exports.default, id: key, exportKey: "default ", factory });
         }
 
         for (const exportKey in mod.exports) if (exportKey.length <= 3) {
             const exportValue = mod.exports[exportKey];
 
             if (exportValue != null && filter(exportValue)) {
-                ret.push(exportValue);
+                results.push({ result: exportValue, id: key, exportKey, factory });
                 break;
             }
         }
     }
 
-    return ret;
+    return results;
+}
+
+/**
+ * Find the the export or module exports from an all the required modules that match the filter.
+ *
+ * @param filter A function that takes an export or module exports and returns a boolean
+ * @returns An array of found exports or module exports
+ */
+export function cacheFindAll(filter: FilterFn) {
+    return _cacheFindAll(filter).map(({ result }) => result);
 }
 
 /**
  * Find the id of the first already loaded module factory that includes all the given code.
  */
-export const cacheFindModuleId = traceFunction("cacheFindModuleId", function cacheFindModuleId(...code: CodeFilter) {
-    const parsedCode = code.map(canonicalizeMatch);
-
-    for (const id in wreq.m) {
-        if (stringMatches(String(wreq.m[id]), parsedCode)) {
-            return id;
-        }
-    }
-});
+export function cacheFindModuleId(...code: CodeFilter) {
+    return _cacheFind(filters.byFactoryCode(...code)).id;
+}
 
 /**
- * Search modules by keyword. This searches the factory methods,
+ * Search factories by keyword. This searches the source code of the module factories,
  * meaning you can search all sorts of things, methodName, strings somewhere in the code, etc.
  *
  * @param code One or more strings or regexes
- * @returns Mapping of found modules
+ * @returns Mapping of found factories by their module id
  */
-export function search(...code: CodeFilter) {
-    code = code.map(canonicalizeMatch);
+export function searchFactories(...code: CodeFilter) {
+    const filter = filters.byFactoryCode(...code);
 
-    const results: WebpackRequire["m"] = {};
-    const factories = wreq.m;
+    return _cacheFindAll(filter).reduce((results, { factory, id }) => {
+        results[id] = factory;
 
-    for (const id in factories) {
-        const factory = factories[id];
-
-        if (stringMatches(String(factory), code)) {
-            results[id] = factory;
-        }
-    }
-
-    return results;
+        return results;
+    }, {} as Record<PropertyKey, AnyModuleFactory>);
 }
 
 /**
@@ -819,7 +818,7 @@ export function search(...code: CodeFilter) {
  */
 export function extract(id: PropertyKey) {
     const factory = wreq.m[id];
-    if (!factory) return null;
+    if (factory == null) return null;
 
     const code = `
 // [EXTRACTED] WebpackModule${String(id)}
@@ -832,6 +831,8 @@ export function extract(id: PropertyKey) {
     const extracted: ModuleFactory = (0, eval)(code);
     return extracted;
 }
+
+/* ------------------------------- Deprecations -------------------------------  */
 
 /**
  * @deprecated Use separate finds instead
@@ -1040,7 +1041,7 @@ export const mapMangledModuleLazy = deprecatedRedirect("mapMangledModuleLazy", "
 export const findAll = deprecatedRedirect("findAll", "cacheFindAll", cacheFindAll);
 
 /**
- * @deprecated Use {@link cacheFindBulk} instead
+ * @deprecated Use separate finds instead
  *
  * Same as {@link cacheFind} but in bulk
  *
@@ -1057,3 +1058,14 @@ export const findBulk = deprecatedRedirect("findBulk", "cacheFindBulk", cacheFin
  * @returns string or null
  */
 export const findModuleId = deprecatedRedirect("findModuleId", "cacheFindModuleId", cacheFindModuleId);
+
+/**
+ * @deprecated Use {@link searchFactories} instead
+ *
+ * Search modules by keyword. This searches the factory methods,
+ * meaning you can search all sorts of things, methodName, strings somewhere in the code, etc.
+ *
+ * @param code One or more strings or regexes
+ * @returns Mapping of found modules
+ */
+export const search = deprecatedRedirect("search", "searchFactories", searchFactories);

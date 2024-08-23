@@ -481,7 +481,7 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
                     // inline require to avoid including it in !IS_DEV builds
                     const diff = (require("diff") as typeof import("diff")).diffWordsWithSpace(context, patchedContext);
                     let fmt = "%c %s ";
-                    const elements = [] as string[];
+                    const elements: string[] = [];
                     for (const d of diff) {
                         const color = d.removed
                             ? "red"

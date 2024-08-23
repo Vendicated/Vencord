@@ -22,7 +22,7 @@ import { Margins } from "@utils/margins";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { makeCodeblock } from "@utils/text";
 import { Patch, ReplaceFn } from "@utils/types";
-import { search } from "@webpack";
+import { searchFactories } from "@webpack";
 import { Button, Clipboard, Forms, Parser, React, Switch, TextArea, TextInput } from "@webpack/common";
 
 import { SettingsTab, wrapTab } from "./shared";
@@ -33,7 +33,7 @@ if (IS_DEV) {
 }
 
 const findCandidates = debounce(function ({ find, setModule, setError }) {
-    const candidates = search(find);
+    const candidates = searchFactories(find);
     const keys = Object.keys(candidates);
     const len = keys.length;
     if (len === 0)

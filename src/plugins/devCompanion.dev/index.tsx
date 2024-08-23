@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
-import { cacheFindAll, filters, search } from "@webpack";
+import { cacheFindAll, filters, searchFactories } from "@webpack";
 
 const PORT = 8485;
 const NAV_ID = "dev-companion-reconnect";
@@ -154,7 +154,7 @@ function initWs(isManual = false) {
             case "testPatch": {
                 const { find, replacement } = data as PatchData;
 
-                const candidates = search(find);
+                const candidates = searchFactories(find);
                 const keys = Object.keys(candidates);
                 if (keys.length !== 1)
                     return reply("Expected exactly one 'find' matches, found " + keys.length);
@@ -213,7 +213,7 @@ function initWs(isManual = false) {
                             results = cacheFindAll(filters.byCode(...parsedArgs));
                             break;
                         case "ModuleId":
-                            results = Object.keys(search(parsedArgs[0]));
+                            results = Object.keys(searchFactories(parsedArgs[0]));
                             break;
                         case "ComponentByCode":
                             results = cacheFindAll(filters.componentByCode(...parsedArgs));
