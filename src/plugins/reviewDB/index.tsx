@@ -79,8 +79,22 @@ export default definePlugin({
         {
             find: ".BITE_SIZE,user:",
             replacement: {
-                match: /(?<=\.BITE_SIZE,children:\[)\(0,\i\.jsx\)\(\i\.\i,\{user:(\i),/,
-                replace: "$self.BiteSizeReviewsButton({user:$1}),$&"
+                match: /{profileType:\i\.\i\.BITE_SIZE,children:\[/,
+                replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
+            }
+        },
+        {
+            find: ".FULL_SIZE,user:",
+            replacement: {
+                match: /{profileType:\i\.\i\.FULL_SIZE,children:\[/,
+                replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
+            }
+        },
+        {
+            find: ".PANEL,isInteractionSource:",
+            replacement: {
+                match: /{profileType:\i\.\i\.PANEL,children:\[/,
+                replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
             }
         }
     ],
