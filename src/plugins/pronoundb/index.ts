@@ -26,11 +26,6 @@ import { CompactPronounsChatComponentWrapper, PronounsChatComponentWrapper } fro
 import { useProfilePronouns } from "./pronoundbUtils";
 import { settings } from "./settings";
 
-const PRONOUN_TOOLTIP_PATCH = {
-    match: /text:(.{0,10}.Messages\.USER_PROFILE_PRONOUNS)(?=,)/,
-    replace: '$& + (typeof vcPronounSource !== "undefined" ? ` (${vcPronounSource})` : "")'
-};
-
 export default definePlugin({
     name: "PronounDB",
     authors: [Devs.Tyman, Devs.TheKodeToad, Devs.Ven, Devs.Elvyra],
@@ -51,26 +46,23 @@ export default definePlugin({
                 }
             ]
         },
-        // Patch the profile popout username header to use our pronoun hook instead of Discord's pronouns
+
         {
-            find: ".pronouns,children",
+            find: ".Messages.USER_PROFILE_PRONOUNS",
+            group: true,
             replacement: [
                 {
-                    match: /{user:(\i),[^}]*,pronouns:(\i),[^}]*}=\i.*?;(?=return)/,
-                    replace: "$&let vcPronounSource;[$2,vcPronounSource]=$self.useProfilePronouns($1.id);"
+                    match: /\.PANEL},/,
+                    replace: "$&[vcPronoun,vcPronounSource,vcHasPendingPronouns]=$self.useProfilePronouns(arguments[0].user?.id),"
                 },
-                PRONOUN_TOOLTIP_PATCH
-            ]
-        },
-        // Patch the profile modal username header to use our pronoun hook instead of Discord's pronouns
-        {
-            find: ".nameTagSmall)",
-            replacement: [
                 {
-                    match: /\.getName\(\i\);(?<=displayProfile.{0,200})/,
-                    replace: "$&const [vcPronounce,vcPronounSource]=$self.useProfilePronouns(arguments[0].user.id,true);if(arguments[0].displayProfile&&vcPronounce)arguments[0].displayProfile.pronouns=vcPronounce;"
+                    match: /text:\i\.\i.Messages.USER_PROFILE_PRONOUNS/,
+                    replace: '$&+vcHasPendingPronouns?"":` (${vcPronounSource})`'
                 },
-                PRONOUN_TOOLTIP_PATCH
+                {
+                    match: /(\.pronounsText.+?children:)(\i)/,
+                    replace: "$1vcHasPendingPronouns?$2:vcPronoun"
+                }
             ]
         }
     ],
