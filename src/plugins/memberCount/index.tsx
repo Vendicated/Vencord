@@ -38,6 +38,12 @@ export const ChannelMemberStore: FluxStore & {
     };
 } = findStoreLazy("ChannelMemberStore");
 
+export const ThreadMemberListStore: FluxStore & {
+    getMemberListSections: (channelId: string) => {
+        [sectionId: string]: { sectionId: string; userIds: string[]; };
+    };
+} = findStoreLazy("ThreadMemberListStore");
+
 const settings = definePluginSettings({
     toolTip: {
         type: OptionType.BOOLEAN,

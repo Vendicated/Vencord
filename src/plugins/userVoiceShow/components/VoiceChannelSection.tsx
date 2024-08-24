@@ -19,11 +19,10 @@
 import "./VoiceChannelSection.css";
 
 import type { ChannelRecord } from "@vencord/discord-types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { Button, Forms, Permissions, PermissionStore, Toasts } from "@webpack/common";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectChannel", "selectVoiceChannel");
-const UserPopoutSection = findByCodeLazy(".lastSection", "children:");
 
 interface VoiceChannelFieldProps {
     channel: ChannelRecord;
@@ -32,7 +31,8 @@ interface VoiceChannelFieldProps {
 }
 
 export const VoiceChannelSection = ({ channel, label, showHeader }: VoiceChannelFieldProps) => (
-    <UserPopoutSection>
+    // @TODO The div is supposed to be a UserPopoutSection
+    <div>
         {showHeader && <Forms.FormTitle className="vc-uvs-header">In a voice channel</Forms.FormTitle>}
         <Button
             className="vc-uvs-button"
@@ -55,5 +55,5 @@ export const VoiceChannelSection = ({ channel, label, showHeader }: VoiceChannel
         >
             {label}
         </Button>
-    </UserPopoutSection>
+    </div>
 );

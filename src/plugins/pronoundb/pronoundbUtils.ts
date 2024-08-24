@@ -21,13 +21,17 @@ import { debounce } from "@shared/debounce";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { getCurrentChannel } from "@utils/discord";
 import { useAwaiter } from "@utils/react";
+import type { FluxStore } from "@vencord/discord-types";
+import { findStoreLazy } from "@webpack";
 import { UserProfileStore, UserStore } from "@webpack/common";
 
 import { settings } from "./settings";
 import { type CachePronouns, type PronounCode, PronounMapping, type PronounsResponse } from "./types";
 
-type PronounsWithSource = [string | undefined, string];
-const EmptyPronouns: PronounsWithSource = [undefined, ""];
+const UserSettingsAccountStore: FluxStore & Record<string, any> = findStoreLazy("UserSettingsAccountStore");
+
+type PronounsWithSource = [pronouns: string | null, source: string, hasPendingPronouns: boolean];
+const EmptyPronouns: PronounsWithSource = [null, "", false];
 
 export const enum PronounsFormat {
     Lowercase = "LOWERCASE",
@@ -75,13 +79,15 @@ export function useFormattedPronouns(id: string, useGlobalProfile: boolean = fal
         onError: e => { console.error("Fetching pronouns failed: ", e); }
     });
 
+    const hasPendingPronouns = UserSettingsAccountStore.getPendingPronouns() != null;
+
     if (settings.store.pronounSource === PronounSource.PreferDiscord && discordPronouns)
-        return [discordPronouns, "Discord"];
+        return [discordPronouns, "Discord", hasPendingPronouns];
 
     if (result && result !== PronounMapping.unspecified)
-        return [result, "PronounDB"];
+        return [result, "PronounDB", hasPendingPronouns];
 
-    return [discordPronouns, "Discord"];
+    return [discordPronouns!, "Discord", hasPendingPronouns];
 }
 
 export function useProfilePronouns(id: string, useGlobalProfile: boolean = false): PronounsWithSource {

@@ -140,6 +140,15 @@ export interface Constants {
     FriendsSections: Record<string, string>;
 }
 
+export interface ExpressionPickerStoreState {
+    activeView: ExpressionPickerStoreState | null;
+    activeViewType: any | null;
+    isSearchSuggestion: boolean;
+    lastActiveView: ExpressionPickerStoreState | null;
+    pickerId: string;
+    searchQuery: string;
+}
+
 // zustand store
 export interface ExpressionPickerStore {
     closeExpressionPicker: (activeViewType?: Record<string, any> | null) => void;
@@ -147,6 +156,14 @@ export interface ExpressionPickerStore {
         activeView: ExpressionPickerViewType | null,
         activeViewType: Record<string, any> | null
     ) => void;
+    toggleExpressionPicker: (activeView: ExpressionPickerViewType, activeViewType?: any) => void;
+    toggleMultiExpressionPicker: (activeViewType?: any) => void;
+    setExpressionPickerView: (activeView: ExpressionPickerViewType) => void;
+    setSearchQuery: (searchQuery: string, isSearchSuggestion?: boolean) => void;
+    useExpressionPickerStore: {
+        <T>(selector: (state: ExpressionPickerStoreState) => T): T;
+        (): ExpressionPickerStoreState;
+    };
 }
 
 export interface BrowserWindowFeatures {

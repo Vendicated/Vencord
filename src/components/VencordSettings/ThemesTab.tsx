@@ -25,7 +25,6 @@ import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import type { UserThemeHeader } from "@main/themes";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findLazy } from "@webpack";
@@ -46,7 +45,6 @@ type FileInput = ComponentType<{
 }>;
 
 const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
-const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
 const cl = classNameFactory("vc-settings-theme-");
 
@@ -306,7 +304,7 @@ function ThemesTab() {
                 <TextArea
                     value={themeText}
                     onChange={setThemeText}
-                    className={classes(TextAreaProps.textarea, "vc-settings-theme-links")}
+                    className="vc-settings-theme-links"
                     placeholder="Theme Links"
                     spellCheck={false}
                     onBlur={onBlur}

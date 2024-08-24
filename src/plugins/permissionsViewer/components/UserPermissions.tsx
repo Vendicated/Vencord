@@ -22,6 +22,7 @@ import { classes } from "@utils/misc";
 import type { GuildMember, GuildRecord } from "@vencord/discord-types";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { i18n, Permissions, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
+import type { BuildTuple } from "type-fest/source/internal";
 
 import { PermissionsSortOrder, settings } from "..";
 import { cl, getPermissionString, getSortedRoles, sortUserRoles } from "../utils";
@@ -42,14 +43,23 @@ const Classes: Record<"actionButton" | "addButton" | "addButtonIcon" | "alignCen
         )
     }));
 
+const { RoleRootClasses, RoleClasses, RoleBorderClasses } = proxyLazyWebpack(() => {
+    const [RoleRootClasses, RoleClasses, RoleBorderClasses] = findBulk(
+        filters.byProps("root", "showMoreButton", "collapseButton"),
+        filters.byProps("role", "roleCircle", "roleName"),
+        filters.byProps("roleCircle", "dot", "dotBorderColor")
+    ) as BuildTuple<3, Record<string, string>>;
+
+    return { RoleRootClasses, RoleClasses, RoleBorderClasses };
+});
+
 interface UserPermissionsComponentProps {
     forceOpen?: boolean;
     guild: GuildRecord;
     guildMember: GuildMember;
-    showBorder: boolean;
 }
 
-function UserPermissionsComponent({ forceOpen = false, guild, guildMember, showBorder }: UserPermissionsComponentProps) {
+function UserPermissionsComponent({ forceOpen = false, guild, guildMember }: UserPermissionsComponentProps) {
     const stns = settings.use(["permissionsSortOrder"]);
 
     const [rolePermissions, userPermissions] = useMemo(() => {
@@ -97,8 +107,6 @@ function UserPermissionsComponent({ forceOpen = false, guild, guildMember, showB
         return [rolePermissions, userPermissions];
     }, [stns.permissionsSortOrder]);
 
-    const { root, role, roleRemoveButton, roleNameOverflow, roles, rolePill, rolePillBorder, roleCircle, roleName } = Classes;
-
     return (
         <ExpandableHeader
             forceOpen={forceOpen}
@@ -140,18 +148,18 @@ function UserPermissionsComponent({ forceOpen = false, guild, guildMember, showB
             ]}
         >
             {userPermissions.length > 0 && (
-                <div className={classes(root, roles)}>
+                <div className={classes(RoleRootClasses.root)}>
                     {userPermissions.map(({ permission, roleColor }) => (
-                        <div className={classes(role, rolePill, showBorder ? rolePillBorder : null)}>
-                            <div className={roleRemoveButton}>
+                        <div className={classes(RoleClasses.role)}>
+                            <div className={RoleClasses.roleRemoveButton}>
                                 <span
-                                    className={roleCircle}
+                                    className={classes(RoleBorderClasses.roleCircle, RoleClasses.roleCircle)}
                                     style={{ backgroundColor: roleColor }}
                                 />
                             </div>
-                            <div className={roleName}>
+                            <div className={RoleClasses.roleName}>
                                 <Text
-                                    className={roleNameOverflow}
+                                    className={RoleClasses.roleNameOverflow}
                                     variant="text-xs/medium"
                                 >
                                     {permission}

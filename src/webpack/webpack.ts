@@ -51,12 +51,17 @@ type PropsFilter = [string, ...string[]];
 type CodeFilter = [string | RegExp, ...(string | RegExp)[]];
 type StoreNameFilter = string;
 
-const stringMatches = (s: string, filter: CodeFilter) =>
-    filter.every(f =>
-        typeof f === "string"
-            ? s.includes(f)
-            : f.test(s)
-    );
+export function stringMatches(s: string, filter: CodeFilter) {
+    for (const f of filter) {
+        if (typeof f === "string") {
+            if (!s.includes(f)) return false;
+        } else {
+            if (f.global) f.lastIndex = 0;
+            if (!f.test(s)) return false;
+        }
+    }
+    return true;
+}
 
 export const filters = {
     byProps: (...props: PropsFilter): FilterFn =>
@@ -267,6 +272,8 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
  * @returns string or null
  */
 export const findModuleId = traceFunction("findModuleId", function findModuleId(...code: CodeFilter) {
+    code = code.map(canonicalizeMatch);
+
     for (const id in wreq.m) {
         if (stringMatches(wreq.m[id]!.toString(), code)) return id;
     }
@@ -461,13 +468,10 @@ export function findExportedComponentLazy<T extends object = any>(...props: Prop
  *          })
  */
 export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>): Record<S, any> {
-    if (!Array.isArray(code)) code = [code];
-    code = code.map(canonicalizeMatch);
-
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const exports = {} as Record<S, any>;
 
-    const id = findModuleId(...code);
+    const id = findModuleId(...Array.isArray(code) ? code : [code] as CodeFilter);
     if (id === null)
         return exports;
 
@@ -622,6 +626,8 @@ export function waitFor(filter: string | PropsFilter | FilterFn, callback: Callb
  * @returns Mapping of found modules
  */
 export function search(...code: CodeFilter) {
+    code = code.map(canonicalizeMatch);
+
     const results: Record<string | number, (...args: any) => any> = {};
     const factories = wreq.m;
 
