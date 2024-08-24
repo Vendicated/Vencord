@@ -6,3 +6,17 @@
     border-radius: 50%;
     box-sizing: border-box;
 }
+
+.vc-mentionAvatars-roleicon {
+    vertical-align: middle;
+    width: 1em !important; /* just in case */
+    height: 1em;
+    margin: 0 4px 0.2rem 2px;
+    box-sizing: border-box;
+    
+    /* left: 0; */
+
+    /* position: absolute; */
+
+    /* margin-right: 1px; */
+}
