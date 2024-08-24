@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { ExtractAction, FluxAction } from "../flux/fluxActions";
 import type { ChannelRecord } from "../general/channels/ChannelRecord";
 import type { GuildRecord } from "../general/GuildRecord";
 import type { PermissionOverwriteMap } from "../general/Permissions";
@@ -13,11 +12,7 @@ import type { UserRecord } from "../general/UserRecord";
 import type { Nullish } from "../internal";
 import type { FluxStore } from "./abstract/FluxStore";
 
-export type PermissionStoreAction = ExtractAction<FluxAction, "BACKGROUND_SYNC" | "CACHE_LOADED" | "CACHE_LOADED_LAZY" | "CHANNEL_CREATE" | "CHANNEL_DELETE" | "CHANNEL_UPDATES" | "CONNECTION_CLOSED" | "CONNECTION_OPEN" | "CURRENT_USER_UPDATE" | "GUILD_CREATE" | "GUILD_DELETE" | "GUILD_MEMBER_ADD" | "GUILD_MEMBER_UPDATE" | "GUILD_ROLE_CREATE" | "GUILD_ROLE_DELETE" | "GUILD_ROLE_UPDATE" | "GUILD_UPDATE" | "IMPERSONATE_STOP" | "IMPERSONATE_UPDATE" | "LOAD_ARCHIVED_THREADS_SUCCESS" | "LOAD_MESSAGES_SUCCESS" | "LOAD_THREADS_SUCCESS" | "LOGOUT" | "MOD_VIEW_SEARCH_FINISH" | "OVERLAY_INITIALIZE" | "SEARCH_FINISH" | "STAGE_INSTANCE_CREATE" | "STAGE_INSTANCE_DELETE" | "STAGE_INSTANCE_UPDATE" | "THREAD_CREATE" | "THREAD_LIST_SYNC" | "THREAD_MEMBER_UPDATE" | "THREAD_MEMBERS_UPDATE" | "THREAD_UPDATE">;
-
-export declare class PermissionStore<
-    Action extends FluxAction = PermissionStoreAction
-> extends FluxStore<Action> {
+export declare class PermissionStore extends FluxStore {
     static displayName: "PermissionStore";
 
     /** Always returns false for private (non-guild) channels. */

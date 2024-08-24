@@ -20,25 +20,26 @@ export enum DraftType {
     SLASH_COMMAND = 5,
 }
 
-export interface DraftMessage {
-    draft: string;
+export interface DraftBase {
     timestamp: number;
+}
+
+export interface DraftMessage extends DraftBase {
+    draft: string;
 }
 
 export type DraftThreadSettings = DraftForumThreadSettings | DraftNonForumThreadSettings;
 
-export interface DraftForumThreadSettings {
-    appliedTags: Set<string>;
-    name: string;
+export interface DraftThreadSettingsBase extends DraftBase {
+    name?: string;
     parentChannelId: string;
-    timestamp: number;
 }
 
-export interface DraftNonForumThreadSettings {
-    isPrivate: boolean;
-    /** @todo */
-    location?: any;
-    parentChannelId: string;
-    parentMessageId: string | undefined;
-    timestamp: number;
+export interface DraftForumThreadSettings extends DraftThreadSettingsBase {
+    appliedTags?: Set<string>;
+}
+
+export interface DraftNonForumThreadSettings extends DraftThreadSettingsBase {
+    isPrivate?: boolean;
+    parentMessageId?: string | undefined;
 }

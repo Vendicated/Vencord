@@ -1,16 +1,14 @@
 diff --git a/dist/brace-style.js b/dist/brace-style.js
-index 902b38461fd7339d0c93a5cd2d7da0250c09952b..084c44dfa38816c6a446e146f30d7b1971994696 100644
+index 023fe9fb129d75d77b0b550ff9564c8185c4020e..0fc762a5bd21bb6ff5ad2e6e9ef6682065b98b78 100644
 --- a/dist/brace-style.js
 +++ b/dist/brace-style.js
-@@ -2,6 +2,41 @@
+@@ -2,6 +2,38 @@
  
  var utils = require('./utils.js');
  
 +function* getAllCommentRanges(sourceCode) {
-+  for (const { loc } of sourceCode.getAllComments()) {
-+    if (!loc) continue;
-+    yield [loc.start.line, loc.end.line];
-+  }
++  for (const { loc } of sourceCode.getAllComments())
++    if (loc) yield [loc.start.line, loc.end.line];
 +}
 +
 +function createLineSet(length) {
@@ -29,10 +27,9 @@ index 902b38461fd7339d0c93a5cd2d7da0250c09952b..084c44dfa38816c6a446e146f30d7b19
 +      const targetLines = createLineSet(rightStart - leftEnd - 1);
 +      let totalLines = 0n;
 +      for (let [start, end] of getAllCommentRanges(sourceCode)) {
-+        if (start < rightStart && end > leftEnd) {
-+          start = Math.max(start, leftEnd + 1);
-+          end = Math.min(rightStart - 1, end);
-+        } else continue;
++        if (start >= rightStart || end <= leftEnd) continue;
++        start = Math.max(start, leftEnd + 1);
++        end = Math.min(rightStart - 1, end);
 +        totalLines |= createLineSet(end - start + 1) << BigInt(start - leftEnd - 1);
 +        if (totalLines === targetLines) return true;
 +      }
@@ -42,9 +39,9 @@ index 902b38461fd7339d0c93a5cd2d7da0250c09952b..084c44dfa38816c6a446e146f30d7b19
 +}
 +
  var braceStyle = utils.createRule({
-   meta: {
-     type: "layout",
-@@ -85,7 +120,7 @@ var braceStyle = utils.createRule({
+   name: "brace-style",
+   package: "js",
+@@ -86,7 +118,7 @@ var braceStyle = utils.createRule({
      }
      function validateCurlyBeforeKeyword(curlyToken) {
        const keywordToken = sourceCode.getTokenAfter(curlyToken);

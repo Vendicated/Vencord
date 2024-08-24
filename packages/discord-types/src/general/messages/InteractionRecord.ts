@@ -20,7 +20,7 @@ export declare class InteractionRecord<
 
     static createFromServer(
         interactionFromServer: Omit<InteractionProperties, "user"> & {
-            /** @todo This is not a UserRecord; it's a user object from the API. */
+            /** @todo This is not a UserRecord; it is a user object from the API. */
             user: Record<string, any>;
         }
     ): InteractionRecord;

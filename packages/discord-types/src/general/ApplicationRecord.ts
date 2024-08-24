@@ -43,7 +43,7 @@ export declare class ApplicationRecord<
     eulaId: string | null;
     executables: ApplicationExecutable[];
     flags: ApplicationFlags;
-    /** @todo This is not a GuildRecord; it's a guild object from the API. */
+    /** @todo This is not a GuildRecord; it is a guild object from the API. */
     guild: Record<string, any> | null;
     guildId: string | null;
     hashes: string[];
@@ -171,6 +171,7 @@ export enum OAuth2Scope {
     RPC_VIDEO_WRITE = "rpc.video.write",
     RPC_VOICE_READ = "rpc.voice.read",
     RPC_VOICE_WRITE = "rpc.voice.write",
+    SDK_SOCIAL_LAYER = "sdk.social_layer",
     VOICE = "voice",
     WEBHOOK_INCOMING = "webhook.incoming",
 }
@@ -195,6 +196,8 @@ export enum ApplicationFlags {
     EMBEDDED_FIRST_PARTY = 1 << 20,
     APPLICATION_COMMAND_BADGE = 1 << 23,
     SOCIAL_LAYER_INTEGRATION = 1 << 27,
+    PROMOTED = 1 << 29,
+    PARTNER = 1 << 30,
 }
 
 export enum ApplicationOverlayMethodFlags {

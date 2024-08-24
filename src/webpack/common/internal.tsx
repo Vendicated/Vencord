@@ -23,6 +23,7 @@ import type { ComponentType } from "react";
 import { type FilterFn, filters, lazyWebpackSearchHistory, waitFor } from "../webpack";
 
 export function waitForComponent<
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
     T extends ComponentType<any> = ComponentType<any> & Record<string, any>
 >(name: string, filter: [string, ...string[]] | string | FilterFn): T {
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["waitForComponent", Array.isArray(filter) ? filter : [filter]]);

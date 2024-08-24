@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { ExtractAction, FluxAction } from "../flux/fluxActions";
 import type { GuildMemberProfile } from "../general/GuildMemberProfile";
 import type { GuildRecord } from "../general/GuildRecord";
 import type { UserProfile } from "../general/UserProfile";
@@ -18,11 +17,10 @@ export interface UserProfileStoreSnapshotData {
     userId: string;
 }
 
-export type UserProfileStoreAction = ExtractAction<FluxAction, "CACHE_LOADED_LAZY" | "GUILD_DELETE" | "GUILD_JOIN" | "GUILD_MEMBER_ADD" | "GUILD_MEMBER_REMOVE" | "GUILD_MEMBER_UPDATE" | "LOGOUT" | "MUTUAL_FRIENDS_FETCH_FAILURE" | "MUTUAL_FRIENDS_FETCH_START" | "MUTUAL_FRIENDS_FETCH_SUCCESS" | "USER_PROFILE_FETCH_FAILURE" | "USER_PROFILE_FETCH_START" | "USER_PROFILE_FETCH_SUCCESS" | "USER_PROFILE_UPDATE_FAILURE" | "USER_PROFILE_UPDATE_START" | "USER_PROFILE_UPDATE_SUCCESS" | "USER_UPDATE">;
-
 export declare class UserProfileStore<
-    Constructor extends GenericConstructor = typeof UserProfileStore
-> extends FluxSnapshotStore<Constructor, UserProfileStoreSnapshotData, UserProfileStoreAction> {
+    Constructor extends GenericConstructor = typeof UserProfileStore,
+    SnapshotData extends UserProfileStoreSnapshotData = UserProfileStoreSnapshotData
+> extends FluxSnapshotStore<Constructor, SnapshotData> {
     constructor();
 
     static displayName: "UserProfileStore";
@@ -45,7 +43,7 @@ export declare class UserProfileStore<
     isFetchingFriends(userId: string): boolean;
     isFetchingProfile(userId: string): boolean;
     get isSubmitting(): boolean;
-    takeSnapshot(): FluxSnapshot<UserProfileStoreSnapshotData>;
+    takeSnapshot(): FluxSnapshot<SnapshotData>;
 
     loadCache: () => void;
 }

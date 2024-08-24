@@ -20,20 +20,10 @@ import { WEBPACK_CHUNK } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { canonicalizeReplacement } from "@utils/patches";
 import type { PatchReplacement } from "@utils/types";
-// Can be removed when #2485 gets merged.
-// eslint-disable-next-line no-restricted-imports
-import type { WebpackInstance as $WebpackInstance } from "discord-types/other";
-
-interface WebpackInstance extends Omit<$WebpackInstance, "c" | "m"> {
-    // Omit removes call signatures
-    (id: number): any;
-    c?: $WebpackInstance["c"] & Record<string | number, any>;
-    m: $WebpackInstance["m"] & Record<string | number, any>;
-}
 
 import { traceFunction } from "../debug/Tracer";
 import { patches } from "../plugins";
-import { _initWebpack, beforeInitListeners, factoryListeners, moduleListeners, subscriptions, wreq } from ".";
+import { _initWebpack, beforeInitListeners, factoryListeners, moduleListeners, subscriptions, type WebpackInstance, wreq } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 

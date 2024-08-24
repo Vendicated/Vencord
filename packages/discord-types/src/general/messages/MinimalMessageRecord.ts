@@ -477,7 +477,7 @@ export interface GuildSticker extends StickerBase {
     /** @todo May actually not be optional. */
     available?: boolean;
     guild_id: string;
-    /** @todo This is not a UserRecord; it's a user object from the API. */
+    /** @todo This is not a UserRecord; it is a user object from the API. */
     user: Record<string, any>;
 }
 

@@ -104,7 +104,7 @@ export declare abstract class ChannelRecordProperties {
     isSpam?: boolean | undefined;
     lastMessageId: string | Nullish;
     lastPinTimestamp: string | Nullish;
-    /** @todo */
+    /** @todo May have more properties. */
     linkedLobby?: { application_id?: string | null; } & Record<string, any> | Nullish;
     member?: ThreadMember | undefined;
     memberCount?: number | undefined;
@@ -250,6 +250,7 @@ export enum ChannelType {
     GUILD_DIRECTORY = 14,
     GUILD_FORUM = 15,
     GUILD_MEDIA = 16,
+    LOBBY = 17,
     UNKNOWN = 10_000,
 }
 

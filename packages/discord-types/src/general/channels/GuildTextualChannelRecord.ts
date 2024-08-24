@@ -46,7 +46,7 @@ export declare abstract class GuildTextualChannelRecordBase extends ChannelRecor
     isSpam?: undefined;
     lastMessageId: ChannelRecordBase["lastMessageId"];
     lastPinTimestamp: ChannelRecordBase["lastPinTimestamp"];
-    /** @todo */
+    /** @todo May only be nullish. */
     linkedLobby: ChannelRecordBase["linkedLobby"];
     member?: undefined;
     memberCount?: undefined;

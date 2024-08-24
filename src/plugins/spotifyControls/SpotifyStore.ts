@@ -17,7 +17,7 @@
 */
 
 import { Settings } from "@api/Settings";
-import type { ExtractAction, FluxAction, FluxStore } from "@vencord/discord-types";
+import type { FluxStore } from "@vencord/discord-types";
 import { findByPropsLazy, findStore, proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
@@ -74,9 +74,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
 
     const API_BASE = "https://api.spotify.com/v1/me/player";
 
-    type SpotifyStoreAction = ExtractAction<FluxAction, "SPOTIFY_PLAYER_STATE" | "SPOTIFY_SET_DEVICES">;
-
-    class SpotifyStore extends Flux.Store<SpotifyStoreAction> {
+    class SpotifyStore extends Flux.Store {
         public mPosition = 0;
         // https://github.com/microsoft/TypeScript/issues/36060
         /* private */ start = 0;

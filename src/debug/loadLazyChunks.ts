@@ -115,7 +115,7 @@ export async function loadLazyChunks() {
 
         for (const factoryId in wreq.m) {
             let isResolved = false;
-            searchAndLoadLazyChunks(wreq.m[factoryId].toString()).then(() => { isResolved = true; });
+            searchAndLoadLazyChunks(wreq.m[factoryId]!.toString()).then(() => { isResolved = true; });
 
             chunksSearchPromises.push(() => isResolved);
         }

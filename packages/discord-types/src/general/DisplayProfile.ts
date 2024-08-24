@@ -33,7 +33,7 @@ export declare class DisplayProfile<
         canAnimate?: boolean | undefined,
         size?: number | undefined /* = 480 */
     ): string | Nullish;
-    getPreviewBio(pendingBio?: string | Nullish): (true extends Guild ? boolean : false) extends infer GuildValue
+    getPreviewBio(pendingBio?: string | Nullish): Guild | false extends infer GuildValue
         ? GuildValue extends true
             ? { isUsingGuildValue: true; value: string; }
             : { isUsingGuildValue: false; value: string | undefined; }
@@ -44,9 +44,9 @@ export declare class DisplayProfile<
     hasFullProfile(): boolean;
     hasPremiumCustomization(): boolean;
     hasThemeColors(): boolean;
-    isUsingGuildMemberBanner(): true extends Guild ? boolean : false;
-    isUsingGuildMemberBio(): true extends Guild ? boolean : false;
-    isUsingGuildMemberPronouns(): true extends Guild ? boolean : false;
+    isUsingGuildMemberBanner(): Guild | false;
+    isUsingGuildMemberBio(): Guild | false;
+    isUsingGuildMemberPronouns(): Guild | false;
     get premiumGuildSince(): UserProfile<FetchFailed>["premiumGuildSince"];
     get premiumSince(): UserProfile<FetchFailed>["premiumSince"];
     get premiumType(): UserProfile<FetchFailed>["premiumType"];
@@ -60,6 +60,7 @@ export declare class DisplayProfile<
     guildId: Guild extends true ? string : undefined;
     /** @todo Does not seem to be implemented. */
     popoutAnimationParticleType: UserProfile["popoutAnimationParticleType"];
+    profileEffectExpiresAt: UserProfile["profileEffectExpiresAt"];
     profileEffectId: UserProfile<FetchFailed>["profileEffectId"];
     pronouns: UserProfile<FetchFailed>["pronouns"];
     themeColors: UserProfile["themeColors"];

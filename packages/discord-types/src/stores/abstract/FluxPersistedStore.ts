@@ -5,7 +5,6 @@
  */
 
 import type { FluxActionHandlerMap } from "../../flux/FluxActionHandlersGraph";
-import type { FluxAction } from "../../flux/fluxActions";
 import type { FluxDispatcher } from "../../flux/FluxDispatcher";
 import type { GenericConstructor, Nullish } from "../../internal";
 import type { FluxStore } from "./FluxStore";
@@ -13,10 +12,9 @@ import type { FluxStore } from "./FluxStore";
 // Original name: PersistedStore
 export declare abstract class FluxPersistedStore<
     Constructor extends GenericConstructor = GenericConstructor,
-    State = unknown,
-    Action extends FluxAction = FluxAction
-> extends FluxStore<Action> {
-    constructor(dispatcher: FluxDispatcher, actionHandlers: FluxActionHandlerMap<Action>);
+    State = unknown
+> extends FluxStore {
+    constructor(dispatcher: FluxDispatcher, actionHandlers: Partial<FluxActionHandlerMap>);
 
     static _clearAllPromise: Promise<void> | Nullish;
     static _writePromises: Map</* persistKey: */string, Promise<void>>;
@@ -27,17 +25,21 @@ export declare abstract class FluxPersistedStore<
     static disableWrite: boolean;
     static disableWrites: boolean;
     static getAllStates(): Promise<{ [persistKey: string]: unknown; }>;
-    static initializeAll(stateMap: { [persistKey: string]: unknown; }): void;
+    static initializeAll(stateMap: { [persistKey: string]: unknown; } & Pick<Object, "hasOwnProperty">): void;
     /**
      * If {@link clearAll} has been called for the specified persist key, state in the returned object will be undefined.
      */
-    static migrateAndReadStoreState<NewestState = unknown, OldStates extends unknown[] = any[]>(
+    static migrateAndReadStoreState<
+        States extends readonly [unknown, ...unknown[]] | readonly [...unknown[], unknown] = [unknown]
+    >(
         persistKey: string,
-        migrations?: FluxPersistedStoreMigrations<[...OldStates, NewestState]> | Nullish
-    ): { requiresPersist: boolean; state: NewestState; } | { requiresPersist: false; state: undefined; };
-    static migrations: ((oldState: any) => unknown)[] | undefined;
+        ...migrations: [] extends FluxPersistedStoreMigrations<States>
+            ? [migrations?: FluxPersistedStoreMigrations<States> | Nullish]
+            : [migrations: FluxPersistedStoreMigrations<States>]
+    ): { requiresPersist: true; state: Tail<States>; } | { requiresPersist: false; state: undefined; };
+    static migrations: ((oldState: never) => unknown)[] | undefined;
     /**
-     * Not present on FluxPersistedStore's constructor.
+     * Not present on {@link FluxPersistedStore}'s constructor.
      * All subclasses are required to define their own.
      */
     static persistKey: string;
@@ -68,16 +70,40 @@ export interface FluxPersistedStoreClearOptions {
     type: "all" | "user-data-only";
 }
 
-type MigrationsFromTuple<States extends readonly unknown[]>
-    = States extends readonly [infer OldState, infer NewState, ...infer NewerStates]
-        ? [(oldState: OldState) => NewState, ...MigrationsFromTuple<[NewState, ...NewerStates]>]
-        : [];
+export type FluxPersistedStoreMigrations<
+    States extends readonly [unknown, ...unknown[]] | readonly [...unknown[], unknown]
+>
+    = States extends readonly [...infer OldStates, infer NewState]
+        ? OldStates extends [...infer OlderStates, infer OldState]
+            ? [...FluxPersistedStoreMigrations<[...OlderStates, OldState]>, (oldState: OldState) => NewState]
+            : OldStates extends []
+                ? []
+                : OldStates extends (infer T)[]
+                    ? [] | [...((oldState: T) => T)[], (oldState: T) => NewState]
+                    : never
+        : FluxPersistedStoreMigrationsTrailingRest<States>;
 
-export type FluxPersistedStoreMigrations<States extends readonly unknown[] = any[]>
-    = States extends readonly [infer OldState, ...infer NewerStates]
-        ? NewerStates extends []
-            ? [(oldState: OldState) => unknown]
-            : MigrationsFromTuple<States>
-        : States extends readonly (infer T)[]
-            ? ((oldState: T) => T)[]
-            : never;
+type FluxPersistedStoreMigrationsTrailingRest<States extends readonly unknown[]>
+    = States extends readonly [infer OldState, ...infer NewStates]
+        ? NewStates extends [infer NewState, ...infer NewerStates]
+            ? [(oldState: OldState) => NewState, ...FluxPersistedStoreMigrationsTrailingRest<[NewState, ...NewerStates]>]
+            : NewStates extends []
+                ? []
+                : NewStates extends (infer T)[]
+                    ? [] | [(oldState: OldState) => T, ...((oldState: T) => T)[]]
+                    : never
+        : never;
+
+type Tail<T extends readonly [unknown, ...unknown[]] | readonly [...unknown[], unknown]>
+    = T extends readonly [...unknown[], infer U]
+        ? U
+        : TailTrailingRest<T>;
+
+type TailTrailingRest<T extends readonly unknown[]>
+    = T extends readonly [infer U, ...infer V]
+        ? V extends [unknown, ...unknown[]]
+            ? TailTrailingRest<V>
+            : V extends (infer W)[]
+                ? U | W
+                : never
+        : never;

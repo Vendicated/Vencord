@@ -4,14 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { ExtractAction, FluxAction } from "../flux/fluxActions";
 import type { FluxStore } from "./abstract/FluxStore";
 
-export type WindowStoreAction = ExtractAction<FluxAction, "WINDOW_FOCUS" | "WINDOW_FULLSCREEN_CHANGE" | "WINDOW_INIT" | "WINDOW_RESIZED" | "WINDOW_UNLOAD" | "WINDOW_VISIBILITY_CHANGE">;
-
-export declare class WindowStore<
-    Action extends FluxAction = WindowStoreAction
-> extends FluxStore<Action> {
+export declare class WindowStore extends FluxStore {
     static displayName: "WindowStore";
 
     getFocusedWindowId(): string | null;

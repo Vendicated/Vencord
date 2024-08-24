@@ -62,6 +62,9 @@ export default {
                 // Screaming snake case to pascal case (source enum's keys have no underscores)
                 keyMapper: key => key.replace(/(?<=^.).+/, s => s.toLowerCase()),
             },
+            SeverityLevel: {
+                type: "enum",
+            },
         },
         "./flux/FluxEmitter.ts": {
             FluxEmitter: {

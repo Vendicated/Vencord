@@ -71,9 +71,20 @@ export enum FluxDispatchBand {
 export interface SentryUtils {
     addBreadcrumb: (breadcrumb: {
         category?: string | undefined;
-        data?: unknown;
-        level?: string | undefined;
+        data?: Record<string, unknown> | undefined;
+        event_id?: string | undefined;
+        level?: SeverityLevel | undefined;
         message?: string | undefined;
+        timestamp?: number | undefined;
         type?: string | undefined;
     }) => void;
+}
+
+export enum SeverityLevel {
+    DEBUG = "debug",
+    ERROR = "error",
+    FATAL = "fatal",
+    INFO = "info",
+    LOG = "log",
+    WARNING = "warning",
 }

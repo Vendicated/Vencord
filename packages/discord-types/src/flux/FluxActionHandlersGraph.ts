@@ -53,10 +53,12 @@ export type FluxActionHandlerMap<Action extends FluxAction = FluxAction>
     // Workaround to avoid ts(2589)
     = UnionToIntersection<
         Action extends unknown
-            ? PropertyKey extends keyof Action
-                ? unknown extends IsAny<Action[string]> & IsAny<Action[number]> & IsAny<Action[symbol]>
-                    ? { [ActionType in Action["type"]]: (action: any) => void; }
-                    : { [ActionType in Action["type"]]: (action: Action & { type: ActionType; }) => void; }
+            ? unknown extends (
+                IsAny<Action[Extract<string, keyof Action>]>
+                & IsAny<Action[Extract<number, keyof Action>]>
+                & IsAny<Action[Extract<symbol, keyof Action>]>
+            )
+                ? { [ActionType in Action["type"]]: (action: any) => void; }
                 : { [ActionType in Action["type"]]: (action: Action & { type: ActionType; }) => void; }
             : never
     >;

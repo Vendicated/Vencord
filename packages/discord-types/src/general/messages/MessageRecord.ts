@@ -62,7 +62,7 @@ export declare class MessageRecord<
 
     activity: MessageActivity | null;
     activityInstance: { id: string; } | null;
-    /** @todo This is not an ApplicationRecord; it's an application object from the API. */
+    /** @todo This is not an ApplicationRecord; it is an application object from the API. */
     application: Record<string, any> | null;
     applicationId: string | null;
     author: UserRecord;
@@ -148,7 +148,7 @@ export interface MessageInteractionMetadata {
     original_response_message_id?: string;
     triggering_interaction_metadata?: MessageInteractionMetadata;
     type: InteractionType;
-    /** @todo This is not a UserRecord; it's a user object from the API. */
+    /** @todo This is not a UserRecord; it is a user object from the API. */
     user: Record<string, any>;
 }
 

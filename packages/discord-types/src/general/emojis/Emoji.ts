@@ -15,7 +15,13 @@ export declare class UnicodeEmoji {
     get allNamesString(): string;
     get animated(): false;
     get defaultDiversityChild(): UnicodeEmojiObjectDiversityChild | Nullish;
-    forEachDiversity(callback: (value: string, index: number, array: string[]) => unknown): any;
+    /**
+     * @param callback The iteratee. Iteration will terminate early if it returns false.
+     */
+    forEachDiversity(callback: (value: string, index: number, array: string[]) => unknown): void;
+    /**
+     * @param callback The iteratee. Iteration will terminate early if it returns false.
+     */
     forEachName(callback: (value: string, index: number, array: string[]) => unknown): void;
     get hasDiversity(): UnicodeEmojiObject["hasDiversity"];
     get hasDiversityParent(): UnicodeEmojiObjectDiversityChild["hasDiversityParent"];
@@ -51,7 +57,7 @@ export interface UnicodeEmojiObject {
 }
 
 export interface UnicodeEmojiObjectDiversityChild extends Pick<UnicodeEmojiObject, "names" | "surrogates" | "unicodeVersion"> {
-    diversity: [string, string?];
+    diversity: [string] | [string, string];
     hasDiversityParent?: boolean;
     hasMultiDiversityParent?: boolean;
 }

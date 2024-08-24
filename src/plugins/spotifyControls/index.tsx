@@ -26,7 +26,10 @@ import hoverOnlyStyle from "./hoverOnly.css?managed";
 import { Player } from "./PlayerComponent";
 
 function toggleHoverControls(value: boolean) {
-    (value ? enableStyle : disableStyle)(hoverOnlyStyle);
+    if (value)
+        enableStyle(hoverOnlyStyle);
+    else
+        disableStyle(hoverOnlyStyle);
 }
 
 export default definePlugin({

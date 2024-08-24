@@ -27,6 +27,7 @@ export interface UserProfileFetchSucceeded {
     premiumGuildSince: Date | null;
     premiumSince: Date | null;
     premiumType: UserPremiumType | Nullish;
+    profileEffectExpiresAt: number | Nullish;
     profileEffectId: string | undefined;
     profileFetchFailed: false;
     pronouns: string;
@@ -51,6 +52,8 @@ export interface UserProfileFetchFailed {
     premiumSince: null;
     /** Never present if fetch failed. */
     premiumType?: undefined;
+    /** Never present if fetch failed. */
+    profileEffectExpiresAt?: undefined;
     /** Never present if fetch failed. */
     profileEffectId?: undefined;
     profileFetchFailed: true;

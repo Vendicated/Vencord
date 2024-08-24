@@ -27,11 +27,10 @@ import type { ComponentType } from "react";
 
 import { traceFunction } from "../debug/Tracer";
 
-interface WebpackInstance extends Omit<$WebpackInstance, "c" | "m"> {
-    // Omit removes call signatures
-    (id: number): any;
-    c?: $WebpackInstance["c"] & Record<string | number, any>;
-    m: $WebpackInstance["m"] & Record<string | number, any>;
+export interface WebpackInstance extends Omit<$WebpackInstance, "c" | "m"> {
+    (...args: Parameters<$WebpackInstance>): ReturnType<$WebpackInstance>;
+    c?: Record<string | number, $WebpackInstance["c"][number]>;
+    m: Record<string | number, $WebpackInstance["m"] & { original?: $WebpackInstance["m"]; }>;
 }
 
 const logger = new Logger("Webpack");
@@ -269,7 +268,7 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
  */
 export const findModuleId = traceFunction("findModuleId", function findModuleId(...code: CodeFilter) {
     for (const id in wreq.m) {
-        if (stringMatches(wreq.m[id].toString(), code)) return id;
+        if (stringMatches(wreq.m[id]!.toString(), code)) return id;
     }
 
     const err = new Error("Didn't find module with code(s):\n" + code.join("\n"));
@@ -561,7 +560,7 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher: RegExp = D
         ));
     }
 
-    if (wreq.m[entryPointId] == null) {
+    if (wreq.m[entryPointId!] == null) {
         const err = new Error("extractAndLoadChunks: Entry point is not loaded in the module factories, perhaps one of the chunks failed to load");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
 
@@ -627,7 +626,7 @@ export function search(...code: CodeFilter) {
     const factories = wreq.m;
 
     for (const id in factories) {
-        const factory = factories[id].original ?? factories[id];
+        const factory = factories[id]!.original ?? factories[id]!;
 
         if (stringMatches(factory.toString(), code))
             results[id] = factory;

@@ -22,6 +22,9 @@ export declare class ReadState<Type extends ReadStateType = ReadStateType> {
     static clear(userId: string, type: UserIdReadStateType): boolean;
     static clear(guildId: string, type: GuildIdReadStateType): boolean;
     static clearAll(): void;
+    /**
+     * @param callback The iteratee. Iteration will terminate early if it returns false.
+     */
     static forEach(callback: (value: ReadState) => unknown): void;
     static get(channelId: string, type?: ChannelIdReadStateType | undefined): ReadState<ChannelIdReadStateType>;
     static get<T extends UserIdReadStateType>(userId: string, type: T): ReadState<T>;

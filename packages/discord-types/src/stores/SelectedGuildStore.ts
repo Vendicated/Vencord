@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { ExtractAction, FluxAction } from "../flux/fluxActions";
 import type { GenericConstructor } from "../internal";
 import type { FluxPersistedStore } from "./abstract/FluxPersistedStore";
 
@@ -14,13 +13,10 @@ export interface SelectedGuildStoreState {
     selectedGuildTimestampMillis: { [guildId: string]: number; };
 }
 
-export type SelectedGuildStoreAction = ExtractAction<FluxAction, "CHANNEL_SELECT" | "CONNECTION_OPEN" | "GUILD_DELETE" | "GUILD_MEMBER_REMOVE" | "LOGOUT" | "OVERLAY_INITIALIZE">;
-
 export declare class SelectedGuildStore<
     Constructor extends GenericConstructor = typeof SelectedGuildStore,
-    State extends SelectedGuildStoreState = SelectedGuildStoreState,
-    Action extends FluxAction = SelectedGuildStoreAction
-> extends FluxPersistedStore<Constructor, State, Action> {
+    State extends SelectedGuildStoreState = SelectedGuildStoreState
+> extends FluxPersistedStore<Constructor, State> {
     static displayName: "SelectedGuildStore";
     static persistKey: "SelectedGuildStore";
 

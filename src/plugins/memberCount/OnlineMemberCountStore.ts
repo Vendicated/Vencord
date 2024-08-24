@@ -7,7 +7,7 @@
 import { proxyLazy } from "@utils/lazy";
 import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
-import { type ExtractAction, type FluxAction, StatusType } from "@vencord/discord-types";
+import { StatusType } from "@vencord/discord-types";
 import { ChannelActionCreators, Flux, FluxDispatcher, GuildChannelStore } from "@webpack/common";
 
 export const OnlineMemberCountStore = proxyLazy(() => {
@@ -15,9 +15,7 @@ export const OnlineMemberCountStore = proxyLazy(() => {
 
     const onlineMemberMap = new Map<string, number>();
 
-    type OnlineMemberCountStoreAction = ExtractAction<FluxAction, "GUILD_MEMBER_LIST_UPDATE" | "ONLINE_GUILD_MEMBER_COUNT_UPDATE">;
-
-    class OnlineMemberCountStore extends Flux.Store<OnlineMemberCountStoreAction> {
+    class OnlineMemberCountStore extends Flux.Store {
         getCount(guildId: string) {
             return onlineMemberMap.get(guildId);
         }

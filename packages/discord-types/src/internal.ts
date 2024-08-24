@@ -5,11 +5,6 @@
  */
 
 /** @internal */
-export type Bivariant<T extends (...args: never) => unknown>
-    // eslint-disable-next-line @typescript-eslint/method-signature-style
-    = { _(...args: Parameters<T>): ReturnType<T>; }["_"];
-
-/** @internal */
 export type Defined<T> = Exclude<T, undefined>;
 
 /** @internal */
@@ -32,6 +27,10 @@ export type IsDomainFinite<T extends PropertyKey>
 
 /** @internal */
 export type Nullish = null | undefined;
+
+/** @internal */
+export type OmitIndexSignature<T>
+    = { [Key in keyof T as {} extends Record<Key, unknown> ? never : Key]: T[Key]; };
 
 /** @internal */
 export type OmitOptional<T>
@@ -88,5 +87,5 @@ export type UnionToIntersection<Union> = (
         ? (arg: Union) => unknown
         : never
 ) extends ((arg: infer Intersection) => unknown)
-    ? Intersection
+    ? Intersection & Union
     : never;

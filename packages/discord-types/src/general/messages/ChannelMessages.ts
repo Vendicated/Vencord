@@ -17,6 +17,9 @@ export declare class ChannelMessages {
     static clear(channelId: string): void;
     static clearCache(channelId: string): void;
     static commit(channelMessages: ChannelMessages): void;
+    /**
+     * @param callback The iteratee. Iteration will terminate early if it returns false.
+     */
     static forEach(callback: (value: ChannelMessages, index: number, array: ChannelMessages[]) => unknown): void;
     static get(channelId: string): ChannelMessages | undefined;
     static getOrCreate(channelId: string): ChannelMessages;
@@ -58,7 +61,7 @@ export declare class ChannelMessages {
     ): void;
     forEach<BreakOnReturnFalse extends boolean | undefined = undefined>(
         callback: (value: MessageRecord, index: number, array: MessageRecord[]) =>
-        true extends BreakOnReturnFalse
+        [BreakOnReturnFalse] extends [false | undefined]
             // https://github.com/typescript-eslint/typescript-eslint/issues/8113
             // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
             ? void

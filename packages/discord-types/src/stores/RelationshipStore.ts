@@ -4,18 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { ExtractAction, FluxAction } from "../flux/fluxActions";
 import type { MessageRecord } from "../general/messages/MessageRecord";
 import type { Nullish } from "../internal";
 import type { FluxStore } from "./abstract/FluxStore";
 
-export type RelationshipStoreAction = ExtractAction<FluxAction, "CONNECTION_OPEN" | "OVERLAY_INITIALIZE" | "RELATIONSHIP_ADD" | "RELATIONSHIP_PENDING_INCOMING_REMOVED" | "RELATIONSHIP_REMOVE" | "RELATIONSHIP_UPDATE">;
-
-export declare class RelationshipStore<
-    Action extends FluxAction = RelationshipStoreAction
-> extends FluxStore<Action> {
+export declare class RelationshipStore extends FluxStore {
     static displayName: "RelationshipStore";
 
+    /** @todo May eventually be renamed to `getBlockedIds`. */
+    getBlockedIDs(): string[];
     getFriendCount(): number;
     /** @todo May eventually be renamed to `getFriendIds`. */
     getFriendIDs(): string[];
@@ -27,6 +24,7 @@ export declare class RelationshipStore<
     getRelationshipType(userId: string): RelationshipType;
     getSince(userId: string): string | undefined;
     getSinces(): { [userId: string]: string; };
+    getSpamCount(): number;
     initialize(): void;
     isBlocked(userId?: string | Nullish): boolean;
     isBlockedForMessage(message?: MessageRecord | {
@@ -34,6 +32,7 @@ export declare class RelationshipStore<
         interaction_metadata?: { user: { id?: string | Nullish; } | Nullish; } | Nullish;
     }): boolean;
     isFriend(userId?: string | Nullish): boolean;
+    isSpam(userId: string): boolean;
 }
 
 // Original name: RelationshipTypes

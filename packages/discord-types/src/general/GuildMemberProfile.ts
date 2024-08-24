@@ -15,6 +15,7 @@ export interface GuildMemberProfile {
     guildId: string;
     /** @todo Does not seem to be implemented. */
     popoutAnimationParticleType: any /* | Nullish */;
+    profileEffectExpiresAt: number | Nullish;
     profileEffectId: string | undefined;
     pronouns: string;
     themeColors: ProfileThemeColors | Nullish;
