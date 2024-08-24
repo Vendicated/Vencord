@@ -14,7 +14,7 @@ import { RestAPI,SelectedGuildStore, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const settings = definePluginSettings({
-    showAtSymbolAvatar: {
+    showAtSymbol: {
         type: OptionType.BOOLEAN,
         description: "Whether the the @ symbol should be displayed on user mentions",
         default: true
@@ -73,7 +73,7 @@ export default definePlugin({
 });
 
 function getUsernameString(username: string) {
-    return settings.store.showAtSymbolAvatar
+    return settings.store.showAtSymbol
         ? `@${username}`
         : username;
 }
