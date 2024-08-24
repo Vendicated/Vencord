@@ -6,3 +6,11 @@
 .vc-std-wrapper [class*="communicationDisabled"] {
     margin-right: 0;
 }
+
+.vc-std-wrapper-text {
+    color: var(--status-danger);
+}
+
+.vc-std-automod :is(svg, .vc-std-wrapper-text) {
+    color: var(--status-warning);
+}

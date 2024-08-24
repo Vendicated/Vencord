@@ -6,14 +6,19 @@
 
 import "./styles.css";
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, i18n, Text, Tooltip } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, i18n, Parser, Text, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
 import { FunctionComponent, ReactNode } from "react";
+
+import { TimeoutEntry, TimeoutReasonStore, useTimeoutReason } from "./TimeoutReasonStore";
+
+
 
 const CountDown = findComponentLazy(m => m.prototype?.render?.toString().includes(".MAX_AGE_NEVER"));
 
@@ -22,18 +27,23 @@ const enum DisplayStyle {
     Inline = "ssalggnikool"
 }
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     displayStyle: {
-        description: "How to display the timeout duration",
+        description: "How to display the timeout duration and reason",
         type: OptionType.SELECT,
         options: [
             { label: "In the Tooltip", value: DisplayStyle.Tooltip },
             { label: "Next to the timeout icon", value: DisplayStyle.Inline, default: true },
         ],
+    },
+    showReason: {
+        description: "Should timeout reasons be shown?",
+        type: OptionType.BOOLEAN,
+        default: false
     }
 });
 
-function renderTimeout(message: Message, inline: boolean) {
+function renderTimeout(message: Message, inline: boolean, reason?: TimeoutEntry) {
     const guildId = ChannelStore.getChannel(message.channel_id)?.guild_id;
     if (!guildId) return null;
 
@@ -50,15 +60,38 @@ function renderTimeout(message: Message, inline: boolean) {
 
     return inline
         ? countdown()
-        : i18n.Messages.GUILD_ENABLE_COMMUNICATION_TIME_REMAINING.format({
-            username: message.author.username,
-            countdown
-        });
+        : <>
+            {i18n.Messages.GUILD_ENABLE_COMMUNICATION_TIME_REMAINING.format({
+                username: message.author.username,
+                countdown
+            })}
+            {reason && <Reason isTooltip reason={reason!} message={message} />}
+        </>;
 }
 
+
+function Reason({ isTooltip, reason, message }: { isTooltip?: boolean, reason: TimeoutEntry; message: Message; }) {
+    if (reason.loading) return null;
+    const details = [
+        reason.moderator && Parser.parse(`<@${reason.moderator}>`, true, {
+            channelId: message.channel_id,
+            messageId: message.id
+        }),
+        reason.moderator && " ",
+        reason.reason
+    ];
+    if (!details.some(Boolean)) return null;
+    return [
+        isTooltip ? "\n" : <span className="vc-std-wrapper-text">: </span>,
+        ...details
+    ];
+}
+
+migratePluginSettings("ShowTimeoutDetails", "ShowTimeoutDuration");
+
 export default definePlugin({
-    name: "ShowTimeoutDuration",
-    description: "Shows how much longer a user's timeout will last, either in the timeout icon tooltip or next to it",
+    name: "ShowTimeoutDetails",
+    description: "Shows how much longer a user's timeout will last and why they are timed out, either in the timeout icon tooltip or next to it",
     authors: [Devs.Ven, Devs.Sqaaakoi],
 
     settings,
@@ -75,18 +108,28 @@ export default definePlugin({
         }
     ],
 
+    TimeoutReasonStore,
+
     TooltipWrapper: ErrorBoundary.wrap(({ message, children, text }: { message: Message; children: FunctionComponent<any>; text: ReactNode; }) => {
+        const guildId = ChannelStore.getChannel(message.channel_id)?.guild_id;
+        const timeoutReason = useTimeoutReason(guildId, message.author.id);
+
         if (settings.store.displayStyle === DisplayStyle.Tooltip) return <Tooltip
-            children={children}
-            text={renderTimeout(message, false)}
+            text={renderTimeout(message, false, settings.store.showReason ? timeoutReason : undefined)}
+            children={(props: any) => (
+                <span className={classes("vc-std-icon", timeoutReason.automod && "vc-std-automod")}>
+                    {children(props)}
+                </span>
+            )}
         />;
         return (
-            <div className="vc-std-wrapper">
+            <div className={classes("vc-std-wrapper", timeoutReason.automod && "vc-std-automod")}>
                 <Tooltip text={text} children={children} />
-                <Text variant="text-md/normal" color="status-danger">
-                    {renderTimeout(message, true)} timeout remaining
+                <Text variant="text-md/normal">
+                    <span className="vc-std-wrapper-text">{renderTimeout(message, true)} timeout remaining</span>
+                    {settings.store.showReason && <Reason reason={timeoutReason} message={message} />}
                 </Text>
             </div>
         );
-    }, { noop: true })
+    }, { noop: true }),
 });
