@@ -32,6 +32,10 @@ export const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as F
 export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
     getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
 };
+export const ThreadMemberListStore = findStoreLazy("ThreadMemberListStore") as FluxStore & {
+    getMemberListSections(channelId: string): { [sectionId: string]: { sectionId: string; userIds: string[]; }; };
+};
+
 
 const settings = definePluginSettings({
     toolTip: {
