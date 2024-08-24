@@ -464,6 +464,8 @@ export function findByFactoryCode<T = any>(...code: CodeFilter | [...CodeFilter,
  * Find the module exports of the first module which the factory when stringified includes all the given code,
  * then map them into an easily usable object via the specified mappers.
  *
+ * IMPORTANT: mapMangledModule is the only way to webpack find primitive values, as long as you dont destructure them at top level.
+ *
  * IMPORTANT: You can destructure the properties of the returned object at top level as long as the property filter does not return a primitive value export.
  *
  * @example
