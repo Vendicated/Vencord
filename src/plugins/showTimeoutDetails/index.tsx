@@ -77,14 +77,16 @@ function Reason({ isTooltip, reason, message }: { isTooltip?: boolean, reason: T
             channelId: message.channel_id,
             messageId: message.id
         }),
-        reason.moderator && " ",
+        reason.automod && Parser.parse(`**${i18n.Messages.GUILD_SETTINGS_AUTOMOD_TITLE}**`, true),
         reason.reason
     ];
     if (!details.some(Boolean)) return null;
-    return [
+    const result = [
         isTooltip ? "\n" : <span className="vc-std-wrapper-text">: </span>,
-        ...details
+        ...details.flatMap(i => [i, " "])
     ];
+    result.pop();
+    return result;
 }
 
 migratePluginSettings("ShowTimeoutDetails", "ShowTimeoutDuration");

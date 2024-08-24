@@ -18,7 +18,7 @@ const AuditLogReasons: {
 
 export type TimeoutEntry = {
     reason: string | undefined;
-    moderator: string | undefined;
+    moderator: string | undefined; // User ID of moderator, undefined if automod did the timeout
     automod: boolean | undefined;
     expires: string | undefined; // used to compare if timeout reason is different
     loading: boolean;
@@ -46,16 +46,24 @@ export const TimeoutReasonStore = proxyLazy(() => {
 
         getReason(guildId: string, userId: string) {
             const member = GuildMemberStore.getMember(guildId, userId);
+
             if (!member?.communicationDisabledUntil) return NoTimeout;
-            const timeoutExpiry = new Date(member?.communicationDisabledUntil!);
-            if (timeoutExpiry <= new Date()) return NoTimeout;
+            if (new Date(member?.communicationDisabledUntil!) <= new Date()) return NoTimeout;
+
             const reason = this.reasonMap.get(`${guildId}-${userId}`);
-            if (reason && !reason.loading && reason.expires === member?.communicationDisabledUntil) return reason;
+            // Return if timeout reason entry is found and is up to date, or if it's still loading
+            if (reason && (reason.loading ? true : reason.expires === member?.communicationDisabledUntil)) return reason;
+
+            // The indicator being visible does not depend on any data here. This just returns that there's no extra information about the timeout.
             if (!PermissionStore.canWithPartialContext(PermissionsBits.VIEW_AUDIT_LOG, { guildId })) return NoTimeout;
+
+            // Stop requesting data multiple times
             this.reasonMap.set(`${guildId}-${userId}`, TimeoutLoading);
+
             RestAPI.get({
                 url: Constants.Endpoints.GUILD_AUDIT_LOG(guildId),
                 query: {
+                    // action_type is intentionally not specified here as we need multiple types of audit log actions.
                     target_id: userId,
                     limit: 100
                 }
@@ -64,8 +72,11 @@ export const TimeoutReasonStore = proxyLazy(() => {
                     if (entry.action_type === AuditLogReasons.AUTO_MODERATION_USER_COMMUNICATION_DISABLED) return true;
                     if (entry.action_type === AuditLogReasons.MEMBER_UPDATE && entry?.changes.some((change: { key: string; }) => change.key === "communication_disabled_until")) return true;
                 });
+
                 if (!entry) return this.reasonMap.set(`${guildId}-${userId}`, NoTimeout);
+
                 const isAutomod = entry.action_type === AuditLogReasons.AUTO_MODERATION_USER_COMMUNICATION_DISABLED;
+
                 this.reasonMap.set(`${guildId}-${userId}`, {
                     reason: entry.reason,
                     moderator: isAutomod ? undefined : entry.user_id,
@@ -73,8 +84,11 @@ export const TimeoutReasonStore = proxyLazy(() => {
                     expires: member?.communicationDisabledUntil,
                     loading: false
                 });
+
+                // Re-render the timeout indicator components
                 this.emitChange();
             });
+
             return TimeoutLoading;
         }
     }
