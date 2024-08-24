@@ -9,6 +9,7 @@ import "./styles.css";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentLazy } from "@webpack";
@@ -82,7 +83,7 @@ function Reason({ isTooltip, reason, message }: { isTooltip?: boolean, reason: T
     ];
     if (!details.some(Boolean)) return null;
     const result = [
-        isTooltip ? "\n" : <span className="vc-std-wrapper-text">: </span>,
+        isTooltip ? <br className={Margins.bottom8} /> : <span className="vc-std-wrapper-text">: </span>,
         ...details.flatMap(i => [i, " "])
     ];
     result.pop();
