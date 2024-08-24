@@ -10,14 +10,7 @@ import { defaultColorwaySource, fallbackColorways, nullColorwayObj } from "../..
 import { Colorway } from "../../types";
 import Setting from "../Setting";
 import Switch from "../Switch";
-import { changeTheme as changeThemeMain } from "../MainModal";
-import { connect, updateShouldAutoconnect } from "../../wsClient";
-import { changeThemeIDCard } from "../ColorwayID";
-
-function changeTheme(theme: string) {
-    changeThemeMain(theme);
-    changeThemeIDCard(theme);
-}
+import { connect, isWSOpen } from "../../wsClient";
 
 export default function ({
     hasTheme = false
@@ -33,7 +26,7 @@ export default function ({
     useEffect(() => {
         async function load() {
             setTheme(await DataStore.get("colorwaysPluginTheme") as string);
-            setShouldAutoconnect(await DataStore.get("colorwaysManagerDoAutoconnect") as "1" | "2");
+            setShouldAutoconnect((await DataStore.get("colorwaysManagerDoAutoconnect") as boolean) ? "1" : "2");
         }
         load();
     }, []);
@@ -100,10 +93,13 @@ export default function ({
                 <select
                     className="colorwaysPillButton"
                     style={{ border: "none" }}
-                    onChange={e => {
-                        setTheme(e.currentTarget.value);
-                        DataStore.set("colorwaysPluginTheme", e.currentTarget.value);
-                        changeTheme(e.currentTarget.value);
+                    onChange={({ currentTarget: { value } }) => {
+                        setTheme(value);
+                        DataStore.set("colorwaysPluginTheme", value);
+                        FluxDispatcher.dispatch({
+                            type: "COLORWAYS_UPDATE_THEME" as FluxEvents,
+                            theme: value
+                        });
                     }}
                     value={theme}
                 >
@@ -126,12 +122,12 @@ export default function ({
                     className="colorwaysPillButton"
                     style={{ border: "none" }}
                     onChange={({ currentTarget: { value } }) => {
+                        setShouldAutoconnect(value as "1" | "2");
                         if (value == "1") {
                             DataStore.set("colorwaysManagerDoAutoconnect", true);
-                            updateShouldAutoconnect(true);
+                            if (!isWSOpen()) connect();
                         } else {
                             DataStore.set("colorwaysManagerDoAutoconnect", false);
-                            updateShouldAutoconnect(false);
                         }
                     }}
                     value={shouldAutoconnect}
@@ -178,10 +174,6 @@ export default function ({
                                 url: defaultColorwaySource
                             }]],
                             ["showColorwaysButton", false],
-                            ["onDemandWays", false],
-                            ["onDemandWaysTintedText", true],
-                            ["onDemandWaysDiscordSaturation", false],
-                            ["onDemandWaysOsAccentColor", false],
                             ["activeColorwayObject", nullColorwayObj],
                             ["colorwaysPluginTheme", "discord"],
                             ["colorwaysBoundManagers", []],

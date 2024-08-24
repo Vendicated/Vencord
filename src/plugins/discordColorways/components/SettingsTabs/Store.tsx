@@ -47,7 +47,7 @@ export default function ({
         <div style={{ display: "flex", marginBottom: "8px" }}>
             <input
                 type="text"
-                className="colorwaySelector-search"
+                className="colorwayTextBox"
                 placeholder="Search for sources..."
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.currentTarget.value)}

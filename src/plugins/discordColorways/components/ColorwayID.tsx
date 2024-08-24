@@ -1,10 +1,8 @@
-import { DataStore, openModal, useState, useEffect, Toasts } from "..";
+import { DataStore, openModal, useState, useEffect, Toasts, FluxDispatcher, FluxEvents } from "..";
 import { generateCss } from "../css";
 import { colorToHex, hexToString } from "../utils";
 import CreatorModal from "./CreatorModal";
 import { ColorwayCSS } from "../colorwaysAPI";
-
-export let changeThemeIDCard: (theme: string) => void = () => { };
 
 export default function ({ props }) {
     const [theme, setTheme] = useState("discord");
@@ -13,10 +11,10 @@ export default function ({ props }) {
         async function load() {
             setTheme(await DataStore.get("colorwaysPluginTheme") as string);
         }
-        changeThemeIDCard = (theme) => setTheme(theme);
+        FluxDispatcher.subscribe("COLORWAYS_UPDATE_THEME" as FluxEvents, ({ theme }) => setTheme(theme));
         load();
         return () => {
-            changeThemeIDCard = () => { };
+            FluxDispatcher.unsubscribe("COLORWAYS_UPDATE_THEME" as FluxEvents, ({ theme }) => setTheme(theme));
         };
     }, []);
     if (String(props.message.content).match(/colorway:[0-9a-f]{0,100}/)) {

@@ -77,7 +77,7 @@
     padding: 12px;
 }
 
-[data-theme="discord"] .colorwaySelector-search {
+[data-theme="discord"] .colorwayTextBox {
     border-radius: 3px;
     color: var(--text-normal);
     background-color: var(--input-background) !important;
@@ -331,4 +331,60 @@
 
 [data-theme="discord"] .colorwaysManagerConnectionValue > b {
     color: var(--text-normal);
+}
+
+.visual-refresh .colorwaySelectorModal[data-theme="discord"] {
+    border-radius: 12px;
+    background-color: var(--bg-base-primary);
+}
+
+.visual-refresh .colorwaySelectorModal[data-theme="discord"] > .colorwaySelectorSidebar {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    background-color: var(--bg-base-tertiary);
+    margin-right: 0;
+    border: 1px solid var(--border-subtle);
+}
+
+.visual-refresh .colorwaySelectorModal[data-theme="discord"] .colorwaySelectorSidebar-tab {
+    border-radius: 8px;
+    width: 44px;
+    height: 44px;
+    border: 1px solid transparent;
+    transition:
+        background-color 0.1s ease-in-out,
+        border-color 0.1s ease-in-out;
+}
+
+.visual-refresh .colorwaySelectorModal[data-theme="discord"] .colorwaySelectorSidebar-tab.active {
+    background: var(--bg-overlay-1, var(--bg-surface-raised));
+    border-color: var(--border-faint);
+}
+
+.visual-refresh [data-theme="discord"] .colorwaysPillButton,
+.visual-refresh [data-theme="discord"] .discordColorway {
+    background: var(--bg-mod-faint);
+    border-radius: 8px;
+    transition:
+        background-color 0.1s ease-in-out,
+        border-color 0.1s ease-in-out;
+}
+
+.visual-refresh [data-theme="discord"] .discordColorway {
+    border: 1px solid transparent;
+}
+
+.visual-refresh [data-theme="discord"] .colorwaysPillButton:hover,
+.visual-refresh [data-theme="discord"] .discordColorway:hover {
+    background: var(--bg-mod-subtle);
+}
+
+.visual-refresh [data-theme="discord"] .discordColorway[aria-checked="true"] {
+    border-color: var(--border-faint);
+    background: var(--bg-mod-strong);
+}
+
+.visual-refresh [data-theme="discord"] .colorwayTextBox {
+    background: var(--bg-overlay-3, var(--bg-mod-strong)) !important;
+    border-radius: 8px;
 }

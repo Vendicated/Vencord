@@ -7,7 +7,7 @@
 export interface Colorway {
     [key: string]: any,
     name: string,
-    "dc-import": string,
+    "dc-import"?: string,
     accent: string,
     primary: string,
     secondary: string,
@@ -21,8 +21,7 @@ export interface Colorway {
     source?: string,
     linearGradient?: string,
     preset?: string,
-    creatorVersion: string,
-    colorObj?: { accent?: string, primary?: string, secondary?: string, tertiary?: string; };
+    creatorVersion: string;
 }
 
 export interface ColorPickerProps {
@@ -38,12 +37,13 @@ export interface ColorwayObject {
     css?: string | null,
     sourceType: "online" | "offline" | "temporary" | null,
     source: string | null | undefined,
-    colors?: {
+    colors: {
         accent?: string | undefined,
         primary?: string | undefined,
         secondary?: string | undefined,
         tertiary?: string | undefined;
-    } | undefined;
+    },
+    linearGradient?: string;
 }
 
 export interface SourceObject {

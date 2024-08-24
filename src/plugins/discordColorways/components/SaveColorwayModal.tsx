@@ -106,7 +106,7 @@ export default function ({ modalProps, colorways, onFinish }: { modalProps: Moda
                                                         <div className="colorwaysModalContent">
                                                             <input
                                                                 type="text"
-                                                                className="colorwaySelector-search"
+                                                                className="colorwayTextBox"
                                                                 value={newColorwayName}
                                                                 onInput={({ currentTarget: { value } }) => setNewColorwayName(value)}
                                                                 placeholder="Enter valid colorway name" />

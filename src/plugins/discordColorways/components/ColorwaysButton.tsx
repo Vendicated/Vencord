@@ -23,14 +23,12 @@ export default function () {
             setIsThin(await DataStore.get("useThinMenuButton") as boolean);
             setAutoPreset(await DataStore.get("activeAutoPreset") as string);
         })();
-    });
 
-    FluxDispatcher.subscribe("COLORWAYS_UPDATE_BUTTON_HEIGHT" as FluxEvents, ({ isTall }) => {
-        setIsThin(isTall);
-    });
+        FluxDispatcher.subscribe("COLORWAYS_UPDATE_BUTTON_VISIBILITY" as FluxEvents, ({ isVisible }) => setVisibility(isVisible));
 
-    FluxDispatcher.subscribe("COLORWAYS_UPDATE_BUTTON_VISIBILITY" as FluxEvents, ({ isVisible }) => {
-        setVisibility(isVisible);
+        return () => {
+            FluxDispatcher.unsubscribe("COLORWAYS_UPDATE_BUTTON_VISIBILITY" as FluxEvents, ({ isVisible }) => setVisibility(isVisible));
+        };
     });
 
     return <Tooltip text={

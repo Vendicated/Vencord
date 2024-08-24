@@ -8,7 +8,6 @@
 import ColorwaysButton from "./components/ColorwaysButton";
 import CreatorModal from "./components/CreatorModal";
 import Selector from "./components/Selector";
-import OnDemandWaysPage from "./components/SettingsTabs/OnDemandPage";
 import SettingsPage from "./components/SettingsTabs/SettingsPage";
 import SourceManager from "./components/SettingsTabs/SourceManager";
 import Store from "./components/SettingsTabs/Store";
@@ -36,11 +35,13 @@ import {
     SettingsRouter
 } from "@webpack/common";
 import ColorwayID from "./components/ColorwayID";
-import { connect } from "./wsClient";
+import { closeWS, connect } from "./wsClient";
 import { ColorwayCSS } from "./colorwaysAPI";
 import { FluxEvents as $FluxEvents } from "@webpack/types";
 import PCSMigrationModal from "./components/PCSMigrationModal";
 import defaultsLoader from "./defaultsLoader";
+import { generateCss, gradientBase } from "./css";
+import { colorToHex } from "./utils";
 
 export const DataStore = $DataStore;
 export type ReactNode = $ReactNode;
@@ -68,12 +69,10 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
     return <Spinner className="colorways-creator-module-warning" />;
 };
 
-defaultsLoader();
-
 export const PluginProps = {
-    pluginVersion: "6.2.0",
+    pluginVersion: "6.3.0",
     clientMod: "Vencord",
-    UIVersion: "2.0.0",
+    UIVersion: "2.1.0",
     creatorVersion: "1.20"
 };
 
@@ -195,12 +194,6 @@ export default definePlugin({
                 className: "dc-colorway-sources-manager"
             },
             {
-                section: "ColorwaysOnDemand",
-                label: "On-Demand",
-                element: () => <OnDemandWaysPage hasTheme />,
-                className: "dc-colorway-ondemand"
-            },
-            {
                 section: "ColorwaysStore",
                 label: "Store",
                 element: () => <Store hasTheme />,
@@ -217,24 +210,51 @@ export default definePlugin({
     async start() {
         addServerListElement(ServerListRenderPosition.In, this.ColorwaysButton);
 
-        connect();
-
         enableStyle(style);
         enableStyle(discordTheme);
-        ColorwayCSS.set((await DataStore.get("activeColorwayObject") as ColorwayObject).css || "");
 
-        if ((await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).map(i => i.url).includes("https://raw.githubusercontent.com/DaBluLite/ProjectColorway/master/index.json") || (!(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).map(i => i.url).includes("https://raw.githubusercontent.com/DaBluLite/ProjectColorway/master/index.json") && !(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).map(i => i.url).includes("https://raw.githubusercontent.com/ProjectColorway/ProjectColorway/master/index.json"))) {
-            DataStore.set("colorwaySourceFiles", [{ name: "Project Colorway", url: defaultColorwaySource }, ...(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).filter(i => i.name !== "Project Colorway")]);
-            openModal(props => <PCSMigrationModal modalProps={props} />);
-        }
+        defaultsLoader();
+
+        const [
+            activeColorwayObject,
+            colorwaysManagerAutoconnectPeriod,
+            colorwaysManagerDoAutoconnect,
+            colorwaySourceFiles
+        ] = await DataStore.getMany([
+            "activeColorwayObject",
+            "colorwaysManagerAutoconnectPeriod",
+            "colorwaysManagerDoAutoconnect",
+            "colorwaySourceFiles"
+        ]);
+
+        connect(colorwaysManagerDoAutoconnect as boolean, colorwaysManagerAutoconnectPeriod as number);
+
+        const active: ColorwayObject = activeColorwayObject;
+
+        active.colors.primary ??= "#313338";
+        active.colors.secondary ??= "#2b2d31";
+        active.colors.tertiary ??= "#1e1f22";
+        active.colors.accent ??= "#ffffff";
+        ColorwayCSS.set(!Object.keys(active).includes("linearGradient") ? generateCss(
+            colorToHex(active.colors.primary),
+            colorToHex(active.colors.secondary),
+            colorToHex(active.colors.tertiary),
+            colorToHex(active.colors.accent)
+        ) : gradientBase(colorToHex(active.colors.accent), true) + `:root:root {--custom-theme-background: linear-gradient(${active.linearGradient})}`);
 
         addAccessory("colorways-btn", props => <ColorwayID props={props} />);
+
+        if ((colorwaySourceFiles as { name: string, url: string; }[]).map(i => i.url).includes("https://raw.githubusercontent.com/DaBluLite/ProjectColorway/master/index.json") || (!(colorwaySourceFiles as { name: string, url: string; }[]).map(i => i.url).includes("https://raw.githubusercontent.com/DaBluLite/ProjectColorway/master/index.json") && !(colorwaySourceFiles as { name: string, url: string; }[]).map(i => i.url).includes("https://raw.githubusercontent.com/ProjectColorway/ProjectColorway/master/index.json"))) {
+            DataStore.set("colorwaySourceFiles", [{ name: "Project Colorway", url: defaultColorwaySource }, ...(colorwaySourceFiles as { name: string, url: string; }[]).filter(i => i.name !== "Project Colorway")]);
+            openModal(props => <PCSMigrationModal modalProps={props} />);
+        }
     },
     stop() {
         removeServerListElement(ServerListRenderPosition.In, this.ColorwaysButton);
         disableStyle(style);
         disableStyle(discordTheme);
         ColorwayCSS.remove();
+        closeWS();
         removeAccessory("colorways-btn");
     },
 });

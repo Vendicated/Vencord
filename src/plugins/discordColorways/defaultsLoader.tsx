@@ -6,10 +6,6 @@ export default async function () {
         customColorways,
         colorwaySourceFiles,
         showColorwaysButton,
-        onDemandWays,
-        onDemandWaysTintedText,
-        onDemandWaysDiscordSaturation,
-        onDemandWaysOsAccentColor,
         activeColorwayObject,
         colorwaysPluginTheme,
         colorwaysBoundManagers,
@@ -19,10 +15,6 @@ export default async function () {
         "customColorways",
         "colorwaySourceFiles",
         "showColorwaysButton",
-        "onDemandWays",
-        "onDemandWaysTintedText",
-        "onDemandWaysDiscordSaturation",
-        "onDemandWaysOsAccentColor",
         "activeColorwayObject",
         "colorwaysPluginTheme",
         "colorwaysBoundManagers",
@@ -47,26 +39,6 @@ export default async function () {
             default: false
         },
         {
-            name: "onDemandWays",
-            value: onDemandWays,
-            default: false
-        },
-        {
-            name: "onDemandWaysTintedText",
-            value: onDemandWaysTintedText,
-            default: true
-        },
-        {
-            name: "onDemandWaysDiscordSaturation",
-            value: onDemandWaysDiscordSaturation,
-            default: false
-        },
-        {
-            name: "onDemandWaysOsAccentColor",
-            value: onDemandWaysOsAccentColor,
-            default: false
-        },
-        {
             name: "colorwaysBoundManagers",
             value: colorwaysBoundManagers,
             default: []
@@ -87,8 +59,8 @@ export default async function () {
         if (!value) DataStore.set(name, def);
     });
 
-    if (customColorways) {
-        if (!customColorways[0].colorways) {
+    if (customColorways && Array.isArray(customColorways) && customColorways.length) {
+        if (typeof customColorways[0] !== "object" || !Object.keys(customColorways[0]).includes("colorways")) {
             DataStore.set("customColorways", [{ name: "Custom", colorways: customColorways }]);
         }
     } else {

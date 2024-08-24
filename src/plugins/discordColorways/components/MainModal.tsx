@@ -9,16 +9,12 @@
 import SourceManager from "./SettingsTabs/SourceManager";
 import Store from "./SettingsTabs/Store";
 import Selector from "./Selector";
-import { useState, useEffect, DataStore, useRef } from "../";
+import { useState, useEffect, DataStore, useRef, FluxDispatcher, FluxEvents } from "../";
 import SettingsPage from "./SettingsTabs/SettingsPage";
 import { ModalProps } from "../types";
 import { MouseEvent, MouseEventHandler } from "react";
 import { restartWS, updateRemoteSources, wsOpen } from "../wsClient";
 import { boundKey as bk } from "../wsClient";
-
-export let changeTheme = (theme: string) => { };
-export let updateWSMain: (status: boolean) => void = () => { };
-export let updateBoundKeyMain: (boundKey: { [managerKey: string]: string; }) => void = () => { };
 
 export default function ({
     modalProps
@@ -37,15 +33,16 @@ export default function ({
         async function load() {
             setTheme(await DataStore.get("colorwaysPluginTheme") as string);
         }
-        updateWSMain = (status) => setWsConnected(status);
-        changeTheme = (theme: string) => setTheme(theme);
-        updateBoundKeyMain = (bound) => setBoundKey(bound);
+        FluxDispatcher.subscribe("COLORWAYS_UPDATE_WS_CONNECTED" as FluxEvents, ({ isConnected }) => setWsConnected(isConnected));
+        FluxDispatcher.subscribe("COLORWAYS_UPDATE_BOUND_KEY" as FluxEvents, ({ boundKey }) => setBoundKey(boundKey));
+        FluxDispatcher.subscribe("COLORWAYS_UPDATE_THEME" as FluxEvents, ({ theme }) => setTheme(theme));
+
         load();
 
         return () => {
-            updateWSMain = () => { };
-            changeTheme = () => { };
-            updateBoundKeyMain = () => { };
+            FluxDispatcher.unsubscribe("COLORWAYS_UPDATE_BOUND_KEY" as FluxEvents, ({ boundKey }) => setBoundKey(boundKey));
+            FluxDispatcher.unsubscribe("COLORWAYS_UPDATE_WS_CONNECTED" as FluxEvents, ({ isConnected }) => setWsConnected(isConnected));
+            FluxDispatcher.unsubscribe("COLORWAYS_UPDATE_THEME" as FluxEvents, ({ theme }) => setTheme(theme));
         };
     }, []);
 

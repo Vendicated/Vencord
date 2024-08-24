@@ -31,7 +31,7 @@ function RenameColorwayModal({ modalProps, ogName, onFinish, colorwayList }: { m
         <div className="colorwaysModalContent">
             <input
                 type="text"
-                className="colorwaySelector-search"
+                className="colorwayTextBox"
                 value={newName}
                 onInput={({ currentTarget: { value } }) => {
                     setNewName(value);
@@ -135,28 +135,23 @@ export default function ({
                         className="colorwaysPillButton"
                         style={{ width: "100%" }}
                         onClick={() => {
-                            navigator.clipboard.writeText(colorway["dc-import"]);
-                            Toasts.show({
-                                message: "Copied CSS to Clipboard",
-                                type: 1,
-                                id: "copy-colorway-css-notify",
-                            });
+                            if (colorway["dc-import"]) {
+                                navigator.clipboard.writeText(colorway["dc-import"]);
+                                Toasts.show({
+                                    message: "Copied CSS to Clipboard",
+                                    type: 1,
+                                    id: "copy-colorway-css-notify",
+                                });
+                            } else {
+                                Toasts.show({
+                                    message: "Colorway did not provide CSS",
+                                    type: 2,
+                                    id: "copy-colorway-css-failed-notify",
+                                });
+                            }
                         }}
                     >
                         Copy CSS
-                    </button>
-                    <button
-                        className="colorwaysPillButton"
-                        style={{ width: "100%" }}
-                        onClick={async () => {
-                            const newColorway = {
-                                ...colorway,
-                                "dc-import": generateCss(colorToHex(colorway.primary) || "313338", colorToHex(colorway.secondary) || "2b2d31", colorToHex(colorway.tertiary) || "1e1f22", colorToHex(colorway.accent) || "5865f2", true, true, undefined, colorway.name)
-                            };
-                            openModal(props => <SaveColorwayModal modalProps={props} colorways={[newColorway]} onFinish={() => { }} />);
-                        }}
-                    >
-                        Update CSS
                     </button>
                     {colorway.sourceType === "offline" && <button
                         className="colorwaysPillButton"
@@ -190,17 +185,19 @@ export default function ({
                         className="colorwaysPillButton"
                         style={{ width: "100%" }}
                         onClick={() => {
-                            if (!colorway["dc-import"].includes("@name")) {
-                                saveFile(new File([`/**
-                                    * @name ${colorway.name || "Colorway"}
-                                    * @version ${PluginProps.creatorVersion}
-                                    * @description Automatically generated Colorway.
-                                    * @author ${UserStore.getCurrentUser().username}
-                                    * @authorId ${UserStore.getCurrentUser().id}
-                                    */
-                                   ${colorway["dc-import"].replace((colorway["dc-import"].match(/\/\*.+\*\//) || [""])[0], "").replaceAll("url(//", "url(https://").replaceAll("url(\"//", "url(\"https://")}`], `${colorway.name.replaceAll(" ", "-").toLowerCase()}.theme.css`, { type: "text/plain" }));
-                            } else {
-                                saveFile(new File([colorway["dc-import"]], `${colorway.name.replaceAll(" ", "-").toLowerCase()}.theme.css`, { type: "text/plain" }));
+                            if (colorway["dc-import"]) {
+                                if (!colorway["dc-import"].includes("@name")) {
+                                    saveFile(new File([`/**
+                                        * @name ${colorway.name || "Colorway"}
+                                        * @version ${PluginProps.creatorVersion}
+                                        * @description Automatically generated Colorway.
+                                        * @author ${UserStore.getCurrentUser().username}
+                                        * @authorId ${UserStore.getCurrentUser().id}
+                                        */
+                                       ${colorway["dc-import"].replace((colorway["dc-import"].match(/\/\*.+\*\//) || [""])[0], "").replaceAll("url(//", "url(https://").replaceAll("url(\"//", "url(\"https://")}`], `${colorway.name.replaceAll(" ", "-").toLowerCase()}.theme.css`, { type: "text/plain" }));
+                                } else {
+                                    saveFile(new File([colorway["dc-import"]], `${colorway.name.replaceAll(" ", "-").toLowerCase()}.theme.css`, { type: "text/plain" }));
+                                }
                             }
                         }}
                     >

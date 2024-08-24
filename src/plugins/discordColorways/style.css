@@ -832,7 +832,7 @@
     box-shadow: none !important;
 }
 
-.colorwaySelector-search {
+.colorwayTextBox {
     width: 100%;
     border-radius: 6px;
     background-color: #101010;
@@ -844,11 +844,11 @@
     box-sizing: border-box;
 }
 
-.colorwaySelector-search:hover {
+.colorwayTextBox:hover {
     background-color: #1a1a1a;
 }
 
-.colorwaySelector-search:focus {
+.colorwayTextBox:focus {
     background-color: #1a1a1a;
     border-color: #a6a6a6;
 }
@@ -1334,7 +1334,7 @@
     border-radius: 8px;
 }
 
-.colorwaySelector-searchPopout {
+.colorwayTextBoxPopout {
     display: none !important;
 }
 

@@ -140,7 +140,7 @@ export default function ({
                 <span className="colorwaysModalSectionHeader">Name:</span>
                 <input
                     type="text"
-                    className="colorwaySelector-search"
+                    className="colorwayTextBox"
                     placeholder="Give your Colorway a name"
                     value={colorwayName}
                     onInput={e => setColorwayName(e.currentTarget.value)}
@@ -261,7 +261,6 @@ export default function ({
                         }
                         const customColorway: Colorway = {
                             name: (colorwayName || "Colorway"),
-                            "dc-import": customColorwayCSS,
                             accent: "#" + colors.accent,
                             primary: "#" + colors.primary,
                             secondary: "#" + colors.secondary,

@@ -32,7 +32,7 @@ export function StoreNameModal({ modalProps, originalName, onFinish, conflicting
         <div className="colorwaysModalContent">
             {conflicting ? <span className="colorwaysModalSectionHeader">A store with the same name already exists. Please give a different name to the imported store:</span> : <></>}
             <span className="colorwaysModalSectionHeader">Name:</span>
-            <input type="text" className="colorwaySelector-search" value={newStoreName} onChange={({ currentTarget: { value } }) => setNewStoreName(value)} style={{ marginBottom: "16px" }} />
+            <input type="text" className="colorwayTextBox" value={newStoreName} onChange={({ currentTarget: { value } }) => setNewStoreName(value)} style={{ marginBottom: "16px" }} />
         </div>
         <div className="colorwaysModalFooter">
             <button
@@ -82,7 +82,7 @@ function AddOnlineStoreModal({ modalProps, onFinish }: { modalProps: ModalProps,
             <span className="colorwaysModalSectionHeader">Name:</span>
             <input
                 type="text"
-                className="colorwaySelector-search"
+                className="colorwayTextBox"
                 placeholder="Enter a valid Name..."
                 onInput={e => setColorwaySourceName(e.currentTarget.value)}
                 value={colorwaySourceName}
@@ -92,7 +92,7 @@ function AddOnlineStoreModal({ modalProps, onFinish }: { modalProps: ModalProps,
             <span className="colorwaysModalSectionHeader" style={{ marginTop: "8px" }}>URL:</span>
             <input
                 type="text"
-                className="colorwaySelector-search"
+                className="colorwayTextBox"
                 placeholder="Enter a valid URL..."
                 onChange={({ currentTarget: { value } }) => {
                     setColorwaySourceURL(value);

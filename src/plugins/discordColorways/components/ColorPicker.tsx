@@ -39,7 +39,7 @@ export default function ({ modalProps }: { modalProps: ModalProps; }) {
         <div style={{ gap: "8px", marginBottom: "8px", display: "flex" }}>
             <input
                 type="text"
-                className="colorwaySelector-search"
+                className="colorwayTextBox"
                 placeholder="Search for a color:"
                 onChange={({ currentTarget: { value } }) => {
                     searchToolboxItems(value);

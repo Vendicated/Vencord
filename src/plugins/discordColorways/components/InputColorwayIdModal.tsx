@@ -23,7 +23,7 @@ export default function ({ modalProps, onColorwayId }: { modalProps: ModalProps,
             <span className="colorwaysModalSectionHeader">Colorway ID:</span>
             <input
                 type="text"
-                className="colorwaySelector-search"
+                className="colorwayTextBox"
                 placeholder="Enter Colorway ID"
                 onInput={({ currentTarget: { value } }) => setColorwayID(value)}
             />

@@ -25,7 +25,7 @@ export default function ({ modalProps, onFinish }: { modalProps: ModalProps, onF
                     setColorwaySourceURL(e.currentTarget.value);
                 }}
                 value={colorwaySourceURL}
-                className="colorwaySelector-search"
+                className="colorwayTextBox"
             />
         </div>
         <div className="colorwaysModalFooter">

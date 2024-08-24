@@ -1,5 +1,5 @@
 import { PlusIcon, PalleteIcon, CodeIcon, IDIcon, DeleteIcon } from "./Icons";
-import { DataStore, ReactNode, Toasts } from "..";
+import { DataStore, FluxDispatcher, FluxEvents, ReactNode, Toasts } from "..";
 import { nullColorwayObj } from "../constants";
 import { generateCss, getAutoPresets, gradientBase } from "../css";
 import { ColorwayObject, Colorway, SortOptions, SourceObject, ModalProps } from "../types";
@@ -14,10 +14,6 @@ import UseRepainterThemeModal from "./UseRepainterThemeModal";
 import FiltersMenu from "./FiltersMenu";
 import SourcesMenu from "./SourcesMenu";
 import ReloadButton from "./ReloadButton";
-
-export let updateWS: (status: boolean) => void = () => { };
-export let updateManagerRole: (hasManager: boolean) => void = () => { };
-export let updateActiveColorway: (active: ColorwayObject) => void = () => { };
 
 export default function ({
     settings = { selectorType: "normal" },
@@ -44,19 +40,15 @@ export default function ({
             setTheme(await DataStore.get("colorwaysPluginTheme") as string);
         }
         load();
-        updateWS = (status) => {
-            setWsConnected(status);
-        };
-        console.log(hasManagerRole);
-        updateManagerRole = (hasManager) => {
-            setManager(hasManager);
-            console.log(hasManager);
-        };
-        updateActiveColorway = setActiveColorwayObject;
+
+        FluxDispatcher.subscribe("COLORWAYS_UPDATE_WS_CONNECTED" as FluxEvents, ({ isConnected }) => setWsConnected(isConnected));
+        FluxDispatcher.subscribe("COLORWAYS_UPDATE_ACTIVE_COLORWAY" as FluxEvents, ({ active }) => setActiveColorwayObject(active));
+        FluxDispatcher.subscribe("COLORWAYS_UPDATE_WS_MANAGER_ROLE" as FluxEvents, ({ isManager }) => setManager(isManager));
+
         return () => {
-            updateWS = () => { };
-            updateManagerRole = () => { };
-            updateActiveColorway = () => { };
+            FluxDispatcher.unsubscribe("COLORWAYS_UPDATE_WS_CONNECTED" as FluxEvents, ({ isConnected }) => setWsConnected(isConnected));
+            FluxDispatcher.unsubscribe("COLORWAYS_UPDATE_ACTIVE_COLORWAY" as FluxEvents, ({ active }) => setActiveColorwayObject(active));
+            FluxDispatcher.unsubscribe("COLORWAYS_UPDATE_WS_MANAGER_ROLE" as FluxEvents, ({ isManager }) => setManager(isManager));
         };
     }, [isManager]);
 
@@ -133,7 +125,7 @@ export default function ({
     return <>{(settings.selectorType !== "preview" && (!wsConnected || (wsConnected && isManager))) ? <Header>
         <input
             type="text"
-            className="colorwaySelector-search"
+            className="colorwayTextBox"
             placeholder="Search for Colorways..."
             value={searchValue}
             autoFocus
@@ -257,49 +249,65 @@ export default function ({
                     id="colorway-Auto"
                     aria-checked={activeColorwayObject.id === "Auto" && activeColorwayObject.source === null}
                     onClick={async () => {
-                        if (isManager) {
-                            Toasts.show({
-                                message: "Cannot use Auto colorway while on manager mode",
-                                type: 2,
-                                id: "colorways-manager-role-auto-colorway-error"
-                            });
-                        } else {
-                            const activeAutoPreset = await DataStore.get("activeAutoPreset");
-                            if (activeColorwayObject.id === "Auto") {
+                        const activeAutoPreset = await DataStore.get("activeAutoPreset");
+                        if (activeColorwayObject.id === "Auto") {
+                            if (isManager) {
+                                sendColorway(nullColorwayObj);
+                            } else {
                                 DataStore.set("activeColorwayObject", nullColorwayObj);
                                 setActiveColorwayObject(nullColorwayObj);
                                 ColorwayCSS.remove();
-                            } else {
-                                if (!activeAutoPreset) {
-                                    openModal((props: ModalProps) => <AutoColorwaySelector autoColorwayId="" modalProps={props} onChange={autoPresetId => {
-                                        const demandedColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6))[autoPresetId].preset();
-                                        ColorwayCSS.set(demandedColorway);
-                                        const newObj: ColorwayObject = {
-                                            id: "Auto",
-                                            css: demandedColorway,
-                                            sourceType: "online",
-                                            source: null,
-                                            colors: {
-                                                accent: colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6)
-                                            }
-                                        };
-                                        DataStore.set("activeColorwayObject", newObj);
-                                        setActiveColorwayObject(newObj);
-                                    }} />);
-                                } else {
-                                    const autoColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6))[activeAutoPreset].preset();
+                            }
+                        } else {
+                            if (!activeAutoPreset) {
+                                openModal((props: ModalProps) => <AutoColorwaySelector autoColorwayId="" modalProps={props} onChange={autoPresetId => {
+                                    const { colors } = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6))[autoPresetId];
                                     const newObj: ColorwayObject = {
                                         id: "Auto",
-                                        css: autoColorway,
                                         sourceType: "online",
                                         source: null,
-                                        colors: {
-                                            accent: colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6)
-                                        }
+                                        colors: colors
                                     };
+                                    if (isManager) {
+                                        sendColorway(newObj);
+                                    } else {
+                                        ColorwayCSS.set(generateCss(
+                                            colors.primary,
+                                            colors.secondary,
+                                            colors.tertiary,
+                                            colors.accent,
+                                            true,
+                                            true,
+                                            undefined,
+                                            "Auto Colorway"
+                                        ));
+                                        DataStore.set("activeColorwayObject", newObj);
+                                        setActiveColorwayObject(newObj);
+                                    }
+                                }} />);
+                            } else {
+                                const { colors } = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6))[activeAutoPreset];
+                                const newObj: ColorwayObject = {
+                                    id: "Auto",
+                                    sourceType: "online",
+                                    source: null,
+                                    colors: colors
+                                };
+                                if (isManager) {
+                                    sendColorway(newObj);
+                                } else {
+                                    ColorwayCSS.set(generateCss(
+                                        colors.primary,
+                                        colors.secondary,
+                                        colors.tertiary,
+                                        colors.accent,
+                                        true,
+                                        true,
+                                        undefined,
+                                        "Auto Colorway"
+                                    ));
                                     DataStore.set("activeColorwayObject", newObj);
                                     setActiveColorwayObject(newObj);
-                                    ColorwayCSS.set(autoColorway);
                                 }
                             }
                         }
@@ -314,19 +322,29 @@ export default function ({
                             const activeAutoPreset = await DataStore.get("activeAutoPreset");
                             openModal((props: ModalProps) => <AutoColorwaySelector autoColorwayId={activeAutoPreset} modalProps={props} onChange={autoPresetId => {
                                 if (activeColorwayObject.id === "Auto") {
-                                    const demandedColorway = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6))[autoPresetId].preset();
+                                    const { colors } = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6))[activeAutoPreset];
                                     const newObj: ColorwayObject = {
                                         id: "Auto",
-                                        css: demandedColorway,
                                         sourceType: "online",
                                         source: null,
-                                        colors: {
-                                            accent: colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6)
-                                        }
+                                        colors: colors
                                     };
-                                    DataStore.set("activeColorwayObject", newObj);
-                                    setActiveColorwayObject(newObj);
-                                    ColorwayCSS.set(demandedColorway);
+                                    if (isManager) {
+                                        sendColorway(newObj);
+                                    } else {
+                                        ColorwayCSS.set(generateCss(
+                                            colors.primary,
+                                            colors.secondary,
+                                            colors.tertiary,
+                                            colors.accent,
+                                            true,
+                                            true,
+                                            undefined,
+                                            "Auto Colorway"
+                                        ));
+                                        DataStore.set("activeColorwayObject", newObj);
+                                        setActiveColorwayObject(newObj);
+                                    }
                                 }
                             }} />);
                         }}
@@ -375,13 +393,21 @@ export default function ({
                                     return a.name.localeCompare(b.name);
                             }
                         })
-                        .map((color: Colorway) => color.colors ? color : { ...color, colors: ["accent", "primary", "secondary", "tertiary"] })
                         .map((color: Colorway) => {
-                            const colors: { accent?: string, primary?: string, secondary?: string, tertiary?: string; } = {};
-                            color.colors!.map((colorStr) => colors[colorStr] = colorToHex(color[colorStr]));
-                            return { ...color, colorObj: colors };
-                        })
-                        .map((color: Colorway) => {
+                            color.primary ??= "#313338";
+                            color.secondary ??= "#2b2d31";
+                            color.tertiary ??= "#1e1f22";
+                            color.accent ??= "#ffffff";
+                            color["dc-import"] = !color.isGradient ? generateCss(
+                                colorToHex(color.primary),
+                                colorToHex(color.secondary),
+                                colorToHex(color.tertiary),
+                                colorToHex(color.accent).slice(0, 6),
+                                true,
+                                false,
+                                undefined,
+                                color.name
+                            ) : gradientBase(colorToHex(color.accent), true) + `:root:root {--custom-theme-background: linear-gradient(${color.linearGradient})}`;
                             return (color.name.toLowerCase().includes(searchValue.toLowerCase()) ?
                                 <div
                                     className="discordColorway"
@@ -389,17 +415,6 @@ export default function ({
                                     aria-checked={activeColorwayObject.id === color.name && activeColorwayObject.source === color.source}
                                     onClick={async () => {
                                         if (settings.selectorType === "normal") {
-                                            const [
-                                                onDemandWays,
-                                                onDemandWaysTintedText,
-                                                onDemandWaysDiscordSaturation,
-                                                onDemandWaysOsAccentColor
-                                            ] = await DataStore.getMany([
-                                                "onDemandWays",
-                                                "onDemandWaysTintedText",
-                                                "onDemandWaysDiscordSaturation",
-                                                "onDemandWaysOsAccentColor"
-                                            ]);
                                             if (activeColorwayObject.id === color.name && activeColorwayObject.source === color.source) {
                                                 if (isManager) {
                                                     sendColorway(nullColorwayObj);
@@ -409,48 +424,23 @@ export default function ({
                                                     ColorwayCSS.remove();
                                                 }
                                             } else {
-                                                if (isManager) {
-                                                    const newObj: ColorwayObject = {
-                                                        id: color.name,
-                                                        sourceType: color.type,
-                                                        source: color.source,
-                                                        colors: color.colorObj
-                                                    };
-                                                    sendColorway(newObj);
-                                                } else {
-                                                    if (onDemandWays) {
-                                                        const demandedColorway = !color.isGradient ? generateCss(
-                                                            colorToHex(color.primary),
-                                                            colorToHex(color.secondary),
-                                                            colorToHex(color.tertiary),
-                                                            colorToHex(onDemandWaysOsAccentColor ? getComputedStyle(document.body).getPropertyValue("--os-accent-color") : color.accent).slice(0, 6),
-                                                            onDemandWaysTintedText,
-                                                            onDemandWaysDiscordSaturation,
-                                                            undefined,
-                                                            color.name
-                                                        ) : gradientBase(colorToHex(onDemandWaysOsAccentColor ? getComputedStyle(document.body).getPropertyValue("--os-accent-color") : color.accent), onDemandWaysDiscordSaturation) + `:root:root {--custom-theme-background: linear-gradient(${color.linearGradient})}`;
-                                                        ColorwayCSS.set(demandedColorway);
-                                                        const newObj: ColorwayObject = {
-                                                            id: color.name,
-                                                            css: demandedColorway,
-                                                            sourceType: color.type,
-                                                            source: color.source,
-                                                            colors: { ...color.colorObj, accent: colorToHex(onDemandWaysOsAccentColor ? getComputedStyle(document.body).getPropertyValue("--os-accent-color") : color.accent).slice(0, 6) }
-                                                        };
-                                                        setActiveColorwayObject(newObj);
-                                                        DataStore.set("activeColorwayObject", newObj);
-                                                    } else {
-                                                        ColorwayCSS.set(color["dc-import"]);
-                                                        const newObj: ColorwayObject = {
-                                                            id: color.name,
-                                                            css: color["dc-import"],
-                                                            sourceType: color.type,
-                                                            source: color.source,
-                                                            colors: color.colorObj
-                                                        };
-                                                        setActiveColorwayObject(newObj);
-                                                        DataStore.set("activeColorwayObject", newObj);
+                                                const newObj: ColorwayObject = {
+                                                    id: color.name,
+                                                    sourceType: color.type,
+                                                    source: color.source,
+                                                    colors: {
+                                                        accent: color.accent,
+                                                        primary: color.primary,
+                                                        secondary: color.secondary,
+                                                        tertiary: color.tertiary
                                                     }
+                                                };
+                                                if (color.linearGradient) newObj.linearGradient = color.linearGradient;
+                                                if (isManager) sendColorway(newObj);
+                                                else {
+                                                    ColorwayCSS.set(color["dc-import"] as string);
+                                                    setActiveColorwayObject(newObj);
+                                                    DataStore.set("activeColorwayObject", newObj);
                                                 }
                                             }
                                         }
@@ -464,7 +454,12 @@ export default function ({
                                     }}
                                 >
                                     <div className="discordColorwayPreviewColorContainer">
-                                        {!color.isGradient ? Object.values(color.colorObj as { accent?: string, primary?: string, secondary?: string, tertiary?: string; }).map((colorStr) => <div
+                                        {!color.isGradient ? Object.values({
+                                            accent: color.accent,
+                                            primary: color.primary,
+                                            secondary: color.secondary,
+                                            tertiary: color.tertiary
+                                        }).map((colorStr) => <div
                                             className="discordColorwayPreviewColor"
                                             style={{
                                                 backgroundColor: `#${colorToHex(colorStr)}`,
@@ -502,7 +497,7 @@ export default function ({
                                         className="colorwaysPillButton colorwaysPillButton-onSurface"
                                         onClick={async e => {
                                             e.stopPropagation();
-                                            navigator.clipboard.writeText(color["dc-import"]);
+                                            navigator.clipboard.writeText(color["dc-import"] as string);
                                             Toasts.show({
                                                 message: "Copied Colorway CSS Successfully",
                                                 type: 1,
