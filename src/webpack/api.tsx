@@ -556,7 +556,7 @@ export function findModuleFactory(code: CodeFilterWithSingle, { isIndirect = fal
     const filter = filters.byFactoryCode(...Array.isArray(code) ? code : [code]);
 
     const [proxy, setInnerValue] = proxyInner<AnyModuleFactory>(`Webpack module factory find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
-    waitFor(filter, (_, { factory }) => setInnerValue(factory));
+    waitFor(filter, (_, { factory }) => setInnerValue(factory), { isIndirect: true });
 
     if (IS_REPORTER && !isIndirect) {
         webpackSearchHistory.push(["findModuleFactory", [proxy, code]]);
