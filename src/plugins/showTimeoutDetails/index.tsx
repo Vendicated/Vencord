@@ -95,6 +95,7 @@ export default definePlugin({
     name: "ShowTimeoutDetails",
     description: "Shows how much longer a user's timeout will last and why they are timed out, either in the timeout icon tooltip or next to it",
     authors: [Devs.Ven, Devs.Sqaaakoi],
+    tags: ["ShowTimeoutDuration", "ShowTimeoutReason"],
 
     settings,
 
