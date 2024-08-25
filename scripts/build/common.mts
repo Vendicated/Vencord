@@ -128,7 +128,7 @@ export const globPlugins: (kind: "web" | "discordDesktop" | "vencordDesktop" | "
                         }
                     }
 
-                    const folderName = `src/${dir}/${fileName}`.replace(/^src\/plugins\//, "");
+                    const folderName = `src/${dir}/${fileName}`;
 
                     const mod = `p${i}`;
                     code += `import ${mod} from "./${dir}/${fileName.replace(/\.tsx?$/, "")}";\n`;
