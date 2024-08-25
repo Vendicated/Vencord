@@ -9,7 +9,7 @@
 
 .vc-mentionAvatars-roleicon {
     vertical-align: middle;
-    width: 1em !important; /* just in case */
+    width: 1em;
     height: 1em;
     margin: 0 4px 0.2rem 2px;
     box-sizing: border-box;
