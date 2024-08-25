@@ -158,7 +158,7 @@ export default definePlugin({
                         const progress = quest.config.configVersion === 1 ? data.userStatus.streamProgressSeconds : Math.floor(data.userStatus.progress.PLAY_ON_DESKTOP.value);
                         showNotification({
                             title: `${applicationName} - Quests Completer`,
-                            body: `Current progress: ${progress}/${secondsNeeded} minutes.`,
+                            body: `Current progress: ${progress}/${secondsNeeded} seconds.`,
                             icon: icon,
                         });
 
@@ -191,7 +191,7 @@ export default definePlugin({
                     const progress = quest.config.configVersion === 1 ? data.userStatus.streamProgressSeconds : Math.floor(data.userStatus.progress.STREAM_ON_DESKTOP.value);
                     showNotification({
                         title: `${applicationName} - Quests Completer`,
-                        body: `Current progress: ${progress}/${secondsNeeded} minutes.`,
+                        body: `Current progress: ${progress}/${secondsNeeded} seconds.`,
                         icon: icon,
                     });
 
