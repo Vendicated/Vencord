@@ -151,7 +151,7 @@ export default definePlugin({
         {
             find: 'backgroundColor:"COMPLETE"',
             replacement: {
-                match: /(?<=hasProfileEffect.+?)children:\[/,
+                match: /(?<=backgroundImage.+?)children:\[/,
                 replace: "$&$self.renderProfileTimezone(arguments[0]),"
             }
         },
