@@ -555,6 +555,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
 } satisfies Record<string, Dev>);
 
 export const EquicordDevs = Object.freeze({
+    nobody: {
+        name: "nobody",
+        id: 0n
+    },
     thororen: {
         name: "thororen",
         id: 848339671629299742n

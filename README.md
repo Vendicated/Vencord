@@ -48,7 +48,6 @@ An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vend
 - CutePats by thororen
 - DeadMembers by Kyuuhachi
 - Demonstration by Samwich
-- DiscordColorways by DaBluLite
 - DNDWhilePlaying by thororen
 - DoNotLeak by Perny
 - DontFilterMe by Samwich

@@ -148,13 +148,13 @@ export default definePlugin({
 
     patches: [
         // stolen from ViewIcons
-        ...[".NITRO_BANNER,", "=!1,canUsePremiumCustomization:"].map(find => ({
-            find,
+        {
+            find: 'backgroundColor:"COMPLETE"',
             replacement: {
-                match: /(?<=hasProfileEffect.+?)children:\[/,
+                match: /(?<=backgroundImage.+?)children:\[/,
                 replace: "$&$self.renderProfileTimezone(arguments[0]),"
             }
-        })),
+        },
         {
             find: '"Message Username"',
             replacement: {
