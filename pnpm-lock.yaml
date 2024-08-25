@@ -37,9 +37,6 @@ importers:
       nanoid:
         specifier: ^5.0.7
         version: 5.0.7
-      virtual-merge:
-        specifier: ^1.0.1
-        version: 1.0.1
     devDependencies:
       '@stylistic/eslint-plugin':
         specifier: ^2.6.1
@@ -2629,9 +2626,6 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
-
-  virtual-merge@1.0.1:
-    resolution: {integrity: sha512-h7rzV6n5fZJbDu2lP4iu+IOtsZ00uqECFUxFePK1uY0pz/S5B7FNDJpmdDVfyGL7poyJECEHfTaIpJaknNkU0Q==}
 
   vscode-oniguruma@1.7.0:
     resolution: {integrity: sha512-L9WMGRfrjOhgHSdOYgCt/yRMsXzLDJSL7BPrOZt73gU0iWO4mpqzqQzOz5srxqTvMBaR0XZTSrVWo4j55Rc6cA==}
@@ -5283,8 +5277,6 @@ snapshots:
   use@3.1.1: {}
 
   util-deprecate@1.0.2: {}
-
-  virtual-merge@1.0.1: {}
 
   vscode-oniguruma@1.7.0: {}
 
