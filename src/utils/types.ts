@@ -309,6 +309,8 @@ export interface DefinedSettings<
 > {
     /** Shorthand for `Vencord.Settings.plugins.PluginName`, but with typings */
     store: SettingsStore<Def> & PrivateSettings;
+    /** Shorthand for `Vencord.PlainSettings.plugins.PluginName`, but with typings */
+    plain: SettingsStore<Def> & PrivateSettings;
     /**
      * React hook for getting the settings for this plugin
      * @param filter optional filter to avoid rerenders for irrelevent settings
