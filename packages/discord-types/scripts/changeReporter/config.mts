@@ -53,6 +53,16 @@ export default {
                 type: "class",
             },
         },
+        "./flux/FluxBatchedStoreListener.ts": {
+            FluxBatchedStoreListener: {
+                type: "class",
+            },
+        },
+        "./flux/FluxChangeListeners.ts": {
+            FluxChangeListeners: {
+                type: "class",
+            },
+        },
         "./flux/FluxDispatcher.ts": {
             FluxDispatcher: {
                 type: "class",
@@ -623,8 +633,17 @@ export default {
             FluxStore: {
                 type: "class",
             },
-            FluxChangeListeners: {
+        },
+        "./stores/abstract/FluxUserAgnosticStore.ts": {
+            FluxUserAgnosticStore: {
                 type: "class",
+                find() {
+                    return Object.getPrototypeOf(this.Webpack.Common.Flux.DeviceSettingsStore);
+                },
+                ignoredAdditions: {
+                    // Overrides
+                    methods: ["initializeFromState", "initializeIfNeeded", "getState"],
+                },
             },
         },
         "./stores/ApplicationStore.ts": {

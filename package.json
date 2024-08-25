@@ -73,7 +73,7 @@
         "stylelint": "^16.8.2",
         "stylelint-config-standard": "^36.0.1",
         "ts-patch": "^3.2.1",
-        "tsx": "^4.17.0",
+        "tsx": "^4.18.0",
         "type-fest": "^4.25.0",
         "typescript": "^5.5.4",
         "typescript-eslint": "^8.2.0",

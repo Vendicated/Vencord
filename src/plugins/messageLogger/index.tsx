@@ -29,9 +29,9 @@ import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { type ChannelMessages, type FormattedMessage, MessageFlags, type MessageRecord, type MessageRecordOwnProperties } from "@vencord/discord-types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, i18n, MarkupUtils, Menu, MessageStore, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
+import { type ChannelMessages, MessageFlags, type MessageRecord, type MessageRecordOwnProperties } from "@vencord/discord-types";
+import { findByPropsLazy } from "@webpack";
+import { ChannelStore, FluxDispatcher, getMessage, i18n, MarkupUtils, Menu, MessageStore, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
@@ -46,8 +46,6 @@ interface MLMessageRecord extends MessageRecord<MLMessageRecordOwnProperties> {
 }
 
 const styles: Record<string, string> = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
-const getMessage: (message?: string | null, locales?: string | string[]) => FormattedMessage
-    = findByCodeLazy('replace(/^\\n+|\\n+$/g,"")');
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger!.deleteStyle === "text") {
@@ -320,7 +318,7 @@ export default definePlugin({
     },
 
     Messages: proxyLazy(() => ({
-        DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
+        DELETED_MESSAGE_COUNT: getMessage<"count", false>("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
     })),
 
     patches: [

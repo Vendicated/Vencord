@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { ChannelMessages as $ChannelMessages, ChannelRecord, DraftType, FluxDispatcher as $FluxDispatcher, FormattedMessage as $FormattedMessage, I18N, UserRecord } from "@vencord/discord-types";
+import type { ChannelMessages as $ChannelMessages, ChannelRecord, DraftType, FluxDispatcher as $FluxDispatcher, FormattedMessage as $FormattedMessage, I18N, MessageFactory, UserRecord } from "@vencord/discord-types";
 import type { ReactNode } from "react";
 
 // eslint-disable-next-line path-alias/no-relative
@@ -146,6 +146,8 @@ export enum ExpressionPickerViewType {
 }
 
 export const FormattedMessage: typeof $FormattedMessage = findByCodeLazy('(this,"intlMessage",');
+
+export const getMessage: MessageFactory = findByCodeLazy('.replace(/^\\n+|\\n+$/g,"")');
 
 export const hljs: typeof import("highlight.js").default = findByPropsLazy("highlight", "registerLanguage");
 

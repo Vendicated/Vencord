@@ -8,3 +8,4 @@ export * from "./FormattedMessage";
 export * from "./I18N";
 export * from "./I18NMessages";
 export * from "./Provider";
+export * from "./utils";

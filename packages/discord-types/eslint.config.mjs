@@ -226,6 +226,8 @@ export default tseslint.config(
                     "[declare=true] *",
                     // Allow enums, interfaces, and type aliases
                     "[type=/^TS/] *",
+                    // Allow re-exporting of all named exports
+                    "ExportAllDeclaration *",
                     // Allow imports
                     "ImportDeclaration *",
                 ].join(", ")})`,
@@ -251,17 +253,6 @@ export default tseslint.config(
         ignores: ["src/**/index.ts"],
         rules: {
             "import/no-unused-modules": ["error", { missingExports: true }],
-        }
-    },
-    {
-        files: ["src/**/index.ts"],
-        rules: {
-            "no-restricted-syntax": [
-                "error",
-                // Only allow re-exporting of all named exports
-                "Program[comments.length!=1]",
-                "Program > :not(ExportAllDeclaration[exported=null])",
-            ],
         }
     },
 );

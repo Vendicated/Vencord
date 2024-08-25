@@ -16,18 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { FluxEmitter } from "@vencord/discord-types";
+import type { Flux as $Flux } from "@vencord/discord-types";
 import type * as Stores from "@vencord/discord-types/src/stores";
 
 // eslint-disable-next-line path-alias/no-relative
 import { findByCodeLazy, findByPropsLazy } from "../webpack";
 import { waitForStore } from "./internal";
 
-export const Flux: {
-    Emitter: typeof FluxEmitter;
-    PersistedStore: typeof Stores.FluxPersistedStore;
-    Store: typeof Stores.FluxStore;
-} = findByPropsLazy("connectStores");
+export const Flux: $Flux = findByPropsLazy("connectStores");
+
+export const createFetchStore: Stores.FetchStoreFactory
+    = findByCodeLazy("dangerousAbortOnCleanup:", "new AbortController");
 
 /**
  * React hook that returns stateful data for one or more stores
@@ -39,21 +38,31 @@ export const Flux: {
  *
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
-export const useStateFromStores: Stores.UseStateFromStoresHook = findByCodeLazy("useStateFromStores");
+export const useStateFromStores: Stores.StoreStateHook = findByCodeLazy("useStateFromStores");
+
+const shallowEqual: (
+    a?: {},
+    b?: {},
+    ignoredKeys?: readonly string[] | null,
+    equalityInvariant?: ((message: string) => void) | null
+) => boolean = findByCodeLazy('"shallowEqual: unequal key lengths "');
+
+/** @see {@link useStateFromStores} */
+export const useStateFromStoresObject: Stores.StoreObjectStateHook
+    = (a, b, c) => useStateFromStores(a, b, c, shallowEqual);
 
 // shallowEqual.tsx
 const areArraysShallowEqual = (a: readonly unknown[], b?: readonly unknown[] | null) =>
     b != null && a.length === b.length && a.every((x, i) => x === b[i]);
 
 /** @see {@link useStateFromStores} */
-export const useStateFromStoresArray: Stores.UseStateFromStoresArrayHook
+export const useStateFromStoresArray: Stores.StoreArrayStateHook
     = (a, b, c) => useStateFromStores(a, b, c, areArraysShallowEqual);
 
-const shallowEqual = findByCodeLazy('"shallowEqual: unequal key lengths "');
+export const statesWillNeverBeEqual: Stores.UnequatableStateComparator = () => false;
 
-/** @see {@link useStateFromStores} */
-export const useStateFromStoresObject: Stores.UseStateFromStoresObjectHook
-    = (a, b, c) => useStateFromStores(a, b, c, shallowEqual);
+export let ApplicationStore: Stores.ApplicationStore;
+waitForStore("ApplicationStore", m => { ApplicationStore = m; });
 
 export let ChannelStore: Stores.ChannelStore;
 waitForStore("ChannelStore", m => { ChannelStore = m; });

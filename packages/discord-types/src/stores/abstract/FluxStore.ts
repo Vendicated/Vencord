@@ -6,6 +6,7 @@
 
 import type { FluxActionHandlerMap } from "../../flux/FluxActionHandlersGraph";
 import type { FluxAction } from "../../flux/fluxActions";
+import type { FluxChangeListeners } from "../../flux/FluxChangeListeners";
 import type { FluxDispatchBand, FluxDispatcher } from "../../flux/FluxDispatcher";
 import type { Nullish } from "../../internal";
 
@@ -63,26 +64,3 @@ export declare abstract class FluxStore {
     removeChangeListener: FluxChangeListeners["remove"];
     removeReactChangeListener: FluxChangeListeners["remove"];
 }
-
-// Original name: ChangeListeners
-export declare class FluxChangeListeners {
-    has(listener: FluxChangeListener): boolean;
-    hasAny(): boolean;
-    invokeAll(): void;
-
-    add: (listener: FluxChangeListener<false>) => void;
-    /**
-     * @param listener The change listener to add. It will be removed when it returns false.
-     */
-    addConditional: (
-        listener: FluxChangeListener<true>,
-        immediatelyCall?: boolean | undefined /* = true */
-    ) => void;
-    listeners: Set<FluxChangeListener>;
-    remove: (listener: FluxChangeListener) => void;
-}
-
-export type FluxChangeListener<Conditional extends boolean = boolean>
-    = true extends Conditional
-        ? () => unknown
-        : () => void;

@@ -10,8 +10,10 @@ import type { State } from "simple-markdown";
 
 import type { IsAny, IsDomainFinite, Stringable, StringProperties, UnionToIntersection } from "../../internal";
 
+export type FormattedMessageArgs = RecordArgs | TupleArgs | string | number;
+
 export declare class FormattedMessage<
-    Args extends GenericArgs = GenericArgs,
+    Args extends FormattedMessageArgs = FormattedMessageArgs,
     Markdown extends boolean | undefined = boolean | undefined
 > {
     /**
@@ -55,14 +57,13 @@ export declare class FormattedMessage<
     message: string;
 }
 
-type GenericArgs = RecordArgs | TupleArgs | string | number;
 type RecordArgs = Record<string | number, GenericValue>;
 type TupleArgs = readonly [stringableArgs: string | number, hookArgs: string | number];
 
 type GenericValue = Stringable | HookValue;
 type HookValue = (result: ReactNode, key: State["key"]) => ReactNode;
 
-type FormatArgs<Args extends GenericArgs>
+type FormatArgs<Args extends FormattedMessageArgs>
     = unknown extends IsAny<Args>
         ? [values?: RecordArgs]
         : [Args] extends [never]
@@ -73,7 +74,7 @@ type FormatArgs<Args extends GenericArgs>
                     ? [values: MessageValues<Args>]
                     : [values: never];
 
-type MessageValues<Args extends GenericArgs> = UnionToIntersection<
+type MessageValues<Args extends FormattedMessageArgs> = UnionToIntersection<
     Args extends string | number
         ? Record<Args, Stringable>
         : Args extends TupleArgs

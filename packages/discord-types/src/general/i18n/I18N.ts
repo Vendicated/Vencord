@@ -5,12 +5,12 @@
  */
 
 import type { EventEmitter } from "events";
-import type { ReactRules } from "simple-markdown";
 
 import type { Nullish } from "../../internal";
 import type { FormattedMessage } from "./FormattedMessage";
 import type { I18NMessages } from "./I18NMessages";
 import type { Provider, ProviderParsedMessagesGetter } from "./Provider";
+import type { UpdateRulesSetter } from "./utils";
 
 export declare class I18N<
     Messages extends Record<never, string | FormattedMessage> = I18NMessages,
@@ -42,7 +42,7 @@ export declare class I18N<
     getLocale(): string;
     getLocaleInfo(): I18NLanguage;
     setLocale(locale: string): void;
-    setUpdateRules(updateRules: (rules: ReactRules) => ReactRules): void;
+    setUpdateRules(...args: Parameters<UpdateRulesSetter>): void;
     updateMessagesForExperiment(
         locale: string,
         updater: (messages: Record<keyof Messages, string>) => Record<keyof Messages, string>

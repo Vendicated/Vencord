@@ -7,3 +7,4 @@
 export * from "./FluxPersistedStore";
 export * from "./FluxSnapshotStore";
 export * from "./FluxStore";
+export * from "./FluxUserAgnosticStore";
