@@ -37,7 +37,7 @@ export default definePlugin({
         find: ".ROLE_MENTION)",
         replacement: {
             match: /function \i\(\i\){let{roleColor:.+?,roleId:(\i),.+?roleName:\i,guildId:(\i).+?}=\i,{analyticsLocations:.+\.ROLE_MENTION\),.+\i&&\(0,\i\.jsx\)\(\i\.RoleDot,{color:\(0,\i\.\i\).+?\.roleDot,background:.+?(1|0)}\),\i/,
-            replace:  "$&,$self.AddRoleIcon($1,$2)"
+            replace: "$&,$self.AddRoleIcon($1,$2)"
         }
     }],
 
