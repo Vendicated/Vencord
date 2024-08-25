@@ -207,6 +207,12 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     */
 
     const pluginMeta = PluginMeta[plugin.name];
+    let link: string;
+    if (pluginMeta.folderName.includes("equicordplugins")) {
+        link = `https://github.com/${gitRemote}/tree/main/${pluginMeta.folderName}`;
+    } else {
+        link = `https://github.com/${gitRemote}/tree/main/src/plugins/${pluginMeta.folderName}`;
+    }
 
     return (
         <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM} className="vc-text-selectable">
@@ -228,7 +234,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             <div className="vc-settings-modal-links">
                                 <GithubButton
                                     text="View source code"
-                                    href={`https://github.com/${gitRemote}/tree/main/src/plugins/${pluginMeta.folderName}`}
+                                    href={link}
                                 />
                             </div>
                         )}
