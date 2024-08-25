@@ -1,25 +1,14 @@
-# Equicord
+# Equicord [<img src="./browser/icon.png" width="225" align="left" alt="Equicord">](https://github.com/Equicord/Equicord)
 
-An enhanced version of [Vencord](https://github.com/Vendicated/Vencord) by [Vendicated](https://github.com/Vendicated) called Equicord.
+[![Equibop](https://img.shields.io/badge/Equibop-grey?style=flat)](https://github.com/Equicord/Equibop)
+[![Tests](https://github.com/Equicord/Equicord/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/Equicord/Equicord/actions/workflows/test.yml)
+[![Discord](https://img.shields.io/discord/1207691698386501634.svg?color=768AD4&label=Discord&logo=discord&logoColor=white)](https://discord.gg/VasF3Ma4Ab)
 
-![image](https://github.com/Equicord/Equicord/assets/78185467/81707ad9-3a04-4f76-88a0-60ee70684f81)
+Equicord is a fork of [Vencord](https://github.com/Vendicated/Vencord), with over 300+ plugins.
 
-## Features
+You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, changes, chat or even support.<br><br></br>
 
--   Third-party plugins implemented into the main build.
--   100+ plugins built-in.
-    -   Some highlights: SpotifyControls, MessageLogger, Experiments, GameActivityToggle, Translate, NoTrack, QuickReply, Free Emotes/Stickers, PermissionsViewer,
-        CustomCommands, ShowHiddenChannels, PronounDB
--   Fairly lightweight despite the many inbuilt plugins
--   Works on any Discord branch: Stable, Canary or PTB all work (though for the best experience, I recommend stable!)
--   Custom CSS and Themes: Inbuilt CSS editor with support to import any CSS files (including BetterDiscord themes)
--   Privacy friendly, blocks Discord analytics & crash reporting out of the box and has no telemetry
--   Maintained very actively, broken plugins are usually fixed within 12 hours
--   Able to update inside of Equicord through the update tab.
--   Same supporter badges as on Vencord (Don't lose your benefits)
--   Easy to install third-party plugins through the plugin page in Discord.
--   Request for plugins from Discord.
-
+### Extra included plugins
 <details>
 <summary>Extra included plugins (123 additional plugins)</summary>
 
@@ -200,17 +189,10 @@ Inject Equicord into your client:
 ```shell
 pnpm inject
 ```
-After you have done this command, it will look like you are just installing Equicord but it will say it is a development build. If it doesn't say it is a development build, please reach out for support in the [Discord Server](https://discord.gg/5Xh2W87egW)
-
-## Join our Support/Community Server
-
-https://discord.gg/5Xh2W87egW
 
 ## Credits
 
-Thank you to [Vendicated](https://github.com/Vendicated) for creating [Vencord](https://github.com/Vendicated/Vencord).
-
-Thank you to [Suncord [EOL]](https://github.com/verticalsync/Suncord) by [VerticalSync](https://github.com/verticalsync) for helping me when needed.
+Thank you to [Vendicated](https://github.com/Vendicated) for creating [Vencord](https://github.com/Vendicated/Vencord) & [Suncord](https://github.com/verticalsync/Suncord) by [verticalsync](https://github.com/verticalsync) for helping when needed.
 
 ## Star History
 
