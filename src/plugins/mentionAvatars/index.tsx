@@ -36,8 +36,8 @@ export default definePlugin({
     {
         find: ".ROLE_MENTION)",
         replacement: {
-            match: /function \i\(\i\){let{roleColor:.+?,roleId:(\i),.+?roleName:\i,guildId:(\i).+?}=\i,{analyticsLocations:.+\.ROLE_MENTION\),.+\i&&\(0,\i\.jsx\)\(\i\.RoleDot,{color:\(0,\i\.\i\).+?\.roleDot,background:.+?(1|0)}\),\i/,
-            replace: "$&,$self.AddRoleIcon($1,$2)"
+            match: /.+\.ROLE_MENTION\),.+\i&&\(0,\i\.jsx\)\(\i\.RoleDot,{color:\(0,\i\.\i\).+?\.roleDot,background:.+?(1|0)}\),\i/,
+                replace: "$&,$self.renderRoleIcon(arguments[0])"
         }
     }],
 
@@ -60,7 +60,7 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    AddRoleIcon(roleId, guildId) {
+    renderRoleIcon: ErrorBoundary.wrap(({ roleId, guildId }) => {
         const role = GuildStore.getRole(guildId, roleId);
 
         if (role?.icon)
@@ -72,8 +72,8 @@ export default definePlugin({
                 />
             );
 
-        return (
-            <svg
+            return (
+                <svg
                 className="vc-mentionAvatars-roleicon"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -98,7 +98,7 @@ export default definePlugin({
                 />
             </svg>
         );
-    }
+    }),
 });
 
 function getUsernameString(username: string) {

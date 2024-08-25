@@ -1,4 +1,4 @@
-.vc-mentionAvatars-avatar {
+.vc-mentionAvatars-avatar, .vc-mentionAvatars-roleicon {
     vertical-align: middle;
     width: 1em !important; /* insane discord sets width: 100% in channel topic */
     height: 1em;
@@ -9,8 +9,5 @@
 
 .vc-mentionAvatars-roleicon {
     vertical-align: middle;
-    width: 1em;
-    height: 1em;
-    margin: 0 4px 0.2rem 2px;
-    box-sizing: border-box;
+    border-radius: 0% !important; /* not quite sure if !important is needed */
 }
