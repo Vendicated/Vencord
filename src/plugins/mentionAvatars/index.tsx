@@ -86,6 +86,9 @@ export default definePlugin({
     }, { noop: true }),
 
     renderRoleIcon: ErrorBoundary.wrap(({ roleId, guildId }: { roleId: string, guildId: string; }) => {
+        // Discord uses Role Mentions for uncached users because .... idk
+        if (!roleId) return null;
+
         const role = GuildStore.getRole(guildId, roleId);
 
         if (!role?.icon) return <DefaultRoleIcon />;
