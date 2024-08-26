@@ -247,15 +247,16 @@ export default definePlugin({
             }
         },
         {
-            find: 'copyMetaData:"User Tag"',
+            find: ".Messages.USER_PROFILE_PRONOUNS",
             replacement: {
-                match: /(?=,botClass:)/,
+                match: /(?=,hideBotTag:!0)/,
                 replace: ",moreTags_channelId:arguments[0].moreTags_channelId"
             }
         },
         // in profiles
         {
             find: ",overrideDiscriminator:",
+            group: true,
             replacement: [
                 {
                     // prevent channel id from getting ghosted
@@ -263,7 +264,7 @@ export default definePlugin({
                     match: /user:\i,nick:\i,/,
                     replace: "$&moreTags_channelId,"
                 }, {
-                    match: /,botType:(\i\((\i)\)),/g,
+                    match: /,botType:(\i),(?<=user:(\i).+?)/g,
                     replace: ",botType:$self.getTag({user:$2,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),"
                 }
             ]
