@@ -18,7 +18,6 @@
     background-color: var(--background-floating);
     cursor: pointer;
     padding: 4px;
-    opacity: 0.8;
     margin-top: auto;
     margin-bottom: auto;
     display: flex;

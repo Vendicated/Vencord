@@ -11,8 +11,7 @@ export interface UserProps {
     user: User;
 }
 
-export interface VoiceActivityIconProps {
-    user: User;
+export interface VoiceActivityIconProps extends UserProps {
     needContainer: boolean;
     inProfile: boolean;
 }

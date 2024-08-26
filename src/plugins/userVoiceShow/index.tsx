@@ -18,16 +18,17 @@
 
 import "./styles.css";
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 import VoiceActivityIcon from "./components/VoiceActivityIcon";
 import { settings } from "./settings";
-import { UserProps } from "./types";
+import { VoiceActivityIconProps } from "./types";
 
 export default definePlugin({
     name: "UserVoiceShow",
-    description: "Shows user's voice activity information in popouts and members lists.",
+    description: "Shows users' voice activity information in profiles and members lists",
     authors: [Devs.LordElias, Devs.llytz],
     tags: ["voice", "activity"],
     settings,
@@ -37,65 +38,61 @@ export default definePlugin({
         {
             find: ".BITE_SIZE,user:",
             replacement: {
-                match: /,{profileType:.+?.BITE_SIZE,children:\[/,
-                replace: "$&$self.patch(arguments[0], false, true),",
+                match: /,{profileType:.{0,30}\.BITE_SIZE,children:\[/,
+                replace: "$&$self.renderVoiceActivityIcon({user: arguments[0].user, needContainer: false, inProfile: true}),",
             }
         },
         // Direct Messages Side Profile
         {
-            find: /location:"SimplifiedProfilePanel",.+?displayProfile:/,
+            find: '"SimplifiedProfilePanel",user:t,displayProfile:',
             replacement: {
                 match: /PANEL,children:\[/,
-                replace: "$&$self.patch(arguments[0], false, true),",
+                replace: "$&$self.renderVoiceActivityIcon({user: arguments[0].user, needContainer: false, inProfile: true}),",
             }
         },
         // Full Size Profile
         {
-            find: ":\"SimplifiedUserProfileModalHeader\"}",
+            find: ':"SimplifiedUserProfileModalHeader"}',
             replacement: {
                 match: /.FULL_SIZE,children:\[/,
-                replace: "$&$self.patch(arguments[0], false, true),",
+                replace: "$&$self.renderVoiceActivityIcon({user: arguments[0].user, needContainer: false, inProfile: true}),",
             }
         },
         // Guild Members List
         {
-            find: "(\"member_list_item\")",
+            find: '("member_list_item")',
             replacement: {
-                match: /avatar:(\i){1,2}/,
-                replace: "children:[$self.patch(arguments[0], false, false)],$&",
+                match: /avatar:\i\(/,
+                replace: "children:[$self.renderVoiceActivityIcon({user: arguments[0].user, needContainer: false, inProfile: false})],$&",
             }
         },
         // Direct Messages List
         {
             find: "PrivateChannel.renderAvatar",
             replacement: {
-                match: /highlighted:.+?name:.+?decorators.+?\}\)\}\),/,
-                replace: "$&$self.patch(arguments[0], true, false),",
+                match: /Types.SYSTEM_DM,verified:.+?\}\),/,
+                replace: "$&$self.renderVoiceActivityIcon({user: arguments[0].user, needContainer: true, inProfile: false}),",
             }
         },
         // Friends list
         {
-            find: /.alignPomelo]:.+?.isPomelo()/,
+            find: ".alignPomelo]:t.isPomelo()",
             replacement: {
-                match: /children:.+?}\)]}\)/,
-                replace: "$&,$self.patch(arguments[0], true, false)",
+                match: /\.subtext,children:\i}/,
+                replace: "$&,$self.renderVoiceActivityIcon({user: arguments[0].user, needContainer: true, inProfile: false})",
             }
         }
     ],
 
-    patch: ({ user }: UserProps, needContainer: boolean, inProfile: boolean) => {
-        if (!settings.store.showVoiceActivityIconsInLists || !user) return null;
-        if (inProfile && !settings.store.showVoiceActivityIconInUserProfile) return null;
+    renderVoiceActivityIcon: ErrorBoundary.wrap((props: VoiceActivityIconProps) => {
+        if (!settings.store.showVoiceActivityIconsInLists || !props.user) return null;
+        if (props.inProfile && !settings.store.showVoiceActivityIconInUserProfile) return null;
 
         return (
-            <VoiceActivityIcon user={user} needContainer={needContainer} inProfile={inProfile} />
+            <VoiceActivityIcon {...props} />
         );
-    },
+    }, { noop: true }),
 });
-
-export const Permissions = {
-    CONNECT: 1n << 20n
-} as const;
 
 export const Icons = {
     Private: "M11 5V3C16.515 3 21 7.486 21 13H19C19 8.589 15.411 5 11 5ZM17 13H15C15 10.795 13.206 9 11 9V7C14.309 7 17 9.691 17 13ZM11 11V13H13C13 11.896 12.105 11 11 11ZM14 16H18C18.553 16 19 16.447 19 17V21C19 21.553 18.553 22 18 22H13C6.925 22 2 17.075 2 11V6C2 5.447 2.448 5 3 5H7C7.553 5 8 5.447 8 6V10C8 10.553 7.553 11 7 11H6C6.063 14.938 9 18 13 18V17C13 16.447 13.447 16 14 16Z", // M11 5V3C16.515 3 21 7.486
