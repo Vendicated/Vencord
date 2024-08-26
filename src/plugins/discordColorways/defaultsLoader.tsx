@@ -10,7 +10,8 @@ export default async function () {
         colorwaysPluginTheme,
         colorwaysBoundManagers,
         colorwaysManagerAutoconnectPeriod,
-        colorwaysManagerDoAutoconnect
+        colorwaysManagerDoAutoconnect,
+        colorwaysPreset
     ] = await DataStore.getMany([
         "customColorways",
         "colorwaySourceFiles",
@@ -19,7 +20,8 @@ export default async function () {
         "colorwaysPluginTheme",
         "colorwaysBoundManagers",
         "colorwaysManagerAutoconnectPeriod",
-        "colorwaysManagerDoAutoconnect"
+        "colorwaysManagerDoAutoconnect",
+        "colorwaysPreset"
     ]);
 
     const defaults = [
@@ -52,6 +54,11 @@ export default async function () {
             name: "colorwaysPluginTheme",
             value: colorwaysPluginTheme,
             default: "discord"
+        },
+        {
+            name: "colorwaysPreset",
+            value: colorwaysPreset,
+            default: "default"
         }
     ];
 

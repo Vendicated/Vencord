@@ -362,7 +362,8 @@
 }
 
 .visual-refresh [data-theme="discord"] .colorwaysPillButton,
-.visual-refresh [data-theme="discord"] .discordColorway {
+.visual-refresh [data-theme="discord"] .discordColorway,
+.visual-refresh [data-theme="discord"] .colorwaysSettings-colorwaySource {
     background: var(--bg-mod-faint);
     border-radius: 8px;
     transition:
@@ -375,7 +376,8 @@
 }
 
 .visual-refresh [data-theme="discord"] .colorwaysPillButton:hover,
-.visual-refresh [data-theme="discord"] .discordColorway:hover {
+.visual-refresh [data-theme="discord"] .discordColorway:hover,
+.visual-refresh [data-theme="discord"] .colorwaysSettings-colorwaySource:hover {
     background: var(--bg-mod-subtle);
 }
 
@@ -387,4 +389,9 @@
 .visual-refresh [data-theme="discord"] .colorwayTextBox {
     background: var(--bg-overlay-3, var(--bg-mod-strong)) !important;
     border-radius: 8px;
+}
+
+[data-theme="discord"] .colorwayLabel,
+[data-theme="discord"] .colorwaysPillButton {
+    color: var(--interactive-active);
 }

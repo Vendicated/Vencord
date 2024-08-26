@@ -40,7 +40,7 @@ import { ColorwayCSS } from "./colorwaysAPI";
 import { FluxEvents as $FluxEvents } from "@webpack/types";
 import PCSMigrationModal from "./components/PCSMigrationModal";
 import defaultsLoader from "./defaultsLoader";
-import { generateCss, gradientBase } from "./css";
+import { generateCss, getPreset, gradientBase, gradientPresetIds } from "./css";
 import { colorToHex } from "./utils";
 
 export const DataStore = $DataStore;
@@ -70,17 +70,22 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
 };
 
 export const PluginProps = {
-    pluginVersion: "6.3.0",
+    pluginVersion: "6.4.0",
     clientMod: "Vencord",
     UIVersion: "2.1.0",
-    creatorVersion: "1.20"
+    CSSVersion: "1.20"
+};
+
+const mainDev = Devs["DaBluLite"] || {
+    name: "DaBluLite",
+    id: 582170007505731594n
 };
 
 export default definePlugin({
     name: "DiscordColorways",
     description:
         "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
-    authors: [Devs.DaBluLite, Devs.ImLvna],
+    authors: [mainDev, Devs.ImLvna],
     dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
     pluginVersion: PluginProps.pluginVersion,
     toolboxActions: {
@@ -219,28 +224,40 @@ export default definePlugin({
             activeColorwayObject,
             colorwaysManagerAutoconnectPeriod,
             colorwaysManagerDoAutoconnect,
-            colorwaySourceFiles
+            colorwaySourceFiles,
+            colorwaysPreset
         ] = await DataStore.getMany([
             "activeColorwayObject",
             "colorwaysManagerAutoconnectPeriod",
             "colorwaysManagerDoAutoconnect",
-            "colorwaySourceFiles"
+            "colorwaySourceFiles",
+            "colorwaysPreset"
         ]);
 
         connect(colorwaysManagerDoAutoconnect as boolean, colorwaysManagerAutoconnectPeriod as number);
 
         const active: ColorwayObject = activeColorwayObject;
 
-        active.colors.primary ??= "#313338";
-        active.colors.secondary ??= "#2b2d31";
-        active.colors.tertiary ??= "#1e1f22";
-        active.colors.accent ??= "#ffffff";
-        ColorwayCSS.set(!Object.keys(active).includes("linearGradient") ? generateCss(
-            colorToHex(active.colors.primary),
-            colorToHex(active.colors.secondary),
-            colorToHex(active.colors.tertiary),
-            colorToHex(active.colors.accent)
-        ) : gradientBase(colorToHex(active.colors.accent), true) + `:root:root {--custom-theme-background: linear-gradient(${active.linearGradient})}`);
+        if (active.id) {
+            if (colorwaysPreset == "default") {
+                ColorwayCSS.set(generateCss(
+                    active.colors,
+                    true,
+                    true,
+                    undefined,
+                    active.id
+                ));
+            } else {
+                if (gradientPresetIds.includes(colorwaysPreset)) {
+                    const css = Object.keys(active).includes("linearGradient")
+                        ? gradientBase(colorToHex(active.colors.accent), true) + `:root:root {--custom-theme-background: linear-gradient(${active.linearGradient})}`
+                        : (getPreset(active.colors)[colorwaysPreset].preset as { full: string; }).full;
+                    ColorwayCSS.set(css);
+                } else {
+                    ColorwayCSS.set(getPreset(active.colors)[colorwaysPreset].preset as string);
+                }
+            }
+        }
 
         addAccessory("colorways-btn", props => <ColorwayID props={props} />);
 

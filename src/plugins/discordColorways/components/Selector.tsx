@@ -1,7 +1,7 @@
 import { PlusIcon, PalleteIcon, CodeIcon, IDIcon, DeleteIcon } from "./Icons";
 import { DataStore, FluxDispatcher, FluxEvents, ReactNode, Toasts } from "..";
 import { nullColorwayObj } from "../constants";
-import { generateCss, getAutoPresets, gradientBase } from "../css";
+import { generateCss, getAutoPresets, getPreset, gradientBase, gradientPresetIds } from "../css";
 import { ColorwayObject, Colorway, SortOptions, SourceObject, ModalProps } from "../types";
 import { colorToHex, getHex, stringToHex } from "../utils";
 import AutoColorwaySelector from "./AutoColorwaySelector";
@@ -156,7 +156,12 @@ export default function ({
                 id="colorway-userepaintertheme"
                 onClick={() => {
                     openModal((props) => <UseRepainterThemeModal modalProps={props} onFinish={async ({ id, colors }) => {
-                        const demandedColorway = generateCss(colors[7].replace("#", ""), colors[11].replace("#", ""), colors[14].replace("#", ""), colors[16].replace("#", ""));
+                        const demandedColorway = generateCss({
+                            primary: colors[7].replace("#", ""),
+                            secondary: colors[11].replace("#", ""),
+                            tertiary: colors[14].replace("#", ""),
+                            accent: colors[16].replace("#", "")
+                        });
                         ColorwayCSS.set(demandedColorway);
                         const newObj: ColorwayObject = {
                             id: id!,
@@ -272,10 +277,7 @@ export default function ({
                                         sendColorway(newObj);
                                     } else {
                                         ColorwayCSS.set(generateCss(
-                                            colors.primary,
-                                            colors.secondary,
-                                            colors.tertiary,
-                                            colors.accent,
+                                            colors,
                                             true,
                                             true,
                                             undefined,
@@ -297,10 +299,7 @@ export default function ({
                                     sendColorway(newObj);
                                 } else {
                                     ColorwayCSS.set(generateCss(
-                                        colors.primary,
-                                        colors.secondary,
-                                        colors.tertiary,
-                                        colors.accent,
+                                        colors,
                                         true,
                                         true,
                                         undefined,
@@ -332,18 +331,26 @@ export default function ({
                                     if (isManager) {
                                         sendColorway(newObj);
                                     } else {
-                                        ColorwayCSS.set(generateCss(
-                                            colors.primary,
-                                            colors.secondary,
-                                            colors.tertiary,
-                                            colors.accent,
-                                            true,
-                                            true,
-                                            undefined,
-                                            "Auto Colorway"
-                                        ));
                                         DataStore.set("activeColorwayObject", newObj);
                                         setActiveColorwayObject(newObj);
+
+                                        DataStore.get("colorwaysPreset").then((colorwaysPreset: string) => {
+                                            if (colorwaysPreset == "default") {
+                                                ColorwayCSS.set(generateCss(
+                                                    colors,
+                                                    true,
+                                                    true,
+                                                    undefined,
+                                                    newObj.id as string
+                                                ));
+                                            } else {
+                                                if (gradientPresetIds.includes(colorwaysPreset)) {
+                                                    ColorwayCSS.set((getPreset(colors)[colorwaysPreset].preset as { full: string; }).full);
+                                                } else {
+                                                    ColorwayCSS.set(getPreset(colors)[colorwaysPreset].preset as string);
+                                                }
+                                            }
+                                        });
                                     }
                                 }
                             }} />);
@@ -393,159 +400,148 @@ export default function ({
                                     return a.name.localeCompare(b.name);
                             }
                         })
-                        .map((color: Colorway) => {
-                            color.primary ??= "#313338";
-                            color.secondary ??= "#2b2d31";
-                            color.tertiary ??= "#1e1f22";
-                            color.accent ??= "#ffffff";
-                            color["dc-import"] = !color.isGradient ? generateCss(
-                                colorToHex(color.primary),
-                                colorToHex(color.secondary),
-                                colorToHex(color.tertiary),
-                                colorToHex(color.accent).slice(0, 6),
-                                true,
-                                false,
-                                undefined,
-                                color.name
-                            ) : gradientBase(colorToHex(color.accent), true) + `:root:root {--custom-theme-background: linear-gradient(${color.linearGradient})}`;
-                            return (color.name.toLowerCase().includes(searchValue.toLowerCase()) ?
-                                <div
-                                    className="discordColorway"
-                                    id={"colorway-" + color.name}
-                                    aria-checked={activeColorwayObject.id === color.name && activeColorwayObject.source === color.source}
-                                    onClick={async () => {
-                                        if (settings.selectorType === "normal") {
-                                            if (activeColorwayObject.id === color.name && activeColorwayObject.source === color.source) {
-                                                if (isManager) {
-                                                    sendColorway(nullColorwayObj);
+                        .filter(({ name }) => name.toLowerCase().includes(searchValue.toLowerCase()))
+                        .map((color: Colorway) => <div
+                            className="discordColorway"
+                            id={"colorway-" + color.name}
+                            aria-checked={activeColorwayObject.id === color.name && activeColorwayObject.source === color.source}
+                            onClick={async () => {
+                                if (settings.selectorType === "normal") {
+                                    if (activeColorwayObject.id === color.name && activeColorwayObject.source === color.source) {
+                                        if (isManager) {
+                                            sendColorway(nullColorwayObj);
+                                        } else {
+                                            DataStore.set("activeColorwayObject", nullColorwayObj);
+                                            setActiveColorwayObject(nullColorwayObj);
+                                            ColorwayCSS.remove();
+                                        }
+                                    } else {
+                                        const newObj: ColorwayObject = {
+                                            id: color.name,
+                                            sourceType: color.type,
+                                            source: color.source,
+                                            colors: {}
+                                        } as ColorwayObject;
+                                        color.accent ? (newObj.colors.accent = "#" + colorToHex(color.accent)) : void 0;
+                                        color.primary ? (newObj.colors.primary = "#" + colorToHex(color.primary)) : void 0;
+                                        color.secondary ? (newObj.colors.secondary = "#" + colorToHex(color.secondary)) : void 0;
+                                        color.tertiary ? (newObj.colors.tertiary = "#" + colorToHex(color.tertiary)) : void 0;
+
+                                        if (color.linearGradient) newObj.linearGradient = color.linearGradient;
+                                        if (isManager) sendColorway(newObj);
+                                        else {
+                                            setActiveColorwayObject(newObj);
+                                            DataStore.set("activeColorwayObject", newObj);
+
+                                            DataStore.get("colorwaysPreset").then((colorwaysPreset: string) => {
+                                                if (colorwaysPreset == "default") {
+                                                    ColorwayCSS.set(generateCss(
+                                                        newObj.colors,
+                                                        true,
+                                                        true,
+                                                        undefined,
+                                                        newObj.id as string
+                                                    ));
                                                 } else {
-                                                    DataStore.set("activeColorwayObject", nullColorwayObj);
-                                                    setActiveColorwayObject(nullColorwayObj);
-                                                    ColorwayCSS.remove();
-                                                }
-                                            } else {
-                                                const newObj: ColorwayObject = {
-                                                    id: color.name,
-                                                    sourceType: color.type,
-                                                    source: color.source,
-                                                    colors: {
-                                                        accent: color.accent,
-                                                        primary: color.primary,
-                                                        secondary: color.secondary,
-                                                        tertiary: color.tertiary
+                                                    if (gradientPresetIds.includes(colorwaysPreset)) {
+                                                        const css = Object.keys(newObj).includes("linearGradient")
+                                                            ? gradientBase(colorToHex(newObj.colors.accent), true) + `:root:root {--custom-theme-background: linear-gradient(${newObj.linearGradient})}`
+                                                            : (getPreset(newObj.colors)[colorwaysPreset].preset as { full: string; }).full;
+                                                        ColorwayCSS.set(css);
+                                                    } else {
+                                                        ColorwayCSS.set(getPreset(newObj.colors)[colorwaysPreset].preset as string);
                                                     }
-                                                };
-                                                if (color.linearGradient) newObj.linearGradient = color.linearGradient;
-                                                if (isManager) sendColorway(newObj);
-                                                else {
-                                                    ColorwayCSS.set(color["dc-import"] as string);
-                                                    setActiveColorwayObject(newObj);
-                                                    DataStore.set("activeColorwayObject", newObj);
                                                 }
-                                            }
+                                            });
                                         }
-                                        if (settings.selectorType === "multiple-selection") {
-                                            if (selectedColorways.includes(color)) {
-                                                setSelectedColorways(selectedColorways.filter(c => c !== color));
-                                            } else {
-                                                setSelectedColorways([...selectedColorways, color]);
-                                            }
-                                        }
+                                    }
+                                }
+                                if (settings.selectorType === "multiple-selection") {
+                                    if (selectedColorways.includes(color)) {
+                                        setSelectedColorways(selectedColorways.filter(c => c !== color));
+                                    } else {
+                                        setSelectedColorways([...selectedColorways, color]);
+                                    }
+                                }
+                            }}
+                        >
+                            <div className="discordColorwayPreviewColorContainer">
+                                {!color.isGradient ? Object.values({
+                                    accent: color.accent,
+                                    primary: color.primary,
+                                    secondary: color.secondary,
+                                    tertiary: color.tertiary
+                                }).map((colorStr) => <div
+                                    className="discordColorwayPreviewColor"
+                                    style={{
+                                        backgroundColor: `#${colorToHex(colorStr)}`,
                                     }}
+                                />) : <div
+                                    className="discordColorwayPreviewColor"
+                                    style={{
+                                        background: `linear-gradient(${color.linearGradient})`,
+                                    }}
+                                />}
+                            </div>
+                            <span className="colorwayLabel">{color.name}</span>
+                            {settings.selectorType === "normal" && <button
+                                className="colorwaysPillButton colorwaysPillButton-onSurface"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    openModal((props) => <InfoModal
+                                        modalProps={props}
+                                        colorway={color}
+                                        loadUIProps={loadUI}
+                                    />);
+                                }}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    fill="currentColor"
+                                    viewBox="0 0 16 16"
                                 >
-                                    <div className="discordColorwayPreviewColorContainer">
-                                        {!color.isGradient ? Object.values({
-                                            accent: color.accent,
-                                            primary: color.primary,
-                                            secondary: color.secondary,
-                                            tertiary: color.tertiary
-                                        }).map((colorStr) => <div
-                                            className="discordColorwayPreviewColor"
-                                            style={{
-                                                backgroundColor: `#${colorToHex(colorStr)}`,
-                                            }}
-                                        />) : <div
-                                            className="discordColorwayPreviewColor"
-                                            style={{
-                                                background: `linear-gradient(${color.linearGradient})`,
-                                            }}
-                                        />}
-                                    </div>
-                                    <span className="colorwayLabel">{color.name}</span>
-                                    {settings.selectorType === "normal" && <button
-                                        className="colorwaysPillButton colorwaysPillButton-onSurface"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            openModal((props) => <InfoModal
-                                                modalProps={props}
-                                                colorway={color}
-                                                loadUIProps={loadUI}
-                                            />);
-                                        }}
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="20"
-                                            height="20"
-                                            fill="currentColor"
-                                            viewBox="0 0 16 16"
-                                        >
-                                            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
-                                        </svg>
-                                    </button>}
-                                    <button
-                                        className="colorwaysPillButton colorwaysPillButton-onSurface"
-                                        onClick={async e => {
-                                            e.stopPropagation();
-                                            navigator.clipboard.writeText(color["dc-import"] as string);
-                                            Toasts.show({
-                                                message: "Copied Colorway CSS Successfully",
-                                                type: 1,
-                                                id: "copy-colorway-css-notify",
-                                            });
-                                        }}
-                                    >
-                                        <CodeIcon width={20} height={20} />
-                                    </button>
-                                    <button
-                                        className="colorwaysPillButton colorwaysPillButton-onSurface"
-                                        onClick={async e => {
-                                            e.stopPropagation();
-                                            const colorwayIDArray = `${color.accent},${color.primary},${color.secondary},${color.tertiary}|n:${color.name}${color.preset ? `|p:${color.preset}` : ""}`;
-                                            const colorwayID = stringToHex(colorwayIDArray);
-                                            navigator.clipboard.writeText(colorwayID);
-                                            Toasts.show({
-                                                message: "Copied Colorway ID Successfully",
-                                                type: 1,
-                                                id: "copy-colorway-id-notify",
-                                            });
-                                        }}
-                                    >
-                                        <IDIcon width={20} height={20} />
-                                    </button>
-                                    {(color.sourceType === "offline" && settings.selectorType !== "preview") && <button
-                                        className="colorwaysPillButton colorwaysPillButton-onSurface"
-                                        onClick={async e => {
-                                            e.stopPropagation();
-                                            const oldStores = (await DataStore.get("customColorways") as { name: string, colorways: Colorway[], id?: string; }[]).filter(sourcee => sourcee.name !== color.source);
-                                            const storeToModify = (await DataStore.get("customColorways") as { name: string, colorways: Colorway[], id?: string; }[]).filter(sourcee => sourcee.name === color.source)[0];
-                                            const newStore = { name: storeToModify.name, colorways: storeToModify.colorways.filter(colorway => colorway.name !== color.name) };
-                                            DataStore.set("customColorways", [...oldStores, newStore]);
-                                            setCustomColorwayData([...oldStores, newStore].map((colorSrc: { name: string, colorways: Colorway[], id?: string; }) =>
-                                                ({ type: "offline", source: colorSrc.name, colorways: colorSrc.colorways })));
-                                            if ((await DataStore.get("activeColorwayObject")).id === color.name) {
-                                                DataStore.set("activeColorwayObject", nullColorwayObj);
-                                                setActiveColorwayObject(nullColorwayObj);
-                                                ColorwayCSS.remove();
-                                            }
-                                            updateRemoteSources();
-                                        }}
-                                    >
-                                        <DeleteIcon width={20} height={20} />
-                                    </button>}
-                                </div> : <></>
-                            );
-                        })
+                                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
+                                </svg>
+                            </button>}
+                            <button
+                                className="colorwaysPillButton colorwaysPillButton-onSurface"
+                                onClick={async e => {
+                                    e.stopPropagation();
+                                    const colorwayIDArray = `${color.accent},${color.primary},${color.secondary},${color.tertiary}|n:${color.name}${color.preset ? `|p:${color.preset}` : ""}`;
+                                    const colorwayID = stringToHex(colorwayIDArray);
+                                    navigator.clipboard.writeText(colorwayID);
+                                    Toasts.show({
+                                        message: "Copied Colorway ID Successfully",
+                                        type: 1,
+                                        id: "copy-colorway-id-notify",
+                                    });
+                                }}
+                            >
+                                <IDIcon width={20} height={20} />
+                            </button>
+                            {(color.sourceType === "offline" && settings.selectorType !== "preview") && <button
+                                className="colorwaysPillButton colorwaysPillButton-onSurface"
+                                onClick={async e => {
+                                    e.stopPropagation();
+                                    const oldStores = (await DataStore.get("customColorways") as { name: string, colorways: Colorway[], id?: string; }[]).filter(sourcee => sourcee.name !== color.source);
+                                    const storeToModify = (await DataStore.get("customColorways") as { name: string, colorways: Colorway[], id?: string; }[]).filter(sourcee => sourcee.name === color.source)[0];
+                                    const newStore = { name: storeToModify.name, colorways: storeToModify.colorways.filter(colorway => colorway.name !== color.name) };
+                                    DataStore.set("customColorways", [...oldStores, newStore]);
+                                    setCustomColorwayData([...oldStores, newStore].map((colorSrc: { name: string, colorways: Colorway[], id?: string; }) =>
+                                        ({ type: "offline", source: colorSrc.name, colorways: colorSrc.colorways })));
+                                    if ((await DataStore.get("activeColorwayObject")).id === color.name) {
+                                        DataStore.set("activeColorwayObject", nullColorwayObj);
+                                        setActiveColorwayObject(nullColorwayObj);
+                                        ColorwayCSS.remove();
+                                    }
+                                    updateRemoteSources();
+                                }}
+                            >
+                                <DeleteIcon width={20} height={20} />
+                            </button>}
+                        </div>)
                 )}
             </Container>
         </>}</>;

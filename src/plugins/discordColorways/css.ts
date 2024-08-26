@@ -470,14 +470,19 @@ export function gradientBase(accentColor?: string, discordSaturation = false) {
 }`;
 }
 
-export function generateCss(primaryColor: string, secondaryColor: string, tertiaryColor: string, accentColor: string, tintedText: boolean = true, discordSaturation: boolean = true, mutedTextBrightness?: number, name?: string) {
-    primaryColor = primaryColor.replace("#", "");
-    secondaryColor = secondaryColor.replace("#", "");
-    tertiaryColor = tertiaryColor.replace("#", "");
-    accentColor = accentColor.replace("#", "");
+export function generateCss(colors: { accent?: string, primary?: string, secondary?: string, tertiary?: string; }, tintedText: boolean = true, discordSaturation: boolean = true, mutedTextBrightness?: number, name?: string) {
+    colors.primary ??= "#313338";
+    colors.secondary ??= "#2b2d31";
+    colors.tertiary ??= "#1e1f22";
+    colors.accent ??= "#ffffff";
+
+    const primaryColor = colors.primary.replace("#", "");
+    const secondaryColor = colors.secondary.replace("#", "");
+    const tertiaryColor = colors.tertiary.replace("#", "");
+    const accentColor = colors.accent.replace("#", "");
     return `/**
  * @name ${name}
- * @version ${PluginProps.creatorVersion}
+ * @version ${PluginProps.CSSVersion}
  * @description Automatically generated Colorway.
  * @author ${UserStore.getCurrentUser().username}
  * @authorId ${UserStore.getCurrentUser().id}
@@ -699,6 +704,16 @@ export function getAutoPresets(accentColor?: string) {
                 tertiary: "#1e1f22"
             }
         },
+        AMOLED: {
+            name: "AMOLED",
+            id: "AMOLED",
+            colors: {
+                accent: accentColor,
+                primary: "#000000",
+                secondary: "#000000",
+                tertiary: "#000000"
+            }
+        },
         materialYou: {
             name: "Material You",
             id: "materialYou",
@@ -709,18 +724,13 @@ export function getAutoPresets(accentColor?: string) {
                 tertiary: "#" + colorToHex(`hsl(${HexToHSL("#" + accentColor)[0]} 16% 18%)`)
             }
         }
-    } as { [key: string]: { name: string, id: string, colors: { [key: string]: string; }; }; };
+    } as { [key: string]: { name: string, id: string, colors: { accent: string, primary: string, secondary: string, tertiary: string; }; }; };
 }
 
-export function getPreset(
-    primaryColor?: string,
-    secondaryColor?: string,
-    tertiaryColor?: string,
-    accentColor?: string
-): {
+export function getPreset(colors: { accent?: string, primary?: string, secondary?: string, tertiary?: string; }, discordSaturation = false): {
     [preset: string]: {
         name: string,
-        preset: (...args: any) => string | { full: string, base: string; },
+        preset: string | { full: string, base: string; },
         id: string,
         colors: string[],
         calculated?: {
@@ -731,24 +741,51 @@ export function getPreset(
         };
     };
 } {
-    function cyanLegacy(discordSaturation = false) {
-        return `:root:root {
-    --cyan-accent-color: #${accentColor};
-    --cyan-background-primary: hsl(${HexToHSL("#" + primaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + primaryColor)[1]}%) ${HexToHSL("#" + primaryColor)[2]}%/40%);
-    --cyan-background-secondary: hsl(${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.min(HexToHSL("#" + tertiaryColor)[2] + (3.6 * 2), 100)}%);
-}`;
-    }
+    colors.primary ??= "#313338";
+    colors.secondary ??= "#2b2d31";
+    colors.tertiary ??= "#1e1f22";
+    colors.accent ??= "#ffffff";
 
-    function cyan(discordSaturation = false) {
-        return `:root:root {
+    const primaryColor = colors.primary.replace("#", "");
+    const secondaryColor = colors.secondary.replace("#", "");
+    const tertiaryColor = colors.tertiary.replace("#", "");
+    const accentColor = colors.accent.replace("#", "");
+
+    return {
+        default: {
+            name: "Default",
+            preset: generateCss(
+                colors,
+                true,
+                discordSaturation,
+                undefined
+            ),
+            id: "default",
+            colors: ["accent", "primary", "secondary", "tertiary"]
+        },
+        cyan: {
+            name: "Cyan",
+            preset: `:root:root {
     --cyan-accent-color: #${accentColor};
     --cyan-background-primary: hsl(${HexToHSL("#" + primaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + primaryColor)[1]}%) ${HexToHSL("#" + primaryColor)[2]}%/60%);
     --cyan-second-layer: hsl(${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.min(HexToHSL("#" + tertiaryColor)[2] + (3.6 * 2), 100)}%/60%);
-}`;
-    }
-
-    function nexusRemastered(discordSaturation = false) {
-        return `:root:root {
+}`,
+            id: "cyan",
+            colors: ["accent", "primary", "secondary"]
+        },
+        cyanLegacy: {
+            name: "Cyan 1 (Legacy)",
+            preset: `:root:root {
+    --cyan-accent-color: #${accentColor};
+    --cyan-background-primary: hsl(${HexToHSL("#" + primaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + primaryColor)[1]}%) ${HexToHSL("#" + primaryColor)[2]}%/40%);
+    --cyan-background-secondary: hsl(${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.min(HexToHSL("#" + tertiaryColor)[2] + (3.6 * 2), 100)}%);
+}`,
+            id: "cyanLegacy",
+            colors: ["accent", "primary", "secondary"]
+        },
+        nexusRemastered: {
+            name: "Nexus Remastered",
+            preset: `:root:root {
     --nexus-accent-color: #${accentColor};
     --nexus-background-secondary: hsl(${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + tertiaryColor)[1] / 100) * (100 + PrimarySatDiffs[800])) * 10) / 10 : HexToHSL("#" + tertiaryColor)[1]}%) ${Math.max(HexToHSL("#" + tertiaryColor)[2] - (3.6 * 2), 0)}%);
     --nexus-background-elevated: hsl(${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + tertiaryColor)[1] / 100) * (100 + PrimarySatDiffs[800])) * 10) / 10 : HexToHSL("#" + tertiaryColor)[1]}%) ${Math.max(HexToHSL("#" + tertiaryColor)[2] - (3.6 * 2), 0)}%);
@@ -773,11 +810,23 @@ export function getPreset(
 }
 .theme-light {
     --background-tertiary: var(--primary-200) !important;
-}`;
-    }
-
-    function modular(discordSaturation = false) {
-        return `:root:root {
+}`,
+            id: "nexusRemastered",
+            colors: ["accent", "primary", "secondary", "tertiary"]
+        },
+        virtualBoy: {
+            name: "Virtual Boy",
+            preset: `:root:root {
+    --VBaccent: ${HexToHSL("#" + accentColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + accentColor)[1]}%) ${HexToHSL("#" + accentColor)[2]}%;
+    --VBaccent-muted: ${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.max(((HexToHSL("#" + tertiaryColor)[2]) - 10), 0)}%;
+    --VBaccent-dimmest: ${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.min((HexToHSL("#" + tertiaryColor)[2] + (3.6 * 5) - 3), 100)}%;
+}`,
+            id: "virtualBoy",
+            colors: ["accent", "tertiary"]
+        },
+        modular: {
+            name: "Modular",
+            preset: `:root:root {
     --brand-experiment: #${accentColor};
     --primary-800-hsl: ${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + tertiaryColor)[1] / 100) * (100 + PrimarySatDiffs[800])) * 10) / 10 : HexToHSL("#" + tertiaryColor)[1]}%) ${Math.max(HexToHSL("#" + tertiaryColor)[2] - (3.6 * 2), 0)}%;
     --primary-730-hsl: ${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + tertiaryColor)[1] / 100) * (100 + PrimarySatDiffs[730])) * 10) / 10 : HexToHSL("#" + tertiaryColor)[1]}%) ${Math.max(HexToHSL("#" + tertiaryColor)[2] - 3.6, 0)}%;
@@ -792,19 +841,13 @@ export function getPreset(
     --primary-330: ${HexToHSL("#" + secondaryColor)[0] === 0 ? "gray" : ((HexToHSL("#" + secondaryColor)[2] < 80) ? "hsl(" + HexToHSL("#" + secondaryColor)[0] + `, calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + primaryColor)[1] / 100) * (100 + PrimarySatDiffs[330])) * 10) / 10 : HexToHSL("#" + primaryColor)[1]}%), 90%)` : "hsl(" + HexToHSL("#" + secondaryColor)[0] + ", calc(var(--saturation-factor, 1)*100%), 20%)")};
     --primary-360: ${HexToHSL("#" + secondaryColor)[0] === 0 ? "gray" : ((HexToHSL("#" + secondaryColor)[2] < 80) ? "hsl(" + HexToHSL("#" + secondaryColor)[0] + `, calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + primaryColor)[1] / 100) * (100 + PrimarySatDiffs[360])) * 10) / 10 : HexToHSL("#" + primaryColor)[1]}%), 90%)` : "hsl(" + HexToHSL("#" + secondaryColor)[0] + ", calc(var(--saturation-factor, 1)*100%), 20%)")};
     --primary-400: ${HexToHSL("#" + secondaryColor)[0] === 0 ? "gray" : ((HexToHSL("#" + secondaryColor)[2] < 80) ? "hsl(" + HexToHSL("#" + secondaryColor)[0] + `, calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + primaryColor)[1] / 100) * (100 + PrimarySatDiffs[400])) * 10) / 10 : HexToHSL("#" + primaryColor)[1]}%), 90%)` : "hsl(" + HexToHSL("#" + secondaryColor)[0] + ", calc(var(--saturation-factor, 1)*100%), 20%)")}
-}`;
-    }
-
-    function virtualBoy(discordSaturation = false) {
-        return `:root:root {
-    --VBaccent: ${HexToHSL("#" + accentColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + accentColor)[1]}%) ${HexToHSL("#" + accentColor)[2]}%;
-    --VBaccent-muted: ${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.max(((HexToHSL("#" + tertiaryColor)[2]) - 10), 0)}%;
-    --VBaccent-dimmest: ${HexToHSL("#" + tertiaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + tertiaryColor)[1]}%) ${Math.min((HexToHSL("#" + tertiaryColor)[2] + (3.6 * 5) - 3), 100)}%;
-}`;
-    }
-
-    function solana(discordSaturation = false) {
-        return `:root:root {
+}`,
+            id: "modular",
+            colors: ["accent", "primary", "secondary", "tertiary"]
+        },
+        solana: {
+            name: "Solana",
+            preset: `:root:root {
     --accent-hue: ${HexToHSL("#" + accentColor)[0]};
     --accent-saturation: calc(var(--saturation-factor, 1)${HexToHSL("#" + accentColor)[1]}%);
     --accent-brightness: ${HexToHSL("#" + accentColor)[2]}%;
@@ -812,90 +855,37 @@ export function getPreset(
     --background-accent-saturation: calc(var(--saturation-factor, 1)${HexToHSL("#" + primaryColor)[1]}%);
     --background-accent-brightness: ${HexToHSL("#" + primaryColor)[2]}%;
     --background-overlay-opacity: 0%;
-}`;
-    }
-
-    function gradientType1(discordSaturation = false) {
-        return {
-            full: `${gradientBase(accentColor, discordSaturation)}
-            :root:root {
-                --custom-theme-background: linear-gradient(239.16deg, #${primaryColor} 10.39%, #${secondaryColor} 26.87%, #${tertiaryColor} 48.31%, hsl(${HexToHSL("#" + secondaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + secondaryColor)[1]}%) ${Math.min(HexToHSL("#" + secondaryColor)[2] + 3.6, 100)}%) 64.98%, #${primaryColor} 92.5%);
-            }`,
-            base: `239.16deg, #${primaryColor} 10.39%, #${secondaryColor} 26.87%, #${tertiaryColor} 48.31%, hsl(${HexToHSL("#" + secondaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + secondaryColor)[1]}%) ${Math.min(HexToHSL("#" + secondaryColor)[2] + 3.6, 100)}%) 64.98%, #${primaryColor} 92.5%`
-        };
-    }
-
-    function gradientType2(discordSaturation = false) {
-        return {
-            full: `${gradientBase(accentColor, discordSaturation)}
-        :root:root {
-            --custom-theme-background: linear-gradient(48.17deg, #${primaryColor} 11.21%, #${secondaryColor} 61.92%);
-        }`, base: `48.17deg, #${primaryColor} 11.21%, #${secondaryColor} 61.92%`
-        };
-    }
-
-    return {
-        default: {
-            name: "Default",
-            preset: generateCss,
-            id: "default",
-            colors: ["accent", "primary", "secondary", "tertiary"]
-        },
-        cyan: {
-            name: "Cyan",
-            preset: cyan,
-            id: "cyan",
-            colors: ["accent", "primary", "secondary"]
-        },
-        cyanLegacy: {
-            name: "Cyan 1 (Legacy)",
-            preset: cyanLegacy,
-            id: "cyanLegacy",
-            colors: ["accent", "primary", "secondary"]
-        },
-        nexusRemastered: {
-            name: "Nexus Remastered",
-            preset: nexusRemastered,
-            id: "nexusRemastered",
-            colors: ["accent", "primary", "secondary", "tertiary"]
-        },
-        virtualBoy: {
-            name: "Virtual Boy",
-            preset: virtualBoy,
-            id: "virtualBoy",
-            colors: ["accent", "tertiary"]
-        },
-        modular: {
-            name: "Modular",
-            preset: modular,
-            id: "modular",
-            colors: ["accent", "primary", "secondary", "tertiary"]
-        },
-        solana: {
-            name: "Solana",
-            preset: solana,
+}`,
             id: "solana",
             colors: ["accent", "primary"]
         },
         gradientType1: {
             name: "Gradient Type 1",
-            preset: gradientType1,
+            preset: {
+                full: `${gradientBase(accentColor, discordSaturation)}
+                :root:root {
+                    --custom-theme-background: linear-gradient(239.16deg, #${primaryColor} 10.39%, #${secondaryColor} 26.87%, #${tertiaryColor} 48.31%, hsl(${HexToHSL("#" + secondaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + secondaryColor)[1]}%) ${Math.min(HexToHSL("#" + secondaryColor)[2] + 3.6, 100)}%) 64.98%, #${primaryColor} 92.5%);
+                }`,
+                base: `239.16deg, #${primaryColor} 10.39%, #${secondaryColor} 26.87%, #${tertiaryColor} 48.31%, hsl(${HexToHSL("#" + secondaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + secondaryColor)[1]}%) ${Math.min(HexToHSL("#" + secondaryColor)[2] + 3.6, 100)}%) 64.98%, #${primaryColor} 92.5%`
+            },
             id: "gradientType1",
             colors: ["accent", "primary", "secondary", "tertiary"]
         },
         gradientType2: {
             name: "Gradient Type 2",
-            preset: gradientType2,
+            preset: {
+                full: `${gradientBase(accentColor, discordSaturation)}
+            :root:root {
+                --custom-theme-background: linear-gradient(48.17deg, #${primaryColor} 11.21%, #${secondaryColor} 61.92%);
+            }`, base: `48.17deg, #${primaryColor} 11.21%, #${secondaryColor} 61.92%`
+            },
             id: "gradientType2",
             colors: ["accent", "primary", "secondary"]
         },
         hueRotation: {
             name: "Hue Rotation",
-            preset: () => generateCss(
-                getAutoPresets(accentColor).hueRotation.colors.primary,
-                getAutoPresets(accentColor).hueRotation.colors.secondary,
-                getAutoPresets(accentColor).hueRotation.colors.tertiary,
-                getAutoPresets(accentColor).hueRotation.colors.accent,
+            preset: generateCss(
+                getAutoPresets(accentColor).hueRotation.colors,
                 true,
                 true,
                 undefined
@@ -910,11 +900,8 @@ export function getPreset(
         },
         accentSwap: {
             name: "Accent Swap",
-            preset: () => generateCss(
-                getAutoPresets(accentColor).accentSwap.colors.primary,
-                getAutoPresets(accentColor).accentSwap.colors.secondary,
-                getAutoPresets(accentColor).accentSwap.colors.tertiary,
-                getAutoPresets(accentColor).accentSwap.colors.accent,
+            preset: generateCss(
+                getAutoPresets(accentColor).accentSwap.colors,
                 true,
                 true,
                 undefined
@@ -924,11 +911,8 @@ export function getPreset(
         },
         materialYou: {
             name: "Material You",
-            preset: () => generateCss(
-                getAutoPresets(accentColor).materialYou.colors.primary,
-                getAutoPresets(accentColor).materialYou.colors.secondary,
-                getAutoPresets(accentColor).materialYou.colors.tertiary,
-                getAutoPresets(accentColor).materialYou.colors.accent,
+            preset: generateCss(
+                getAutoPresets(accentColor).materialYou.colors,
                 true,
                 true,
                 undefined
@@ -939,6 +923,22 @@ export function getPreset(
                 primary: `hsl(${HexToHSL("#" + accentColor)[0]} 12% 12%)`,
                 secondary: `hsl(${HexToHSL("#" + accentColor)[0]} 12% 16%)`,
                 tertiary: `hsl(${HexToHSL("#" + accentColor)[0]} 16% 18%)`
+            }
+        },
+        AMOLED: {
+            name: "AMOLED",
+            preset: generateCss(
+                getAutoPresets(accentColor).AMOLED.colors,
+                true,
+                true,
+                undefined
+            ),
+            id: "AMOLED",
+            colors: ["accent"],
+            calculated: {
+                primary: `#000000`,
+                secondary: `#000000`,
+                tertiary: `#000000`
             }
         }
     };

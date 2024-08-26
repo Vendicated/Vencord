@@ -6,15 +6,13 @@
 
 import { ColorPicker, openModal, useEffect, useState, useReducer, UserStore, PluginProps, DataStore, Slider } from "..";
 import { knownThemeVars } from "../constants";
-import { generateCss, getPreset, gradientPresetIds, PrimarySatDiffs, pureGradientBase } from "../css";
+import { generateCss, getPreset, gradientPresetIds } from "../css";
 import { Colorway, ModalProps } from "../types";
 import { colorToHex, getHex, HexToHSL, hexToString } from "../utils";
 import { updateRemoteSources } from "../wsClient";
-import ColorwayCreatorSettingsModal from "./ColorwayCreatorSettingsModal";
 import ConflictingColorsModal from "./ConflictingColorsModal";
 import InputColorwayIdModal from "./InputColorwayIdModal";
 import SaveColorwayModal from "./SaveColorwayModal";
-import ThemePreviewCategory from "./ThemePreview";
 export default function ({
     modalProps,
     loadUIProps = () => new Promise(() => { }),
@@ -61,10 +59,6 @@ export default function ({
         tertiary: "1e1f22"
     });
     const [colorwayName, setColorwayName] = useState<string>("");
-    const [tintedText, setTintedText] = useState<boolean>(true);
-    const [discordSaturation, setDiscordSaturation] = useState<boolean>(true);
-    const [preset, setPreset] = useState<string>("default");
-    const [presetColorArray, setPresetColorArray] = useState<string[]>(["accent", "primary", "secondary", "tertiary"]);
     const [mutedTextBrightness, setMutedTextBrightness] = useState<number>(Math.min(HexToHSL("#" + colors.primary)[2] + (3.6 * 3), 100));
     const [theme, setTheme] = useState("discord");
 
@@ -113,12 +107,6 @@ export default function ({
                     if (prop.includes("n:")) {
                         setColorwayName(prop.split("n:")[1]);
                     }
-                    if (prop.includes("p:")) {
-                        if (Object.values(getPreset()).map(preset => preset.id).includes(prop.split("p:")[1])) {
-                            setPreset(prop.split("p:")[1]);
-                            setPresetColorArray(getPreset()[prop.split("p:")[1]].colors);
-                        }
-                    }
                 });
             }
         }
@@ -148,33 +136,16 @@ export default function ({
                 <div className="colorwaysCreator-settingCat">
                     <span className="colorwaysModalSectionHeader">Colors & Values:</span>
                     <div className="colorwayCreator-colorPreviews">
-                        {colorProps.filter(color => presetColorArray.includes(color.id) || Object.keys(getPreset()[preset].calculated! || {}).includes(color.id)).map(presetColor => {
+                        {colorProps.map(presetColor => {
                             return <ColorPicker
-                                label={<span className="colorwaysPicker-colorLabel">{Object.keys(getPreset()[preset].calculated! || {}).includes(presetColor.id) ? (presetColor.name + " (Calculated)") : presetColor.name}</span>}
-                                color={!Object.keys(
-                                    getPreset()[preset].calculated! || {}
-                                ).includes(presetColor.id) ?
-                                    parseInt(colors[presetColor.id], 16) :
-                                    parseInt(
-                                        colorToHex(
-                                            getPreset(
-                                                colors.primary,
-                                                colors.secondary,
-                                                colors.tertiary,
-                                                colors.accent
-                                            )[preset].calculated![presetColor.id]
-                                        ),
-                                        16
-                                    )
-                                }
+                                label={<span className="colorwaysPicker-colorLabel">{presetColor.name}</span>}
+                                color={parseInt(colors[presetColor.id], 16)}
                                 onChange={(color: number) => {
-                                    if (!Object.keys(getPreset()[preset].calculated! || {}).includes(presetColor.id)) {
-                                        let hexColor = color.toString(16);
-                                        while (hexColor.length < 6) {
-                                            hexColor = "0" + hexColor;
-                                        }
-                                        updateColors({ task: presetColor.id as "accent" | "primary" | "secondary" | "tertiary", color: hexColor });
+                                    let hexColor = color.toString(16);
+                                    while (hexColor.length < 6) {
+                                        hexColor = "0" + hexColor;
                                     }
+                                    updateColors({ task: presetColor.id as "accent" | "primary" | "secondary" | "tertiary", color: hexColor });
                                 }}
                                 {...colorPickerProps}
                             />;
@@ -189,94 +160,20 @@ export default function ({
                         onValueChange={setMutedTextBrightness}
                     />
                 </div>
-                <div
-                    className="colorwaysCreator-setting"
-                    onClick={() => openModal((props: ModalProps) => <ColorwayCreatorSettingsModal
-                        modalProps={props}
-                        hasDiscordSaturation={discordSaturation}
-                        hasTintedText={tintedText}
-                        presetId={preset}
-                        onSettings={({ presetId, tintedText, discordSaturation }) => {
-                            setPreset(presetId);
-                            setPresetColorArray(getPreset()[presetId].colors);
-                            setDiscordSaturation(discordSaturation);
-                            setTintedText(tintedText);
-                        }} />)}>
-                    <span className="colorwaysModalSectionHeader">Settings & Presets</span>
-                    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img" style={{ rotate: "-90deg" }}>
-                        <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10L12 15 17 10" aria-hidden="true" />
-                    </svg>
-                </div>
-                <ThemePreviewCategory
-                    accent={"#" + colors.accent}
-                    primary={"#" + colors.primary}
-                    secondary={"#" + colors.secondary}
-                    tertiary={"#" + colors.tertiary}
-                    previewCSS={gradientPresetIds.includes(getPreset()[preset].id) ? pureGradientBase + `.colorwaysPreview-modal,.colorwaysPreview-wrapper {--gradient-theme-bg: linear-gradient(${(getPreset(
-                        colors.primary,
-                        colors.secondary,
-                        colors.tertiary,
-                        colors.accent
-                    )[preset].preset(discordSaturation) as { full: string, base: string; }).base})}` : (tintedText ? `.colorwaysPreview-modal,.colorwaysPreview-wrapper {
-                        --primary-500: hsl(${HexToHSL("#" + colors.primary)[0]} calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + colors.primary)[1] / 100) * (100 + PrimarySatDiffs[500])) * 10) / 10 : HexToHSL("#" + colors.primary)[1]}%) ${mutedTextBrightness || Math.min(HexToHSL("#" + colors.primary)[2] + (3.6 * 3), 100)}%);
-                        --primary-360: hsl(${HexToHSL("#" + colors.secondary)[0]} calc(var(--saturation-factor, 1)*${discordSaturation ? Math.round(((HexToHSL("#" + colors.primary)[1] / 100) * (100 + PrimarySatDiffs[360])) * 10) / 10 : HexToHSL("#" + colors.primary)[1]}%) 90%);
-                }` : "")}
-                />
             </div>
             <div className="colorwaysModalFooter">
                 <button
                     className="colorwaysPillButton colorwaysPillButton-onSurface"
                     onClick={async () => {
-                        var customColorwayCSS: string = "";
-                        if (preset === "default") {
-                            customColorwayCSS = generateCss(
-                                colors.primary,
-                                colors.secondary,
-                                colors.tertiary,
-                                colors.accent,
-                                tintedText,
-                                discordSaturation,
-                                mutedTextBrightness,
-                                (colorwayName || "Colorway")
-                            );
-                        } else {
-                            gradientPresetIds.includes(getPreset()[preset].id) ?
-                                customColorwayCSS = `/**
-                                * @name ${colorwayName || "Colorway"}
-                                * @version ${PluginProps.creatorVersion}
-                                * @description Automatically generated Colorway.
-                                * @author ${UserStore.getCurrentUser().username}
-                                * @authorId ${UserStore.getCurrentUser().id}
-                                * @preset Gradient
-                                */
-                               ${(getPreset(colors.primary, colors.secondary, colors.tertiary, colors.accent)[preset].preset(discordSaturation) as { full: string; }).full}` : customColorwayCSS = `/**
-                               * @name ${colorwayName || "Colorway"}
-                               * @version ${PluginProps.creatorVersion}
-                               * @description Automatically generated Colorway.
-                               * @author ${UserStore.getCurrentUser().username}
-                               * @authorId ${UserStore.getCurrentUser().id}
-                               * @preset ${getPreset()[preset].name}
-                               */
-                               ${(getPreset(colors.primary, colors.secondary, colors.tertiary, colors.accent)[preset].preset(discordSaturation) as string)}`;
-                        }
                         const customColorway: Colorway = {
                             name: (colorwayName || "Colorway"),
                             accent: "#" + colors.accent,
                             primary: "#" + colors.primary,
                             secondary: "#" + colors.secondary,
                             tertiary: "#" + colors.tertiary,
-                            colors: presetColorArray,
                             author: UserStore.getCurrentUser().username,
                             authorID: UserStore.getCurrentUser().id,
-                            isGradient: gradientPresetIds.includes(getPreset()[preset].id),
-                            linearGradient: gradientPresetIds.includes(getPreset()[preset].id) ? (getPreset(
-                                colors.primary,
-                                colors.secondary,
-                                colors.tertiary,
-                                colors.accent
-                            )[preset].preset(discordSaturation) as { base: string; }).base : "",
-                            preset: getPreset()[preset].id,
-                            creatorVersion: PluginProps.creatorVersion
+                            CSSVersion: PluginProps.CSSVersion
                         };
                         openModal(props => <SaveColorwayModal modalProps={props} colorways={[customColorway]} onFinish={() => {
                             modalProps.onClose();

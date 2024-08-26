@@ -21,7 +21,7 @@ export interface Colorway {
     source?: string,
     linearGradient?: string,
     preset?: string,
-    creatorVersion: string;
+    CSSVersion: string;
 }
 
 export interface ColorPickerProps {
@@ -38,10 +38,10 @@ export interface ColorwayObject {
     sourceType: "online" | "offline" | "temporary" | null,
     source: string | null | undefined,
     colors: {
-        accent?: string | undefined,
-        primary?: string | undefined,
-        secondary?: string | undefined,
-        tertiary?: string | undefined;
+        accent: string,
+        primary: string,
+        secondary: string,
+        tertiary: string;
     },
     linearGradient?: string;
 }

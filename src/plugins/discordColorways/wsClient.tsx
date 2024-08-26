@@ -2,7 +2,7 @@ import { DataStore, FluxDispatcher, FluxEvents, openModal } from ".";
 import { ColorwayCSS } from "./colorwaysAPI";
 import MainModal from "./components/MainModal";
 import { nullColorwayObj } from "./constants";
-import { generateCss, gradientBase } from "./css";
+import { generateCss, getPreset, gradientBase, gradientPresetIds } from "./css";
 import { ColorwayObject } from "./types";
 import { colorToHex, getWsClientIdentity } from "./utils";
 
@@ -87,21 +87,31 @@ export function connect(doAutoconnect = true, autoconnectTimeout = 3000) {
                             active: nullColorwayObj
                         });
                     } else {
-                        data.active.colors.primary ??= "313338";
-                        data.active.colors.secondary ??= "2b2d31";
-                        data.active.colors.tertiary ??= "1e1f22";
-                        data.active.colors.accent ??= "ffffff";
-                        const demandedColorway = !Object.keys(data.active).includes("linearGradient") ? generateCss(
-                            colorToHex("#" + data.active.colors.primary.replace("#", "")),
-                            colorToHex("#" + data.active.colors.secondary.replace("#", "")),
-                            colorToHex("#" + data.active.colors.tertiary.replace("#", "")),
-                            colorToHex("#" + data.active.colors.accent.replace("#", ""))
-                        ) : gradientBase(colorToHex("#" + data.active.colors.accent.replace("#", "")), true) + `:root:root {--custom-theme-background: linear-gradient(${data.active.linearGradient})}`;
-                        ColorwayCSS.set(demandedColorway);
-                        DataStore.set("activeColorwayObject", { ...data.active, css: demandedColorway });
+                        DataStore.set("activeColorwayObject", data.active);
                         FluxDispatcher.dispatch({
                             type: "COLORWAYS_UPDATE_ACTIVE_COLORWAY" as FluxEvents,
-                            active: { ...data.active, css: demandedColorway }
+                            active: data.active
+                        });
+
+                        DataStore.get("colorwaysPreset").then((colorwaysPreset: string) => {
+                            if (colorwaysPreset == "default") {
+                                ColorwayCSS.set(generateCss(
+                                    data.active.colors,
+                                    true,
+                                    true,
+                                    undefined,
+                                    data.active.id
+                                ));
+                            } else {
+                                if (gradientPresetIds.includes(colorwaysPreset)) {
+                                    const css = Object.keys(data.active).includes("linearGradient")
+                                        ? gradientBase(colorToHex(data.active.colors.accent), true) + `:root:root {--custom-theme-background: linear-gradient(${data.active.linearGradient})}`
+                                        : (getPreset(data.active.colors)[colorwaysPreset].preset as { full: string; }).full;
+                                    ColorwayCSS.set(css);
+                                } else {
+                                    ColorwayCSS.set(getPreset(data.active.colors)[colorwaysPreset].preset as string);
+                                }
+                            }
                         });
                     }
                     return;

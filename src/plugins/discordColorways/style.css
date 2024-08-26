@@ -3,6 +3,7 @@
 /* stylelint-disable selector-id-pattern */
 /* stylelint-disable selector-class-pattern */
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css");
+@import url("https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Edu+AU+VIC+WA+NT+Hand:wght@400..700&display=swap");
 
 .ColorwaySelectorBtn {
     height: 48px;
@@ -297,7 +298,7 @@
     padding: 0 16px !important;
 }
 
-.ColorwaySelectorBtnContainer {
+.colorwaysServerListItem {
     position: relative;
     margin: 0 0 8px;
     display: flex;
@@ -1701,7 +1702,8 @@
 
 .colorwaysModalSectionHeader {
     font-size: 14px;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+    display: block;
 }
 
 .colorwaysModalSectionError {
@@ -1840,4 +1842,57 @@
 
 .colorwaysManagerConnectionValue > b {
     color: #a0a6ae;
+}
+
+.colorwaysWordmarkFirstPart {
+    font-family: var(--font-headline);
+    font-size: 24px;
+    color: var(--header-primary);
+    line-height: 31px;
+    margin-bottom: 0px;
+}
+
+.colorwaysWordmarkSecondPart {
+    font-family: var(--font-display);
+    font-size: 24px;
+    background-color: var(--brand-500);
+    padding: 0px 4px;
+    border-radius: 4px;
+}
+
+.visual-refresh .colorwaysWordmarkSecondPart {
+    border-radius: 8px;
+    padding: 0px 8px;
+    border: 1px solid var(--border-strong);
+    font-family: "Edu AU VIC WA NT Hand", cursive;
+    line-height: 32px;
+    display: inline-block;
+}
+
+.visual-refresh .ColorwaySelectorBtn {
+    width: 44px;
+    height: 44px;
+}
+
+.colorwaysServerListItemPill {
+    width: 4px;
+    margin-left: -4px;
+    height: 0px;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    background-color: var(--header-primary);
+    border-radius: 0 4px 4px 0;
+    transition: 0.2s ease-in-out;
+}
+
+.colorwaysServerListItemPill[data-status="hover"],
+.colorwaysServerListItemPill[data-status="active"] {
+    margin-left: 0;
+    height: 20px;
+}
+
+.colorwaysServerListItemPill[data-status="active"] {
+    height: 40px;
 }

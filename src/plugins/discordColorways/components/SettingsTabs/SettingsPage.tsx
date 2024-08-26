@@ -7,10 +7,13 @@
 import { DataStore, PluginProps, ReactNode, useState, useEffect, FluxDispatcher, FluxEvents } from "../../";
 
 import { defaultColorwaySource, fallbackColorways, nullColorwayObj } from "../../constants";
-import { Colorway } from "../../types";
+import { Colorway, ColorwayObject } from "../../types";
 import Setting from "../Setting";
 import Switch from "../Switch";
-import { connect, isWSOpen } from "../../wsClient";
+import { connect, hasManagerRole, isWSOpen, sendColorway, wsOpen } from "../../wsClient";
+import { generateCss, getPreset, gradientBase, gradientPresetIds } from "../../css";
+import { ColorwayCSS } from "plugins/discordColorways/colorwaysAPI";
+import { colorToHex } from "plugins/discordColorways/utils";
 
 export default function ({
     hasTheme = false
@@ -22,26 +25,31 @@ export default function ({
     const [colorsButtonVisibility, setColorsButtonVisibility] = useState<boolean>(false);
     const [theme, setTheme] = useState("discord");
     const [shouldAutoconnect, setShouldAutoconnect] = useState<"1" | "2">("1");
-
-    useEffect(() => {
-        async function load() {
-            setTheme(await DataStore.get("colorwaysPluginTheme") as string);
-            setShouldAutoconnect((await DataStore.get("colorwaysManagerDoAutoconnect") as boolean) ? "1" : "2");
-        }
-        load();
-    }, []);
+    const [preset, setPreset] = useState<string>("default");
 
     useEffect(() => {
         (async function () {
             const [
                 customColorways,
                 colorwaySourceFiles,
-                showColorwaysButton
+                showColorwaysButton,
+                colorwaysPreset,
+                colorwaysPluginTheme,
+                colorwaysManagerDoAutoconnect
             ] = await DataStore.getMany([
                 "customColorways",
                 "colorwaySourceFiles",
-                "showColorwaysButton"
+                "showColorwaysButton",
+                "colorwaysPreset",
+                "colorwaysPluginTheme",
+                "colorwaysManagerDoAutoconnect"
             ]);
+
+            setTheme(colorwaysPluginTheme);
+            setShouldAutoconnect(colorwaysManagerDoAutoconnect ? "1" : "2");
+
+            setPreset(colorwaysPreset);
+
             const responses: Response[] = await Promise.all(
                 colorwaySourceFiles.map(({ url }: { url: string; }) =>
                     fetch(url)
@@ -109,7 +117,7 @@ export default function ({
             </div>
         </Setting>
         <span className="colorwaysModalSectionHeader">Manager</span>
-        <Setting>
+        <Setting divider>
             <div style={{
                 display: "flex",
                 flexDirection: "row",
@@ -137,6 +145,7 @@ export default function ({
                 </select>
             </div>
         </Setting>
+        <span className="colorwaysModalSectionHeader">Colorways</span>
         <Setting divider>
             <div style={{
                 display: "flex",
@@ -145,16 +154,54 @@ export default function ({
                 alignItems: "center",
                 cursor: "pointer"
             }}>
-                <label className="colorwaySwitch-label">Try to connect to Manager manually</label>
-                <button
+                <label className="colorwaySwitch-label">Colorway preset</label>
+                <select
                     className="colorwaysPillButton"
-                    onClick={() => connect()}
-                    value={shouldAutoconnect}
+                    style={{ border: "none" }}
+                    onChange={({ currentTarget: { value } }) => {
+                        setPreset(value);
+                        DataStore.set("colorwaysPreset", value);
+
+                        DataStore.get("activeColorwayObject").then((active: ColorwayObject) => {
+                            if (active.id) {
+                                if (wsOpen) {
+                                    if (hasManagerRole) {
+                                        sendColorway(active);
+                                    }
+                                } else {
+                                    if (value == "default") {
+                                        ColorwayCSS.set(generateCss(
+                                            active.colors,
+                                            true,
+                                            true,
+                                            undefined,
+                                            active.id
+                                        ));
+                                    } else {
+                                        if (gradientPresetIds.includes(value)) {
+                                            const css = Object.keys(active).includes("linearGradient")
+                                                ? gradientBase(colorToHex(active.colors.accent), true) + `:root:root {--custom-theme-background: linear-gradient(${active.linearGradient})}`
+                                                : (getPreset(active.colors)[value].preset as { full: string; }).full;
+                                            ColorwayCSS.set(css);
+                                        } else {
+                                            ColorwayCSS.set(getPreset(active.colors)[value].preset as string);
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }}
+                    value={preset}
                 >
-                    Try to connect...
-                </button>
+                    {Object.values(getPreset({})).map(pre => <option
+                        value={pre.id}>
+                        {pre.name}
+                    </option>)}
+                </select>
             </div>
+            <span className="colorwaysNote">Presets allow colorways to adapt to various Discord themes.</span>
         </Setting>
+        <span className="colorwaysModalSectionHeader">Other...</span>
         <Setting divider>
             <div style={{
                 display: "flex",
@@ -178,7 +225,8 @@ export default function ({
                             ["colorwaysPluginTheme", "discord"],
                             ["colorwaysBoundManagers", []],
                             ["colorwaysManagerAutoconnectPeriod", 3000],
-                            ["colorwaysManagerDoAutoconnect", true]
+                            ["colorwaysManagerDoAutoconnect", true],
+                            ["colorwaysPreset", "default"]
                         ]);
                     }}
                 >
@@ -188,20 +236,8 @@ export default function ({
             <span className="colorwaysNote">Reset the plugin to its default settings. All bound managers, sources, and colorways will be deleted. Please reload Discord after use.</span>
         </Setting>
         <div style={{ flexDirection: "column", display: "flex" }}>
-            <h1 style={{
-                fontFamily: "var(--font-headline)",
-                fontSize: "24px",
-                color: "var(--header-primary)",
-                lineHeight: "31px",
-                marginBottom: "0"
-            }}>
-                Discord <span style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "24px",
-                    backgroundColor: "var(--brand-500)",
-                    padding: "0 4px",
-                    borderRadius: "4px"
-                }}>Colorways</span>
+            <h1 className="colorwaysWordmarkFirstPart">
+                Discord <span className="colorwaysWordmarkSecondPart">Colorways</span>
             </h1>
             <span
                 style={{
@@ -238,7 +274,7 @@ export default function ({
                 {PluginProps.UIVersion}
             </span>
             <span className="colorwaysModalSectionHeader">
-                Creator Version:
+                CSS Version:
             </span>
             <span
                 style={{
@@ -248,7 +284,7 @@ export default function ({
                     marginBottom: "8px"
                 }}
             >
-                {PluginProps.creatorVersion}
+                {PluginProps.CSSVersion}
             </span>
             <span className="colorwaysModalSectionHeader">
                 Loaded Colorways:

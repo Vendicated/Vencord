@@ -189,7 +189,7 @@ export default function ({
                                 if (!colorway["dc-import"].includes("@name")) {
                                     saveFile(new File([`/**
                                         * @name ${colorway.name || "Colorway"}
-                                        * @version ${PluginProps.creatorVersion}
+                                        * @version ${PluginProps.CSSVersion}
                                         * @description Automatically generated Colorway.
                                         * @author ${UserStore.getCurrentUser().username}
                                         * @authorId ${UserStore.getCurrentUser().id}

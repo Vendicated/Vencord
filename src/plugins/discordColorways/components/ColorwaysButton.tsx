@@ -9,18 +9,17 @@ import { PalleteIcon } from "./Icons";
 import { getAutoPresets } from "../css";
 import { ColorwayObject } from "../types";
 import Selector from "./MainModal";
-import { DataStore, useEffect, useState, FluxDispatcher, FluxEvents, openModal, PluginProps } from "..";
+import { DataStore, useEffect, useState, FluxDispatcher, FluxEvents, openModal, PluginProps, useRef } from "..";
 import Tooltip from "./Tooltip";
+import ListItem from "./ListItem";
 
 export default function () {
     const [activeColorway, setActiveColorway] = useState<string>("None");
     const [visibility, setVisibility] = useState<boolean>(true);
-    const [isThin, setIsThin] = useState<boolean>(false);
     const [autoPreset, setAutoPreset] = useState<string>("hueRotation");
     useEffect(() => {
         (async function () {
             setVisibility(await DataStore.get("showColorwaysButton") as boolean);
-            setIsThin(await DataStore.get("useThinMenuButton") as boolean);
             setAutoPreset(await DataStore.get("activeAutoPreset") as string);
         })();
 
@@ -31,30 +30,34 @@ export default function () {
         };
     });
 
-    return <Tooltip text={
-        <>
-            {!isThin ? <>
+    return (visibility || PluginProps.clientMod === "BetterDiscord") ? <ListItem
+        hasPill
+        tooltip={
+            <>
                 <span>Colorways</span>
                 <span style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: 12 }}>{"Active Colorway: " + activeColorway}</span>
-            </> : <span>{"Active Colorway: " + activeColorway}</span>}
-            {activeColorway === "Auto" ? <span style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: 12 }}>{"Auto Preset: " + (getAutoPresets()[autoPreset].name || "None")}</span> : <></>}
-        </>
-    } position="right"
-    >
-        {({ onMouseEnter, onMouseLeave, onClick }) => (visibility || PluginProps.clientMod === "BetterDiscord") ? <div className="ColorwaySelectorBtnContainer">
-            <div
-                className={"ColorwaySelectorBtn" + (isThin ? " ColorwaySelectorBtn_thin" : "")}
-                onMouseEnter={async () => {
-                    onMouseEnter();
+                {activeColorway === "Auto" ? <span style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: 12 }}>{"Auto Preset: " + (getAutoPresets()[autoPreset].name || "None")}</span> : <></>}
+            </>
+        }>
+        {({ onMouseEnter, onMouseLeave, isActive, onClick }) => {
+            return <div
+                className="ColorwaySelectorBtn"
+                onMouseEnter={async (e) => {
+                    onMouseEnter(e);
                     setActiveColorway((await DataStore.get("activeColorwayObject") as ColorwayObject).id || "None");
                     setAutoPreset(await DataStore.get("activeAutoPreset") as string);
                 }}
-                onMouseLeave={onMouseLeave}
-                onClick={() => {
-                    onClick();
+                onMouseLeave={(e) => {
+                    onMouseLeave(e);
+                }}
+                onClick={(e) => {
+                    onClick(e);
+                    isActive(false);
                     openModal((props: any) => <Selector modalProps={props} />);
                 }}
-            >{isThin ? <span style={{ color: "var(--header-primary)", fontWeight: 700, fontSize: 9 }}>Colorways</span> : <PalleteIcon />}</div>
-        </div> : <></>}
-    </Tooltip>;
+            >
+                <PalleteIcon />
+            </div>;
+        }}
+    </ListItem> : <></>;
 }
