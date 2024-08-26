@@ -26,12 +26,13 @@ process.on("uncaughtExceptionMonitor", error => {
 assertEnvValidity(process.env, {
     CHANNEL: ["stable", "ptb", "canary"],
     CHROMIUM_BIN: true,
+    CHROMIUM_VERSION: /^\d+(?:\.|$)/,
     DISCORD_TOKEN: true,
     DISCORD_WEBHOOK: false,
     VENCORD_DIST: true,
 });
 
-const { CHANNEL, CHROMIUM_BIN, DISCORD_TOKEN, DISCORD_WEBHOOK, VENCORD_DIST } = process.env;
+const { CHANNEL, CHROMIUM_BIN, CHROMIUM_VERSION, DISCORD_TOKEN, DISCORD_WEBHOOK, VENCORD_DIST } = process.env;
 const CWD = process.cwd();
 
 const browser = await puppeteer.launch({
@@ -41,7 +42,7 @@ const browser = await puppeteer.launch({
 });
 
 const page = await browser.newPage();
-await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
+await page.setUserAgent(`Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${CHROMIUM_VERSION.split(".", 1)[0]}.0.0.0 Safari/537.36`);
 await page.setBypassCSP(true);
 
 await page.evaluateOnNewDocument(`(() => {

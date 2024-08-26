@@ -26,7 +26,7 @@ export function autoFindEnum(this: typeof Vencord, source: CR.EnumSource) {
             if (isValidEnum(exp) && !checked.has(exp)) {
                 checked.add(exp);
 
-                const changes = getEnumChanges(exp, source);
+                const changes = getEnumChanges(source, exp);
                 const { changedCount } = changes;
                 if (
                     changedCount < lowestChangedCount
@@ -53,7 +53,7 @@ export function isValidEnum(value: unknown): value is CR.EnumMembers {
         && !Array.isArray(value);
 }
 
-export function getEnumChanges(obj: CR.EnumMembers, source: CR.EnumSource): CR.EnumChanges {
+export function getEnumChanges(source: CR.EnumSource, obj: CR.EnumMembers): CR.EnumChanges {
     const additions: CR.EnumMembers = {};
     const removals: CR.EnumMembers = { ...source };
     let unchangedCount = 0;

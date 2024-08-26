@@ -8,7 +8,7 @@
 import type * as Vencord from "../../../../../src/Vencord.ts";
 import type { CR } from "../types.mts";
 
-export function autoFindStore(this: typeof Vencord, name: string, source: CR.ClassMembers) {
+export function autoFindStore(this: typeof Vencord, source: CR.ClassMembers, name: string) {
     const persistKeyRE = new RegExp(`^${name}(?:V\\d+)?$`);
 
     const store: { constructor: CR.Class; } | undefined = this.Webpack.find(exp => {
@@ -21,7 +21,7 @@ export function autoFindStore(this: typeof Vencord, name: string, source: CR.Cla
     });
 
     if (store)
-        return getClassChanges(store.constructor, source);
+        return getClassChanges(source, store.constructor);
 }
 
 export function autoFindClass(this: typeof Vencord, source: CR.ClassMembers) {
@@ -49,7 +49,7 @@ export function autoFindClass(this: typeof Vencord, source: CR.ClassMembers) {
             if (!checked.has(constructor)) {
                 checked.add(constructor);
 
-                const changes = getClassChanges(constructor, source);
+                const changes = getClassChanges(source, constructor);
                 const { changedCount } = changes;
                 if (changedCount < lowestChangedCount) {
                     lowestChangedCount = changedCount;
@@ -72,12 +72,9 @@ export function isValidClass(value: unknown): value is CR.Class {
 }
 
 export function getClassChanges(
-    constructors: [CR.Class, ...CR.Class[]] | CR.Class,
-    source: CR.ClassMembers
+    source: CR.ClassMembers,
+    ...constructors: [CR.Class, ...CR.Class[]]
 ): CR.ClassChanges {
-    if (!Array.isArray(constructors))
-        constructors = [constructors];
-
     let hasConstructorDefinition = false;
 
     const constructorKeys = new Set<PropertyKey>();

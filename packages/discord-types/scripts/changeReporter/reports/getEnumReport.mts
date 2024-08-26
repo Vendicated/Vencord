@@ -34,7 +34,7 @@ export async function getEnumReport(
         try {
             const changes = await page.evaluate<[CR.EnumSource], CR.FindFunction<[CR.EnumSource], CR.EnumChanges>>(
                 pageAsyncFunction("s", `const o = await ${funcToString(find)}.call(Vencord, s);`
-                    + "if (isValidEnum(o)) return getEnumChanges(o);"),
+                    + "if (isValidEnum(o)) return getEnumChanges(s, o);"),
                 source
             );
             if (changes) {
@@ -50,7 +50,7 @@ export async function getEnumReport(
 
     try {
         const changes = await page.evaluate<Parameters<typeof autoFindEnum>, typeof autoFindEnum>(
-            pageFunction("o", "return autoFindEnum(o);"),
+            pageFunction("s", "return autoFindEnum(s);"),
             source
         );
         if (changes) {
@@ -69,7 +69,7 @@ export async function getEnumReport(
 }
 
 function getEnumMembers(
-    members: TSESTree.TSEnumMember[],
+    members: readonly TSESTree.TSEnumMember[],
     config: CR.EnumConfig,
     report: CR.EnumReport
 ) {

@@ -9,11 +9,7 @@ import console from "node:console";
 import type { CR } from "../types.mts";
 import { codeBlock, formatChannel, getSummaryURL } from "./utils.mjs";
 
-export async function postError(
-    error: Error,
-    webhookURL: string | undefined,
-    channel?: string | undefined
-) {
+export async function postError(error: Error, webhookURL?: string, channel?: string) {
     if (!webhookURL) return;
 
     const res = await fetch(webhookURL, {
@@ -34,11 +30,7 @@ export async function postError(
         console.error(`Failed to exectute webhook (status '${res.status} ${res.statusText}').`);
 }
 
-export async function postReport(
-    report: CR.ChangeReport,
-    webhookURL: string,
-    channel?: string | undefined
-) {
+export async function postReport(report: CR.ChangeReport, webhookURL: string, channel?: string) {
     const { deps, src } = report;
 
     let areChanges = false;

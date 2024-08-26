@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import process from "node:process";
+
 export function capitalize(string: string) {
     return string.replace(/^./, c => c.toUpperCase());
 }
@@ -13,29 +15,32 @@ export function codeBlock(content?: unknown, indentLevel = 0) {
     return `\`\`\`\n${content}\n\`\`\``.replaceAll(/^/gm, indent) + "\n";
 }
 
-export function formatWarnList(warns: string[], indentLevel = 0) {
+export function formatWarnList(warns: readonly string[], indentLevel = 0) {
     return warns.reduce((list, warn) => list + codeBlock(warn, indentLevel), "");
 }
 
-export function formatKeyList(keys: string[], indentLevel = 0) {
+export function formatKeyList(keys: readonly string[], indentLevel = 0) {
     const indent = "  ".repeat(indentLevel);
     return keys.reduce((list, key) => list + indent + `* \`${key}\`\n`, "");
 }
 
 export function formatValue(value?: unknown) {
-    if (typeof value === "string")
-        return JSON.stringify(value);
-    if (typeof value === "bigint")
-        return value.toString() + "n";
-    return String(value);
+    switch (typeof value) {
+        case "string":
+            return JSON.stringify(value);
+        case "bigint":
+            return value + "n";
+        default:
+            return String(value);
+    }
 }
 
-export function formatEnumEntryList(entries: [key: string, value: unknown][], indentLevel = 0) {
+export function formatEnumEntryList(entries: readonly (readonly [key: string, value: unknown])[], indentLevel = 0) {
     const indent = "  ".repeat(indentLevel);
     return entries.reduce((list, [key, value]) => list + indent + `* \`${key} = ${formatValue(value)}\`\n`, "");
 }
 
-export function formatChannel(channel?: string | undefined) {
+export function formatChannel(channel?: string) {
     switch (channel) {
         case "stable":
         case "canary":
@@ -47,9 +52,11 @@ export function formatChannel(channel?: string | undefined) {
     }
 }
 
-export function getSummaryURL(channel?: string | undefined) {
+export function getSummaryURL(channel?: string) {
     const { GITHUB_SERVER_URL, GITHUB_REPOSITORY, GITHUB_RUN_ID, GITHUB_RUN_ATTEMPT } = process.env;
     if (GITHUB_SERVER_URL && GITHUB_REPOSITORY && GITHUB_RUN_ID && GITHUB_RUN_ATTEMPT)
-        return `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}`
-            + `#:~:text=Change%20Report%20%28${formatChannel(channel)}%29`;
+        return encodeURI(
+            `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}`
+            + `#:~:text=Change Report (${formatChannel(channel)})`
+        );
 }

@@ -4,13 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-type EnvConfig = Record<string, boolean | [string, ...string[]]>;
+type EnvConfig = Record<string, RegExp | [string, ...string[]] | [...string[], string] | boolean>;
 
 type ValidEnv<Config extends EnvConfig> = NodeJS.ProcessEnv & {
-    [Key in keyof Config as false extends Config[Key] ? never : Key]: Config[Key] extends string[]
+    [Key in keyof Config as false extends Config[Key]
+        ? never
+        : Key
+    ]: Config[Key] extends string[]
         ? Config[Key][number]
         : string;
-} & { [Key in keyof Config as false extends Config[Key] ? Key : never]?: string; };
+} & Partial<Record<keyof Config, string>>;
 
 export function assertEnvValidity<const Config extends EnvConfig>(
     env: NodeJS.ProcessEnv,
@@ -25,8 +28,11 @@ export function assertEnvValidity<const Config extends EnvConfig>(
         if (varValue === undefined) {
             if (varConfig)
                 errors.push(`TypeError: A value must be provided for required environment variable '${key}'.`);
-        } else if (Array.isArray(varConfig) && !varConfig.includes(varValue))
-            errors.push(`RangeError: The value provided for environment variable '${key}' must be one of ${formatChoices(varConfig)}.`);
+        } else if (Array.isArray(varConfig)) {
+            if (!varConfig.includes(varValue))
+                errors.push(`RangeError: The value provided for environment variable '${key}' must be one of ${formatChoices(varConfig)}.`);
+        } else if (typeof varConfig === "object" && !varConfig.test(varValue))
+            errors.push(`RangeError: The value provided for environment variable '${key}' must match ${varConfig}.`);
     }
 
     if (errors.length > 0) {

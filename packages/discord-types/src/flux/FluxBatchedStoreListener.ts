@@ -11,8 +11,8 @@ import type { FluxStore } from "../stores/abstract/FluxStore";
 export declare class FluxBatchedStoreListener {
     constructor(stores: FluxStore[], changeCallback: () => void);
 
-    attatch(debugName?: Stringable): void;
-    detatch(): void;
+    attach(debugName?: Stringable): void;
+    detach(): void;
 
     changeCallback: () => void;
     handleStoreChange: () => void;

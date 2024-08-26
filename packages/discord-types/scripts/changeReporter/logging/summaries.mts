@@ -6,11 +6,12 @@
 
 import console from "node:console";
 import { writeFile } from "node:fs/promises";
+import process from "node:process";
 
 import type { CR } from "../types.mts";
 import { capitalize, codeBlock, formatChannel, formatEnumEntryList, formatKeyList, formatWarnList } from "./utils.mjs";
 
-export function logSummary(report: CR.ChangeReport, channel?: string | undefined) {
+export function logSummary(report: CR.ChangeReport, channel?: string) {
     const { deps, src } = report;
 
     let summary = `# Change Report (${formatChannel(channel)})\n`;

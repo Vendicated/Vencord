@@ -33,8 +33,8 @@ export async function getClassReport(
         try {
             const changes = await page.evaluate<[CR.ClassMembers], CR.FindFunction<[CR.ClassMembers], CR.ClassChanges>>(
                 pageAsyncFunction("s", `const c = await ${funcToString(find)}.call(Vencord, s);`
-                    + "if (Array.isArray(c) ? c.length > 0 && c.every(isValidClass) : isValidClass(c))"
-                    + "return getClassChanges(c, s);"),
+                    + "if (Array.isArray(c)) { if (c.length > 0 && c.every(isValidClass)) return getClassChanges(s, ...c); }"
+                    + "else if (isValidClass(c)) return getClassChanges(s, c);"),
                 source
             );
             if (changes) {
@@ -52,9 +52,9 @@ export async function getClassReport(
     if (/Store$/.test(name) && !declaration.abstract) {
         try {
             const changes = await page.evaluate<Parameters<typeof autoFindStore>, typeof autoFindStore>(
-                pageFunction("n", "s", "return autoFindStore(n, s);"),
-                name,
-                source
+                pageFunction("s", "n", "return autoFindStore(s, n);"),
+                source,
+                name
             );
             if (changes) {
                 checkClassIgnores(changes, config, report);
@@ -94,7 +94,7 @@ export async function getClassReport(
 }
 
 function getClassMembers(
-    members: TSESTree.ClassElement[],
+    members: readonly TSESTree.ClassElement[],
     config: CR.ClassConfig,
     report: CR.ClassReport
 ): CR.ClassMembers {
@@ -230,14 +230,14 @@ function getClassMemberName(
 }
 
 /** Adds ignored additions so as to not affect `changedCount`. */
-function applyClassIgnoredAdditions(members: Set<string>, ignored?: string[] | undefined) {
+function applyClassIgnoredAdditions(members: Set<string>, ignored?: string[]) {
     if (ignored)
         for (const key of ignored)
             members.add(key);
 }
 
 /** Removes ignored removals so as to not affect `changedCount`. */
-function applyClassIgnoredRemovals(members: Set<string>, ignored?: string[] | boolean | undefined) {
+function applyClassIgnoredRemovals(members: Set<string>, ignored?: string[] | boolean) {
     if (Array.isArray(ignored)) {
         for (const key of ignored)
             members.delete(key);

@@ -23,6 +23,7 @@ export function pageFunction(...args: [string, ...string[]]): any {
     return new Function(...args, `"use strict";${body}`);
 }
 
+// https://github.com/microsoft/TypeScript/issues/36177
 const AsyncFunction: any = async function () {}.constructor;
 
 export function pageAsyncFunction(...args: [string, ...string[]]): any {
