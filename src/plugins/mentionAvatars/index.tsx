@@ -57,7 +57,7 @@ export default definePlugin({
     {
         find: ".ROLE_MENTION)",
         replacement: {
-            match: /.+\.ROLE_MENTION\),.+\i&&\(0,\i\.jsx\)\(\i\.RoleDot,{color:\(0,\i\.\i\).+?\.roleDot,background:.+?(1|0)}\),\i/,
+            match: /children:\[\i&&.{0,50}\.RoleDot.{0,300},\i(?=\])/,
             replace: "$&,$self.renderRoleIcon(arguments[0])"
         }
     }],
