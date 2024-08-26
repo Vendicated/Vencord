@@ -27,11 +27,11 @@ export default definePlugin({
             find: ".Messages.PREVIEW_BYTES_LEFT.format(",
             replacement: {
                 match: /\.footerGap.+?url:\i,fileName:\i,fileSize:\i}\),(?<=fileContents:(\i),bytesLeft:(\i).+?)/g,
-                replace: "$&$self.AddCopyButton({ fileContents: $1, bytesLeft: $2 }),"
+                replace: "$&$self.addCopyButton({fileContents:$1,bytesLeft:$2}),"
             }
         }
     ],
-    AddCopyButton: ErrorBoundary.wrap(({ fileContents, bytesLeft }: { fileContents: string, bytesLeft: number; }) => {
+    addCopyButton: ErrorBoundary.wrap(({ fileContents, bytesLeft }: { fileContents: string, bytesLeft: number; }) => {
         const [recentlyCopied, setRecentlyCopied] = useState(false);
         return (
             <Tooltip text={recentlyCopied ? "Copied!" : bytesLeft > 0 ? "File too large to copy" : "Copy File Contents"}>
