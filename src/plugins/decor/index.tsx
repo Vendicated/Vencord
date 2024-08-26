@@ -91,7 +91,7 @@ export default definePlugin({
             replacement: [
                 // Use Decor avatar decoration hook
                 {
-                    match: /(?<=\i\)\({avatarDecoration:)(\i).avatarDecoration(?=,)/,
+                    match: /(?<=\i\)\({avatarDecoration:)(\i)(?=,)(?<=currentUser:(\i).+?)/,
                     replace: "$self.useUserDecorAvatarDecoration($1)??$&"
                 }
             ]
