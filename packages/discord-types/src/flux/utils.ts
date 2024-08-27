@@ -5,27 +5,27 @@
  */
 
 import type { Nullish } from "../internal";
-import type { FluxStore } from "./abstract/FluxStore";
+import type { Store } from "./Store";
 
 // For createFetchStore
 export type FetchStoreFactory<
-    StoreConstraint extends FluxStore = FluxStore,
+    StoreConstraint extends Store = Store,
     StateConstraint = unknown,
     DependenciesConstraint extends readonly unknown[] = readonly unknown[],
     IsLoadingConstraint extends boolean = boolean
 > = <
-    Store extends StoreConstraint,
+    S extends StoreConstraint,
     State extends StateConstraint,
     Dependencies extends DependenciesConstraint,
     IsLoading extends IsLoadingConstraint
 >(
-    store: Store,
+    store: S,
     options: {
         dangerousAbortOnCleanup?: boolean | undefined /* = false */;
         get: (...dependencies: Dependencies) => State;
         getIsLoading: (...dependencies: Dependencies) => IsLoading;
         load: (signal: AbortSignal, ...dependencies: Dependencies) => Promise<void>;
-        useStateHook: StoreStateHook<[Store], State, Dependencies>;
+        useStateHook: StoreStateHook<[S], State, Dependencies>;
     }
 ) => (...dependencies: Dependencies) => {
     data: State;
@@ -35,7 +35,7 @@ export type FetchStoreFactory<
 
 // For useStateFromStores
 export type StoreStateHook<
-    Stores extends readonly FluxStore[] = readonly FluxStore[],
+    Stores extends readonly Store[] = readonly Store[],
     StateConstraint = unknown,
     Dependencies extends readonly unknown[] | Nullish = readonly unknown[] | Nullish
 > = <State extends StateConstraint>(
@@ -51,7 +51,7 @@ export type StoreStateHook<
 
 // For useStateFromStoresObject
 export type StoreObjectStateHook<
-    Stores extends readonly FluxStore[] = readonly FluxStore[],
+    Stores extends readonly Store[] = readonly Store[],
     StateConstraint extends {} = {},
     Dependencies extends readonly unknown[] | Nullish = readonly unknown[] | Nullish
 > = <State extends StateConstraint>(
@@ -64,7 +64,7 @@ export type StoreObjectStateHook<
 
 // For useStateFromStoresArray
 export type StoreArrayStateHook<
-    Stores extends readonly FluxStore[] = readonly FluxStore[],
+    Stores extends readonly Store[] = readonly Store[],
     StateConstraint extends readonly unknown[] = readonly unknown[],
     Dependencies extends readonly unknown[] | Nullish = readonly unknown[] | Nullish
 > = <State extends StateConstraint>(

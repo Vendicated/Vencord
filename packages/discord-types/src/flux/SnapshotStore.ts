@@ -4,29 +4,28 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { FluxActionHandlerMap } from "../../flux/FluxActionHandlersGraph";
-import type { GenericConstructor } from "../../internal";
-import type { FluxStore } from "./FluxStore";
+import type { GenericConstructor } from "../internal";
+import type { ActionHandlerMap } from "./ActionHandlersGraph";
+import type { Store } from "./Store";
 
-export interface FluxSnapshot<SnapshotData = unknown> {
+export interface SnapshotStoreSnapshot<SnapshotData = unknown> {
     data: SnapshotData;
     version: number;
 }
 
-// Original name: SnapshotStore
-export declare abstract class FluxSnapshotStore<
+export declare abstract class SnapshotStore<
     Constructor extends GenericConstructor = GenericConstructor,
     SnapshotData = unknown
-> extends FluxStore {
+> extends Store {
     constructor(
-        actionHandlers: Partial<FluxActionHandlerMap>
+        actionHandlers: Partial<ActionHandlerMap>
             & Partial<Record<"CLEAR_CACHES" | "WRITE_CACHES", never>>
     );
 
-    static allStores: FluxSnapshotStore[];
+    static allStores: SnapshotStore[];
     static clearAll(): void;
     /**
-     * Not present on {@link FluxSnapshotStore}'s constructor.
+     * Not present on {@link SnapshotStore}'s constructor.
      * All subclasses are required to define their own.
      */
     static displayName: string;
@@ -36,5 +35,5 @@ export declare abstract class FluxSnapshotStore<
     get persistKey(): string;
     readSnapshot(version: number): SnapshotData | null;
     save(): void;
-    abstract takeSnapshot(): FluxSnapshot<SnapshotData>;
+    abstract takeSnapshot(): SnapshotStoreSnapshot<SnapshotData>;
 }

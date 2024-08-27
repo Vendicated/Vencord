@@ -20,11 +20,11 @@ import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatB
 import { generateId, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
-import { DraftType, type FluxStore, type MessageAttachment } from "@vencord/discord-types";
+import { DraftType, type MessageAttachment, type Store } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { DraftStore, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
 
-const UploadAttachmentStore: FluxStore & Record<string, any> = findStoreLazy("UploadAttachmentStore");
+const UploadAttachmentStore: Store & Record<string, any> = findStoreLazy("UploadAttachmentStore");
 
 const getDraft = (channelId: string) => DraftStore.getDraft(channelId, DraftType.CHANNEL_MESSAGE);
 

@@ -5,8 +5,8 @@
  */
 
 import type { Nullish, Optional, SnakeCasedProperties } from "../internal";
-import type { ImmutableRecord } from "./ImmutableRecord";
 import type { IconSource } from "./misc";
+import type { RecordBase } from "./RecordBase";
 
 export type UserRecordOwnProperties = Pick<UserRecord, "avatar" | "avatarDecorationData" | "banner" | "bot" | "clan" | "desktop" | "discriminator" | "email" | "flags" | "globalName" | "guildMemberAvatars" | "hasAnyStaffLevel" | "hasBouncedEmail" | "hasFlag" | "id" | "isStaff" | "isStaffPersonal" | "mfaEnabled" | "mobile" | "nsfwAllowed" | "personalConnectionId" | "phone" | "premiumType" | "premiumUsageFlags" | "publicFlags" | "purchasedFlags" | "system" | "username" | "verified">;
 
@@ -18,7 +18,7 @@ export type UserProperties = Optional<Omit<UserRecordOwnProperties, "avatarDecor
 
 export declare class UserRecord<
     OwnProperties extends UserRecordOwnProperties = UserRecordOwnProperties
-> extends ImmutableRecord<OwnProperties> {
+> extends RecordBase<OwnProperties> {
     constructor(userProperties: UserProperties);
 
     addGuildAvatarHash(guildId: string, avatarHash: string): this;

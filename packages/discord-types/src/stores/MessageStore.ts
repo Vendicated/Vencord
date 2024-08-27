@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Store } from "../flux/Store";
 import type { ChannelMessages } from "../general/messages/ChannelMessages";
 import type { MessageRecord } from "../general/messages/MessageRecord";
 import type { Nullish } from "../internal";
-import type { FluxStore } from "./abstract/FluxStore";
 
-export declare class MessageStore extends FluxStore {
+export declare class MessageStore extends Store {
     static displayName: "MessageStore";
 
     focusedMessageId(channelId: string): string | undefined;

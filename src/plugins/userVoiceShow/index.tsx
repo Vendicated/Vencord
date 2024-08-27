@@ -20,13 +20,13 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import type { FluxStore, UserRecord } from "@vencord/discord-types";
+import type { Store, UserRecord } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
 
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
 
-const VoiceStateStore: FluxStore & Record<string, any> = findStoreLazy("VoiceStateStore");
+const VoiceStateStore: Store & Record<string, any> = findStoreLazy("VoiceStateStore");
 
 const settings = definePluginSettings({
     showInUserProfileModal: {

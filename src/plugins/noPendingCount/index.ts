@@ -19,10 +19,10 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import type { FluxSnapshotStore } from "@vencord/discord-types";
+import type { SnapshotStore } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 
-const MessageRequestStore: FluxSnapshotStore & Record<string, any> = findStoreLazy("MessageRequestStore");
+const MessageRequestStore: SnapshotStore & Record<string, any> = findStoreLazy("MessageRequestStore");
 
 const settings = definePluginSettings({
     hideFriendRequestsCount: {

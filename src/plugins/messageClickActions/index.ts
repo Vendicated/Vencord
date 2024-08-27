@@ -20,11 +20,11 @@ import { addClickListener, removeClickListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { type FluxStore, MessageFlags, type MessageRecord } from "@vencord/discord-types";
+import { MessageFlags, type MessageRecord, type Store } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { FluxDispatcher, MessageActionCreators, Permissions, PermissionStore, UserStore } from "@webpack/common";
 
-const EditMessageStore: FluxStore & Record<string, any> = findStoreLazy("EditMessageStore");
+const EditMessageStore: Store & Record<string, any> = findStoreLazy("EditMessageStore");
 
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);

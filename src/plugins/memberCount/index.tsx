@@ -23,22 +23,22 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import type { FluxStore } from "@vencord/discord-types";
+import type { Store } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 
 import { MemberCount } from "./MemberCount";
 
-export const GuildMemberCountStore: FluxStore & {
+export const GuildMemberCountStore: Store & {
     getMemberCount: (guildId?: string | null | undefined) => number | null | undefined;
 } = findStoreLazy("GuildMemberCountStore");
 
-export const ChannelMemberStore: FluxStore & {
+export const ChannelMemberStore: Store & {
     getProps: (guildId: string, channelId?: string | null | undefined) => {
         groups: { count: number; id: string; }[];
     };
 } = findStoreLazy("ChannelMemberStore");
 
-export const ThreadMemberListStore: FluxStore & {
+export const ThreadMemberListStore: Store & {
     getMemberListSections: (channelId: string) => {
         [sectionId: string]: { sectionId: string; userIds: string[]; };
     };

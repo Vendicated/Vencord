@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import type { FluxPersistedStore, FluxSnapshotStore } from "@vencord/discord-types";
+import type { PersistedStore, SnapshotStore } from "@vencord/discord-types";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher, i18n, useMemo } from "@webpack/common";
 
@@ -32,8 +32,8 @@ enum FolderIconDisplay {
 }
 
 const GuildsTree = findLazy(m => m.prototype?.moveNextTo);
-const SortedGuildStore: FluxSnapshotStore & Record<string, any> = findStoreLazy("SortedGuildStore");
-export const ExpandedGuildFolderStore: FluxPersistedStore & Record<string, any> = findStoreLazy("ExpandedGuildFolderStore");
+const SortedGuildStore: SnapshotStore & Record<string, any> = findStoreLazy("SortedGuildStore");
+export const ExpandedGuildFolderStore: PersistedStore & Record<string, any> = findStoreLazy("ExpandedGuildFolderStore");
 const GuildActionCreators = findByPropsLazy("move", "toggleGuildFolderExpand");
 
 let lastGuildId: string | null = null;

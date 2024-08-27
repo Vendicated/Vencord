@@ -32,13 +32,13 @@ export default {
         },
     },
     src: {
-        "./flux/FluxActionHandlersGraph.ts": {
-            FluxActionHandlersGraph: {
+        "./flux/ActionHandlersGraph.ts": {
+            ActionHandlersGraph: {
                 type: "class",
             },
         },
-        "./flux/FluxActionLog.ts": {
-            FluxActionLog: {
+        "./flux/ActionLog.ts": {
+            ActionLog: {
                 type: "class",
                 find() {
                     return this.Webpack.Common.FluxDispatcher.actionLogger.log(
@@ -48,26 +48,26 @@ export default {
                 },
             },
         },
-        "./flux/FluxActionLogger.ts": {
-            FluxActionLogger: {
+        "./flux/ActionLogger.ts": {
+            ActionLogger: {
                 type: "class",
             },
         },
-        "./flux/FluxBatchedStoreListener.ts": {
-            FluxBatchedStoreListener: {
+        "./flux/BatchedStoreListener.ts": {
+            BatchedStoreListener: {
                 type: "class",
             },
         },
-        "./flux/FluxChangeListeners.ts": {
-            FluxChangeListeners: {
+        "./flux/ChangeListeners.ts": {
+            ChangeListeners: {
                 type: "class",
             },
         },
-        "./flux/FluxDispatcher.ts": {
-            FluxDispatcher: {
+        "./flux/Dispatcher.ts": {
+            Dispatcher: {
                 type: "class",
             },
-            FluxDispatchBand: {
+            DispatchBand: {
                 type: "enum",
                 // Screaming snake case to pascal case (source enum's keys have no underscores)
                 keyMapper: key => key.replace(/(?<=^.).+/, s => s.toLowerCase()),
@@ -76,9 +76,45 @@ export default {
                 type: "enum",
             },
         },
-        "./flux/FluxEmitter.ts": {
-            FluxEmitter: {
+        "./flux/Emitter.ts": {
+            Emitter: {
                 type: "class",
+            },
+        },
+        "./flux/PersistedStore.ts": {
+            PersistedStore: {
+                type: "class",
+                ignoredAdditions: {
+                    // Overrides
+                    staticMethodsAndFields: ["destroy"],
+                    methods: ["initializeIfNeeded"],
+                },
+            },
+        },
+        "./flux/SnapshotStore.ts": {
+            SnapshotStore: {
+                type: "class",
+                ignoredRemovals: {
+                    // Exists on type to enforce that subclasses have `displayName`
+                    staticMethodsAndFields: ["displayName"],
+                },
+            },
+        },
+        "./flux/Store.ts": {
+            Store: {
+                type: "class",
+            },
+        },
+        "./flux/UserAgnosticStore.ts": {
+            UserAgnosticStore: {
+                type: "class",
+                find() {
+                    return Object.getPrototypeOf(this.Webpack.Common.Flux.DeviceSettingsStore);
+                },
+                ignoredAdditions: {
+                    // Overrides
+                    methods: ["initializeFromState", "initializeIfNeeded", "getState"],
+                },
             },
         },
         "./general/channels/ChannelRecord.ts": {
@@ -253,25 +289,6 @@ export default {
                             }).catch(() => {});
                         });
                     return values[0]?.constructor;
-                },
-            },
-        },
-        "./general/i18n/FormattedMessage.ts": {
-            FormattedMessage: {
-                type: "class",
-            },
-            ASTNodeType: {
-                type: "enum",
-                // Undocumented
-                ignoredRemovals: [["HOOK"]],
-            },
-        },
-        "./general/i18n/Provider.ts": {
-            Provider: {
-                type: "class",
-                find() {
-                    const { constructor } = this.Webpack.Common.i18n._provider;
-                    return [Object.getPrototypeOf(constructor), constructor];
                 },
             },
         },
@@ -531,15 +548,6 @@ export default {
                 type: "enum",
             },
         },
-        "./general/ImmutableRecord.ts": {
-            ImmutableRecord: {
-                type: "class",
-                ignoredRemovals: {
-                    // Exists on type to enforce that subclasses have a valid constructor
-                    constructorDefinition: true,
-                },
-            },
-        },
         "./general/Permissions.ts": {
             /*
             // bigint enums are not yet possible: https://github.com/microsoft/TypeScript/issues/37783
@@ -583,6 +591,15 @@ export default {
                 type: "enum",
             },
         },
+        "./general/RecordBase.ts": {
+            RecordBase: {
+                type: "class",
+                ignoredRemovals: {
+                    // Exists on type to enforce that subclasses have a valid constructor
+                    constructorDefinition: true,
+                },
+            },
+        },
         "./general/Role.ts": {
             RoleFlags: {
                 type: "enum",
@@ -610,39 +627,27 @@ export default {
                 type: "enum",
             },
         },
-        "./stores/abstract/FluxPersistedStore.ts": {
-            FluxPersistedStore: {
+        "./i18n/FormattedMessage.ts": {
+            FormattedMessage: {
                 type: "class",
-                ignoredAdditions: {
-                    // Overrides
-                    staticMethodsAndFields: ["destroy"],
-                    methods: ["initializeIfNeeded"],
-                },
+            },
+            ASTNodeType: {
+                type: "enum",
+                // Undocumented
+                ignoredRemovals: [["HOOK"]],
             },
         },
-        "./stores/abstract/FluxSnapshotStore.ts": {
-            FluxSnapshotStore: {
-                type: "class",
-                ignoredRemovals: {
-                    // Exists on type to enforce that subclasses have `displayName`
-                    staticMethodsAndFields: ["displayName"],
-                },
-            },
-        },
-        "./stores/abstract/FluxStore.ts": {
-            FluxStore: {
+        "./i18n/I18N.ts": {
+            I18N: {
                 type: "class",
             },
         },
-        "./stores/abstract/FluxUserAgnosticStore.ts": {
-            FluxUserAgnosticStore: {
+        "./i18n/Provider.ts": {
+            Provider: {
                 type: "class",
                 find() {
-                    return Object.getPrototypeOf(this.Webpack.Common.Flux.DeviceSettingsStore);
-                },
-                ignoredAdditions: {
-                    // Overrides
-                    methods: ["initializeFromState", "initializeIfNeeded", "getState"],
+                    const { constructor } = this.Webpack.Common.i18n._provider;
+                    return [Object.getPrototypeOf(constructor), constructor];
                 },
             },
         },

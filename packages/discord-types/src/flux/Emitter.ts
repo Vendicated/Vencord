@@ -4,28 +4,27 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { FluxStore } from "../stores/abstract/FluxStore";
+import type { Store } from "./Store";
 
-// Original name: Emitter
-export declare class FluxEmitter {
+export declare class Emitter {
     batched<T>(callback: () => T): T;
     destroy(): void;
     emit(): void;
-    emitNonReactOnce(syncWiths: Set<() => unknown>, changedStores: Set<FluxStore>): void;
+    emitNonReactOnce(syncWiths: Set<() => unknown>, changedStores: Set<Store>): void;
     emitReactOnce(): void;
     getChangeSentinel(): number;
     getIsPaused(): boolean;
     injectBatchEmitChanges(batchEmitChanges: () => unknown): void;
-    markChanged(store: FluxStore): void;
+    markChanged(store: Store): void;
     /** If timeout is omitted, Emitter will pause until resume is called. */
     pause(timeout?: number | undefined): void;
     resume(shouldEmit?: boolean | undefined /* = true */): void;
 
-    changedStores: Set<FluxStore>;
+    changedStores: Set<Store>;
     changeSentinel: number;
     isBatchEmitting: boolean;
     isDispatching: boolean;
     isPaused: boolean;
     pauseTimer: number | null;
-    reactChangedStores: Set<FluxStore>;
+    reactChangedStores: Set<Store>;
 }

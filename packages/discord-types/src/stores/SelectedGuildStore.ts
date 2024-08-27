@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { PersistedStore } from "../flux/PersistedStore";
 import type { GenericConstructor } from "../internal";
-import type { FluxPersistedStore } from "./abstract/FluxPersistedStore";
 
 export interface SelectedGuildStoreState {
     lastSelectedGuildId: string | null;
@@ -16,7 +16,7 @@ export interface SelectedGuildStoreState {
 export declare class SelectedGuildStore<
     Constructor extends GenericConstructor = typeof SelectedGuildStore,
     State extends SelectedGuildStoreState = SelectedGuildStoreState
-> extends FluxPersistedStore<Constructor, State> {
+> extends PersistedStore<Constructor, State> {
     static displayName: "SelectedGuildStore";
     static persistKey: "SelectedGuildStore";
 

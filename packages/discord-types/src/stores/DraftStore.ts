@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { PersistedStore } from "../flux/PersistedStore";
 import type { Draft, DraftForumThreadSettings, DraftNonForumThreadSettings, DraftType } from "../general/Draft";
 import type { GenericConstructor, Nullish } from "../internal";
-import type { FluxPersistedStore } from "./abstract/FluxPersistedStore";
 
 export interface DraftStoreState {
     [userId: string]: { [channelId: string]: { [Type in DraftType]?: Draft<Type>; }; };
@@ -15,7 +15,7 @@ export interface DraftStoreState {
 export declare class DraftStore<
     Constructor extends GenericConstructor = typeof DraftStore,
     State extends DraftStoreState = DraftStoreState
-> extends FluxPersistedStore<Constructor, State> {
+> extends PersistedStore<Constructor, State> {
     static displayName: "DraftStore";
     static persistKey: "DraftStore";
 

@@ -19,7 +19,7 @@
 import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import type { FluxStore } from "@vencord/discord-types";
+import type { Store } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { FluxDispatcher, MessageActionCreators } from "@webpack/common";
 
@@ -53,8 +53,8 @@ interface Track {
     name: string;
 }
 
-const SpotifyStore: FluxStore & Record<string, any> = findStoreLazy("SpotifyStore");
-const PendingReplyStore: FluxStore & Record<string, any> = findStoreLazy("PendingReplyStore");
+const SpotifyStore: Store & Record<string, any> = findStoreLazy("SpotifyStore");
+const PendingReplyStore: Store & Record<string, any> = findStoreLazy("PendingReplyStore");
 
 async function sendMessage(channelId: string, message: { content: string; }) {
     const messageToSend = {

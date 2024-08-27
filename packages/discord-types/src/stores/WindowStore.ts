@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { FluxStore } from "./abstract/FluxStore";
+import type { Store } from "../flux/Store";
 
-export declare class WindowStore extends FluxStore {
+export declare class WindowStore extends Store {
     static displayName: "WindowStore";
 
     getFocusedWindowId(): string | null;

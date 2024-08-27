@@ -6,8 +6,8 @@
 
 import type { Nullish, Optional, PartialOnUndefined, SnakeCasedProperties } from "../internal";
 import type { CompanyRecord } from "./CompanyRecord";
-import type { ImmutableRecord } from "./ImmutableRecord";
 import type { IconSource } from "./misc";
+import type { RecordBase } from "./RecordBase";
 import type { UserRecord } from "./UserRecord";
 
 export type ApplicationRecordOwnProperties = Pick<ApplicationRecord, "aliases" | "bot" | "coverImage" | "description" | "developers" | "embeddedActivityConfig" | "eulaId" | "executables" | "flags" | "guild" | "guildId" | "hashes" | "hook" | "icon" | "id" | "integrationTypesConfig" | "isMonetized" | "maxParticipants" | "name" | "overlay" | "overlayCompatibilityHook" | "overlayMethods" | "overlayWarn" | "primarySkuId" | "privacyPolicyUrl" | "publishers" | "roleConnectionsVerificationUrl" | "slug" | "splash" | "storefront_available" | "storeListingSkuId" | "tags" | "team" | "termsOfServiceUrl" | "thirdPartySkus" | "type">;
@@ -18,7 +18,7 @@ export type ApplicationProperties = Optional<PartialOnUndefined<Omit<Application
 
 export declare class ApplicationRecord<
     OwnProperties extends ApplicationRecordOwnProperties = ApplicationRecordOwnProperties
-> extends ImmutableRecord<OwnProperties> {
+> extends RecordBase<OwnProperties> {
     constructor(applicationProperties: ApplicationProperties);
 
     /** @todo */

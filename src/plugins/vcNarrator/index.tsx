@@ -23,7 +23,7 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType, type PluginOptionsItem, ReporterTestable } from "@utils/types";
-import type { FluxStore } from "@vencord/discord-types";
+import type { Store } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore } from "@webpack/common";
 import type { ReactElement } from "react";
@@ -38,7 +38,7 @@ interface VoiceState {
     selfMute: boolean;
 }
 
-const VoiceStateStore: FluxStore & Record<string, any> = findStoreLazy("VoiceStateStore");
+const VoiceStateStore: Store & Record<string, any> = findStoreLazy("VoiceStateStore");
 
 // Mute/Deaf for other people than you is commented out, because otherwise someone can spam it and it will be annoying
 // Filtering out events is not as simple as just dropping duplicates, as otherwise mute, unmute, mute would

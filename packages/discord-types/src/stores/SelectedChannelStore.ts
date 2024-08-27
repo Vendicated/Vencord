@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Store } from "../flux/Store";
 import type { Nullish } from "../internal";
-import type { FluxStore } from "./abstract/FluxStore";
 
-export declare class SelectedChannelStore extends FluxStore {
+export declare class SelectedChannelStore extends Store {
     static displayName: "SelectedChannelStore";
 
     getChannelId(guildId?: string | Nullish): string | undefined;

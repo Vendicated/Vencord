@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { SnapshotStore, SnapshotStoreSnapshot } from "../flux/SnapshotStore";
 import type { GuildMemberProfile } from "../general/GuildMemberProfile";
 import type { GuildRecord } from "../general/GuildRecord";
 import type { UserProfile } from "../general/UserProfile";
 import type { UserRecord } from "../general/UserRecord";
 import type { GenericConstructor, Nullish } from "../internal";
-import type { FluxSnapshot, FluxSnapshotStore } from "./abstract/FluxSnapshotStore";
 import type { StatusType } from "./PresenceStore";
 
 export interface UserProfileStoreSnapshotData {
@@ -20,7 +20,7 @@ export interface UserProfileStoreSnapshotData {
 export declare class UserProfileStore<
     Constructor extends GenericConstructor = typeof UserProfileStore,
     SnapshotData extends UserProfileStoreSnapshotData = UserProfileStoreSnapshotData
-> extends FluxSnapshotStore<Constructor, SnapshotData> {
+> extends SnapshotStore<Constructor, SnapshotData> {
     constructor();
 
     static displayName: "UserProfileStore";
@@ -43,7 +43,7 @@ export declare class UserProfileStore<
     isFetchingFriends(userId: string): boolean;
     isFetchingProfile(userId: string): boolean;
     get isSubmitting(): boolean;
-    takeSnapshot(): FluxSnapshot<SnapshotData>;
+    takeSnapshot(): SnapshotStoreSnapshot<SnapshotData>;
 
     loadCache: () => void;
 }

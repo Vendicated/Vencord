@@ -22,7 +22,7 @@ import { addServerListElement, removeServerListElement, ServerListRenderPosition
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { type FluxStore, GuildChannelType, ReadStateType, type ThreadChannelRecord } from "@vencord/discord-types";
+import { GuildChannelType, ReadStateType, type Store, type ThreadChannelRecord } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { Button, FluxDispatcher, GuildChannelStore, GuildStore, ReadStateStore } from "@webpack/common";
 
@@ -34,7 +34,7 @@ interface ThreadJoined {
 type ThreadsJoined = Record<string, ThreadJoined>;
 type ThreadsJoinedByParent = Record<string, ThreadsJoined>;
 
-const ActiveJoinedThreadsStore: FluxStore & {
+const ActiveJoinedThreadsStore: Store & {
     getActiveJoinedThreadsForGuild: (guildId: string) => ThreadsJoinedByParent;
 } = findStoreLazy("ActiveJoinedThreadsStore");
 

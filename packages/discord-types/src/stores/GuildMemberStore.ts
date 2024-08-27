@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Store } from "../flux/Store";
 import type { GuildMember } from "../general/GuildMember";
 import type { Nullish } from "../internal";
-import type { FluxStore } from "./abstract/FluxStore";
 
-export declare class GuildMemberStore extends FluxStore {
+export declare class GuildMemberStore extends Store {
     static displayName: "GuildMemberStore";
 
     getCommunicationDisabledUserMap(): { [userId: string]: string; };

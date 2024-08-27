@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { Flux as $Flux } from "@vencord/discord-types";
+import type { FetchStoreFactory, Flux as $Flux, StoreArrayStateHook, StoreObjectStateHook, StoreStateHook, UnequatableStateComparator } from "@vencord/discord-types";
 import type * as Stores from "@vencord/discord-types/src/stores";
 
 // eslint-disable-next-line path-alias/no-relative
@@ -25,7 +25,7 @@ import { waitForStore } from "./internal";
 
 export const Flux: $Flux = findByPropsLazy("connectStores");
 
-export const createFetchStore: Stores.FetchStoreFactory
+export const createFetchStore: FetchStoreFactory
     = findByCodeLazy("dangerousAbortOnCleanup:", "new AbortController");
 
 /**
@@ -38,7 +38,7 @@ export const createFetchStore: Stores.FetchStoreFactory
  *
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
-export const useStateFromStores: Stores.StoreStateHook = findByCodeLazy("useStateFromStores");
+export const useStateFromStores: StoreStateHook = findByCodeLazy("useStateFromStores");
 
 const shallowEqual: (
     a?: {},
@@ -48,7 +48,7 @@ const shallowEqual: (
 ) => boolean = findByCodeLazy('"shallowEqual: unequal key lengths "');
 
 /** @see {@link useStateFromStores} */
-export const useStateFromStoresObject: Stores.StoreObjectStateHook
+export const useStateFromStoresObject: StoreObjectStateHook
     = (a, b, c) => useStateFromStores(a, b, c, shallowEqual);
 
 // shallowEqual.tsx
@@ -56,10 +56,10 @@ const areArraysShallowEqual = (a: readonly unknown[], b?: readonly unknown[] | n
     b != null && a.length === b.length && a.every((x, i) => x === b[i]);
 
 /** @see {@link useStateFromStores} */
-export const useStateFromStoresArray: Stores.StoreArrayStateHook
+export const useStateFromStoresArray: StoreArrayStateHook
     = (a, b, c) => useStateFromStores(a, b, c, areArraysShallowEqual);
 
-export const statesWillNeverBeEqual: Stores.UnequatableStateComparator = () => false;
+export const statesWillNeverBeEqual: UnequatableStateComparator = () => false;
 
 export let ApplicationStore: Stores.ApplicationStore;
 waitForStore("ApplicationStore", m => { ApplicationStore = m; });

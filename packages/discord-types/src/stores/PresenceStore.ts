@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Store } from "../flux/Store";
 import type { Activity } from "../general/Activity";
 import type { Nullish } from "../internal";
-import type { FluxStore } from "./abstract/FluxStore";
 
-export declare class PresenceStore extends FluxStore {
+export declare class PresenceStore extends Store {
     static displayName: "PresenceStore";
 
     findActivity<T extends Activity>(

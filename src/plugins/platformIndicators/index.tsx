@@ -25,7 +25,7 @@ import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { type ClientStatusMap, ClientType, type FluxStore, StatusType, type UserRecord } from "@vencord/discord-types";
+import { type ClientStatusMap, ClientType, StatusType, type Store, type UserRecord } from "@vencord/discord-types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 
@@ -40,7 +40,7 @@ export interface Session {
     };
 }
 
-const SessionsStore: FluxStore & {
+const SessionsStore: Store & {
     getSessions: () => Record<string, Session>;
 } = findStoreLazy("SessionsStore");
 

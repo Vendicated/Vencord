@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Store } from "../flux/Store";
 import type { GuildRecord } from "../general/GuildRecord";
 import type { Role } from "../general/Role";
 import type { Nullish } from "../internal";
-import type { FluxStore } from "./abstract/FluxStore";
 
-export declare class GuildStore extends FluxStore {
+export declare class GuildStore extends Store {
     static displayName: "GuildStore";
 
     getAllGuildsRoles(): { [guildId: string]: { [roleId: string]: Role; }; };

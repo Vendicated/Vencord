@@ -4,29 +4,34 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { FluxPersistedStore } from "../stores/abstract/FluxPersistedStore";
-import type { FluxStore } from "../stores/abstract/FluxStore";
-import type { FluxUserAgnosticStore } from "../stores/abstract/FluxUserAgnosticStore";
-import type { FluxEmitter } from "./FluxEmitter";
+import type { Emitter } from "./Emitter";
+import type { PersistedStore } from "./PersistedStore";
+import type { Store } from "./Store";
+import type { UserAgnosticStore } from "./UserAgnosticStore";
 
-export * from "./FluxActionHandlersGraph";
-export * from "./FluxActionLog";
-export * from "./FluxActionLogger";
-export * from "./fluxActions";
-export * from "./FluxBatchedStoreListener";
-export * from "./FluxChangeListeners";
-export * from "./FluxDispatcher";
-export * from "./FluxEmitter";
+export * from "./ActionHandlersGraph";
+export * from "./ActionLog";
+export * from "./ActionLogger";
+export * from "./actions";
+export * from "./BatchedStoreListener";
+export * from "./ChangeListeners";
+export * from "./Dispatcher";
+export * from "./Emitter";
+export * from "./PersistedStore";
+export * from "./SnapshotStore";
+export * from "./Store";
+export * from "./UserAgnosticStore";
+export * from "./utils";
 
 export interface Flux {
-    get initialized(): typeof FluxStore["initialized"];
+    get initialized(): typeof Store["initialized"];
 
     /** @todo */
     connectStores: (a?: any, b?: any, c?: any) => (a?: any) => any;
-    DeviceSettingsStore: typeof FluxUserAgnosticStore;
-    Emitter: FluxEmitter;
-    initialize: typeof FluxStore["initialize"];
-    OfflineCacheStore: typeof FluxUserAgnosticStore;
-    PersistedStore: typeof FluxPersistedStore;
-    Store: typeof FluxStore;
+    DeviceSettingsStore: typeof UserAgnosticStore;
+    Emitter: Emitter;
+    initialize: typeof Store["initialize"];
+    OfflineCacheStore: typeof UserAgnosticStore;
+    PersistedStore: typeof PersistedStore;
+    Store: typeof Store;
 }

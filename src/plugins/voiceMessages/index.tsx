@@ -27,7 +27,7 @@ import { ModalContent, ModalFooter, ModalHeader, type ModalProps, ModalRoot, ope
 import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
-import { type ChannelRecord, type FluxStore, MessageFlags, MessageType } from "@vencord/discord-types";
+import { type ChannelRecord, MessageFlags, MessageType, type Store } from "@vencord/discord-types";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActionCreators, Permissions, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import type { ComponentType } from "react";
@@ -39,7 +39,7 @@ import { VoicePreview } from "./VoicePreview";
 import { VoiceRecorderWeb } from "./WebRecorder";
 
 const CloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
-const PendingReplyStore: FluxStore & Record<string, any> = findStoreLazy("PendingReplyStore");
+const PendingReplyStore: Store & Record<string, any> = findStoreLazy("PendingReplyStore");
 const OptionClasses: Record<string, string> = findByPropsLazy("optionName", "optionIcon", "optionLabel");
 
 export type VoiceRecorder = ComponentType<{

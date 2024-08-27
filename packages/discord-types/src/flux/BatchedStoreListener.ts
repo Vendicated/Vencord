@@ -5,17 +5,16 @@
  */
 
 import type { Stringable } from "../internal";
-import type { FluxStore } from "../stores/abstract/FluxStore";
+import type { Store } from "./Store";
 
-// Original name: BatchedStoreListener
-export declare class FluxBatchedStoreListener {
-    constructor(stores: FluxStore[], changeCallback: () => void);
+export declare class BatchedStoreListener {
+    constructor(stores: Store[], changeCallback: () => void);
 
     attach(debugName?: Stringable): void;
     detach(): void;
 
     changeCallback: () => void;
     handleStoreChange: () => void;
-    stores: FluxStore[];
+    stores: Store[];
     storeVersionHandled: number | undefined;
 }

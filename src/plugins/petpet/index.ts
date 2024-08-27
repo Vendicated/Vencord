@@ -20,7 +20,7 @@ import { ApplicationCommandInputType, type Argument, type CommandContext, findOp
 import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
-import { ApplicationCommandOptionType, DraftType, type FluxStore } from "@vencord/discord-types";
+import { ApplicationCommandOptionType, DraftType, type Store } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { promptToUpload, UploadAttachmentActionCreators, UserActionCreators } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
@@ -36,7 +36,7 @@ const getFrames = makeLazy(() => {
     return Promise.all(frames);
 });
 
-const UploadAttachmentStore: FluxStore & Record<string, any> = findStoreLazy("UploadAttachmentStore");
+const UploadAttachmentStore: Store & Record<string, any> = findStoreLazy("UploadAttachmentStore");
 
 function loadImage(source: File | string) {
     const isFile = source instanceof File;

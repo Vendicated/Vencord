@@ -6,7 +6,7 @@
 
 import type { EventEmitter } from "events";
 
-import type { Nullish } from "../../internal";
+import type { Nullish } from "../internal";
 import type { FormattedMessage } from "./FormattedMessage";
 import type { I18NMessages } from "./I18NMessages";
 import type { Provider, ProviderParsedMessagesGetter } from "./Provider";

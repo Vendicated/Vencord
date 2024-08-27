@@ -23,19 +23,19 @@ import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { DraftType, type Emoji, EmojiIntention, EmojiType, type FluxPersistedStore, type FluxStore, type MessageAttachment, type MessageEmbed, type MessageRecord, type Sticker, StickerFormat, UserPremiumType } from "@vencord/discord-types";
+import { DraftType, type Emoji, EmojiIntention, EmojiType, type MessageAttachment, type MessageEmbed, type MessageRecord, type PersistedStore, type Sticker, StickerFormat, type Store, UserPremiumType } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
 import { AlertActionCreators, ChannelStore, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, MarkupUtils, Permissions, PermissionStore, promptToUpload, UserSettingsProtoActionCreators, UserStore } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
-const StickerStore: FluxStore & {
+const StickerStore: Store & {
     getPremiumPacks: () => StickerPack[];
     getAllGuildStickers: () => Map<string, Sticker[]>;
     getStickerById: (id: string) => Sticker | undefined;
 } = findStoreLazy("StickersStore");
 
-const UserSettingsProtoStore: FluxPersistedStore & Record<string, any> = findStoreLazy("UserSettingsProtoStore");
+const UserSettingsProtoStore: PersistedStore & Record<string, any> = findStoreLazy("UserSettingsProtoStore");
 
 const BINARY_READ_OPTIONS = findByPropsLazy("readerFactory");
 

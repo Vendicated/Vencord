@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { SnapshotStore, SnapshotStoreSnapshot } from "../flux/SnapshotStore";
 import type { UserRecord } from "../general/UserRecord";
 import type { GenericConstructor, Nullish } from "../internal";
-import type { FluxSnapshot, FluxSnapshotStore } from "./abstract/FluxSnapshotStore";
 
 export interface UserStoreSnapshotData {
     users: [UserRecord?];
@@ -15,7 +15,7 @@ export interface UserStoreSnapshotData {
 export declare class UserStore<
     Constructor extends GenericConstructor = typeof UserStore,
     SnapshotData extends UserStoreSnapshotData = UserStoreSnapshotData
-> extends FluxSnapshotStore<Constructor, SnapshotData> {
+> extends SnapshotStore<Constructor, SnapshotData> {
     constructor();
 
     static displayName: "UserStore";
@@ -44,5 +44,5 @@ export declare class UserStore<
         users: readonly any[] | Nullish;
     }): void;
     initialize(): void;
-    takeSnapshot(): FluxSnapshot<SnapshotData>;
+    takeSnapshot(): SnapshotStoreSnapshot<SnapshotData>;
 }

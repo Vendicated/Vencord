@@ -18,7 +18,7 @@
 
 import type { Command } from "@api/Commands";
 import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import type { FluxActionHandlerMap } from "@vencord/discord-types";
+import type { ActionHandlerMap } from "@vencord/discord-types";
 import type { ComponentType, FunctionComponent } from "react";
 import type Electron from "standalone-electron-types";
 import type { Promisable } from "type-fest";
@@ -129,7 +129,7 @@ export interface PluginDef {
     /**
      * Allows you to subscribe to Flux actions
      */
-    flux?: Partial<FluxActionHandlerMap>;
+    flux?: Partial<ActionHandlerMap>;
     /**
      * Allows you to manipulate context menus
      */

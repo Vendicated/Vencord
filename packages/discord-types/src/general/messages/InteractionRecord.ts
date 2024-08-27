@@ -5,7 +5,7 @@
  */
 
 import type { Nullish } from "../../internal";
-import type { ImmutableRecord } from "../ImmutableRecord";
+import type { RecordBase } from "../RecordBase";
 import type { UserRecord } from "../UserRecord";
 
 export type InteractionRecordOwnProperties = Pick<InteractionRecord, "displayName" | "id" | "name" | "type" | "user">;
@@ -15,7 +15,7 @@ export type InteractionProperties = Omit<InteractionRecordOwnProperties, "displa
 
 export declare class InteractionRecord<
     OwnProperties extends InteractionRecordOwnProperties = InteractionRecordOwnProperties
-> extends ImmutableRecord<OwnProperties> {
+> extends RecordBase<OwnProperties> {
     constructor(interaction: InteractionProperties);
 
     static createFromServer(

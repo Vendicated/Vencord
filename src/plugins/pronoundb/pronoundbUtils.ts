@@ -21,14 +21,14 @@ import { debounce } from "@shared/debounce";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { getCurrentChannel } from "@utils/discord";
 import { useAwaiter } from "@utils/react";
-import type { FluxStore } from "@vencord/discord-types";
+import type { Store } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { UserProfileStore, UserStore } from "@webpack/common";
 
 import { settings } from "./settings";
 import { type CachePronouns, type PronounCode, PronounMapping, type PronounsResponse } from "./types";
 
-const UserSettingsAccountStore: FluxStore & Record<string, any> = findStoreLazy("UserSettingsAccountStore");
+const UserSettingsAccountStore: Store & Record<string, any> = findStoreLazy("UserSettingsAccountStore");
 
 type PronounsWithSource = [pronouns: string | null, source: string, hasPendingPronouns: boolean];
 const EmptyPronouns: PronounsWithSource = [null, "", false];

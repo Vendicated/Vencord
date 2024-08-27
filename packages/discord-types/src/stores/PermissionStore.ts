@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Store } from "../flux/Store";
 import type { ChannelRecord } from "../general/channels/ChannelRecord";
 import type { GuildRecord } from "../general/GuildRecord";
 import type { PermissionOverwriteMap } from "../general/Permissions";
 import type { Role } from "../general/Role";
 import type { UserRecord } from "../general/UserRecord";
 import type { Nullish } from "../internal";
-import type { FluxStore } from "./abstract/FluxStore";
 
-export declare class PermissionStore extends FluxStore {
+export declare class PermissionStore extends Store {
     static displayName: "PermissionStore";
 
     /** Always returns false for private (non-guild) channels. */

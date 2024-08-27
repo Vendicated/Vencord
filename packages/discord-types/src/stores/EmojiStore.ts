@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { PersistedStore } from "../flux/PersistedStore";
 import type { ChannelRecord } from "../general/channels/ChannelRecord";
 import type { Emoji, GuildEmoji } from "../general/emojis/Emoji";
 import type { EmojiDisambiguations } from "../general/emojis/EmojiDisambiguations";
 import type { GuildEmojis } from "../general/emojis/GuildEmojis";
 import type { Frecency } from "../general/Frecency";
 import type { GenericConstructor, Nullish } from "../internal";
-import type { FluxPersistedStore } from "./abstract/FluxPersistedStore";
 
 export interface EmojiStoreState {
     emojiReactionPendingUsages: EmojiUsage[];
@@ -26,7 +26,7 @@ export interface EmojiUsage {
 export declare class EmojiStore<
     Constructor extends GenericConstructor = typeof EmojiStore,
     State extends EmojiStoreState = EmojiStoreState
-> extends FluxPersistedStore<Constructor, State> {
+> extends PersistedStore<Constructor, State> {
     static displayName: "EmojiStore";
     static persistKey: "EmojiStoreV2";
 

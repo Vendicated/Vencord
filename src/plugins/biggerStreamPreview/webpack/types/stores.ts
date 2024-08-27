@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { FluxStore } from "@vencord/discord-types";
+import type { Store } from "@vencord/discord-types";
 
-export interface ApplicationStreamPreviewStore extends FluxStore {
+export interface ApplicationStreamPreviewStore extends Store {
     getIsPreviewLoading: (guildId: string | null | undefined, channelId: string, ownerId: string) => boolean;
     getPreviewURL: (guildId: string | null | undefined, channelId: string, ownerId: string) => string | null;
     getPreviewURLForStreamKey: (streamKey: string) => ReturnType<ApplicationStreamPreviewStore["getPreviewURL"]>;
@@ -57,7 +57,7 @@ export interface StreamingStoreState {
 /**
  * example how a stream key could look like: `call(type of connection):1116549917987192913(channelId):305238513941667851(ownerId)`
  */
-export interface ApplicationStreamingStore extends FluxStore {
+export interface ApplicationStreamingStore extends Store {
     getActiveStreamForApplicationStream: (stream: ApplicationStream) => Stream | null;
     getActiveStreamForStreamKey: (streamKey: string) => Stream | null;
     getActiveStreamForUser: (userId: string, guildId?: string | null) => Stream | null;

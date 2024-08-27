@@ -16,15 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { ChannelMessages as $ChannelMessages, ChannelRecord, DraftType, FluxDispatcher as $FluxDispatcher, FormattedMessage as $FormattedMessage, I18N, MessageFactory, UserRecord } from "@vencord/discord-types";
+import type { ChannelMessages as $ChannelMessages, ChannelRecord, Dispatcher, DraftType, FormattedMessage as $FormattedMessage, I18N, MessageFactory, UserRecord } from "@vencord/discord-types";
 import type { ReactNode } from "react";
 
 // eslint-disable-next-line path-alias/no-relative
 import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
-export let FluxDispatcher: $FluxDispatcher;
-waitFor(["dispatch", "subscribe"], (m: $FluxDispatcher) => {
+export let FluxDispatcher: Dispatcher;
+waitFor(["dispatch", "subscribe"], (m: Dispatcher) => {
     FluxDispatcher = m;
     // Non import call to avoid circular dependency
     Vencord.Plugins.subscribeAllPluginsFluxActions(m);

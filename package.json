@@ -51,7 +51,7 @@
         "@types/diff": "^5.2.1",
         "@types/html-minifier-terser": "^7.0.2",
         "@types/lodash": "~4.17.7",
-        "@types/node": "^18.19.45",
+        "@types/node": "^18.19.46",
         "@types/react": "~18.2.79",
         "@types/react-dom": "~18.2.25",
         "@types/yazl": "^2.4.5",
@@ -68,7 +68,7 @@
         "highlight.js": "11.8.0",
         "html-minifier-terser": "^7.2.0",
         "moment": "2.22.2",
-        "puppeteer-core": "^23.1.1",
+        "puppeteer-core": "^23.2.0",
         "standalone-electron-types": "^1.0.0",
         "stylelint": "^16.8.2",
         "stylelint-config-standard": "^36.0.1",
@@ -76,11 +76,11 @@
         "tsx": "^4.18.0",
         "type-fest": "^4.25.0",
         "typescript": "^5.5.4",
-        "typescript-eslint": "^8.2.0",
+        "typescript-eslint": "^8.3.0",
         "typescript-transform-paths": "^3.5.0",
         "zip-local": "^0.3.5"
     },
-    "packageManager": "pnpm@9.8.0",
+    "packageManager": "pnpm@9.9.0",
     "pnpm": {
         "patchedDependencies": {
             "@stylistic/eslint-plugin-js@2.6.4": "patches/@stylistic__eslint-plugin-js@2.6.4.patch",

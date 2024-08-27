@@ -22,7 +22,7 @@ import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind } from "@utils/patches";
 import { type Patch, type Plugin, ReporterTestable, StartAt } from "@utils/types";
-import type { FluxActionType } from "@vencord/discord-types";
+import type { ActionType, Dispatcher } from "@vencord/discord-types";
 import { FluxDispatcher } from "@webpack/common";
 
 import Plugins from "~plugins";
@@ -167,13 +167,13 @@ export function startDependenciesRecursive(plugin: Plugin) {
     return { restartNeeded, failures };
 }
 
-export function subscribePluginFluxActions(plugin: Plugin, fluxDispatcher: typeof FluxDispatcher) {
+export function subscribePluginFluxActions(plugin: Plugin, fluxDispatcher: Dispatcher) {
     if (plugin.flux && !subscribedFluxActionsPlugins.has(plugin.name) && (!IS_REPORTER || isReporterTestable(plugin, ReporterTestable.FluxActions))) {
         subscribedFluxActionsPlugins.add(plugin.name);
 
         logger.debug("Subscribing to Flux actions of plugin", plugin.name);
         for (const [action, handler] of Object.entries(plugin.flux)) {
-            const wrappedHandler = plugin.flux[action as FluxActionType] = function () {
+            const wrappedHandler = plugin.flux[action as ActionType] = function () {
                 try {
                     // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
                     const res = handler.apply(plugin, arguments as any);
@@ -186,23 +186,23 @@ export function subscribePluginFluxActions(plugin: Plugin, fluxDispatcher: typeo
                 }
             };
 
-            fluxDispatcher.subscribe(action as FluxActionType, wrappedHandler);
+            fluxDispatcher.subscribe(action as ActionType, wrappedHandler);
         }
     }
 }
 
-export function unsubscribePluginFluxActions(plugin: Plugin, fluxDispatcher: typeof FluxDispatcher) {
+export function unsubscribePluginFluxActions(plugin: Plugin, fluxDispatcher: Dispatcher) {
     if (plugin.flux) {
         subscribedFluxActionsPlugins.delete(plugin.name);
 
         logger.debug("Unsubscribing from Flux action of plugin", plugin.name);
         for (const [action, handler] of Object.entries(plugin.flux)) {
-            fluxDispatcher.unsubscribe(action as FluxActionType, handler);
+            fluxDispatcher.unsubscribe(action as ActionType, handler);
         }
     }
 }
 
-export function subscribeAllPluginsFluxActions(fluxDispatcher: typeof FluxDispatcher) {
+export function subscribeAllPluginsFluxActions(fluxDispatcher: Dispatcher) {
     enabledPluginsSubscribedFlux = true;
 
     for (const name in Plugins) {

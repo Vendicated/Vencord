@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Store } from "../flux/Store";
 import type { GuildChannelRecord } from "../general/channels/ChannelRecord";
 import type { GuildRecord } from "../general/GuildRecord";
 import type { ChannelIdReadStateType, GuildChannelOverride, GuildIdReadStateType, ReadState, ReadStateSnapshot, ReadStateType, SerializedReadState, UserIdReadStateType } from "../general/ReadState";
 import type { Nullish } from "../internal";
-import type { FluxStore } from "./abstract/FluxStore";
 import type { BasicPermissionsObject } from "./PermissionStore";
 
-export declare class ReadStateStore extends FluxStore {
+export declare class ReadStateStore extends Store {
     static displayName: "ReadStateStore";
 
     ackMessageId(id: string, type?: ReadStateType | undefined /* = ReadStateType.CHANNEL */): string | null;

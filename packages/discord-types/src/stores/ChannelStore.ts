@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Store } from "../flux/Store";
 import type { ChannelRecord, GuildChannelRecord } from "../general/channels/ChannelRecord";
 import type { DMChannelRecord, PrivateChannelRecord } from "../general/channels/PrivateChannelRecord";
 import type { ThreadChannelRecord } from "../general/channels/ThreadChannelRecord";
 import type { Nullish } from "../internal";
-import type { FluxStore } from "./abstract/FluxStore";
 
-export declare class ChannelStore extends FluxStore {
+export declare class ChannelStore extends Store {
     static displayName: "ChannelStore";
 
     getAllThreadsForParent(channelId: string): ThreadChannelRecord[];

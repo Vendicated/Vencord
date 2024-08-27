@@ -19,14 +19,14 @@
 import { DataStore, Notices } from "@api/index";
 import { showNotification } from "@api/Notifications";
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
-import { type FluxStore, RelationshipType } from "@vencord/discord-types";
+import { RelationshipType, type Store } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore, IconUtils, RelationshipStore, UserActionCreators, UserStore } from "@webpack/common";
 
 import settings from "./settings";
 import type { SimpleGroupDMChannel, SimpleGuild } from "./types";
 
-export const GuildAvailabilityStore: FluxStore & {
+export const GuildAvailabilityStore: Store & {
     totalGuilds: number;
     totalUnavailableGuilds: number;
     unavailableGuilds: string[];

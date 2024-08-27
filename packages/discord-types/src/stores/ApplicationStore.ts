@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Store } from "../flux/Store";
 import type { ApplicationRecord, ApplicationType } from "../general/ApplicationRecord";
 import type { Nullish } from "../internal";
-import type { FluxStore } from "./abstract/FluxStore";
 
-export declare class ApplicationStore extends FluxStore {
+export declare class ApplicationStore extends Store {
     static displayName: "ApplicationStore";
 
     _getAllApplications(): ApplicationRecord[];

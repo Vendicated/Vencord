@@ -21,7 +21,7 @@ import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { type Activity, type ActivityAssets, ActivityFlags, ActivityType, type FluxStore } from "@vencord/discord-types";
+import { type Activity, type ActivityAssets, ActivityFlags, ActivityType, type Store } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
@@ -52,7 +52,7 @@ const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
 
 const logger = new Logger("LastFMRichPresence");
 
-const SelfPresenceStore: FluxStore & Record<string, any> = findStoreLazy("SelfPresenceStore");
+const SelfPresenceStore: Store & Record<string, any> = findStoreLazy("SelfPresenceStore");
 
 const getApplicationAsset = async (key: string) =>
     (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0]!;

@@ -8,7 +8,7 @@ import type MessageFormat from "intl-messageformat";
 import type { ReactElement, ReactNode } from "react";
 import type { State } from "simple-markdown";
 
-import type { IsAny, IsDomainFinite, Stringable, StringProperties, UnionToIntersection } from "../../internal";
+import type { IsAny, IsDomainFinite, Stringable, StringProperties, UnionToIntersection } from "../internal";
 
 export type FormattedMessageArgs = RecordArgs | TupleArgs | string | number;
 

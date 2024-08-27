@@ -17,8 +17,8 @@
 */
 
 import { classNameFactory } from "@api/Styles";
-import type { FluxStore } from "@vencord/discord-types";
+import type { Store } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 
-export const MediaEngineStore: FluxStore & Record<string, any> = findStoreLazy("MediaEngineStore");
+export const MediaEngineStore: Store & Record<string, any> = findStoreLazy("MediaEngineStore");
 export const cl = classNameFactory("vc-vmsg-");

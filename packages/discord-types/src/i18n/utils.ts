@@ -6,7 +6,7 @@
 
 import type { ParserRules } from "simple-markdown";
 
-import type { Nullish } from "../../internal";
+import type { Nullish } from "../internal";
 import type { FormattedMessage, FormattedMessageArgs } from "./FormattedMessage";
 
 // For getSystemLocale

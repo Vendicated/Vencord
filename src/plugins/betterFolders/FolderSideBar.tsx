@@ -17,14 +17,14 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import type { FluxStore } from "@vencord/discord-types";
+import type { Store } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { useStateFromStores } from "@webpack/common";
 import type { CSSProperties } from "react";
 
 import { ExpandedGuildFolderStore, settings } from ".";
 
-const ChannelRTCStore: FluxStore & Record<string, any> = findStoreLazy("ChannelRTCStore");
+const ChannelRTCStore: Store & Record<string, any> = findStoreLazy("ChannelRTCStore");
 const Animations = findByPropsLazy("a", "animated", "useTransition");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 

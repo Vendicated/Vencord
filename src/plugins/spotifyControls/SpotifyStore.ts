@@ -17,7 +17,7 @@
 */
 
 import { Settings } from "@api/Settings";
-import type { FluxStore } from "@vencord/discord-types";
+import type { Store } from "@vencord/discord-types";
 import { findByPropsLazy, findStore, proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
@@ -69,7 +69,7 @@ type Repeat = "off" | "track" | "context";
 
 // Don't wanna run before Flux and Dispatcher are ready!
 export const SpotifyStore = proxyLazyWebpack(() => {
-    const $SpotifyStore: FluxStore & Record<string, any> = findStore("SpotifyStore");
+    const $SpotifyStore: Store & Record<string, any> = findStore("SpotifyStore");
     const SpotifyAPI = findByPropsLazy("vcSpotifyMarker");
 
     const API_BASE = "https://api.spotify.com/v1/me/player";

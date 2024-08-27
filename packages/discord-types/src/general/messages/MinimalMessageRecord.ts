@@ -8,7 +8,7 @@ import type { Moment } from "moment";
 
 import type { Nullish, Optional, SnakeCasedProperties } from "../../internal";
 import type { ChannelType } from "../channels/ChannelRecord";
-import type { ImmutableRecord } from "../ImmutableRecord";
+import type { RecordBase } from "../RecordBase";
 
 export type MinimalMessageRecordOwnProperties = Pick<MinimalMessageRecord, "attachments" | "codedLinks" | "components" | "content" | "editedTimestamp" | "embeds" | "flags" | "stickerItems" | "stickers" | "timestamp" | "type">;
 
@@ -17,7 +17,7 @@ export type MinimalMessageProperties = Optional<MinimalMessageRecordOwnPropertie
 
 export declare class MinimalMessageRecord<
     OwnProperties extends MinimalMessageRecordOwnProperties = MinimalMessageRecordOwnProperties
-> extends ImmutableRecord<OwnProperties> {
+> extends RecordBase<OwnProperties> {
     constructor(minimalMessageProperties: MinimalMessageProperties);
 
     attachments: MessageAttachment[];

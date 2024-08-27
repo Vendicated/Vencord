@@ -12,7 +12,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import type { ChannelRecord, FluxStore } from "@vencord/discord-types";
+import type { ChannelRecord, Store } from "@vencord/discord-types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, Menu } from "@webpack/common";
 import type { ComponentType, ReactNode } from "react";
@@ -30,7 +30,7 @@ interface ChannelComponentProps {
 
 const headerClasses: Record<string, string> = findByPropsLazy("privateChannelsHeaderContainer");
 
-export const PrivateChannelSortStore: FluxStore & {
+export const PrivateChannelSortStore: Store & {
     getPrivateChannelIds: () => string[];
 } = findStoreLazy("PrivateChannelSortStore");
 

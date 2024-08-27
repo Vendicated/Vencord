@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { OmitIndexSignature } from "../../internal";
+import type { OmitIndexSignature } from "../internal";
 import type { FormattedMessage as FM } from "./FormattedMessage";
 
 /*

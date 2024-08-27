@@ -4,24 +4,23 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { FluxActionHandlerMap } from "../../flux/FluxActionHandlersGraph";
-import type { FluxDispatcher } from "../../flux/FluxDispatcher";
-import type { GenericConstructor, Nullish } from "../../internal";
-import type { FluxStore } from "./FluxStore";
+import type { GenericConstructor, Nullish } from "../internal";
+import type { ActionHandlerMap } from "./ActionHandlersGraph";
+import type { Dispatcher } from "./Dispatcher";
+import type { Store } from "./Store";
 
-// Original name: PersistedStore
-export declare abstract class FluxPersistedStore<
+export declare abstract class PersistedStore<
     Constructor extends GenericConstructor = GenericConstructor,
     State = unknown
-> extends FluxStore {
-    constructor(dispatcher: FluxDispatcher, actionHandlers: Partial<FluxActionHandlerMap>);
+> extends Store {
+    constructor(dispatcher: Dispatcher, actionHandlers: Partial<ActionHandlerMap>);
 
     static _clearAllPromise: Promise<void> | Nullish;
     static _writePromises: Map</* persistKey: */string, Promise<void>>;
     static _writeResolvers: Map</* persistKey: */string, [resolver: () => void, callbackId: number]>;
     static allPersistKeys: Set<string>;
-    static clearAll(options: FluxPersistedStoreClearOptions): Promise<void>;
-    static clearPersistQueue(options: FluxPersistedStoreClearOptions): void;
+    static clearAll(options: PersistedStoreClearOptions): Promise<void>;
+    static clearPersistQueue(options: PersistedStoreClearOptions): void;
     static disableWrite: boolean;
     static disableWrites: boolean;
     static getAllStates(): Promise<{ [persistKey: string]: unknown; }>;
@@ -33,17 +32,17 @@ export declare abstract class FluxPersistedStore<
         States extends readonly [unknown, ...unknown[]] | readonly [...unknown[], unknown] = [unknown]
     >(
         persistKey: string,
-        ...migrations: [] extends FluxPersistedStoreMigrations<States>
-            ? [migrations?: FluxPersistedStoreMigrations<States> | Nullish]
-            : [migrations: FluxPersistedStoreMigrations<States>]
+        ...migrations: [] extends PersistedStoreMigrations<States>
+            ? [migrations?: PersistedStoreMigrations<States> | Nullish]
+            : [migrations: PersistedStoreMigrations<States>]
     ): { requiresPersist: true; state: Tail<States>; } | { requiresPersist: false; state: undefined; };
     static migrations: ((oldState: never) => unknown)[] | undefined;
     /**
-     * Not present on {@link FluxPersistedStore}'s constructor.
+     * Not present on {@link PersistedStore}'s constructor.
      * All subclasses are required to define their own.
      */
     static persistKey: string;
-    static shouldClear(options: FluxPersistedStoreClearOptions, persistKey: string): boolean;
+    static shouldClear(options: PersistedStoreClearOptions, persistKey: string): boolean;
     static throttleDelay: number;
     static userAgnosticPersistKeys: Set<string>;
 
@@ -64,29 +63,29 @@ export declare abstract class FluxPersistedStore<
     };
 }
 
-export interface FluxPersistedStoreClearOptions {
+export interface PersistedStoreClearOptions {
     /** Array of persist keys */
     omit?: readonly string[] | Nullish;
     type: "all" | "user-data-only";
 }
 
-export type FluxPersistedStoreMigrations<
+export type PersistedStoreMigrations<
     States extends readonly [unknown, ...unknown[]] | readonly [...unknown[], unknown]
 >
     = States extends readonly [...infer OldStates, infer NewState]
         ? OldStates extends [...infer OlderStates, infer OldState]
-            ? [...FluxPersistedStoreMigrations<[...OlderStates, OldState]>, (oldState: OldState) => NewState]
+            ? [...PersistedStoreMigrations<[...OlderStates, OldState]>, (oldState: OldState) => NewState]
             : OldStates extends []
                 ? []
                 : OldStates extends (infer T)[]
                     ? [] | [...((oldState: T) => T)[], (oldState: T) => NewState]
                     : never
-        : FluxPersistedStoreMigrationsTrailingRest<States>;
+        : PersistedStoreMigrationsTrailingRest<States>;
 
-type FluxPersistedStoreMigrationsTrailingRest<States extends readonly unknown[]>
+type PersistedStoreMigrationsTrailingRest<States extends readonly unknown[]>
     = States extends readonly [infer OldState, ...infer NewStates]
         ? NewStates extends [infer NewState, ...infer NewerStates]
-            ? [(oldState: OldState) => NewState, ...FluxPersistedStoreMigrationsTrailingRest<[NewState, ...NewerStates]>]
+            ? [(oldState: OldState) => NewState, ...PersistedStoreMigrationsTrailingRest<[NewState, ...NewerStates]>]
             : NewStates extends []
                 ? []
                 : NewStates extends (infer T)[]

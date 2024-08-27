@@ -6,8 +6,8 @@
 
 import type { Nullish, Optional } from "../internal";
 import type { Clan } from "./Clan";
-import type { ImmutableRecord } from "./ImmutableRecord";
 import type { IconSource } from "./misc";
+import type { RecordBase } from "./RecordBase";
 import type { UserRecord } from "./UserRecord";
 
 export type GuildRecordOwnProperties = Pick<GuildRecord, "afkChannelId" | "afkTimeout" | "application_id" | "banner" | "clan" | "defaultMessageNotifications" | "description" | "discoverySplash" | "explicitContentFilter" | "features" | "homeHeader" | "hubType" | "icon" | "id" | "joinedAt" | "latestOnboardingQuestionId" | "maxMembers" | "maxStageVideoChannelUsers" | "maxVideoChannelUsers" | "mfaLevel" | "name" | "nsfwLevel" | "ownerId" | "preferredLocale" | "premiumProgressBarEnabled" | "premiumSubscriberCount" | "premiumTier" | "publicUpdatesChannelId" | "rulesChannelId" | "safetyAlertsChannelId" | "splash" | "systemChannelFlags" | "systemChannelId" | "vanityURLCode" | "verificationLevel">;
@@ -19,7 +19,7 @@ export type GuildProperties = Optional<Omit<GuildRecordOwnProperties, "features"
 
 export declare class GuildRecord<
     OwnProperties extends GuildRecordOwnProperties = GuildRecordOwnProperties
-> extends ImmutableRecord<OwnProperties> {
+> extends RecordBase<OwnProperties> {
     constructor(guildProperties: GuildProperties);
 
     get acronym(): string;

@@ -23,12 +23,12 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { type FluxStore, type GuildEmoji as $Emoji, type MessageRecord, type Sticker as $Sticker, StickerFormat } from "@vencord/discord-types";
+import { type GuildEmoji as $Emoji, type MessageRecord, type Sticker as $Sticker, StickerFormat, type Store } from "@vencord/discord-types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, Permissions, PermissionStore, RestAPI, Toasts, Tooltip, useMemo, useReducer, UserStore, useState } from "@webpack/common";
 import type { Promisable } from "type-fest";
 
-const StickersStore: FluxStore & Record<string, any> = findStoreLazy("StickersStore");
+const StickersStore: Store & Record<string, any> = findStoreLazy("StickersStore");
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
 
 const DATA_TYPE = Symbol();

@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Store } from "../flux/Store";
 import { ChannelType, type GuildChannelRecord, type GuildSelectableChannelRecord } from "../general/channels/ChannelRecord";
 import type { GuildCategoryChannelRecord } from "../general/channels/GuildTextualChannelRecord";
 import type { GuildVocalChannelRecord } from "../general/channels/GuildVocalChannelRecord";
 import type { Nullish } from "../internal";
-import type { FluxStore } from "./abstract/FluxStore";
 
-export declare class GuildChannelStore extends FluxStore {
+export declare class GuildChannelStore extends Store {
     static displayName: "GuildChannelStore";
 
     getAllGuilds(): { [guildId: string]: GuildChannels | undefined; };

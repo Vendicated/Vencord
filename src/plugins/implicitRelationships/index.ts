@@ -19,12 +19,12 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { type FluxPersistedStore, RelationshipType } from "@vencord/discord-types";
+import { type PersistedStore, RelationshipType } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
 
-const UserAffinitiesStore: FluxPersistedStore & Record<string, any> = findStoreLazy("UserAffinitiesStore");
+const UserAffinitiesStore: PersistedStore & Record<string, any> = findStoreLazy("UserAffinitiesStore");
 
 export default definePlugin({
     name: "ImplicitRelationships",

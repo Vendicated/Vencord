@@ -12,7 +12,7 @@ import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { ActivityType, type FluxStore } from "@vencord/discord-types";
+import { ActivityType, type Store } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { Button, Forms, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
 import type { MouseEvent } from "react";
@@ -28,7 +28,7 @@ interface IgnoredActivity {
     type: ActivitiesTypes;
 }
 
-const RunningGameStore: FluxStore & Record<string, any> = findStoreLazy("RunningGameStore");
+const RunningGameStore: Store & Record<string, any> = findStoreLazy("RunningGameStore");
 
 const ShowCurrentGame = getUserSettingLazy("status", "showCurrentGame")!;
 

@@ -22,7 +22,7 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import type { FluxPersistedStore, FluxStore } from "@vencord/discord-types";
+import type { PersistedStore, Store } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, i18n, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 import type { ReactNode } from "react";
@@ -32,8 +32,8 @@ import { buildSeveralUsers } from "../typingTweaks";
 const ThreeDots = findExportedComponentLazy("Dots", "AnimatedDots");
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 
-const TypingStore: FluxStore & Record<string, any> = findStoreLazy("TypingStore");
-const UserGuildSettingsStore: FluxPersistedStore & Record<string, any> = findStoreLazy("UserGuildSettingsStore");
+const TypingStore: Store & Record<string, any> = findStoreLazy("TypingStore");
+const UserGuildSettingsStore: PersistedStore & Record<string, any> = findStoreLazy("UserGuildSettingsStore");
 
 const enum IndicatorMode {
     Dots = 1 << 0,

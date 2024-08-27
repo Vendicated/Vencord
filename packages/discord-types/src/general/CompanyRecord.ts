@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { ImmutableRecord } from "./ImmutableRecord";
+import type { RecordBase } from "./RecordBase";
 
 export type CompanyRecordOwnProperties = Pick<CompanyRecord, "id" | "name">;
 
 export declare class CompanyRecord<
     OwnProperties extends CompanyRecordOwnProperties = CompanyRecordOwnProperties
-> extends ImmutableRecord<OwnProperties> {
+> extends RecordBase<OwnProperties> {
     constructor(companyProperties: CompanyRecordOwnProperties);
 
     static createFromServer(companyFromServer: CompanyRecordOwnProperties): CompanyRecord;

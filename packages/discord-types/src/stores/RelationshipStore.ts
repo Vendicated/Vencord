@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { Store } from "../flux/Store";
 import type { MessageRecord } from "../general/messages/MessageRecord";
 import type { Nullish } from "../internal";
-import type { FluxStore } from "./abstract/FluxStore";
 
-export declare class RelationshipStore extends FluxStore {
+export declare class RelationshipStore extends Store {
     static displayName: "RelationshipStore";
 
     /** @todo May eventually be renamed to `getBlockedIds`. */
