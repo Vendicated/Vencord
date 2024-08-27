@@ -83,7 +83,7 @@ function Reason({ isTooltip, reason, message }: { isTooltip?: boolean, reason: T
     ];
     if (!details.some(Boolean)) return null;
     const result = [
-        isTooltip ? <br className={Margins.bottom8} /> : <span className="vc-std-wrapper-text">: </span>,
+        isTooltip ? <div className={Margins.bottom8} /> : <span className="vc-std-wrapper-text">: </span>,
         ...details.flatMap(i => [i, " "])
     ];
     result.pop();
