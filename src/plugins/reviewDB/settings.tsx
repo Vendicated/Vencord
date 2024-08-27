@@ -54,12 +54,6 @@ export const settings = definePluginSettings({
         description: "Hide reviews from blocked users",
         default: true,
     },
-    preferButtonOverDropdown: {
-        description: "Show a button instead of dropdown to view reviews",
-        type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: true
-    },
     buttons: {
         type: OptionType.COMPONENT,
         description: "ReviewDB buttons",
