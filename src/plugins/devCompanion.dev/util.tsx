@@ -69,7 +69,8 @@ export function extractModule(id: number, patched = settings.store.usePatchedMod
     if (!module)
         throw new Error("No module found for module id:" + id);
     return patched ? module.$$vencordPatchedSource ?? module.original.toString() : module.original.toString();
-} export function parseNode(node: Node) {
+}
+export function parseNode(node: Node) {
     switch (node.type) {
         case "string":
             return node.value;
