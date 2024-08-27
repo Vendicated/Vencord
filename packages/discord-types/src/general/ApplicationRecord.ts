@@ -10,10 +10,10 @@ import type { IconSource } from "./misc";
 import type { RecordBase } from "./RecordBase";
 import type { UserRecord } from "./UserRecord";
 
-export type ApplicationRecordOwnProperties = Pick<ApplicationRecord, "aliases" | "bot" | "coverImage" | "description" | "developers" | "embeddedActivityConfig" | "eulaId" | "executables" | "flags" | "guild" | "guildId" | "hashes" | "hook" | "icon" | "id" | "integrationTypesConfig" | "isMonetized" | "maxParticipants" | "name" | "overlay" | "overlayCompatibilityHook" | "overlayMethods" | "overlayWarn" | "primarySkuId" | "privacyPolicyUrl" | "publishers" | "roleConnectionsVerificationUrl" | "slug" | "splash" | "storefront_available" | "storeListingSkuId" | "tags" | "team" | "termsOfServiceUrl" | "thirdPartySkus" | "type">;
+export type ApplicationRecordOwnProperties = Pick<ApplicationRecord, "aliases" | "bot" | "coverImage" | "description" | "developers" | "embeddedActivityConfig" | "eulaId" | "executables" | "flags" | "guild" | "guildId" | "hashes" | "hook" | "icon" | "id" | "integrationTypesConfig" | "isMonetized" | "isVerified" | "maxParticipants" | "name" | "overlay" | "overlayCompatibilityHook" | "overlayMethods" | "overlayWarn" | "primarySkuId" | "privacyPolicyUrl" | "publishers" | "roleConnectionsVerificationUrl" | "slug" | "splash" | "storefront_available" | "storeListingSkuId" | "tags" | "team" | "termsOfServiceUrl" | "thirdPartySkus" | "type">;
 
-export type ApplicationProperties = Optional<PartialOnUndefined<Omit<ApplicationRecordOwnProperties, "embeddedActivityConfig" | "executables" | "isMonetized">>, Nullish, "id" | "integrationTypesConfig" | "maxParticipants" | "name" | "primarySkuId" | "privacyPolicyUrl" | "roleConnectionsVerificationUrl" | "storefront_available" | "storeListingSkuId" | "team" | "termsOfServiceUrl" | "type", true>
-    & SnakeCasedProperties<PartialOnUndefined<Pick<ApplicationRecordOwnProperties, "embeddedActivityConfig" | "isMonetized">>>
+export type ApplicationProperties = Optional<PartialOnUndefined<Omit<ApplicationRecordOwnProperties, "embeddedActivityConfig" | "executables" | "isMonetized" | "isVerified">>, Nullish, "id" | "integrationTypesConfig" | "maxParticipants" | "name" | "primarySkuId" | "privacyPolicyUrl" | "roleConnectionsVerificationUrl" | "storefront_available" | "storeListingSkuId" | "team" | "termsOfServiceUrl" | "type", true>
+    & SnakeCasedProperties<PartialOnUndefined<Pick<ApplicationRecordOwnProperties, "embeddedActivityConfig" | "isMonetized" | "isVerified">>>
     & { executables: Readonly<ApplicationRecord["executables"]>; };
 
 export declare class ApplicationRecord<
@@ -52,6 +52,7 @@ export declare class ApplicationRecord<
     id: string;
     integrationTypesConfig: Partial<Record<ApplicationIntegrationType, ApplicationIntegrationTypeConfig>> | null;
     isMonetized: boolean;
+    isVerified: boolean;
     maxParticipants: number | undefined;
     name: string;
     overlay: boolean;
