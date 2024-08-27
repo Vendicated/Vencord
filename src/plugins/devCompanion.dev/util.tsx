@@ -95,7 +95,7 @@ export function findModuleId(find: CodeFilter) {
         throw new Error("No Matches Found");
     }
     if (matches.length !== 1) {
-        throw new Error("More than one match");
+        throw new Error(`This filter matches ${matches.length} modules. Make it more specific!`);
     }
     return matches[0];
 }

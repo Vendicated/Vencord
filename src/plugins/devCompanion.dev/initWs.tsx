@@ -212,6 +212,7 @@ export function initWs(isManual = false) {
                                 let results: any[];
                                 switch (findType.replace("find", "").replace("Lazy", "")) {
                                     case "":
+                                    case "Component":
                                         results = findAll(parsedArgs[0]);
                                         break;
                                     case "ByProps":
@@ -317,6 +318,7 @@ export function initWs(isManual = false) {
                     let results: any[];
                     switch (type.replace("find", "").replace("Lazy", "")) {
                         case "":
+                        case "Component":
                             results = findAll(parsedArgs[0]);
                             break;
                         case "ByProps":
