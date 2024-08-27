@@ -20,6 +20,8 @@ export type TimeoutEntry = {
     reason: string | undefined;
     moderator: string | undefined; // User ID of moderator, undefined if automod did the timeout
     automod: boolean | undefined;
+    automodRuleName: string | undefined;
+    automodChannelId: string | undefined;
     expires: string | undefined; // used to compare if timeout reason is different
     loading: boolean;
 };
@@ -28,6 +30,8 @@ export const NoTimeout: TimeoutEntry = {
     reason: undefined,
     moderator: undefined,
     automod: undefined,
+    automodRuleName: undefined,
+    automodChannelId: undefined,
     expires: undefined,
     loading: false
 };
@@ -36,6 +40,8 @@ export const TimeoutLoading: TimeoutEntry = {
     reason: undefined,
     moderator: undefined,
     automod: undefined,
+    automodRuleName: undefined,
+    automodChannelId: undefined,
     expires: undefined,
     loading: true
 };
@@ -81,6 +87,8 @@ export const TimeoutReasonStore = proxyLazy(() => {
                     reason: entry.reason,
                     moderator: isAutomod ? undefined : entry.user_id,
                     automod: isAutomod,
+                    automodRuleName: isAutomod ? entry?.options.auto_moderation_rule_name : undefined,
+                    automodChannelId: isAutomod ? entry?.options?.channel_id : undefined,
                     expires: member?.communicationDisabledUntil,
                     loading: false
                 });

@@ -78,7 +78,17 @@ function Reason({ isTooltip, reason, message }: { isTooltip?: boolean, reason: T
             channelId: message.channel_id,
             messageId: message.id
         }),
-        reason.automod && Parser.parse(`**${i18n.Messages.GUILD_SETTINGS_AUTOMOD_TITLE}**`, true),
+        reason.automod && Parser.parse(`**${i18n.Messages.GUILD_SETTINGS_AUTOMOD_TITLE}**` + (() => {
+            const automodDetails = [
+                reason.automodRuleName,
+                reason.automodChannelId && `<#${reason.automodChannelId}>`,
+            ].filter(Boolean);
+            if (automodDetails.length) return ": " + automodDetails.join(" ");
+            return "";
+        })(), true, {
+            channelId: message.channel_id,
+            messageId: message.id
+        }),
         reason.reason
     ];
     if (!details.some(Boolean)) return null;
