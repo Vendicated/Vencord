@@ -17,7 +17,9 @@
 */
 
 import { definePluginSettings, Settings } from "@api/Settings";
+import { disableStyle, enableStyle } from "@api/Styles";
 import { getUserSettingLazy } from "@api/UserSettings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
@@ -29,11 +31,66 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
+import style from "./style.css?managed";
+const Toggle = findComponentByCodeLazy("Button.Sizes.NONE,disabled:");
 const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
 const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
-
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
+
+function makeIcon(showCurrentGame?: boolean) {
+    const { oldIcon } = settings.use(["oldIcon"]);
+
+    const starPath = "M12 2L14.09 8.09L21 8.5L15.5 12.36L17.09 19L12 15.5L6.91 19L8.5 12.36L3 8.5L9.91 8.09L12 2Z";
+
+    const redLinePath = !oldIcon
+        ? "M22.7 2.7a1 1 0 0 0-1.4-1.4l-20 20a1 1 0 1 0 1.4 1.4Z"
+        : "M23 2.27 21.73 1 1 21.73 2.27 23 23 2.27Z";
+
+    const maskBlackPath = !oldIcon
+        ? "M23.27 4.73 19.27 .73 -.27 20.27 3.73 24.27Z"
+        : "M23.27 4.54 19.46.73 .73 19.46 4.54 23.27 23.27 4.54Z";
+
+    return function () {
+        return (
+            <svg width="26" height="26" viewBox="0 0 26 26">
+                <path
+                    fill={!showCurrentGame && !oldIcon ? "var(--status-danger)" : "currentColor"}
+                    d={starPath}
+                />
+                {!showCurrentGame && <>
+                    <path fill="var(--status-danger)" d={redLinePath} />
+                    {!oldIcon && (
+                        <mask id="gameActivityMask">
+                            <rect fill="white" x="0" y="0" width="26" height="26" />
+                            <path fill="black" d={maskBlackPath} />
+                        </mask>
+                    )}
+                </>}
+            </svg>
+        );
+    };
+}
+
+function GameActivityToggleButton() {
+    const [rpcEnabled, setRpcEnabled] = React.useState(true);
+
+    const toggleRpc = () => {
+        const newStatus = !rpcEnabled;
+        setRpcEnabled(newStatus);
+        setRpc(!newStatus);
+    };
+
+    return (
+        <Toggle
+            tooltipText={rpcEnabled ? "Disable Custom RPC" : "Enable Custom RPC"}
+            icon={makeIcon(rpcEnabled)}
+            role="switch"
+            aria-checked={!rpcEnabled}
+            onClick={toggleRpc}
+        />
+    );
+}
 
 async function getApplicationAsset(key: string): Promise<string> {
     if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
@@ -256,6 +313,11 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "Button 2 URL",
         onChange: onChange
+    },
+    oldIcon: {
+        type: OptionType.BOOLEAN,
+        description: "Use the old icon style before Discord icon redesign",
+        default: false
     }
 });
 
@@ -392,11 +454,30 @@ async function setRpc(disable?: boolean) {
 export default definePlugin({
     name: "CustomRPC",
     description: "Allows you to set a custom rich presence.",
-    authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev],
+    authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev, Devs.loosaz],
     dependencies: ["UserSettingsAPI"],
-    start: setRpc,
-    stop: () => setRpc(true),
     settings,
+
+    patches: [
+        {
+            find: ".Messages.ACCOUNT_SPEAKING_WHILE_MUTED",
+            replacement: {
+                match: /this\.renderNameZone\(\).+?children:\[/,
+                replace: "$&$self.GameActivityToggleButton(),"
+            }
+        }
+    ],
+
+    GameActivityToggleButton: ErrorBoundary.wrap(GameActivityToggleButton, { noop: true }),
+
+    start() {
+        setRpc;
+        enableStyle(style);
+    },
+    stop: () => {
+        setRpc(true);
+        disableStyle(style);
+    },
 
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);

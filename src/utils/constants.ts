@@ -434,6 +434,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "nin0dev",
         id: 886685857560539176n
     },
+    loosaz: {
+        name: "LoosaZ",
+        id:310099824777232394n,
+    },
     Elvyra: {
         name: "Elvyra",
         id: 708275751816003615n,
