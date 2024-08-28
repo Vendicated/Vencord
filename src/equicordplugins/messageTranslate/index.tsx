@@ -22,9 +22,16 @@ const settings = definePluginSettings(
             default: "0.8",
             restartNeeded: true
         },
+        languageBlacklist: {
+            type: OptionType.STRING,
+            description: "Language codes to disable functionality in (separate with comma)",
+            default: "",
+            restartNeeded: true
+        },
     });
 
 async function translateAPI(sourceLang: string, targetLang: string, text: string): Promise<any> {
+    if (settings.store.languageBlacklist.includes(sourceLang)) return;
 
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&dj=1&q=${encodeURIComponent(text)}`;
     const response = await fetch(url);
