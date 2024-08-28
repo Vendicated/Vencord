@@ -45,7 +45,7 @@ const Classes: Record<"actionButton" | "addButton" | "addButtonIcon" | "alignCen
 
 const { RoleRootClasses, RoleClasses, RoleBorderClasses } = proxyLazyWebpack(() => {
     const [RoleRootClasses, RoleClasses, RoleBorderClasses] = findBulk(
-        filters.byProps("root", "showMoreButton", "collapseButton"),
+        filters.byProps("root", "expandButton", "collapseButton"),
         filters.byProps("role", "roleCircle", "roleName"),
         filters.byProps("roleCircle", "dot", "dotBorderColor")
     ) as BuildTuple<3, Record<string, string>>;
