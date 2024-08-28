@@ -81,6 +81,7 @@ async function generateDebugInfoMessage() {
     const client = (() => {
         if (IS_DISCORD_DESKTOP) return `Discord Desktop v${DiscordNative.app.getVersion()}`;
         if (IS_VESKTOP) return `Vesktop v${VesktopNative.app.getVersion()}`;
+        if (IS_EQUIBOP) return `Equibop v${VesktopNative.app.getVersion()}`;
         if ("armcord" in window) return `ArmCord v${window.armcord.version}`;
 
         // @ts-expect-error
