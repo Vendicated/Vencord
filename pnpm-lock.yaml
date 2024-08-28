@@ -83,8 +83,8 @@ importers:
         specifier: ~4.17.7
         version: 4.17.7
       '@types/node':
-        specifier: ^18.19.46
-        version: 18.19.46
+        specifier: ^18.19.47
+        version: 18.19.47
       '@types/react':
         specifier: ~18.2.79
         version: 18.2.79
@@ -149,8 +149,8 @@ importers:
         specifier: ^3.2.1
         version: 3.2.1
       tsx:
-        specifier: ^4.18.0
-        version: 4.18.0
+        specifier: ^4.19.0
+        version: 4.19.0
       type-fest:
         specifier: ^4.25.0
         version: 4.25.0
@@ -195,8 +195,8 @@ importers:
         specifier: ^2.6.4
         version: 2.6.4(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
       '@types/node':
-        specifier: ^20.16.1
-        version: 20.16.1
+        specifier: ^20.16.2
+        version: 20.16.2
       '@types/semver':
         specifier: ^7.5.8
         version: 7.5.8
@@ -210,8 +210,8 @@ importers:
         specifier: ^2.8.0
         version: 2.8.0(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))
       eslint-plugin-import-x:
-        specifier: ^4.0.0
-        version: 4.0.0(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
+        specifier: ^4.1.0
+        version: 4.1.0(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
       eslint-plugin-simple-header:
         specifier: ^1.1.1
         version: 1.1.1
@@ -231,8 +231,8 @@ importers:
         specifier: ^7.6.3
         version: 7.6.3
       tsx:
-        specifier: ^4.18.0
-        version: 4.18.0
+        specifier: ^4.19.0
+        version: 4.19.0
       type-fest:
         specifier: ^4.25.0
         version: 4.25.0
@@ -249,8 +249,8 @@ importers:
         specifier: ~4.17.7
         version: 4.17.7
       '@types/node':
-        specifier: ^18.19.46
-        version: 18.19.46
+        specifier: ^18.19.47
+        version: 18.19.47
       '@types/react':
         specifier: ~18.2.79
         version: 18.2.79
@@ -277,8 +277,8 @@ importers:
         specifier: ^11.2.0
         version: 11.2.0
       tsx:
-        specifier: ^4.18.0
-        version: 4.18.0
+        specifier: ^4.19.0
+        version: 4.19.0
       typescript:
         specifier: ^5.5.4
         version: 5.5.4
@@ -701,11 +701,11 @@ packages:
   '@types/lodash@4.17.7':
     resolution: {integrity: sha512-8wTvZawATi/lsmNu10/j2hk1KEP0IvjubqPE3cu1Xz7xfXXt5oCq3SNUz4fMIP4XGF9Ky+Ue2tBA3hcS7LSBlA==}
 
-  '@types/node@18.19.46':
-    resolution: {integrity: sha512-vnRgMS7W6cKa1/0G3/DTtQYpVrZ8c0Xm6UkLaVFrb9jtcVC3okokW09Ki1Qdrj9ISokszD69nY4WDLRlvHlhAA==}
+  '@types/node@18.19.47':
+    resolution: {integrity: sha512-1f7dB3BL/bpd9tnDJrrHb66Y+cVrhxSOTGorRNdHwYTUlTay3HuTDPKo9a/4vX9pMQkhYBcAbL4jQdNlhCFP9A==}
 
-  '@types/node@20.16.1':
-    resolution: {integrity: sha512-zJDo7wEadFtSyNz5QITDfRcrhqDvQI1xQNQ0VoizPjM/dVAODqqIUWbJPkvsxmTI0MYRGRikcdjMPhOssnPejQ==}
+  '@types/node@20.16.2':
+    resolution: {integrity: sha512-91s/n4qUPV/wg8eE9KHYW1kouTfDk2FPGjXbBMfRWP/2vg1rCXNQL1OCabwGs0XSdukuK+MwCDXE30QpSeMUhQ==}
 
   '@types/normalize-package-data@2.4.1':
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -1180,8 +1180,8 @@ packages:
     peerDependencies:
       eslint: '>=7.28.0'
 
-  eslint-plugin-import-x@4.0.0:
-    resolution: {integrity: sha512-5bWZ+2p3DKlpLSP830cAUmRUoYEnnvuBmSOSlURffEUuXL68uQUX0v2JpoXxyoDRIQWApzbqhnFeHA0XoQWosA==}
+  eslint-plugin-import-x@4.1.0:
+    resolution: {integrity: sha512-1BYJU0C5NBJLY4qukmwDbFrf2w8fLGEU9zZV3viWa7gNnbn4o4meQy5O4LVXn56eFh9Y4fQxu3udhIqQuVITvw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
@@ -2282,8 +2282,8 @@ packages:
   tslib@2.7.0:
     resolution: {integrity: sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==}
 
-  tsx@4.18.0:
-    resolution: {integrity: sha512-a1jaKBSVQkd6yEc1/NI7G6yHFfefIcuf3QJST7ZEyn4oQnxLYrZR5uZAM8UrwUa3Ge8suiZHcNS1gNrEvmobqg==}
+  tsx@4.19.0:
+    resolution: {integrity: sha512-bV30kM7bsLZKZIOCHeMNVMJ32/LuJzLVajkQI/qf92J2Qr08ueLQvW00PUZGiuLPP760UINwupgUj8qrSCPUKg==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -2774,7 +2774,7 @@ snapshots:
   '@types/fs-extra@11.0.4':
     dependencies:
       '@types/jsonfile': 6.1.4
-      '@types/node': 20.16.1
+      '@types/node': 20.16.2
 
   '@types/har-format@1.2.13': {}
 
@@ -2786,15 +2786,15 @@ snapshots:
 
   '@types/jsonfile@6.1.4':
     dependencies:
-      '@types/node': 20.16.1
+      '@types/node': 20.16.2
 
   '@types/lodash@4.17.7': {}
 
-  '@types/node@18.19.46':
+  '@types/node@18.19.47':
     dependencies:
       undici-types: 5.26.5
 
-  '@types/node@20.16.1':
+  '@types/node@20.16.2':
     dependencies:
       undici-types: 6.19.8
 
@@ -2820,12 +2820,12 @@ snapshots:
 
   '@types/yauzl@2.10.0':
     dependencies:
-      '@types/node': 20.16.1
+      '@types/node': 20.16.2
     optional: true
 
   '@types/yazl@2.4.5':
     dependencies:
-      '@types/node': 20.16.1
+      '@types/node': 20.16.2
 
   '@typescript-eslint/eslint-plugin@8.3.0(@typescript-eslint/parser@8.3.0(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4))(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)':
     dependencies:
@@ -3309,7 +3309,7 @@ snapshots:
       is-glob: 4.0.3
       micromatch: 4.0.7
 
-  eslint-plugin-import-x@4.0.0(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4):
+  eslint-plugin-import-x@4.1.0(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4):
     dependencies:
       '@typescript-eslint/typescript-estree': 8.3.0(typescript@5.5.4)
       '@typescript-eslint/utils': 8.3.0(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
@@ -4330,7 +4330,7 @@ snapshots:
 
   standalone-electron-types@1.0.0(patch_hash=cvychuhjtbzvtowhc2efrgpqjq):
     dependencies:
-      '@types/node': 18.19.46
+      '@types/node': 18.19.47
 
   static-extend@0.1.2:
     dependencies:
@@ -4505,7 +4505,7 @@ snapshots:
 
   tslib@2.7.0: {}
 
-  tsx@4.18.0:
+  tsx@4.19.0:
     dependencies:
       esbuild: 0.23.1
       get-tsconfig: 4.7.5

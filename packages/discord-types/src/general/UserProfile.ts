@@ -12,55 +12,35 @@ export type UserProfile<FetchFailed extends boolean = boolean> = FetchFailed ext
     ? UserProfileFetchFailed
     : UserProfileFetchSucceeded;
 
-export interface UserProfileFetchSucceeded {
+export interface UserProfileBase {
     accentColor: number | Nullish;
     application: ProfileApplicationData | null;
     applicationRoleConnections: ProfileApplicationRoleConnectionData[];
-    badges: ProfileBadge[];
+    badges?: ProfileBadge[];
     banner: string | Nullish;
     bio: string;
     connectedAccounts: ProfileConnectedAccountData[];
     lastFetched: number;
     legacyUsername: string | Nullish;
     /** @todo Does not seem to be implemented. */
-    popoutAnimationParticleType: any /* |  Nullish */;
+    popoutAnimationParticleType?: any /* |  Nullish */;
     premiumGuildSince: Date | null;
     premiumSince: Date | null;
-    premiumType: UserPremiumType | Nullish;
-    profileEffectExpiresAt: number | Nullish;
-    profileEffectId: string | undefined;
-    profileFetchFailed: false;
+    premiumType?: UserPremiumType | Nullish;
+    profileEffectExpiresAt?: number | Nullish;
+    profileEffectId?: string | undefined;
+    profileFetchFailed: boolean;
     pronouns: string;
-    themeColors: ProfileThemeColors | Nullish;
+    themeColors?: ProfileThemeColors | Nullish;
     userId: string;
 }
 
-export interface UserProfileFetchFailed {
-    accentColor: null;
-    application: null;
-    applicationRoleConnections: [];
-    /** Never present if fetch failed. */
-    badges?: undefined;
-    banner: null;
-    bio: "";
-    connectedAccounts: [];
-    lastFetched: number;
-    legacyUsername: null;
-    /** Never present if fetch failed. */
-    popoutAnimationParticleType?: undefined;
-    premiumGuildSince: null;
-    premiumSince: null;
-    /** Never present if fetch failed. */
-    premiumType?: undefined;
-    /** Never present if fetch failed. */
-    profileEffectExpiresAt?: undefined;
-    /** Never present if fetch failed. */
-    profileEffectId?: undefined;
+export interface UserProfileFetchSucceeded extends Required<UserProfileBase> {
+    profileFetchFailed: false;
+}
+
+export interface UserProfileFetchFailed extends UserProfileBase {
     profileFetchFailed: true;
-    pronouns: "";
-    /** Never present if fetch failed. */
-    themeColors?: undefined;
-    userId: string;
 }
 
 export interface ProfileApplicationData extends Pick<ApplicationRecord, "flags" | "id" | "primarySkuId" | "storefront_available"> {

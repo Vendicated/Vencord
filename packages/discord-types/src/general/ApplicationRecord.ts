@@ -152,6 +152,7 @@ export enum OAuth2Scope {
     GATEWAY_CONNECT = "gateway.connect",
     GDM_JOIN = "gdm.join",
     GUILDS = "guilds",
+    GUILDS_CHANNELS_READ = "guilds.channels.read",
     GUILDS_JOIN = "guilds.join",
     GUILDS_MEMBERS_READ = "guilds.members.read",
     IDENTIFY = "identify",
