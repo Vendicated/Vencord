@@ -318,6 +318,8 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                     if (IS_COMPANION_TEST)
                         reporterData.failedPatches.erroredPatch.push({
                             ...patch,
+                            oldModule: lastCode,
+                            newModule: code,
                             id
                         });
                     if (IS_DEV) {

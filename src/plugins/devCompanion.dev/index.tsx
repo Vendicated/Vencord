@@ -35,9 +35,14 @@ export const settings = definePluginSettings({
         default: true
     },
     usePatchedModule: {
-        description: "On extract requests, reply with the current patched module (if it is patched) instead of the original",
-        type: OptionType.BOOLEAN,
+        description: "On extract requests, reply with the current patched module (if it is patched) instead of the original.",
         default: true,
+        type: OptionType.BOOLEAN,
+    },
+    reloadAfterToggle: {
+        description: "Reload after a disable/enable plugin command is recived.",
+        default: true,
+        type: OptionType.BOOLEAN
     }
 });
 
@@ -45,8 +50,7 @@ export default definePlugin({
     name: "DevCompanion",
     description: "Dev Companion Plugin",
     authors: [Devs.Ven, Devs.sadan, Devs.Samwich],
-    // we need to be reporter testable to run and give the reuslts
-    reporterTestable: IS_COMPANION_TEST ? undefined : ReporterTestable.None,
+    reporterTestable: ReporterTestable.None,
     settings,
 
     toolboxActions: {

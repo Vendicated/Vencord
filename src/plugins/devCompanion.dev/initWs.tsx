@@ -8,9 +8,10 @@ import { showNotification } from "@api/Notifications";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { filters, findAll, search, wreq } from "@webpack";
 import { reporterData } from "debug/reporterData";
+import { Settings } from "Vencord";
 
 import { logger, PORT, settings } from ".";
-import { extractModule, extractOrThrow, FindData, findModuleId, FindType, mkRegexFind, parseNode, PatchData, SendData } from "./util";
+import { extractModule, extractOrThrow, FindData, findModuleId, FindType, mkRegexFind, parseNode, PatchData, SendData, toggleEnabled, } from "./util";
 
 export function stopWs() {
     socket?.close(1000, "Plugin Stopped");
@@ -117,6 +118,13 @@ export function initWs(isManual = false) {
         logger.info("Received Message:", type, "\n", data);
 
         switch (type) {
+            case "disable": {
+                const { enabled, pluginName } = data;
+                const settings = Settings.plugins[pluginName];
+                if (enabled !== settings.enabled)
+                    toggleEnabled(pluginName, reply);
+                break;
+            }
             case "diff": {
                 try {
                     const { extractType, idOrSearch } = data;

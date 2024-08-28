@@ -13,12 +13,16 @@ import { TypeWebpackSearchHistory } from "@webpack";
 interface EvaledPatch extends Patch {
     id: number | string;
 }
+interface ErroredPatch extends EvaledPatch {
+    oldModule: string,
+    newModule: string;
+}
 interface ReporterData {
     failedPatches: {
         foundNoModule: Patch[];
         hadNoEffect: EvaledPatch[];
         undoingPatchGroup: EvaledPatch[];
-        erroredPatch: EvaledPatch[];
+        erroredPatch: ErroredPatch[];
     };
     failedWebpack: Record<TypeWebpackSearchHistory, string[][]>;
 }
