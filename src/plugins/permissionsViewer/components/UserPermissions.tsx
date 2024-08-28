@@ -35,7 +35,7 @@ interface UserPermission {
 
 type UserPermissions = Array<UserPermission>;
 
-const RoleRootClasses = findByProps("root", "showMoreButton", "collapseButton");
+const RoleRootClasses = findByProps("root", "expandButton", "collapseButton");
 const RoleClasses = findByProps("role", "roleCircle", "roleName");
 const RoleBorderClasses = findByProps("roleCircle", "dot", "dotBorderColor");
 
