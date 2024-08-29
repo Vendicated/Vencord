@@ -85,11 +85,14 @@ const settings = definePluginSettings({
         default: 0.5,
         markers: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
     },
-    showLogsButton: {
-        default: true,
-        type: OptionType.BOOLEAN,
-        description: "Toggle to whenever show the toolbox or not",
-        restartNeeded: true,
+    IconLocation: {
+        description: "choose where to show the SoundBoard Log icon (requires restart)",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Toolbar", value: "toolbar", default: true },
+            { label: "Chat input", value: "chat" }
+        ],
+        restartNeeded: true
     },
 });
 
