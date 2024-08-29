@@ -61,13 +61,6 @@ export default definePlugin({
             }
         },
         {
-            find: "notosans-400-normalitalic",
-            replacement: {
-                match: /,"notosans-.+?"/g,
-                replace: ""
-            }
-        },
-        {
             find: 'console.warn("[DEPRECATED] Please use `subscribeWithSelector` middleware");',
             all: true,
             replacement: {
