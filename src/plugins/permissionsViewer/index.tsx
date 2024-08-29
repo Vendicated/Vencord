@@ -177,18 +177,10 @@ export default definePlugin({
     patches: [
         {
             find: ".VIEW_ALL_ROLES,",
-            replacement: [
-                {
-                    match: /children:"\+"\.concat\(\i\.length-\i\.length\).{0,20}\}\),/,
-                    replace: "$&$self.ViewPermissionsButton(arguments[0]),",
-                    predicate: () => settings.store.preferButtonOverDropdown
-                },
-                {
-                    match: /0!==\i\.length\|\|\i\?\(0,.+?guild:(\i),guildMember:(\i).+?null/,
-                    replace: "[$&,$self.UserPermissions($1,$2)]",
-                    predicate: () => !settings.store.preferButtonOverDropdown
-                }
-            ]
+            replacement: {
+                match: /\.collapseButton,.+?}\)}\),/,
+                replace: "$&$self.ViewPermissionsButton(arguments[0]),"
+            }
         }
     ],
 
