@@ -89,8 +89,8 @@ const tags: Tag[] = [
     }, {
         name: "MODERATOR",
         displayName: "Mod",
-        description: "Can manage messages or kick/ban people",
-        permissions: ["MANAGE_MESSAGES", "KICK_MEMBERS", "BAN_MEMBERS"]
+        description: "Can mute, kick or ban members",
+        permissions: ["MODERATE_MEMBERS", "KICK_MEMBERS", "BAN_MEMBERS"]
     }, {
         name: "VOICE_MODERATOR",
         displayName: "VC Mod",
@@ -98,9 +98,9 @@ const tags: Tag[] = [
         permissions: ["MOVE_MEMBERS", "MUTE_MEMBERS", "DEAFEN_MEMBERS"]
     }, {
         name: "CHAT_MODERATOR",
-        displayName: "Chat Mod",
-        description: "Can timeout people",
-        permissions: ["MODERATE_MEMBERS"]
+        displayName: "ChatMod",
+        description: "Can manage messages",
+        permissions: ["MANAGE_MESSAGES"]
     }
 ];
 const defaultSettings = Object.fromEntries(
@@ -175,7 +175,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "MoreUserTags",
     description: "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
-    authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN],
+    authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN, Devs.Gorciu],
     settings,
     patches: [
         // add tags to the tag list
