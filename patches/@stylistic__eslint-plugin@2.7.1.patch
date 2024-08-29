@@ -1,10 +1,10 @@
-diff --git a/dist/brace-style.js b/dist/brace-style.js
-index 023fe9fb129d75d77b0b550ff9564c8185c4020e..0fc762a5bd21bb6ff5ad2e6e9ef6682065b98b78 100644
---- a/dist/brace-style.js
-+++ b/dist/brace-style.js
-@@ -2,6 +2,38 @@
- 
- var utils = require('./utils.js');
+diff --git a/dist/rules/brace-style.js b/dist/rules/brace-style.js
+index 224d58eb1e9047e572c6e3cecb567a5b69379392..3b6dbdefb1968efdbbe7887bac11baff8bbe2816 100644
+--- a/dist/rules/brace-style.js
++++ b/dist/rules/brace-style.js
+@@ -6,6 +6,38 @@ require('eslint-visitor-keys');
+ require('espree');
+ require('estraverse');
  
 +function* getAllCommentRanges(sourceCode) {
 +  for (const { loc } of sourceCode.getAllComments())
@@ -38,10 +38,10 @@ index 023fe9fb129d75d77b0b550ff9564c8185c4020e..0fc762a5bd21bb6ff5ad2e6e9ef66820
 +  return false;
 +}
 +
- var braceStyle = utils.createRule({
+ var _baseRule = utils.createRule({
    name: "brace-style",
    package: "js",
-@@ -86,7 +118,7 @@ var braceStyle = utils.createRule({
+@@ -90,7 +122,7 @@ var _baseRule = utils.createRule({
      }
      function validateCurlyBeforeKeyword(curlyToken) {
        const keywordToken = sourceCode.getTokenAfter(curlyToken);

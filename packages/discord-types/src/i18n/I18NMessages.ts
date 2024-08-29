@@ -9,6 +9,8 @@ import type { FormattedMessage as FM } from "./FormattedMessage";
 
 /*
 function generateI18NMessages() {
+    "use strict";
+
     const hookRule = (() => {
         let key;
         return Vencord.Webpack.find(m => {
@@ -115,6 +117,8 @@ function generateI18NMessages() {
 
 /*
 function mergeI18NMessages(oldMessages, newMessages) {
+    "use strict";
+
     const messageEntryRE = /(?<= )[^ ].*?: (?:FM<[^>]+>|string);/g;
     const messageKeyRE = /(?:^[^"]|^[^"].*[^"]|(?<=^").*(?="))(?="?: (?:FM<[^>]+>|string);$)/;
 

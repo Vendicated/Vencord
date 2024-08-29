@@ -44,11 +44,11 @@
         "nanoid": "^5.0.7"
     },
     "devDependencies": {
-        "@stylistic/eslint-plugin": "^2.6.4",
+        "@stylistic/eslint-plugin": "^2.7.1",
         "@stylistic/stylelint-config": "^2.0.0",
         "@stylistic/stylelint-plugin": "^3.0.1",
         "@types/chrome": "^0.0.270",
-        "@types/diff": "^5.2.1",
+        "@types/diff": "^5.2.2",
         "@types/html-minifier-terser": "^7.0.2",
         "@types/lodash": "~4.17.7",
         "@types/node": "^18.19.47",
@@ -68,13 +68,13 @@
         "highlight.js": "11.8.0",
         "html-minifier-terser": "^7.2.0",
         "moment": "2.22.2",
-        "puppeteer-core": "^23.2.0",
+        "puppeteer-core": "^23.2.1",
         "standalone-electron-types": "^1.0.0",
-        "stylelint": "^16.8.2",
+        "stylelint": "^16.9.0",
         "stylelint-config-standard": "^36.0.1",
         "ts-patch": "^3.2.1",
         "tsx": "^4.19.0",
-        "type-fest": "^4.25.0",
+        "type-fest": "^4.26.0",
         "typescript": "^5.5.4",
         "typescript-eslint": "^8.3.0",
         "typescript-transform-paths": "^3.5.0",
@@ -83,7 +83,7 @@
     "packageManager": "pnpm@9.9.0",
     "pnpm": {
         "patchedDependencies": {
-            "@stylistic/eslint-plugin-js@2.6.4": "patches/@stylistic__eslint-plugin-js@2.6.4.patch",
+            "@stylistic/eslint-plugin@2.7.1": "patches/@stylistic__eslint-plugin@2.7.1.patch",
             "eslint-plugin-path-alias@2.1.0": "patches/eslint-plugin-path-alias@2.1.0.patch",
             "eslint@9.9.1": "patches/eslint@9.9.1.patch",
             "standalone-electron-types@1.0.0": "patches/standalone-electron-types@1.0.0.patch"

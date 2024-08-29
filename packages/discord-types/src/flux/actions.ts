@@ -58,6 +58,8 @@ export type ExtractAction<A extends Action, T extends A["type"]>
 
 /*
 async function generateActionType() {
+    "use strict";
+
     const { wreq } = Vencord.Webpack;
 
     // Load all chunks
@@ -97,6 +99,8 @@ async function generateActionType() {
 
 /*
 function mergeActionTypes(oldActionType, newActionType) {
+    "use strict";
+
     const actionTypeRE = /(?<=")[^"|]+(?=")/g;
 
     const oldActionTypes = new Set(oldActionType.match(actionTypeRE));
