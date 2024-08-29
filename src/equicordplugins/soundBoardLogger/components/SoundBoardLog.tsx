@@ -9,14 +9,22 @@ import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { LazyComponent } from "@utils/react";
+import { filters, find } from "@webpack";
 import { Button, Clickable, Forms, Text, Tooltip, useEffect, UserUtils, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import settings from "../settings";
 import { clearLoggedSounds, getLoggedSounds } from "../store";
 import { addListener, AvatarStyles, cl, downloadAudio, getEmojiUrl, playSound, removeListener, SoundLogEntry, UserSummaryItem } from "../utils";
+import { LogIcon } from "./Icons";
 import { openMoreUsersModal } from "./MoreUsersModal";
 import { openUserModal } from "./UserModal";
+
+const HeaderBarIcon = LazyComponent(() => {
+    const filter = filters.byCode(".HEADER_BAR_BADGE");
+    return find(m => m.Icon && filter(m.Icon)).Icon;
+});
 
 export async function openSoundBoardLog(): Promise<void> {
 
@@ -27,6 +35,17 @@ export async function openSoundBoardLog(): Promise<void> {
         </ModalRoot>
     </ErrorBoundary>);
 
+}
+
+export function OpenSBLogsButton() {
+    return (
+        <HeaderBarIcon
+            className="chatBarLogIcon"
+            onClick={() => openSoundBoardLog()}
+            tooltip={"Open SoundBoard Log"}
+            icon={LogIcon}
+        />
+    );
 }
 
 export default function SoundBoardLog({ data, closeModal }) {

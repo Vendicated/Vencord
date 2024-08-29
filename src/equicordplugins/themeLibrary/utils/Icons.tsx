@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export const LikeIcon = (isLiked: boolean) => (
+export const LikeIcon = (isLiked: boolean = false) => (
     <svg
         viewBox="0 0 20 20"
         fill={isLiked ? "red" : "currentColor"}
@@ -17,7 +17,7 @@ export const LikeIcon = (isLiked: boolean) => (
     </svg>
 );
 
-export const DownloadIcon = (props: any) => (
+export const DownloadIcon = (props?: any) => (
     <svg
         aria-hidden="true"
         viewBox="0 0 20 20"
@@ -30,3 +30,35 @@ export const DownloadIcon = (props: any) => (
         <path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path>
     </svg>
 );
+
+export const ClockIcon = (props?: any) => {
+    return (
+
+        <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="currentColor"
+            {...props}
+        >
+            <path fill-rule="evenodd" d="M12 23a11 11 0 1 0 0-22 11 11 0 0 0 0 22Zm1-18a1 1 0 1 0-2 0v7c0 .27.1.52.3.7l3 3a1 1 0 0 0 1.4-1.4L13 11.58V5Z" clip-rule="evenodd"></path>
+        </svg>
+    );
+};
+
+export const WarningIcon = (props?: any) => {
+    return (
+        <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="currentColor"
+            {...props}
+        >
+            <circle cx="12" cy="12" r="10" fill="transparent"></circle>
+            <path fill-rule="evenodd" d="M12 23a11 11 0 1 0 0-22 11 11 0 0 0 0 22Zm1.44-15.94L13.06 14a1.06 1.06 0 0 1-2.12 0l-.38-6.94a1 1 0 0 1 1-1.06h.88a1 1 0 0 1 1 1.06Zm-.19 10.69a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z" clip-rule="evenodd"></path>
+        </svg>
+    );
+};

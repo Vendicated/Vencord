@@ -11,11 +11,11 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import type { PluginNative } from "@utils/types";
-import { findComponentByCodeLazy, findByPropsLazy } from "@webpack";
-import { Button, Clipboard, Forms, React, showToast, Toasts } from "@webpack/common";
+import { findComponentByCodeLazy } from "@webpack";
+import { Button, Clipboard, Forms, Parser, React, showToast, Toasts } from "@webpack/common";
 
 import { Theme, ThemeInfoModalProps } from "../types";
-import { DownloadIcon } from "../utils/Icons";
+import { ClockIcon, DownloadIcon, WarningIcon } from "../utils/Icons";
 import { logger } from "./LikesComponent";
 
 const Native = VencordNative.pluginHelpers.ThemeLibrary as PluginNative<typeof import("../native")>;
@@ -32,22 +32,23 @@ async function downloadTheme(themesDir: string, theme: Theme) {
 }
 
 export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, ...props }) => {
-    const { type, content, likes, guild, tags } = theme;
+    const { type, content, likes, guild, tags, last_updated, requiresThemeAttributes } = theme;
 
     const themeContent = window.atob(content);
     const metadata = themeContent.match(/\/\*\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g)?.[0] || "";
     const donate = metadata.match(/@donate\s+(.+)/)?.[1] || "";
     const version = metadata.match(/@version\s+(.+)/)?.[1] || "";
-
+    const invite = metadata.match(/@invite\s+(.+)/)?.[1] || "";
 
     const authors = Array.isArray(author) ? author : [author];
+
+    const lastUpdated = Math.floor(new Date(last_updated ?? 0).getTime() / 1000);
 
     return (
         <ModalRoot {...props}>
             <ModalHeader>
                 <Forms.FormTitle tag="h4">{type} Details</Forms.FormTitle>
             </ModalHeader>
-
             <ModalContent>
                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>{authors.length > 1 ? "Authors" : "Author"}</Forms.FormTitle>
                 <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
@@ -94,12 +95,14 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                 </Forms.FormText>
                             </>
                         )}
-                        {guild && (
+                        {(guild || invite) && (
                             <>
                                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Support Server</Forms.FormTitle>
-                                <Forms.FormText>
-                                    {guild.name}
-                                </Forms.FormText>
+                                {guild && (
+                                    <Forms.FormText>
+                                        {guild.name}
+                                    </Forms.FormText>
+                                )}
                                 <Forms.FormText>
                                     <Button
                                         color={Button.Colors.BRAND_NEW}
@@ -107,7 +110,8 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                         className={Margins.top8}
                                         onClick={async e => {
                                             e.preventDefault();
-                                            guild.invite_link != null && openInviteModal(guild.invite_link.split("discord.gg/")[1]).catch(() => showToast("Invalid or expired invite!", Toasts.Type.FAILURE));
+                                            const useInvite = guild ? guild.invite_link?.split("discord.gg/")[1] : invite;
+                                            useInvite != null && openInviteModal(useInvite).catch(() => showToast("Invalid or expired invite!", Toasts.Type.FAILURE));
                                         }}
                                     >
                                         Join Discord Server
@@ -161,6 +165,16 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                 </Forms.FormText>
                             </>
                         )}
+                        {requiresThemeAttributes && (
+                            <Forms.FormText style={{ marginTop: "10px" }}>
+                                <WarningIcon /> This theme requires the <b>ThemeAttributes</b> plugin!
+                            </Forms.FormText>
+                        )}
+                        {last_updated && (
+                            <Forms.FormText style={{ marginTop: "10px" }}>
+                                <ClockIcon /> This theme was last updated {Parser.parse("<t:" + lastUpdated + ":F>")} ({Parser.parse("<t:" + lastUpdated + ":R>")})
+                            </Forms.FormText>
+                        )}
                     </div>
                 </div>
             </ModalContent>
@@ -184,7 +198,6 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                         const validThemesDir = await Native.getThemesDir(themesDir, theme);
                         // check if theme exists, and ask if they want to overwrite
                         if (exists) {
-                            showToast("A file with the same name already exists!", Toasts.Type.FAILURE);
                             openModal(modalProps => (
                                 <ModalRoot {...modalProps} size={ModalSize.SMALL}>
                                     <ModalHeader>

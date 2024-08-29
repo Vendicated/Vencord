@@ -24,13 +24,15 @@ export interface Theme {
     likes: number;
     tags: string[];
     thumbnail_url: string;
-    release_date: string;
+    release_date: Date;
+    last_updated?: Date;
     guild?: {
         name: string;
         snowflake: string;
         invite_link: string;
     };
     source?: string;
+    requiresThemeAttributes?: boolean;
 }
 
 export interface ThemeInfoModalProps extends ModalProps {
