@@ -60,12 +60,6 @@ export const settings = definePluginSettings({
         description: "Whether the permissions dropdown on user popouts should be open by default",
         type: OptionType.BOOLEAN,
         default: false,
-    },
-    preferButtonOverDropdown: {
-        description: "Show a button next to the roles instead of dropdown",
-        type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: true
     }
 });
 
