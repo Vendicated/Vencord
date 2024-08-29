@@ -27,10 +27,10 @@ export default definePlugin({
     authors: [Devs.surgedevs],
     patches: [
         {
-            find: "action:\"EXPAND_ROLES\"",
+            find: 'action:"EXPAND_ROLES"',
             replacement: {
-                match: /(\[\i,\i\]=\i\.useState\()!1\)/,
-                replace: "$1!0)"
+                match: /(roles:\i(?=.+?(\i)\(!0\)[,;]\i\({action:"EXPAND_ROLES"}\)).+?\[\i,\2\]=\i\.useState\()!1\)/,
+                replace: (_, rest, setExpandedRoles) => `${rest}!0)`
             }
         }
     ]
