@@ -1,3 +1,13 @@
+diff --git a/dist/dts/index.d.ts b/dist/dts/index.d.ts
+index 14b31ba65b45b87f748d8e3e88c3808d7866a887..7529b0a52f977649d301242a8b5027fc1d726bc2 100644
+--- a/dist/dts/index.d.ts
++++ b/dist/dts/index.d.ts
+@@ -1,4 +1,4 @@
+-import { Rule, Linter } from 'eslint';
++import { Rule, Linter, ESLint } from 'eslint';
+ import { UnprefixedRuleOptions } from './rule-options.js';
+ export { RuleOptions } from './rule-options.js';
+ 
 diff --git a/dist/rules/brace-style.js b/dist/rules/brace-style.js
 index 224d58eb1e9047e572c6e3cecb567a5b69379392..3b6dbdefb1968efdbbe7887bac11baff8bbe2816 100644
 --- a/dist/rules/brace-style.js

@@ -23,7 +23,7 @@ overrides:
 
 patchedDependencies:
   '@stylistic/eslint-plugin@2.7.1':
-    hash: hgabz23qzpdlfvbmkgegp3so3q
+    hash: iqb44y745sgygcjzpm7tbam46i
     path: patches/@stylistic__eslint-plugin@2.7.1.patch
   eslint-plugin-path-alias@2.1.0:
     hash: japuwsqfkulviwgkm4kd2oi3ky
@@ -63,7 +63,7 @@ importers:
     devDependencies:
       '@stylistic/eslint-plugin':
         specifier: ^2.7.1
-        version: 2.7.1(patch_hash=hgabz23qzpdlfvbmkgegp3so3q)(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
+        version: 2.7.1(patch_hash=iqb44y745sgygcjzpm7tbam46i)(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
       '@stylistic/stylelint-config':
         specifier: ^2.0.0
         version: 2.0.0(stylelint@16.9.0(typescript@5.5.4))
@@ -193,7 +193,7 @@ importers:
     devDependencies:
       '@stylistic/eslint-plugin':
         specifier: ^2.7.1
-        version: 2.7.1(patch_hash=hgabz23qzpdlfvbmkgegp3so3q)(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
+        version: 2.7.1(patch_hash=iqb44y745sgygcjzpm7tbam46i)(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
       '@types/node':
         specifier: ^20.16.2
         version: 20.16.2
@@ -2663,7 +2663,7 @@ snapshots:
 
   '@sapphi-red/web-noise-suppressor@0.3.5': {}
 
-  '@stylistic/eslint-plugin@2.7.1(patch_hash=hgabz23qzpdlfvbmkgegp3so3q)(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)':
+  '@stylistic/eslint-plugin@2.7.1(patch_hash=iqb44y745sgygcjzpm7tbam46i)(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)':
     dependencies:
       '@types/eslint': 9.6.1
       '@typescript-eslint/utils': 8.3.0(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
