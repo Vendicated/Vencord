@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findLazy } from "@webpack";
-import { Card, ChannelStore, Forms, GuildStore, PermissionsBits, Switch, TextInput, Tooltip } from "@webpack/common";
+import { Card, ChannelStore, Forms, GuildStore, PermissionsBits, Switch, TextInput, Tooltip, useState } from "@webpack/common";
 import type { Permissions, RC } from "@webpack/types";
 import type { Channel, Guild, Message, User } from "discord-types/general";
 
@@ -89,8 +89,8 @@ const tags: Tag[] = [
     }, {
         name: "MODERATOR",
         displayName: "Mod",
-        description: "Can manage messages or kick/ban people",
-        permissions: ["MANAGE_MESSAGES", "KICK_MEMBERS", "BAN_MEMBERS"]
+        description: "Can mute, kick and ban people",
+        permissions: ["MODERATE_MEMBERS", "KICK_MEMBERS", "BAN_MEMBERS"]
     }, {
         name: "VOICE_MODERATOR",
         displayName: "VC Mod",
@@ -98,17 +98,23 @@ const tags: Tag[] = [
         permissions: ["MOVE_MEMBERS", "MUTE_MEMBERS", "DEAFEN_MEMBERS"]
     }, {
         name: "CHAT_MODERATOR",
-        displayName: "Chat Mod",
-        description: "Can timeout people",
-        permissions: ["MODERATE_MEMBERS"]
+        displayName: "ChatMod",
+        description: "Can manage messages",
+        permissions: ["MANAGE_MESSAGES"]
     }
 ];
 const defaultSettings = Object.fromEntries(
     tags.map(({ name, displayName }) => [name, { text: displayName, showInChat: true, showInNotChat: true }])
 ) as TagSettings;
 
-function SettingsComponent() {
-    const tagSettings = settings.store.tagSettings ??= defaultSettings;
+function SettingsComponent(props: { setValue(v: any): void; }) {
+    settings.store.tagSettings ??= defaultSettings;
+
+    const [tagSettings, setTagSettings] = useState(settings.store.tagSettings as TagSettings);
+    const setValue = (v: TagSettings) => {
+        setTagSettings(v);
+        props.setValue(v);
+    };
 
     return (
         <Flex flexDirection="column">
@@ -131,13 +137,19 @@ function SettingsComponent() {
                         type="text"
                         value={tagSettings[t.name]?.text ?? t.displayName}
                         placeholder={`Text on tag (default: ${t.displayName})`}
-                        onChange={v => tagSettings[t.name].text = v}
+                        onChange={v => {
+                            tagSettings[t.name].text = v;
+                            setValue(tagSettings);
+                        }}
                         className={Margins.bottom16}
                     />
 
                     <Switch
                         value={tagSettings[t.name]?.showInChat ?? true}
-                        onChange={v => tagSettings[t.name].showInChat = v}
+                        onChange={v => {
+                            tagSettings[t.name].showInChat = v;
+                            setValue(tagSettings);
+                        }}
                         hideBorder
                     >
                         Show in messages
@@ -145,7 +157,10 @@ function SettingsComponent() {
 
                     <Switch
                         value={tagSettings[t.name]?.showInNotChat ?? true}
-                        onChange={v => tagSettings[t.name].showInNotChat = v}
+                        onChange={v => {
+                            tagSettings[t.name].showInNotChat = v;
+                            setValue(tagSettings);
+                        }}
                         hideBorder
                     >
                         Show in member list and profiles
@@ -168,14 +183,14 @@ const settings = definePluginSettings({
     tagSettings: {
         type: OptionType.COMPONENT,
         component: SettingsComponent,
-        description: "fill me"
+        description: "fill me",
     }
 });
 
 export default definePlugin({
-    name: "MoreUserTags",
-    description: "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
-    authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN],
+    name: "UserTags",
+    description: "Adds user tags for webhooks and moderative roles (owner, admin, etc.).",
+    authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN, Devs.Gorciu],
     settings,
     patches: [
         // add tags to the tag list
