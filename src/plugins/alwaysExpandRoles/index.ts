@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,18 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+migratePluginSettings("AlwaysExpandRoles", "ShowAllRoles");
 export default definePlugin({
-    name: "MessagePopoverAPI",
-    description: "API to add buttons to message popovers.",
-    authors: [Devs.KingFish, Devs.Ven, Devs.Nuckyz],
-    patches: [{
-        find: "Messages.MESSAGE_UTILITIES_A11Y_LABEL",
-        replacement: {
-            match: /\.jsx\)\((\i\.\i),\{label:\i\.\i\.Messages\.MESSAGE_ACTION_REPLY.{0,200}?"reply-self".{0,50}?\}\):null(?=,.+?message:(\i))/,
-            replace: "$&,Vencord.Api.MessagePopover._buildPopoverElements($1,$2)"
+    name: "AlwaysExpandRoles",
+    description: "Always expands the role list in profile popouts",
+    authors: [Devs.surgedevs],
+    patches: [
+        {
+            find: 'action:"EXPAND_ROLES"',
+            replacement: {
+                match: /(roles:\i(?=.+?(\i)\(!0\)[,;]\i\({action:"EXPAND_ROLES"}\)).+?\[\i,\2\]=\i\.useState\()!1\)/,
+                replace: (_, rest, setExpandedRoles) => `${rest}!0)`
+            }
         }
-    }],
+    ]
 });
