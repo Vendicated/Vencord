@@ -116,6 +116,9 @@ importers:
       ts-patch:
         specifier: ^3.2.1
         version: 3.2.1
+      ts-pattern:
+        specifier: ^5.3.1
+        version: 5.3.1
       tsx:
         specifier: ^4.16.5
         version: 4.16.5
@@ -2523,6 +2526,9 @@ packages:
   ts-patch@3.2.1:
     resolution: {integrity: sha512-hlR43v+GUIUy8/ZGFP1DquEqPh7PFKQdDMTAmYt671kCCA6AkDQMoeFaFmZ7ObPLYOmpMgyKUqL1C+coFMf30w==}
     hasBin: true
+
+  ts-pattern@5.3.1:
+    resolution: {integrity: sha512-1RUMKa8jYQdNfmnK4jyzBK3/PS/tnjcZ1CW0v1vWDeYe5RBklc/nquw03MEoB66hVBm4BnlCfmOqDVxHyT1DpA==}
 
   tsconfig-paths@3.15.0:
     resolution: {integrity: sha512-2Ac2RgzDe/cn48GvOe3M+o82pEFewD3UPbyoUHHdKasHwJKjds4fLXWf/Ux5kATBKN20oaFGu+jbElp1pos0mg==}
@@ -5157,6 +5163,8 @@ snapshots:
       resolve: 1.22.8
       semver: 7.6.3
       strip-ansi: 6.0.1
+
+  ts-pattern@5.3.1: {}
 
   tsconfig-paths@3.15.0:
     dependencies:
