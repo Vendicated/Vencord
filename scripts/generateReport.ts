@@ -225,7 +225,7 @@ page.on("console", async e => {
                     plugin,
                     type,
                     id,
-                    match: regex.replace(/\[A-Za-z_\$\]\[\\w\$\]\*/g, "\\i"),
+                    match: regex,
                     error: await maybeGetError(e.args()[3])
                 });
 

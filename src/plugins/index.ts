@@ -20,7 +20,7 @@ import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
-import { canonicalizeFind } from "@utils/patches";
+import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
 import { Patch, Plugin, ReporterTestable, StartAt } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
@@ -67,11 +67,12 @@ export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
     }
 
     patch.replacement = patch.replacement.filter(({ predicate }) => !predicate || predicate());
+    for (const replacement of patch.replacement) {
+        canonicalizeReplacement(replacement, pluginName);
 
-    if (IS_REPORTER) {
-        patch.replacement.forEach(r => {
-            delete r.predicate;
-        });
+        if (IS_REPORTER) {
+            delete replacement.predicate;
+        }
     }
 
     patches.push(patch);

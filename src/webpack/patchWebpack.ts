@@ -7,7 +7,6 @@
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { interpolateIfDefined } from "@utils/misc";
-import { canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
 
 import { traceFunctionWithResults } from "../debug/Tracer";
@@ -431,8 +430,6 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
         for (const replacement of patch.replacement as PatchReplacement[]) {
             const lastCode = code;
             const lastFactory = factory;
-
-            canonicalizeReplacement(replacement, patch.plugin);
 
             try {
                 const [newCode, totalTime] = executePatch(replacement.match, replacement.replace as string);

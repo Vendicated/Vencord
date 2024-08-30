@@ -19,17 +19,23 @@
 import { Patch, PatchReplacement, ReplaceFn } from "./types";
 
 export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
-    if (typeof match === "string") return match;
-    const canonSource = match.source
-        .replaceAll("\\i", "[A-Za-z_$][\\w$]*");
-    return new RegExp(canonSource, match.flags) as T;
+    if (typeof match === "string") {
+        return match;
+    }
+
+    const canonRegex = new RegExp(match.source.replaceAll(String.raw`\i`, String.raw`(?:[A-Za-z_$][\w$]*)`), match.flags);
+    const originalToString = canonRegex.toString.bind(canonRegex);
+    canonRegex.toString = () => originalToString().replaceAll(String.raw`(?:[A-Za-z_$][\w$]*)`, String.raw`\i`);
+
+    return canonRegex as T;
 }
 
 export function canonicalizeReplace<T extends string | ReplaceFn>(replace: T, pluginName: string): T {
     const self = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`;
 
-    if (typeof replace !== "function")
+    if (typeof replace !== "function") {
         return replace.replaceAll("$self", self) as T;
+    }
 
     return ((...args) => replace(...args).replaceAll("$self", self)) as T;
 }
