@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { classes } from "@utils/misc";
+import { classes, Margins } from "@utils/index";
 import { findByPropsLazy, findComponentLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, i18n, Popout, Text, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
@@ -53,6 +53,7 @@ export default function TooltipWrapper({ message, children, text }: { message: M
                 onClick={e => { e.stopPropagation(); popoutProps.onClick(e); }} // stop double click to reply/edit
             >
                 <Tooltip text={text} children={children} />
+                <span className={Margins.right8} />
                 <Text variant="text-md/normal" className="vc-std-wrapper-text">
                     {renderTimeout(message, true)} timeout remaining
                 </Text>
@@ -68,18 +69,26 @@ function renderTimeout(message: Message, inline: boolean) {
     const member = GuildMemberStore.getMember(guildId, message.author.id);
     if (!member?.communicationDisabledUntil) return null;
 
-    const countdown = () => (
-        <CountDown
-            deadline={new Date(member.communicationDisabledUntil!)}
-            showUnits
-            stopAtOneSec
-        />
-    );
+    const countdown = () => <>
+        <wbr />
+        <span style={{ whiteSpace: "nowrap" }}>
+            <CountDown
+                deadline={new Date(member.communicationDisabledUntil!)}
+                showUnits
+                stopAtOneSec
+            />
+        </span>
+        <wbr />
+    </>;
 
     return inline
         ? countdown()
-        : i18n.Messages.GUILD_ENABLE_COMMUNICATION_TIME_REMAINING.format({
-            username: message.author.username,
-            countdown
-        });
+        : <>
+            {i18n.Messages.GUILD_ENABLE_COMMUNICATION_TIME_REMAINING.format({
+                username: message.author.username,
+                countdown
+            })}
+            <br />
+            Click for more details.
+        </>;
 }

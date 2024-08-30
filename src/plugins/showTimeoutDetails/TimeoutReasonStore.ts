@@ -8,7 +8,6 @@ import { proxyLazy } from "@utils/lazy";
 import { findByPropsLazy } from "@webpack";
 import { Constants, Flux, FluxDispatcher, GuildMemberStore, PermissionsBits, PermissionStore, RestAPI, useStateFromStores } from "@webpack/common";
 
-import { settings } from ".";
 
 const AuditLogReasons: {
     MEMBER_UPDATE: number;
@@ -107,6 +106,5 @@ export const TimeoutReasonStore = proxyLazy(() => {
 });
 
 export const useTimeoutReason = (guildId: string, userId: string) => useStateFromStores([TimeoutReasonStore], () => {
-    if (settings.store.showReason) return TimeoutReasonStore.getReason(guildId, userId);
-    return NoTimeout;
+    return TimeoutReasonStore.getReason(guildId, userId);
 });
