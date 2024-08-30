@@ -24,8 +24,7 @@ export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
     }
 
     const canonRegex = new RegExp(match.source.replaceAll(String.raw`\i`, String.raw`(?:[A-Za-z_$][\w$]*)`), match.flags);
-    const originalToString = canonRegex.toString.bind(canonRegex);
-    canonRegex.toString = () => originalToString().replaceAll(String.raw`(?:[A-Za-z_$][\w$]*)`, String.raw`\i`);
+    canonRegex.toString = match.toString.bind(match);
 
     return canonRegex as T;
 }
