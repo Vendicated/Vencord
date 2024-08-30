@@ -14,3 +14,21 @@
 .vc-std-automod :is(svg, .vc-std-wrapper-text) {
     color: var(--status-warning);
 }
+
+.vc-std-tooltip {
+    max-width: 320px;
+}
+
+.vc-std-popout {
+    width: unset;
+    min-width: 180px;
+    color: var(--text-normal);
+}
+
+.vc-std-popout-button-wrapper {
+    margin-top: 8px;
+}
+
+.vc-std-popout-button {
+    padding: 2px 10px;
+}
