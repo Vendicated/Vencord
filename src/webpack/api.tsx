@@ -231,7 +231,7 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
 
         if (cacheFindResult != null) {
             const { result, id, exportKey, factory } = cacheFindResult;
-            return callback(result, { id, exportKey, factory: factory });
+            return callback(result, { id, exportKey, factory });
         }
     }
 
