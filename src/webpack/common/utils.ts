@@ -46,6 +46,11 @@ export const moment = findByProps<typeof import("moment")>("parseTwoDigitYear");
 
 export const hljs = findByProps<typeof import("highlight.js")>("highlight", "registerLanguage");
 
+export const { match, P }: Pick<typeof import("ts-pattern"), "match" | "P"> = mapMangledModule("@ts-pattern/matcher", {
+    match: filters.byCode("return new"),
+    P: filters.byProps("when")
+});
+
 export const lodash = findByProps<typeof import("lodash")>("debounce", "cloneDeep");
 
 export const i18n = find<t.i18n>(m => m.Messages?.["en-US"]);
