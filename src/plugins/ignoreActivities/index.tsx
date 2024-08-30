@@ -26,6 +26,11 @@ interface IgnoredActivity {
     type: ActivitiesTypes;
 }
 
+const enum FilterMode {
+    Whitelist,
+    Blacklist
+}
+
 const RunningGameStore = findStoreLazy("RunningGameStore");
 
 const ShowCurrentGame = getUserSettingLazy("status", "showCurrentGame")!;
@@ -70,7 +75,10 @@ function handleActivityToggle(e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     if (ignoredActivityIndex === -1) settings.store.ignoredActivities = getIgnoredActivities().concat(activity);
     else settings.store.ignoredActivities = getIgnoredActivities().filter((_, index) => index !== ignoredActivityIndex);
 
-    // Trigger activities recalculation
+    recalculateActivities();
+}
+
+function recalculateActivities() {
     ShowCurrentGame.updateSetting(old => old);
 }
 
@@ -151,14 +159,15 @@ const settings = definePluginSettings({
         options: [
             {
                 label: "Whitelist",
-                value: false,
+                value: FilterMode.Whitelist,
                 default: true
             },
             {
                 label: "Blacklist",
-                value: true,
+                value: FilterMode.Blacklist,
             }
-        ]
+        ],
+        onChange: recalculateActivities
     },
     idsList: {
         type: OptionType.COMPONENT,
@@ -167,33 +176,39 @@ const settings = definePluginSettings({
         onChange(newValue: string) {
             const ids = new Set(newValue.split(",").map(id => id.trim()).filter(Boolean));
             settings.store.idsList = Array.from(ids).join(", ");
+            recalculateActivities();
         },
         component: props => <IdsListComponent setValue={props.setValue} />
     },
     ignorePlaying: {
         type: OptionType.BOOLEAN,
         description: "Ignore all playing activities (These are usually game and RPC activities)",
-        default: false
+        default: false,
+        onChange: recalculateActivities
     },
     ignoreStreaming: {
         type: OptionType.BOOLEAN,
         description: "Ignore all streaming activities",
-        default: false
+        default: false,
+        onChange: recalculateActivities
     },
     ignoreListening: {
         type: OptionType.BOOLEAN,
         description: "Ignore all listening activities (These are usually spotify activities)",
-        default: false
+        default: false,
+        onChange: recalculateActivities
     },
     ignoreWatching: {
         type: OptionType.BOOLEAN,
         description: "Ignore all watching activities",
-        default: false
+        default: false,
+        onChange: recalculateActivities
     },
     ignoreCompeting: {
         type: OptionType.BOOLEAN,
         description: "Ignore all competing activities (These are normally special game activities)",
-        default: false
+        default: false,
+        onChange: recalculateActivities
     }
 }).withPrivateSettings<{
     ignoredActivities: IgnoredActivity[];
@@ -204,9 +219,8 @@ function getIgnoredActivities() {
 }
 
 function isActivityTypeIgnored(type: number, id?: string) {
-
     if (id && settings.store.idsList.includes(id)) {
-        return settings.store.listMode;
+        return settings.store.listMode === FilterMode.Blacklist;
     }
 
     switch (type) {
@@ -269,7 +283,6 @@ export default definePlugin({
     ],
 
     async start() {
-
         // Migrate allowedIds
         if (Settings.plugins.IgnoreActivities.allowedIds) {
             settings.store.idsList = Settings.plugins.IgnoreActivities.allowedIds;
@@ -302,7 +315,7 @@ export default definePlugin({
         if (isActivityTypeIgnored(props.type, props.application_id)) return false;
 
         if (props.application_id != null) {
-            return !getIgnoredActivities().some(activity => activity.id === props.application_id) || settings.store.idsList.includes(props.application_id);
+            return !getIgnoredActivities().some(activity => activity.id === props.application_id) || (settings.store.listMode === FilterMode.Whitelist && settings.store.idsList.includes(props.application_id));
         } else {
             const exePath = RunningGameStore.getRunningGames().find(game => game.name === props.name)?.exePath;
             if (exePath) {
