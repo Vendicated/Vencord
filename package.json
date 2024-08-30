@@ -44,7 +44,7 @@
         "nanoid": "^5.0.7"
     },
     "devDependencies": {
-        "@stylistic/eslint-plugin": "^2.7.1",
+        "@stylistic/eslint-plugin": "^2.7.2",
         "@stylistic/stylelint-config": "^2.0.0",
         "@stylistic/stylelint-plugin": "^3.0.1",
         "@types/chrome": "^0.0.270",
@@ -84,7 +84,7 @@
     "packageManager": "pnpm@9.9.0",
     "pnpm": {
         "patchedDependencies": {
-            "@stylistic/eslint-plugin@2.7.1": "patches/@stylistic__eslint-plugin@2.7.1.patch",
+            "@stylistic/eslint-plugin@2.7.2": "patches/@stylistic__eslint-plugin@2.7.2.patch",
             "eslint-plugin-path-alias@2.1.0": "patches/eslint-plugin-path-alias@2.1.0.patch",
             "eslint@9.9.1": "patches/eslint@9.9.1.patch",
             "standalone-electron-types@1.0.0": "patches/standalone-electron-types@1.0.0.patch"

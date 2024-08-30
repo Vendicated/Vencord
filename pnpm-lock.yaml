@@ -22,9 +22,9 @@ overrides:
   string.prototype.repeat: npm:@nolyfill/string.prototype.repeat@^1
 
 patchedDependencies:
-  '@stylistic/eslint-plugin@2.7.1':
-    hash: iqb44y745sgygcjzpm7tbam46i
-    path: patches/@stylistic__eslint-plugin@2.7.1.patch
+  '@stylistic/eslint-plugin@2.7.2':
+    hash: hgabz23qzpdlfvbmkgegp3so3q
+    path: patches/@stylistic__eslint-plugin@2.7.2.patch
   eslint-plugin-path-alias@2.1.0:
     hash: japuwsqfkulviwgkm4kd2oi3ky
     path: patches/eslint-plugin-path-alias@2.1.0.patch
@@ -62,8 +62,8 @@ importers:
         version: 5.0.7
     devDependencies:
       '@stylistic/eslint-plugin':
-        specifier: ^2.7.1
-        version: 2.7.1(patch_hash=iqb44y745sgygcjzpm7tbam46i)(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
+        specifier: ^2.7.2
+        version: 2.7.2(patch_hash=hgabz23qzpdlfvbmkgegp3so3q)(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
       '@stylistic/stylelint-config':
         specifier: ^2.0.0
         version: 2.0.0(stylelint@16.9.0(typescript@5.5.4))
@@ -195,8 +195,8 @@ importers:
         version: 0.7.2
     devDependencies:
       '@stylistic/eslint-plugin':
-        specifier: ^2.7.1
-        version: 2.7.1(patch_hash=iqb44y745sgygcjzpm7tbam46i)(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
+        specifier: ^2.7.2
+        version: 2.7.2(patch_hash=hgabz23qzpdlfvbmkgegp3so3q)(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
       '@types/node':
         specifier: ^20.16.2
         version: 20.16.2
@@ -618,8 +618,8 @@ packages:
   '@sapphi-red/web-noise-suppressor@0.3.5':
     resolution: {integrity: sha512-jh3+V9yM+zxLriQexoGm0GatoPaJWjs6ypFIbFYwQp+AoUb55eUXrjKtKQyuC5zShzzeAQUl0M5JzqB7SSrsRA==}
 
-  '@stylistic/eslint-plugin@2.7.1':
-    resolution: {integrity: sha512-JqnHom8CP14oOgPhwTPbn0QgsBJwgNySQSe00V9GQQDlY1tEqZUlK4jM2DIOJ5nE+oXoy51vZWHnHkfZ6rEruw==}
+  '@stylistic/eslint-plugin@2.7.2':
+    resolution: {integrity: sha512-3DVLU5HEuk2pQoBmXJlzvrxbKNpu2mJ0SRqz5O/CJjyNCr12ZiPcYMEtuArTyPOk5i7bsAU44nywh1rGfe3gKQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: '>=8.40.0'
@@ -2669,7 +2669,7 @@ snapshots:
 
   '@sapphi-red/web-noise-suppressor@0.3.5': {}
 
-  '@stylistic/eslint-plugin@2.7.1(patch_hash=iqb44y745sgygcjzpm7tbam46i)(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)':
+  '@stylistic/eslint-plugin@2.7.2(patch_hash=hgabz23qzpdlfvbmkgegp3so3q)(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)':
     dependencies:
       '@types/eslint': 9.6.1
       '@typescript-eslint/utils': 8.3.0(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
