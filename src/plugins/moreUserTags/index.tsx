@@ -89,7 +89,7 @@ const tags: Tag[] = [
     }, {
         name: "MODERATOR",
         displayName: "Mod",
-        description: "Can mute, kick or ban members.",
+        description: "Can timeout, kick or ban members.",
         permissions: ["MODERATE_MEMBERS", "KICK_MEMBERS", "BAN_MEMBERS"]
     }, {
         name: "VOICE_MODERATOR",
