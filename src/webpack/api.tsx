@@ -205,10 +205,12 @@ function wrapWebpackComponent<T extends object = any>(
  * @param callback A function that takes the find result as its first argument
  */
 export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
-    if (typeof filter !== "function")
+    if (typeof filter !== "function") {
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
-    if (typeof callback !== "function")
+    }
+    if (typeof callback !== "function") {
         throw new Error("Invalid callback. Expected a function got " + typeof callback);
+    }
 
     if (IS_REPORTER && !isIndirect) {
         const originalCallback = callback;
@@ -225,8 +227,12 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
     }
 
     if (cache != null) {
-        const { result, id, exportKey, factory } = _cacheFind(filter);
-        if (result != null) return callback(result, { id: id!, exportKey: exportKey as PropertyKey | null, factory: factory! });
+        const cacheFindResult = _cacheFind(filter);
+
+        if (cacheFindResult != null) {
+            const { result, id, exportKey, factory } = cacheFindResult;
+            return callback(result, { id, exportKey, factory: factory });
+        }
     }
 
     waitForSubscriptions.set(filter, callback);
@@ -250,10 +256,12 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
  * @returns A proxy that has the parse function return value as its true value, or the plain parse function return value, if it was called immediately.
  */
 export function find<T = any>(filter: FilterFn, parse: (module: ModuleExports) => ModuleExports = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
-    if (typeof filter !== "function")
+    if (typeof filter !== "function") {
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
-    if (typeof parse !== "function")
+    }
+    if (typeof parse !== "function") {
         throw new Error("Invalid find parse. Expected a function got " + typeof parse);
+    }
 
     const [proxy, setInnerValue] = proxyInner<T>(`Webpack find matched no module. Filter: ${printFilter(filter)}`, "Webpack find with proxy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the find.");
     waitFor(filter, m => setInnerValue(parse(m)), { isIndirect: true });
@@ -275,10 +283,12 @@ export function find<T = any>(filter: FilterFn, parse: (module: ModuleExports) =
  * @returns The component if found, or a noop component
  */
 export function findComponent<T extends object = any>(filter: FilterFn, parse: (component: ModuleExports) => LazyComponentType<T> = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
-    if (typeof filter !== "function")
+    if (typeof filter !== "function") {
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
-    if (typeof parse !== "function")
+    }
+    if (typeof parse !== "function") {
         throw new Error("Invalid component parse. Expected a function got " + typeof parse);
+    }
 
     const [WrapperComponent, setInnerComponent] = wrapWebpackComponent<T>(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
     waitFor(filter, m => setInnerComponent(m, parse(m)), { isIndirect: true });
@@ -578,7 +588,9 @@ export function findModuleFactory(code: CodeFilterWithSingle, { isIndirect = fal
  * @returns Result of factory function
  */
 export function webpackDependantLazy<T = any>(factory: () => T, attempts?: number) {
-    if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazy", [factory]]);
+    if (IS_REPORTER) {
+        webpackSearchHistory.push(["webpackDependantLazy", [factory]]);
+    }
 
     return proxyLazy<T>(factory, attempts, `Webpack dependant lazy factory failed:\n${factory}`, "Webpack dependant lazy called on a primitive value. This can happen if you try to destructure a primitive in the top level definition of the lazy.");
 }
@@ -593,7 +605,9 @@ export function webpackDependantLazy<T = any>(factory: () => T, attempts?: numbe
  * @returns Result of factory function
  */
 export function webpackDependantLazyComponent<T extends object = any>(factory: () => any, attempts?: number) {
-    if (IS_REPORTER) webpackSearchHistory.push(["webpackDependantLazyComponent", [factory]]);
+    if (IS_REPORTER) {
+        webpackSearchHistory.push(["webpackDependantLazyComponent", [factory]]);
+    }
 
     return LazyComponent<T>(factory, attempts, `Webpack dependant LazyComponent factory failed:\n${factory}`);
 }
@@ -656,15 +670,15 @@ export function extractAndLoadChunksLazy(code: CodeFilterWithSingle, matcher: Re
 }
 
 export type CacheFindResult = {
-    /** The find result. `undefined` if nothing was found */
-    result?: ModuleExports;
-    /** The id of the module exporting where the result was found. `undefined` if nothing was found */
-    id?: PropertyKey;
-    /** The key exporting the result. `null` if the find result was all the module exports, `undefined` if nothing was found */
-    exportKey?: PropertyKey | null;
-    /** The factory of the module exporting the result. `undefined` if nothing was found */
-    factory?: AnyModuleFactory;
-};
+    /** The find result. */
+    result: ModuleExports;
+    /** The id of the module exporting where the result was found. */
+    id: PropertyKey;
+    /** The key exporting the result. `null` if the find result was all the module exports. */
+    exportKey: PropertyKey | null;
+    /** The factory of the module exporting the result. */
+    factory: AnyModuleFactory;
+} | undefined;
 
 /**
  * Find the first export or module exports from an already required module that matches the filter.
@@ -710,8 +724,6 @@ export const _cacheFind = traceFunction("cacheFind", function _cacheFind(filter:
             }
         }
     }
-
-    return {};
 });
 
 /**
@@ -721,8 +733,8 @@ export const _cacheFind = traceFunction("cacheFind", function _cacheFind(filter:
  * @returns The found export, module exports, module factory, or undefined
  */
 export function cacheFind(filter: FilterFn, shouldReturnFactory: boolean = false) {
-    const { result, factory } = _cacheFind(filter);
-    return shouldReturnFactory ? factory : result;
+    const cacheFindResult = _cacheFind(filter);
+    return shouldReturnFactory ? cacheFindResult?.factory : cacheFindResult?.result;
 }
 
 /**
@@ -730,12 +742,12 @@ export function cacheFind(filter: FilterFn, shouldReturnFactory: boolean = false
  *
  * @param filter A function that takes an export or module exports and returns a boolean
  */
-export function _cacheFindAll(filter: FilterFn): Required<CacheFindResult>[] {
+export function _cacheFindAll(filter: FilterFn): NonNullable<CacheFindResult>[] {
     if (typeof filter !== "function") {
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
     }
 
-    const results: Required<CacheFindResult>[] = [];
+    const results: NonNullable<CacheFindResult>[] = [];
 
     for (const key in cache) {
         const mod = cache[key];
@@ -791,7 +803,7 @@ export function cacheFindAll(filter: FilterFn, shouldReturnFactories: boolean = 
  * Find the id of the first already loaded module factory that includes all the given code.
  */
 export function cacheFindModuleId(...code: CodeFilter) {
-    return _cacheFind(filters.byFactoryCode(...code)).id;
+    return _cacheFind(filters.byFactoryCode(...code))?.id;
 }
 
 /**
