@@ -28,6 +28,11 @@ interface IgnoredActivity {
     type: ActivitiesTypes;
 }
 
+const enum FilterMode {
+    Whitelist,
+    Blacklist
+}
+
 const RunningGameStore: Store & Record<string, any> = findStoreLazy("RunningGameStore");
 
 const ShowCurrentGame = getUserSettingLazy("status", "showCurrentGame")!;
@@ -78,14 +83,18 @@ function handleActivityToggle(e: MouseEvent<HTMLButtonElement>, activity: Ignore
     if (ignoredActivityIndex === -1) settings.store.ignoredActivities = getIgnoredActivities().concat(activity);
     else settings.store.ignoredActivities = getIgnoredActivities().filter((_, index) => index !== ignoredActivityIndex);
 
-    // Trigger activities recalculation
+    recalculateActivities();
+}
+
+function recalculateActivities() {
     ShowCurrentGame.updateSetting((old: any) => old);
 }
+
 
 const ImportCustomRPCComponent = () => (
     <Flex flexDirection="column">
         <Forms.FormText type={Forms.FormText.Types.DESCRIPTION}>
-            Import the application id of the CustomRPC plugin to the allowed list
+            Import the application id of the CustomRPC plugin to the filter list
         </Forms.FormText>
         <div>
             <Button
@@ -96,7 +105,7 @@ const ImportCustomRPCComponent = () => (
                         return;
                     }
 
-                    const isAlreadyAdded = allowedIdsPushID?.(id);
+                    const isAlreadyAdded = idsListPushId?.(id);
                     if (isAlreadyAdded) {
                         showToast("CustomRPC application ID is already added.", Toasts.Type.FAILURE);
                     }
@@ -108,39 +117,37 @@ const ImportCustomRPCComponent = () => (
     </Flex>
 );
 
-let allowedIdsPushID: ((id: string) => boolean) | null = null;
+let idsListPushId: ((id: string) => boolean) | null = null;
 
-function AllowedIdsComponent(props: { setValue: (value: string) => void; }) {
-    const [allowedIds, setAllowedIds] = useState<string>(settings.store.allowedIds ?? "");
+function IdsListComponent(props: { setValue: (value: string) => void; }) {
+    const [idsList, setIdsList] = useState<string>(settings.store.idsList ?? "");
 
-    allowedIdsPushID = (id: string) => {
-        if (!allowedIds.includes(id)) {
-            const ids = allowedIds + ", " + id;
-            setAllowedIds(ids);
-            props.setValue(ids);
-            return false;
-        }
-        return true;
+    idsListPushId = id => {
+        if (idsList.includes(id)) return true;
+        const ids = idsList + ", " + id;
+        setIdsList(ids);
+        props.setValue(ids);
+        return false;
     };
 
     useEffect(() => () => {
-        allowedIdsPushID = null;
+        idsListPushId = null;
     }, []);
 
     function handleChange(newValue: string) {
-        setAllowedIds(newValue);
+        setIdsList(newValue);
         props.setValue(newValue);
     }
 
     return (
         <Forms.FormSection>
-            <Forms.FormTitle tag="h3">Allowed List</Forms.FormTitle>
+            <Forms.FormTitle tag="h3">Filter List</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom8} type={Forms.FormText.Types.DESCRIPTION}>
-                Comma separated list of activity IDs to allow (Useful for allowing RPC activities and CustomRPC)
+                Comma separated list of activity IDs to allow (Useful for filtering specific RPC activities and CustomRPC)
             </Forms.FormText>
             <TextInput
                 type="text"
-                value={allowedIds}
+                value={idsList}
                 onChange={handleChange}
                 placeholder="235834946571337729, 343383572805058560"
             />
@@ -154,40 +161,62 @@ const settings = definePluginSettings({
         description: "",
         component: () => <ImportCustomRPCComponent />
     },
-    allowedIds: {
+    listMode: {
+        type: OptionType.SELECT,
+        description: "Change the mode of the filter list",
+        options: [
+            {
+                label: "Whitelist",
+                value: FilterMode.Whitelist,
+                default: true
+            },
+            {
+                label: "Blacklist",
+                value: FilterMode.Blacklist,
+            }
+        ],
+        onChange: recalculateActivities
+    },
+    idsList: {
         type: OptionType.COMPONENT,
         description: "",
         default: "",
         onChange(newValue: string) {
             const ids = new Set(newValue.match(/[^,\s](?:[^,]*[^,\s])?/g));
-            settings.store.allowedIds = [...ids].join(", ");
+            settings.store.idsList = [...ids].join(", ");
+            recalculateActivities();
         },
-        component: props => <AllowedIdsComponent setValue={props.setValue} />
+        component: props => <IdsListComponent setValue={props.setValue} />
     },
     ignorePlaying: {
         type: OptionType.BOOLEAN,
         description: "Ignore all playing activities (These are usually game and RPC activities)",
-        default: false
+        default: false,
+        onChange: recalculateActivities
     },
     ignoreStreaming: {
         type: OptionType.BOOLEAN,
         description: "Ignore all streaming activities",
-        default: false
+        default: false,
+        onChange: recalculateActivities
     },
     ignoreListening: {
         type: OptionType.BOOLEAN,
         description: "Ignore all listening activities (These are usually spotify activities)",
-        default: false
+        default: false,
+        onChange: recalculateActivities
     },
     ignoreWatching: {
         type: OptionType.BOOLEAN,
         description: "Ignore all watching activities",
-        default: false
+        default: false,
+        onChange: recalculateActivities
     },
     ignoreCompeting: {
         type: OptionType.BOOLEAN,
         description: "Ignore all competing activities (These are normally special game activities)",
-        default: false
+        default: false,
+        onChange: recalculateActivities
     }
 }).withPrivateSettings<{
     ignoredActivities: IgnoredActivity[];
@@ -199,8 +228,8 @@ function getIgnoredActivities() {
 }
 
 function isActivityTypeIgnored(type: ActivityType, id?: string) {
-    if (id && settings.store.allowedIds.includes(id)) {
-        return false;
+    if (id && settings.store.idsList.includes(id)) {
+        return settings.store.listMode === FilterMode.Blacklist;
     }
 
     switch (type) {
@@ -216,7 +245,7 @@ function isActivityTypeIgnored(type: ActivityType, id?: string) {
 
 export default definePlugin({
     name: "IgnoreActivities",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.Kylie],
     description: "Ignore activities from showing up on your status ONLY. You can configure which ones are specifically ignored from the Registered Games and Activities tabs, or use the general settings below.",
     dependencies: ["UserSettingsAPI"],
 
@@ -263,6 +292,12 @@ export default definePlugin({
     ],
 
     async start() {
+        // Migrate allowedIds
+        if (Settings.plugins.IgnoreActivities!.allowedIds) {
+            settings.store.idsList = Settings.plugins.IgnoreActivities!.allowedIds;
+            delete Settings.plugins.IgnoreActivities!.allowedIds; // Remove allowedIds
+        }
+
         const oldIgnoredActivitiesData = await DataStore.get<Map<IgnoredActivity["id"], IgnoredActivity>>("IgnoreActivities_ignoredActivities");
 
         if (oldIgnoredActivitiesData != null) {
@@ -292,7 +327,8 @@ export default definePlugin({
 
         if (props.application_id != null) {
             return !getIgnoredActivities().some(activity => activity.id === props.application_id)
-                || settings.store.allowedIds.includes(props.application_id);
+                || settings.store.listMode === FilterMode.Whitelist
+                && settings.store.idsList.includes(props.application_id);
         } else {
             const exePath = RunningGameStore.getRunningGames().find((game: any) => game.name === props.name)?.exePath;
             if (exePath) {
