@@ -65,7 +65,7 @@ export default definePlugin({
     ],
 
     isActivityTimestamped(activity: Activity) {
-        return activity.timestamps && activity.timestamps.start && activity.timestamps.end;
+        return activity.timestamps != null && activity.timestamps.start != null && activity.timestamps.end != null
     },
 
     getTimeBar(activity: Activity) {
