@@ -40,7 +40,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "Messages.USER_ACTIVITY_PLAYING",
+            find: ".Messages.USER_ACTIVITY_PLAYING",
             replacement: [
                 // Insert Spotify time bar component
                 {
