@@ -9,8 +9,9 @@ import "./style.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { CopyIcon, NoEntrySignIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { copyWithToast } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { Clipboard, Tooltip, useState } from "@webpack/common";
+import { Tooltip, useState } from "@webpack/common";
 
 const CheckMarkIcon = () => {
     return <svg width="24" height="24" viewBox="0 0 24 24">
@@ -43,7 +44,7 @@ export default definePlugin({
                         role="button"
                         onClick={() => {
                             if (bytesLeft <= 0) {
-                                Clipboard.copy(fileContents);
+                                copyWithToast(fileContents);
                                 setRecentlyCopied(true);
                             }
                         }}
