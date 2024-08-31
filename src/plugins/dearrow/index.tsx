@@ -171,7 +171,7 @@ const settings = definePluginSettings({
         description: "Do not dearrow by default",
         type: OptionType.BOOLEAN,
         default: false,
-        restartNeeded: false // IDK if it is needed, it only doesn't invert the already patched embeds, if someone could decide if this would warrant a restart
+        restartNeeded: false
     }
 });
 
