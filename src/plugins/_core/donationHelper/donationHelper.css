@@ -1,0 +1,69 @@
+.vc-sponsor-badge-edit {
+    align-items: flex-start;
+
+    .badge-edit-grid {
+        gap: 8px;
+    }
+
+    .badge-edit-entry {
+        width: 100%;
+        padding: 20px;
+        border-radius: 12px;
+        background-color: var(--background-secondary);
+        box-shadow: var(--elevation-low);
+
+        .badge-edit-entry-image {
+            cursor: pointer;
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: contain;
+            border-radius: 3px;
+        }
+
+        .badge-edit-entry-description {
+            cursor: pointer;
+            padding: 10px;
+            background-color: var(--input-background);
+            border-radius: 3px;
+            font-size: 16px;
+        }
+    }
+}
+
+.vc-sponsor-pending-changes {
+    align-items: flex-start;
+
+    .pending-changes-entry {
+        width: 100%;
+        padding: 20px;
+        border-radius: 12px;
+        background-color: var(--background-secondary);
+        box-shadow: var(--elevation-low);
+
+        .pending-changes-entry-badges {
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            display: grid;
+        }
+
+        .pending-changes-entry-badge {
+            padding: 8px;
+            border-radius: 8px;
+            background-color: var(--background-tertiary);
+
+            .pending-changes-entry-image {
+                width: 100%;
+                aspect-ratio: 1/1;
+                object-fit: contain;
+                border-radius: 3px;
+            }
+
+            .pending-changes-entry-description {
+                padding: 10px;
+                border-radius: 3px;
+                font-size: 16px;
+            }
+        }
+    }
+}
