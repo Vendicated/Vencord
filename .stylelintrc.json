@@ -1,7 +1,6 @@
 {
     "extends": "stylelint-config-standard",
     "rules": {
-        "indentation": 4,
         "selector-class-pattern": [
             "^[a-z][a-zA-Z0-9]*(-[a-z0-9][a-zA-Z0-9]*)*$",
             {

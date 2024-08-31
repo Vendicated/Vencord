@@ -183,39 +183,21 @@ export default definePlugin({
     },
 
     patches: [
-        // Profiles Modal pfp
-        ...[".MODAL,hasProfileEffect", ".FULL_SIZE,hasProfileEffect:"].map(find => ({
-            find,
-            replacement: {
-                match: /\{src:(\i)(?=,avatarDecoration)/,
-                replace: "{src:$1,onClick:()=>$self.openImage($1)"
-            }
-        })),
-        // Banners
-        ...[".NITRO_BANNER,", "=!1,canUsePremiumCustomization:"].map(find => ({
-            find,
-            replacement: {
-                // style: { backgroundImage: shouldShowBanner ? "url(".concat(bannerUrl,
-                match: /style:\{(?=backgroundImage:(null!=\i)\?"url\("\.concat\((\i),)/,
-                replace:
-                    // onClick: () => shouldShowBanner && ev.target.style.backgroundImage && openImage(bannerUrl), style: { cursor: shouldShowBanner ? "pointer" : void 0,
-                    'onClick:ev=>$1&&ev.target.style.backgroundImage&&$self.openImage($2),style:{cursor:$1?"pointer":void 0,'
-            }
-        })),
-        // User DMs "User Profile" popup in the right
+        // Avatar component used in User DMs "User Profile" popup in the right and Profiles Modal pfp
         {
-            find: ".avatarPositionPanel",
+            find: ".overlay:void 0,status:",
             replacement: {
-                match: /(avatarWrapperNonUserBot.{0,50})onClick:(\i\|\|\i)\?void 0(?<=,avatarSrc:(\i).+?)/,
-                replace: "$1style:($2)?{cursor:\"pointer\"}:{},onClick:$2?()=>{$self.openImage($3)}"
-            }
-        },
-        {
-            find: ".canUsePremiumProfileCustomization,{avatarSrc:",
-            replacement: {
-                match: /\.avatar,\i\.clickable\),onClick:\i,(?<=avatarSrc:(\i).+?)/,
+                match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",{...\2,/,
                 replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openImage($1)},"
-
+            },
+            all: true
+        },
+        // Banners
+        {
+            find: 'backgroundColor:"COMPLETE"',
+            replacement: {
+                match: /(\.banner,.+?),style:{(?=.+?backgroundImage:null!=(\i)\?"url\("\.concat\(\2,)/,
+                replace: (_, rest, bannerSrc) => `${rest},onClick:()=>${bannerSrc}!=null&&$self.openImage(${bannerSrc}),style:{cursor:${bannerSrc}!=null?"pointer":void 0,`
             }
         },
         // Group DMs top small & large icon
