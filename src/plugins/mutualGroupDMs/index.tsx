@@ -21,7 +21,7 @@ import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Avatar, ChannelStore, Clickable, IconUtils, NavigationRouter, RelationshipStore, ScrollerThin, useMemo, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, useMemo, UserStore } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
@@ -147,7 +147,7 @@ export default definePlugin({
                     header={header}
                     isLoadingHeader={false}
                     children={mutualGDms.map(c => (
-                        <Clickable className={ProfileListClasses.listRow} onClick={() => { NavigationRouter.transitionTo(`/channels/@me/${c.id}`); }}>
+                        <Clickable className={ProfileListClasses.listRow} onClick={() => { SelectedChannelActionCreators.selectPrivateChannel(c.id); }}>
                             <Avatar
                                 src={IconUtils.getChannelIconURL({ id: c.id, icon: c.icon, size: 32 })}
                                 size="SIZE_40"
