@@ -20,14 +20,16 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, useMemo, UserStore } from "@webpack/common";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { Avatar, ChannelStore, Clickable, IconUtils, NavigationRouter, RelationshipStore, ScrollerThin, useMemo, UserStore } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
 
 const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
 const UserUtils = findByPropsLazy("getGlobalName");
 
 const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
+const ListStyles = findByPropsLazy("list", "divider");
+const ExpandableList = findComponentByCodeLazy(".mutualFriendItem]");
 const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
 
 function getGroupDMName(channel: Channel) {
@@ -70,6 +72,13 @@ export default definePlugin({
                     replace: "$1==='MUTUAL_GDMS'?$self.renderMutualGDMs(arguments[0]):$&"
                 }
             ]
+        },
+        {
+            find: 'section:"MUTUAL_FRIENDS"',
+            replacement: {
+                match: /,\i\)}\)}\)(?<=(\(0,\i\.jsx\)\(\i\.\i,{className:\i\.divider}\)).+?)/,
+                replace: "$&,$self.renderDMPageList({user: arguments[0].user, Divider: $1})"
+            }
         }
     ],
 
@@ -123,6 +132,36 @@ export default definePlugin({
                     )
                 }
             </ScrollerThin>
+        );
+    }),
+
+    renderDMPageList: ErrorBoundary.wrap(({ user, Divider }: { user: User, Divider: JSX.Element; }) => {
+        const mutualGDms = getMutualGroupDms(user.id);
+        if (mutualGDms.length === 0) return null;
+        const header = getMutualGDMCountText(user);
+        return (
+            <>
+                {Divider}
+                <ExpandableList
+                    className={ListStyles.list}
+                    header={header}
+                    isLoadingHeader={false}
+                    children={mutualGDms.map(c => (
+                        <Clickable className={ProfileListClasses.listRow} onClick={() => { NavigationRouter.transitionTo(`/channels/@me/${c.id}`); }}>
+                            <Avatar
+                                src={IconUtils.getChannelIconURL({ id: c.id, icon: c.icon, size: 32 })}
+                                size="SIZE_40"
+                                className={ProfileListClasses.listAvatar}
+                            >
+                            </Avatar>
+                            <div className={ProfileListClasses.listRowContent}>
+                                <div className={ProfileListClasses.listName}>{getGroupDMName(c)}</div>
+                                <div className={GuildLabelClasses.guildNick}>{c.recipients.length + 1} Members</div>
+                            </div>
+                        </Clickable>
+                    ))}
+                />
+            </>
         );
     })
 });
