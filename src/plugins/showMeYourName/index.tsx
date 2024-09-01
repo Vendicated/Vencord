@@ -4,12 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*
- * Vencord, a Discord client mod
- * Copyright (c) 2023 rini
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
-
 import "./styles.css";
 
 import { ChannelStore } from "@webpack/common";
