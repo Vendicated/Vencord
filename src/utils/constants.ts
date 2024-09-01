@@ -554,9 +554,17 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "sadan",
         id: 521819891141967883n
     },
+    Obsidian: {
+        name: "Obsidian",
+        id: 683171006717755446n,
+    },
     SerStars: {
         name: "SerStars",
         id: 861631850681729045n,
+    },
+    niko: {
+        name: "niko",
+        id: 341377368075796483n,
     },
 } satisfies Record<string, Dev>);
 
