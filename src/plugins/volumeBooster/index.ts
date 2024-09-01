@@ -20,7 +20,6 @@ import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy } from "@webpack";
 
 const settings = definePluginSettings({
     multiplier: {
@@ -31,8 +30,6 @@ const settings = definePluginSettings({
         stickToMarkers: true,
     }
 });
-
-const amplitudeToPerceptual = findByCodeLazy("6+1:");
 
 interface StreamData {
     audioContext: AudioContext,
@@ -54,7 +51,7 @@ interface StreamData {
 export default definePlugin({
     name: "VolumeBooster",
     authors: [Devs.Nuckyz, Devs.sadan],
-    description: "Allows you to set the user and stream volume above the default maximum.",
+    description: "Allows you to set the user and stream volume above the default maximum",
     settings,
 
     patches: [
@@ -69,18 +66,18 @@ export default definePlugin({
                 replace: (_, higherMaxVolume, minorMaxVolume) => `${higherMaxVolume}*$self.settings.store.multiplier`
             }
         })),
-        // patches needed for web/vesktop
+        // Patches needed for web/vesktop
         {
             find: "streamSourceNode",
-            predicate: () => !IS_DISCORD_DESKTOP,
+            predicate: () => IS_WEB,
             group: true,
             replacement: [
-                // remove the cap of 100%
+                // Remove rounding algorithm
                 {
                     match: /Math\.max.{0,30}\)\)/,
                     replace: "arguments[0]"
                 },
-                // to actually patch the volume
+                // Patch the volume
                 {
                     match: /\.volume=this\._volume\/100;/,
                     replace: ".volume=0.00;$self.patchVolume(this);"
@@ -133,6 +130,6 @@ export default definePlugin({
 
         data.gainNode.gain.value = data._mute
             ? 0
-            : amplitudeToPerceptual(data._volume) / 100;
+            : data._volume / 100;
     }
 });
