@@ -52,7 +52,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "rizzMoji 😏",
+    name: "Smirk 😏",
     description: "Get rizzed up with this emoji (also a heavily inspired plugin from the Moyai plugin by Megu and Nuckyz)",
     authors: [Devs.uhAlexz],
     settings,
