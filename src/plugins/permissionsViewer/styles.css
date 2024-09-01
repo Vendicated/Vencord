@@ -110,6 +110,7 @@
 .vc-permviewer-perms-role-image {
     width: 20px;
     height: 20px;
+    object-fit: contain;
     margin-right: 8px;
 }
 
