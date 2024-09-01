@@ -31,7 +31,7 @@ function updateProfileEffectId(profile: UserProfile, id: bigint) {
     }
 }
 
-export function decodeAboutMeFPTEHook(profile: UserProfile | undefined) {
+export function decodeAboutMeFPTEHook(profile?: UserProfile) {
     if (!profile) return profile;
 
     if (settings.store.prioritizeNitro) {

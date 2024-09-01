@@ -14,7 +14,7 @@ export const ProfileEffectStore: FluxStore & {
     hasFetched: () => boolean;
     readonly fetchError: Error | undefined;
     readonly isFetching: boolean;
-    readonly profileEffects: readonly ProfileEffect[];
+    readonly profileEffects: ProfileEffect[];
     readonly tryItOutId: string | null;
 } = findStoreLazy("ProfileEffectStore");
 
@@ -23,9 +23,9 @@ export const ProfileEffectRecord: {
     fromServer: (profileEffectFromServer: SnakeCasedProperties<ProfileEffectProperties>) => ProfileEffectRecordInstance;
 } = findByCodeLazy(",this.type=", ".PROFILE_EFFECT");
 
-type ProfileEffectProperties = Omit<ProfileEffectRecordInstance, "type">;
+export type ProfileEffectProperties = Omit<ProfileEffectRecordInstance, "type">;
 
-interface ProfileEffectRecordInstance {
+export interface ProfileEffectRecordInstance {
     id: string;
     skuId: string;
     type: CollectiblesItemType.PROFILE_EFFECT;

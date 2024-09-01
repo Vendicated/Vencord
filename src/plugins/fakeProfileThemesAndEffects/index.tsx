@@ -15,7 +15,10 @@ import { ProfileEffectRecord, ProfileEffectStore } from "./lib/profileEffects";
 import { profilePreviewHook } from "./lib/profilePreview";
 import { decodeAboutMeFPTEHook } from "./lib/userProfile";
 
-function replaceHelper(string: string, replaceArgs: [searchRegExp: RegExp, replaceString: string][]) {
+function replaceHelper(
+    string: string,
+    replaceArgs: readonly (readonly [searchRegExp: RegExp, replaceString: string])[]
+) {
     let result = string;
     for (const [searchRegExp, replaceString] of replaceArgs) {
         const beforeReplace = result;
@@ -60,7 +63,7 @@ export default definePlugin({
         },
         // Patches ProfileCustomizationPreview
         {
-            find: '"ProfileCustomizationPreview"',
+            find: ".EDIT_PROFILE_BANNER})",
             replacement: {
                 match: /:function\(\){return (\i)}.+function \1\((\i)\){/,
                 replace: "$&$self.profilePreviewHook($2);"
@@ -84,13 +87,13 @@ export default definePlugin({
         },
         // ProfileEffectModal
         {
-            find: "initialSelectedProfileEffectId",
+            find: "initialSelectedProfileEffectId:",
             group: true,
             replacement: [
                 // Modal root
                 {
-                    match: /(function (\i)\([^)]*\){(?:.(?!function |}$))*\.ModalRoot,(?:.(?!function |}$))*}).*(?=}$)/,
-                    replace: (match, func, funcName) => `${match}{$self.ProfileEffectModal=${funcName};`
+                    match: /(function (\i)\([^)]*\){(?:.(?!function |}$))*\.ModalRoot,(?:.(?!function |}$))*}).*(?=})/,
+                    replace: (match, func, funcName) => `${match}(()=>{$self.ProfileEffectModal=${funcName};`
                         + replaceHelper(func, [
                             // Required for the profile preview to show profile effects
                             [
@@ -98,11 +101,11 @@ export default definePlugin({
                                 "{isFetching:!1,categories:new Map,purchases:$self.usePurchases()}"
                             ]
                         ])
-                        + "}"
+                        + "})()"
                 },
                 // Modal content
                 {
-                    match: /(function \i\([^)]*\){(?:.(?!function ))*\.ModalContent,(?:.(?!function ))*}).*(?=}}$)/,
+                    match: /(function \i\([^)]*\){(?:.(?!function ))*\.ModalContent,(?:.(?!function ))*}).*(?=}\))/,
                     replace: (match, func) => match + replaceHelper(func, [
                         // Required to show the apply button
                         [
@@ -112,7 +115,7 @@ export default definePlugin({
                         // Replaces the profile effect list with the modified version
                         [
                             /(?<=\.jsxs?\)\()[^,]+(?=,{(?:(?:.(?!\.jsxs?\)))+,)?onSelect:)/,
-                            "$self.ProfileEffectSection"
+                            "$self.ProfileEffectSelection"
                         ],
                         // Replaces the apply profile effect function with the modified version
                         [
@@ -133,12 +136,12 @@ export default definePlugin({
                 }
             ]
         },
-        // ProfileEffectSection
+        // ProfileEffectSelection
         {
             find: ".presetEffectBackground",
             replacement: {
                 match: /function\(\i,(\i),.+[,;}]\1\.\i=([^=].+?})(?=;|}$).*(?=}$)/,
-                replace: (match, _, func) => `${match};$self.ProfileEffectSection=`
+                replace: (match, _, func) => `${match};$self.ProfileEffectSelection=`
                     + replaceHelper(func, [
                         // Removes the "Exclusive to Nitro" and "Preview The Shop" sections
                         // Adds every profile effect to the "Your Decorations" section and removes the "Shop" button
@@ -149,7 +152,7 @@ export default definePlugin({
                     ])
             }
         },
-        // ProfileEffectPreview
+        // Patches ProfileEffectPreview
         {
             find: ".effectDescriptionContainer",
             replacement: {
@@ -162,7 +165,7 @@ export default definePlugin({
 
     addFPTEBuilder: (guild?: BuilderProps["guild"]) => settings.store.hideBuilder ? null : <Builder guild={guild} />,
 
-    onApply(_effectId: string | undefined) {},
+    onApply(_effectId?: string) {},
     set ProfileEffectModal(comp: Parameters<typeof setProfileEffectModal>[0]) {
         setProfileEffectModal(props => {
             this.onApply = effectId => {
@@ -173,7 +176,7 @@ export default definePlugin({
         });
     },
 
-    ProfileEffectSection: () => null,
+    ProfileEffectSelection: () => null,
 
     usePurchases: () => useMemo(
         () => new Map(ProfileEffectStore.profileEffects.map(effect => [

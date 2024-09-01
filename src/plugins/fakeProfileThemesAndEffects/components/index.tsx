@@ -67,14 +67,14 @@ export interface CustomColorPickerProps {
 
 export const CustomColorPicker = findComponentByCodeLazy<CustomColorPickerProps>(".customColorPicker");
 
-export interface ProfileEffectModalProps extends ModalProps {
+interface ProfileEffectModalProps extends ModalProps {
     analyticsLocations?: string[] | undefined;
     guild?: Guild | null | undefined;
     initialSelectedEffectId?: string | undefined;
     onApply: (effect: ProfileEffectConfig | null) => void;
 }
 
-export let ProfileEffectModal: FunctionComponent<ProfileEffectModalProps> = () => null;
+let ProfileEffectModal: FunctionComponent<ProfileEffectModalProps> = () => null;
 
 export function setProfileEffectModal(comp: typeof ProfileEffectModal) {
     ProfileEffectModal = comp;
