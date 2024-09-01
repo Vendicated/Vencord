@@ -406,6 +406,7 @@ function PatchHelper() {
                     <Forms.FormTitle className={Margins.top20}>Code</Forms.FormTitle>
                     <CodeBlock lang="js" content={code} />
                     <Button onClick={() => { ClipboardUtils.copy(code); }}>Copy to Clipboard</Button>
+                    <Button className={Margins.top8} onClick={() => { ClipboardUtils.copy("```ts\n" + code + "\n```"); }}>Copy as Codeblock</Button>
                 </>
             )}
         </SettingsTab>
