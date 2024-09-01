@@ -39,6 +39,10 @@
 
 /*  RolesAndUsersPermissions Component */
 
+.vc-permviewer-perms-content {
+    padding: 16px 4px 16px 16px !important;
+}
+
 .vc-permviewer-perms-title {
     flex-grow: 1;
 }
@@ -53,18 +57,17 @@
 }
 
 .vc-permviewer-perms-container {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    grid-template-areas: "list permissions";
-    padding: 16px 0;
+    height: 100%;
+    display: flex;
 }
 
 .vc-permviewer-perms-list {
-    grid-area: list;
+    overflow: hidden auto;
+    padding-right: 8px;
     display: flex;
     flex-direction: column;
     gap: 2px;
-    border-right: 2px solid var(--background-modifier-active);
+    flex: unset;
 }
 
 .vc-permviewer-perms-list-item-btn {
@@ -77,7 +80,7 @@
     align-items: center;
     padding: 8px 5px;
     cursor: pointer;
-    width: 230px;
+    width: 250px;
     border-radius: 5px;
 }
 
@@ -104,6 +107,12 @@
     flex-shrink: 0;
 }
 
+.vc-permviewer-perms-role-image {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+}
+
 .vc-permviewer-perms-user-img {
     border-radius: 50%;
     width: 20px;
@@ -115,7 +124,7 @@
     grid-area: permissions;
     display: flex;
     flex-direction: column;
-    margin-left: 5px;
+    padding-right: 5px !important;
 }
 
 .vc-permviewer-perms-perms-item {

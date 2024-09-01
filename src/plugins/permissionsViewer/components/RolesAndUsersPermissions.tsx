@@ -21,8 +21,10 @@ import { Flex } from "@components/Flex";
 import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
 import { getUniqueUsername } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Clipboard, ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, i18n, Menu, PermissionsBits, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
-import type { Guild } from "discord-types/general";
+import { findByCodeLazy } from "@webpack";
+import { Clipboard, ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, i18n, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { UnicodeEmoji } from "@webpack/types";
+import type { Guild, Role } from "discord-types/general";
 
 import { settings } from "..";
 import { cl, getPermissionDescription, getPermissionString } from "../utils";
@@ -52,6 +54,21 @@ function openRolesAndUsersPermissionsModal(permissions: Array<RoleOrUserPermissi
         />
     ));
 }
+
+const getRoleIconInfo = findByCodeLazy("convertSurrogateToName", "customIconSrc", "unicodeEmoji");
+
+const getRoleIconSrc = (role: Role) => {
+    const icon: {
+        customIconSrc?: string;
+        unicodeEmoji?: UnicodeEmoji;
+    } = getRoleIconInfo(role, 20);
+
+    if (!icon) return;
+
+    const { customIconSrc, unicodeEmoji } = icon;
+
+    return customIconSrc || unicodeEmoji?.url;
+};
 
 function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, header }: { permissions: Array<RoleOrUserPermission>; guild: Guild; modalProps: ModalProps; header: string; }) {
     permissions.sort((a, b) => a.type - b.type);
@@ -90,7 +107,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 
-            <ModalContent>
+            <ModalContent className={cl("perms-content")}>
                 {!selectedItem && (
                     <div className={cl("perms-no-perms")}>
                         <Text variant="heading-lg/normal">No permissions to display!</Text>
@@ -99,10 +116,11 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
 
                 {selectedItem && (
                     <div className={cl("perms-container")}>
-                        <div className={cl("perms-list")}>
+                        <ScrollerThin className={cl("perms-list")}>
                             {permissions.map((permission, index) => {
                                 const user = UserStore.getUser(permission.id ?? "");
                                 const role = roles[permission.id ?? ""];
+                                const roleIconSrc = (permission.type === PermissionType.Role) ? getRoleIconSrc(role) : null;
 
                                 return (
                                     <button
@@ -136,6 +154,12 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                     style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }}
                                                 />
                                             )}
+                                            {permission.type === PermissionType.Role && roleIconSrc && (
+                                                <img
+                                                    className={cl("perms-role-image")}
+                                                    src={roleIconSrc}
+                                                />
+                                            )}
                                             {permission.type === PermissionType.User && user !== undefined && (
                                                 <img
                                                     className={cl("perms-user-img")}
@@ -164,8 +188,13 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                     </button>
                                 );
                             })}
-                        </div>
-                        <div className={cl("perms-perms")}>
+                        </ScrollerThin>
+                        <div style={{
+                            width: "2px",
+                            margin: "0 5px",
+                            backgroundColor: "var(--background-modifier-active)",
+                        }} />
+                        <ScrollerThin className={cl("perms-perms")}>
                             {Object.entries(PermissionsBits).map(([permissionName, bit]) => (
                                 <div className={cl("perms-perms-item")}>
                                     <div className={cl("perms-perms-item-icon")}>
@@ -192,7 +221,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                     </Tooltip>
                                 </div>
                             ))}
-                        </div>
+                        </ScrollerThin>
                     </div>
                 )}
             </ModalContent>
