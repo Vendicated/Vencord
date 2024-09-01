@@ -65,7 +65,9 @@ interface TrackData {
 // only relevant enum values
 const enum ActivityType {
     PLAYING = 0,
+    STREAMING = 1,
     LISTENING = 2,
+    WATCHING = 3
 }
 
 const enum ActivityFlag {
@@ -160,10 +162,28 @@ const settings = definePluginSettings({
             }
         ],
     },
-    useListeningStatus: {
-        description: 'show "Listening to" status instead of "Playing"',
-        type: OptionType.BOOLEAN,
-        default: false,
+    activityType: {
+        description: 'Activity Type',
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Playing",
+                value: ActivityType.PLAYING,
+                default: true
+            },
+            {
+                label: "Listening",
+                value: ActivityType.LISTENING
+            },
+            {
+                label: "Streaming",
+                value: ActivityType.STREAMING
+            },
+            {
+                label: "Watching",
+                value: ActivityType.WATCHING
+            }
+        ]
     },
     missingArt: {
         description: "When album or album art is missing",
@@ -344,7 +364,7 @@ export default definePlugin({
                 button_urls: buttons.map(v => v.url),
             },
 
-            type: settings.store.useListeningStatus ? ActivityType.LISTENING : ActivityType.PLAYING,
+            type: settings.store.activityType,
             flags: ActivityFlag.INSTANCE,
         };
     }
