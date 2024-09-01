@@ -170,23 +170,13 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".popularApplicationCommandIds,",
-            replacement: {
-                match: /showBorder:(.{0,60})}\),(?<=guild:(\i),guildMember:(\i),.+?)/,
-                replace: (m, showBoder, guild, guildMember) => `${m}$self.UserPermissions(${guild},${guildMember},${showBoder}),`
-            }
-        },
-        {
             find: ".VIEW_ALL_ROLES,",
             replacement: {
-                match: /children:"\+"\.concat\(\i\.length-\i\.length\).{0,20}\}\),/,
+                match: /\.collapseButton,.+?}\)}\),/,
                 replace: "$&$self.ViewPermissionsButton(arguments[0]),"
             }
         }
     ],
-
-    UserPermissions: (guild: Guild, guildMember: GuildMember | undefined, showBorder: boolean) =>
-        !!guildMember && <UserPermissions guild={guild} guildMember={guildMember} showBorder={showBorder} />,
 
     ViewPermissionsButton: ErrorBoundary.wrap(({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) => (
         <Popout
@@ -194,7 +184,7 @@ export default definePlugin({
             align="center"
             renderPopout={() => (
                 <Dialog className={PopoutClasses.container} style={{ width: "500px" }}>
-                    <UserPermissions guild={guild} guildMember={guildMember} showBorder forceOpen />
+                    <UserPermissions guild={guild} guildMember={guildMember} forceOpen />
                 </Dialog>
             )}
         >

@@ -119,14 +119,8 @@ export function getContrastYIQ(hexColor: string | undefined): "#000000" | "#ffff
     return yiq >= 128 ? "#000000" : "#ffffff";
 }
 
-function SettingsComponent(props: { setValue(v: any): void; }) {
-    settings.store.tagSettings ??= defaultSettings;
-
-    const [tagSettings, setTagSettings] = useState(settings.store.tagSettings as TagSettings);
-    const setValue = (v: TagSettings) => {
-        setTagSettings(v);
-        props.setValue(v);
-    };
+function SettingsComponent() {
+    const tagSettings = settings.store.tagSettings ??= defaultSettings;
 
     return (
         <Flex flexDirection="column">
@@ -149,19 +143,13 @@ function SettingsComponent(props: { setValue(v: any): void; }) {
                         type="text"
                         value={tagSettings[t.name]?.text ?? t.displayName}
                         placeholder={`Text on tag (default: ${t.displayName})`}
-                        onChange={v => {
-                            tagSettings[t.name].text = v;
-                            setValue(tagSettings);
-                        }}
+                        onChange={v => tagSettings[t.name].text = v}
                         className={Margins.bottom16}
                     />
 
                     <Switch
                         value={tagSettings[t.name]?.showInChat ?? true}
-                        onChange={v => {
-                            tagSettings[t.name].showInChat = v;
-                            setValue(tagSettings);
-                        }}
+                        onChange={v => tagSettings[t.name].showInChat = v}
                         hideBorder
                     >
                         Show in messages
@@ -169,10 +157,7 @@ function SettingsComponent(props: { setValue(v: any): void; }) {
 
                     <Switch
                         value={tagSettings[t.name]?.showInNotChat ?? true}
-                        onChange={v => {
-                            tagSettings[t.name].showInNotChat = v;
-                            setValue(tagSettings);
-                        }}
+                        onChange={v => tagSettings[t.name].showInNotChat = v}
                         hideBorder
                     >
                         Show in member list and profiles
@@ -199,7 +184,7 @@ const settings = definePluginSettings({
     tagSettings: {
         type: OptionType.COMPONENT,
         component: SettingsComponent,
-        description: "fill me",
+        description: "fill me"
     }
 });
 
@@ -275,9 +260,9 @@ export default definePlugin({
             }
         },
         {
-            find: 'copyMetaData:"User Tag"',
+            find: ".Messages.USER_PROFILE_PRONOUNS",
             replacement: {
-                match: /(?=,botClass:)/,
+                match: /(?=,hideBotTag:!0)/,
                 replace: ",moreTags_channelId:arguments[0].moreTags_channelId"
             }
         },
