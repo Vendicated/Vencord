@@ -12,16 +12,35 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildStore, SelectedGuildStore, useState } from "@webpack/common";
 import { User } from "discord-types/general";
+import { PropsWithChildren } from "react";
 
 const settings = definePluginSettings({
     showAtSymbol: {
         type: OptionType.BOOLEAN,
         description: "Whether the the @ symbol should be displayed on user mentions",
         default: true
+    },
+    useDefaultSymbol: {
+        description: "Wether to use a default role icon or nothing",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    roles: {
+        description: "Enable the plugin for roles",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
+    },
+    avatars: {
+        description: "Enable the plugin for avatars",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
     }
 });
 
 function DefaultRoleIcon() {
+    if (!settings.store.useDefaultSymbol) return "@";
     return (
         <svg
             className="vc-mentionAvatars-icon vc-mentionAvatars-role-icon"
@@ -42,13 +61,20 @@ function DefaultRoleIcon() {
     );
 }
 
+interface RenderRoleIconProps extends PropsWithChildren {
+    roleName: string;
+    roleId: string;
+    guildId: string;
+}
+
 export default definePlugin({
     name: "MentionAvatars",
     description: "Shows user avatars and role icons inside mentions",
-    authors: [Devs.Ven, Devs.SerStars],
+    authors: [Devs.Ven, Devs.SerStars, Devs.sadan],
 
     patches: [{
         find: ".USER_MENTION)",
+        predicate: () => settings.store.avatars,
         replacement: {
             match: /children:"@"\.concat\((null!=\i\?\i:\i)\)(?<=\.useName\((\i)\).+?)/,
             replace: "children:$self.renderUsername({username:$1,user:$2})"
@@ -57,10 +83,11 @@ export default definePlugin({
     {
         find: ".ROLE_MENTION)",
         replacement: {
-            match: /children:\[\i&&.{0,50}\.RoleDot.{0,300},\i(?=\])/,
-            replace: "$&,$self.renderRoleIcon(arguments[0])"
+            match: /(children:\[\i&&.{0,50}\.RoleDot.{0,70})\i]/,
+            replace: "$1$self.renderRoleIcon(arguments[0])]"
         }
-    }],
+    }
+    ],
 
     settings,
 
@@ -85,19 +112,25 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    renderRoleIcon: ErrorBoundary.wrap(({ roleId, guildId }: { roleId: string, guildId: string; }) => {
+    renderRoleIcon: ErrorBoundary.wrap(({ children, roleName, roleId, guildId }: RenderRoleIconProps) => {
         // Discord uses Role Mentions for uncached users because .... idk
-        if (!roleId) return null;
+        if (!roleId) return children;
 
         const role = GuildStore.getRole(guildId, roleId);
 
-        if (!role?.icon) return <DefaultRoleIcon />;
+        if (!role?.icon) return <>
+            <DefaultRoleIcon />
+            {roleName.substring(1)}
+        </>;
 
         return (
-            <img
-                className="vc-mentionAvatars-icon vc-mentionAvatars-role-icon"
-                src={`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${roleId}/${role.icon}.webp?size=24&quality=lossless`}
-            />
+            <>
+                <img
+                    className="vc-mentionAvatars-icon vc-mentionAvatars-role-icon"
+                    src={`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${roleId}/${role.icon}.webp?size=24&quality=lossless`}
+                />
+                {roleName.substring(1)}
+            </>
         );
     }),
 });
@@ -106,4 +139,9 @@ function getUsernameString(username: string) {
     return settings.store.showAtSymbol
         ? `@${username}`
         : username;
+}
+
+function log<T>(a: T): T {
+    console.log(a);
+    return a;
 }
