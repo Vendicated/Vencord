@@ -108,7 +108,9 @@ function DearrowButton({ component }: { component: Component<Props>; }) {
                     onMouseLeave={onMouseLeave}
                     className={"vc-dearrow-toggle-" + (embed.dearrow.enabled ? "on" : "off")}
                     onClick={() => {
+                        const { invert } = settings.store;
                         const { enabled, oldThumb, oldTitle } = embed.dearrow;
+                        settings.store.invert = !invert;
                         embed.dearrow.enabled = !enabled;
                         if (oldTitle) {
                             embed.dearrow.oldTitle = embed.rawTitle;
