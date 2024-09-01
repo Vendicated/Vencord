@@ -35,6 +35,7 @@ export default definePlugin({
 
     addCopyButton: ErrorBoundary.wrap(({ fileContents, bytesLeft }: { fileContents: string, bytesLeft: number; }) => {
         const [recentlyCopied, setRecentlyCopied] = useState(false);
+
         return (
             <Tooltip text={recentlyCopied ? "Copied!" : bytesLeft > 0 ? "File too large to copy" : "Copy File Contents"}>
                 {tooltipProps => (
@@ -43,9 +44,10 @@ export default definePlugin({
                         className="vc-cfc-button"
                         role="button"
                         onClick={() => {
-                            if (bytesLeft <= 0) {
+                            if (!recentlyCopied && bytesLeft <= 0) {
                                 copyWithToast(fileContents);
                                 setRecentlyCopied(true);
+                                setTimeout(() => setRecentlyCopied(false), 2000);
                             }
                         }}
                     >
