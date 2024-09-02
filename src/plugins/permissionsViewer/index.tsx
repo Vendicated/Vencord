@@ -73,7 +73,8 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
             action={() => {
                 const guild = GuildStore.getGuild(guildId);
 
-                const { permissions, header }: { permissions: RoleOrUserPermission[], header: string; } = match(type)
+                const { permissions, header } = match(type)
+                    .returnType<{ permissions: RoleOrUserPermission[], header: string; }>()
                     .with(MenuItemParentType.User, () => {
                         const member = GuildMemberStore.getMember(guildId, id!);
 
