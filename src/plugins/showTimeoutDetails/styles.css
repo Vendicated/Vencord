@@ -22,6 +22,7 @@
 .vc-std-popout {
     width: unset;
     min-width: 180px;
+    max-width: 360px;
     color: var(--text-normal);
 }
 
