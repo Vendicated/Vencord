@@ -45,6 +45,7 @@ interface Props extends UserProps {
     page?: number;
     scrollToTop?(): void;
     hideOwnReview?: boolean;
+    type: ReviewType;
 }
 
 export default function ReviewsView({
@@ -56,6 +57,7 @@ export default function ReviewsView({
     page = 1,
     showInput = false,
     hideOwnReview = false,
+    type,
 }: Props) {
     const [signal, refetch] = useForceUpdater(true);
 
@@ -80,7 +82,7 @@ export default function ReviewsView({
                 reviews={reviewData!.reviews}
                 hideOwnReview={hideOwnReview}
                 profileId={discordId}
-                type={(UserStore.getUser(discordId) === null) ? ReviewType.User : ReviewType.Server}
+                type={type}
             />
 
             {showInput && (
