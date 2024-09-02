@@ -22,11 +22,11 @@ import { useForceUpdater } from "@utils/react";
 import { Paginator, Text, useRef, useState } from "@webpack/common";
 
 import { Auth } from "../auth";
+import { ReviewType } from "../entities";
 import { Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { cl } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 import ReviewsView, { ReviewsInputComponent } from "./ReviewsView";
-import { ReviewType } from "../entities";
 
 function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: any; modalKey: string, discordId: string; name: string; type: ReviewType; }) {
     const [data, setData] = useState<Response>();
