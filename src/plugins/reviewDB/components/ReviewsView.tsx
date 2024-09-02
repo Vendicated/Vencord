@@ -21,7 +21,7 @@ import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpa
 import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
 import { Auth, authorize } from "../auth";
-import { Review } from "../entities";
+import { Review, ReviewType } from "../entities";
 import { addReview, getReviews, Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { settings } from "../settings";
 import { cl, showToast } from "../utils";
@@ -45,6 +45,7 @@ interface Props extends UserProps {
     page?: number;
     scrollToTop?(): void;
     hideOwnReview?: boolean;
+    type: ReviewType;
 }
 
 export default function ReviewsView({
@@ -56,6 +57,7 @@ export default function ReviewsView({
     page = 1,
     showInput = false,
     hideOwnReview = false,
+    type,
 }: Props) {
     const [signal, refetch] = useForceUpdater(true);
 
@@ -80,6 +82,7 @@ export default function ReviewsView({
                 reviews={reviewData!.reviews}
                 hideOwnReview={hideOwnReview}
                 profileId={discordId}
+                type={type}
             />
 
             {showInput && (
@@ -94,7 +97,7 @@ export default function ReviewsView({
     );
 }
 
-function ReviewList({ refetch, reviews, hideOwnReview, profileId }: { refetch(): void; reviews: Review[]; hideOwnReview: boolean; profileId: string; }) {
+function ReviewList({ refetch, reviews, hideOwnReview, profileId, type }: { refetch(): void; reviews: Review[]; hideOwnReview: boolean; profileId: string; type: ReviewType; }) {
     const myId = UserStore.getCurrentUser().id;
 
     return (
@@ -111,7 +114,7 @@ function ReviewList({ refetch, reviews, hideOwnReview, profileId }: { refetch():
 
             {reviews?.length === 0 && (
                 <Forms.FormText className={cl("placeholder")}>
-                    Looks like nobody reviewed this user yet. You could be the first!
+                    Looks like nobody reviewed this {type === ReviewType.User ? "user" : "server"} yet. You could be the first!
                 </Forms.FormText>
             )}
         </div>

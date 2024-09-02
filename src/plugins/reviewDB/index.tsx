@@ -30,7 +30,7 @@ import { Guild, User } from "discord-types/general";
 
 import { Auth, initAuth, updateAuth } from "./auth";
 import { openReviewsModal } from "./components/ReviewModal";
-import { NotificationType } from "./entities";
+import { NotificationType, ReviewType } from "./entities";
 import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
 import { showToast } from "./utils";
@@ -44,7 +44,7 @@ const guildPopoutPatch: NavContextMenuPatchCallback = (children, { guild }: { gu
             label="View Reviews"
             id="vc-rdb-server-reviews"
             icon={OpenExternalIcon}
-            action={() => openReviewsModal(guild.id, guild.name)}
+            action={() => openReviewsModal(guild.id, guild.name, ReviewType.Server)}
         />
     );
 };
@@ -56,7 +56,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
             label="View Reviews"
             id="vc-rdb-user-reviews"
             icon={OpenExternalIcon}
-            action={() => openReviewsModal(user.id, user.username)}
+            action={() => openReviewsModal(user.id, user.username, ReviewType.User)}
         />
     );
 };
@@ -157,7 +157,7 @@ export default definePlugin({
         return (
             <TooltipContainer text="View Reviews">
                 <Button
-                    onClick={() => openReviewsModal(user.id, user.username)}
+                    onClick={() => openReviewsModal(user.id, user.username, ReviewType.User)}
                     look={Button.Looks.FILLED}
                     size={Button.Sizes.NONE}
                     color={RoleButtonClasses.bannerColor}
