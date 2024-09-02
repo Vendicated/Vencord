@@ -44,6 +44,7 @@ export const GuildMemberStore = findStore<t.GuildMemberStore>("GuildMemberStore"
 export const RelationshipStore = findStore<t.RelationshipStore>("RelationshipStore");
 
 export const EmojiStore = findStore<t.EmojiStore>("EmojiStore");
+export const ThemeStore = findStore<t.ThemeStore>("ThemeStore");
 export const WindowStore = findStore<t.WindowStore>("WindowStore");
 export const DraftStore = findStore<t.DraftStore>("DraftStore");
 

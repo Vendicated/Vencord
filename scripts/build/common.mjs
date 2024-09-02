@@ -334,5 +334,6 @@ export const commonRendererPlugins = [
     banImportPlugin(builtinModuleRegex, "Cannot import node inbuilt modules in browser code. You need to use a native.ts file"),
     banImportPlugin(/^react$/, "Cannot import from react. React and hooks should be imported from @webpack/common"),
     banImportPlugin(/^electron(\/.*)?$/, "Cannot import electron in browser code. You need to use a native.ts file"),
+    banImportPlugin(/^ts-pattern$/, "Cannot import from ts-pattern. match and P should be imported from @webpack/common"),
     ...commonOpts.plugins
 ];

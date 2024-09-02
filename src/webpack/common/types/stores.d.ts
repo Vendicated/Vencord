@@ -234,6 +234,14 @@ export type RelationshipStore = FluxStore & Stores.RelationshipStore & {
     getSince(userId: string): string;
 };
 
+export class ThemeStore extends FluxStore {
+    theme: "light" | "dark" | "darker" | "midnight";
+    darkSidebar: boolean;
+    isSystemThemeAvailable: boolean;
+    systemPrefersColorScheme: "light" | "dark";
+    systemTheme: null;
+}
+
 export type useStateFromStores = <T>(
     stores: FluxStore[],
     mapper: () => T,
