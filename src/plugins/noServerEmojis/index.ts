@@ -36,7 +36,7 @@ export default definePlugin({
         }
     ],
     shouldSkip(guildId: string, emoji: any) {
-        if (emoji.type !== "GUILD_EMOJI") {
+        if (emoji.guildId === undefined) {
             return false;
         }
         if (settings.store.shownEmojis === "onlyUnicode") {
