@@ -64,13 +64,14 @@ async function initThemes() {
     const activeTheme = ThemeStore.theme === "light" ? "light" : "dark";
 
     const links = themeLinks
-        .map(link => {
-            const themeToggleMatch = /^@(light|dark) (.*)/.exec(link);
-            if (!themeToggleMatch) return link;
-            if (activeTheme !== themeToggleMatch[1]) return null;
-            return themeToggleMatch[2];
+        .map(rawLink => {
+            const match = /^@(light|dark) (.*)/.exec(rawLink);
+            if (!match) return rawLink;
+
+            const [, mode, link] = match;
+            return mode === activeTheme ? link : null;
         })
-        .filter(link => link !== null) as string[];
+        .filter(link => link !== null);
 
     if (IS_WEB) {
         for (const theme of enabledThemes) {

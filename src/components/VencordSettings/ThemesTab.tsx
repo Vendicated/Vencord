@@ -77,9 +77,14 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
             <Forms.FormTitle className={Margins.top20} tag="h5">Validator</Forms.FormTitle>
             <Forms.FormText>This section will tell you whether your themes can successfully be loaded</Forms.FormText>
             <div>
-                {themeLinks.map(link => {
-                    const themeToggleMatch = /^@(light|dark) (.*)/.exec(link);
-                    const label = themeToggleMatch === null ? link : `[${themeToggleMatch[1]} mode only] ${themeToggleMatch[2]}`;
+                {themeLinks.map(rawLink => {
+                    const { label, link } = (() => {
+                        const match = /^@(light|dark) (.*)/.exec(rawLink);
+                        if (!match) return { label: rawLink, link: rawLink };
+
+                        const [, mode, link] = match;
+                        return { label: `[${mode} mode only] ${link}`, link };
+                    })();
 
                     return <Card style={{
                         padding: ".5em",
@@ -91,7 +96,7 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
                         }}>
                             {label}
                         </Forms.FormTitle>
-                        <Validator link={themeToggleMatch ? themeToggleMatch[2] : link} />
+                        <Validator link={link} />
                     </Card>;
                 })}
             </div>
