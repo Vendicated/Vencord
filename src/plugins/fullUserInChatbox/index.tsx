@@ -19,13 +19,13 @@ export default definePlugin({
         {
             find: "UNKNOWN_ROLE_PLACEHOLDER]",
             replacement: {
-                match: /(hidePersonalInformation.*?)return/,
+                match: /(hidePersonalInformation.{0,170}?)return/,
                 replace: "$1return $self.patchChatboxMention(arguments[0]);"
             }
         }
     ],
 
-    patchChatboxMention(props) {
+    patchChatboxMention(props: any) {
         return normalMessageComponent({
             className: "mention",
             userId: props.id,
