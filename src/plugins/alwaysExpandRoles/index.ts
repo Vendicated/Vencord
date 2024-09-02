@@ -45,6 +45,7 @@ export default definePlugin({
             }
         }
     ],
+    settings,
     start() {
         if (settings.store.hideArrow) enableStyle(style);
     },
