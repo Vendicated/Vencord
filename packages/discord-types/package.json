@@ -30,9 +30,9 @@
     },
     "devDependencies": {
         "@stylistic/eslint-plugin": "^2.7.2",
-        "@types/node": "^20.16.2",
+        "@types/node": "^20.16.3",
         "@types/semver": "^7.5.8",
-        "@typescript-eslint/typescript-estree": "^8.3.0",
+        "@typescript-eslint/typescript-estree": "^8.4.0",
         "eslint": "^9.9.1",
         "eslint-plugin-check-file": "^2.8.0",
         "eslint-plugin-import-x": "^4.1.1",
@@ -45,6 +45,6 @@
         "tsx": "^4.19.0",
         "type-fest": "^4.26.0",
         "typescript": "^5.5.4",
-        "typescript-eslint": "^8.3.0"
+        "typescript-eslint": "^8.4.0"
     }
 }

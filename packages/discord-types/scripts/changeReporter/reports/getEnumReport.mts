@@ -168,6 +168,4 @@ function checkEnumIgnores(
         for (const [key, value] of ignoredRemovals)
             if (value === undefined ? key in additions : additions[key] === value)
                 report.warns.push(`Ignored removal '${key}${value === undefined ? "" : " = " + formatValue(value)}' in config for enum '${report.identifier}' had no effect.`);
-
-    return changes;
 }

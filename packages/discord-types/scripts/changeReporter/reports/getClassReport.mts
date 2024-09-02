@@ -33,8 +33,8 @@ export async function getClassReport(
         try {
             const changes = await page.evaluate<[CR.ClassMembers], CR.FindFunction<[CR.ClassMembers], CR.ClassChanges>>(
                 pageAsyncFunction("s", `const c = await ${funcToString(find)}.call(Vencord, s);`
-                    + "if (Array.isArray(c)) { if (c.length > 0 && c.every(isValidClass)) return getClassChanges(s, ...c); }"
-                    + "else if (isValidClass(c)) return getClassChanges(s, c);"),
+                    + "if (Array.isArray(c)) { if (c.length > 0 && c.every(isValidClass)) return getClassChanges(s, c); }"
+                    + "else if (isValidClass(c)) return getClassChanges(s, [c]);"),
                 source
             );
             if (changes) {
@@ -230,14 +230,14 @@ function getClassMemberName(
 }
 
 /** Adds ignored additions so as to not affect `changedCount`. */
-function applyClassIgnoredAdditions(members: Set<string>, ignored?: string[]) {
+function applyClassIgnoredAdditions(members: Set<string>, ignored?: readonly string[]) {
     if (ignored)
         for (const key of ignored)
             members.add(key);
 }
 
 /** Removes ignored removals so as to not affect `changedCount`. */
-function applyClassIgnoredRemovals(members: Set<string>, ignored?: string[] | boolean) {
+function applyClassIgnoredRemovals(members: Set<string>, ignored?: readonly string[] | boolean) {
     if (Array.isArray(ignored)) {
         for (const key of ignored)
             members.delete(key);

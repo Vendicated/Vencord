@@ -21,7 +21,7 @@ export function autoFindStore(this: typeof Vencord, source: CR.ClassMembers, nam
     });
 
     if (store)
-        return getClassChanges(source, store.constructor);
+        return getClassChanges(source, [store.constructor]);
 }
 
 export function autoFindClass(this: typeof Vencord, source: CR.ClassMembers) {
@@ -49,7 +49,7 @@ export function autoFindClass(this: typeof Vencord, source: CR.ClassMembers) {
             if (!checked.has(constructor)) {
                 checked.add(constructor);
 
-                const changes = getClassChanges(source, constructor);
+                const changes = getClassChanges(source, [constructor]);
                 const { changedCount } = changes;
                 if (changedCount < lowestChangedCount) {
                     lowestChangedCount = changedCount;
@@ -73,16 +73,11 @@ export function isValidClass(value: unknown): value is CR.Class {
 
 export function getClassChanges(
     source: CR.ClassMembers,
-    ...constructors: [CR.Class, ...CR.Class[]]
+    constructors: readonly [CR.Class, ...CR.Class[]] | readonly [...CR.Class[], CR.Class]
 ): CR.ClassChanges {
     let hasConstructorDefinition = false;
-
-    const constructorKeys = new Set<PropertyKey>();
     const constructorDescriptors = new Map<PropertyKey, PropertyDescriptor>();
-
-    const prototypeKeys = new Set<PropertyKey>();
     const prototypeDescriptors = new Map<PropertyKey, PropertyDescriptor>();
-
     const matchedFields = new Set<string>();
 
     // Ignore constructor definitions without parameters
@@ -95,25 +90,17 @@ export function getClassChanges(
             hasConstructorDefinition = true;
 
         const constDescriptors = Object.getOwnPropertyDescriptors(constructor);
-        for (const key of Object.getOwnPropertyNames(constructor)) {
-            constructorKeys.add(key);
+        for (const key of Object.getOwnPropertyNames(constructor))
             constructorDescriptors.set(key, constDescriptors[key]!);
-        }
-        for (const key of Object.getOwnPropertySymbols(constructor)) {
-            constructorKeys.add(key);
+        for (const key of Object.getOwnPropertySymbols(constructor))
             constructorDescriptors.set(key, constDescriptors[key]!);
-        }
 
         const { prototype } = constructor;
         const protoDescriptors = Object.getOwnPropertyDescriptors(prototype);
-        for (const key of Object.getOwnPropertyNames(prototype)) {
-            prototypeKeys.add(key);
+        for (const key of Object.getOwnPropertyNames(prototype))
             prototypeDescriptors.set(key, protoDescriptors[key]!);
-        }
-        for (const key of Object.getOwnPropertySymbols(prototype)) {
-            prototypeKeys.add(key);
+        for (const key of Object.getOwnPropertySymbols(prototype))
             prototypeDescriptors.set(key, protoDescriptors[key]!);
-        }
 
         for (const [field] of constructorString.matchAll(fieldRE))
             matchedFields.add(field);
@@ -155,10 +142,9 @@ export function getClassChanges(
     const staticSetters = new Set(source.staticSetters);
 
     const ignoredConstructorKeys = new Set<PropertyKey>(["length", "name", "prototype"]);
-    for (const rawKey of constructorKeys) {
+    for (const [rawKey, descriptor] of constructorDescriptors) {
         if (ignoredConstructorKeys.has(rawKey)) continue;
 
-        const descriptor = constructorDescriptors.get(rawKey)!;
         const key = rawKey.toString();
 
         if (descriptor.get) {
@@ -205,16 +191,15 @@ export function getClassChanges(
 
     changedCount += staticMethodsAndFields.size + staticGetters.size + staticSetters.size;
 
-    // Instance method and accessor removals
+    // Instance method and getter/setter removals
     const methods = new Set(source.methods);
     const getters = new Set(source.getters);
     const setters = new Set(source.setters);
 
     const ignoredPrototypeKeys = new Set<PropertyKey>(["constructor"]);
-    for (const rawKey of prototypeKeys) {
+    for (const [rawKey, descriptor] of prototypeDescriptors) {
         if (ignoredPrototypeKeys.has(rawKey)) continue;
 
-        const descriptor = prototypeDescriptors.get(rawKey)!;
         const key = rawKey.toString();
 
         if (descriptor.get) {
