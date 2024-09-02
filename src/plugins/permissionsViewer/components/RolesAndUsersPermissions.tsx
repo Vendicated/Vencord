@@ -21,8 +21,9 @@ import { Flex } from "@components/Flex";
 import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
 import { getUniqueUsername } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, type ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import type { GuildRecord } from "@vencord/discord-types";
-import { ClipboardUtils, ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, i18n, Menu, Permissions, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
+import type { GuildRecord, Role, UnicodeEmoji } from "@vencord/discord-types";
+import { findByCodeLazy } from "@webpack";
+import { ClipboardUtils, ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, i18n, Menu, Permissions, ScrollerThin, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 
 import { settings } from "..";
 import { cl, getPermissionDescription, getPermissionString } from "../utils";
@@ -42,15 +43,17 @@ export interface RoleOrUserPermission {
     overwriteDeny?: bigint;
 }
 
-function openRolesAndUsersPermissionsModal(permissions: RoleOrUserPermission[], guild: GuildRecord, header: string) {
-    return openModal(modalProps => (
-        <RolesAndUsersPermissions
-            modalProps={modalProps}
-            permissions={permissions}
-            guild={guild}
-            header={header}
-        />
-    ));
+const getRoleIconData: {
+    (role: Role, size?: number | null): {
+        customIconSrc: string | undefined;
+        unicodeEmoji: UnicodeEmoji | undefined;
+    };
+    (role?: null, size?: number | null): null;
+} = findByCodeLazy("convertSurrogateToName", "customIconSrc", "unicodeEmoji");
+
+function getRoleIconSrc(role: Role) {
+    const icon = getRoleIconData(role, 20);
+    return icon.customIconSrc ?? icon.unicodeEmoji?.url;
 }
 
 function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, header }: { permissions: RoleOrUserPermission[]; guild: GuildRecord; modalProps: ModalProps; header: string; }) {
@@ -86,31 +89,34 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
             size={ModalSize.LARGE}
         >
             <ModalHeader>
-                <Text className={cl("perms-title")} variant="heading-lg/semibold">{header} permissions:</Text>
+                <Text className={cl("modal-title")} variant="heading-lg/semibold">{header} permissions:</Text>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 
-            <ModalContent>
+            <ModalContent className={cl("modal-content")}>
                 {!selectedItem && (
-                    <div className={cl("perms-no-perms")}>
+                    <div className={cl("modal-no-perms")}>
                         <Text variant="heading-lg/normal">No permissions to display!</Text>
                     </div>
                 )}
 
                 {selectedItem && (
-                    <div className={cl("perms-container")}>
-                        <div className={cl("perms-list")}>
+                    <div className={cl("modal-container")}>
+                        <ScrollerThin className={cl("modal-list")} orientation="auto">
                             {permissions.map((permission, index) => {
                                 const user = UserStore.getUser(permission.id);
-                                const role = roles[permission.id ?? ""];
+                                const role = permission.id ? roles[permission.id] : undefined;
+                                const roleIconSrc = role ? getRoleIconSrc(role) : undefined;
 
                                 return (
-                                    <button
-                                        className={cl("perms-list-item-btn")}
+                                    <div
+                                        className={cl("modal-list-item-btn")}
                                         onClick={() => { selectItem(index); }}
+                                        role="button"
+                                        tabIndex={0}
                                     >
                                         <div
-                                            className={cl("perms-list-item", { "perms-list-item-active": selectedItemIndex === index })}
+                                            className={cl("modal-list-item", { "modal-list-item-active": selectedItemIndex === index })}
                                             onContextMenu={e => {
                                                 if (permission.type === PermissionType.Role)
                                                     ContextMenuApi.openContextMenu(e, () => (
@@ -129,13 +135,19 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                         >
                                             {(permission.type === PermissionType.Role || permission.type === PermissionType.Owner) && (
                                                 <span
-                                                    className={cl("perms-role-circle")}
+                                                    className={cl("modal-role-circle")}
                                                     style={{ backgroundColor: role?.colorString ?? "var(--primary-300)" }}
                                                 />
                                             )}
-                                            {permission.type === PermissionType.User && user !== undefined && (
+                                            {permission.type === PermissionType.Role && roleIconSrc != null && (
                                                 <img
-                                                    className={cl("perms-user-img")}
+                                                    className={cl("modal-role-image")}
+                                                    src={roleIconSrc}
+                                                />
+                                            )}
+                                            {permission.type === PermissionType.User && user && (
+                                                <img
+                                                    className={cl("modal-user-img")}
                                                     src={user.getAvatarURL()}
                                                 />
                                             )}
@@ -147,24 +159,21 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                         : (
                                                             <Flex style={{ gap: "0.2em", justifyItems: "center" }}>
                                                                 @owner
-                                                                <OwnerCrownIcon
-                                                                    height={18}
-                                                                    width={18}
-                                                                    aria-hidden="true"
-                                                                />
+                                                                <OwnerCrownIcon height={18} width={18} aria-hidden="true" />
                                                             </Flex>
                                                         )
                                                 }
                                             </Text>
                                         </div>
-                                    </button>
+                                    </div>
                                 );
                             })}
-                        </div>
-                        <div className={cl("perms-perms")}>
+                        </ScrollerThin>
+                        <div className={cl("modal-divider")} />
+                        <ScrollerThin className={cl("modal-perms")} orientation="auto">
                             {Object.entries(Permissions).map(([permissionName, flag]) => (
-                                <div className={cl("perms-perms-item")}>
-                                    <div className={cl("perms-perms-item-icon")}>
+                                <div className={cl("modal-perms-item")}>
+                                    <div className={cl("modal-perms-item-icon")}>
                                         {(() => {
                                             const { permissions, overwriteAllow, overwriteDeny } = selectedItem;
 
@@ -188,7 +197,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                     </Tooltip>
                                 </div>
                             ))}
-                        </div>
+                        </ScrollerThin>
                     </div>
                 )}
             </ModalContent>
@@ -204,7 +213,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: GuildRecord; roleI
             aria-label="Role Options"
         >
             <Menu.MenuItem
-                id="vc-copy-role-id"
+                id={cl("copy-role-id")}
                 label={i18n.Messages.COPY_ID_ROLE}
                 action={() => {
                     ClipboardUtils.copy(roleId);
@@ -213,14 +222,13 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: GuildRecord; roleI
 
             {(settings.store as any).unsafeViewAsRole && (
                 <Menu.MenuItem
-                    id="vc-pw-view-as-role"
+                    id={cl("view-as-role")}
                     label={i18n.Messages.VIEW_AS_ROLE}
                     action={() => {
                         const role = GuildStore.getRole(guild.id, roleId);
                         if (!role) return;
 
                         onClose();
-
                         FluxDispatcher.dispatch({
                             type: "IMPERSONATE_UPDATE",
                             guildId: guild.id,
@@ -231,8 +239,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: GuildRecord; roleI
                                 }
                             }
                         });
-                    }
-                    }
+                    }}
                 />
             )}
         </Menu.Menu>
@@ -247,7 +254,7 @@ function UserContextMenu({ userId }: { userId: string; }) {
             aria-label="User Options"
         >
             <Menu.MenuItem
-                id="vc-copy-user-id"
+                id={cl("copy-user-id")}
                 label={i18n.Messages.COPY_ID_USER}
                 action={() => {
                     ClipboardUtils.copy(userId);
@@ -259,4 +266,13 @@ function UserContextMenu({ userId }: { userId: string; }) {
 
 const RolesAndUsersPermissions = ErrorBoundary.wrap(RolesAndUsersPermissionsComponent);
 
-export default openRolesAndUsersPermissionsModal;
+export default function openRolesAndUsersPermissionsModal(permissions: RoleOrUserPermission[], guild: GuildRecord, header: string) {
+    return openModal(modalProps => (
+        <RolesAndUsersPermissions
+            modalProps={modalProps}
+            permissions={permissions}
+            guild={guild}
+            header={header}
+        />
+    ));
+}

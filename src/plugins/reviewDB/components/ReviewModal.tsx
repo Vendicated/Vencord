@@ -22,12 +22,13 @@ import { useForceUpdater } from "@utils/react";
 import { Paginator, Text, useRef, useState } from "@webpack/common";
 
 import { Auth } from "../auth";
+import type { ReviewType } from "../entities";
 import { type Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { cl } from "../utils";
 import ReviewComponent from "./ReviewComponent";
 import ReviewsView, { ReviewsInputComponent } from "./ReviewsView";
 
-function Modal({ discordId, modalKey, modalProps, name }: { discordId: string; modalKey: string; modalProps: ModalProps; name: string; }) {
+function Modal({ discordId, modalKey, modalProps, name, type }: { discordId: string; modalKey: string; modalProps: ModalProps; name: string; type: ReviewType; }) {
     const [data, setData] = useState<Response>();
     const [signal, refetch] = useForceUpdater(true);
     const [page, setPage] = useState(1);
@@ -58,6 +59,7 @@ function Modal({ discordId, modalKey, modalProps, name }: { discordId: string; m
                             onFetchReviews={setData}
                             scrollToTop={() => { ref.current?.scrollTo({ top: 0, behavior: "smooth" }); }}
                             hideOwnReview
+                            type={type}
                         />
                     </div>
                 </ModalContent>
@@ -95,7 +97,7 @@ function Modal({ discordId, modalKey, modalProps, name }: { discordId: string; m
     );
 }
 
-export function openReviewsModal(discordId: string, name: string) {
+export function openReviewsModal(discordId: string, name: string, type: ReviewType) {
     const modalKey = "vc-rdb-modal-" + Date.now();
 
     openModal(props => (
@@ -104,6 +106,7 @@ export function openReviewsModal(discordId: string, name: string) {
             modalProps={props}
             discordId={discordId}
             name={name}
+            type={type}
         />
     ), { modalKey });
 }

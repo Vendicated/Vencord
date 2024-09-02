@@ -28,6 +28,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import type { GuildMember, GuildRecord } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, Dialog, GuildMemberStore, GuildStore, Menu, Permissions, Popout, TooltipContainer, UserStore } from "@webpack/common";
+import type { ReactElement } from "react";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
 import UserPermissions from "./components/UserPermissions";
@@ -54,12 +55,12 @@ export const settings = definePluginSettings({
         options: [
             { label: "Highest Role", value: PermissionsSortOrder.HighestRole, default: true },
             { label: "Lowest Role", value: PermissionsSortOrder.LowestRole }
-        ],
+        ]
     },
     defaultPermissionsDropdownState: {
         description: "Whether the permissions dropdown on user popouts should be open by default",
         type: OptionType.BOOLEAN,
-        default: false,
+        default: false
     }
 });
 
@@ -80,11 +81,10 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                     case MenuItemParentType.User: {
                         const member = GuildMemberStore.getMember(guildId, id!)!;
 
-                        permissions = getSortedRoles(guild, member)
-                            .map(role => ({
-                                type: PermissionType.Role,
-                                ...role
-                            }));
+                        permissions = getSortedRoles(guild, member).map(role => ({
+                            type: PermissionType.Role,
+                            ...role
+                        }));
 
                         if (guild.ownerId === id) {
                             permissions.push({
@@ -97,32 +97,30 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
 
                         break;
                     }
-
                     case MenuItemParentType.Channel: {
                         const channel = ChannelStore.getChannel(id)!;
 
-                        permissions = sortPermissionOverwrites(Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
-                            type: type as number as PermissionType,
-                            id,
-                            overwriteAllow: allow,
-                            overwriteDeny: deny
-                        })), guildId);
+                        permissions = sortPermissionOverwrites(
+                            Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
+                                type: type as number as PermissionType,
+                                id,
+                                overwriteAllow: allow,
+                                overwriteDeny: deny
+                            })),
+                            guildId
+                        );
 
                         header = channel.name;
 
                         break;
                     }
-
-                    default: {
+                    default:
                         permissions = Object.values(GuildStore.getRoles(guild.id)).map(role => ({
                             type: PermissionType.Role,
                             ...role
                         }));
 
                         header = guild.name;
-
-                        break;
-                    }
                 }
 
                 openRolesAndUsersPermissionsModal(permissions, guild, header);
@@ -133,31 +131,39 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
 
 const makeContextMenuPatch = (childId: string | string[], type?: MenuItemParentType) =>
     ((children, props) => {
-        if (!props) return;
-        if ((type === MenuItemParentType.User && !props.user) || (type === MenuItemParentType.Guild && !props.guild) || (type === MenuItemParentType.Channel && (!props.channel || !props.guild)))
-            return;
+        if (
+            !props ||
+            (type === MenuItemParentType.User && !props.user) ||
+            (type === MenuItemParentType.Guild && !props.guild) ||
+            (type === MenuItemParentType.Channel && (!props.channel || !props.guild))
+        ) return;
 
         const group = findGroupChildrenByChildId(childId, children);
 
-        const item = (() => {
-            switch (type) {
-                case MenuItemParentType.User:
-                    return MenuItem(props.guildId, props.user.id, type);
-                case MenuItemParentType.Channel:
-                    return MenuItem(props.guild.id, props.channel.id, type);
-                case MenuItemParentType.Guild:
-                    return MenuItem(props.guild.id);
-                default:
-                    return null;
-            }
-        })();
+        let item: ReactElement | null;
+        switch (type) {
+            case MenuItemParentType.User:
+                item = MenuItem(props.guildId, props.user.id, type);
+                break;
+            case MenuItemParentType.Channel:
+                item = MenuItem(props.guild.id, props.channel.id, type);
+                break;
+            case MenuItemParentType.Guild:
+                item = MenuItem(props.guild.id);
+                break;
+            default:
+                return;
+        }
 
-        if (item == null) return;
+        if (item === null) return;
 
-        if (group)
+        if (group) {
             group.push(item);
-        else if (childId === "roles" && props.guildId)
-            // "roles" may not be present due to the member not having any roles. In that case, add it above "Copy ID"
+            return;
+        }
+
+        // "roles" may not be present due to the member not having any roles. In that case, add it above "Copy ID"
+        if (childId === "roles" && props.guildId)
             children.splice(-1, 0, <Menu.MenuGroup>{item}</Menu.MenuGroup>);
     }) satisfies NavContextMenuPatchCallback;
 

@@ -14,7 +14,7 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import type { PersistedStore } from "@vencord/discord-types";
 import { findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Button, Forms, useStateFromStores } from "@webpack/common";
+import { Button, Forms, ThemeStore, useStateFromStores } from "@webpack/common";
 
 const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
 
@@ -38,7 +38,6 @@ function setTheme(theme: string) {
     saveClientTheme({ theme });
 }
 
-const ThemeStore: PersistedStore & Record<string, any> = findStoreLazy("ThemeStore");
 const ClientThemesBackgroundStore: PersistedStore & Record<string, any> = findStoreLazy("ClientThemesBackgroundStore");
 
 function ThemeSettings() {

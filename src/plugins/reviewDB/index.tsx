@@ -30,7 +30,7 @@ import { AlertActionCreators, Button, MarkupUtils, Menu, TooltipContainer } from
 
 import { Auth, initAuth, updateAuth } from "./auth";
 import { openReviewsModal } from "./components/ReviewModal";
-import { NotificationType } from "./entities";
+import { NotificationType, ReviewType } from "./entities";
 import { getCurrentUserInfo, readNotification } from "./reviewDbApi";
 import { settings } from "./settings";
 import { showToast } from "./utils";
@@ -38,28 +38,28 @@ import { showToast } from "./utils";
 const RoleButtonClasses: Record<string, string> = findByPropsLazy("button", "buttonInner", "icon", "banner");
 
 const guildPopoutPatch = ((children, { guild }: { guild?: GuildRecord; onClose: () => void; }) => {
-    if (!guild) return;
-    children.push(
-        <Menu.MenuItem
-            label="View Reviews"
-            id="vc-rdb-server-reviews"
-            icon={OpenExternalIcon}
-            action={() => { openReviewsModal(guild.id, guild.name); }}
-        />
-    );
+    if (guild)
+        children.push(
+            <Menu.MenuItem
+                label="View Reviews"
+                id="vc-rdb-server-reviews"
+                icon={OpenExternalIcon}
+                action={() => { openReviewsModal(guild.id, guild.name, ReviewType.Server); }}
+            />
+        );
 }) satisfies NavContextMenuPatchCallback;
 
-const userContextPatch = ((children, { user }: { user?: UserRecord; onClose: () => void; }) => {
+const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { user?: UserRecord; onClose: () => void; }) => {
     if (user)
         children.push(
             <Menu.MenuItem
                 label="View Reviews"
                 id="vc-rdb-user-reviews"
                 icon={OpenExternalIcon}
-                action={() => { openReviewsModal(user.id, user.username); }}
+                action={() => { openReviewsModal(user.id, user.username, ReviewType.User); }}
             />
         );
-}) satisfies NavContextMenuPatchCallback;
+};
 
 export default definePlugin({
     name: "ReviewDB",
@@ -158,7 +158,7 @@ export default definePlugin({
         return (
             <TooltipContainer text="View Reviews">
                 <Button
-                    onClick={() => { openReviewsModal(user.id, user.username); }}
+                    onClick={() => { openReviewsModal(user.id, user.username, ReviewType.User); }}
                     look={Button.Looks.FILLED}
                     size={Button.Sizes.NONE}
                     color={RoleButtonClasses.bannerColor}

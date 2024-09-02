@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { FetchStoreFactory, Flux as $Flux, StoreArrayStateHook, StoreObjectStateHook, StoreStateHook, UnequatableStateComparator } from "@vencord/discord-types";
+import type { FetchStoreFactory, Flux as $Flux, PersistedStore, StoreArrayStateHook, StoreObjectStateHook, StoreStateHook, UnequatableStateComparator } from "@vencord/discord-types";
 import type * as Stores from "@vencord/discord-types/src/stores";
 
 // eslint-disable-next-line path-alias/no-relative
@@ -102,6 +102,9 @@ waitForStore("SelectedChannelStore", m => { SelectedChannelStore = m; });
 
 export let SelectedGuildStore: Stores.SelectedGuildStore;
 waitForStore("SelectedGuildStore", m => { SelectedGuildStore = m; });
+
+export let ThemeStore: PersistedStore & Record<string, any>;
+waitForStore("ThemeStore", m => { ThemeStore = m; });
 
 export let UserProfileStore: Stores.UserProfileStore;
 waitForStore("UserProfileStore", m => { UserProfileStore = m; });

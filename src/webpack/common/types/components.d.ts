@@ -459,7 +459,7 @@ export type ScrollerThin = ComponentType<PropsWithChildren<{
     style?: CSSProperties;
 
     dir?: "ltr";
-    orientation?: "horizontal" | "vertical";
+    orientation?: "horizontal" | "vertical" | "auto";
     paddingFix?: boolean;
     fade?: boolean;
 

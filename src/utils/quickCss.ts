@@ -17,6 +17,7 @@
 */
 
 import { Settings, SettingsStore } from "@api/Settings";
+import { ThemeStore } from "@webpack/common";
 
 
 let style: HTMLStyleElement | undefined;
@@ -32,11 +33,8 @@ function createStyle(id: string) {
 async function initSystemValues() {
     const values = await VencordNative.themes.getSystemValues();
     let variables = "";
-    for (const k in values) {
-        const v = values[k];
-        if (v !== "#")
-            variables += `--${k}: ${v};`;
-    }
+    for (const [k, v] of Object.entries(values))
+        if (v !== "#") variables += `--${k}: ${v};`;
 
     createStyle("vencord-os-theme-values").textContent = `:root{${variables}}`;
 }
@@ -61,7 +59,17 @@ async function initThemes() {
 
     const { themeLinks, enabledThemes } = Settings;
 
-    const links = [...themeLinks];
+    // "darker" and "midnight" both count as dark
+    const activeTheme = ThemeStore.theme === "light" ? "light" : "dark";
+
+    const links: string[] = [];
+    for (const rawLink of themeLinks) {
+        const match = /^@(light|dark) (.*)/.exec(rawLink);
+        if (match) {
+            const [, mode, link] = match;
+            if (mode === activeTheme) links.push(link!);
+        } else links.push(rawLink);
+    }
 
     if (IS_WEB) {
         for (const theme of enabledThemes) {
@@ -87,6 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     SettingsStore.addChangeListener("themeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
+    ThemeStore.addChangeListener(initThemes);
 
     if (!IS_WEB)
         VencordNative.quickCss.addThemeChangeListener(initThemes);

@@ -22,7 +22,7 @@ import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpa
 import { Forms, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
 import { Auth, authorize } from "../auth";
-import type { Review } from "../entities";
+import { type Review, ReviewType } from "../entities";
 import { addReview, getReviews, type Response, REVIEWS_PER_PAGE } from "../reviewDbApi";
 import { settings } from "../settings";
 import { cl, showToast } from "../utils";
@@ -46,6 +46,7 @@ interface ReviewsViewProps extends UserProps {
     refetchSignal?: unknown;
     scrollToTop?: () => void;
     showInput?: boolean;
+    type: ReviewType;
 }
 
 export default function ReviewsView({
@@ -57,6 +58,7 @@ export default function ReviewsView({
     page = 1,
     showInput = false,
     hideOwnReview = false,
+    type,
 }: ReviewsViewProps) {
     const [signal, refetch] = useForceUpdater(true);
 
@@ -81,6 +83,7 @@ export default function ReviewsView({
                 reviews={reviewData.reviews}
                 hideOwnReview={hideOwnReview}
                 profileId={discordId}
+                type={type}
             />
 
             {showInput && (
@@ -100,9 +103,10 @@ interface ReviewListProps {
     profileId: string;
     refetch: () => void;
     reviews: Review[];
+    type: ReviewType;
 }
 
-function ReviewList({ hideOwnReview, profileId, refetch, reviews }: ReviewListProps) {
+function ReviewList({ hideOwnReview, profileId, refetch, reviews, type }: ReviewListProps) {
     const meId = UserStore.getCurrentUser()!.id;
 
     return (
@@ -120,7 +124,7 @@ function ReviewList({ hideOwnReview, profileId, refetch, reviews }: ReviewListPr
 
             {reviews.length === 0 && (
                 <Forms.FormText className={cl("placeholder")}>
-                    Looks like nobody reviewed this user yet. You could be the first!
+                    Looks like nobody reviewed this {type === ReviewType.User ? "user" : "server"} yet. You could be the first!
                 </Forms.FormText>
             )}
         </div>
