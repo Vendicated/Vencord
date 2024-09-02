@@ -37,7 +37,7 @@ export default definePlugin({
         const [recentlyCopied, setRecentlyCopied] = useState(false);
 
         return (
-            <Tooltip text={recentlyCopied ? "Copied!" : bytesLeft > 0 ? "File too large to copy" : "Copy File Contents"}>
+            <Tooltip text={recentlyCopied ? "Copied!" : bytesLeft > 0 ? "File too large to copy" : "Copy file contents"}>
                 {tooltipProps => (
                     <div
                         {...tooltipProps}
