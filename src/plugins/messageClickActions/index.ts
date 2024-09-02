@@ -99,7 +99,7 @@ export default definePlugin({
                     });
                 }
             } else if (settings.store.enableDeleteOnClick && (isMe || PermissionStore.can(PermissionsBits.MANAGE_MESSAGES, channel))) {
-                if (msg.deleted) {
+                if (msg && !msg.deleted) {
                     FluxDispatcher.dispatch({
                         type: "MESSAGE_DELETE",
                         channelId: channel.id,
