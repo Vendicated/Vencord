@@ -1,14 +1,9 @@
 # TextProfileView
 
-TextProfileView userplugin for Vencord 🚀
+Adds the Full user mention to the textbox
 
-## Install
+Adds the avatar if you have mentioned avatars enabled
 
-> [!WARNING]
-> DO NOT GO CRY IN VENCORD SUPPORT IF YOU CAN'T INSTALL THIS. Can't do it? Womp womp, use an official build
+Provides the full context menu to make it easy to access the users profile, and other common actions
 
-However, if you have basic reading abilities, read https://docs.vencord.dev/installing/custom-plugins/.
-
-## Contribute
-
-you don't :trolley:
+https://github.com/user-attachments/assets/cd9edb33-99c8-4c8d-b669-8cddd05f4b45
