@@ -118,15 +118,20 @@ function UserPermissionsComponent({ forceOpen = false, guild, guildMember }: Use
 
         sortUserRoles(userRoles);
 
-        for (const [permission, flag] of Object.entries(Permissions))
-            for (const { permissions, colorString, position, name } of userRoles)
-                if ((permissions & flag) === flag)
+        for (const [permission, flag] of Object.entries(Permissions)) {
+            for (const { permissions, colorString, position, name } of userRoles) {
+                if ((permissions & flag) === flag) {
                     userPermissions.push({
                         permission: getPermissionString(permission),
                         roleName: name,
                         roleColor: colorString || "var(--primary-300)",
                         rolePosition: position
                     });
+
+                    break;
+                }
+            }
+        }
 
         userPermissions.sort((a, b) => b.rolePosition - a.rolePosition);
 
