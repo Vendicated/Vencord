@@ -290,11 +290,11 @@ page.on("console", async e => {
 });
 
 page.on("error", e => {
-    if (e.message.includes("the network is offline")) return;
     console.error("[Error]", e.message);
 });
 page.on("pageerror", e => {
     if (e.message.includes("Sentry successfully disabled")) return;
+    if (e.message.includes("the network is offline")) return;
 
     if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module")) {
         console.error("[Page Error]", e.message);
