@@ -57,7 +57,7 @@ export default definePlugin({
                 },
                 {
                     match: /text:\i\.\i.Messages.USER_PROFILE_PRONOUNS/,
-                    replace: '$&+vcHasPendingPronouns?"":` (${vcPronounSource})`'
+                    replace: '$&+(vcHasPendingPronouns?"":` (${vcPronounSource})`)'
                 },
                 {
                     match: /(\.pronounsText.+?children:)(\i)/,
