@@ -31,7 +31,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ColorMessage by Kyuuhachi
 - CommandPalette by Ethan
 - CopyUserMention by Cortex and castdrian
-- CustomSounds by ScattrdBlade
+- CustomSounds by TheKodeToad and SpikeHD
 - CuteAnimeBoys by ShadyGoat
 - CuteNekos by echo
 - CutePats by thororen
