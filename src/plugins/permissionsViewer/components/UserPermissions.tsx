@@ -36,15 +36,6 @@ interface UserPermission {
     rolePosition: number;
 }
 
-const Classes: Record<"actionButton" | "addButton" | "addButtonIcon" | "alignCenter" | "background" | "desaturateUserColors" | "dot" | "dotBorderBase" | "dotBorderColor" | "flex" | "justifyCenter" | "overflowButton" | "overflowRolesPopout" | "overflowRolesPopoutArrow" | "overflowRolesPopoutArrowWrapper" | "overflowRolesPopoutHeader" | "overflowRolesPopoutHeaderIcon" | "overflowRolesPopoutHeaderText" | "popoutBottom" | "popoutTop" | "role" | "roleCircle" | "roleDot" | "roleFlowerStar" | "roleIcon" | "roleName" | "roleNameOverflow" | "rolePill" | "rolePillBorder" | "roleRemoveButton" | "roleRemoveIcon" | "roleRemoveIconFocused" | "roles" | "roleVerifiedIcon" | "root" | "svg" | "wrap", string>
-    = proxyLazyWebpack(() => ({
-        ...findBulk(
-            filters.byProps("roles", "rolePill", "rolePillBorder"),
-            filters.byProps("roleCircle", "dotBorderBase", "dotBorderColor"),
-            filters.byProps("roleNameOverflow", "root", "roleName", "roleRemoveButton")
-        )
-    }));
-
 const { RoleRootClasses, RoleClasses, RoleBorderClasses } = proxyLazyWebpack(() => {
     const [RoleRootClasses, RoleClasses, RoleBorderClasses] = findBulk(
         filters.byProps("root", "expandButton", "collapseButton"),
