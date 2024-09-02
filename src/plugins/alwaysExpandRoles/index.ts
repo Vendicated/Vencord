@@ -28,6 +28,7 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
         description: "Hide Arrow",
+        restartNeeded: true
     },
 });
 
