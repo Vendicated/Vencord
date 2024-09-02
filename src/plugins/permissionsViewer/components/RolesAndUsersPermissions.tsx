@@ -21,7 +21,7 @@ import { Flex } from "@components/Flex";
 import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
 import { getUniqueUsername } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { findByCodeLazy } from "@webpack";
+import { findByCode } from "@webpack";
 import { Clipboard, ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, i18n, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { UnicodeEmoji } from "@webpack/types";
 import type { Guild, Role, User } from "discord-types/general";
@@ -45,7 +45,7 @@ export interface RoleOrUserPermission {
 }
 
 type GetRoleIconData = (role: Role, size: number) => { customIconSrc?: string; unicodeEmoji?: UnicodeEmoji; };
-const getRoleIconData: GetRoleIconData = findByCodeLazy("convertSurrogateToName", "customIconSrc", "unicodeEmoji");
+const getRoleIconData: GetRoleIconData = findByCode("convertSurrogateToName", "customIconSrc", "unicodeEmoji");
 
 function getRoleIconSrc(role: Role) {
     const icon = getRoleIconData(role, 20);
