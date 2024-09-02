@@ -40,6 +40,48 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Toggle functionality",
         default: true,
+    },
+    blockAllTypingIndicators: {
+        type: OptionType.BOOLEAN,
+        description: "Toggle functionality on all typing indicators on avatars",
+        default: false,
+        restartNeeded: true
+    },
+    blockAllIsTyping: {
+        type: OptionType.BOOLEAN,
+        description: "Toggle functionality on all 'Is Typing...'",
+        default: false,
+        restartNeeded: true
+    },
+    oldBlockAllTypingIndicators: {
+        type: OptionType.BOOLEAN,
+        description: "Toggle functionality on all 'Is Typing...'",
+        default: false,
+        restartNeeded: true,
+        hidden: true
+    },
+    oldBlockAllIsTyping: {
+        type: OptionType.BOOLEAN,
+        description: "Toggle functionality on all 'Is Typing...'",
+        default: false,
+        restartNeeded: true,
+        hidden: true
+    },
+    blockEverything: {
+        type: OptionType.BOOLEAN,
+        description: "Toggle functionality on Everything",
+        default: false,
+        restartNeeded: true,
+        onChange: (value: boolean) => {
+            settings.store.oldBlockAllTypingIndicators = settings.store.blockAllTypingIndicators;
+            settings.store.oldBlockAllIsTyping = settings.store.blockAllIsTyping;
+            if (!value) {
+                settings.store.blockAllTypingIndicators = settings.store.oldBlockAllTypingIndicators;
+                settings.store.blockAllIsTyping = settings.store.oldBlockAllIsTyping;
+            }
+            settings.store.blockAllTypingIndicators = value;
+            settings.store.blockAllIsTyping = value;
+        }
     }
 });
 
@@ -83,7 +125,6 @@ const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
     );
 };
 
-
 export default definePlugin({
     name: "SilentTyping",
     authors: [Devs.Ven, Devs.Rini, Devs.ImBanana],
@@ -101,6 +142,30 @@ export default definePlugin({
                 replace: "startTyping:$self.startTyping,stop"
             }
         },
+        {
+            find: "isTyping:",
+            all: true,
+            noWarn: true,
+            replacement: {
+                match: /isTyping:.+?([,}].*?\))/g,
+                replace: (m, rest) => {
+                    const destructuringMatch = rest.match(/}=.+/);
+                    if (destructuringMatch == null) return `isTyping:!1${rest}`;
+                    return m;
+                }
+            },
+            predicate: () => settings.store.blockAllTypingIndicators
+        },
+        {
+            find: "getTypingUsers(",
+            all: true,
+            noWarn: true,
+            replacement: {
+                match: /getTypingUsers\(.*?\)/,
+                replace: "getTypingUsers()"
+            },
+            predicate: () => settings.store.blockAllIsTyping
+        }
     ],
 
     commands: [{
@@ -128,6 +193,8 @@ export default definePlugin({
         FluxDispatcher.dispatch({ type: "TYPING_START_LOCAL", channelId });
     },
 
-    start: () => addChatBarButton("SilentTyping", SilentTypingToggle),
+    start: () => {
+        addChatBarButton("SilentTyping", SilentTypingToggle);
+    },
     stop: () => removeChatBarButton("SilentTyping"),
 });
