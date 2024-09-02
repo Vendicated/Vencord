@@ -18,7 +18,6 @@ import { i18n, Menu, Tooltip, useEffect, useState } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 import { SetTimezoneModal } from "./TimezoneModal";
-import { migrateData } from "plugins/pinDms/data";
 
 export const DATASTORE_KEY = "vencord-timezones";
 
