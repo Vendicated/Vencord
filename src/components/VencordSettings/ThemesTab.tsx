@@ -77,8 +77,16 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
             <Forms.FormTitle className={Margins.top20} tag="h5">Validator</Forms.FormTitle>
             <Forms.FormText>This section will tell you whether your themes can successfully be loaded</Forms.FormText>
             <div>
-                {themeLinks.map(link => (
-                    <Card style={{
+                {themeLinks.map(rawLink => {
+                    const { label, link } = (() => {
+                        const match = /^@(light|dark) (.*)/.exec(rawLink);
+                        if (!match) return { label: rawLink, link: rawLink };
+
+                        const [, mode, link] = match;
+                        return { label: `[${mode} mode only] ${link}`, link };
+                    })();
+
+                    return <Card style={{
                         padding: ".5em",
                         marginBottom: ".5em",
                         marginTop: ".5em"
@@ -86,11 +94,11 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
                         <Forms.FormTitle tag="h5" style={{
                             overflowWrap: "break-word"
                         }}>
-                            {link}
+                            {label}
                         </Forms.FormTitle>
                         <Validator link={link} />
-                    </Card>
-                ))}
+                    </Card>;
+                })}
             </div>
         </>
     );
@@ -296,6 +304,7 @@ function ThemesTab() {
                 <Card className="vc-settings-card vc-text-selectable">
                     <Forms.FormTitle tag="h5">Paste links to css files here</Forms.FormTitle>
                     <Forms.FormText>One link per line</Forms.FormText>
+                    <Forms.FormText>You can prefix lines with @light or @dark to toggle them based on your Discord theme</Forms.FormText>
                     <Forms.FormText>Make sure to use direct links to files (raw or github.io)!</Forms.FormText>
                 </Card>
 
