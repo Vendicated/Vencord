@@ -78,8 +78,8 @@ export default function TimeoutDetailsPopout({ closePopout, guildId, userId, mes
         </TimeoutDetailsRow>
 
         <TimeoutDetailsRow
-            description="AutoMod Rule"
-            icon={CustomAutoModRuleIcon}
+            description="Reason"
+            icon={MessageIcon}
         >
             {reason.reason}
         </TimeoutDetailsRow>
