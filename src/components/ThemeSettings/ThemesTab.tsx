@@ -433,14 +433,22 @@ function ThemesTab() {
                     </Card>
 
                     <div className={cl("grid")}>
-                        {onlineThemes?.map(theme => {
+                        {onlineThemes?.map(rawLink => {
+                            const { label, link } = (() => {
+                                const match = /^@(light|dark) (.*)/.exec(rawLink.link);
+                                if (!match) return { label: rawLink, link: rawLink };
+
+                                const [, mode, link] = match;
+                                return { label: `[${mode} mode only] ${link}`, link };
+                            })();
+
                             return <OtherThemeCard
-                                key={theme.fileName}
-                                enabled={settings.enabledThemeLinks.includes(theme.link)}
-                                onChange={enabled => onThemeLinkEnabledChange(theme.link, enabled)}
-                                onDelete={() => deleteThemeLink(theme.link)}
+                                key={rawLink.fileName}
+                                enabled={settings.enabledThemeLinks.includes(rawLink.link)}
+                                onChange={enabled => onThemeLinkEnabledChange(rawLink.link, enabled)}
+                                onDelete={() => deleteThemeLink(rawLink.link)}
                                 showDeleteButton
-                                theme={theme}
+                                theme={rawLink}
                             />;
                         })}
                     </div>
