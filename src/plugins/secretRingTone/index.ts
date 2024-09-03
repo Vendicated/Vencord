@@ -21,21 +21,21 @@ export default definePlugin({
     name: "SecretRingToneEnabler",
     description: "Always play the secret version of the discord ringtone (except during special ringtone events)",
     authors: [Devs.AndrewDLO, Devs.FieryFlames, Devs.RamziAH],
+    settings,
     patches: [
         {
             find: '"call_ringing_beat"',
             replacement: [
                 {
                     match: /500!==\i\(\)\.random\(1,1e3\)/,
-                    replace: "false",
+                    replace: "false"
                 },
                 {
-                    predicate: ()=> settings.store.onlySnow,
+                    predicate: () => settings.store.onlySnow,
                     match: /"call_ringing_beat",/,
-                    replace: "",
+                    replace: ""
                 }
             ]
-        },
-    ],
-    settings,
+        }
+    ]
 });
