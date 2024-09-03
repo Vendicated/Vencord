@@ -18,7 +18,7 @@ export default definePlugin({
     authors: [Devs.relitrix],
     patches: [
         {
-            find: /.Messages.STATUS_MENU_LABEL/,
+            find: "Messages.STATUS_MENU_LABEL",
             replacement: {
                 match: /hidePersonalInformation:\i,onClose:\i}\)/,
                 replace: "$&,$self.Roles(),"
