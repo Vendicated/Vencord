@@ -4,11 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentGuild } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { UserStore } from "@webpack/common";
+import { User } from "discord-types/general";
 
 const RolesComponent = findComponentByCodeLazy("user", "currentUser", "guild", "trackUserProfileAction");
 
