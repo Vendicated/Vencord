@@ -7,15 +7,16 @@
 import { SafetyIcon } from "@components/Icons";
 import { classes, Margins } from "@utils/index";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Dialog, GuildStore, i18n, Parser, PermissionsBits, PermissionStore, Text, Tooltip, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { Button, Dialog, GuildMemberStore, GuildStore, i18n, Parser, PermissionsBits, PermissionStore, Text, Tooltip, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { Message } from "discord-types/general";
 
+import { CountDown } from "..";
 import { useTimeoutReason } from "../TimeoutReasonStore";
-
 
 const PopoutClasses = findByPropsLazy("container", "scroller", "list");
 const rowClasses = findByPropsLazy("row", "rowIcon", "rowGuildName");
 
+const TimeoutIcon = findComponentByCodeLazy("M12 23c.08 0 .14-.08.11-.16a2.88 2.88 0 0 1 .29-2.31l2.2-3.85");
 const ChannelIcon = findComponentByCodeLazy("h4.97l-.8 4.84a1 1 0 0 0 1.97.32l.86-5.16H20a1");
 const CustomAutoModRuleIcon = findComponentByCodeLazy("a1 1 0 0 1 1-1h8a1 1 0 0 1 0 2H3a1 1 0 0 1-1-1ZM3 19a1 1 0 1 0 0 2h8a1 1 0 0 0 0-2H3Z");
 const MessageIcon = findComponentByCodeLazy('"M12 22a10 10 0 1 0-8.45-4.64c.13.19.11.44-.04.61l-2.06 2.37A1 1 0 0 0 2.2 22H12Z"');
@@ -24,6 +25,7 @@ const { setCommunicationDisabledUntil } = findByPropsLazy("setCommunicationDisab
 
 export default function TimeoutDetailsPopout({ closePopout, guildId, userId, message }: { closePopout(): void; guildId: string; userId: string; message: Message; }) {
     const user = UserStore.getUser(userId);
+    const member = GuildMemberStore.getMember(guildId, userId);
     const reason = useTimeoutReason(guildId, userId);
     const hasModerationPermission = useStateFromStores([PermissionStore], () => PermissionStore.canManageUser(PermissionsBits.MODERATE_MEMBERS, userId, GuildStore.getGuild(guildId)));
     const parse = (text: string) => Parser.parse(text, true, {
@@ -40,6 +42,16 @@ export default function TimeoutDetailsPopout({ closePopout, guildId, userId, mes
             Timeout details for {user.username}
         </Text>
         <div className={Margins.bottom8} />
+        <div className={rowClasses.row}>
+            <Tooltip text="Remaining time in timeout">
+                {p => <TimeoutIcon {...p} className={rowClasses.rowIcon} height="24" width="24" />}
+            </Tooltip>
+            <CountDown
+                deadline={new Date(member.communicationDisabledUntil!)}
+                showUnits
+                stopAtOneSec
+            />
+        </div>
         {(reason.moderator || reason.automod) && <div className={rowClasses.row}>
             <Tooltip text="Moderator">
                 {p => <SafetyIcon {...p} className={rowClasses.rowIcon} height="24" width="24" />}

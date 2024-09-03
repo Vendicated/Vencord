@@ -5,16 +5,14 @@
  */
 
 import { classes, Margins } from "@utils/index";
-import { findByPropsLazy, findComponentLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, i18n, Popout, Text, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
 import { FunctionComponent, ReactNode } from "react";
 
-import { DisplayStyle, settings } from "..";
+import { CountDown, DisplayStyle, settings } from "..";
 import { useTimeoutReason } from "../TimeoutReasonStore";
 import TimeoutDetailsPopout from "./TimeoutDetailsPopout";
-
-const CountDown = findComponentLazy(m => m.prototype?.render?.toString().includes(".MAX_AGE_NEVER"));
 
 const clickableClasses = findByPropsLazy("clickable", "avatar", "username");
 
