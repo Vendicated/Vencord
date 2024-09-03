@@ -7,6 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { type Emoji, EmojiType } from "@vencord/discord-types";
 
 const settings = definePluginSettings({
     shownEmojis: {
@@ -35,8 +36,8 @@ export default definePlugin({
             }
         }
     ],
-    shouldSkip(guildId: string, emoji: any) {
-        if (emoji.type !== "GUILD_EMOJI") {
+    shouldSkip(guildId: string, emoji: Emoji) {
+        if (emoji.type !== EmojiType.GUILD) {
             return false;
         }
         if (settings.store.shownEmojis === "onlyUnicode") {
