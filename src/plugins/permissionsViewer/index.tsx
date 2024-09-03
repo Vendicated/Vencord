@@ -26,7 +26,7 @@ import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, ChannelStore, Dialog, GuildMemberStore, GuildStore, Menu, PermissionsBits, Popout, TooltipContainer, UserStore } from "@webpack/common";
+import { Button, ChannelStore, Dialog, GuildMemberStore, GuildStore, match, Menu, PermissionsBits, Popout, TooltipContainer, UserStore } from "@webpack/common";
 import type { Guild, GuildMember } from "discord-types/general";
 
 import openRolesAndUsersPermissionsModal, { PermissionType, RoleOrUserPermission } from "./components/RolesAndUsersPermissions";
@@ -54,12 +54,12 @@ export const settings = definePluginSettings({
         options: [
             { label: "Highest Role", value: PermissionsSortOrder.HighestRole, default: true },
             { label: "Lowest Role", value: PermissionsSortOrder.LowestRole }
-        ],
+        ]
     },
     defaultPermissionsDropdownState: {
         description: "Whether the permissions dropdown on user popouts should be open by default",
         type: OptionType.BOOLEAN,
-        default: false,
+        default: false
     }
 });
 
@@ -73,14 +73,12 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
             action={() => {
                 const guild = GuildStore.getGuild(guildId);
 
-                let permissions: RoleOrUserPermission[];
-                let header: string;
-
-                switch (type) {
-                    case MenuItemParentType.User: {
+                const { permissions, header } = match(type)
+                    .returnType<{ permissions: RoleOrUserPermission[], header: string; }>()
+                    .with(MenuItemParentType.User, () => {
                         const member = GuildMemberStore.getMember(guildId, id!);
 
-                        permissions = getSortedRoles(guild, member)
+                        const permissions: RoleOrUserPermission[] = getSortedRoles(guild, member)
                             .map(role => ({
                                 type: PermissionType.Role,
                                 ...role
@@ -93,37 +91,37 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
                             });
                         }
 
-                        header = member.nick ?? UserStore.getUser(member.userId).username;
-
-                        break;
-                    }
-
-                    case MenuItemParentType.Channel: {
+                        return {
+                            permissions,
+                            header: member.nick ?? UserStore.getUser(member.userId).username
+                        };
+                    })
+                    .with(MenuItemParentType.Channel, () => {
                         const channel = ChannelStore.getChannel(id!);
 
-                        permissions = sortPermissionOverwrites(Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
+                        const permissions = sortPermissionOverwrites(Object.values(channel.permissionOverwrites).map(({ id, allow, deny, type }) => ({
                             type: type as PermissionType,
                             id,
                             overwriteAllow: allow,
                             overwriteDeny: deny
                         })), guildId);
 
-                        header = channel.name;
-
-                        break;
-                    }
-
-                    default: {
-                        permissions = Object.values(GuildStore.getRoles(guild.id)).map(role => ({
+                        return {
+                            permissions,
+                            header: channel.name
+                        };
+                    })
+                    .otherwise(() => {
+                        const permissions = Object.values(GuildStore.getRoles(guild.id)).map(role => ({
                             type: PermissionType.Role,
                             ...role
                         }));
 
-                        header = guild.name;
-
-                        break;
-                    }
-                }
+                        return {
+                            permissions,
+                            header: guild.name
+                        };
+                    });
 
                 openRolesAndUsersPermissionsModal(permissions, guild, header);
             }}
@@ -133,32 +131,34 @@ function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
 
 function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentType): NavContextMenuPatchCallback {
     return (children, props) => {
-        if (!props) return;
-        if ((type === MenuItemParentType.User && !props.user) || (type === MenuItemParentType.Guild && !props.guild) || (type === MenuItemParentType.Channel && (!props.channel || !props.guild)))
+        if (
+            !props ||
+            (type === MenuItemParentType.User && !props.user) ||
+            (type === MenuItemParentType.Guild && !props.guild) ||
+            (type === MenuItemParentType.Channel && (!props.channel || !props.guild))
+        ) {
             return;
+        }
 
         const group = findGroupChildrenByChildId(childId, children);
 
-        const item = (() => {
-            switch (type) {
-                case MenuItemParentType.User:
-                    return MenuItem(props.guildId, props.user.id, type);
-                case MenuItemParentType.Channel:
-                    return MenuItem(props.guild.id, props.channel.id, type);
-                case MenuItemParentType.Guild:
-                    return MenuItem(props.guild.id);
-                default:
-                    return null;
-            }
-        })();
+        const item = match(type)
+            .with(MenuItemParentType.User, () => MenuItem(props.guildId, props.user.id, type))
+            .with(MenuItemParentType.Channel, () => MenuItem(props.guild.id, props.channel.id, type))
+            .with(MenuItemParentType.Guild, () => MenuItem(props.guild.id))
+            .otherwise(() => null);
+
 
         if (item == null) return;
 
-        if (group)
-            group.push(item);
-        else if (childId === "roles" && props.guildId)
-            // "roles" may not be present due to the member not having any roles. In that case, add it above "Copy ID"
+        if (group) {
+            return group.push(item);
+        }
+
+        // "roles" may not be present due to the member not having any roles. In that case, add it above "Copy ID"
+        if (childId === "roles" && props.guildId) {
             children.splice(-1, 0, <Menu.MenuGroup>{item}</Menu.MenuGroup>);
+        }
     };
 }
 
