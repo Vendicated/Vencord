@@ -591,7 +591,7 @@ export default {
                 type: "enum",
             },
         },
-        "./general/RecordBase.ts": {
+        "./general/Record.ts": {
             RecordBase: {
                 type: "class",
                 ignoredRemovals: {
@@ -741,6 +741,18 @@ export default {
         "./stores/SelectedGuildStore.ts": {
             SelectedGuildStore: {
                 type: "class",
+            },
+        },
+        "./stores/ThemeStore.ts": {
+            ThemeStore: {
+                type: "class",
+                ignoredAdditions: {
+                    // Overrides
+                    staticMethodsAndFields: ["migrations"],
+                },
+            },
+            Theme: {
+                type: "enum",
             },
         },
         "./stores/UserProfileStore.ts": {

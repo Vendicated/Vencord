@@ -6,7 +6,7 @@
 
 import type { Nullish, Optional, SnakeCasedProperties } from "../internal";
 import type { IconSource } from "./misc";
-import type { RecordBase } from "./RecordBase";
+import type { RecordBase } from "./Record";
 
 export type UserRecordOwnProperties = Pick<UserRecord, "avatar" | "avatarDecorationData" | "banner" | "bot" | "clan" | "desktop" | "discriminator" | "email" | "flags" | "globalName" | "guildMemberAvatars" | "hasAnyStaffLevel" | "hasBouncedEmail" | "hasFlag" | "id" | "isStaff" | "isStaffPersonal" | "mfaEnabled" | "mobile" | "nsfwAllowed" | "personalConnectionId" | "phone" | "premiumType" | "premiumUsageFlags" | "publicFlags" | "purchasedFlags" | "system" | "username" | "verified">;
 

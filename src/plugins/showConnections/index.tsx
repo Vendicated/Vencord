@@ -25,13 +25,22 @@ import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import type { PlatformType, ProfileConnectedAccountData, UserRecord } from "@vencord/discord-types";
+import { type DisplayProfile, type PlatformType, type ProfileConnectedAccountData, Theme, type UserRecord } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { Tooltip, UserProfileStore } from "@webpack/common";
 
 import { VerifiedIcon } from "./VerifiedIcon";
 
-const getProfileThemeProps = findByCodeLazy(".getPreviewThemeColors", "primaryColor:");
+const useProfileTheme: (options: {
+    displayProfile?: DisplayProfile | null | undefined;
+    isPreview?: boolean | undefined /* = false */;
+    pendingAvatar?: string | null | undefined;
+    pendingThemeColors?: Parameters<DisplayProfile["getPreviewThemeColors"]>[0];
+    user?: UserRecord | null | undefined;
+}) => { theme: Theme.DARK | Theme.LIGHT; }
+    & ({ primaryColor: number; secondaryColor: number; }
+    | { primaryColor: null; secondaryColor: null; })
+    = findByCodeLazy(".getPreviewThemeColors", "primaryColor:");
 
 const Platforms: {
     get: (type: PlatformType) => ConnectionPlatform;
@@ -71,17 +80,17 @@ interface ConnectionPlatform {
 }
 
 const profilePopoutComponent = ErrorBoundary.wrap(
-    (props: { user: UserRecord; displayProfile?: any; }) => (
+    (props: { user: UserRecord; displayProfile?: DisplayProfile; }) => (
         <ConnectionsComponent
             {...props}
             id={props.user.id}
-            theme={getProfileThemeProps(props).theme}
+            theme={useProfileTheme(props).theme}
         />
     ),
     { noop: true }
 );
 
-function ConnectionsComponent({ id, theme }: { id: string; theme: string; }) {
+function ConnectionsComponent({ id, theme }: { id: string; theme: Theme.DARK | Theme.LIGHT; }) {
     const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
@@ -102,14 +111,14 @@ function ConnectionsComponent({ id, theme }: { id: string; theme: string; }) {
     );
 }
 
-function CompactConnectionComponent({ connection, theme }: { connection: ProfileConnectedAccountData; theme: string; }) {
+function CompactConnectionComponent({ connection, theme }: { connection: ProfileConnectedAccountData; theme: Theme.DARK | Theme.LIGHT; }) {
     const platform = Platforms.get(useLegacyPlatformType(connection.type));
     const url = platform.getPlatformUserUrl?.(connection);
 
     const img = (
         <img
             aria-label={connection.name}
-            src={theme === "light" ? platform.icon.lightSVG : platform.icon.darkSVG}
+            src={theme === Theme.LIGHT ? platform.icon.lightSVG : platform.icon.darkSVG}
             style={{
                 width: settings.store.iconSize,
                 height: settings.store.iconSize

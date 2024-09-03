@@ -5,7 +5,7 @@
  */
 
 import type { Nullish } from "../../internal";
-import type { RecordBase } from "../RecordBase";
+import type { RecordBase } from "../Record";
 import type { UserRecord } from "../UserRecord";
 
 export type InteractionRecordOwnProperties = Pick<InteractionRecord, "displayName" | "id" | "name" | "type" | "user">;

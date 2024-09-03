@@ -18,6 +18,7 @@ export * from "./ReadStateStore";
 export * from "./RelationshipStore";
 export * from "./SelectedChannelStore";
 export * from "./SelectedGuildStore";
+export * from "./ThemeStore";
 export * from "./UserProfileStore";
 export * from "./UserStore";
 export * from "./WindowStore";

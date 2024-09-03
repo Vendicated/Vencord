@@ -17,6 +17,7 @@
 */
 
 import { Settings, SettingsStore } from "@api/Settings";
+import { Theme } from "@vencord/discord-types";
 import { ThemeStore } from "@webpack/common";
 
 
@@ -60,7 +61,7 @@ async function initThemes() {
     const { themeLinks, enabledThemes } = Settings;
 
     // "darker" and "midnight" both count as dark
-    const activeTheme = ThemeStore.theme === "light" ? "light" : "dark";
+    const activeTheme = ThemeStore.theme === Theme.LIGHT ? Theme.LIGHT : Theme.DARK;
 
     const links: string[] = [];
     for (const rawLink of themeLinks) {

@@ -29,5 +29,5 @@ export declare class DraftStore<
     getThreadDraftWithParentMessageId(messageId: string): DraftNonForumThreadSettings | Nullish;
     getThreadSettings<ForumThread extends boolean = boolean>(threadId: string):
         (ForumThread extends true ? DraftForumThreadSettings : DraftNonForumThreadSettings) | Nullish;
-    initialize(state: State): void;
+    initialize(state?: State | Nullish): void;
 }

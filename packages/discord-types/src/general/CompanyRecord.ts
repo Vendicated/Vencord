@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { RecordBase } from "./RecordBase";
+import type { RecordBase } from "./Record";
 
 export type CompanyRecordOwnProperties = Pick<CompanyRecord, "id" | "name">;
 

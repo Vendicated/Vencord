@@ -7,7 +7,7 @@
 import type { Nullish, Optional, PartialOnUndefined, SnakeCasedProperties } from "../internal";
 import type { CompanyRecord } from "./CompanyRecord";
 import type { IconSource } from "./misc";
-import type { RecordBase } from "./RecordBase";
+import type { RecordBase } from "./Record";
 import type { UserRecord } from "./UserRecord";
 
 export type ApplicationRecordOwnProperties = Pick<ApplicationRecord, "aliases" | "bot" | "coverImage" | "description" | "developers" | "embeddedActivityConfig" | "eulaId" | "executables" | "flags" | "guild" | "guildId" | "hashes" | "hook" | "icon" | "id" | "integrationTypesConfig" | "isMonetized" | "isVerified" | "maxParticipants" | "name" | "overlay" | "overlayCompatibilityHook" | "overlayMethods" | "overlayWarn" | "primarySkuId" | "privacyPolicyUrl" | "publishers" | "roleConnectionsVerificationUrl" | "slug" | "splash" | "storefront_available" | "storeListingSkuId" | "tags" | "team" | "termsOfServiceUrl" | "thirdPartySkus" | "type">;

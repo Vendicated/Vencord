@@ -51,7 +51,7 @@ export declare class EmojiStore<
     hasFavoriteEmojis(guildId?: string | Nullish): boolean;
     hasPendingUsage(): boolean;
     hasUsableEmojiInAnyGuild(): boolean;
-    initialize(state: State): void;
+    initialize(state?: State | Nullish): void;
     get loadState(): number;
     /** If count is less than or equal to 0, all unlocked results will be returned. */
     searchWithoutFetchingLatest(options: {

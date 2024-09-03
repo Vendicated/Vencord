@@ -21,7 +21,7 @@ export * from "./messages";
 export * from "./misc";
 export * from "./Permissions";
 export * from "./ReadState";
-export * from "./RecordBase";
+export * from "./Record";
 export * from "./Role";
 export * from "./UserProfile";
 export * from "./UserRecord";

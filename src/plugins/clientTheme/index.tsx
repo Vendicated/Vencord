@@ -12,7 +12,7 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import type { PersistedStore } from "@vencord/discord-types";
+import { type PersistedStore, Theme } from "@vencord/discord-types";
 import { findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, Forms, ThemeStore, useStateFromStores } from "@webpack/common";
 
@@ -42,8 +42,8 @@ const ClientThemesBackgroundStore: PersistedStore & Record<string, any> = findSt
 
 function ThemeSettings() {
     const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme);
-    const isLightTheme = theme === "light";
-    const oppositeTheme = isLightTheme ? "dark" : "light";
+    const isLightTheme = theme === Theme.LIGHT;
+    const oppositeTheme = isLightTheme ? Theme.DARK : Theme.LIGHT;
 
     const nitroTheme = useStateFromStores(
         [ClientThemesBackgroundStore],

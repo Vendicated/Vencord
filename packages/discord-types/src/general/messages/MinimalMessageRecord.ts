@@ -8,7 +8,7 @@ import type { Moment } from "moment";
 
 import type { Nullish, Optional, SnakeCasedProperties } from "../../internal";
 import type { ChannelType } from "../channels/ChannelRecord";
-import type { RecordBase } from "../RecordBase";
+import type { RecordBase } from "../Record";
 
 export type MinimalMessageRecordOwnProperties = Pick<MinimalMessageRecord, "attachments" | "codedLinks" | "components" | "content" | "editedTimestamp" | "embeds" | "flags" | "stickerItems" | "stickers" | "timestamp" | "type">;
 
