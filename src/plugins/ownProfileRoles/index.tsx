@@ -14,7 +14,7 @@ import { User } from "discord-types/general";
 const RolesComponent = findComponentByCodeLazy("user", "currentUser", "guild", "trackUserProfileAction");
 
 export default definePlugin({
-    name: "RolesInProfile",
+    name: "OwnProfileRoles",
     description: "Allows you to view your roles in your profile, without having to look at your server profile from another place, like the member list",
     authors: [Devs.relitrix],
     patches: [
