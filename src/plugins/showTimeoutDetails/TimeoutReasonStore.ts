@@ -86,7 +86,7 @@ export const TimeoutReasonStore = proxyLazy(() => {
                     reason: entry.reason,
                     moderator: isAutomod ? undefined : entry.user_id,
                     automod: isAutomod,
-                    automodRuleName: isAutomod ? entry?.options.auto_moderation_rule_name : undefined,
+                    automodRuleName: isAutomod ? entry?.options?.auto_moderation_rule_name : undefined,
                     automodChannelId: isAutomod ? entry?.options?.channel_id : undefined,
                     expires: member?.communicationDisabledUntil,
                     loading: false

@@ -7,14 +7,14 @@
 import { SafetyIcon } from "@components/Icons";
 import { classes, Margins } from "@utils/index";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Dialog, GuildMemberStore, GuildStore, i18n, Parser, PermissionsBits, PermissionStore, Text, Tooltip, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { Button, Dialog, GuildMemberStore, GuildStore, i18n, Parser, PermissionsBits, PermissionStore, Text, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import { CountDown } from "..";
 import { useTimeoutReason } from "../TimeoutReasonStore";
+import TimeoutDetailsRow from "./TimeoutDetailsRow";
 
 const PopoutClasses = findByPropsLazy("container", "scroller", "list");
-const rowClasses = findByPropsLazy("row", "rowIcon", "rowGuildName");
 
 const TimeoutIcon = findComponentByCodeLazy("M12 23c.08 0 .14-.08.11-.16a2.88 2.88 0 0 1 .29-2.31l2.2-3.85");
 const ChannelIcon = findComponentByCodeLazy("h4.97l-.8 4.84a1 1 0 0 0 1.97.32l.86-5.16H20a1");
@@ -42,40 +42,48 @@ export default function TimeoutDetailsPopout({ closePopout, guildId, userId, mes
             Timeout details for {user.username}
         </Text>
         <div className={Margins.bottom8} />
-        <div className={rowClasses.row}>
-            <Tooltip text="Remaining time in timeout">
-                {p => <TimeoutIcon {...p} className={rowClasses.rowIcon} height="24" width="24" />}
-            </Tooltip>
+
+        <TimeoutDetailsRow
+            description="Remaining time in timeout"
+            icon={TimeoutIcon}
+        >
             <CountDown
                 deadline={new Date(member.communicationDisabledUntil!)}
                 showUnits
                 stopAtOneSec
             />
-        </div>
-        {(reason.moderator || reason.automod) && <div className={rowClasses.row}>
-            <Tooltip text="Moderator">
-                {p => <SafetyIcon {...p} className={rowClasses.rowIcon} height="24" width="24" />}
-            </Tooltip>
+        </TimeoutDetailsRow>
+
+        <TimeoutDetailsRow
+            description="Moderator"
+            icon={SafetyIcon}
+            condition={!!(reason.moderator || reason.automod)}
+        >
             {reason.automod ? i18n.Messages.GUILD_SETTINGS_AUTOMOD_TITLE : parse(`<@${reason.moderator}>`)}
-        </div>}
-        {(reason.automodChannelId) && <div className={rowClasses.row}>
-            <Tooltip text="Channel where offending message was sent">
-                {p => <ChannelIcon {...p} className={rowClasses.rowIcon} height="24" width="24" />}
-            </Tooltip>
+        </TimeoutDetailsRow>
+
+        <TimeoutDetailsRow
+            description="Channel where offending message was sent"
+            icon={ChannelIcon}
+            condition={!!reason.automodChannelId}
+        >
             {parse(`<#${reason.automodChannelId}>`)}
-        </div>}
-        {(reason.automodRuleName) && <div className={rowClasses.row}>
-            <Tooltip text="AutoMod Rule">
-                {p => <CustomAutoModRuleIcon {...p} className={rowClasses.rowIcon} height="24" width="24" />}
-            </Tooltip>
+        </TimeoutDetailsRow>
+
+        <TimeoutDetailsRow
+            description="AutoMod Rule"
+            icon={CustomAutoModRuleIcon}
+        >
             {reason.automodRuleName}
-        </div>}
-        {(reason.reason) && <div className={rowClasses.row}>
-            <Tooltip text="Reason">
-                {p => <MessageIcon {...p} className={rowClasses.rowIcon} height="24" width="24" />}
-            </Tooltip>
+        </TimeoutDetailsRow>
+
+        <TimeoutDetailsRow
+            description="AutoMod Rule"
+            icon={CustomAutoModRuleIcon}
+        >
             {reason.reason}
-        </div>}
+        </TimeoutDetailsRow>
+
         {hasModerationPermission && <div className="vc-std-popout-button-wrapper"><Button
             className="vc-std-popout-button"
             size={Button.Sizes.SMALL}
