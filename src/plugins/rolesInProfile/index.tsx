@@ -14,22 +14,23 @@ const RolesComponent = findComponentByCodeLazy("user", "currentUser", "guild", "
 
 export default definePlugin({
     name: "RolesInProfile",
-    description: "Allows you to view roles in your profile, without having to scroll a list of members",
+    description: "Allows you to view your roles in your profile, without having to look at your server profile from another place, like the member list",
     authors: [Devs.relitrix],
     patches: [
         {
-            find: "Messages.STATUS_MENU_LABEL",
+            find: ".Messages.STATUS_MENU_LABEL",
             replacement: {
-                match: /hidePersonalInformation:\i,onClose:\i}\)/,
-                replace: "$&,$self.Roles(),"
+                match: /\(0,\i\.jsxs?\)\("div",{className:\i\.menus,(?<=user:(\i).+?)/,
+                replace: "$self.Roles({user:$1}),$&"
             }
         }
     ],
-    Roles() {
+
+    Roles: ErrorBoundary.wrap(({ user }: { user: User; }) => {
         if (!getCurrentGuild()) {
             return;
         }
-        const user = UserStore.getCurrentUser();
+
         return <RolesComponent guild={getCurrentGuild()} currentUser={user} user={user} />;
-    },
+    })
 });

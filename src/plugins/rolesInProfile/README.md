@@ -1,3 +1,3 @@
 # RolesInProfile
 
-Allows you to view roles in your profile, without having to scroll a list of members
+Allows you to view your roles in your profile, without having to look at your server profile from another place, like the member list
