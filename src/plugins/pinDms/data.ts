@@ -118,7 +118,7 @@ export function getAllUncollapsedChannels() {
 export function getAllGuildsBarChannels() {
     const privateChannelIds = PrivateChannelSortStore.getPrivateChannelIds();
 
-    if (settings.store.pinOrder === PinOrder.LastMessage && privateChannelIds.length != 0) {
+    if (settings.store.pinOrder === PinOrder.LastMessage && privateChannelIds.length !== 0) {
         const sortedChannels = PrivateChannelSortStore.getPrivateChannelIds();
         return categories.filter(c => c.displayOnServerList && !c.collapsed).flatMap(c => sortedChannels.filter(channel => c.channels.includes(channel)));
     }

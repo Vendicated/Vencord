@@ -37,7 +37,7 @@ export let instance: any;
 export function forceUpdate() {
     instance?.props?._forceUpdate?.();
     PrivateChannelReadStateStore.emitChange();
-};
+}
 
 export const enum PinOrder {
     LastMessage,
