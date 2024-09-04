@@ -78,7 +78,7 @@ async function embedDidMount(this: Component<Props>) {
             const replacementProxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}&time=${thumbnails[0].timestamp}`;
 
             embed.dearrow.oldThumb = dearrowByDefault ? embed.thumbnail.proxyURL : replacementProxyURL;
-            if (embed.thumbnail.proxyURL) embed.thumbnail.proxyURL = replacementProxyURL;
+            if (dearrowByDefault) embed.thumbnail.proxyURL = replacementProxyURL;
         }
 
         this.forceUpdate();
