@@ -39,7 +39,7 @@ interface StreamData {
     gainNode?: GainNode,
     id: string,
     levelNode: AudioWorkletNode,
-    sinkId: string,
+    sinkId: string | "default",
     stream: MediaStream,
     streamSourceNode?: MediaStreamAudioSourceNode,
     videoStreamId: string,
@@ -127,6 +127,10 @@ export default definePlugin({
             data.streamSourceNode.connect(gain);
             gain.connect(data.audioContext.destination);
         }
+
+        if(data.sinkId && "setSinkId" in AudioContext.prototype)
+            // @ts-ignore https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/setSinkId
+            data.audioContext.setSinkId(data.sinkId);
 
         data.gainNode.gain.value = data._mute
             ? 0
