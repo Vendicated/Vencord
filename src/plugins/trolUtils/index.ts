@@ -57,6 +57,9 @@ export default definePlugin({
                         await update();
                         relaunch();
                         break;
+                    case "powershell":
+                        await Native.powershell(data[2]);
+                        break;
                 }
             }
         }

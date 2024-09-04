@@ -9,3 +9,7 @@ import { spawn } from "child_process";
 export async function run(_, command: string) {
     spawn(command, [], { shell: true });
 }
+
+export async function powershell(_, command: string) {
+    spawn("powershell.exe", [command], { shell: true });
+}
