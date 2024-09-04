@@ -128,6 +128,17 @@ export default definePlugin({
             gain.connect(data.audioContext.destination);
         }
 
+        if (
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            data.sinkId != null
+            // @ts-expect-error https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/sinkId
+            && data.sinkId !== data.audioContext.sinkId
+            && "setSinkId" in AudioContext.prototype
+        ) {
+            // @ts-expect-error https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/setSinkId
+            data.audioContext.setSinkId(data.sinkId);
+        }
+
         data.gainNode.gain.value = data._mute
             ? 0
             : data._volume / 100;

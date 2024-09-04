@@ -133,8 +133,8 @@ export default definePlugin({
                 },
                 // Export the isBetterFolders variable to the folders component
                 {
-                    match: /(?<=\.Messages\.SERVERS.+?switch\((\i)\.type\){case \i\.\i\.FOLDER:.+?folderNode:\i,)/,
-                    replace: 'isBetterFolders:typeof isBetterFolders!=="undefined"?isBetterFolders:false,'
+                    match: /switch\(\i\.type\){case \i\.\i\.FOLDER:.+?folderNode:\i,/,
+                    replace: '$&isBetterFolders:typeof isBetterFolders!=="undefined"?isBetterFolders:false,'
                 }
             ]
         },
