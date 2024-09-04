@@ -7,16 +7,15 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
-import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
-import { Heading, RelationshipStore, Text } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { RelationshipStore, Text } from "@webpack/common";
 
 const containerWrapper = findByPropsLazy("memberSinceWrapper");
 const container = findByPropsLazy("memberSince");
 const getCreatedAtDate = findByCodeLazy('month:"short",day:"numeric"');
 const locale = findByPropsLazy("getLocale");
-const section = findLazy((m: any) => m.section !== void 0 && m.heading !== void 0 && Object.values(m).length === 2);
+const Section = findComponentByCodeLazy('"auto":"smooth"', ".section");
 
 export default definePlugin({
     name: "FriendsSince",
@@ -28,7 +27,7 @@ export default definePlugin({
             find: ".PANEL}),nicknameIcons",
             replacement: {
                 match: /USER_PROFILE_MEMBER_SINCE,.{0,100}userId:(\i\.id)}\)}\)/,
-                replace: "$&,$self.friendsSinceNew({userId:$1,isSidebar:true})"
+                replace: "$&,$self.FriendsSinceComponent({userId:$1,isSidebar:true})"
             }
         },
         // User Profile Modal
@@ -36,34 +35,19 @@ export default definePlugin({
             find: "action:\"PRESS_APP_CONNECTION\"",
             replacement: {
                 match: /USER_PROFILE_MEMBER_SINCE,.{0,100}userId:(\i\.id),.{0,100}}\)}\),/,
-                replace: "$&,$self.friendsSinceNew({userId:$1,isSidebar:false}),"
+                replace: "$&,$self.FriendsSinceComponent({userId:$1,isSidebar:false}),"
             }
         }
     ],
 
-    getFriendSince(userId: string) {
-        try {
-            if (!RelationshipStore.isFriend(userId)) return null;
-
-            return RelationshipStore.getSince(userId);
-        } catch (err) {
-            new Logger("FriendsSince").error(err);
-            return null;
-        }
-    },
-
-    friendsSinceNew: ErrorBoundary.wrap(({ userId, isSidebar }: { userId: string; isSidebar: boolean; }) => {
+    FriendsSinceComponent: ErrorBoundary.wrap(({ userId, isSidebar }: { userId: string; isSidebar: boolean; }) => {
         if (!RelationshipStore.isFriend(userId)) return null;
 
         const friendsSince = RelationshipStore.getSince(userId);
         if (!friendsSince) return null;
 
         return (
-            <section className={section.section}>
-                <Heading variant="text-xs/semibold" style={isSidebar ? {} : { color: "var(--header-secondary)" }}>
-                    Friends Since
-                </Heading>
-
+            <Section heading="Friends Since">
                 {
                     isSidebar ? (
                         <Text variant="text-sm/normal">
@@ -91,8 +75,7 @@ export default definePlugin({
                         </div>
                     )
                 }
-
-            </section>
+            </Section>
         );
     }, { noop: true }),
 });
