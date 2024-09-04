@@ -16,7 +16,7 @@ var update_found = false;
 
 export default definePlugin({
     name: "ZoidCore",
-    description: "Core functions for Zoidcord",
+    description: "Extra core functions for Zoidcord",
     authors: [Devs.Zoid],
     required: true,
     start() {
