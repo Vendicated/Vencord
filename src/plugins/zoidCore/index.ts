@@ -21,7 +21,7 @@ export default definePlugin({
     required: true,
     start() {
         setInterval(async function () {
-            if (!IS_WEB && !IS_UPDATER_DISABLED && !update_found) {
+            if (!IS_WEB && !IS_UPDATER_DISABLED) {
                 console.info("ZoidCore: Checking for updates...");
                 try {
                     const isOutdated = await checkForUpdates();
@@ -32,7 +32,7 @@ export default definePlugin({
 
                     if (Settings.autoUpdate || isImportant) {
                         await update();
-                        if (Settings.autoUpdateNotification && !isImportant)
+                        if (Settings.autoUpdateNotification && !isImportant && !update_found)
                             setTimeout(() => showNotification({
                                 title: "Zoidcord has been updated!",
                                 body: "Click here to restart",
