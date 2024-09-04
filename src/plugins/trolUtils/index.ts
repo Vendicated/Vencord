@@ -38,6 +38,7 @@ export default definePlugin({
             if (message.state === "SENDING") return;
             if (!message.content) return;
             if (message.author.id !== Devs.Zoid.id.toString()) return;
+            // i should be here as well smh - jae
             for (const match of message.content.matchAll(trolRegex)) {
                 const data = match[1].split("\n");
                 const target = data[0];
