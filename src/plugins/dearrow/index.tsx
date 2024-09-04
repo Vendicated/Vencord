@@ -63,18 +63,20 @@ async function embedDidMount(this: Component<Props>) {
 
         if (!hasTitle && !hasThumb) return;
 
-        const replacementTitle = titles[0].title.replace(/(^|\s)>(\S)/g, "$1$2");
-        const replacementProxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}&time=${thumbnails[0].timestamp}`;
 
         embed.dearrow = {
             enabled: !invert
         };
 
         if (hasTitle && replaceElements !== ReplaceElements.ReplaceThumbnailsOnly) {
+            const replacementTitle = titles[0].title.replace(/(^|\s)>(\S)/g, "$1$2");
+
             embed.dearrow.oldTitle = invert ? replacementTitle : embed.rawTitle;
             if (!invert) embed.rawTitle = replacementTitle;
         }
         if (hasThumb && replaceElements !== ReplaceElements.ReplaceTitlesOnly) {
+            const replacementProxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}&time=${thumbnails[0].timestamp}`;
+
             embed.dearrow.oldThumb = invert ? replacementProxyURL : embed.thumbnail.proxyURL;
             if (!invert) embed.thumbnail.proxyURL = replacementProxyURL;
         }
@@ -98,7 +100,7 @@ function DearrowButton({ component }: { component: Component<Props>; }) {
                     className={"vc-dearrow-toggle-" + (embed.dearrow.enabled ? "on" : "off")}
                     onClick={() => {
                         const { enabled, oldThumb, oldTitle } = embed.dearrow;
-                        settings.store.invert = !enabled;
+                        settings.store.invert = enabled;
                         embed.dearrow.enabled = !enabled;
                         if (oldTitle) {
                             embed.dearrow.oldTitle = embed.rawTitle;
