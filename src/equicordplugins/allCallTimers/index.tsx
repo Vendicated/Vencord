@@ -102,7 +102,6 @@ export default definePlugin({
     name: "AllCallTimers",
     description: "Add call timer to all users in a server voice channel.",
     authors: [EquicordDevs.MaxHerbold, Devs.D3SOX],
-
     settings,
 
     patches: [
