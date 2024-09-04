@@ -349,11 +349,7 @@ export function Player() {
         }
     }, [isPlaying]);
 
-    if (!track || shouldHide) return (
-        <div id={cl("player")}>
-            YouTubeMusic is not playing
-        </div>
-    );
+    if (!track || shouldHide) return;
 
     const exportTrackImageStyle = {
         "--vc-ytm-track-image": `url(${track?.imageSrc || ""})`,
