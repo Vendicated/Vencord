@@ -25,6 +25,7 @@ import { promisify } from "util";
 import { serializeErrors } from "./common";
 
 const VENCORD_SRC_DIR = join(__dirname, "..");
+const EQUICORD_DIR = join(__dirname, "../../");
 
 const execFile = promisify(cpExecFile);
 
@@ -72,14 +73,16 @@ async function pull() {
 }
 
 async function build() {
-    const opts = { cwd: VENCORD_SRC_DIR };
+    const opts = { cwd: EQUICORD_DIR };
 
     const command = isFlatpak ? "flatpak-spawn" : "node";
-    const args = isFlatpak ? ["--host", "node", "../scripts/build/build.mts"] : ["../scripts/build/build.mts"];
+    const args = isFlatpak ? ["--host", "node", "scripts/build/build.mjs"] : ["scripts/build/build.mjs"];
 
     if (IS_DEV) args.push("--dev");
 
     const res = await execFile(command, args, opts);
+    console.log(res);
+    console.log(`\n\n\n\n\n${res.stderr}`);
 
     return !res.stderr.includes("Build failed");
 }

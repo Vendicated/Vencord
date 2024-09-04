@@ -16,11 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function getPluginTarget(filePath: string) {
+/**
+ * @param {string} filePath
+ * @returns {string | null}
+ */
+export function getPluginTarget(filePath) {
     const pathParts = filePath.split(/[/\\]/);
-    if (/^index\.tsx?$/.test(pathParts.at(-1)!)) pathParts.pop();
+    if (/^index\.tsx?$/.test(pathParts.at(-1))) pathParts.pop();
 
-    const identifier = pathParts.at(-1)!.replace(/\.tsx?$/, "");
+    const identifier = pathParts.at(-1).replace(/\.tsx?$/, "");
     const identiferBits = identifier.split(".");
     return identiferBits.length === 1 ? null : identiferBits.at(-1);
 }

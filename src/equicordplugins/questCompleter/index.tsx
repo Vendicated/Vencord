@@ -76,7 +76,6 @@ function ToolBarHeader() {
 }
 
 async function openCompleteQuestUI() {
-    // check if user is sharing screen and there is someone that is watching the stream
     const ApplicationStreamingStore = findByProps("getStreamerActiveStreamMetadata");
     const RunningGameStore = findByProps("getRunningGames");
     const ExperimentStore = findByProps("getGuildExperiments");

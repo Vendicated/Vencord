@@ -23,12 +23,12 @@ import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises
 import { join } from "path";
 import Zip from "zip-local";
 
-import { addBuild, BUILD_TIMESTAMP, buildOrWatchAll, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION } from "./common.mjs";
 
 /**
  * @type {esbuild.BuildOptions}
  */
-const commonOptions: esbuild.BuildOptions = {
+const commonOptions = {
     ...commonOpts,
     entryPoints: ["browser/Vencord.ts"],
     globalName: "Vencord",
@@ -68,7 +68,7 @@ const RnNoiseFiles = [
 
 await Promise.all(
     [
-        addBuild({
+        esbuild.build({
             entryPoints: MonacoWorkerEntryPoints.map(entry => `node_modules/monaco-editor/esm/${entry}`),
             bundle: true,
             minify: true,
@@ -76,7 +76,7 @@ await Promise.all(
             outbase: "node_modules/monaco-editor/esm/",
             outdir: "dist/browser/monaco"
         }),
-        addBuild({
+        esbuild.build({
             entryPoints: ["browser/monaco.ts"],
             bundle: true,
             minify: true,
@@ -86,12 +86,12 @@ await Promise.all(
                 ".ttf": "file"
             }
         }),
-        addBuild({
+        esbuild.build({
             ...commonOptions,
             outfile: "dist/browser/browser.js",
             footer: { js: "//# sourceURL=VencordWeb" }
         }),
-        addBuild({
+        esbuild.build({
             ...commonOptions,
             outfile: "dist/browser/extension.js",
             define: {
@@ -100,7 +100,7 @@ await Promise.all(
             },
             footer: { js: "//# sourceURL=VencordWeb" }
         }),
-        addBuild({
+        esbuild.build({
             ...commonOptions,
             inject: ["browser/GMPolyfill.js", ...(commonOptions?.inject || [])],
             define: {
@@ -119,10 +119,11 @@ await Promise.all(
     ]
 );
 
-await buildOrWatchAll();
-
-async function globDir(dir: string): Promise<string[]> {
-    const files = [] as string[];
+/**
+ * @type {(dir: string) => Promise<string[]>}
+ */
+async function globDir(dir) {
+    const files = [];
 
     for (const child of await readdir(dir, { withFileTypes: true })) {
         const p = join(dir, child.name);
@@ -135,23 +136,34 @@ async function globDir(dir: string): Promise<string[]> {
     return files;
 }
 
-async function loadDir(dir: string, basePath = "") {
+/**
+ * @type {(dir: string, basePath?: string) => Promise<Record<string, string>>}
+ */
+async function loadDir(dir, basePath = "") {
     const files = await globDir(dir);
-    return Object.fromEntries(await Promise.all(files.map(async f =>
-        [f.slice(basePath.length), await readFile(f)] as const
-    )));
+    return Object.fromEntries(
+        await Promise.all(
+            files.map(
+                async f =>
+                    [f.slice(basePath.length), await readFile(f)]
+            )
+        )
+    );
 }
 
-async function buildExtension(target: string, files: string[]): Promise<void> {
-    const entries: Record<string, Buffer> = {
+/**
+  * @type {(target: string, files: string[]) => Promise<void>}
+ */
+async function buildExtension(target, files) {
+    const entries = {
         "dist/Vencord.js": await readFile("dist/browser/extension.js"),
         "dist/Vencord.css": await readFile("dist/browser/extension.css"),
         ...await loadDir("dist/browser/monaco"),
         ...Object.fromEntries(await Promise.all(RnNoiseFiles.map(async file =>
-            [`third-party/rnnoise/${file.replace(/^dist\//, "")}`, await readFile(`node_modules/@sapphi-red/web-noise-suppressor/${file}`)] as const
+            [`third-party/rnnoise/${file.replace(/^dist\//, "")}`, await readFile(`node_modules/@sapphi-red/web-noise-suppressor/${file}`)]
         ))),
         ...Object.fromEntries(await Promise.all(files.map(async f => {
-            let content: Uint8Array | Buffer = await readFile(join("browser", f));
+            let content = await readFile(join("browser", f));
             if (f.startsWith("manifest")) {
                 const json = JSON.parse(content.toString("utf-8"));
                 json.version = VERSION;
@@ -161,7 +173,7 @@ async function buildExtension(target: string, files: string[]): Promise<void> {
             return [
                 f.startsWith("manifest") ? "manifest.json" : f,
                 content
-            ] as const;
+            ];
         })))
     };
 

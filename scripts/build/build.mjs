@@ -17,13 +17,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import esbuild from "esbuild";
 import { createPackage } from "@electron/asar";
-import { BuildOptions, Plugin } from "esbuild";
-import { existsSync, readdirSync } from "fs";
-import { readdir, rm, writeFile } from "fs/promises";
-import { join } from "path";
+import { readdir, writeFile } from "fs/promises";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
-import { addBuild, BUILD_TIMESTAMP, buildOrWatchAll, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, watch } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, watch } from "./common.mjs";
 
 const defines = {
     IS_STANDALONE: String(IS_STANDALONE),
@@ -41,6 +41,9 @@ if (defines.IS_STANDALONE === "false")
     // for the specific platform we're on
     defines["process.platform"] = JSON.stringify(process.platform);
 
+/**
+ * @type {esbuild.BuildOptions}
+ */
 const nodeCommonOpts = {
     ...commonOpts,
     format: "cjs",
@@ -48,12 +51,15 @@ const nodeCommonOpts = {
     target: ["esnext"],
     external: ["electron", "original-fs", "~pluginNatives", ...commonOpts.external],
     define: defines
-} satisfies BuildOptions;
+};
 
-const sourceMapFooter = (s: string) => watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
+const sourceMapFooter = s => watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
 const sourcemap = watch ? "inline" : "external";
 
-const globNativesPlugin: Plugin = {
+/**
+ * @type {import("esbuild").Plugin}
+ */
+const globNativesPlugin = {
     name: "glob-natives-plugin",
     setup: build => {
         const filter = /^~pluginNatives$/;
@@ -100,9 +106,9 @@ const globNativesPlugin: Plugin = {
 
 await Promise.all([
     // Discord Desktop main & renderer & preload
-    addBuild({
+    esbuild.build({
         ...nodeCommonOpts,
-        entryPoints: ["src/main/index.ts"],
+        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/main/index.ts")],
         outfile: "dist/desktop/patcher.js",
         footer: { js: "//# sourceURL=VencordPatcher\n" + sourceMapFooter("patcher") },
         sourcemap,
@@ -117,9 +123,9 @@ await Promise.all([
             globNativesPlugin
         ]
     }),
-    addBuild({
+    esbuild.build({
         ...commonOpts,
-        entryPoints: ["src/Vencord.ts"],
+        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/Vencord.ts")],
         outfile: "dist/desktop/renderer.js",
         format: "iife",
         target: ["esnext"],
@@ -137,9 +143,9 @@ await Promise.all([
             IS_EQUIBOP: "false"
         }
     }),
-    addBuild({
+    esbuild.build({
         ...nodeCommonOpts,
-        entryPoints: ["src/preload.ts"],
+        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/preload.ts")],
         outfile: "dist/desktop/preload.js",
         footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
         sourcemap,
@@ -152,9 +158,9 @@ await Promise.all([
     }),
 
     // Vencord Desktop main & renderer & preload
-    addBuild({
+    esbuild.build({
         ...nodeCommonOpts,
-        entryPoints: ["src/main/index.ts"],
+        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/main/index.ts")],
         outfile: "dist/vesktop/main.js",
         footer: { js: "//# sourceURL=VencordMain\n" + sourceMapFooter("main") },
         sourcemap,
@@ -169,10 +175,10 @@ await Promise.all([
             globNativesPlugin
         ]
     }),
-    addBuild({
+    esbuild.build({
         ...commonOpts,
-        entryPoints: ["src/Vencord.ts"],
-        outfile: "dist/vesktop/renderer.js",
+        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/Vencord.ts")],
+        outfile: "dist/vencordDesktopRenderer.js",
         format: "iife",
         target: ["esnext"],
         footer: { js: "//# sourceURL=VencordRenderer\n" + sourceMapFooter("renderer") },
@@ -189,9 +195,9 @@ await Promise.all([
             IS_EQUIBOP: "false"
         }
     }),
-    addBuild({
+    esbuild.build({
         ...nodeCommonOpts,
-        entryPoints: ["src/preload.ts"],
+        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/preload.ts")],
         outfile: "dist/vesktop/preload.js",
         footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
         sourcemap,
@@ -204,9 +210,9 @@ await Promise.all([
     }),
 
     // Equicord Desktop main & renderer & preload
-    addBuild({
+    esbuild.build({
         ...nodeCommonOpts,
-        entryPoints: ["src/main/index.ts"],
+        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/main/index.ts")],
         outfile: "dist/equibop/main.js",
         footer: { js: "//# sourceURL=EquicordMain\n" + sourceMapFooter("main") },
         sourcemap,
@@ -221,9 +227,9 @@ await Promise.all([
             globNativesPlugin
         ]
     }),
-    addBuild({
+    esbuild.build({
         ...commonOpts,
-        entryPoints: ["src/Vencord.ts"],
+        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/Vencord.ts")],
         outfile: "dist/equibop/renderer.js",
         format: "iife",
         target: ["esnext"],
@@ -241,9 +247,9 @@ await Promise.all([
             IS_EQUIBOP: "true"
         }
     }),
-    addBuild({
+    esbuild.build({
         ...nodeCommonOpts,
-        entryPoints: ["src/preload.ts"],
+        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/preload.ts")],
         outfile: "dist/equibop/preload.js",
         footer: { js: "//# sourceURL=EquicordPreload\n" + sourceMapFooter("preload") },
         sourcemap,
@@ -254,9 +260,13 @@ await Promise.all([
             IS_EQUIBOP: "true"
         }
     }),
-]);
-
-await buildOrWatchAll();
+]).catch(err => {
+    console.error("Build failed");
+    console.error(err.message);
+    // make ci fail
+    if (!commonOpts.watch)
+        process.exitCode = 1;
+});
 
 await Promise.all([
     writeFile("dist/desktop/package.json", JSON.stringify({
@@ -278,24 +288,3 @@ await Promise.all([
     createPackage("dist/equibop", "dist/equibop.asar"),
     createPackage("dist/vesktop", "dist/vesktop.asar")
 ]);
-
-
-if (existsSync("dist/renderer.js")) {
-    console.warn("Legacy dist folder. Cleaning up and adding shims.");
-
-    await Promise.all(
-        readdirSync("dist")
-            .filter(f =>
-                f.endsWith(".map") ||
-                f.endsWith(".LEGAL.txt") ||
-                ["patcher", "preload", "renderer"].some(name => f.startsWith(name))
-            )
-            .map(file => rm(join("dist", file)))
-    );
-
-    await Promise.all([
-        writeFile("dist/patcher.js", 'require("./desktop")'),
-        writeFile("dist/equicordDesktopMain.js", 'require("./equibop")'),
-        writeFile("dist/vencordDesktopMain.js", 'require("./vesktop")')
-    ]);
-}

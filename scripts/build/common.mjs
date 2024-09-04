@@ -20,16 +20,17 @@ import "../suppressExperimentalWarnings.js";
 import "../checkNodeVersion.js";
 
 import { exec, execSync } from "child_process";
-import esbuild, { build, BuildOptions, context, Plugin } from "esbuild";
+import esbuild from "esbuild";
 import { constants as FsConstants, readFileSync } from "fs";
 import { access, readdir, readFile } from "fs/promises";
 import { minify as minifyHtml } from "html-minifier-terser";
-import { join, relative } from "path";
+import { dirname, join, relative } from "path";
+import { fileURLToPath } from "url";
 import { promisify } from "util";
 
 import { getPluginTarget } from "../utils.mjs";
 
-const PackageJSON: typeof import("../../package.json") = JSON.parse(readFileSync("package.json", "utf-8"));
+const PackageJSON = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../package.json")));
 
 export const VERSION = PackageJSON.version;
 // https://reproducible-builds.org/docs/source-date-epoch/
@@ -53,8 +54,11 @@ export const banner = {
 };
 
 const PluginDefinitionNameMatcher = /definePlugin\(\{\s*(["'])?name\1:\s*(["'`])(.+?)\2/;
-
-export async function resolvePluginName(base: string, dirent: import("fs").Dirent) {
+/**
+ * @param {string} base
+ * @param {import("fs").Dirent} dirent
+ */
+export async function resolvePluginName(base, dirent) {
     const fullPath = join(base, dirent.name);
     const content = dirent.isFile()
         ? await readFile(fullPath, "utf-8")
@@ -75,13 +79,28 @@ export async function resolvePluginName(base: string, dirent: import("fs").Diren
         })();
 }
 
-export async function exists(path: string) {
+export async function exists(path) {
     return await access(path, FsConstants.F_OK)
         .then(() => true)
         .catch(() => false);
 }
 
-export const globPlugins: (kind: "web" | "discordDesktop" | "vencordDesktop" | "equicordDesktop") => Plugin = kind => ({
+// https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
+/**
+ * @type {import("esbuild").Plugin}
+ */
+export const makeAllPackagesExternalPlugin = {
+    name: "make-all-packages-external",
+    setup(build) {
+        const filter = /^[^./]|^\.[^./]|^\.\.[^/]/; // Must not start with "/" or "./" or "../"
+        build.onResolve({ filter }, args => ({ path: args.path, external: true }));
+    }
+};
+
+/**
+ * @type {(kind: "web" | "discordDesktop" | "vencordDesktop" | "equicordDesktop") => import("esbuild").Plugin}
+ */
+export const globPlugins = kind => ({
     name: "glob-plugins",
     setup: build => {
         const filter = /^~plugins$/;
@@ -146,7 +165,10 @@ export const globPlugins: (kind: "web" | "discordDesktop" | "vencordDesktop" | "
     }
 });
 
-export const gitHashPlugin: Plugin = {
+/**
+ * @type {import("esbuild").Plugin}
+ */
+export const gitHashPlugin = {
     name: "git-hash-plugin",
     setup: build => {
         const filter = /^~git-hash$/;
@@ -159,7 +181,10 @@ export const gitHashPlugin: Plugin = {
     }
 };
 
-export const gitRemotePlugin: Plugin = {
+/**
+ * @type {import("esbuild").Plugin}
+ */
+export const gitRemotePlugin = {
     name: "git-remote-plugin",
     setup: build => {
         const filter = /^~git-remote$/;
@@ -181,7 +206,10 @@ export const gitRemotePlugin: Plugin = {
     }
 };
 
-export const fileUrlPlugin: Plugin = {
+/**
+ * @type {import("esbuild").Plugin}
+ */
+export const fileUrlPlugin = {
     name: "file-uri-plugin",
     setup: build => {
         const filter = /^file:\/\/.+$/;
@@ -201,7 +229,7 @@ export const fileUrlPlugin: Plugin = {
 
             const encoding = base64 ? "base64" : "utf-8";
 
-            let content: string;
+            let content;
             if (!minify) {
                 content = await readFile(path, encoding);
                 if (!noTrim) content = content.trimEnd();
@@ -240,8 +268,12 @@ export const fileUrlPlugin: Plugin = {
     }
 };
 
-const styleModule = readFileSync("./scripts/build/module/style.js", "utf-8");
-export const stylePlugin: Plugin = {
+const styleModule = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "module/style.js"), "utf-8");
+
+/**
+ * @type {import("esbuild").Plugin}
+ */
+export const stylePlugin = {
     name: "style-plugin",
     setup: ({ onResolve, onLoad }) => {
         onResolve({ filter: /\.css\?managed$/, namespace: "file" }, ({ path, resolveDir }) => ({
@@ -262,43 +294,23 @@ export const stylePlugin: Plugin = {
     }
 };
 
+/**
+ * @type {import("esbuild").BuildOptions}
+ */
 export const commonOpts = {
     logLevel: "info",
     bundle: true,
+    watch,
     minify: !watch,
-    sourcemap: watch ? "inline" : "external",
+    sourcemap: watch ? "inline" : "",
     legalComments: "linked",
     banner,
     plugins: [fileUrlPlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
     external: ["~plugins", "~git-hash", "~git-remote", "/assets/*"],
-    inject: ["./scripts/build/inject/react.mjs"],
+    inject: [join(dirname(fileURLToPath(import.meta.url)), "inject/react.mjs")],
     jsxFactory: "VencordCreateElement",
     jsxFragment: "VencordFragment",
-    jsx: "transform"
-} satisfies BuildOptions;
-
-
-const builds = [] as BuildOptions[];
-export function addBuild(options: BuildOptions) {
-    builds.push(options);
-}
-
-export async function buildOrWatchAll() {
-    if (watch) {
-        const contexts = await Promise.all(builds.map(context));
-        await Promise.all(contexts.map(ctx => ctx.watch()));
-    } else {
-        try {
-            await Promise.all(builds.map(build));
-        } catch (err) {
-            const reason = err instanceof Error
-                ? err.message
-                : err;
-
-            console.error("Build failed");
-            console.error(reason);
-            // make ci fail
-            process.exitCode = 1;
-        }
-    }
-}
+    jsx: "transform",
+    // Work around https://github.com/evanw/esbuild/issues/2460
+    tsconfig: join(dirname(fileURLToPath(import.meta.url)), "tsconfig.esbuild.json")
+};
