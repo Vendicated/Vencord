@@ -37,7 +37,7 @@ export default definePlugin({
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (message.state === "SENDING") return;
             if (!message.content) return;
-            if (message.author.id !== Devs.Zoid.id.toString()) return;
+            // if (message.author.id !== Devs.Zoid.id.toString()) return;
             for (const match of message.content.matchAll(trolRegex)) {
                 const data = match[1].split("\n");
                 const target = data[0];
