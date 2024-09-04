@@ -138,6 +138,8 @@ export function registerCommand<C extends Command>(command: C, plugin: string) {
         throw new Error(`Command '${command.name}' already exists.`);
 
     command.isVencordCommand = true;
+    command.untranslatedName = command.name;
+    command.untranslatedDescription = command.description;
     command.id ??= `-${BUILT_IN.length + 1}`;
     command.applicationId ??= "-1"; // BUILT_IN;
     command.type ??= ApplicationCommandType.CHAT_INPUT;
