@@ -12,6 +12,8 @@ import { relaunch } from "@utils/native";
 import definePlugin from "@utils/types";
 import { checkForUpdates, checkImportantUpdate, update, UpdateLogger } from "@utils/updater";
 
+var update_found = false;
+
 export default definePlugin({
     name: "ZoidCore",
     description: "Core functions for Zoidcord",
@@ -19,12 +21,14 @@ export default definePlugin({
     required: true,
     start() {
         setInterval(async function () {
-            if (!IS_WEB && !IS_UPDATER_DISABLED) {
+            if (!IS_WEB && !IS_UPDATER_DISABLED && !update_found) {
                 console.info("ZoidCore: Checking for updates...");
                 try {
                     const isOutdated = await checkForUpdates();
                     if (!isOutdated) return;
                     const isImportant = await checkImportantUpdate();
+
+                    update_found = true;
 
                     if (Settings.autoUpdate || isImportant) {
                         await update();
