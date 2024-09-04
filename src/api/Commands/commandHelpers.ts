@@ -17,7 +17,7 @@
 */
 
 import { mergeDefaults } from "@utils/mergeDefaults";
-import type { ChannelType, InteractionType, MessageActivity, MessageAttachment, MessageEmbedType, MessageFlags, MessageInteractionMetadata, MessagePoll, MessageReference, MessageRoleSubscriptionData, MessageType, Sticker, StickerItem, UserClanData, UserFlags, UserPremiumType } from "@vencord/discord-types";
+import type { ChannelType, InteractionType, MessageActivity, MessageAttachment, MessageEmbedType, MessageFlags, MessageInteractionMetadata, MessagePoll, MessageReference, MessageRoleSubscriptionData, MessageType, PremiumType, Sticker, StickerItem, UserClanData, UserFlags } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { MessageActionCreators, SnowflakeUtils } from "@webpack/common";
 import type { LiteralToPrimitive, PartialDeep, SnakeCasedProperties } from "type-fest";
@@ -154,7 +154,7 @@ export interface UserJSON {
     locale?: string;
     mfa_enabled?: boolean;
     system?: boolean;
-    premium_type?: UserPremiumType | 0;
+    premium_type?: PremiumType | 0;
     public_flags?: UserFlags;
     username: string;
     verified?: boolean;

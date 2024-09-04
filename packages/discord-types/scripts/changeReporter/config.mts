@@ -623,7 +623,7 @@ export default {
                 // From the API documentation
                 ignoredRemovals: [["TEAM_PSEUDO_USER"]],
             },
-            UserPremiumType: {
+            PremiumType: {
                 type: "enum",
             },
         },

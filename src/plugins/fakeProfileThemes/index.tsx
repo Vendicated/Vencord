@@ -26,7 +26,7 @@ import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { type GuildRecord, type ProfileThemeColors, UserPremiumType, type UserProfile, type UserRecord } from "@vencord/discord-types";
+import { type GuildRecord, PremiumType, type ProfileThemeColors, type UserProfile, type UserRecord } from "@vencord/discord-types";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Flex, Forms, Text, UserProfileStore, UserStore, useState } from "@webpack/common";
 import type { ReactNode } from "react";
@@ -229,7 +229,7 @@ export default definePlugin({
 
             const colors = decode(profile.bio);
             if (colors) {
-                profile.premiumType = UserPremiumType.TIER_2;
+                profile.premiumType = PremiumType.TIER_2;
                 profile.themeColors = colors;
             }
         }

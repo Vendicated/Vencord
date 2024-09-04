@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { ComponentClass, ElementType, ForwardRefExoticComponent } from "react";
+
+import type { Nullish, Subtract } from "../internal";
 import type { Emitter } from "./Emitter";
 import type { PersistedStore } from "./PersistedStore";
 import type { Store } from "./Store";
@@ -26,8 +29,19 @@ export * from "./utils";
 export interface Flux {
     get initialized(): typeof Store["initialized"];
 
-    /** @todo */
-    connectStores: (a?: any, b?: any, c?: any) => (a?: any) => any;
+    connectStores: <
+        Props extends {},
+        State extends {},
+        ForwardRef extends boolean | undefined = undefined
+    >(
+        stores: Store[],
+        getStateFromStores: (props: Props) => State,
+        options?: {
+            forwardRef?: ForwardRef /* = false */;
+        } | Nullish
+    ) => <P extends Props & State>(type: ElementType<P>) => ForwardRef extends true
+        ? ForwardRefExoticComponent<Subtract<P, State> & Props>
+        : ComponentClass<Subtract<P, State> & Props>;
     DeviceSettingsStore: typeof UserAgnosticStore;
     Emitter: Emitter;
     initialize: typeof Store["initialize"];

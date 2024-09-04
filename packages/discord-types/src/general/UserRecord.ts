@@ -80,7 +80,7 @@ export declare class UserRecord<
     nsfwAllowed: boolean;
     personalConnectionId: string | null;
     phone: string | null;
-    premiumType: UserPremiumType | Nullish;
+    premiumType: PremiumType | Nullish;
     premiumUsageFlags: number;
     publicFlags: UserFlags;
     purchasedFlags: number;
@@ -95,7 +95,7 @@ export interface AvatarDecorationData {
 }
 
 // Original name: PremiumTypes
-export enum UserPremiumType {
+export enum PremiumType {
     /** Nitro Classic */
     TIER_1 = 1,
     /** Nitro Standard */

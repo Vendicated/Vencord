@@ -23,7 +23,7 @@ import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { DraftType, type Emoji, EmojiIntention, EmojiType, type MessageAttachment, type MessageEmbed, type MessageRecord, type PersistedStore, type Sticker, StickerFormat, type Store, UserPremiumType } from "@vencord/discord-types";
+import { DraftType, type Emoji, EmojiIntention, EmojiType, type MessageAttachment, type MessageEmbed, type MessageRecord, type PersistedStore, PremiumType, type Sticker, StickerFormat, type Store } from "@vencord/discord-types";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
 import { AlertActionCreators, ChannelStore, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, MarkupUtils, Permissions, PermissionStore, promptToUpload, UserSettingsProtoActionCreators, UserStore } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
@@ -389,7 +389,7 @@ export default definePlugin({
     },
 
     get canUseStickers() {
-        return (UserStore.getCurrentUser()!.premiumType ?? 0) > UserPremiumType.TIER_1;
+        return (UserStore.getCurrentUser()!.premiumType ?? 0) > PremiumType.TIER_1;
     },
 
     handleProtoChange(proto: any, user: any) {
@@ -398,7 +398,7 @@ export default definePlugin({
 
             const premiumType: number = user?.premium_type ?? UserStore.getCurrentUser()?.premiumType ?? 0;
 
-            if (premiumType !== UserPremiumType.TIER_2) {
+            if (premiumType !== PremiumType.TIER_2) {
                 proto.appearance ??= AppearanceSettingsActionCreators.create();
 
                 if (UserSettingsProtoStore.settings.appearance?.theme != null) {
@@ -427,7 +427,7 @@ export default definePlugin({
 
     handleGradientThemeSelect(backgroundGradientPresetId: number | undefined, theme: number, original: () => void) {
         const premiumType = UserStore.getCurrentUser()?.premiumType;
-        if (premiumType === UserPremiumType.TIER_2 || backgroundGradientPresetId == null) {
+        if (premiumType === PremiumType.TIER_2 || backgroundGradientPresetId == null) {
             original();
             return;
         }

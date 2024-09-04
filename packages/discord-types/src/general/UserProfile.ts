@@ -5,8 +5,8 @@
  */
 
 import type { Nullish } from "../internal";
-import type { ApplicationInstallParams, ApplicationIntegrationType, ApplicationRecord } from "./ApplicationRecord";
-import type { UserPremiumType } from "./UserRecord";
+import type { ApplicationInstallParams, ApplicationIntegrationType, ApplicationRecordOwnProperties } from "./ApplicationRecord";
+import type { PremiumType } from "./UserRecord";
 
 export type UserProfile<FetchFailed extends boolean = boolean> = FetchFailed extends true
     ? UserProfileFetchFailed
@@ -26,7 +26,7 @@ export interface UserProfileBase {
     popoutAnimationParticleType?: any /* |  Nullish */;
     premiumGuildSince: Date | null;
     premiumSince: Date | null;
-    premiumType?: UserPremiumType | Nullish;
+    premiumType?: PremiumType | Nullish;
     profileEffectExpiresAt?: number | Nullish;
     profileEffectId?: string | undefined;
     profileFetchFailed: boolean;
@@ -43,9 +43,7 @@ export interface UserProfileFetchFailed extends UserProfileBase {
     profileFetchFailed: true;
 }
 
-export interface ProfileApplicationData extends Pick<ApplicationRecord, "flags" | "id" | "primarySkuId" | "storefront_available"> {
-    customInstallUrl: string | undefined;
-    installParams: ApplicationInstallParams | undefined;
+export interface ProfileApplicationData extends Pick<ApplicationRecordOwnProperties, "customInstallUrl" | "flags" | "id" | "installParams" | "primarySkuId" | "storefront_available"> {
     integrationTypesConfig: Partial<Record<ApplicationIntegrationType, {
         oauth2_install_params?: ApplicationInstallParams;
     } | null>>;

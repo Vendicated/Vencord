@@ -10,10 +10,10 @@ import type { IconSource } from "./misc";
 import type { RecordBase } from "./Record";
 import type { UserRecord } from "./UserRecord";
 
-export type ApplicationRecordOwnProperties = Pick<ApplicationRecord, "aliases" | "bot" | "coverImage" | "description" | "developers" | "embeddedActivityConfig" | "eulaId" | "executables" | "flags" | "guild" | "guildId" | "hashes" | "hook" | "icon" | "id" | "integrationTypesConfig" | "isMonetized" | "isVerified" | "maxParticipants" | "name" | "overlay" | "overlayCompatibilityHook" | "overlayMethods" | "overlayWarn" | "primarySkuId" | "privacyPolicyUrl" | "publishers" | "roleConnectionsVerificationUrl" | "slug" | "splash" | "storefront_available" | "storeListingSkuId" | "tags" | "team" | "termsOfServiceUrl" | "thirdPartySkus" | "type">;
+export type ApplicationRecordOwnProperties = Pick<ApplicationRecord, "aliases" | "bot" | "coverImage" | "customInstallUrl" | "description" | "developers" | "embeddedActivityConfig" | "eulaId" | "executables" | "flags" | "guild" | "guildId" | "hashes" | "hook" | "icon" | "id" | "installParams" | "integrationTypesConfig" | "isMonetized" | "isVerified" | "maxParticipants" | "name" | "overlay" | "overlayCompatibilityHook" | "overlayMethods" | "overlayWarn" | "primarySkuId" | "privacyPolicyUrl" | "publishers" | "roleConnectionsVerificationUrl" | "slug" | "splash" | "storefront_available" | "storeListingSkuId" | "tags" | "team" | "termsOfServiceUrl" | "thirdPartySkus" | "type">;
 
-export type ApplicationProperties = Optional<PartialOnUndefined<Omit<ApplicationRecordOwnProperties, "embeddedActivityConfig" | "executables" | "isMonetized" | "isVerified">>, Nullish, "id" | "integrationTypesConfig" | "maxParticipants" | "name" | "primarySkuId" | "privacyPolicyUrl" | "roleConnectionsVerificationUrl" | "storefront_available" | "storeListingSkuId" | "team" | "termsOfServiceUrl" | "type", true>
-    & SnakeCasedProperties<PartialOnUndefined<Pick<ApplicationRecordOwnProperties, "embeddedActivityConfig" | "isMonetized" | "isVerified">>>
+export type ApplicationProperties = Optional<PartialOnUndefined<Omit<ApplicationRecordOwnProperties, "customInstallUrl" | "embeddedActivityConfig" | "executables" | "installParams" | "isMonetized" | "isVerified">>, Nullish, "id" | "integrationTypesConfig" | "maxParticipants" | "name" | "primarySkuId" | "privacyPolicyUrl" | "roleConnectionsVerificationUrl" | "storefront_available" | "storeListingSkuId" | "team" | "termsOfServiceUrl" | "type", true>
+    & SnakeCasedProperties<PartialOnUndefined<Pick<ApplicationRecordOwnProperties, "customInstallUrl" | "embeddedActivityConfig" | "installParams" | "isMonetized" | "isVerified">>>
     & { executables: Readonly<ApplicationRecord["executables"]>; };
 
 export declare class ApplicationRecord<
@@ -37,6 +37,7 @@ export declare class ApplicationRecord<
     aliases: string[];
     bot: UserRecord | null;
     coverImage: string | null;
+    customInstallUrl: string | undefined;
     description: string | null;
     developers: CompanyRecord[];
     embeddedActivityConfig: EmbeddedActivityConfig | undefined;
@@ -50,6 +51,7 @@ export declare class ApplicationRecord<
     hook: boolean;
     icon: string | null;
     id: string;
+    installParams: ApplicationInstallParams | undefined;
     integrationTypesConfig: Partial<Record<ApplicationIntegrationType, ApplicationIntegrationTypeConfig>> | null;
     isMonetized: boolean;
     isVerified: boolean;
@@ -122,13 +124,10 @@ export interface ApplicationExecutable {
     os: string;
 }
 
-export enum ApplicationIntegrationType {
-    GUILD_INSTALL = 0,
-    USER_INSTALL = 1,
-}
-
-export interface ApplicationIntegrationTypeConfig {
-    oauth2InstallParams: ApplicationInstallParams | undefined;
+export interface ApplicationInstallParams {
+    /** Permissions serialized as a string. */
+    permissions: string;
+    scopes: OAuth2Scope[];
 }
 
 // Original name: OAuth2Scopes
@@ -178,10 +177,13 @@ export enum OAuth2Scope {
     WEBHOOK_INCOMING = "webhook.incoming",
 }
 
-export interface ApplicationInstallParams {
-    /** Permissions serialized as a string. */
-    permissions: string;
-    scopes: OAuth2Scope[];
+export enum ApplicationIntegrationType {
+    GUILD_INSTALL = 0,
+    USER_INSTALL = 1,
+}
+
+export interface ApplicationIntegrationTypeConfig {
+    oauth2InstallParams: ApplicationInstallParams | undefined;
 }
 
 export enum ApplicationFlags {

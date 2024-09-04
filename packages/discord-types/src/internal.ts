@@ -82,6 +82,21 @@ export type StringProperties<T>
     = { [Key in keyof T as Exclude<Key, symbol>]: T[Key]; };
 
 /** @internal */
+export type Subtract<T, U> = {
+    [TKey in keyof T as keyof {
+        [UKey in keyof U as UKey extends TKey
+            ? TKey extends UKey
+                ? UKey
+                : never
+            : never
+        ]: never;
+    } extends never
+        ? TKey
+        : never
+    ]: T[TKey];
+};
+
+/** @internal */
 export type UnionToIntersection<Union> = (
     Union extends unknown
         ? (arg: Union) => unknown
