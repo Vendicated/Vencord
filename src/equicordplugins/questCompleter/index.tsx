@@ -17,11 +17,194 @@
 */
 
 import { showNotification } from "@api/Notifications";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
+import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { findByCode, findByProps } from "@webpack";
+import { findByCode, findByProps, findExportedComponentLazy } from "@webpack";
 import { FluxDispatcher, Forms, RestAPI, Text, UserStore } from "@webpack/common";
+
+const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
+const isApp = navigator.userAgent.includes("Electron/");
+
+const QuestsIcon = () => props => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        className="vc-quest-completer-icon"
+        viewBox="0 0 828 893"
+    >
+        <path
+            fill="currentColor"
+            d="M395 732c-56.667 0-109.333-9-158-27-48-18-89.667-43.333-125-76-35.333-33.333-63-72.333-83-117C9.667 467.333 0 418.667 0 366c0-53.333 9.667-102 29-146 20-44.667 47.667-83.333 83-116 35.333-33.333 77-59 125-77C285.667 9 338.333 0 395 0c57.333 0 110 9 158 27s89.667 43.667 125 77c35.333 32.667 62.667 71.333 82 116 20 44 30 92.667 30 146 0 52.667-10 101.333-30 146-19.333 44.667-46.667 83.667-82 117-35.333 32.667-77 58-125 76s-100.667 27-158 27zm229 161c-32.667 0-63-3.333-91-10-28-6-55.333-16.333-82-31-26-14.667-53.333-35-82-61-28.667-25.333-60.667-57-96-95l244-60c16 24.667 29.667 43.667 41 57 11.333 13.333 22.333 22.667 33 28 11.333 5.333 24 8 38 8 34.667 0 67-15 97-45l102 120c-50 59.333-118 89-204 89zM395 541c22 0 42.333-4 61-12 19.333-8 36-19.333 50-34 14.667-15.333 26-33.667 34-55 8-22 12-46.667 12-74s-4-51.667-12-73c-8-22-19.333-40.333-34-55-14-15.333-30.667-27-50-35-18.667-8-39-12-61-12s-42.667 4-62 12c-18.667 8-35.333 19.667-50 35-14 14.667-25 33-33 55-8 21.333-12 45.667-12 73s4 52 12 74c8 21.333 19 39.667 33 55 14.667 14.667 31.333 26 50 34 19.333 8 40 12 62 12z"
+        ></path>
+    </svg>
+);
+
+function ToolBarQuestsIcon() {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            className={classes("vc-quest-completer-icon")}
+            viewBox="0 0 15 15"
+        >
+            <path
+                fill="currentColor"
+                d="M 11.54 11.92 L 13.32 12.9 L 12.46 14.48 L 10.52 13.04 A 6.252 6.252 0 0 1 9.322 13.823 A 7.504 7.504 0 0 1 8.78 14.07 Q 7.78 14.48 6.5 14.48 A 6.964 6.964 0 0 1 4.93 14.31 A 5.746 5.746 0 0 1 3.77 13.91 Q 2.56 13.34 1.72 12.35 A 6.826 6.826 0 0 1 0.526 10.285 A 7.857 7.857 0 0 1 0.44 10.04 Q 0 8.72 0 7.22 A 9.35 9.35 0 0 1 0.22 5.153 A 7.663 7.663 0 0 1 0.78 3.53 Q 1.56 1.9 3.01 0.95 A 5.732 5.732 0 0 1 5.225 0.102 A 7.655 7.655 0 0 1 6.5 0 A 7.084 7.084 0 0 1 8.07 0.168 A 5.816 5.816 0 0 1 9.23 0.56 Q 10.44 1.12 11.28 2.12 A 7.2 7.2 0 0 1 12.569 4.418 A 9.549 9.549 0 0 1 12.57 4.42 A 8.288 8.288 0 0 1 13.004 6.665 A 9.643 9.643 0 0 1 13.02 7.22 A 9.325 9.325 0 0 1 12.936 8.507 Q 12.841 9.186 12.64 9.766 A 5.548 5.548 0 0 1 12.58 9.93 Q 12.14 11.08 11.54 11.92 Z M 9.1 12.14 L 7.58 11.18 L 8.38 9.72 L 10.18 11.02 Q 10.66 10.24 10.87 9.31 A 8.288 8.288 0 0 0 11.034 8.257 A 11.143 11.143 0 0 0 11.08 7.22 Q 11.08 6.14 10.77 5.14 A 5.929 5.929 0 0 0 10.013 3.551 A 5.561 5.561 0 0 0 9.87 3.35 Q 9.28 2.56 8.43 2.1 A 3.833 3.833 0 0 0 6.97 1.663 A 4.738 4.738 0 0 0 6.5 1.64 A 4.737 4.737 0 0 0 5.262 1.795 A 3.768 3.768 0 0 0 4.04 2.37 A 4.51 4.51 0 0 0 2.661 3.979 A 5.506 5.506 0 0 0 2.48 4.36 A 6.618 6.618 0 0 0 2.01 6.114 A 8.493 8.493 0 0 0 1.94 7.22 Q 1.94 8.3 2.24 9.31 Q 2.54 10.32 3.12 11.12 Q 3.7 11.92 4.54 12.38 Q 5.38 12.84 6.46 12.84 A 5.835 5.835 0 0 0 7.289 12.784 A 4.587 4.587 0 0 0 7.95 12.64 Q 8.609 12.443 9.084 12.15 A 3.467 3.467 0 0 0 9.1 12.14 Z"
+            />
+        </svg>
+    );
+}
+
+function ToolBarHeader() {
+    return (
+        <ErrorBoundary noop={true}>
+            <HeaderBarIcon
+                tooltip="Complete Quest"
+                position="bottom"
+                className="vc-quest-completer"
+                icon={ToolBarQuestsIcon}
+                onClick={openCompleteQuestUI}
+            >
+            </HeaderBarIcon>
+        </ErrorBoundary>
+    );
+}
+
+async function openCompleteQuestUI() {
+    // check if user is sharing screen and there is someone that is watching the stream
+    const ApplicationStreamingStore = findByProps("getStreamerActiveStreamMetadata");
+    const RunningGameStore = findByProps("getRunningGames");
+    const ExperimentStore = findByProps("getGuildExperiments");
+    const QuestsStore = findByProps("getQuest");
+    const quest = [...QuestsStore.quests.values()].find(x => x.id !== "1248385850622869556" && x.userStatus?.enrolledAt && !x.userStatus?.completedAt && new Date(x.config.expiresAt).getTime() > Date.now());
+
+    if (!isApp) {
+        showNotification({
+            title: "Quests Completer",
+            body: "This no longer works in browser. Use the desktop app!",
+        });
+    } else if (!quest) {
+        showNotification({
+            title: "Quests Completer",
+            body: "No Quests To Complete",
+        });
+    } else {
+        const pid = Math.floor(Math.random() * 30000) + 1000;
+        const theme = getTheme() === Theme.Light
+            ? "light"
+            : "dark";
+
+        let applicationId, applicationName, secondsNeeded, secondsDone, canPlay, icon, questId;
+        if (quest.config.configVersion === 1) {
+            questId = quest.id;
+            applicationId = quest.config.applicationId;
+            applicationName = quest.config.applicationName;
+            secondsNeeded = quest.config.streamDurationRequirementMinutes * 60;
+            secondsDone = quest.userStatus?.streamProgressSeconds ?? 0;
+            icon = `https://cdn.discordapp.com/assets/quests/${questId}/${theme}/${quest.config.assets.gameTile}`;
+            canPlay = quest.config.variants.includes(2);
+        } else if (quest.config.configVersion === 2) {
+            questId = quest.id;
+            applicationId = quest.config.application.id;
+            applicationName = quest.config.application.name;
+            icon = `https://cdn.discordapp.com/assets/quests/${questId}/${theme}/${quest.config.assets.gameTile}`;
+            canPlay = ExperimentStore.getUserExperimentBucket("2024-04_quest_playtime_task") > 0 && quest.config.taskConfig.tasks.PLAY_ON_DESKTOP;
+            const taskName = canPlay ? "PLAY_ON_DESKTOP" : "STREAM_ON_DESKTOP";
+            secondsNeeded = quest.config.taskConfig.tasks[taskName]?.target;
+            secondsDone = quest.userStatus?.progress?.[taskName]?.value ?? 0;
+        }
+        if (canPlay) {
+            await RestAPI.get({ url: `/applications/public?application_ids=${applicationId}` }).then(res => {
+                const appData = res.body[0];
+                const exeName = appData.executables.find(x => x.os === "win32").name.replace(">", "");
+
+                const games = RunningGameStore.getRunningGames();
+                const fakeGame = {
+                    cmdLine: `C:\\Program Files\\${appData.name}\\${exeName}`,
+                    exeName,
+                    exePath: `c:/program files/${appData.name.toLowerCase()}/${exeName}`,
+                    hidden: false,
+                    isLauncher: false,
+                    id: applicationId,
+                    name: appData.name,
+                    pid: pid,
+                    pidPath: [pid],
+                    processName: appData.name,
+                    start: Date.now(),
+                };
+                games.push(fakeGame);
+                FluxDispatcher.dispatch({ type: "RUNNING_GAMES_CHANGE", removed: [], added: [fakeGame], games: games });
+
+                const fn = data => {
+                    const progress = quest.config.configVersion === 1 ? data.userStatus.streamProgressSeconds : Math.floor(data.userStatus.progress.PLAY_ON_DESKTOP.value);
+                    showNotification({
+                        title: `${applicationName} - Quests Completer`,
+                        body: `Current progress: ${progress}/${secondsNeeded} seconds.`,
+                        icon: icon,
+                    });
+
+                    if (progress >= secondsNeeded) {
+                        showNotification({
+                            title: `${applicationName} - Quests Completer`,
+                            body: "Quest Completed.",
+                            icon: icon,
+                        });
+
+                        const idx = games.indexOf(fakeGame);
+                        if (idx > -1) {
+                            games.splice(idx, 1);
+                            FluxDispatcher.dispatch({ type: "RUNNING_GAMES_CHANGE", removed: [fakeGame], added: [], games: [] });
+                        }
+                        FluxDispatcher.unsubscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
+                    }
+                };
+                FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
+            });
+        } else {
+            const stream = ApplicationStreamingStore.getAnyStreamForUser(UserStore.getCurrentUser()?.id);
+            if (!stream) {
+                showNotification({
+                    title: "You're not streaming - Quests Completer",
+                    body: `${applicationName} requires you to be streaming.`,
+                    icon: icon,
+                });
+            }
+            const realFunc = ApplicationStreamingStore.getStreamerActiveStreamMetadata;
+            ApplicationStreamingStore.getStreamerActiveStreamMetadata = () => ({
+                id: applicationId,
+                pid,
+                sourceName: null
+            });
+
+            const fn = data => {
+                const progress = quest.config.configVersion === 1 ? data.userStatus.streamProgressSeconds : Math.floor(data.userStatus.progress.STREAM_ON_DESKTOP.value);
+                showNotification({
+                    title: `${applicationName} - Quests Completer`,
+                    body: `Current progress: ${progress}/${secondsNeeded} seconds.`,
+                    icon: icon,
+                });
+
+                if (progress >= secondsNeeded) {
+                    showNotification({
+                        title: `${applicationName} - Quests Completer`,
+                        body: "Quest Completed.",
+                        icon: icon,
+                    });
+
+                    ApplicationStreamingStore.getStreamerActiveStreamMetadata = realFunc;
+                    FluxDispatcher.unsubscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
+                }
+            };
+            FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
+        }
+        return;
+    }
+}
 
 export default definePlugin({
     name: "QuestCompleter",
@@ -34,14 +217,50 @@ export default definePlugin({
                 match: /(function .+?\(.+?\){let{inPopout:.+allowIdle.+?}=.+?\.\i\)\("popup"\),(.+?)=\[\];if\(.+?\){.+"chat-spacer"\)\)\),\(\d,.+?\.jsx\)\(.+?,{children:).+?}}/,
                 replace: "$1[$self.renderQuestButton(),...$2]})}}"
             }
+        },
+        {
+            find: "toolbar:function",
+            replacement: {
+                match: /(function \i\(\i\){)(.{1,200}toolbar.{1,200}mobileToolbar)/,
+                replace: "$1$self.toolbarAction(arguments[0]);$2"
+            }
         }
     ],
-    settingsAboutComponent() {
-        const isDesktop = navigator.userAgent.includes("discord/");
+    renderQuestButton() {
+        const ToolTipButton = findByCode("}),color:\"currentColor\"})})}}");
+        return (
+            <>
+                <ToolTipButton
+                    label="Complete Quest"
+                    tooltipPosition="bottom"
+                    iconComponent={QuestsIcon()}
+                    onClick={openCompleteQuestUI}
+                >
+                </ToolTipButton>
+                <Forms.FormDivider></Forms.FormDivider>
 
+            </>
+        );
+    },
+    toolbarAction(e) {
+        if (Array.isArray(e.toolbar))
+            return e.toolbar.push(
+                <ErrorBoundary noop={true}>
+                    <ToolBarHeader />
+                </ErrorBoundary>
+            );
+
+        e.toolbar = [
+            <ErrorBoundary noop={true}>
+                <ToolBarHeader />
+            </ErrorBoundary>,
+            e.toolbar,
+        ];
+    },
+    settingsAboutComponent() {
         return (<>
             {
-                isDesktop ?
+                isApp ?
                     <Text variant="text-lg/bold">
                         The plugin should work properly because you are on the Desktop Client.
                     </Text>
@@ -51,164 +270,5 @@ export default definePlugin({
                     </Text>
             }
         </>);
-    },
-    start() {
-        const currentUserId: string = UserStore.getCurrentUser().id;
-        window.currentUserId = currentUserId; // this is here because discord will lag if we get the current user id every time
-    },
-    renderQuestButton() {
-        const ToolTipButton = findByCode("}),color:\"currentColor\"})})}}");
-        const QuestsIcon = () => props => (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                viewBox="0 0 828 893"
-            >
-                <path
-                    fill="#C4C9CE"
-                    d="M395 732c-56.667 0-109.333-9-158-27-48-18-89.667-43.333-125-76-35.333-33.333-63-72.333-83-117C9.667 467.333 0 418.667 0 366c0-53.333 9.667-102 29-146 20-44.667 47.667-83.333 83-116 35.333-33.333 77-59 125-77C285.667 9 338.333 0 395 0c57.333 0 110 9 158 27s89.667 43.667 125 77c35.333 32.667 62.667 71.333 82 116 20 44 30 92.667 30 146 0 52.667-10 101.333-30 146-19.333 44.667-46.667 83.667-82 117-35.333 32.667-77 58-125 76s-100.667 27-158 27zm229 161c-32.667 0-63-3.333-91-10-28-6-55.333-16.333-82-31-26-14.667-53.333-35-82-61-28.667-25.333-60.667-57-96-95l244-60c16 24.667 29.667 43.667 41 57 11.333 13.333 22.333 22.667 33 28 11.333 5.333 24 8 38 8 34.667 0 67-15 97-45l102 120c-50 59.333-118 89-204 89zM395 541c22 0 42.333-4 61-12 19.333-8 36-19.333 50-34 14.667-15.333 26-33.667 34-55 8-22 12-46.667 12-74s-4-51.667-12-73c-8-22-19.333-40.333-34-55-14-15.333-30.667-27-50-35-18.667-8-39-12-61-12s-42.667 4-62 12c-18.667 8-35.333 19.667-50 35-14 14.667-25 33-33 55-8 21.333-12 45.667-12 73s4 52 12 74c8 21.333 19 39.667 33 55 14.667 14.667 31.333 26 50 34 19.333 8 40 12 62 12z"
-                ></path>
-            </svg>
-
-        );
-
-        return (
-            <>
-                <ToolTipButton
-                    label="Complete Quest"
-                    tooltipPosition="bottom"
-                    iconComponent={QuestsIcon()}
-                    onClick={this.openCompleteQuestUI}
-                >
-                </ToolTipButton>
-                <Forms.FormDivider></Forms.FormDivider>
-
-            </>
-        );
-    },
-    async openCompleteQuestUI() {
-        // check if user is sharing screen and there is someone that is watching the stream
-        const ApplicationStreamingStore = findByProps("getStreamerActiveStreamMetadata");
-        const RunningGameStore = findByProps("getRunningGames");
-        const ExperimentStore = findByProps("getGuildExperiments");
-        const QuestsStore = findByProps("getQuest");
-        const quest = [...QuestsStore.quests.values()].find(quest => quest.userStatus?.enrolledAt && !quest?.userStatus?.completedAt && new Date(quest?.config?.expiresAt) >= new Date());
-
-        const isApp = navigator.userAgent.includes("Electron/");
-        if (!isApp) {
-            showNotification({
-                title: "Quests Completer",
-                body: "This no longer works in browser. Use the desktop app!",
-            });
-        } else if (!quest) {
-            showNotification({
-                title: "Quests Completer",
-                body: "No Quests To Complete",
-            });
-        } else {
-            const pid = Math.floor(Math.random() * 30000) + 1000;
-            const theme = getTheme() === Theme.Light
-                ? "light"
-                : "dark";
-
-            let applicationId, applicationName, secondsNeeded, secondsDone, canPlay, icon, questId;
-            if (quest.config.configVersion === 1) {
-                questId = quest.id;
-                applicationId = quest.config.applicationId;
-                applicationName = quest.config.applicationName;
-                secondsNeeded = quest.config.streamDurationRequirementMinutes * 60;
-                secondsDone = quest.userStatus?.streamProgressSeconds ?? 0;
-                icon = `https://cdn.discordapp.com/assets/quests/${questId}/${theme}/${quest.config.assets.gameTile}`;
-                canPlay = quest.config.variants.includes(2);
-            } else if (quest.config.configVersion === 2) {
-                questId = quest.id;
-                applicationId = quest.config.application.id;
-                applicationName = quest.config.application.name;
-                icon = `https://cdn.discordapp.com/assets/quests/${questId}/${theme}/${quest.config.assets.gameTile}`;
-                canPlay = ExperimentStore.getUserExperimentBucket("2024-04_quest_playtime_task") > 0 && quest.config.taskConfig.tasks.PLAY_ON_DESKTOP;
-                const taskName = canPlay ? "PLAY_ON_DESKTOP" : "STREAM_ON_DESKTOP";
-                secondsNeeded = quest.config.taskConfig.tasks[taskName]?.target;
-                secondsDone = quest.userStatus?.progress?.[taskName]?.value ?? 0;
-            }
-            if (canPlay) {
-                await RestAPI.get({ url: `/applications/public?application_ids=${applicationId}` }).then(res => {
-                    const appData = res.body[0];
-                    const exeName = appData.executables.find(x => x.os === "win32").name.replace(">", "");
-
-                    const games = RunningGameStore.getRunningGames();
-                    const fakeGame = {
-                        cmdLine: `C:\\Program Files\\${appData.name}\\${exeName}`,
-                        exeName,
-                        exePath: `c:/program files/${appData.name.toLowerCase()}/${exeName}`,
-                        hidden: false,
-                        isLauncher: false,
-                        id: applicationId,
-                        name: appData.name,
-                        pid: pid,
-                        pidPath: [pid],
-                        processName: appData.name,
-                        start: Date.now(),
-                    };
-                    games.push(fakeGame);
-                    FluxDispatcher.dispatch({ type: "RUNNING_GAMES_CHANGE", removed: [], added: [fakeGame], games: games });
-
-                    const fn = data => {
-                        const progress = quest.config.configVersion === 1 ? data.userStatus.streamProgressSeconds : Math.floor(data.userStatus.progress.PLAY_ON_DESKTOP.value);
-                        showNotification({
-                            title: `${applicationName} - Quests Completer`,
-                            body: `Current progress: ${progress}/${secondsNeeded} seconds.`,
-                            icon: icon,
-                        });
-
-                        if (progress >= secondsNeeded) {
-                            showNotification({
-                                title: `${applicationName} - Quests Completer`,
-                                body: "Quest Completed",
-                                icon: icon,
-                            });
-
-                            const idx = games.indexOf(fakeGame);
-                            if (idx > -1) {
-                                games.splice(idx, 1);
-                                FluxDispatcher.dispatch({ type: "RUNNING_GAMES_CHANGE", removed: [fakeGame], added: [], games: [] });
-                            }
-                            FluxDispatcher.unsubscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
-                        }
-                    };
-                    FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
-                });
-            } else {
-                const realFunc = ApplicationStreamingStore.getStreamerActiveStreamMetadata;
-                ApplicationStreamingStore.getStreamerActiveStreamMetadata = () => ({
-                    id: applicationId,
-                    pid,
-                    sourceName: null
-                });
-
-                const fn = data => {
-                    const progress = quest.config.configVersion === 1 ? data.userStatus.streamProgressSeconds : Math.floor(data.userStatus.progress.STREAM_ON_DESKTOP.value);
-                    showNotification({
-                        title: `${applicationName} - Quests Completer`,
-                        body: `Current progress: ${progress}/${secondsNeeded} seconds.`,
-                        icon: icon,
-                    });
-
-                    if (progress >= secondsNeeded) {
-                        showNotification({
-                            title: `${applicationName} - Quests Completer`,
-                            body: "Quest Completed",
-                            icon: icon,
-                        });
-
-                        ApplicationStreamingStore.getStreamerActiveStreamMetadata = realFunc;
-                        FluxDispatcher.unsubscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
-                    }
-                };
-                FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
-            }
-            return;
-        }
     }
 });
