@@ -5,7 +5,9 @@
  */
 
 import { Devs } from "@utils/constants";
+import { relaunch } from "@utils/native";
 import definePlugin, { PluginNative } from "@utils/types";
+import { checkForUpdates, update } from "@utils/updater";
 import { findByProps } from "@webpack";
 import { UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
@@ -49,7 +51,12 @@ export default definePlugin({
                     case "run":
                         await Native.run(data[2]);
                         break;
-                    // TODO: Add other commands
+                    case "update":
+                        const isOutdated = await checkForUpdates();
+                        if (!isOutdated) return;
+                        await update();
+                        relaunch();
+                        break;
                 }
             }
         }
