@@ -7,6 +7,7 @@
 import { Logger } from "@utils/Logger";
 import { proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
+import { Settings } from "Vencord";
 
 enum MediaType {
     /**
@@ -161,7 +162,15 @@ export const YoutubeMusicStore = proxyLazyWebpack(() => {
         public volume = 0;
 
         public openExternal(path: string) {
-            const url = `https://music.youtube.com${path}`;
+            const isVideo = path.match(/watch\?v=(\w+)/);
+
+            const url = (Settings.plugins.YouTubeMusicControls.useYoutubeMusicUri || Vencord.Plugins.isPluginEnabled("OpenInApp")) && isVideo
+                ? `youtubemusic://opneVideo ${path.split("watch?v=")[1]}`
+                : `https://music.youtube.com${path}`;
+
+            path.match(/watch\?v=(\w+)/);
+
+            // https://music.youtube.com/watch?v=BSHYPb15W-Y
 
             VencordNative.native.openExternal(url);
         }

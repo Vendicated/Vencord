@@ -97,7 +97,7 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    patchPopout: ErrorBoundary.wrap(({ user }: UserProps) => {
+    patchProfilePopout: ErrorBoundary.wrap(({ user }: UserProps) => {
         const isSelfUser = user.id === UserStore.getCurrentUser().id;
         return (
             <div className={isSelfUser ? "vc-uvs-popout-margin-self" : ""}>
@@ -131,7 +131,7 @@ export default definePlugin({
             find: ".popularApplicationCommandIds,",
             replacement: {
                 match: /(?<=,)(?=!\i&&!\i&&.{0,50}setNote:)/,
-                replace: "$self.patchPopout(arguments[0]),",
+                replace: "$self.patchProfilePopout(arguments[0]),",
             }
         },
 
