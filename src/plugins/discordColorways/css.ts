@@ -859,6 +859,24 @@ export function getPreset(colors: { accent?: string, primary?: string, secondary
             id: "solana",
             colors: ["accent", "primary"]
         },
+        neobrutal: {
+            name: "Neobrutal",
+            preset: `.theme-light {
+    --neobrutal-color-1: hsl(${HexToHSL("#" + primaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + primaryColor)[1]}%) ${HexToHSL("#" + primaryColor)[2]}%) !important;
+    --neobrutal-color-2: hsl(${HexToHSL("#" + primaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + primaryColor)[1]}%) ${Math.min(HexToHSL("#" + primaryColor)[2] + 80, 90)}%) !important;
+    --neobrutal-color-text: hsl(${HexToHSL("#" + accentColor)[0]} ${HexToHSL("#" + accentColor)[1]} ${HexToHSL("#" + accentColor)[2] - 10}) !important;
+    --neobrutal-color-accent: #${accentColor} !important;
+}
+
+.theme-dark {
+    --neobrutal-color-1: hsl(${HexToHSL("#" + primaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + primaryColor)[1]}%) ${Math.min(HexToHSL("#" + primaryColor)[2] + 80, 90)}%) !important;
+    --neobrutal-color-2: hsl(${HexToHSL("#" + primaryColor)[0]} calc(var(--saturation-factor, 1)*${HexToHSL("#" + primaryColor)[1]}%) ${HexToHSL("#" + primaryColor)[2]}%) !important;
+    --neobrutal-color-text: hsl(${HexToHSL("#" + accentColor)[0]} ${HexToHSL("#" + accentColor)[1]}% ${HexToHSL("#" + accentColor)[2] + 10}%) !important;
+    --neobrutal-color-accent: #${accentColor} !important;
+}`,
+            id: "neobrutal",
+            colors: ["accent", "primary"]
+        },
         gradientType1: {
             name: "Gradient Type 1",
             preset: {

@@ -63,7 +63,6 @@
     width: 100%;
     scrollbar-width: none !important;
     flex-direction: column;
-    padding: 0 16px !important;
     box-sizing: border-box;
     overflow: hidden auto;
 }
@@ -76,8 +75,8 @@
 .colorwayModal {
     width: 90% !important;
     height: 90% !important;
-    border-radius: 8px;
-    border: 1px solid #a6a6a6f0;
+    border-radius: 12px;
+    border: 1px solid #2a2a2a;
     display: flex;
     flex-direction: row;
     background-color: #090909;
@@ -211,7 +210,6 @@
 .colorwayModal-selectorHeader {
     display: flex;
     width: 100%;
-    padding: 16px;
     padding-bottom: 8px;
     box-sizing: border-box;
     flex-direction: column;
@@ -223,6 +221,9 @@
     flex-direction: column;
     width: 100%;
     height: 100%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 4px 4px 0;
 }
 
 .colorwaySelectorSidebar-tab {
@@ -275,13 +276,31 @@
     border-color: #a6a6a6;
 }
 
+.colorwaysPageHeader {
+    color: #fff;
+    margin: 8px;
+    font-weight: normal;
+    padding-left: 16px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    background-color: #101010;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    height: 50px;
+    flex-shrink: 0;
+}
+
 .colorwaySelectorSidebar {
     background-color: #101010;
     color: #fff;
     box-sizing: border-box;
-    height: 100%;
+    height: calc(100% - 16px);
+    border-radius: 8px;
     flex: 0 0 auto;
-    padding: 16px;
+    padding: 8px;
+    margin: 8px;
+    margin-right: 0;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -1144,7 +1163,7 @@
 }
 
 .colorwaysModalTab {
-    padding: 16px;
+    height: 100%;
 }
 
 .colorwaysSettings-colorwaySource {
@@ -1461,16 +1480,16 @@
     mask: var(--si-vencordsettings) center/contain no-repeat !important;
 }
 
-.dc-colorway-ondemand::before {
-    /* stylelint-disable-next-line property-no-vendor-prefix */
-    -webkit-mask: var(--si-vencordupdater) center/contain no-repeat !important;
-    mask: var(--si-vencordupdater) center/contain no-repeat !important;
-}
-
 .dc-colorway-sources-manager::before {
     /* stylelint-disable-next-line property-no-vendor-prefix */
     -webkit-mask: var(--si-instantinvites) center/contain no-repeat !important;
     mask: var(--si-instantinvites) center/contain no-repeat !important;
+}
+
+.dc-colorway-store::before {
+    /* stylelint-disable-next-line property-no-vendor-prefix */
+    -webkit-mask: var(--si-discovery) center/contain no-repeat !important;
+    mask: var(--si-discovery) center/contain no-repeat !important;
 }
 
 .colorwaySourceModal {
@@ -1644,9 +1663,7 @@
 
 .colorwaysMenuTabs {
     width: 100%;
-    height: 30px;
-    padding-bottom: 8px;
-    box-sizing: content-box;
+    height: 24px;
 }
 
 .colorwaysMenuTab {
@@ -1659,12 +1676,15 @@
     display: inline-block;
 }
 
-.colorwaySourceTab {
+.colorwayInnerTab {
     box-sizing: border-box;
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    background-color: #090909;
+    height: calc(100% - 58px);
+    padding: 8px;
 }
 
 .colorwaysMenuTab:hover {
@@ -1895,4 +1915,21 @@
 
 .colorwaysServerListItemPill[data-status="active"] {
     height: 40px;
+}
+
+.colorwaysManagerActive {
+    color: #fff;
+    margin: auto;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    backdrop-filter: blur(16px);
+    z-index: +5;
 }

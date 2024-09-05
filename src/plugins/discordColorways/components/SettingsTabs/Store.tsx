@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore, ReactNode, useEffect, useState, openModal } from "../../";
-import { DeleteIcon, DownloadIcon, PalleteIcon } from "../Icons";
-
+import { DataStore, openModal, ReactNode, useEffect, useState } from "../../";
 import { StoreItem } from "../../types";
+import { DeleteIcon, DownloadIcon, PalleteIcon } from "../Icons";
 import Selector from "../Selector";
 
 export default function ({
@@ -39,8 +38,8 @@ export default function ({
     }, []);
 
     function Container({ children }: { children: ReactNode; }) {
-        if (hasTheme) return <div className="colorwaysModalTab" data-theme={theme}>{children}</div>;
-        else return <div className="colorwaysModalTab">{children}</div>;
+        if (hasTheme) return <div className="colorwaysModalTab colorwayInnerTab" style={{ height: "100%" }} data-theme={theme}>{children}</div>;
+        else return <div className="colorwaysModalTab colorwayInnerTab" style={{ height: "100%" }}>{children}</div>;
     }
 
     return <Container>
@@ -50,7 +49,7 @@ export default function ({
                 className="colorwayTextBox"
                 placeholder="Search for sources..."
                 value={searchValue}
-                onChange={(e) => setSearchValue(e.currentTarget.value)}
+                onChange={e => setSearchValue(e.currentTarget.value)}
             />
             <button
                 className="colorwaysPillButton"
@@ -90,7 +89,7 @@ export default function ({
         </div>
         <div className="colorwaysSettings-sourceScroller">
             {storeObject.map((item: StoreItem) =>
-                item.name.toLowerCase().includes(searchValue.toLowerCase()) ? <div className={`colorwaysSettings-colorwaySource`} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }}>
+                item.name.toLowerCase().includes(searchValue.toLowerCase()) ? <div className={"colorwaysSettings-colorwaySource"} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }}>
                     <div style={{ gap: ".5rem", display: "flex", marginBottom: "8px", flexDirection: "column" }}>
                         <span className="colorwaysSettings-colorwaySourceLabelHeader">
                             {item.name}

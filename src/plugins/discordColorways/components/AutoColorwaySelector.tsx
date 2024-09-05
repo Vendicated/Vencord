@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore, useState, useEffect } from "../";
+import { DataStore, useEffect, useState } from "../";
 import { getAutoPresets } from "../css";
 import { ModalProps } from "../types";
 

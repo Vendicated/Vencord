@@ -159,7 +159,7 @@ export default function ({
     }
 
     return <Container>
-        <TabBar items={[
+        <TabBar container={({ children }) => <div className="colorwaysPageHeader">{children}</div>} items={[
             {
                 name: "Online",
                 component: OnlineTab
@@ -180,7 +180,7 @@ function OfflineTab() {
             updateRemoteSources();
         })();
     }, []);
-    return <div className="colorwaySourceTab">
+    return <div className="colorwayInnerTab">
         <div style={{
             display: "flex",
             gap: "8px"
@@ -296,7 +296,7 @@ function OnlineTab() {
             updateRemoteSources();
         })();
     }, []);
-    return <div className="colorwaySourceTab">
+    return <div className="colorwayInnerTab">
         <div style={{
             display: "flex",
             gap: "8px"

@@ -5,24 +5,6 @@
  */
 
 // Plugin Imports
-import ColorwaysButton from "./components/ColorwaysButton";
-import CreatorModal from "./components/CreatorModal";
-import Selector from "./components/Selector";
-import SettingsPage from "./components/SettingsTabs/SettingsPage";
-import SourceManager from "./components/SettingsTabs/SourceManager";
-import Store from "./components/SettingsTabs/Store";
-import Spinner from "./components/Spinner";
-import { defaultColorwaySource } from "./constants";
-import style from "./style.css?managed";
-import discordTheme from "./theme.discord.css?managed";
-import { ColorPickerProps, ColorwayObject } from "./types";
-
-// Mod-specific imports
-
-import {
-    ReactNode as $ReactNode,
-    CSSProperties as $CSSProperties
-} from "react";
 import * as $DataStore from "@api/DataStore";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
@@ -34,49 +16,66 @@ import {
     i18n,
     SettingsRouter
 } from "@webpack/common";
-import ColorwayID from "./components/ColorwayID";
-import { closeWS, connect } from "./wsClient";
-import { ColorwayCSS } from "./colorwaysAPI";
 import { FluxEvents as $FluxEvents } from "@webpack/types";
+// Mod-specific imports
+import {
+    CSSProperties as $CSSProperties,
+    ReactNode as $ReactNode
+} from "react";
+
+import { ColorwayCSS } from "./colorwaysAPI";
+import ColorwayID from "./components/ColorwayID";
+import ColorwaysButton from "./components/ColorwaysButton";
+import CreatorModal from "./components/CreatorModal";
 import PCSMigrationModal from "./components/PCSMigrationModal";
-import defaultsLoader from "./defaultsLoader";
+import Selector from "./components/Selector";
+import SettingsPage from "./components/SettingsTabs/SettingsPage";
+import SourceManager from "./components/SettingsTabs/SourceManager";
+import Store from "./components/SettingsTabs/Store";
+import Spinner from "./components/Spinner";
+import { defaultColorwaySource } from "./constants";
 import { generateCss, getPreset, gradientBase, gradientPresetIds } from "./css";
+import defaultsLoader from "./defaultsLoader";
+import style from "./style.css?managed";
+import discordTheme from "./theme.discord.css?managed";
+import { ColorPickerProps, ColorwayObject } from "./types";
 import { colorToHex } from "./utils";
+import { closeWS, connect } from "./wsClient";
 
 export const DataStore = $DataStore;
 export type ReactNode = $ReactNode;
 export type CSSProperties = $CSSProperties;
 export type FluxEvents = $FluxEvents;
+export { closeModal, openModal } from "@utils/modal";
 export {
-    useState,
+    Clipboard,
+    FluxDispatcher,
+    i18n,
+    ReactDOM,
+    SettingsRouter,
+    Slider,
+    Toasts,
+    useCallback,
     useEffect,
     useReducer,
-    useStateFromStores,
-    useCallback,
     useRef,
     UserStore,
-    Clipboard,
-    i18n,
-    SettingsRouter,
-    Toasts,
-    FluxDispatcher,
-    ReactDOM,
-    Slider
+    useState,
+    useStateFromStores
 } from "@webpack/common";
-export { openModal, closeModal } from "@utils/modal";
 
 export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
     return <Spinner className="colorways-creator-module-warning" />;
 };
 
 export const PluginProps = {
-    pluginVersion: "6.4.0",
+    pluginVersion: "6.5.0",
     clientMod: "Vencord",
     UIVersion: "2.1.0",
-    CSSVersion: "1.20"
+    CSSVersion: "1.21"
 };
 
-const mainDev = Devs["DaBluLite"] || {
+const mainDev = Devs.DaBluLite || {
     name: "DaBluLite",
     id: 582170007505731594n
 };
@@ -200,7 +199,7 @@ export default definePlugin({
             },
             {
                 section: "ColorwaysStore",
-                label: "Store",
+                label: "Discover",
                 element: () => <Store hasTheme />,
                 className: "dc-colorway-store"
             },
