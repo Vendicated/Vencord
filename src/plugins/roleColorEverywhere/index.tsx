@@ -160,5 +160,5 @@ export default definePlugin({
                 channelId: props.channel_id,
             }),
         };
-    },
+    }
 });
