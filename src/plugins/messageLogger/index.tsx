@@ -32,9 +32,11 @@ import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, i18n, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 import { Message } from "discord-types/general";
 
+import RoleColorEverywhere from "../roleColorEverywhere/index";
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
 import { openHistoryModal } from "./HistoryModal";
+import roleColorEverywhere from "../roleColorEverywhere/index";
 
 interface MLMessage extends Message {
     deleted?: boolean;
@@ -171,7 +173,9 @@ export default definePlugin({
         return Settings.plugins.MessageLogger.inlineEdits && (
             <>
                 {message.editHistory?.map(edit => (
-                    <div className="messagelogger-edited">
+                    <div className="messagelogger-edited" style={roleColorEverywhere.settings.store.coloredText ? {
+                    color: "var(--text-normal)"
+                    } : undefined}>
                         {parseEditContent(edit.content, message)}
                         <Timestamp
                             timestamp={edit.timestamp}

@@ -1,26 +1,15 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
+import { Message } from "discord-types/general";
 
 const settings = definePluginSettings({
     chatMentions: {
@@ -46,13 +35,19 @@ const settings = definePluginSettings({
         default: true,
         description: "Show role colors in the reactors list",
         restartNeeded: true
-    }
+    },
+    coloredText: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show role colors in users text",
+        restartNeeded: true,
+    },
 });
 
 
 export default definePlugin({
     name: "RoleColorEverywhere",
-    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN],
+    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.sadan],
     description: "Adds the top role color anywhere possible",
     patches: [
         // Chat Mentions
@@ -114,6 +109,15 @@ export default definePlugin({
                 replace: "$&,style:{color:$self.getColor($2?.id,$1)}"
             },
             predicate: () => settings.store.reactorsList,
+        },
+        // message text color
+        {
+            find: "SEND_FAILED,",
+            predicate: () => settings.store.coloredText,
+            replacement: {
+                match: /children:\[/,
+                replace: "style:$self.getMessageStyle(arguments[0].message),$&",
+            }
         }
     ],
     settings,
@@ -148,5 +152,13 @@ export default definePlugin({
                 color: this.getColor(userId, { guildId })
             }
         };
-    }
+    },
+
+    getMessageStyle(props: Message) {
+        return {
+            color: this.getColor(props.author.id, {
+                channelId: props.channel_id,
+            }),
+        };
+    },
 });
