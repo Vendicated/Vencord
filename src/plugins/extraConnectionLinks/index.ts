@@ -7,7 +7,6 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-
 /**
  * All the connection types implemented into this plugin
  */
@@ -20,8 +19,8 @@ enum connectionTypes {
 /**
  * The uri to use.
  * There are also two variables that you can use, name and id.
- * The "name" is well the name of the account and the name is what shows up when viewing a connection on a discord profile.
- * The "id" is an identifier that normal users don't see, it will usually be an user id (, for example Roblox has user ids, and discord stores that user id in the id field of the connection).
+ * The "name" is what shows up when viewing a connection on a discord profile.
+ * The "id" is the identifier of the account connected, the type depends on the service connected.
  * @example [connectionTypes.Xbox]: "https://www.xbox.com/play/user/${name}",
  * @example [connectionTypes.Roblox]: "https://www.roblox.com/users/${id}/profile",
  */
@@ -52,7 +51,7 @@ export default definePlugin({
             return {
                 find: "getPlatformUserUrl:",
                 replacement: {
-                    match: new RegExp(`(?<=${serviceNames[connectionTypeSelected]}",.*},.+)(?=},)`),
+                    match: new RegExp(`(r`),
                     replace: `, getPlatformUserUrl:e=>{let {name, id} = e; return \`${uris[connectionTypeSelected]}\`;}`
                 }
             };
