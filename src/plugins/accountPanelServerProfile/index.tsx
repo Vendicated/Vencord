@@ -33,10 +33,10 @@ const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
                 id="vc-ap-view-server-profile"
                 label="View Server Profile"
                 disabled={getCurrentChannel()?.getGuildId() == null}
-                action={() => {
+                action={e => {
                     shouldOpenUserProfile = true;
                     accountPanelRef.current?.props.onMouseDown();
-                    accountPanelRef.current?.props.onClick(new MouseEvent("click"));
+                    accountPanelRef.current?.props.onClick(e);
                 }}
             />
         </Menu.Menu>
