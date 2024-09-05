@@ -92,7 +92,7 @@ export type Tooltip = ComponentType<{
     /** Tooltip.Colors.BLACK */
     color?: string;
     /** TooltipPositions.TOP */
-    position?: string;
+    position?: PopoutPosition;
 
     tooltipClassName?: string;
     tooltipContentClassName?: string;
@@ -111,7 +111,7 @@ export type TooltipContainer = ComponentType<PropsWithChildren<{
     /** Tooltip.Colors.BLACK */
     color?: string;
     /** TooltipPositions.TOP */
-    position?: string;
+    position?: PopoutPosition;
     spacing?: number;
 
     className?: string;
@@ -253,7 +253,7 @@ export type Select = ComponentType<PropsWithChildren<{
     look?: 0 | 1;
     className?: string;
     popoutClassName?: string;
-    popoutPosition?: "top" | "left" | "right" | "bottom" | "center" | "window_center";
+    popoutPosition?: PopoutPosition;
     optionClassName?: string;
 
     autoFocus?: boolean;
@@ -294,7 +294,7 @@ export type SearchableSelect = ComponentType<PropsWithChildren<{
     className?: string;
     popoutClassName?: string;
     wrapperClassName?: string;
-    popoutPosition?: "top" | "left" | "right" | "bottom" | "center" | "window_center";
+    popoutPosition?: PopoutPosition;
     optionClassName?: string;
 
     autoFocus?: boolean;
@@ -377,6 +377,8 @@ declare enum PopoutAnimation {
     FADE = "4"
 }
 
+type PopoutPosition = "top" | "bottom" | "left" | "right" | "center" | "window_center";
+
 export type Popout = ComponentType<{
     children: (
         thing: {
@@ -388,7 +390,7 @@ export type Popout = ComponentType<{
         },
         data: {
             isShown: boolean;
-            position: string;
+            position: PopoutPosition;
         }
     ) => ReactNode;
     shouldShow?: boolean;
@@ -396,7 +398,7 @@ export type Popout = ComponentType<{
         closePopout: () => void;
         isPositioned: boolean;
         nudge: number;
-        position: string;
+        position: PopoutPosition;
         setPopoutRef: (ref: any) => void;
         updatePosition: () => void;
     }) => ReactNode;
@@ -405,13 +407,13 @@ export type Popout = ComponentType<{
     onRequestClose?: () => void;
 
     /** "center" and others */
-    align?: string;
+    align?: "left" | "right" | "center";
     /** Popout.Animation */
     animation?: PopoutAnimation;
     autoInvert?: boolean;
     nudgeAlignIntoViewport?: boolean;
     /** "bottom" and others */
-    position?: string;
+    position?: PopoutPosition;
     positionKey?: string;
     spacing?: number;
 }> & {

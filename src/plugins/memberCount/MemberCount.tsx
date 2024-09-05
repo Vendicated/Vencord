@@ -15,7 +15,7 @@ import { OnlineMemberCountStore } from "./OnlineMemberCountStore";
 export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; tooltipGuildId?: string; }) {
     const currentChannel = useStateFromStores([SelectedChannelStore], () => getCurrentChannel());
 
-    const guildId = isTooltip ? tooltipGuildId! : currentChannel!.guild_id!;
+    const guildId = isTooltip ? tooltipGuildId! : currentChannel?.guild_id;
 
     const totalCount = useStateFromStores(
         [GuildMemberCountStore],
@@ -24,17 +24,18 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
 
     let onlineCount = useStateFromStores(
         [OnlineMemberCountStore],
-        () => OnlineMemberCountStore.getCount(guildId)
+        () => OnlineMemberCountStore.getCount(guildId!)
     );
 
     const { groups } = useStateFromStores(
         [ChannelMemberStore],
-        () => ChannelMemberStore.getProps(guildId, currentChannel?.id)
+        () => ChannelMemberStore.getProps(guildId!, currentChannel?.id)
     );
 
     const threadGroups = useStateFromStores(
         [ThreadMemberListStore],
-        () => ThreadMemberListStore.getMemberListSections(currentChannel!.id)
+        // @ts-expect-error
+        () => ThreadMemberListStore.getMemberListSections(currentChannel?.id)
     );
 
     if (!isTooltip && (groups.length >= 1 || groups[0]!.id !== StatusType.UNKNOWN)) {
@@ -47,7 +48,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
     }
 
     useEffect(() => {
-        OnlineMemberCountStore.ensureCount(guildId);
+        OnlineMemberCountStore.ensureCount(guildId!);
     }, [guildId]);
 
     if (totalCount == null)

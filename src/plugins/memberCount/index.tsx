@@ -29,11 +29,11 @@ import { findStoreLazy } from "@webpack";
 import { MemberCount } from "./MemberCount";
 
 export const GuildMemberCountStore: Store & {
-    getMemberCount: (guildId?: string | null | undefined) => number | null | undefined;
+    getMemberCount: (guildId?: string | null) => number | null | undefined;
 } = findStoreLazy("GuildMemberCountStore");
 
 export const ChannelMemberStore: Store & {
-    getProps: (guildId: string, channelId?: string | null | undefined) => {
+    getProps: (guildId: string, channelId?: string | null) => {
         groups: { count: number; id: string; }[];
     };
 } = findStoreLazy("ChannelMemberStore");

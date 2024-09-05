@@ -39,7 +39,7 @@ interface NotificationObject {
     title: string;
     content: string;
     useBase64Icon: boolean;
-    icon: ArrayBuffer | string;
+    icon: string;
     sourceApp: string;
 }
 
@@ -262,7 +262,12 @@ function shouldIgnoreForChannelType(channel: ChannelRecord) {
 }
 
 async function sendMsgNotif(titleString: string, content: string, message: MessageJSON) {
-    const result = await (await fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`)).arrayBuffer();
+    const blob = await (await fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`)).blob();
+    const result = await new Promise<string>(resolve => {
+        const r = new FileReader();
+        r.onload = () => { resolve((r.result as string).split(",", 2)[1]!); };
+        r.readAsDataURL(blob);
+    });
 
     sendToOverlay({
         type: 1,
@@ -274,7 +279,7 @@ async function sendMsgNotif(titleString: string, content: string, message: Messa
         title: titleString,
         content: content,
         useBase64Icon: true,
-        icon: new TextDecoder().decode(result),
+        icon: result,
         sourceApp: "Vencord"
     });
 }

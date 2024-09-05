@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Logger } from "@utils/Logger";
 import { makeCodeblock } from "@utils/text";
 import { ApplicationCommandOptionType, ApplicationCommandType } from "@vencord/discord-types";
 
@@ -47,10 +48,10 @@ export let RequiredMessageOption: Option = ReqPlaceholder;
 export const _init = function (cmds: Command[]) {
     try {
         BUILT_IN = cmds;
-        OptionalMessageOption = cmds.find(c => c.name === "shrug")!.options![0]!;
-        RequiredMessageOption = cmds.find(c => c.name === "me")!.options![0]!;
-    } catch {
-        console.error("Failed to load CommandsAPI");
+        OptionalMessageOption = cmds.find(c => (c.untranslatedName || c.displayName) === "shrug")!.options![0]!;
+        RequiredMessageOption = cmds.find(c => (c.untranslatedName || c.displayName) === "me")!.options![0]!;
+    } catch (e) {
+        new Logger("CommandsAPI").error("Failed to load CommandsApi", e, " - cmds is", cmds);
     }
     return cmds;
 } as never;
@@ -140,6 +141,8 @@ export function registerCommand(command: Command, plugin: string) {
         throw new Error(`Command '${command.name}' already exists.`);
 
     command.isVencordCommand = true;
+    command.untranslatedName ??= command.name;
+    command.untranslatedDescription ??= command.description;
     command.id ??= `-${BUILT_IN.length + 1}`;
     command.applicationId ??= "-1"; // BUILT_IN;
     command.type ??= ApplicationCommandType.CHAT;
