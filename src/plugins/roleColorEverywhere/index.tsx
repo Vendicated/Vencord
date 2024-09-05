@@ -57,7 +57,7 @@ export default definePlugin({
     patches: [
         // Chat Mentions
         {
-            find: 'location:"UserMention',
+            find: ".USER_MENTION)",
             replacement: [
                 {
                     match: /onContextMenu:\i,color:\i,\.\.\.\i(?=,children:)(?<=user:(\i),channel:(\i).{0,500}?)/,

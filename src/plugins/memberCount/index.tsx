@@ -28,14 +28,13 @@ import { FluxStore } from "@webpack/types";
 
 import { MemberCount } from "./MemberCount";
 
-export const GuildMemberCountStore = findStore("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId: string): number | null; };
+export const GuildMemberCountStore = findStore("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId?: string): number | null; };
 export const ChannelMemberStore = findStore("ChannelMemberStore") as FluxStore & {
-    getProps(guildId: string, channelId: string): { groups: { count: number; id: string; }[]; };
+    getProps(guildId?: string, channelId?: string): { groups: { count: number; id: string; }[]; };
 };
 export const ThreadMemberListStore = findStore("ThreadMemberListStore") as FluxStore & {
-    getMemberListSections(channelId: string): { [sectionId: string]: { sectionId: string; userIds: string[]; }; };
+    getMemberListSections(channelId?: string): { [sectionId: string]: { sectionId: string; userIds: string[]; }; };
 };
-
 
 const settings = definePluginSettings({
     toolTip: {
