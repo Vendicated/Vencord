@@ -131,6 +131,7 @@ export declare class ChannelMessages {
         truncateTop?: boolean | undefined /* = true */
     ): ChannelMessages | this;
     receivePushNotification(messageProperties: MessageProperties): ChannelMessages | this;
+    receiveReactionInAppNotification(messageProperties: MessageProperties): ChannelMessages | this;
     reduce(
         callback: (
             previousValue: MessageRecord,

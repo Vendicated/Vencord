@@ -83,8 +83,8 @@ importers:
         specifier: ~4.17.7
         version: 4.17.7
       '@types/node':
-        specifier: ^18.19.49
-        version: 18.19.49
+        specifier: ^18.19.50
+        version: 18.19.50
       '@types/react':
         specifier: ~18.2.79
         version: 18.2.79
@@ -198,8 +198,8 @@ importers:
         specifier: ^2.7.2
         version: 2.7.2(patch_hash=hgabz23qzpdlfvbmkgegp3so3q)(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)
       '@types/node':
-        specifier: ^20.16.4
-        version: 20.16.4
+        specifier: ^20.16.5
+        version: 20.16.5
       '@types/semver':
         specifier: ^7.5.8
         version: 7.5.8
@@ -252,8 +252,8 @@ importers:
         specifier: ~4.17.7
         version: 4.17.7
       '@types/node':
-        specifier: ^18.19.49
-        version: 18.19.49
+        specifier: ^18.19.50
+        version: 18.19.50
       '@types/react':
         specifier: ~18.2.79
         version: 18.2.79
@@ -681,11 +681,11 @@ packages:
   '@types/lodash@4.17.7':
     resolution: {integrity: sha512-8wTvZawATi/lsmNu10/j2hk1KEP0IvjubqPE3cu1Xz7xfXXt5oCq3SNUz4fMIP4XGF9Ky+Ue2tBA3hcS7LSBlA==}
 
-  '@types/node@18.19.49':
-    resolution: {integrity: sha512-ALCeIR6n0nQ7j0FUF1ycOhrp6+XutJWqEu/vtdEqXFUQwkBfgUA5cEg3ZNmjWGF/ZYA/FcF9QMkL55Ar0O6UrA==}
+  '@types/node@18.19.50':
+    resolution: {integrity: sha512-xonK+NRrMBRtkL1hVCc3G+uXtjh1Al4opBLjqVmipe5ZAaBYWW6cNAiBVZ1BvmkBhep698rP3UM3aRAdSALuhg==}
 
-  '@types/node@20.16.4':
-    resolution: {integrity: sha512-ioyQ1zK9aGEomJ45zz8S8IdzElyxhvP1RVWnPrXDf6wFaUb+kk1tEcVVJkF7RPGM0VWI7cp5U57oCPIn5iN1qg==}
+  '@types/node@20.16.5':
+    resolution: {integrity: sha512-VwYCweNo3ERajwy0IUlqqcyZ8/A7Zwa9ZP3MnENWcB11AejO+tLy3pu850goUW2FC/IJMdZUfKpX/yxL1gymCA==}
 
   '@types/normalize-package-data@2.4.1':
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -2725,7 +2725,7 @@ snapshots:
   '@types/fs-extra@11.0.4':
     dependencies:
       '@types/jsonfile': 6.1.4
-      '@types/node': 20.16.4
+      '@types/node': 20.16.5
 
   '@types/har-format@1.2.13': {}
 
@@ -2737,15 +2737,15 @@ snapshots:
 
   '@types/jsonfile@6.1.4':
     dependencies:
-      '@types/node': 20.16.4
+      '@types/node': 20.16.5
 
   '@types/lodash@4.17.7': {}
 
-  '@types/node@18.19.49':
+  '@types/node@18.19.50':
     dependencies:
       undici-types: 5.26.5
 
-  '@types/node@20.16.4':
+  '@types/node@20.16.5':
     dependencies:
       undici-types: 6.19.8
 
@@ -2771,12 +2771,12 @@ snapshots:
 
   '@types/yauzl@2.10.0':
     dependencies:
-      '@types/node': 20.16.4
+      '@types/node': 20.16.5
     optional: true
 
   '@types/yazl@2.4.5':
     dependencies:
-      '@types/node': 20.16.4
+      '@types/node': 20.16.5
 
   '@typescript-eslint/eslint-plugin@8.4.0(@typescript-eslint/parser@8.4.0(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4))(eslint@9.9.1(patch_hash=wy5a2dwvtxac2ygzwebqqjurgi))(typescript@5.5.4)':
     dependencies:
@@ -4280,7 +4280,7 @@ snapshots:
 
   standalone-electron-types@1.0.0(patch_hash=cvychuhjtbzvtowhc2efrgpqjq):
     dependencies:
-      '@types/node': 18.19.49
+      '@types/node': 18.19.50
 
   static-extend@0.1.2:
     dependencies:
