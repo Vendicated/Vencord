@@ -81,8 +81,6 @@ async function build() {
     if (IS_DEV) args.push("--dev");
 
     const res = await execFile(command, args, opts);
-    console.log(res);
-    console.log(`\n\n\n\n\n${res.stderr}`);
 
     return !res.stderr.includes("Build failed");
 }
