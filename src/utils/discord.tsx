@@ -18,7 +18,7 @@
 
 import { MessageObject } from "@api/MessageEvents";
 import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
-import { Guild, Message, User } from "discord-types/general";
+import { Channel, Guild, Message, User } from "discord-types/general";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
 
@@ -54,12 +54,12 @@ export async function openInviteModal(code: string) {
     });
 }
 
-export function getCurrentChannel() {
+export function getCurrentChannel(): Channel | undefined {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());
 }
 
 export function getCurrentGuild(): Guild | undefined {
-    return GuildStore.getGuild(getCurrentChannel()?.guild_id);
+    return GuildStore.getGuild(getCurrentChannel()?.guild_id!);
 }
 
 export function openPrivateChannel(userId: string) {
