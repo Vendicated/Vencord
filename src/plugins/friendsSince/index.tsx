@@ -18,8 +18,6 @@ const getCreatedAtDate = findByCodeLazy('month:"short",day:"numeric"');
 const locale = findByPropsLazy("getLocale");
 const Section = findComponentByCodeLazy('"auto":"smooth"', ".section");
 
-const cl = classNameFactory("vc-friendssince-");
-
 export default definePlugin({
     name: "FriendsSince",
     description: "Shows when you became friends with someone in the user popout",

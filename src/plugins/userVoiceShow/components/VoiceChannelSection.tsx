@@ -18,6 +18,9 @@
 
 import "./VoiceChannelSection.css";
 
+import { findByPropsLazy } from "@webpack";
+import { Button, Forms, PermissionStore, Toasts } from "@webpack/common";
+import { Channel } from "discord-types/general";
 import { classNameFactory } from "@api/Styles";
 import { LazyComponent } from "@utils/lazyReact";
 import { findByCode, findByCodeLazy, findByPropsLazy, findStoreLazy } from "@webpack";
