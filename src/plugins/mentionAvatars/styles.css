@@ -9,3 +9,8 @@
 .vc-mentionAvatars-role-icon {
     margin: 0 2px 0.2rem 4px;
 }
+
+/** don't display inside the ServerInfo modal owner mention */
+.vc-gp-owner .vc-mentionAvatars-icon {
+    display: none;
+}
