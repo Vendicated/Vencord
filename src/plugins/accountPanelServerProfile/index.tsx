@@ -57,8 +57,8 @@ export default definePlugin({
                     replace: "$&$self.accountPanelRef=Vencord.Webpack.Common.useRef(null);"
                 },
                 {
-                    match: /(\.AVATAR,children:.+?renderPopout:(\i)=>{)(.+?)(?=},position)(?<=currentUser:(\i).+?)/,
-                    replace: (_, rest, popoutProps, originalPopout, currentUser) => `${rest}return $self.UserProfile({popoutProps:${popoutProps},currentUser:${currentUser},originalPopout:()=>{${originalPopout}}})`
+                    match: /(\.AVATAR,children:.+?renderPopout:(\i)=>){(.+?)}(?=,position)(?<=currentUser:(\i).+?)/,
+                    replace: (_, rest, popoutProps, originalPopout, currentUser) => `${rest}$self.UserProfile({popoutProps:${popoutProps},currentUser:${currentUser},originalPopout:()=>{${originalPopout}}})`
                 },
                 {
                     match: /\.AVATAR,children:.+?(?=renderPopout:)/,
