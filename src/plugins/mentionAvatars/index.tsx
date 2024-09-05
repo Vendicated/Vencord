@@ -16,10 +16,21 @@ import { User } from "discord-types/general";
 const settings = definePluginSettings({
     showAtSymbol: {
         type: OptionType.BOOLEAN,
-        description: "Whether the the @ symbol should be displayed on user mentions",
+        description: "Whether the @ symbol should be displayed on user mentions",
         default: true
-    }
+    },
+    where: {
+        type: OptionType.SELECT,
+        description: "Where to display the Avatar",
+        options: [
+            { label: "Avatar then name", value: "Avatar-name", default: true },
+            { label: "Name then avatar", value: "Name-Avatar" },
+
+        ],
+    },
 });
+
+
 
 function DefaultRoleIcon() {
     return (
@@ -70,17 +81,20 @@ export default definePlugin({
 
         if (!user) return <>{getUsernameString(username)}</>;
 
+        const avatar = (
+            <img
+                src={user.getAvatarURL(SelectedGuildStore.getGuildId(), 16, isHovering)}
+                className="vc-mentionAvatars-icon"
+                style={{ borderRadius: "50%" }}
+            />
+        );
+
         return (
             <span
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
             >
-                <img
-                    src={user.getAvatarURL(SelectedGuildStore.getGuildId(), 16, isHovering)}
-                    className="vc-mentionAvatars-icon"
-                    style={{ borderRadius: "50%" }}
-                />
-                {getUsernameString(username)}
+                {settings.store.where === "Avatar-name" ? <>{avatar}{getUsernameString(username)}</> : <>{getUsernameString(username)} {avatar}</>}
             </span>
         );
     }, { noop: true }),
