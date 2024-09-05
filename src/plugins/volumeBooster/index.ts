@@ -31,10 +31,27 @@ const settings = definePluginSettings({
     }
 });
 
+interface StreamData {
+    audioContext: AudioContext,
+    audioElement: HTMLAudioElement,
+    emitter: any,
+    // added by this plugin
+    gainNode?: GainNode,
+    id: string,
+    levelNode: AudioWorkletNode,
+    sinkId: string | "default",
+    stream: MediaStream,
+    streamSourceNode?: MediaStreamAudioSourceNode,
+    videoStreamId: string,
+    _mute: boolean,
+    _speakingFlags: number,
+    _volume: number;
+}
+
 export default definePlugin({
     name: "VolumeBooster",
-    authors: [Devs.Nuckyz],
-    description: "Allows you to set the user and stream volume above the default maximum.",
+    authors: [Devs.Nuckyz, Devs.sadan],
+    description: "Allows you to set the user and stream volume above the default maximum",
     settings,
 
     patches: [
@@ -45,12 +62,28 @@ export default definePlugin({
         ].map(find => ({
             find,
             replacement: {
-                match: /(?<=maxValue:\i\.\i)\?(\d+?):(\d+?)(?=,)/,
-                replace: (_, higherMaxVolume, minorMaxVolume) => ""
-                    + `?${higherMaxVolume}*$self.settings.store.multiplier`
-                    + `:${minorMaxVolume}*$self.settings.store.multiplier`
+                match: /(?<=maxValue:)\i\.\i\?(\d+?):(\d+?)(?=,)/,
+                replace: (_, higherMaxVolume, minorMaxVolume) => `${higherMaxVolume}*$self.settings.store.multiplier`
             }
         })),
+        // Patches needed for web/vesktop
+        {
+            find: "streamSourceNode",
+            predicate: () => !IS_DISCORD_DESKTOP,
+            group: true,
+            replacement: [
+                // Remove rounding algorithm
+                {
+                    match: /Math\.max.{0,30}\)\)/,
+                    replace: "arguments[0]"
+                },
+                // Patch the volume
+                {
+                    match: /\.volume=this\._volume\/100;/,
+                    replace: ".volume=0.00;$self.patchVolume(this);"
+                }
+            ]
+        },
         // Prevent Audio Context Settings sync from trying to sync with values above 200, changing them to 200 before we send to Discord
         {
             find: "AudioContextSettingsMigrated",
@@ -83,4 +116,26 @@ export default definePlugin({
             ]
         }
     ],
+
+    patchVolume(data: StreamData) {
+        if (data.stream.getAudioTracks().length === 0) return;
+
+        data.streamSourceNode ??= data.audioContext.createMediaStreamSource(data.stream);
+
+        if (!data.gainNode) {
+            const gain = data.gainNode = data.audioContext.createGain();
+            data.streamSourceNode.connect(gain);
+            gain.connect(data.audioContext.destination);
+        }
+
+        // @ts-expect-error
+        if (data.sinkId != null && data.sinkId !== data.audioContext.sinkId && "setSinkId" in AudioContext.prototype) {
+            // @ts-expect-error https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/setSinkId
+            data.audioContext.setSinkId(data.sinkId);
+        }
+
+        data.gainNode.gain.value = data._mute
+            ? 0
+            : data._volume / 100;
+    }
 });
