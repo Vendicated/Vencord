@@ -256,6 +256,7 @@ async function SendInChat(onClose) {
     const preview = generateFileNamePreview(recentmessage.content);
     const imageName = `${preview} - ${recentmessage.author.username}`;
     const file = new File([image], `${imageName}.png`, { type: "image/png" });
+    // @ts-expect-error typing issue
     UploadHandler.promptToUpload([file], getCurrentChannel(), 0);
     onClose();
 }

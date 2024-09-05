@@ -10,6 +10,7 @@ import { getCurrentChannel, sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
 
 async function handleButtonClick() {
+    // @ts-expect-error typing issue
     sendMessage(getCurrentChannel().id, { content: "meow" });
 }
 

@@ -50,7 +50,9 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
         const listener: SendListener = async (_, message) => {
             if (enabled) {
                 const groupChannel = await DataStore.get("encryptcordChannelId");
+                // @ts-expect-error typing issue
                 if (getCurrentChannel().id !== groupChannel) {
+                    // @ts-expect-error typing issue
                     sendBotMessage(getCurrentChannel().id, { content: `You must be in <#${groupChannel}> to send an encrypted message!\n> If you wish to send an unencrypted message, please click the button in the chatbar.` });
                     message.content = "";
                     return;
@@ -81,18 +83,24 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
         <ChatBarButton
             tooltip={enabled ? "Send Unencrypted Messages" : "Send Encrypted Messages"}
             onClick={async () => {
+                // @ts-expect-error typing issue
                 if (await DataStore.get("encryptcordGroup") === false || (await DataStore.get("encryptcordChannelId") !== getCurrentChannel().id)) {
                     setButtonDisabled(true);
+                    // @ts-expect-error typing issue
                     await sendTempMessage(getCurrentChannel().id, "", `join\`\`\`\n${await DataStore.get("encryptcordPublicKey")}\`\`\``, false);
+                    // @ts-expect-error typing issue
                     sendBotMessage(getCurrentChannel().id, { content: `*Checking for any groups in this channel...*\n> If none is found, a new one will be created <t:${Math.floor(Date.now() / 1000) + 5}:R>\n> [Tip] You can do \`/encryptcord leave\` to leave a group` });
                     await sleep(5000);
+                    // @ts-expect-error typing issue
                     if (await DataStore.get("encryptcordGroup") === true && (await DataStore.get("encryptcordChannelId") !== getCurrentChannel().id)) {
+                        // @ts-expect-error typing issue
                         sendBotMessage(getCurrentChannel().id, { content: "*Leaving current group...*" });
                         await leave("", { channel: { id: await DataStore.get("encryptcordChannelId") } });
                     } else if (await DataStore.get("encryptcordGroup") === true) {
                         setButtonDisabled(false);
                         return;
                     }
+                    // @ts-expect-error typing issue
                     await startGroup("", { channel: { id: getCurrentChannel().id } });
                 }
                 setEnabled(!enabled);
