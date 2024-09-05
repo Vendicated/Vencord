@@ -18,4 +18,4 @@ Allows you to open more connections in browser!
 * PlayStation Network (Sony built a service called My PlayStation, but removed it for unknown reasons in 2021)
 * Facebook
 * Crunchyroll (can't view other peoples profiles nor your own profile)
-* Amazon Music (nothing references to the actual amazon music user id in discord.
+* Amazon Music (nothing references to the actual amazon music user id in discord.)
