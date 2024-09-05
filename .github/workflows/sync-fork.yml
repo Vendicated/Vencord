@@ -18,6 +18,11 @@ jobs:
         # Fetch all history for all branches and tags
         fetch-depth: 0
 
+    - name: Set up Git config
+      run: |
+        git config --local user.name "GitHub Action"
+        git config --local user.email "actions@github.com"
+
     - name: Add upstream repository
       run: git remote add upstream https://github.com/Vendicated/Vencord.git
 
@@ -26,9 +31,6 @@ jobs:
 
     - name: Merge upstream changes
       run: git merge upstream/main --allow-unrelated-histories
-      env:
-        GIT_COMMITTER_NAME: GitHub Action
-        GIT_COMMITTER_EMAIL: actions@github.com
 
     - name: Push changes to fork repository
       run: git push origin main
