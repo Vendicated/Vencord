@@ -33,7 +33,7 @@ interface URLReplacementRule {
 // Do not forget to add protocols to the ALLOWED_PROTOCOLS constant
 const UrlReplacementRules: Record<string, URLReplacementRule> = {
     spotify: {
-        match: /^https:\/\/open\.spotify\.com\/(track|album|artist|playlist|user|episode)\/(.+)(?:\?.+?)?$/,
+        match: /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|artist|playlist|user|episode)\/(.+)(?:\?.+?)?$/,
         replace: (_, type, id) => `spotify://${type}/${id}`,
         description: "Open Spotify links in the Spotify app",
         shortlinkMatch: /^https:\/\/spotify\.link\/.+$/,
