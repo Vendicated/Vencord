@@ -21,9 +21,9 @@ export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 
 export interface Dev {
-    name: string;
-    id: bigint;
-    badge?: boolean;
+	name: string;
+	id: bigint;
+	badge?: boolean;
 }
 
 /**
@@ -573,14 +573,14 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     RamziAH: {
         name: "RamziAH",
         id: 1279957227612147747n,
-    },
+    }
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
 export const DevsById = /* #__PURE__*/ (() =>
-    Object.freeze(Object.fromEntries(
-        Object.entries(Devs)
-            .filter(d => d[1].id !== 0n)
-            .map(([_, v]) => [v.id, v] as const)
-    ))
+	Object.freeze(Object.fromEntries(
+		Object.entries(Devs)
+			.filter(d => d[1].id !== 0n)
+			.map(([_, v]) => [v.id, v] as const)
+	))
 )() as Record<string, Dev>;
