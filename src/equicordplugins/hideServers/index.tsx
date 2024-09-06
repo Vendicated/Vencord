@@ -91,7 +91,7 @@ export default definePlugin({
             find: "QUICKSWITCHER_PROTIP.format",
             replacement: {
                 match: /(?<=renderResults\(\){)let{query/,
-                replace: "this.props.results = $self.flteredGuildResults(this.props.results);$&",
+                replace: "this.props.results = $self.filteredGuildResults(this.props.results);$&",
             },
         },
     ],
