@@ -662,6 +662,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     PWall: {
         name: "PWall",
         id: 0n
+	},
+    Magix: {
+        name: "Magix",
+        id: 252090676068614145n
     }
 } satisfies Record<string, Dev>);
 
