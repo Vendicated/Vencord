@@ -39,7 +39,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     Arjix: {
         name: "ArjixWasTaken",
-        id: 674710789138939916n
+        id: 674710789138939916n,
+        badge: false
     },
     Cyn: {
         name: "Cynosphere",
