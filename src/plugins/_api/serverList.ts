@@ -33,10 +33,16 @@ export default definePlugin({
         },
         {
             find: "Messages.SERVERS,children",
-            replacement: {
-                match: /(?<=Messages\.SERVERS,children:)\i\.map\(\i\)/,
-                replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"
-            }
+            replacement: [
+                {
+                    match: /(?<=Messages\.SERVERS,children:)\i\.map\(\i\)/,
+                    replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"
+                },
+                {
+                    match: /guildDiscoveryRef.{0,300}\{\}\)\]\}\)\]/,
+                    replace: "$&.concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below))"
+                }
+            ]
         }
     ]
 });

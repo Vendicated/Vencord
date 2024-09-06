@@ -786,6 +786,10 @@ export const EquicordDevs = Object.freeze({
     SpikeHD: {
         name: "SpikeHD",
         id: 221757857836564485n
+    },
+    bep: {
+        name: "bep",
+        id: 0n,
     }
 } satisfies Record<string, Dev>);
 

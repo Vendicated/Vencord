@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>Extra included plugins (123 additional plugins)</summary>
+<summary>Extra included plugins (124 additional plugins)</summary>
 
 - AllCallTimers by MaxHerbold and D3SOX
 - AltKrispSwitch by newwares
@@ -59,6 +59,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Grammar by Samwich
 - GrammarFix by unstream
 - HideMessage by Hanzy
+- HideServers by bepvte
 - HolyNotes by Wolfie
 - HomeTyping by Samwich
 - HopOn by ImLvna
