@@ -126,9 +126,9 @@ export default definePlugin({
         }
 
         return (
-        	<div className={styles.accountProfilePopoutWrapper}>
-        		<UserProfile {...popoutProps} userId={currentUser.id} guildId={currentChannel.getGuildId()} channelId={currentChannel.id} />
-        	</div>
-       );
+            <div className={styles.accountProfilePopoutWrapper}>
+                <UserProfile {...popoutProps} userId={currentUser.id} guildId={currentChannel.getGuildId()} channelId={currentChannel.id} />
+            </div>
+        );
     }, { noop: true })
 });
