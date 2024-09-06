@@ -40,7 +40,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: 'location:"UserProfileActivityCard"',
+            find: ".gameState,children:",
             replacement: [
                 // Insert Spotify time bar component
                 {
