@@ -66,7 +66,6 @@ export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
         patch.replacement = [patch.replacement];
     }
 
-    patch.replacement = patch.replacement.filter(({ predicate }) => !predicate || predicate());
     for (const replacement of patch.replacement) {
         canonicalizeReplacement(replacement, pluginName);
 
@@ -74,6 +73,8 @@ export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
             delete replacement.predicate;
         }
     }
+
+    patch.replacement = patch.replacement.filter(({ predicate }) => !predicate || predicate());
 
     patches.push(patch);
 }
