@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.9.8",
+    "version": "1.10.1",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -70,6 +70,7 @@
         "stylelint": "^16.8.1",
         "stylelint-config-standard": "^36.0.1",
         "ts-patch": "^3.2.1",
+        "ts-pattern": "^5.3.1",
         "tsx": "^4.16.5",
         "type-fest": "^4.23.0",
         "typescript": "^5.5.4",
