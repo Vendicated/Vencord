@@ -9,24 +9,27 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
+import type { UserRecord } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ContextMenuApi, Menu, useEffect, useRef } from "@webpack/common";
-import { User } from "discord-types/general";
+import type { MutableRefObject, ReactNode, UIEvent } from "react";
 
 interface UserProfileProps {
     popoutProps: Record<string, any>;
-    currentUser: User;
-    originalPopout: () => React.ReactNode;
+    currentUser: UserRecord;
+    originalPopout: () => ReactNode;
 }
 
-const UserProfile = findComponentByCodeLazy("UserProfilePopoutWrapper: user cannot be undefined");
-const styles = findByPropsLazy("accountProfilePopoutWrapper");
+const UserProfilePopoutWrapper = findComponentByCodeLazy("UserProfilePopoutWrapper: user cannot be undefined");
+const styles: Record<string, string> = findByPropsLazy("accountProfilePopoutWrapper");
 
 let openAlternatePopout = false;
-let accountPanelRef: React.MutableRefObject<Record<PropertyKey, any> | null> = { current: null };
+let accountPanelRef: MutableRefObject<Record<PropertyKey, any> | null> = { current: null };
 
 const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
     const { prioritizeServerProfile } = settings.use(["prioritizeServerProfile"]);
+
+    const currentChannel = getCurrentChannel();
 
     return (
         <Menu.Menu
@@ -36,7 +39,7 @@ const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
             <Menu.MenuItem
                 id="vc-ap-view-alternate-popout"
                 label={prioritizeServerProfile ? "View Account Profile" : "View Server Profile"}
-                disabled={getCurrentChannel()?.getGuildId() == null}
+                disabled={!currentChannel || currentChannel.isPrivate()}
                 action={e => {
                     openAlternatePopout = true;
                     accountPanelRef.current?.props.onMouseDown();
@@ -47,7 +50,7 @@ const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
                 id="vc-ap-prioritize-server-profile"
                 label="Prioritize Server Profile"
                 checked={prioritizeServerProfile}
-                action={() => settings.store.prioritizeServerProfile = !prioritizeServerProfile}
+                action={() => { settings.store.prioritizeServerProfile = !prioritizeServerProfile; }}
             />
         </Menu.Menu>
     );
@@ -104,7 +107,7 @@ export default definePlugin({
         return (accountPanelRef = useRef(null));
     },
 
-    openAccountPanelContextMenu(event: React.UIEvent) {
+    openAccountPanelContextMenu(event: UIEvent) {
         ContextMenuApi.openContextMenu(event, AccountPanelContextMenu);
     },
 
@@ -116,18 +119,20 @@ export default definePlugin({
         if (
             (settings.store.prioritizeServerProfile && openAlternatePopout) ||
             (!settings.store.prioritizeServerProfile && !openAlternatePopout)
-        ) {
-            return originalPopout();
-        }
+        ) return originalPopout();
 
         const currentChannel = getCurrentChannel();
-        if (currentChannel?.getGuildId() == null) {
+        if (!currentChannel || currentChannel.isPrivate())
             return originalPopout();
-        }
 
         return (
             <div className={styles.accountProfilePopoutWrapper}>
-                <UserProfile {...popoutProps} userId={currentUser.id} guildId={currentChannel.getGuildId()} channelId={currentChannel.id} />
+                <UserProfilePopoutWrapper
+                    {...popoutProps}
+                    userId={currentUser.id}
+                    guildId={currentChannel.getGuildId()}
+                    channelId={currentChannel.id}
+                />
             </div>
         );
     }, { noop: true })
