@@ -17,7 +17,7 @@ export const OnlineMemberCountStore = proxyLazy(() => {
 
     class OnlineMemberCountStore extends Flux.Store {
         getCount(guildId?: string) {
-            return onlineMemberMap.get(guildId!);
+            return onlineMemberMap.get(guildId);
         }
 
         async _ensureCount(guildId: string) {

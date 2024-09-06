@@ -84,12 +84,35 @@ declare global {
             ? Extract<unknown[], typeof arg>
             : ToArray<typeof arg>;
     }
+    // https://github.com/microsoft/TypeScript/issues/26255
     // https://github.com/microsoft/TypeScript/issues/29841
     interface Array<T> {
+        includes(searchElement: unknown, fromIndex?: number): boolean;
+        indexOf(searchElement: unknown, fromIndex?: number): number;
+        lastIndexOf(searchElement: unknown, fromIndex?: number): number;
         map<U>(callbackfn: (value: T, index: TupleKeys<this>, array: this) => U, thisArg?: any): MappedTuple<this, U>;
     }
     interface ReadonlyArray<T> {
+        includes(searchElement: unknown, fromIndex?: number): boolean;
+        indexOf(searchElement: unknown, fromIndex?: number): number;
+        lastIndexOf(searchElement: unknown, fromIndex?: number): number;
         map<U>(callbackfn: (value: T, index: TupleKeys<this>, array: this) => U, thisArg?: any): MappedTuple<this, U>;
+    }
+    interface Map<K, V> {
+        delete(key: unknown): boolean;
+        get(key: unknown): V | undefined;
+        has(key: unknown): boolean;
+    }
+    interface ReadonlyMap<K, V> {
+        get(key: unknown): V | undefined;
+        has(key: unknown): boolean;
+    }
+    interface Set<T> {
+        delete(value: unknown): boolean;
+        has(value: unknown): boolean;
+    }
+    interface ReadonlySet<T> {
+        has(value: unknown): boolean;
     }
     /* eslint-enable @typescript-eslint/method-signature-style */
 }

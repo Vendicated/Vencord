@@ -57,15 +57,15 @@ export default tseslint.config(
             "@stylistic/new-parens": "error",
             "@stylistic/no-extra-semi": "error",
             "@stylistic/no-floating-decimal": "error",
-            "@stylistic/no-multi-spaces": "error",
+            "@stylistic/no-multi-spaces": ["error", { exceptions: { Property: false } }],
             "@stylistic/no-multiple-empty-lines": ["error", { max: 1, maxBOF: 0, maxEOF: 0 }],
             "@stylistic/no-trailing-spaces": "error",
             "@stylistic/no-whitespace-before-property": "error",
             "@stylistic/object-curly-newline": "error",
             "@stylistic/object-curly-spacing": ["error", "always"],
-            "@stylistic/rest-spread-spacing": "error",
             "@stylistic/quote-props": ["error", "as-needed"],
             "@stylistic/quotes": ["error", "double", { avoidEscape: true }],
+            "@stylistic/rest-spread-spacing": "error",
             "@stylistic/semi": "error",
             "@stylistic/semi-spacing": "error",
             "@stylistic/semi-style": "error",
@@ -166,13 +166,13 @@ export default tseslint.config(
         ignores: ["src/**"],
         rules: {
             "@typescript-eslint/no-unnecessary-type-parameters": "error",
-            "unicorn/prefer-node-protocol": "error",
             "simple-import-sort/imports": ["error", {
                 groups: [
                     ["^((node:)?(assert(/strict)?|async_hooks|buffer|child_process|cluster|console|constants|crypto|dgram|diagnostics_channel|dns(/promises)?|domain|events|fs(/promises)?|http|http2|https|module|net|os|path(/(posix|win32))?|perf_hooks|process|punycode|querystring|readline(/promises)?|repl|stream(/(consumers|promises|web))?|string_decoder|timers(/promises)?|tls|trace_events|tty|url|util(/types)?|v8|vm|wasi|worker_threads|zlib)|node:test(/reporters)?)$"],
                     ["^[^.]"]
                 ]
             }],
+            "unicorn/prefer-node-protocol": "error",
         }
     },
     {
