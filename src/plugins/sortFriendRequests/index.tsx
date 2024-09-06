@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import type { UserRecord } from "@vencord/discord-types";
+import { type RecordBase, RelationshipType, type UserRecord } from "@vencord/discord-types";
 import { RelationshipStore } from "@webpack/common";
 
 const settings = definePluginSettings({
@@ -50,14 +50,17 @@ export default definePlugin({
             find: ".Messages.FRIEND_REQUEST_CANCEL",
             replacement: {
                 predicate: () => settings.store.showDates,
-                match: /subText:(\i)(?=,className:\i\.userInfo}\))(?<=user:(\i).+?)/,
+                match: /subText:(\i)(?<=user:(\i).+?)/,
                 replace: (_, subtext, user) => `subText:$self.makeSubtext(${subtext},${user})`
             }
         }
     ],
 
-    wrapSort(comparator: (...args: unknown[]) => any, row: any) {
-        return row.type === 3 || row.type === 4
+    wrapSort(
+        comparator: (row: RecordBase & Record<string, any>) => [type: RelationshipType, name: string],
+        row: RecordBase & Record<string, any>
+    ) {
+        return row.type === RelationshipType.PENDING_INCOMING || row.type === RelationshipType.PENDING_OUTGOING
             ? -this.getSince(row.user)
             : comparator(row);
     },
@@ -69,9 +72,9 @@ export default definePlugin({
     makeSubtext(text: string, user: UserRecord) {
         const since = this.getSince(user);
         return (
-            <Flex flexDirection="row" style={{ gap: 0, flexWrap: "wrap", lineHeight: "0.9rem" }}>
+            <Flex flexDirection="column" style={{ gap: 0, flexWrap: "wrap", lineHeight: "0.9rem" }}>
                 <span>{text}</span>
-                {!isNaN(since.getTime()) && <span>Received &mdash; {since.toDateString()}</span>}
+                {!Number.isNaN(since.getTime()) && <span>Received &mdash; {since.toDateString()}</span>}
             </Flex>
         );
     }
