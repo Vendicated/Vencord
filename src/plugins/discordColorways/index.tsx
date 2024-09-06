@@ -75,16 +75,11 @@ export const PluginProps = {
     CSSVersion: "1.21"
 };
 
-const mainDev = Devs.DaBluLite || {
-    name: "DaBluLite",
-    id: 582170007505731594n
-};
-
 export default definePlugin({
     name: "DiscordColorways",
     description:
         "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
-    authors: [mainDev, Devs.ImLvna],
+    authors: [Devs.DaBluLite, Devs.ImLvna],
     dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
     pluginVersion: PluginProps.pluginVersion,
     toolboxActions: {
