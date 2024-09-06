@@ -678,6 +678,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Magix: {
         name: "Magix",
         id: 252090676068614145n
+	},
+    Scyye: {
+        name: "Scyye",
+        id: 553652308295155723n
     }
 } satisfies Record<string, Dev>);
 
