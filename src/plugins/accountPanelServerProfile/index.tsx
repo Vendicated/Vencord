@@ -9,7 +9,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findComponentByCodeLazy, findLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ContextMenuApi, Menu, useEffect, useRef } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -20,7 +20,7 @@ interface UserProfileProps {
 }
 
 const UserProfile = findComponentByCodeLazy("UserProfilePopoutWrapper: user cannot be undefined");
-const styles = findLazy(m => m.accountProfilePopoutWrapper);
+const styles = findByPropsLazy("accountProfilePopoutWrapper");
 
 let openAlternatePopout = false;
 let accountPanelRef: React.MutableRefObject<Record<PropertyKey, any> | null> = { current: null };
