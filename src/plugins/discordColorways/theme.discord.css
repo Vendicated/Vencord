@@ -1,0 +1,416 @@
+.colorwaySelectorModal[data-theme="discord"],
+.colorwayModal[data-theme="discord"] {
+    border: none;
+    box-shadow: var(--legacy-elevation-border), var(--legacy-elevation-high);
+    background-color: var(--modal-footer-background);
+}
+
+[data-theme="discord"] .colorwaysSettingsDivider {
+    border-color: var(--background-modifier-accent);
+}
+
+[data-theme="discord"] .colorwaySwitch-label,
+[data-theme="discord"] .colorwaysNote {
+    color: var(--header-primary);
+}
+
+[data-theme="discord"] .colorwaysSettings-switchCircle {
+    fill: #fff !important;
+}
+
+[data-theme="discord"] .colorwayInnerTab,
+.colorwayInnerTab[data-theme="discord"] {
+    background-color: var(--modal-background);
+    border-top-left-radius: 4px;
+}
+
+[data-theme="discord"] .colorwaysSettings-switch {
+    background-color: rgb(128, 132, 142);
+}
+
+[data-theme="discord"] .colorwaysSettings-switch.checked {
+    background-color: #23a55a;
+}
+
+[data-theme="discord"] > .colorwaySelectorSidebar > .colorwaySelectorSidebar-tab {
+    transition: none;
+    border-radius: 4px;
+    border: none;
+}
+
+[data-theme="discord"] > .colorwaySelectorSidebar > .colorwaySelectorSidebar-tab.active {
+    background-color: var(--background-modifier-selected);
+}
+
+[data-theme="discord"] > .colorwaySelectorSidebar > .colorwaySelectorSidebar-tab:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+[data-theme="discord"] .colorwaysPillButton {
+    color: var(--white-500);
+    background-color: var(--button-secondary-background);
+    height: var(--custom-button-button-sm-height);
+    min-width: var(--custom-button-button-sm-width);
+    min-height: var(--custom-button-button-sm-height);
+    width: auto;
+    transition:
+        background-color var(--custom-button-transition-duration) ease,
+        color var(--custom-button-transition-duration) ease;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    border: none;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 16px;
+    padding: 2px 16px;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+[data-theme="discord"] .colorwaysPillButton:hover {
+    background-color: var(--button-secondary-background-hover);
+}
+
+[data-theme="discord"] > .colorwaySelectorSidebar {
+    border-radius: 4px 0 0 4px;
+    background-color: var(--modal-footer-background);
+    box-shadow: inset 0 1px 0 hsl(var(--primary-630-hsl) / 0.6);
+    padding: 12px;
+    margin: 0;
+    height: 100%;
+}
+
+[data-theme="discord"] .colorwayTextBox {
+    border-radius: 3px;
+    color: var(--text-normal);
+    background-color: var(--input-background) !important;
+    height: 40px;
+    padding: 10px;
+    transition: none;
+    font-size: 16px;
+    border: none;
+}
+
+[data-theme="discord"] .colorwaysSettings-colorwaySource {
+    border-radius: 4px;
+    color: var(--interactive-normal);
+    background-color: var(--background-secondary);
+}
+
+[data-theme="discord"] .colorwaysSettings-colorwaySource:hover {
+    color: var(--interactive-active);
+    background-color: var(--background-modifier-hover);
+}
+
+[data-theme="discord"] .discordColorway {
+    border-radius: 4px;
+    transition: none;
+    background-color: var(--background-secondary);
+    border: none;
+}
+
+[data-theme="discord"] .discordColorway:hover {
+    filter: none;
+    background-color: var(--background-modifier-hover);
+}
+
+[data-theme="discord"] .discordColorway[aria-checked="true"] {
+    background-color: var(--background-modifier-selected);
+}
+
+[data-theme="discord"] .colorwaysSettings-colorwaySourceLabelHeader,
+[data-theme="discord"] .colorwaysSettings-colorwaySourceDesc {
+    color: var(--header-primary);
+}
+
+[data-theme="discord"] .colorways-badge {
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 4px;
+    margin-left: 4px;
+    flex: 0 0 auto;
+    background: var(--bg-brand);
+    color: var(--white);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    vertical-align: top;
+    display: inline-flex;
+    align-items: center;
+    text-indent: 0;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.colorwaysModal[data-theme="discord"] {
+    box-shadow: var(--legacy-elevation-border), var(--legacy-elevation-high);
+    background-color: var(--modal-background);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    pointer-events: all;
+    position: relative;
+}
+
+[data-theme="discord"] .colorwaysMenuTabs {
+    padding-bottom: 16px;
+}
+
+[data-theme="discord"] .colorwaysMenuTab {
+    padding: 0;
+    padding-bottom: 16px;
+    margin-right: 32px;
+    margin-bottom: -2px;
+    border-bottom: 2px solid transparent;
+    transition: none;
+    border-radius: 0;
+    background-color: transparent;
+    font-size: 16px;
+    line-height: 20px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+[data-theme="discord"] .colorwaysMenuTab:hover {
+    color: var(--interactive-hover);
+    border-bottom-color: var(--brand-500);
+}
+
+[data-theme="discord"] .colorwaysMenuTab.active {
+    cursor: default;
+    color: var(--interactive-active);
+    border-bottom-color: var(--control-brand-foreground);
+}
+
+[data-theme="discord"] .colorwaysModalFooter {
+    border-radius: 0 0 5px 5px;
+    background-color: var(--modal-footer-background);
+    padding: 16px;
+    box-shadow: inset 0 1px 0 hsl(var(--primary-630-hsl) / 0.6);
+    gap: 0;
+    width: unset;
+}
+
+[data-theme="discord"] .colorwaysModalFooter > .colorwaysPillButton {
+    width: auto;
+    height: var(--custom-button-button-md-height);
+    min-width: var(--custom-button-button-md-width);
+    min-height: var(--custom-button-button-md-height);
+    transition:
+        color var(--custom-button-transition-duration) ease,
+        background-color var(--custom-button-transition-duration) ease,
+        border-color var(--custom-button-transition-duration) ease;
+    border: 1px solid var(--button-outline-primary-border);
+    color: var(--button-outline-primary-text);
+    margin-left: 8px;
+    background-color: transparent;
+}
+
+[data-theme="discord"] .colorwaysModalFooter > .colorwaysPillButton:hover {
+    background-color: var(--button-outline-primary-background-hover);
+    border-color: var(--button-outline-primary-border-hover);
+    color: var(--button-outline-primary-text-hover);
+}
+
+[data-theme="discord"] .colorwaysModalFooter > .colorwaysPillButton:active {
+    background-color: var(--button-outline-primary-background-active);
+    border-color: var(--button-outline-primary-border-active);
+    color: var(--button-outline-primary-text-active);
+}
+
+[data-theme="discord"] .colorwaysModalFooter > .colorwaysPillButton.colorwaysPillButton-onSurface {
+    color: var(--white-500);
+    background-color: var(--brand-500);
+    border: none;
+}
+
+[data-theme="discord"] .colorwaysModalFooter > .colorwaysPillButton.colorwaysPillButton-onSurface:hover {
+    background-color: var(--brand-560);
+}
+
+[data-theme="discord"] .colorwaysModalFooter > .colorwaysPillButton.colorwaysPillButton-onSurface:active {
+    background-color: var(--brand-600);
+}
+
+[data-theme="discord"] .colorwaysModalHeader {
+    box-shadow:
+        0 1px 0 0 hsl(var(--primary-800-hsl) / 0.3),
+        0 1px 2px 0 hsl(var(--primary-800-hsl) / 0.3);
+    border-radius: 4px 4px 0 0;
+    transition: box-shadow 0.1s ease-out;
+    word-wrap: break-word;
+}
+
+[data-theme="discord"] .colorwaysModalSectionHeader,
+[data-theme="discord"] .colorwaysSettings-colorwaySourceLabel,
+[data-theme="discord"] .colorwaysSettings-colorwaySourceLabelHeader,
+[data-theme="discord"] .colorwaysSettings-colorwaySourceDesc {
+    color: var(--header-primary);
+}
+
+[data-theme="discord"] .colorwaysCreator-setting,
+[data-theme="discord"] .colorwaysCreator-settingCat {
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+}
+
+[data-theme="discord"] .colorwaysCreator-setting:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+[data-theme="discord"] .colorwaysContextMenu {
+    background: var(--background-floating);
+    box-shadow: var(--shadow-high);
+    border-radius: 4px;
+    padding: 6px 8px;
+    border: none;
+    gap: 0;
+    min-width: 188px;
+    max-width: 320px;
+    box-sizing: border-box;
+}
+
+[data-theme="discord"] .colorwaysContextMenuItm {
+    border: none;
+    transition: none;
+    margin: 2px 0;
+    border-radius: 2px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18px;
+    color: var(--interactive-normal);
+    background-color: transparent;
+}
+
+[data-theme="discord"] .colorwaysContextMenuItm:hover {
+    background-color: var(--menu-item-default-hover-bg);
+    color: var(--white);
+}
+
+[data-theme="discord"] .colorwaysContextMenuItm:active {
+    background-color: var(--menu-item-default-active-bg);
+    color: var(--white);
+}
+
+[data-theme="discord"] .colorwaysRadioSelected {
+    fill: var(--control-brand-foreground-new);
+}
+
+[data-theme="discord"] .colorwaysConflictingColors-warning {
+    color: var(--text-normal);
+}
+
+[data-theme="discord"] .colorwaysManagerConnectionMenu {
+    transition:
+        transform 0.1s ease,
+        opacity 0.1s ease !important;
+    transform: scale(0.95);
+    transform-origin: 0% 50%;
+    background-color: var(--background-floating);
+    box-shadow: var(--shadow-high);
+    color: var(--text-normal);
+    border: none;
+    border-radius: 5px;
+}
+
+.colorwayIDCard[data-theme="discord"] > .colorwayMessage {
+    border-radius: 5px;
+    border: none;
+    background-color: var(--background-secondary);
+}
+
+.theme-dark .colorwayIDCard[data-theme="discord"] .colorwayMessage {
+    background: hsl(var(--primary-630-hsl) / 60%);
+}
+
+.theme-light .colorwayIDCard[data-theme="discord"] .colorwayMessage {
+    background: hsl(var(--primary-100-hsl) / 60%);
+}
+
+[data-theme="discord"] .colorwaysManagerConnectionValue {
+    color: var(--text-muted);
+}
+
+[data-theme="discord"] .colorwaysManagerConnectionValue > b {
+    color: var(--text-normal);
+}
+
+.visual-refresh .colorwaySelectorModal[data-theme="discord"] {
+    border-radius: 12px;
+    background-color: var(--bg-base-primary);
+}
+
+.visual-refresh .colorwaySelectorModal[data-theme="discord"] > .colorwaySelectorSidebar {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    background-color: var(--bg-base-tertiary);
+    margin-right: 0;
+    border: 1px solid var(--border-subtle);
+}
+
+.visual-refresh .colorwaySelectorModal[data-theme="discord"] .colorwaySelectorSidebar-tab {
+    border-radius: 8px;
+    width: 44px;
+    height: 44px;
+    border: 1px solid transparent;
+    transition:
+        background-color 0.1s ease-in-out,
+        border-color 0.1s ease-in-out;
+}
+
+.visual-refresh .colorwaySelectorModal[data-theme="discord"] .colorwaySelectorSidebar-tab.active {
+    background: var(--bg-overlay-1, var(--bg-surface-raised));
+    border-color: var(--border-faint);
+}
+
+.visual-refresh [data-theme="discord"] .colorwaysPillButton,
+.visual-refresh [data-theme="discord"] .discordColorway,
+.visual-refresh [data-theme="discord"] .colorwaysSettings-colorwaySource {
+    background: var(--bg-mod-faint);
+    border-radius: 8px;
+    transition:
+        background-color 0.1s ease-in-out,
+        border-color 0.1s ease-in-out;
+}
+
+.visual-refresh [data-theme="discord"] .discordColorway {
+    border: 1px solid transparent;
+}
+
+.visual-refresh [data-theme="discord"] .colorwaysPillButton:hover,
+.visual-refresh [data-theme="discord"] .discordColorway:hover,
+.visual-refresh [data-theme="discord"] .colorwaysSettings-colorwaySource:hover {
+    background: var(--bg-mod-subtle);
+}
+
+.visual-refresh [data-theme="discord"] .discordColorway[aria-checked="true"] {
+    border-color: var(--border-faint);
+    background: var(--bg-mod-strong);
+}
+
+.visual-refresh [data-theme="discord"] .colorwayTextBox {
+    background: var(--bg-overlay-3, var(--bg-mod-strong)) !important;
+    border-radius: 8px;
+}
+
+[data-theme="discord"] .colorwayLabel,
+[data-theme="discord"] .colorwaysPillButton {
+    color: var(--interactive-active);
+}
+
+[data-theme="discord"] .colorwaysPageHeader {
+    border-radius: 0;
+    border-top-right-radius: 4px;
+    padding-top: 16px;
+    margin: 0;
+    background-color: transparent;
+}
+
+[data-theme="discord"] .colorwaySelectorModal {
+    border-radius: 4px;
+}
