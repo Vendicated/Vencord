@@ -19,7 +19,7 @@
 import { Upload } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 
@@ -39,6 +39,11 @@ const tarExtMatcher = /\.tar\.\w+$/;
 const settings = definePluginSettings({
     anonymiseByDefault: {
         description: "Whether to anonymise file names by default",
+        type: OptionType.BOOLEAN,
+        default: true,
+    },
+    fixOpusExtensions: {
+        description: "Whether to fix file extensions by default",
         type: OptionType.BOOLEAN,
         default: true,
     },
@@ -67,7 +72,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "AnonymiseFileNames",
-    authors: [Devs.fawn],
+    authors: [Devs.fawn, EquicordDevs.thororen],
     description: "Anonymise uploaded file names",
     patches: [
         {
@@ -119,7 +124,19 @@ export default definePlugin({
         const file = upload.filename;
         const tarMatch = tarExtMatcher.exec(file);
         const extIdx = tarMatch?.index ?? file.lastIndexOf(".");
-        const ext = extIdx !== -1 ? file.slice(extIdx) : "";
+        let ext = extIdx !== -1 ? file.slice(extIdx) : "";
+        const matchList = [
+            ".ogv",
+            ".oga",
+            ".ogx",
+            ".ogm",
+            ".spx",
+            ".opus"
+        ];
+
+        if (settings.store.fixOpusExtensions && ext !== "ogg" && matchList.includes(ext)) {
+            ext = ".ogg";
+        }
 
         switch (settings.store.method) {
             case Methods.Random:
