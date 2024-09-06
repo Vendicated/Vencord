@@ -54,6 +54,7 @@ export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
 };
 
 export let EmojiStore: t.EmojiStore;
+export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
 
@@ -67,7 +68,6 @@ export let DraftStore: t.DraftStore;
  *
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
-// eslint-disable-next-line prefer-destructuring
 export const useStateFromStores: t.useStateFromStores = findByCodeLazy("useStateFromStores");
 
 waitForStore("DraftStore", s => DraftStore = s);
@@ -87,3 +87,4 @@ waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
 waitForStore("TypingStore", m => TypingStore = m);
+waitForStore("ThemeStore", m => ThemeStore = m);

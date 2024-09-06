@@ -8,15 +8,16 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "ShowAllRoles",
-    description: "Show all roles in new profiles.",
-    authors: [Devs.Luna],
+    name: "StickerPaste",
+    description: "Makes picking a sticker in the sticker picker insert it into the chatbox instead of instantly sending",
+    authors: [Devs.ImBanana],
+
     patches: [
         {
-            find: ".Messages.VIEW_ALL_ROLES",
+            find: ".stickers,previewSticker:",
             replacement: {
-                match: /(\i)\.slice\(0,\i\)/,
-                replace: "$1"
+                match: /if\(\i\.\i\.getUploadCount/,
+                replace: "return true;$&",
             }
         }
     ]
