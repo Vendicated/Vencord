@@ -120,7 +120,7 @@ export default definePlugin({
         }
 
         const currentChannel = getCurrentChannel();
-        if (currentChannel == null || currentChannel.getGuildId() == null) {
+        if (currentChannel?.getGuildId() == null) {
             return originalPopout();
         }
 
