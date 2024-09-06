@@ -66,13 +66,13 @@ export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
         patch.replacement = [patch.replacement];
     }
 
-    patch.replacement = patch.replacement.filter(({ predicate }) => !predicate || predicate());
-
     if (IS_REPORTER) {
         patch.replacement.forEach(r => {
             delete r.predicate;
         });
     }
+
+    patch.replacement = patch.replacement.filter(({ predicate }) => !predicate || predicate());
 
     patches.push(patch);
 }
