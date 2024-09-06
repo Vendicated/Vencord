@@ -442,6 +442,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Av32000",
         id: 593436735380127770n,
     },
+    catcraft: {
+        name: "catcraft",
+        id: 290162449213292546n,
+    },
     Noxillio: {
         name: "Noxillio",
         id: 138616536502894592n,
