@@ -77,13 +77,18 @@ export default definePlugin({
     },
 
     isReplyToBlocked(message: Message) {
-        if (!Settings.plugins.NoBlockedMessages.hideRepliesToBlockedMessages)
+        if (!Settings.plugins.NoBlockedMessages.hideRepliesToBlockedMessages || !message)
             return false;
 
-        const { messageReference } = message;
-        if (!messageReference) return false;
-        const replyMessage = MessageStore.getMessage(messageReference.channel_id, messageReference.message_id);
-        return this.isBlocked(replyMessage);
+		try {
+        	const { messageReference } = message;
+	        if (!messageReference) return false;
+	        
+	        const replyMessage = MessageStore.getMessage(messageReference.channel_id, messageReference.message_id);
+	        return this.isBlocked(replyMessage);
+	    } catch (e) {
+            new Logger("NoBlockedMessages").error("Failed to check if user is blocked:", e);
+		}
     },
 
     isBlocked(message: Message | undefined) {
