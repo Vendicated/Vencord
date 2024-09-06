@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { ContextMenuApi, Menu } from "@webpack/common";
 import { User } from "discord-types/general";
@@ -20,33 +21,51 @@ interface UserProfileProps {
 
 const UserProfile = findComponentByCodeLazy("UserProfilePopoutWrapper: user cannot be undefined");
 
-let shouldOpenUserProfile = false;
+let openAlternatePopout = false;
 let accountPanelRef: React.MutableRefObject<Record<PropertyKey, any> | null> = { current: null };
 
 const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
+    const { prioritizeServerProfile } = settings.use(["prioritizeServerProfile"]);
+
     return (
         <Menu.Menu
             navId="vc-ap-server-profile"
             onClose={ContextMenuApi.closeContextMenu}
         >
             <Menu.MenuItem
-                id="vc-ap-view-server-profile"
-                label="View Server Profile"
+                id="vc-ap-view-alternate-popout"
+                label={prioritizeServerProfile ? "View Account Panel" : "View Server Profile"}
                 disabled={getCurrentChannel()?.getGuildId() == null}
                 action={e => {
-                    shouldOpenUserProfile = true;
+                    openAlternatePopout = true;
                     accountPanelRef.current?.props.onMouseDown();
                     accountPanelRef.current?.props.onClick(e);
                 }}
+            />
+            <Menu.MenuCheckboxItem
+                id="vc-ap-prioritize-server-profile"
+                label="Prioritize Server Profile"
+                checked={prioritizeServerProfile}
+                action={() => settings.store.prioritizeServerProfile = !prioritizeServerProfile}
             />
         </Menu.Menu>
     );
 }, { noop: true });
 
+const settings = definePluginSettings({
+    prioritizeServerProfile: {
+        type: OptionType.BOOLEAN,
+        description: "Prioritize Server Profile when left clicking your account panel",
+        default: false
+    }
+});
+
 export default definePlugin({
     name: "AccountPanelServerProfile",
     description: "Right click your account panel in the bottom left to view your profile in the current server",
     authors: [Devs.Nuckyz, Devs.relitrix],
+    settings,
+
     patches: [
         {
             find: ".Messages.ACCOUNT_SPEAKING_WHILE_MUTED",
@@ -85,12 +104,19 @@ export default definePlugin({
     },
 
     onPopoutClose: () => {
-        shouldOpenUserProfile = false;
+        openAlternatePopout = false;
     },
 
     UserProfile: ErrorBoundary.wrap(({ popoutProps, currentUser, originalPopout }: UserProfileProps) => {
+        if (
+            (settings.store.prioritizeServerProfile && openAlternatePopout) ||
+            (!settings.store.prioritizeServerProfile && !openAlternatePopout)
+        ) {
+            return originalPopout();
+        }
+
         const currentChannel = getCurrentChannel();
-        if (!shouldOpenUserProfile || currentChannel == null || currentChannel.getGuildId() == null) {
+        if (currentChannel == null || currentChannel.getGuildId() == null) {
             return originalPopout();
         }
 
