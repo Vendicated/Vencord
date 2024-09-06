@@ -10,7 +10,7 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { ContextMenuApi, Menu } from "@webpack/common";
+import { ContextMenuApi, Menu, useEffect, useRef } from "@webpack/common";
 import { User } from "discord-types/general";
 
 interface UserProfileProps {
@@ -73,7 +73,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=\.SIZE_32\)}\);)/,
-                    replace: "$&$self.accountPanelRef=Vencord.Webpack.Common.useRef(null);"
+                    replace: "$&$self.useAccountPanelRef();"
                 },
                 {
                     match: /(\.AVATAR,children:.+?renderPopout:(\i)=>){(.+?)}(?=,position)(?<=currentUser:(\i).+?)/,
@@ -95,8 +95,12 @@ export default definePlugin({
         return accountPanelRef;
     },
 
-    set accountPanelRef(ref) {
-        accountPanelRef = ref;
+    useAccountPanelRef() {
+        useEffect(() => () => {
+            accountPanelRef.current = null;
+        }, []);
+
+        return (accountPanelRef = useRef(null));
     },
 
     openAccountPanelContextMenu: (event: React.UIEvent) => {
