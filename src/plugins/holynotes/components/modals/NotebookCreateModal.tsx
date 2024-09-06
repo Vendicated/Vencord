@@ -7,7 +7,7 @@
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { Button, React, Text, TextInput } from "@webpack/common";
 
-import noteHandler from "../../NoteHandler";
+import noteHandler from "../../noteHandler";
 
 export default (props: ModalProps & { onClose: () => void; }) => {
     const [notebookName, setNotebookName] = React.useState("");

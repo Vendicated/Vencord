@@ -8,7 +8,7 @@ import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, M
 import { findByProps } from "@webpack";
 import { Button, Forms, Text } from "@webpack/common";
 
-import noteHandler from "../../NoteHandler";
+import noteHandler from "../../noteHandler";
 import { downloadNotes, uploadNotes } from "../../utils";
 
 export default ({ onClose, ...modalProps }: ModalProps & { onClose: () => void; }) => {
