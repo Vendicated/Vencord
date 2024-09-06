@@ -76,7 +76,7 @@ function _showNotification(notification: NotificationData, id: number) {
     });
 }
 
-function shouldBeNative() {
+export function shouldBeNative() {
     if (typeof Notification === "undefined") return false;
 
     const { useNative } = Settings.notifications;
