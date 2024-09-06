@@ -44,7 +44,7 @@ export default definePlugin({
         },
         // Direct Messages Side Profile
         {
-            find: /location:"SimplifiedProfilePanel",.+?displayProfile:/,
+            find: /location:"UserProfilePanel",.+?displayProfile:/,
             replacement: {
                 match: /PANEL,children:\[/,
                 replace: "$&$self.renderVoiceActivityIcon(arguments[0], false, true),",
@@ -52,7 +52,7 @@ export default definePlugin({
         },
         // Full Size Profile
         {
-            find: ':"SimplifiedUserProfileModalHeader"}',
+            find: ':"UserProfileModalHeader"}',
             replacement: {
                 match: /.FULL_SIZE,children:\[/,
                 replace: "$&$self.renderVoiceActivityIcon(arguments[0], false, true),",
@@ -76,7 +76,7 @@ export default definePlugin({
         },
         // Friends list
         {
-            find: /.alignPomelo]:.+?.isPomelo()/,
+            find: /.alignPomelo]:\i.isPomelo()/,
             replacement: {
                 match: /\.subtext,children:\i}/,
                 replace: "$&,$self.renderVoiceActivityIcon(arguments[0], true, false)",
