@@ -40,7 +40,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: '"UserProfileActivityCard"',
+            find: ".gameState,children:",
             replacement: [
                 // Insert Spotify time bar component
                 {
@@ -49,7 +49,7 @@ export default definePlugin({
                 },
                 // Hide the large title on listening activities, to make them look more like Spotify (also visible from hovering over the large icon)
                 {
-                    match: /(\i).type===(\i\..{0,10})\.WATCHING/,
+                    match: /(\i).type===(\i\.\i)\.WATCHING/,
                     replace: "($self.settings.store.hideActivityDetailText&&$self.isActivityTimestamped($1)&&$1.type===$2.LISTENING)||$&"
                 }
             ]
