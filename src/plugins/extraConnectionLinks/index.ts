@@ -51,7 +51,7 @@ export default definePlugin({
             return {
                 find: "getPlatformUserUrl:",
                 replacement: {
-                    match: new RegExp("\(r"),
+                    match: new RegExp("\\(r"),
                     replace: `, getPlatformUserUrl:e=>{let {name, id} = e; return \`${uris[connectionTypeSelected]}\`;}`
                 }
             };
