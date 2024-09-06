@@ -170,6 +170,12 @@ export const InviteActions = findByPropsLazy("resolveInvite");
 
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
 
+export const ReadStateUtils = mapMangledModuleLazy('type:"ENABLE_AUTOMATIC_ACK",', {
+    ackChannel: filters.byCode(".getActiveJoinedThreadsForParent(")
+});
+
+const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i,activeViewType:/);
+// TODO: type
 export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
     openExpressionPicker: filters.byCode(/setState\({activeView:(?:(?!null)\i),activeViewType:/),
     closeExpressionPicker: filters.byCode("setState({activeView:null"),
