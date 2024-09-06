@@ -103,11 +103,11 @@ export default definePlugin({
         return (accountPanelRef = useRef(null));
     },
 
-    openAccountPanelContextMenu: (event: React.UIEvent) => {
+    openAccountPanelContextMenu(event: React.UIEvent) {
         ContextMenuApi.openContextMenu(event, AccountPanelContextMenu);
     },
 
-    onPopoutClose: () => {
+    onPopoutClose() {
         openAlternatePopout = false;
     },
 
