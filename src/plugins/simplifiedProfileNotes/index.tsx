@@ -16,7 +16,7 @@ const NoteEditor = findComponentByCodeLazy("hideNote:", ".userId);return");
 const Section = findComponentByCodeLazy("section", '"header-secondary"', "requestAnimationFrame");
 
 const classes = findByPropsLazy("note", "appsConnections");
-const requireClasses = extractAndLoadChunksLazy(['"handleOpenUserProfileModal"']);
+const requireClasses = extractAndLoadChunksLazy(['"USER_PROFILE_MODAL_KEY:".concat(']);
 
 const settings = definePluginSettings({
     hideWhenEmpty: {
@@ -60,7 +60,7 @@ function useNoteBox(userId: string): NoteHook {
 function NotesSection(props: NoteHook & NotesSectionProps) {
     const [loaded, setLoaded] = useState(false);
     useEffect(() => {
-        requireClasses().then(() => setLoaded(true)).catch(() => { });
+        requireClasses().then(() => setLoaded(true)).catch(console.error);
     }, []);
     if (!props.visible || !loaded) return null;
     return <Section
