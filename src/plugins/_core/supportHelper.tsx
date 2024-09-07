@@ -33,7 +33,7 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, NavigationRouter, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
 
 import gitHash from "~git-hash";
 import plugins, { PluginMeta } from "~plugins";
@@ -192,7 +192,10 @@ export default definePlugin({
                         <Forms.FormText>Before you ask for help,</Forms.FormText>
                         <Forms.FormText>Check for updates and if this</Forms.FormText>
                         <Forms.FormText>issue could be caused by Equicord!</Forms.FormText>
-                    </div>
+                    </div>,
+                    confirmText: "Go to Equicord Support",
+                    cancelText: "Okay continue",
+                    onConfirm: () => NavigationRouter.transitionTo("channels/1173279886065029291/1173342942858055721"),
                 });
             }
 
@@ -241,11 +244,11 @@ export default definePlugin({
                 return Alerts.show({
                     title: "Hold on!",
                     body: <div>
-                        <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
+                        <Forms.FormText>You are using a custom build of Equicord, which we do not provide support for!</Forms.FormText>
 
                         <Forms.FormText className={Margins.top8}>
-                            We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
-                            Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
+                            We only provide support for <Link href="https://github.com/Equicord/Equicord">official builds</Link>.
+                            Either <Link href="https://github.com/Equicord/Equilotl">switch to an official build</Link> or figure your issue out yourself.
                         </Forms.FormText>
 
                         <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
