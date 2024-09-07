@@ -51,7 +51,7 @@ export default definePlugin({
             },
         },
         {
-            find: "2022-07_invites_disabled",
+            find: "INVITES_DISABLED))||",
             predicate: () => settings.store.showInvitesPaused,
             replacement: {
                 match: /\i\.\i\.can\(\i\.\i.MANAGE_GUILD,\i\)/,
@@ -64,6 +64,15 @@ export default definePlugin({
             replacement: {
                 match: /return \i\.\i\(\i\.\i\(\{user:\i,context:\i,checkElevated:!1\}\),\i\.\i\)/,
                 replace: "return true",
+            }
+        },
+        // fixes a bug where Members page must be loaded to see highest role, why is Discord depending on MemberSafetyStore.getEnhancedMember for something that can be obtained here?
+        {
+            find: "Messages.GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL,allowOverflow",
+            predicate: () => settings.store.showModView,
+            replacement: {
+                match: /(role:)\i(?=,guildId.{0,100}role:(\i\[))/,
+                replace: "$1$2arguments[0].member.highestRoleId]",
             }
         },
         {
