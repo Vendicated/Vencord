@@ -536,4 +536,5 @@ export enum MessageType {
     POLL_RESULT = 46,
     CHANGELOG = 47,
     NITRO_NOTIFICATION = 48,
+    CHANNEL_LINKED_TO_LOBBY = 49,
 }
