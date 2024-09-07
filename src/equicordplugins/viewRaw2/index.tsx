@@ -14,6 +14,8 @@ import definePlugin from "@utils/types";
 import { Forms, i18n, Menu, Text } from "@webpack/common";
 import { Message } from "discord-types/general";
 
+type CustomMessage = Message & { editHistory?: any; deleted?: any; firstEditTimestamp?: any; };
+
 const CopyIcon = () => {
     return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" width="18" height="18">
         <path d="M12.9297 3.25007C12.7343 3.05261 12.4154 3.05226 12.2196 3.24928L11.5746 3.89824C11.3811 4.09297 11.3808 4.40733 11.5739 4.60245L16.5685 9.64824C16.7614 9.84309 16.7614 10.1569 16.5685 10.3517L11.5739 15.3975C11.3808 15.5927 11.3811 15.907 11.5746 16.1017L12.2196 16.7507C12.4154 16.9477 12.7343 16.9474 12.9297 16.7499L19.2604 10.3517C19.4532 10.1568 19.4532 9.84314 19.2604 9.64832L12.9297 3.25007Z" />
@@ -21,12 +23,15 @@ const CopyIcon = () => {
     </svg>;
 };
 
-function cleanMessage(msg: Message) {
+function cleanMessage(msg: CustomMessage) {
     const author = { ...msg.author } as any;
     delete author.email;
     delete author.phone;
     delete author.mfaEnabled;
     delete author.personalConnectionId;
+    delete msg.editHistory;
+    delete msg.deleted;
+    delete msg.firstEditTimestamp;
     return { ...msg, author };
 }
 
