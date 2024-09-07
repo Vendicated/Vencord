@@ -33,7 +33,7 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, NavigationRouter, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
 
 import gitHash from "~git-hash";
 import plugins, { PluginMeta } from "~plugins";
@@ -195,7 +195,7 @@ export default definePlugin({
                     </div>,
                     confirmText: "Go to Equicord Support",
                     cancelText: "Okay continue",
-                    onConfirm: () => NavigationRouter.transitionTo("channels/1173279886065029291/1173342942858055721"),
+                    onConfirm: () => VencordNative.native.openExternal("https://discord.gg/npnv52UQwY"),
                 });
             }
 
