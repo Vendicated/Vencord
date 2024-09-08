@@ -56,10 +56,10 @@
         "@types/react-dom": "~18.2.25",
         "@types/yazl": "^2.4.5",
         "@vencord/discord-types": "workspace:^",
-        "diff": "^6.0.0",
+        "diff": "^7.0.0",
         "discord-types": "latest",
         "esbuild": "^0.23.1",
-        "eslint": "^9.9.1",
+        "eslint": "^9.10.0",
         "eslint-plugin-path-alias": "^2.1.0",
         "eslint-plugin-react": "^7.35.2",
         "eslint-plugin-simple-header": "^1.1.1",
@@ -75,7 +75,7 @@
         "ts-patch": "^3.2.1",
         "ts-pattern": "5.0.4",
         "tsx": "^4.19.0",
-        "type-fest": "^4.26.0",
+        "type-fest": "^4.26.1",
         "typescript": "^5.5.4",
         "typescript-eslint": "^8.4.0",
         "typescript-transform-paths": "^3.5.0",
@@ -86,7 +86,7 @@
         "patchedDependencies": {
             "@stylistic/eslint-plugin@2.7.2": "patches/@stylistic__eslint-plugin@2.7.2.patch",
             "eslint-plugin-path-alias@2.1.0": "patches/eslint-plugin-path-alias@2.1.0.patch",
-            "eslint@9.9.1": "patches/eslint@9.9.1.patch",
+            "eslint@9.10.0": "patches/eslint@9.10.0.patch",
             "standalone-electron-types@1.0.0": "patches/standalone-electron-types@1.0.0.patch"
         },
         "peerDependencyRules": {

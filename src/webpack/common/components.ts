@@ -52,7 +52,8 @@ export let Avatar: t.Avatar;
 export let FocusLock: t.FocusLock;
 // token lagger real
 /** css colour resolver stuff, no clue what exactly this does, just copied usage from Discord */
-export let useToken: t.useToken;
+export let useToken: t.TokenHook;
+export const tokens: t.Tokens = findByPropsLazy("unsafe_rawColors", "modules");
 
 export const MaskedLink = waitForComponent<t.MaskedLink>("MaskedLink", filters.componentByCode("MASKED_LINK)"));
 export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));

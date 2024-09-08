@@ -16,15 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findComponentByCodeLazy, findLazy } from "@webpack";
-import { i18n, useToken } from "@webpack/common";
+import { findComponentByCodeLazy } from "@webpack";
+import { i18n, tokens, useToken } from "@webpack/common";
 
-const ColorMap = findLazy(m => m.colors?.INTERACTIVE_MUTED?.css);
 const VerifiedIconComponent = findComponentByCodeLazy(".CONNECTIONS_ROLE_OFFICIAL_ICON_TOOLTIP");
 
 export function VerifiedIcon() {
-    const color = useToken(ColorMap.colors.INTERACTIVE_MUTED).hex();
-    const forcedIconColor = useToken(ColorMap.colors.INTERACTIVE_ACTIVE).hex();
+    const color = useToken(tokens.colors.INTERACTIVE_MUTED!).hex();
+    const forcedIconColor = useToken(tokens.colors.INTERACTIVE_ACTIVE!).hex();
 
     return (
         <VerifiedIconComponent

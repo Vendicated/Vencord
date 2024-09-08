@@ -61,7 +61,6 @@ export type FormDivider = ComponentType<{
     style?: CSSProperties;
 }>;
 
-
 export type FormText = ComponentType<PropsWithChildren<{
     disabled?: boolean;
     selectable?: boolean;
@@ -422,18 +421,6 @@ export type Popout = ComponentType<{
 
 export type Dialog = ComponentType<JSX.IntrinsicElements["div"]>;
 
-type Resolve = (data: { theme: Theme; saturation: number; }) => {
-    hex: () => string;
-    hsl: () => string;
-    int: () => number;
-    spring: () => string;
-};
-
-export type useToken = (color: {
-    css: string;
-    resolve: Resolve;
-}) => ReturnType<Resolve>;
-
 export type Paginator = ComponentType<{
     currentPage: number;
     maxVisiblePages: number;
@@ -503,3 +490,53 @@ export type Avatar = ComponentType<PropsWithChildren<{
 type FocusLock = ComponentType<PropsWithChildren<{
     containerRef: RefObject<HTMLElement>;
 }>>;
+
+export interface Tokens {
+    colors: Record<string, {
+        css: string;
+        resolve: (options: { saturation: number; theme: Theme; }) => RawColor;
+    }>;
+    modules: {
+        chat: Record<string, number>;
+    };
+    radii: Record<string, number>;
+    shadows: Record<string, {
+        css: string;
+        resolve: (options: { theme: Theme; }) => {
+            boxShadow: string;
+            filter: string;
+            nativeStyles: {
+                elevation: number;
+                shadowColor: string;
+                shadowColorAndroid: string;
+                shadowOffset: {
+                    height: number;
+                    width: number;
+                };
+                shadowOpacity: number;
+                shadowRadius: number;
+            };
+        };
+    }>;
+    spacing: Record<`PX_${number}`, `${number}px`>;
+    themes: typeof Theme;
+    unsafe_rawColors: Record<string, {
+        css: string;
+        resolve: (options: { saturation: number; }) => RawColor;
+    }>;
+}
+
+interface RawColor {
+    hex: ColorFormater<string>;
+    hsl: ColorFormater<string>;
+    int: ColorFormater<number>;
+    spring: ColorFormater<string>;
+}
+
+type ColorFormater<T> = (options?: { opacity?: number | null | undefined /* = 1 */; }) => T;
+
+// For useToken
+export type TokenHook = (
+    color: Pick<Tokens["colors"][never], "resolve">,
+    theme?: Theme | null /* = useTheme() */
+) => RawColor;

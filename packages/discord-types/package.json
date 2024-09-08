@@ -33,7 +33,7 @@
         "@types/node": "^20.16.5",
         "@types/semver": "^7.5.8",
         "@typescript-eslint/typescript-estree": "^8.4.0",
-        "eslint": "^9.9.1",
+        "eslint": "^9.10.0",
         "eslint-plugin-check-file": "^2.8.0",
         "eslint-plugin-import-x": "^4.2.1",
         "eslint-plugin-simple-header": "^1.1.1",
@@ -43,7 +43,7 @@
         "puppeteer-core": "^23.3.0",
         "semver": "^7.6.3",
         "tsx": "^4.19.0",
-        "type-fest": "^4.26.0",
+        "type-fest": "^4.26.1",
         "typescript": "^5.5.4",
         "typescript-eslint": "^8.4.0"
     }
