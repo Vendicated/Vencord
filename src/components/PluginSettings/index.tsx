@@ -345,7 +345,7 @@ export default function PluginSettings() {
                             { label: "Show Enabled", value: SearchStatus.ENABLED },
                             { label: "Show Disabled", value: SearchStatus.DISABLED },
                             { label: "Show New", value: SearchStatus.NEW },
-                            { label: "Show User Plugins", value: SearchStatus.USERPLUGINS }
+                            ...(IS_STANDALONE ? [] : [{ label: "Show UserPlugins", value: SearchStatus.USERPLUGINS }])
                         ]}
                         serialize={String}
                         select={onStatusChange}
