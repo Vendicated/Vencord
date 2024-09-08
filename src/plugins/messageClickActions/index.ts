@@ -61,7 +61,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "MessageClickActions",
-    description: "Hold Backspace and click to delete, double click to edit/reply, Ctrl+Shift+Left+Click to pin/unpin",
+    description: "Hold Backspace and click to delete, double click to edit/reply, Ctrl+Shift+Click to pin/unpin",
     authors: [Devs.Ven, Devs.Prism],
     dependencies: ["MessageEventsAPI"],
 
