@@ -30,11 +30,11 @@ const settings = definePluginSettings({
     sendBehavior: {
         type: OptionType.SELECT,
         default: "Send",
-        description: "Choose how GIFs are added to your chats",
+        description: "Choose how GIF selection is handled",
         restartNeeded: false,
         options: [
             { value: "Send", label: "Send immediately" },
-            { value: "Insert", label: "Insert into chatbox" },
+            { value: "Insert", label: "Insert into chatbox (GifPaste behavior)" },
             { value: "InsertWithShift", label: "Insert link if SHIFT is held" }
         ]
     },
