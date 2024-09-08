@@ -23,7 +23,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Button, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
+import { Button, ChannelStore, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 interface ThreadJoined {
@@ -61,6 +61,16 @@ function onClick() {
             });
     });
 
+    Object.values(ChannelStore.getMutablePrivateChannels()).forEach((channel: Channel) => {
+            if (!ReadStateStore.hasUnread(channel.id)) return;
+
+                channels.push({
+                    channelId: channel.id,
+                    messageId: ReadStateStore.lastMessageId(channel.id),
+                    readStateType: 0
+            });
+    });
+
     FluxDispatcher.dispatch({
         type: "BULK_ACK",
         context: "APP",
@@ -81,7 +91,7 @@ const ReadAllButton = () => (
 
 export default definePlugin({
     name: "ReadAllNotificationsButton",
-    description: "Read all server notifications with a single button click!",
+    description: "Read all notifications by clicking 'Read All'",
     authors: [Devs.kemo],
     dependencies: ["ServerListAPI"],
 
