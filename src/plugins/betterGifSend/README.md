@@ -19,3 +19,7 @@ Control how GIFs are sent:
 - **Send immediately**: Sends the GIF directly to the chat. (Default)
 - **Insert into chatbox**: Inserts the GIF URL into the chatbox, allowing you to add additional text before sending.
 - **Insert link if SHIFT is held**: Inserts the GIF URL into the chatbox if the SHIFT key is held down.
+
+### Clear Reply
+
+Automatically clear the reply context after sending a singular GIF.

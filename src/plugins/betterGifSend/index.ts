@@ -6,9 +6,10 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { insertTextIntoChatInputBox, sendMessage } from "@utils/discord";
+import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { ExpressionPickerStore, SelectedChannelStore } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { ExpressionPickerStore, FluxDispatcher, MessageActions, SelectedChannelStore } from "@webpack/common";
 
 interface Gif {
     url: string;
@@ -36,8 +37,16 @@ const settings = definePluginSettings({
             { value: "Insert", label: "Insert into chatbox" },
             { value: "InsertWithShift", label: "Insert link if SHIFT is held" }
         ]
+    },
+    clearReply: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Clear the reply context after sending a singular GIF",
+        restartNeeded: false
     }
 });
+
+const PendingReplyStore = findByPropsLazy("getPendingReply");
 
 let shiftHeld = false;
 
@@ -78,7 +87,11 @@ export default definePlugin({
         if (sendBehavior === "Insert" || (sendBehavior === "InsertWithShift" && shiftHeld)) {
             insertTextIntoChatInputBox(gif.url + " ");
         } else {
-            sendMessage(channel, { content: gif.url });
+            const reply = PendingReplyStore.getPendingReply(channel);
+            MessageActions.sendMessage(channel, { content: gif.url }, void 0, true, MessageActions.getSendMessageOptionsForReply(reply));
+            if (settings.store.clearReply && reply) {
+                FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", channelId: channel });
+            }
         }
 
         if (closeBehavior === "Close" || (closeBehavior === "ShiftOpen" && !shiftHeld)) {
