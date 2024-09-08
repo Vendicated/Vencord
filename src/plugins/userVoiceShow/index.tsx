@@ -19,7 +19,7 @@
 import "./styles.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 import VoiceActivityIcon from "./components/VoiceActivityIcon";
@@ -29,7 +29,7 @@ import { VoiceActivityProps } from "./types";
 export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows users' voice activity information in profiles and members lists",
-    authors: [Devs.LordElias, Devs.llytz],
+    authors: [Devs.LordElias, EquicordDevs.llytz],
     tags: ["voice", "activity"],
     settings,
 

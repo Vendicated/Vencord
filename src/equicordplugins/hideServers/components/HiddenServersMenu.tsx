@@ -17,7 +17,7 @@ import {
     openModal,
 } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
-import { Button, Forms, IconUtils, Text, useState, useStateFromStores } from "@webpack/common";
+import { Button, Forms, IconUtils, Text, useStateFromStores } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
 import { HiddenServersStore } from "../HiddenServersStore";
@@ -91,7 +91,7 @@ export function HiddenServersMenu({ servers }: { servers: Guild[]; }) {
             </Text>
         )}
     </div>;
-};
+}
 
 export function openHiddenServersModal() {
     const key = openModal(modalProps => {

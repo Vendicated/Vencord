@@ -8,6 +8,7 @@ import "./style.css";
 
 import { classNameFactory } from "@api/Styles";
 import { Button, ButtonLooks, GuildStore, useStateFromStores } from "@webpack/common";
+
 import { HiddenServersStore } from "../HiddenServersStore";
 import { openHiddenServersModal } from "./HiddenServersMenu";
 
