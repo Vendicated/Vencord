@@ -25,6 +25,7 @@ import { FluxDispatcher, PermissionsBits, PermissionStore, UserStore } from "@we
 
 const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
 const EditStore = findByPropsLazy("isEditing", "isEditingAny");
+const PinStore = findByPropsLazy("pinMessage", "unpinMessage");
 
 let isDeletePressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
@@ -50,13 +51,18 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Only do double click actions when shift/ctrl is held",
         default: false
-    }
+    },
+    enablePinOnCtrlShiftClick: {
+        type: OptionType.BOOLEAN,
+        description: "Enable pin/unpin on Ctrl+Shift+Click",
+        default: true
+    },
 });
 
 export default definePlugin({
     name: "MessageClickActions",
-    description: "Hold Backspace and click to delete, double click to edit/reply",
-    authors: [Devs.Ven],
+    description: "Hold Backspace and click to delete, double click to edit/reply, Ctrl+Shift+Left+Click to pin/unpin",
+    authors: [Devs.Ven, Devs.Prism],
     dependencies: ["MessageEventsAPI"],
 
     settings,
@@ -67,6 +73,19 @@ export default definePlugin({
 
         this.onClick = addClickListener((msg: any, channel, event) => {
             const isMe = msg.author.id === UserStore.getCurrentUser().id;
+
+            if (event.ctrlKey && event.shiftKey && event.button === 0 && settings.store.enablePinOnCtrlShiftClick) {
+                if (PermissionStore.can(PermissionsBits.MANAGE_MESSAGES, channel)) {
+                    if (msg.pinned) {
+                        PinStore.unpinMessage(channel, msg.id);
+                    } else {
+                        PinStore.pinMessage(channel, msg.id);
+                    }
+                    event.preventDefault();
+                    return;
+                }
+            }
+
             if (!isDeletePressed) {
                 if (event.detail < 2) return;
                 if (settings.store.requireModifier && !event.ctrlKey && !event.shiftKey) return;
