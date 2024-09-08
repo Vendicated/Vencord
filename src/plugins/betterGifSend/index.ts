@@ -17,12 +17,12 @@ interface Gif {
 const settings = definePluginSettings({
     closeBehavior: {
         type: OptionType.SELECT,
-        default: "Open",
+        default: "Close",
         description: "Choose how the GIF Picker behaves after clicking a GIF",
         restartNeeded: false,
         options: [
-            { value: "Open", label: "Always keep open" },
             { value: "Close", label: "Close immediately" },
+            { value: "Open", label: "Always keep open" },
             { value: "ShiftOpen", label: "Keep open if SHIFT is held" }
         ]
     },
