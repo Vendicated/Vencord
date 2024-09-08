@@ -38,15 +38,15 @@ export let cache: WebpackInstance["c"];
 
 export type FilterFn = (mod: any) => boolean;
 
-type PropsFilter = Array<string>;
-type CodeFilter = Array<string | RegExp>;
-type StoreNameFilter = string;
+export type PropsFilter = Array<string>;
+export type CodeFilter = Array<string | RegExp>;
+export type StoreNameFilter = string;
 
-const stringMatches = (s: string, filter: CodeFilter) =>
+export const stringMatches = (s: string, filter: CodeFilter) =>
     filter.every(f =>
         typeof f === "string"
             ? s.includes(f)
-            : f.test(s)
+            : (f.global && (f.lastIndex = 0), f.test(s))
     );
 
 export const filters = {
@@ -258,6 +258,8 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
  * @returns string or null
  */
 export const findModuleId = traceFunction("findModuleId", function findModuleId(...code: CodeFilter) {
+    code = code.map(canonicalizeMatch);
+
     for (const id in wreq.m) {
         if (stringMatches(wreq.m[id].toString(), code)) return id;
     }
@@ -299,7 +301,7 @@ export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "f
  * Note that the example below exists already as an api, see {@link findByPropsLazy}
  * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
-export function proxyLazyWebpack<T = any>(factory: () => any, attempts?: number) {
+export function proxyLazyWebpack<T = any>(factory: () => T, attempts?: number) {
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["proxyLazyWebpack", [factory]]);
 
     return proxyLazy<T>(factory, attempts);
@@ -452,12 +454,9 @@ export function findExportedComponentLazy<T extends object = any>(...props: Prop
  *          })
  */
 export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>): Record<S, any> {
-    if (!Array.isArray(code)) code = [code];
-    code = code.map(canonicalizeMatch);
-
     const exports = {} as Record<S, any>;
 
-    const id = findModuleId(...code);
+    const id = findModuleId(...Array.isArray(code) ? code : [code]);
     if (id === null)
         return exports;
 
@@ -606,6 +605,8 @@ export function waitFor(filter: string | PropsFilter | FilterFn, callback: Callb
  * @returns Mapping of found modules
  */
 export function search(...code: CodeFilter) {
+    code = code.map(canonicalizeMatch);
+
     const results = {} as Record<number, Function>;
     const factories = wreq.m;
 

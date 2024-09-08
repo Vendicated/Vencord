@@ -9,7 +9,7 @@ import { createSocket, Socket } from "dgram";
 let xsoSocket: Socket;
 
 export function sendToOverlay(_, data: any) {
-    data.icon = Buffer.from(data.icon).toString("base64");
+    data.messageType = data.type;
     const json = JSON.stringify(data);
     xsoSocket ??= createSocket("udp4");
     xsoSocket.send(json, 42069, "127.0.0.1");
