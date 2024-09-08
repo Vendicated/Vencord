@@ -39,7 +39,7 @@ function setCss() {
 export default definePlugin({
     name: "BlurNSFW+",
     description: "Up-to-date fork of BlurNSFW, blur attachments in NSFW channels until hovered with additional options. Original plugin made by Ven.",
-    authors: [Devs.MiguVT],
+    authors: [Devs.MiguVT, Devs.Ven],
 
     patches: [
         {
