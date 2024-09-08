@@ -572,7 +572,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     Scab: {
         name: "Scab",
-        id: 1230764273676980317,
+        id: 1230764273676980317n,
     },
 } satisfies Record<string, Dev>);
 
