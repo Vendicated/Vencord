@@ -26,8 +26,8 @@ function setCss() {
     style.textContent = `
         .vc-nsfw-img [class^=imageWrapper] img,
         .vc-nsfw-img [class^=wrapperPaused] video {
-            filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
-            transition: filter 0.2s;
+            filter: blur(${Settings.plugins["BlurNSFW"].blurAmount}px);
+            transition: filter ${Settings.plugins["BlurNSFW"].transitionTime}ms;
         }
         .vc-nsfw-img [class^=imageWrapper]:hover img,
         .vc-nsfw-img [class^=wrapperPaused]:hover video {
@@ -39,7 +39,7 @@ function setCss() {
 export default definePlugin({
     name: "BlurNSFW",
     description: "Blur attachments in NSFW channels until hovered",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.MiguVT],
 
     patches: [
         {
@@ -57,7 +57,14 @@ export default definePlugin({
             description: "Blur Amount",
             default: 10,
             onChange: setCss
-        }
+        },
+        transitionTime: {
+            type: OptionType.NUMBER,
+            description: "Transition time for blur effect (in milliseconds)",
+            default: 200,
+            min: 0,
+            max: 1000
+        },
     },
 
     start() {
