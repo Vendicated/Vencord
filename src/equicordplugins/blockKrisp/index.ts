@@ -30,7 +30,7 @@ export default definePlugin({
         },
         // Set Krisp to not supported
         {
-            find: "\"shouldSkipMuteUnmuteSound\"",
+            find: "isNoiseCancellationSupported(){",
             replacement: {
                 match: /isNoiseCancellationSupported\(\)\{/,
                 replace: "$&return false;"
