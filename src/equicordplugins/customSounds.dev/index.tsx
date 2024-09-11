@@ -55,7 +55,7 @@ export default definePlugin({
     patches: [
         // sound class
         {
-            find: 'Error("could not play audio")',
+            find: '"_ensureAudioPromise"',
             replacement: [
                 // override URL
                 {
@@ -64,7 +64,7 @@ export default definePlugin({
                 },
                 // override volume
                 {
-                    match: /Math.min\(\i\.\i\.getOutputVolume\(\)\/100\*this\._volume/,
+                    match: /Math.min\(\i\.\i\.getOutputVolume\(\).{0,20}volume/,
                     replace: "$& * ($self.findOverride(this.name)?.volume ?? 100) / 100"
                 }
             ]
