@@ -10,7 +10,7 @@ import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { React } from "@webpack/common";
+import { Alerts, React } from "@webpack/common";
 
 import { SoundOverrideComponent } from "./components/SoundOverrideComponent";
 import { makeEmptyOverride, SoundOverride, soundTypes } from "./types";
@@ -81,6 +81,19 @@ export default definePlugin({
     settings,
     findOverride,
     isOverriden,
+    afterSave() {
+        Alerts.show({
+            title: "Restart required",
+            body: (
+                <>
+                    <p>CustomSounds requires a restart for settings to activate.</p>
+                </>
+            ),
+            confirmText: "Restart now",
+            cancelText: "Later!",
+            onConfirm: () => location.reload()
+        });
+    },
     async start() {
         overrides = await DataStore.get(OVERRIDES_KEY) ?? {};
         for (const type of soundTypes)
