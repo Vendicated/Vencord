@@ -266,20 +266,13 @@ export default definePlugin({
                 replace: (m, props, nowPlaying) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`
             }
         },
-        // Discord has 3 different components for activities. Currently, the last is the one being used
+        // Discord has 2 different components for activities. Currently, the last is the one being used
         {
             find: ".activityTitleText,variant",
             replacement: {
                 match: /\.activityTitleText.+?children:(\i)\.name.*?}\),/,
                 replace: (m, props) => `${m}$self.renderToggleActivityButton(${props}),`
             },
-        },
-        {
-            find: ".activityCardDetails,children",
-            replacement: {
-                match: /\.activityCardDetails.+?children:(\i\.application)\.name.*?}\),/,
-                replace: (m, props) => `${m}$self.renderToggleActivityButton(${props}),`
-            }
         },
         {
             find: ".promotedLabelWrapperNonBanner,children",

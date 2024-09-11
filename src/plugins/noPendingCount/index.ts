@@ -62,16 +62,7 @@ export default definePlugin({
                 replace: "return 0;"
             }
         },
-        // New message requests hook
-        {
-            find: 'location:"use-message-requests-count"',
-            predicate: () => settings.store.hideMessageRequestsCount,
-            replacement: {
-                match: /getNonChannelAckId\(\i\.\i\.MESSAGE_REQUESTS\).+?return /,
-                replace: "$&0;"
-            }
-        },
-        // Old message requests hook
+        // Message requests hook
         {
             find: "getMessageRequestsCount(){",
             predicate: () => settings.store.hideMessageRequestsCount,
