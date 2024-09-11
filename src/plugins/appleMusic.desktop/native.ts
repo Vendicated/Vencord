@@ -11,28 +11,15 @@ import type { TrackData } from ".";
 
 const exec = promisify(execFile);
 
-// function exec(file: string, args: string[] = []) {
-//     return new Promise<{ code: number | null, stdout: string | null, stderr: string | null; }>((resolve, reject) => {
-//         const process = spawn(file, args, { stdio: [null, "pipe", "pipe"] });
-
-//         let stdout: string | null = null;
-//         process.stdout.on("data", (chunk: string) => { stdout ??= ""; stdout += chunk; });
-//         let stderr: string | null = null;
-//         process.stderr.on("data", (chunk: string) => { stdout ??= ""; stderr += chunk; });
-
-//         process.on("exit", code => { resolve({ code, stdout, stderr }); });
-//         process.on("error", err => reject(err));
-//     });
-// }
-
 async function applescript(cmds: string[]) {
     const { stdout } = await exec("osascript", cmds.map(c => ["-e", c]).flat());
     return stdout;
 }
 
-function makeSearchUrl(type: string, query: string) {
-    const url = new URL("https://tools.applemediaservices.com/api/apple-media/music/US/search.json");
-    url.searchParams.set("types", type);
+function makeiTunesUrl(query: string) {
+    const url = new URL("https://itunes.apple.com/search");
+    url.searchParams.set("media", "music");
+    url.searchParams.set("entity", "musicTrack");
     url.searchParams.set("limit", "1");
     url.searchParams.set("term", query);
     return url;
@@ -58,21 +45,23 @@ async function fetchRemoteData({ id, name, artist, album }: { id: string, name: 
     }
 
     try {
-        const [songData, artistData] = await Promise.all([
-            fetch(makeSearchUrl("songs", artist + " " + album + " " + name), requestOptions).then(r => r.json()),
-            fetch(makeSearchUrl("artists", artist.split(/ *[,&] */)[0]), requestOptions).then(r => r.json())
-        ]);
+        const { results: [{ trackId, trackViewUrl, artworkUrl100, artistViewUrl }] } = await fetch(
+            makeiTunesUrl(name + " " + artist + " " + album), requestOptions
+        ).then(r => r.json());
 
-        const appleMusicLink = songData?.songs?.data[0]?.attributes.url;
-        const songLink = songData?.songs?.data[0]?.id ? `https://song.link/i/${songData?.songs?.data[0]?.id}` : undefined;
-
-        const albumArtwork = songData?.songs?.data[0]?.attributes.artwork.url.replace("{w}", "512").replace("{h}", "512");
-        const artistArtwork = artistData?.artists?.data[0]?.attributes.artwork.url.replace("{w}", "512").replace("{h}", "512");
+        const artistHtml = await fetch(artistViewUrl, requestOptions).then(r => r.text());
+        const extractedArtistArtwork = artistHtml.match(/,"image":"(https:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)\.png)"/);
 
         cachedRemoteData = {
             id,
-            data: { appleMusicLink, songLink, albumArtwork, artistArtwork }
+            data: {
+                appleMusicLink: trackViewUrl,
+                songLink: `https://song.link/i/${trackId}`,
+                albumArtwork: artworkUrl100.replace("100x100", "512x512"),
+                artistArtwork: extractedArtistArtwork ? extractedArtistArtwork[1].replace(/\d+x\d+bb/, "512x512bb") : undefined,
+            }
         };
+
         return cachedRemoteData.data;
     } catch (e) {
         console.error("[AppleMusicRichPresence] Failed to fetch remote data:", e);
