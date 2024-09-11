@@ -11,9 +11,9 @@ import type { Action, ActionHandler, ActionType, ExtractAction } from "./actions
 
 export declare class Dispatcher {
     constructor(
-        defaultBand?: DispatchBand | undefined /* = DispatchBand.EARLY */,
-        actionLogger?: ActionLogger | Nullish,
-        sentryUtils?: SentryUtils | Nullish
+        defaultBand?: DispatchBand /* = DispatchBand.EARLY */,
+        actionLogger?: ActionLogger | null,
+        sentryUtils?: SentryUtils | null
     );
 
     _dispatch(
@@ -32,8 +32,8 @@ export declare class Dispatcher {
         storeName: string,
         actionHandlers: ActionHandlerMap<A>,
         storeDidChange: ActionHandler<A>,
-        dispatchBand?: DispatchBand | Nullish, /* = this._defaultBand */
-        dispatchToken?: string | undefined /* = this._actionHandlers.createToken() */
+        dispatchBand?: DispatchBand | null, /* = this._defaultBand */
+        dispatchToken?: string /* = this._actionHandlers.createToken() */
     ): string;
     subscribe<T extends ActionType>(
         actionType: T,

@@ -28,8 +28,8 @@ export declare class ChannelMessages {
     _clearMessages(): void;
     _merge(
         messages: readonly MessageRecord[],
-        isBefore?: boolean | undefined /* = false */,
-        clearCache?: boolean | undefined /* = false */
+        isBefore?: boolean /* = false */,
+        clearCache?: boolean /* = false */
     ): void;
     /** @throws {Error} `messages` must be sorted in descending order by ID. */
     addCachedMessages(messages: readonly MessageRecord[], cached: boolean): ChannelMessages;
@@ -69,32 +69,32 @@ export declare class ChannelMessages {
         thisArg?: unknown,
         breakOnReturnFalse?: BreakOnReturnFalse
     ): void;
-    get(messageId: string, searchCaches?: boolean | undefined /* = false */): MessageRecord | undefined;
+    get(messageId: string, searchCaches?: boolean /* = false */): MessageRecord | undefined;
     getAfter(messageId: string): MessageRecord | null;
     getByIndex(index: number): MessageRecord | undefined;
     /** If count is -1, all results will be returned. */
     getManyAfter(
         messageId: string,
         count: number,
-        callback?: ((message: MessageRecord) => void) | Nullish
+        callback?: ((message: MessageRecord) => void) | null
     ): MessageRecord[] | null;
     /** If count is -1, all results will be returned. */
     getManyBefore(
         messageId: string,
         count: number,
-        callback?: ((message: MessageRecord) => void) | Nullish
+        callback?: ((message: MessageRecord) => void) | null
     ): MessageRecord[] | null;
-    has(messageId: string, searchCaches?: boolean | undefined): boolean;
+    has(messageId: string, searchCaches?: boolean): boolean;
     hasAfterCached(messageId: string): boolean;
     hasBeforeCached(messageId: string): boolean;
     hasPresent(): boolean;
     indexOf(messageId: string): number;
     jumpToMessage(
         messageId: string | null,
-        jumpFlash?: boolean | undefined /* = true */,
-        jumpTargetOffset?: number | Nullish,
-        jumpReturnTargetId?: string | Nullish,
-        jumpType?: JumpType | Nullish /* = JumpType.ANIMATED */
+        jumpFlash?: boolean /* = true */,
+        jumpTargetOffset?: number | null,
+        jumpReturnTargetId?: string | null,
+        jumpType?: JumpType | null /* = JumpType.ANIMATED */
     ): ChannelMessages;
     jumpToPresent(countFromPresent: number): ChannelMessages;
     last(): MessageRecord | undefined;
@@ -106,29 +106,29 @@ export declare class ChannelMessages {
         offset?: number | Nullish;
         present?: boolean | Nullish;
         returnMessageId?: string | Nullish;
-    } | Nullish): ChannelMessages;
+    } | null): ChannelMessages;
     map<T>(
         callback: (value: MessageRecord, index: number, array: MessageRecord[]) => T,
         thisArg?: unknown
     ): T[];
     merge(
         messages: readonly MessageRecord[],
-        isBefore?: boolean | undefined /* = false */,
-        clearCache?: boolean | undefined /* = false */
+        isBefore?: boolean /* = false */,
+        clearCache?: boolean /* = false */
     ): ChannelMessages;
     mergeDelta(
-        messages?: readonly MessageRecord[] | undefined /* = [] */,
-        messageProperties?: readonly MessageProperties[] | undefined /* = [] */,
+        messages?: readonly MessageRecord[] /* = [] */,
+        messageProperties?: readonly MessageProperties[] /* = [] */,
         excludedMessageIds?: readonly string[] /* = [] */
     ): ChannelMessages;
     mutate(
         mutaterOrObject?: ((channelMessages: ChannelMessages) => void)
             | Optional<Omit<ChannelMessagesOwnProperties, "_after" | "_array" | "_before" | "_map" | "channelId">>,
-        deep?: boolean | undefined /* = false */
+        deep?: boolean /* = false */
     ): ChannelMessages;
     receiveMessage(
         messageProperties: MessageProperties,
-        truncateTop?: boolean | undefined /* = true */
+        truncateTop?: boolean /* = true */
     ): ChannelMessages | this;
     receivePushNotification(messageProperties: MessageProperties): ChannelMessages | this;
     receiveReactionInAppNotification(messageProperties: MessageProperties): ChannelMessages | this;
@@ -139,7 +139,7 @@ export declare class ChannelMessages {
             currentIndex: number,
             array: MessageRecord[]
         ) => MessageRecord,
-        initialValue?: MessageRecord | undefined
+        initialValue?: MessageRecord
     ): MessageRecord;
     reduce<T>(
         callback: (
@@ -159,9 +159,9 @@ export declare class ChannelMessages {
         thisArg?: unknown
     ): boolean;
     toArray(): MessageRecord[];
-    truncate(count: number, mutateDeep?: boolean | undefined /* = true */): ChannelMessages | this;
-    truncateBottom(count: number, mutateDeep?: boolean | undefined /* = true */): ChannelMessages | this;
-    truncateTop(count: number, mutateDeep?: boolean | undefined /* = true */): ChannelMessages | this;
+    truncate(count: number, mutateDeep?: boolean /* = true */): ChannelMessages | this;
+    truncateBottom(count: number, mutateDeep?: boolean /* = true */): ChannelMessages | this;
+    truncateTop(count: number, mutateDeep?: boolean /* = true */): ChannelMessages | this;
     update(messageId: string, updater: (message: MessageRecord) => MessageRecord): ChannelMessages | this;
 
     _after: MessageCache;

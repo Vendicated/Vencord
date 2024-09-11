@@ -6,7 +6,6 @@
 
 import type { Store } from "../flux/Store";
 import type { Activity } from "../general/Activity";
-import type { Nullish } from "../internal";
 
 export declare class PresenceStore extends Store {
     static displayName: "PresenceStore";
@@ -18,7 +17,7 @@ export declare class PresenceStore extends Store {
             index: number,
             array: Activity[]
         ) => value is T,
-        guildId?: string | Nullish /* = null */
+        guildId?: string | null /* = null */
     ): T | undefined;
     findActivity(
         userId: string,
@@ -27,9 +26,9 @@ export declare class PresenceStore extends Store {
             index: number,
             array: Activity[]
         ) => unknown,
-        guildId?: string | Nullish /* = null */
+        guildId?: string | null /* = null */
     ): Activity | undefined;
-    getActivities(userId: string, guildId?: string | Nullish /* = null */): Activity[];
+    getActivities(userId: string, guildId?: string | null /* = null */): Activity[];
     getActivityMetadata(userId: string): Record<string, unknown> | undefined;
     getAllApplicationActivities(applicationId?: Activity["application_id"]): {
         activity: Activity;
@@ -38,10 +37,10 @@ export declare class PresenceStore extends Store {
     getApplicationActivity(
         userId: string,
         applicationId?: Activity["application_id"],
-        guildId?: string | Nullish /* = null */
+        guildId?: string | null /* = null */
     ): Activity | undefined;
     getClientStatus(userId: string): ClientStatusMap | undefined;
-    getPrimaryActivity(userId: string, guildId?: string | Nullish /* = null */): Activity | undefined;
+    getPrimaryActivity(userId: string, guildId?: string | null /* = null */): Activity | undefined;
     getState(): {
         activities: { [userId: string]: Activity[]; };
         activityMetadata: { [userId: string]: Record<string, unknown>; };
@@ -52,8 +51,8 @@ export declare class PresenceStore extends Store {
     };
     getStatus(
         userId: string,
-        guildId?: string | Nullish /* = null */,
-        defaultStatus?: StatusType | undefined /* = StatusType.OFFLINE */
+        guildId?: string | null /* = null */,
+        defaultStatus?: StatusType /* = StatusType.OFFLINE */
     ): StatusType;
     getUserIds(): string[];
     initialize(): void;

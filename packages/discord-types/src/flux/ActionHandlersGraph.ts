@@ -29,7 +29,7 @@ export declare class ActionHandlersGraph {
         actionHandlers: ActionHandlerMap<A>,
         storeDidChange: ActionHandler<A>,
         dispatchBand: DispatchBand,
-        dispatchToken?: string | undefined /* = this.createToken() */
+        dispatchToken?: string /* = this.createToken() */
     ): string;
 
     _dependencyGraph: DepGraph<ActionHandlersGraphNode>;

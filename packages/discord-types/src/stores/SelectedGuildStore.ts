@@ -5,7 +5,7 @@
  */
 
 import type { PersistedStore } from "../flux/PersistedStore";
-import type { GenericConstructor, Nullish } from "../internal";
+import type { GenericConstructor } from "../internal";
 
 export interface SelectedGuildStoreState {
     lastSelectedGuildId: string | null;
@@ -24,5 +24,5 @@ export declare class SelectedGuildStore<
     getLastSelectedGuildId(): string | null;
     getLastSelectedTimestamp(guildId: string): number | undefined;
     getState(): State;
-    initialize(state?: State | Nullish): void;
+    initialize(state?: State | null): void;
 }

@@ -5,6 +5,7 @@
     "compilerOptions": {
         "exactOptionalPropertyTypes": true,
         "noUncheckedIndexedAccess": true,
+        "noUncheckedSideEffectImports": true,
         "strict": true,
 
         "module": "NodeNext",

@@ -30,16 +30,16 @@ export declare class UserRecord<
     } | null);
     get createdAt(): Date;
     getAvatarSource(
-        guildId?: string | Nullish,
-        canAnimate?: boolean | undefined /* = false */,
-        avatarSize?: number | undefined /* = 128 */
+        guildId?: string | null,
+        canAnimate?: boolean /* = false */,
+        avatarSize?: number /* = 128 */
     ): IconSource;
     getAvatarURL(
-        guildId?: string | Nullish,
-        avatarSize?: number | undefined /* = 128 */,
-        canAnimate?: boolean | undefined /* = false */
+        guildId?: string | null,
+        avatarSize?: number /* = 128 */,
+        canAnimate?: boolean /* = false */
     ): string;
-    hasAvatarForGuild(guildId?: string | Nullish): boolean;
+    hasAvatarForGuild(guildId?: string | null): boolean;
     hasFreePremium(): boolean;
     hasHadPremium(): boolean;
     hasHadSKU(skuId: string): boolean;

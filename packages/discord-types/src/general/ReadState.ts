@@ -9,7 +9,7 @@ import type { BasicPermissionsObject } from "../stores/PermissionStore";
 import type { GuildChannelRecord } from "./channels/ChannelRecord";
 
 export declare class ReadState<Type extends ReadStateType = ReadStateType> {
-    constructor(channelId: string, type?: Type & ChannelIdReadStateType | undefined);
+    constructor(channelId: string, type?: Type & ChannelIdReadStateType);
     constructor(userId: string, type: Type & UserIdReadStateType);
     constructor(guildId: string, type: Type & GuildIdReadStateType);
 
@@ -18,7 +18,7 @@ export declare class ReadState<Type extends ReadStateType = ReadStateType> {
     static _readStates: { [T in ChannelIdReadStateType]?: { [channelId: string]: ReadState<T>; }; }
         & { [T in UserIdReadStateType]?: { [userId: string]: ReadState<T>; }; }
         & { [T in GuildIdReadStateType]?: { [guildId: string]: ReadState<T>; }; };
-    static clear(channelId: string, type?: ChannelIdReadStateType | undefined): boolean;
+    static clear(channelId: string, type?: ChannelIdReadStateType): boolean;
     static clear(userId: string, type: UserIdReadStateType): boolean;
     static clear(guildId: string, type: GuildIdReadStateType): boolean;
     static clearAll(): void;
@@ -26,11 +26,11 @@ export declare class ReadState<Type extends ReadStateType = ReadStateType> {
      * @param callback The iteratee. Iteration will terminate early if it returns false.
      */
     static forEach(callback: (value: ReadState) => unknown): void;
-    static get(channelId: string, type?: ChannelIdReadStateType | undefined): ReadState<ChannelIdReadStateType>;
+    static get(channelId: string, type?: ChannelIdReadStateType): ReadState<ChannelIdReadStateType>;
     static get<T extends UserIdReadStateType>(userId: string, type: T): ReadState<T>;
     static get<T extends GuildIdReadStateType>(guildId: string, type: T): ReadState<T>;
     static getGuildSentinels(guildId: string): typeof ReadState["_guildReadStateSentinels"];
-    static getIfExists(channelId: string, type?: ChannelIdReadStateType | undefined): ReadState<ChannelIdReadStateType> | undefined;
+    static getIfExists(channelId: string, type?: ChannelIdReadStateType): ReadState<ChannelIdReadStateType> | undefined;
     static getIfExists<T extends UserIdReadStateType>(userId: string, type: T): ReadState<T> | undefined;
     static getIfExists<T extends GuildIdReadStateType>(guildId: string, type: T): ReadState<T> | undefined;
     static getMentionChannelIds(): string[];
@@ -57,9 +57,9 @@ export declare class ReadState<Type extends ReadStateType = ReadStateType> {
     _ack(location: string, trackAnalytics: boolean): void;
     _nonChannelAck(): void;
     _shouldAck(
-        force?: boolean | undefined,
-        local?: boolean | undefined,
-        isExplicitUserAction?: boolean | undefined
+        force?: boolean,
+        local?: boolean,
+        isExplicitUserAction?: boolean
     ): boolean;
     ack(options: {
         force?: boolean | undefined /* = false */;
@@ -72,12 +72,12 @@ export declare class ReadState<Type extends ReadStateType = ReadStateType> {
     }): boolean;
     get ackMessageId(): ReadState["_ackMessageId"];
     set ackMessageId(messageId: ReadState["_ackMessageId"]);
-    ackPins(isoTimestamp?: string | Nullish): boolean;
+    ackPins(isoTimestamp?: string | null): boolean;
     canBeUnread(): boolean;
     canHaveMentions(): boolean;
     canTrackUnreads(): boolean;
     clearOutgoingAck(): void;
-    delete(remote?: boolean | undefined): void;
+    delete(remote?: boolean): void;
     deserializeForOverlay(serlizedReadState: Optional<SerializedReadState<false, Type>, Nullish, "_isJoinedThread" | "estimated" | "_isActiveThread" | "isManualAck" | "_isThread" | "loadedMessages" | "oldestUnreadMessageIdStale" | "type"> & {
         _isActiveJoinedThread?: boolean | Nullish;
         _unreadCount?: number | Nullish;
@@ -88,7 +88,7 @@ export declare class ReadState<Type extends ReadStateType = ReadStateType> {
         isOptInEnabled: boolean,
         guildChannelOverrides: { [channelId: string]: GuildChannelOverride; },
         isChannelMuted: boolean,
-        isReadStateTypeUnread?: boolean | undefined
+        isReadStateTypeUnread?: boolean
     ): {
         mentionCount: number;
         unread: boolean;
@@ -113,9 +113,9 @@ export declare class ReadState<Type extends ReadStateType = ReadStateType> {
     set oldestUnreadMessageId(messageId: ReadState["_oldestUnreadMessageId"]);
     get oldestUnreadTimestamp(): number;
     rebuildChannelState(
-        ackMessageId?: string | Nullish,
-        resetMentionCount?: boolean | undefined /* = false */,
-        newMentionCount?: number | Nullish
+        ackMessageId?: string | null,
+        resetMentionCount?: boolean /* = false */,
+        newMentionCount?: number | null
     ): void;
     recalculateFlags(): ReadStateFlags | undefined;
     recordLastViewedTime(): void;

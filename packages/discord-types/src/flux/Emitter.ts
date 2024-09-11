@@ -17,8 +17,8 @@ export declare class Emitter {
     injectBatchEmitChanges(batchEmitChanges: () => unknown): void;
     markChanged(store: Store): void;
     /** If timeout is omitted, Emitter will pause until resume is called. */
-    pause(timeout?: number | undefined): void;
-    resume(shouldEmit?: boolean | undefined /* = true */): void;
+    pause(timeout?: number): void;
+    resume(shouldEmit?: boolean /* = true */): void;
 
     changedStores: Set<Store>;
     changeSentinel: number;

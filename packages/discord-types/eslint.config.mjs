@@ -2,7 +2,6 @@ import stylistic from "@stylistic/eslint-plugin";
 // @ts-expect-error: No types
 import checkFile from "eslint-plugin-check-file";
 import eslintPluginImport from "eslint-plugin-import-x";
-// @ts-expect-error: No types
 import simpleHeader from "eslint-plugin-simple-header";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";

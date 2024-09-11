@@ -15,7 +15,7 @@ export declare class UnknownChannelRecord extends ChannelRecordBase {
     static fromServer(
         /** @todo */
         channelFromServer: { type?: ChannelType.UNKNOWN | Nullish; } & Record<string, any>,
-        guildId?: string | Nullish
+        guildId?: string | null
     ): UnknownChannelRecord;
 
     application_id: ChannelRecordBase["application_id"];

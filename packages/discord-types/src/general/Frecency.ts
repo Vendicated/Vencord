@@ -20,24 +20,24 @@ export declare class Frecency<Key extends PropertyKey = PropertyKey, Value = unk
     compute(): void;
     get frequently(): Value[];
     set frequently(values: Value[]);
-    getEntry(key?: Key | Nullish): FrecencyUsageHistoryEntry | Nullish;
-    getFrecency(key?: Key | Nullish): number | null;
-    getScore(key?: Key | Nullish): number | null;
+    getEntry(key?: Key | null): FrecencyUsageHistoryEntry | Nullish;
+    getFrecency(key?: Key | null): number | null;
+    getScore(key?: Key | null): number | null;
     isDirty(): boolean;
     markDirty(): void;
     overwriteHistory(
-        usageHistory?: Omit<FrecencyUsageHistoryEntry, "frecency"> | Nullish,
+        usageHistory?: Omit<FrecencyUsageHistoryEntry, "frecency"> | null,
         track?: readonly {
             key?: Key | Nullish;
             timestamp?: number | Nullish;
-        }[] | Nullish
+        }[] | null
     ): void;
     replaceEntryComputeFunctions(
         computeWeight: Frecency["computeWeight"],
         computeFrecency: Frecency["computeFrecency"],
         calculateMaxTotalUse: Frecency["calculateMaxTotalUse"]
     ): void;
-    track(key?: Key | Nullish, timestamp?: number | Nullish): void;
+    track(key?: Key | null, timestamp?: number | null): void;
 
     _frequently: Value[];
     afterCompute: (

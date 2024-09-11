@@ -13,8 +13,8 @@ import type { DispatchBand, Dispatcher } from "./Dispatcher";
 export declare abstract class Store {
     constructor(
         dispatcher: Dispatcher,
-        actionHandlers?: Partial<ActionHandlerMap> | Nullish,
-        dispatchBand?: DispatchBand | Nullish /* = dispatcher._defaultBand */
+        actionHandlers?: Partial<ActionHandlerMap> | null,
+        dispatchBand?: DispatchBand | null /* = dispatcher._defaultBand */
     );
 
     static destroy(): void;
@@ -30,16 +30,16 @@ export declare abstract class Store {
     initialize(...args: never[]): void;
     initializeIfNeeded(): void;
     mustEmitChanges(
-        mustEmitChanges?: ((action: Action) => boolean) | Nullish /* = () => true */
+        mustEmitChanges?: ((action: Action) => boolean) | null /* = () => true */
     ): void;
     registerActionHandlers(
         actionHandlers: Partial<ActionHandlerMap>,
-        dispatchBand?: DispatchBand | Nullish /* = this._dispatcher._defaultBand */
+        dispatchBand?: DispatchBand | null /* = this._dispatcher._defaultBand */
     ): void;
     syncWith(
         stores: readonly Store[],
         func: () => unknown,
-        timeout?: number | Nullish
+        timeout?: number | null
     ): void;
     waitFor(...stores: Store[]): void;
 

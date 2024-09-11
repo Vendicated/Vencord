@@ -6,7 +6,6 @@
 
 import type { ParserRules } from "simple-markdown";
 
-import type { Nullish } from "../internal";
 import type { FormattedMessage, FormattedMessageArgs } from "./FormattedMessage";
 
 // For getSystemLocale
@@ -21,5 +20,5 @@ export interface MessageFactory {
         message: string,
         locales?: string | readonly string[]
     ): FormattedMessage<Args, Markdown>;
-    (message?: Nullish, locales?: string | readonly string[]): "";
+    (message?: null, locales?: string | readonly string[]): "";
 }

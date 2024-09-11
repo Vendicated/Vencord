@@ -18,7 +18,6 @@
 
 import type { ChannelMessages as $ChannelMessages, ChannelRecord, Dispatcher, DraftType, FormattedMessage as $FormattedMessage, I18N, MessageFactory, UserRecord } from "@vencord/discord-types";
 import type { ReactNode } from "react";
-import type { match as $match, P as $P } from "ts-pattern";
 
 // eslint-disable-next-line path-alias/no-relative
 import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
@@ -190,7 +189,9 @@ export const RouterUtils: t.RouterUtils = mapMangledModuleLazy("Transitioning to
 export let SnowflakeUtils: t.SnowflakeUtils;
 waitFor(["fromTimestamp", "extractTimestamp"], m => { SnowflakeUtils = m; });
 
-export const { match, P }: { match: typeof $match; P: typeof $P; } = mapMangledModuleLazy("@ts-pattern/matcher", {
+// https://github.com/gvergnaud/ts-pattern/issues/110
+// https://github.com/microsoft/TypeScript/issues/56107
+export const { match, P }: { match: any; P: any; } = mapMangledModuleLazy("@ts-pattern/matcher", {
     match: filters.byCode("return new"),
     P: filters.byProps("when"),
 });

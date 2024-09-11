@@ -17,7 +17,7 @@ export declare class ThreadChannelRecord<ChannelType extends ThreadChannelType =
     static fromServer<Type extends ThreadChannelType | Nullish = undefined>(
         /** @todo */
         channelFromServer: { type?: Type; } & Record<string, any>,
-        guildId?: string | Nullish
+        guildId?: string | null
     ): ThreadChannelRecord<Type extends ThreadChannelType ? Type : ChannelType.PUBLIC_THREAD>;
 
     application_id?: undefined;

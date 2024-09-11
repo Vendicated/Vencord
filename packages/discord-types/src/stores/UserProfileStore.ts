@@ -26,7 +26,7 @@ export declare class UserProfileStore<
     static displayName: "UserProfileStore";
     static LATEST_SNAPSHOT_VERSION: number;
 
-    getGuildMemberProfile(userId: string, guildId?: string | Nullish): GuildMemberProfile | Nullish;
+    getGuildMemberProfile(userId: string, guildId?: string | null): GuildMemberProfile | Nullish;
     getMutualFriends(userId: string): {
         /** The ID of the user. */
         key: string;

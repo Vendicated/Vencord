@@ -3,6 +3,7 @@
 
     "compilerOptions": {
         "noUncheckedIndexedAccess": true,
+        "noUncheckedSideEffectImports": true,
         "strict": true,
 
         "baseUrl": "./src/",
@@ -35,7 +36,6 @@
             }
         ],
 
-        "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
 
         "jsx": "preserve",

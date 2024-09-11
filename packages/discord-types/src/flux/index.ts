@@ -6,7 +6,7 @@
 
 import type { ComponentClass, ElementType, ForwardRefExoticComponent } from "react";
 
-import type { Nullish, Subtract } from "../internal";
+import type { Subtract } from "../internal";
 import type { Emitter } from "./Emitter";
 import type { PersistedStore } from "./PersistedStore";
 import type { Store } from "./Store";
@@ -38,7 +38,7 @@ export interface Flux {
         getStateFromStores: (props: Props) => State,
         options?: {
             forwardRef?: ForwardRef /* = false */;
-        } | Nullish
+        } | null
     ) => <P extends Props & State>(type: ElementType<P>) => ForwardRef extends true
         ? ForwardRefExoticComponent<Subtract<P, State> & Props>
         : ComponentClass<Subtract<P, State> & Props>;

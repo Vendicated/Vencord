@@ -17,7 +17,7 @@ export declare class ForumChannelRecord<ChannelType extends ForumChannelType = F
     static fromServer<Type extends ForumChannelType>(
         /** @todo */
         channelFromServer: { type: Type; } & Record<string, any>,
-        guildId?: string | Nullish
+        guildId?: string | null
     ): ForumChannelRecord<Type>;
 
     application_id?: undefined;

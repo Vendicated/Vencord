@@ -8,24 +8,23 @@ import type { Store } from "../flux/Store";
 import type { ChannelRecord, GuildChannelRecord } from "../general/channels/ChannelRecord";
 import type { DMChannelRecord, PrivateChannelRecord } from "../general/channels/PrivateChannelRecord";
 import type { ThreadChannelRecord } from "../general/channels/ThreadChannelRecord";
-import type { Nullish } from "../internal";
 
 export declare class ChannelStore extends Store {
     static displayName: "ChannelStore";
 
     getAllThreadsForParent(channelId: string): ThreadChannelRecord[];
     /** @todo May not return a ChannelRecord. */
-    getBasicChannel(channelId?: string | Nullish): ChannelRecord | null;
-    getChannel(channelId?: string | Nullish): ChannelRecord | undefined;
-    getChannelIds(guildId?: string | Nullish): string[];
+    getBasicChannel(channelId?: string | null): ChannelRecord | null;
+    getChannel(channelId?: string | null): ChannelRecord | undefined;
+    getChannelIds(guildId?: string | null): string[];
     getDebugInfo(): {
         guildSizes: string[];
         loadedGuildIds: string[];
         /** @todo */
         pendingGuildLoads: any[];
     };
-    getDMChannelFromUserId(userId?: string | Nullish): DMChannelRecord | undefined;
-    getDMFromUserId(userId?: string | Nullish): string | undefined;
+    getDMChannelFromUserId(userId?: string | null): DMChannelRecord | undefined;
+    getDMFromUserId(userId?: string | null): string | undefined;
     getDMUserIds(): string[];
     getGuildChannelsVersion(guildId: string): number;
     getInitialOverlayState(): { [channelId: string]: ChannelRecord; };

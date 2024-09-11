@@ -10,15 +10,15 @@ import type { Nullish } from "../internal";
 export declare class SelectedChannelStore extends Store {
     static displayName: "SelectedChannelStore";
 
-    getChannelId(guildId?: string | Nullish): string | undefined;
-    getCurrentlySelectedChannelId(guildId?: string | Nullish): string | Nullish;
+    getChannelId(guildId?: string | null): string | undefined;
+    getCurrentlySelectedChannelId(guildId?: string | null): string | Nullish;
     getLastChannelFollowingDestination(): {
         channelId: string;
         guildId: string;
     };
-    getLastSelectedChannelId(guildId?: string | Nullish): string | undefined;
+    getLastSelectedChannelId(guildId?: string | null): string | undefined;
     getLastSelectedChannels(guildId: string | null): string | undefined;
-    getMostRecentSelectedTextChannelId(guildId?: string | Nullish): string | null;
+    getMostRecentSelectedTextChannelId(guildId?: string | null): string | null;
     getVoiceChannelId(): string | null;
     initialize(): void;
 }

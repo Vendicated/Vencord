@@ -6,7 +6,7 @@
 
 import type { CollectionChain } from "lodash";
 
-import type { Defined, Nullish } from "../../internal";
+import type { Defined } from "../../internal";
 import type { Emoji, EmojiType, GuildEmoji, UnicodeEmoji } from "./Emoji";
 
 export declare class EmojiDisambiguations {
@@ -14,7 +14,7 @@ export declare class EmojiDisambiguations {
 
     static _lastInstance: EmojiDisambiguations | null;
     static clear(guildId: string): void;
-    static get(guildId?: string | Nullish): EmojiDisambiguations;
+    static get(guildId?: string | null): EmojiDisambiguations;
     static reset(): void;
     static resetFavorites(): void;
     static resetFrequentlyUsed(): void;
@@ -56,7 +56,7 @@ export declare class EmojiDisambiguations {
     frequentlyUsedReactionEmojis: Emoji[] | null;
     groupedCustomEmojis: { [guildId: string]: GuildEmoji; } | undefined;
     guildId: string | null;
-    isFavoriteEmojiWithoutFetchingLatest: (emoji?: Emoji | Nullish) => boolean;
+    isFavoriteEmojiWithoutFetchingLatest: (emoji?: Emoji | null) => boolean;
     newlyAddedEmoji: { [guildId: string]: GuildEmoji; } | null;
     topEmojis: GuildEmoji[] | null;
     unicodeAliases: Record<string, string> | undefined;

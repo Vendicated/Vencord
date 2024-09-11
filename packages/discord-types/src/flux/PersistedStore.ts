@@ -33,7 +33,7 @@ export declare abstract class PersistedStore<
     >(
         persistKey: string,
         ...migrations: [] extends PersistedStoreMigrations<States>
-            ? [migrations?: PersistedStoreMigrations<States> | Nullish]
+            ? [migrations?: PersistedStoreMigrations<States> | null]
             : [migrations: PersistedStoreMigrations<States>]
     ): { requiresPersist: true; state: Tail<States>; } | { requiresPersist: false; state: undefined; };
     static migrations: ((oldState: never) => unknown)[] | undefined;

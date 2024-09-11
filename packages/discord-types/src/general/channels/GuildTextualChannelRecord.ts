@@ -19,7 +19,7 @@ export declare abstract class GuildTextualChannelRecordBase extends ChannelRecor
     static fromServer<Type extends GuildTextualChannelType | Nullish = undefined>(
         /** @todo */
         channelFromServer: { type?: Type; } & Record<string, any>,
-        guildId?: string | Nullish
+        guildId?: string | null
     ): {
         [ChannelType.GUILD_ANNOUNCEMENT]: GuildAnnouncementChannelRecord;
         [ChannelType.GUILD_CATEGORY]: GuildCategoryChannelRecord;

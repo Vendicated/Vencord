@@ -11,8 +11,8 @@ export declare class WindowStore extends Store {
 
     getFocusedWindowId(): string | null;
     getLastFocusedWindowId(): string | null;
-    isElementFullScreen(windowId?: string | undefined): boolean;
-    isFocused(windowId?: string | undefined): boolean;
-    isVisible(windowId?: string | undefined): boolean;
-    windowSize(windowId?: string | undefined): { height: number; width: number; };
+    isElementFullScreen(windowId?: string): boolean;
+    isFocused(windowId?: string): boolean;
+    isVisible(windowId?: string): boolean;
+    windowSize(windowId?: string): { height: number; width: number; };
 }

@@ -26,12 +26,12 @@ export declare class RelationshipStore extends Store {
     getSinces(): { [userId: string]: string; };
     getSpamCount(): number;
     initialize(): void;
-    isBlocked(userId?: string | Nullish): boolean;
+    isBlocked(userId?: string | null): boolean;
     isBlockedForMessage(message?: MessageRecord | {
         author?: { id: string; } | Nullish;
         interaction_metadata?: { user: { id?: string | Nullish; } | Nullish; } | Nullish;
     }): boolean;
-    isFriend(userId?: string | Nullish): boolean;
+    isFriend(userId?: string | null): boolean;
     isSpam(userId: string): boolean;
 }
 

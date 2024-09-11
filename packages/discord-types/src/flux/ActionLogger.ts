@@ -6,20 +6,16 @@
 
 import type { EventEmitter } from "events";
 
-import type { Nullish } from "../internal";
 import type { ActionLog } from "./ActionLog";
 import type { Action, ActionType } from "./actions";
 
 export declare class ActionLogger extends EventEmitter {
-    constructor(options?: { persist?: boolean | undefined; } | undefined);
+    constructor(options?: { persist?: boolean | undefined; });
 
-    getLastActionMetrics(
-        title: string,
-        limit?: number | undefined /* = 20 */
-    ): ActionMetric[];
+    getLastActionMetrics(title: string, limit?: number /* = 20 */): ActionMetric[];
     getSlowestActions<T extends ActionType = ActionType>(
-        actionType?: T | Nullish,
-        limit?: number | undefined /* = 20 */
+        actionType?: T | null,
+        limit?: number /* = 20 */
     ): ActionMetric<T>[];
     log<A extends Action>(
         action: A,

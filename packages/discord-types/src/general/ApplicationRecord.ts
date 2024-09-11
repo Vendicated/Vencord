@@ -23,14 +23,14 @@ export declare class ApplicationRecord<
 
     /** @todo */
     static createFromServer(applicationFromServer: Record<string, any>): ApplicationRecord;
-    static supportsOutOfProcessOverlay(overlayMethods?: ApplicationOverlayMethodFlags | Nullish): boolean;
+    static supportsOutOfProcessOverlay(overlayMethods?: ApplicationOverlayMethodFlags | null): boolean;
 
     get destinationSkuId(): string | undefined;
-    getCoverImageURL(imageSize?: number | undefined): string | null;
-    getIconSource(iconSize?: number | undefined, iconFormat?: string | Nullish): IconSource | null;
-    getIconURL(iconSize?: number | undefined, iconFormat?: string | Nullish): string | null;
+    getCoverImageURL(imageSize?: number): string | null;
+    getIconSource(iconSize?: number, iconFormat?: string | null): IconSource | null;
+    getIconURL(iconSize?: number, iconFormat?: string | null): string | null;
     getMaxParticipants(): number;
-    getSplashURL(splashSize?: number | undefined, splashFormat?: string | Nullish): string | null;
+    getSplashURL(splashSize?: number, splashFormat?: string | null): string | null;
     supportsIntegrationTypes(...integrationTypes: ApplicationIntegrationType[]): boolean;
     get supportsOutOfProcessOverlay(): boolean;
 

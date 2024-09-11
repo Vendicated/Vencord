@@ -8,17 +8,16 @@ import type { Store } from "../flux/Store";
 import { ChannelType, type GuildChannelRecord, type GuildSelectableChannelRecord } from "../general/channels/ChannelRecord";
 import type { GuildCategoryChannelRecord } from "../general/channels/GuildTextualChannelRecord";
 import type { GuildVocalChannelRecord } from "../general/channels/GuildVocalChannelRecord";
-import type { Nullish } from "../internal";
 
 export declare class GuildChannelStore extends Store {
     static displayName: "GuildChannelStore";
 
     getAllGuilds(): { [guildId: string]: GuildChannels | undefined; };
-    getChannels(guildId?: string | Nullish): GuildChannels;
+    getChannels(guildId?: string | null): GuildChannels;
     getDefaultChannel<SearchVocal extends boolean | undefined = undefined>(
         guild: string,
         searchVocal?: SearchVocal /* = false */,
-        permissions?: /* Permissions */ bigint | undefined /* = Permissions.VIEW_CHANNEL */
+        permissions?: /* Permissions */ bigint /* = Permissions.VIEW_CHANNEL */
     ): ChannelFromSearchVocal<SearchVocal> | null;
     getDirectoryChannelIds(guildId: string): string[];
     getFirstChannel<SearchVocal extends boolean | undefined = undefined>(
@@ -44,9 +43,9 @@ export declare class GuildChannelStore extends Store {
     getSFWDefaultChannel<SearchVocal extends boolean | undefined = undefined>(
         guild: string,
         searchVocal?: SearchVocal /* = false */,
-        permissions?: /* Permissions */ bigint | undefined /* = Permissions.VIEW_CHANNEL */
+        permissions?: /* Permissions */ bigint /* = Permissions.VIEW_CHANNEL */
     ): ChannelFromSearchVocal<SearchVocal> | null;
-    getTextChannelNameDisambiguations(guildId?: string | Nullish): {
+    getTextChannelNameDisambiguations(guildId?: string | null): {
         [channelId: string]: { id: string; name: string; };
     };
     getVocalChannelIds(guildId: string): string[];

@@ -10,7 +10,6 @@ import type { GuildRecord } from "../general/GuildRecord";
 import type { PermissionOverwriteMap } from "../general/Permissions";
 import type { Role } from "../general/Role";
 import type { UserRecord } from "../general/UserRecord";
-import type { Nullish } from "../internal";
 
 export declare class PermissionStore extends Store {
     static displayName: "PermissionStore";
@@ -18,19 +17,19 @@ export declare class PermissionStore extends Store {
     /** Always returns false for private (non-guild) channels. */
     can(
         permissions: /* Permissions */ bigint,
-        context?: GuildRecord | ChannelRecord | Nullish,
-        overwrites?: PermissionOverwriteMap | Nullish,
-        roles?: { [roleId: string]: Role; } | Nullish,
-        excludeGuildPermissions?: boolean | undefined /* = false */
+        context?: GuildRecord | ChannelRecord | null,
+        overwrites?: PermissionOverwriteMap | null,
+        roles?: { [roleId: string]: Role; } | null,
+        excludeGuildPermissions?: boolean /* = false */
     ): boolean;
     canAccessGuildSettings(guild: GuildRecord): boolean;
     canAccessMemberSafetyPage(guild: GuildRecord): boolean;
     canBasicChannel<Context extends BasicPermissionsObject | GuildRecord | ChannelRecord>(
         permissions: Context extends BasicPermissionsObject ? /* Permissions */ bigint : Parameters<BigIntConstructor>[0],
         context: Context,
-        overwrites?: PermissionOverwriteMap | Nullish,
-        roles?: { [roleId: string]: Role; } | Nullish,
-        excludeGuildPermissions?: boolean | undefined /* = false */
+        overwrites?: PermissionOverwriteMap | null,
+        roles?: { [roleId: string]: Role; } | null,
+        excludeGuildPermissions?: boolean /* = false */
     ): boolean;
     canImpersonateRole(guild: GuildRecord, role: Role): boolean;
     canManageUser(
@@ -44,10 +43,10 @@ export declare class PermissionStore extends Store {
     ): boolean;
     computeBasicPermissions(context: BasicPermissionsObject): /* Permissions */ bigint;
     computePermissions(
-        context?: GuildRecord | ChannelRecord | Nullish,
-        overwrites?: PermissionOverwriteMap | Nullish,
-        roles?: { [roleId: string]: Role; } | Nullish,
-        excludeGuildPermissions?: boolean | undefined /* = false */
+        context?: GuildRecord | ChannelRecord | null,
+        overwrites?: PermissionOverwriteMap | null,
+        roles?: { [roleId: string]: Role; } | null,
+        excludeGuildPermissions?: boolean /* = false */
     ): /* Permissions */ bigint;
     getChannelPermissions(channel: ChannelRecord): /* Permissions */ bigint;
     getChannelsVersion(): number;

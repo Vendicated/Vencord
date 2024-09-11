@@ -24,7 +24,7 @@ export declare class FormattedMessage<
      */
     constructor(
         message: string,
-        locales?: string | readonly string[] | undefined /* = MessageFormat.defaultLocale */,
+        locales?: string | readonly string[] /* = MessageFormat.defaultLocale */,
         ...hasMarkdown: undefined extends Markdown
             ? [hasMarkdown?: Markdown]
             : [hasMarkdown: Markdown]

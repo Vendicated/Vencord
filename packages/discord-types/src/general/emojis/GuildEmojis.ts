@@ -11,7 +11,7 @@ export declare class GuildEmojis {
         guildId: string,
         userId: string,
         emojis: GuildEmoji[],
-        canSeeServerSubIAP?: boolean | undefined /* = false */
+        canSeeServerSubIAP?: boolean /* = false */
     );
 
     build(): void;

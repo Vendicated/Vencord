@@ -17,7 +17,7 @@ export declare class Provider<Messages extends GenericMessages<never> = GenericM
 
     _context: ProviderContext<keyof Messages>;
     _createProxy: (
-        context?: ProviderContext<keyof Messages> | undefined /* = this._context */
+        context?: ProviderContext<keyof Messages> /* = this._context */
     ) => Messages & Record<PropertyKey, string>;
     _getParsedMessages: ProviderParsedMessagesGetter<Messages>;
     /**

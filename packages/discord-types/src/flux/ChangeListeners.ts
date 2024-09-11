@@ -15,7 +15,7 @@ export declare class ChangeListeners {
      */
     addConditional: (
         listener: ChangeListener<true>,
-        immediatelyCall?: boolean | undefined /* = true */
+        immediatelyCall?: boolean /* = true */
     ) => void;
     listeners: Set<ChangeListener>;
     remove: (listener: ChangeListener) => void;

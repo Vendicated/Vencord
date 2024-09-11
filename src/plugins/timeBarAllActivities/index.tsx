@@ -8,17 +8,8 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import type { Activity, ActivityTimestamps } from "@vencord/discord-types";
 import { findComponentByCodeLazy } from "@webpack";
-import { RequiredDeep } from "type-fest";
-
-interface Activity {
-    timestamps?: ActivityTimestamps;
-}
-
-interface ActivityTimestamps {
-    start?: string;
-    end?: string;
-}
 
 interface TimebarComponentProps {
     activity: Activity;
@@ -26,7 +17,7 @@ interface TimebarComponentProps {
 
 const ActivityTimeBar = findComponentByCodeLazy<ActivityTimestamps>(".bar", ".progress", "(100*");
 
-function isActivityTimestamped(activity: Activity): activity is RequiredDeep<Activity> {
+function isActivityTimestamped(activity: Activity): activity is Activity & { timestamps: Required<ActivityTimestamps>; } {
     return activity.timestamps != null && activity.timestamps.start != null && activity.timestamps.end != null;
 }
 

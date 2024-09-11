@@ -26,8 +26,8 @@ export declare class GuildRecord<
     canHaveRaidActivityAlerts(): boolean;
     getApplicationId(): string | null;
     getEveryoneRoleId(): string;
-    getIconSource(iconSize?: number | undefined, canAnimate?: boolean | undefined /* = false */): IconSource;
-    getIconURL(iconSize?: number | undefined, canAnimate?: boolean | undefined /* = false */): string;
+    getIconSource(iconSize?: number, canAnimate?: boolean /* = false */): IconSource;
+    getIconURL(iconSize?: number, canAnimate?: boolean /* = false */): string;
     getMaxEmojiSlots(): number;
     getMaxRoleSubscriptionEmojiSlots(): number;
     getMaxSoundboardSlots(): number;
@@ -38,8 +38,8 @@ export declare class GuildRecord<
     isCommunity(): boolean;
     isLurker(): boolean;
     isNew(): boolean;
-    isOwner(userOrUserId?: UserRecord | string | Nullish): boolean;
-    isOwnerWithRequiredMfaLevel(userOrUserId?: UserRecord | string | Nullish): boolean;
+    isOwner(userOrUserId?: UserRecord | string | null): boolean;
+    isOwnerWithRequiredMfaLevel(userOrUserId?: UserRecord | string | null): boolean;
     updateJoinedAt(joinedAt: Date | string): this;
 
     afkChannelId: string | null;

@@ -29,9 +29,9 @@ export declare class MessageRecord<
 
     addReaction(
         emoji: MessageReactionEmoji,
-        me?: boolean | undefined /* = false */,
-        deafultBurstColors?: string[] | undefined /* = [] */,
-        type?: ReactionType | undefined /* = ReactionType.NORMAL */
+        me?: boolean /* = false */,
+        deafultBurstColors?: string[] /* = [] */,
+        type?: ReactionType /* = ReactionType.NORMAL */
     ): this;
     addReactionBatch(
         reactions: readonly {
@@ -53,12 +53,12 @@ export declare class MessageRecord<
     isUIKitComponents(): boolean;
     removeReaction(
         emoji: MessageReactionEmoji,
-        me?: boolean | undefined /* = false */,
-        type?: ReactionType | undefined /* = ReactionType.NORMAL */
+        me?: boolean /* = false */,
+        type?: ReactionType /* = ReactionType.NORMAL */
     ): this;
     removeReactionsForEmoji(emoji: MessageReactionEmoji): this;
     toJS(): OwnProperties & SnakeCasedProperties<Pick<OwnProperties, "editedTimestamp" | "mentionEveryone" | "webhookId">>;
-    userHasReactedWithEmoji(emoji: MessageReactionEmoji, burst?: boolean | undefined /* = false */): boolean;
+    userHasReactedWithEmoji(emoji: MessageReactionEmoji, burst?: boolean /* = false */): boolean;
 
     activity: MessageActivity | null;
     activityInstance: { id: string; } | null;

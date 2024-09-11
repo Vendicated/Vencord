@@ -14,12 +14,12 @@ export declare class GuildMemberStore extends Store {
     getCommunicationDisabledUserMap(): { [userId: string]: string; };
     getCommunicationDisabledVersion(): number;
     getMember(guildId: string, userId: string): GuildMember | null;
-    getMemberIds(guildId?: string | Nullish): string[];
+    getMemberIds(guildId?: string | null): string[];
     getMemberRoleWithPendingUpdates(guildId: string, userId: string): string[];
-    getMembers(guildId?: string | Nullish): GuildMember[];
+    getMembers(guildId?: string | null): GuildMember[];
     getMemberVersion(): number;
     getMutableAllGuildsAndMembers(): { [guildId: string]: { [userId: string]: GuildMember; }; };
-    getNick(guildId?: string | Nullish, userId?: string | Nullish): string | null;
+    getNick(guildId?: string | null, userId?: string | null): string | null;
     getNicknameGuildsMapping(userId: string): { [nickname: string]: string[]; };
     getNicknames(userId: string): string[];
     getPendingRoleUpdates(guildId: string): {
@@ -29,8 +29,8 @@ export declare class GuildMemberStore extends Store {
     getSelfMember(guildId: string): GuildMember | Nullish;
     getTrueMember(guildId: string, userId: string): GuildMember | Nullish;
     initialize(): void;
-    isCurrentUserGuest(guildId?: string | Nullish): boolean;
-    isGuestOrLurker(guildId?: string | Nullish, userId?: string | Nullish): boolean;
-    isMember(guildId?: string | Nullish, userId?: string | Nullish): boolean;
+    isCurrentUserGuest(guildId?: string | null): boolean;
+    isGuestOrLurker(guildId?: string | null, userId?: string | null): boolean;
+    isMember(guildId?: string | null, userId?: string | null): boolean;
     memberOf(userId: string): string[];
 }

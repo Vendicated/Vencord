@@ -36,22 +36,22 @@ export declare class EmojiStore<
     get emojiReactionFrecencyWithoutFetchingLatest(): Frecency<string, Emoji>;
     get expandedSectionsByGuildIds(): EmojiStoreState["expandedSectionsByGuildIds"];
     getCustomEmojiById(emojiId: string): GuildEmoji | undefined;
-    getDisambiguatedEmojiContext(guildId?: string | Nullish): EmojiDisambiguations;
+    getDisambiguatedEmojiContext(guildId?: string | null): EmojiDisambiguations;
     getEmojiAutosuggestion(channel?: ChannelRecord): Emoji[];
     getGuildEmoji(guildId: string): GuildEmoji[];
     getGuilds(): { [guildId: string]: GuildEmojis; };
-    getNewlyAddedEmoji(guildId?: string | Nullish): GuildEmoji[];
+    getNewlyAddedEmoji(guildId?: string | null): GuildEmoji[];
     /** If count is less than or equal to 0, all results will be returned. */
     getSearchResultsOrder(emojis: Emoji[], query: string, count: number): Emoji[];
     getState(): State;
-    getTopEmoji(guildId?: string | Nullish): GuildEmoji[];
+    getTopEmoji(guildId?: string | null): GuildEmoji[];
     getTopEmojisMetadata(guildId: string): GuildTopEmojisMetadata | undefined;
     getUsableCustomEmojiById(emojiId: string): GuildEmoji | undefined;
     getUsableGuildEmoji(guildId: string): GuildEmoji[];
-    hasFavoriteEmojis(guildId?: string | Nullish): boolean;
+    hasFavoriteEmojis(guildId?: string | null): boolean;
     hasPendingUsage(): boolean;
     hasUsableEmojiInAnyGuild(): boolean;
-    initialize(state?: State | Nullish): void;
+    initialize(state?: State | null): void;
     get loadState(): number;
     /** If count is less than or equal to 0, all unlocked results will be returned. */
     searchWithoutFetchingLatest(options: {

@@ -21,9 +21,9 @@ export declare class UserStore<
     static displayName: "UserStore";
     static LATEST_SNAPSHOT_VERSION: number;
 
-    filter<T extends UserRecord>(predicate: (user: UserRecord) => user is T, sort?: boolean | undefined /* = false */): T[];
-    filter(predicate: (user: UserRecord) => unknown, sort?: boolean | undefined /* = false */): UserRecord[];
-    findByTag(username: string, discriminator?: string | Nullish): UserRecord | undefined;
+    filter<T extends UserRecord>(predicate: (user: UserRecord) => user is T, sort?: boolean /* = false */): T[];
+    filter(predicate: (user: UserRecord) => unknown, sort?: boolean /* = false */): UserRecord[];
+    findByTag(username: string, discriminator?: string | null): UserRecord | undefined;
     /**
      * @param callback The iteratee. Iteration will terminate early if it returns false.
      */
@@ -32,7 +32,7 @@ export declare class UserStore<
      * @returns The UserRecord object for the current user. If the current user has not yet been loaded, undefined is returned.
      */
     getCurrentUser(): UserRecord | undefined;
-    getUser(userId?: string | Nullish): UserRecord | undefined;
+    getUser(userId?: string | null): UserRecord | undefined;
     getUsers(): { [userId: string]: UserRecord; };
     getUserStoreVersion(): number;
     handleLoadCache(cache: {

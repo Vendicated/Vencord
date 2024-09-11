@@ -3,7 +3,6 @@ import stylistic from "@stylistic/eslint-plugin";
 import pathAlias from "eslint-plugin-path-alias";
 // @ts-expect-error: https://github.com/jsx-eslint/eslint-plugin-react/issues/3776
 import eslintPluginReact from "eslint-plugin-react";
-// @ts-expect-error: No types
 import simpleHeader from "eslint-plugin-simple-header";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import unusedImports from "eslint-plugin-unused-imports";

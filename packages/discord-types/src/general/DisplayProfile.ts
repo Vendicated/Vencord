@@ -16,7 +16,7 @@ export declare class DisplayProfile<
         userProfile: UserProfile<FetchFailed>,
         ...guildMemberProfile: Guild extends true
             ? [guildMemberProfile: GuildMemberProfile]
-            : [guildMemberProfile?: Nullish]
+            : [guildMemberProfile?: null]
     );
 
     get application(): UserProfile["application"];
@@ -24,22 +24,22 @@ export declare class DisplayProfile<
     get canUsePremiumProfileCustomization(): boolean;
     getBadges(): ProfileBadge[];
     getBannerURL(options: {
-        canAnimate?: boolean | undefined /* = false */;
+        canAnimate?: boolean /* = false */;
         size: number;
     }): string | undefined;
     getLegacyUsername(): UserProfile<FetchFailed>["legacyUsername"];
     getPreviewBanner(
-        pendingBanner?: string | Nullish,
-        canAnimate?: boolean | undefined,
-        size?: number | undefined /* = 480 */
+        pendingBanner?: string | null,
+        canAnimate?: boolean,
+        size?: number /* = 480 */
     ): string | Nullish;
-    getPreviewBio(pendingBio?: string | Nullish): Guild | false extends infer GuildValue
+    getPreviewBio(pendingBio?: string | null): Guild | false extends infer GuildValue
         ? GuildValue extends true
             ? { isUsingGuildValue: true; value: string; }
             : { isUsingGuildValue: false; value: string | undefined; }
         : never;
     getPreviewThemeColors(
-        pendingThemeColors?: OptionalTuple<ProfileThemeColors, Nullish> | Nullish
+        pendingThemeColors?: OptionalTuple<ProfileThemeColors, Nullish> | null
     ): UserProfile["themeColors"];
     hasFullProfile(): boolean;
     hasPremiumCustomization(): boolean;

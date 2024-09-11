@@ -28,7 +28,7 @@ export declare class I18N<
     _applyMessagesForLocale(
         messages: Record<keyof Messages, string>,
         locale: string,
-        defaultMessages?: Record<keyof Messages, string> | undefined /* = this._findMessages() */
+        defaultMessages?: Record<keyof Messages, string> /* = this._findMessages() */
     ): void;
     _fetchMessages(locale: string): ReturnType<I18NMessagesGetter<keyof Messages, Async>>;
     /**

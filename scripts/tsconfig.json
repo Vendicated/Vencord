@@ -4,6 +4,7 @@
 
     "compilerOptions": {
         "noUncheckedIndexedAccess": true,
+        "noUncheckedSideEffectImports": true,
         "strict": true,
 
         "module": "NodeNext",

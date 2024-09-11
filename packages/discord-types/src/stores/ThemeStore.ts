@@ -5,7 +5,7 @@
  */
 
 import type { PersistedStore } from "../flux";
-import type { GenericConstructor, Nullish } from "../internal";
+import type { GenericConstructor } from "../internal";
 
 export interface ThemeStoreState {
     theme: Theme;
@@ -20,7 +20,7 @@ export declare class ThemeStore<
 
     get darkSidebar(): boolean;
     getState(): State;
-    initialize(state?: State | Nullish): void;
+    initialize(state?: State | null): void;
     get isSystemThemeAvailable(): boolean;
     get systemPrefersColorScheme(): Theme.DARK | Theme.LIGHT | undefined;
     /** Only null when `isSystemThemeAvailable` is false. */
