@@ -10,7 +10,7 @@ import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Alerts, React } from "@webpack/common";
+import { React } from "@webpack/common";
 
 import { SoundOverrideComponent } from "./components/SoundOverrideComponent";
 import { makeEmptyOverride, SoundOverride, soundTypes } from "./types";
@@ -55,12 +55,12 @@ export default definePlugin({
     patches: [
         // sound class
         {
-            find: '"_ensureAudioPromise"',
+            find: 'Error("could not play audio")',
             replacement: [
                 // override URL
                 {
-                    match: /\i\([0-9]+\)\(.{1,20}(\i),"\.mp3"\)/,
-                    replace: "$self.findOverride($1)?.url || $&"
+                    match: /(?<=new Audio;\i\.src=)\i\([0-9]+\)\(.{0,20}\(this\.name,"\.mp3"\)/,
+                    replace: "$self.findOverride(this.name)?.url || $&"
                 },
                 // override volume
                 {
@@ -81,19 +81,6 @@ export default definePlugin({
     settings,
     findOverride,
     isOverriden,
-    afterSave() {
-        Alerts.show({
-            title: "Restart required",
-            body: (
-                <>
-                    <p>CustomSounds requires a restart for settings to activate.</p>
-                </>
-            ),
-            confirmText: "Restart now",
-            cancelText: "Later!",
-            onConfirm: () => location.reload()
-        });
-    },
     async start() {
         overrides = await DataStore.get(OVERRIDES_KEY) ?? {};
         for (const type of soundTypes)
