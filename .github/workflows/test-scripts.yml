@@ -28,6 +28,6 @@ jobs:
 
             - name: Check scripts for TypeScript errors
               run: | # https://github.com/microsoft/TypeScript/issues/40431
-                  tsc --emitDeclarationOnly
+                  pnpm tsc --emitDeclarationOnly
                   cd scripts
-                  tsc --noEmit
+                  pnpm tsc --noEmit

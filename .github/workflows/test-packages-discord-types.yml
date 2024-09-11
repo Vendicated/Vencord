@@ -26,7 +26,7 @@ jobs:
 
             - name: Check packages/discord-types for TypeScript errors and lint
               run: | # https://github.com/microsoft/TypeScript/issues/40431
-                  tsc --emitDeclarationOnly
+                  pnpm tsc --emitDeclarationOnly
                   cd packages/discord-types
                   pnpm test
 
