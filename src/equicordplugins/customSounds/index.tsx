@@ -59,8 +59,8 @@ export default definePlugin({
             replacement: [
                 // override URL
                 {
-                    match: /(?<=new Audio;\i\.src=)\i\([0-9]+\)\("\.\/"\.concat\(this\.name,"\.mp3"\)/,
-                    replace: "$self.findOverride(this.name)?.url || $&"
+                    match: /\i\([0-9]+\)\(.{1,20}(\i),"\.mp3"\)/,
+                    replace: "$self.findOverride($1)?.url || $&"
                 },
                 // override volume
                 {
