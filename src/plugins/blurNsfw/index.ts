@@ -47,9 +47,7 @@ export default definePlugin({
             replacement: [{
                 match: /(?<=channel:\s*\i).*?\.container/g,
                 replace: "$&+(n.nsfw?' vc-nsfw-img':'')"
-            },
-
-            ]
+            }]
         },
     ],
 
