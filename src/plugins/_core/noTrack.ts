@@ -49,7 +49,7 @@ export default definePlugin({
             },
         },
         {
-            find: ".METRICS,",
+            find: ".METRICS",
             replacement: [
                 {
                     match: /this\._intervalId=/,
