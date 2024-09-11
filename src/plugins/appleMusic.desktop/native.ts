@@ -38,6 +38,8 @@ interface RemoteData {
 
 let cachedRemoteData: { id: string, data: RemoteData; } | { id: string, failures: number; } | null = null;
 
+const ARTIST_ARTWORK_REGEX = /,"image":"(https:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)\.png)"/;
+
 async function fetchRemoteData({ id, name, artist, album }: { id: string, name: string, artist: string, album: string; }) {
     if (id === cachedRemoteData?.id) {
         if ("data" in cachedRemoteData) return cachedRemoteData.data;
@@ -50,7 +52,7 @@ async function fetchRemoteData({ id, name, artist, album }: { id: string, name: 
         ).then(r => r.json());
 
         const artistHtml = await fetch(artistViewUrl, requestOptions).then(r => r.text());
-        const extractedArtistArtwork = artistHtml.match(/,"image":"(https:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)\.png)"/);
+        const extractedArtistArtwork = artistHtml.match(ARTIST_ARTWORK_REGEX);
 
         cachedRemoteData = {
             id,
