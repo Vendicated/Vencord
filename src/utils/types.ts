@@ -118,6 +118,11 @@ export interface PluginDef {
      */
     beforeSave?(options: Record<string, any>): Promisable<true | string>;
     /**
+     * Check that this returns true after allowing a save to complete.
+     * If a string is returned, show the error to the user.
+     */
+    afterSave?: boolean;
+    /**
      * Allows you to specify a custom Component that will be rendered in your
      * plugin's settings page
      */

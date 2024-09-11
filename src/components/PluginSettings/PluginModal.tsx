@@ -126,6 +126,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         }
 
         let restartNeeded = false;
+        if (plugin.name === "CustomSounds") restartNeeded = true;
         for (const [key, value] of Object.entries(tempSettings)) {
             const option = plugin.options[key];
             pluginSettings[key] = value;
@@ -133,6 +134,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             if (option?.restartNeeded) restartNeeded = true;
         }
         if (restartNeeded) onRestartNeeded();
+        plugin.afterSave = true;
         onClose();
     }
 
