@@ -16,17 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStoreLazy } from "@webpack";
-import { ChannelStore, GuildStore, UserStore } from "@webpack/common";
+import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { ChannelStore, GuildStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
+import { VoiceChannelIndicator } from "./components/VoiceChannelIndicator";
 import { VoiceChannelSection } from "./components/VoiceChannelSection";
 
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
+const UserModalSection = findByCodeLazy("heading:", "subheading:", "scrollIntoView:");
 
 const settings = definePluginSettings({
     showInUserProfileModal: {
@@ -34,9 +37,9 @@ const settings = definePluginSettings({
         description: "Show a user's voice channel in their profile modal",
         default: true,
     },
-    showVoiceChannelSectionHeader: {
+    showVoiceChannelIndicator: {
         type: OptionType.BOOLEAN,
-        description: 'Whether to show "IN A VOICE CHANNEL" above the join button',
+        description: "Indicator in the member list wether a user is in a voice channel",
         default: true,
     }
 });
@@ -44,8 +47,12 @@ const settings = definePluginSettings({
 interface UserProps {
     user: User;
 }
+interface VoiceChannelFieldProps {
+    user: User;
+    isPopout?: boolean;
+}
 
-const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
+const VoiceChannelField = ErrorBoundary.wrap(({ user, isPopout = false }: VoiceChannelFieldProps) => {
     const { channelId } = VoiceStateStore.getVoiceStateForUser(user.id) ?? {};
     if (!channelId) return null;
 
@@ -58,11 +65,19 @@ const VoiceChannelField = ErrorBoundary.wrap(({ user }: UserProps) => {
 
     const result = `${guild.name} | ${channel.name}`;
 
-    return (
+    // when popout do padding and show header, when in modal no pad and no header
+    return isPopout ? (
+        <div style={{ padding: "4px 16px 8px" }}>
+            <VoiceChannelSection
+                channel={channel}
+                label={result}
+                showHeader
+            />
+        </div>
+    ) : (
         <VoiceChannelSection
             channel={channel}
             label={result}
-            showHeader={settings.store.showVoiceChannelSectionHeader}
         />
     );
 });
@@ -73,28 +88,69 @@ export default definePlugin({
     authors: [Devs.LordElias],
     settings,
 
+    start() {
+        VoiceStateStore.getAllVoiceStates(); // reduces api spam i hope
+
+        addDecorator("uvs-indicator", props => {
+            if (!props.user) return null;
+
+            const { channelId } = VoiceStateStore.getVoiceStateForUser(props.user.id) ?? {};
+            if (!channelId) return null;
+
+            const channel = ChannelStore.getChannel(channelId);
+            if (!channel) return null;
+
+            const guild = GuildStore.getGuild(channel.guild_id);
+
+            if (!guild) return null; // When in DM call
+
+            const result = `${guild.name} | ${channel.name}`;
+
+            return (
+                <ErrorBoundary noop>
+                    <VoiceChannelIndicator tooltipText={result} channel={channel}></VoiceChannelIndicator>
+                </ErrorBoundary>
+            );
+        });
+    },
+
+    stop() {
+        removeDecorator("uvs-indicator");
+    },
+
     patchModal({ user }: UserProps) {
-        if (!settings.store.showInUserProfileModal)
-            return null;
+        if (!settings.store.showInUserProfileModal) return null;
 
         return (
-            <div className="vc-uvs-modal-margin">
+            <UserModalSection heading="In a voice channel">
                 <VoiceChannelField user={user} />
-            </div>
+            </UserModalSection>
         );
     },
 
-    patchProfilePopout: ({ user }: UserProps) => {
-        const isSelfUser = user.id === UserStore.getCurrentUser().id;
+    patchPopout: ({ user }: UserProps) => {
         return (
-            <div className={isSelfUser ? "vc-uvs-popout-margin-self" : ""}>
-                <VoiceChannelField user={user} />
-            </div>
+            <VoiceChannelField user={user} isPopout />
         );
     },
 
     patches: [
-        // @TODO Maybe patch UserVoiceShow in simplified profile popout
-        // @TODO Patch new profile modal
+        // in profile popout above message box
+        {
+            find: ":\"BITE_SIZE_POPOUT_RESTRICTED_BLOCKER_PROFILE",
+            replacement: {
+                match: /\(0,\i\.jsx\)\(\i\.\i,{user:\i,guildId:\i,channelId:\i,onClose:\i}\)\]}\),/,
+                replace: "$self.patchPopout(arguments[0]),$&",
+            }
+        },
+        // in profile modal
+        {
+            find: "action:\"PRESS_APP_CONNECTION\"",
+            replacement: {
+                // match: /scroller,children:\[/, // at very top
+                match: /setLineClamp:!\d}\),/, // after bio
+                replace: "$&$self.patchModal(arguments[0]),"
+            }
+        }
     ],
 });

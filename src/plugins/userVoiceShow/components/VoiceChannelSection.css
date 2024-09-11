@@ -8,20 +8,15 @@
     height: unset;
 }
 
+.vc-uvs-button-view {
+    width: 32px;
+    min-width: 32px;
+    height: unset;
+    margin: unset;
+    padding: unset;
+}
+
 .vc-uvs-header {
     color: var(--header-primary);
     margin-bottom: 6px;
-}
-
-.vc-uvs-modal-margin {
-    margin: 0 12px;
-}
-
-.vc-uvs-modal-margin div {
-    margin-bottom: 0 !important;
-}
-
-.vc-uvs-popout-margin-self>[class^="section"] {
-    padding-top: 0;
-    padding-bottom: 12px;
 }
