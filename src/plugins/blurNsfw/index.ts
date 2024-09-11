@@ -45,8 +45,8 @@ export default definePlugin({
         {
             find: ".embedWrapper,embed",
             replacement: [{
-                match: /(?<=channel:\s*(n)).*?\.container/g,
-                replace: "$&+($1.nsfw?' vc-nsfw-img':'')"
+                match: /\.container(?=.+?a&&(this))/g,
+                replace: "$&+($1.props.channel.nsfw? ' vc-nsfw-img': '')"
             }]
         },
     ],
