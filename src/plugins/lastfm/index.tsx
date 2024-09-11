@@ -124,6 +124,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
     },
+    hideWithActivity: {
+        description: "Hide Last.fm presence if any other activity is detected",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
     statusName: {
         description: "custom status text",
         type: OptionType.STRING,
@@ -274,7 +279,13 @@ export default definePlugin({
     },
 
     async getActivity(): Promise<Activity | null> {
-        if (settings.store.hideWithSpotify) {
+        if (settings.store.hideWithActivity) {
+            for (const activity of presenceStore.getActivities()) {
+                if (activity.application_id !== applicationId) {
+                    return null;
+                }
+            }
+        } else if (settings.store.hideWithSpotify) {
             for (const activity of presenceStore.getActivities()) {
                 if (activity.type === ActivityType.LISTENING && activity.application_id !== applicationId) {
                     // there is already music status because of Spotify or richerCider (probably more)
