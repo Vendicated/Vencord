@@ -39,16 +39,18 @@ function setCss() {
 export default definePlugin({
     name: "BlurNSFW",
     description: "Blur attachments in NSFW channels until hovered",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.rya],
 
     patches: [
         {
             find: ".embedWrapper,embed",
             replacement: [{
-                match: /\.embedWrapper(?=.+?channel_id:(\i)\.id)/g,
-                replace: "$&+($1.nsfw?' vc-nsfw-img':'')"
-            }]
-        }
+                match: /(?<=channel:\s*n).*?\.container/g,
+                replace: "$&+(n.nsfw?' vc-nsfw-img':'')"
+            },
+
+            ]
+        },
     ],
 
     options: {
