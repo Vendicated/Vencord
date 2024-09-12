@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getCurrentGuild } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
 
 const settings = definePluginSettings({
@@ -19,6 +19,14 @@ const settings = definePluginSettings({
     },
 });
 
+type fetchRecentMentionsType = (before: BigInt | null, limit: Number | null, all_servers: string | null | undefined, role: boolean, everyone: boolean,) => void;
+const { fetchRecentMentions } = findByPropsLazy("fetchRecentMentions") as { fetchRecentMentions: fetchRecentMentionsType; };
+
+interface ReloadMentions {
+    everyone: boolean;
+    role: boolean;
+    all_servers: boolean;
+}
 
 export default definePlugin({
     name: "FilterBotMentions",
@@ -50,14 +58,13 @@ export default definePlugin({
 
     ],
     settings,
-    reloadMentions(everyone: boolean, role: boolean, all_servers: boolean) {
+    reloadMentions({ everyone, role, all_servers }: ReloadMentions): void {
         FluxDispatcher.dispatch({ type: "CLEAR_MENTIONS" });
-        all_servers = all_servers ? null : getCurrentGuild()?.id;
-
-        findByProps("fetchRecentMentions").fetchRecentMentions(null, null, all_servers, role, everyone);
+        const serverToFilter: string | undefined | null = all_servers ? null : getCurrentGuild()?.id;
+        fetchRecentMentions(null, null, serverToFilter, role, everyone);
 
     },
-    toggleBotMentions() {
+    toggleBotMentions(): void {
         this.settings.store.toggle = !this.settings.store.toggle;
     }
 
