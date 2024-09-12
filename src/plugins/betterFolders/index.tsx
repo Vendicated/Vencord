@@ -30,9 +30,9 @@ enum FolderIconDisplay {
     MoreThanOneFolderExpanded
 }
 
-const GuildsTree = find(m => m.prototype?.moveNextTo);
-const SortedGuildStore = findStore("SortedGuildStore");
 export const ExpandedGuildFolderStore = findStore("ExpandedGuildFolderStore");
+const SortedGuildStore = findStore("SortedGuildStore");
+const GuildsTree = find(m => m.prototype?.moveNextTo);
 const FolderUtils = findByProps("move", "toggleGuildFolderExpand");
 
 let lastGuildId = null as string | null;
@@ -173,13 +173,13 @@ export default definePlugin({
                 {
                     predicate: () => !settings.store.keepIcons,
                     match: /(?<=\.Messages\.SERVER_FOLDER_PLACEHOLDER.+?useTransition\)\()/,
-                    replace: "!!arguments[0].isBetterFolders&&"
+                    replace: "$self.shouldShowTransition(arguments[0])&&"
                 },
                 // If we are rendering the normal GuildsBar sidebar, we avoid rendering guilds from folders that are expanded
                 {
                     predicate: () => !settings.store.keepIcons,
                     match: /expandedFolderBackground,.+?,(?=\i\(\(\i,\i,\i\)=>{let{key.{0,45}ul)(?<=selected:\i,expanded:(\i),.+?)/,
-                    replace: (m, isExpanded) => `${m}!arguments[0].isBetterFolders&&${isExpanded}?null:`
+                    replace: (m, isExpanded) => `${m}$self.shouldRenderContents(arguments[0],${isExpanded})?null:`
                 },
                 {
                     // Decide if we should render the expanded folder background if we are rendering the Better Folders sidebar
@@ -201,7 +201,7 @@ export default definePlugin({
             replacement: {
                 // Render the Better Folders sidebar
                 match: /(?<=({className:\i\.guilds,themeOverride:\i})\))/,
-                replace: ",$self.FolderSideBar($1)"
+                replace: ",$self.FolderSideBar({...$1})"
             }
         },
         {
@@ -306,7 +306,20 @@ export default definePlugin({
         }
     },
 
-    FolderSideBar: guildsBarProps => <FolderSideBar {...guildsBarProps} />,
+    shouldShowTransition(props: any) {
+        // Pending guilds
+        if (props.folderNode.id === 1) return true;
 
-    closeFolders
+        return !!props.isBetterFolders;
+    },
+
+    shouldRenderContents(props: any, isExpanded: boolean) {
+        // Pending guilds
+        if (props.folderNode.id === 1) return false;
+
+        return !props.isBetterFolders && isExpanded;
+    },
+
+    FolderSideBar,
+    closeFolders,
 });
