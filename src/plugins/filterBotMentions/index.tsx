@@ -10,6 +10,8 @@ import { getCurrentGuild } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher } from "@webpack/common";
+import { Message } from "discord-types/general";
+
 
 const settings = definePluginSettings({
     toggle: {
@@ -38,14 +40,14 @@ export default definePlugin({
             find: "type:\"LOAD_RECENT_MENTIONS_SUCCESS\"",
             replacement: {
                 match: /dispatch\(\{type:"LOAD_RECENT_MENTIONS_SUCCESS",messages:(\i)/,
-                replace: "$&.filter(function (message) {if (!message.author.bot){return true} else {return $self.settings.store.toggle}})"
+                replace: "$&.filter($self.filterMessages)"
             }
         },
         {
             find: "analyticsName:\"Recent Mentions\"",
             replacement: {
                 match: /channel:\i,messages:\i/,
-                replace: "$&?.filter(function (message) {if (!message.author.bot){return true} else {return $self.settings.store.toggle}})"
+                replace: "$&?.filter($self.filterMessages)"
             }
         },
         {
@@ -65,7 +67,12 @@ export default definePlugin({
 
     },
     toggleBotMentions(): void {
-        this.settings.store.toggle = !this.settings.store.toggle;
+        settings.store.toggle = !settings.store.toggle;
+    },
+    filterMessages(message: Message): boolean {
+        console.log(this, self, self.settings);
+        return !message.author.bot || settings.store.toggle;
+
     }
 
 });
