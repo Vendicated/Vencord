@@ -6,6 +6,6 @@ Always show the folder icon, regardless of if the folder is open or not
 
 Only have one folder open at a time
 
-Open folders in a sidebar
+Open folders in a sidebar:
 
-![a folder open in a separate bar](https://github.com/user-attachments/assets/46bb664e-591a-44d1-83f7-6bcf4967763e)
+![A folder open in a separate sidebar](https://github.com/user-attachments/assets/432d3146-8091-4bae-9c1e-c19046c72947)

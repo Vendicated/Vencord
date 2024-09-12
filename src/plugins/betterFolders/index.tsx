@@ -30,9 +30,9 @@ enum FolderIconDisplay {
     MoreThanOneFolderExpanded
 }
 
-const GuildsTree = findLazy(m => m.prototype?.moveNextTo);
-const SortedGuildStore = findStoreLazy("SortedGuildStore");
 export const ExpandedGuildFolderStore = findStoreLazy("ExpandedGuildFolderStore");
+const SortedGuildStore = findStoreLazy("SortedGuildStore");
+const GuildsTree = findLazy(m => m.prototype?.moveNextTo);
 const FolderUtils = findByPropsLazy("move", "toggleGuildFolderExpand");
 
 let lastGuildId = null as string | null;
@@ -179,7 +179,7 @@ export default definePlugin({
                 {
                     predicate: () => !settings.store.keepIcons,
                     match: /expandedFolderBackground,.+?,(?=\i\(\(\i,\i,\i\)=>{let{key.{0,45}ul)(?<=selected:\i,expanded:(\i),.+?)/,
-                    replace: (m, isExpanded) => `${m}$self.shouldRenderContents(arguments[0], ${isExpanded})?null:`
+                    replace: (m, isExpanded) => `${m}$self.shouldRenderContents(arguments[0],${isExpanded})?null:`
                 },
                 {
                     // Decide if we should render the expanded folder background if we are rendering the Better Folders sidebar
@@ -201,7 +201,7 @@ export default definePlugin({
             replacement: {
                 // Render the Better Folders sidebar
                 match: /(?<=({className:\i\.guilds,themeOverride:\i})\))/,
-                replace: ",$self.FolderSideBar($1)"
+                replace: ",$self.FolderSideBar({...$1})"
             }
         },
         {
@@ -306,21 +306,20 @@ export default definePlugin({
         }
     },
 
-    FolderSideBar: guildsBarProps => <FolderSideBar {...guildsBarProps} />,
-
-    closeFolders,
-
     shouldShowTransition(props: any) {
-        // pending guilds
+        // Pending guilds
         if (props.folderNode.id === 1) return true;
 
         return !!props.isBetterFolders;
     },
 
     shouldRenderContents(props: any, isExpanded: boolean) {
-        // pending guilds
+        // Pending guilds
         if (props.folderNode.id === 1) return false;
 
         return !props.isBetterFolders && isExpanded;
-    }
+    },
+
+    FolderSideBar,
+    closeFolders,
 });
