@@ -312,14 +312,14 @@ export default definePlugin({
 
     shouldShowTransition(props: any) {
         // pending guilds
-        if(props.folderNode.id === 1) return true;
+        if (props.folderNode.id === 1) return true;
 
         return !!props.isBetterFolders;
     },
 
     shouldRenderContents(props: any, isExpanded: boolean) {
         // pending guilds
-        if(props.folderNode.id === 1) return false;
+        if (props.folderNode.id === 1) return false;
 
         return !props.isBetterFolders && isExpanded;
     }
