@@ -263,7 +263,7 @@ const UserContextMenu: NavContextMenuPatchCallback = (menuItems, { user }: UserC
 
 // Define and export the plugin
 export default definePlugin({
-    name: "WatchUser",
+    name: "FindUsersInVC",
     description: "Watches a user, and notifies when they join or leave a channel in a server you share",
     authors: [Devs.KillaMeep],
 
