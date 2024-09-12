@@ -173,13 +173,13 @@ export default definePlugin({
                 {
                     predicate: () => !settings.store.keepIcons,
                     match: /(?<=\.Messages\.SERVER_FOLDER_PLACEHOLDER.+?useTransition\)\()/,
-                    replace: "!!arguments[0].isBetterFolders&&"
+                    replace: "$self.shouldShowTransition(arguments[0])&&"
                 },
                 // If we are rendering the normal GuildsBar sidebar, we avoid rendering guilds from folders that are expanded
                 {
                     predicate: () => !settings.store.keepIcons,
                     match: /expandedFolderBackground,.+?,(?=\i\(\(\i,\i,\i\)=>{let{key.{0,45}ul)(?<=selected:\i,expanded:(\i),.+?)/,
-                    replace: (m, isExpanded) => `${m}!arguments[0].isBetterFolders&&${isExpanded}?null:`
+                    replace: (m, isExpanded) => `${m}$self.shouldRenderContents(arguments[0], ${isExpanded})?null:`
                 },
                 {
                     // Decide if we should render the expanded folder background if we are rendering the Better Folders sidebar
@@ -308,5 +308,19 @@ export default definePlugin({
 
     FolderSideBar: guildsBarProps => <FolderSideBar {...guildsBarProps} />,
 
-    closeFolders
+    closeFolders,
+
+    shouldShowTransition(props: any) {
+        // pending guilds
+        if(props.folderNode.id === 1) return true;
+
+        return !!props.isBetterFolders;
+    },
+
+    shouldRenderContents(props: any, isExpanded: boolean) {
+        // pending guilds
+        if(props.folderNode.id === 1) return false;
+
+        return !props.isBetterFolders && isExpanded;
+    }
 });
