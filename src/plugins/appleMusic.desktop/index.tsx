@@ -212,14 +212,16 @@ export default definePlugin({
 
         const assets: ActivityAssets = {};
 
+        const isARadioStation = (trackData.album === "missing value") && Number.isNaN(trackData.duration) && !trackData.artist && (trackData.playerPosition === 0); // this is the values returned by Apple if you're listening to a radio station, e.g. BBC
+
         if (settings.store.largeImageType !== AssetImageType.Disabled) {
             assets.large_image = largeImageAsset;
-            assets.large_text = customFormat(settings.store.largeTextString, trackData);
+            if (!isARadioStation) assets.large_text = customFormat(settings.store.largeTextString, trackData);
         }
 
         if (settings.store.smallImageType !== AssetImageType.Disabled) {
             assets.small_image = smallImageAsset;
-            assets.small_text = customFormat(settings.store.smallTextString, trackData);
+            if (!isARadioStation) assets.small_text = customFormat(settings.store.smallTextString, trackData);
         }
 
         const buttons: ActivityButton[] = [];
@@ -238,8 +240,6 @@ export default definePlugin({
                 });
         }
 
-        const isARadioStation = (trackData.album === "missing value") && Number.isNaN(trackData.duration) && !trackData.artist && (trackData.playerPosition === 0); // this is the value returned by Apple if you're listening to a radio station
-
         return {
             application_id: applicationId,
 
@@ -252,7 +252,7 @@ export default definePlugin({
                 end: Date.now() - (trackData.playerPosition * 1000) + (trackData.duration * 1000),
             } : undefined) : undefined,
 
-            assets: isARadioStation ? undefined : assets,
+            assets,
 
             buttons: isARadioStation ? undefined : buttons.length ? buttons.map(v => v.label) : undefined,
             metadata: isARadioStation ? undefined : { button_urls: buttons.map(v => v.url) || undefined, },
