@@ -114,7 +114,7 @@ export const settings = definePluginSettings({
         type: OptionType.STRING,
         description: "User ID of the watched user",
         restartNeeded: false,
-        hidden: true, // Managed via context menu and indicator
+        hidden: true,
         default: "",
     },
     playSounds: {
@@ -122,7 +122,7 @@ export const settings = definePluginSettings({
         description: "Play sounds when a user joins or leaves",
         restartNeeded: false,
         hidden: false,
-        default: true,
+        default: false,
     }
 });
 
