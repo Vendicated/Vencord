@@ -118,17 +118,17 @@ export default definePlugin({
                 // If we are rendering the Better Folders sidebar, we filter out guilds that are not in folders and unexpanded folders
                 {
                     match: /\[(\i)\]=(\(0,\i\.\i\).{0,40}getGuildsTree\(\).+?}\))(?=,)/,
-                    replace: (_, originalTreeVar, rest) => `[betterFoldersOriginalTree]=${rest},${originalTreeVar}=$self.getGuildTree(!!arguments[0].isBetterFolders,betterFoldersOriginalTree,arguments[0].betterFoldersExpandedIds)`
+                    replace: (_, originalTreeVar, rest) => `[betterFoldersOriginalTree]=${rest},${originalTreeVar}=$self.getGuildTree(!!arguments[0]?.isBetterFolders,betterFoldersOriginalTree,arguments[0]?.betterFoldersExpandedIds)`
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the servers and folders from the GuildsBar Guild List children
                 {
                     match: /lastTargetNode:\i\[\i\.length-1\].+?Fragment.+?\]}\)\]/,
-                    replace: "$&.filter($self.makeGuildsBarGuildListFilter(!!arguments[0].isBetterFolders))"
+                    replace: "$&.filter($self.makeGuildsBarGuildListFilter(!!arguments[0]?.isBetterFolders))"
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the scroller for the guild list from the GuildsBar Tree children
                 {
                     match: /unreadMentionsIndicatorBottom,.+?}\)\]/,
-                    replace: "$&.filter($self.makeGuildsBarTreeFilter(!!arguments[0].isBetterFolders))"
+                    replace: "$&.filter($self.makeGuildsBarTreeFilter(!!arguments[0]?.isBetterFolders))"
                 },
                 // Export the isBetterFolders variable to the folders component
                 {
@@ -167,7 +167,7 @@ export default definePlugin({
                 {
                     predicate: () => settings.store.keepIcons,
                     match: /(?<=let{folderNode:\i,setNodeRef:\i,.+?expanded:(\i),.+?;)(?=let)/,
-                    replace: (_, isExpanded) => `${isExpanded}=!!arguments[0].isBetterFolders&&${isExpanded};`
+                    replace: (_, isExpanded) => `${isExpanded}=!!arguments[0]?.isBetterFolders&&${isExpanded};`
                 },
                 // Disable expanding and collapsing folders transition in the normal GuildsBar sidebar
                 {
@@ -185,13 +185,13 @@ export default definePlugin({
                     // Decide if we should render the expanded folder background if we are rendering the Better Folders sidebar
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
                     match: /(?<=\.wrapper,children:\[)/,
-                    replace: "$self.shouldShowFolderIconAndBackground(!!arguments[0].isBetterFolders,arguments[0].betterFoldersExpandedIds)&&"
+                    replace: "$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)&&"
                 },
                 {
                     // Decide if we should render the expanded folder icon if we are rendering the Better Folders sidebar
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
                     match: /(?<=\.expandedFolderBackground.+?}\),)(?=\i,)/,
-                    replace: "!$self.shouldShowFolderIconAndBackground(!!arguments[0].isBetterFolders,arguments[0].betterFoldersExpandedIds)?null:"
+                    replace: "!$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)?null:"
                 }
             ]
         },
@@ -308,16 +308,16 @@ export default definePlugin({
 
     shouldShowTransition(props: any) {
         // Pending guilds
-        if (props.folderNode.id === 1) return true;
+        if (props?.folderNode?.id === 1) return true;
 
-        return !!props.isBetterFolders;
+        return !!props?.isBetterFolders;
     },
 
     shouldRenderContents(props: any, isExpanded: boolean) {
         // Pending guilds
-        if (props.folderNode.id === 1) return false;
+        if (props?.folderNode?.id === 1) return false;
 
-        return !props.isBetterFolders && isExpanded;
+        return !props?.isBetterFolders && isExpanded;
     },
 
     FolderSideBar,
