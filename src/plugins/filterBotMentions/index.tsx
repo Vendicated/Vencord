@@ -22,7 +22,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "FilterBotMentions",
-    description: "Filter mentions by bots",
+    description: "Filter mentions by bots in inbox",
     authors: [Devs.Taran],
 
     patches: [
