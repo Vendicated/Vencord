@@ -23,7 +23,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "Filter Bot Mentions",
     description: "Filter mentions by bots",
-    authors: [{ name: "Taran", id: 482951588055351306n }],
+    authors: [Devs.Taran],
 
     patches: [
         {
@@ -52,7 +52,7 @@ export default definePlugin({
     settings,
     reloadMentions(everyone, role, all_servers) {
         FluxDispatcher.dispatch({ type: "CLEAR_MENTIONS" });
-		all_servers = all_servers ? null : getCurrentGuild()?.id;
+        all_servers = all_servers ? null : getCurrentGuild()?.id;
 
         findByProps("fetchRecentMentions").fetchRecentMentions(null, null, all_servers, role, everyone);
 
