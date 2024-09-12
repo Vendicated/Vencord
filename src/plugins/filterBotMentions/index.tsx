@@ -52,11 +52,7 @@ export default definePlugin({
     settings,
     reloadMentions(everyone, role, all_servers) {
         FluxDispatcher.dispatch({ type: "CLEAR_MENTIONS" });
-        if (all_servers === false) {
-            all_servers = getCurrentGuild()?.id;
-        } else {
-            all_servers = null;
-        }
+		all_servers = all_servers ? null : getCurrentGuild()?.id;
 
         findByProps("fetchRecentMentions").fetchRecentMentions(null, null, all_servers, role, everyone);
 
