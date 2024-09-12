@@ -24,7 +24,6 @@ export default definePlugin({
     name: "Filter Bot Mentions",
     description: "Filter mentions by bots",
     authors: [{ name: "Taran", id: 482951588055351306n }],
-    version: "1.0.0",
 
     patches: [
         {
