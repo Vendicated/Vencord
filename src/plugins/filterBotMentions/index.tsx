@@ -50,7 +50,7 @@ export default definePlugin({
 
     ],
     settings,
-    reloadMentions(everyone, role, all_servers) {
+    reloadMentions(everyone: boolean, role: boolean, all_servers: boolean) {
         FluxDispatcher.dispatch({ type: "CLEAR_MENTIONS" });
         all_servers = all_servers ? null : getCurrentGuild()?.id;
 
