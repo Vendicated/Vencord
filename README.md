@@ -72,7 +72,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Jumpscare by Surgedevs
 - JumpToStart by Samwich
 - KeyboardSounds by HypedDomi
-- KeywordNotify by camila314 (maintained by thororen)
+- KeywordNotify by camila314 and x3rt
 - LoginWithQR by nexpid
 - MediaDownloader by Colorman
 - MediaPlaybackSpeed by D3SOX

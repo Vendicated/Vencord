@@ -27,7 +27,9 @@ export { FluxEvents };
 
 export interface FluxDispatcher {
     _actionHandlers: any;
+    _interceptors: any;
     _subscriptions: any;
+    addInterceptor(interceptor: any): void;
     dispatch(event: { [key: string]: unknown; type: FluxEvents; }): Promise<void>;
     isDispatching(): boolean;
     subscribe(event: FluxEvents, callback: (data: any) => void): void;
