@@ -70,7 +70,6 @@ export default definePlugin({
         settings.store.toggle = !settings.store.toggle;
     },
     filterMessages(message: Message): boolean {
-        console.log(this, self, self.settings);
         return !message.author.bot || settings.store.toggle;
 
     }
