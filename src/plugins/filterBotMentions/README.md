@@ -1,4 +1,4 @@
-# Filter Bot Mentions
+# FilterBotMentions
 Allows you to filter bot mentions in recent mentions panel.
 
 # Usage
