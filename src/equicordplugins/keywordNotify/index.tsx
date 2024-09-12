@@ -30,7 +30,7 @@ let currentUser: User;
 let keywordLog: Array<any> = [];
 
 const recentMentionsPopoutClass = findByPropsLazy("recentMentionsPopout");
-const tabClass = findByPropsLazy("tab");
+const tabClass = findByPropsLazy("inboxTitle", "tab");
 const buttonClass = findByPropsLazy("size36");
 const Popout = findByCodeLazy(".Messages.UNBLOCK_TO_JUMP_TITLE", "canCloseAllMessages:");
 const createMessageRecord = findByCodeLazy(".createFromServer(", ".isBlockedForMessage", "messageReference:");
