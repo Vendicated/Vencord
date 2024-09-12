@@ -21,7 +21,6 @@ import { Button, ChannelStore, FluxDispatcher, Forms, Select, SelectedChannelSto
 import { Message, User } from "discord-types/general/index.js";
 import type { PropsWithChildren } from "react";
 
-
 type IconProps = JSX.IntrinsicElements["svg"];
 type KeywordEntry = { regex: string, listIds: Array<string>, listType: ListType, ignoreCase: boolean; };
 
@@ -29,7 +28,6 @@ let keywordEntries: Array<KeywordEntry> = [];
 let currentUser: User;
 let keywordLog: Array<any> = [];
 let interceptor: (e: any) => void;
-
 
 const recentMentionsPopoutClass = findByPropsLazy("recentMentionsPopout");
 const tabClass = findByPropsLazy("inboxTitle", "tab");
@@ -171,7 +169,6 @@ function ListTypeSelector({ listType, setListType }: { listType: ListType, setLi
         />
     );
 }
-
 
 function KeywordEntries() {
     const update = useForceUpdater();
@@ -359,6 +356,7 @@ export default definePlugin({
         };
         FluxDispatcher.addInterceptor(interceptor);
     },
+
     stop() {
         const index = FluxDispatcher._interceptors.indexOf(interceptor);
         if (index > -1) {
