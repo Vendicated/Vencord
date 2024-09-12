@@ -11,7 +11,6 @@ import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
-import { onceDefined } from "@shared/onceDefined";
 import { EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
@@ -39,15 +38,7 @@ const KEYWORD_ENTRIES_KEY = "KeywordNotify_keywordEntries";
 const KEYWORD_LOG_KEY = "KeywordNotify_log";
 
 const cl = classNameFactory("vc-keywordnotify-");
-
-let MenuHeader;
-onceDefined(window, "GLOBAL_ENV", v => {
-    if (v.RELEASE_CHANNEL === "canary") {
-        MenuHeader = findByCodeLazy(".getOverdueMessageReminderCount())");
-    } else {
-        MenuHeader = findByCodeLazy(".getMessageReminders()).length");
-    }
-});
+const MenuHeader = findByCodeLazy("getUnseenInviteCount())");
 
 async function addKeywordEntry(forceUpdate: () => void) {
     keywordEntries.push({ regex: "", listIds: [], listType: ListType.BlackList, ignoreCase: false });
