@@ -1,0 +1,13 @@
+.vc-inviter-avatar {
+    height: 20px;
+    width: 20px;
+    position: static;
+}
+
+.vc-invited-text {
+    display: inline;
+}
+
+.vc-header-wrapper {
+    display: inline;
+}
