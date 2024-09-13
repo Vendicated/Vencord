@@ -33,7 +33,7 @@ function lurk(id: string) {
 
 export default definePlugin({
     name: "BetterInvites",
-    description: "bomby",
+    description: "See invites expiration date, view inviter profile, and preview discoverable servers before joining by clicking their name",
     authors: [Devs.iamme],
     patches: [
         {
@@ -82,3 +82,4 @@ export default definePlugin({
     },
     startAt: StartAt.WebpackReady
 });
+
