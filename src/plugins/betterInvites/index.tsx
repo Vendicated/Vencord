@@ -34,7 +34,7 @@ function lurk(id: string) {
 export default definePlugin({
     name: "BetterInvites",
     description: "bomby",
-    authors: [Devs.Samwich],
+    authors: [Devs.iamme],
     patches: [
         {
             find: ".Messages.HUB_INVITE_ANOTHER_SCHOOL_LINK",
