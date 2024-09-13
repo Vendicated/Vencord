@@ -3,14 +3,10 @@ h3[class^="h5"]:has([class="vc-bi-header-inner"]) {
     margin: 0 !important;
 }
 
-.vc-bi-tool-tip-conainer {
-    margin-top: 2px;
-}
-
 .vc-bi-inviter-avatar {
     margin: 0;
-    height: 20px;
-    width: 20px;
+    height: 16px;
+    width: 16px;
     position: static;
 }
 
@@ -18,7 +14,6 @@ h3[class^="h5"]:has([class="vc-bi-header-inner"]) {
     margin: 0;
     display: flex;
     margin-left: 5px;
-    margin-top: 2px;
 }
 
 .vc-bi-header-inner {
