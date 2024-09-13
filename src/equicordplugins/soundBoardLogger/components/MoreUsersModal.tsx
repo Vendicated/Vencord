@@ -9,7 +9,7 @@ import { Flex } from "@components/Flex";
 import { closeModal, ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { Clickable, Forms } from "@webpack/common";
 
-import { cl, getEmojiUrl,SoundLogEntry, User } from "../utils";
+import { cl, getEmojiUrl, SoundLogEntry, User } from "../utils";
 
 export function openMoreUsersModal(item: SoundLogEntry, users: User[], onClickUser: Function) {
     const key = openModal(props => (
@@ -20,7 +20,6 @@ export function openMoreUsersModal(item: SoundLogEntry, users: User[], onClickUs
         </ErrorBoundary>
     ));
 }
-
 
 export default function MoreUsersModal({ item, users, onClickUser, closeModal }: { item: SoundLogEntry, users: User[], onClickUser: Function, closeModal: Function; }) {
     return (

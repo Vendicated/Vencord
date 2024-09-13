@@ -130,7 +130,9 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - VencordRPC by AutumnVN
 - VideoSpeed by Samwich
 - ViewRaw2 by Kyuuhachi
+- VoiceChannelLog by Sqaaakoi (maintained by thororen)
 - VoiceChatUtilities by D3SOX
+- VoiceJoinMessages by Sqaaakoi (maintained by thororen)
 - WebpackTarball by Kyuuhachi
 - WhosWatching by fres
 - WigglyText by nexpid
