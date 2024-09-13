@@ -212,16 +212,16 @@ export default definePlugin({
 
         const assets: ActivityAssets = {};
 
-        const isARadioStation = (trackData.album === "missing value") && Number.isNaN(trackData.duration) && !trackData.artist && (trackData.playerPosition === 0); // this is the values returned by Apple if you're listening to a radio station, e.g. BBC
+        const isRadio = (trackData.album === "missing value") && Number.isNaN(trackData.duration) && !trackData.artist && (trackData.playerPosition === 0);
 
         if (settings.store.largeImageType !== AssetImageType.Disabled) {
             assets.large_image = largeImageAsset;
-            if (!isARadioStation) assets.large_text = customFormat(settings.store.largeTextString, trackData);
+            if (!isRadio) assets.large_text = customFormat(settings.store.largeTextString, trackData);
         }
 
         if (settings.store.smallImageType !== AssetImageType.Disabled) {
             assets.small_image = smallImageAsset;
-            if (!isARadioStation) assets.small_text = customFormat(settings.store.smallTextString, trackData);
+            if (!isRadio) assets.small_text = customFormat(settings.store.smallTextString, trackData);
         }
 
         const buttons: ActivityButton[] = [];
@@ -245,7 +245,7 @@ export default definePlugin({
 
             name: customFormat(settings.store.nameString, trackData),
             details: customFormat(settings.store.detailsString, trackData),
-            state: isARadioStation ? undefined : customFormat(settings.store.stateString, trackData),
+            state: isRadio ? undefined : customFormat(settings.store.stateString, trackData),
 
             timestamps: (trackData.playerPosition && trackData.duration) ? (settings.store.enableTimestamps ? {
                 start: Date.now() - (trackData.playerPosition * 1000),
@@ -254,8 +254,8 @@ export default definePlugin({
 
             assets,
 
-            buttons: isARadioStation ? undefined : buttons.length ? buttons.map(v => v.label) : undefined,
-            metadata: isARadioStation ? undefined : { button_urls: buttons.map(v => v.url) || undefined, },
+            buttons: isRadio ? undefined : buttons.length ? buttons.map(v => v.label) : undefined,
+            metadata: isRadio ? undefined : { button_urls: buttons.map(v => v.url) || undefined, },
 
             type: settings.store.activityType,
             flags: ActivityFlag.INSTANCE,
