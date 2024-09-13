@@ -16,13 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { type PersistedStore, RelationshipType } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { ChannelStore, Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
-import { Settings } from "Vencord";
 
 const UserAffinitiesStore: PersistedStore & Record<string, any> = findStoreLazy("UserAffinitiesStore");
 

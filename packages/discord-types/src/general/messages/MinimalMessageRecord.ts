@@ -20,6 +20,8 @@ export declare class MinimalMessageRecord<
 > extends RecordBase<OwnProperties> {
     constructor(minimalMessageProperties: MinimalMessageProperties);
 
+    hasFlag(flag: MessageFlags): boolean;
+
     attachments: MessageAttachment[];
     codedLinks: CodedLink[];
     components: MessageComponent[];

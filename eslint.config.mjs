@@ -208,4 +208,14 @@ export default tseslint.config(
             "yoda": "error",
         }
     },
+    // Declarations are not emitted for '.d.ts' files: https://github.com/microsoft/TypeScript/issues/38146
+    {
+        files: ["src/webpack/common/types/**"],
+        rules: {
+            "no-restricted-syntax": ["error", {
+                selector: ":expression:not([declare=true] *, [type=/^TS/] *, ExportAllDeclaration *, ExportNamedDeclaration *, ImportDeclaration *)",
+                message: "This file is intended to contain only types."
+            }],
+        }
+    },
 );

@@ -14,7 +14,7 @@ import type { ChannelRecord, ChannelType } from "../channels/ChannelRecord";
 import type { UserRecord } from "../UserRecord";
 import type { InteractionRecord, InteractionType } from "./InteractionRecord";
 import type { MessageSnapshotRecord } from "./MessageSnapshotRecord";
-import type { MessageFlags, MinimalMessageRecord, MinimalMessageRecordOwnProperties } from "./MinimalMessageRecord";
+import type { MinimalMessageRecord, MinimalMessageRecordOwnProperties } from "./MinimalMessageRecord";
 
 export type MessageRecordOwnProperties = MinimalMessageRecordOwnProperties & Pick<MessageRecord, "activity" | "activityInstance" | "application" | "applicationId" | "author" | "blocked" | "bot" | "call" | "changelogId" | "channel_id" | "colorString" | "customRenderedContent" | "giftCodes" | "giftInfo" | "id" | "interaction" | "interactionData" | "interactionError" | "interactionMetadata" | "isSearchHit" | "isUnsupported" | "loggingName" | "mentionChannels" | "mentioned" | "mentionEveryone" | "mentionRoles" | "mentions" | "messageReference" | "messageSnapshots" | "nick" | "nonce" | "pinned" | "poll" | "purchaseNotification" | "reactions" | "referralTrialOfferId" | "roleSubscriptionData" | "state" | "tts" | "webhookId">;
 
@@ -42,8 +42,8 @@ export declare class MessageRecord<
     ): this;
     canDeleteOwnMessage(userId: string): boolean;
     getChannelId(): string;
+    getContentMessage(): MinimalMessageRecord | this | undefined;
     getReaction(emoji: MessageReactionEmoji): MessageReaction | undefined;
-    hasFlag(flag: MessageFlags): boolean;
     isCommandType(): boolean;
     isEdited(): boolean;
     isFirstMessageInForumPost(channel: ChannelRecord): boolean;

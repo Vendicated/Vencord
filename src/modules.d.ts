@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/// <reference types="standalone-electron-types"/>
+/// <reference types="standalone-electron-types" />
 
 declare module "~plugins" {
     const plugins: Record<string, import("./utils/types").Plugin>;

@@ -1,0 +1,13 @@
+diff --git a/dist/transformer.js b/dist/transformer.js
+index a065be75d92d96332bb38dd66e45aa742c191446..259463bb61e50396289cf56abcaf89de5009e6a4 100644
+--- a/dist/transformer.js
++++ b/dist/transformer.js
+@@ -108,7 +108,7 @@ manualTransformOptions) {
+                 ...tsTransformPathsContext,
+                 sourceFile,
+                 isDeclarationFile: sourceFile.isDeclarationFile,
+-                originalSourceFile: tsInstance.getOriginalSourceFile(sourceFile),
++                originalSourceFile: tsInstance.getSourceFileOfNode(sourceFile),
+                 getVisitor() {
+                     return visitor_1.nodeVisitor.bind(this);
+                 },

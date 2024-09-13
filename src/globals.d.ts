@@ -138,4 +138,4 @@ type TupleKeys<T extends readonly unknown[]>
         ? number
         : Exclude<Partial<T>["length"], T["length"]>;
 
-export { };
+export {};

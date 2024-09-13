@@ -25,8 +25,9 @@ import definePlugin, { type PluginNative, StartAt } from "@utils/types";
 import * as Webpack from "@webpack";
 import { extract, filters, findAll, findModuleId, search } from "@webpack";
 import * as Common from "@webpack/common";
-import { loadLazyChunks } from "debug/loadLazyChunks";
 import type { ComponentType } from "react";
+
+import { loadLazyChunks } from "../../debug/loadLazyChunks";
 
 const DESKTOP_ONLY = (f: string) => () => {
     throw new Error(`'${f}' is Discord Desktop only.`);

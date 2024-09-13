@@ -6,22 +6,22 @@
         "noUncheckedSideEffectImports": true,
         "strict": true,
 
-        "baseUrl": "./src/",
+        // 'baseUrl' allows module specifiers that are invalid in emitted declarations: https://github.com/microsoft/TypeScript/issues/34749
         "module": "ESNext",
         "moduleResolution": "Bundler",
         "paths": {
-            "@api": ["./api"],
-            "@api/*": ["./api/*"],
-            "@components": ["./components"],
-            "@components/*": ["./components/*"],
-            "@main": ["./main"],
-            "@main/*": ["./main/*"],
-            "@shared/*": ["./shared/*"],
-            "@utils": ["./utils"],
-            "@utils/*": ["./utils/*"],
-            "@webpack": ["./webpack/webpack"],
-            "@webpack/types": ["./webpack/common/types"],
-            "@webpack/common": ["./webpack/common"]
+            "@api": ["./src/api"],
+            "@api/*": ["./src/api/*"],
+            "@components": ["./src/components"],
+            "@components/*": ["./src/components/*"],
+            "@main": ["./src/main"],
+            "@main/*": ["./src/main/*"],
+            "@shared/*": ["./src/shared/*"],
+            "@utils": ["./src/utils"],
+            "@utils/*": ["./src/utils/*"],
+            "@webpack": ["./src/webpack/webpack"],
+            "@webpack/types": ["./src/webpack/common/types"],
+            "@webpack/common": ["./src/webpack/common"]
         },
         "resolveJsonModule": true,
 

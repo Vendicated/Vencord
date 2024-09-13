@@ -6,8 +6,8 @@
 
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { patches } from "plugins";
 
+import { patches } from "../plugins";
 import { loadLazyChunks } from "./loadLazyChunks";
 
 const ReporterLogger = new Logger("Reporter");

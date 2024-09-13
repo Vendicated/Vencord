@@ -5,7 +5,7 @@
  */
 
 import { CopyIcon, DeleteIcon } from "@components/Icons";
-import { AlertActionCreators, ClipboardUtils, ContextMenuApi, Menu, UserStore } from "webpack/common";
+import { AlertActionCreators, ClipboardUtils, ContextMenuApi, Menu, UserStore } from "@webpack/common";
 
 import type { Decoration } from "../../lib/api";
 import { useCurrentUserDecorationsStore } from "../../lib/stores/CurrentUserDecorationsStore";
