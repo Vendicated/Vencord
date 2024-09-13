@@ -37,6 +37,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - CutePats by thororen
 - DeadMembers by Kyuuhachi
 - Demonstration by Samwich
+- DisableCameras by Joona
 - DNDWhilePlaying by thororen
 - DoNotLeak by Perny
 - DontFilterMe by Samwich
