@@ -14,9 +14,9 @@ import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, Parser } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
+//
 const AvatarStyles = findByPropsLazy("avatar", "zalgo");
 const GuildManager = findByPropsLazy("joinGuild");
-
 
 interface User {
     id: string;
@@ -40,15 +40,19 @@ export default definePlugin({
             find: ".Messages.HUB_INVITE_ANOTHER_SCHOOL_LINK",
             replacement: [
                 {
-                    match: /,(\i)&&(\(\i=\(0,\i\.jsx\)\(\i\.TooltipContainer.+):(\i\.\i\.Messages.GUEST_MEMBERSHIP_EXPLANATION)/,
-                    replace: ",($1 || ((!$1)&&(arguments[0].invite.expires_at))) && $2:$self.handleTip($1, $3, arguments[0].invite.expires_at)"
+                    match: /,_(\i)&&(\(\i=\(0,\i\.jsx\)\(\i\.TooltipContainer.+)className:(\i.tooltipContainer),text:(\i\.\i\.Messages.GUEST_MEMBERSHIP_EXPLANATION)/,
+                    // replace: (_, isGuest, rest, className, message) => `,${isGuest}&&((!${isGuest})&&arguments[0].invite.expires_at) && ${rest}:$self.handleTip(${isGuest}, ${message}, arguments[0].invite.expires_at),className:${className}+" vc-bi-tool-tip-conainer"`
+                    replace: ",($1 || ((!$1)&&(arguments[0].invite.expires_at))) && $2:$self.handleTip($1, $4, arguments[0].invite.expires_at),className:$3+\"vc-bi-tool-tip-conainer\""
+                }, {
+                    match: /,(\i)&&(\(\i=\(0,\i\.jsx\)\(\i\.TooltipContainer.+)className:(\i.tooltipContainer),text:(\i\.\i\.Messages.GUEST_MEMBERSHIP_EXPLANATION)/,
+                    replace: ",($1 || ((!$1)&&(arguments[0].invite.expires_at))) && $2text:$self.handleTip($1, $4, arguments[0].invite.expires_at),className:$3+\" vc-bi-tool-tip-conainer\""
                 },
                 {
                     match: /(\.jsx\)\(\i.\i.Info,{.+onClick):(\i\?\i:null),/,
                     replace: "$1:$2 || $self.Lurkable(arguments[0].invite.guild.id, arguments[0].invite.guild.features),"
                 },
                 {
-                    match: /(0,\i\.jsx\)\(\i\.\i\.Header,\{)text:(\i)/,
+                    match: /(\.jsx\)\(\i\.\i\.Header,\{)text:(\i)/,
                     replace: "$1text: $self.Header(arguments[0].currentUserId, arguments[0].invite.inviter, $2)"
                 }
             ]
@@ -58,15 +62,15 @@ export default definePlugin({
         return <>this invite will expire {Parser.parse(`<t:${Math.round(new Date(expires_at).getTime() / 1000)}:R>`)}{isGuest ? ". " + message : ""}</>;
     },
     Header(currentUserId: string, inviter: User | undefined, defaultMessage: string) {
-        return <div className="vc-bi-header-wrapper">
+        return <div className="vc-bi-header-inner">
             {(inviter && (currentUserId !== inviter.id)) ? <>
                 <img
                     className={classes(AvatarStyles.avatar, AvatarStyles.clickable) + " vc-bi-inviter-avatar"}
                     onClick={() => openUserProfile(inviter.id)}
                     src={inviter.avatar ? `https://cdn.discordapp.com/avatars/${inviter.id}/${inviter.avatar}.webp?size=80` : "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
                 />
-                <p className="vc-bi-invited-text"> {inviter.global_name ? inviter.global_name.toUpperCase() : inviter.username.toUpperCase()} HAS INVITED YOU TO JOIN</p>
-            </> : defaultMessage}</div>;
+                <p className="vc-bi-invite-title"> {inviter.global_name ? inviter.global_name.toUpperCase() : inviter.username.toUpperCase()} HAS INVITED YOU TO JOIN</p>
+            </> : <p className="vc-bi-invite-title">{defaultMessage}</p>}</div>;
     },
     Lurkable: (id: string, features: Guild["features"] | Array<string>) => {
         let discoverable = false;

@@ -1,5 +1,10 @@
-h3[class^="h5"]:has([class="vc-bi-header-wrapper"]) {
+h3[class^="h5"]:has([class="vc-bi-header-inner"]) {
     display: flex;
+    margin: 0 !important;
+}
+
+.vc-bi-tool-tip-conainer {
+    margin-top: 2px;
 }
 
 .vc-bi-inviter-avatar {
@@ -9,12 +14,20 @@ h3[class^="h5"]:has([class="vc-bi-header-wrapper"]) {
     position: static;
 }
 
-.vc-bi-invited-text {
+.vc-bi-invite-title {
     margin: 0;
     display: flex;
     margin-left: 5px;
+    margin-top: 2px;
 }
 
-.vc-bi-header-wrapper {
+.vc-bi-header-inner {
+    display: flex;
+    margin: 0;
+    margin-bottom: 5px;
+}
+
+.vc-bi-default-text {
+    margin: 0;
     display: flex;
 }
