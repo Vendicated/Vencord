@@ -49,7 +49,7 @@ export default definePlugin({
                 },
                 {
                     match: /(0,\i\.jsx\)\(\i\.\i\.Header,\{)text:(\i)/,
-                    replace: "$1text: $self.Header(arguments[0].invite.inviter, $2),style:{display:\"flex\"}"
+                    replace: "$1text: $self.Header(arguments[0].invite.inviter, $2)"
                 }
             ]
         }
