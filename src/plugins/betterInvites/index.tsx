@@ -40,13 +40,8 @@ export default definePlugin({
             find: ".Messages.HUB_INVITE_ANOTHER_SCHOOL_LINK",
             replacement: [
                 {
-                    match: /,_(\i)&&(\(\i=\(0,\i\.jsx\)\(\i\.TooltipContainer.+)className:(\i.tooltipContainer),text:(\i\.\i\.Messages.GUEST_MEMBERSHIP_EXPLANATION)/,
-                    // replace: (_, isGuest, rest, className, message) => `,${isGuest}&&((!${isGuest})&&arguments[0].invite.expires_at) && ${rest}:$self.handleTip(${isGuest}, ${message}, arguments[0].invite.expires_at),className:${className}+" vc-bi-tool-tip-conainer"`
-                    replace: ",($1 || ((!$1)&&(arguments[0].invite.expires_at))) && $2:$self.handleTip($1, $4, arguments[0].invite.expires_at),className:$3+\"vc-bi-tool-tip-conainer\""
-                }, {
                     match: /,(\i)&&(\(\i=\(0,\i\.jsx\)\(\i\.TooltipContainer.+)className:(\i.tooltipContainer),text:(\i\.\i\.Messages.GUEST_MEMBERSHIP_EXPLANATION)/,
                     replace: (_, isGuest, rest, className, message) => `,(${isGuest}||((!${isGuest})&&arguments[0].invite.expires_at)) && ${rest}text:$self.handleTip(${isGuest}, ${message}, arguments[0].invite.expires_at),className:${className}+" vc-bi-tool-tip-conainer"`
-                    // replace: ",($1 || ((!$1)&&(arguments[0].invite.expires_at))) && $2text:$self.handleTip($1, $4, arguments[0].invite.expires_at),className:$3+\" vc-bi-tool-tip-conainer\""
                 },
                 {
                     match: /(\.jsx\)\(\i.\i.Info,{.+onClick):(\i\?\i:null),/,

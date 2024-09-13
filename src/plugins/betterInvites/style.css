@@ -26,8 +26,3 @@ h3[class^="h5"]:has([class="vc-bi-header-inner"]) {
     margin: 0;
     margin-bottom: 5px;
 }
-
-.vc-bi-default-text {
-    margin: 0;
-    display: flex;
-}
