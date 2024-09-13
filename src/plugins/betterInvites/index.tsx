@@ -33,7 +33,7 @@ function lurk(id: string) {
 
 export default definePlugin({
     name: "BetterInvites",
-    description: "See invites expiration date, view inviter profile, and preview discoverable servers before joining by clicking their name",
+    description: "See invites expiration date, view inviter profile and preview discoverable servers before joining by clicking their name",
     authors: [Devs.iamme],
     patches: [
         {
@@ -49,7 +49,7 @@ export default definePlugin({
                 },
                 {
                     match: /(0,\i\.jsx\)\(\i\.\i\.Header,\{)text:(\i)/,
-                    replace: "$1text: $self.Header(arguments[0].invite.inviter, $2)"
+                    replace: "$1text: $self.Header(arguments[0].currentUserId, arguments[0].invite.inviter, $2)"
                 }
             ]
         }
@@ -57,9 +57,9 @@ export default definePlugin({
     handleTip(isGuest: boolean, message: string, expires_at: string) {
         return <>this invite will expire {Parser.parse(`<t:${Math.round(new Date(expires_at).getTime() / 1000)}:R>`)}{isGuest ? ". " + message : ""}</>;
     },
-    Header(inviter: User | undefined, defaultMessage: string) {
+    Header(currentUserId: string, inviter: User | undefined, defaultMessage: string) {
         return <div className="vc-bi-header-wrapper">
-            {inviter ? <>
+            {(inviter && (currentUserId !== inviter.id)) ? <>
                 <img
                     className={classes(AvatarStyles.avatar, AvatarStyles.clickable) + " vc-bi-inviter-avatar"}
                     onClick={() => openUserProfile(inviter.id)}
