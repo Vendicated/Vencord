@@ -13,11 +13,11 @@ export default definePlugin({
     authors: [Devs.Joona],
     patches: [
         {
-            find: 'logger.error("Connect called',
+            find: ".identifyStartTime));",
             replacement: {
-                match: /case 12:this.emit\("video",(\i\.user_id).+?;/,
-                replace: '$&findByProps("setDisableLocalVideo").setDisableLocalVideo($1, "DISABLED");'
-            }
+                match: /\i\.self_video\|\|!1/g,
+                replace: "false"
+            },
         }
     ]
 });
