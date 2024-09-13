@@ -49,7 +49,7 @@ export default definePlugin({
                 },
                 {
                     match: /(0,\i\.jsx\)\(\i\.\i\.Header,\{)text:(\i)/,
-                    replace: "$1text: $self.Header(arguments[0].invite.inviter, $2)"
+                    replace: "$1text: $self.Header(arguments[0].invite.inviter, $2),style:{display:\"flex\"}"
                 }
             ]
         }
@@ -58,14 +58,14 @@ export default definePlugin({
         return <>this invite will expire {Parser.parse(`<t:${Math.round(new Date(expires_at).getTime() / 1000)}:R>`)}{isGuest ? ". " + message : ""}</>;
     },
     Header(inviter: User | undefined, defaultMessage: string) {
-        return <div className="vc-header-wrapper">
+        return <div className="vc-bi-header-wrapper">
             {inviter ? <>
                 <img
-                    className={classes(AvatarStyles.avatar, AvatarStyles.clickable) + " vc-inviter-avatar"}
+                    className={classes(AvatarStyles.avatar, AvatarStyles.clickable) + " vc-bi-inviter-avatar"}
                     onClick={() => openUserProfile(inviter.id)}
                     src={inviter.avatar ? `https://cdn.discordapp.com/avatars/${inviter.id}/${inviter.avatar}.webp?size=80` : "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
                 />
-                <p className="vc-invited-text"> <span>{inviter.global_name ? inviter.global_name.toUpperCase() : inviter.username.toUpperCase()}</span> HAS INVITED YOU TO JOIN</p>
+                <p className="vc-bi-invited-text"> {inviter.global_name ? inviter.global_name.toUpperCase() : inviter.username.toUpperCase()} HAS INVITED YOU TO JOIN</p>
             </> : defaultMessage}</div>;
     },
     Lurkable: (id: string, features: Guild["features"] | Array<string>) => {

@@ -1,13 +1,20 @@
-.vc-inviter-avatar {
+h3[class^="h5"]:has([class="vc-bi-header-wrapper"]) {
+    display: flex;
+}
+
+.vc-bi-inviter-avatar {
+    margin: 0;
     height: 20px;
     width: 20px;
     position: static;
 }
 
-.vc-invited-text {
-    display: inline;
+.vc-bi-invited-text {
+    margin: 0;
+    display: flex;
+    margin-left: 5px;
 }
 
-.vc-header-wrapper {
-    display: inline;
+.vc-bi-header-wrapper {
+    display: flex;
 }
