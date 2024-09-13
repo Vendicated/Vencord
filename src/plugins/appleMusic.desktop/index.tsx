@@ -247,15 +247,15 @@ export default definePlugin({
             details: customFormat(settings.store.detailsString, trackData),
             state: isRadio ? undefined : customFormat(settings.store.stateString, trackData),
 
-            timestamps: (trackData.playerPosition && trackData.duration) ? (settings.store.enableTimestamps ? {
-                start: Date.now() - (trackData.playerPosition * 1000),
-                end: Date.now() - (trackData.playerPosition * 1000) + (trackData.duration * 1000),
-            } : undefined) : undefined,
+            timestamps: (trackData.playerPosition && trackData.duration && settings.store.enableTimestamps) ? {
+            start: Date.now() - (trackData.playerPosition * 1000),
+            end: Date.now() - (trackData.playerPosition * 1000) + (trackData.duration * 1000),
+            } : undefined,
 
             assets,
 
-            buttons: isRadio ? undefined : buttons.length ? buttons.map(v => v.label) : undefined,
-            metadata: isRadio ? undefined : { button_urls: buttons.map(v => v.url) || undefined, },
+            buttons: !isRadio && buttons.length ? buttons.map(v => v.label) : undefined,
+            metadata: !isRadio && buttons.length ? { button_urls: buttons.map(v => v.url) } : undefined,
 
             type: settings.store.activityType,
             flags: ActivityFlag.INSTANCE,
