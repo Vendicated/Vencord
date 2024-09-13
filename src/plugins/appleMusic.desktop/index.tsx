@@ -155,8 +155,8 @@ const settings = definePluginSettings({
 function customFormat(formatStr: string, data: TrackData) {
     return formatStr
         .replaceAll("{name}", data.name)
-        .replaceAll("{album}", data.album || "")
-        .replaceAll("{artist}", data.artist || "");
+        .replaceAll("{album}", data.album ?? "")
+        .replaceAll("{artist}", data.artist ?? "");
 }
 
 function getImageAsset(type: AssetImageType, data: TrackData) {
