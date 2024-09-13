@@ -41,7 +41,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /,(\i)&&(\(\i=\(0,\i\.jsx\)\(\i\.TooltipContainer.+)className:(\i.tooltipContainer),text:(\i\.\i\.Messages.GUEST_MEMBERSHIP_EXPLANATION)/,
-                    replace: (_, isGuest, rest, className, message) => `,(${isGuest}||((!${isGuest})&&arguments[0].invite.expires_at)) && ${rest}text:$self.handleTip(${isGuest}, ${message}, arguments[0].invite.expires_at),className:${className}+" vc-bi-tool-tip-conainer"`
+                    replace: (_, isGuest, rest, className, message) => `,(${isGuest}||((!${isGuest})&&arguments[0].invite.expires_at)) && ${rest}text:$self.handleTip(${isGuest}, ${message}, arguments[0].invite.expires_at),className:${className}+" vc-bi-tool-tip-container"`
                 },
                 {
                     match: /(\.jsx\)\(\i.\i.Info,{.+onClick):(\i\?\i:null),/,
