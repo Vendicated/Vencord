@@ -55,7 +55,7 @@ export default definePlugin({
         }
     ],
     handleTip(isGuest: boolean, message: string, expires_at: string) {
-        return <>this invite will expire {Parser.parse(`<t:${Math.round(new Date(expires_at).getTime() / 1000)}:R>`)}{isGuest ? ". " + message : ""}</>;
+        return <>This invite will expire {Parser.parse(`<t:${Math.round(new Date(expires_at).getTime() / 1000)}:R>`)}{isGuest ? ". " + message : ""}</>;
     },
     Header(currentUserId: string, inviter: User | undefined, defaultMessage: string) {
         return <div className="vc-bi-header-inner">
@@ -68,14 +68,8 @@ export default definePlugin({
                 <p className="vc-bi-invite-title"> {inviter.global_name ? inviter.global_name.toUpperCase() : inviter.username.toUpperCase()} HAS INVITED YOU TO JOIN</p>
             </> : <p className="vc-bi-invite-title">{defaultMessage}</p>}</div>;
     },
-    Lurkable: (id: string, features: Guild["features"] | Array<string>) => {
-        let discoverable = false;
-
-        if (features instanceof Set) discoverable = features.has("DISCOVERABLE");
-        else if (features instanceof Array) discoverable = features.includes("DISCOVERABLE");
-
-        if (discoverable) return () => lurk(id);
-        return;
+    Lurkable: (id: string, features: Guild["features"] | Array<string> | undefined) => {
+        return new Set(features).has("DISCOVERABLE") ? () => lurk(id) : null;
     },
     start() {
         FluxDispatcher.subscribe("GUILD_CREATE", e => console.warn(e));
