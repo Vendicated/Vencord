@@ -12,7 +12,6 @@ import { classes } from "@utils/misc";
 import definePlugin, { StartAt } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { FluxDispatcher, Parser } from "@webpack/common";
-import { Guild } from "discord-types/general";
 
 
 const AvatarStyles = findByPropsLazy("avatar", "zalgo");
@@ -68,7 +67,7 @@ export default definePlugin({
                 <p className="vc-bi-invite-title"> {inviter.global_name ? inviter.global_name.toUpperCase() : inviter.username.toUpperCase()} HAS INVITED YOU TO JOIN</p>
             </> : <p className="vc-bi-invite-title">{defaultMessage}</p>}</div>;
     },
-    Lurkable: (id: string, features: Guild["features"] | Array<string> | undefined) => {
+    Lurkable: (id: string, features: Iterable<string> | undefined) => {
         return new Set(features).has("DISCOVERABLE") ? () => lurk(id) : null;
     },
     start() {
