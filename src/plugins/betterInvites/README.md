@@ -1,8 +1,8 @@
 # BetterInvites
 
-![inviter preview](https://github.com/user-attachments/assets/9f040e27-5540-433f-86e6-d4bd745e36a3)
+![Inviter preview](https://github.com/user-attachments/assets/9f040e27-5540-433f-86e6-d4bd745e36a3)
 
-![receiver preview](https://github.com/user-attachments/assets/00d87d09-e420-4830-a0b9-28bded1aaed7)
+![Receiver preview](https://github.com/user-attachments/assets/00d87d09-e420-4830-a0b9-28bded1aaed7)
 
 # features
 
