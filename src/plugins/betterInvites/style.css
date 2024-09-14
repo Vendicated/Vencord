@@ -5,15 +5,10 @@ h3[class^="h5"]:has([class="vc-bi-header-inner"]) {
 
 .vc-bi-inviter-avatar {
     margin: 0;
+    margin-right: 5px;
     height: 16px;
     width: 16px;
     position: static;
-}
-
-.vc-bi-invite-title {
-    margin: 0;
-    display: flex;
-    margin-left: 5px;
 }
 
 .vc-bi-header-inner {

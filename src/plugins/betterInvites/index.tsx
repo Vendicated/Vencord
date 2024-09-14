@@ -63,9 +63,8 @@ export default definePlugin({
                     className={classes(AvatarStyles.avatar, AvatarStyles.clickable) + " vc-bi-inviter-avatar"}
                     onClick={() => openUserProfile(inviter.id)}
                     src={inviter.avatar ? `https://cdn.discordapp.com/avatars/${inviter.id}/${inviter.avatar}.webp?size=80` : "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
-                />
-                <p className="vc-bi-invite-title"> {inviter.global_name ? inviter.global_name.toUpperCase() : inviter.username.toUpperCase()} HAS INVITED YOU TO JOIN</p>
-            </> : <p className="vc-bi-invite-title">{defaultMessage}</p>}</div>;
+                /> {inviter.global_name ? inviter.global_name.toUpperCase() : inviter.username.toUpperCase()} HAS INVITED YOU TO JOIN
+            </> : defaultMessage}</div>;
     },
     Lurkable: (id: string, features: Iterable<string> | undefined) => {
         return new Set(features).has("DISCOVERABLE") ? () => lurk(id) : null;
