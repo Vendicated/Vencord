@@ -114,6 +114,19 @@ export function closeTabsToTheRight(id: number) {
     else update();
 }
 
+export function closeTabsToTheLeft(id: number) {
+    const i = openTabs.findIndex(v => v.id === id);
+    if (i === -1) return logger.error("Couldn't find channel tab with ID " + id, openTabs);
+
+    const tabsToTheLeft = openTabs.filter((_, ind) => ind < i);
+    closedTabs.push(...tabsToTheLeft.reverse());
+    const tabsToTheRight = openTabs.filter((_, ind) => ind >= i);
+    replaceArray(openTabs, ...tabsToTheRight);
+
+    if (!tabsToTheRight.some(v => v.id === currentlyOpenTab)) moveToTab(openTabs[0].id);
+    else update();
+}
+
 export function handleChannelSwitch(ch: BasicChannelTabsProps) {
     const tab = openTabs.find(c => c.id === currentlyOpenTab);
     if (tab === undefined) return logger.error("Couldn't find the currently open channel " + currentlyOpenTab, openTabs);
