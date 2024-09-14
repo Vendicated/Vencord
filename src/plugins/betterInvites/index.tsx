@@ -30,6 +30,7 @@ function lurk(id: string) {
         .catch(() => { throw new Error("Guild is not lurkable"); });
 }
 
+
 export default definePlugin({
     name: "BetterInvites",
     description: "See invites expiration date, view inviter profile and preview discoverable servers before joining by clicking their name",
@@ -39,8 +40,8 @@ export default definePlugin({
             find: ".Messages.HUB_INVITE_ANOTHER_SCHOOL_LINK",
             replacement: [
                 {
-                    match: /,(\i)&&(\(\i=\(0,\i\.jsx\)\(\i\.TooltipContainer.+)className:(\i.tooltipContainer),text:(\i\.\i\.Messages.GUEST_MEMBERSHIP_EXPLANATION)/,
-                    replace: (_, isGuest, rest, className, message) => `,(${isGuest}||((!${isGuest})&&arguments[0].invite.expires_at)) && ${rest}text:$self.handleTip(${isGuest}, ${message}, arguments[0].invite.expires_at),className:${className}+" vc-bi-tool-tip-container"`
+                    match: /,(\i)&&(\(.{0,15}\i\.TooltipContainer.+)(\i\.\i\.Messages.GUEST_MEMBERSHIP_EXPLANATION)/,
+                    replace: ",($1||((!$1)&&arguments[0].invite.expires_at)) && $2$self.RenderTip($1, $3, arguments[0].invite.expires_at)"
                 },
                 {
                     match: /(\.jsx\)\(\i.\i.Info,{.+onClick):(\i\?\i:null),/,
@@ -53,7 +54,7 @@ export default definePlugin({
             ]
         }
     ],
-    handleTip(isGuest: boolean, message: string, expires_at: string) {
+    RenderTip(isGuest: boolean, message: string, expires_at: string) {
         return <>This invite will expire {Parser.parse(`<t:${Math.round(new Date(expires_at).getTime() / 1000)}:R>`)}{isGuest ? ". " + message : ""}</>;
     },
     Header(currentUserId: string, inviter: User | undefined, defaultMessage: string) {
