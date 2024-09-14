@@ -11,36 +11,10 @@ import type { TrackData } from ".";
 
 const exec = promisify(execFile);
 
-// function exec(file: string, args: string[] = []) {
-//     return new Promise<{ code: number | null, stdout: string | null, stderr: string | null; }>((resolve, reject) => {
-//         const process = spawn(file, args, { stdio: [null, "pipe", "pipe"] });
-
-//         let stdout: string | null = null;
-//         process.stdout.on("data", (chunk: string) => { stdout ??= ""; stdout += chunk; });
-//         let stderr: string | null = null;
-//         process.stderr.on("data", (chunk: string) => { stdout ??= ""; stderr += chunk; });
-
-//         process.on("exit", code => { resolve({ code, stdout, stderr }); });
-//         process.on("error", err => reject(err));
-//     });
-// }
-
 async function applescript(cmds: string[]) {
     const { stdout } = await exec("osascript", cmds.flatMap(c => ["-e", c]));
     return stdout;
 }
-
-function makeSearchUrl(type: string, query: string) {
-    const url = new URL("https://tools.applemediaservices.com/api/apple-media/music/US/search.json");
-    url.searchParams.set("types", type);
-    url.searchParams.set("limit", "1");
-    url.searchParams.set("term", query);
-    return url;
-}
-
-const requestOptions: RequestInit = {
-    headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; rv:125.0) Gecko/20100101 Firefox/125.0" },
-};
 
 interface RemoteData {
     appleMusicLink?: string;
@@ -51,6 +25,24 @@ interface RemoteData {
 
 let cachedRemoteData: { id: string; data: RemoteData; } | { id: string; failures: number; } | null = null;
 
+const APPLE_MUSIC_BUNDLE_REGEX = /<script type="module" crossorigin src="([a-zA-Z0-9.\-/]+)"><\/script>/;
+const APPLE_MUSIC_TOKEN_REGEX = /\w+="([A-Za-z0-9-_]*\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*)",\w+="x-apple-jingle-correlation-key"/;
+
+let cachedToken: string | undefined;
+
+async function getToken() {
+    if (cachedToken) return cachedToken;
+
+    const html = await (await fetch("https://music.apple.com/")).text();
+    const bundleUrl = new URL(html.match(APPLE_MUSIC_BUNDLE_REGEX)![1]!, "https://music.apple.com/");
+
+    const bundle = await (await fetch(bundleUrl)).text();
+    const [, token] = bundle.match(APPLE_MUSIC_TOKEN_REGEX)!;
+
+    cachedToken = token;
+    return token!;
+}
+
 async function fetchRemoteData({ id, name, artist, album }: { id: string; name: string; artist: string; album: string; }) {
     if (id === cachedRemoteData?.id) {
         if ("data" in cachedRemoteData) return cachedRemoteData.data;
@@ -58,21 +50,37 @@ async function fetchRemoteData({ id, name, artist, album }: { id: string; name: 
     }
 
     try {
-        const [songData, artistData] = await Promise.all([
-            fetch(makeSearchUrl("songs", artist + " " + album + " " + name), requestOptions).then(r => r.json()),
-            fetch(makeSearchUrl("artists", artist.split(/ *[,&] */)[0]!), requestOptions).then(r => r.json())
-        ]);
+        const dataUrl = new URL("https://amp-api-edge.music.apple.com/v1/catalog/us/search");
+        dataUrl.searchParams.set("platform", "web");
+        dataUrl.searchParams.set("l", "en-US");
+        dataUrl.searchParams.set("limit", "1");
+        dataUrl.searchParams.set("with", "serverBubbles");
+        dataUrl.searchParams.set("types", "songs");
+        dataUrl.searchParams.set("term", `${name} ${artist} ${album}`);
+        dataUrl.searchParams.set("include[songs]", "artists");
 
-        const appleMusicLink = songData?.songs?.data[0]?.attributes.url;
-        const songLink = songData?.songs?.data[0]?.id ? `https://song.link/i/${songData?.songs?.data[0]?.id}` : undefined;
+        const token = await getToken();
 
-        const albumArtwork = songData?.songs?.data[0]?.attributes.artwork.url.replace("{w}", "512").replace("{h}", "512");
-        const artistArtwork = artistData?.artists?.data[0]?.attributes.artwork.url.replace("{w}", "512").replace("{h}", "512");
+        const [songData] = (await (await fetch(dataUrl, {
+            headers: {
+                "accept": "*/*",
+                "accept-language": "en-US,en;q=0.9",
+                "authorization": `Bearer ${token}`,
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+                "origin": "https://music.apple.com",
+            },
+        })).json()).results.song.data;
 
         cachedRemoteData = {
             id,
-            data: { appleMusicLink, songLink, albumArtwork, artistArtwork }
+            data: {
+                appleMusicLink: songData.attributes.url,
+                songLink: `https://song.link/i/${songData.id}`,
+                albumArtwork: songData.attributes.artwork.url.replace("{w}x{h}", "512x512"),
+                artistArtwork: songData.relationships.artists.data[0].attributes.artwork.url.replace("{w}x{h}", "512x512"),
+            }
         };
+
         return cachedRemoteData.data;
     } catch (e) {
         console.error("[AppleMusicRichPresence] Failed to fetch remote data:", e);
@@ -87,7 +95,7 @@ async function fetchRemoteData({ id, name, artist, album }: { id: string; name: 
 export async function fetchTrackData(): Promise<TrackData | null> {
     try {
         await exec("pgrep", ["^Music$"]);
-    } catch (error) {
+    } catch {
         return null;
     }
 
