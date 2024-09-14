@@ -66,7 +66,7 @@ function FilePreview({ attachment }: { attachment: Attachment; }) {
 
     if (!previewBlobUrl) return null;
 
-    return previewBlobUrl && <div className={"file-viewer container"} id={`file-viewer-${stripLink(attachment.url)}`}><embed src={previewBlobUrl} className="file-viewer preview" title={attachment.filename} /></div>;
+    return <div className={"file-viewer container"} id={`file-viewer-${stripLink(attachment.url)}`}><embed src={previewBlobUrl} className="file-viewer preview" title={attachment.filename} /></div>;
 }
 
 async function buildCss() {
@@ -151,8 +151,8 @@ export default definePlugin({
         {
             find: "Messages.IMG_ALT_ATTACHMENT_FILE_TYPE.format",
             replacement: {
-                match: /function\((.+?)\)(.+Fragment.{0,500}newMosaicStyle.{0,500}?children:\[)(.+?\])/,
-                replace: "function($1)$2$self.renderPreviewButton($1),$3"
+                match: /newMosaicStyle,\i\),children:\[(?<=}=(\i);.+?)/,
+                replace: "$&$self.renderPreviewButton($1),"
             }
         }
     ],
