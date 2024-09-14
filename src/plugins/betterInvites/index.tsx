@@ -11,7 +11,7 @@ import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import definePlugin, { StartAt } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, Parser } from "@webpack/common";
+import { Parser } from "@webpack/common";
 
 
 const AvatarStyles = findByPropsLazy("avatar", "zalgo");
@@ -69,9 +69,6 @@ export default definePlugin({
     },
     Lurkable: (id: string, features: Iterable<string> | undefined) => {
         return new Set(features).has("DISCOVERABLE") ? () => lurk(id) : null;
-    },
-    start() {
-        FluxDispatcher.subscribe("GUILD_CREATE", e => console.warn(e));
     },
     startAt: StartAt.WebpackReady
 });
