@@ -23,6 +23,12 @@
     padding: 1px;
 }
 
+.vc-bactivities-activity-tooltip img {
+    width: 50px;
+    height: 50px;
+    margin-right: 5px;
+}
+
 .vc-bactivities-caret-left,
 .vc-bactivities-caret-right {
     color: #ddd;
