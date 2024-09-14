@@ -27,7 +27,7 @@ interface User {
 
 function lurk(id: string) {
     GuildManager.joinGuild(id, { lurker: true })
-        .then(() => { setTimeout(() => GuildManager.transitionToGuildSync(id), 100); })
+        .then(() => { GuildManager.transitionToGuildSync(id); })
         .catch(() => { throw new Error("Guild is not lurkable"); });
 }
 
