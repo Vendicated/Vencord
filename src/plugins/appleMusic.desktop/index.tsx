@@ -212,7 +212,7 @@ export default definePlugin({
 
         const assets: ActivityAssets = {};
 
-        const isRadio = (trackData.album === "missing value") && Number.isNaN(trackData.duration) && !trackData.artist && (trackData.playerPosition === 0);
+        const isRadio = Number.isNaN(trackData.duration) && (trackData.playerPosition === 0);
 
         if (settings.store.largeImageType !== AssetImageType.Disabled) {
             assets.large_image = largeImageAsset;
