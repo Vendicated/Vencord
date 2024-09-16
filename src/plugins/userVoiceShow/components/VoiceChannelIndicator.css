@@ -13,3 +13,7 @@
 .vc-uvs-indicator > svg {
     fill: dodgerblue;
 }
+
+.vc-uvs-indicator > svg:hover {
+    fill: deepskyblue;
+}
