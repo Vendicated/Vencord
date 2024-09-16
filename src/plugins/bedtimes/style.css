@@ -1,0 +1,110 @@
+.vc-bedtimes-settings input[type="time"] {
+    background: var(--input-background);
+    color: var(--text-normal);
+    border: 0;
+    border-radius: var(--radius-xs);
+
+    padding: 4px 8px;
+}
+
+.vc-bedtimes-user-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.vc-bedtimes-delete {
+    color: var(--info-danger-foreground);
+    cursor: pointer;
+}
+.vc-bedtimes-delete svg {
+    display: block;
+    width: 1.25em;
+    height: 1.25em;
+}
+
+.vc-bedtimes-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-bedtimes-user .vc-bedtimes-avatar {
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 50%;
+}
+
+.vc-bedtimes-user .vc-bedtimes-username {
+    user-select: none;
+    pointer-events: none;
+}
+
+.vc-bedtimes-settings th > * {
+    text-align: left;
+    user-select: none;
+}
+
+.vc-bedtimes-settings tr > td:not(:nth-child(3)) {
+    padding-right: 12px;
+}
+
+.vc-bedtimes-settings td {
+    vertical-align: middle;
+    padding-top: 8px;
+}
+
+.vc-bedtimes-addUser {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    padding: 6px;
+    border-radius: var(--radius-xs);
+    cursor: pointer !important;
+    user-select: none !important;
+    color: var(--text-muted);
+}
+.vc-bedtimes-addUser:hover {
+    background-color: var(--primary-560);
+}
+.vc-bedtimes-addUser:active {
+    background-color: var(--primary-530);
+}
+
+.vc-bedtimes-addUser svg {
+    width: 1em;
+    height: 1em;
+}
+
+.vc-bedtimes-popout {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    background-color: var(--primary-760);
+    padding: 14px;
+    border-radius: var(--radius-xs);
+    width: 400px;
+}
+
+.vc-bedtimes-popout-subtext {
+    color: var(--text-muted);
+}
+
+.vc-bedtimes-popout-scroller {
+    height: 300px;
+}
+
+.vc-bedtimes-popout-scroller .vc-bedtimes-user {
+    padding: 6px;
+    border-radius: var(--radius-xs);
+
+    cursor: pointer;
+}
+.vc-bedtimes-popout-scroller .vc-bedtimes-user:hover {
+    background-color: var(--primary-730);
+}
+.vc-bedtimes-popout-scroller .vc-bedtimes-user:active {
+    background-color: var(--primary-700);
+}
