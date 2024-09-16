@@ -25,7 +25,7 @@ declare module "~plugins" {
         folderName: string;
         userPlugin: boolean;
     }>;
-    export const ExcludedPlugins: Record<string, "web" | "discordDesktop" | "vencordDesktop" | "equicordDesktop" | "fullcordDesktop" | "desktop" | "dev">;
+    export const ExcludedPlugins: Record<string, "web" | "discordDesktop" | "vencordDesktop" | "equicordDesktop" | "desktop" | "dev">;
 }
 
 declare module "~pluginNatives" {
