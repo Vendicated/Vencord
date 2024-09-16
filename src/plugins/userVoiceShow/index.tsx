@@ -89,8 +89,6 @@ export default definePlugin({
     settings,
 
     start() {
-        VoiceStateStore.getAllVoiceStates(); // reduces api spam i hope
-
         addDecorator("uvs-indicator", props => {
             if (!props.user) return null;
 
