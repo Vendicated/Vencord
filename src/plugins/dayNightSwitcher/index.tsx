@@ -55,7 +55,8 @@ function startPlugin() {
 }
 
 function stopPlugin() {
-    // Optionally reset to user's original theme (not implemented yet)
+    // reload discord theme
+    document.body.classList.remove("theme-light", "theme-dark");
 }
 
 // Plugin export with metadata and settings
