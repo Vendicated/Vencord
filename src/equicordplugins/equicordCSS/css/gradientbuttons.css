@@ -27,25 +27,35 @@
     transition: var(--button-transition);
     background: var(--gradient);
 }
+
 .lookFilled-yCfaCM:hover {
     transform: var(--button-transform-hover);
 }
+
 .lookFilled-yCfaCM[disabled] {
     transform: none;
 }
+
 .lookFilled-yCfaCM.colorBrand-I6CyqQ {
     --gradient: linear-gradient(var(--gradient-blurple));
 }
-.lookFilled-yCfaCM.colorGreen-3y-Z79, .lookFilled-yCfaCM.button_adcaac.buttonActive_adcaac {
+
+.lookFilled-yCfaCM.colorGreen-3y-Z79,
+.lookFilled-yCfaCM.button_adcaac.buttonActive_adcaac {
     --gradient: linear-gradient(var(--gradient-green));
 }
+
 .lookFilled-yCfaCM.colorYellow-Pgtmch {
     --gradient: linear-gradient(var(--gradient-yellow));
 }
+
 .lookFilled-yCfaCM.colorRed-rQXKgM {
     --gradient: linear-gradient(var(--gradient-red));
 }
-.lookFilled-yCfaCM.colorPrimary-2AuQVo, .lookFilled-yCfaCM.colorGrey-2iAG-B, .lookFilled-yCfaCM.buttonColor_adcaac {
+
+.lookFilled-yCfaCM.colorPrimary-2AuQVo,
+.lookFilled-yCfaCM.colorGrey-2iAG-B,
+.lookFilled-yCfaCM.buttonColor_adcaac {
     --gradient: linear-gradient(var(--gradient-grey));
 }
 
@@ -54,47 +64,66 @@
     font-weight: var(--font-default);
     transition: var(--button-transition);
 }
-.menu_d90b3d .item-1OdjEX:not(.hideInteraction-2jPGL_).focused-3qFvc8, .menu_d90b3d .item-1OdjEX:not(.hideInteraction-2jPGL_):active {
+
+.menu_d90b3d .item-1OdjEX:not(.hideInteraction-2jPGL_).focused-3qFvc8,
+.menu_d90b3d .item-1OdjEX:not(.hideInteraction-2jPGL_):active {
     font-size: var(--fontsize-hover);
     font-weight: var(--font-hover);
     background: var(--gradient);
 }
-.menu_d90b3d .colorDefault-CDqZdO.focused-3qFvc8, .menu_d90b3d .colorDefault-CDqZdO:active {
+
+.menu_d90b3d .colorDefault-CDqZdO.focused-3qFvc8,
+.menu_d90b3d .colorDefault-CDqZdO:active {
     --gradient: linear-gradient(var(--gradient-blurple));
 }
-.menu_d90b3d .colorDanger-3n-KnP.focused-3qFvc8, .menu_d90b3d .colorDanger-3n-KnP:active,
+
+.menu_d90b3d .colorDanger-3n-KnP.focused-3qFvc8,
+.menu_d90b3d .colorDanger-3n-KnP:active,
 .menu_d90b3d #status-picker-dnd.focused-3qFvc8,
 .menu_d90b3d #status-picker-dnd:active {
     --gradient: linear-gradient(var(--gradient-red));
 }
-.menu_d90b3d .colorPremium-vwmYZQ.focused-3qFvc8, .menu_d90b3d .colorPremium-vwmYZQ:active {
-    --gradient: linear-gradient(var(--gradient-special)) ;
+
+.menu_d90b3d .colorPremium-vwmYZQ.focused-3qFvc8,
+.menu_d90b3d .colorPremium-vwmYZQ:active {
+    --gradient: linear-gradient(var(--gradient-special));
 }
-.menu_d90b3d #status-picker-online.focused-3qFvc8, .menu_d90b3d #status-picker-online:active {
+
+.menu_d90b3d #status-picker-online.focused-3qFvc8,
+.menu_d90b3d #status-picker-online:active {
     --gradient: linear-gradient(var(--gradient-green));
 }
-.menu_d90b3d #status-picker-idle.focused-3qFvc8, .menu_d90b3d #status-picker-idle:active {
+
+.menu_d90b3d #status-picker-idle.focused-3qFvc8,
+.menu_d90b3d #status-picker-idle:active {
     --gradient: linear-gradient(var(--gradient-yellow));
 }
-.menu_d90b3d #status-picker-invisible.focused-3qFvc8, .menu_d90b3d #status-picker-invisible:active {
+
+.menu_d90b3d #status-picker-invisible.focused-3qFvc8,
+.menu_d90b3d #status-picker-invisible:active {
     --gradient: linear-gradient(var(--gradient-grey));
 }
 
 /* || Message Actions */
-.wrapper_ef319f .button_ef319f {
+.wrapper_f7e168 .button_f7e168 {
     background: var(--gradient);
 }
-.wrapper_ef319f .button_ef319f img, .wrapper_ef319f .button_ef319f svg {
+
+.wrapper_f7e168 .button_f7e168 img,
+.wrapper_f7e168 .button_f7e168 svg {
     transition: var(--button-transition);
     transform: var(--transform-normal);
 }
-.wrapper_ef319f .button_ef319f:hover {
+
+.wrapper_f7e168 .button_f7e168:hover {
     --gradient: linear-gradient(var(--gradient-blurple));
 }
-.wrapper_ef319f .button_ef319f:hover svg {
+
+.wrapper_f7e168 .button_f7e168:hover svg {
     transform: var(--transform-hover);
     color: white;
 }
-.wrapper_ef319f .button_ef319f.dangerous_ef319f:hover {
-    --gradient: linear-gradient(var(--gradient-red)) ;
+
+.wrapper_f7e168 .button_f7e168.dangerous_f7e168:hover {
+    --gradient: linear-gradient(var(--gradient-red));
 }
