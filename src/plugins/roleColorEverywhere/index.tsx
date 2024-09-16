@@ -57,10 +57,10 @@ export default definePlugin({
     patches: [
         // Chat Mentions
         {
-            find: 'location:"UserMention',
+            find: ".USER_MENTION)",
             replacement: [
                 {
-                    match: /user:(\i),channel:(\i).{0,400}?"@"\.concat\(.+?\)/,
+                    match: /onContextMenu:\i,color:\i,\.\.\.\i(?=,children:)(?<=user:(\i),channel:(\i).{0,500}?)/,
                     replace: "$&,color:$self.getUserColor($1?.id,{channelId:$2?.id})"
                 }
             ],

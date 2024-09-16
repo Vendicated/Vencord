@@ -59,6 +59,8 @@ export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
         delete patch.group;
     }
 
+    if (patch.predicate && !patch.predicate()) return;
+
     canonicalizeFind(patch);
     if (!Array.isArray(patch.replacement)) {
         patch.replacement = [patch.replacement];
@@ -69,6 +71,8 @@ export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
             delete r.predicate;
         });
     }
+
+    patch.replacement = patch.replacement.filter(({ predicate }) => !predicate || predicate());
 
     patches.push(patch);
 }
@@ -169,7 +173,18 @@ export function subscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof Flux
 
         logger.debug("Subscribing to flux events of plugin", p.name);
         for (const [event, handler] of Object.entries(p.flux)) {
-            fluxDispatcher.subscribe(event as FluxEvents, handler);
+            const wrappedHandler = p.flux[event] = function () {
+                try {
+                    const res = handler.apply(p, arguments as any);
+                    return res instanceof Promise
+                        ? res.catch(e => logger.error(`${p.name}: Error while handling ${event}\n`, e))
+                        : res;
+                } catch (e) {
+                    logger.error(`${p.name}: Error while handling ${event}\n`, e);
+                }
+            };
+
+            fluxDispatcher.subscribe(event as FluxEvents, wrappedHandler);
         }
     }
 }
