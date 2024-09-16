@@ -1,0 +1,37 @@
+.vc-uvs-speaker {
+    color: var(--interactive-normal);
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vc-uvs-clickable {
+    cursor: pointer;
+}
+
+.vc-uvs-clickable:hover {
+    color: var(--interactive-hover);
+}
+
+.vc-uvs-tooltip-container {
+    max-width: 200px;
+}
+
+.vc-uvs-guild-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vc-uvs-guild-icon {
+    border-radius: 100%;
+    align-self: center;
+}
+
+.vc-uvs-vc-members {
+    display: flex;
+    margin: 8px 0;
+    flex-direction: row;
+    gap: 6px;
+}
