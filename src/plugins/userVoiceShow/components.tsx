@@ -132,6 +132,8 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId }: VoiceChanne
         }
 
         clearTimeout(clickTimers[channelId]);
+        delete clickTimers[channelId];
+
         if (e.detail > 1) {
             if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) {
                 showToast("You cannot join the user's Voice Channel", Toasts.Type.FAILURE);
