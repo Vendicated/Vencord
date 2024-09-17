@@ -7,13 +7,13 @@
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
-import { findByProps, findComponentByCode, findStore } from "@webpack";
+import { findComponentByCode, findProp, findStore } from "@webpack";
 import { ChannelStore, GuildStore, IconUtils, NavigationRouter, PermissionsBits, PermissionStore, showToast, Text, Toasts, Tooltip, useCallback, useMemo, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 const cl = classNameFactory("vc-uvs-");
 
-const { selectVoiceChannel } = findByProps("selectChannel", "selectVoiceChannel");
+const selectVoiceChannel = findProp("selectVoiceChannel", "selectChannel");
 const VoiceStateStore = findStore("VoiceStateStore");
 const UserSummaryItem = findComponentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 
