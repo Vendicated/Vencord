@@ -4,15 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Logger } from "@utils/Logger";
-
 export class LRUCache {
     private cache: Map<string, string>;
     private maxSize: number;
 
-    constructor() {
+    constructor(maxSize: number) {
         this.cache = new Map();
-        this.maxSize = 50;
+        this.maxSize = maxSize;
     }
 
     get(key: string): string | undefined {
@@ -46,17 +44,5 @@ export class LRUCache {
             URL.revokeObjectURL(this.cache.get(key)!);
         }
         this.cache.clear();
-    }
-
-    setMaxSize(maxSize: number) {
-        if (maxSize < 1) {
-            new Logger("FileViewer").error("Cache size must be at least 1");
-            return;
-        }
-        this.maxSize = maxSize;
-    }
-
-    getMaxSize() {
-        return this.maxSize;
     }
 }

@@ -4,22 +4,20 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./fileViewer.css";
+import "./pdfViewer.css";
 
 import { get, set } from "@api/DataStore";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { PreviewInvisible, PreviewVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
-import { Tooltip, useEffect, useState } from "@webpack/common";
+import { Icons, Spinner, Tooltip, useEffect, useState } from "@webpack/common";
 
 import { LRUCache } from "./cache";
 
-const Native = VencordNative.pluginHelpers.FileViewer as PluginNative<typeof import("./native")>;
+const Native = VencordNative.pluginHelpers.PdfViewer as PluginNative<typeof import("./native")>;
 
 const settings = definePluginSettings({
     autoEmptyCache: {
@@ -32,20 +30,10 @@ const settings = definePluginSettings({
         description: "Persist the state of opened/closed File Previews across channel switches and reloads.",
         default: false
     },
-    cacheSize: {
-        type: OptionType.SLIDER,
-        description: "Maximum number of PDF files to cache (after that, the least recently used file will be removed). Lower this value if you're running out of memory.",
-        default: 50,
-        restartNeeded: true,
-        markers: [10, 20, 30, 40, 50, 75, 100],
-        stickToMarkers: true,
-    }
 });
 
-const objectUrlsCache = new LRUCache();
-const STORE_KEY = "FileViewer_PersistVisible";
-
-let style: HTMLStyleElement;
+const objectUrlsCache = new LRUCache(20);
+const STORE_KEY = "PdfViewer_PersistVisible";
 
 interface Attachment {
     id: string;
@@ -58,25 +46,19 @@ interface Attachment {
     title: string;
     spoiler: boolean;
     previewBlobUrl?: string;
+    previewVisible?: boolean;
 }
 
-const stripLink = (url: string) => url.replace("https://cdn.discordapp.com/attachments/", "").split("/").slice(0, 2).join("-");
 function FilePreview({ attachment }: { attachment: Attachment; }) {
-    const { previewBlobUrl } = attachment;
+    const { previewBlobUrl, previewVisible } = attachment;
 
-    if (!previewBlobUrl) return null;
+    if (!previewVisible) return null;
 
-    return <div className={"file-viewer container"} id={`file-viewer-${stripLink(attachment.url)}`}><embed src={previewBlobUrl} className="file-viewer preview" title={attachment.filename} /></div>;
-}
-
-async function buildCss() {
-    const visiblePreviews: Set<string> | undefined = await get(STORE_KEY);
-    const elements = [...(visiblePreviews || [])].map(url => `#file-viewer-${stripLink(url)}`).join(",");
-    style.textContent = `
-    :is(${elements})  {
-        display: flex !important;
-    }
-    `;
+    return (
+        <div className={"vc-pdf-viewer-container"}>
+            {previewBlobUrl ? <embed src={previewBlobUrl} className="vc-pdf-viewer-preview" title={attachment.filename} /> : <Spinner />}
+        </div>
+    );
 }
 
 function PreviewButton({ attachment, channelId, messageId }: { attachment: Attachment; channelId: string; messageId: string; }) {
@@ -92,6 +74,7 @@ function PreviewButton({ attachment, channelId, messageId }: { attachment: Attac
         try {
             const buffer = await Native.getBufferResponse(attachment.url);
             const file = new File([buffer], attachment.filename, { type: attachment.content_type });
+
             const blobUrl = URL.createObjectURL(file);
             objectUrlsCache.set(attachment.url, blobUrl);
             setUrl(blobUrl);
@@ -100,24 +83,31 @@ function PreviewButton({ attachment, channelId, messageId }: { attachment: Attac
         }
     };
 
+    const updateVisibility = async () => {
+        const data: Set<string> = await get(STORE_KEY) ?? new Set();
+
+        if (visible === null) {
+            setVisible(settings.store.persistPreviewState ? data.has(attachment.url) : false);
+        } else {
+            if (visible) data.add(attachment.url);
+            else data.delete(attachment.url);
+
+            await set(STORE_KEY, data);
+
+            attachment.previewVisible = visible;
+            updateMessage(channelId, messageId);
+        }
+    };
+
     useEffect(() => {
-        get(STORE_KEY).then(async data => {
-            if (visible === null) {
-                setVisible(settings.store.persistPreviewState ? (data ?? new Set()).has(attachment.url) : false);
-            } else {
-                const persistSet = (data ?? new Set());
-                if (visible) persistSet.add(attachment.url);
-                else persistSet.delete(attachment.url);
-                await set(STORE_KEY, persistSet);
-                buildCss();
-            }
-        });
+        updateVisibility();
+
         if (visible && !url) initPdfData();
     }, [visible]);
 
     useEffect(() => {
         attachment.previewBlobUrl = url;
-        updateMessage(channelId, messageId,);
+        updateMessage(channelId, messageId);
         return () => {
             if (url && settings.store.autoEmptyCache) {
                 objectUrlsCache.delete(attachment.url);
@@ -129,20 +119,20 @@ function PreviewButton({ attachment, channelId, messageId }: { attachment: Attac
         {tooltipProps => (
             <div
                 {...tooltipProps}
-                className="file-viewer toggle"
+                className="vc-pdf-viewer-toggle"
                 role="button"
                 onClick={() => {
                     setVisible(v => !v);
                 }}
             >
-                {visible ? <PreviewInvisible /> : <PreviewVisible />}
+                {visible ? <Icons.EyeSlashIcon /> : <Icons.EyeIcon />}
             </div>
         )}
     </Tooltip>;
 }
 
 export default definePlugin({
-    name: "FileViewer",
+    name: "PdfViewer",
     description: "Preview PDF Files without having to download them",
     authors: [Devs.AGreenPig],
     dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI",],
@@ -157,8 +147,7 @@ export default definePlugin({
         }
     ],
     start() {
-        objectUrlsCache.setMaxSize(Math.round(settings.store.cacheSize));
-        addAccessory("fileViewer", props => {
+        addAccessory("pdfViewer", props => {
             const pdfAttachments = props.message.attachments.filter(a => a.content_type === "application/pdf");
             if (!pdfAttachments.length) return null;
 
@@ -170,18 +159,13 @@ export default definePlugin({
                 </ErrorBoundary>
             );
         }, -1);
-
-        style = document.createElement("style");
-        style.id = "VencordFileViewer";
-        document.head.appendChild(style);
     },
     renderPreviewButton: ErrorBoundary.wrap(e => {
         if (e.item.originalItem.content_type !== "application/pdf") return null;
         return <PreviewButton attachment={e.item.originalItem} channelId={e.message.channel_id} messageId={e.message.id} />;
-    },
+    }),
     stop() {
         objectUrlsCache.clear();
-        removeAccessory("fileViewer");
-        style.remove();
+        removeAccessory("pdfViewer");
     }
 });

@@ -1,4 +1,4 @@
-.file-viewer.container {
+.vc-pdf-viewer-container {
     resize: both;
     overflow: hidden;
     max-width: 100%;
@@ -6,16 +6,18 @@
     max-height: 80vh;
     min-height: 500px;
     box-sizing: border-box;
-    display: none; /* Will be set with buildCss */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.file-viewer.preview {
+.vc-pdf-viewer-preview {
     width: 100%;
     flex-grow: 1;
     border: none;
 }
 
-.file-viewer.toggle {
+.vc-pdf-viewer-toggle {
     justify-self: center;
     display: flex;
     justify-content: center;
@@ -24,6 +26,6 @@
     cursor: pointer;
 }
 
-.file-viewer.toggle:hover {
+.vc-pdf-viewer-toggle:hover {
     color: var(--interactive-hover);
 }
