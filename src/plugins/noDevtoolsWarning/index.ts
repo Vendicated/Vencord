@@ -21,7 +21,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "NoDevtoolsWarning",
-    description: "Disables the 'HOLD UP' banner in the console. Also stops random logouts when using DevTools.",
+    description: "Disables the 'HOLD UP' banner in the console. Also stops random logouts & token hiding when using DevTools.",
     authors: [Devs.Ven],
     patches: [{
         find: "setDevtoolsCallbacks",
