@@ -158,7 +158,6 @@ export default definePlugin({
     ],
     start() {
         objectUrlsCache.setMaxSize(Math.round(settings.store.cacheSize));
-        new Logger("FileViewer").info(`Initialized LRU Cache with size ${objectUrlsCache.getMaxSize()}`);
         addAccessory("fileViewer", props => {
             const pdfAttachments = props.message.attachments.filter(a => a.content_type === "application/pdf");
             if (!pdfAttachments.length) return null;
