@@ -133,7 +133,7 @@ export default definePlugin({
             }
         },
         {
-            find: '"Handling ping: "',
+            find: '"_handleLocalVideoDisabled: ',
             predicate: () => settings.store.disableNoisyLoggers,
             replacement: {
                 match: /new \i\.\i\("RTCConnection\("\.concat.+?\)\)(?=,)/,
