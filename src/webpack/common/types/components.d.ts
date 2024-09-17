@@ -69,7 +69,7 @@ export type FormText = ComponentType<PropsWithChildren<{
 }> & TextProps> & { Types: FormTextTypes; };
 
 export type Tooltip = ComponentType<{
-    text: ReactNode;
+    text: ReactNode | ComponentType;
     children: FunctionComponent<{
         onClick(): void;
         onMouseEnter(): void;
