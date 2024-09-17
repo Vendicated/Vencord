@@ -47,7 +47,7 @@ export function SettingSelectComponent({ option, pluginSettings, definedSettings
     return (
         <Forms.FormSection>
             <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom20} type="description">{option.description}</Forms.FormText>
+            <Forms.FormText className={Margins.bottom16} type="description">{option.description}</Forms.FormText>
             <Select
                 isDisabled={option.disabled?.call(definedSettings) ?? false}
                 options={option.options}
