@@ -102,7 +102,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
      */
     a: (this: WebpackRequire, module: Module, body: AsyncModuleBody, hasAwaitAfterDependencies?: boolean) => void;
     /** getDefaultExport function for compatibility with non-harmony modules */
-    n: (this: WebpackRequire, module: Module) => () => ModuleExports;
+    n: (this: WebpackRequire, module: any) => () => ModuleExports;
     /**
      * Create a fake namespace object, useful for faking an __esModule with a default export.
      *
