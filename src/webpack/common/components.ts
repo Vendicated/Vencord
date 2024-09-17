@@ -28,6 +28,8 @@ export let Forms = {} as {
     FormText: t.FormText,
 };
 
+export let Icons = {} as t.Icons;
+
 export let Card: t.Card;
 export let Button: t.Button;
 export let Switch: t.Switch;
@@ -85,4 +87,5 @@ waitFor(["FormItem", "Button"], m => {
         Heading
     } = m);
     Forms = m;
+    Icons = m;
 });
