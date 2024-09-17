@@ -61,7 +61,7 @@ export default definePlugin({
     },
 
     start() {
-        // if were running the reporter, we need to initws in the reporter file to avoid a race condition
+        // if we're running the reporter, we need to initws in the reporter file to avoid a race condition
         if (!IS_COMPANION_TEST)
             initWs();
     },

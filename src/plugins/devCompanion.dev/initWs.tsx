@@ -125,6 +125,15 @@ export function initWs(isManual = false) {
                     toggleEnabled(pluginName, reply);
                 break;
             }
+            case "rawId": {
+                const { id } = data;
+                replyData({
+                    ok: true,
+                    data: extractModule(id),
+                    type: "ret"
+                });
+                break;
+            }
             case "diff": {
                 try {
                     const { extractType, idOrSearch } = data;
