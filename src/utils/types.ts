@@ -72,13 +72,13 @@ export interface PluginDef {
     stop?(): void;
     patches?: Omit<Patch, "plugin">[];
     /**
-     * List of commands. If you specify these, you must add CommandsAPI to dependencies
+     * List of commands that your plugin wants to register
      */
     commands?: Command[];
     /**
      * A list of other plugins that your plugin depends on.
      * These will automatically be enabled and loaded before your plugin
-     * Common examples are CommandsAPI, MessageEventsAPI...
+     * Generally these will be API plugins
      */
     dependencies?: string[],
     /**

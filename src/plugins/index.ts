@@ -105,6 +105,11 @@ for (const p of pluginsValues) if (isPluginEnabled(p.name)) {
         settings[d].enabled = true;
         dep.isDependency = true;
     });
+
+    if (p.commands?.length) {
+        Plugins.CommandsAPI.isDependency = true;
+        settings.CommandsAPI.enabled = true;
+    }
 }
 
 for (const p of pluginsValues) {
