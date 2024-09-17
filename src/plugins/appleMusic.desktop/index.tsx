@@ -248,8 +248,8 @@ export default definePlugin({
             state: isRadio ? undefined : customFormat(settings.store.stateString, trackData),
 
             timestamps: (trackData.playerPosition && trackData.duration && settings.store.enableTimestamps) ? {
-            start: Date.now() - (trackData.playerPosition * 1000),
-            end: Date.now() - (trackData.playerPosition * 1000) + (trackData.duration * 1000),
+                start: Date.now() - (trackData.playerPosition * 1000),
+                end: Date.now() - (trackData.playerPosition * 1000) + (trackData.duration * 1000),
             } : undefined,
 
             assets,
