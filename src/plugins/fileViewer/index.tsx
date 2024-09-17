@@ -175,7 +175,7 @@ export default definePlugin({
         style.id = "VencordFileViewer";
         document.head.appendChild(style);
     },
-    renderPreviewButton(e) {
+    renderPreviewButton: ErrorBoundary.wrap(e => {
         if (e.item.originalItem.content_type !== "application/pdf") return null;
         return <PreviewButton attachment={e.item.originalItem} channelId={e.message.channel_id} messageId={e.message.id} />;
     },
