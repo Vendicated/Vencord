@@ -19,6 +19,8 @@
 import { LoDashStatic } from "lodash";
 
 declare global {
+    type AnyRecord = Record<PropertyKey, any>;
+
     /**
      * This exists only at build time, so references to it in patches should insert it
      * via String interpolation OR use different replacement code based on this
@@ -64,7 +66,7 @@ declare global {
     export var Vesktop: any;
     export var VesktopNative: any;
 
-    interface Window extends Record<PropertyKey, any> {
+    interface Window extends AnyRecord {
         _: LoDashStatic;
     }
 }

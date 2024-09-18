@@ -72,7 +72,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
     //  * });
     //  * @returns fromObject
     //  */
-    // es: (this: WebpackRequire, fromObject: Record<PropertyKey, any>, toObject: Record<PropertyKey, any>) => Record<PropertyKey, any>;
+    // es: (this: WebpackRequire, fromObject: AnyRecord, toObject: AnyRecord) => AnyRecord;
     /**
      * Creates an async module. A module that exports something that is a Promise, or requires an export from an async module.
      *
@@ -132,7 +132,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
      * }
      * // exports is now { exportName: someExportedValue } (but each value is actually a getter)
      */
-    d: (this: WebpackRequire, exports: Record<PropertyKey, any>, definiton: Record<PropertyKey, any>) => void;
+    d: (this: WebpackRequire, exports: AnyRecord, definiton: AnyRecord) => void;
     /** The chunk handlers, which are used to ensure the files of the chunks are loaded, or load if necessary */
     f: ChunkHandlers;
     /**

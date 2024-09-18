@@ -51,12 +51,13 @@ export type ModCallbackInfo = {
     factory: AnyModuleFactory;
 };
 
+export type FactoryListernFn = (factory: AnyModuleFactory) => void;
 export type ModListenerFn = (module: ModuleExports, info: ModListenerInfo) => void;
 export type ModCallbackFn = ((module: ModuleExports, info: ModCallbackInfo) => void) & {
     $$vencordCallbackCalled?: () => boolean;
 };
 
-export const factoryListeners = new Set<(factory: AnyModuleFactory) => void>();
+export const factoryListeners = new Set<FactoryListernFn>();
 export const moduleListeners = new Set<ModListenerFn>();
 export const waitForSubscriptions = new Map<FilterFn, ModCallbackFn>();
 
@@ -170,16 +171,14 @@ function printFilter(filter: FilterFn) {
     return String(filter);
 }
 
-function wrapWebpackComponent<T extends object = any>(
-    errMsg: string | (() => string)
-): [WrapperComponent: LazyComponentType<T>, setInnerComponent: (rawComponent: any, parsedComponent: LazyComponentType<T>) => void] {
-    let InnerComponent = null as LazyComponentType<T> | null;
+function wrapWebpackComponent<P extends AnyRecord>(err: string | (() => string)): [WrapperComponent: LazyComponentType<P>, setInnerComponent: (rawComponent: any, parsedComponent: LazyComponentType<P>) => void] {
+    let InnerComponent = null as LazyComponentType<P> | null;
 
     let findFailedLogged = false;
-    const WrapperComponent = (props: T) => {
+    const WrapperComponent: LazyComponentType<P> = function (props) {
         if (InnerComponent === null && !findFailedLogged) {
             findFailedLogged = true;
-            logger.error(typeof errMsg === "string" ? errMsg : errMsg());
+            logger.error(typeof err === "string" ? err : err());
         }
 
         return InnerComponent && <InnerComponent {...props} />;
@@ -187,7 +186,7 @@ function wrapWebpackComponent<T extends object = any>(
 
     WrapperComponent[SYM_LAZY_COMPONENT_INNER] = () => InnerComponent;
 
-    function setInnerComponent(RawComponent: any, ParsedComponent: LazyComponentType<T>) {
+    function setInnerComponent(RawComponent: any, ParsedComponent: LazyComponentType<P>) {
         InnerComponent = ParsedComponent;
         Object.assign(WrapperComponent, RawComponent);
     }
@@ -282,7 +281,7 @@ export function find<T = any>(filter: FilterFn, parse: (module: ModuleExports) =
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findComponent<T extends object = any>(filter: FilterFn, parse: (component: ModuleExports) => LazyComponentType<T> = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+export function findComponent<P extends AnyRecord>(filter: FilterFn, parse: (component: ModuleExports) => LazyComponentType<P> = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
     if (typeof filter !== "function") {
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
     }
@@ -290,14 +289,14 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
         throw new Error("Invalid component parse. Expected a function got " + typeof parse);
     }
 
-    const [WrapperComponent, setInnerComponent] = wrapWebpackComponent<T>(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
+    const [WrapperComponent, setInnerComponent] = wrapWebpackComponent<P>(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
     waitFor(filter, m => setInnerComponent(m, parse(m)), { isIndirect: true });
 
     if (IS_REPORTER && !isIndirect) {
         webpackSearchHistory.push(["findComponent", [WrapperComponent, filter]]);
     }
 
-    if (WrapperComponent[SYM_LAZY_COMPONENT_INNER]() != null) return WrapperComponent[SYM_LAZY_COMPONENT_INNER]() as LazyComponentType<T>;
+    if (WrapperComponent[SYM_LAZY_COMPONENT_INNER]() != null) return WrapperComponent[SYM_LAZY_COMPONENT_INNER]()!;
 
     return WrapperComponent;
 }
@@ -312,20 +311,20 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findExportedComponent<T extends object = any>(...props: PropsFilter | [...PropsFilter, (component: ModuleExports) => LazyComponentType<T>]) {
-    const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (component: ModuleExports) => LazyComponentType<T>;
+export function findExportedComponent<P extends AnyRecord>(...props: PropsFilter | [...PropsFilter, (component: ModuleExports) => LazyComponentType<P>]) {
+    const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (component: ModuleExports) => LazyComponentType<P>;
     const newProps = props as PropsFilter;
 
     const filter = filters.byProps(...newProps);
 
-    const [WrapperComponent, setInnerComponent] = wrapWebpackComponent<T>(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
+    const [WrapperComponent, setInnerComponent] = wrapWebpackComponent<P>(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
     waitFor(filter, m => setInnerComponent(m[newProps[0]], parse(m[newProps[0]])), { isIndirect: true });
 
     if (IS_REPORTER) {
         webpackSearchHistory.push(["findExportedComponent", [WrapperComponent, ...newProps]]);
     }
 
-    if (WrapperComponent[SYM_LAZY_COMPONENT_INNER]() != null) return WrapperComponent[SYM_LAZY_COMPONENT_INNER]() as LazyComponentType<T>;
+    if (WrapperComponent[SYM_LAZY_COMPONENT_INNER]() != null) return WrapperComponent[SYM_LAZY_COMPONENT_INNER]()!;
 
     return WrapperComponent;
 }
@@ -340,11 +339,11 @@ export function findExportedComponent<T extends object = any>(...props: PropsFil
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findComponentByCode<T extends object = any>(...code: CodeFilter | [...CodeFilter, (component: ModuleExports) => LazyComponentType<T>]) {
-    const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (component: ModuleExports) => LazyComponentType<T>;
+export function findComponentByCode<P extends AnyRecord>(...code: CodeFilter | [...CodeFilter, (component: ModuleExports) => LazyComponentType<P>]) {
+    const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (component: ModuleExports) => LazyComponentType<P>;
     const newCode = code as CodeFilter;
 
-    const ComponentResult = findComponent<T>(filters.componentByCode(...newCode), parse, { isIndirect: true });
+    const ComponentResult = findComponent<P>(filters.componentByCode(...newCode), parse, { isIndirect: true });
 
     if (IS_REPORTER) {
         webpackSearchHistory.push(["findComponentByCode", [ComponentResult, ...newCode]]);
@@ -363,11 +362,11 @@ export function findComponentByCode<T extends object = any>(...code: CodeFilter 
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findComponentByFields<T extends object = any>(...fields: PropsFilter | [...PropsFilter, (component: ModuleExports) => LazyComponentType<T>]) {
-    const parse = (typeof fields.at(-1) === "function" ? fields.pop() : m => m) as (component: ModuleExports) => LazyComponentType<T>;
+export function findComponentByFields<P extends AnyRecord>(...fields: PropsFilter | [...PropsFilter, (component: ModuleExports) => LazyComponentType<P>]) {
+    const parse = (typeof fields.at(-1) === "function" ? fields.pop() : m => m) as (component: ModuleExports) => LazyComponentType<P>;
     const newFields = fields as PropsFilter;
 
-    const ComponentResult = findComponent<T>(filters.componentByFields(...newFields), parse, { isIndirect: true });
+    const ComponentResult = findComponent<P>(filters.componentByFields(...newFields), parse, { isIndirect: true });
 
     if (IS_REPORTER) {
         webpackSearchHistory.push(["findComponentByCode", [ComponentResult, ...newFields]]);
@@ -497,14 +496,14 @@ export function mapMangledModule<S extends PropertyKey>(code: CodeFilterWithSing
         const mapperFilter = mappers[newName];
 
         // Wrapper to select whether the parent factory filter or child mapper filter failed when the error is thrown
-        const errorMsgWrapper = () => `Webpack mapMangledModule ${callbackCalled ? "mapper" : "factory"} filter matched no module. Filter: ${printFilter(callbackCalled ? mapperFilter : factoryFilter)}`;
+        const errorWrapper = () => `Webpack mapMangledModule ${callbackCalled ? "mapper" : "factory"} filter matched no module. Filter: ${printFilter(callbackCalled ? mapperFilter : factoryFilter)}`;
 
         if (mapperFilter.$$vencordIsComponentFilter) {
-            const [WrapperComponent, setInnerComponent] = wrapWebpackComponent(errorMsgWrapper);
+            const [WrapperComponent, setInnerComponent] = wrapWebpackComponent(errorWrapper);
             mapping[newName] = WrapperComponent;
             wrapperComponentSetters[newName] = setInnerComponent;
         } else {
-            const [proxy, setInnerValue] = proxyInner(errorMsgWrapper, "Webpack find with proxy called on a primitive value. This may happen if you are trying to destructure a mapMangledModule primitive value on top level.");
+            const [proxy, setInnerValue] = proxyInner(errorWrapper, "Webpack find with proxy called on a primitive value. This may happen if you are trying to destructure a mapMangledModule primitive value on top level.");
             mapping[newName] = proxy;
             proxyInnerSetters[newName] = setInnerValue;
         }
@@ -604,12 +603,12 @@ export function webpackDependantLazy<T = any>(factory: () => T, attempts?: numbe
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
  */
-export function webpackDependantLazyComponent<T extends object = any>(factory: () => any, attempts?: number) {
+export function webpackDependantLazyComponent<P extends AnyRecord>(factory: () => any, attempts?: number) {
     if (IS_REPORTER) {
         webpackSearchHistory.push(["webpackDependantLazyComponent", [factory]]);
     }
 
-    return LazyComponent<T>(factory, attempts, `Webpack dependant LazyComponent factory failed:\n${factory}`);
+    return LazyComponent<P>(factory, attempts, `Webpack dependant LazyComponent factory failed:\n${factory}`);
 }
 
 export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/;

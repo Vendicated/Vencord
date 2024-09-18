@@ -241,7 +241,7 @@ export interface Constants {
 
 export type ActiveView = LiteralUnion<"emoji" | "gif" | "sticker" | "soundboard", string>;
 
-export interface ExpressionPickerStoreState extends Record<PropertyKey, any> {
+export interface ExpressionPickerStoreState extends AnyRecord {
     activeView: ActiveView | null;
     lastActiveView: ActiveView | null;
     activeViewType: any | null;

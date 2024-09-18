@@ -17,7 +17,7 @@ const selectVoiceChannel = findProp("selectVoiceChannel", "selectChannel");
 const VoiceStateStore = findStore("VoiceStateStore");
 const UserSummaryItem = findComponentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 
-interface IconProps extends React.HTMLAttributes<HTMLDivElement> {
+interface IconProps extends React.ComponentPropsWithoutRef<"div"> {
     size?: number;
 }
 

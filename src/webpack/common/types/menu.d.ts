@@ -18,7 +18,7 @@
 
 import type { ComponentType, CSSProperties, MouseEvent, PropsWithChildren, ReactNode, UIEvent } from "react";
 
-type RC<C> = ComponentType<PropsWithChildren<C & Record<PropertyKey, any>>>;
+type RC<C> = ComponentType<PropsWithChildren<C & AnyRecord>>;
 
 export interface Menu {
     Menu: RC<{
@@ -73,7 +73,7 @@ export interface Menu {
         renderValue?(value: number): string,
     }>;
     MenuSearchControl: RC<{
-        query: string
+        query: string;
         onChange(query: string): void;
         placeholder?: string;
     }>;

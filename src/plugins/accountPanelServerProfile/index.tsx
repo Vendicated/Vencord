@@ -23,7 +23,7 @@ const UserProfile = findComponentByCode("UserProfilePopoutWrapper: user cannot b
 const styles = findByProps("accountProfilePopoutWrapper");
 
 let openAlternatePopout = false;
-let accountPanelRef: React.MutableRefObject<Record<PropertyKey, any> | null> = { current: null };
+let accountPanelRef: React.MutableRefObject<AnyRecord | null> = { current: null };
 
 const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
     const { prioritizeServerProfile } = settings.use(["prioritizeServerProfile"]);
