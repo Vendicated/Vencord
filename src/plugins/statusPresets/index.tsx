@@ -26,10 +26,6 @@ import { Button, Menu, Text, Toasts } from "@webpack/common";
 const Components = findByPropsLazy("Status");
 const StatusStyles = findByPropsLazy("statusItem");
 
-const statusCrossSponding = {
-    "online": "rgb(35, 165, 90)"
-};
-
 interface Emoji {
     animated: boolean;
     id: bigint | null;
@@ -71,9 +67,8 @@ function MakeContextCallback(): NavContextMenuPatchCallback {
                     label={status.status}
                     action={() => console.log("pog")}
                     render={() => (<div className={StatusStyles.statusItem}><Components.Status
-                        status={status} className={StatusStyles.icon}
+                        status={status.status} className={StatusStyles.icon}
                         size={10}
-                        color={statusCrossSponding[status.status] || "currentColor"}
                     />
                         <div className={StatusStyles.status}>{status.status}</div>
                         <div className={StatusStyles.description}>{status.text}</div>
@@ -102,8 +97,7 @@ export default definePlugin({
     contextMenus: {
         "set-status-submenu": MakeContextCallback()
     },
-    renderRememberButton({ statue }: { statue: DiscordStatus; }) {
-        if (!statue) return;
+    renderRememberButton(statue: DiscordStatus) {
         return <Button onClick={() => {
             settings.store.StatusPresets[statue.text] = statue;
             Toasts.show({
