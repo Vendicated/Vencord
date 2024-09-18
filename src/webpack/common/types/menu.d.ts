@@ -16,12 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { ComponentType, CSSProperties, MouseEvent, PropsWithChildren, ReactNode, UIEvent } from "react";
-
-type RC<C> = ComponentType<PropsWithChildren<C & AnyRecord>>;
+import type { CSSProperties, MouseEvent, ReactNode, UIEvent } from "react";
 
 export interface Menu {
-    Menu: RC<{
+    Menu: AnyComponentTypeWithChildren<{
         navId: string;
         onClose(): void;
         className?: string;
@@ -29,31 +27,31 @@ export interface Menu {
         hideScroller?: boolean;
         onSelect?(): void;
     }>;
-    MenuSeparator: ComponentType;
-    MenuGroup: RC<{
+    MenuSeparator: AnyComponentType;
+    MenuGroup: AnyComponentTypeWithChildren<{
         label?: string;
     }>;
-    MenuItem: RC<{
+    MenuItem: AnyComponentTypeWithChildren<{
         id: string;
         label: ReactNode;
         action?(e: MouseEvent): void;
-        icon?: ComponentType<any>;
+        icon?: AnyComponentType<any>;
 
         color?: string;
-        render?: ComponentType<any>;
+        render?: AnyComponentType<any>;
         onChildrenScroll?: Function;
         childRowHeight?: number;
         listClassName?: string;
         disabled?: boolean;
     }>;
-    MenuCheckboxItem: RC<{
+    MenuCheckboxItem: AnyComponentTypeWithChildren<{
         id: string;
         label: string;
         checked: boolean;
         action?(e: MouseEvent): void;
         disabled?: boolean;
     }>;
-    MenuRadioItem: RC<{
+    MenuRadioItem: AnyComponentTypeWithChildren<{
         id: string;
         group: string;
         label: string;
@@ -61,18 +59,18 @@ export interface Menu {
         action?(e: MouseEvent): void;
         disabled?: boolean;
     }>;
-    MenuControlItem: RC<{
+    MenuControlItem: AnyComponentTypeWithChildren<{
         id: string;
         interactive?: boolean;
     }>;
-    MenuSliderControl: RC<{
+    MenuSliderControl: AnyComponentTypeWithChildren<{
         minValue: number,
         maxValue: number,
         value: number,
         onChange(value: number): void,
         renderValue?(value: number): string,
     }>;
-    MenuSearchControl: RC<{
+    MenuSearchControl: AnyComponentTypeWithChildren<{
         query: string;
         onChange(query: string): void;
         placeholder?: string;
