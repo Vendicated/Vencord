@@ -271,6 +271,7 @@ export default definePlugin({
             showInChat: true,
             showInNotChat: true
         };
+        settings.store.useBotInsteadOfApp ??= false;
     },
 
     getPermissions(user: User, channel: Channel): string[] {
