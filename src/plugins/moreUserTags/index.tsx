@@ -165,6 +165,11 @@ const settings = definePluginSettings({
         description: "Only show extra tags for bots / Hide [BOT] text",
         type: OptionType.BOOLEAN
     },
+    useBotNotApp: {
+        description: "Use [BOT] instead of [APP] for bot tags",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
     tagSettings: {
         type: OptionType.COMPONENT,
         component: SettingsComponent,
