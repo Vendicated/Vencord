@@ -43,7 +43,7 @@ export function SettingsTab({ title, children }: React.PropsWithChildren<{ title
 
 export const handleSettingsTabError = onlyOnce(handleComponentFailed);
 
-export function wrapTab(component: React.ComponentType<AnyRecord>, tab: string) {
+export function wrapTab<P extends AnyRecord>(component: React.ComponentType<P>, tab: string) {
     return ErrorBoundary.wrap(component, {
         message: `Failed to render the ${tab} tab. If this issue persists, try using the installer to reinstall!`,
         onError: handleSettingsTabError,
