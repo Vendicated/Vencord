@@ -17,12 +17,11 @@
 */
 
 import { LoDashStatic } from "lodash";
-import { PropsWithChildren } from "react";
 
 declare global {
     type AnyRecord = Record<PropertyKey, any>;
     type AnyComponentType<P extends AnyRecord = AnyRecord> = React.ComponentType<P & AnyRecord> & AnyRecord;
-    type AnyComponentTypeWithChildren<P extends AnyRecord = AnyRecord> = AnyComponentType<PropsWithChildren<P>>;
+    type AnyComponentTypeWithChildren<P extends AnyRecord = AnyRecord> = AnyComponentType<React.PropsWithChildren<P>>;
 
     /**
      * This exists only at build time, so references to it in patches should insert it
