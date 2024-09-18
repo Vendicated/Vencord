@@ -60,17 +60,17 @@ export default definePlugin({
     },
 
     async buildCss() {
-        let chatMessages = ""
-        let messagesContent = ""
-        hiddenMessages.forEach((ids) => {
-            chatMessages += `#chat-messages-${JSON.parse(ids).channelId}-${JSON.parse(ids).messageId},`
-            messagesContent += `#message-content-${JSON.parse(ids).messageId},`
-        })
+        const chatMessages = [...hiddenMessages].map(ids => `#chat-messages-${JSON.parse(ids).channelId}-${JSON.parse(ids).messageId}`).join(",");
+        const messagesContent = [...hiddenMessages].map(ids => `#message-content-${JSON.parse(ids).messageId}`).join(",");
+        const messagesAccessories = [...hiddenMessages].map(ids => `#message-accessories-${JSON.parse(ids).messageId}`).join(",");
         style.textContent = `
         :is(${chatMessages}) :is([class*="message_d5deea"]) :is([class*="embedWrapper"], [class*="clickableSticker"]) {
             display: none !important;
         }
         :is(${messagesContent}) {
+            display: none !important;
+        }
+        :is(${messagesAccessories}) {
             display: none !important;
         }
         `;
