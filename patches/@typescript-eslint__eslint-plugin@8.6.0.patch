@@ -1,0 +1,72 @@
+diff --git a/dist/rules/class-literal-property-style.js b/dist/rules/class-literal-property-style.js
+index 2454cd853753408dca5335cf7cf7eccbd28d5255..c8c0aef6ef8fa1ce8beafeed06e68ebf88c3ec87 100644
+--- a/dist/rules/class-literal-property-style.js
++++ b/dist/rules/class-literal-property-style.js
+@@ -79,8 +79,7 @@ exports.default = (0, util_1.createRule)({
+         function excludeAssignedProperty(node) {
+             if ((0, util_1.isAssignee)(node)) {
+                 const { excludeSet } = propertiesInfoStack[propertiesInfoStack.length - 1];
+-                const name = (0, util_1.getStaticStringValue)(node.property) ??
+-                    context.sourceCode.getText(node.property);
++                const name = (0, util_1.getStaticMemberAccessValue)(node, context);
+                 if (name) {
+                     excludeSet.add(name);
+                 }
+diff --git a/dist/rules/class-methods-use-this.js b/dist/rules/class-methods-use-this.js
+index 6d4a871cb4f6f57b97c338a472ea77dc10841706..acaa45fde2a8a9a2f9702cc80737c1b0bcc078ee 100644
+--- a/dist/rules/class-methods-use-this.js
++++ b/dist/rules/class-methods-use-this.js
+@@ -121,7 +121,7 @@ exports.default = (0, util_1.createRule)({
+             }
+             const hashIfNeeded = node.key.type === utils_1.AST_NODE_TYPES.PrivateIdentifier ? '#' : '';
+             const name = (0, util_1.getStaticMemberAccessValue)(node, context);
+-            return !exceptMethods.has(hashIfNeeded + (name ?? ''));
++            return (typeof name !== 'string' || !exceptMethods.has(hashIfNeeded + name));
+         }
+         /**
+          * Checks if we are leaving a function that is a method, and reports if 'this' has not been used.
+diff --git a/dist/util/isArrayMethodCallWithPredicate.js b/dist/util/isArrayMethodCallWithPredicate.js
+index eba71334f16a931ee51e9ad6d11cf4bba3c41a75..73a4044660d223450c54a9f9939631ad71562c05 100644
+--- a/dist/util/isArrayMethodCallWithPredicate.js
++++ b/dist/util/isArrayMethodCallWithPredicate.js
+@@ -42,7 +42,7 @@ function isArrayMethodCallWithPredicate(context, services, node) {
+         return false;
+     }
+     const staticAccessValue = (0, misc_1.getStaticMemberAccessValue)(node.callee, context);
+-    if (!staticAccessValue || !ARRAY_PREDICATE_FUNCTIONS.has(staticAccessValue)) {
++    if (!ARRAY_PREDICATE_FUNCTIONS.has(staticAccessValue)) {
+         return false;
+     }
+     const checker = services.program.getTypeChecker();
+diff --git a/dist/util/misc.js b/dist/util/misc.js
+index 4b4d937ee0f1c6bd51de3d5c7fb931648642abf6..826dcee437f9df7d81168bd5229c79a769692d89 100644
+--- a/dist/util/misc.js
++++ b/dist/util/misc.js
+@@ -198,13 +198,21 @@ function isParenlessArrowFunction(node, sourceCode) {
+ }
+ function getStaticMemberAccessValue(node, { sourceCode }) {
+     const key = node.type === utils_1.AST_NODE_TYPES.MemberExpression ? node.property : node.key;
+-    if (!node.computed) {
+-        return key.type === utils_1.AST_NODE_TYPES.Literal
+-            ? `${key.value}`
+-            : key.name;
++    const { type } = key;
++    if (type === utils_1.AST_NODE_TYPES.Literal) {
++        return String(key.value);
+     }
+-    const value = (0, astUtils_1.getStaticValue)(key, sourceCode.getScope(node))?.value;
+-    return value == null ? undefined : `${value}`;
++    if (!node.computed &&
++        (type === utils_1.AST_NODE_TYPES.Identifier ||
++        type === utils_1.AST_NODE_TYPES.PrivateIdentifier)) {
++        return key.name;
++    }
++    const result = (0, astUtils_1.getStaticValue)(key, sourceCode.getScope(node));
++    if (!result) {
++        return undefined;
++    }
++    const { value } = result;
++    return typeof value === 'symbol' ? value : String(value);
+ }
+ /**
+  * Answers whether the member expression looks like

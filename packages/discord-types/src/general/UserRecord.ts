@@ -53,6 +53,7 @@ export declare class UserRecord<
     isNonUserBot(): boolean;
     isPhoneVerified(): boolean;
     isPomelo(): boolean;
+    isProvisional(): boolean;
     isSystemUser(): boolean;
     isVerifiedBot(): boolean;
     removeGuildAvatarHash(guildId: string): this;
