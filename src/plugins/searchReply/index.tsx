@@ -35,7 +35,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
     if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return;
 
     // dms and group chats
-    const dmGroup = findGroupChildrenByChildId("pin", children);
+    const dmGroup = findGroupChildrenByChildId("create-thread", children);
     if (dmGroup && !dmGroup.some(child => child?.props?.id === "reply")) {
         const pinIndex = dmGroup.findIndex(c => c?.props.id === "pin");
         dmGroup.splice(pinIndex + 1, 0, (
@@ -50,7 +50,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { messag
     }
 
     // servers
-    const serverGroup = findGroupChildrenByChildId("mark-unread", children);
+    const serverGroup = findGroupChildrenByChildId("create-thread", children);
     if (serverGroup && !serverGroup.some(child => child?.props?.id === "reply")) {
         serverGroup.unshift((
             <Menu.MenuItem
