@@ -26,7 +26,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Menu, ReactDOM } from "@webpack/common";
 import type { Root } from "react-dom/client";
 
-import { Magnifier, MagnifierProps } from "./components/Magnifier";
+import { Magnifier } from "./components/Magnifier";
 import { ELEMENT_ID } from "./constants";
 import styles from "./styles.css?managed";
 
@@ -201,7 +201,7 @@ export default definePlugin({
     },
 
     // to stop from rendering twice /shrug
-    currentMagnifierElement: null as React.FunctionComponentElement<MagnifierProps & JSX.IntrinsicAttributes> | null,
+    currentMagnifierElement: null as React.ReactNode,
     element: null as HTMLDivElement | null,
 
     Magnifier,
