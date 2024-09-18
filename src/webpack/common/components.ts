@@ -44,6 +44,8 @@ export let Avatar: t.Avatar = NoopComponent;
 export let FocusLock: t.FocusLock = NoopComponent;
 export let useToken: t.useToken;
 
+export let Icons = {} as t.Icons;
+
 export const MaskedLink = findComponentByCode<t.MaskedLinkProps>("MASKED_LINK)");
 export const Timestamp = findComponentByCode<t.TimestampProps>(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format");
 export const Flex = findComponent(filters.byProps("Justify", "Align", "Wrap")) as t.Flex;
@@ -76,5 +78,6 @@ export const Forms = findByProps<t.Forms>("FormItem", "Button", m => {
         Heading
     } = m);
 
+    Icons = m;
     return m;
 });

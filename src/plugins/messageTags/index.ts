@@ -84,8 +84,6 @@ export default definePlugin({
     authors: [Devs.Luna],
     settings,
 
-    dependencies: ["CommandsAPI"],
-
     async start() {
         for (const tag of await getTags()) createTagCommand(tag);
     },

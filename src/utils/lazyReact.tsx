@@ -19,7 +19,7 @@ export type LazyComponentType<P extends AnyRecord> = React.FunctionComponent<P> 
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
  */
-export function LazyComponent<P extends AnyRecord>(factory: () => AnyComponentType<P>, attempts = 5, err: string | (() => string) = `LazyComponent factory failed:\n${factory}`): LazyComponentType<P> {
+export function LazyComponent<P extends AnyRecord>(factory: () => React.ComponentType<P>, attempts = 5, err: string | (() => string) = `LazyComponent factory failed:\n${factory}`): LazyComponentType<P> {
     const get = makeLazy(factory, attempts, { isIndirect: true });
 
     let InnerComponent = null as AnyComponentType<P> | null;
