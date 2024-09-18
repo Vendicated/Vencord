@@ -296,7 +296,7 @@ export function findComponent<P extends AnyRecord>(filter: FilterFn, parse: (com
         webpackSearchHistory.push(["findComponent", [WrapperComponent, filter]]);
     }
 
-    if (WrapperComponent[SYM_LAZY_COMPONENT_INNER]() != null) return WrapperComponent[SYM_LAZY_COMPONENT_INNER]()!;
+    if (WrapperComponent[SYM_LAZY_COMPONENT_INNER]() != null) return WrapperComponent[SYM_LAZY_COMPONENT_INNER]() as AnyLazyComponentType<P>;
 
     return WrapperComponent;
 }
@@ -324,7 +324,7 @@ export function findExportedComponent<P extends AnyRecord>(...props: PropsFilter
         webpackSearchHistory.push(["findExportedComponent", [WrapperComponent, ...newProps]]);
     }
 
-    if (WrapperComponent[SYM_LAZY_COMPONENT_INNER]() != null) return WrapperComponent[SYM_LAZY_COMPONENT_INNER]()!;
+    if (WrapperComponent[SYM_LAZY_COMPONENT_INNER]() != null) return WrapperComponent[SYM_LAZY_COMPONENT_INNER]() as AnyLazyComponentType<P>;
 
     return WrapperComponent;
 }
