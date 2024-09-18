@@ -137,6 +137,7 @@ export default definePlugin({
     authors: [Devs.AGreenPig],
     dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI",],
     settings,
+
     patches: [
         {
             find: "Messages.IMG_ALT_ATTACHMENT_FILE_TYPE.format",
@@ -146,6 +147,7 @@ export default definePlugin({
             }
         }
     ],
+
     start() {
         addAccessory("pdfViewer", props => {
             const pdfAttachments = props.message.attachments.filter(a => a.content_type === "application/pdf");
@@ -160,12 +162,15 @@ export default definePlugin({
             );
         }, -1);
     },
-    renderPreviewButton: ErrorBoundary.wrap(e => {
-        if (e.item.originalItem.content_type !== "application/pdf") return null;
-        return <PreviewButton attachment={e.item.originalItem} channelId={e.message.channel_id} messageId={e.message.id} />;
-    }),
+
     stop() {
         objectUrlsCache.clear();
         removeAccessory("pdfViewer");
     }
+
+    renderPreviewButton: ErrorBoundary.wrap(e => {
+        if (e.item.originalItem.content_type !== "application/pdf") return null;
+        return <PreviewButton attachment={e.item.originalItem} channelId={e.message.channel_id} messageId={e.message.id} />;
+    }, { noop: true }),
+
 });
