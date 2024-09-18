@@ -11,7 +11,7 @@ export const SYM_LAZY_COMPONENT_INNER = Symbol.for("vencord.lazyComponent.inner"
 export type LazyComponentType<P extends AnyRecord = AnyRecord> = React.FunctionComponent<P> & AnyRecord & {
     [SYM_LAZY_COMPONENT_INNER]: () => AnyComponentType<P> | null;
 };
-export type AnyLazyComponentType<P extends AnyRecord> = LazyComponentType<P & AnyRecord>;
+export type AnyLazyComponentType<P extends AnyRecord = AnyRecord> = LazyComponentType<P & AnyRecord>;
 
 /**
  * A lazy component. The factory method is called on first render.
