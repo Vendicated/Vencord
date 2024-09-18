@@ -56,7 +56,7 @@ function FilePreview({ attachment }: { attachment: Attachment; }) {
 
     return (
         <div className={"vc-pdf-viewer-container"}>
-            {previewBlobUrl ? <embed src={previewBlobUrl} className="vc-pdf-viewer-preview" title={attachment.filename} /> : <Spinner />}
+            {previewBlobUrl ? <embed src={previewBlobUrl} className="vc-pdf-viewer-preview" title={attachment.filename} /> : <div style={{ display: "flex" }}><Spinner /></div>}
         </div>
     );
 }
