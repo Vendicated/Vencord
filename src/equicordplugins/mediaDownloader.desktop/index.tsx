@@ -194,7 +194,6 @@ export default definePlugin({
     name: "MediaDownloader",
     description: "Download and send videos with from YouTube, Twitter, Reddit and more.",
     authors: [EquicordDevs.Colorman],
-    dependencies: ["CommandsAPI"],
     reporterTestable: ReporterTestable.Patches,
     settings,
     commands: [{

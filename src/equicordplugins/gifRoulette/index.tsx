@@ -40,7 +40,6 @@ export default definePlugin({
     name: "GifRoulette",
     description: "Adds a command to send a random gif from your favourites, and a one in ten chance to ping the owner of the server",
     authors: [Devs.Samwich],
-    dependencies: ["CommandsAPI"],
     settings,
     commands: [
         {

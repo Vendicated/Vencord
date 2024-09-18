@@ -19,7 +19,6 @@ export default definePlugin({
     name: "CuteNekos",
     authors: [Devs.echo],
     description: "Neko Command",
-    dependencies: ["CommandsAPI"],
     commands: [{
         name: "nekos",
         description: "Baby don't hurt me no more",

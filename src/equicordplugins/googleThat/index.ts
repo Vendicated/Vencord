@@ -56,7 +56,6 @@ export default definePlugin({
     description: "Adds a command to send a google search link to a query",
     authors: [Devs.Samwich],
     tags: ["search", "google", "query", "duckduckgo", "command"],
-    dependencies: ["CommandsAPI"],
     settings,
     commands: [
         {

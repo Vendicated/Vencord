@@ -18,9 +18,8 @@ async function getcutepats(): Promise<string> {
 
 export default definePlugin({
     name: "CutePats",
-    description: "Pat Command",
-    dependencies: ["CommandsAPI"],
     authors: [EquicordDevs.thororen],
+    description: "Pat Command",
     commands: [{
         name: "pat",
         description: "Baby don't hurt me no more",

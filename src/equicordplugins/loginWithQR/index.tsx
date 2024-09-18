@@ -68,8 +68,8 @@ export default definePlugin({
         {
             find: "Messages.MULTI_ACCOUNT_MENU_LABEL",
             replacement: {
-                // Insert our own MenuItem before the Switch Account button
-                match: /children:\[(.{54}id:"switch-account")/,
+                // Insert our own MenuItem before the Switch Accounts button
+                match: /children:\[(.{0,54}id:"switch-accounts")/,
                 replace: "children:[$self.ScanQrMenuItem,$1",
             },
         },

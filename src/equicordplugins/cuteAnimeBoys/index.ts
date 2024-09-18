@@ -31,7 +31,6 @@ export default definePlugin({
     name: "CuteAnimeBoys",
     authors: [EquicordDevs.ShadyGoat],
     description: "Add a command to send cute anime boys in the chat",
-    dependencies: ["CommandsAPI"],
     commands: [{
         name: "anime-boys",
         description: "Send cute anime boys",

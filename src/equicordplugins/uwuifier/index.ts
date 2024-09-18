@@ -152,7 +152,7 @@ export default definePlugin({
     name: "UwUifier",
     description: "Make everything uwu",
     authors: [Devs.echo],
-    dependencies: ["CommandsAPI", "MessageEventsAPI"],
+    dependencies: ["MessageEventsAPI"],
     settings,
 
     commands: [
