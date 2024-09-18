@@ -42,12 +42,14 @@ const settings = definePluginSettings({
     }
 });
 
-export function buildSeveralUsers({ a, b, count }: { a: string, b: string, count: number; }) {
+export function buildSeveralUsers({ a, b, c, count }: { a: string, b: string, c: string, count: number; }) {
     return [
         <strong key="0">{a}</strong>,
         ", ",
         <strong key="1">{b}</strong>,
-        `, and ${count} others are typing...`
+        ", ",
+        <strong key="2">{c}</strong>,
+        ` and ${count} others are typing...`
     ];
 }
 
@@ -112,8 +114,8 @@ export default definePlugin({
         {
             find: "getCooldownTextStyle",
             replacement: {
-                match: /(?<=(\i)\.length\?\i.\i\.Messages.THREE_USERS_TYPING\.format\({\i:(\i),(?:\i:)?(\i),\i:\i}\):)\i\.\i\.Messages\.SEVERAL_USERS_TYPING/,
-                replace: (_, users, a, b) => `$self.buildSeveralUsers({ a: ${a}, b: ${b}, count: ${users}.length - 2 })`
+                match: /(?<=(\i)\.length\?\i.\i\.Messages.THREE_USERS_TYPING\.format\({\i:(\i),\i:(\i),\i:(\i)}\):)\i\.\i\.Messages\.SEVERAL_USERS_TYPING/,
+                replace: (_, users, a, b, c) => `$self.buildSeveralUsers({ a: ${a}, b: ${b}, c: ${c}, count: ${users}.length - 2 })`
             },
             predicate: () => settings.store.alternativeFormatting
         }
