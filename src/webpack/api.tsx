@@ -5,7 +5,7 @@
  */
 
 import { makeLazy, proxyLazy } from "@utils/lazy";
-import { LazyComponent, LazyComponentType, SYM_LAZY_COMPONENT_INNER } from "@utils/lazyReact";
+import { AnyLazyComponentType, LazyComponent, SYM_LAZY_COMPONENT_INNER } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
 import { proxyInner, SYM_PROXY_INNER_GET, SYM_PROXY_INNER_VALUE } from "@utils/proxyInner";
@@ -171,11 +171,11 @@ function printFilter(filter: FilterFn) {
     return String(filter);
 }
 
-function wrapWebpackComponent<P extends AnyRecord>(err: string | (() => string)): [WrapperComponent: LazyComponentType<P>, setInnerComponent: (rawComponent: any, parsedComponent: React.ComponentType<P>) => void] {
+function wrapWebpackComponent<P extends AnyRecord>(err: string | (() => string)): [WrapperComponent: AnyLazyComponentType<P>, setInnerComponent: (rawComponent: any, parsedComponent: React.ComponentType<P>) => void] {
     let InnerComponent = null as AnyComponentType<P> | null;
 
     let findFailedLogged = false;
-    const WrapperComponent: LazyComponentType<P> = function (props) {
+    const WrapperComponent: AnyLazyComponentType<P> = function (props) {
         if (InnerComponent === null && !findFailedLogged) {
             findFailedLogged = true;
             logger.error(typeof err === "string" ? err : err());
