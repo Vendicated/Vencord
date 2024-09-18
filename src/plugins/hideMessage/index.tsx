@@ -6,13 +6,13 @@
 
 import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { ChannelStore } from "@webpack/common";
 import { get, set } from "@api/DataStore";
 
 let style: HTMLStyleElement;
 
-const KEY = "HideMessage_HiddenIds";
+const KEY = "HideMessage___HiddenMessages";
 
 let hiddenMessages: Set<string> = new Set();
 const getHiddenMessages = () => get(KEY).then(set => {
@@ -31,7 +31,7 @@ const HideIcon = () => {
 export default definePlugin({
     name: "HideMessage",
     description: "Adds an option to hide messages",
-    authors: [Devs.IsaacZSH],
+    authors: [Devs.Isaac],
     dependencies: ["MessagePopoverAPI"],
 
     async start() {
@@ -43,11 +43,6 @@ export default definePlugin({
         await this.buildCss();
 
         addButton("HideMessage", msg => {
-            const handleClick = () => {
-                this.toggleHide(msg.id)
-                console.log(msg)
-            };
-
             const label = "Hide Message";
 
             return {
@@ -55,7 +50,7 @@ export default definePlugin({
                 icon: HideIcon,
                 message: msg,
                 channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: handleClick,
+                onClick: () => this.toggleHide(`{"channelId": "${msg.channel_id}", "messageId": "${msg.id}"}`)
             };
         });
     },
@@ -65,20 +60,26 @@ export default definePlugin({
     },
 
     async buildCss() {
-        console.log(hiddenMessages)
-        console.log(...hiddenMessages)
-        const elements = [...hiddenMessages].map(id => `#message-content-${id}`).join(",");
+        let chatMessages = ""
+        let messagesContent = ""
+        hiddenMessages.forEach((ids) => {
+            chatMessages += `#chat-messages-${JSON.parse(ids).channelId}-${JSON.parse(ids).messageId},`
+            messagesContent += `#message-content-${JSON.parse(ids).messageId},`
+        })
         style.textContent = `
-        :is(${elements}) {
+        :is(${chatMessages}) :is([class*="message_d5deea"]) :is([class*="embedWrapper"], [class*="clickableSticker"]) {
+            display: none !important;
+        }
+        :is(${messagesContent}) {
             display: none !important;
         }
         `;
     },
 
-    async toggleHide(id: string) {
+    async toggleHide(sentIds: string) {
         const ids = await getHiddenMessages();
-        if (!ids.delete(id))
-            ids.add(id);
+        if (!ids.delete(sentIds))
+            ids.add(sentIds);
 
         await saveHiddenMessages(ids);
         await this.buildCss();
