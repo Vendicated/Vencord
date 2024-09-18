@@ -7,7 +7,6 @@
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps } from "@webpack";
 import { Button, Forms, i18n, Menu, TabBar } from "@webpack/common";
 import { ReactElement } from "react";
 
@@ -17,8 +16,7 @@ import openQrModal from "./ui/modals/QrModal";
 
 export default definePlugin({
     name: "LoginWithQR",
-    description:
-        "Allows you to login to another device by scanning a login QR code, just like on mobile!",
+    description: "Allows you to login to another device by scanning a login QR code, just like on mobile!",
     authors: [EquicordDevs.nexpid],
 
     settings: definePluginSettings({
@@ -97,10 +95,6 @@ export default definePlugin({
     ),
 
     get ScanQrMenuItem() {
-        const { menuItemFocused, subMenuIcon } = findByProps(
-            "menuItemFocused"
-        ) as Record<string, string>;
-
         return (
             <Menu.MenuGroup>
                 <Menu.MenuItem
@@ -109,8 +103,6 @@ export default definePlugin({
                     icon={QrCodeIcon}
                     action={openQrModal}
                     showIconFirst
-                    focusedClassName={menuItemFocused}
-                    subMenuIconClassName={subMenuIcon}
                 />
             </Menu.MenuGroup>
         );
