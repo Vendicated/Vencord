@@ -55,39 +55,41 @@ const settings = definePluginSettings({
 });
 
 function StatusMenuItem({ status }: { status: DiscordStatus; }) {
-    return (<Menu.MenuItem
-        id={"status-presets-" + status.text}
-        label={status.status}
-        action={() => console.log("pog")}
-        render={() => (<div className={StatusStyles.statusItem}><Components.Status
-            status={status} className={StatusStyles.icon}
-            size={10}
-            color={statusCrossSponding[status.status] || "currentColor"}
-        />
-            <div className={StatusStyles.status}>{status.status}</div>
-            <div className={StatusStyles.description}>{status.text}</div>
-        </div>)}
-    />);
+    return;
 }
 
 function MakeContextCallback(): NavContextMenuPatchCallback {
     return (children, contextMenuApiArguments) => {
-        children[1]?.props.children.props.children.props.children.splice(1, 0,
+        console.log("BLAH. presets", children);
+        children[0]?.props.children.splice(1, 0,
             <Menu.MenuItem
                 id="status-presets"
                 label="Presets" // add an icon to fit in
             >
-                {Object.values((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(status => <StatusMenuItem status={status} />)}
+                {Object.values((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(status => <Menu.MenuItem
+                    id={"status-presets-" + status.text}
+                    label={status.status}
+                    action={() => console.log("pog")}
+                    render={() => (<div className={StatusStyles.statusItem}><Components.Status
+                        status={status} className={StatusStyles.icon}
+                        size={10}
+                        color={statusCrossSponding[status.status] || "currentColor"}
+                    />
+                        <div className={StatusStyles.status}>{status.status}</div>
+                        <div className={StatusStyles.description}>{status.text}</div>
+                    </div>)}
+                />)}
             </Menu.MenuItem>
         );
     };
 }
 
 export default definePlugin({
-    name: "StatusPresetsS",
+    name: "StatusPresets_",
     description: "do now and think later",
     authors: [Devs.Dolfies],
     settings: settings,
+    dependencies: ["ContextMenuAPI"],
     patches: [
         {
             find: ".Messages.CUSTOM_STATUS_CLEAR_AFTER",
@@ -98,7 +100,7 @@ export default definePlugin({
         }
     ],
     contextMenus: {
-        "status": MakeContextCallback()
+        "set-status-submenu": MakeContextCallback()
     },
     renderRememberButton({ statue }: { statue: DiscordStatus; }) {
         if (!statue) return;
