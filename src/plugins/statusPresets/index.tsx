@@ -50,10 +50,6 @@ const settings = definePluginSettings({
     }
 });
 
-function StatusMenuItem({ status }: { status: DiscordStatus; }) {
-    return;
-}
-
 function MakeContextCallback(): NavContextMenuPatchCallback {
     return (children, contextMenuApiArguments) => {
         console.log("BLAH. presets", children);
