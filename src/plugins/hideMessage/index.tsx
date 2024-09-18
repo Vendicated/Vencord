@@ -68,7 +68,16 @@ export default definePlugin({
             display: none !important;
         }
         :is(${messagesContent}) {
-            display: none !important;
+            visibility: hidden;
+        }
+        :is(${messagesContent})::after {
+            visibility: visible;
+            content: "Message hidden" !important;
+            color: var(--text-muted);
+            font-size: 80%;
+            position: absolute;
+            display: block;
+            top: 0;
         }
         :is(${messagesAccessories}) {
             display: none !important;
