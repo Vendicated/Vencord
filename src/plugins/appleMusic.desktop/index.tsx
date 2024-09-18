@@ -19,8 +19,8 @@ interface ActivityButton {
 
 export interface TrackData {
     name: string;
-    album: string;
-    artist: string;
+    album?: string;
+    artist?: string;
 
     appleMusicLink?: string;
     songLink?: string;
@@ -28,8 +28,8 @@ export interface TrackData {
     albumArtwork?: string;
     artistArtwork?: string;
 
-    playerPosition: number;
-    duration: number;
+    playerPosition?: number;
+    duration?: number;
 }
 
 const enum AssetImageType {
@@ -126,8 +126,8 @@ const settings = definePluginSettings({
 function customFormat(formatStr: string, data: TrackData) {
     return formatStr
         .replaceAll("{name}", data.name)
-        .replaceAll("{album}", data.album)
-        .replaceAll("{artist}", data.artist);
+        .replaceAll("{album}", data.album ?? "")
+        .replaceAll("{artist}", data.artist ?? "");
 }
 
 async function getImageAsset(type: AssetImageType, data: TrackData) {
@@ -184,14 +184,16 @@ export default definePlugin({
 
         const assets: ActivityAssets = {};
 
+        const isRadio = Number.isNaN(trackData.duration) && (trackData.playerPosition === 0);
+
         if (settings.store.largeImageType !== AssetImageType.Disabled) {
             assets.large_image = largeImageAsset;
-            assets.large_text = customFormat(settings.store.largeTextString, trackData);
+            if (!isRadio) assets.large_text = customFormat(settings.store.largeTextString, trackData);
         }
 
         if (settings.store.smallImageType !== AssetImageType.Disabled) {
             assets.small_image = smallImageAsset;
-            assets.small_text = customFormat(settings.store.smallTextString, trackData);
+            if (!isRadio) assets.small_text = customFormat(settings.store.smallTextString, trackData);
         }
 
         const buttons: ActivityButton[] = [];
@@ -219,17 +221,17 @@ export default definePlugin({
 
             name: customFormat(settings.store.nameString, trackData),
             details: customFormat(settings.store.detailsString, trackData),
-            state: customFormat(settings.store.stateString, trackData),
+            state: isRadio ? undefined : customFormat(settings.store.stateString, trackData),
 
-            timestamps: (settings.store.enableTimestamps ? {
+            timestamps: (trackData.playerPosition && trackData.duration && settings.store.enableTimestamps) ? {
                 start: Date.now() - (trackData.playerPosition * 1000),
                 end: Date.now() - (trackData.playerPosition * 1000) + (trackData.duration * 1000),
-            } : undefined),
+            } : undefined,
 
             assets,
 
-            buttons: buttons.length ? buttons.map(v => v.label) : undefined,
-            metadata: { button_urls: buttons.length ? buttons.map(v => v.url) : undefined },
+            buttons: !isRadio && buttons.length ? buttons.map(v => v.label) : undefined,
+            metadata: !isRadio && buttons.length ? { button_urls: buttons.map(v => v.url) } : undefined,
 
             type: settings.store.activityType,
             flags: ActivityFlags.INSTANCE,

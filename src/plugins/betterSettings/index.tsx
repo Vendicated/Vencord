@@ -13,7 +13,9 @@ import { waitFor } from "@webpack";
 import { ComponentDispatch, FocusLock, i18n, Menu, useEffect, useRef } from "@webpack/common";
 import type { HTMLAttributes, ReactElement } from "react";
 
-type SettingsEntry = { section: string; label: string; };
+import PluginsSubmenu from "./PluginsSubmenu";
+
+interface SettingsEntry { section: string; label: string; }
 
 const cl = classNameFactory("");
 let Classes: Record<string, string>;
@@ -118,12 +120,20 @@ export default definePlugin({
         },
         { // Settings cog context menu
             find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
-            replacement: {
-                match: /(EXPERIMENTS:.+?)(\(0,\i.\i\)\(\))(?=\.filter\(\i=>\{let\{section:\i\}=)/,
-                replace: "$1$self.wrapMenu($2)"
-            }
-        }
+            replacement: [
+                {
+                    match: /(EXPERIMENTS:.+?)(\(0,\i.\i\)\(\))(?=\.filter\(\i=>\{let\{section:\i\}=)/,
+                    replace: "$1$self.wrapMenu($2)"
+                },
+                {
+                    match: /case \i\.\i\.DEVELOPER_OPTIONS:return \i;/,
+                    replace: "$&case 'VencordPlugins':return $self.PluginsSubmenu();"
+                }
+            ]
+        },
     ],
+
+    PluginsSubmenu,
 
     // This is the very outer layer of the entire ui, so we can't wrap this in an ErrorBoundary
     // without possibly also catching unrelated errors of children.
