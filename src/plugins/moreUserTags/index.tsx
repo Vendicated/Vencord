@@ -165,7 +165,7 @@ const settings = definePluginSettings({
         description: "Only show extra tags for bots / Hide [BOT] text",
         type: OptionType.BOOLEAN
     },
-    useBotNotApp: {
+    useBotInsteadOfApp: {
         description: "Use [BOT] instead of [APP] for bot tags",
         type: OptionType.BOOLEAN,
         default: false
@@ -301,7 +301,7 @@ export default definePlugin({
     isOPTag: (tag: number) => tag === Tag.Types.ORIGINAL_POSTER || tags.some(t => tag === Tag.Types[`${t.name}-OP`]),
 
     getTagText(passedTagName: string, strings: Record<string, string>) {
-        const APP_TAG = (this.settings.store.useBotNotApp) ? "BOT" : strings.APP_TAG;
+        const APP_TAG = (this.settings.store.useBotInsteadOfApp) ? "BOT" : strings.APP_TAG; // strings.APP_TAG is "APP"
         if (!passedTagName) return APP_TAG;
         const [tagName, variant] = passedTagName.split("-");
         const tag = tags.find(({ name }) => tagName === name);
