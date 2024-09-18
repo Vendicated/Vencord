@@ -168,7 +168,8 @@ const settings = definePluginSettings({
     useBotInsteadOfApp: {
         description: "Use [BOT] instead of [APP] for bot tags",
         type: OptionType.BOOLEAN,
-        default: false
+        default: false,
+        restartNeeded: true // blame caching
     },
     tagSettings: {
         type: OptionType.COMPONENT,
