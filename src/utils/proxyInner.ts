@@ -42,22 +42,18 @@ const handler: ProxyHandler<any> = {
  * IMPORTANT:
  * Destructuring at top level is not supported for proxyInner.
  *
- * @param errMsg The error message to throw when the inner value is not set
- * @param primitiveErrMsg The error message to throw when the inner value is a primitive
+ * @param err The error message to throw when the inner value is not set
+ * @param primitiveErr The error message to throw when the inner value is a primitive
  * @returns A proxy which will act like the inner value when accessed
  */
-export function proxyInner<T = any>(
-    errMsg: string | (() => string) = "Proxy inner value is undefined, setInnerValue was never called.",
-    primitiveErrMsg = "proxyInner called on a primitive value. This can happen if you try to destructure a primitive at the same tick as the proxy was created.",
-    isChild = false
-): [proxy: T, setInnerValue: (innerValue: T) => void] {
+export function proxyInner<T = any>(err: string | (() => string) = "Proxy inner value is undefined, setInnerValue was never called.", primitiveErr = "proxyInner called on a primitive value. This can happen if you try to destructure a primitive at the same tick as the proxy was created.", isChild = false): [proxy: T, setInnerValue: (innerValue: T) => void] {
     let isSameTick = true;
     if (!isChild) setTimeout(() => isSameTick = false, 0);
 
     const proxyDummy = Object.assign(function () { }, {
         [SYM_PROXY_INNER_GET]: function () {
             if (proxyDummy[SYM_PROXY_INNER_VALUE] == null) {
-                throw new Error(typeof errMsg === "string" ? errMsg : errMsg());
+                throw new Error(typeof err === "string" ? err : err());
             }
 
             return proxyDummy[SYM_PROXY_INNER_VALUE];
@@ -85,7 +81,7 @@ export function proxyInner<T = any>(
                     "\nConsider not destructuring, using findProp or if you really need to destructure, using mapMangledModule instead."
                 );
 
-                const [recursiveProxy, recursiveSetInnerValue] = proxyInner(errMsg, primitiveErrMsg, true);
+                const [recursiveProxy, recursiveSetInnerValue] = proxyInner(err, primitiveErr, true);
 
                 recursiveSetInnerValues.push((innerValue: T) => {
                     // Set the inner value of the destructured value as the prop value p of the parent
@@ -100,7 +96,7 @@ export function proxyInner<T = any>(
                 return Reflect.get(innerTarget, p, innerTarget);
             }
 
-            throw new Error(primitiveErrMsg);
+            throw new Error(primitiveErr);
         }
     });
 

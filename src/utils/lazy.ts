@@ -17,7 +17,7 @@ export function makeLazy<T>(factory: () => T, attempts = 5, { isIndirect = false
     let tries = 0;
     let cache: T;
 
-    const getter = () => {
+    const getter: LazyFunction<T> = function () {
         if (!cache && attempts > tries) {
             tries++;
             cache = factory();
@@ -30,7 +30,6 @@ export function makeLazy<T>(factory: () => T, attempts = 5, { isIndirect = false
     };
 
     getter.$$vencordLazyFailed = () => tries === attempts;
-
     return getter;
 }
 
@@ -69,17 +68,11 @@ const handler: ProxyHandler<any> = {
  *
  * @param factory Factory returning the result
  * @param attempts How many times to try to evaluate the factory before giving up
- * @param errMsg The error message to throw when the factory fails
- * @param primitiveErrMsg The error message to throw when factory result is a primitive
+ * @param err The error message to throw when the factory fails
+ * @param primitiveErr The error message to throw when factory result is a primitive
  * @returns Result of factory function
  */
-export function proxyLazy<T = any>(
-    factory: () => T,
-    attempts = 5,
-    errMsg: string | (() => string) = `proxyLazy factory failed:\n${factory}`,
-    primitiveErrMsg = "proxyLazy called on a primitive value.",
-    isChild = false
-): T {
+export function proxyLazy<T = any>(factory: () => T, attempts = 5, err: string | (() => string) = `proxyLazy factory failed:\n${factory}`, primitiveErr = "proxyLazy called on a primitive value.", isChild = false): T {
     const get = makeLazy(factory, attempts, { isIndirect: true });
 
     let isSameTick = true;
@@ -93,7 +86,7 @@ export function proxyLazy<T = any>(
                 }
 
                 if (!proxyDummy[SYM_LAZY_CACHED]) {
-                    throw new Error(typeof errMsg === "string" ? errMsg : errMsg());
+                    throw new Error(typeof err === "string" ? err : err());
                 } else {
                     if (typeof proxyDummy[SYM_LAZY_CACHED] === "function") {
                         proxy.toString = proxyDummy[SYM_LAZY_CACHED].toString.bind(proxyDummy[SYM_LAZY_CACHED]);
@@ -129,8 +122,8 @@ export function proxyLazy<T = any>(
                         return Reflect.get(lazyTarget, p, lazyTarget);
                     },
                     attempts,
-                    errMsg,
-                    primitiveErrMsg,
+                    err,
+                    primitiveErr,
                     true
                 );
             }
@@ -140,7 +133,7 @@ export function proxyLazy<T = any>(
                 return Reflect.get(lazyTarget, p, lazyTarget);
             }
 
-            throw new Error(primitiveErrMsg);
+            throw new Error(primitiveErr);
         }
     });
 

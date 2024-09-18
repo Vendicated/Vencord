@@ -9,7 +9,7 @@ import { makeLazy } from "./lazy";
 export const SYM_LAZY_COMPONENT_INNER = Symbol.for("vencord.lazyComponent.inner");
 
 export type LazyComponentType<P extends AnyRecord> = React.FunctionComponent<P> & AnyRecord & {
-    [SYM_LAZY_COMPONENT_INNER]: () => LazyComponentType<P> | null;
+    [SYM_LAZY_COMPONENT_INNER]: () => AnyComponentType<P> | null;
 };
 
 /**
@@ -19,10 +19,10 @@ export type LazyComponentType<P extends AnyRecord> = React.FunctionComponent<P> 
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
  */
-export function LazyComponent<P extends AnyRecord>(factory: () => any, attempts = 5, err: string | (() => string) = `LazyComponent factory failed:\n${factory}`): LazyComponentType<P> {
+export function LazyComponent<P extends AnyRecord>(factory: () => AnyComponentType<P>, attempts = 5, err: string | (() => string) = `LazyComponent factory failed:\n${factory}`): LazyComponentType<P> {
     const get = makeLazy(factory, attempts, { isIndirect: true });
 
-    let InnerComponent = null as LazyComponentType<P> | null;
+    let InnerComponent = null as AnyComponentType<P> | null;
 
     let lazyFailedLogged = false;
     const LazyComponent: LazyComponentType<P> = function (props) {

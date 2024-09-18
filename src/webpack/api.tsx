@@ -171,8 +171,8 @@ function printFilter(filter: FilterFn) {
     return String(filter);
 }
 
-function wrapWebpackComponent<P extends AnyRecord>(err: string | (() => string)): [WrapperComponent: LazyComponentType<P>, setInnerComponent: (rawComponent: any, parsedComponent: LazyComponentType<P>) => void] {
-    let InnerComponent = null as LazyComponentType<P> | null;
+function wrapWebpackComponent<P extends AnyRecord>(err: string | (() => string)): [WrapperComponent: LazyComponentType<P>, setInnerComponent: (rawComponent: any, parsedComponent: AnyComponentType<P>) => void] {
+    let InnerComponent = null as AnyComponentType<P> | null;
 
     let findFailedLogged = false;
     const WrapperComponent: LazyComponentType<P> = function (props) {
@@ -186,7 +186,7 @@ function wrapWebpackComponent<P extends AnyRecord>(err: string | (() => string))
 
     WrapperComponent[SYM_LAZY_COMPONENT_INNER] = () => InnerComponent;
 
-    function setInnerComponent(RawComponent: any, ParsedComponent: LazyComponentType<P>) {
+    function setInnerComponent(RawComponent: any, ParsedComponent: AnyComponentType<P>) {
         InnerComponent = ParsedComponent;
         Object.assign(WrapperComponent, RawComponent);
     }
@@ -281,7 +281,7 @@ export function find<T = any>(filter: FilterFn, parse: (module: ModuleExports) =
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findComponent<P extends AnyRecord>(filter: FilterFn, parse: (component: ModuleExports) => LazyComponentType<P> = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+export function findComponent<P extends AnyRecord>(filter: FilterFn, parse: (component: ModuleExports) => AnyComponentType<P> = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
     if (typeof filter !== "function") {
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
     }
@@ -311,8 +311,8 @@ export function findComponent<P extends AnyRecord>(filter: FilterFn, parse: (com
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findExportedComponent<P extends AnyRecord>(...props: PropsFilter | [...PropsFilter, (component: ModuleExports) => LazyComponentType<P>]) {
-    const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (component: ModuleExports) => LazyComponentType<P>;
+export function findExportedComponent<P extends AnyRecord>(...props: PropsFilter | [...PropsFilter, (component: ModuleExports) => AnyComponentType<P>]) {
+    const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (component: ModuleExports) => AnyComponentType<P>;
     const newProps = props as PropsFilter;
 
     const filter = filters.byProps(...newProps);
@@ -339,8 +339,8 @@ export function findExportedComponent<P extends AnyRecord>(...props: PropsFilter
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findComponentByCode<P extends AnyRecord>(...code: CodeFilter | [...CodeFilter, (component: ModuleExports) => LazyComponentType<P>]) {
-    const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (component: ModuleExports) => LazyComponentType<P>;
+export function findComponentByCode<P extends AnyRecord>(...code: CodeFilter | [...CodeFilter, (component: ModuleExports) => AnyComponentType<P>]) {
+    const parse = (typeof code.at(-1) === "function" ? code.pop() : m => m) as (component: ModuleExports) => AnyComponentType<P>;
     const newCode = code as CodeFilter;
 
     const ComponentResult = findComponent<P>(filters.componentByCode(...newCode), parse, { isIndirect: true });
@@ -362,8 +362,8 @@ export function findComponentByCode<P extends AnyRecord>(...code: CodeFilter | [
  * @param parse A function that takes the found component as its first argument and returns a component. Useful if you want to wrap the found component in something. Defaults to the original component
  * @returns The component if found, or a noop component
  */
-export function findComponentByFields<P extends AnyRecord>(...fields: PropsFilter | [...PropsFilter, (component: ModuleExports) => LazyComponentType<P>]) {
-    const parse = (typeof fields.at(-1) === "function" ? fields.pop() : m => m) as (component: ModuleExports) => LazyComponentType<P>;
+export function findComponentByFields<P extends AnyRecord>(...fields: PropsFilter | [...PropsFilter, (component: ModuleExports) => AnyComponentType<P>]) {
+    const parse = (typeof fields.at(-1) === "function" ? fields.pop() : m => m) as (component: ModuleExports) => AnyComponentType<P>;
     const newFields = fields as PropsFilter;
 
     const ComponentResult = findComponent<P>(filters.componentByFields(...newFields), parse, { isIndirect: true });
