@@ -12,7 +12,7 @@ import { get, set } from "@api/DataStore";
 
 let style: HTMLStyleElement;
 
-const KEY = "HideMessage___HiddenMessages";
+const KEY = "HideMessage_HiddenMessages";
 
 let hiddenMessages: Set<string> = new Set();
 const getHiddenMessages = () => get(KEY).then(set => {
