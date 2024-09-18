@@ -7,11 +7,10 @@
 import { NoopComponent } from "@utils/react";
 import { findComponentByCode } from "@webpack";
 import { React } from "@webpack/common";
-import type { ComponentType, HTMLProps, PropsWithChildren } from "react";
 
 import { AvatarDecoration } from "../..";
 
-type DecorationGridItemComponent = ComponentType<PropsWithChildren<HTMLProps<HTMLDivElement>> & {
+type DecorationGridItemComponent = AnyComponentTypeWithChildren<React.ComponentPropsWithoutRef<"div"> & {
     onSelect: () => void,
     isSelected: boolean,
 }>;
@@ -21,7 +20,7 @@ export const setDecorationGridItem = v => DecorationGridItem = v;
 
 export const AvatarDecorationModalPreview = findComponentByCode(".shopPreviewBanner", component => React.memo(component));
 
-type DecorationGridDecorationComponent = React.ComponentType<HTMLProps<HTMLDivElement> & {
+type DecorationGridDecorationComponent = AnyComponentType<React.ComponentPropsWithoutRef<"div"> & {
     avatarDecoration: AvatarDecoration;
     onSelect: () => void,
     isSelected: boolean,

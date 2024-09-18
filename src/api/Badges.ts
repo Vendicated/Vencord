@@ -17,7 +17,6 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { ComponentType, HTMLProps } from "react";
 
 import Plugins from "~plugins";
 
@@ -30,7 +29,7 @@ export interface ProfileBadge {
     /** The tooltip to show on hover. Required for image badges */
     description?: string;
     /** Custom component for the badge (tooltip not included) */
-    component?: ComponentType<ProfileBadge & BadgeUserArgs>;
+    component?: React.ComponentType<ProfileBadge & BadgeUserArgs>;
     /** The custom image to use */
     image?: string;
     link?: string;
@@ -39,7 +38,7 @@ export interface ProfileBadge {
     /** Should the user display this badge? */
     shouldShow?(userInfo: BadgeUserArgs): boolean;
     /** Optional props (e.g. style) for the badge, ignored for component badges */
-    props?: HTMLProps<HTMLImageElement>;
+    props?: React.ComponentPropsWithoutRef<"img">;
     /** Insert at start or end? */
     position?: BadgePosition;
     /** The badge name to display, Discord uses this. Required for component badges */

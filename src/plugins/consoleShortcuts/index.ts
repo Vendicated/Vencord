@@ -28,7 +28,6 @@ import * as Webpack from "@webpack";
 import { cacheFindAll, cacheFindModuleId, extract, filters, searchFactories } from "@webpack";
 import * as Common from "@webpack/common";
 import { loadLazyChunks } from "debug/loadLazyChunks";
-import type { ComponentType } from "react";
 
 const DESKTOP_ONLY = (f: string) => () => {
     throw new Error(`'${f}' is Discord Desktop only.`);
@@ -129,7 +128,7 @@ function makeShortcuts() {
         canonicalizeReplacement,
 
         preEnable: (plugin: string) => (Vencord.Settings.plugins[plugin] ??= { enabled: true }).enabled = true,
-        fakeRender: (component: ComponentType, props: any) => {
+        fakeRender: (component: React.ComponentType<AnyRecord>, props: any) => {
             const prevWin = fakeRenderWin?.deref();
             const win = prevWin?.closed === false
                 ? prevWin

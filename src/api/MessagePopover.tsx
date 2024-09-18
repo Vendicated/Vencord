@@ -19,18 +19,17 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { Channel, Message } from "discord-types/general";
-import type { ComponentType, MouseEventHandler } from "react";
 
 const logger = new Logger("MessagePopover");
 
 export interface ButtonItem {
     key?: string,
     label: string,
-    icon: ComponentType<any>,
+    icon: React.ComponentType<AnyRecord>,
     message: Message,
     channel: Channel,
-    onClick?: MouseEventHandler<HTMLButtonElement>,
-    onContextMenu?: MouseEventHandler<HTMLButtonElement>;
+    onClick?: React.MouseEventHandler<HTMLButtonElement>,
+    onContextMenu?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 export type getButtonItem = (message: Message) => ButtonItem | null;

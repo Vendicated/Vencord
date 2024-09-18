@@ -8,7 +8,7 @@ import { makeLazy } from "./lazy";
 
 export const SYM_LAZY_COMPONENT_INNER = Symbol.for("vencord.lazyComponent.inner");
 
-export type LazyComponentType<P extends AnyRecord> = React.FunctionComponent<P> & AnyRecord & {
+export type LazyComponentType<P extends AnyRecord = AnyRecord> = React.FunctionComponent<P> & AnyRecord & {
     [SYM_LAZY_COMPONENT_INNER]: () => AnyComponentType<P> | null;
 };
 

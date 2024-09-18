@@ -17,7 +17,6 @@
 */
 
 import { findByProps, findComponentByCode } from "@webpack";
-import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { NoopComponent } from "./react";
 
@@ -47,10 +46,10 @@ export interface ModalOptions {
     onCloseCallback?: (() => void);
 }
 
-type RenderFunction = (props: ModalProps) => ReactNode;
+type RenderFunction = (props: ModalProps) => React.ReactNode;
 
 type Modals = {
-    ModalRoot: ComponentType<PropsWithChildren<{
+    ModalRoot: AnyComponentTypeWithChildren<{
         transitionState: ModalTransitionState;
         size?: ModalSize;
         role?: "alertdialog" | "dialog";
@@ -59,8 +58,8 @@ type Modals = {
         "aria-label"?: string;
         "aria-labelledby"?: string;
         onAnimationEnd?(): string;
-    }>>;
-    ModalHeader: ComponentType<PropsWithChildren<{
+    }>;
+    ModalHeader: AnyComponentTypeWithChildren<{
         /** Flex.Justify.START */
         justify?: string;
         /** Flex.Direction.HORIZONTAL */
@@ -72,14 +71,13 @@ type Modals = {
         separator?: boolean;
 
         className?: string;
-    }>>;
+    }>;
     /** This also accepts Scroller props but good luck with that */
-    ModalContent: ComponentType<PropsWithChildren<{
+    ModalContent: AnyComponentTypeWithChildren<{
         className?: string;
-        scrollerRef?: Ref<HTMLElement>;
-        [prop: string]: any;
-    }>>;
-    ModalFooter: ComponentType<PropsWithChildren<{
+        scrollerRef?: React.Ref<HTMLElement>;
+    }>;
+    ModalFooter: AnyComponentTypeWithChildren<{
         /** Flex.Justify.START */
         justify?: string;
         /** Flex.Direction.HORIZONTAL_REVERSE */
@@ -91,8 +89,8 @@ type Modals = {
         separator?: boolean;
 
         className?: string;
-    }>>;
-    ModalCloseButton: ComponentType<{
+    }>;
+    ModalCloseButton: AnyComponentType<{
         focusProps?: any;
         onClick(): void;
         withCircleBackground?: boolean;
@@ -123,8 +121,8 @@ export type ImageModalProps = {
     height?: number;
     animated?: boolean;
     responsive?: boolean;
-    renderLinkComponent(props: any): ReactNode;
-    renderForwardComponent(props: any): ReactNode;
+    renderLinkComponent(props: any): React.ReactNode;
+    renderForwardComponent(props: any): React.ReactNode;
     maxWidth?: number;
     maxHeight?: number;
     shouldAnimate?: boolean;
