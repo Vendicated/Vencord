@@ -5,8 +5,9 @@
  */
 
 import { addButton, removeButton } from "@api/MessagePopover";
+import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore } from "@webpack/common";
 import { get, set } from "@api/DataStore";
 
@@ -33,6 +34,13 @@ export default definePlugin({
     description: "Adds an option to hide messages",
     authors: [Devs.Isaac],
     dependencies: ["MessagePopoverAPI"],
+    options: {
+        showMessageHiddenText: {
+            description: `Hidden messages will contain a small text indicating they're hidden.`,
+            type: OptionType.BOOLEAN,
+            default: true
+        },
+    },
 
     async start() {
         style = document.createElement("style");
@@ -70,19 +78,22 @@ export default definePlugin({
         :is(${messagesContent}) {
             visibility: hidden;
         }
-        :is(${messagesContent})::after {
-            visibility: visible;
-            content: "Message hidden" !important;
-            color: var(--text-muted);
-            font-size: 80%;
-            position: absolute;
-            display: block;
-            top: 0;
-        }
         :is(${messagesAccessories}) {
             display: none !important;
         }
         `;
+        if (Settings.plugins.HideMessage.showMessageHiddenText) { 
+            style.textContent += `
+            :is(${messagesContent})::after {
+                visibility: visible;
+                content: "Message hidden" !important;
+                color: var(--text-muted);
+                font-size: 80%;
+                position: absolute;
+                display: block;
+                top: 0;
+            }
+        `}
     },
 
     async toggleHide(sentIds: string) {
