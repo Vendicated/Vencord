@@ -24,11 +24,7 @@ export default definePlugin({
     authors: [Devs.Isaac],
 
     hideMessage(msg: Message) {
-        FluxDispatcher.dispatch({type: "MESSAGE_DELETE",
-            channelId: msg.channel_id,
-            id: msg.id,
-            mlDeleted: true
-        });
+        FluxDispatcher.dispatch({type: "MESSAGE_DELETE", channelId: msg.channel_id, id: msg.id, mlDeleted: true});
     },
 
     start() {
