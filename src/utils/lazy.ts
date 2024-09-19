@@ -30,6 +30,7 @@ export function makeLazy<T>(factory: () => T, attempts = 5, { isIndirect = false
     };
 
     getter.$$vencordLazyFailed = () => tries === attempts;
+
     return getter;
 }
 

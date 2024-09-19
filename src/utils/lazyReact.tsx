@@ -12,6 +12,7 @@ export type LazyComponentType<P extends AnyRecord = AnyRecord> = React.FunctionC
     [SYM_LAZY_COMPONENT_INNER]: () => AnyComponentType<P> | null;
 };
 export type AnyLazyComponentType<P extends AnyRecord = AnyRecord> = LazyComponentType<P & AnyRecord>;
+export type AnyLazyComponentTypeWithChildren<P extends AnyRecord = AnyRecord> = AnyLazyComponentType<React.PropsWithChildren<P>>;
 
 /**
  * A lazy component. The factory method is called on first render.

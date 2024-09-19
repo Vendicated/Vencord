@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { AnyLazyComponentTypeWithChildren } from "@utils/lazyReact";
 import type { ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, KeyboardEvent, MouseEvent, PropsWithChildren, PropsWithRef, ReactNode, Ref } from "react";
 
 import { IconNames } from "./iconNames";
@@ -371,7 +372,7 @@ export type Slider = ComponentType<PropsWithChildren<{
 }>>;
 
 // TODO - type maybe idk probably not that useful other than the constants
-export type Flex = ComponentType<PropsWithChildren<any>> & {
+export type Flex = AnyLazyComponentTypeWithChildren & {
     Align: Record<"START" | "END" | "CENTER" | "STRETCH" | "BASELINE", string>;
     Direction: Record<"VERTICAL" | "HORIZONTAL" | "HORIZONTAL_REVERSE", string>;
     Justify: Record<"START" | "END" | "CENTER" | "BETWEEN" | "AROUND", string>;
