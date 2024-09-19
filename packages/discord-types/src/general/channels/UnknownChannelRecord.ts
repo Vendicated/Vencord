@@ -34,8 +34,6 @@ export declare class UnknownChannelRecord extends ChannelRecordBase {
     isMessageRequest: ChannelRecordBase["isMessageRequest"];
     isMessageRequestTimestamp: ChannelRecordBase["isMessageRequestTimestamp"];
     isSpam: ChannelRecordBase["isSpam"];
-    lastMessageId: ChannelRecordBase["lastMessageId"];
-    lastPinTimestamp: ChannelRecordBase["lastPinTimestamp"];
     linkedLobby: ChannelRecordBase["linkedLobby"];
     member: ChannelRecordBase["member"];
     memberCount: ChannelRecordBase["memberCount"];

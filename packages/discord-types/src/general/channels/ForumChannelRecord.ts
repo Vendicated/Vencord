@@ -36,8 +36,6 @@ export declare class ForumChannelRecord<ChannelType extends ForumChannelType = F
     isMessageRequest?: undefined;
     isMessageRequestTimestamp?: undefined;
     isSpam?: undefined;
-    lastMessageId: ChannelRecordBase["lastMessageId"];
-    lastPinTimestamp: ChannelRecordBase["lastPinTimestamp"];
     linkedLobby?: undefined;
     member?: undefined;
     memberCount?: undefined;
@@ -67,5 +65,4 @@ export declare class ForumChannelRecord<ChannelType extends ForumChannelType = F
     userLimit_?: undefined;
     version: ChannelRecordBase["version"];
     videoQualityMode?: undefined;
-    voiceBackgroundDisplay?: undefined;
 }

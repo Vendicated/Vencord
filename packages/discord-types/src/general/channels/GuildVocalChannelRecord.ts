@@ -41,7 +41,6 @@ export declare abstract class GuildVocalChannelRecordBase extends ChannelRecordB
     isMessageRequest?: undefined;
     isMessageRequestTimestamp?: undefined;
     isSpam?: undefined;
-    lastMessageId: ChannelRecordBase["lastMessageId"];
     lastPinTimestamp: undefined;
     linkedLobby?: undefined;
     member?: undefined;
@@ -73,7 +72,6 @@ export declare abstract class GuildVocalChannelRecordBase extends ChannelRecordB
     userLimit_: Defined<ChannelRecordBase["userLimit_"]>;
     version: ChannelRecordBase["version"];
     videoQualityMode: ChannelRecordBase["videoQualityMode"];
-    voiceBackgroundDisplay: Defined<ChannelRecordBase["voiceBackgroundDisplay"]>;
 }
 
 export type GuildVoiceChannelProperties = Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<GuildVoiceChannelRecord>>>, Nullish, "guild_id" | "name" | "permissionOverwrites_">;

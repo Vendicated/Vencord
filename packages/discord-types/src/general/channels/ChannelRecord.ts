@@ -37,7 +37,6 @@ export declare abstract class ChannelRecordBase extends ChannelRecordProperties 
     isAnnouncementThread(): this is ThreadChannelRecord<ChannelType.ANNOUNCEMENT_THREAD>;
     isArchivedLockedThread(): boolean;
     isArchivedThread(): boolean;
-    isBroadcastChannel(): boolean;
     isCategory(): this is GuildCategoryChannelRecord;
     isDirectory(): this is GuildDirectoryChannelRecord;
     isDM(): this is DMChannelRecord;
@@ -134,10 +133,6 @@ export declare abstract class ChannelRecordProperties {
     userLimit_?: number | undefined;
     version?: number | undefined;
     videoQualityMode?: VideoQualityMode | undefined;
-    /** @todo This seems to have been removed. */
-    voiceBackgroundDisplay?: { type: VoiceCallBackgroundType.EMPTY; }
-        | { resourceId: string; type: VoiceCallBackgroundType.GRADIENT; }
-        | Nullish;
 }
 
 export interface ForumTag {
@@ -257,11 +252,4 @@ export enum ChannelType {
 export enum VideoQualityMode {
     AUTO = 1,
     FULL = 2,
-}
-
-// Original name: VoiceCallBackgroundTypes
-/** @todo This seems to have been removed. */
-export enum VoiceCallBackgroundType {
-    EMPTY = 0,
-    GRADIENT = 1,
 }

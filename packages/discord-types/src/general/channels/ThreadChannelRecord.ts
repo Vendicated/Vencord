@@ -36,8 +36,6 @@ export declare class ThreadChannelRecord<ChannelType extends ThreadChannelType =
     isMessageRequest?: undefined;
     isMessageRequestTimestamp?: undefined;
     isSpam?: undefined;
-    lastMessageId: ChannelRecordBase["lastMessageId"];
-    lastPinTimestamp: ChannelRecordBase["lastMessageId"];
     linkedLobby?: undefined;
     member: ChannelRecordBase["member"];
     memberCount: Defined<ChannelRecordBase["memberCount"]>;
@@ -66,5 +64,4 @@ export declare class ThreadChannelRecord<ChannelType extends ThreadChannelType =
     userLimit_: undefined;
     version?: undefined;
     videoQualityMode: undefined;
-    voiceBackgroundDisplay?: undefined;
 }

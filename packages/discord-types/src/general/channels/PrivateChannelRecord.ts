@@ -47,8 +47,6 @@ export declare abstract class PrivateChannelRecordBase extends ChannelRecordBase
     isMessageRequest: ChannelRecordBase["isMessageRequest"];
     isMessageRequestTimestamp: ChannelRecordBase["isMessageRequestTimestamp"];
     isSpam: Defined<ChannelRecordBase["isSpam"]>;
-    lastMessageId: ChannelRecordBase["lastMessageId"];
-    lastPinTimestamp: ChannelRecordBase["lastPinTimestamp"];
     linkedLobby?: undefined;
     member?: undefined;
     memberCount?: undefined;
@@ -77,7 +75,6 @@ export declare abstract class PrivateChannelRecordBase extends ChannelRecordBase
     userLimit_?: undefined;
     version?: undefined;
     videoQualityMode?: undefined;
-    voiceBackgroundDisplay?: undefined;
 }
 
 export type DMChannelProperties = Omit<Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<DMChannelRecord>>>, Nullish, "guild_id" | "name" | "safetyWarnings">, "rawRecipients" | "recipients">

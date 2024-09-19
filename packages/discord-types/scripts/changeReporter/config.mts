@@ -129,10 +129,6 @@ export default {
                     return constructor && Object.getPrototypeOf(constructor);
                 },
                 includeOptional: true,
-                ignoredRemovals: {
-                    // Seems to have been removed
-                    fields: ["voiceBackgroundDisplay"],
-                },
             },
             ForumLayout: {
                 type: "enum",
@@ -171,12 +167,6 @@ export default {
             VideoQualityMode: {
                 type: "enum",
             },
-            /*
-            // This seems to have been removed
-            VoiceCallBackgroundType: {
-                type: "enum",
-            },
-            */
         },
         "./general/channels/ForumChannelRecord.ts": {
             ForumChannelRecord: {

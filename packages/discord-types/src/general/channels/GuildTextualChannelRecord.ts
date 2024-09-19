@@ -44,8 +44,6 @@ export declare abstract class GuildTextualChannelRecordBase extends ChannelRecor
     isMessageRequest?: undefined;
     isMessageRequestTimestamp?: undefined;
     isSpam?: undefined;
-    lastMessageId: ChannelRecordBase["lastMessageId"];
-    lastPinTimestamp: ChannelRecordBase["lastPinTimestamp"];
     /** @todo May only be nullish. */
     linkedLobby: ChannelRecordBase["linkedLobby"];
     member?: undefined;
@@ -76,7 +74,6 @@ export declare abstract class GuildTextualChannelRecordBase extends ChannelRecor
     userLimit_?: undefined;
     version: ChannelRecordBase["version"];
     videoQualityMode?: undefined;
-    voiceBackgroundDisplay?: undefined;
 }
 
 export type GuildTextChannelProperties = Optional<PartialOnUndefined<OmitOptional<ChannelRecordOwnProperties<GuildTextChannelRecord>>>, Nullish, "guild_id" | "name" | "permissionOverwrites_" | "type">;
