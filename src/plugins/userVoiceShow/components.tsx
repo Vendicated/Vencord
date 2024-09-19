@@ -105,7 +105,7 @@ function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
                 <UserSummaryItem
                     users={users}
                     renderIcon={false}
-                    max={7}
+                    max={14}
                     size={18}
                 />
             </div>
@@ -170,6 +170,7 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId }: VoiceChanne
         <Tooltip
             text={<VoiceChannelTooltip channel={channel} />}
             tooltipClassName={cl("tooltip-container")}
+            tooltipContentClassName={cl("tooltip-content")}
         >
             {props =>
                 isLocked ?
