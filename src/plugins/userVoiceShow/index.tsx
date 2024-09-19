@@ -32,7 +32,7 @@ const settings = definePluginSettings({
         default: true,
         restartNeeded: true
     },
-    showInVoiceMemberList: {
+    showInMemberList: {
         type: OptionType.BOOLEAN,
         description: "Show a user's Voice Channel indicator in the member and DMs list",
         default: true,
@@ -82,12 +82,12 @@ export default definePlugin({
                 match: /\.subtext,children:.+?}\)\]}\)(?=])/,
                 replace: "$&,$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id})"
             },
-            predicate: () => settings.store.showInVoiceMemberList
+            predicate: () => settings.store.showInMemberList
         }
     ],
 
     start() {
-        if (settings.store.showInVoiceMemberList) {
+        if (settings.store.showInMemberList) {
             addDecorator("UserVoiceShow", ({ user }) => user == null ? null : <VoiceChannelIndicator userId={user.id} />);
         }
     },

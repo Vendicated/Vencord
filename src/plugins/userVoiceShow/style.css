@@ -15,7 +15,13 @@
 }
 
 .vc-uvs-tooltip-container {
-    max-width: 200px;
+    max-width: 300px;
+}
+
+.vc-uvs-tooltip-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .vc-uvs-guild-name {
@@ -31,7 +37,5 @@
 
 .vc-uvs-vc-members {
     display: flex;
-    margin: 8px 0;
-    flex-direction: row;
     gap: 6px;
 }

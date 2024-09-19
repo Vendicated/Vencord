@@ -8,7 +8,7 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildStore, IconUtils, NavigationRouter, PermissionsBits, PermissionStore, showToast, Text, Toasts, Tooltip, useCallback, useMemo, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelStore, GuildStore, IconUtils, NavigationRouter, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 const cl = classNameFactory("vc-uvs-");
@@ -17,7 +17,7 @@ const { selectVoiceChannel } = findByPropsLazy("selectChannel", "selectVoiceChan
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 
-interface IconProps extends React.HTMLAttributes<HTMLDivElement> {
+interface IconProps extends React.ComponentPropsWithoutRef<"div"> {
     size?: number;
 }
 
@@ -71,23 +71,18 @@ interface VoiceChannelTooltipProps {
 
 function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
     const voiceStates = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStatesForChannel(channel.id));
+
     const users = useMemo(
         () => Object.values<any>(voiceStates).map(voiceState => UserStore.getUser(voiceState.userId)).filter(user => user != null),
         [voiceStates]
     );
 
-    const guild = useMemo(
-        () => channel.getGuildId() == null ? undefined : GuildStore.getGuild(channel.getGuildId()),
-        [channel]
-    );
-
-    const guildIcon = useMemo(() => {
-        return guild?.icon == null ? undefined : IconUtils.getGuildIconURL({
-            id: guild.id,
-            icon: guild.icon,
-            size: 30
-        });
-    }, [guild]);
+    const guild = channel.getGuildId() == null ? undefined : GuildStore.getGuild(channel.getGuildId());
+    const guildIcon = guild?.icon == null ? undefined : IconUtils.getGuildIconURL({
+        id: guild.id,
+        icon: guild.icon,
+        size: 30
+    });
 
     return (
         <>
@@ -103,7 +98,7 @@ function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
                 <UserSummaryItem
                     users={users}
                     renderIcon={false}
-                    max={7}
+                    max={13}
                     size={18}
                 />
             </div>
@@ -119,11 +114,14 @@ const clickTimers = {} as Record<string, any>;
 
 export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId }: VoiceChannelIndicatorProps) => {
     const channelId = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(userId)?.channelId as string | undefined);
-    const channel = useMemo(() => channelId == null ? undefined : ChannelStore.getChannel(channelId), [channelId]);
 
-    const onClick = useCallback((e: React.MouseEvent) => {
+    const channel = channelId == null ? undefined : ChannelStore.getChannel(channelId);
+    if (channel == null) return null;
+
+    function onClick(e: React.MouseEvent) {
         e.preventDefault();
         e.stopPropagation();
+
         if (channel == null || channelId == null) return;
 
         if (!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel)) {
@@ -147,18 +145,15 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId }: VoiceChanne
                 delete clickTimers[channelId];
             }, 250);
         }
-    }, [channelId]);
+    }
 
-    const isLocked = useMemo(() => {
-        return !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || !PermissionStore.can(PermissionsBits.CONNECT, channel);
-    }, [channelId]);
-
-    if (channel == null) return null;
+    const isLocked = !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || !PermissionStore.can(PermissionsBits.CONNECT, channel);
 
     return (
         <Tooltip
             text={<VoiceChannelTooltip channel={channel} />}
             tooltipClassName={cl("tooltip-container")}
+            tooltipContentClassName={cl("tooltip-content")}
         >
             {props =>
                 isLocked ?
