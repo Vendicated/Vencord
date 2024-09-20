@@ -539,4 +539,5 @@ export enum MessageType {
     CHANGELOG = 47,
     NITRO_NOTIFICATION = 48,
     CHANNEL_LINKED_TO_LOBBY = 49,
+    GIFTING_PROMPT = 50,
 }
