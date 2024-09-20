@@ -77,10 +77,10 @@ export default definePlugin({
         }, */
         // Friends List
         {
-            find: ".avatar,animate:",
+            find: "null!=this.peopleListItemRef.current",
             replacement: {
-                match: /\.subtext,children:.+?}\)\]}\)(?=])/,
-                replace: "$&,$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id})"
+                match: /\.actions,children:\[/,
+                replace: "$&$self.VoiceChannelIndicator({userId:this?.props?.user?.id,size:20,isActionButton:true}),"
             },
             predicate: () => settings.store.showInMemberList
         }
