@@ -112,12 +112,12 @@ export default definePlugin({
         },
         // patch request that queries if term is allowed
         {
-            find: ".GUILD_DISCOVERY_VALID_TERM",
+            find: ".GUILD_DISCOVERY_VALID_TERM,query:",
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
             all: true,
             replacement: {
-                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\);/g,
-                replace: "Promise.resolve({ body: { valid: true } });"
+                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\)/g,
+                replace: "Promise.resolve({ body: { valid: true } })"
             }
         }
     ],
