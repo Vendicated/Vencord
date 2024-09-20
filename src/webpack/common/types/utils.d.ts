@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Guild, GuildMember, User } from "discord-types/general";
+import { Channel, Guild, GuildMember, User } from "discord-types/general";
 import type { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
@@ -171,6 +171,11 @@ export interface NavigationRouter {
     forward(): void;
     transitionTo(path: string, ...args: unknown[]): void;
     transitionToGuild(guildId: string, ...args: unknown[]): void;
+}
+
+export interface ChannelRouter {
+    transitionToChannel: (channelId: string) => void;
+    transitionToThread: (channel: Channel) => void;
 }
 
 export interface IconUtils {
