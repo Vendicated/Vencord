@@ -37,7 +37,7 @@ const settings = definePluginSettings({
     },
     enableNavigationRouter: {
         type: OptionType.BOOLEAN,
-        description: "Shows the navigation router logger even if noisy loggers are disabled",
+        description: "Shows the navigation router logger even if noisy loggers are hidden",
         default: true,
         onChange(newVal) {
             if (!newVal) {
