@@ -7,15 +7,22 @@
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
-import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildStore, IconUtils, NavigationRouter, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, useStateFromStores } from "@webpack/common";
+import { filters, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
+import { ChannelStore, GuildStore, IconUtils, match, NavigationRouter, P, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 const cl = classNameFactory("vc-uvs-");
 
-const { selectVoiceChannel } = findByPropsLazy("selectChannel", "selectVoiceChannel");
+const { selectVoiceChannel } = findByPropsLazy("selectVoiceChannel", "selectChannel");
+const { useChannelName } = mapMangledModuleLazy(".Messages.GROUP_DM_ALONE", {
+    useChannelName: filters.byCode("()=>null==")
+});
+const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
+
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
+const Avatar = findComponentByCodeLazy(".AVATAR_STATUS_TYPING_16;");
+const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarURL");
 
 interface IconProps extends React.ComponentPropsWithoutRef<"div"> {
     size?: number;
@@ -28,7 +35,7 @@ function SpeakerIcon(props: IconProps) {
         <div
             {...props}
             role={props.onClick != null ? "button" : undefined}
-            className={classes(cl("speaker"), props.onClick != null ? cl("clickable") : undefined)}
+            className={classes(cl("speaker"), props.onClick != null ? cl("clickable") : undefined, props.className)}
         >
             <svg
                 width={props.size}
@@ -50,7 +57,7 @@ function LockedSpeakerIcon(props: IconProps) {
         <div
             {...props}
             role={props.onClick != null ? "button" : undefined}
-            className={classes(cl("speaker"), props.onClick != null ? cl("clickable") : undefined)}
+            className={classes(cl("speaker"), props.onClick != null ? cl("clickable") : undefined, props.className)}
         >
             <svg
                 width={props.size}
@@ -84,15 +91,27 @@ function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
         size: 30
     });
 
+    const channelIcon = match(channel.type)
+        .with(P.union(1, 3), () => {
+            return channel.recipients.length >= 2 && channel.icon == null
+                ? <GroupDMAvatars recipients={channel.recipients} size="SIZE_32" />
+                : <Avatar src={getDMChannelIcon(channel)} size="SIZE_32" />;
+        })
+        .otherwise(() => null);
+    const channelName = useChannelName(channel);
+
     return (
         <>
             {guild != null && (
-                <div className={cl("guild-name")}>
+                <div className={cl("name")}>
                     {guildIcon != null && <img className={cl("guild-icon")} src={guildIcon} alt="" />}
                     <Text variant="text-sm/bold">{guild.name}</Text>
                 </div>
             )}
-            <Text variant="text-sm/semibold">{channel.name}</Text>
+            <div className={cl("name")}>
+                {channelIcon}
+                <Text variant="text-sm/semibold">{channelName}</Text>
+            </div>
             <div className={cl("vc-members")}>
                 <SpeakerIcon size={18} />
                 <UserSummaryItem
@@ -108,15 +127,20 @@ function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
 
 interface VoiceChannelIndicatorProps {
     userId: string;
+    size?: number;
+    isActionButton?: boolean;
 }
 
 const clickTimers = {} as Record<string, any>;
 
-export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId }: VoiceChannelIndicatorProps) => {
+export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, size, isActionButton }: VoiceChannelIndicatorProps) => {
     const channelId = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(userId)?.channelId as string | undefined);
 
     const channel = channelId == null ? undefined : ChannelStore.getChannel(channelId);
     if (channel == null) return null;
+
+    const isDM = channel.isDM() || channel.isMultiUserDM();
+    const isLocked = !isDM && (!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || !PermissionStore.can(PermissionsBits.CONNECT, channel));
 
     function onClick(e: React.MouseEvent) {
         e.preventDefault();
@@ -124,7 +148,7 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId }: VoiceChanne
 
         if (channel == null || channelId == null) return;
 
-        if (!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel)) {
+        if (!isDM && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel)) {
             showToast("You cannot view the user's Voice Channel", Toasts.Type.FAILURE);
             return;
         }
@@ -133,7 +157,7 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId }: VoiceChanne
         delete clickTimers[channelId];
 
         if (e.detail > 1) {
-            if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) {
+            if (!isDM && !PermissionStore.can(PermissionsBits.CONNECT, channel)) {
                 showToast("You cannot join the user's Voice Channel", Toasts.Type.FAILURE);
                 return;
             }
@@ -147,19 +171,24 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId }: VoiceChanne
         }
     }
 
-    const isLocked = !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || !PermissionStore.can(PermissionsBits.CONNECT, channel);
-
     return (
         <Tooltip
             text={<VoiceChannelTooltip channel={channel} />}
             tooltipClassName={cl("tooltip-container")}
             tooltipContentClassName={cl("tooltip-content")}
         >
-            {props =>
-                isLocked ?
-                    <LockedSpeakerIcon {...props} onClick={onClick} />
-                    : <SpeakerIcon {...props} onClick={onClick} />
-            }
+            {props => {
+                const iconProps = {
+                    ...props,
+                    onClick,
+                    size,
+                    className: isActionButton ? cl("indicator-action-button") : cl("speaker-padding")
+                };
+
+                return isLocked ?
+                    <LockedSpeakerIcon {...iconProps} />
+                    : <SpeakerIcon {...iconProps} />;
+            }}
         </Tooltip>
     );
 }, { noop: true });
