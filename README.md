@@ -131,7 +131,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - VencordRPC by AutumnVN
 - VideoSpeed by Samwich
 - ViewRaw2 by Kyuuhachi
-- VoiceChannelLog by Sqaaakoi (Maintained by thororen & Dev build only)
+- VoiceChannelLog by Sqaaakoi (Maintained by thororen)
 - VoiceChatUtilities by D3SOX
 - VoiceJoinMessages by Sqaaakoi (Maintained by thororen & Dev build only)
 - WebpackTarball by Kyuuhachi
