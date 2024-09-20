@@ -82,7 +82,6 @@ export default definePlugin({
             default: true
         }
     },
-    dependencies: ["CommandsAPI"],
 
     async start() {
         for (const tag of await getTags()) createTagCommand(tag);
