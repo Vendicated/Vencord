@@ -43,7 +43,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - DoubleCounterBypass by nyx
 - EmojiDumper by Cortex, Samwich, Woosh
 - Encryptcord by Inbestigator
-- EquicordCSS by thororen, Dablulite, Coolesding, MiniDiscordThemes, LuckFire
+- EquicordCSS by thororen, Panniku, Dablulite, Coolesding, MiniDiscordThemes, LuckFire, gold_me
 - ExportContacts by dat_insanity
 - FindReply by newwares
 - FrequentQuickSwitcher by Samwich

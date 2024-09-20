@@ -1,97 +1,86 @@
-/* stylelint-disable rule-empty-line-before */
-/* stylelint-disable no-duplicate-selectors */
-/* stylelint-disable selector-attribute-quotes */
 /* stylelint-disable property-no-vendor-prefix */
-/* stylelint-disable value-keyword-case */
-/* stylelint-disable declaration-block-no-duplicate-custom-properties */
-/* stylelint-disable function-url-quotes */
-/* stylelint-disable number-max-precision */
-/* stylelint-disable declaration-block-single-line-max-declarations */
 /* stylelint-disable selector-class-pattern */
+
 :root {
     --settingsicons: 1;
     --si-size: 18px;
     --si-gap: 14px;
-    --use-si: calc(var(--settingsicons, 1) / (var(--settingsicons, 1) + 0.00000000000000000000001));
-    --si-myaccount: url(https://minidiscordthemes.github.io/SettingsIcons/svg/myaccount.svg);
-    --si-profilecustomization: url(https://minidiscordthemes.github.io/SettingsIcons/svg/profilecustomization.svg);
-    --si-privacysafety: url(https://minidiscordthemes.github.io/SettingsIcons/svg/privacysafety.svg);
-    --si-familycenter: url(https://minidiscordthemes.github.io/SettingsIcons/svg/familycenter.svg);
-    --si-authorizedapps: url(https://minidiscordthemes.github.io/SettingsIcons/svg/authorizedapps.svg);
-    --si-sessions: url(https://minidiscordthemes.github.io/SettingsIcons/svg/sessions.svg);
-    --si-connections: url(https://minidiscordthemes.github.io/SettingsIcons/svg/connections.svg);
-    --si-settingsclips: url(https://minidiscordthemes.github.io/SettingsIcons/svg/settingsclips.svg);
-    --si-friendrequests: url(https://minidiscordthemes.github.io/SettingsIcons/svg/friendrequests.svg);
-    --si-discordnitro: url(https://minidiscordthemes.github.io/SettingsIcons/svg/discordnitro.svg);
-    --si-nitroserverboost: url(https://minidiscordthemes.github.io/SettingsIcons/svg/nitroserverboost.svg);
-    --si-subscriptions: url(https://minidiscordthemes.github.io/SettingsIcons/svg/subscriptions.svg);
-    --si-libraryinventory: url(https://minidiscordthemes.github.io/SettingsIcons/svg/libraryinventory.svg);
-    --si-billing: url(https://minidiscordthemes.github.io/SettingsIcons/svg/billing.svg);
-    --si-appearance: url(https://minidiscordthemes.github.io/SettingsIcons/svg/appearance.svg);
-    --si-accessibility: url(https://minidiscordthemes.github.io/SettingsIcons/svg/accessibility.svg);
-    --si-voicevideo: url(https://minidiscordthemes.github.io/SettingsIcons/svg/voicevideo.svg);
-    --si-textimages: url(https://minidiscordthemes.github.io/SettingsIcons/svg/textimages.svg);
-    --si-notifications: url(https://minidiscordthemes.github.io/SettingsIcons/svg/notifications.svg);
-    --si-keybinds: url(https://minidiscordthemes.github.io/SettingsIcons/svg/keybinds.svg);
-    --si-language: url(https://minidiscordthemes.github.io/SettingsIcons/svg/language.svg);
-    --si-windows: url(https://minidiscordthemes.github.io/SettingsIcons/svg/windows.svg);
-    --si-streamermode: url(https://minidiscordthemes.github.io/SettingsIcons/svg/streamermode.svg);
-    --si-rtcspeedtest: url(https://minidiscordthemes.github.io/SettingsIcons/svg/rtcspeedtest.svg);
-    --si-advanced: url(https://minidiscordthemes.github.io/SettingsIcons/svg/advanced.svg);
-    --si-activityprivacy: url(https://minidiscordthemes.github.io/SettingsIcons/svg/activityprivacy.svg);
-    --si-gameactivity: url(https://minidiscordthemes.github.io/SettingsIcons/svg/gameactivity.svg);
-    --si-overlay: url(https://minidiscordthemes.github.io/SettingsIcons/svg/overlay.svg);
-    --si-changelog: url(https://minidiscordthemes.github.io/SettingsIcons/svg/changelog.svg);
-    --si-merchandise: url(https://minidiscordthemes.github.io/SettingsIcons/svg/merchandise.svg);
-    --si-hypesquadonline: url(https://minidiscordthemes.github.io/SettingsIcons/svg/hypesquadonline.svg);
-    --si-powermodesettings: url(https://minidiscordthemes.github.io/SettingsIcons/svg/powermodesettings.svg);
-    --si-experiments: url(https://minidiscordthemes.github.io/SettingsIcons/svg/experiments.svg);
-    --si-developeroptions: url(https://minidiscordthemes.github.io/SettingsIcons/svg/developeroptions.svg);
-    --si-hotspotoptions: url(https://minidiscordthemes.github.io/SettingsIcons/svg/hotspotoptions.svg);
-    --si-dismissiblecontentoptions: url(https://minidiscordthemes.github.io/SettingsIcons/svg/dismissiblecontentoptions.svg);
-    --si-startuptimings: url(https://minidiscordthemes.github.io/SettingsIcons/svg/startuptimings.svg);
-    --si-paymentflowmodals: url(https://minidiscordthemes.github.io/SettingsIcons/svg/paymentflowmodals.svg);
-    --si-textplayground: url(https://minidiscordthemes.github.io/SettingsIcons/svg/textplayground.svg);
-    --si-textcomponent: url(https://minidiscordthemes.github.io/SettingsIcons/svg/textcomponent.svg);
-    --si-logout: url(https://minidiscordthemes.github.io/SettingsIcons/svg/logout.svg);
-    --si-equicordsettings: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordsettings.svg);
-    --si-equicordplugins: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordplugins.svg);
-    --si-equicordthemes: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordthemes.svg);
-    --si-equicordupdater: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordupdater.svg);
-    --si-equicordcloud: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordcloud.svg);
-    --si-equicordsettingssync: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordsettingssync.svg);
-    --si-equicordpatchhelper: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vencordpatchhelper.svg);
-    --si-equibop: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vesktop.svg);
-    --si-vesktop: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vesktop.svg);
-    --si-overview: url(https://minidiscordthemes.github.io/SettingsIcons/svg/overview.svg);
-    --si-roles: url(https://minidiscordthemes.github.io/SettingsIcons/svg/roles.svg);
-    --si-emoji: url(https://minidiscordthemes.github.io/SettingsIcons/svg/emoji.svg);
-    --si-stickers: url(https://minidiscordthemes.github.io/SettingsIcons/svg/stickers.svg);
-    --si-soundboard: url(https://minidiscordthemes.github.io/SettingsIcons/svg/soundboard.svg);
-    --si-widget: url(https://minidiscordthemes.github.io/SettingsIcons/svg/widget.svg);
-    --si-guildtemplates: url(https://minidiscordthemes.github.io/SettingsIcons/svg/guildtemplates.svg);
-    --si-vanityurl: url(https://minidiscordthemes.github.io/SettingsIcons/svg/vanityurl.svg);
-    --si-integrations: url(https://minidiscordthemes.github.io/SettingsIcons/svg/integrations.svg);
-    --si-appdirectory: url(https://minidiscordthemes.github.io/SettingsIcons/svg/appdirectory.svg);
-    --si-safety: url(https://minidiscordthemes.github.io/SettingsIcons/svg/safety.svg);
-    --si-auditlog: url(https://minidiscordthemes.github.io/SettingsIcons/svg/auditlog.svg);
-    --si-bans: url(https://minidiscordthemes.github.io/SettingsIcons/svg/bans.svg);
-    --si-community: url(https://minidiscordthemes.github.io/SettingsIcons/svg/community.svg);
-    --si-onboarding: url(https://minidiscordthemes.github.io/SettingsIcons/svg/onboarding.svg);
-    --si-analytics: url(https://minidiscordthemes.github.io/SettingsIcons/svg/analytics.svg);
-    --si-partner: url(https://minidiscordthemes.github.io/SettingsIcons/svg/partner.svg);
-    --si-discovery: url(https://minidiscordthemes.github.io/SettingsIcons/svg/discovery.svg);
-    --si-rolesubscriptions: url(https://minidiscordthemes.github.io/SettingsIcons/svg/rolesubscriptions.svg);
-    --si-guildpremium: url(https://minidiscordthemes.github.io/SettingsIcons/svg/guildpremium.svg);
-    --si-members: url(https://minidiscordthemes.github.io/SettingsIcons/svg/members.svg);
-    --si-instantinvites: url(https://minidiscordthemes.github.io/SettingsIcons/svg/instantinvites.svg);
-    --si-delete: url(https://minidiscordthemes.github.io/SettingsIcons/svg/delete.svg);
-    --si-overview: url(https://minidiscordthemes.github.io/SettingsIcons/svg/overview.svg);
-    --si-permissions: url(https://minidiscordthemes.github.io/SettingsIcons/svg/permissions.svg);
-    --si-instantinvites: url(https://minidiscordthemes.github.io/SettingsIcons/svg/instantinvites.svg);
-    --si-integrations: url(https://minidiscordthemes.github.io/SettingsIcons/svg/integrations.svg);
-    --si-delete: url(https://minidiscordthemes.github.io/SettingsIcons/svg/delete.svg);
-    --si-default: url(https://minidiscordthemes.github.io/SettingsIcons/svg/default.svg)
+    --use-si: calc(var(--settingsicons, 1) / (var(--settingsicons, 1)));
+    --si-myaccount: url("https://minidiscordthemes.github.io/SettingsIcons/svg/myaccount.svg");
+    --si-profilecustomization: url("https://minidiscordthemes.github.io/SettingsIcons/svg/profilecustomization.svg");
+    --si-privacysafety: url("https://minidiscordthemes.github.io/SettingsIcons/svg/privacysafety.svg");
+    --si-familycenter: url("https://minidiscordthemes.github.io/SettingsIcons/svg/familycenter.svg");
+    --si-authorizedapps: url("https://minidiscordthemes.github.io/SettingsIcons/svg/authorizedapps.svg");
+    --si-sessions: url("https://minidiscordthemes.github.io/SettingsIcons/svg/sessions.svg");
+    --si-connections: url("https://minidiscordthemes.github.io/SettingsIcons/svg/connections.svg");
+    --si-settingsclips: url("https://minidiscordthemes.github.io/SettingsIcons/svg/settingsclips.svg");
+    --si-friendrequests: url("https://minidiscordthemes.github.io/SettingsIcons/svg/friendrequests.svg");
+    --si-discordnitro: url("https://minidiscordthemes.github.io/SettingsIcons/svg/discordnitro.svg");
+    --si-nitroserverboost: url("https://minidiscordthemes.github.io/SettingsIcons/svg/nitroserverboost.svg");
+    --si-subscriptions: url("https://minidiscordthemes.github.io/SettingsIcons/svg/subscriptions.svg");
+    --si-libraryinventory: url("https://minidiscordthemes.github.io/SettingsIcons/svg/libraryinventory.svg");
+    --si-billing: url("https://minidiscordthemes.github.io/SettingsIcons/svg/billing.svg");
+    --si-appearance: url("https://minidiscordthemes.github.io/SettingsIcons/svg/appearance.svg");
+    --si-accessibility: url("https://minidiscordthemes.github.io/SettingsIcons/svg/accessibility.svg");
+    --si-voicevideo: url("https://minidiscordthemes.github.io/SettingsIcons/svg/voicevideo.svg");
+    --si-textimages: url("https://minidiscordthemes.github.io/SettingsIcons/svg/textimages.svg");
+    --si-notifications: url("https://minidiscordthemes.github.io/SettingsIcons/svg/notifications.svg");
+    --si-keybinds: url("https://minidiscordthemes.github.io/SettingsIcons/svg/keybinds.svg");
+    --si-language: url("https://minidiscordthemes.github.io/SettingsIcons/svg/language.svg");
+    --si-windows: url("https://minidiscordthemes.github.io/SettingsIcons/svg/windows.svg");
+    --si-streamermode: url("https://minidiscordthemes.github.io/SettingsIcons/svg/streamermode.svg");
+    --si-rtcspeedtest: url("https://minidiscordthemes.github.io/SettingsIcons/svg/rtcspeedtest.svg");
+    --si-advanced: url("https://minidiscordthemes.github.io/SettingsIcons/svg/advanced.svg");
+    --si-activityprivacy: url("https://minidiscordthemes.github.io/SettingsIcons/svg/activityprivacy.svg");
+    --si-gameactivity: url("https://minidiscordthemes.github.io/SettingsIcons/svg/gameactivity.svg");
+    --si-overlay: url("https://minidiscordthemes.github.io/SettingsIcons/svg/overlay.svg");
+    --si-changelog: url("https://minidiscordthemes.github.io/SettingsIcons/svg/changelog.svg");
+    --si-merchandise: url("https://minidiscordthemes.github.io/SettingsIcons/svg/merchandise.svg");
+    --si-hypesquadonline: url("https://minidiscordthemes.github.io/SettingsIcons/svg/hypesquadonline.svg");
+    --si-powermodesettings: url("https://minidiscordthemes.github.io/SettingsIcons/svg/powermodesettings.svg");
+    --si-experiments: url("https://minidiscordthemes.github.io/SettingsIcons/svg/experiments.svg");
+    --si-developeroptions: url("https://minidiscordthemes.github.io/SettingsIcons/svg/developeroptions.svg");
+    --si-hotspotoptions: url("https://minidiscordthemes.github.io/SettingsIcons/svg/hotspotoptions.svg");
+    --si-dismissiblecontentoptions: url("https://minidiscordthemes.github.io/SettingsIcons/svg/dismissiblecontentoptions.svg");
+    --si-startuptimings: url("https://minidiscordthemes.github.io/SettingsIcons/svg/startuptimings.svg");
+    --si-paymentflowmodals: url("https://minidiscordthemes.github.io/SettingsIcons/svg/paymentflowmodals.svg");
+    --si-textplayground: url("https://minidiscordthemes.github.io/SettingsIcons/svg/textplayground.svg");
+    --si-textcomponent: url("https://minidiscordthemes.github.io/SettingsIcons/svg/textcomponent.svg");
+    --si-logout: url("https://minidiscordthemes.github.io/SettingsIcons/svg/logout.svg");
+    --si-equicordsettings: url("https://minidiscordthemes.github.io/SettingsIcons/svg/vencordsettings.svg");
+    --si-equicordplugins: url("https://minidiscordthemes.github.io/SettingsIcons/svg/vencordplugins.svg");
+    --si-equicordthemes: url("https://minidiscordthemes.github.io/SettingsIcons/svg/vencordthemes.svg");
+    --si-equicordupdater: url("https://minidiscordthemes.github.io/SettingsIcons/svg/vencordupdater.svg");
+    --si-equicordcloud: url("https://minidiscordthemes.github.io/SettingsIcons/svg/vencordcloud.svg");
+    --si-equicordsettingssync: url("https://minidiscordthemes.github.io/SettingsIcons/svg/vencordsettingssync.svg");
+    --si-equicordpatchhelper: url("https://minidiscordthemes.github.io/SettingsIcons/svg/vencordpatchhelper.svg");
+    --si-equibop: url("https://minidiscordthemes.github.io/SettingsIcons/svg/vesktop.svg");
+    --si-vesktop: url("https://minidiscordthemes.github.io/SettingsIcons/svg/vesktop.svg");
+    --si-overview: url("https://minidiscordthemes.github.io/SettingsIcons/svg/overview.svg");
+    --si-roles: url("https://minidiscordthemes.github.io/SettingsIcons/svg/roles.svg");
+    --si-emoji: url("https://minidiscordthemes.github.io/SettingsIcons/svg/emoji.svg");
+    --si-stickers: url("https://minidiscordthemes.github.io/SettingsIcons/svg/stickers.svg");
+    --si-soundboard: url("https://minidiscordthemes.github.io/SettingsIcons/svg/soundboard.svg");
+    --si-widget: url("https://minidiscordthemes.github.io/SettingsIcons/svg/widget.svg");
+    --si-guildtemplates: url("https://minidiscordthemes.github.io/SettingsIcons/svg/guildtemplates.svg");
+    --si-vanityurl: url("https://minidiscordthemes.github.io/SettingsIcons/svg/vanityurl.svg");
+    --si-integrations: url("https://minidiscordthemes.github.io/SettingsIcons/svg/integrations.svg");
+    --si-appdirectory: url("https://minidiscordthemes.github.io/SettingsIcons/svg/appdirectory.svg");
+    --si-safety: url("https://minidiscordthemes.github.io/SettingsIcons/svg/safety.svg");
+    --si-auditlog: url("https://minidiscordthemes.github.io/SettingsIcons/svg/auditlog.svg");
+    --si-bans: url("https://minidiscordthemes.github.io/SettingsIcons/svg/bans.svg");
+    --si-community: url("https://minidiscordthemes.github.io/SettingsIcons/svg/community.svg");
+    --si-onboarding: url("https://minidiscordthemes.github.io/SettingsIcons/svg/onboarding.svg");
+    --si-analytics: url("https://minidiscordthemes.github.io/SettingsIcons/svg/analytics.svg");
+    --si-partner: url("https://minidiscordthemes.github.io/SettingsIcons/svg/partner.svg");
+    --si-discovery: url("https://minidiscordthemes.github.io/SettingsIcons/svg/discovery.svg");
+    --si-rolesubscriptions: url("https://minidiscordthemes.github.io/SettingsIcons/svg/rolesubscriptions.svg");
+    --si-guildpremium: url("https://minidiscordthemes.github.io/SettingsIcons/svg/guildpremium.svg");
+    --si-members: url("https://minidiscordthemes.github.io/SettingsIcons/svg/members.svg");
+    --si-instantinvites: url("https://minidiscordthemes.github.io/SettingsIcons/svg/instantinvites.svg");
+    --si-delete: url("https://minidiscordthemes.github.io/SettingsIcons/svg/delete.svg");
+    --si-permissions: url("https://minidiscordthemes.github.io/SettingsIcons/svg/permissions.svg");
+    --si-default: url("https://minidiscordthemes.github.io/SettingsIcons/svg/default.svg");
 }
 
 .sidebarRegion_c25c6d {
@@ -117,7 +106,7 @@
     width: calc(var(--use-si)*var(--si-size));
     height: calc(var(--use-si)*var(--si-size));
     margin-right: calc(var(--use-si)*var(--si-size)/2);
-    background: currentColor;
+    background: currentcolor;
     z-index: 2;
     -webkit-mask: var(--si-default) center/contain no-repeat;
     mask: var(--si-default) center/contain no-repeat
@@ -148,12 +137,12 @@
     mask: var(--si-authorizedapps) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Sessions]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Sessions"]::before {
     -webkit-mask: var(--si-sessions) center/contain no-repeat;
     mask: var(--si-sessions) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Connections]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Connections"]::before {
     -webkit-mask: var(--si-connections) center/contain no-repeat;
     mask: var(--si-connections) center/contain no-repeat
 }
@@ -178,7 +167,7 @@
     mask: var(--si-nitroserverboost) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Subscriptions]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Subscriptions"]::before {
     -webkit-mask: var(--si-subscriptions) center/contain no-repeat;
     mask: var(--si-subscriptions) center/contain no-repeat
 }
@@ -188,17 +177,17 @@
     mask: var(--si-libraryinventory) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Billing]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Billing"]::before {
     -webkit-mask: var(--si-billing) center/contain no-repeat;
     mask: var(--si-billing) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Appearance]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Appearance"]::before {
     -webkit-mask: var(--si-appearance) center/contain no-repeat;
     mask: var(--si-appearance) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Accessibility]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Accessibility"]::before {
     -webkit-mask: var(--si-accessibility) center/contain no-repeat;
     mask: var(--si-accessibility) center/contain no-repeat
 }
@@ -213,22 +202,22 @@
     mask: var(--si-textimages) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Notifications]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Notifications"]::before {
     -webkit-mask: var(--si-notifications) center/contain no-repeat;
     mask: var(--si-notifications) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Keybinds]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Keybinds"]::before {
     -webkit-mask: var(--si-keybinds) center/contain no-repeat;
     mask: var(--si-keybinds) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Language]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Language"]::before {
     -webkit-mask: var(--si-language) center/contain no-repeat;
     mask: var(--si-language) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Windows]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Windows"]::before {
     -webkit-mask: var(--si-windows) center/contain no-repeat;
     mask: var(--si-windows) center/contain no-repeat
 }
@@ -243,7 +232,7 @@
     mask: var(--si-rtcspeedtest) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Advanced]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Advanced"]::before {
     -webkit-mask: var(--si-advanced) center/contain no-repeat;
     mask: var(--si-advanced) center/contain no-repeat
 }
@@ -258,17 +247,17 @@
     mask: var(--si-gameactivity) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Overlay]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Overlay"]::before {
     -webkit-mask: var(--si-overlay) center/contain no-repeat;
     mask: var(--si-overlay) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=changelog]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="changelog"]::before {
     -webkit-mask: var(--si-changelog) center/contain no-repeat;
     mask: var(--si-changelog) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=merchandise]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="merchandise"]::before {
     -webkit-mask: var(--si-merchandise) center/contain no-repeat;
     mask: var(--si-merchandise) center/contain no-repeat
 }
@@ -283,7 +272,7 @@
     mask: var(--si-powermodesettings) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Experiments]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Experiments"]::before {
     -webkit-mask: var(--si-experiments) center/contain no-repeat;
     mask: var(--si-experiments) center/contain no-repeat
 }
@@ -303,7 +292,7 @@
     mask: var(--si-dismissiblecontentoptions) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=StartupTimings]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="StartupTimings"]::before {
     -webkit-mask: var(--si-startuptimings) center/contain no-repeat;
     mask: var(--si-startuptimings) center/contain no-repeat
 }
@@ -323,194 +312,174 @@
     mask: var(--si-textcomponent) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=logout]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="logout"]::before {
     -webkit-mask: var(--si-logout) center/contain no-repeat;
     mask: var(--si-logout) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EquicordSettings]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="EquicordSettings"]::before {
     -webkit-mask: var(--si-equicordsettings) center/contain no-repeat;
     mask: var(--si-equicordsettings) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EquicordPlugins]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="EquicordPlugins"]::before {
     -webkit-mask: var(--si-equicordplugins) center/contain no-repeat;
     mask: var(--si-equicordplugins) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EquicordThemes]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="EquicordThemes"]::before {
     -webkit-mask: var(--si-equicordthemes) center/contain no-repeat;
     mask: var(--si-equicordthemes) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EquicordUpdater]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="EquicordUpdater"]::before {
     -webkit-mask: var(--si-equicordupdater) center/contain no-repeat;
     mask: var(--si-equicordupdater) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EquicordCloud]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="EquicordCloud"]::before {
     -webkit-mask: var(--si-equicordcloud) center/contain no-repeat;
     mask: var(--si-equicordcloud) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EquicordSettingsSync]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="EquicordSettingsSync"]::before {
     -webkit-mask: var(--si-equicordsettingssync) center/contain no-repeat;
     mask: var(--si-equicordsettingssync) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EquicordPatchHelper]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="EquicordPatchHelper"]::before {
     -webkit-mask: var(--si-equicordpatchhelper) center/contain no-repeat;
     mask: var(--si-equicordpatchhelper) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Equibop]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Equibop"]::before {
     -webkit-mask: var(--si-equibop) center/contain no-repeat;
     mask: var(--si-equibop) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=Vesktop]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="Vesktop"]::before {
     -webkit-mask: var(--si-vesktop) center/contain no-repeat;
     mask: var(--si-vesktop) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=OVERVIEW]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="OVERVIEW"]::before {
     -webkit-mask: var(--si-overview) center/contain no-repeat;
     mask: var(--si-overview) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=ROLES]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="ROLES"]::before {
     -webkit-mask: var(--si-roles) center/contain no-repeat;
     mask: var(--si-roles) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=EMOJI]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="EMOJI"]::before {
     -webkit-mask: var(--si-emoji) center/contain no-repeat;
     mask: var(--si-emoji) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=STICKERS]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="STICKERS"]::before {
     -webkit-mask: var(--si-stickers) center/contain no-repeat;
     mask: var(--si-stickers) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=SOUNDBOARD]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="SOUNDBOARD"]::before {
     -webkit-mask: var(--si-soundboard) center/contain no-repeat;
     mask: var(--si-soundboard) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=WIDGET]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="WIDGET"]::before {
     -webkit-mask: var(--si-widget) center/contain no-repeat;
     mask: var(--si-widget) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=GUILD_TEMPLATES]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="GUILD_TEMPLATES"]::before {
     -webkit-mask: var(--si-guildtemplates) center/contain no-repeat;
     mask: var(--si-guildtemplates) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=VANITY_URL]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="VANITY_URL"]::before {
     -webkit-mask: var(--si-vanityurl) center/contain no-repeat;
     mask: var(--si-vanityurl) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=INTEGRATIONS]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="INTEGRATIONS"]::before {
     -webkit-mask: var(--si-integrations) center/contain no-repeat;
     mask: var(--si-integrations) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=APP_DIRECTORY]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="APP_DIRECTORY"]::before {
     -webkit-mask: var(--si-appdirectory) center/contain no-repeat;
     mask: var(--si-appdirectory) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=SAFETY]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="SAFETY"]::before {
     -webkit-mask: var(--si-safety) center/contain no-repeat;
     mask: var(--si-safety) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=AUDIT_LOG]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="AUDIT_LOG"]::before {
     -webkit-mask: var(--si-auditlog) center/contain no-repeat;
     mask: var(--si-auditlog) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=BANS]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="BANS"]::before {
     -webkit-mask: var(--si-bans) center/contain no-repeat;
     mask: var(--si-bans) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=COMMUNITY]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="COMMUNITY"]::before {
     -webkit-mask: var(--si-community) center/contain no-repeat;
     mask: var(--si-community) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=ONBOARDING]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="ONBOARDING"]::before {
     -webkit-mask: var(--si-onboarding) center/contain no-repeat;
     mask: var(--si-onboarding) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=ANALYTICS]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="ANALYTICS"]::before {
     -webkit-mask: var(--si-analytics) center/contain no-repeat;
     mask: var(--si-analytics) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=PARTNER]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="PARTNER"]::before {
     -webkit-mask: var(--si-partner) center/contain no-repeat;
     mask: var(--si-partner) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=DISCOVERY]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="DISCOVERY"]::before {
     -webkit-mask: var(--si-discovery) center/contain no-repeat;
     mask: var(--si-discovery) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=ROLE_SUBSCRIPTIONS]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="ROLE_SUBSCRIPTIONS"]::before {
     -webkit-mask: var(--si-rolesubscriptions) center/contain no-repeat;
     mask: var(--si-rolesubscriptions) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=GUILD_PREMIUM]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="GUILD_PREMIUM"]::before {
     -webkit-mask: var(--si-guildpremium) center/contain no-repeat;
     mask: var(--si-guildpremium) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=MEMBERS]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="MEMBERS"]::before {
     -webkit-mask: var(--si-members) center/contain no-repeat;
     mask: var(--si-members) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=INSTANT_INVITES]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="INSTANT_INVITES"]::before {
     -webkit-mask: var(--si-instantinvites) center/contain no-repeat;
     mask: var(--si-instantinvites) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=DELETE]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="DELETE"]::before {
     -webkit-mask: var(--si-delete) center/contain no-repeat;
     mask: var(--si-delete) center/contain no-repeat
 }
 
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=OVERVIEW]::before {
-    -webkit-mask: var(--si-overview) center/contain no-repeat;
-    mask: var(--si-overview) center/contain no-repeat
-}
-
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=PERMISSIONS]::before {
+.sidebar_c25c6d .side_a0 .item_a0[data-tab-id="PERMISSIONS"]::before {
     -webkit-mask: var(--si-permissions) center/contain no-repeat;
     mask: var(--si-permissions) center/contain no-repeat
-}
-
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=INSTANT_INVITES]::before {
-    -webkit-mask: var(--si-instantinvites) center/contain no-repeat;
-    mask: var(--si-instantinvites) center/contain no-repeat
-}
-
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=INTEGRATIONS]::before {
-    -webkit-mask: var(--si-integrations) center/contain no-repeat;
-    mask: var(--si-integrations) center/contain no-repeat
-}
-
-.sidebar_c25c6d .side_a0 .item_a0[data-tab-id=DELETE]::before {
-    -webkit-mask: var(--si-delete) center/contain no-repeat;
-    mask: var(--si-delete) center/contain no-repeat
 }
 
 .sidebar_c25c6d .side_a0 .item_a0>div {

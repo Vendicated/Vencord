@@ -25,6 +25,7 @@ import definePlugin, { OptionType } from "@utils/types";
 // Importing the style managed fixes on and off switch
 import betterauthapps from "./css/betterauthapps.css?managed";
 import betterstatuspicker from "./css/betterstatuspicker.css?managed";
+import discordicons from "./css/discordicons.css?managed";
 import gradientbuttons from "./css/gradientbuttons.css?managed";
 import nitrothemesfix from "./css/nitrothemesfix.css?managed";
 import settingsicons from "./css/settingsicons.css?managed";
@@ -41,6 +42,12 @@ const settings = definePluginSettings({
     betterStatusPicker: {
         type: OptionType.BOOLEAN,
         description: "Enable Better Status Picker CSS",
+        restartNeeded: true,
+        default: false
+    },
+    discordicons: {
+        type: OptionType.BOOLEAN,
+        description: "Enable Discord Icons CSS",
         restartNeeded: true,
         default: false
     },
@@ -85,6 +92,7 @@ export default definePlugin({
         settingsArray.push(
             settings.store.betterAuthApps,
             settings.store.betterStatusPicker,
+            settings.store.discordicons,
             settings.store.gradientButtons,
             settings.store.nitroThemesFix,
             settings.store.settingsIcons,
@@ -93,6 +101,7 @@ export default definePlugin({
         cssArray.push(
             betterauthapps,
             betterstatuspicker,
+            discordicons,
             gradientbuttons,
             nitrothemesfix,
             settingsicons,
