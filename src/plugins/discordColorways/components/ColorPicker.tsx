@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { CopyIcon } from "./Icons";
-
+import { DataStore, Toasts, useEffect, useState } from "..";
 import { mainColors } from "../constants";
 import { colorVariables } from "../css";
-import { getHex } from "../utils";
-import { useState, useEffect, DataStore, Toasts } from "..";
 import { ModalProps } from "../types";
+import { getHex } from "../utils";
+import { CopyIcon } from "./Icons";
 
 export default function ({ modalProps }: { modalProps: ModalProps; }) {
     const [ColorVars, setColorVars] = useState<string[]>(colorVariables);

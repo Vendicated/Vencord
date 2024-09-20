@@ -14,12 +14,10 @@ import { colorToHex, getHex, stringToHex } from "../utils";
 import { hasManagerRole, requestManagerRole, sendColorway, updateRemoteSources, wsOpen } from "../wsClient";
 import AutoColorwaySelector from "./AutoColorwaySelector";
 import CreatorModal from "./CreatorModal";
-import FiltersMenu from "./FiltersMenu";
-import { DeleteIcon, IDIcon, PalleteIcon, PlusIcon } from "./Icons";
+import { DeleteIcon, IDIcon, PlusIcon } from "./Icons";
 import InfoModal from "./InfoModal";
 import ReloadButton from "./ReloadButton";
-import SourcesMenu from "./SourcesMenu";
-import UseRepainterThemeModal from "./UseRepainterThemeModal";
+import SelectorOptionsMenu from "./SelectorOptionsMenu";
 
 export default function ({
     settings = { selectorType: "normal" },
@@ -124,8 +122,8 @@ export default function ({
     }
 
     function Container({ children }: { children: ReactNode; }) {
-        if (hasTheme) return <div style={{ maxHeight: settings.selectorType === "multiple-selection" ? "50%" : "unset" }} className="ColorwaySelectorWrapper" data-theme={theme}>{children}</div>;
-        else return <div style={{ maxHeight: settings.selectorType === "multiple-selection" ? "50%" : "unset" }} className="ColorwaySelectorWrapper">{children}</div>;
+        if (hasTheme) return <div style={{ maxHeight: settings.selectorType === "multiple-selection" ? "50%" : "unset" }} className="colorways-selector" data-theme={theme}>{children}</div>;
+        else return <div style={{ maxHeight: settings.selectorType === "multiple-selection" ? "50%" : "unset" }} className="colorways-selector">{children}</div>;
     }
 
     return <><Header>
@@ -155,49 +153,58 @@ export default function ({
                 }}
             >
                 <PlusIcon width={14} height={14} style={{ boxSizing: "content-box" }} />
-                Create
+                Add...
             </button>
-            <button
-                className="colorwaysPillButton"
-                id="colorway-userepaintertheme"
-                onClick={() => {
-                    openModal(props => <UseRepainterThemeModal modalProps={props} onFinish={async ({ id, colors }) => {
-                        const demandedColorway = generateCss({
-                            primary: colors[7].replace("#", ""),
-                            secondary: colors[11].replace("#", ""),
-                            tertiary: colors[14].replace("#", ""),
-                            accent: colors[16].replace("#", "")
-                        });
-                        ColorwayCSS.set(demandedColorway);
-                        const newObj: ColorwayObject = {
-                            id: id!,
-                            css: demandedColorway,
-                            sourceType: "temporary",
-                            source: "Repainter",
-                            colors: {
-                                accent: colors![16],
-                                primary: colors![2],
-                                secondary: colors![5],
-                                tertiary: colors![8]
-                            }
-                        };
-                        DataStore.set("activeColorwayObject", newObj);
-                        setActiveColorwayObject(newObj);
-                    }} />);
+            <SelectorOptionsMenu
+                sort={sortBy}
+                onSortChange={newSort => {
+                    setSortBy(newSort);
                 }}
-            >
-                <PalleteIcon width={14} height={14} style={{ boxSizing: "content-box" }} />
-                Use Repainter theme
-            </button>
-            <FiltersMenu sort={sortBy} onSortChange={newSort => {
-                setSortBy(newSort);
-            }} />
-            <SourcesMenu source={filters.filter(filter => filter.id == visibleSources)[0]} sources={filters} onSourceChange={sourceId => {
-                setVisibleSources(sourceId);
-            }} />
+                source={filters.find(filter => filter.id === visibleSources) as { name: string, id: string, sources: SourceObject[]; }}
+                sources={filters}
+                onSourceChange={sourceId => {
+                    setVisibleSources(sourceId);
+                }}
+                onAutoPreset={activeAutoPreset => {
+                    DataStore.set("activeAutoPreset", activeAutoPreset);
+                    if (activeColorwayObject.id === "Auto") {
+                        const { colors } = getAutoPresets(colorToHex(getComputedStyle(document.body).getPropertyValue("--os-accent-color")).slice(0, 6))[activeAutoPreset];
+                        const newObj: ColorwayObject = {
+                            id: "Auto",
+                            sourceType: "online",
+                            source: null,
+                            colors: colors
+                        };
+                        if (isManager) {
+                            sendColorway(newObj);
+                        } else {
+                            DataStore.set("activeColorwayObject", newObj);
+                            setActiveColorwayObject(newObj);
+
+                            DataStore.get("colorwaysPreset").then((colorwaysPreset: string) => {
+                                if (colorwaysPreset === "default") {
+                                    ColorwayCSS.set(generateCss(
+                                        colors,
+                                        true,
+                                        true,
+                                        undefined,
+                                        newObj.id as string
+                                    ));
+                                } else {
+                                    if (gradientPresetIds.includes(colorwaysPreset)) {
+                                        ColorwayCSS.set((getPreset(colors)[colorwaysPreset].preset as { full: string; }).full);
+                                    } else {
+                                        ColorwayCSS.set(getPreset(colors)[colorwaysPreset].preset as string);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }}
+            />
         </div>
     </Header>
-        {(wsConnected && settings.selectorType == "normal" && !isManager) ? <div className="colorwaysManagerActive">
+        {(wsConnected && settings.selectorType === "normal" && !isManager) ? <div className="colorwaysManagerActive">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 16 16" style={{
                 transform: "scaleX(1.4) scaleY(0.9)"
             }}>
@@ -334,7 +341,7 @@ export default function ({
                                     setActiveColorwayObject(newObj);
 
                                     DataStore.get("colorwaysPreset").then((colorwaysPreset: string) => {
-                                        if (colorwaysPreset == "default") {
+                                        if (colorwaysPreset === "default") {
                                             ColorwayCSS.set(generateCss(
                                                 colors,
                                                 true,
@@ -433,7 +440,7 @@ export default function ({
                                         DataStore.set("activeColorwayObject", newObj);
 
                                         DataStore.get("colorwaysPreset").then((colorwaysPreset: string) => {
-                                            if (colorwaysPreset == "default") {
+                                            if (colorwaysPreset === "default") {
                                                 ColorwayCSS.set(generateCss(
                                                     newObj.colors,
                                                     true,
@@ -444,7 +451,7 @@ export default function ({
                                             } else {
                                                 if (gradientPresetIds.includes(colorwaysPreset)) {
                                                     const css = Object.keys(newObj).includes("linearGradient")
-                                                        ? gradientBase(colorToHex(newObj.colors.accent), true) + `:root:root {--custom-theme-background: linear-gradient(${newObj.linearGradient})}`
+                                                        ? gradientBase(newObj.colors, true) + `:root:root {--custom-theme-background: linear-gradient(${newObj.linearGradient})}`
                                                         : (getPreset(newObj.colors)[colorwaysPreset].preset as { full: string; }).full;
                                                     ColorwayCSS.set(css);
                                                 } else {

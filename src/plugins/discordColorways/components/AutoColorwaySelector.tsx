@@ -18,9 +18,9 @@ export default function ({ modalProps, onChange, autoColorwayId = "" }: { modalP
         }
         load();
     }, []);
-    return <div className={`colorwaysModal ${modalProps.transitionState == 2 ? "closing" : ""} ${modalProps.transitionState == 4 ? "hidden" : ""}`} data-theme={theme}>
+    return <div className={`colorwaysModal ${modalProps.transitionState === 2 ? "closing" : ""} ${modalProps.transitionState === 4 ? "hidden" : ""}`} data-theme={theme}>
         <h2 className="colorwaysModalHeader">
-            Auto Preset Settings
+            Auto Colorway Settings
         </h2>
         <div className="colorwaysModalContent">
             <div className="dc-info-card" style={{ marginTop: "1em" }}>

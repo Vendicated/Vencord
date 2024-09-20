@@ -34,7 +34,7 @@ export default function () {
             <>
                 <span>Colorways</span>
                 <span style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: 12 }}>{"Active Colorway: " + activeColorway}</span>
-                {activeColorway === "Auto" ? <span style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: 12 }}>{"Auto Preset: " + (autoPreset ? getAutoPresets()[autoPreset].name : "None")}</span> : <></>}
+                {activeColorway === "Auto" ? <span style={{ color: "var(--text-muted)", fontWeight: 500, fontSize: 12 }}>{"Auto Colorway Preset: " + (autoPreset ? getAutoPresets()[autoPreset].name : "None")}</span> : <></>}
             </>
         }>
         {({ onMouseEnter, onMouseLeave, isActive, onClick }) => {

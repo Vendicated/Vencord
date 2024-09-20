@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { hexToString } from "../utils";
+import { DataStore, useEffect, useState } from "..";
 import { ModalProps } from "../types";
-import { DataStore, useState, useEffect } from "..";
+import { hexToString } from "../utils";
 
 export default function ({ modalProps, onColorwayId }: { modalProps: ModalProps, onColorwayId: (colorwayID: string) => void; }) {
     const [colorwayID, setColorwayID] = useState<string>("");
@@ -18,7 +18,7 @@ export default function ({ modalProps, onColorwayId }: { modalProps: ModalProps,
         }
         load();
     }, []);
-    return <div className={`colorwaysModal ${modalProps.transitionState == 2 ? "closing" : ""} ${modalProps.transitionState == 4 ? "hidden" : ""}`} data-theme={theme}>
+    return <div className={`colorwaysModal ${modalProps.transitionState === 2 ? "closing" : ""} ${modalProps.transitionState === 4 ? "hidden" : ""}`} data-theme={theme}>
         <div className="colorwaysModalContent">
             <span className="colorwaysModalSectionHeader">Colorway ID:</span>
             <input

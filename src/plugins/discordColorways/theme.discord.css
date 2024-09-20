@@ -1,8 +1,10 @@
+/* stylelint-disable no-descending-specificity */
 .colorwaySelectorModal[data-theme="discord"],
 .colorwayModal[data-theme="discord"] {
     border: none;
     box-shadow: var(--legacy-elevation-border), var(--legacy-elevation-high);
     background-color: var(--modal-footer-background);
+    border-radius: 4px;
 }
 
 [data-theme="discord"] .colorwaysSettingsDivider {
@@ -25,7 +27,7 @@
 }
 
 [data-theme="discord"] .colorwaysSettings-switch {
-    background-color: rgb(128, 132, 142);
+    background-color: rgb(128 132 142);
 }
 
 [data-theme="discord"] .colorwaysSettings-switch.checked {
@@ -67,7 +69,6 @@
     font-weight: 500;
     line-height: 16px;
     padding: 2px 16px;
-    -moz-user-select: none;
     user-select: none;
 }
 
@@ -78,7 +79,7 @@
 [data-theme="discord"] > .colorwaySelectorSidebar {
     border-radius: 4px 0 0 4px;
     background-color: var(--modal-footer-background);
-    box-shadow: inset 0 1px 0 hsl(var(--primary-630-hsl) / 0.6);
+    box-shadow: inset 0 1px 0 hsl(var(--primary-630-hsl) / 60%);
     padding: 12px;
     margin: 0;
     height: 100%;
@@ -135,7 +136,6 @@
     flex: 0 0 auto;
     background: var(--bg-brand);
     color: var(--white);
-    font-size: 0.625rem;
     text-transform: uppercase;
     vertical-align: top;
     display: inline-flex;
@@ -191,7 +191,7 @@
     border-radius: 0 0 5px 5px;
     background-color: var(--modal-footer-background);
     padding: 16px;
-    box-shadow: inset 0 1px 0 hsl(var(--primary-630-hsl) / 0.6);
+    box-shadow: inset 0 1px 0 hsl(var(--primary-630-hsl) / 60%);
     gap: 0;
     width: unset;
 }
@@ -239,8 +239,8 @@
 
 [data-theme="discord"] .colorwaysModalHeader {
     box-shadow:
-        0 1px 0 0 hsl(var(--primary-800-hsl) / 0.3),
-        0 1px 2px 0 hsl(var(--primary-800-hsl) / 0.3);
+        0 1px 0 0 hsl(var(--primary-800-hsl) / 30%),
+        0 1px 2px 0 hsl(var(--primary-800-hsl) / 30%);
     border-radius: 4px 4px 0 0;
     transition: box-shadow 0.1s ease-out;
     word-wrap: break-word;
@@ -413,4 +413,9 @@
 
 [data-theme="discord"] .colorwaySelectorModal {
     border-radius: 4px;
+}
+
+[data-theme="discord"] .colorwaysMenuHeader {
+    text-decoration: none;
+    color: var(--interactive-normal);
 }
