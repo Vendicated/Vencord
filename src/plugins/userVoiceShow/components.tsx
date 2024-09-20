@@ -127,13 +127,13 @@ function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
 
 interface VoiceChannelIndicatorProps {
     userId: string;
-    size?: number;
     isActionButton?: boolean;
+    isMessageIndicator?: boolean;
 }
 
 const clickTimers = {} as Record<string, any>;
 
-export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, size, isActionButton }: VoiceChannelIndicatorProps) => {
+export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isActionButton, isMessageIndicator }: VoiceChannelIndicatorProps) => {
     const channelId = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(userId)?.channelId as string | undefined);
 
     const channel = channelId == null ? undefined : ChannelStore.getChannel(channelId);
@@ -178,16 +178,18 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, size, isActio
             tooltipContentClassName={cl("tooltip-content")}
         >
             {props => {
-                const iconProps = {
+                const iconProps: IconProps = {
                     ...props,
-                    onClick,
-                    size,
-                    className: isActionButton ? cl("indicator-action-button") : cl("speaker-padding")
+                    className: isActionButton ? cl("indicator-action-button") : cl("speaker-padding"),
+                    size: isActionButton ? 20 : undefined,
+                    onClick
                 };
 
-                return isLocked ?
-                    <LockedSpeakerIcon {...iconProps} />
-                    : <SpeakerIcon {...iconProps} />;
+                return <div className={isMessageIndicator ? cl("speaker-vertical-margin") : undefined}>
+                    {isLocked ?
+                        <LockedSpeakerIcon {...iconProps} />
+                        : <SpeakerIcon {...iconProps} />}
+                </div>;
             }}
         </Tooltip>
     );
