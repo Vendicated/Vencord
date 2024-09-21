@@ -350,7 +350,7 @@ export default definePlugin({
                 </Forms.FormText>
                 <br />
                 <Forms.FormText variant="text-md/normal">
-                    The new activity this plugin creates will be missing some features (time bar, play on spotify and listen along). This is a compromise, not a bug.
+                    The new activity this plugin creates will be missing some features (play on spotify and listen along). This is a compromise, not a bug.
                 </Forms.FormText>
                 <br />
                 <Forms.FormText variant="text-md/normal">
