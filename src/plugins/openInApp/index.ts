@@ -101,6 +101,20 @@ export default definePlugin({
             }
         },
         {
+            find: "no artist ids in metadata",
+            predicate: () => !IS_DISCORD_DESKTOP && pluginSettings.store.spotify,
+            replacement: [
+                {
+                    match: /\i\.\i\.isProtocolRegistered\(\)/g,
+                    replace: "true"
+                },
+                {
+                    match: /!\(0,\i\.isDesktop\)\(\)/,
+                    replace: "false"
+                }
+            ]
+        },
+        {
             find: ".CONNECTED_ACCOUNT_VIEWED,",
             replacement: {
                 match: /(?<=href:\i,onClick:(\i)=>\{)(?=.{0,10}\i=(\i)\.type,.{0,100}CONNECTED_ACCOUNT_VIEWED)/,
