@@ -7,7 +7,7 @@
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
-import { filters, findByCode, findComponentByCode, findProp, findStore, mapMangledModule } from "@webpack";
+import { filters, findByCode, findByProps, findComponentByCode, findProp, findStore, mapMangledModule } from "@webpack";
 import { ChannelRouter, ChannelStore, GuildStore, IconUtils, match, P, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
@@ -23,6 +23,8 @@ const VoiceStateStore = findStore("VoiceStateStore");
 const UserSummaryItem = findComponentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const Avatar = findComponentByCode(".AVATAR_STATUS_TYPING_16;");
 const GroupDMAvatars = findComponentByCode(".AvatarSizeSpecs[", "getAvatarURL");
+
+const ActionButtonClasses = findByProps("actionButton", "highlight");
 
 interface IconProps extends React.ComponentPropsWithoutRef<"div"> {
     size?: number;
@@ -182,7 +184,7 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isActionButto
             {props => {
                 const iconProps: IconProps = {
                     ...props,
-                    className: classes(isActionButton ? cl("indicator-action-button") : cl("speaker-padding"), isMessageIndicator && cl("message-indicator"), shouldHighlight && cl("highlight")),
+                    className: classes(isActionButton ? ActionButtonClasses.actionButton : cl("speaker-padding"), isMessageIndicator && cl("message-indicator"), shouldHighlight && ActionButtonClasses.highlight),
                     size: isActionButton ? 20 : undefined,
                     onClick
                 };

@@ -23,18 +23,6 @@
     position: relative;
 }
 
-.vc-uvs-indicator-action-button {
-    background-color: var(--background-secondary);
-    border-radius: 100%;
-    height: 36px;
-    width: 36px;
-    margin-left: 10px;
-}
-
-.vc-uvs-indicator-action-button.vc-uvs-highlight {
-    background-color: var(--background-tertiary);
-}
-
 .vc-uvs-tooltip-container {
     max-width: 300px;
 }
