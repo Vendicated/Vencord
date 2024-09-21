@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { showNotification } from "@api/Notifications";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { filters, findAll, search, wreq } from "@webpack";
+import { Toasts } from "@webpack/common";
 import { reporterData } from "debug/reporterData";
 import { Settings } from "Vencord";
 
@@ -56,10 +56,13 @@ export function initWs(isManual = false) {
         }
 
 
-        (settings.store.notifyOnAutoConnect || isManual) && showNotification({
-            title: "Dev Companion Connected",
-            body: "Connected to WebSocket",
-            noPersist: true
+        (settings.store.notifyOnAutoConnect || isManual) && Toasts.show({
+            message: "Connected to WebSocket",
+            id: Toasts.genId(),
+            type: Toasts.Type.SUCCESS,
+            options: {
+                position: Toasts.Position.TOP
+            }
         });
     });
 
@@ -70,11 +73,13 @@ export function initWs(isManual = false) {
 
         logger.error("Dev Companion Error:", e);
 
-        showNotification({
-            title: "Dev Companion Error",
-            body: (e as ErrorEvent).message || "No Error Message",
-            color: "var(--status-danger, red)",
-            noPersist: true
+        Toasts.show({
+            message: "Dev Companion Error",
+            id: Toasts.genId(),
+            type: Toasts.Type.FAILURE,
+            options: {
+                position: Toasts.Position.TOP
+            }
         });
     });
 
@@ -83,16 +88,12 @@ export function initWs(isManual = false) {
 
         logger.info("Dev Companion Disconnected:", e.code, e.reason);
 
-        showNotification({
-            title: "Dev Companion Disconnected",
-            body: e.reason || "No Reason provided",
-            color: "var(--status-danger, red)",
-            noPersist: true,
-            onClick() {
-                setTimeout(() => {
-                    socket?.close(1000, "Reconnecting");
-                    initWs(true);
-                }, 2500);
+        Toasts.show({
+            message: "Dev Companion Disconnected",
+            id: Toasts.genId(),
+            type: Toasts.Type.FAILURE,
+            options: {
+                position: Toasts.Position.TOP
             }
         });
     });
