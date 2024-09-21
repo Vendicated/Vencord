@@ -119,6 +119,7 @@ export default definePlugin({
                 replace: ""
             }
         },
+        // Patches discords generic logger function
         {
             find: "Σ:",
             predicate: () => settings.store.disableLoggers,
