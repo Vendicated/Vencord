@@ -7,17 +7,26 @@
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
-import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildStore, IconUtils, NavigationRouter, PermissionsBits, PermissionStore, showToast, Text, Toasts, Tooltip, useCallback, useMemo, UserStore, useStateFromStores } from "@webpack/common";
+import { filters, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
+import { ChannelRouter, ChannelStore, GuildStore, IconUtils, match, P, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 const cl = classNameFactory("vc-uvs-");
 
-const { selectVoiceChannel } = findByPropsLazy("selectChannel", "selectVoiceChannel");
+const { selectVoiceChannel } = findByPropsLazy("selectVoiceChannel", "selectChannel");
+const { useChannelName } = mapMangledModuleLazy(".Messages.GROUP_DM_ALONE", {
+    useChannelName: filters.byCode("()=>null==")
+});
+const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
-const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 
-interface IconProps extends React.HTMLAttributes<HTMLDivElement> {
+const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
+const Avatar = findComponentByCodeLazy(".AVATAR_STATUS_TYPING_16;");
+const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarURL");
+
+const ActionButtonClasses = findByPropsLazy("actionButton", "highlight");
+
+interface IconProps extends React.ComponentPropsWithoutRef<"div"> {
     size?: number;
 }
 
@@ -28,7 +37,7 @@ function SpeakerIcon(props: IconProps) {
         <div
             {...props}
             role={props.onClick != null ? "button" : undefined}
-            className={classes(cl("speaker"), props.onClick != null ? cl("clickable") : undefined)}
+            className={classes(cl("speaker"), props.onClick != null ? cl("clickable") : undefined, props.className)}
         >
             <svg
                 width={props.size}
@@ -50,7 +59,7 @@ function LockedSpeakerIcon(props: IconProps) {
         <div
             {...props}
             role={props.onClick != null ? "button" : undefined}
-            className={classes(cl("speaker"), props.onClick != null ? cl("clickable") : undefined)}
+            className={classes(cl("speaker"), props.onClick != null ? cl("clickable") : undefined, props.className)}
         >
             <svg
                 width={props.size}
@@ -67,43 +76,51 @@ function LockedSpeakerIcon(props: IconProps) {
 
 interface VoiceChannelTooltipProps {
     channel: Channel;
+    isLocked: boolean;
 }
 
-function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
+function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
     const voiceStates = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStatesForChannel(channel.id));
+
     const users = useMemo(
         () => Object.values<any>(voiceStates).map(voiceState => UserStore.getUser(voiceState.userId)).filter(user => user != null),
         [voiceStates]
     );
 
-    const guild = useMemo(
-        () => channel.getGuildId() == null ? undefined : GuildStore.getGuild(channel.getGuildId()),
-        [channel]
-    );
+    const guild = channel.getGuildId() == null ? undefined : GuildStore.getGuild(channel.getGuildId());
+    const guildIcon = guild?.icon == null ? undefined : IconUtils.getGuildIconURL({
+        id: guild.id,
+        icon: guild.icon,
+        size: 30
+    });
 
-    const guildIcon = useMemo(() => {
-        return guild?.icon == null ? undefined : IconUtils.getGuildIconURL({
-            id: guild.id,
-            icon: guild.icon,
-            size: 30
-        });
-    }, [guild]);
+    const channelIcon = match(channel.type)
+        .with(P.union(1, 3), () => {
+            return channel.recipients.length >= 2 && channel.icon == null
+                ? <GroupDMAvatars recipients={channel.recipients} size="SIZE_32" />
+                : <Avatar src={getDMChannelIcon(channel)} size="SIZE_32" />;
+        })
+        .otherwise(() => null);
+    const channelName = useChannelName(channel);
 
     return (
         <>
             {guild != null && (
-                <div className={cl("guild-name")}>
+                <div className={cl("name")}>
                     {guildIcon != null && <img className={cl("guild-icon")} src={guildIcon} alt="" />}
                     <Text variant="text-sm/bold">{guild.name}</Text>
                 </div>
             )}
-            <Text variant="text-sm/semibold">{channel.name}</Text>
+            <div className={cl("name")}>
+                {channelIcon}
+                <Text variant="text-sm/semibold">{channelName}</Text>
+            </div>
             <div className={cl("vc-members")}>
-                <SpeakerIcon size={18} />
+                {isLocked ? <LockedSpeakerIcon size={18} /> : <SpeakerIcon size={18} />}
                 <UserSummaryItem
                     users={users}
                     renderIcon={false}
-                    max={7}
+                    max={13}
                     size={18}
                 />
             </div>
@@ -113,20 +130,29 @@ function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
 
 interface VoiceChannelIndicatorProps {
     userId: string;
+    isActionButton?: boolean;
+    isMessageIndicator?: boolean;
+    shouldHighlight?: boolean;
 }
 
 const clickTimers = {} as Record<string, any>;
 
-export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId }: VoiceChannelIndicatorProps) => {
+export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isActionButton, isMessageIndicator, shouldHighlight }: VoiceChannelIndicatorProps) => {
     const channelId = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(userId)?.channelId as string | undefined);
-    const channel = useMemo(() => channelId == null ? undefined : ChannelStore.getChannel(channelId), [channelId]);
 
-    const onClick = useCallback((e: React.MouseEvent) => {
+    const channel = channelId == null ? undefined : ChannelStore.getChannel(channelId);
+    if (channel == null) return null;
+
+    const isDM = channel.isDM() || channel.isMultiUserDM();
+    const isLocked = !isDM && (!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || !PermissionStore.can(PermissionsBits.CONNECT, channel));
+
+    function onClick(e: React.MouseEvent) {
         e.preventDefault();
         e.stopPropagation();
+
         if (channel == null || channelId == null) return;
 
-        if (!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel)) {
+        if (!isDM && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel)) {
             showToast("You cannot view the user's Voice Channel", Toasts.Type.FAILURE);
             return;
         }
@@ -135,7 +161,7 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId }: VoiceChanne
         delete clickTimers[channelId];
 
         if (e.detail > 1) {
-            if (!PermissionStore.can(PermissionsBits.CONNECT, channel)) {
+            if (!isDM && !PermissionStore.can(PermissionsBits.CONNECT, channel)) {
                 showToast("You cannot join the user's Voice Channel", Toasts.Type.FAILURE);
                 return;
             }
@@ -143,28 +169,30 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId }: VoiceChanne
             selectVoiceChannel(channelId);
         } else {
             clickTimers[channelId] = setTimeout(() => {
-                NavigationRouter.transitionTo(`/channels/${channel.getGuildId() ?? "@me"}/${channelId}`);
+                ChannelRouter.transitionToChannel(channelId);
                 delete clickTimers[channelId];
             }, 250);
         }
-    }, [channelId]);
-
-    const isLocked = useMemo(() => {
-        return !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || !PermissionStore.can(PermissionsBits.CONNECT, channel);
-    }, [channelId]);
-
-    if (channel == null) return null;
+    }
 
     return (
         <Tooltip
-            text={<VoiceChannelTooltip channel={channel} />}
+            text={<VoiceChannelTooltip channel={channel} isLocked={isLocked} />}
             tooltipClassName={cl("tooltip-container")}
+            tooltipContentClassName={cl("tooltip-content")}
         >
-            {props =>
-                isLocked ?
-                    <LockedSpeakerIcon {...props} onClick={onClick} />
-                    : <SpeakerIcon {...props} onClick={onClick} />
-            }
+            {props => {
+                const iconProps: IconProps = {
+                    ...props,
+                    className: classes(isActionButton ? ActionButtonClasses.actionButton : cl("speaker-padding"), isMessageIndicator && cl("message-indicator"), shouldHighlight && ActionButtonClasses.highlight),
+                    size: isActionButton ? 20 : undefined,
+                    onClick
+                };
+
+                return isLocked ?
+                    <LockedSpeakerIcon {...iconProps} />
+                    : <SpeakerIcon {...iconProps} />;
+            }}
         </Tooltip>
     );
 }, { noop: true });
