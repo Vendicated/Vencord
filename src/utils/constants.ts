@@ -575,9 +575,13 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "RamziAH",
         id: 1279957227612147747n,
     },
-        SomeAspy: {
+    SomeAspy: {
         name: "SomeAspy",
         id: 516750892372852754n,
+    },
+    UnmatchedBracket: {
+        name: "UnmatchedBracket",
+        id: 971943551816581161n,
     },
 } satisfies Record<string, Dev>);
 
