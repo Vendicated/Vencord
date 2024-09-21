@@ -21,7 +21,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, Menu, Text, Toasts } from "@webpack/common";
+import { Button, Menu, Text, Toasts, useState } from "@webpack/common";
 
 const Components = findByPropsLazy("Status");
 const StatusStyles = findByPropsLazy("statusItem");
@@ -50,8 +50,45 @@ const settings = definePluginSettings({
     }
 });
 
+const RenderStatusMenuItem = ({ status }) => {
+
+    const [isHovering, setIsHovering] = useState(false);
+    const handleMouseOver = () => {
+        setIsHovering(true);
+    };
+
+    const handleMouseOut = () => {
+        setIsHovering(false);
+    };
+
+    return <div className={StatusStyles.statusItem}
+        onMouseOver={handleMouseOver}
+        onMouseOut={handleMouseOut}>
+        {isHovering ? <Components.Status
+            status={"dnd"} className={StatusStyles.icon}
+            size={12}
+            style={{
+                rotate: "60deg"
+            }}
+            onClick={() => {
+                delete settings.store.StatusPresets[status.text];
+                Toasts.show({
+                    message: "Successfully removed Status",
+                    type: Toasts.Type.SUCCESS,
+                    id: Toasts.genId()
+                });
+            }}
+        /> : <Components.Status
+            status={status.status} className={StatusStyles.icon}
+            size={12}
+        />}
+        <div className={StatusStyles.status}>{status.status}</div>
+        <div className={StatusStyles.description}>{status.text}</div>
+    </div>;
+};
+
 function MakeContextCallback(): NavContextMenuPatchCallback {
-    return (children, contextMenuApiArguments) => {
+    return (children, _) => {
         console.log("BLAH. presets", children);
         children[0]?.props.children.splice(1, 0,
             <Menu.MenuItem
@@ -62,13 +99,7 @@ function MakeContextCallback(): NavContextMenuPatchCallback {
                     id={"status-presets-" + status.text}
                     label={status.status}
                     action={() => console.log("pog")}
-                    render={() => (<div className={StatusStyles.statusItem}><Components.Status
-                        status={status.status} className={StatusStyles.icon}
-                        size={10}
-                    />
-                        <div className={StatusStyles.status}>{status.status}</div>
-                        <div className={StatusStyles.description}>{status.text}</div>
-                    </div>)}
+                    render={() => <RenderStatusMenuItem status={status} />}
                 />)}
             </Menu.MenuItem>
         );
@@ -101,6 +132,6 @@ export default definePlugin({
                 type: Toasts.Type.SUCCESS,
                 id: Toasts.genId()
             });
-        }}>Remember</Button>;
+        }} style={{ marginRight: "20px" }}>Remember</Button>;
     }
 });
