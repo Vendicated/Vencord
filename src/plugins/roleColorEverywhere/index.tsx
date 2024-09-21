@@ -175,7 +175,7 @@ export default definePlugin({
             const { messageSaturation } = settings.use(["messageSaturation"]);
             const author = useMessageAuthor(message);
             if (author.colorString !== undefined)
-                return `color-mix(in lab, ${author.colorString} calc(${messageSaturation} * 1%), var(--text-normal))`;
+                return `color-mix(in lab, ${author.colorString} ${messageSaturation}%, var(--text-normal))`;
         } catch(e) {
             console.error("[RCE] failed to get message color", e);
         }
