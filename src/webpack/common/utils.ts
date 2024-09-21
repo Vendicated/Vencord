@@ -139,6 +139,10 @@ export const NavigationRouter: t.NavigationRouter = mapMangledModule("Transition
     back: filters.byCode("goBack()"),
     forward: filters.byCode("goForward()"),
 });
+export const ChannelRouter: t.ChannelRouter = mapMangledModule('"Thread must have a parent ID."', {
+    transitionToChannel: filters.byCode(".preload"),
+    transitionToThread: filters.byCode('"Thread must have a parent ID."')
+});
 
 export const SettingsRouter = findByProps("open", "saveAccountChanges");
 

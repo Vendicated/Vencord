@@ -19,8 +19,6 @@
 
 .vc-uvs-message-indicator {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
     top: 2.5px;
     position: relative;
 }
@@ -31,6 +29,10 @@
     height: 36px;
     width: 36px;
     margin-left: 10px;
+}
+
+.vc-uvs-indicator-action-button.vc-uvs-highlight {
+    background-color: var(--background-tertiary);
 }
 
 .vc-uvs-tooltip-container {
