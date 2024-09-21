@@ -21,11 +21,13 @@ const NoopLogger = {
     time: Noop,
     fileOnly: Noop
 };
-const logAllow = new Set(["Spotify"]);
+
+const logAllow = new Set();
+
 const settings = definePluginSettings({
-    disableNoisyLoggers: {
+    disableLoggers: {
         type: OptionType.BOOLEAN,
-        description: "Disable noisy loggers like the MessageActionCreators",
+        description: "Disables Discords loggers",
         default: false,
         restartNeeded: true
     },
@@ -35,17 +37,14 @@ const settings = definePluginSettings({
         default: true,
         restartNeeded: true
     },
-    enableNavigationRouter: {
-        type: OptionType.BOOLEAN,
-        description: "Shows the navigation router logger even if noisy loggers are hidden",
-        default: true,
-        onChange(newVal) {
-            if (!newVal) {
-                logAllow.add("Routing/Utils");
-            } else {
-                logAllow.delete("Routing/Utils");
-            }
-        }
+    whitelistedLoggers: {
+        type: OptionType.STRING,
+        description: "Semi colon seperated. Shows some loggers even if the others are hidden",
+        default: "GatewaySocket; Routing/Utils",
+        onChange(newVal: string) {
+            logAllow.clear();
+            newVal.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
+        },
     }
 });
 
@@ -56,8 +55,8 @@ export default definePlugin({
     settings,
 
     start(){
-        if(!settings.store.enableNavigationRouter)
-            logAllow.add("Routing/Utils");
+        logAllow.clear();
+        this.settings.store.whitelistedLoggers?.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
     },
 
     NoopLogger: () => NoopLogger,
@@ -122,7 +121,7 @@ export default definePlugin({
         },
         {
             find: "Σ:",
-            predicate: () => settings.store.disableNoisyLoggers,
+            predicate: () => settings.store.disableLoggers,
             replacement: {
                 match: /(?<=&&)(?=console)/,
                 replace: "$self.shouldLog(arguments[0])&&"
@@ -130,7 +129,7 @@ export default definePlugin({
         },
         {
             find: '"Experimental codecs: "',
-            predicate: () => settings.store.disableNoisyLoggers,
+            predicate: () => settings.store.disableLoggers,
             replacement: {
                 match: /new \i\.\i\("Connection\("\.concat\(\i,"\)"\)\)/,
                 replace: "$self.NoopLogger()"
@@ -138,7 +137,7 @@ export default definePlugin({
         },
         {
             find: '"_handleLocalVideoDisabled: ',
-            predicate: () => settings.store.disableNoisyLoggers,
+            predicate: () => settings.store.disableLoggers,
             replacement: {
                 match: /new \i\.\i\("RTCConnection\("\.concat.+?\)\)(?=,)/,
                 replace: "$self.NoopLogger()"
