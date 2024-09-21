@@ -402,6 +402,7 @@ export type Popout = ComponentType<{
 
     onRequestOpen?(): void;
     onRequestClose?(): void;
+    preload?(): any;
 
     /** "center" and others */
     align?: string;
