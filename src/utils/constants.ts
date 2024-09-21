@@ -39,7 +39,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     Arjix: {
         name: "ArjixWasTaken",
-        id: 674710789138939916n
+        id: 674710789138939916n,
+        badge: false
     },
     Cyn: {
         name: "Cynosphere",
@@ -267,7 +268,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 841509053422632990n
     },
     F53: {
-        name: "F53",
+        name: "Cassie (Code)",
         id: 280411966126948353n
     },
     AutumnVN: {
@@ -565,6 +566,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     niko: {
         name: "niko",
         id: 341377368075796483n,
+    },
+    relitrix: {
+        name: "Relitrix",
+        id: 423165393901715456n,
     },
     RamziAH: {
         name: "RamziAH",
