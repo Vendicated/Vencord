@@ -13,8 +13,8 @@
     color: var(--interactive-hover);
 }
 
-.vc-uvs-speaker-padding {
-    padding: 0 4px;
+.vc-uvs-speaker-margin {
+    margin-left: 4px;
 }
 
 .vc-uvs-message-indicator {

@@ -130,8 +130,8 @@ function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
 
 interface VoiceChannelIndicatorProps {
     userId: string;
-    isActionButton?: boolean;
     isMessageIndicator?: boolean;
+    isActionButton?: boolean;
     shouldHighlight?: boolean;
 }
 
@@ -184,7 +184,7 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isActionButto
             {props => {
                 const iconProps: IconProps = {
                     ...props,
-                    className: classes(isActionButton ? ActionButtonClasses.actionButton : cl("speaker-padding"), isMessageIndicator && cl("message-indicator"), shouldHighlight && ActionButtonClasses.highlight),
+                    className: classes(isMessageIndicator && cl("message-indicator"), !isActionButton && cl("speaker-margin"), isActionButton && ActionButtonClasses.actionButton, shouldHighlight && ActionButtonClasses.highlight),
                     size: isActionButton ? 20 : undefined,
                     onClick
                 };
