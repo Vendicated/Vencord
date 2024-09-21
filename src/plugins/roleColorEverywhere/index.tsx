@@ -53,7 +53,7 @@ const settings = definePluginSettings({
     },
     messageSaturation: {
         type: OptionType.SLIDER,
-        description: "Message color saturation",
+        description: "Intensity of message coloring. 0 to disable.",
         markers: makeRange(0, 100, 10),
         default: 30,
         // This is called only once at startup, but late enough that the store is initialized.
@@ -131,7 +131,7 @@ export default definePlugin({
             find: '.Messages.MESSAGE_EDITED,")"',
             replacement: {
                 match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
-                replace: 'style:{"color":$self.useMessageColor($1)},'
+                replace: "style:{color:$self.useMessageColor($1)},"
             },
             predicate: () => settings.store.messageSaturation !== 0,
         },
@@ -175,7 +175,7 @@ export default definePlugin({
             const { messageSaturation } = settings.use(["messageSaturation"]);
             const author = useMessageAuthor(message);
             if (author.colorString !== undefined)
-                return `color-mix(in lab, ${author.colorString} ${messageSaturation}%, var(--text-normal))`;
+                return `color-mix(in oklch, ${author.colorString} ${messageSaturation}%, var(--text-normal))`;
         } catch(e) {
             console.error("[RCE] failed to get message color", e);
         }
