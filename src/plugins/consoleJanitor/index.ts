@@ -124,8 +124,8 @@ export default definePlugin({
             find: "Σ:",
             predicate: () => settings.store.disableNoisyLoggers,
             replacement: {
-                match: /(&&)(console)/,
-                replace: "$1$self.shouldLog(arguments[0])&&$2"
+                match: /(?<=&&)(?=console)/,
+                replace: "$self.shouldLog(arguments[0])&&"
             }
         },
         {
