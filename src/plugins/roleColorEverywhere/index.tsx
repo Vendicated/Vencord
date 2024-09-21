@@ -174,7 +174,7 @@ export default definePlugin({
         try {
             const { messageSaturation } = settings.use(["messageSaturation"]);
             const author = useMessageAuthor(message);
-            if (author.colorString !== undefined)
+            if (author.colorString !== undefined && messageSaturation !== 0)
                 return `color-mix(in oklch, ${author.colorString} ${messageSaturation}%, var(--text-normal))`;
         } catch(e) {
             console.error("[RCE] failed to get message color", e);
