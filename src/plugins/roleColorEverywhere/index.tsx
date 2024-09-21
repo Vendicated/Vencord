@@ -18,9 +18,13 @@
 
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { findByCodeLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
+
+const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
 
 const settings = definePluginSettings({
     chatMentions: {
@@ -46,7 +50,15 @@ const settings = definePluginSettings({
         default: true,
         description: "Show role colors in the reactors list",
         restartNeeded: true
-    }
+    },
+    messageSaturation: {
+        type: OptionType.SLIDER,
+        description: "Message color saturation",
+        markers: makeRange(0, 100, 10),
+        default: 30,
+        // This is called only once at startup, but late enough that the store is initialized.
+        get restartNeeded() { return settings.store.messageSaturation === 0; }
+    },
 });
 
 
@@ -114,7 +126,15 @@ export default definePlugin({
                 replace: "$&,style:{color:$self.getColor($2?.id,$1)}"
             },
             predicate: () => settings.store.reactorsList,
-        }
+        },
+        {
+            find: '.Messages.MESSAGE_EDITED,")"',
+            replacement: {
+                match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
+                replace: 'style:{"color":$self.useMessageColor($1)},'
+            },
+            predicate: () => settings.store.messageSaturation !== 0,
+        },
     ],
     settings,
 
@@ -148,5 +168,17 @@ export default definePlugin({
                 color: this.getColor(userId, { guildId })
             }
         };
-    }
+    },
+
+    useMessageColor(message: any) {
+        try {
+            const { messageSaturation } = settings.use(["messageSaturation"]);
+            const author = useMessageAuthor(message);
+            if (author.colorString !== undefined)
+                return `color-mix(in lab, ${author.colorString} calc(${messageSaturation} * 1%), var(--text-normal))`;
+        } catch(e) {
+            console.error("[RCE] failed to get message color", e);
+        }
+        return undefined;
+    },
 });
