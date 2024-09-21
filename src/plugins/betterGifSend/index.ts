@@ -59,7 +59,7 @@ function handleShift(event: KeyboardEvent): void {
 export default definePlugin({
     name: "BetterGifSend",
     description: "Change GIF picker visibility and send (paste/insert) behavior",
-    authors: [Devs.Ven, Devs.rya],
+    authors: [Devs.Ven, Devs.rya, Devs.iilwy],
     patches: [{
         find: '"handleSelectGIF",',
         replacement: {
