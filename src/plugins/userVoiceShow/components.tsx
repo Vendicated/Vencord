@@ -189,11 +189,9 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isActionButto
                     onClick
                 };
 
-                return <div className={isMessageIndicator ? cl("message-indicator") : undefined}>
-                    {isLocked ?
-                        <LockedSpeakerIcon {...iconProps} />
-                        : <SpeakerIcon {...iconProps} />}
-                </div>;
+                return isLocked ?
+                    <LockedSpeakerIcon {...iconProps} />
+                    : <SpeakerIcon {...iconProps} />;
             }}
         </Tooltip>
     );
