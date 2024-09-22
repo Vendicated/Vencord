@@ -16,15 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { NoopComponent } from "@utils/react";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { filters, findByPropsLazy, waitFor } from "@webpack";
 import { ChannelStore, ContextMenuApi, i18n, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
-import type { MouseEvent } from "react";
 
 const { useMessageMenu } = findByPropsLazy("useMessageMenu");
+
+interface CopyIdMenuItemProps {
+    id: string;
+    label: string;
+}
+
+let CopyIdMenuItem: (props: CopyIdMenuItemProps) => React.ReactElement | null = NoopComponent;
+waitFor(filters.componentByCode('"devmode-copy-id-".concat'), m => CopyIdMenuItem = m);
 
 function MessageMenu({ message, channel, onHeightUpdate }) {
     const canReport = message.author &&
@@ -48,8 +57,24 @@ function MessageMenu({ message, channel, onHeightUpdate }) {
         itemSrc: void 0,
         itemSafeSrc: void 0,
         itemTextContent: void 0,
+
+        isFullSearchContextMenu: true
     });
 }
+
+interface MessageActionsProps {
+    message: Message;
+    isFullSearchContextMenu?: boolean;
+}
+
+const contextMenuPatch: NavContextMenuPatchCallback = (children, props: MessageActionsProps) => {
+    if (props?.isFullSearchContextMenu == null) return;
+
+    const group = findGroupChildrenByChildId("devmode-copy-id", children, true);
+    group?.push(
+        CopyIdMenuItem({ id: props.message.author.id, label: i18n.Messages.COPY_ID_AUTHOR })
+    );
+};
 
 migratePluginSettings("FullSearchContext", "SearchReply");
 export default definePlugin({
@@ -65,7 +90,7 @@ export default definePlugin({
         }
     }],
 
-    handleContextMenu(event: MouseEvent, message: Message) {
+    handleContextMenu(event: React.MouseEvent, message: Message) {
         const channel = ChannelStore.getChannel(message.channel_id);
         if (!channel) return;
 
@@ -78,5 +103,9 @@ export default definePlugin({
                 onHeightUpdate={contextMenuProps.onHeightUpdate}
             />
         );
+    },
+
+    contextMenus: {
+        "message-actions": contextMenuPatch
     }
 });
