@@ -1,0 +1,20 @@
+.role-color-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.role-color-settings-labels {
+    display: flex;
+    flex-direction: column;
+    margin-right: 20px;
+}
+
+.role-color-pickers {
+    display: flex;
+    gap: 15px;
+}
+
+.color-picker-container {
+    margin-left: 10px;
+}
