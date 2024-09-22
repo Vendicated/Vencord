@@ -51,13 +51,18 @@ const settings = definePluginSettings({
         description: "Show role colors in the reactors list",
         restartNeeded: true
     },
+    colorChatMessages: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Color chat messages based on the author's role color",
+        restartNeeded: true,
+    },
     messageSaturation: {
         type: OptionType.SLIDER,
-        description: "Intensity of message coloring. 0 to disable.",
+        description: "Intensity of message coloring.",
         markers: makeRange(0, 100, 10),
         default: 30,
-        // This is called only once at startup, but late enough that the store is initialized.
-        get restartNeeded() { return settings.store.messageSaturation === 0; }
+        restartNeeded: true
     },
 });
 
@@ -133,7 +138,7 @@ export default definePlugin({
                 match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
                 replace: "style:{color:$self.useMessageColor($1)},"
             },
-            predicate: () => settings.store.messageSaturation !== 0,
+            predicate: () => settings.store.colorChatMessages,
         },
     ],
     settings,
@@ -176,7 +181,7 @@ export default definePlugin({
             const author = useMessageAuthor(message);
             if (author.colorString !== undefined && messageSaturation !== 0)
                 return `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var(--text-normal))`;
-        } catch(e) {
+        } catch (e) {
             console.error("[RCE] failed to get message color", e);
         }
         return undefined;
