@@ -12,17 +12,17 @@ const urlChecks = [
     (url: URL) => url.pathname.endsWith(".pdf")
 ];
 
-export async function getBufferResponse(_: IpcMainInvokeEvent, url: string): Promise<Buffer> {
+export async function getBufferResponse(_: IpcMainInvokeEvent, url: string) {
     const urlObj = new URL(url);
     if (!urlChecks.every(check => check(urlObj))) {
         throw new Error("Invalid URL");
     }
 
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch: ${response.statusText}`);
+    const response = await fetch(url).catch(() => null);
+    if (!response?.ok) {
+        throw new Error(`Failed to fetch: ${response?.statusText ?? "Failed to connect"}`);
     }
 
     const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    return new Uint8Array(arrayBuffer);
 }
