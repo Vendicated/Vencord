@@ -59,7 +59,7 @@ export default definePlugin({
             find: ".Messages.USER_PROFILE_LOAD_ERROR",
             replacement: {
                 match: /(\.fetchError.+?\?)null/,
-                replace: (_, rest) => `${rest}$self.VoiceChannelIndicator({userId:arguments[0]?.userId})`
+                replace: (_, rest) => `${rest}$self.VoiceChannelIndicator({userId:arguments[0]?.userId,isProfile:true})`
             },
             predicate: () => settings.store.showInUserProfileModal
         },
@@ -86,8 +86,8 @@ export default definePlugin({
         {
             find: "null!=this.peopleListItemRef.current",
             replacement: {
-                match: /\.actions,children:\[/,
-                replace: "$&$self.VoiceChannelIndicator({userId:this?.props?.user?.id,isActionButton:true}),"
+                match: /\.actions,children:\[(?<=isFocused:(\i).+?)/,
+                replace: "$&$self.VoiceChannelIndicator({userId:this?.props?.user?.id,isActionButton:true,shouldHighlight:$1}),"
             },
             predicate: () => settings.store.showInMemberList
         }

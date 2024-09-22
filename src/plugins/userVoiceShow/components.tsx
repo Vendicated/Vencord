@@ -8,7 +8,7 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { filters, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
-import { ChannelStore, GuildStore, IconUtils, match, NavigationRouter, P, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelRouter, ChannelStore, GuildStore, IconUtils, match, P, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 const cl = classNameFactory("vc-uvs-");
@@ -23,6 +23,8 @@ const VoiceStateStore = findStoreLazy("VoiceStateStore");
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const Avatar = findComponentByCodeLazy(".AVATAR_STATUS_TYPING_16;");
 const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarURL");
+
+const ActionButtonClasses = findByPropsLazy("actionButton", "highlight");
 
 interface IconProps extends React.ComponentPropsWithoutRef<"div"> {
     size?: number;
@@ -74,9 +76,10 @@ function LockedSpeakerIcon(props: IconProps) {
 
 interface VoiceChannelTooltipProps {
     channel: Channel;
+    isLocked: boolean;
 }
 
-function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
+function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
     const voiceStates = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStatesForChannel(channel.id));
 
     const users = useMemo(
@@ -113,7 +116,7 @@ function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
                 <Text variant="text-sm/semibold">{channelName}</Text>
             </div>
             <div className={cl("vc-members")}>
-                <SpeakerIcon size={18} />
+                {isLocked ? <LockedSpeakerIcon size={18} /> : <SpeakerIcon size={18} />}
                 <UserSummaryItem
                     users={users}
                     renderIcon={false}
@@ -127,19 +130,23 @@ function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
 
 interface VoiceChannelIndicatorProps {
     userId: string;
-    isActionButton?: boolean;
     isMessageIndicator?: boolean;
+    isProfile?: boolean;
+    isActionButton?: boolean;
+    shouldHighlight?: boolean;
 }
 
 const clickTimers = {} as Record<string, any>;
 
-export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isActionButton, isMessageIndicator }: VoiceChannelIndicatorProps) => {
+export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isMessageIndicator, isProfile, isActionButton, shouldHighlight }: VoiceChannelIndicatorProps) => {
     const channelId = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(userId)?.channelId as string | undefined);
 
     const channel = channelId == null ? undefined : ChannelStore.getChannel(channelId);
     if (channel == null) return null;
 
     const isDM = channel.isDM() || channel.isMultiUserDM();
+    if (!isDM && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) && !Vencord.Plugins.isPluginEnabled("ShowHiddenChannels")) return null;
+
     const isLocked = !isDM && (!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || !PermissionStore.can(PermissionsBits.CONNECT, channel));
 
     function onClick(e: React.MouseEvent) {
@@ -147,11 +154,6 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isActionButto
         e.stopPropagation();
 
         if (channel == null || channelId == null) return;
-
-        if (!isDM && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel)) {
-            showToast("You cannot view the user's Voice Channel", Toasts.Type.FAILURE);
-            return;
-        }
 
         clearTimeout(clickTimers[channelId]);
         delete clickTimers[channelId];
@@ -165,7 +167,7 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isActionButto
             selectVoiceChannel(channelId);
         } else {
             clickTimers[channelId] = setTimeout(() => {
-                NavigationRouter.transitionTo(`/channels/${channel.getGuildId() ?? "@me"}/${channelId}`);
+                ChannelRouter.transitionToChannel(channelId);
                 delete clickTimers[channelId];
             }, 250);
         }
@@ -173,14 +175,14 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isActionButto
 
     return (
         <Tooltip
-            text={<VoiceChannelTooltip channel={channel} />}
+            text={<VoiceChannelTooltip channel={channel} isLocked={isLocked} />}
             tooltipClassName={cl("tooltip-container")}
             tooltipContentClassName={cl("tooltip-content")}
         >
             {props => {
                 const iconProps: IconProps = {
                     ...props,
-                    className: isActionButton ? cl("indicator-action-button") : cl("speaker-padding"),
+                    className: classes(isMessageIndicator && cl("message-indicator"), (!isProfile && !isActionButton) && cl("speaker-margin"), isActionButton && ActionButtonClasses.actionButton, shouldHighlight && ActionButtonClasses.highlight),
                     size: isActionButton ? 20 : undefined,
                     onClick
                 };
