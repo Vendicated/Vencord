@@ -25,21 +25,12 @@ export interface UserProfilePronounsProps {
     hidePersonalInformation: boolean;
 }
 
-export interface PronounsResponse {
-    [id: string]: {
-        sets?: {
-            [locale: string]: PronounCode[];
-        }
-    }
-}
+export type PronounSets = Record<string, PronounCode[]>;
+export type PronounsResponse = Record<string, { sets?: PronounSets; }>;
 
-export interface CachePronouns {
-    sets?: {
-        [locale: string]: PronounCode[];
-    }
+export interface PronounsCache {
+    sets?: PronounSets;
 }
-
-export type PronounCode = keyof typeof PronounMapping;
 
 export const PronounMapping = {
     he: "He/Him",
@@ -51,4 +42,22 @@ export const PronounMapping = {
     ask: "Ask me my pronouns",
     avoid: "Avoid pronouns, use my name",
     unspecified: "No pronouns specified.",
-} as const;
+} as const satisfies Record<string, string>;
+
+export type PronounCode = keyof typeof PronounMapping;
+
+export interface Pronouns {
+    pronouns?: string;
+    source: string;
+    hasPendingPronouns: boolean;
+}
+
+export const enum PronounsFormat {
+    Lowercase = "LOWERCASE",
+    Capitalized = "CAPITALIZED"
+}
+
+export const enum PronounSource {
+    PreferPDB,
+    PreferDiscord
+}

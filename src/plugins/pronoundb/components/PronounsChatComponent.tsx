@@ -22,7 +22,7 @@ import { findByPropsLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-import { useFormattedPronouns } from "../pronoundbUtils";
+import { useFormattedPronouns } from "../api";
 import { settings } from "../settings";
 
 const styles: Record<string, string> = findByPropsLazy("timestampInline");
@@ -53,25 +53,21 @@ export const CompactPronounsChatComponentWrapper = ErrorBoundary.wrap(({ message
 }, { noop: true });
 
 function PronounsChatComponent({ message }: { message: Message; }) {
-    const [result] = useFormattedPronouns(message.author.id);
+    const { pronouns } = useFormattedPronouns(message.author.id);
 
-    return result
-        ? (
-            <span
-                className={classes(styles.timestampInline, styles.timestamp)}
-            >• {result}</span>
-        )
-        : null;
+    return pronouns && (
+        <span
+            className={classes(styles.timestampInline, styles.timestamp)}
+        >• {pronouns}</span>
+    );
 }
 
 export const CompactPronounsChatComponent = ErrorBoundary.wrap(({ message }: { message: Message; }) => {
-    const [result] = useFormattedPronouns(message.author.id);
+    const { pronouns } = useFormattedPronouns(message.author.id);
 
-    return result
-        ? (
-            <span
-                className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact")}
-            >• {result}</span>
-        )
-        : null;
+    return pronouns && (
+        <span
+            className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact")}
+        >• {pronouns}</span>
+    );
 }, { noop: true });
