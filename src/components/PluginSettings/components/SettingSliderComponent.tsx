@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Margins } from "@utils/margins";
+import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import type { PluginOptionSlider } from "@utils/types";
 import { Forms, Slider, useEffect, useState } from "@webpack/common";
 
@@ -52,7 +54,8 @@ export function SettingSliderComponent({ option, pluginSettings, definedSettings
 
     return (
         <Forms.FormSection>
-            <Forms.FormTitle>{option.description}</Forms.FormTitle>
+            <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
+            <Forms.FormText className={Margins.bottom20} type="description">{option.description}</Forms.FormText>
             <Slider
                 disabled={option.disabled?.call(definedSettings) ?? false}
                 markers={option.markers}

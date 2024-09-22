@@ -175,7 +175,7 @@ export default definePlugin({
         }
         if (settings.store.attemptToNavigateToHome) {
             try {
-                RouterUtils.transitionTo("/channels/@me");
+                RouterUtils.transitionToGuild("@me");
             } catch (err) {
                 CrashHandlerLogger.debug("Failed to navigate to home", err);
             }

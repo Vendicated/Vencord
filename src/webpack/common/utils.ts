@@ -111,6 +111,12 @@ export const ChannelActionCreators = findByPropsLazy("openPrivateChannel");
 
 export const ChannelMessages: typeof $ChannelMessages = findByPropsLazy("clearCache", "_channelMessages");
 
+// transitionToChannel.tsx
+export const ChannelRouter: t.ChannelRouter = mapMangledModuleLazy('"Thread must have a parent ID."', {
+    transitionToChannel: filters.byCode(".preload"),
+    transitionToThread: filters.byCode('"Thread must have a parent ID."')
+});
+
 export const ClipboardUtils: t.ClipboardUtils = mapMangledModuleLazy('queryCommandEnabled("copy")', {
     copy: filters.byCode(".copy("),
     SUPPORTS_COPY: e => typeof e === "boolean"

@@ -7,9 +7,9 @@
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
-import type { ChannelRecord, Store } from "@vencord/discord-types";
+import type { ChannelRecord, DMChannelRecord, GroupDMChannelRecord, Store } from "@vencord/discord-types";
 import { filters, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
-import { ChannelStore, GuildStore, Permissions, PermissionStore, RouterUtils, showToast, Text, Toasts, Tooltip, useMemo, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelRouter, ChannelStore, GuildStore, Permissions, PermissionStore, showToast, Text, Toasts, Tooltip, useMemo, UserStore, useStateFromStores } from "@webpack/common";
 import type { HTMLAttributes, MouseEvent } from "react";
 
 const cl = classNameFactory("vc-uvs-");
@@ -18,12 +18,24 @@ const { selectVoiceChannel } = findByPropsLazy("selectVoiceChannel", "selectChan
 const { useChannelName } = mapMangledModuleLazy(".Messages.GROUP_DM_ALONE", {
     useChannelName: filters.byCode("()=>null==")
 });
-const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
+// Not the same as getChannelIconURL from AvatarUtils
+const getChannelIconURL: <T extends ChannelRecord>(
+    channel: T,
+    size?: number | null /* = 128 */,
+    canAnimate?: boolean /* = false */
+) => (
+    // Only null if the UserRecord for the recipient has not loaded yet
+    T extends DMChannelRecord ? string | null
+    : T extends GroupDMChannelRecord ? string
+    : undefined
+) = findByCodeLazy(".getChannelIconURL({");
 const VoiceStateStore: Store & Record<string, any> = findStoreLazy("VoiceStateStore");
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const Avatar = findComponentByCodeLazy(".AVATAR_STATUS_TYPING_16;");
 const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarURL");
+
+const ActionButtonClasses: Record<string, string> = findByPropsLazy("actionButton", "highlight");
 
 interface IconProps extends HTMLAttributes<HTMLDivElement> {
     size?: number;
@@ -73,9 +85,10 @@ function LockedSpeakerIcon(props: IconProps) {
 
 interface VoiceChannelTooltipProps {
     channel: ChannelRecord;
+    isLocked: boolean;
 }
 
-function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
+function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
     const voiceStates = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStatesForChannel(channel.id));
 
     const users = useMemo(
@@ -89,7 +102,7 @@ function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
     const channelIcon = channel.isPrivate()
         ? channel.recipients.length >= 2 && channel.icon == null
             ? <GroupDMAvatars recipients={channel.recipients} size="SIZE_32" />
-            : <Avatar src={getDMChannelIcon(channel)} size="SIZE_32" />
+            : <Avatar src={getChannelIconURL(channel)} size="SIZE_32" />
         : null;
     const channelName = useChannelName(channel);
 
@@ -106,7 +119,7 @@ function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
                 <Text variant="text-sm/semibold">{channelName}</Text>
             </div>
             <div className={cl("vc-members")}>
-                <SpeakerIcon size={18} />
+                {isLocked ? <LockedSpeakerIcon size={18} /> : <SpeakerIcon size={18} />}
                 <UserSummaryItem
                     users={users}
                     renderIcon={false}
@@ -121,13 +134,15 @@ function VoiceChannelTooltip({ channel }: VoiceChannelTooltipProps) {
 // Must export to avoid TS4082, since VoiceChannelIndicator is used in the default export of './index.tsx'.
 export interface VoiceChannelIndicatorProps {
     userId: string;
-    size?: number;
+    isMessageIndicator?: boolean;
+    isProfile?: boolean;
     isActionButton?: boolean;
+    shouldHighlight?: boolean;
 }
 
 const clickTimers: Record<string, any> = {};
 
-export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, size, isActionButton }: VoiceChannelIndicatorProps) => {
+export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isMessageIndicator, isProfile, isActionButton, shouldHighlight }: VoiceChannelIndicatorProps) => {
     const channelId = useStateFromStores(
         [VoiceStateStore],
         () => VoiceStateStore.getVoiceStateForUser(userId)?.channelId as string | undefined
@@ -161,7 +176,7 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, size, isActio
             selectVoiceChannel(channelId);
         } else {
             clickTimers[channelId] = setTimeout(() => {
-                RouterUtils.transitionTo(`/channels/${channel.getGuildId() ?? "@me"}/${channelId}`);
+                ChannelRouter.transitionToChannel(channelId);
                 delete clickTimers[channelId];
             }, 250);
         }
@@ -169,16 +184,16 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, size, isActio
 
     return (
         <Tooltip
-            text={<VoiceChannelTooltip channel={channel} />}
+            text={<VoiceChannelTooltip channel={channel} isLocked={isLocked} />}
             tooltipClassName={cl("tooltip-container")}
             tooltipContentClassName={cl("tooltip-content")}
         >
             {props => {
-                const iconProps = {
+                const iconProps: IconProps = {
                     ...props,
-                    onClick,
-                    size,
-                    className: isActionButton ? cl("indicator-action-button") : cl("speaker-padding")
+                    className: classes(isMessageIndicator && cl("message-indicator"), (!isProfile && !isActionButton) && cl("speaker-margin"), isActionButton && ActionButtonClasses.actionButton, shouldHighlight && ActionButtonClasses.highlight),
+                    size: isActionButton ? 20 : undefined,
+                    onClick
                 };
 
                 return isLocked ?
