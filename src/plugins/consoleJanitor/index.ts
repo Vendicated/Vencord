@@ -6,7 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, StartAt } from "@utils/types";
 
 const Noop = () => { };
 const NoopLogger = {
@@ -54,6 +54,7 @@ export default definePlugin({
     authors: [Devs.Nuckyz, Devs.sadan],
     settings,
 
+    startAt: StartAt.Init,
     start() {
         logAllow.clear();
         this.settings.store.whitelistedLoggers?.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
