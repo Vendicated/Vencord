@@ -39,12 +39,12 @@ const settings = definePluginSettings({
     },
     whitelistedLoggers: {
         type: OptionType.STRING,
-        description: "Semi colon seperated. Shows some loggers even if the others are hidden",
+        description: "Semi colon separated list of loggers to allow even if others are hidden",
         default: "GatewaySocket; Routing/Utils",
         onChange(newVal: string) {
             logAllow.clear();
             newVal.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
-        },
+        }
     }
 });
 
@@ -54,12 +54,15 @@ export default definePlugin({
     authors: [Devs.Nuckyz, Devs.sadan],
     settings,
 
-    start(){
+    start() {
         logAllow.clear();
         this.settings.store.whitelistedLoggers?.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
     },
 
     NoopLogger: () => NoopLogger,
+    shouldLog(logger: string) {
+        return logAllow.has(logger);
+    },
 
     patches: [
         {
@@ -129,22 +132,6 @@ export default definePlugin({
             }
         },
         {
-            find: '"Experimental codecs: "',
-            predicate: () => settings.store.disableLoggers,
-            replacement: {
-                match: /new \i\.\i\("Connection\("\.concat\(\i,"\)"\)\)/,
-                replace: "$self.NoopLogger()"
-            }
-        },
-        {
-            find: '"_handleLocalVideoDisabled: ',
-            predicate: () => settings.store.disableLoggers,
-            replacement: {
-                match: /new \i\.\i\("RTCConnection\("\.concat.+?\)\)(?=,)/,
-                replace: "$self.NoopLogger()"
-            }
-        },
-        {
             find: '("Spotify")',
             predicate: () => settings.store.disableSpotifyLogger,
             replacement: {
@@ -153,9 +140,4 @@ export default definePlugin({
             }
         }
     ],
-
-    shouldLog(logger: string) {
-        return logAllow.has(logger);
-    }
 });
-
