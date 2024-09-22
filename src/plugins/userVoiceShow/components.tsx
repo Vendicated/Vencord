@@ -145,6 +145,8 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isMessageIndi
     if (channel == null) return null;
 
     const isDM = channel.isDM() || channel.isMultiUserDM();
+    if (!isDM && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) && !Vencord.Plugins.isPluginEnabled("ShowHiddenChannels")) return null;
+
     const isLocked = !isDM && (!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) || !PermissionStore.can(PermissionsBits.CONNECT, channel));
 
     function onClick(e: React.MouseEvent) {
@@ -152,11 +154,6 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isMessageIndi
         e.stopPropagation();
 
         if (channel == null || channelId == null) return;
-
-        if (!isDM && !PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel)) {
-            showToast("You cannot view the user's Voice Channel", Toasts.Type.FAILURE);
-            return;
-        }
 
         clearTimeout(clickTimers[channelId]);
         delete clickTimers[channelId];
