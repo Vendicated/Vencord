@@ -8,16 +8,16 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "NoDefaultHangStatus",
-    description: "Disable the default hang status when joining voice channels",
-    authors: [Devs.D3SOX],
+    name: "StickerPaste",
+    description: "Makes picking a sticker in the sticker picker insert it into the chatbox instead of instantly sending",
+    authors: [Devs.ImBanana],
 
     patches: [
         {
-            find: ".CHILLING)",
+            find: ".stickers,previewSticker:",
             replacement: {
-                match: /{enableHangStatus:(\i),/,
-                replace: "{_enableHangStatus:$1=false,"
+                match: /if\(\i\.\i\.getUploadCount/,
+                replace: "return true;$&",
             }
         }
     ]
