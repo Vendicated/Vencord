@@ -1,14 +1,8 @@
-/*
- * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
 
-import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 
-function generateRandomString(length, isUpperCase = false) {
+function generateRandomString(length: number, isUpperCase = false) {
     const patterns = [
         "mraow", "mrow", "mew", "mrr", "purr", "raow", "rrow", "nya", "merp",
         "mee", "mewo", "meo", "mewmraow", "mraowmew", "mewmrow", "mraowmrow",
@@ -23,6 +17,15 @@ function generateRandomString(length, isUpperCase = false) {
     return result;
 }
 
+function generateMrrpString(min: number, max: number, isUpperCase: boolean = false, count: number) {
+    const mrrps = [];
+    for (let i = 0; i < count; i++) {
+        const randomNumber = min + Math.floor(Math.random() * (max - min + 1));
+        //@ts-ignore
+        mrrps.push(generateRandomString(randomNumber, isUpperCase));
+    }
+    return mrrps.join(' ');
+}
 
 export default definePlugin({
     name: "Auto Mrrp",
@@ -30,17 +33,18 @@ export default definePlugin({
     authors: [{ name: "Yande", id: 1014588310036951120n }],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
 
-
     start() {
-
-
-
         this.preSend = addPreSendListener(async (_, message) => {
             if (!message.content) return;
 
-            message.content = message.content.replace(/(mrrp|MRRP) (\d+)/g, (_, prefix, number) => {
+            // Match mrrp x, mrrp x-y, or mrrp x/y-z
+            message.content = message.content.replace(/(mrrp|MRRP) (\d+)(\/(\d+))?(-(\d+))?/g, (_, prefix, min, __, maxSplit, ___, count) => {
                 const isUpperCase = prefix === 'MRRP';
-                return generateRandomString(Number(number), isUpperCase);
+                const minNumber = Number(min);
+                const maxNumber = maxSplit ? Number(maxSplit) : minNumber;
+                const mrrpCount = count ? Number(count) : 1;
+
+                return generateMrrpString(minNumber, maxNumber, isUpperCase, mrrpCount);
             });
         });
     },
