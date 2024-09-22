@@ -22,6 +22,7 @@ const EmojiLib = findByPropsLazy("getByName", "getCategories", "getDefaultDivers
 }
 */
 
+const alphabet = [..."abcdefghijklmnopqrstuvwxyz"];
 const doubleMatch = /^([a-zA-Z])\1?$/;
 
 const settings = definePluginSettings({
@@ -35,6 +36,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         description: "Makes e.g. :bb: alias to 🇧. This makes just typing :bb: work (and it sends the real 🇧), but has the side effect of rendering the plaintext of :bb: as an emoji.",
+        restartNeeded: false
+    },
+    allLetters: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Makes :ltr:/:letter:/:letters: autocomplete to all regional indicators.",
         restartNeeded: false
     }
 });
@@ -56,24 +63,29 @@ export default definePlugin({
             find: "getDefaultDiversitySurrogate:function()",
             replacement: {
                 match: /convertNameToSurrogate:(\i),/,
-                replace: "convertNameToSurrogate:$self.convertNameToSurrogatePatch($1),"
+                replace: "convertNameToSurrogate:$self.surrogatePatch($1),"
             }
         }
     ],
     addEmojiToList(list: Object[], query: { query: string; }) {
-        if (!Vencord.Settings.plugins.LetterEmojiShortcut.autocomplete)
-            return list;
-
-        let match = doubleMatch.exec(query.query);
-        if (match) {
-            let emoji = EmojiLib.getByName("regional_indicator_" + match[1]);
-            if (emoji) {
-                list.unshift(emoji);
+        if (Vencord.Settings.plugins.LetterEmojiShortcut.autocomplete) {
+            let match = doubleMatch.exec(query.query);
+            if (match) {
+                let emoji = EmojiLib.getByName("regional_indicator_" + match[1]);
+                if (emoji) {
+                    list = list.filter(x => x != emoji);
+                    list.unshift(emoji);
+                }
             }
         }
+        if (Vencord.Settings.plugins.LetterEmojiShortcut.allLetters
+            && (query.query == "ltr" || query.query == "letter" || query.query == "letters")) {
+            list.unshift(...alphabet.map(l => EmojiLib.getByName("regional_indicator_" + l)));
+        }
+
         return list;
     },
-    convertNameToSurrogatePatch(original: Function) {
+    surrogatePatch(original: Function) {
         return (name: string, default_: string | undefined) => {
             if (!Vencord.Settings.plugins.LetterEmojiShortcut.alias)
                 return original(name, default_);
