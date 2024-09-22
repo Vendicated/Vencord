@@ -6,7 +6,6 @@
 
 import "./pdfViewer.css";
 
-import { get, set } from "@api/DataStore";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
@@ -25,15 +24,9 @@ const settings = definePluginSettings({
         description: "Automatically remove the cached PDF file when the component is unmounted. Turning this on will increase load times for PDFs that have already been viewed, but may consume less memory.",
         default: false
     },
-    persistPreviewState: {
-        type: OptionType.BOOLEAN,
-        description: "Persist the state of opened/closed File Previews across channel switches and reloads.",
-        default: false
-    },
 });
 
 const objectUrlsCache = new LRUCache(20);
-const STORE_KEY = "PdfViewer_PersistVisible";
 
 interface Attachment {
     id: string;
@@ -62,7 +55,7 @@ function FilePreview({ attachment }: { attachment: Attachment; }) {
 }
 
 function PreviewButton({ attachment, channelId, messageId }: { attachment: Attachment; channelId: string; messageId: string; }) {
-    const [visible, setVisible] = useState<boolean | null>(null);
+    const [visible, setVisible] = useState<boolean>(false);
     const [url, setUrl] = useState<string>();
 
     const initPdfData = async () => {
@@ -83,24 +76,10 @@ function PreviewButton({ attachment, channelId, messageId }: { attachment: Attac
         }
     };
 
-    const updateVisibility = async () => {
-        const data: Set<string> = await get(STORE_KEY) ?? new Set();
-
-        if (visible === null) {
-            setVisible(settings.store.persistPreviewState ? data.has(attachment.url) : false);
-        } else {
-            if (visible) data.add(attachment.url);
-            else data.delete(attachment.url);
-
-            await set(STORE_KEY, data);
-
-            attachment.previewVisible = visible;
-            updateMessage(channelId, messageId);
-        }
-    };
-
     useEffect(() => {
-        updateVisibility();
+        setVisible(visible);
+        attachment.previewVisible = visible;
+        updateMessage(channelId, messageId);
 
         if (visible && !url) initPdfData();
     }, [visible]);
@@ -166,7 +145,7 @@ export default definePlugin({
     stop() {
         objectUrlsCache.clear();
         removeAccessory("pdfViewer");
-    }
+    },
 
     renderPreviewButton: ErrorBoundary.wrap(e => {
         if (e.item.originalItem.content_type !== "application/pdf") return null;
