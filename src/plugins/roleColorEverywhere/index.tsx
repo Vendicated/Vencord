@@ -76,13 +76,6 @@ const settings = definePluginSettings({
 
 const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
 
-const colorPresets = [
-    "#1E1514", "#172019", "#13171B", "#1C1C28", "#402D2D",
-    "#3A483D", "#344242", "#313D4B", "#2D2F47", "#322B42",
-    "#3C2E42", "#422938", "#b6908f", "#bfa088", "#d3c77d",
-    "#86ac86", "#88aab3", "#8693b5", "#8a89ba", "#ad94bb",
-];
-
 function newColor(hex: any, sim: any, pound: boolean) {
     var hex = hex.replace("#", "");
     var converted = Math.round((0.5 + ((sim - 1) * 0.5 / 9)) * 10) / 10;
@@ -132,7 +125,6 @@ function ColorTester(this: any) {
                         color={parseInt(displayColor, 16)}
                         onChange={handleColorChange}
                         showEyeDropper={false}
-                        suggestedColors={colorPresets}
                     />
                     <ColorPicker
                         color={parseInt(secondColor, 16)}
