@@ -16,14 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findProp } from "@webpack";
-import { ChannelStore, ContextMenuApi, i18n, UserStore } from "@webpack/common";
+import { findComponentByCode, findProp } from "@webpack";
+import { ChannelStore, Clipboard, ContextMenuApi, i18n, Menu, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 const useMessageMenu = findProp("useMessageMenu");
+const IdIcon = findComponentByCode("M15.3 14.48c-.46.45-1.08.67-1.86.67h");
 
 function MessageMenu({ message, channel, onHeightUpdate }) {
     const canReport = message.author &&
@@ -47,8 +49,24 @@ function MessageMenu({ message, channel, onHeightUpdate }) {
         itemSrc: void 0,
         itemSafeSrc: void 0,
         itemTextContent: void 0,
+
+        isFullSearchContextMenu: true
     });
 }
+
+const contextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    if (props?.isFullSearchContextMenu == null) return;
+
+    const group = findGroupChildrenByChildId("devmode-copy-id", children, true);
+    group?.push(
+        <Menu.MenuItem
+            id={`devmode-copy-id-${props.message.author.id}`}
+            label={i18n.Messages.COPY_ID_AUTHOR}
+            action={() => Clipboard.copy(props.message.author.id)}
+            icon={IdIcon}
+        />
+    );
+};
 
 migratePluginSettings("FullSearchContext", "SearchReply");
 export default definePlugin({
@@ -77,5 +95,9 @@ export default definePlugin({
                 onHeightUpdate={contextMenuProps.onHeightUpdate}
             />
         );
+    },
+
+    contextMenus: {
+        "message-actions": contextMenuPatch
     }
 });
