@@ -19,7 +19,7 @@
 import { getCurrentChannel } from "@utils/discord";
 import { useAwaiter } from "@utils/react";
 import { findStore } from "@webpack";
-import { UserProfileStore } from "@webpack/common";
+import { UserProfileStore, UserStore } from "@webpack/common";
 
 import { settings } from "./settings";
 import { PronounMapping, Pronouns, PronounsCache, PronounSets, PronounsFormat, PronounSource, PronounsResponse } from "./types";
@@ -158,10 +158,15 @@ export function useFormattedPronouns(id: string, useGlobalProfile: boolean = fal
 }
 
 export function useProfilePronouns(id: string, useGlobalProfile: boolean = false): Pronouns {
-    const pronouns = useFormattedPronouns(id, useGlobalProfile);
+    try {
+        const pronouns = useFormattedPronouns(id, useGlobalProfile);
 
-    if (!settings.store.showInProfile) return EmptyPronouns;
-    if (!settings.store.showSelf && id === UserProfileStore.getCurrentUser()?.id) return EmptyPronouns;
+        if (!settings.store.showInProfile) return EmptyPronouns;
+        if (!settings.store.showSelf && id === UserStore.getCurrentUser()?.id) return EmptyPronouns;
 
-    return pronouns;
+        return pronouns;
+    } catch (e) {
+        console.error(e);
+        return EmptyPronouns;
+    }
 }
