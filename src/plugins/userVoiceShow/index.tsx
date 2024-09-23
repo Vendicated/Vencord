@@ -51,6 +51,7 @@ export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows an indicator when a user is in a Voice Channel",
     authors: [Devs.Nuckyz, Devs.LordElias],
+    dependencies: ["MemberListDecoratorsAPI", "MessageDecorationsAPI"],
     settings,
 
     patches: [
