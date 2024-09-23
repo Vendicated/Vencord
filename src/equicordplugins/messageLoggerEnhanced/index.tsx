@@ -567,7 +567,7 @@ const contextMenuPath: NavContextMenuPatchCallback = (children, props) => {
 export default definePlugin({
     name: "MessageLoggerEnhanced",
     authors: [Devs.Aria],
-    description: "G'day",
+    description: "logs messages, images, and ghost pings",
     dependencies: ["MessageLogger"],
     contextMenus: {
         "message": contextMenuPath,
