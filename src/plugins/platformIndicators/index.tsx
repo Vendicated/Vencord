@@ -307,7 +307,7 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Use Vencords Console Icon",
             default: false,
-            restartNeeded: false,
+            restartNeeded: true,
         }
     }
 });
