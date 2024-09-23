@@ -204,6 +204,14 @@ export default definePlugin({
 
     patches: [
         {
+            find: "emojiItemDisabled]",
+            predicate: () => settings.store.enableEmojiBypass,
+            replacement: {
+                match: /CHAT/,
+                replace: "STATUS"
+            }
+        },
+        {
             find: ".PREMIUM_LOCKED;",
             group: true,
             predicate: () => settings.store.enableEmojiBypass,
