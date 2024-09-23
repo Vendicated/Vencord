@@ -41,6 +41,17 @@ const settings = definePluginSettings({
     },
 });
 
+interface GuildProps {
+    guild: Guild;
+    nick: string | null;
+    user: User;
+    theme: string;
+    onSelect: Function;
+    position: "left" | "right";
+    Original: React.ComponentType<any>;
+};
+
+
 export default definePlugin({
     name: "ShowMeTheMember",
     authors: [Devs.Joona],
@@ -51,7 +62,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /return\(0,\i\.jsxs?\)\((\i),({.+?}),\i\.id\)/,
-                    replace: "return $self.renderGuild({Original: $1, ...$2})"
+                    replace: "return $self.renderGuild({Original: $1, position: 'right', ...$2})"
                 },
                 {
                     match: /onClick:\i,onContextMenu:.+?children:/,
@@ -63,7 +74,7 @@ export default definePlugin({
             find: 'section:"MUTUAL_FRIENDS"',
             replacement: {
                 match: /return\(0,\i\.jsxs?\)\((\i\.\i),({.+?}),\i\.id\)/,
-                replace: "return $self.renderGuild({Original: $1, ...$2})"
+                replace: "return $self.renderGuild({Original: $1, position: 'left', ...$2})"
             }
         }
     ],
@@ -78,7 +89,7 @@ export default definePlugin({
         document.removeEventListener("keydown", keydown);
         document.removeEventListener("keyup", keyup);
     },
-    renderGuild({ guild, nick, user, theme, onSelect, Original }: { guild: Guild, nick: string | null, user: User, theme: string, onSelect: Function, Original: React.ComponentType<any>; }) {
+    renderGuild({ guild, nick, user, theme, onSelect, position, Original }: GuildProps) {
         return (
             <ErrorBoundary>
                 <Popout
@@ -89,8 +100,8 @@ export default definePlugin({
                             guildId={guild.id}
                         />
                     )}
-                    position="top"
-                    align="right"
+                    position={position}
+                    align="center"
                     preload={() =>
                         preloadUser(user.id, user.getAvatarURL(guild.id, 80), { guildId: guild.id })
                     }
