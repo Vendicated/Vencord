@@ -49,7 +49,7 @@ interface GuildProps {
     onSelect: Function;
     position: "left" | "right";
     Original: React.ComponentType<any>;
-};
+}
 
 
 export default definePlugin({
