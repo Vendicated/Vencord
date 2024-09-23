@@ -43,21 +43,24 @@ let madeComponent = false;
 function findReplies(message: Message) {
     const messages: Array<Message & {
         deleted?: boolean;
-    }> = [...MessageStore.getMessages(message.channel_id)?._array ?? []].filter(m => !m.deleted).sort((a, b) => a.timestamp.getTime()-b.timestamp.getTime()); // Need to deep copy Message array when sorting
+    }> = [...MessageStore.getMessages(message.channel_id)?._array ?? []].filter(m => !m.deleted).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()); // Need to deep copy Message array when sorting
     const found: Message[] = [];
     for (const other of messages) {
         if (new Date(other.timestamp.toString()).getTime() <= new Date(message.timestamp.toString()).getTime()) continue;
         if (other.messageReference?.message_id === message.id) {
             found.push(other);
+            continue;
         }
         if (Vencord.Settings.plugins.FindReply.includePings) {
             if (other.content?.includes(`<@${message.author.id}>`)) {
                 found.push(other);
+                continue;
             }
         }
         if (Vencord.Settings.plugins.FindReply.includeAuthor) {
             if (messages.find(m => m.id === other.messageReference?.message_id)?.author.id === message.author.id) {
                 found.push(other);
+                continue;
             }
         }
     }
