@@ -10,7 +10,7 @@ import definePlugin from "@utils/types";
 import { ChannelStore, GuildMemberStore, SelectedChannelStore, SelectedGuildStore } from "@webpack/common";
 
 export default definePlugin({
-    name: "atSomeone",
+    name: "AtSomeone",
     authors: [Devs.Joona],
     description: "Mention someone randomly",
     patches: [
