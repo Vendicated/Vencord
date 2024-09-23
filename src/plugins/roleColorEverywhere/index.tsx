@@ -61,8 +61,7 @@ const settings = definePluginSettings({
         type: OptionType.SLIDER,
         description: "Intensity of message coloring.",
         markers: makeRange(0, 100, 10),
-        default: 30,
-        restartNeeded: true
+        default: 30
     },
 });
 
