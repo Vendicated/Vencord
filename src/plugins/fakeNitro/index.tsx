@@ -203,6 +203,7 @@ export default definePlugin({
     settings,
 
     patches: [
+        // Patch the emoji picker in voice calls to not be bypassed by fake nitro
         {
             find: "emojiItemDisabled]",
             predicate: () => settings.store.enableEmojiBypass,
