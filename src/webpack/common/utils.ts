@@ -49,6 +49,11 @@ export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYea
 
 export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", "registerLanguage");
 
+export const { match, P }: Pick<typeof import("ts-pattern"), "match" | "P"> = mapMangledModuleLazy("@ts-pattern/matcher", {
+    match: filters.byCode("return new"),
+    P: filters.byProps("when")
+});
+
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
 export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
@@ -143,6 +148,10 @@ export const NavigationRouter: t.NavigationRouter = mapMangledModuleLazy("Transi
     transitionToGuild: filters.byCode("transitionToGuild -"),
     back: filters.byCode("goBack()"),
     forward: filters.byCode("goForward()"),
+});
+export const ChannelRouter: t.ChannelRouter = mapMangledModuleLazy('"Thread must have a parent ID."', {
+    transitionToChannel: filters.byCode(".preload"),
+    transitionToThread: filters.byCode('"Thread must have a parent ID."')
 });
 
 export let SettingsRouter: any;

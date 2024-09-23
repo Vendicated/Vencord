@@ -19,7 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
-import { PronounsFormat, PronounSource } from "./pronoundbUtils";
+import { PronounsFormat, PronounSource } from "./types";
 
 export const settings = definePluginSettings({
     pronounsFormat: {
