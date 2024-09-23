@@ -19,13 +19,21 @@
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { NoopComponent } from "@utils/react";
 import definePlugin from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelStore, Clipboard, ContextMenuApi, i18n, Menu, UserStore } from "@webpack/common";
+import { filters, findByPropsLazy, waitFor } from "@webpack";
+import { ChannelStore, ContextMenuApi, i18n, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 const { useMessageMenu } = findByPropsLazy("useMessageMenu");
-const IdIcon = findComponentByCodeLazy("M15.3 14.48c-.46.45-1.08.67-1.86.67h");
+
+interface CopyIdMenuItemProps {
+    id: string;
+    label: string;
+}
+
+let CopyIdMenuItem: (props: CopyIdMenuItemProps) => React.ReactElement | null = NoopComponent;
+waitFor(filters.componentByCode('"devmode-copy-id-".concat'), m => CopyIdMenuItem = m);
 
 function MessageMenu({ message, channel, onHeightUpdate }) {
     const canReport = message.author &&
@@ -54,17 +62,17 @@ function MessageMenu({ message, channel, onHeightUpdate }) {
     });
 }
 
-const contextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+interface MessageActionsProps {
+    message: Message;
+    isFullSearchContextMenu?: boolean;
+}
+
+const contextMenuPatch: NavContextMenuPatchCallback = (children, props: MessageActionsProps) => {
     if (props?.isFullSearchContextMenu == null) return;
 
     const group = findGroupChildrenByChildId("devmode-copy-id", children, true);
     group?.push(
-        <Menu.MenuItem
-            id={`devmode-copy-id-${props.message.author.id}`}
-            label={i18n.Messages.COPY_ID_AUTHOR}
-            action={() => Clipboard.copy(props.message.author.id)}
-            icon={IdIcon}
-        />
+        CopyIdMenuItem({ id: props.message.author.id, label: i18n.Messages.COPY_ID_AUTHOR })
     );
 };
 

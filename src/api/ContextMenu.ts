@@ -92,7 +92,7 @@ export function removeGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallba
  * @param children The context menu children
  * @param matchSubstring Whether to check if the id is a substring of the child id
  */
-export function findGroupChildrenByChildId(id: string | string[], children: Array<ReactElement | null>, matchSubstring = false): Array<ReactElement | null> | null {
+export function findGroupChildrenByChildId(id: string | string[], children: Array<ReactElement | null | undefined>, matchSubstring = false): Array<ReactElement | null | undefined> | null {
     for (const child of children) {
         if (child == null) continue;
 
