@@ -86,7 +86,7 @@ interface NotificationObject {
     title: string;
     content: string;
     useBase64Icon: boolean;
-    icon: ArrayBuffer | string;
+    icon: string;
     sourceApp: string;
 }
 
@@ -320,23 +320,29 @@ function shouldIgnoreForChannelType(channel: Channel) {
 }
 
 function sendMsgNotif(titleString: string, content: string, message: Message) {
-    fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`).then(response => response.arrayBuffer()).then(result => {
-        const msgData: NotificationObject = {
-            type: 1,
-            timeout: settings.store.lengthBasedTimeout ? calculateTimeout(content) : settings.store.timeout,
-            height: calculateHeight(content),
-            opacity: settings.store.opacity,
-            volume: settings.store.volume,
-            audioPath: settings.store.soundPath,
-            title: titleString,
-            content: content,
-            useBase64Icon: true,
-            icon: new TextDecoder().decode(result),
-            sourceApp: "Vencord"
-        };
+    fetch(`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.png?size=128`)
+        .then(response => response.blob())
+        .then(blob => new Promise<string>(resolve => {
+            const r = new FileReader();
+            r.onload = () => resolve((r.result as string).split(",")[1]);
+            r.readAsDataURL(blob);
+        })).then(result => {
+            const msgData: NotificationObject = {
+                type: 1,
+                timeout: settings.store.lengthBasedTimeout ? calculateTimeout(content) : settings.store.timeout,
+                height: calculateHeight(content),
+                opacity: settings.store.opacity,
+                volume: settings.store.volume,
+                audioPath: settings.store.soundPath,
+                title: titleString,
+                content: content,
+                useBase64Icon: true,
+                icon: result,
+                sourceApp: "Vencord"
+            };
 
-        sendToOverlay(msgData);
-    });
+            sendToOverlay(msgData);
+        });
 }
 
 function sendOtherNotif(content: string, titleString: string) {
