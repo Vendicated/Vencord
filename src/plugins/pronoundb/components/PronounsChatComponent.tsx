@@ -22,7 +22,7 @@ import { type MessageRecord, MessageType } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 
-import { useFormattedPronouns } from "../pronoundbUtils";
+import { useFormattedPronouns } from "../api";
 import { settings } from "../settings";
 
 const styles: Record<string, string> = findByPropsLazy("timestampInline");
@@ -38,38 +38,40 @@ function shouldShow(message: MessageRecord) {
     return true;
 }
 
-export const PronounsChatComponentWrapper = ErrorBoundary.wrap(({ message }: { message: MessageRecord; }) => {
-    return shouldShow(message)
+export const PronounsChatComponentWrapper = ErrorBoundary.wrap(
+    ({ message }: { message: MessageRecord; }) => shouldShow(message)
         ? <PronounsChatComponent message={message} />
-        : null;
-}, { noop: true });
+        : null,
+    { noop: true }
+);
 
-export const CompactPronounsChatComponentWrapper = ErrorBoundary.wrap(({ message }: { message: MessageRecord; }) => {
-    return shouldShow(message)
+export const CompactPronounsChatComponentWrapper = ErrorBoundary.wrap(
+    ({ message }: { message: MessageRecord; }) => shouldShow(message)
         ? <CompactPronounsChatComponent message={message} />
-        : null;
-}, { noop: true });
+        : null,
+    { noop: true }
+);
 
 function PronounsChatComponent({ message }: { message: MessageRecord; }) {
-    const [result] = useFormattedPronouns(message.author.id);
+    const { pronouns } = useFormattedPronouns(message.author.id);
 
-    return result
-        ? (
-            <span className={classes(styles.timestampInline, styles.timestamp)}>
-                • {result}
-            </span>
-        )
-        : null;
+    return pronouns && (
+        <span
+            className={classes(styles.timestampInline, styles.timestamp)}
+        >
+            • {pronouns}
+        </span>
+    );
 }
 
 export const CompactPronounsChatComponent = ErrorBoundary.wrap(({ message }: { message: MessageRecord; }) => {
-    const [result] = useFormattedPronouns(message.author.id);
+    const { pronouns } = useFormattedPronouns(message.author.id);
 
-    return result
-        ? (
-            <span className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact")}>
-                • {result}
-            </span>
-        )
-        : null;
+    return pronouns && (
+        <span
+            className={classes(styles.timestampInline, styles.timestamp, "vc-pronoundb-compact")}
+        >
+            • {pronouns}
+        </span>
+    );
 }, { noop: true });

@@ -51,13 +51,17 @@ const settings = definePluginSettings({
         description: "Show role colors in the reactors list",
         restartNeeded: true
     },
+    colorChatMessages: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Color chat messages based on the author's role color",
+        restartNeeded: true,
+    },
     messageSaturation: {
         type: OptionType.SLIDER,
-        description: "Intensity of message coloring. 0 to disable.",
+        description: "Intensity of message coloring.",
         markers: makeRange(0, 100, 10),
-        default: 30,
-        // This is called only once at startup, but late enough that the store is initialized.
-        get restartNeeded(): boolean { return settings.store.messageSaturation === 0; }
+        default: 30
     },
 });
 
@@ -133,7 +137,7 @@ export default definePlugin({
                 match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
                 replace: "style:{color:$self.useMessageColor($1)},"
             },
-            predicate: () => settings.store.messageSaturation !== 0,
+            predicate: () => settings.store.colorChatMessages,
         },
     ],
     settings,
