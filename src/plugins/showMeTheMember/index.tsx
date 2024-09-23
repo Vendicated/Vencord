@@ -82,8 +82,6 @@ export default definePlugin({
     async start() {
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
-        await requireUserContextMenu();
-        await requireGuildContextMenu();
     },
     stop() {
         document.removeEventListener("keydown", keydown);
@@ -114,22 +112,31 @@ export default definePlugin({
                             }}
                             onContextMenu={e => {
                                 if (shiftPressed !== settings.store.ReverseShift) {
-                                    ContextMenuApi.openContextMenu(e, () => (
-                                        <GuildContext
-                                            guild={guild}
-                                        />
-                                    ));
+                                    ContextMenuApi.openContextMenuLazy(e, async () => {
+                                        await requireGuildContextMenu();
+
+                                        return props => (
+                                            <GuildContext
+                                                {...props}
+                                                guild={guild}
+                                            />);
+                                    });
                                     return;
                                 }
-                                ContextMenuApi.openContextMenu(e, () => (
-                                    <div className="vc-smtm-menu">
-                                        <UserContext
-                                            user={user}
-                                            guildId={guild.id}
-                                            channel={ChannelStore.getChannel(SelectedChannelStore.getChannelId())}
-                                        />
-                                    </div>
-                                ));
+                                ContextMenuApi.openContextMenuLazy(e, async () => {
+                                    await requireUserContextMenu();
+
+                                    return props => (
+                                        <div className="vc-smtm-menu">
+                                            <UserContext
+                                                {...props}
+                                                user={user}
+                                                guildId={guild.id}
+                                                channel={ChannelStore.getChannel(SelectedChannelStore.getChannelId())}
+                                            />
+                                        </div>
+                                    );
+                                });
                             }}
                         >
                             <Original
