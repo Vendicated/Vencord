@@ -44,6 +44,12 @@ const settings = definePluginSettings({
         description: "Show a user's Voice Channel indicator in messages",
         default: true,
         restartNeeded: true
+    },
+    showLiveIndicator: {
+        type: OptionType.BOOLEAN,
+        description: "Show a Live indicator next to a user's Voice Channel indicator",
+        default: true,
+        restartNeeded: true
     }
 });
 
