@@ -47,7 +47,7 @@ export default definePlugin({
         {
             find: ".COLLECTIBLES_SHOP_FULLSCREEN))",
             replacement: {
-                match: /(\?void 0:(\i)\.channelId.{0,120})\i\.Fragment,{/,
+                match: /(\?void 0:(\i)\.channelId.{0,200})\i\.Fragment,{/,
                 replace: "$1$self.render,{currentChannel:$2,"
             }
         },
