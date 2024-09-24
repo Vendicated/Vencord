@@ -16,23 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { UserStore } from "@webpack/common";
 
+migratePluginSettings("AlwaysExpandRoles", "ShowAllRoles");
 export default definePlugin({
-    name: "NoProfileThemes",
-    description: "Completely removes Nitro profile themes from everyone but yourself",
-    authors: [Devs.TheKodeToad],
+    name: "AlwaysExpandRoles",
+    description: "Always expands the role list in profile popouts",
+    authors: [Devs.surgedevs],
     patches: [
         {
-            find: "hasThemeColors(){",
+            find: 'action:"EXPAND_ROLES"',
             replacement: {
-                match: /get canUsePremiumProfileCustomization\(\){return /,
-                replace: "$&$self.isCurrentUser(this.userId)&&"
+                match: /(roles:\i(?=.+?(\i)\(!0\)[,;]\i\({action:"EXPAND_ROLES"}\)).+?\[\i,\2\]=\i\.useState\()!1\)/,
+                replace: (_, rest, setExpandedRoles) => `${rest}!0)`
             }
-        },
-    ],
-
-    isCurrentUser: (userId: string) => userId === UserStore.getCurrentUser()?.id,
+        }
+    ]
 });
