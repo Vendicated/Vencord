@@ -588,6 +588,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "sadan",
         id: 521819891141967883n
     },
+    Magix: {
+        name: "Magix",
+        id: 252090676068614145n
+    },
     Antti: {
         name: "Antti",
         id: 312974985876471810n
@@ -687,10 +691,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     PWall: {
         name: "PWall",
         id: 0n
-	},
-    Magix: {
-        name: "Magix",
-        id: 252090676068614145n
 	},
     Scyye: {
         name: "Scyye",
