@@ -103,7 +103,7 @@ export function findGroupChildrenByChildId(id: string | string[], children: Arra
 
         if (
             (Array.isArray(id) && id.some(id => matchSubstring ? child.props?.id?.includes(id) : child.props?.id === id))
-                || matchSubstring ? child.props?.id?.includes(id) : child.props?.id === id
+            || (matchSubstring ? child.props?.id?.includes(id) : child.props?.id === id)
         ) return children;
 
         let nextChildren = child.props?.children;
