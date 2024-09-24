@@ -59,6 +59,8 @@ export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
         delete patch.group;
     }
 
+    if (patch.predicate && !patch.predicate()) return;
+
     canonicalizeFind(patch);
     if (!Array.isArray(patch.replacement)) {
         patch.replacement = [patch.replacement];
@@ -69,6 +71,8 @@ export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
             delete r.predicate;
         });
     }
+
+    patch.replacement = patch.replacement.filter(({ predicate }) => !predicate || predicate());
 
     patches.push(patch);
 }
@@ -101,6 +105,11 @@ for (const p of pluginsValues) if (isPluginEnabled(p.name)) {
         settings[d].enabled = true;
         dep.isDependency = true;
     });
+
+    if (p.commands?.length) {
+        Plugins.CommandsAPI.isDependency = true;
+        settings.CommandsAPI.enabled = true;
+    }
 }
 
 for (const p of pluginsValues) {
