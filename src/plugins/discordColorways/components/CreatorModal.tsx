@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ColorPicker, openModal, useEffect, useState, useReducer, UserStore, PluginProps, DataStore, Slider } from "..";
+import { ColorPicker, DataStore, FocusLock, openModal, PluginProps, Slider, useEffect, useReducer, useRef, UserStore, useState } from "..";
 import { knownThemeVars } from "../constants";
-import { generateCss, getPreset, gradientPresetIds } from "../css";
 import { Colorway, ModalProps } from "../types";
 import { colorToHex, getHex, HexToHSL, hexToString } from "../utils";
 import { updateRemoteSources } from "../wsClient";
@@ -61,6 +60,7 @@ export default function ({
     const [colorwayName, setColorwayName] = useState<string>("");
     const [mutedTextBrightness, setMutedTextBrightness] = useState<number>(Math.min(HexToHSL("#" + colors.primary)[2] + (3.6 * 3), 100));
     const [theme, setTheme] = useState("discord");
+    const cont = useRef(null);
 
     useEffect(() => {
         async function load() {
@@ -122,138 +122,161 @@ export default function ({
     };
 
     return (
-        <div className={`colorwaysModal ${modalProps.transitionState == 2 ? "closing" : ""} ${modalProps.transitionState == 4 ? "hidden" : ""}`} data-theme={theme}>
-            <h2 className="colorwaysModalHeader">Create a Colorway</h2>
-            <div className="colorwaysModalContent" style={{ minWidth: 500 }}>
-                <span className="colorwaysModalSectionHeader">Name:</span>
-                <input
-                    type="text"
-                    className="colorwayTextBox"
-                    placeholder="Give your Colorway a name"
-                    value={colorwayName}
-                    onInput={e => setColorwayName(e.currentTarget.value)}
-                />
-                <div className="colorwaysCreator-settingCat">
-                    <span className="colorwaysModalSectionHeader">Colors & Values:</span>
-                    <div className="colorwayCreator-colorPreviews">
-                        {colorProps.map(presetColor => {
-                            return <ColorPicker
-                                label={<span className="colorwaysPicker-colorLabel">{presetColor.name}</span>}
-                                color={parseInt(colors[presetColor.id], 16)}
-                                onChange={(color: number) => {
-                                    let hexColor = color.toString(16);
-                                    while (hexColor.length < 6) {
-                                        hexColor = "0" + hexColor;
-                                    }
-                                    updateColors({ task: presetColor.id as "accent" | "primary" | "secondary" | "tertiary", color: hexColor });
-                                }}
-                                {...colorPickerProps}
-                            />;
-                        })}
-                    </div>
-                    <div className="colorwaysSettingsDivider" style={{ margin: "10px 0" }} />
-                    <span className="colorwaysModalSectionHeader">Muted Text Brightness:</span>
-                    <Slider
-                        minValue={0}
-                        maxValue={100}
-                        initialValue={mutedTextBrightness}
-                        onValueChange={setMutedTextBrightness}
+        <FocusLock containerRef={cont}>
+            <div ref={cont} className={`colorwaysModal ${modalProps.transitionState === 2 ? "closing" : ""} ${modalProps.transitionState === 4 ? "hidden" : ""}`} data-theme={theme}>
+                <h2 className="colorwaysModalHeader">Create a Colorway</h2>
+                <div className="colorwaysModalContent" style={{ minWidth: 500 }}>
+                    <span className="colorwaysModalSectionHeader">Name:</span>
+                    <input
+                        type="text"
+                        className="colorwayTextBox"
+                        placeholder="Give your Colorway a name"
+                        value={colorwayName}
+                        autoFocus
+                        onInput={e => setColorwayName(e.currentTarget.value)}
                     />
+                    <div className="colorwaysCreator-settingCat">
+                        <span className="colorwaysModalSectionHeader">Colors & Values:</span>
+                        <div className="colorwayCreator-colorPreviews">
+                            {colorProps.map(presetColor => {
+                                return <ColorPicker
+                                    label={<span className="colorwaysPicker-colorLabel">{presetColor.name}</span>}
+                                    color={parseInt(colors[presetColor.id], 16)}
+                                    onChange={(color: number) => {
+                                        let hexColor = color.toString(16);
+                                        while (hexColor.length < 6) {
+                                            hexColor = "0" + hexColor;
+                                        }
+                                        updateColors({ task: presetColor.id as "accent" | "primary" | "secondary" | "tertiary", color: hexColor });
+                                    }}
+                                    {...colorPickerProps}
+                                />;
+                            })}
+                        </div>
+                        <div className="colorwaysSettingsDivider" style={{ margin: "10px 0" }} />
+                        <span className="colorwaysModalSectionHeader">Muted Text Brightness:</span>
+                        <Slider
+                            minValue={0}
+                            maxValue={100}
+                            initialValue={mutedTextBrightness}
+                            onValueChange={setMutedTextBrightness}
+                        />
+                    </div>
                 </div>
-            </div>
-            <div className="colorwaysModalFooter">
-                <button
-                    className="colorwaysPillButton colorwaysPillButton-onSurface"
-                    onClick={async () => {
-                        const customColorway: Colorway = {
-                            name: (colorwayName || "Colorway"),
-                            accent: "#" + colors.accent,
-                            primary: "#" + colors.primary,
-                            secondary: "#" + colors.secondary,
-                            tertiary: "#" + colors.tertiary,
-                            author: UserStore.getCurrentUser().username,
-                            authorID: UserStore.getCurrentUser().id,
-                            CSSVersion: PluginProps.CSSVersion
-                        };
-                        openModal(props => <SaveColorwayModal modalProps={props} colorways={[customColorway]} onFinish={() => {
-                            modalProps.onClose();
-                            loadUIProps();
-                            updateRemoteSources();
-                        }} />);
-                    }}
-                >
-                    Finish
-                </button>
-                <button
+                <div className="colorwaysModalFooter">
+                    <button
+                        className="colorwaysPillButton colorwaysPillButton-onSurface"
+                        onClick={async () => {
+                            const customColorway: Colorway = {
+                                name: (colorwayName || "Colorway"),
+                                accent: "#" + colors.accent,
+                                primary: "#" + colors.primary,
+                                secondary: "#" + colors.secondary,
+                                tertiary: "#" + colors.tertiary,
+                                author: UserStore.getCurrentUser().username,
+                                authorID: UserStore.getCurrentUser().id,
+                                CSSVersion: PluginProps.CSSVersion
+                            };
+                            openModal(props => <SaveColorwayModal modalProps={props} colorways={[customColorway]} onFinish={() => {
+                                modalProps.onClose();
+                                loadUIProps();
+                                updateRemoteSources();
+                            }} />);
+                        }}
+                    >
+                        Finish
+                    </button>
+                    <button
+                        className="colorwaysPillButton"
+                        onClick={() => {
+                            function setAllColors({ accent, primary, secondary, tertiary }: { accent: string, primary: string, secondary: string, tertiary: string; }) {
+                                updateColors({
+                                    task: "all",
+                                    colorObj: {
+                                        accent: accent.split("#")[1],
+                                        primary: primary.split("#")[1],
+                                        secondary: secondary.split("#")[1],
+                                        tertiary: tertiary.split("#")[1]
+                                    }
+                                });
+                            }
+                            var copiedThemes = ["Discord"];
+                            Object.values(knownThemeVars).map((theme: { variable: string; variableType?: string; }, i: number) => {
+                                if (getComputedStyle(document.body).getPropertyValue(theme.variable)) {
+                                    copiedThemes.push(Object.keys(knownThemeVars)[i]);
+                                }
+                            });
+                            if (copiedThemes.length > 1) {
+                                openModal(props => <ConflictingColorsModal modalProps={props} onFinished={setAllColors} />);
+                            } else {
+                                updateColors({
+                                    task: "all", colorObj: {
+                                        primary: getHex(
+                                            getComputedStyle(
+                                                document.body
+                                            ).getPropertyValue("--primary-600")
+                                        ).split("#")[1],
+                                        secondary: getHex(
+                                            getComputedStyle(
+                                                document.body
+                                            ).getPropertyValue("--primary-630")
+                                        ).split("#")[1],
+                                        tertiary: getHex(
+                                            getComputedStyle(
+                                                document.body
+                                            ).getPropertyValue("--primary-700")
+                                        ).split("#")[1],
+                                        accent: getHex(
+                                            getComputedStyle(
+                                                document.body
+                                            ).getPropertyValue("--brand-experiment")
+                                        ).split("#")[1]
+                                    }
+                                });
+                            }
+                        }}
+                    >
+                        Copy Current Colors
+                    </button>
+                    <button
+                        className="colorwaysPillButton"
+                        onClick={() => openModal((props: any) => <InputColorwayIdModal modalProps={props} onColorwayId={colorwayID => {
+                            hexToString(colorwayID).split(/,#/).forEach((color: string, i: number) => updateColors({ task: setColor[i], color: colorToHex(color) }));
+                        }} />)}
+                    >
+                        Enter Colorway ID
+                    </button>
+                    {/* <button
                     className="colorwaysPillButton"
+                    id="colorway-userepaintertheme"
                     onClick={() => {
-                        function setAllColors({ accent, primary, secondary, tertiary }: { accent: string, primary: string, secondary: string, tertiary: string; }) {
+                        openModal(props => <UseRepainterThemeModal modalProps={props} onFinish={async ({ id, colors }) => {
+                            setColorwayName(id);
                             updateColors({
                                 task: "all",
                                 colorObj: {
-                                    accent: accent.split("#")[1],
-                                    primary: primary.split("#")[1],
-                                    secondary: secondary.split("#")[1],
-                                    tertiary: tertiary.split("#")[1]
+                                    accent: colorToHex(colors![16]),
+                                    primary: colorToHex(colors![2]),
+                                    secondary: colorToHex(colors![5]),
+                                    tertiary: colorToHex(colors![8])
                                 }
                             });
-                        }
-                        var copiedThemes = ["Discord"];
-                        Object.values(knownThemeVars).map((theme: { variable: string; variableType?: string; }, i: number) => {
-                            if (getComputedStyle(document.body).getPropertyValue(theme.variable)) {
-                                copiedThemes.push(Object.keys(knownThemeVars)[i]);
-                            }
-                        });
-                        if (copiedThemes.length > 1) {
-                            openModal(props => <ConflictingColorsModal modalProps={props} onFinished={setAllColors} />);
-                        } else {
-                            updateColors({
-                                task: "all", colorObj: {
-                                    primary: getHex(
-                                        getComputedStyle(
-                                            document.body
-                                        ).getPropertyValue("--primary-600")
-                                    ).split("#")[1],
-                                    secondary: getHex(
-                                        getComputedStyle(
-                                            document.body
-                                        ).getPropertyValue("--primary-630")
-                                    ).split("#")[1],
-                                    tertiary: getHex(
-                                        getComputedStyle(
-                                            document.body
-                                        ).getPropertyValue("--primary-700")
-                                    ).split("#")[1],
-                                    accent: getHex(
-                                        getComputedStyle(
-                                            document.body
-                                        ).getPropertyValue("--brand-experiment")
-                                    ).split("#")[1]
-                                }
-                            });
-                        }
+                        }} />);
                     }}
                 >
-                    Copy Current Colors
-                </button>
-                <button
-                    className="colorwaysPillButton"
-                    onClick={() => openModal((props: any) => <InputColorwayIdModal modalProps={props} onColorwayId={colorwayID => {
-                        hexToString(colorwayID).split(/,#/).forEach((color: string, i: number) => updateColors({ task: setColor[i], color: colorToHex(color) }));
-                    }} />)}
-                >
-                    Enter Colorway ID
-                </button>
-                <button
-                    className="colorwaysPillButton"
-                    onClick={() => {
-                        modalProps.onClose();
-                    }}
-                >
-                    Cancel
-                </button>
+                    Use Repainter theme
+                </button> */}
+                    <button
+                        className="colorwaysPillButton"
+                        onClick={() => {
+                            modalProps.onClose();
+                        }}
+                    >
+                        Cancel
+                    </button>
+                </div>
             </div>
-        </div>
+        </FocusLock>
     );
 }
 

@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore, ReactNode, useEffect, useState, openModal } from "../../";
-import { CopyIcon, DeleteIcon, DownloadIcon, ImportIcon, PlusIcon } from "../Icons";
-
+import { DataStore, openModal, ReactNode, useEffect, useState } from "../../";
 import { defaultColorwaySource } from "../../constants";
-import { Colorway, ModalProps } from "../../types";
-import TabBar from "../TabBar";
+import { Colorway, ModalProps, StoreItem } from "../../types";
 import { chooseFile, saveFile } from "../../utils";
 import { updateRemoteSources } from "../../wsClient";
+import { CopyIcon, DeleteIcon, DownloadIcon, ImportIcon, PalleteIcon, PlusIcon } from "../Icons";
+import Selector from "../Selector";
+import TabBar from "../TabBar";
 
-export function StoreNameModal({ modalProps, originalName, onFinish, conflicting }: { modalProps: ModalProps, originalName: string, onFinish: (newName: string) => Promise<void>, conflicting: boolean; }) {
+export function StoreNameModal({ modalProps, originalName = "", onFinish, conflicting = false }: { modalProps: ModalProps, originalName?: string, onFinish: (newName: string) => Promise<void>, conflicting?: boolean; }) {
     const [error, setError] = useState<string>("");
     const [newStoreName, setNewStoreName] = useState<string>(originalName);
     const [theme, setTheme] = useState("discord");
@@ -25,13 +25,13 @@ export function StoreNameModal({ modalProps, originalName, onFinish, conflicting
         load();
     }, []);
 
-    return <div className={`colorwaysModal ${modalProps.transitionState == 2 ? "closing" : ""} ${modalProps.transitionState == 4 ? "hidden" : ""}`} data-theme={theme}>
+    return <div className={`colorwaysModal ${modalProps.transitionState === 2 ? "closing" : ""} ${modalProps.transitionState === 4 ? "hidden" : ""}`} data-theme={theme}>
         <h2 className="colorwaysModalHeader">
             {conflicting ? "Duplicate Store Name" : "Give this store a name"}
         </h2>
         <div className="colorwaysModalContent">
             {conflicting ? <span className="colorwaysModalSectionHeader">A store with the same name already exists. Please give a different name to the imported store:</span> : <></>}
-            <span className="colorwaysModalSectionHeader">Name:</span>
+            <span className="colorwaysModalSectionHeader">Name: {error ? <span className="colorwaysModalSectionError">{error}</span> : <></>}</span>
             <input type="text" className="colorwayTextBox" value={newStoreName} onChange={({ currentTarget: { value } }) => setNewStoreName(value)} style={{ marginBottom: "16px" }} />
         </div>
         <div className="colorwaysModalFooter">
@@ -74,12 +74,12 @@ function AddOnlineStoreModal({ modalProps, onFinish }: { modalProps: ModalProps,
         }
         load();
     }, []);
-    return <div className={`colorwaysModal ${modalProps.transitionState == 2 ? "closing" : ""} ${modalProps.transitionState == 4 ? "hidden" : ""}`} data-theme={theme}>
+    return <div className={`colorwaysModal ${modalProps.transitionState === 2 ? "closing" : ""} ${modalProps.transitionState === 4 ? "hidden" : ""}`} data-theme={theme}>
         <h2 className="colorwaysModalHeader">
             Add a source:
         </h2>
         <div className="colorwaysModalContent">
-            <span className="colorwaysModalSectionHeader">Name:</span>
+            <span className="colorwaysModalSectionHeader">Name: {nameError ? <span className="colorwaysModalSectionError">{nameError}</span> : <></>}</span>
             <input
                 type="text"
                 className="colorwayTextBox"
@@ -89,7 +89,7 @@ function AddOnlineStoreModal({ modalProps, onFinish }: { modalProps: ModalProps,
                 readOnly={nameReadOnly}
                 disabled={nameReadOnly}
             />
-            <span className="colorwaysModalSectionHeader" style={{ marginTop: "8px" }}>URL:</span>
+            <span className="colorwaysModalSectionHeader" style={{ marginTop: "8px" }}>URL: {URLError ? <span className="colorwaysModalSectionError">{URLError}</span> : <></>}</span>
             <input
                 type="text"
                 className="colorwayTextBox"
@@ -144,7 +144,23 @@ export default function ({
 }: {
     hasTheme?: boolean;
 }) {
+    const items = [
+        {
+            name: "Online",
+            component: OnlineTab
+        },
+        {
+            name: "Offline",
+            component: OfflineTab
+        },
+        {
+            name: "Discover",
+            component: StoreTab
+        }
+    ];
+
     const [theme, setTheme] = useState("discord");
+    const [active, setActive] = useState(items[0].name);
 
     useEffect(() => {
         async function load() {
@@ -159,16 +175,11 @@ export default function ({
     }
 
     return <Container>
-        <TabBar container={({ children }) => <div className="colorwaysPageHeader">{children}</div>} items={[
-            {
-                name: "Online",
-                component: OnlineTab
-            },
-            {
-                name: "Offline",
-                component: OfflineTab
-            }
-        ]} />
+        <TabBar active={active} container={({ children }) => <div className="colorwaysPageHeader">{children}</div>} onChange={setActive} items={items} />
+        {items.map(item => {
+            const Component = item.component;
+            return active === item.name ? <Component /> : null;
+        })}
     </Container >;
 }
 
@@ -221,7 +232,7 @@ function OfflineTab() {
                 className="colorwaysPillButton"
                 style={{ flexShrink: "0" }}
                 onClick={() => {
-                    openModal(props => <StoreNameModal conflicting={false} modalProps={props} originalName="" onFinish={async e => {
+                    openModal(props => <StoreNameModal modalProps={props} onFinish={async e => {
                         await DataStore.set("customColorways", [...await DataStore.get("customColorways"), { name: e, colorways: [] }]);
                         setCustomColorwayStores(await DataStore.get("customColorways") as { name: string, colorways: Colorway[]; }[]);
                         props.onClose();
@@ -244,14 +255,14 @@ function OfflineTab() {
             </button>
         </div>
         <div className="colorwaysSettings-sourceScroller">
-            {getComputedStyle(document.body).getPropertyValue("--os-accent-color") ? <div className={`colorwaysSettings-colorwaySource`} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }}>
+            {getComputedStyle(document.body).getPropertyValue("--os-accent-color") ? <div className={"colorwaysSettings-colorwaySource"} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }}>
                 <div style={{ alignItems: "center", width: "100%", height: "30px", display: "flex" }}>
                     <span className="colorwaysSettings-colorwaySourceLabel">OS Accent Color{" "}
                         <div className="colorways-badge">Built-In</div>
                     </span>
                 </div>
             </div> : <></>}
-            {customColorwayStores.map(({ name: customColorwaySourceName, colorways: offlineStoreColorways }) => <div className={`colorwaysSettings-colorwaySource`} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }}>
+            {customColorwayStores.map(({ name: customColorwaySourceName, colorways: offlineStoreColorways }) => <div className={"colorwaysSettings-colorwaySource"} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }}>
                 <span className="colorwaysSettings-colorwaySourceLabel">
                     {customColorwaySourceName}
                 </span>
@@ -327,7 +338,7 @@ function OnlineTab() {
             </button>
         </div>
         <div className="colorwaysSettings-sourceScroller">
-            {!colorwaySourceFiles.length && <div className={`colorwaysSettings-colorwaySource`} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }} onClick={async () => {
+            {!colorwaySourceFiles.length && <div className={"colorwaysSettings-colorwaySource"} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }} onClick={async () => {
                 DataStore.set("colorwaySourceFiles", [{ name: "Project Colorway", url: defaultColorwaySource }, ...(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).filter(i => i.name !== "Project Colorway")]);
                 setColorwaySourceFiles([{ name: "Project Colorway", url: defaultColorwaySource }, ...(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]).filter(i => i.name !== "Project Colorway")]);
             }}>
@@ -336,7 +347,7 @@ function OnlineTab() {
                     Add Project Colorway Source
                 </span>
             </div>}
-            {colorwaySourceFiles.map((colorwaySourceFile: { name: string, url: string; }, i: number) => <div className={`colorwaysSettings-colorwaySource`} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }}>
+            {colorwaySourceFiles.map((colorwaySourceFile: { name: string, url: string; }, i: number) => <div className={"colorwaysSettings-colorwaySource"} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }}>
                 <div className="hoverRoll">
                     <span className="colorwaysSettings-colorwaySourceLabel hoverRoll_normal">
                         {colorwaySourceFile.name} {colorwaySourceFile.url === defaultColorwaySource && <div className="colorways-badge">Built-In</div>} {colorwaySourceFile.url === "https://raw.githubusercontent.com/DaBluLite/ProjectColorway/master/index.json" && <div className="colorways-badge">Built-In | Outdated</div>}
@@ -387,7 +398,7 @@ function OnlineTab() {
                             <button
                                 className="colorwaysPillButton colorwaysPillButton-onSurface"
                                 onClick={async () => {
-                                    openModal(props => <StoreNameModal conflicting={false} modalProps={props} originalName={colorwaySourceFile.name || ""} onFinish={async e => {
+                                    openModal(props => <StoreNameModal modalProps={props} originalName={colorwaySourceFile.name} onFinish={async e => {
                                         const res = await fetch(colorwaySourceFile.url);
                                         const data = await res.json();
                                         DataStore.set("customColorways", [...await DataStore.get("customColorways"), { name: e, colorways: data.colorways || [] }]);
@@ -413,4 +424,128 @@ function OnlineTab() {
             )}
         </div>
     </div>;
+}
+
+function StoreTab() {
+    const [storeObject, setStoreObject] = useState<StoreItem[]>([]);
+    const [colorwaySourceFiles, setColorwaySourceFiles] = useState<{ name: string, url: string; }[]>([]);
+    const [searchValue, setSearchValue] = useState<string>("");
+    const [theme, setTheme] = useState("discord");
+
+    useEffect(() => {
+        async function load() {
+            setTheme(await DataStore.get("colorwaysPluginTheme") as string);
+        }
+        load();
+    }, []);
+
+    useEffect(() => {
+        if (!searchValue) {
+            (async function () {
+                const res: Response = await fetch("https://dablulite.vercel.app/");
+                const data = await res.json();
+                setStoreObject(data.sources);
+                setColorwaySourceFiles(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]);
+            })();
+        }
+    }, []);
+    return <div className="colorwayInnerTab"><div style={{ display: "flex", marginBottom: "8px" }}>
+        <input
+            type="text"
+            className="colorwayTextBox"
+            placeholder="Search for sources..."
+            value={searchValue}
+            onChange={e => setSearchValue(e.currentTarget.value)}
+        />
+        <button
+            className="colorwaysPillButton"
+            style={{ marginLeft: "8px", marginTop: "auto", marginBottom: "auto" }}
+            onClick={async function () {
+                const res: Response = await fetch("https://dablulite.vercel.app/");
+                const data = await res.json();
+                setStoreObject(data.sources);
+                setColorwaySourceFiles(await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]);
+            }}
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                x="0px"
+                y="0px"
+                width="14"
+                height="14"
+                style={{ boxSizing: "content-box", flexShrink: 0 }}
+                viewBox="0 0 24 24"
+                fill="currentColor"
+            >
+                <rect
+                    y="0"
+                    fill="none"
+                    width="24"
+                    height="24"
+                />
+                <path
+                    d="M6.351,6.351C7.824,4.871,9.828,4,12,4c4.411,0,8,3.589,8,8h2c0-5.515-4.486-10-10-10 C9.285,2,6.779,3.089,4.938,4.938L3,3v6h6L6.351,6.351z"
+                />
+                <path
+                    d="M17.649,17.649C16.176,19.129,14.173,20,12,20c-4.411,0-8-3.589-8-8H2c0,5.515,4.486,10,10,10 c2.716,0,5.221-1.089,7.062-2.938L21,21v-6h-6L17.649,17.649z"
+                />
+            </svg>
+            Refresh
+        </button>
+    </div>
+        <div className="colorwaysSettings-sourceScroller">
+            {storeObject.map((item: StoreItem) =>
+                item.name.toLowerCase().includes(searchValue.toLowerCase()) ? <div className={"colorwaysSettings-colorwaySource"} style={{ flexDirection: "column", padding: "16px", alignItems: "start" }}>
+                    <div style={{ gap: ".5rem", display: "flex", marginBottom: "8px", flexDirection: "column" }}>
+                        <span className="colorwaysSettings-colorwaySourceLabelHeader">
+                            {item.name}
+                        </span>
+                        <span className="colorwaysSettings-colorwaySourceDesc">
+                            {item.description}
+                        </span>
+                        <span className="colorwaysSettings-colorwaySourceDesc" style={{ opacity: ".8" }}>
+                            by {item.authorGh}
+                        </span>
+                    </div>
+                    <div style={{ gap: "8px", alignItems: "center", width: "100%", display: "flex" }}>
+                        <a role="link" target="_blank" href={"https://github.com/" + item.authorGh}>
+                            <img src="/assets/6a853b4c87fce386cbfef4a2efbacb09.svg" alt="GitHub" />
+                        </a>
+                        <button
+                            className="colorwaysPillButton colorwaysPillButton-onSurface"
+                            style={{ marginLeft: "auto" }}
+                            onClick={async () => {
+                                if (colorwaySourceFiles.map(source => source.name).includes(item.name)) {
+                                    const sourcesArr: { name: string, url: string; }[] = colorwaySourceFiles.filter(source => source.name !== item.name);
+                                    DataStore.set("colorwaySourceFiles", sourcesArr);
+                                    setColorwaySourceFiles(sourcesArr);
+                                } else {
+                                    const sourcesArr: { name: string, url: string; }[] = [...colorwaySourceFiles, { name: item.name, url: item.url }];
+                                    DataStore.set("colorwaySourceFiles", sourcesArr);
+                                    setColorwaySourceFiles(sourcesArr);
+                                }
+                            }}
+                        >
+                            {colorwaySourceFiles.map(source => source.name).includes(item.name) ? <><DeleteIcon width={14} height={14} /> Remove</> : <><DownloadIcon width={14} height={14} /> Add to Sources</>}
+                        </button>
+                        <button
+                            className="colorwaysPillButton colorwaysPillButton-onSurface"
+                            onClick={async () => {
+                                openModal(props => <div className={`colorwaysModal ${props.transitionState === 2 ? "closing" : ""} ${props.transitionState === 4 ? "hidden" : ""}`} data-theme={theme}>
+                                    <h2 className="colorwaysModalHeader">
+                                        Previewing colorways for {item.name}
+                                    </h2>
+                                    <div className="colorwaysModalContent colorwaysModalContent-sourcePreview">
+                                        <Selector settings={{ selectorType: "preview", previewSource: item.url }} />
+                                    </div>
+                                </div>);
+                            }}
+                        >
+                            <PalleteIcon width={14} height={14} />
+                            Preview
+                        </button>
+                    </div>
+                </div> : <></>
+            )}
+        </div></div>;
 }

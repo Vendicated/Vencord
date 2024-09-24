@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { PlusIcon } from "./Icons";
-
+import { DataStore, openModal, useEffect, useState } from "..";
 import { Colorway, ModalProps } from "../types";
+import { PlusIcon } from "./Icons";
 import { StoreNameModal } from "./SettingsTabs/SourceManager";
-import { DataStore, useState, useEffect, openModal } from "..";
 
 export default function ({ modalProps, colorways, onFinish }: { modalProps: ModalProps, colorways: Colorway[], onFinish: () => void; }) {
     const [offlineColorwayStores, setOfflineColorwayStores] = useState<{ name: string, colorways: Colorway[], id?: string; }[]>([]);
@@ -27,12 +26,12 @@ export default function ({ modalProps, colorways, onFinish }: { modalProps: Moda
         }
         load();
     }, []);
-    return <div className={`colorwaysModal ${modalProps.transitionState == 2 ? "closing" : ""} ${modalProps.transitionState == 4 ? "hidden" : ""}`} data-theme={theme}>
+    return <div className={`colorwaysModal ${modalProps.transitionState === 2 ? "closing" : ""} ${modalProps.transitionState === 4 ? "hidden" : ""}`} data-theme={theme}>
         <h2 className="colorwaysModalHeader">
             Save to source:
         </h2>
         <div className="colorwaysModalContent">
-            {noStoreError ? <span style={{ color: "var(--text-danger)" }}>Error: No store selected</span> : <></>}
+            {noStoreError ? <span className="colorwaysModalSectionError">Error: No store selected</span> : <></>}
             {offlineColorwayStores.map(store => <div
                 className="discordColorway"
                 style={{ padding: "10px" }}
@@ -50,7 +49,7 @@ export default function ({ modalProps, colorways, onFinish }: { modalProps: Moda
                 className="discordColorway"
                 style={{ padding: "10px" }}
                 onClick={() => {
-                    openModal(props => <StoreNameModal modalProps={props} conflicting={false} originalName="" onFinish={async e => {
+                    openModal(props => <StoreNameModal modalProps={props} onFinish={async e => {
                         await DataStore.set("customColorways", [...await DataStore.get("customColorways"), { name: e, colorways: [] }]);
                         setOfflineColorwayStores(await DataStore.get("customColorways") as { name: string, colorways: Colorway[]; }[]);
                     }} />);

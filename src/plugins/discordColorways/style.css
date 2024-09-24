@@ -56,9 +56,11 @@
     width: 100%;
 }
 
-.ColorwaySelectorWrapper {
+.colorways-selector {
     position: relative;
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+	grid-template-rows: repeat(auto-fill, 44px);
     gap: 8px;
     width: 100%;
     scrollbar-width: none !important;
@@ -67,7 +69,7 @@
     overflow: hidden auto;
 }
 
-.ColorwaySelectorWrapper::-webkit-scrollbar {
+.colorways-selector::-webkit-scrollbar {
     width: 0;
 }
 
@@ -90,14 +92,17 @@
     from {
         translate: 0 -20px;
     }
+
     to {
         translate: 0;
     }
 }
+
 @keyframes reveal-modal-backdrop {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 0.75;
     }
@@ -144,10 +149,12 @@
         transform: scale(0.7);
         opacity: 0;
     }
+
     75% {
         transform: scale(1.009);
         opacity: 1;
     }
+
     100% {
         transform: scale(1);
         opacity: 1;
@@ -159,6 +166,7 @@
         transform: scale(1);
         opacity: 1;
     }
+
     to {
         transform: scale(0.7);
         opacity: 0;
@@ -173,7 +181,7 @@
 }
 
 .colorwaysSettings-switch {
-    background-color: rgb(85, 87, 94);
+    background-color: rgb(85 87 94);
     flex: 0 0 auto;
     position: relative;
     border-radius: 14px;
@@ -181,7 +189,6 @@
     height: 24px;
     cursor: pointer;
     transition: 0.15s ease;
-    cursor: pointer;
 }
 
 .colorwaysSettings-switch.checked {
@@ -227,7 +234,7 @@
 }
 
 .colorwaySelectorSidebar-tab {
-    font-family: bootstrap-icons;
+    font-family: bootstrap-icons, var(--font-display);
     width: 48px;
     height: 48px;
     border-radius: 8px;
@@ -980,7 +987,7 @@
     background-color: hsl(223deg calc(var(--saturation-factor, 1) * 5.8%) 52.9%);
 }
 
-.ColorwaySelectorWrapper .colorwayToolbox-list {
+.colorways-selector .colorwayToolbox-list {
     width: 100%;
 }
 
@@ -1082,7 +1089,7 @@
     padding: 0;
 }
 
-.is-mobile .ColorwaySelectorWrapper {
+.is-mobile .colorways-selector {
     justify-content: space-around;
     gap: 10px;
 }
@@ -1647,6 +1654,7 @@
     transition: 0.4s ease;
     animation: show-modal 0.4s ease;
     pointer-events: all;
+    min-width: 400px;
 }
 
 .colorwaysModalContent {
@@ -1683,7 +1691,7 @@
     flex-direction: column;
     gap: 8px;
     background-color: #090909;
-    height: calc(100% - 58px);
+    height: calc(100% - 50px);
     padding: 8px;
 }
 
@@ -1746,6 +1754,11 @@
     flex-direction: column;
     gap: 4px;
     z-index: 5;
+}
+
+.colorwaysSubmenuWrapper .colorwaysContextMenu {
+    right: -12px;
+    position: relative;
 }
 
 .colorwaysContextMenuItm {
@@ -1846,6 +1859,7 @@
     font-weight: 600;
     font-size: 16px;
     line-height: 20px;
+    z-index: +1;
 }
 
 .colorwaysManagerConnectionMenu.visible {
@@ -1869,20 +1883,20 @@
     font-size: 24px;
     color: var(--header-primary);
     line-height: 31px;
-    margin-bottom: 0px;
+    margin-bottom: 0;
 }
 
 .colorwaysWordmarkSecondPart {
     font-family: var(--font-display);
     font-size: 24px;
     background-color: var(--brand-500);
-    padding: 0px 4px;
+    padding: 0 4px;
     border-radius: 4px;
 }
 
 .visual-refresh .colorwaysWordmarkSecondPart {
     border-radius: 8px;
-    padding: 0px 8px;
+    padding: 0 8px;
     border: 1px solid var(--border-strong);
     font-family: "Edu AU VIC WA NT Hand", cursive;
     line-height: 32px;
@@ -1897,7 +1911,7 @@
 .colorwaysServerListItemPill {
     width: 4px;
     margin-left: -4px;
-    height: 0px;
+    height: 0;
     position: absolute;
     top: 50%;
     left: 0;
@@ -1932,4 +1946,29 @@
     width: 100%;
     backdrop-filter: blur(16px);
     z-index: +5;
+}
+
+.colorwaysMenuHeader {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 32px;
+    padding: 6px 8px;
+    text-transform: uppercase;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 12px;
+    padding-top: 4px;
+    padding-bottom: 0;
+    color: #fff;
+    text-decoration: underline;
+}
+
+.colorwaysCaretContainer {
+    position: relative;
+    flex: 0 0 auto;
+    height: 18px;
+    width: 18px;
+    margin-left: 8px;
 }
