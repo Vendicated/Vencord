@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>127 additional plugins</summary>
+<summary>126 additional plugins</summary>
 
 - AllCallTimers by MaxHerbold & D3SOX
 - AltKrispSwitch by newwares
@@ -28,7 +28,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ChannelTabs by TheSun, TheKodeToad, keifufu, Nickyux
 - CleanChannelName by AutumnVN
 - ClientSideBlock by Samwich
-- ColorMessage by Kyuuhachi
 - CommandPalette by Ethan
 - CopyUserMention by Cortex & castdrian
 - CustomSounds by TheKodeToad & SpikeHD
