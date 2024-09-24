@@ -200,8 +200,8 @@ export default definePlugin({
             predicate: () => settings.store.sidebar,
             replacement: {
                 // Render the Better Folders sidebar
-                match: /(?<=({className:\i\.guilds,themeOverride:\i})\))/,
-                replace: ",$self.FolderSideBar({...$1})"
+                match: /(container.{0,50}({className:\i\.guilds,themeOverride:\i})\))/,
+                replace: "$1,$self.FolderSideBar({...$2})"
             }
         },
         {
