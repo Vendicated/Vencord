@@ -109,18 +109,27 @@ const settings = definePluginSettings({
         description: "last.fm api key",
         type: OptionType.STRING,
     },
+    useListenBrainz: {
+        description: "use listenbrainz instead of last.fm",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
+    listenBrainzUsername: {
+        description: "listenbrainz username",
+        type: OptionType.STRING,
+    },
     shareUsername: {
-        description: "show link to last.fm profile",
+        description: "show link to last.fm/listenbrainz profile",
         type: OptionType.BOOLEAN,
         default: false,
     },
     shareSong: {
-        description: "show link to song on last.fm",
+        description: "show link to song on last.fm/listenbrainz",
         type: OptionType.BOOLEAN,
         default: true,
     },
     hideWithSpotify: {
-        description: "hide last.fm presence if spotify is running",
+        description: "hide last.fm/listenbrainz presence if spotify is running",
         type: OptionType.BOOLEAN,
         default: true,
     },
@@ -189,8 +198,8 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "LastFMRichPresence",
-    description: "Little plugin for Last.fm rich presence",
-    authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu],
+    description: "Little plugin for Last.fm and ListenBrainz rich presence",
+    authors: [Devs.dzshn, Devs.RuiNtD, Devs.blahajZip, Devs.archeruwu, Devs.ConfiG],
 
     settingsAboutComponent: () => (
         <>
@@ -219,7 +228,7 @@ export default definePlugin({
         clearInterval(this.updateInterval);
     },
 
-    async fetchTrackData(): Promise<TrackData | null> {
+    async fetchLastFM(): Promise<TrackData | null> {
         if (!settings.store.username || !settings.store.apiKey)
             return null;
 
@@ -261,6 +270,78 @@ export default definePlugin({
         }
     },
 
+    async fetchListenBrainz(): Promise<TrackData | null> {
+        if (!settings.store.listenBrainzUsername)
+            return null;
+
+        try {
+            const res = await fetch(`https://api.listenbrainz.org/1/user/${settings.store.listenBrainzUsername}/playing-now`);
+            if (!res.ok) throw `${res.status} ${res.statusText}`;
+
+            const json = await res.json();
+            if (json.error) {
+                logger.error("Error from ListenBrainz API", `${json.error}: ${json.message}`);
+                return null;
+            }
+
+            const trackData = json.payload.listens[0];
+
+            if (!trackData?.playing_now)
+                return null;
+
+            let recordingMbid = trackData.track_metadata.additional_info.recording_mbid;
+            let releaseMbid = trackData.track_metadata.additional_info.release_mbid;
+
+            if (!recordingMbid || !releaseMbid) {
+                const metadata = await this.lookupListenBrainzMetadata(
+                    trackData.track_metadata.artist_name,
+                    trackData.track_metadata.track_name,
+                    trackData.track_metadata.release_name
+                );
+
+                recordingMbid = recordingMbid || metadata.recording_mbid;
+                releaseMbid = releaseMbid || metadata.release_mbid;
+            }
+
+            return {
+                name: trackData.track_metadata.track_name,
+                album: trackData.track_metadata.release_name,
+                artist: trackData.track_metadata.artist_name,
+                url: recordingMbid && `https://musicbrainz.org/recording/${recordingMbid}`,
+                imageUrl: releaseMbid && `https://coverartarchive.org/release/${releaseMbid}/front`
+            };
+        } catch (e) {
+            logger.error("Failed to query ListenBrainz API", e);
+            // will clear the rich presence if API fails
+            return null;
+        }
+    },
+
+    async lookupListenBrainzMetadata(artistName: string, recordingName: string, releaseName: string | undefined) {
+        try {
+            const params = new URLSearchParams({
+                artist_name: artistName,
+                recording_name: recordingName
+            });
+            if (releaseName)
+                params.append("release_name", releaseName);
+
+            const res = await fetch(`https://api.listenbrainz.org/1/metadata/lookup/?${params}`);
+            if (!res.ok) throw `${res.status} ${res.statusText}`;
+
+            const json = await res.json();
+            if (json.error) {
+                logger.error("Error from ListenBrainz API", `${json.error}: ${json.message}`);
+                return {};
+            }
+
+            return json;
+        } catch (e) {
+            logger.error("Failed to query ListenBrainz API", e);
+            return {};
+        }
+    },
+
     async updatePresence() {
         setActivity(await this.getActivity());
     },
@@ -283,7 +364,7 @@ export default definePlugin({
             }
         }
 
-        const trackData = await this.fetchTrackData();
+        const trackData = settings.store.useListenBrainz ? await this.fetchListenBrainz() : await this.fetchLastFM();
         if (!trackData) return null;
 
         const largeImage = this.getLargeImage(trackData);
@@ -302,13 +383,22 @@ export default definePlugin({
 
         const buttons: ActivityButton[] = [];
 
-        if (settings.store.shareUsername)
-            buttons.push({
-                label: "Last.fm Profile",
-                url: `https://www.last.fm/user/${settings.store.username}`,
-            });
+        if (settings.store.shareUsername) {
+            if (settings.store.useListenBrainz) {
+                buttons.push({
+                    label: "ListenBrainz Profile",
+                    url: `https://listenbrainz.org/user/${settings.store.listenBrainzUsername}`,
+                });
+            }
+            else {
+                buttons.push({
+                    label: "Last.fm Profile",
+                    url: `https://www.last.fm/user/${settings.store.username}`,
+                });
+            }
+        }
 
-        if (settings.store.shareSong)
+        if (settings.store.shareSong && trackData.url)
             buttons.push({
                 label: "View Song",
                 url: trackData.url,
