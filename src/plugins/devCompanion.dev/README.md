@@ -9,8 +9,13 @@
     -   From Finds
 -   Disable/Enable Plugin buttons above the definePlugin export
 -   Automatically run the reporter and have a gui with with the results
+-   Webpack LSP that lets you jump around extracted webpack files
 
 ## Images/Videos of the Features
+
+### Webpack LSP
+
+https://github.com/user-attachments/assets/7d4ab157-0751-4a59-8e0e-1a3607a3247d
 
 ### Reporter Gui
 
