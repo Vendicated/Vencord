@@ -62,6 +62,7 @@ export declare abstract class GuildTextualChannelRecordBase extends ChannelRecor
     position_: Defined<ChannelRecordBase["position_"]>;
     rateLimitPerUser_: Defined<ChannelRecordBase["rateLimitPerUser_"]>;
     rawRecipients?: undefined;
+    recipientFlags?: undefined;
     recipients?: undefined;
     rtcRegion?: undefined;
     safetyWarnings?: undefined;

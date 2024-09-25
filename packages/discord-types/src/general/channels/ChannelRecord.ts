@@ -19,7 +19,7 @@ export type GuildChannelRecord = GuildTextualChannelRecord | GuildVocalChannelRe
 
 export type GuildSelectableChannelRecord = Exclude<GuildChannelRecord, GuildCategoryChannelRecord | GuildVocalChannelRecord>;
 
-type ChannelRecordOwnPropertyKeys = "application_id" | "appliedTags" | "availableTags" | "bitrate_" | "blockedUserWarningDismissed" | "defaultAutoArchiveDuration" | "defaultForumLayout" | "defaultReactionEmoji" | "defaultSortOrder" | "defaultThreadRateLimitPerUser" | "flags_" | "guild_id" | "icon" | "iconEmoji" | "id" | "isMessageRequest" | "isMessageRequestTimestamp" | "isSpam" | "lastMessageId" | "lastPinTimestamp" | "linkedLobby" | "member" | "memberCount" | "memberIdsPreview" | "memberListId" | "messageCount" | "name" | "nicks" | "nsfw_" | "originChannelId" | "ownerId" | "parentChannelThreadType" | "parent_id" | "permissionOverwrites_" | "position_" | "rateLimitPerUser_" | "rawRecipients" | "recipients" | "rtcRegion" | "safetyWarnings" | "template" | "themeColor" | "threadMetadata" | "topic_" | "totalMessageSent" | "type" | "userLimit_" | "version" | "videoQualityMode";
+type ChannelRecordOwnPropertyKeys = "application_id" | "appliedTags" | "availableTags" | "bitrate_" | "blockedUserWarningDismissed" | "defaultAutoArchiveDuration" | "defaultForumLayout" | "defaultReactionEmoji" | "defaultSortOrder" | "defaultThreadRateLimitPerUser" | "flags_" | "guild_id" | "icon" | "iconEmoji" | "id" | "isMessageRequest" | "isMessageRequestTimestamp" | "isSpam" | "lastMessageId" | "lastPinTimestamp" | "linkedLobby" | "member" | "memberCount" | "memberIdsPreview" | "memberListId" | "messageCount" | "name" | "nicks" | "nsfw_" | "originChannelId" | "ownerId" | "parentChannelThreadType" | "parent_id" | "permissionOverwrites_" | "position_" | "rateLimitPerUser_" | "rawRecipients" | "recipientFlags" | "recipients" | "rtcRegion" | "safetyWarnings" | "template" | "themeColor" | "threadMetadata" | "topic_" | "totalMessageSent" | "type" | "userLimit_" | "version" | "videoQualityMode";
 
 export type ChannelRecordOwnProperties<Channel extends ChannelRecordBase> = Pick<Channel, ChannelRecordOwnPropertyKeys>;
 
@@ -121,6 +121,7 @@ export declare abstract class ChannelRecordProperties {
     position_?: number | undefined;
     rateLimitPerUser_?: number | undefined;
     rawRecipients?: ChannelRecipient[] | undefined;
+    recipientFlags?: number | undefined;
     recipients?: string[] | undefined;
     rtcRegion?: string | Nullish;
     safetyWarnings?: SafetyWarning[] | undefined;

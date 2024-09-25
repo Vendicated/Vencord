@@ -52,6 +52,7 @@ export declare class ThreadChannelRecord<ChannelType extends ThreadChannelType =
     position_?: undefined;
     rateLimitPerUser_: Defined<ChannelRecordBase["rateLimitPerUser_"]>;
     rawRecipients?: undefined;
+    recipientFlags?: undefined;
     recipients?: undefined;
     rtcRegion: undefined;
     safetyWarnings?: undefined;

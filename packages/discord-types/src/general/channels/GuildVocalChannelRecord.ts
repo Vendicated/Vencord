@@ -60,6 +60,7 @@ export declare abstract class GuildVocalChannelRecordBase extends ChannelRecordB
     position_: Defined<ChannelRecordBase["position_"]>;
     rateLimitPerUser_: Defined<ChannelRecordBase["rateLimitPerUser_"]>;
     rawRecipients?: undefined;
+    recipientFlags?: undefined;
     recipients?: undefined;
     rtcRegion: Defined<ChannelRecordBase["rtcRegion"]>;
     safetyWarnings?: undefined;

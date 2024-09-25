@@ -50,6 +50,7 @@ export declare class UnknownChannelRecord extends ChannelRecordBase {
     position_: ChannelRecordBase["position_"];
     rateLimitPerUser_: ChannelRecordBase["rateLimitPerUser_"];
     rawRecipients: Defined<ChannelRecordBase["rawRecipients"]>;
+    recipientFlags: ChannelRecordBase["recipientFlags"];
     recipients: Defined<ChannelRecordBase["recipients"]>;
     rtcRegion: ChannelRecordBase["rtcRegion"];
     safetyWarnings: ChannelRecordBase["safetyWarnings"];

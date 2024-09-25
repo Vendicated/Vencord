@@ -63,6 +63,7 @@ export declare abstract class PrivateChannelRecordBase extends ChannelRecordBase
     position_?: undefined;
     rateLimitPerUser_?: undefined;
     rawRecipients: Defined<ChannelRecordBase["rawRecipients"]>;
+    recipientFlags: Defined<ChannelRecordBase["recipientFlags"]>;
     recipients: Defined<ChannelRecordBase["recipients"]>;
     rtcRegion?: undefined;
     safetyWarnings: ChannelRecordBase["safetyWarnings"];

@@ -91,7 +91,6 @@ export default tseslint.config(
                 objectLiteralTypeAssertions: "allow-as-parameter"
             }],
             "@typescript-eslint/consistent-type-definitions": "error",
-            "@typescript-eslint/consistent-type-exports": ["error", { fixMixedExportsWithInlineTypeSpecifier: true }],
             "@typescript-eslint/consistent-type-imports": ["error", { fixStyle: "inline-type-imports" }],
             "@typescript-eslint/dot-notation": "error",
             "@typescript-eslint/method-signature-style": "error",
@@ -164,6 +163,7 @@ export default tseslint.config(
         files: ["**/*"],
         ignores: ["src/**"],
         rules: {
+            "@typescript-eslint/consistent-type-exports": ["error", { fixMixedExportsWithInlineTypeSpecifier: true }],
             "@typescript-eslint/no-unnecessary-type-parameters": "error",
             "simple-import-sort/imports": ["error", {
                 groups: [
@@ -225,8 +225,8 @@ export default tseslint.config(
                     "[declare=true] *",
                     // Allow enums, interfaces, and type aliases
                     "[type=/^TS/] *",
-                    // Allow re-exporting of all named exports
-                    "ExportAllDeclaration *",
+                    // Allow re-exporting of all named exports, but disallow type exports to ensure enums are useable
+                    "ExportAllDeclaration[exportKind=value] *",
                     // Allow imports
                     "ImportDeclaration *",
                 ].join(", ")})`,
