@@ -581,10 +581,9 @@ export default definePlugin({
             find: '"MessageStore"',
             replacement: {
                 match: /getOrCreate\(\i\);\i=\i\.loadComplete.*?}\),/,
-                replace: "$self.messageLoadSuccess(arguments[0]);"
+                replace: "$&$self.messageLoadSuccess(arguments[0]);"
             }
         },
-
         {
             find: "THREAD_STARTER_MESSAGE?null===",
             replacement: {
