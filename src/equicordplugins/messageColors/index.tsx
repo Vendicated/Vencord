@@ -55,8 +55,8 @@ export default definePlugin({
             find: ".defaultRules.text,match:",
             group: true,
             replacement: {
-                // $)/)
-                match: /\$\)\/\)}/,
+                // $)
+                match: /\$\)/,
                 // hsl(|rgb(|$&
                 replace: requiredFirstCharacters.join("|") + "|$&",
             },

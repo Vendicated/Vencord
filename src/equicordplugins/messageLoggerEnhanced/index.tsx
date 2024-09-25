@@ -580,8 +580,8 @@ export default definePlugin({
         {
             find: '"MessageStore"',
             replacement: {
-                match: /LOAD_MESSAGES_SUCCESS:function\(\i\){/,
-                replace: "$&$self.messageLoadSuccess(arguments[0]);"
+                match: /getOrCreate\(\i\);\i=\i\.loadComplete.*?}\),/,
+                replace: "$self.messageLoadSuccess(arguments[0]);"
             }
         },
 

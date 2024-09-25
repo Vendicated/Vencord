@@ -58,12 +58,12 @@ export default definePlugin({
             }
         },
         {
-            find: "{})).SUBTLE=\"SUBTLE\"",
+            find: ".SUBTLE=\"SUBTLE\"",
             replacement: {
                 match: /\(0,\i\.useTransition\)*/,
                 replace: "$self.nullTransition"
             }
-        },
+        }
     ],
 
     nullTransition(value: any, args: object) {
