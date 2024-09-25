@@ -84,8 +84,6 @@ export async function translate(kind: "received" | "sent", text: string): Promis
     }
 }
 
-
-
 async function googleTranslate(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
     const url = "https://translate.googleapis.com/translate_a/single?" + new URLSearchParams({
         // see https://stackoverflow.com/a/29537590 for more params
