@@ -173,7 +173,7 @@ export const InviteActions = findByPropsLazy("resolveInvite");
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
 
 export const ReadStateUtils = mapMangledModuleLazy('type:"ENABLE_AUTOMATIC_ACK",', {
-    ackChannel: filters.byCode(".getActiveJoinedThreadsForParent(")
+    ackChannel: filters.byCode(".isForumLikeChannel(")
 });
 
 export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
