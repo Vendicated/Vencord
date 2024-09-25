@@ -304,9 +304,13 @@ export default definePlugin({
         {
             find: '"UserSettingsProtoStore"',
             replacement: [
+                // {
+                //     // Overwrite incoming connection settings proto with our local settings
+                //     match: /CONNECTION_OPEN:function\((\i)\){/,
+                //     replace: (m, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
+                // },
                 {
-                    // Overwrite incoming connection settings proto with our local settings
-                    match: /CONNECTION_OPEN:function\((\i)\){/,
+                    match: /function (\i)\((\i)\){(?=.*CONNECTION_OPEN:\1)/,
                     replace: (m, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
                 },
                 {
