@@ -6,8 +6,9 @@
 
 import { Margins } from "@utils/margins";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, ReadStateUtils, Select, Text, TextInput, useState } from "@webpack/common";
+import { Button, ChannelStore, FluxDispatcher, Forms, i18n, Menu, ReadStateStore, Select, Text, TextInput, useState } from "@webpack/common";
 
+import { ackChannel } from "..";
 import { bookmarkFolderColors, bookmarkPlaceholderName, closeOtherTabs, closeTab, closeTabsToTheLeft, closeTabsToTheRight, createTab, hasClosedTabs, isBookmarkFolder, openedTabs, reopenClosedTab, settings, toggleCompactTab } from "../util";
 import { Bookmark, BookmarkFolder, Bookmarks, ChannelTabsProps, UseBookmarkMethods } from "../util/types";
 
@@ -179,7 +180,7 @@ export function BookmarkContextMenu({ bookmarks, index, methods }: { bookmarks: 
                         id="mark-as-read"
                         label={i18n.Messages.MARK_AS_READ}
                         disabled={!ReadStateStore.hasUnread(bookmark.channelId)}
-                        action={() => ReadStateUtils.ackChannel(ChannelStore.getChannel(bookmark.channelId))}
+                        action={() => ackChannel(ChannelStore.getChannel(bookmark.channelId))}
                     />
                 }
                 {isFolder
@@ -289,7 +290,7 @@ export function TabContextMenu({ tab }: { tab: ChannelTabsProps; }) {
                         id="mark-as-read"
                         label={i18n.Messages.MARK_AS_READ}
                         disabled={!ReadStateStore.hasUnread(channel.id)}
-                        action={() => ReadStateUtils.ackChannel(channel)}
+                        action={() => ackChannel(channel)}
                     />
                 }
                 <Menu.MenuCheckboxItem
