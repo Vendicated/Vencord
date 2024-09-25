@@ -307,7 +307,8 @@ export default definePlugin({
                 name: trackData.track_metadata.track_name,
                 album: trackData.track_metadata.release_name,
                 artist: trackData.track_metadata.artist_name,
-                url: recordingMbid && `https://musicbrainz.org/recording/${recordingMbid}`,
+                url: trackData.track_metadata.additional_info.origin_url ||
+                    recordingMbid && `https://musicbrainz.org/recording/${recordingMbid}`,
                 imageUrl: releaseMbid && `https://coverartarchive.org/release/${releaseMbid}/front`
             };
         } catch (e) {
