@@ -113,11 +113,11 @@ function registerSubCommands(cmd: Command, plugin: string) {
             type: ApplicationCommandType.CHAT_INPUT,
             name: `${cmd.name} ${o.name}`,
             id: `${o.name}-${cmd.id}`,
-            displayName: `${cmd.name} ${o.name}`,
+            displayName: `${cmd.displayName ?? cmd.name} ${o.displayName ?? o.name}`,
             subCommandPath: [{
                 name: o.name,
                 type: o.type,
-                displayName: o.name
+                displayName: o.displayName
             }],
             rootCommand: cmd
         };
