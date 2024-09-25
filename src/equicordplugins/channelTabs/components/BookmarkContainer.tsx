@@ -8,9 +8,8 @@ import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
 import { closeModal, openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, i18n, Menu, ReadStateStore, Text, Tooltip, useDrag, useDrop, useEffect, useRef, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, i18n, Menu, ReadStateStore, ReadStateUtils, Text, Tooltip, useDrag, useDrop, useEffect, useRef, UserStore } from "@webpack/common";
 
-import { ackChannel } from "..";
 import { BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, CircleQuestionIcon, isBookmarkFolder, settings, switchChannel, useBookmarks } from "../util";
 import { NotificationDot } from "./ChannelTab";
 import { BookmarkContextMenu, EditModal } from "./ContextMenus";
@@ -111,7 +110,7 @@ function BookmarkFolderOpenMenu(props: BookmarkProps) {
                                 id="mark-as-read"
                                 label={i18n.Messages.MARK_AS_READ}
                                 disabled={!ReadStateStore.hasUnread(b.channelId)}
-                                action={() => ackChannel(ChannelStore.getChannel(b.channelId))}
+                                action={() => ReadStateUtils.ackChannel(ChannelStore.getChannel(b.channelId))}
                             />
                         </Menu.MenuGroup>
                     ),
