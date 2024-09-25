@@ -87,6 +87,13 @@ export default definePlugin({
                     replace: "return $1;"
                 }
             ]
+        },
+        {
+            find: "lastShownFriendsListGiftIntents).size",
+            replacement: {
+                match: /return .{0,50}.size>0/,
+                replace: "return;"
+            }
         }
     ],
 
