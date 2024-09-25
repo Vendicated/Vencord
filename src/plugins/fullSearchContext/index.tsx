@@ -19,14 +19,22 @@
 import { findGroupChildrenByChildId, type NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { NoopComponent } from "@utils/react";
 import definePlugin from "@utils/types";
 import type { ChannelRecord, MessageRecord } from "@vencord/discord-types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelStore, ClipboardUtils, ContextMenuApi, i18n, Menu, UserStore } from "@webpack/common";
-import type { MouseEvent } from "react";
+import { filters, findByPropsLazy, waitFor } from "@webpack";
+import { ChannelStore, ContextMenuApi, i18n, UserStore } from "@webpack/common";
+import type { MouseEvent, ReactElement } from "react";
 
 const { useMessageMenu } = findByPropsLazy("useMessageMenu");
-const IdIcon = findComponentByCodeLazy("M15.3 14.48c-.46.45-1.08.67-1.86.67h");
+
+interface CopyIdMenuItemProps {
+    id: string;
+    label: string;
+}
+
+let CopyIdMenuItem: (props: CopyIdMenuItemProps) => ReactElement | null = NoopComponent;
+waitFor(filters.componentByCode('"devmode-copy-id-".concat'), m => { CopyIdMenuItem = m; });
 
 function MessageMenu({ message, channel, onHeightUpdate }: {
     message: MessageRecord;
@@ -58,17 +66,17 @@ function MessageMenu({ message, channel, onHeightUpdate }: {
     });
 }
 
-const contextMenuPatch = ((children, props) => {
+interface MessageActionsProps {
+    message: MessageRecord;
+    isFullSearchContextMenu?: boolean;
+}
+
+const contextMenuPatch = ((children, props?: MessageActionsProps) => {
     if (props?.isFullSearchContextMenu == null) return;
 
     const group = findGroupChildrenByChildId("devmode-copy-id", children, true);
     group?.push(
-        <Menu.MenuItem
-            id={`devmode-copy-id-${props.message.author.id}`}
-            label={i18n.Messages.COPY_ID_AUTHOR}
-            action={() => { ClipboardUtils.copy(props.message.author.id); }}
-            icon={IdIcon}
-        />
+        CopyIdMenuItem({ id: props.message.author.id, label: i18n.Messages.COPY_ID_AUTHOR })
     );
 }) satisfies NavContextMenuPatchCallback;
 
