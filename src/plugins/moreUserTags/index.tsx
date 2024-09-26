@@ -182,7 +182,7 @@ export default definePlugin({
         {
             find: ".ORIGINAL_POSTER=",
             replacement: {
-                match: /(\i)=\{\}\)\);/,
+                match: /(\i)=\{\}\)\);(?=let \i=100)/,
                 replace: "$1=$self.getTagTypes()));"
             }
         },
