@@ -253,7 +253,7 @@ export default definePlugin({
             ]
         },
         {
-            find: '="ActivityTrackingStore",',
+            find: '"ActivityTrackingStore"',
             replacement: {
                 match: /getVisibleRunningGames\(\).+?;(?=for)(?<=(\i)=\i\.\i\.getVisibleRunningGames.+?)/,
                 replace: (m, runningGames) => `${m}${runningGames}=${runningGames}.filter(({id,name})=>$self.isActivityNotIgnored({type:0,application_id:id,name}));`
