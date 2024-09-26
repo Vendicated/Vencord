@@ -79,7 +79,7 @@ export default definePlugin({
         {
             find: ".messagesPopoutWrap",
             replacement: {
-                match: /\i&&\((\i).maxHeight.{1,5}\)/,
+                match: /\i&&\((\i).maxHeight.{0,5}\)/,
                 replace: "$&;$1.maxHeight-=$self.containerHeight"
             }
         },
