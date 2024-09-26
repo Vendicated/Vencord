@@ -53,6 +53,13 @@ interface Emoji {
     isAnimated: boolean;
 }
 
+interface ForumTagProps {
+    tag: {
+        emojiId?: string;
+        emojiName?: string;
+    };
+};
+
 type Data = Emoji | Sticker;
 
 const StickerExt = [, "png", "png", "json", "gif"] as const;
@@ -379,6 +386,22 @@ const imageContextPatch: NavContextMenuPatchCallback = (children, props: {
     })));
 };
 
+const forumTagContextPatch: NavContextMenuPatchCallback = (
+    children,
+    { tag: { emojiId, emojiName } }: {
+        tag: {
+            emojiId?: string;
+            emojiName?: string;
+        };
+    },
+) => {
+    console.log(arguments[0]);
+    if (emojiName) return;
+    if (!emojiId) throw new Error("No emojiName or emojiId provided");
+
+    children.push(buildMenuItem("Emoji",));
+};
+
 const emojiMatchRegex = /<(a?):(\w+):(\d{19})>/g;
 const channelContextStatusPatch: NavContextMenuPatchCallback = (children, props: {
     channel: Channel;
@@ -416,6 +439,7 @@ export default definePlugin({
         "message": messageContextMenuPatch,
         "expression-picker": expressionPickerPatch,
         "image-context": imageContextPatch,
-        "channel-context": channelContextStatusPatch
+        "channel-context": channelContextStatusPatch,
+        "forum-tag": forumTagContextPatch
     },
 });
