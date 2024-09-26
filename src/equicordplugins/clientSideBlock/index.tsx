@@ -216,7 +216,7 @@ export default definePlugin({
         {
             find: "}getMutualFriends(",
             replacement: {
-                match: /(getMutualFriends\(\i\){)return (\i\[\i\])/,
+                match: /(getMutualFriends\(\i\){)return (\i\.get\(\i\))/,
                 replace: "$1if($2 != undefined) return $2.filter(u => !$self.shouldHideUser(u.key))"
             }
         }
