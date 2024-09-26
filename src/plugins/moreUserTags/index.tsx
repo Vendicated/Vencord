@@ -182,8 +182,8 @@ export default definePlugin({
         {
             find: ".ORIGINAL_POSTER=",
             replacement: {
-                match: /\((\i)=\{\}\)\)\[(\i)\.BOT/,
-                replace: "($1=$self.getTagTypes()))[$2.BOT"
+                match: /(\i)=\{\}\)\);(?=let \i=100)/,
+                replace: "$1=$self.getTagTypes()));"
             }
         },
         {
@@ -249,8 +249,8 @@ export default definePlugin({
                     match: /user:\i,nick:\i,/,
                     replace: "$&moreTags_channelId,"
                 }, {
-                    match: /,botType:(\i),(?<=user:(\i).+?)/g,
-                    replace: ",botType:$self.getTag({user:$2,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),"
+                    match: /,botType:(\i),botVerified:(\i),(?!discriminatorClass:)(?<=user:(\i).+?)/g,
+                    replace: ",botType:$self.getTag({user:$3,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),botVerified:$2,"
                 }
             ]
         },

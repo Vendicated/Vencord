@@ -71,7 +71,7 @@ export default definePlugin({
     description: "Anonymise uploaded file names",
     patches: [
         {
-            find: "instantBatchUpload:function",
+            find: "instantBatchUpload:",
             replacement: {
                 match: /uploadFiles:(\i),/,
                 replace:

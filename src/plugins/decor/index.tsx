@@ -54,7 +54,7 @@ export default definePlugin({
                     replace: "$self.DecorationGridItem=$&"
                 },
                 {
-                    match: /(?<==)\i=>{let{user:\i,avatarDecoration.{300,600}decorationGridItemChurned/,
+                    match: /(?<==)\i=>{let{user:\i,avatarDecoration/,
                     replace: "$self.DecorationGridDecoration=$&"
                 },
                 // Remove NEW label from decor avatar decorations

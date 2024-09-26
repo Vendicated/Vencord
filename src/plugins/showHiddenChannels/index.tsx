@@ -444,7 +444,7 @@ export default definePlugin({
             }
         },
         {
-            find: '="GuildChannelStore",',
+            find: '"GuildChannelStore"',
             replacement: [
                 {
                     // Make GuildChannelStore contain hidden channels
@@ -453,7 +453,7 @@ export default definePlugin({
                 },
                 {
                     // Filter hidden channels from GuildChannelStore.getChannels unless told otherwise
-                    match: /(?<=getChannels\(\i)(\){.+?)return (.+?)}/,
+                    match: /(?<=getChannels\(\i)(\){.*?)return (.+?)}/,
                     replace: (_, rest, channels) => `,shouldIncludeHidden${rest}return $self.resolveGuildChannels(${channels},shouldIncludeHidden??arguments[0]==="@favorites");}`
                 }
             ]
