@@ -79,8 +79,8 @@ export default definePlugin({
                 },
                 // Fix streams not playing audio until you update them
                 {
-                    match: /(?=}return"video")/,
-                    replace: "this.updateAudioElement();"
+                    match: /\}return"video"/,
+                    replace: "this.updateAudioElement();$&"
                 },
                 // Patch the volume
                 {
