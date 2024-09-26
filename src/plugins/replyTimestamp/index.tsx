@@ -69,7 +69,7 @@ export default definePlugin({
         {
             find: ".REPLY_QUOTE_MESSAGE_BLOCKED",
             replacement: {
-                match: /(?<="aria-label":\i,children:\[)(?=\i,\i,\i\])/,
+                match: /(?<="aria-label":\i,children:\[)(?=.{0,250}\i,\i,\i\])/,
                 replace: "$self.ReplyTimestamp(arguments[0]),"
             }
         }
