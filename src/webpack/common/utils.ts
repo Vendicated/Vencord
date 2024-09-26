@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { canonicalizeMatch } from "@utils/patches";
 import type { Channel } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
@@ -49,6 +48,11 @@ export const RestAPI: t.RestAPI = findLazy(m => typeof m === "object" && m.del &
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
 export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", "registerLanguage");
+
+export const { match, P }: Pick<typeof import("ts-pattern"), "match" | "P"> = mapMangledModuleLazy("@ts-pattern/matcher", {
+    match: filters.byCode("return new"),
+    P: filters.byProps("when")
+});
 
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
@@ -145,6 +149,10 @@ export const NavigationRouter: t.NavigationRouter = mapMangledModuleLazy("Transi
     back: filters.byCode("goBack()"),
     forward: filters.byCode("goForward()"),
 });
+export const ChannelRouter: t.ChannelRouter = mapMangledModuleLazy('"Thread must have a parent ID."', {
+    transitionToChannel: filters.byCode(".preload"),
+    transitionToThread: filters.byCode('"Thread must have a parent ID."')
+});
 
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
@@ -162,11 +170,14 @@ export const InviteActions = findByPropsLazy("resolveInvite");
 
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
 
-const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i,activeViewType:/);
-// TODO: type
 export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
+    openExpressionPicker: filters.byCode(/setState\({activeView:(?:(?!null)\i),activeViewType:/),
     closeExpressionPicker: filters.byCode("setState({activeView:null"),
-    openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(m.toString()),
+    toggleMultiExpressionPicker: filters.byCode(".EMOJI,"),
+    toggleExpressionPicker: filters.byCode(/getState\(\)\.activeView===\i\?\i\(\):\i\(/),
+    setExpressionPickerView: filters.byCode(/setState\({activeView:\i,lastActiveView:/),
+    setSearchQuery: filters.byCode("searchQuery:"),
+    useExpressionPickerStore: filters.byCode("Object.is")
 });
 
 export const PopoutActions: t.PopoutActions = mapMangledModuleLazy('type:"POPOUT_WINDOW_OPEN"', {

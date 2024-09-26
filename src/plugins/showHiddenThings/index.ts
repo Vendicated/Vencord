@@ -51,7 +51,7 @@ export default definePlugin({
             },
         },
         {
-            find: "2022-07_invites_disabled",
+            find: "INVITES_DISABLED))||",
             predicate: () => settings.store.showInvitesPaused,
             replacement: {
                 match: /\i\.\i\.can\(\i\.\i.MANAGE_GUILD,\i\)/,
@@ -112,12 +112,12 @@ export default definePlugin({
         },
         // patch request that queries if term is allowed
         {
-            find: ".GUILD_DISCOVERY_VALID_TERM",
+            find: ".GUILD_DISCOVERY_VALID_TERM,query:",
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
             all: true,
             replacement: {
-                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\);/g,
-                replace: "Promise.resolve({ body: { valid: true } });"
+                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\)/g,
+                replace: "Promise.resolve({ body: { valid: true } })"
             }
         }
     ],

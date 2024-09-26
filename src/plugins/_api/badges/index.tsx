@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./fixBadgeOverflow.css";
-
 import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -62,34 +60,6 @@ export default definePlugin({
     authors: [Devs.Megu, Devs.Ven, Devs.TheSun],
     required: true,
     patches: [
-        /* Patch the badge list component on user profiles */
-        {
-            find: 'id:"premium",',
-            replacement: [
-                {
-                    match: /&&(\i)\.push\(\{id:"premium".+?\}\);/,
-                    replace: "$&$1.unshift(...$self.getBadges(arguments[0]));",
-                },
-                {
-                    // alt: "", aria-hidden: false, src: originalSrc
-                    match: /alt:" ","aria-hidden":!0,src:(?=(\i)\.src)/,
-                    // ...badge.props, ..., src: badge.image ?? ...
-                    replace: "...$1.props,$& $1.image??"
-                },
-                // replace their component with ours if applicable
-                {
-                    match: /(?<=text:(\i)\.description,spacing:12,.{0,50})children:/,
-                    replace: "children:$1.component ? () => $self.renderBadgeComponent($1) :"
-                },
-                // conditionally override their onClick with badge.onClick if it exists
-                {
-                    match: /href:(\i)\.link/,
-                    replace: "...($1.onClick && { onClick: vcE => $1.onClick(vcE, $1) }),$&"
-                }
-            ]
-        },
-
-        /* new profiles */
         {
             find: ".FULL_SIZE]:26",
             replacement: {
@@ -107,7 +77,7 @@ export default definePlugin({
                     replace: "...$1.props,$& $1.image??"
                 },
                 {
-                    match: /(?<=text:(\i)\.description,.{0,50})children:/,
+                    match: /(?<=text:(\i)\.description,.{0,200})children:/,
                     replace: "children:$1.component ? $self.renderBadgeComponent({ ...$1 }) :"
                 },
                 // conditionally override their onClick with badge.onClick if it exists
