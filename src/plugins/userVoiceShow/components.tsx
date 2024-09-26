@@ -21,7 +21,7 @@ const getDMChannelIcon = findByCode(".getChannelIconURL({");
 const VoiceStateStore = findStore("VoiceStateStore");
 
 const UserSummaryItem = findComponentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-const Avatar = findComponentByCode(".AVATAR_STATUS_TYPING_16;");
+const Avatar = findComponentByCode(".status)/2):0");
 const GroupDMAvatars = findComponentByCode(".AvatarSizeSpecs[", "getAvatarURL");
 
 const ActionButtonClasses = findByProps("actionButton", "highlight");

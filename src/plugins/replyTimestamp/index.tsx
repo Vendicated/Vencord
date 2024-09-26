@@ -69,8 +69,8 @@ export default definePlugin({
         {
             find: ".REPLY_QUOTE_MESSAGE_BLOCKED",
             replacement: {
-                match: /(?<="aria-label":\i,children:\[)(?=\i,\i,\i\])/,
-                replace: "$self.ReplyTimestamp(arguments[0]),"
+                match: /\.onClickReply,.+?}\),(?=\i,\i,\i\])/,
+                replace: "$&$self.ReplyTimestamp(arguments[0]),"
             }
         }
     ],
