@@ -140,7 +140,7 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
         messages = messages.filter(m => m.author.id === meId);
     }
 
-    if (Vencord.Plugins.isPluginEnabled("NoBlockedMessages")) {
+    if (Vencord.Plugins.isPluginEnabled("NoBlockedUsers")) {
         messages = messages.filter(m => !RelationshipStore.isBlocked(m.author.id));
     }
 
