@@ -30,7 +30,7 @@
     },
     "devDependencies": {
         "@stylistic/eslint-plugin": "^2.8.0",
-        "@types/node": "^20.16.7",
+        "@types/node": "^20.16.9",
         "@types/semver": "^7.5.8",
         "@typescript-eslint/typescript-estree": "^8.7.0",
         "eslint": "^9.11.1",
