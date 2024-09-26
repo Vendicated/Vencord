@@ -22,12 +22,14 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
+import { openPluginModal } from "@components/PluginSettings/PluginModal";
+import { ExcludedReasons, togglePluginEnabled } from "@components/PluginSettings/utils";
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
 import { Devs, SUPPORT_CHANNEL_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { isPluginDev, tryOrElse } from "@utils/misc";
+import { isObjectEmpty, isPluginDev, tryOrElse } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
@@ -36,7 +38,7 @@ import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
 
 import gitHash from "~git-hash";
-import plugins, { PluginMeta } from "~plugins";
+import plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
 
@@ -320,6 +322,55 @@ export default definePlugin({
                                 Run Snippet
                             </Button>
                         );
+                    }
+                    if (props.message.embeds[0]?.url?.includes("/plugins/")) {
+                        const pluginName = props.message.embeds[0].rawTitle;
+                        const excludedPlugin = ExcludedPlugins[pluginName];
+                        if (excludedPlugin) {
+                            buttons.push(
+                                <Button
+                                    key="vc-plugin-notice"
+                                    color={Button.Colors.RED}
+                                >
+                                    Only available on {ExcludedReasons[excludedPlugin]}
+                                </Button>
+                            );
+                            // button really wide, good ideas?
+                        } else {
+                            const isEnabled = Vencord.Plugins.isPluginEnabled(pluginName);
+                            const toggle = isEnabled ? "Disable" : "Enable";
+                            const plugin = plugins[pluginName];
+                            const onRestartNeeded = () => showToast("Restart to apply changes!");
+                            const togglePlugin = () => togglePluginEnabled(isEnabled, plugin, onRestartNeeded);
+                            if (plugin.required) {
+                                buttons.push(
+                                    <Button
+                                        key="vc-required-plugin"
+                                    >
+                                        {pluginName} is required
+                                    </Button>
+                                );
+                            } else {
+                                buttons.push(
+                                    <Button
+                                        key="vc-enable-plugin"
+                                        onClick={togglePlugin}
+                                    >
+                                        {toggle} {pluginName}
+                                    </Button>
+                                );
+                            }
+                            if (plugin.options && !isObjectEmpty(plugin.options)) {
+                                buttons.push(
+                                    <Button
+                                        key="vc-plugin-settings"
+                                        onClick={() => openPluginModal(plugin, onRestartNeeded)}
+                                    >
+                                        Open plugin Settings
+                                    </Button>
+                                );
+                            }
+                        }
                     }
                 }
             }
