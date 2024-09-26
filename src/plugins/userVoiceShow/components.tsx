@@ -32,7 +32,7 @@ const getChannelIconURL: <T extends ChannelRecord>(
 const VoiceStateStore: Store & Record<string, any> = findStoreLazy("VoiceStateStore");
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-const Avatar = findComponentByCodeLazy(".AVATAR_STATUS_TYPING_16;");
+const Avatar = findComponentByCodeLazy(".status)/2):0");
 const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarURL");
 
 const ActionButtonClasses: Record<string, string> = findByPropsLazy("actionButton", "highlight");
