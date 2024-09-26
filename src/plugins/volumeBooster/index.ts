@@ -77,7 +77,7 @@ export default definePlugin({
                     match: /Math\.max.{0,30}\)\)/,
                     replace: "arguments[0]"
                 },
-                // Fix streams not playing audio untill you update them
+                // Fix streams not playing audio until you update them
                 {
                     match: /(?=}return"video")/,
                     replace: "this.updateAudioElement();"
