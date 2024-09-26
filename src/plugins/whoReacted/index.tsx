@@ -111,7 +111,7 @@ export default definePlugin({
             }
         },
         {
-            find: "\"MessageReactionsStore\"",
+            find: '"MessageReactionsStore"',
             replacement: {
                 match: /function (\i)\(\){(\i)={}(?=.*CONNECTION_OPEN:\1)/,
                 replace: "$&;$self.reactions=$2;"

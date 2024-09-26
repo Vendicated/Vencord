@@ -257,8 +257,8 @@ export default definePlugin({
             find: "canUseCustomStickersEverywhere:",
             predicate: () => settings.store.enableStickerBypass,
             replacement: {
-                match: /(canUseCustomStickersEverywhere:)\i/,
-                replace: "$1 () => true"
+                match: /(?<=canUseCustomStickersEverywhere:)\i/,
+                replace: "()=>true"
             },
         },
         // Make stickers always available
@@ -279,8 +279,8 @@ export default definePlugin({
                 "canStreamQuality",
             ].map(func => {
                 return {
-                    match: new RegExp(`(${func}:)\\i`, "g"),
-                    replace: "$1 () => true"
+                    match: new RegExp(`(?<=${func}:)\\i`, "g"),
+                    replace: "()=>true"
                 };
             })
         },
@@ -297,16 +297,17 @@ export default definePlugin({
         {
             find: "canUseClientThemes:",
             replacement: {
-                match: /(canUseClientThemes:)\i/,
-                replace: "$1 () => true"
+                match: /(?<=canUseClientThemes:)\i/,
+                replace: "()=>true"
             }
         },
         {
             find: '"UserSettingsProtoStore"',
             replacement: [
                 {
+                    // Overwrite incoming connection settings proto with our local settings
                     match: /function (\i)\((\i)\){(?=.*CONNECTION_OPEN:\1)/,
-                    replace: (m, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
+                    replace: (m, funcName, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
                 },
                 {
                     // Overwrite non local proto changes with our local settings
@@ -401,8 +402,8 @@ export default definePlugin({
         {
             find: "canUsePremiumAppIcons:",
             replacement: {
-                match: /(canUsePremiumAppIcons:)\i/,
-                replace: "$1 () => true"
+                match: /(?<=canUsePremiumAppIcons:)\i/,
+                replace: "()=>true"
             }
         },
         // Separate patch for allowing using custom app icons
@@ -425,8 +426,8 @@ export default definePlugin({
         {
             find: "canUseCustomNotificationSounds:",
             replacement: {
-                match: /(canUseCustomNotificationSounds:)\i/,
-                replace: "$1 () => true"
+                match: /(?<=canUseCustomNotificationSounds:)\i/,
+                replace: "()=>true"
             }
         }
     ],
