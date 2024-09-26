@@ -237,14 +237,14 @@ function isActivityTypeIgnored(type: number, id?: string) {
 export default definePlugin({
     name: "IgnoreActivities",
     authors: [Devs.Nuckyz, Devs.Kylie],
-    description: "Ignore activities from showing up on your status ONLY. You can configure which ones are specifically ignored from the Registered Games and Activities tabs, or use the general settings below.",
+    description: "Ignore activities from showing up on your status ONLY. You can configure which ones are specifically ignored from the Registered Games and Activities tabs, or use the general settings below",
     dependencies: ["UserSettingsAPI"],
 
     settings,
 
     patches: [
         {
-            find: '="LocalActivityStore",',
+            find: '"LocalActivityStore"',
             replacement: [
                 {
                     match: /HANG_STATUS.+?(?=!\i\(\)\(\i,\i\)&&)(?<=(\i)\.push.+?)/,
@@ -253,7 +253,7 @@ export default definePlugin({
             ]
         },
         {
-            find: '="ActivityTrackingStore",',
+            find: '"ActivityTrackingStore"',
             replacement: {
                 match: /getVisibleRunningGames\(\).+?;(?=for)(?<=(\i)=\i\.\i\.getVisibleRunningGames.+?)/,
                 replace: (m, runningGames) => `${m}${runningGames}=${runningGames}.filter(({id,name})=>$self.isActivityNotIgnored({type:0,application_id:id,name}));`
@@ -266,6 +266,7 @@ export default definePlugin({
                 replace: (m, props, nowPlaying) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`
             }
         },
+        // Discord has 2 different components for activities. Currently, the last is the one being used
         {
             find: ".activityTitleText,variant",
             replacement: {
@@ -274,9 +275,9 @@ export default definePlugin({
             },
         },
         {
-            find: ".activityCardDetails,children",
+            find: ".promotedLabelWrapperNonBanner,children",
             replacement: {
-                match: /\.activityCardDetails.+?children:(\i\.application)\.name.*?}\),/,
+                match: /\.appDetailsHeaderContainer.+?children:\i.*?}\),(?<=application:(\i).+?)/,
                 replace: (m, props) => `${m}$self.renderToggleActivityButton(${props}),`
             }
         }
