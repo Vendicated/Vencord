@@ -77,6 +77,10 @@ export default definePlugin({
                     match: /Math\.max.{0,30}\)\)/,
                     replace: "arguments[0]"
                 },
+                {
+                    match: /(?=}return"video")/,
+                    replace: "this.updateAudioElement();"
+                },
                 // Patch the volume
                 {
                     match: /\.volume=this\._volume\/100;/,
