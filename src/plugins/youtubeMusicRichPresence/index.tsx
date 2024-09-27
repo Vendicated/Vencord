@@ -196,7 +196,7 @@ export default definePlugin({
     },
     async updatePresence() {
         const webSocketDebuggerUrl = await Native.getWebSocketDebuggerUrl();
-        if(!webSocketDebuggerUrl) {
+        if (!webSocketDebuggerUrl || webSocketDebuggerUrl === "") {
             logger.error("Failed to get WebSocket URL");
             return;
         }
