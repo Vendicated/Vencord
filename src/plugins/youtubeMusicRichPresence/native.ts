@@ -25,6 +25,10 @@ const getURLFromString = (str: string): string => {
 
 export function getWebSocketDebuggerUrl(): Promise<string> {
     return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+            reject(new Error("Timed out while trying to get the WebSocket debugger URL"));
+        }, 400);
+
         const req = http.request(options, function (res) {
             const chunks: any[] = [];
 
@@ -33,13 +37,20 @@ export function getWebSocketDebuggerUrl(): Promise<string> {
             });
 
             res.on("end", function () {
+                clearTimeout(timeout);
                 const body = Buffer.concat(chunks);
                 resolve(getURLFromString(body.toString()));
             });
 
             res.on("error", error => {
+                clearTimeout(timeout);
                 reject(error);
             });
+        });
+
+        req.on("error", error => {
+            clearTimeout(timeout);
+            reject(error);
         });
 
         req.end();
