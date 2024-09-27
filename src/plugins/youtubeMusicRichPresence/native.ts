@@ -16,6 +16,7 @@ const options: http.RequestOptions = {
     }
 };
 const getURLFromString = (str: string): string => {
+    if(!str) return "";
     const json = JSON.parse(str);
     const matches = json.filter((page: { type: string; url: string; }) =>
         page.url.startsWith("https://music.youtube.com") && page.type === "page");
