@@ -374,4 +374,3 @@ export function initWs(isManual = false) {
         }
     });
 }
-
