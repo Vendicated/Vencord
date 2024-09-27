@@ -40,6 +40,9 @@ export const watch = process.argv.includes("--watch");
 export const IS_DEV = watch || process.argv.includes("--dev");
 export const IS_REPORTER = process.argv.includes("--reporter");
 export const IS_STANDALONE = process.argv.includes("--standalone");
+export const IS_COMPANION_TEST = IS_REPORTER && process.argv.includes("--companion-test");
+if (!IS_COMPANION_TEST && process.argv.includes("--companion-test"))
+    console.error("--companion-test must be run with --reporter for any effect");
 
 export const IS_UPDATER_DISABLED = process.argv.includes("--disable-updater");
 export const gitHash = process.env.EQUICORD_HASH || execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();

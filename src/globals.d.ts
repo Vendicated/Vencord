@@ -38,6 +38,7 @@ declare global {
     export var IS_UPDATER_DISABLED: boolean;
     export var IS_DEV: boolean;
     export var IS_REPORTER: boolean;
+    export var IS_COMPANION_TEST: boolean;
     export var IS_DISCORD_DESKTOP: boolean;
     export var IS_VESKTOP: boolean;
     export var IS_EQUIBOP: boolean;
