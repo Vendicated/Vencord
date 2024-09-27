@@ -317,6 +317,9 @@ export default {
                 // From the API documentation
                 ignoredRemovals: [["SPECTATE"]],
             },
+            GiftIntentType: {
+                type: "enum",
+            },
             MessageReferenceType: {
                 type: "enum",
             },

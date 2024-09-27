@@ -16,7 +16,7 @@ import type { InteractionRecord, InteractionType } from "./InteractionRecord";
 import type { MessageSnapshotRecord } from "./MessageSnapshotRecord";
 import type { MinimalMessageRecord, MinimalMessageRecordOwnProperties } from "./MinimalMessageRecord";
 
-export type MessageRecordOwnProperties = MinimalMessageRecordOwnProperties & Pick<MessageRecord, "activity" | "activityInstance" | "application" | "applicationId" | "author" | "blocked" | "bot" | "call" | "changelogId" | "channel_id" | "colorString" | "customRenderedContent" | "giftCodes" | "giftInfo" | "id" | "interaction" | "interactionData" | "interactionError" | "interactionMetadata" | "isSearchHit" | "isUnsupported" | "loggingName" | "mentionChannels" | "mentioned" | "mentionEveryone" | "mentionRoles" | "mentions" | "messageReference" | "messageSnapshots" | "nick" | "nonce" | "pinned" | "poll" | "purchaseNotification" | "reactions" | "referralTrialOfferId" | "roleSubscriptionData" | "state" | "tts" | "webhookId">;
+export type MessageRecordOwnProperties = MinimalMessageRecordOwnProperties & Pick<MessageRecord, "activity" | "activityInstance" | "application" | "applicationId" | "author" | "blocked" | "bot" | "call" | "changelogId" | "channel_id" | "colorString" | "customRenderedContent" | "giftCodes" | "giftInfo" | "giftingPrompt" | "id" | "interaction" | "interactionData" | "interactionError" | "interactionMetadata" | "isSearchHit" | "isUnsupported" | "loggingName" | "mentionChannels" | "mentioned" | "mentionEveryone" | "mentionRoles" | "mentions" | "messageReference" | "messageSnapshots" | "nick" | "nonce" | "pinned" | "poll" | "purchaseNotification" | "reactions" | "referralTrialOfferId" | "roleSubscriptionData" | "state" | "tts" | "webhookId">;
 
 export type MessageProperties = Optional<PartialOnUndefined<MessageRecordOwnProperties>, Nullish, "author" | "channel_id" | "id" | "colorString" | "giftInfo" | "nick" | "roleSubscriptionData" | "purchaseNotification" | "poll", true>
     & SnakeCasedProperties<Optional<Pick<MessageRecordOwnProperties, "applicationId" | "activityInstance" | "giftInfo" | "changelogId">, Nullish>>
@@ -75,6 +75,7 @@ export declare class MessageRecord<
     customRenderedContent: MessageCustomRenderedContent | Nullish;
     giftCodes: string[];
     giftInfo: MessageGiftInfo | undefined;
+    giftingPrompt: MessageGiftingPrompt | null;
     id: string;
     interaction: InteractionRecord | null;
     interactionData: MessageInteractionData | null;
@@ -134,6 +135,16 @@ export interface MessageGiftInfo {
     emoji?: MessageReactionEmoji | null;
     /** @todo May have more properties. */
     sound?: { id: string; } | null;
+}
+
+export interface MessageGiftingPrompt {
+    giftIntentType: GiftIntentType;
+    recipientUserId: string;
+}
+
+// Original name unknown
+export enum GiftIntentType {
+    FRIEND_ANNIVERSARY = 0,
 }
 
 export interface MessageInteractionData extends Pick<ApplicationCommand<ApplicationCommandType.CHAT>, "id" | "name" | "options" | "type"> {
