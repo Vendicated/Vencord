@@ -92,8 +92,7 @@ interface PluginCardProps extends HTMLProps<HTMLDivElement> {
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name]!;
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const isEnabled = () => settings.enabled ?? false;
+    const isEnabled = () => Vencord.Plugins.isPluginEnabled(plugin.name);
 
     function toggleEnabled() {
         const wasEnabled = isEnabled();
