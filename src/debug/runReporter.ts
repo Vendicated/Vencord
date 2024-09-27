@@ -7,11 +7,12 @@
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
 import { patches } from "plugins";
+import { initWs } from "plugins/devCompanion/initWs";
 
 import { loadLazyChunks } from "./loadLazyChunks";
+import { reporterData } from "./reporterData";
 
 const ReporterLogger = new Logger("Reporter");
-
 async function runReporter() {
     try {
         ReporterLogger.log("Starting test...");
@@ -25,6 +26,8 @@ async function runReporter() {
         for (const patch of patches) {
             if (!patch.all) {
                 new Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
+                if (IS_COMPANION_TEST)
+                    reporterData.failedPatches.foundNoModule.push(patch);
             }
         }
 
@@ -71,15 +74,21 @@ async function runReporter() {
                     logMessage += `("${args[0]}", {\n${failedMappings.map(mapping => `\t${mapping}: ${args[1][mapping].toString().slice(0, 147)}...`).join(",\n")}\n})`;
                 }
                 else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
-
+                if (IS_COMPANION_TEST)
+                    reporterData.failedWebpack[method].push(args.map(a => String(a)));
                 ReporterLogger.log("Webpack Find Fail:", logMessage);
             }
         }
 
+        // if we are running the reporter with companion integration, send the list to vscode as soon as we can
+        if (IS_COMPANION_TEST)
+            initWs();
         ReporterLogger.log("Finished test");
     } catch (e) {
         ReporterLogger.log("A fatal error occurred:", e);
     }
 }
 
-runReporter();
+// imported in webpack for reporterData, wrap to avoid running reporter
+if (IS_REPORTER)
+    runReporter();

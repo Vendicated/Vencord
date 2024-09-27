@@ -21,6 +21,7 @@ import { WEBPACK_CHUNK } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
+import { reporterData } from "debug/reporterData";
 import { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
@@ -287,6 +288,11 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                             if (IS_DEV) {
                                 logger.debug("Function Source:\n", code);
                             }
+                            if (IS_COMPANION_TEST)
+                                reporterData.failedPatches.hadNoEffect.push({
+                                    ...patch,
+                                    id
+                                });
                         }
 
                         if (patch.group) {
@@ -294,6 +300,11 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                             mod = previousMod;
                             code = previousCode;
                             patchedBy.delete(patch.plugin);
+                            if (IS_COMPANION_TEST)
+                                reporterData.failedPatches.undoingPatchGroup.push({
+                                    ...patch,
+                                    id
+                                });
                             break;
                         }
 
@@ -304,7 +315,13 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                     mod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
                 } catch (err) {
                     logger.error(`Patch by ${patch.plugin} errored (Module id is ${id}): ${replacement.match}\n`, err);
-
+                    if (IS_COMPANION_TEST)
+                        reporterData.failedPatches.erroredPatch.push({
+                            ...patch,
+                            oldModule: lastCode,
+                            newModule: code,
+                            id
+                        });
                     if (IS_DEV) {
                         const changeSize = code.length - lastCode.length;
                         const match = lastCode.match(replacement.match)!;
@@ -342,6 +359,11 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
                     if (patch.group) {
                         logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
+                        if (IS_COMPANION_TEST)
+                            reporterData.failedPatches.undoingPatchGroup.push({
+                                ...patch,
+                                id
+                            });
                         mod = previousMod;
                         code = previousCode;
                         break;
