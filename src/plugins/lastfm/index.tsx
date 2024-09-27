@@ -174,7 +174,7 @@ const settings = definePluginSettings({
                 value: NameFormat.AlbumName
             },
             {
-                label: "Use client name (either the streaming service or the music player, falls back to custom status text if song has no album)",
+                label: "Use streaming service or music player name (falls back to custom status text if no client info is available)",
                 value: NameFormat.ClientName
             }
         ],
