@@ -16,11 +16,11 @@ const options: http.RequestOptions = {
     }
 };
 const getURLFromString = (str: string): string => {
-    if(!str) return "";
+    if (!str || str === "") return "";
     const json = JSON.parse(str);
     const matches = json.filter((page: { type: string; url: string; }) =>
         page.url.startsWith("https://music.youtube.com") && page.type === "page");
-    return matches[0].webSocketDebuggerUrl;
+    return matches[0]?.webSocketDebuggerUrl || "";
 };
 
 export function getWebSocketDebuggerUrl(): Promise<string> {
