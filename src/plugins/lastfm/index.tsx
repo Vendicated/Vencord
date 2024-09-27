@@ -65,6 +65,7 @@ interface TrackData {
         end: number;
     };
     client?: string;
+    clientDetails: string;
 }
 
 // only relevant enum values
@@ -94,8 +95,9 @@ const logger = new Logger("LastFMRichPresence");
 
 const presenceStore = findByPropsLazy("getLocalPresence");
 
-async function getApplicationAsset(key: string): Promise<string> {
-    return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];
+async function getApplicationAsset(key: string): Promise<string | undefined> {
+    const ids = await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]);
+    return ids.length > 0 ? ids[0] : undefined;
 }
 
 function setActivity(activity: Activity | null) {
@@ -200,7 +202,7 @@ const settings = definePluginSettings({
         ],
     },
     showLastFmLogo: {
-        description: "show the Last.fm logo by the album cover",
+        description: "show the Last.fm/ListenBrainz/streaming service/music player logo by the album cover",
         type: OptionType.BOOLEAN,
         default: true,
     },
@@ -281,7 +283,8 @@ export default definePlugin({
                 album: trackData.album["#text"],
                 artist: trackData.artist["#text"] || "Unknown",
                 url: trackData.url,
-                imageUrl: trackData.image?.find((x: any) => x.size === "large")?.["#text"]
+                imageUrl: trackData.image?.find((x: any) => x.size === "large")?.["#text"],
+                clientDetails: "Last.fm"
             };
         } catch (e) {
             logger.error("Failed to query Last.fm API", e);
@@ -326,6 +329,29 @@ export default definePlugin({
                 releaseMbid = releaseMbid || metadata.release_mbid;
             }
 
+            let clientDetails = "ListenBrainz";
+            if (trackAddInfo) {
+                const musicService = trackAddInfo.music_service_name || trackAddInfo.music_service;
+
+                let mediaPlayer = trackAddInfo.media_player;
+                if (mediaPlayer && trackAddInfo.media_player_version)
+                    mediaPlayer = `${mediaPlayer} ${trackAddInfo.media_player_version}`;
+
+                let submissionClient = trackAddInfo.submission_client;
+                if (submissionClient && trackAddInfo.submission_client_version)
+                    submissionClient = `${submissionClient} ${trackAddInfo.submission_client_version}`;
+
+                if (submissionClient && trackAddInfo.submission_client !== trackAddInfo.media_player)
+                    clientDetails = `${clientDetails} via ${submissionClient}`;
+
+                if (musicService && mediaPlayer)
+                    clientDetails = `${musicService} through ${mediaPlayer} to ${clientDetails}`;
+                else if (musicService)
+                    clientDetails = `${musicService} to ${clientDetails}`;
+                else if (mediaPlayer)
+                    clientDetails = `${mediaPlayer} to ${clientDetails}`;
+            }
+
             return {
                 name: trackMeta.track_name || "Unknown",
                 album: trackMeta.release_name || "Unknown",
@@ -333,7 +359,8 @@ export default definePlugin({
                 url: trackAddInfo?.origin_url || recordingMbid && `https://musicbrainz.org/recording/${recordingMbid}`,
                 imageUrl: releaseMbid && `https://coverartarchive.org/release/${releaseMbid}/front`,
                 timestamps: settings.store.sendTimestamps ? await this.getListenBrainzTimestamps(trackData) : undefined,
-                client: trackAddInfo?.music_service_name || trackAddInfo?.music_service || trackAddInfo?.media_player
+                client: trackAddInfo?.music_service_name || trackAddInfo?.music_service || trackAddInfo?.media_player,
+                clientDetails
             };
         } catch (e) {
             logger.error("Failed to query ListenBrainz API", e);
@@ -466,8 +493,11 @@ export default definePlugin({
                 large_image: await getApplicationAsset(largeImage),
                 large_text: trackData.album || undefined,
                 ...(settings.store.showLastFmLogo && {
-                    small_image: await getApplicationAsset("lastfm-small"),
-                    small_text: "Last.fm"
+                    small_image: trackData.client && (
+                        await getApplicationAsset(`client-${trackData.client}-small`) ||
+                        trackData.url && await getApplicationAsset(encodeURI(`https://s2.googleusercontent.com/s2/favicons?domain=${trackData.url}`))
+                    ) || await getApplicationAsset("lastfm-small"),
+                    small_text: trackData.clientDetails
                 }),
             } : {
                 large_image: await getApplicationAsset("lastfm-large"),
