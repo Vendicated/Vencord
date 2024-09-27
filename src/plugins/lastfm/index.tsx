@@ -60,6 +60,10 @@ interface TrackData {
     artist: string;
     url: string;
     imageUrl?: string;
+    timestamps?: {
+        start: number;
+        end: number;
+    };
 }
 
 // only relevant enum values
@@ -193,6 +197,11 @@ const settings = definePluginSettings({
         description: "show the Last.fm logo by the album cover",
         type: OptionType.BOOLEAN,
         default: true,
+    },
+    sendTimestamps: {
+        description: "show track duration / listening progress bar (currently only works on listenbrainz), keep in mind that these might not always be 100% accurate",
+        type: OptionType.BOOLEAN,
+        default: true,
     }
 });
 
@@ -220,12 +229,17 @@ export default definePlugin({
     settings,
 
     start() {
+        this.timestampStuff = {
+            lastTrack: "",
+            lastTrackChange: Date.now()
+        };
         this.updatePresence();
         this.updateInterval = setInterval(() => { this.updatePresence(); }, 16000);
     },
 
     stop() {
         clearInterval(this.updateInterval);
+        this.timestampStuff = undefined;
     },
 
     async fetchLastFM(): Promise<TrackData | null> {
@@ -309,7 +323,8 @@ export default definePlugin({
                 artist: trackData.track_metadata.artist_name,
                 url: trackData.track_metadata.additional_info.origin_url ||
                     recordingMbid && `https://musicbrainz.org/recording/${recordingMbid}`,
-                imageUrl: releaseMbid && `https://coverartarchive.org/release/${releaseMbid}/front`
+                imageUrl: releaseMbid && `https://coverartarchive.org/release/${releaseMbid}/front`,
+                timestamps: settings.store.sendTimestamps ? await this.getListenBrainzTimestamps(trackData) : undefined
             };
         } catch (e) {
             logger.error("Failed to query ListenBrainz API", e);
@@ -341,6 +356,70 @@ export default definePlugin({
             logger.error("Failed to query ListenBrainz API", e);
             return {};
         }
+    },
+
+    // attempt to get timestamps using some heuristics
+    // pausing while listening and unpausing before the track would've ended will throw this off
+    // but other than that it's pretty accurate, at least accurate enough :p
+    async getListenBrainzTimestamps(trackData: any) {
+        if (!trackData.track_metadata.additional_info?.duration && !trackData.track_metadata.additional_info?.duration_ms)
+            return undefined;
+
+        const now = Date.now();
+
+        const res = await fetch(`https://api.listenbrainz.org/1/user/${settings.store.listenBrainzUsername}/listens?count=1`);
+        if (!res.ok) throw `${res.status} ${res.statusText}`;
+
+        const json = await res.json();
+        if (json.error) {
+            logger.error("Error from ListenBrainz API", `${json.error}: ${json.message}`);
+            return undefined;
+        }
+
+        const duration = trackData.track_metadata.additional_info.duration_ms ||
+            trackData.track_metadata.additional_info.duration * 1000;
+
+        const trackMetadataJson = JSON.stringify(trackData.track_metadata);
+        // track obviously changed
+        if (trackMetadataJson !== this.timestampStuff.lastTrack) {
+            this.timestampStuff.lastTrack = trackMetadataJson;
+            this.timestampStuff.lastTrackChange = now;
+        }
+        // track probably changed because current time exceeded expected track end time
+        else if (now > this.timestampStuff.lastTrackChange + duration) {
+            this.timestampStuff.lastTrackChange = now;
+        }
+
+        const listenAddInfo = json.payload.count >= 1 && json.payload.listens[0].track_metadata.additional_info;
+        if (listenAddInfo?.duration || listenAddInfo?.duration_ms) {
+            const listenDuration = listenAddInfo.duration_ms || listenAddInfo.duration * 1000;
+            const listenStart = json.payload.listens[0].listened_at * 1000;
+            const listenEnd = listenStart + listenDuration;
+
+            // this listen is current! we have accurate info!
+            if (now <= listenEnd) {
+                return {
+                    start: listenStart,
+                    end: listenEnd
+                };
+            }
+
+            // it is Pretty Safe to assume we are listening to music sequentially without stopping Most Of The Time
+            if (now <= listenEnd + duration) {
+                return {
+                    start: listenEnd,
+                    end: listenEnd + duration
+                };
+            }
+        }
+
+        // this technically won't be accurate but good enough
+        // until we get accurate info halfway through or 4 minutes into the track
+        // or it's not the first track we are listening to in a row
+        return {
+            start: this.timestampStuff.lastTrackChange,
+            end: this.timestampStuff.lastTrackChange + duration
+        };
     },
 
     async updatePresence() {
@@ -434,6 +513,8 @@ export default definePlugin({
             metadata: {
                 button_urls: buttons.map(v => v.url),
             },
+
+            timestamps: trackData.timestamps,
 
             type: settings.store.useListeningStatus ? ActivityType.LISTENING : ActivityType.PLAYING,
             flags: ActivityFlag.INSTANCE,
