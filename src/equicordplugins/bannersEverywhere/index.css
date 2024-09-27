@@ -1,0 +1,10 @@
+/* stylelint-disable property-no-vendor-prefix */
+.vc-banners-everywhere-memberlist {
+    opacity: 0.8;
+    -webkit-mask-image: linear-gradient(to right, transparent 20%, #fff);
+    mask-image: linear-gradient(to right, transparent 20%, #fff);
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    cursor: pointer;
+}
