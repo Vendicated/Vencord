@@ -46,24 +46,24 @@ const settings = definePluginSettings({
         description: "Choose the image format to use for non animated images. Animated images will always use .gif",
         options: [
             {
-                label: "webp",
-                value: "webp",
+                label: "PNG (Portable Network Graphics)",
+                value: "png",
                 default: true
             },
             {
-                label: "png",
-                value: "png",
+                label: "JPEG (Joint Photographic Experts Group)",
+                value: "jpg"
             },
             {
-                label: "jpg",
-                value: "jpg",
+                label: "WebP",
+                value: "webp"
             }
         ]
     },
     imgSize: {
         type: OptionType.SELECT,
         description: "The image size to use",
-        options: ["128", "256", "512", "1024", "2048", "4096"].map(n => ({ label: n, value: n, default: n === "1024" }))
+        options: ["128", "256", "512", "1024", "2048", "4096"].map(n => ({ label: n, value: n, default: n === "4096" }))
     }
 });
 
