@@ -118,7 +118,7 @@ async function updateActivity(mediaSession: any) {
     }
 
     const activity = await createActivity(mediaSession);
-    logger.log("Updating Activity:", activity);
+    // logger.log("Updating Activity:", activity);
     dispatchActivityUpdate(activity);
 }
 
@@ -218,7 +218,7 @@ export default definePlugin({
 
             this.ws.onmessage = async (ev: { data: string; }) => {
                 const response = JSON.parse(ev.data);
-                if (response.id === 1 && response.result.result.value) {
+                if (response.id === 1 && response.result?.result?.value) {
                     const mediaSession = response.result.result.value;
                     await updateActivity(mediaSession);
                 }
