@@ -15,7 +15,8 @@ import { User } from "discord-types/general";
 import style from "./index.css?managed";
 
 interface iUSRBG extends Plugin {
-    data: { [key: string]: string; };
+    userHasBackground(userId: string);
+    getImageUrl(userId: string): string | null;
 }
 
 const settings = definePluginSettings({
@@ -80,8 +81,10 @@ export default definePlugin({
     },
 
     getBanner(userId: string): string | undefined {
-        if (Vencord.Plugins.isPluginEnabled("USRBG") && (Vencord.Plugins.plugins.USRBG as iUSRBG).data[userId]) {
-            return (Vencord.Plugins.plugins.USRBG as iUSRBG).data[userId];
+        if (Vencord.Plugins.isPluginEnabled("USRBG") && (Vencord.Plugins.plugins.USRBG as iUSRBG).userHasBackground(userId)) {
+            let banner = (Vencord.Plugins.plugins.USRBG as iUSRBG).getImageUrl(userId);
+            if (banner === null) banner = "";
+            return banner;
         }
         const userProfile = UserProfileStore.getUserProfile(userId);
         if (userProfile?.banner) {
