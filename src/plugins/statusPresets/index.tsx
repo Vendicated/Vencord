@@ -18,13 +18,29 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
+import { getUserSettingLazy } from "@api/UserSettings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Button, Menu, Text, Toasts, useState } from "@webpack/common";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { Button, Clickable, Menu, Text, Toasts, useState } from "@webpack/common";
+
+// const { PMenu } = mapMangledModuleLazy("{id:t,label:n,icon:c,hint:_,renderSubmenu:E,...h}", {
+//    PMenu: filters.byCode("{id:t,label:n,icon:c,hint:_,renderSubmenu:E,...h}")
+// });
+
+const PMenu = findComponentByCodeLazy("{id:t,label:n,icon:c,hint:_,renderSubmenu:h,...E}");
+const EmojiComponent = findComponentByCodeLazy("let{emoji:t,className:n,animate:r=!0,hideTooltip:a,tooltipDelay:o}");
+const PSubMenu = findComponentByCodeLazy("submenuPaddingContainer,children:(0,i.jsx)(o.Menu,{contextMenuApiArguments:");
+//
+// submenuPaddingContainer,children:(
 
 const Components = findByPropsLazy("Status");
 const StatusStyles = findByPropsLazy("statusItem");
+const Icons = findByPropsLazy("CircleXIcon");
+const statusSettings = getUserSettingLazy("status", "status");
+const customStatusSettings = getUserSettingLazy("status", "status");
+
 
 interface Emoji {
     animated: boolean;
@@ -64,12 +80,7 @@ const RenderStatusMenuItem = ({ status }) => {
     return <div className={StatusStyles.statusItem}
         onMouseOver={handleMouseOver}
         onMouseOut={handleMouseOut}>
-        {isHovering ? <Components.Status
-            status={"dnd"} className={StatusStyles.icon}
-            size={12}
-            style={{
-                rotate: "60deg"
-            }}
+        {isHovering ? <Clickable
             onClick={() => {
                 delete settings.store.StatusPresets[status.text];
                 Toasts.show({
@@ -77,10 +88,15 @@ const RenderStatusMenuItem = ({ status }) => {
                     type: Toasts.Type.SUCCESS,
                     id: Toasts.genId()
                 });
-            }}
-        /> : <Components.Status
+            }}><Components.Status
+                status={"dnd"} className={StatusStyles.icon}
+                size={12}
+                style={{
+                    rotate: "60deg",
+                }}
+            /></Clickable> : <Components.Status
             status={status.status} className={StatusStyles.icon}
-            size={12}
+            size={10}
         />}
         <div className={StatusStyles.status}>{status.status}</div>
         <div className={StatusStyles.description}>{status.text}</div>
@@ -89,7 +105,6 @@ const RenderStatusMenuItem = ({ status }) => {
 
 function MakeContextCallback(): NavContextMenuPatchCallback {
     return (children, _) => {
-        console.log("BLAH. presets", children);
         children[0]?.props.children.splice(1, 0,
             <Menu.MenuItem
                 id="status-presets"
@@ -111,7 +126,7 @@ export default definePlugin({
     description: "do now and think later",
     authors: [Devs.Dolfies],
     settings: settings,
-    dependencies: ["ContextMenuAPI"],
+    dependencies: ["ContextMenuAPI", "UserSettingsAPI"],
     patches: [
         {
             find: ".Messages.CUSTOM_STATUS_CLEAR_AFTER",
@@ -119,10 +134,52 @@ export default definePlugin({
                 match: /\.ModalFooter,.+\.Messages\.SAVE\}\)/,
                 replace: "$&,$self.renderRememberButton(this.state)"
             }
+        },
+        {
+            find: "!eS&&(0,i.",
+            replacement: {
+                match: /!eS&&(\(0,i.jsxs\)\(i\.Fragment,{children)/,
+                replace: "$self.render(eI, eC, W, w.Ok),true&&$1"
+            }
         }
     ],
     contextMenus: {
         "set-status-submenu": MakeContextCallback()
+    },
+    render(status, openStatusModal, OnClose) {
+        return <ErrorBoundary>
+            <div className={StatusStyles.menuDivider} />
+            {status == null ? <PMenu
+                id="sp-custom/presets-status"
+                action="PRESS_SET_STATUS"
+                onClick={() => { OnClose(), openStatusModal(); }}
+                icon={() => <div className={StatusStyles.customEmojiPlaceholder} />}
+                label="Set Custom Status" renderSubmenu={() => {
+                    return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
+                        {Object.values((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(status => <Menu.MenuItem
+                            id={"status-presets-" + status.text}
+                            label={status.status}
+                            action={() => console.log("pog")}
+                            render={() => <RenderStatusMenuItem status={status} />}
+                        />)}
+                    </Menu.Menu>;
+                }} /> : <PMenu
+                id="sp-edit/presets-status"
+                action="PRESS_EDIT_CUSTOM_STATUS"
+                onClick={() => { OnClose(), openStatusModal(); }}
+                hint={<Clickable className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings.updateSetting(null)}><Menu.CircleXIcon size="sm" /></Clickable>}
+                icon={() => status.emoji != null ? <EmojiComponent emoji={status.emoji} animate={false} hideTooltip={false} /> : null}
+                label="Edit Custom Status" renderSubmenu={() => {
+                    return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
+                        {Object.values((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(status => <Menu.MenuItem
+                            id={"status-presets-" + status.text}
+                            label={status.status}
+                            action={() => console.log("pog")}
+                            render={() => <RenderStatusMenuItem status={status} />}
+                        />)}
+                    </Menu.Menu>;
+                }} />}
+        </ErrorBoundary>;
     },
     renderRememberButton(statue: DiscordStatus) {
         return <Button onClick={() => {
