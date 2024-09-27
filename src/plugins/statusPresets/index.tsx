@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Clickable, Icons, Menu, Text, Toasts, useState } from "@webpack/common";
+import { Button, Clickable, Icons, Menu, Toasts, useState } from "@webpack/common";
 
 // const { PMenu } = mapMangledModuleLazy("{id:t,label:n,icon:c,hint:_,renderSubmenu:E,...h}", {
 //    PMenu: filters.byCode("{id:t,label:n,icon:c,hint:_,renderSubmenu:E,...h}")
@@ -36,8 +36,9 @@ const PSubMenu = findComponentByCodeLazy("submenuPaddingContainer,children:(0,i.
 
 const Components = findByPropsLazy("Status");
 const StatusStyles = findByPropsLazy("statusItem");
+
 const statusSettings = getUserSettingLazy("status", "status");
-const customStatusSettings = getUserSettingLazy("status", "status");
+const customStatusSettings = getUserSettingLazy("status", "customStatus");
 
 
 interface Emoji {
@@ -56,10 +57,8 @@ interface DiscordStatus {
 const settings = definePluginSettings({
     StatusPresets: {
         type: OptionType.COMPONENT,
-        description: "yaps",
-        component: () => {
-            return (<Text>yo</Text>);
-        },
+        description: "Status Presets",
+        component: () => <></>,
         default: {}
     }
 });
@@ -124,7 +123,7 @@ export default definePlugin({
     description: "do now and think later",
     authors: [Devs.Dolfies],
     settings: settings,
-    dependencies: ["ContextMenuAPI", "UserSettingsAPI"],
+    dependencies: ["UserSettingsAPI"],
     patches: [
         {
             find: ".Messages.CUSTOM_STATUS_CLEAR_AFTER",
@@ -141,20 +140,21 @@ export default definePlugin({
             }
         }
     ],
-    render(status, openStatusModal_: () => void, OnClose: () => void) {
-        const openStatusModal = () => { OnClose(), openStatusModal_(); };
+    render(status, openStatusModal: () => void, OnClose: () => void) {
+        if (!customStatusSettings) return;
+        const openModal = () => { OnClose(); openStatusModal(); };
         return <ErrorBoundary>
             <div className={StatusStyles.menuDivider} />
             {status == null ? <PMenu
                 id="sp-custom/presets-status"
                 action="PRESS_SET_STATUS"
-                onClick={openStatusModal}
+                onClick={openModal}
                 icon={() => <div className={StatusStyles.customEmojiPlaceholder} />}
                 label="Set Custom Status" renderSubmenu={StatusSubMenuComponent} /> : <PMenu
                 id="sp-edit/presets-status"
                 action="PRESS_EDIT_CUSTOM_STATUS"
-                onClick={openStatusModal}
-                hint={<Clickable className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings.updateSetting(null)}><Icons.CircleXIcon size="sm" /></Clickable>}
+                onClick={openModal}
+                hint={<Clickable tabIndex={-1} className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings.updateSetting(null)}><Icons.CircleXIcon size="sm" /></Clickable>}
                 icon={() => status.emoji != null ? <EmojiComponent emoji={status.emoji} animate={false} hideTooltip={false} /> : null}
                 label="Edit Custom Status" renderSubmenu={StatusSubMenuComponent} />}
         </ErrorBoundary>;
