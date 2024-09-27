@@ -279,7 +279,7 @@ export default definePlugin({
 				}, {
 					// Get the tag type and tag colors so that they can be distributed
 					match: /(,\i=\i\.isPomelo\(\)\|\|\i;)(.+?botType:(\i),botVerified:(\i),(?!discriminatorClass:)(?<=user:(\i).+?))/,
-					replace: "$1let moreTags_tagType=$self.getTag({user:$4,channelId:moreTags_channelId,origType:$3,location:'not-chat'});let moreTags_tagColors=$self.getTagColors({user:$4,channelId:moreTags_channelId,tagType:moreTags_tagType,location:'not-chat'});$2"
+					replace: "$1let moreTags_tagType=$self.getTag({user:$5,channelId:moreTags_channelId,origType:$3,location:'not-chat'});let moreTags_tagColors=$self.getTagColors({user:$5,channelId:moreTags_channelId,tagType:moreTags_tagType,location:'not-chat'});$2"
 				}, {
 					// This isn't actually the function that passes into the tag renderer so we need more patches to help it along the way
 					match: /,botType:(\i),botVerified:(\i),(?!discriminatorClass:)(?<=user:(\i).+?)/g,
@@ -287,7 +287,7 @@ export default definePlugin({
 				}, {
 					// Get the parameters from the function that were passed in previously
 					// because Discord needs to make it hard on us
-					match: /,showStreamerModeTooltip:\i/,
+					match: /,botClass:\i,showStreamerModeTooltip:\i/,
 					replace: "$&,moreTags_bgColor:moreTags_bgColor,moreTags_fgColor:moreTags_fgColor"
 				}, {
 					// Finally pass the color information into the renderer
