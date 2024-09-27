@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Clickable, Menu, Text, Toasts, useState } from "@webpack/common";
+import { Button, Clickable, Icons, Menu, Text, Toasts, useState } from "@webpack/common";
 
 // const { PMenu } = mapMangledModuleLazy("{id:t,label:n,icon:c,hint:_,renderSubmenu:E,...h}", {
 //    PMenu: filters.byCode("{id:t,label:n,icon:c,hint:_,renderSubmenu:E,...h}")
@@ -37,7 +36,6 @@ const PSubMenu = findComponentByCodeLazy("submenuPaddingContainer,children:(0,i.
 
 const Components = findByPropsLazy("Status");
 const StatusStyles = findByPropsLazy("statusItem");
-const Icons = findByPropsLazy("CircleXIcon");
 const statusSettings = getUserSettingLazy("status", "status");
 const customStatusSettings = getUserSettingLazy("status", "status");
 
@@ -65,6 +63,12 @@ const settings = definePluginSettings({
         default: {}
     }
 });
+
+
+function SetStatus(status: DiscordStatus, sourceAnalyticsContext: any) {
+    return Vencord.Webpack.wreq(720449).Z(status.text, status.emojiInfo, status.clearAfter, sourceAnalyticsContext);
+}
+
 
 const RenderStatusMenuItem = ({ status }) => {
 
@@ -103,23 +107,17 @@ const RenderStatusMenuItem = ({ status }) => {
     </div>;
 };
 
-function MakeContextCallback(): NavContextMenuPatchCallback {
-    return (children, _) => {
-        children[0]?.props.children.splice(1, 0,
-            <Menu.MenuItem
-                id="status-presets"
-                label="Presets" // add an icon to fit in
-            >
-                {Object.values((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(status => <Menu.MenuItem
-                    id={"status-presets-" + status.text}
-                    label={status.status}
-                    action={() => console.log("pog")}
-                    render={() => <RenderStatusMenuItem status={status} />}
-                />)}
-            </Menu.MenuItem>
-        );
-    };
-}
+const StatusSubMenuComponent = () => {
+    return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
+        {Object.values((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(status => <Menu.MenuItem
+            id={"status-presets-" + status.text}
+            label={status.status}
+            action={() => SetStatus(status, { "location": { "section": "Account Panel", "object": "Avatar" } })}
+            render={() => <RenderStatusMenuItem status={status} />}
+        />)}
+    </Menu.Menu>;
+};
+
 
 export default definePlugin({
     name: "StatusPresets_",
@@ -143,42 +141,22 @@ export default definePlugin({
             }
         }
     ],
-    contextMenus: {
-        "set-status-submenu": MakeContextCallback()
-    },
-    render(status, openStatusModal, OnClose) {
+    render(status, openStatusModal_: () => void, OnClose: () => void) {
+        const openStatusModal = () => { OnClose(), openStatusModal_(); };
         return <ErrorBoundary>
             <div className={StatusStyles.menuDivider} />
             {status == null ? <PMenu
                 id="sp-custom/presets-status"
                 action="PRESS_SET_STATUS"
-                onClick={() => { OnClose(), openStatusModal(); }}
+                onClick={openStatusModal}
                 icon={() => <div className={StatusStyles.customEmojiPlaceholder} />}
-                label="Set Custom Status" renderSubmenu={() => {
-                    return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
-                        {Object.values((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(status => <Menu.MenuItem
-                            id={"status-presets-" + status.text}
-                            label={status.status}
-                            action={() => console.log("pog")}
-                            render={() => <RenderStatusMenuItem status={status} />}
-                        />)}
-                    </Menu.Menu>;
-                }} /> : <PMenu
+                label="Set Custom Status" renderSubmenu={StatusSubMenuComponent} /> : <PMenu
                 id="sp-edit/presets-status"
                 action="PRESS_EDIT_CUSTOM_STATUS"
-                onClick={() => { OnClose(), openStatusModal(); }}
-                hint={<Clickable className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings.updateSetting(null)}><Menu.CircleXIcon size="sm" /></Clickable>}
+                onClick={openStatusModal}
+                hint={<Clickable className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings.updateSetting(null)}><Icons.CircleXIcon size="sm" /></Clickable>}
                 icon={() => status.emoji != null ? <EmojiComponent emoji={status.emoji} animate={false} hideTooltip={false} /> : null}
-                label="Edit Custom Status" renderSubmenu={() => {
-                    return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
-                        {Object.values((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(status => <Menu.MenuItem
-                            id={"status-presets-" + status.text}
-                            label={status.status}
-                            action={() => console.log("pog")}
-                            render={() => <RenderStatusMenuItem status={status} />}
-                        />)}
-                    </Menu.Menu>;
-                }} />}
+                label="Edit Custom Status" renderSubmenu={StatusSubMenuComponent} />}
         </ErrorBoundary>;
     },
     renderRememberButton(statue: DiscordStatus) {
@@ -190,5 +168,6 @@ export default definePlugin({
                 id: Toasts.genId()
             });
         }} style={{ marginRight: "20px" }}>Remember</Button>;
-    }
+    },
+    startAt: StartAt.WebpackReady
 });
