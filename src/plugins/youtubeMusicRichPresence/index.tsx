@@ -71,7 +71,8 @@ async function createActivity(mediaSession: any) {
     const applicationId = getAppID();
     if (!mediaSession) return;
 
-    const artwork = await getApplicationAsset(mediaSession.artwork || "ytm_logo");
+    const artwork_large = await getApplicationAsset(mediaSession.artwork || "ytm_logo");
+    const artwork_small = await getApplicationAsset("ytm_logo");
     const [currentSongTime, startTime, endTime] = songTimestamps(mediaSession.time);
     const activity: Activity = {
         application_id: applicationId,
@@ -80,8 +81,10 @@ async function createActivity(mediaSession: any) {
         details: mediaSession.title || "Unknown Title",
         state: mediaSession.artist || "Unknown Artist",
         assets: {
-            large_image: artwork,
-            large_text: mediaSession.album || "Unknown Album"
+            large_image: artwork_large,
+            large_text: mediaSession.album || "Unknown Album",
+            small_image: artwork_small,
+            small_text: "YouTube Music"
         },
         buttons: ["Listen on YouTube Music"],
         metadata: {
