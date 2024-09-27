@@ -21,7 +21,7 @@ interface iUSRBG extends Plugin {
 
 const settings = definePluginSettings({
     animate: {
-        description: "Animate banners",
+        description: "Animate Discord banners (NOT USRBG)",
         type: OptionType.BOOLEAN,
         default: false
     },
