@@ -64,6 +64,7 @@ interface TrackData {
         start: number;
         end: number;
     };
+    client?: string;
 }
 
 // only relevant enum values
@@ -82,7 +83,8 @@ const enum NameFormat {
     SongFirst = "song-first",
     ArtistOnly = "artist",
     SongOnly = "song",
-    AlbumName = "album"
+    AlbumName = "album",
+    ClientName = "client"
 }
 
 const applicationId = "1108588077900898414";
@@ -170,6 +172,10 @@ const settings = definePluginSettings({
             {
                 label: "Use album name (falls back to custom status text if song has no album)",
                 value: NameFormat.AlbumName
+            },
+            {
+                label: "Use client name (either the streaming service or the music player, falls back to custom status text if song has no album)",
+                value: NameFormat.ClientName
             }
         ],
     },
@@ -303,8 +309,10 @@ export default definePlugin({
             if (!trackData?.playing_now)
                 return null;
 
-            let recordingMbid = trackData.track_metadata.additional_info.recording_mbid;
-            let releaseMbid = trackData.track_metadata.additional_info.release_mbid;
+            const trackAddInfo = trackData.track_metadata.additional_info;
+
+            let recordingMbid = trackAddInfo.recording_mbid;
+            let releaseMbid = trackAddInfo.release_mbid;
 
             if (!recordingMbid || !releaseMbid) {
                 const metadata = await this.lookupListenBrainzMetadata(
@@ -321,10 +329,11 @@ export default definePlugin({
                 name: trackData.track_metadata.track_name,
                 album: trackData.track_metadata.release_name,
                 artist: trackData.track_metadata.artist_name,
-                url: trackData.track_metadata.additional_info.origin_url ||
+                url: trackAddInfo.origin_url ||
                     recordingMbid && `https://musicbrainz.org/recording/${recordingMbid}`,
                 imageUrl: releaseMbid && `https://coverartarchive.org/release/${releaseMbid}/front`,
-                timestamps: settings.store.sendTimestamps ? await this.getListenBrainzTimestamps(trackData) : undefined
+                timestamps: settings.store.sendTimestamps ? await this.getListenBrainzTimestamps(trackData) : undefined,
+                client: trackAddInfo?.music_service_name || trackAddInfo?.music_service || trackAddInfo?.media_player
             };
         } catch (e) {
             logger.error("Failed to query ListenBrainz API", e);
@@ -496,6 +505,8 @@ export default definePlugin({
                     return trackData.name;
                 case NameFormat.AlbumName:
                     return trackData.album || settings.store.statusName;
+                case NameFormat.ClientName:
+                    return trackData.client || settings.store.statusName;
                 default:
                     return settings.store.statusName;
             }
