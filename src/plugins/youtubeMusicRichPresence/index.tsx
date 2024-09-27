@@ -6,6 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
+import { CodeBlock } from "@components/CodeBlock";
 import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
@@ -264,6 +265,39 @@ export default definePlugin({
         const gameActivityEnabledSetting = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
         return (
             <>
+                <div
+                    className={classes(Margins.top16, Margins.bottom16)}
+                    style={{ padding: "1em" }}
+                >
+                    <ErrorCard>
+                        <Forms.FormTitle>Warning</Forms.FormTitle>
+                        <Forms.FormText>
+                            Enabling remote debugging on your browser can expose your browser to potential security risks. In this case,
+                            by setting the <code>--remote-allow-origins</code> flag to <code>https://discord.com</code>,
+                            you are allowing Discord to connect to your browser. Please try to understand and be aware of the risks before proceeding.
+                        </Forms.FormText>
+
+                    </ErrorCard>
+                    <Forms.FormTitle>How to Enable the Plugin</Forms.FormTitle>
+                    <Forms.FormText>
+                        (This plugin only works on Chromium-based browsers)
+                        To enable this plugin, please add the following flags to your Chromium-based browser:
+                    </Forms.FormText>
+                    <CodeBlock content="--remote-debugging-port=9222 --remote-allow-origins=https://discord.com" lang="bash" />
+                    <Forms.FormText>
+                        You do so by right-clicking your browser shortcut, selecting "Properties", and adding the flags to the "Target" field, right after the path to your browser executable.
+                        Click "Apply" and "OK" to save the changes.
+                    </Forms.FormText>
+                    <Forms.FormText>Here are some images for context:</Forms.FormText>
+
+                    <div className={Margins.top16}>
+                        <img src="https://teop.me/resources/discord/shortcut-props.png" alt="How to set flags" style={{ width: "200", height: "200", marginBottom: "1em" }} />
+                        <img src="https://teop.me/resources/discord/first-flag.png" alt="First flag" style={{ width: "100", height: "100", marginBottom: "1em" }} />
+                        <img src="https://teop.me/resources/discord/second-flag.png" alt="Second flag" style={{ width: "150", height: "150", marginBottom: "1em" }} />
+                    </div>
+                </div>
+
+
                 {!gameActivityEnabledSetting.useSetting() && (
                     <ErrorCard
                         className={classes(Margins.top16, Margins.bottom16)}
