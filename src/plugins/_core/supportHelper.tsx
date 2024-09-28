@@ -180,7 +180,11 @@ export default definePlugin({
         async CHANNEL_SELECT({ channelId }) {
             if (!SUPPORT_CHANNEL_IDS.includes(channelId)) return;
 
-            if (channelId === VC_SUPPORT_CHANNEL_ID && Vencord.Plugins.isPluginEnabled("VCSupport") && !clicked) {
+            const selfId = UserStore.getCurrentUser()?.id;
+            if (
+                channelId === VC_SUPPORT_CHANNEL_ID && Vencord.Plugins.isPluginEnabled("VCSupport") && !clicked && !isEquicordPluginDev(selfId) ||
+                channelId === VC_SUPPORT_CHANNEL_ID && Vencord.Plugins.isPluginEnabled("VCSupport") && !clicked && !isPluginDev(selfId)
+            ) {
                 clicked = true;
                 return Alerts.show({
                     title: "You are entering the support channel!",
@@ -199,7 +203,6 @@ export default definePlugin({
                 });
             }
 
-            const selfId = UserStore.getCurrentUser()?.id;
             if (!selfId || isPluginDev(selfId) || isEquicordPluginDev(selfId)) return;
 
             if (!IS_UPDATER_DISABLED) {
