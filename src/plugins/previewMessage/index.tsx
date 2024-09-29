@@ -81,8 +81,9 @@ const PreviewButton: ChatBarButton = ({ isMainChat, isEmpty, type: { attachments
 
     const hasAttachments = attachments && UploadStore.getUploads(channelId, DraftType.ChannelMessage).length > 0;
     const hasContent = !isEmpty && draft?.length > 0;
+    const isCommand = draft?.split(" ")[0]?.match(/^\/[-_\p{L}\p{N}]{1,32}$/gmu) !== null;
 
-    if (!hasContent && !hasAttachments) return null;
+    if (!hasContent && !hasAttachments || isCommand) return null;
 
     return (
         <ChatBarButton
