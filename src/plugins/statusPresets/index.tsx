@@ -133,12 +133,12 @@ export default definePlugin({
         {
             find: ".Messages.STATUS_MENU_LABEL",
             replacement: {
-                match: /!\i&&(.{0,15}\i\.Fragment.+null==(\i).+customEmojiPlaceholder\}\),onClick:([^}]+))/,
-                replace: "$self.render($2, $3}),false&&$1"
+                match: /!\i&&(.{0,15}\i\.Fragment.+null==(\i).+customEmojiPlaceholder\}\),onClick:([^}]+}))/,
+                replace: "$self.render($2, $3),false&&$1"
             }
         }
     ],
-    render(status, openCustomStatusModal: () => void) {
+    render(status: null | { emoji: Emoji | null; }, openCustomStatusModal: () => void) {
         if (!customStatusSettings) return;
         return <ErrorBoundary>
             <div className={StatusStyles.menuDivider} />
