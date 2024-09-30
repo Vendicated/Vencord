@@ -91,7 +91,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".PANEL,isInteractionSource:",
+            find: 'location:"UserProfilePanel"',
             replacement: {
                 match: /{profileType:\i\.\i\.PANEL,children:\[/,
                 replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
