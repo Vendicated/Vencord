@@ -32,8 +32,7 @@ const EmojiComponent = findComponentByCodeLazy(/\i.translateSurrogatesToInlineEm
 const StatusStyles = findByPropsLazy("statusItem");
 
 const customStatusSettings = getUserSettingLazy("status", "customStatus");
-const setStatusFunc = findByCodeLazy(/default\.track\(\i.\i.CUSTOM_STATUS_UPDATED/);
-const setStatus = (status: DiscordStatus) => setStatusFunc(status.text, status.emojiInfo, status.clearAfter, { "location": { "section": "Account Panel", "object": "Avatar" } });
+const setStatus = findByCodeLazy(/default\.track\(\i.\i.CUSTOM_STATUS_UPDATED/);
 
 interface Emoji {
     animated: boolean;
@@ -93,7 +92,7 @@ const StatusSubMenuComponent = () => {
         {Object.values((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(status => <Menu.MenuItem
             id={"status-presets-" + status.text}
             label={status.status}
-            action={() => setStatus(status)}
+            action={() => setStatus(status.text, status.emojiInfo, status.clearAfter, { "location": { "section": "Account Panel", "object": "Avatar" } })}
             render={() => <RenderStatusMenuItem status={status} />}
         />)}
     </Menu.Menu>;
