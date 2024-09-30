@@ -24,15 +24,8 @@ import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Clickable, Icons, Menu, Toasts, useState } from "@webpack/common";
 
-// const { PMenu } = mapMangledModuleLazy("{id:t,label:n,icon:c,hint:_,renderSubmenu:E,...h}", {
-//    PMenu: filters.byCode("{id:t,label:n,icon:c,hint:_,renderSubmenu:E,...h}")
-// });
-
-const PMenu = findComponentByCodeLazy("{id:t,label:n,icon:c,hint:_,renderSubmenu:h,...E}");
-const EmojiComponent = findComponentByCodeLazy("let{emoji:t,className:n,animate:r=!0,hideTooltip:a,tooltipDelay:o}");
-const PSubMenu = findComponentByCodeLazy("submenuPaddingContainer,children:(0,i.jsx)(o.Menu,{contextMenuApiArguments:");
-//
-// submenuPaddingContainer,children:(
+const PMenu = findComponentByCodeLazy(/{id:\i,label:\i,icon:\i,hint:\i,renderSubmenu:\i,...\i}/); // findComponentByCodeLazy("{id:t,label:n,icon:c,hint:_,renderSubmenu:h,...E}");
+const EmojiComponent = findComponentByCodeLazy(/\i.translateSurrogatesToInlineEmoji\(\i.name\)/);
 
 const Components = findByPropsLazy("Status");
 const StatusStyles = findByPropsLazy("statusItem");
@@ -65,9 +58,9 @@ const settings = definePluginSettings({
 });
 
 
+const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings?.updateSetting(null)}><Icons.CircleXIcon size="sm" /></Clickable>;
 
-
-const RenderStatusMenuItem = ({ status }) => {
+const RenderStatusMenuItem = ({ status }: { status: DiscordStatus; }) => {
 
     const [isHovering, setIsHovering] = useState(false);
     const handleMouseOver = () => {
@@ -81,7 +74,7 @@ const RenderStatusMenuItem = ({ status }) => {
     return <div className={StatusStyles.statusItem}
         onMouseOver={handleMouseOver}
         onMouseOut={handleMouseOut}>
-        {isHovering ? <Clickable
+        <Clickable
             onClick={() => {
                 delete settings.store.StatusPresets[status.text];
                 Toasts.show({
@@ -89,20 +82,11 @@ const RenderStatusMenuItem = ({ status }) => {
                     type: Toasts.Type.SUCCESS,
                     id: Toasts.genId()
                 });
-            }}><Components.Status
-                status={"dnd"} className={StatusStyles.icon}
-                size={12}
-                style={{
-                    rotate: "60deg",
-                }}
-            /></Clickable> : <Components.Status
-            status={status.status} className={StatusStyles.icon}
-            size={10}
-        />}
-        <div className={StatusStyles.status}>{status.status}</div>
-        <div className={StatusStyles.description}>{status.text}</div>
-    </div>;
+            }}>{status.emojiInfo != null ? <EmojiComponent emoji={status.emojiInfo} animate={false} hideTooltip={false} /> : <div className={StatusStyles.customEmojiPlaceholder} />}</Clickable>
+        <div className={StatusStyles.status} style={{ marginLeft: "5px" }}>{status.text}</div>
+    </div >;
 };
+
 
 const StatusSubMenuComponent = () => {
     return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
@@ -139,7 +123,6 @@ export default definePlugin({
         }
     ],
     render(status: null | { emoji: Emoji | null; }, openCustomStatusModal: () => void) {
-        if (!customStatusSettings) return;
         return <ErrorBoundary>
             <div className={StatusStyles.menuDivider} />
             {status == null ?
@@ -155,7 +138,7 @@ export default definePlugin({
                     id="sp-edit/presets-status"
                     action="PRESS_EDIT_CUSTOM_STATUS"
                     onClick={openCustomStatusModal}
-                    hint={<Clickable className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings.updateSetting(null)}><Icons.CircleXIcon size="sm" /></Clickable>}
+                    hint={<ClearStatusButton />}
                     icon={() => status.emoji != null ? <EmojiComponent emoji={status.emoji} animate={false} hideTooltip={false} /> : null}
                     label="Edit Custom Status" renderSubmenu={StatusSubMenuComponent}
                 />}
