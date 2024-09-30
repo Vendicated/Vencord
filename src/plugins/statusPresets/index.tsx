@@ -28,10 +28,9 @@ const PMenu = findComponentByCodeLazy(/{id:\i,label:\i,icon:\i,hint:\i,renderSub
 
 const EmojiComponent = findComponentByCodeLazy(/\i.translateSurrogatesToInlineEmoji\(\i.name\)/);
 
-const Components = findByPropsLazy("Status");
+
 const StatusStyles = findByPropsLazy("statusItem");
 
-const statusSettings = getUserSettingLazy("status", "status");
 const customStatusSettings = getUserSettingLazy("status", "customStatus");
 const setStatusFunc = findByCodeLazy(/default\.track\(\i.\i.CUSTOM_STATUS_UPDATED/);
 const setStatus = (status: DiscordStatus) => setStatusFunc(status.text, status.emojiInfo, status.clearAfter, { "location": { "section": "Account Panel", "object": "Avatar" } });
@@ -102,8 +101,8 @@ const StatusSubMenuComponent = () => {
 
 
 export default definePlugin({
-    name: "StatusPresets_",
-    description: "do now and think later",
+    name: "StatusPresets",
+    description: "Allows you to remember your status and set it later.",
     authors: [Devs.Dolfies],
     settings: settings,
     dependencies: ["UserSettingsAPI"],
