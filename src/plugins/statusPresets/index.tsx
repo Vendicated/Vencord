@@ -131,30 +131,34 @@ export default definePlugin({
             }
         },
         {
-            find: "!eS&&(0,i.",
+            find: ".Messages.STATUS_MENU_LABEL",
             replacement: {
-                match: /!eS&&(\(0,i.jsxs\)\(i\.Fragment,{children)/,
-                replace: "$self.render(eI, eC, W, w.Ok),true&&$1"
+                match: /!\i&&(.{0,15}\i\.Fragment.+null==(\i).+customEmojiPlaceholder\}\),onClick:([^}]+))/,
+                replace: "$self.render($2, $3}),false&&$1"
             }
         }
     ],
-    render(status, openStatusModal: () => void, OnClose: () => void) {
+    render(status, openCustomStatusModal: () => void) {
         if (!customStatusSettings) return;
-        const openModal = () => { OnClose(); openStatusModal(); };
         return <ErrorBoundary>
             <div className={StatusStyles.menuDivider} />
-            {status == null ? <PMenu
-                id="sp-custom/presets-status"
-                action="PRESS_SET_STATUS"
-                onClick={openModal}
-                icon={() => <div className={StatusStyles.customEmojiPlaceholder} />}
-                label="Set Custom Status" renderSubmenu={StatusSubMenuComponent} /> : <PMenu
-                id="sp-edit/presets-status"
-                action="PRESS_EDIT_CUSTOM_STATUS"
-                onClick={openModal}
-                hint={<Clickable className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings.updateSetting(null)}><Icons.CircleXIcon size="sm" /></Clickable>}
-                icon={() => status.emoji != null ? <EmojiComponent emoji={status.emoji} animate={false} hideTooltip={false} /> : null}
-                label="Edit Custom Status" renderSubmenu={StatusSubMenuComponent} />}
+            {status == null ?
+                <PMenu
+                    id="sp-custom/presets-status"
+                    action="PRESS_SET_STATUS"
+                    onClick={openCustomStatusModal}
+                    icon={() => <div className={StatusStyles.customEmojiPlaceholder} />}
+                    label="Set Custom Status" renderSubmenu={StatusSubMenuComponent}
+                />
+                :
+                <PMenu
+                    id="sp-edit/presets-status"
+                    action="PRESS_EDIT_CUSTOM_STATUS"
+                    onClick={openCustomStatusModal}
+                    hint={<Clickable className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings.updateSetting(null)}><Icons.CircleXIcon size="sm" /></Clickable>}
+                    icon={() => status.emoji != null ? <EmojiComponent emoji={status.emoji} animate={false} hideTooltip={false} /> : null}
+                    label="Edit Custom Status" renderSubmenu={StatusSubMenuComponent}
+                />}
         </ErrorBoundary>;
     },
     renderRememberButton(statue: DiscordStatus) {
