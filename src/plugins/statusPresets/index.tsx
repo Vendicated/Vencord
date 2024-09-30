@@ -145,14 +145,20 @@ export default definePlugin({
         </ErrorBoundary>;
     },
     renderRememberButton(statue: DiscordStatus) {
-        return <Button onClick={() => {
-            settings.store.StatusPresets[statue.text] = statue;
-            Toasts.show({
-                message: "Successfully Saved Status",
-                type: Toasts.Type.SUCCESS,
-                id: Toasts.genId()
-            });
-        }} style={{ marginRight: "20px" }}>Remember</Button>;
+        return <Button
+            look={Button.Looks.LINK}
+            color={Button.Colors.WHITE}
+            size={Button.Sizes.MEDIUM}
+            onClick={() => {
+                settings.store.StatusPresets[statue.text] = statue;
+                Toasts.show({
+                    message: "Successfully Saved Status",
+                    type: Toasts.Type.SUCCESS,
+                    id: Toasts.genId()
+                });
+            }}
+            style={{ marginRight: "20px" }}
+        >Remember</Button>;
     },
     startAt: StartAt.WebpackReady
 });
