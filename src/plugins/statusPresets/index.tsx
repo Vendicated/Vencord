@@ -24,15 +24,14 @@ import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Clickable, Icons, Menu, Toasts, useState } from "@webpack/common";
 
-const PMenu = findComponentByCodeLazy(/{id:\i,label:\i,icon:\i,hint:\i,renderSubmenu:\i,...\i}/);
-
-const EmojiComponent = findComponentByCodeLazy(/\i.translateSurrogatesToInlineEmoji\(\i.name\)/);
-
-
-const StatusStyles = findByPropsLazy("statusItem");
-
-const customStatusSettings = getUserSettingLazy("status", "customStatus");
-const setStatus = findByCodeLazy(/default\.track\(\i.\i.CUSTOM_STATUS_UPDATED/);
+const settings = definePluginSettings({
+    StatusPresets: {
+        type: OptionType.COMPONENT,
+        description: "Status Presets",
+        component: () => <></>,
+        default: {}
+    }
+});
 
 interface Emoji {
     animated: boolean;
@@ -47,15 +46,13 @@ interface DiscordStatus {
     status: "online" | "dnd" | "idle" | "invisible";
 }
 
-const settings = definePluginSettings({
-    StatusPresets: {
-        type: OptionType.COMPONENT,
-        description: "Status Presets",
-        component: () => <></>,
-        default: {}
-    }
-});
+const StatusStyles = findByPropsLazy("statusItem");
+const setStatus = findByCodeLazy(/default\.track\(\i.\i.CUSTOM_STATUS_UPDATED/);
 
+const PMenu = findComponentByCodeLazy(/{id:\i,label:\i,icon:\i,hint:\i,renderSubmenu:\i,...\i}/);
+const EmojiComponent = findComponentByCodeLazy(/\i.translateSurrogatesToInlineEmoji\(\i.name\)/);
+
+const customStatusSettings = getUserSettingLazy("status", "customStatus");
 
 const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings?.updateSetting(null)}><Icons.CircleXIcon size="sm" /></Clickable>;
 
@@ -105,7 +102,7 @@ const StatusSubMenuComponent = () => {
 
 export default definePlugin({
     name: "StatusPresets",
-    description: "Allows you to remember your status and set it later.",
+    description: "Allows you to remember your status and set it later",
     authors: [Devs.Dolfies],
     settings: settings,
     dependencies: ["UserSettingsAPI"],
