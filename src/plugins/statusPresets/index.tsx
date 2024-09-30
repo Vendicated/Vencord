@@ -24,7 +24,8 @@ import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Clickable, Icons, Menu, Toasts, useState } from "@webpack/common";
 
-const PMenu = findComponentByCodeLazy(/{id:\i,label:\i,icon:\i,hint:\i,renderSubmenu:\i,...\i}/); // findComponentByCodeLazy("{id:t,label:n,icon:c,hint:_,renderSubmenu:h,...E}");
+const PMenu = findComponentByCodeLazy(/{id:\i,label:\i,icon:\i,hint:\i,renderSubmenu:\i,...\i}/);
+
 const EmojiComponent = findComponentByCodeLazy(/\i.translateSurrogatesToInlineEmoji\(\i.name\)/);
 
 const Components = findByPropsLazy("Status");
