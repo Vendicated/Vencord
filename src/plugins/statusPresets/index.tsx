@@ -71,6 +71,10 @@ const RenderStatusMenuItem = ({ status }: { status: DiscordStatus; }) => {
     };
 
     return <div className={StatusStyles.statusItem}
+        style={isHovering ? {
+            backgroundColor: "var(--menu-item-default-hover-bg)",
+            color: "var(--white)"
+        } : {}}
         onMouseOver={handleMouseOver}
         onMouseOut={handleMouseOut}>
         <Clickable
@@ -89,8 +93,8 @@ const RenderStatusMenuItem = ({ status }: { status: DiscordStatus; }) => {
 
 const StatusSubMenuComponent = () => {
     return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
-        {Object.values((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(status => <Menu.MenuItem
-            id={"status-presets-" + status.text}
+        {Object.entries((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(([index, status]) => <Menu.MenuItem
+            id={"status-presets-" + index}
             label={status.status}
             action={() => setStatus(status.text, status.emojiInfo, status.clearAfter, { "location": { "section": "Account Panel", "object": "Avatar" } })}
             render={() => <RenderStatusMenuItem status={status} />}
