@@ -85,7 +85,6 @@ export default definePlugin({
         "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
     authors: [mainDev, Devs.ImLvna],
     dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
-    pluginVersion: PluginProps.pluginVersion,
     toolboxActions: {
         "Open Colorway Creator": () => openModal(props => <CreatorModal modalProps={props} />),
         "Open Settings": () => SettingsRouter.open("ColorwaysSettings"),
