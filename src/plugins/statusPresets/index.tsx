@@ -110,14 +110,14 @@ export default definePlugin({
         {
             find: ".Messages.CUSTOM_STATUS_CLEAR_AFTER",
             replacement: {
-                match: /\.ModalFooter,.+\.Messages\.SAVE\}\)/,
+                match: /\.ModalFooter,.{0,70}\.Messages\.SAVE\}\)/,
                 replace: "$&,$self.renderRememberButton(this.state)"
             }
         },
         {
             find: ".Messages.STATUS_MENU_LABEL",
             replacement: {
-                match: /!\i&&(.{0,15}\i\.Fragment.+null==(\i).+customEmojiPlaceholder\}\),onClick:([^}]+}))/,
+                match: /!\i&&(.{0,15}\i\.Fragment.{0,55}null==(\i).{0,200}customEmojiPlaceholder\}\),onClick:([^}]+}))/,
                 replace: "$self.render($2, $3),false&&$1"
             }
         }
