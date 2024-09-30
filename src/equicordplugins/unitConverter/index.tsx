@@ -21,7 +21,7 @@ import "./style.css";
 import { addAccessory } from "@api/MessageAccessories";
 import { addButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
-import { EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore } from "@webpack/common";
 
@@ -55,7 +55,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "UnitConverter",
     description: "Converts metric units to Imperal units and vice versa",
-    authors: [EquicordDevs.sadan],
+    authors: [Devs.sadan],
     start() {
         addAccessory("vc-converter", props => <ConverterAccessory message={props.message} />);
         addButton("vc-converter", message => {

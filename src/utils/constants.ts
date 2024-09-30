@@ -604,6 +604,10 @@ export const EquicordDevs = Object.freeze({
         name: "hs50",
         id: 1120045713867423835n,
     },
+    Ven: {
+        name: "Vee",
+        id: 343383572805058560n
+    },
     nexpid: {
         name: "Nexpid",
         id: 853550207039832084n
@@ -795,6 +799,119 @@ export const EquicordDevs = Object.freeze({
     llytz: {
         name: "llytz",
         id: 1271128098301022240n
+    },
+    nin0dev: {
+        name: "nin0dev",
+        id: 886685857560539176n
+    },
+    D3SOX: {
+        name: "D3SOX",
+        id: 201052085641281538n
+    },
+    newwares: {
+        name: "newwares",
+        id: 421405303951851520n
+    },
+    Kyuuhachi: {
+        name: "Kyuuhachi",
+        id: 236588665420251137n,
+    },
+    ImLvna: {
+        name: "lillith <3",
+        id: 799319081723232267n
+    },
+    AutumnVN: {
+        name: "AutumnVN",
+        id: 393694671383166998n
+    },
+    Arjix: {
+        name: "ArjixWasTaken",
+        id: 674710789138939916n,
+        badge: false
+    },
+    Inbestigator: {
+        name: "Inbestigator",
+        id: 761777382041714690n
+    },
+    Sqaaakoi: {
+        name: "Sqaaakoi",
+        id: 259558259491340288n
+    },
+    Samwich: {
+        name: "Samwich",
+        id: 976176454511509554n,
+    },
+    TheSun: {
+        name: "sunnie",
+        id: 406028027768733696n
+    },
+    TheKodeToad: {
+        name: "TheKodeToad",
+        id: 706152404072267788n
+    },
+    Nickyux: {
+        name: "Nickyux",
+        id: 427146305651998721n
+    },
+    Ethan: {
+        name: "Ethan",
+        id: 721717126523781240n,
+    },
+    castdrian: {
+        name: "castdrian",
+        id: 224617799434108928n
+    },
+    echo: {
+        name: "ECHO",
+        id: 712639419785412668n
+    },
+    RyanCaoDev: {
+        name: "RyanCaoDev",
+        id: 952235800110694471n,
+    },
+    HypedDomi: {
+        name: "HypedDomi",
+        id: 354191516979429376n
+    },
+    Grzesiek11: {
+        name: "Grzesiek11",
+        id: 368475654662127616n,
+    },
+    Aria: {
+        name: "Syncxv",
+        id: 549244932213309442n,
+    },
+    ProffDea: {
+        name: "ProffDea",
+        id: 609329952180928513n
+    },
+    HappyEnderman: {
+        name: "Happy enderman",
+        id: 1083437693347827764n
+    },
+    Nyako: {
+        name: "nyako",
+        id: 118437263754395652n
+    },
+    ant0n: {
+        name: "ant0n",
+        id: 145224646868860928n
+    },
+    MaiKokain: {
+        name: "Mai",
+        id: 722647978577363026n
+    },
+    Korbo: {
+        name: "Korbo",
+        id: 455856406420258827n
+    },
+    Moxxie: {
+        name: "Moxxie",
+        id: 712653921692155965n,
+    },
+    arHSM: {
+        name: "arHSM",
+        id: 841509053422632990n
     },
 } satisfies Record<string, Dev>);
 
