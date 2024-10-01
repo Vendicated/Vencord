@@ -56,8 +56,13 @@ const customStatusSettings = getUserSettingLazy("status", "customStatus");
 
 const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings?.updateSetting(null)}><Icons.CircleXIcon size="sm" /></Clickable>;
 
-const RenderStatusMenuItem = ({ status }: { status: DiscordStatus; }) => {
+function StatusIcon({ isHovering, status }: { isHovering: boolean; status: DiscordStatus; }) {
+    return isHovering ?
+        <Icons.CircleXIcon size="sm" style={{ marginTop: "4px" }} />
+        : (status.emojiInfo != null ? <EmojiComponent emoji={status.emojiInfo} animate={false} hideTooltip={false} /> : <div className={StatusStyles.customEmojiPlaceholder} />);
+}
 
+const RenderStatusMenuItem = ({ status }: { status: DiscordStatus; }) => {
     const [isHovering, setIsHovering] = useState(false);
     const handleMouseOver = () => {
         setIsHovering(true);
@@ -82,8 +87,8 @@ const RenderStatusMenuItem = ({ status }: { status: DiscordStatus; }) => {
                     type: Toasts.Type.SUCCESS,
                     id: Toasts.genId()
                 });
-            }}>{status.emojiInfo != null ? <EmojiComponent emoji={status.emojiInfo} animate={false} hideTooltip={false} /> : <div className={StatusStyles.customEmojiPlaceholder} />}</Clickable>
-        <div className={StatusStyles.status} style={{ marginLeft: "5px" }}>{status.text}</div>
+            }}><StatusIcon isHovering={isHovering} status={status} /></Clickable>
+        <div className={StatusStyles.status} style={{ marginLeft: "2px" }}>{status.text}</div>
     </div >;
 };
 
@@ -102,7 +107,7 @@ const StatusSubMenuComponent = () => {
 
 export default definePlugin({
     name: "StatusPresets",
-    description: "Allows you to remember your status and set it later",
+    description: "Allows you to remember your statuses and set them later",
     authors: [Devs.Dolfies],
     settings: settings,
     dependencies: ["UserSettingsAPI"],
