@@ -57,9 +57,9 @@ const customStatusSettings = getUserSettingLazy("status", "customStatus");
 const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings?.updateSetting(null)}><Icons.CircleXIcon size="sm" /></Clickable>;
 
 function StatusIcon({ isHovering, status }: { isHovering: boolean; status: DiscordStatus; }) {
-    return isHovering ?
-        <Icons.CircleXIcon size="sm" style={{ marginTop: "4px" }} />
-        : (status.emojiInfo != null ? <EmojiComponent emoji={status.emojiInfo} animate={false} hideTooltip={false} /> : <div className={StatusStyles.customEmojiPlaceholder} />);
+    return <div className={StatusStyles.status}>{isHovering ?
+        <Icons.CircleXIcon size="sm" />
+        : (status.emojiInfo != null ? <EmojiComponent emoji={status.emojiInfo} animate={false} hideTooltip={false} /> : <div className={StatusStyles.customEmojiPlaceholder} />)}</div>;
 }
 
 const RenderStatusMenuItem = ({ status }: { status: DiscordStatus; }) => {
