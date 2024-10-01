@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>124 additional plugins</summary>
+<summary>125 additional plugins</summary>
 
 - AllCallTimers by MaxHerbold & D3SOX
 - AltKrispSwitch by newwares
@@ -135,6 +135,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - WhosWatching by fres
 - WigglyText by nexpid
 - Woof by Samwich
+- WriteUpperCase by Samwich & KrystalSkull
 - YoutubeDescription by arHSM
 
 </details>
