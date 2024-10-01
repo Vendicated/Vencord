@@ -97,7 +97,7 @@ const RenderStatusMenuItem = ({ status, forceRerender, disabled }: { status: Dis
         <Clickable
             onClick={e => {
                 e.stopPropagation();
-                delete settings.store.StatusPresets[status.text];
+                settings.store.StatusPresets[status.text] = undefined; // setting to undefined to remove it.
                 forceRerender();
             }}><StatusIcon isHovering={isHovering} status={status} /></Clickable>
         <div className={StatusStyles.status} style={{ marginLeft: "2px" }}>{status.text}</div>
@@ -109,7 +109,7 @@ const StatusSubMenuComponent = () => {
     const [, forceUpdate] = useState(0);
     const forceRerender = () => forceUpdate(v => v + 1);
     return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
-        {Object.entries((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(([index, status]) => <Menu.MenuItem
+        {Object.entries((settings.store.StatusPresets as { [k: string]: DiscordStatus | undefined; })).map(([index, status]) => status != null ? <Menu.MenuItem
             id={"status-presets-" + index}
             label={status.status}
             action={() => (status.emojiInfo?.id != null && UserStore.getCurrentUser().hasPremiumPerks || status.emojiInfo?.id == null) && setStatus(status)}
@@ -118,7 +118,7 @@ const StatusSubMenuComponent = () => {
                 forceRerender={forceRerender}
                 disabled={status.emojiInfo?.id != null && !UserStore.getCurrentUser().hasPremiumPerks}
             />}
-        />)}
+        /> : null)}
     </Menu.Menu>;
 };
 
