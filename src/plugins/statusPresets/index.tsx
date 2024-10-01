@@ -16,13 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Clickable, Icons, Menu, Toasts, useState } from "@webpack/common";
+import { Button, Clickable, Icons, Menu, Toasts, UserStore, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
     StatusPresets: {
@@ -62,7 +65,7 @@ function StatusIcon({ isHovering, status }: { isHovering: boolean; status: Disco
         : (status.emojiInfo != null ? <EmojiComponent emoji={status.emojiInfo} animate={false} hideTooltip={false} /> : <div className={StatusStyles.customEmojiPlaceholder} />)}</div>;
 }
 
-const RenderStatusMenuItem = ({ status, forceRerender }: { status: DiscordStatus; forceRerender: () => void; }) => {
+const RenderStatusMenuItem = ({ status, forceRerender, disabled }: { status: DiscordStatus; forceRerender: () => void; disabled: boolean; }) => {
     const [isHovering, setIsHovering] = useState(false);
     const handleMouseOver = () => {
         setIsHovering(true);
@@ -72,11 +75,7 @@ const RenderStatusMenuItem = ({ status, forceRerender }: { status: DiscordStatus
         setIsHovering(false);
     };
 
-    return <div className={StatusStyles.statusItem}
-        style={isHovering ? {
-            backgroundColor: "var(--menu-item-default-hover-bg)",
-            color: "var(--white)",
-        } : {}}
+    return <div className={classes(StatusStyles.statusItem, "vc-sp-item", disabled ? "vc-sp-disabled" : null)}
         onMouseOver={handleMouseOver}
         onMouseOut={handleMouseOut}>
         <Clickable
@@ -84,11 +83,6 @@ const RenderStatusMenuItem = ({ status, forceRerender }: { status: DiscordStatus
                 e.stopPropagation();
                 delete settings.store.StatusPresets[status.text];
                 forceRerender();
-                Toasts.show({
-                    message: "Successfully removed Status",
-                    type: Toasts.Type.SUCCESS,
-                    id: Toasts.genId()
-                });
             }}><StatusIcon isHovering={isHovering} status={status} /></Clickable>
         <div className={StatusStyles.status} style={{ marginLeft: "2px" }}>{status.text}</div>
     </div >;
@@ -102,8 +96,12 @@ const StatusSubMenuComponent = () => {
         {Object.entries((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(([index, status]) => <Menu.MenuItem
             id={"status-presets-" + index}
             label={status.status}
-            action={() => setStatus(status.text, status.emojiInfo, status.clearAfter, { "location": { "section": "Account Panel", "object": "Avatar" } })}
-            render={() => <RenderStatusMenuItem status={status} forceRerender={forceRerender} />}
+            action={() => (status.emojiInfo?.id != null && UserStore.getCurrentUser().hasPremiumPerks || status.emojiInfo?.id == null) && setStatus(status.text, status.emojiInfo, status.clearAfter, { "location": { "section": "Account Panel", "object": "Avatar" } })}
+            render={() => <RenderStatusMenuItem
+                status={status}
+                forceRerender={forceRerender}
+                disabled={status.emojiInfo?.id != null && !UserStore.getCurrentUser().hasPremiumPerks}
+            />}
         />)}
     </Menu.Menu>;
 };
