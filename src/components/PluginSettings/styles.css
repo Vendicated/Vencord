@@ -63,6 +63,7 @@
     height: 8em;
     display: flex;
     flex-direction: column;
+    background-color: var(--background-secondary-alt) !important;
 }
 
 .vc-plugins-info-card div {
@@ -83,4 +84,23 @@
 
 .vc-plugins-info-button svg:not(:hover, :focus) {
     color: var(--text-muted);
+}
+
+.vc-plugin-stats {
+    background-color: var(--background-secondary-alt);
+    border-radius: 8px;
+    padding: 12px;
+    box-sizing: border-box;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    transition: 0.1s ease-out;
+    transition-property: box-shadow, transform, background, opacity;
+}
+
+.vc-plugin-stats:hover {
+    background-color: var(--background-tertiary);
+    transform: translateY(-1px);
+    box-shadow: var(--elevation-high);
 }

@@ -38,6 +38,8 @@ import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextI
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
+import { StockPluginsCard, UserPluginsCard } from "./PluginStatCards";
+
 // Avoid circular dependency
 const { startDependenciesRecursive, startPlugin, stopPlugin } = proxyLazy(() => require("../../plugins"));
 
@@ -343,11 +345,23 @@ export default function PluginSettings() {
 
             <ReloadRequiredCard required={changes.hasChanges} />
 
-            <Card className={cl("info-card")} style={{ marginTop: "12px" }}>
-                <Forms.FormTitle tag="h5">Plugins Information</Forms.FormTitle>
-                <Forms.FormText>Total Plugins: {totalStockPlugins}, Total User Plugins: {totalUserPlugins}</Forms.FormText>
-                <Forms.FormText>Enabled Plugins: {enabledStockPlugins}, Enabled User Plugins: {enabledUserPlugins}</Forms.FormText>
-            </Card>
+            <div className={cl("stats-container")} style={{
+                marginTop: "12px",
+                gap: "16px",
+                display: "flex",
+                flexDirection: "row",
+                width: "100%"
+            }}>
+                <StockPluginsCard
+                    totalStockPlugins={totalStockPlugins}
+                    enabledStockPlugins={enabledStockPlugins}
+                />
+                <UserPluginsCard
+                    totalUserPlugins={totalUserPlugins}
+                    enabledUserPlugins={enabledUserPlugins}
+                />
+            </div>
+
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
                 Filters
