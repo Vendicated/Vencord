@@ -54,15 +54,15 @@ const EmojiComponent = findComponentByCodeLazy(".translateSurrogatesToInlineEmoj
 
 const customStatusSettings = getUserSettingLazy("status", "customStatus");
 
-const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings?.updateSetting(null)}><Icons.CircleXIcon size="sm" /></Clickable>;
+const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings?.updateSetting(null)}><Icons.CircleXIcon size="sm" style={{ pointerEvents: "none" }} /></Clickable>;
 
 function StatusIcon({ isHovering, status }: { isHovering: boolean; status: DiscordStatus; }) {
     return <div className={StatusStyles.status}>{isHovering ?
-        <Icons.CircleXIcon size="sm" />
+        <Icons.CircleXIcon size="sm" style={{ pointerEvents: "none" }} />
         : (status.emojiInfo != null ? <EmojiComponent emoji={status.emojiInfo} animate={false} hideTooltip={false} /> : <div className={StatusStyles.customEmojiPlaceholder} />)}</div>;
 }
 
-const RenderStatusMenuItem = ({ status }: { status: DiscordStatus; }) => {
+const RenderStatusMenuItem = ({ status, forceRerender }: { status: DiscordStatus; forceRerender: ()=>void}) => {
     const [isHovering, setIsHovering] = useState(false);
     const handleMouseOver = () => {
         setIsHovering(true);
@@ -75,13 +75,14 @@ const RenderStatusMenuItem = ({ status }: { status: DiscordStatus; }) => {
     return <div className={StatusStyles.statusItem}
         style={isHovering ? {
             backgroundColor: "var(--menu-item-default-hover-bg)",
-            color: "var(--white)"
+            color: "var(--white)",
         } : {}}
         onMouseOver={handleMouseOver}
         onMouseOut={handleMouseOut}>
         <Clickable
             onClick={() => {
                 delete settings.store.StatusPresets[status.text];
+                forceRerender();
                 Toasts.show({
                     message: "Successfully removed Status",
                     type: Toasts.Type.SUCCESS,
@@ -94,12 +95,14 @@ const RenderStatusMenuItem = ({ status }: { status: DiscordStatus; }) => {
 
 
 const StatusSubMenuComponent = () => {
+    const [, forceUpdate] = useState(0);
+    const forceRerender = () => forceUpdate(v => v + 1);
     return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
         {Object.entries((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(([index, status]) => <Menu.MenuItem
             id={"status-presets-" + index}
             label={status.status}
             action={() => setStatus(status.text, status.emojiInfo, status.clearAfter, { "location": { "section": "Account Panel", "object": "Avatar" } })}
-            render={() => <RenderStatusMenuItem status={status} />}
+            render={() => <RenderStatusMenuItem status={status} forceRerender={forceRerender} />}
         />)}
     </Menu.Menu>;
 };
