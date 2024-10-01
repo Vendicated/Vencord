@@ -47,10 +47,10 @@ interface DiscordStatus {
 }
 
 const StatusStyles = findByPropsLazy("statusItem");
-const setStatus = findByCodeLazy(/default\.track\(\i.\i.CUSTOM_STATUS_UPDATED/);
+const setStatus = findByCodeLazy(".CUSTOM_STATUS_UPDATED,{");
 
-const PMenu = findComponentByCodeLazy(/{id:\i,label:\i,icon:\i,hint:\i,renderSubmenu:\i,...\i}/);
-const EmojiComponent = findComponentByCodeLazy(/\i.translateSurrogatesToInlineEmoji\(\i.name\)/);
+const PMenu = findComponentByCodeLazy(".menuItemLabel", ".menuItemInner");
+const EmojiComponent = findComponentByCodeLazy(".translateSurrogatesToInlineEmoji(");
 
 const customStatusSettings = getUserSettingLazy("status", "customStatus");
 
