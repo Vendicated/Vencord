@@ -446,7 +446,10 @@ function ThemesTab() {
                                 key={rawLink.fileName}
                                 enabled={settings.enabledThemeLinks.includes(rawLink.link)}
                                 onChange={enabled => onThemeLinkEnabledChange(rawLink.link, enabled)}
-                                onDelete={() => deleteThemeLink(rawLink.link)}
+                                onDelete={async () => {
+                                    onThemeLinkEnabledChange(rawLink.link, false);
+                                    deleteThemeLink(rawLink.link);
+                                }}
                                 showDeleteButton
                                 theme={rawLink}
                             />;
