@@ -35,7 +35,6 @@ export default definePlugin({
     name: "UwU",
     description: "Oh god no...",
     authors: [Devs.Zoid],
-    required: true,
     start() {
         if (!uwuInterval) {
             uwuInterval = setInterval(uwuifyDOM, 500);
