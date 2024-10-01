@@ -17,11 +17,16 @@ function uwuify(text) {
         .replace(/ove/g, 'uv');
 }
 
-function uwuifyTextContent(node) {
+function uwuifyTextContent(node: Node): void {
     if (node.nodeType === 3) {
-        node.nodeValue = uwuify(node.nodeValue);
+        node.nodeValue = uwuify(node.nodeValue || '');
     } else if (node.nodeType === 1 && node.childNodes) {
-        node.childNodes.forEach(uwuifyTextContent);
+        const element = node as HTMLElement;
+        const tagName = element.tagName.toLowerCase();
+
+        if (!['input', 'textarea', 'script', 'style'].includes(tagName)) {
+            node.childNodes.forEach(uwuifyTextContent);
+        }
     }
 }
 
