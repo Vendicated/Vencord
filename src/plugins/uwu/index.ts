@@ -23,8 +23,8 @@ function uwuifyTextContent(node: Node): void {
     } else if (node.nodeType === 1 && node.childNodes) {
         const element = node as HTMLElement;
         const tagName = element.tagName.toLowerCase();
-
-        if (!['input', 'textarea', 'script', 'style'].includes(tagName)) {
+        
+        if (!['input', 'textarea', 'script', 'style'].includes(tagName) && !element.isContentEditable) {
             node.childNodes.forEach(uwuifyTextContent);
         }
     }
