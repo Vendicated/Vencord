@@ -54,15 +54,15 @@ const EmojiComponent = findComponentByCodeLazy(".translateSurrogatesToInlineEmoj
 
 const customStatusSettings = getUserSettingLazy("status", "customStatus");
 
-const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomStatusHint} onClick={() => customStatusSettings?.updateSetting(null)}><Icons.CircleXIcon size="sm" style={{ pointerEvents: "none" }} /></Clickable>;
+const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomStatusHint} onClick={e => { e.stopPropagation(); customStatusSettings?.updateSetting(null); }}><Icons.CircleXIcon size="sm" /></Clickable>;
 
 function StatusIcon({ isHovering, status }: { isHovering: boolean; status: DiscordStatus; }) {
     return <div className={StatusStyles.status}>{isHovering ?
-        <Icons.CircleXIcon size="sm" style={{ pointerEvents: "none" }} />
+        <Icons.CircleXIcon size="sm" />
         : (status.emojiInfo != null ? <EmojiComponent emoji={status.emojiInfo} animate={false} hideTooltip={false} /> : <div className={StatusStyles.customEmojiPlaceholder} />)}</div>;
 }
 
-const RenderStatusMenuItem = ({ status, forceRerender }: { status: DiscordStatus; forceRerender: ()=>void}) => {
+const RenderStatusMenuItem = ({ status, forceRerender }: { status: DiscordStatus; forceRerender: () => void; }) => {
     const [isHovering, setIsHovering] = useState(false);
     const handleMouseOver = () => {
         setIsHovering(true);
@@ -80,7 +80,8 @@ const RenderStatusMenuItem = ({ status, forceRerender }: { status: DiscordStatus
         onMouseOver={handleMouseOver}
         onMouseOut={handleMouseOut}>
         <Clickable
-            onClick={() => {
+            onClick={e => {
+                e.stopPropagation();
                 delete settings.store.StatusPresets[status.text];
                 forceRerender();
                 Toasts.show({
@@ -157,7 +158,7 @@ export default definePlugin({
             look={Button.Looks.LINK}
             color={Button.Colors.WHITE}
             size={Button.Sizes.MEDIUM}
-            onClick={() => {
+            onClick={e => {
                 settings.store.StatusPresets[statue.text] = statue;
                 Toasts.show({
                     message: "Successfully Saved Status",
