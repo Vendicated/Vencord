@@ -24,7 +24,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Clickable, Icons, Menu, Toasts, UserStore, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
@@ -45,19 +45,35 @@ interface Emoji {
 interface DiscordStatus {
     emojiInfo: Emoji | null;
     text: string;
-    clearAfter: string | number | null;
+    clearAfter: "TODAY" | number | null;
     status: "online" | "dnd" | "idle" | "invisible";
 }
 
 const StatusStyles = findByPropsLazy("statusItem");
-const setStatus = findByCodeLazy(".CUSTOM_STATUS_UPDATED,{");
 
 const PMenu = findComponentByCodeLazy(".menuItemLabel", ".menuItemInner");
 const EmojiComponent = findComponentByCodeLazy(".translateSurrogatesToInlineEmoji(");
 
-const customStatusSettings = getUserSettingLazy("status", "customStatus");
+const CustomStatusSettings = getUserSettingLazy("status", "customStatus")!;
 
-const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomStatusHint} onClick={e => { e.stopPropagation(); customStatusSettings?.updateSetting(null); }}><Icons.CircleXIcon size="sm" /></Clickable>;
+function getExpirationMs(expiration: "TODAY" | number) {
+    if (expiration !== "TODAY") return Date.now() + expiration;
+
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
+}
+
+function setStatus(status: DiscordStatus) {
+    CustomStatusSettings.updateSetting({
+        text: status.text.trim(),
+        expiresAtMs: status.clearAfter != null ? String(getExpirationMs(status.clearAfter)) : "0",
+        emojiId: status.emojiInfo?.id ?? "0",
+        emojiName: status.emojiInfo?.name ?? "",
+        createdAtMs: String(Date.now())
+    });
+}
+
+const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomStatusHint} onClick={e => { e.stopPropagation(); CustomStatusSettings?.updateSetting(null); }}><Icons.CircleXIcon size="sm" /></Clickable>;
 
 function StatusIcon({ isHovering, status }: { isHovering: boolean; status: DiscordStatus; }) {
     return <div className={StatusStyles.status}>{isHovering ?
@@ -96,7 +112,7 @@ const StatusSubMenuComponent = () => {
         {Object.entries((settings.store.StatusPresets as { [k: string]: DiscordStatus; })).map(([index, status]) => <Menu.MenuItem
             id={"status-presets-" + index}
             label={status.status}
-            action={() => (status.emojiInfo?.id != null && UserStore.getCurrentUser().hasPremiumPerks || status.emojiInfo?.id == null) && setStatus(status.text, status.emojiInfo, status.clearAfter, { "location": { "section": "Account Panel", "object": "Avatar" } })}
+            action={() => (status.emojiInfo?.id != null && UserStore.getCurrentUser().hasPremiumPerks || status.emojiInfo?.id == null) && setStatus(status)}
             render={() => <RenderStatusMenuItem
                 status={status}
                 forceRerender={forceRerender}
