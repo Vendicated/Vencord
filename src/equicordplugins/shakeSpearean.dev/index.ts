@@ -12,13 +12,12 @@ import { MessageStore } from "@webpack/common";
 
 import { transferMessage } from "./native";
 
-
-
 const presendObject: SendListener = async (channelId, msg, extra) => {
     const messageRef = extra.replyOptions.messageReference;
     const repliedMessage = ((messageRef?.message_id && messageRef.channel_id) && MessageStore.getMessage(messageRef?.channel_id, messageRef?.message_id)) || undefined;
     msg.content = await transferMessage(msg, Settings.plugins.Shakespearean.model, repliedMessage);
 };
+
 export default definePlugin({
     name: "Shakespearean",
     description: "Makes every message you send shakespearean",

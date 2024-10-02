@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
+import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -19,6 +19,19 @@ const settings = definePluginSettings(
     }
 );
 
+const presendObject: SendListener = (_, msg) => {
+    const sentences = msg.content.split(/(?<=\w\.)\s/);
+    const blockedWordsArray: string[] = settings.store.blockedWords.split(", ");
+
+    msg.content = sentences.map(element => {
+        if (!blockedWordsArray.some(word => element.toLowerCase().startsWith(word.toLocaleLowerCase()))) {
+            return element.charAt(0).toUpperCase() + element.slice(1);
+        } else {
+            return element;
+        }
+    }).join(" ");
+};
+
 export default definePlugin({
     name: "WriteUpperCase",
     description: "Changes the first Letter of each Sentence in Message Inputs to Uppercase",
@@ -26,26 +39,9 @@ export default definePlugin({
     settings,
 
     start() {
-        this.preSend = addPreSendListener(async (_, message) => {
-            message.content = textProcessing(message.content);
-        });
+        addPreSendListener(presendObject);
     },
     stop() {
-        this.preSend = removePreSendListener(async (_, message) => {
-            message.content = textProcessing(message.content);
-        });
+        removePreSendListener(presendObject);
     }
 });
-
-function textProcessing(textInput: string): string {
-    const sentences = textInput.split(/(?<=\w\.)\s/);
-    const blockedWordsArray: string[] = settings.store.blockedWords.split(", ");
-
-    return sentences.map(element => {
-        if (!blockedWordsArray.some(word => element.toLowerCase().startsWith(word.toLocaleLowerCase()))) {
-            return element.charAt(0).toUpperCase() + element.slice(1);
-        } else {
-            return element;
-        }
-    }).join(" ");
-}
