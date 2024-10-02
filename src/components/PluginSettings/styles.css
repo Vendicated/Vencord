@@ -104,3 +104,20 @@
     transform: translateY(-1px);
     box-shadow: var(--elevation-high);
 }
+
+.vc-plugin-stats-card-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vc-plugin-stats-card-section {
+    text-align: center;
+    flex: 1;
+}
+
+.vc-plugin-stats-card-divider {
+    border-left: 1px solid #ccc;
+    height: 100%;
+    margin: 0 10px;
+}
