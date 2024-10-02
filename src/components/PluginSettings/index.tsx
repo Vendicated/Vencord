@@ -49,7 +49,6 @@ const logger = new Logger("PluginSettings", "#a6d189");
 const InputStyles = findByPropsLazy("inputWrapper", "inputDefault", "error");
 const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
-
 function showErrorToast(message: string) {
     Toasts.show({
         message,
