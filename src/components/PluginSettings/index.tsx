@@ -346,7 +346,7 @@ export default function PluginSettings() {
             <ReloadRequiredCard required={changes.hasChanges} />
 
             <div className={cl("stats-container")} style={{
-                marginTop: "12px",
+                marginTop: "16px",
                 gap: "16px",
                 display: "flex",
                 flexDirection: "row",

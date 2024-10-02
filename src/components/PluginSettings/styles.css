@@ -64,6 +64,8 @@
     display: flex;
     flex-direction: column;
     background-color: var(--background-secondary-alt) !important;
+    transition: 0.1s ease-out;
+    transition-property: box-shadow, transform, background, opacity;
 }
 
 .vc-plugins-info-card div {
@@ -99,6 +101,7 @@
     transition-property: box-shadow, transform, background, opacity;
 }
 
+.vc-plugins-info-card:hover,
 .vc-plugin-stats:hover {
     background-color: var(--background-tertiary);
     transform: translateY(-1px);
