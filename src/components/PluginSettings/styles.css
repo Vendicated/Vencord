@@ -103,7 +103,7 @@
 
 .vc-plugins-info-card:hover,
 .vc-plugin-stats:hover {
-    background-color: var(--background-tertiary);
+    background-color: var(--background-tertiary) !important;
     transform: translateY(-1px);
     box-shadow: var(--elevation-high);
 }
