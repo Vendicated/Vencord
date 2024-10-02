@@ -23,6 +23,7 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
+import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, Clickable, Icons, Menu, Toasts, UserStore, useState } from "@webpack/common";
@@ -81,7 +82,7 @@ function StatusIcon({ isHovering, status }: { isHovering: boolean; status: Disco
         : (status.emojiInfo != null ? <EmojiComponent emoji={status.emojiInfo} animate={false} hideTooltip={false} /> : <div className={StatusStyles.customEmojiPlaceholder} />)}</div>;
 }
 
-const RenderStatusMenuItem = ({ status, forceRerender, disabled }: { status: DiscordStatus; forceRerender: () => void; disabled: boolean; }) => {
+const RenderStatusMenuItem = ({ status, update, disabled }: { status: DiscordStatus; update: () => void; disabled: boolean; }) => {
     const [isHovering, setIsHovering] = useState(false);
     const handleMouseOver = () => {
         setIsHovering(true);
@@ -98,7 +99,7 @@ const RenderStatusMenuItem = ({ status, forceRerender, disabled }: { status: Dis
             onClick={e => {
                 e.stopPropagation();
                 settings.store.StatusPresets[status.text] = undefined; // setting to undefined to remove it.
-                forceRerender();
+                update();
             }}><StatusIcon isHovering={isHovering} status={status} /></Clickable>
         <div className={StatusStyles.status} style={{ marginLeft: "2px" }}>{status.text}</div>
     </div >;
@@ -106,8 +107,7 @@ const RenderStatusMenuItem = ({ status, forceRerender, disabled }: { status: Dis
 
 
 const StatusSubMenuComponent = () => {
-    const [, forceUpdate] = useState(0);
-    const forceRerender = () => forceUpdate(v => v + 1);
+    const update = useForceUpdater();
     return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
         {Object.entries((settings.store.StatusPresets as { [k: string]: DiscordStatus | undefined; })).map(([index, status]) => status != null ? <Menu.MenuItem
             id={"status-presets-" + index}
@@ -115,7 +115,7 @@ const StatusSubMenuComponent = () => {
             action={() => (status.emojiInfo?.id != null && UserStore.getCurrentUser().hasPremiumPerks || status.emojiInfo?.id == null) && setStatus(status)}
             render={() => <RenderStatusMenuItem
                 status={status}
-                forceRerender={forceRerender}
+                update={update}
                 disabled={status.emojiInfo?.id != null && !UserStore.getCurrentUser().hasPremiumPerks}
             />}
         /> : null)}
