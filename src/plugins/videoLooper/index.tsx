@@ -10,20 +10,11 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Tooltip } from "@webpack/common";
 
-const settings = definePluginSettings({
-    loop: {
-        description: "Whether to make the video loop or not",
-        type: OptionType.BOOLEAN,
-        default: false,
-        restartNeeded: false
-    }
-});
 
 export default definePlugin({
     name: "VideoLooper",
     description: "Adds a button to enable/disable looping of videos (next to the Download button)",
     authors: [Devs.Terevenen2],
-    settings,
     patches: [
         {
             find: ".removeMosaicItemHoverButton),",
@@ -48,24 +39,13 @@ export default definePlugin({
                             paddingLeft: "4px",
                             paddingRight: "4px",
                         }}
-                        onLoad={e => {
-                            const video = e.currentTarget.parentNode!.parentNode!.querySelector("video")!;
-                            const isLooping = video.loop;
-
-                            // Force a re-render to update the color
-                            const paths = e.currentTarget.querySelectorAll("path");
-                            // Update path colors based on the video loop state
-                            paths.forEach(path => {
-                                path.setAttribute("fill", isLooping ? "green" : "lightgrey");
-                            });
-                        }}
                         onClick={e => {
                             const video = e.currentTarget.parentNode!.parentNode!.querySelector("video")!;
                             const isLooping = !video.loop;
 
-                            // Update video loop state and re-render colors
+                            // Update video loop state
                             video.loop = isLooping;
-
+							//re-render colors
                             const paths = e.currentTarget.querySelectorAll("path");
                             paths.forEach(path => {
                                 path.setAttribute("fill", isLooping ? "green" : "lightgrey");
