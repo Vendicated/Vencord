@@ -169,8 +169,6 @@ export default definePlugin({
         const reactions = getReactionsWithQueue(message, emoji, type);
         const users = Object.values(reactions).filter(Boolean) as User[];
 
-        console.log(settings.store.avatarClick);
-
         return (
             <div
                 style={{ marginLeft: "0.5em", transform: "scale(0.9)" }}
