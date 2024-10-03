@@ -41,8 +41,9 @@ export default definePlugin({
             replacement: [
                 {
                     match: /let\{[^}]*collapsedReason[^}]*\}/,
-                    replace: "if($self.shouldHide(arguments[0])) return null;$&"
-                }]
+                    replace: "if($self.shouldHide(arguments[0]))return null;$&"
+                }
+            ]
         },
         ...[
             '"MessageStore"',
