@@ -48,7 +48,7 @@ export default definePlugin({
                 match: /\.container/,
                 replace: "$&+(this.props.channel.nsfw? ' vc-nsfw-img': '')"
             }]
-        },
+        }
     ],
 
     options: {
