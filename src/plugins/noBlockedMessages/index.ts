@@ -24,6 +24,7 @@ import { findByPropsLazy } from "@webpack";
 import { Message } from "discord-types/general";
 
 const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
+
 interface MessageDeleteProps {
     collapsedReason: {
         message: string;
