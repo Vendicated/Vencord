@@ -177,6 +177,7 @@ export default definePlugin({
             }
         }
     ],
+
     ViewPermissionsButton: ErrorBoundary.wrap(({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) => (
         <Popout
             position="bottom"
