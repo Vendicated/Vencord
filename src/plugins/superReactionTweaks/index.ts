@@ -22,10 +22,10 @@ export const settings = definePluginSettings({
     },
 
     superReactionPlayingLimit: {
-        description: "Max Super Reactions to play at once",
+        description: "Max Super Reactions to play at once. 0 to disable playing Super Reactions",
         type: OptionType.SLIDER,
         default: 20,
-        markers: [5, 10, 20, 40, 60, 80, 100],
+        markers: [0, 5, 10, 20, 40, 60, 80, 100],
         stickToMarkers: true,
     },
 }, {
@@ -42,8 +42,8 @@ export default definePlugin({
         {
             find: ",BURST_REACTION_EFFECT_PLAY",
             replacement: {
-                match: /(BURST_REACTION_EFFECT_PLAY:\i=>{.{50,100})(\i\(\i,\i\))>=\d+/,
-                replace: "$1!$self.shouldPlayBurstReaction($2)"
+                match: /((\i)=\i=>{.{50,100})(\i\(\i,\i\))>=\i(?=.*BURST_REACTION_EFFECT_PLAY:\2)/,
+                replace: "$1!$self.shouldPlayBurstReaction($3)"
             }
         },
         {
@@ -58,6 +58,7 @@ export default definePlugin({
 
     shouldPlayBurstReaction(playingCount: number) {
         if (settings.store.unlimitedSuperReactionPlaying) return true;
+        if (settings.store.superReactionPlayingLimit === 0) return false;
         if (playingCount <= settings.store.superReactionPlayingLimit) return true;
         return false;
     },

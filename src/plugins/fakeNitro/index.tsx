@@ -24,7 +24,7 @@ import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Emoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
@@ -203,6 +203,15 @@ export default definePlugin({
     settings,
 
     patches: [
+        // Patch the emoji picker in voice calls to not be bypassed by fake nitro
+        {
+            find: "emojiItemDisabled]",
+            predicate: () => settings.store.enableEmojiBypass,
+            replacement: {
+                match: /CHAT/,
+                replace: "STATUS"
+            }
+        },
         {
             find: ".PREMIUM_LOCKED;",
             group: true,
@@ -245,11 +254,11 @@ export default definePlugin({
         },
         // Allow stickers to be sent everywhere
         {
-            find: "canUseCustomStickersEverywhere:function",
+            find: "canUseCustomStickersEverywhere:",
             predicate: () => settings.store.enableStickerBypass,
             replacement: {
-                match: /canUseCustomStickersEverywhere:function\(\i\){/,
-                replace: "$&return true;"
+                match: /(?<=canUseCustomStickersEverywhere:)\i/,
+                replace: "()=>true"
             },
         },
         // Make stickers always available
@@ -263,15 +272,15 @@ export default definePlugin({
         },
         // Allow streaming with high quality
         {
-            find: "canUseHighVideoUploadQuality:function",
+            find: "canUseHighVideoUploadQuality:",
             predicate: () => settings.store.enableStreamQualityBypass,
             replacement: [
                 "canUseHighVideoUploadQuality",
                 "canStreamQuality",
             ].map(func => {
                 return {
-                    match: new RegExp(`${func}:function\\(\\i(?:,\\i)?\\){`, "g"),
-                    replace: "$&return true;"
+                    match: new RegExp(`(?<=${func}:)\\i`, "g"),
+                    replace: "()=>true"
                 };
             })
         },
@@ -286,10 +295,10 @@ export default definePlugin({
         },
         // Allow client themes to be changeable
         {
-            find: "canUseClientThemes:function",
+            find: "canUseClientThemes:",
             replacement: {
-                match: /canUseClientThemes:function\(\i\){/,
-                replace: "$&return true;"
+                match: /(?<=canUseClientThemes:)\i/,
+                replace: "()=>true"
             }
         },
         {
@@ -297,8 +306,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Overwrite incoming connection settings proto with our local settings
-                    match: /CONNECTION_OPEN:function\((\i)\){/,
-                    replace: (m, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
+                    match: /function (\i)\((\i)\){(?=.*CONNECTION_OPEN:\1)/,
+                    replace: (m, funcName, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
                 },
                 {
                     // Overwrite non local proto changes with our local settings
@@ -391,10 +400,10 @@ export default definePlugin({
         },
         // Allow using custom app icons
         {
-            find: "canUsePremiumAppIcons:function",
+            find: "canUsePremiumAppIcons:",
             replacement: {
-                match: /canUsePremiumAppIcons:function\(\i\){/,
-                replace: "$&return true;"
+                match: /(?<=canUsePremiumAppIcons:)\i/,
+                replace: "()=>true"
             }
         },
         // Separate patch for allowing using custom app icons
@@ -415,10 +424,10 @@ export default definePlugin({
         },
         // Allow using custom notification sounds
         {
-            find: "canUseCustomNotificationSounds:function",
+            find: "canUseCustomNotificationSounds:",
             replacement: {
-                match: /canUseCustomNotificationSounds:function\(\i\){/,
-                replace: "$&return true;"
+                match: /(?<=canUseCustomNotificationSounds:)\i/,
+                replace: "()=>true"
             }
         }
     ],
@@ -818,7 +827,14 @@ export default definePlugin({
 
         if (isUnusableRoleSubscriptionEmoji(e, this.guildId, true)) return false;
 
-        if (this.canUseEmotes)
+        let isUsableTwitchSubEmote = false;
+        if (e.managed && e.guildId) {
+            // @ts-ignore outdated type
+            const myRoles = GuildMemberStore.getSelfMember(e.guildId)?.roles ?? [];
+            isUsableTwitchSubEmote = e.roles.some(r => myRoles.includes(r));
+        }
+
+        if (this.canUseEmotes || isUsableTwitchSubEmote)
             return e.guildId === this.guildId || hasExternalEmojiPerms(channelId);
         else
             return !e.animated && e.guildId === this.guildId;
