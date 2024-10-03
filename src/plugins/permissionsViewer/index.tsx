@@ -172,12 +172,11 @@ export default definePlugin({
         {
             find: ".VIEW_ALL_ROLES,",
             replacement: {
-                match: /\.collapseButton,.+?}\)}\),/,
+                match: /\.collapseButton,.+?null,/,
                 replace: "$&$self.ViewPermissionsButton(arguments[0]),"
             }
         }
     ],
-
     ViewPermissionsButton: ErrorBoundary.wrap(({ guild, guildMember }: { guild: Guild; guildMember: GuildMember; }) => (
         <Popout
             position="bottom"
