@@ -16,7 +16,7 @@
     "sideEffects": false,
     "types": "./index.d.ts",
     "dependencies": {
-        "@types/lodash": "~4.17.9",
+        "@types/lodash": "~4.17.10",
         "@types/node": "^18.19.54",
         "@types/react": "~18.2.79",
         "@types/react-dom": "~18.2.25",

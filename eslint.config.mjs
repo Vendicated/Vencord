@@ -1,7 +1,6 @@
 import stylistic from "@stylistic/eslint-plugin";
 // @ts-expect-error: No types
 import pathAlias from "eslint-plugin-path-alias";
-// @ts-expect-error: https://github.com/jsx-eslint/eslint-plugin-react/issues/3776
 import eslintPluginReact from "eslint-plugin-react";
 import simpleHeader from "eslint-plugin-simple-header";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
@@ -24,6 +23,7 @@ export default tseslint.config(
             "@stylistic": stylistic,
             "@typescript-eslint": tseslint.plugin,
             "path-alias": pathAlias,
+            // @ts-expect-error: The declarations are incorrect
             "react": eslintPluginReact,
             "simple-header": simpleHeader,
             "simple-import-sort": simpleImportSort,
