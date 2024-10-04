@@ -53,6 +53,17 @@ export default definePlugin({
             replacement: [
                 {
                     match: /\.PANEL},/,
+<<<<<<< HEAD
+                    replace: "$&[vcPronoun,vcPronounSource,vcHasPendingPronouns]=$self.useProfilePronouns(arguments[0].user?.id),"
+                },
+                {
+                    match: /text:\i\.\i.Messages.USER_PROFILE_PRONOUNS/,
+                    replace: '$&+vcHasPendingPronouns?"":` (${vcPronounSource})`'
+                },
+                {
+                    match: /(\.pronounsText.+?children:)(\i)/,
+                    replace: "$1vcHasPendingPronouns?$2:vcPronoun"
+=======
                     replace: "$&{pronouns:vcPronoun,source:vcPronounSource,hasPendingPronouns:vcHasPendingPronouns}=$self.useProfilePronouns(arguments[0].user?.id),"
                 },
                 {
@@ -62,6 +73,7 @@ export default definePlugin({
                 {
                     match: /(\.pronounsText.+?children:)(\i)/,
                     replace: "$1(vcPronoun==null||vcHasPendingPronouns)?$2:vcPronoun"
+>>>>>>> eb63a54fa64669981c8be4beab81e5a3c478352f
                 }
             ]
         }
