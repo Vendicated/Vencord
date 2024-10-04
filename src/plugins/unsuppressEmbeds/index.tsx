@@ -24,9 +24,21 @@ import { Constants, Menu, PermissionsBits, PermissionStore, RestAPI, UserStore }
 
 const EMBED_SUPPRESSED = 1 << 2;
 
-const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { channel, message: { author, embeds, flags, id: messageId } }) => {
+interface Snapshot {
+    message: {
+        embeds: any[];
+    };
+}
+
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { channel, message: { author, messageSnapshots, embeds, flags, id: messageId } }) => {
     const isEmbedSuppressed = (flags & EMBED_SUPPRESSED) !== 0;
-    if (!isEmbedSuppressed && !embeds.length) return;
+    const hasEmbedsInSnapshots = messageSnapshots.some(
+        (snapshot: Snapshot) => snapshot?.message.embeds.length
+    );
+
+    if (!isEmbedSuppressed && !embeds.length && !hasEmbedsInSnapshots) {
+        return;
+    }
 
     const hasEmbedPerms = channel.isPrivate() || !!(PermissionStore.getChannelPermissions({ id: channel.id }) & PermissionsBits.EMBED_LINKS);
     if (author.id === UserStore.getCurrentUser().id && !hasEmbedPerms) return;
