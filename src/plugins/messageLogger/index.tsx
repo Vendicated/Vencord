@@ -323,7 +323,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
-                    match: /function (\i)\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function.*MESSAGE_DELETE:\1)/,
+                    match: /function (?=.+?MESSAGE_DELETE:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
                     replace:
                         "function $1($2){" +
                         "   var cache = $3getOrCreate($2.channelId);" +
@@ -333,7 +333,7 @@ export default definePlugin({
                 },
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
-                    match: /function (\i)\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function.*MESSAGE_DELETE_BULK:\1)/,
+                    match: /function (?=.+?MESSAGE_DELETE_BULK:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
                     replace:
                         "function $1($2){" +
                         "   var cache = $3getOrCreate($2.channelId);" +
