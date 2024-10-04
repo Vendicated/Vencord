@@ -172,7 +172,7 @@ export default definePlugin({
         {
             find: ".VIEW_ALL_ROLES,",
             replacement: {
-                match: /\.collapseButton,.+?}\)}\),/,
+                match: /\.expandButton,.+?null,/,
                 replace: "$&$self.ViewPermissionsButton(arguments[0]),"
             }
         }
