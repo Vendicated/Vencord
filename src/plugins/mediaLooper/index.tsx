@@ -20,8 +20,8 @@ const cl = classNameFactory("vc-media-loop-");
 type MediaRef = RefObject<HTMLMediaElement> | undefined;
 
 export default definePlugin({
-    name: "MediaLoopControl",
-    description: "Allows enabling/disabling looping of audio and video embeds",
+    name: "mediaLooper",
+    description: "Allows enabling/disabling looping of video, audio and voice message embeds",
     authors: [Devs.Terevenen2],
 
     PlaybackLoopComponent({ mediaRef }: { mediaRef: MediaRef }) {
