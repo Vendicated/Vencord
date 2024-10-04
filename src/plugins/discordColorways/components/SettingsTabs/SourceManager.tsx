@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore, openModal, ReactNode, useEffect, useState } from "../../";
+import { DataStore, FocusLock, openModal, ReactNode, useEffect, useRef, useState } from "../../";
 import { defaultColorwaySource } from "../../constants";
 import { Colorway, ModalProps, StoreItem } from "../../types";
 import { chooseFile, saveFile } from "../../utils";
@@ -17,6 +17,7 @@ export function StoreNameModal({ modalProps, originalName = "", onFinish, confli
     const [error, setError] = useState<string>("");
     const [newStoreName, setNewStoreName] = useState<string>(originalName);
     const [theme, setTheme] = useState("discord");
+    const cont = useRef(null);
 
     useEffect(() => {
         async function load() {
@@ -25,39 +26,41 @@ export function StoreNameModal({ modalProps, originalName = "", onFinish, confli
         load();
     }, []);
 
-    return <div className={`colorwaysModal ${modalProps.transitionState === 2 ? "closing" : ""} ${modalProps.transitionState === 4 ? "hidden" : ""}`} data-theme={theme}>
-        <h2 className="colorwaysModalHeader">
-            {conflicting ? "Duplicate Store Name" : "Give this store a name"}
-        </h2>
-        <div className="colorwaysModalContent">
-            {conflicting ? <span className="colorwaysModalSectionHeader">A store with the same name already exists. Please give a different name to the imported store:</span> : <></>}
-            <span className="colorwaysModalSectionHeader">Name: {error ? <span className="colorwaysModalSectionError">{error}</span> : <></>}</span>
-            <input type="text" className="colorwayTextBox" value={newStoreName} onChange={({ currentTarget: { value } }) => setNewStoreName(value)} style={{ marginBottom: "16px" }} />
+    return <FocusLock containerRef={cont}>
+        <div ref={cont} className={`colorwaysModal ${modalProps.transitionState === 2 ? "closing" : ""} ${modalProps.transitionState === 4 ? "hidden" : ""}`} data-theme={theme}>
+            <h2 className="colorwaysModalHeader">
+                {conflicting ? "Duplicate Store Name" : "Give this store a name"}
+            </h2>
+            <div className="colorwaysModalContent">
+                {conflicting ? <span className="colorwaysModalSectionHeader">A store with the same name already exists. Please give a different name to the imported store:</span> : <></>}
+                <span className="colorwaysModalSectionHeader">Name: {error ? <span className="colorwaysModalSectionError">{error}</span> : <></>}</span>
+                <input type="text" className="colorwayTextBox" value={newStoreName} onChange={({ currentTarget: { value } }) => setNewStoreName(value)} style={{ marginBottom: "16px" }} />
+            </div>
+            <div className="colorwaysModalFooter">
+                <button
+                    className="colorwaysPillButton colorwaysPillButton-onSurface"
+                    style={{ marginLeft: 8 }}
+                    onClick={async () => {
+                        setError("");
+                        if ((await DataStore.get("customColorways")).map(store => store.name).includes(newStoreName)) {
+                            return setError("Error: Store name already exists");
+                        }
+                        onFinish(newStoreName);
+                        modalProps.onClose();
+                    }}
+                >
+                    Finish
+                </button>
+                <button
+                    className="colorwaysPillButton"
+                    style={{ marginLeft: 8 }}
+                    onClick={() => modalProps.onClose()}
+                >
+                    Cancel
+                </button>
+            </div>
         </div>
-        <div className="colorwaysModalFooter">
-            <button
-                className="colorwaysPillButton colorwaysPillButton-onSurface"
-                style={{ marginLeft: 8 }}
-                onClick={async () => {
-                    setError("");
-                    if ((await DataStore.get("customColorways")).map(store => store.name).includes(newStoreName)) {
-                        return setError("Error: Store name already exists");
-                    }
-                    onFinish(newStoreName);
-                    modalProps.onClose();
-                }}
-            >
-                Finish
-            </button>
-            <button
-                className="colorwaysPillButton"
-                style={{ marginLeft: 8 }}
-                onClick={() => modalProps.onClose()}
-            >
-                Cancel
-            </button>
-        </div>
-    </div>;
+    </FocusLock>;
 }
 
 function AddOnlineStoreModal({ modalProps, onFinish }: { modalProps: ModalProps, onFinish: (name: string, url: string) => void; }) {
@@ -67,6 +70,7 @@ function AddOnlineStoreModal({ modalProps, onFinish }: { modalProps: ModalProps,
     const [URLError, setURLError] = useState<string>("");
     const [nameReadOnly, setNameReadOnly] = useState<boolean>(false);
     const [theme, setTheme] = useState("discord");
+    const cont = useRef(null);
 
     useEffect(() => {
         async function load() {
@@ -74,69 +78,71 @@ function AddOnlineStoreModal({ modalProps, onFinish }: { modalProps: ModalProps,
         }
         load();
     }, []);
-    return <div className={`colorwaysModal ${modalProps.transitionState === 2 ? "closing" : ""} ${modalProps.transitionState === 4 ? "hidden" : ""}`} data-theme={theme}>
-        <h2 className="colorwaysModalHeader">
-            Add a source:
-        </h2>
-        <div className="colorwaysModalContent">
-            <span className="colorwaysModalSectionHeader">Name: {nameError ? <span className="colorwaysModalSectionError">{nameError}</span> : <></>}</span>
-            <input
-                type="text"
-                className="colorwayTextBox"
-                placeholder="Enter a valid Name..."
-                onInput={e => setColorwaySourceName(e.currentTarget.value)}
-                value={colorwaySourceName}
-                readOnly={nameReadOnly}
-                disabled={nameReadOnly}
-            />
-            <span className="colorwaysModalSectionHeader" style={{ marginTop: "8px" }}>URL: {URLError ? <span className="colorwaysModalSectionError">{URLError}</span> : <></>}</span>
-            <input
-                type="text"
-                className="colorwayTextBox"
-                placeholder="Enter a valid URL..."
-                onChange={({ currentTarget: { value } }) => {
-                    setColorwaySourceURL(value);
-                    if (value === defaultColorwaySource) {
-                        setNameReadOnly(true);
-                        setColorwaySourceName("Project Colorway");
-                    }
-                }}
-                value={colorwaySourceURL}
-                style={{ marginBottom: "16px" }}
-            />
+    return <FocusLock containerRef={cont}>
+        <div ref={cont} className={`colorwaysModal ${modalProps.transitionState === 2 ? "closing" : ""} ${modalProps.transitionState === 4 ? "hidden" : ""}`} data-theme={theme}>
+            <h2 className="colorwaysModalHeader">
+                Add a source:
+            </h2>
+            <div className="colorwaysModalContent">
+                <span className="colorwaysModalSectionHeader">Name: {nameError ? <span className="colorwaysModalSectionError">{nameError}</span> : <></>}</span>
+                <input
+                    type="text"
+                    className="colorwayTextBox"
+                    placeholder="Enter a valid Name..."
+                    onInput={e => setColorwaySourceName(e.currentTarget.value)}
+                    value={colorwaySourceName}
+                    readOnly={nameReadOnly}
+                    disabled={nameReadOnly}
+                />
+                <span className="colorwaysModalSectionHeader" style={{ marginTop: "8px" }}>URL: {URLError ? <span className="colorwaysModalSectionError">{URLError}</span> : <></>}</span>
+                <input
+                    type="text"
+                    className="colorwayTextBox"
+                    placeholder="Enter a valid URL..."
+                    onChange={({ currentTarget: { value } }) => {
+                        setColorwaySourceURL(value);
+                        if (value === defaultColorwaySource) {
+                            setNameReadOnly(true);
+                            setColorwaySourceName("Project Colorway");
+                        }
+                    }}
+                    value={colorwaySourceURL}
+                    style={{ marginBottom: "16px" }}
+                />
+            </div>
+            <div className="colorwaysModalFooter">
+                <button
+                    className="colorwaysPillButton colorwaysPillButton-onSurface"
+                    onClick={async () => {
+                        const sourcesArr: { name: string, url: string; }[] = (await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]);
+                        if (!colorwaySourceName) {
+                            setNameError("Error: Please enter a valid name");
+                        }
+                        else if (!colorwaySourceURL) {
+                            setURLError("Error: Please enter a valid URL");
+                        }
+                        else if (sourcesArr.map(s => s.name).includes(colorwaySourceName)) {
+                            setNameError("Error: An online source with that name already exists");
+                        }
+                        else if (sourcesArr.map(s => s.url).includes(colorwaySourceURL)) {
+                            setURLError("Error: An online source with that url already exists");
+                        } else {
+                            onFinish(colorwaySourceName, colorwaySourceURL);
+                            modalProps.onClose();
+                        }
+                    }}
+                >
+                    Finish
+                </button>
+                <button
+                    className="colorwaysPillButton"
+                    onClick={() => modalProps.onClose()}
+                >
+                    Cancel
+                </button>
+            </div>
         </div>
-        <div className="colorwaysModalFooter">
-            <button
-                className="colorwaysPillButton colorwaysPillButton-onSurface"
-                onClick={async () => {
-                    const sourcesArr: { name: string, url: string; }[] = (await DataStore.get("colorwaySourceFiles") as { name: string, url: string; }[]);
-                    if (!colorwaySourceName) {
-                        setNameError("Error: Please enter a valid name");
-                    }
-                    else if (!colorwaySourceURL) {
-                        setURLError("Error: Please enter a valid URL");
-                    }
-                    else if (sourcesArr.map(s => s.name).includes(colorwaySourceName)) {
-                        setNameError("Error: An online source with that name already exists");
-                    }
-                    else if (sourcesArr.map(s => s.url).includes(colorwaySourceURL)) {
-                        setURLError("Error: An online source with that url already exists");
-                    } else {
-                        onFinish(colorwaySourceName, colorwaySourceURL);
-                        modalProps.onClose();
-                    }
-                }}
-            >
-                Finish
-            </button>
-            <button
-                className="colorwaysPillButton"
-                onClick={() => modalProps.onClose()}
-            >
-                Cancel
-            </button>
-        </div>
-    </div>;
+    </FocusLock>;
 }
 
 export default function ({

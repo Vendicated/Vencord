@@ -13,8 +13,7 @@ import { Devs } from "@utils/constants";
 import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import {
-    i18n,
-    SettingsRouter
+    i18n
 } from "@webpack/common";
 import { FluxEvents as $FluxEvents } from "@webpack/types";
 // Mod-specific imports
@@ -26,7 +25,6 @@ import {
 import { ColorwayCSS } from "./colorwaysAPI";
 import ColorwayID from "./components/ColorwayID";
 import ColorwaysButton from "./components/ColorwaysButton";
-import CreatorModal from "./components/CreatorModal";
 import PCSMigrationModal from "./components/PCSMigrationModal";
 import Selector from "./components/Selector";
 import SettingsPage from "./components/SettingsTabs/SettingsPage";
@@ -68,7 +66,7 @@ export let ColorPicker: React.FunctionComponent<ColorPickerProps> = () => {
 };
 
 export const PluginProps = {
-    pluginVersion: "6.6.0",
+    pluginVersion: "6.6.1",
     clientMod: "Vencord",
     UIVersion: "2.1.0",
     CSSVersion: "1.22"
@@ -80,19 +78,13 @@ export default definePlugin({
         "A plugin that offers easy access to simple color schemes/themes for Discord, also known as Colorways",
     authors: [Devs.DaBluLite, Devs.ImLvna],
     dependencies: ["ServerListAPI", "MessageAccessoriesAPI"],
-    pluginVersion: PluginProps.pluginVersion,
-    toolboxActions: {
-        "Open Colorway Creator": () => openModal(props => <CreatorModal modalProps={props} />),
-        "Open Settings": () => SettingsRouter.open("ColorwaysSettings"),
-    },
     patches: [
         // Credits to Kyuuhachi for the BetterSettings plugin patches
         {
             find: "this.renderArtisanalHack()",
             replacement: {
                 match: /createPromise:\(\)=>([^:}]*?),webpackId:"\d+",name:(?!="CollectiblesShop")"[^"]+"/g,
-                replace: "$&,_:$1",
-                predicate: () => true
+                replace: "$&,_:$1"
             }
 
         },
@@ -101,8 +93,7 @@ export default definePlugin({
             replacement: {
                 match: /(?<=(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?openContextMenuLazy.{0,100}?(await Promise\.all[^};]*?\)\)).*?,)(?=\1\(this)/,
                 replace: "(async ()=>$2)(),"
-            },
-            predicate: () => true
+            }
         },
         {
             find: "colorPickerFooter:",

@@ -6,7 +6,7 @@
 
 import { MouseEvent, MouseEventHandler } from "react";
 
-import { DataStore, FluxDispatcher, FluxEvents, useEffect, useRef, useState } from "../";
+import { DataStore, FluxDispatcher, FluxEvents, FocusLock, useEffect, useRef, useState } from "../";
 import { ModalProps } from "../types";
 import { boundKey as bk, restartWS, updateRemoteSources, wsOpen } from "../wsClient";
 import Selector from "./Selector";
@@ -93,6 +93,7 @@ export default function ({
 }): JSX.Element | any {
     const [activeTab, setActiveTab] = useState<"selector" | "settings" | "sources" | "ws_connection">("selector");
     const [theme, setTheme] = useState("discord");
+    const cont = useRef(null);
 
     useEffect(() => {
         async function load() {
@@ -108,13 +109,15 @@ export default function ({
     }, []);
 
     return (
-        <div className={`colorwaySelectorModal ${modalProps.transitionState === 2 ? "closing" : ""} ${modalProps.transitionState === 4 ? "hidden" : ""}`} data-theme={theme} {...modalProps}>
-            <MainModalSidebar onTabChange={tab => setActiveTab(tab)} />
-            <div className="colorwayModalContent">
-                {activeTab === "selector" && <div className="colorwayInnerTab" style={{ height: "100%" }}><Selector /></div>}
-                {activeTab === "sources" && <SourceManager />}
-                {activeTab === "settings" && <SettingsPage />}
+        <FocusLock containerRef={cont}>
+            <div ref={cont} className={`colorwaySelectorModal ${modalProps.transitionState === 2 ? "closing" : ""} ${modalProps.transitionState === 4 ? "hidden" : ""}`} data-theme={theme} {...modalProps}>
+                <MainModalSidebar onTabChange={tab => setActiveTab(tab)} />
+                <div className="colorwayModalContent">
+                    {activeTab === "selector" && <div className="colorwayInnerTab" style={{ height: "100%" }}><Selector /></div>}
+                    {activeTab === "sources" && <SourceManager />}
+                    {activeTab === "settings" && <SettingsPage />}
+                </div>
             </div>
-        </div>
+        </FocusLock>
     );
 }
