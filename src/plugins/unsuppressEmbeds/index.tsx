@@ -36,9 +36,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { channe
         (snapshot: Snapshot) => snapshot?.message.embeds.length
     );
 
-    if (!isEmbedSuppressed && !embeds.length && !hasEmbedsInSnapshots) {
-        return;
-    }
+    if (!isEmbedSuppressed && !embeds.length && !hasEmbedsInSnapshots) return;
 
     const hasEmbedPerms = channel.isPrivate() || !!(PermissionStore.getChannelPermissions({ id: channel.id }) & PermissionsBits.EMBED_LINKS);
     if (author.id === UserStore.getCurrentUser().id && !hasEmbedPerms) return;
