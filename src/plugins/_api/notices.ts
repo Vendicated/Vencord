@@ -33,8 +33,8 @@ export default definePlugin({
                     replace: "if(Vencord.Api.Notices.currentNotice)return false;$&"
                 },
                 {
-                    match: /(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,
-                    replace: "if($1.id==\"VencordNotice\")return($1=null,Vencord.Api.Notices.nextNotice(),true);$&"
+                    match: /(?<=function (\i)\(\i\){)return null!=(\i)(?=.*NOTICE_DISMISS:\1)/,
+                    replace: "if($2.id==\"VencordNotice\")return($2=null,Vencord.Api.Notices.nextNotice(),true);$&"
                 }
             ]
         }
