@@ -19,7 +19,7 @@
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
-import { getSettingStoreLazy } from "@api/SettingsStores";
+import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
@@ -54,7 +54,7 @@ const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hid
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
 const EmbedClasses = findByPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
 
-const MessageDisplayCompact = getSettingStoreLazy("textAndImages", "messageDisplayCompact")!;
+const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact")!;
 
 const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(?:\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
 const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;
@@ -147,6 +147,7 @@ async function fetchMessage(channelID: string, messageID: string) {
     if (!msg) return;
 
     const message: Message = MessageStore.getMessages(msg.channel_id).receiveMessage(msg).get(msg.id);
+    if (!message) return;
 
     messageCache.set(message.id, {
         message,
@@ -366,7 +367,7 @@ export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
     authors: [Devs.TheSun, Devs.Ven, Devs.RyanCaoDev],
-    dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI", "SettingsStoreAPI"],
+    dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI", "UserSettingsAPI"],
 
     settings,
 

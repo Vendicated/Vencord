@@ -18,6 +18,8 @@
 
 import type { ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, KeyboardEvent, MouseEvent, PropsWithChildren, PropsWithRef, ReactNode, Ref } from "react";
 
+import { IconNames } from "./iconNames";
+
 export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-sm" | "display-md" | "display-lg" | "code";
 export type FormTextTypes = Record<"DEFAULT" | "INPUT_PLACEHOLDER" | "DESCRIPTION" | "LABEL_BOLD" | "LABEL_SELECTED" | "LABEL_DESCRIPTOR" | "ERROR" | "SUCCESS", string>;
 export type HeadingTag = `h${1 | 2 | 3 | 4 | 5 | 6}`;
@@ -69,7 +71,7 @@ export type FormText = ComponentType<PropsWithChildren<{
 }> & TextProps> & { Types: FormTextTypes; };
 
 export type Tooltip = ComponentType<{
-    text: ReactNode;
+    text: ReactNode | ComponentType;
     children: FunctionComponent<{
         onClick(): void;
         onMouseEnter(): void;
@@ -91,7 +93,7 @@ export type Tooltip = ComponentType<{
     /** Tooltip.Colors.BLACK */
     color?: string;
     /** TooltipPositions.TOP */
-    position?: string;
+    position?: PopoutPosition;
 
     tooltipClassName?: string;
     tooltipContentClassName?: string;
@@ -101,6 +103,28 @@ export type Tooltip = ComponentType<{
 
 export type TooltipPositions = Record<"BOTTOM" | "CENTER" | "LEFT" | "RIGHT" | "TOP" | "WINDOW_CENTER", string>;
 
+export type TooltipContainer = ComponentType<PropsWithChildren<{
+    text: ReactNode;
+    element?: "div" | "span";
+    "aria-label"?: string | false;
+
+    delay?: number;
+    /** Tooltip.Colors.BLACK */
+    color?: string;
+    /** TooltipPositions.TOP */
+    position?: PopoutPosition;
+    spacing?: number;
+
+    className?: string;
+    tooltipClassName?: string | null;
+    tooltipContentClassName?: string | null;
+
+    allowOverflow?: boolean;
+    forceOpen?: boolean;
+    hideOnClick?: boolean;
+    disableTooltipPointerEvents?: boolean;
+}>>;
+
 export type Card = ComponentType<PropsWithChildren<HTMLProps<HTMLDivElement> & {
     editable?: boolean;
     outline?: boolean;
@@ -109,6 +133,26 @@ export type Card = ComponentType<PropsWithChildren<HTMLProps<HTMLDivElement> & {
 }>> & {
     Types: Record<"BRAND" | "CUSTOM" | "DANGER" | "PRIMARY" | "SUCCESS" | "WARNING", string>;
 };
+
+export type ComboboxPopout = ComponentType<PropsWithChildren<{
+    value: Set<any>;
+    placeholder: string;
+    children(query: string): ReactNode[];
+
+    onChange(value: any): void;
+    itemToString?: (item: any) => string;
+    onClose?(): void;
+
+    className?: string;
+    listClassName?: string;
+
+
+    autoFocus?: boolean;
+    multiSelect?: boolean;
+    maxVisibleItems?: number;
+    showScrollbar?: boolean;
+
+}>>;
 
 export type Button = ComponentType<PropsWithChildren<Omit<HTMLProps<HTMLButtonElement>, "size"> & {
     /** Button.Looks.FILLED */
@@ -210,7 +254,7 @@ export type Select = ComponentType<PropsWithChildren<{
     look?: 0 | 1;
     className?: string;
     popoutClassName?: string;
-    popoutPosition?: "top" | "left" | "right" | "bottom" | "center" | "window_center";
+    popoutPosition?: PopoutPosition;
     optionClassName?: string;
 
     autoFocus?: boolean;
@@ -251,7 +295,7 @@ export type SearchableSelect = ComponentType<PropsWithChildren<{
     className?: string;
     popoutClassName?: string;
     wrapperClassName?: string;
-    popoutPosition?: "top" | "left" | "right" | "bottom" | "center" | "window_center";
+    popoutPosition?: PopoutPosition;
     optionClassName?: string;
 
     autoFocus?: boolean;
@@ -334,6 +378,8 @@ declare enum PopoutAnimation {
     FADE = "4"
 }
 
+type PopoutPosition = "top" | "bottom" | "left" | "right" | "center" | "window_center";
+
 export type Popout = ComponentType<{
     children(
         thing: {
@@ -345,7 +391,7 @@ export type Popout = ComponentType<{
         },
         data: {
             isShown: boolean;
-            position: string;
+            position: PopoutPosition;
         }
     ): ReactNode;
     shouldShow?: boolean;
@@ -353,7 +399,7 @@ export type Popout = ComponentType<{
         closePopout(): void;
         isPositioned: boolean;
         nudge: number;
-        position: string;
+        position: PopoutPosition;
         setPopoutRef(ref: any): void;
         updatePosition(): void;
     }): ReactNode;
@@ -362,20 +408,20 @@ export type Popout = ComponentType<{
     onRequestClose?(): void;
 
     /** "center" and others */
-    align?: string;
+    align?: "left" | "right" | "center";
     /** Popout.Animation */
     animation?: PopoutAnimation;
     autoInvert?: boolean;
     nudgeAlignIntoViewport?: boolean;
     /** "bottom" and others */
-    position?: string;
+    position?: PopoutPosition;
     positionKey?: string;
     spacing?: number;
 }> & {
     Animation: typeof PopoutAnimation;
 };
 
-export type Dialog = ComponentType<PropsWithChildren<any>>;
+export type Dialog = ComponentType<JSX.IntrinsicElements["div"]>;
 
 type Resolve = (data: { theme: "light" | "dark", saturation: number; }) => {
     hex(): string;
@@ -417,7 +463,7 @@ export type ScrollerThin = ComponentType<PropsWithChildren<{
     style?: CSSProperties;
 
     dir?: "ltr";
-    orientation?: "horizontal" | "vertical";
+    orientation?: "horizontal" | "vertical" | "auto";
     paddingFix?: boolean;
     fade?: boolean;
 
@@ -458,3 +504,10 @@ export type Avatar = ComponentType<PropsWithChildren<{
 type FocusLock = ComponentType<PropsWithChildren<{
     containerRef: RefObject<HTMLElement>;
 }>>;
+
+export type Icon = ComponentType<JSX.IntrinsicElements["svg"] & {
+    size?: string;
+    colorClass?: string;
+} & Record<string, any>>;
+
+export type Icons = Record<IconNames, Icon>;

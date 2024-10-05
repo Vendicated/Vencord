@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { canonicalizeMatch } from "@utils/patches";
 import type { Channel } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
@@ -50,6 +49,11 @@ export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYea
 
 export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", "registerLanguage");
 
+export const { match, P }: Pick<typeof import("ts-pattern"), "match" | "P"> = mapMangledModuleLazy("@ts-pattern/matcher", {
+    match: filters.byCode("return new"),
+    P: filters.byProps("when")
+});
+
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
 export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
@@ -73,6 +77,25 @@ const ToastPosition = {
     BOTTOM: 1
 };
 
+export interface ToastData {
+    message: string,
+    id: string,
+    /**
+     * Toasts.Type
+     */
+    type: number,
+    options?: ToastOptions;
+}
+
+export interface ToastOptions {
+    /**
+     * Toasts.Position
+     */
+    position?: number;
+    component?: React.ReactNode,
+    duration?: number;
+}
+
 export const Toasts = {
     Type: ToastType,
     Position: ToastPosition,
@@ -81,23 +104,9 @@ export const Toasts = {
 
     // hack to merge with the following interface, dunno if there's a better way
     ...{} as {
-        show(data: {
-            message: string,
-            id: string,
-            /**
-             * Toasts.Type
-             */
-            type: number,
-            options?: {
-                /**
-                 * Toasts.Position
-                 */
-                position?: number;
-                component?: React.ReactNode,
-                duration?: number;
-            };
-        }): void;
+        show(data: ToastData): void;
         pop(): void;
+        create(message: string, type: number, options?: ToastOptions): ToastData;
     }
 };
 
@@ -105,18 +114,15 @@ export const Toasts = {
 waitFor("showToast", m => {
     Toasts.show = m.showToast;
     Toasts.pop = m.popToast;
+    Toasts.create = m.createToast;
 });
 
 
 /**
  * Show a simple toast. If you need more options, use Toasts.show manually
  */
-export function showToast(message: string, type = ToastType.MESSAGE) {
-    Toasts.show({
-        id: Toasts.genId(),
-        message,
-        type
-    });
+export function showToast(message: string, type = ToastType.MESSAGE, options?: ToastOptions) {
+    Toasts.show(Toasts.create(message, type, options));
 }
 
 export const UserUtils = {
@@ -143,6 +149,10 @@ export const NavigationRouter: t.NavigationRouter = mapMangledModuleLazy("Transi
     back: filters.byCode("goBack()"),
     forward: filters.byCode("goForward()"),
 });
+export const ChannelRouter: t.ChannelRouter = mapMangledModuleLazy('"Thread must have a parent ID."', {
+    transitionToChannel: filters.byCode(".preload"),
+    transitionToThread: filters.byCode('"Thread must have a parent ID."')
+});
 
 export let SettingsRouter: any;
 waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
@@ -160,9 +170,24 @@ export const InviteActions = findByPropsLazy("resolveInvite");
 
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
 
-const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i/);
-// TODO: type
-export const ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
+export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
+    openExpressionPicker: filters.byCode(/setState\({activeView:(?:(?!null)\i),activeViewType:/),
     closeExpressionPicker: filters.byCode("setState({activeView:null"),
-    openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(m.toString()),
+    toggleMultiExpressionPicker: filters.byCode(".EMOJI,"),
+    toggleExpressionPicker: filters.byCode(/getState\(\)\.activeView===\i\?\i\(\):\i\(/),
+    setExpressionPickerView: filters.byCode(/setState\({activeView:\i,lastActiveView:/),
+    setSearchQuery: filters.byCode("searchQuery:"),
+    useExpressionPickerStore: filters.byCode("Object.is")
+});
+
+export const PopoutActions: t.PopoutActions = mapMangledModuleLazy('type:"POPOUT_WINDOW_OPEN"', {
+    open: filters.byCode('type:"POPOUT_WINDOW_OPEN"'),
+    close: filters.byCode('type:"POPOUT_WINDOW_CLOSE"'),
+    setAlwaysOnTop: filters.byCode('type:"POPOUT_WINDOW_SET_ALWAYS_ON_TOP"'),
+});
+
+export const UsernameUtils: t.UsernameUtils = findByPropsLazy("useName", "getGlobalName");
+export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModuleLazy(/=\i\.getUserProfile\(\i\),\i=\i\.getGuildMemberProfile\(/, {
+    getDisplayProfile: filters.byCode(".getGuildMemberProfile("),
+    useDisplayProfile: filters.byCode(/\[\i\.\i,\i\.\i],\(\)=>/)
 });

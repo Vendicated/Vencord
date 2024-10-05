@@ -129,7 +129,7 @@ export const SettingsStore = new SettingsStoreClass(settings, {
 
         if (path === "plugins" && key in plugins)
             return target[key] = {
-                enabled: IS_REPORTER ?? plugins[key].required ?? plugins[key].enabledByDefault ?? false
+                enabled: IS_REPORTER || plugins[key].required || plugins[key].enabledByDefault || false
             };
 
         // Since the property is not set, check if this is a plugin's setting and if so, try to resolve
@@ -229,6 +229,10 @@ export function definePluginSettings<
         get store() {
             if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
             return Settings.plugins[definedSettings.pluginName] as any;
+        },
+        get plain() {
+            if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
+            return PlainSettings.plugins[definedSettings.pluginName] as any;
         },
         use: settings => useSettings(
             settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`) as UseSettings<Settings>[]

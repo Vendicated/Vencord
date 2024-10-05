@@ -22,9 +22,9 @@ import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import definePlugin, { OptionType, Patch } from "@utils/types";
+import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
+import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Emoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
@@ -52,6 +52,7 @@ const PreloadedUserSettingsActionCreators = proxyLazyWebpack(() => UserSettingsA
 const AppearanceSettingsActionCreators = proxyLazyWebpack(() => searchProtoClassField("appearance", PreloadedUserSettingsActionCreators.ProtoClass));
 const ClientThemeSettingsActionsCreators = proxyLazyWebpack(() => searchProtoClassField("clientThemeSettings", AppearanceSettingsActionCreators));
 
+const isUnusableRoleSubscriptionEmoji = findByCodeLazy(".getUserIsAdmin(");
 
 const enum EmojiIntentions {
     REACTION,
@@ -193,6 +194,26 @@ const hasExternalStickerPerms = (channelId: string) => hasPermission(channelId, 
 const hasEmbedPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.EMBED_LINKS);
 const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.ATTACH_FILES);
 
+function makeBypassPatches(): Omit<Patch, "plugin"> {
+    const mapping: Array<{ func: string, predicate?: () => boolean; }> = [
+        { func: "canUseCustomStickersEverywhere", predicate: () => settings.store.enableStickerBypass },
+        { func: "canUseHighVideoUploadQuality", predicate: () => settings.store.enableStreamQualityBypass },
+        { func: "canStreamQuality", predicate: () => settings.store.enableStreamQualityBypass },
+        { func: "canUseClientThemes" },
+        { func: "canUseCustomNotificationSounds" },
+        { func: "canUsePremiumAppIcons" }
+    ];
+
+    return {
+        find: "canUseCustomStickersEverywhere:",
+        replacement: mapping.map(({ func, predicate }) => ({
+            match: new RegExp(String.raw`(?<=${func}:function\(\i(?:,\i)?\){)`),
+            replace: "return true;",
+            predicate
+        }))
+    };
+}
+
 export default definePlugin({
     name: "FakeNitro",
     authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
@@ -202,6 +223,17 @@ export default definePlugin({
     settings,
 
     patches: [
+        // General bypass patches
+        makeBypassPatches(),
+        // Patch the emoji picker in voice calls to not be bypassed by fake nitro
+        {
+            find: "emojiItemDisabled]",
+            predicate: () => settings.store.enableEmojiBypass,
+            replacement: {
+                match: /CHAT/,
+                replace: "STATUS"
+            }
+        },
         {
             find: ".PREMIUM_LOCKED;",
             group: true,
@@ -234,24 +266,13 @@ export default definePlugin({
                 }
             ]
         },
-        // FIXME
         // Allows the usage of subscription-locked emojis
-        /* {
+        {
             find: ".getUserIsAdmin(",
             replacement: {
-                match: /(?=.+?\.getUserIsAdmin\((?<=function (\i)\(\i,\i\){.+?))(\i):function\(\){return \1}/,
-                // Replace the original export with a func that always returns false and alias the original
-                replace: "$2:()=>()=>false,isUnusableRoleSubscriptionEmojiOriginal:function(){return $1}"
+                match: /(function \i\(\i,\i)\){(.{0,250}.getUserIsAdmin\(.+?return!1})/,
+                replace: (_, rest1, rest2) => `${rest1},fakeNitroOriginal){if(!fakeNitroOriginal)return false;${rest2}`
             }
-        }, */
-        // Allow stickers to be sent everywhere
-        {
-            find: "canUseCustomStickersEverywhere:function",
-            predicate: () => settings.store.enableStickerBypass,
-            replacement: {
-                match: /canUseCustomStickersEverywhere:function\(\i\){/,
-                replace: "$&return true;"
-            },
         },
         // Make stickers always available
         {
@@ -262,20 +283,6 @@ export default definePlugin({
                 replace: "true?"
             }
         },
-        // Allow streaming with high quality
-        {
-            find: "canUseHighVideoUploadQuality:function",
-            predicate: () => settings.store.enableStreamQualityBypass,
-            replacement: [
-                "canUseHighVideoUploadQuality",
-                "canStreamQuality",
-            ].map(func => {
-                return {
-                    match: new RegExp(`${func}:function\\(\\i(?:,\\i)?\\){`, "g"),
-                    replace: "$&return true;"
-                };
-            })
-        },
         // Remove boost requirements to stream with high quality
         {
             find: "STREAM_FPS_OPTION.format",
@@ -283,14 +290,6 @@ export default definePlugin({
             replacement: {
                 match: /guildPremiumTier:\i\.\i\.TIER_\d,?/g,
                 replace: ""
-            }
-        },
-        // Allow client themes to be changeable
-        {
-            find: "canUseClientThemes:function",
-            replacement: {
-                match: /canUseClientThemes:function\(\i\){/,
-                replace: "$&return true;"
             }
         },
         {
@@ -390,14 +389,6 @@ export default definePlugin({
                 replace: (_, reactNode, props) => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!${props}?.fakeNitroNode?.fake)`
             }
         },
-        // Allow using custom app icons
-        {
-            find: "canUsePremiumAppIcons:function",
-            replacement: {
-                match: /canUsePremiumAppIcons:function\(\i\){/,
-                replace: "$&return true;"
-            }
-        },
         // Separate patch for allowing using custom app icons
         {
             find: /\.getCurrentDesktopIcon.{0,25}\.isPremium/,
@@ -412,14 +403,6 @@ export default definePlugin({
             replacement: {
                 match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
-            }
-        },
-        // Allow using custom notification sounds
-        {
-            find: "canUseCustomNotificationSounds:function",
-            replacement: {
-                match: /canUseCustomNotificationSounds:function\(\i\){/,
-                replace: "$&return true;"
             }
         }
     ],
@@ -817,11 +800,16 @@ export default definePlugin({
         if (e.type === 0) return true;
         if (e.available === false) return false;
 
-        // FIXME
-        /* const isUnusableRoleSubEmoji = isUnusableRoleSubscriptionEmojiOriginal ?? RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmoji;
-        if (isUnusableRoleSubEmoji(e, this.guildId)) return false; */
+        if (isUnusableRoleSubscriptionEmoji(e, this.guildId, true)) return false;
 
-        if (this.canUseEmotes)
+        let isUsableTwitchSubEmote = false;
+        if (e.managed && e.guildId) {
+            // @ts-ignore outdated type
+            const myRoles = GuildMemberStore.getSelfMember(e.guildId)?.roles ?? [];
+            isUsableTwitchSubEmote = e.roles.some(r => myRoles.includes(r));
+        }
+
+        if (this.canUseEmotes || isUsableTwitchSubEmote)
             return e.guildId === this.guildId || hasExternalEmojiPerms(channelId);
         else
             return !e.animated && e.guildId === this.guildId;
