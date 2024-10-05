@@ -94,15 +94,6 @@ export default definePlugin({
         },
         // empty word filter
         {
-            find: '"kinkster","kinky"',
-            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
-            replacement: {
-                match: /=\[".+?"\]/g,
-                replace: "=[]"
-            }
-        },
-        // empty 2nd word filter
-        {
             find: '"pepe","nude"',
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
             replacement: {
