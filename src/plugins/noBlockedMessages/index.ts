@@ -47,14 +47,14 @@ export default definePlugin({
         },
         ...[
             '"MessageStore"',
-            '"displayName","ReadStateStore")'
+            '"ReadStateStore"'
         ].map(find => ({
             find,
             predicate: () => Settings.plugins.NoBlockedMessages.ignoreBlockedMessages === true,
             replacement: [
                 {
-                    match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
-                    replace: (_, _funcName, props) => `if($self.isBlocked(${props}.message))return;`
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.isBlocked(${props}.message))return;`
                 }
             ]
         }))
