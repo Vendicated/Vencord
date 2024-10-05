@@ -92,12 +92,12 @@ export default definePlugin({
                 replace: '">0"'
             }
         },
-        // empty word filter (why would anyone search "horny" in fucking server discovery... please... why are we patching this again??)
+        // empty word filter
         {
-            find: '"horny","fart"',
+            find: '"kinkster","kinky"',
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
             replacement: {
-                match: /=\["egirl",.+?\]/,
+                match: /=\[".+?"\]/g,
                 replace: "=[]"
             }
         },
