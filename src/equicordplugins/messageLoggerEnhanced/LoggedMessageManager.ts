@@ -32,9 +32,9 @@ export const MessageLoggerStore = createStore("MessageLoggerData", "MessageLogge
 
 // this gets used by the logs modal. logs modal should only use saved messages not messages that are being processed
 // also hasMessageInLogs should only check saved messages not the ones that are being processed
-export let savedLoggedMessages: LoggedMessages = defaultLoggedMessages;
+export let savedLoggedMessages: LoggedMessages = { ...defaultLoggedMessages };
 
-export let loggedMessages: LoggedMessages = defaultLoggedMessages;
+export let loggedMessages: LoggedMessages = { ...defaultLoggedMessages };
 
 (async () => {
     try {
