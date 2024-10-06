@@ -92,16 +92,7 @@ export default definePlugin({
                 replace: '">0"'
             }
         },
-        // empty word filter (why would anyone search "horny" in fucking server discovery... please... why are we patching this again??)
-        {
-            find: '"horny","fart"',
-            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
-            replacement: {
-                match: /=\["egirl",.+?\]/,
-                replace: "=[]"
-            }
-        },
-        // empty 2nd word filter
+        // empty word filter
         {
             find: '"pepe","nude"',
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
@@ -112,12 +103,12 @@ export default definePlugin({
         },
         // patch request that queries if term is allowed
         {
-            find: ".GUILD_DISCOVERY_VALID_TERM",
+            find: ".GUILD_DISCOVERY_VALID_TERM,query:",
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
             all: true,
             replacement: {
-                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\);/g,
-                replace: "Promise.resolve({ body: { valid: true } });"
+                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\)/g,
+                replace: "Promise.resolve({ body: { valid: true } })"
             }
         }
     ],

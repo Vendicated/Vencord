@@ -109,7 +109,8 @@ export default definePlugin({
                 match: /(\i)\?null:\(0,\i\.jsx\)\(\i\.\i,{className:\i\.reactionCount,.*?}\),/,
                 replace: "$&$1?null:$self.renderUsers(this.props),"
             }
-        }, {
+        },
+        {
             find: '"MessageReactionsStore"',
             replacement: {
                 match: /(?<=CONNECTION_OPEN:function\(\){)(\i)={}/,
