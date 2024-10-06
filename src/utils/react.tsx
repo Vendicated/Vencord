@@ -144,3 +144,22 @@ export function useTimer({ interval = 1000, deps = [] }: TimerOpts) {
 
     return time;
 }
+
+interface FixedTimerOpts {
+    interval?: number;
+    initialTime?: number;
+}
+
+export function useFixedTimer({ interval = 1000, initialTime = Date.now() }: FixedTimerOpts) {
+    const [time, setTime] = useState(Date.now() - initialTime);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => setTime(Date.now() - initialTime), interval);
+
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, [initialTime]);
+
+    return time;
+}
