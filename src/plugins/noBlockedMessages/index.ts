@@ -25,6 +25,12 @@ import { Message } from "discord-types/general";
 
 const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 
+interface MessageDeleteProps {
+    collapsedReason: {
+        message: string;
+    };
+}
+
 export default definePlugin({
     name: "NoBlockedMessages",
     description: "Hides all blocked messages from chat completely.",
@@ -35,20 +41,20 @@ export default definePlugin({
             replacement: [
                 {
                     match: /let\{[^}]*collapsedReason[^}]*\}/,
-                    replace: "return null;$&"
+                    replace: "if($self.shouldHide(arguments[0]))return null;$&"
                 }
             ]
         },
         ...[
             '"MessageStore"',
-            '"displayName","ReadStateStore")'
+            '"ReadStateStore"'
         ].map(find => ({
             find,
             predicate: () => Settings.plugins.NoBlockedMessages.ignoreBlockedMessages === true,
             replacement: [
                 {
-                    match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
-                    replace: (_, _funcName, props) => `if($self.isBlocked(${props}.message))return;`
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.isBlocked(${props}.message))return;`
                 }
             ]
         }))
@@ -68,5 +74,9 @@ export default definePlugin({
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if user is blocked:", e);
         }
+    },
+
+    shouldHide(props: MessageDeleteProps) {
+        return !props?.collapsedReason?.message.includes("deleted");
     }
 });
