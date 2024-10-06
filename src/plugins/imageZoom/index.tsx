@@ -112,6 +112,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = children => {
                         maxValue={50}
                         value={settings.store.zoom}
                         onChange={debounce((value: number) => settings.store.zoom = value, 100)}
+                        renderValue={(value: number) => `${value.toFixed(3)}x`}
                     />
                 )}
             />
