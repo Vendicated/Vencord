@@ -37,6 +37,7 @@ const enum ShowMode {
 }
 
 const CONNECT = 1n << 20n;
+const CHANNEL_OBFUSCATE = 1 << 15;
 
 export const settings = definePluginSettings({
     hideUnreads: {
@@ -64,7 +65,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "ShowHiddenChannels",
     description: "Show channels that you do not have access to view.",
-    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn],
+    authors: [Devs.BigDuck, Devs.AverageReactEnjoyer, Devs.D3SOX, Devs.Ven, Devs.Nuckyz, Devs.Nickyux, Devs.dzshn, Devs.Davri],
     settings,
 
     patches: [
@@ -472,6 +473,14 @@ export default definePlugin({
                 // Make active now voice states on hidden channels
                 match: /(getVoiceStateForUser.{0,150}?)&&\i\.\i\.canWithPartialContext.{0,20}VIEW_CHANNEL.+?}\)(?=\?)/,
                 replace: "$1"
+            }
+        },
+        // Disable channel name obfuscation flag in the IDENTIFY gateway event
+        {
+            find: "doIdentify",
+            replacement: {
+                match: /capabilities:/,
+                replace: `capabilities:~${CHANNEL_OBFUSCATE}&`
             }
         }
     ],
