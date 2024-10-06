@@ -42,7 +42,7 @@ interface SidebarData {
     id: string;
 }
 
-export interface ContextMenuProps {
+interface ContextMenuProps {
     channel: Channel;
     guildId?: string;
     user: User;
@@ -61,10 +61,12 @@ function MakeContextCallback(name: "user" | "channel"): NavContextMenuPatchCallb
             (!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) && channel.type !== 3)
         )) return;
 
+        const channelTypeText = isUser ? "User" : channel.type === 3 ? "Group DM" : "Channel";
+
         children.push(
             <Menu.MenuItem
                 id={`vc-sidebar-chat-${name}`}
-                label={`Open ${isUser ? "User" : "Channel"} Sidebar Chat`}
+                label={`Open ${channelTypeText} Sidebar Chat`}
                 action={() => {
                     FluxDispatcher.dispatch({
                         // @ts-ignore
