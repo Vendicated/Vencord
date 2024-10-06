@@ -17,7 +17,6 @@ import {
     MessageActions,
     PermissionsBits,
     PermissionStore,
-    SelectedChannelStore,
     Text,
     useEffect,
     UserStore,
@@ -56,10 +55,7 @@ function MakeContextCallback(name: "user" | "channel"): NavContextMenuPatchCallb
         if (!isUser && !channel) return;
 
         if (isUser && user.id === UserStore.getCurrentUser().id) return;
-        if (!isUser && (
-            channel.id === SelectedChannelStore.getChannelId() ||
-            (!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) && channel.type !== 3)
-        )) return;
+        if (!isUser && (!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) && channel.type !== 3)) return;
 
         const channelTypeText = isUser ? "User" : channel.type === 3 ? "Group DM" : "Channel";
 
