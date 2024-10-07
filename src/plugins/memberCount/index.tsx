@@ -28,6 +28,7 @@ import { FluxStore } from "@webpack/types";
 
 import { MemberCount } from "./MemberCount";
 
+export const voiceStateStore = findStoreLazy("VoiceStateStore") as FluxStore;
 export const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId?: string): number | null; };
 export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
     getProps(guildId?: string, channelId?: string): { groups: { count: number; id: string; }[]; };
@@ -49,6 +50,12 @@ const settings = definePluginSettings({
         description: "If the member count should be displayed on the member list",
         default: true,
         restartNeeded: true
+    },
+    voiceActivity: {
+        type: OptionType.BOOLEAN,
+        description: "If the member count should be displayed on the voice activity",
+        default: false,
+        restartNeeded: true
     }
 });
 
@@ -58,8 +65,8 @@ export const cl = classNameFactory("vc-membercount-");
 
 export default definePlugin({
     name: "MemberCount",
-    description: "Shows the amount of online & total members in the server member list and tooltip",
-    authors: [Devs.Ven, Devs.Commandtechno],
+    description: "Displays the count of online members, total members, and members currently in voice channels within the server's member list and tooltip.",
+    authors: [Devs.Ven, Devs.Commandtechno, Devs.Apexo],
     settings,
 
     patches: [
@@ -80,6 +87,6 @@ export default definePlugin({
             predicate: () => settings.store.toolTip
         }
     ],
-    render: ErrorBoundary.wrap(MemberCount, { noop: true }),
+    render: ErrorBoundary.wrap(() => <MemberCount voiceEnabled={settings.store.voiceActivity} />, { noop: true }),
     renderTooltip: ErrorBoundary.wrap(guild => <MemberCount isTooltip tooltipGuildId={guild.id} />, { noop: true })
 });
