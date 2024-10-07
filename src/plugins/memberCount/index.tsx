@@ -53,7 +53,7 @@ const settings = definePluginSettings({
     },
     voiceActivity: {
         type: OptionType.BOOLEAN,
-        description: "If the member count should be displayed on the voice activity",
+        description: "Show voice activity in member list with member count",
         default: false,
         restartNeeded: true
     }
