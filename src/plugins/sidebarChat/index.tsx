@@ -12,17 +12,17 @@ import { filters, findByPropsLazy, findComponentByCodeLazy, mapMangledModuleLazy
 import {
     ChannelStore,
     FluxDispatcher,
+    GuildStore,
     Icons,
     Menu,
     MessageActions,
     PermissionsBits,
     PermissionStore,
-    Text,
     useEffect,
     UserStore,
     useState
 } from "@webpack/common";
-import { Channel, User } from "discord-types/general";
+import { Channel, Guild, User } from "discord-types/general";
 
 const { HeaderBar, HeaderBarIcon } = mapMangledModuleLazy(".themedMobile]:", {
     HeaderBarIcon: filters.byCode('size:"custom",'),
@@ -30,7 +30,7 @@ const { HeaderBar, HeaderBarIcon } = mapMangledModuleLazy(".themedMobile]:", {
 });
 const Chat = findComponentByCodeLazy("filterAfterTimestamp:", "chatInputType");
 const Resize = findComponentByCodeLazy("sidebarType:", "homeSidebarWidth");
-const DMHeader = findComponentByCodeLazy(".cursorPointer:null,children");
+const ChannelHeader = findComponentByCodeLazy(".Messages.HUB_DIRECTORY_CHANNEL_TITLE.format({");
 const Relationships = findByPropsLazy("ensurePrivateChannel");
 const ChatInputTypes = findByPropsLazy("FORM");
 const Sidebars = findByPropsLazy("ThreadSidebar");
@@ -100,12 +100,12 @@ export default definePlugin({
     },
     renderSidebar: ErrorBoundary.wrap(({ maxWidth }: { maxWidth: number; }) => {
         const [channel, setChannel] = useState<Channel | null>(null);
-        const [guild, setGuild] = useState<Channel | null>(null);
+        const [guild, setGuild] = useState<Guild | null>(null);
 
         useEffect(() => {
             const cb = (e: SidebarData) => {
                 const { id, guildId, isUser } = e;
-                setGuild(guildId ? ChannelStore.getChannel(guildId) : null);
+                setGuild(guildId ? GuildStore.getGuild(guildId) : null);
                 if (!isUser) {
                     setChannel(ChannelStore.getChannel(id));
                     return;
@@ -157,13 +157,12 @@ export default definePlugin({
                         />
                     }
                 >
-                    {!channel?.name && (
-                        <DMHeader
-                            level={1}
-                            channel={channel}
-                        />
-                    )}
-                    <Text>{channel?.name ?? ""}</Text>
+                    <ChannelHeader
+                        channel={channel}
+                        channelName={channel?.name}
+                        guild={guild}
+                        parentChannel={ChannelStore.getChannel(channel?.parent_id)}
+                    />
                 </HeaderBar>
                 <Chat
                     channel={channel}
