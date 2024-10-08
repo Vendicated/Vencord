@@ -6,9 +6,9 @@
 
 import "./styles.css";
 
+import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { definePluginSettings } from "@api/Settings";
 
 const eventListeners: { element: HTMLElement, handler: (e: any) => void; }[] = [];
 let lastHoveredElement: HTMLElement | null = null;
@@ -37,7 +37,7 @@ function addHoverEffect(element: HTMLElement, type: string) {
 
     if (settings.store.hoverOutline) {
         if (type === "messageImages") {
-            hoverElementActual = element.closest('[id^="message-accessories-"]')?.querySelector('div')?.querySelector('div') || element;
+            hoverElementActual = element.closest('[id^="message-accessories-"]')?.querySelector("div")?.querySelector("div") || element;
 
             if (!(hoverElementActual instanceof HTMLDivElement)) {
                 hoverElementActual = element;
@@ -147,7 +147,7 @@ function addHoverEffect(element: HTMLElement, type: string) {
         }, hoverDelay);
     };
 
-    const movePreviewListener: (e: MouseEvent) => void = (e) => {
+    const movePreviewListener: (e: MouseEvent) => void = e => {
         positionPreviewDiv(previewDiv, e);
     };
 
@@ -217,7 +217,7 @@ function addHoverEffect(element: HTMLElement, type: string) {
 }
 
 function handleHover(elements: NodeListOf<HTMLElement> | HTMLElement[], type: string) {
-    elements.forEach((el) => {
+    elements.forEach(el => {
         if (!el.dataset.hoverListenerAdded) {
             const handler = () => addHoverEffect(el, type);
             el.addEventListener("mouseover", handler);
@@ -295,7 +295,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "Image Preview",
+    name: "ImagePreview",
     description: "Hover on images, avatars, links, guild icons, and stickers to show a full preview.",
     authors: [EquicordDevs.creations],
     settings: settings,
@@ -313,7 +313,7 @@ export default definePlugin({
                 }
 
                 if (settings.store.messageLinks) {
-                    appContainer.querySelectorAll("span").forEach((span) => {
+                    appContainer.querySelectorAll("span").forEach(span => {
                         const url = span.textContent?.replace(/<[^>]*>?/gm, "");
                         if (url && (url.startsWith("http://") || url.startsWith("https://")) && isLinkAnImage(url)) {
                             handleHover([span], "messageLinks");
@@ -327,10 +327,10 @@ export default definePlugin({
             }
         }
 
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
+        const observer = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
                 if (mutation.type === "childList") {
-                    mutation.addedNodes.forEach((addedNode) => {
+                    mutation.addedNodes.forEach(addedNode => {
                         if (addedNode instanceof HTMLElement) {
                             const element = addedNode as HTMLElement;
 
@@ -346,7 +346,7 @@ export default definePlugin({
                             }
 
                             if (settings.store.messageLinks) {
-                                element.querySelectorAll("span").forEach((span) => {
+                                element.querySelectorAll("span").forEach(span => {
                                     const url = span.textContent?.replace(/<[^>]*>?/gm, "");
                                     if (url && (url.startsWith("http://") || url.startsWith("https://")) && isLinkAnImage(url)) {
                                         handleHover([span], "messageLinks");
@@ -385,12 +385,12 @@ export default definePlugin({
 
         eventListeners.length = 0;
 
-        document.querySelectorAll("[data-hover-listener-added]").forEach((el) => {
+        document.querySelectorAll("[data-hover-listener-added]").forEach(el => {
             el.removeAttribute("data-hover-listener-added");
             (el as HTMLElement).style.outline = "";
         });
 
-        document.querySelectorAll(".preview-div").forEach((preview) => {
+        document.querySelectorAll(".preview-div").forEach(preview => {
             preview.remove();
         });
     }
