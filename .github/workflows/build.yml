@@ -1,8 +1,6 @@
-name: Build DevBuild
+name: Build releases
 on:
     push:
-        branches:
-            - main
         paths:
             - .github/workflows/build.yml
             - src/**
@@ -45,21 +43,41 @@ jobs:
                   rm -rf dist/*-unpacked dist/monaco Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
 
             - name: Get some values needed for the release
-              id: release_values
               run: |
-                  echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
-            - name: Upload DevBuild as release
-              if: github.repository == 'Vendicated/Vencord'
-              run: |
-                  gh release upload devbuild --clobber dist/*
-                  gh release edit devbuild --title "DevBuild $RELEASE_TAG"
+                  echo "commit_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+                  gh release view devbuild &> /dev/null \
+                    && echo "devbuild_exists=true" >> $GITHUB_ENV \
+                    || echo "devbuild_exists=false" >> $GITHUB_ENV
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  RELEASE_TAG: ${{ env.release_tag }}
+
+            - name: Upload latest release (devbuild)
+              if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && github.ref_name == 'main' && !github.event.deleted
+              run: |
+                  gh release upload devbuild --clobber dist/*
+                  gh release edit devbuild --title "DevBuild $COMMIT_SHORT"
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload branch release
+              if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && github.ref_name != 'main' && !github.event.deleted
+              run: |
+                  gh release create branch-$GITHUB_REF_NAME --latest=false --prerelease --target $GITHUB_REF_NAME --title "PreBuild $GITHUB_REF_NAME" || true
+                  gh release upload branch-$GITHUB_REF_NAME --clobber dist/*
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload commit release
+              if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && !github.event.deleted
+              continue-on-error: true
+              run: |
+                  gh release create "commit-$COMMIT_SHORT" --latest=false --prerelease --target $GITHUB_SHA --title "PreBuild $COMMIT_SHORT"
+                  gh release upload "commit-$COMMIT_SHORT" --clobber dist/*
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Upload DevBuild to builds repo
-              if: github.repository == 'Vendicated/Vencord'
+              if: env.devbuild_exists == 'true' && startsWith(github.ref, 'refs/heads/') && github.ref_name == 'main' && !github.event.deleted
               run: |
                   git config --global user.name "$USERNAME"
                   git config --global user.email actions@github.com
