@@ -23,6 +23,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
+import { Channel, User } from "discord-types/general";
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
 
@@ -132,7 +133,7 @@ export default definePlugin({
         {
             find: ".reactorDefault",
             replacement: {
-                match: /,onContextMenu:e=>.{0,15}\((\i),(\i),(\i)\).{0,250}tag:"strong"/,
+                match: /,onContextMenu:\i=>.{0,15}\((\i),(\i),(\i)\).{0,250}tag:"strong"/,
                 replace: "$&,style:{color:$self.getColor($2?.id,$1)}"
             },
             predicate: () => settings.store.reactorsList,
@@ -140,7 +141,7 @@ export default definePlugin({
         {
             find: ",reactionVoteCounts",
             replacement: {
-                match: /,onContextMenu:e=>.{0,15}\((\i),(\i),(\i)\).{0,300}nickname/,
+                match: /,onContextMenu:\i=>.{0,15}\((\i),(\i),(\i)\).{0,300}nickname/,
                 replace: "$&,style:{color:$self.getPollColor($1)}"
             },
             predicate: () => settings.store.pollResults,
@@ -156,9 +157,9 @@ export default definePlugin({
     ],
     settings,
 
-    getPollColor(args: { channel: { guild_id: string | null; }; user: { id: string; }; }) {
-        return args.channel.guild_id
-            ? GuildMemberStore.getMember(args.channel.guild_id, args.user.id)?.colorString ?? null
+    getPollColor(props: { channel: Channel; user: User; }) {
+        return props.channel?.guild_id
+            ? GuildMemberStore.getMember(props.channel.guild_id, props.user.id)?.colorString ?? null
             : null;
     },
 
