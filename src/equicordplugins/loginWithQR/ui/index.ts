@@ -43,4 +43,3 @@ export const QrCodeIcon = proxyLazy(() => icons.QrCodeCameraIcon ?? icons.QrCode
 }>;
 
 export const cl = classNameFactory("qrlogin-");
-

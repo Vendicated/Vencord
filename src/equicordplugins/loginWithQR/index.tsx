@@ -7,11 +7,11 @@
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, i18n, Menu, TabBar } from "@webpack/common";
+import { Button, Forms, i18n, Menu } from "@webpack/common";
 import { ReactElement } from "react";
 
 import { preload, unload } from "./images";
-import { cl, QrCodeIcon } from "./ui";
+import { cl } from "./ui";
 import openQrModal from "./ui/modals/QrModal";
 
 export default definePlugin({
@@ -62,25 +62,31 @@ export default definePlugin({
                 replace: ",$self.insertScanQrButton($1)",
             },
         },
-        // Insert a Scan QR Code MenuItem in the simplified user popout
+        // Insert a Scan QR Code MenuItem in the Swith Accounts popout
         {
-            find: "Messages.MULTI_ACCOUNT_MENU_LABEL",
+            find: ".SWITCH_ACCOUNTS_MANAGE_ACCOUNTS,",
             replacement: {
-                // Insert our own MenuItem before the Switch Accounts button
-                match: /children:\[(.{0,54}id:"switch-accounts")/,
-                replace: "children:[$self.ScanQrMenuItem,$1",
-            },
+                match: /(id:"manage-accounts",.*?)}\)\)(,\i)/,
+                replace: "$1}),$self.ScanQrMenuItem)$2"
+            }
         },
-        // Add a Scan QR entry to the settings TabBar
+
+        // Insert a Scan QR Code button in the Settings sheet
         {
-            find: ".BILLING_SETTINGS,",
+            find: "useGenerateUserSettingsSections",
             replacement: {
-                match: /((\i\.settings)\.forEach.+?(\i).push\(.+}\)}\))/,
-                replace: (_, original, settings, elements) =>
-                    `${original},${settings}?.[0]=="ACCOUNT"` +
-                    `&&${elements}.push({section:"CUSTOM",element:$self.ScanQrTabBarComponent})`,
-            },
+                match: /(\.FRIEND_REQUESTS)/,
+                replace: "$1,\"SCAN_QR_CODE\""
+            }
         },
+        // Insert a Scan QR Code button in the Settings sheet (part 2)
+        {
+            find: ".PRIVACY_ENCRYPTION_VERIFIED_DEVICES_V2]",
+            replacement: {
+                match: /(\.CLIPS]:{.*?},)/,
+                replace: "$1\"SCAN_QR_CODE\":$self.ScanQrSettingsSheet,"
+            }
+        }
     ],
 
     qrModalOpen: false,
@@ -93,26 +99,18 @@ export default definePlugin({
             {button}
         </div>
     ),
-
     get ScanQrMenuItem() {
-        return (
-            <Menu.MenuGroup>
-                <Menu.MenuItem
-                    id="scan-qr"
-                    label={i18n.Messages.USER_SETTINGS_SCAN_QR_CODE}
-                    icon={QrCodeIcon}
-                    action={openQrModal}
-                    showIconFirst
-                />
-            </Menu.MenuGroup>
-        );
+        return <Menu.MenuItem id="scan-qr" label={i18n.Messages.USER_SETTINGS_SCAN_QR_CODE} action={openQrModal} />;
     },
-
-    ScanQrTabBarComponent: () => (
-        <TabBar.Item id="Scan QR Code" onClick={openQrModal}>
-            {i18n.Messages.USER_SETTINGS_SCAN_QR_CODE}
-        </TabBar.Item>
-    ),
+    get ScanQrSettingsSheet() {
+        return {
+            section: i18n.Messages.USER_SETTINGS_SCAN_QR_CODE,
+            onClick: openQrModal,
+            searchableTitles: [i18n.Messages.USER_SETTINGS_SCAN_QR_CODE],
+            label: i18n.Messages.USER_SETTINGS_SCAN_QR_CODE,
+            ariaLabel: i18n.Messages.USER_SETTINGS_SCAN_QR_CODE
+        };
+    },
 
     start() {
         // Preload images

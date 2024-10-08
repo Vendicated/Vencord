@@ -39,7 +39,7 @@ export default definePlugin({
                     replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"
                 },
                 {
-                    match: /guildDiscoveryRef.{0,300}\{\}\)\]\}\)\]/,
+                    match: /lastTargetNode.{0,300}\{\}\)\]\}\)\]/,
                     replace: "$&.concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below))"
                 }
             ]

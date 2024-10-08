@@ -18,8 +18,8 @@
     overflow: hidden;
     transition: 200ms background-color ease-in-out, 200ms border-color ease-in-out,
         200ms opacity ease-in-out, 200ms border-width ease-in-out,
-        250ms width cubic-bezier(0.68, -0.6, 0.32, 1.6),
-        250ms height cubic-bezier(0.68, -0.6, 0.32, 1.6);
+        250ms width cubic-bezier(0.76, 0, 0.24, 1),
+        250ms height cubic-bezier(0.76, 0, 0.24, 1);
 }
 
 .qrlogin-modal-filepaste * {
@@ -39,6 +39,14 @@
 .qrlogin-modal-filepaste-preview {
     border-width: 0;
     background-color: #0005;
+}
+
+.qrlogin-modal-filepaste-preview video {
+    object-fit: fill;
+}
+
+.qrlogin-preview-crosses {
+    animation: 500ms preview-crosses cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
 .qrlogin-preview-cross {
@@ -85,11 +93,10 @@
 .qrlogin-device-confirm {
     margin-top: 18px;
     width: 20rem;
-    background: linear-gradient(
-        to right,
-        var(--button-danger-background) calc(var(--progress) - 1%),
-        var(--button-danger-background-active) var(--progress)
-    ) !important;
+    background: linear-gradient(to right,
+            var(--button-danger-background) calc(var(--progress) - 1%),
+            var(--button-danger-background-active) var(--progress)) !important;
+    border-radius: 420rem;
 
     --progress: 0%;
 }
@@ -119,5 +126,11 @@
 
     100% {
         opacity: 1;
+    }
+}
+
+@keyframes preview-crosses {
+    to {
+        transform: translate(var(--offset-x), var(--offset-y)) scale(var(--scale));
     }
 }

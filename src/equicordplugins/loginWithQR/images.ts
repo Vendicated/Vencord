@@ -8,11 +8,11 @@ export const images = {
     cross: "https://i.imgur.com/XxRnu3b.png",
     deviceImage: {
         success:
-            "https://github.com/nexpid/Themelings/blob/3a063c5188f4cac096171f29163f9e2659f275a3/icons/images/native/img_remote_auth_succeeded.png",
+            "https://github.com/nexpid/Themelings/raw/data/icons/images/native/img_remote_auth_succeeded.png",
         notFound:
-            "https://github.com/nexpid/Themelings/blob/3a063c5188f4cac096171f29163f9e2659f275a3/icons/images/native/img_remote_auth_not_found.png",
+            "https://github.com/nexpid/Themelings/raw/data/icons/images/native/img_remote_auth_not_found.png",
         loading:
-            "https://github.com/nexpid/Themelings/blob/3a063c5188f4cac096171f29163f9e2659f275a3/icons/images/native/img_remote_auth_loaded.png",
+            "https://github.com/nexpid/Themelings/raw/data/icons/images/native/img_remote_auth_loaded.png",
     },
 } as const;
 
