@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, i18n, Menu } from "@webpack/common";
 import { ReactElement } from "react";
@@ -15,15 +16,8 @@ import openQrModal from "./ui/modals/QrModal";
 
 export default definePlugin({
     name: "LoginWithQR",
-    description:
-        "Allows you to login to another device by scanning a login QR code, just like on mobile!",
-    // replace with EquicordDevs.nexpid when merged to Equicord
-    authors: [
-        {
-            name: "Nexpid",
-            id: 853550207039832084n,
-        },
-    ],
+    description: "Allows you to login to another device by scanning a login QR code, just like on mobile!",
+    authors: [EquicordDevs.nexpid],
 
     settings: definePluginSettings({
         scanQr: {
