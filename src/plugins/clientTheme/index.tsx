@@ -6,6 +6,7 @@
 
 import "./clientTheme.css";
 
+import { Styles } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
@@ -113,19 +114,24 @@ export default definePlugin({
     authors: [Devs.F53, Devs.Nuckyz],
     description: "Recreation of the old client theme experiment. Add a color to your Discord client theme",
     settings,
+    dependencies: ["StyleListenerAPI"],
 
-    startAt: StartAt.DOMContentLoaded,
+    startAt: StartAt.Init,
     async start() {
         updateColorVars(settings.store.color);
 
-        const styles = await getStyles();
-        generateColorOffsets(styles);
-        generateLightModeFixes(styles);
+        const lightFixes = createStyle("clientThemeLightModeFixes");
+        const offsets = createStyle("clientThemeOffsets");
+        Styles.styleListeners.add((styles, initial) => {
+            if (initial) offsets.textContent = generateColorOffsets(styles);
+            lightFixes.textContent += generateLightModeFixes(styles);
+        });
     },
 
     stop() {
         document.getElementById("clientThemeVars")?.remove();
         document.getElementById("clientThemeOffsets")?.remove();
+        document.getElementById("clientThemeLightModeFixes")?.remove();
     }
 });
 
@@ -158,13 +164,15 @@ function generateColorOffsets(styles) {
         variableMatch = variableRegex.exec(styles);
     }
 
-    createStyleSheet("clientThemeOffsets", [
+    return [
         `.theme-light {\n ${genThemeSpecificOffsets(variableLightness, lightVariableRegex, "--primary-345-hsl")} \n}`,
         `.theme-dark {\n ${genThemeSpecificOffsets(variableLightness, darkVariableRegex, "--primary-600-hsl")} \n}`,
-    ].join("\n\n"));
+    ].join("\n\n");
 }
 
 function generateLightModeFixes(styles) {
+    const out: string[] = [];
+
     const groupLightUsesW500Regex = /\.theme-light[^{]*\{[^}]*var\(--white-500\)[^}]*}/gm;
     // get light capturing groups that mention --white-500
     const relevantStyles = [...styles.matchAll(groupLightUsesW500Regex)].flat();
@@ -175,8 +183,10 @@ function generateLightModeFixes(styles) {
     const backgroundGroups = mapReject(relevantStyles, entry => captureOne(entry, groupBackgroundRegex)).join(",\n");
     const backgroundColorGroups = mapReject(relevantStyles, entry => captureOne(entry, groupBackgroundColorRegex)).join(",\n");
     // create css to reassign them to --primary-100
-    const reassignBackgrounds = `${backgroundGroups} {\n background: var(--primary-100) \n}`;
-    const reassignBackgroundColors = `${backgroundColorGroups} {\n background-color: var(--primary-100) \n}`;
+    if (backgroundGroups.length > 0)
+        out.push(`${backgroundGroups} {\n background: var(--primary-100) \n}`);
+    if (backgroundColorGroups.length > 0)
+        out.push(`${backgroundColorGroups} {\n background-color: var(--primary-100) \n}`);
 
     const groupBgVarRegex = /\.theme-light\{([^}]*--[^:}]*(?:background|bg)[^:}]*:var\(--white-500\)[^}]*)\}/m;
     const bgVarRegex = /^(--[^:]*(?:background|bg)[^:]*):var\(--white-500\)/m;
@@ -184,14 +194,11 @@ function generateLightModeFixes(styles) {
     const lightVars = mapReject(relevantStyles, style => captureOne(style, groupBgVarRegex)) // get the insides of capture groups that have at least one background var with w500
         .map(str => str.split(";")).flat(); // captureGroupInsides[] -> cssRule[]
     const lightBgVars = mapReject(lightVars, variable => captureOne(variable, bgVarRegex)); // remove vars that aren't for backgrounds or w500
-    // create css to reassign every var
-    const reassignVariables = `.theme-light {\n ${lightBgVars.map(variable => `${variable}: var(--primary-100);`).join("\n")} \n}`;
+    // create css to reassign every usage of w500 to p100
+    if (lightBgVars.length > 0)
+        out.push(`.theme-light{\n${lightBgVars.map(variable => `${variable}: var(--primary-100);`).join("\n")}\n}`);
 
-    createStyleSheet("clientThemeLightModeFixes", [
-        reassignBackgrounds,
-        reassignBackgroundColors,
-        reassignVariables,
-    ].join("\n\n"));
+    return out.join("\n\n");
 }
 
 function captureOne(str, regex) {
@@ -207,8 +214,7 @@ function updateColorVars(color: string) {
     const { hue, saturation, lightness } = hexToHSL(color);
 
     let style = document.getElementById("clientThemeVars");
-    if (!style)
-        style = createStyleSheet("clientThemeVars");
+    if (!style) style = createStyle("clientThemeVars");
 
     style.textContent = `:root {
         --theme-h: ${hue};
@@ -217,26 +223,12 @@ function updateColorVars(color: string) {
     }`;
 }
 
-function createStyleSheet(id, content = "") {
+function createStyle(id: string) {
     const style = document.createElement("style");
-    style.setAttribute("id", id);
-    style.textContent = content.split("\n").map(line => line.trim()).join("\n");
-    document.body.appendChild(style);
+    style.id = id;
+    if (document.documentElement) document.documentElement.append(style);
+    else window.requestAnimationFrame(() => document.documentElement.append(style));
     return style;
-}
-
-// returns all of discord's native styles in a single string
-async function getStyles(): Promise<string> {
-    let out = "";
-    const styleLinkNodes = document.querySelectorAll('link[rel="stylesheet"]');
-    for (const styleLinkNode of styleLinkNodes) {
-        const cssLink = styleLinkNode.getAttribute("href");
-        if (!cssLink) continue;
-
-        const res = await fetch(cssLink);
-        out += await res.text();
-    }
-    return out;
 }
 
 // https://css-tricks.com/converting-color-spaces-in-javascript/
