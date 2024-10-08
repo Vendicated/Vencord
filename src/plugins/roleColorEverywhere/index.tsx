@@ -51,6 +51,12 @@ const settings = definePluginSettings({
         description: "Show role colors in the reactors list",
         restartNeeded: true
     },
+    pollResults: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show role colors in the poll results",
+        restartNeeded: true
+    },
     colorChatMessages: {
         type: OptionType.BOOLEAN,
         default: false,
@@ -68,7 +74,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "RoleColorEverywhere",
-    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi],
+    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi, Devs.jamesbt365],
     description: "Adds the top role color anywhere possible",
     patches: [
         // Chat Mentions
@@ -132,6 +138,14 @@ export default definePlugin({
             predicate: () => settings.store.reactorsList,
         },
         {
+            find: ",reactionVoteCounts",
+            replacement: {
+                match: /,onContextMenu:e=>.{0,15}\((\i),(\i),(\i)\).{0,300}nickname/,
+                replace: "$&,style:{color:$self.getPollColor($1)}"
+            },
+            predicate: () => settings.store.pollResults,
+        },
+        {
             find: '.Messages.MESSAGE_EDITED,")"',
             replacement: {
                 match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
@@ -141,6 +155,12 @@ export default definePlugin({
         },
     ],
     settings,
+
+    getPollColor(args: { channel: { guild_id: string | null; }; user: { id: string; }; }) {
+        return args.channel.guild_id
+            ? GuildMemberStore.getMember(args.channel.guild_id, args.user.id)?.colorString ?? null
+            : null;
+    },
 
     getColor(userId: string, { channelId, guildId }: { channelId?: string; guildId?: string; }) {
         if (!(guildId ??= ChannelStore.getChannel(channelId!)?.guild_id)) return null;
