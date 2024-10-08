@@ -10,6 +10,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { UserStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 interface UsernameProps {
@@ -40,12 +41,18 @@ const settings = definePluginSettings({
         default: false,
         description: "Also apply functionality to reply previews",
     },
+    inMentions: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Also apply functionality to mentions",
+        restartNeeded: true
+    }
 });
 
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display usernames next to nicks, or no nicks at all",
-    authors: [Devs.Rini, Devs.TheKodeToad],
+    authors: [Devs.Rini, Devs.TheKodeToad, Devs.sadan],
     patches: [
         {
             find: '?"@":""',
@@ -54,6 +61,14 @@ export default definePlugin({
                 replace: "$self.renderUsername(arguments[0])}"
             }
         },
+        {
+            find: "missing user\"",
+            predicate: () => settings.store.inMentions,
+            replacement: {
+                match: /"@"\.concat\(null!=(\i)\?\i:(\i)\)/,
+                replace: "$self.renderMentionUsername($1, $2, arguments[0])"
+            }
+        }
     ],
     settings,
 
@@ -81,4 +96,26 @@ export default definePlugin({
             return <>{author?.nick}</>;
         }
     }, { noop: true }),
+
+    renderMentionUsername(nick: string | null, displayName: string, { userId }: {
+        userId: string;
+    }) {
+        try {
+            if (!settings.store.displayNames)
+                displayName = UserStore.getUser(userId).username;
+            switch (settings.store.mode) {
+                case "user-nick":
+                    return <>@{displayName} <span className="vc-smyn-suffix">{nick}</span></>;
+                case "nick-user":
+                    return <>@{nick} <span className="vc-smyn-suffix">{displayName}</span></>;
+                case "user":
+                    return <>@{displayName}</>;
+                default:
+                    throw new Error("settings.store.mode is not one of nick-user, user-nick or user");
+            }
+        } catch (e) {
+            console.error(e);
+            return `@${displayName}`;
+        }
+    }
 });
