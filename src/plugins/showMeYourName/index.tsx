@@ -103,6 +103,8 @@ export default definePlugin({
         try {
             if (!settings.store.displayNames)
                 displayName = UserStore.getUser(userId).username;
+            if (!nick)
+                return <>@{displayName}</>;
             switch (settings.store.mode) {
                 case "user-nick":
                     return <>@{displayName} <span className="vc-smyn-suffix">{nick}</span></>;
