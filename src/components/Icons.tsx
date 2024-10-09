@@ -65,8 +65,7 @@ export function LinkIcon({ height = 24, width = 24, className }: IconProps) {
 }
 
 /**
- * Discord's copy icon, as seen in the user popout right of the username when clicking
- * your own username in the bottom left user panel
+ * Discord's copy icon, as seen in the user panel popout on the right of the username and in large code blocks
  */
 export function CopyIcon(props: IconProps) {
     return (
@@ -76,8 +75,9 @@ export function CopyIcon(props: IconProps) {
             viewBox="0 0 24 24"
         >
             <g fill="currentColor">
-                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1z" />
-                <path d="M15 5H8c-1.1 0-1.99.9-1.99 2L6 21c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V11l-6-6zM8 21V7h6v5h5v9H8z" />
+                <path d="M3 16a1 1 0 0 1-1-1v-5a8 8 0 0 1 8-8h5a1 1 0 0 1 1 1v.5a.5.5 0 0 1-.5.5H10a6 6 0 0 0-6 6v5.5a.5.5 0 0 1-.5.5H3Z" />
+                <path d="M6 18a4 4 0 0 0 4 4h8a4 4 0 0 0 4-4v-4h-3a5 5 0 0 1-5-5V6h-4a4 4 0 0 0-4 4v8Z" />
+                <path d="M21.73 12a3 3 0 0 0-.6-.88l-4.25-4.24a3 3 0 0 0-.88-.61V9a3 3 0 0 0 3 3h2.73Z" />
             </g>
         </Icon>
     );

@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,20 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+migratePluginSettings("AlwaysExpandRoles", "ShowAllRoles");
 export default definePlugin({
-    name: "TimeBarAllActivities",
-    description: "Adds the Spotify time bar to all activities if they have start and end timestamps",
-    authors: [Devs.fawn],
+    name: "AlwaysExpandRoles",
+    description: "Always expands the role list in profile popouts",
+    authors: [Devs.surgedevs],
     patches: [
         {
-            find: "}renderTimeBar(",
+            find: 'action:"EXPAND_ROLES"',
             replacement: {
-                match: /renderTimeBar\((.{1,3})\){.{0,50}?let/,
-                replace: "renderTimeBar($1){let"
+                match: /(roles:\i(?=.+?(\i)\(!0\)[,;]\i\({action:"EXPAND_ROLES"}\)).+?\[\i,\2\]=\i\.useState\()!1\)/,
+                replace: (_, rest, setExpandedRoles) => `${rest}!0)`
             }
         }
-    ],
+    ]
 });
