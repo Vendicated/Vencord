@@ -12,7 +12,6 @@ import { filters, findByPropsLazy, findComponentByCodeLazy, mapMangledModuleLazy
 import {
     ChannelStore,
     FluxDispatcher,
-    GuildStore,
     Icons,
     Menu,
     MessageActions,
@@ -20,9 +19,12 @@ import {
     PermissionStore,
     useEffect,
     UserStore,
-    useState
+    useStateFromStores
 } from "@webpack/common";
-import { Channel, Guild, User } from "discord-types/general";
+import { Channel, User } from "discord-types/general";
+
+import { SidebarStore } from "./store";
+
 
 const { HeaderBar, HeaderBarIcon } = mapMangledModuleLazy(".themedMobile]:", {
     HeaderBarIcon: filters.byCode('size:"custom",'),
@@ -31,15 +33,9 @@ const { HeaderBar, HeaderBarIcon } = mapMangledModuleLazy(".themedMobile]:", {
 const Chat = findComponentByCodeLazy("filterAfterTimestamp:", "chatInputType");
 const Resize = findComponentByCodeLazy("sidebarType:", "homeSidebarWidth");
 const ChannelHeader = findComponentByCodeLazy(".Messages.HUB_DIRECTORY_CHANNEL_TITLE.format({");
-const Relationships = findByPropsLazy("ensurePrivateChannel");
-const ChatInputTypes = findByPropsLazy("FORM");
-const Sidebars = findByPropsLazy("ThreadSidebar");
+const ChatInputTypes = findByPropsLazy("FORM", "NORMAL");
+const Sidebars = findByPropsLazy("ThreadSidebar", "MessageRequestSidebar");
 
-interface SidebarData {
-    isUser: boolean;
-    guildId: string;
-    id: string;
-}
 
 interface ContextMenuProps {
     channel: Channel;
@@ -87,47 +83,24 @@ export default definePlugin({
             replacement: [
                 {
                     match: /this.renderThreadSidebar\(\),/,
-                    replace: "$&$self.renderSidebar({maxWidth:this.props.width}),"
+                    replace: "$&$self.renderSidebar({maxWidth:this.props.width,stockSidebarOpen:this.props.channelSidebarState || this.props.guildSidebarState}),"
                 }
             ]
         }
     ],
+
     contextMenus: {
         "user-context": MakeContextCallback("user"),
         "channel-context": MakeContextCallback("channel"),
         "thread-context": MakeContextCallback("channel"),
         "gdm-context": MakeContextCallback("channel"),
     },
-    renderSidebar: ErrorBoundary.wrap(({ maxWidth }: { maxWidth: number; }) => {
-        const [channel, setChannel] = useState<Channel | null>(null);
-        const [guild, setGuild] = useState<Guild | null>(null);
 
-        useEffect(() => {
-            const cb = (e: SidebarData) => {
-                const { id, guildId, isUser } = e;
-                setGuild(guildId ? GuildStore.getGuild(guildId) : null);
-                if (!isUser) {
-                    setChannel(ChannelStore.getChannel(id));
-                    return;
-                }
-                // @ts-expect-error outdated type
-                const existingDm = ChannelStore.getDMChannelFromUserId(id);
-
-                if (existingDm) {
-                    setChannel(existingDm);
-                    return;
-                }
-
-                Relationships.ensurePrivateChannel(id).then((channelId: string) => {
-                    setChannel(ChannelStore.getChannel(channelId));
-                });
-            };
-            // @ts-ignore
-            FluxDispatcher.subscribe("NEW_SIDEBAR_CHAT", cb);
-
-            // @ts-ignore
-            return () => FluxDispatcher.unsubscribe("NEW_SIDEBAR_CHAT", cb);
-        }, []);
+    renderSidebar: ErrorBoundary.wrap(({ maxWidth, stockSidebarOpen }: { maxWidth: number, stockSidebarOpen: boolean; }) => {
+        const [guild, channel] = useStateFromStores(
+            [SidebarStore],
+            () => [SidebarStore.guild, SidebarStore.channel]
+        );
 
         useEffect(() => {
             if (channel) {
@@ -138,7 +111,7 @@ export default definePlugin({
             }
         }, [channel]);
 
-        if (!channel) return null;
+        if (!channel || stockSidebarOpen) return null;
 
         return (
             <Resize
@@ -151,8 +124,10 @@ export default definePlugin({
                             icon={Icons.XSmallIcon}
                             tooltip="Close Sidebar Chat"
                             onClick={() => {
-                                setChannel(null);
-                                setGuild(null);
+                                FluxDispatcher.dispatch({
+                                    // @ts-ignore
+                                    type: "CLOSE_SIDEBAR_CHAT",
+                                });
                             }}
                         />
                     }
