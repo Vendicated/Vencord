@@ -10,6 +10,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { filters, findByPropsLazy, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
 import {
+    ChannelRouter,
     ChannelStore,
     FluxDispatcher,
     Icons,
@@ -17,6 +18,7 @@ import {
     MessageActions,
     PermissionsBits,
     PermissionStore,
+    SelectedChannelStore,
     useEffect,
     UserStore,
     useStateFromStores
@@ -120,16 +122,33 @@ export default definePlugin({
             >
                 <HeaderBar
                     toolbar={
-                        <HeaderBarIcon
-                            icon={Icons.XSmallIcon}
-                            tooltip="Close Sidebar Chat"
-                            onClick={() => {
-                                FluxDispatcher.dispatch({
-                                    // @ts-ignore
-                                    type: "CLOSE_SIDEBAR_CHAT",
-                                });
-                            }}
-                        />
+                        <>
+                            <HeaderBarIcon
+                                icon={Icons.ArrowsLeftRightIcon}
+                                tooltip="Switch channels"
+                                onClick={() => {
+                                    const currentChannel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
+                                    FluxDispatcher.dispatch({
+                                        // @ts-ignore
+                                        type: "NEW_SIDEBAR_CHAT",
+                                        isUser: currentChannel.id === "1",
+                                        guildId: currentChannel?.guild_id,
+                                        id: currentChannel.id,
+                                    });
+                                    ChannelRouter.transitionToChannel(channel.id);
+                                }}
+                            />
+                            <HeaderBarIcon
+                                icon={Icons.XSmallIcon}
+                                tooltip="Close Sidebar Chat"
+                                onClick={() => {
+                                    FluxDispatcher.dispatch({
+                                        // @ts-ignore
+                                        type: "CLOSE_SIDEBAR_CHAT",
+                                    });
+                                }}
+                            />
+                        </>
                     }
                 >
                     <ChannelHeader
