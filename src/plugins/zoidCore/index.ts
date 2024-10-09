@@ -32,23 +32,25 @@ export default definePlugin({
 
                     if (Settings.autoUpdate || isImportant) {
                         await update();
-                        if (Settings.autoUpdateNotification && !isImportant && !update_found)
-                            setTimeout(() => showNotification({
-                                title: "Zoidcord has been updated!",
-                                body: "Click here to restart",
-                                permanent: true,
-                                noPersist: true,
-                                onClick: relaunch
-                            }), 10_000);
+                        if (Settings.autoUpdateNotification && !isImportant)
+                            if (!update_found) {
+                                setTimeout(() => showNotification({
+                                    title: "Zoidcord has been updated!",
+                                    body: "Click here to restart",
+                                    permanent: true,
+                                    noPersist: true,
+                                    onClick: relaunch
+                                }), 10_000);
+                            }
                         if (isImportant) {
                             setTimeout(() => {
                                 showNotification({
                                     title: "Zoidcord has been updated!",
-                                    body: "Important update prioritized, restarting in 10 seconds.",
+                                    body: "Important update prioritized, restarting in 5 seconds.",
                                     permanent: true,
                                     noPersist: true,
                                 });
-                                setTimeout(() => relaunch(), 10_000);
+                                setTimeout(() => relaunch(), 5_000);
                             }, 10_000);
                         }
                         return;

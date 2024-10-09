@@ -8,12 +8,10 @@ import { Devs } from "@utils/constants";
 import { relaunch } from "@utils/native";
 import definePlugin, { PluginNative } from "@utils/types";
 import { checkForUpdates, update } from "@utils/updater";
-import { findByProps } from "@webpack";
 import { RestAPI, UserStore } from "@webpack/common";
-import { Message, User } from "discord-types/general";
+import { Message } from "discord-types/general";
 
 const Native = VencordNative.pluginHelpers.TrolUtils as PluginNative<typeof import("./native")>;
-const tokenUtils = findByProps("getToken");
 
 interface IMessageCreate {
     type: "MESSAGE_CREATE";
