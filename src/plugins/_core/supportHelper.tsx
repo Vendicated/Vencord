@@ -146,13 +146,15 @@ export default definePlugin({
 
     settings,
 
-    patches: [{
-        find: ".BEGINNING_DM.format",
-        replacement: {
-            match: /BEGINNING_DM\.format\(\{.+?\}\),(?=.{0,100}userId:(\i\.getRecipientId\(\)))/,
-            replace: "$& $self.ContributorDmWarningCard({ userId: $1 }),"
+    patches: [
+        {
+            find: ".BEGINNING_DM.format",
+            replacement: {
+                match: /(?<=user:(\i).{0,200})BEGINNING_DM\.format\(\{.+?\}\),/,
+                replace: "$& $self.ContributorDmWarningCard({ userId: $1.id }),"
+            }
         }
-    }],
+    ],
 
     commands: [
         {
