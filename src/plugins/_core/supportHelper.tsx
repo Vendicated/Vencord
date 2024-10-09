@@ -142,15 +142,15 @@ export default definePlugin({
     required: true,
     description: "Helps us provide support to you",
     authors: [Devs.Ven],
-    dependencies: ["CommandsAPI", "UserSettingsAPI", "MessageAccessoriesAPI"],
+    dependencies: ["UserSettingsAPI", "MessageAccessoriesAPI"],
 
     settings,
 
     patches: [{
         find: ".BEGINNING_DM.format",
         replacement: {
-            match: /BEGINNING_DM\.format\(\{.+?\}\),(?=.{0,100}userId:(\i\.getRecipientId\(\)))/,
-            replace: "$& $self.ContributorDmWarningCard({ userId: $1 }),"
+            match: /BEGINNING_DM\.format\(\{.+?\}\),(?=.{0,300}(\i)\.isMultiUserDM)/,
+            replace: "$& $self.renderContributorDmWarningCard({ channel: $1 }),"
         }
     }],
 
@@ -235,7 +235,8 @@ export default definePlugin({
         }
     },
 
-    ContributorDmWarningCard: ErrorBoundary.wrap(({ userId }) => {
+    renderContributorDmWarningCard: ErrorBoundary.wrap(({ channel }) => {
+        const userId = channel.getRecipientId();
         if (!isPluginDev(userId)) return null;
         if (RelationshipStore.isFriend(userId) || isPluginDev(UserStore.getCurrentUser()?.id)) return null;
 
