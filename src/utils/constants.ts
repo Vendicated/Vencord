@@ -523,6 +523,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "verticalsync",
         id: 328165170536775680n
     },
+    hen: {
+        id: 279266228151779329n,
+        name: "Hen"
+    },
     nekohaxx: {
         name: "nekohaxx",
         id: 1176270221628153886n
