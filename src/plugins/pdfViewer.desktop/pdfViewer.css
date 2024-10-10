@@ -1,0 +1,30 @@
+.vc-pdf-viewer-container {
+    resize: both;
+    overflow: hidden;
+    max-width: 100%;
+    min-width: 432px;
+    max-height: 80vh;
+    min-height: 500px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+}
+
+.vc-pdf-viewer-preview {
+    width: 100%;
+    flex-grow: 1;
+    border: none;
+}
+
+.vc-pdf-viewer-toggle {
+    justify-self: center;
+    display: flex;
+    justify-content: center;
+    margin-right: 8px;
+    color: var(--interactive-normal);
+    cursor: pointer;
+}
+
+.vc-pdf-viewer-toggle:hover {
+    color: var(--interactive-hover);
+}
