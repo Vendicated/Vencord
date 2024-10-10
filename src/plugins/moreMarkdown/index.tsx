@@ -73,6 +73,11 @@ const createRule = (name, order, charList, type, animLength = 0) => {
 let styles: HTMLStyleElement;
 const updateStyles = () => {
     styles.textContent = `
+
+[class*="messageContent"] {
+    overflow: visible !important;
+}
+
 .wiggly {
     position: relative;
     top: 0;
