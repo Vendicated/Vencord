@@ -50,7 +50,7 @@ function MakeContextCallback(name: "user" | "channel"): NavContextMenuPatchCallb
     return (children, { user, channel, guildId }: ContextMenuProps) => {
         const isUser = name === "user";
         if (isUser && !user) return;
-        if (!isUser && !channel) return;
+        if (!isUser && (!channel || channel.type === 4)) return;
 
         if (isUser && user.id === UserStore.getCurrentUser().id) return;
         if (!isUser && (!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) && channel.type !== 3)) return;
@@ -98,7 +98,7 @@ export default definePlugin({
         "gdm-context": MakeContextCallback("channel"),
     },
 
-    renderSidebar: ErrorBoundary.wrap(({ maxWidth, stockSidebarOpen }: { maxWidth: number, stockSidebarOpen: boolean; }) => {
+    renderSidebar: ErrorBoundary.wrap(({ maxWidth, stockSidebarOpen }: { maxWidth: number, stockSidebarOpen: any; }) => {
         const [guild, channel] = useStateFromStores(
             [SidebarStore],
             () => [SidebarStore.guild, SidebarStore.channel]
@@ -161,7 +161,7 @@ export default definePlugin({
                 <Chat
                     channel={channel}
                     guild={guild}
-                    chatInputType={ChatInputTypes.NORMAL}
+                    chatInputType={ChatInputTypes.SIDEBAR}
                 />
             </Resize>
         );
