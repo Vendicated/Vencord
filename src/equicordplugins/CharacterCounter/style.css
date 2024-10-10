@@ -1,0 +1,26 @@
+.char-counter {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: right;
+    position: absolute;
+    bottom: -15px;
+    right: 0;
+    pointer-events: none;
+    z-index: 1;
+    margin: 0;
+    padding: 0;
+}
+
+.char-counter.left {
+    text-align: left;
+    right: auto;
+    left: 0;
+}
+
+.char-counter .char-count {
+    transition: color 0.3s ease;
+}
+
+.char-counter .char-max {
+    color: var(--text-muted);
+}

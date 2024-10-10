@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>126 additional plugins</summary>
+<summary>127 additional plugins</summary>
 
 - AllCallTimers by MaxHerbold & D3SOX
 - AltKrispSwitch by newwares
@@ -34,6 +34,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - CuteAnimeBoys by ShadyGoat
 - CuteNekos by echo
 - CutePats by thororen
+- CharacterCounter by Creations
 - Demonstration by Samwich
 - DisableCameras by Joona
 - DoNotLeak by Perny
@@ -67,7 +68,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - InRole by nin0dev
 - IrcColors by Grzesiek11
 - IRememberYou by zoodogood
-- ImagePreview by Creation's
+- ImagePreview by Creations
 - Jumpscare by Surgedevs
 - JumpToStart by Samwich
 - KeyboardSounds by HypedDomi

@@ -41,9 +41,9 @@ const logger = new Logger("MediaDownloader", "#ff0b01");
 
 const maxFileSize = () => {
     const premiumType = (UserStore.getCurrentUser().premiumType ?? 0);
-    if (premiumType > 1) return 500000000; // 500MB
-    if (premiumType > 0) return 50000000; // 50MB
-    return 25000000; // 25MB
+    if (premiumType === 2) return 500000000; // Nitro 500MB
+    if (premiumType === 1 || premiumType === 3) return 50000000; // Classic || Basic 50MB
+    return 25000000; // Base 25MB
 };
 /** Takes a string and splits it into an array of arguments. */
 const argParse = (args: string): string[] => args.match(
