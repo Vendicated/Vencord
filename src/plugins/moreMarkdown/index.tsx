@@ -84,7 +84,7 @@ const HTMLReact = (data, _1, _2, _3) => {
 };
 
 function escapeRegex(str: string): string {
-    return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+    return str.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
 }
 
 const createRule = (name, order, charList, type, animLength = 0) => {
