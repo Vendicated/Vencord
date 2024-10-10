@@ -64,7 +64,7 @@ const HTMLReact = (data, _1, _2, _3) => {
             console.error(data.content);
         }
     }
-    return <div className="HTMLMessageContent" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trueContent) }} />;
+    return <span className="HTMLMessageContent" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trueContent) }} />;
 };
 
 function escapeRegex(str: string): string {
@@ -98,6 +98,10 @@ const updateStyles = () => {
 
 [class*="messageContent"] {
     overflow: visible !important;
+}
+
+span.HTMLMessageContent {
+    display: inline-block;
 }
 
 .wiggly {
