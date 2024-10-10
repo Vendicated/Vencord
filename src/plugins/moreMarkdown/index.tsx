@@ -54,14 +54,7 @@ const HTMLReact = (data, _1, _2, _3) => {
     for (const child of data.content) {
         try {
             if (child.type === "text") {
-                trueContent += child.content
-                    .replace(/<script/g, "&lt;script")
-                    .replace(/<style/g, "&lt;style")
-                    .replace(/<iframe/g, "&lt;iframe")
-                    .replace(/<embed/g, "&lt;embed")
-                    .replace(/<object/g, "&lt;object")
-                    .replace(/<applet/g, "&lt;applet")
-                    .replace(/<meta/g, "&lt;meta");
+                trueContent += child.content;
             }
             if (child.type === "link") {
                 trueContent += child.content[0].content;
@@ -71,7 +64,7 @@ const HTMLReact = (data, _1, _2, _3) => {
             console.error(data.content);
         }
     }
-    return <div dangerouslySetInnerHTML={{ __html: trueContent }} />;
+    return <div className="HTMLMessageContent" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trueContent) }} />;
 };
 
 function escapeRegex(str: string): string {
@@ -237,6 +230,8 @@ rules.forEach(rule => {
 });
 console.info("Patch: " + patch);
 
+declare const DOMPurify: any;
+
 export default definePlugin({
     name: "MoreMarkdown",
     description: "More markdown capabilities for Zoidcord",
@@ -260,6 +255,10 @@ export default definePlugin({
 
         updateStyles();
         console.log(patch);
+
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js';
+        document.head.appendChild(script);
     },
 
     stop: () => styles.remove()
