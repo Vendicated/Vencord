@@ -100,6 +100,10 @@ const updateStyles = () => {
     overflow: visible !important;
 }
 
+.HTMLMessageContent {
+    overflow: hidden;
+}
+
 .wiggly {
     position: relative;
     top: 0;
