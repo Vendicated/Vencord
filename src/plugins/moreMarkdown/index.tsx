@@ -51,8 +51,12 @@ const characterReact = (data, output, className) => {
     return traverse(output(data.content));
 };
 
+function escapeRegex(str: string): string {
+    return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
+
 const createRule = (name, order, charList, className, type) => {
-    const regex = new RegExp(`^${charList[0]}([\\s\\S]+?)${charList[1]}`);
+    const regex = new RegExp(`^${escapeRegex(charList[0])}([\\s\\S]+?)${escapeRegex(charList[1])}`);
     const reactFunction = type === "block" ? blockReact : characterReact;
     const rule = {
         name: name,
@@ -106,11 +110,29 @@ const updateStyles = () => {
         top: 5px;
         animation-timing-function: ease-in;
     }
+}
+
+.highlighted {
+    background-color: white;
+    color: black;
+}
+
+.spinning {
+    animation: spin 2s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 `;
 };
 
 const rules = [
-    createRule("wiggly", 24, ["~", "~"], "wiggly", "character"),
+    createRule("wiggly", 24, [")~", "~("], "wiggly", "character"),
+    createRule("highlighted", 24, ["==", "=="], "highlighted", "block"),
+    createRule("spinning", 24, ["@@", "@@"], "spinning", "block"),
 ];
 
 const rulesByName = {};
@@ -122,6 +144,7 @@ let patch = "";
 rules.forEach(rule => {
     patch += `${rule.name}:$self.rulesByName["${rule.name}"],`;
 });
+console.info("Patch: " + patch);
 
 export default definePlugin({
     name: "MoreMarkdown",
