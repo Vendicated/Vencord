@@ -17,11 +17,12 @@
 */
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { definePluginSettings } from "@api/Settings";
 import { ScreenshareIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { openImageModal } from "@utils/discord";
-import definePlugin from "@utils/types";
-import { Menu } from "@webpack/common";
+import definePlugin, { OptionType } from "@utils/types";
+import { Menu, Text } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
 
 import { ApplicationStreamingStore, ApplicationStreamPreviewStore } from "./webpack/stores";
@@ -85,12 +86,41 @@ export const userContextPatch: NavContextMenuPatchCallback = (children, { user }
     if (user) return addViewStreamContext(children, { userId: user.id });
 };
 
+const settings = definePluginSettings({
+    thumbnailEnlarge: {
+        type: OptionType.BOOLEAN,
+        description: "Enlarge on thumbnail click",
+        default: true,
+        restartNeeded: true
+    }
+});
+
 export default definePlugin({
     name: "BiggerStreamPreview",
     description: "This plugin allows you to enlarge stream previews",
-    authors: [Devs.phil],
+    authors: [Devs.phil, Devs.relitrix],
+    settings,
     contextMenus: {
         "user-context": userContextPatch,
         "stream-context": streamContextPatch
-    }
+    },
+    patches: [
+        {
+            find: ".WATCH_STREAM_IN_APP",
+            group: true,
+            replacement: [
+                {
+                    match: /(\i.previewHover,children:)\(.,\i.jsx\)\(\i.Text.(.*?)}\)/,
+                    replace: "$1$self.openPreviewText()"
+                },
+                {
+                    match: /(?<=renderPreview\((\i)\).{40,}\i.Clickable,{onClick:)\i/,
+                    replace: (_, stream) => `() => $self.handleViewPreview(${stream})`
+                }
+            ],
+            predicate: () => settings.store.thumbnailEnlarge
+        }
+    ],
+    openPreviewText: () => <Text variant="text-sm/normal">Open Preview</Text>,
+    handleViewPreview
 });
