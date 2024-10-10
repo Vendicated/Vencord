@@ -37,20 +37,9 @@ const settings = definePluginSettings({
     },
 });
 
-function encodeStreamKey(stream) {
-    const { streamType, guildId, channelId, ownerId } = stream;
-    switch (streamType) {
-        case "guild":
-            return [streamType, guildId, channelId, ownerId].join(":");
-        case "call":
-            return [streamType, channelId, ownerId].join(":");
-        default:
-            throw console.log("Unknown stream type ".concat(streamType));
-    }
-}
-
 function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
-    // Missing Users happen when UserStore.getUser(id) returns null -- The client should automatically cache spectators, so this might not be possible but it's better to be sure just in case
+    // Missing Users happen when UserStore.getUser(id) returns null
+    // The client should automatically cache spectators, so this might not be possible but it's better to be sure just in case
     let missingUsers = 0;
     const users = userIds.map(id => UserStore.getUser(id)).filter(user => Boolean(user) ? true : (missingUsers += 1, false));
     return (
@@ -82,13 +71,13 @@ export default definePlugin({
     name: "WhosWatching",
     description: "Hover over the screenshare icon to view what users are watching your stream",
     authors: [EquicordDevs.Fres],
-    settings: settings,
+    settings,
     patches: [
         {
             find: ".Masks.STATUS_SCREENSHARE,width:32",
             replacement: {
-                match: /(\i):function\(\)\{return (\i)\}/,
-                replace: "$1:function(){return $self.component({OriginalComponent:$2})}"
+                match: /jsx\)\((\i\.\i),{mask:/,
+                replace: "jsx)($self.component({OriginalComponent:$1}),{mask:"
             }
         },
         {
@@ -102,11 +91,9 @@ export default definePlugin({
     ],
     WrapperComponent: ErrorBoundary.wrap(props => {
         const stream = useStateFromStores([ApplicationStreamingStore], () => ApplicationStreamingStore.getCurrentUserActiveStream());
-
         if (!stream) return <div {...props}>{props.children}</div>;
 
-        const userIds = ApplicationStreamingStore.getViewerIds(encodeStreamKey(stream));
-
+        const userIds: string[] = ApplicationStreamingStore.getViewerIds(stream);
         let missingUsers = 0;
         const users = userIds.map(id => UserStore.getUser(id)).filter(user => Boolean(user) ? true : (missingUsers += 1, false));
 
@@ -133,15 +120,15 @@ export default definePlugin({
                 <div className={classes(cl("spectators_panel"), Margins.top8)}>
                     {users.length ?
                         <>
-                            <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>{i18n.Messages.SPECTATORS.format({ numViewers: userIds.length })}</Forms.FormTitle>
+                            <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
+                                {i18n.Messages.SPECTATORS.format({ numViewers: userIds.length })}
+                            </Forms.FormTitle>
                             <UserSummaryItem
                                 users={users}
                                 count={userIds.length}
                                 renderIcon={false}
                                 max={12}
                                 showDefaultAvatarsForNullUsers
-                                showUserPopout
-                                guildId={stream.guildId}
                                 renderMoreUsers={renderMoreUsers}
                                 renderUser={(user: User) => (
                                     <Clickable
@@ -166,8 +153,12 @@ export default definePlugin({
     }),
     component: function ({ OriginalComponent }) {
         return ErrorBoundary.wrap((props: any) => {
-            const stream = useStateFromStores([ApplicationStreamingStore], () => ApplicationStreamingStore.getCurrentUserActiveStream());
-            const viewers = ApplicationStreamingStore.getViewerIds(encodeStreamKey(stream));
+            const stream = useStateFromStores(
+                [ApplicationStreamingStore],
+                () => ApplicationStreamingStore.getCurrentUserActiveStream()
+            );
+            if (!stream) return null;
+            const viewers = ApplicationStreamingStore.getViewerIds(stream);
             return <Tooltip text={<Watching userIds={viewers} guildId={stream.guildId} />}>
                 {({ onMouseEnter, onMouseLeave }) => (
                     <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
