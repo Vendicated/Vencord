@@ -6,7 +6,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { React, useRef, useEffect, useState } from 'webpack/common/react';
+import { React, useEffect, useRef, useState } from "webpack/common/react";
 
 const blockReact = (data, output, className, _) => {
     return (
@@ -18,7 +18,7 @@ const blockReact = (data, output, className, _) => {
 
 const characterReact = (data, output, className, animLength) => {
     let offset = 0;
-    const traverse = (raw) => {
+    const traverse = raw => {
         const children = !Array.isArray(raw) ? [raw] : raw;
         let modified = false;
 
@@ -56,13 +56,13 @@ const ShadowDomComponent = ({ children, ...props }) => {
 
     useEffect(() => {
         if (hostRef.current && !hasShadowRoot) {
-            const shadowRoot = hostRef.current.attachShadow({ mode: 'open' });
+            const shadowRoot = hostRef.current.attachShadow({ mode: "open" });
             shadowRoot.innerHTML = DOMPurify.sanitize(children.__html, { ADD_TAGS: ["style", "link"] });
             setHasShadowRoot(true);
         }
     }, [hostRef, children, hasShadowRoot]);
 
-    return <div ref={hostRef} {...props}></div>;
+    return <span ref={hostRef} {...props}></span>;
 };
 
 const HTMLReact = (data, _1, _2, _3) => {
@@ -84,7 +84,7 @@ const HTMLReact = (data, _1, _2, _3) => {
 };
 
 function escapeRegex(str: string): string {
-    return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
 }
 
 const createRule = (name, order, charList, type, animLength = 0) => {
@@ -99,7 +99,7 @@ const createRule = (name, order, charList, type, animLength = 0) => {
     const rule = {
         name: name,
         order: order,
-        match: (source) => source.match(regex),
+        match: source => source.match(regex),
         parse: (capture, transform, state) => ({
             content: transform(capture[1], state)
         }),
@@ -276,8 +276,8 @@ export default definePlugin({
         updateStyles();
         console.log(patch);
 
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js';
+        const script = document.createElement("script");
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js";
         document.head.appendChild(script);
     },
 
