@@ -9,7 +9,7 @@ import definePlugin from "@utils/types";
 import { parse } from "path";
 import { ReactNode } from "react";
 
-const blockReact = (data, output, className) => {
+const blockReact = (data, output, className, _) => {
     return (
         <span className={className}>
             {output(data.content)}
@@ -17,7 +17,7 @@ const blockReact = (data, output, className) => {
     );
 };
 
-const characterReact = (data, output, className) => {
+const characterReact = (data, output, className, animLength) => {
     let offset = 0;
     const traverse = (raw) => {
         const children = !Array.isArray(raw) ? [raw] : raw;
@@ -33,7 +33,7 @@ const characterReact = (data, output, className) => {
                         <span
                             className={className}
                             style={{
-                                animationDelay: `${((offset++) * 25) % 1200}ms`,
+                                animationDelay: `-${((offset++) * animLength / 48) % animLength}ms`,
                             }}
                         >
                             {x}
@@ -55,7 +55,7 @@ function escapeRegex(str: string): string {
     return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
-const createRule = (name, order, charList, className, type) => {
+const createRule = (name, order, charList, type, animLength = 0) => {
     const regex = new RegExp(`^${escapeRegex(charList[0])}([\\s\\S]+?)${escapeRegex(charList[1])}`);
     const reactFunction = type === "block" ? blockReact : characterReact;
     const rule = {
@@ -65,7 +65,7 @@ const createRule = (name, order, charList, className, type) => {
         parse: (capture, transform, state) => ({
             content: transform(capture[1], state)
         }),
-        react: (data, output) => reactFunction(data, output, className),
+        react: (data, output) => reactFunction(data, output, name, animLength),
     };
     return rule;
 };
@@ -126,13 +126,69 @@ const updateStyles = () => {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.glowing {
+    animation: glow 1s infinite alternate;
+}
+
+@keyframes glow {
+    0% { text-shadow: 0 0 3px #fff; }
+    100% { text-shadow: 0 0 6px #fff; }
+}
+
+.rainbow {
+    animation: rainbow 1.2s linear infinite alternate;
+}
+
+@keyframes rainbow {
+    0% { color: red; }
+    20% { color: yellow; }
+    40% { color: green; }
+    60% { color: cyan; }
+    80% { color: blue; }
+    100% { color: magenta; }
+}
+
+.blinking {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.scaling {
+    animation: scale 1.2s infinite alternate ease-in-out;
+    display: inline-block;
+}
+
+@keyframes scale {
+    0% { transform: scale(0.8); }
+    100% { transform: scale(1.2); }
+}
+
+.bouncing {
+    animation: bounce 1s infinite alternate ease-in-out;
+    display: inline-block;
+}
+
+@keyframes bounce {
+    0% { transform: translateY(-5px) }
+    100% { transform: translateY(5px) }
+}
 `;
 };
 
 const rules = [
-    createRule("wiggly", 24, [")~", "~("], "wiggly", "character"),
-    createRule("highlighted", 24, ["==", "=="], "highlighted", "block"),
-    createRule("spinning", 24, ["@@", "@@"], "spinning", "block"),
+    createRule("wiggly", 24, [")~", "~("], "character", 1200),
+    createRule("highlighted", 24, ["==", "=="], "block"),
+    createRule("spinning", 24, ["@@", "@@"], "block"),
+    createRule("glowing", 24, ["++", "++"], "block"),
+    createRule("rainbow", 24, ["%%", "%%"], "character", 2400),
+    createRule("blinking", 24, ["--", "--"], "block"),
+    createRule("scaling", 24, ["+-", "-+"], "character", 2400),
+    createRule("bouncing", 24, ["^^", "^^"], "block"),
 ];
 
 const rulesByName = {};
