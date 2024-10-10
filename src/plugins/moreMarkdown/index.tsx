@@ -6,8 +6,6 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { parse } from "path";
-import { ReactNode } from "react";
 
 const blockReact = (data, output, className, _) => {
     return (
@@ -51,13 +49,44 @@ const characterReact = (data, output, className, animLength) => {
     return traverse(output(data.content));
 };
 
+const HTMLReact = (data, _1, _2, _3) => {
+    let trueContent = "";
+    for (const child of data.content) {
+        try {
+            if (child.type === "text") {
+                trueContent += child.content
+                    .replace(/<script/g, "&lt;script")
+                    .replace(/<style/g, "&lt;style")
+                    .replace(/<iframe/g, "&lt;iframe")
+                    .replace(/<embed/g, "&lt;embed")
+                    .replace(/<object/g, "&lt;object")
+                    .replace(/<applet/g, "&lt;applet")
+                    .replace(/<meta/g, "&lt;meta");
+            }
+            if (child.type === "link") {
+                trueContent += child.content[0].content;
+            }
+        } catch (e) {
+            console.error(e);
+            console.error(data.content);
+        }
+    }
+    return <div dangerouslySetInnerHTML={{ __html: trueContent }} />;
+};
+
 function escapeRegex(str: string): string {
     return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
 const createRule = (name, order, charList, type, animLength = 0) => {
     const regex = new RegExp(`^${escapeRegex(charList[0])}([\\s\\S]+?)${escapeRegex(charList[1])}`);
-    const reactFunction = type === "block" ? blockReact : characterReact;
+    const reactFunction =
+        type === "block" ? blockReact :
+            type === "character" ? characterReact :
+                type === "html" ? HTMLReact :
+                    () => {
+                        throw new Error(`Unsupported type: ${type}`);
+                    };
     const rule = {
         name: name,
         order: order,
@@ -194,6 +223,7 @@ const rules = [
     createRule("blinking", 24, ["--", "--"], "block"),
     createRule("scaling", 24, ["+-", "-+"], "character", 2400),
     createRule("bouncing", 24, ["^^", "^^"], "block"),
+    createRule("html", 24, ["{{", "}}"], "html"),
 ];
 
 const rulesByName = {};
