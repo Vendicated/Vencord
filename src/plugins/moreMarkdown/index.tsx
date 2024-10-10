@@ -6,7 +6,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { React, useEffect, useRef, useState } from "webpack/common/react";
+import { React, useEffect, useRef } from "webpack/common/react";
 
 const blockReact = (data, output, className, _) => {
     return (
@@ -52,15 +52,19 @@ const characterReact = (data, output, className, animLength) => {
 
 const ShadowDomComponent = ({ children, ...props }) => {
     const hostRef = useRef<HTMLDivElement>(null);
-    const [hasShadowRoot, setHasShadowRoot] = useState(false);
 
     useEffect(() => {
-        if (hostRef.current && !hasShadowRoot) {
-            const shadowRoot = hostRef.current.attachShadow({ mode: "open" });
-            shadowRoot.innerHTML = DOMPurify.sanitize(children.__html, { ADD_TAGS: ["style", "link"] });
-            setHasShadowRoot(true);
+        if (hostRef.current) {
+            try {
+                const shadowRoot = hostRef.current.shadowRoot || hostRef.current.attachShadow({ mode: "open" });
+                shadowRoot.innerHTML = DOMPurify.sanitize(children.__html, { ADD_TAGS: ["style", "link"] });
+            } catch (e) {
+                if (!(e instanceof DOMException && e.name === "NotSupportedError")) {
+                    console.error(e);
+                }
+            }
         }
-    }, [hostRef, children, hasShadowRoot]);
+    }, [children.__html]);
 
     return <span ref={hostRef} {...props}></span>;
 };
