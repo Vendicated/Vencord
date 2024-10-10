@@ -6,6 +6,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { React, useRef, useEffect, useState } from 'webpack/common/react';
 
 const blockReact = (data, output, className, _) => {
     return (
@@ -49,6 +50,21 @@ const characterReact = (data, output, className, animLength) => {
     return traverse(output(data.content));
 };
 
+const ShadowDomComponent = ({ children, ...props }) => {
+    const hostRef = useRef<HTMLDivElement>(null);
+    const [hasShadowRoot, setHasShadowRoot] = useState(false);
+
+    useEffect(() => {
+        if (hostRef.current && !hasShadowRoot) {
+            const shadowRoot = hostRef.current.attachShadow({ mode: 'open' });
+            shadowRoot.innerHTML = DOMPurify.sanitize(children.__html, { ADD_TAGS: ["style", "link"] });
+            setHasShadowRoot(true);
+        }
+    }, [hostRef, children, hasShadowRoot]);
+
+    return <div ref={hostRef} {...props}></div>;
+};
+
 const HTMLReact = (data, _1, _2, _3) => {
     let trueContent = "";
     for (const child of data.content) {
@@ -64,7 +80,7 @@ const HTMLReact = (data, _1, _2, _3) => {
             console.error(data.content);
         }
     }
-    return <span className="HTMLMessageContent" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(trueContent) }} />;
+    return <ShadowDomComponent className="HTMLMessageContent" children={{ __html: trueContent }} />;
 };
 
 function escapeRegex(str: string): string {
