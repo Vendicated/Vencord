@@ -4,51 +4,74 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { EquicordDevs } from "@utils/constants";
-import definePlugin from "@utils/types";
-import { SettingsRouter } from "@webpack/common";
+import { ModalProps } from "@utils/modal";
+import { User } from "discord-types/general";
 
-import { settings } from "./utils/settings";
+type Author = {
+    github_name?: string;
+    discord_name: string;
+    discord_snowflake: string;
+};
 
-export default definePlugin({
-    name: "ThemeLibrary",
-    description: "A library of themes for Vencord.",
-    authors: [EquicordDevs.Fafa],
-    settings,
-    toolboxActions: {
-        "Open Theme Library": () => {
-            SettingsRouter.open("ThemeLibrary");
-        },
-    },
+export interface Theme {
+    id: string;
+    name: string;
+    content: string;
+    type: string | "theme" | "snippet";
+    description: string;
+    version: string;
+    author: Author | Author[];
+    likes: number;
+    tags: string[];
+    thumbnail_url: string;
+    release_date: Date;
+    last_updated?: Date;
+    guild?: {
+        name: string;
+        snowflake: string;
+        invite_link: string;
+    };
+    source?: string;
+    requiresThemeAttributes?: boolean;
+}
 
-    start() {
-        const customSettingsSections = (
-            Vencord.Plugins.plugins.Settings as any as {
-                customSections: ((ID: Record<string, unknown>) => any)[];
-            }
-        ).customSections;
+export interface ThemeInfoModalProps extends ModalProps {
+    author: User | User[];
+    theme: Theme;
+}
 
-        const ThemeSection = () => ({
-            section: "ThemeLibrary",
-            label: "Theme Library",
-            element: require("./components/ThemeTab").default,
-            id: "ThemeSection",
-        });
+export const enum TabItem {
+    THEMES,
+    SUBMIT_THEMES,
+}
 
-        customSettingsSections.push(ThemeSection);
-    },
+export interface LikesComponentProps {
+    theme: Theme;
+    userId: User["id"];
+}
 
-    stop() {
-        const customSettingsSections = (
-            Vencord.Plugins.plugins.Settings as any as {
-                customSections: ((ID: Record<string, unknown>) => any)[];
-            }
-        ).customSections;
+export const enum SearchStatus {
+    ALL,
+    ENABLED,
+    DISABLED,
+    THEME,
+    SNIPPET,
+    DARK,
+    LIGHT,
+    LIKED,
+}
 
-        const i = customSettingsSections.findIndex(
-            section => section({}).id === "ThemeSection"
-        );
+export type ThemeLikeProps = {
+    status: number;
+    likes: [{
+        themeId: number;
+        userIds: User["id"][];
+    }];
+};
 
-        if (i !== -1) customSettingsSections.splice(i, 1);
-    },
-});
+export interface Contributor {
+    username: User["username"];
+    github_username: string;
+    id: User["id"];
+    avatar: string;
+}

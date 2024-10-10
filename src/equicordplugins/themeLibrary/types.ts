@@ -68,3 +68,10 @@ export type ThemeLikeProps = {
         userIds: User["id"][];
     }];
 };
+
+export interface Contributor {
+    username: User["username"];
+    github_username: string;
+    id: User["id"];
+    avatar: string;
+}

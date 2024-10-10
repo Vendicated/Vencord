@@ -16,7 +16,7 @@ import { Button, Clipboard, Forms, Parser, React, showToast, Toasts } from "@web
 
 import { Theme, ThemeInfoModalProps } from "../types";
 import { ClockIcon, DownloadIcon, WarningIcon } from "../utils/Icons";
-import { logger } from "./LikesComponent";
+import { logger } from "./ThemeTab";
 
 const Native = VencordNative.pluginHelpers.ThemeLibrary as PluginNative<typeof import("../native")>;
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
@@ -25,7 +25,7 @@ async function downloadTheme(themesDir: string, theme: Theme) {
     try {
         await Native.downloadTheme(themesDir, theme);
         showToast(`Downloaded ${theme.name}!`, Toasts.Type.SUCCESS);
-    } catch (err: any) {
+    } catch (err: unknown) {
         logger.error(err);
         showToast(`Failed to download ${theme.name}! (check console)`, Toasts.Type.FAILURE);
     }
@@ -121,34 +121,36 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                         )}
                         <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Source</Forms.FormTitle>
                         <Forms.FormText>
-                            <Button onClick={() => openModal(modalProps => (
-                                <ModalRoot {...modalProps} size={ModalSize.LARGE}>
-                                    <ModalHeader>
-                                        <Forms.FormTitle tag="h4">Theme Source</Forms.FormTitle>
-                                    </ModalHeader>
-                                    <ModalContent>
-                                        <Forms.FormText style={{
-                                            padding: "8px",
-                                        }}>
-                                            <CodeBlock lang="css" content={themeContent} />
-                                        </Forms.FormText>
-                                    </ModalContent>
-                                    <ModalFooter>
-                                        <Button
-                                            color={Button.Colors.RED}
-                                            look={Button.Looks.OUTLINED}
-                                            onClick={() => modalProps.onClose()}
-                                        >
-                                            Close
-                                        </Button>
-                                        <Button className={Margins.right8}
-                                            onClick={() => {
-                                                Clipboard.copy(themeContent);
-                                                showToast("Copied to Clipboard", Toasts.Type.SUCCESS);
-                                            }}>Copy to Clipboard</Button>
-                                    </ModalFooter>
-                                </ModalRoot>
-                            ))}
+                            <Button
+                                disabled={!theme.content || theme.id === "preview"}
+                                onClick={() => openModal(modalProps => (
+                                    <ModalRoot {...modalProps} size={ModalSize.LARGE}>
+                                        <ModalHeader>
+                                            <Forms.FormTitle tag="h4">Theme Source</Forms.FormTitle>
+                                        </ModalHeader>
+                                        <ModalContent>
+                                            <Forms.FormText style={{
+                                                padding: "8px",
+                                            }}>
+                                                <CodeBlock lang="css" content={themeContent} />
+                                            </Forms.FormText>
+                                        </ModalContent>
+                                        <ModalFooter>
+                                            <Button
+                                                color={Button.Colors.RED}
+                                                look={Button.Looks.OUTLINED}
+                                                onClick={() => modalProps.onClose()}
+                                            >
+                                                Close
+                                            </Button>
+                                            <Button className={Margins.right8}
+                                                onClick={() => {
+                                                    Clipboard.copy(themeContent);
+                                                    showToast("Copied to Clipboard", Toasts.Type.SUCCESS);
+                                                }}>Copy to Clipboard</Button>
+                                        </ModalFooter>
+                                    </ModalRoot>
+                                ))}
                             >
                                 View Theme Source
                             </Button>
@@ -190,6 +192,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                     color={Button.Colors.GREEN}
                     look={Button.Looks.OUTLINED}
                     className={classes("vce-button", Margins.right8)}
+                    disabled={!theme.content || theme.id === "preview"}
                     onClick={async () => {
                         const themesDir = await VencordNative.themes.getThemesDir();
                         const exists = await Native.themeExists(themesDir, theme);

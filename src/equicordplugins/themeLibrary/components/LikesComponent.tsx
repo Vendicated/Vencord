@@ -5,16 +5,13 @@
  */
 
 import * as DataStore from "@api/DataStore";
-import { Logger } from "@utils/Logger";
 import { Button, useEffect, useRef, UserStore, useState } from "@webpack/common";
 import type { User } from "discord-types/general";
 
 import type { Theme, ThemeLikeProps } from "../types";
 import { isAuthorized } from "../utils/auth";
 import { LikeIcon } from "../utils/Icons";
-import { themeRequest } from "./ThemeTab";
-
-export const logger = new Logger("ThemeLibrary", "#e5c890");
+import { logger, themeRequest } from "./ThemeTab";
 
 export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { themeId: Theme["id"], likedThemes: ThemeLikeProps | undefined; }) => {
     const [likesCount, setLikesCount] = useState(0);
@@ -35,7 +32,7 @@ export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { t
         if (!isAuthorized()) return;
         const theme = likedThemes?.likes.find(like => like.themeId === themeId as unknown as Number);
         const currentUser: User = UserStore.getCurrentUser();
-        const hasLiked: boolean = theme?.userIds.includes(currentUser.id) ?? false;
+        const hasLiked: boolean = (theme?.userIds.includes(currentUser.id) || themeId === "preview") ?? false;
         const endpoint = hasLiked ? "/likes/remove" : "/likes/add";
         const token = await DataStore.get("ThemeLibrary_uniqueToken");
 
@@ -83,9 +80,10 @@ export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { t
                 size={Button.Sizes.MEDIUM}
                 color={Button.Colors.PRIMARY}
                 look={Button.Looks.OUTLINED}
+                disabled={themeId === "preview"}
                 style={{ marginLeft: "8px" }}
             >
-                {LikeIcon(hasLiked)} {likesCount}
+                {LikeIcon(hasLiked || themeId === "preview")} {themeId === "preview" ? 143 : likesCount}
             </Button>
         </div>
     );

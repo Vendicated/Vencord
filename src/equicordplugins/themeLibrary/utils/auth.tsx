@@ -9,7 +9,7 @@ import { showNotification } from "@api/Notifications";
 import { openModal } from "@utils/modal";
 import { OAuth2AuthorizeModal, Toasts, UserStore } from "@webpack/common";
 
-import { logger } from "../components/LikesComponent";
+import { logger, themeRequest } from "../components/ThemeTab";
 
 export async function authorizeUser(triggerModal: boolean = true) {
     const isAuthorized = await getAuthorization();
@@ -76,7 +76,7 @@ export async function deauthorizeUser() {
         }
     });
 
-    const res = await fetch("https://themes-delta.vercel.app/api/user/revoke", {
+    const res = await themeRequest("/user/revoke", {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json"
@@ -111,7 +111,7 @@ export async function getAuthorization() {
         return false;
     } else {
         // check if valid
-        const res = await fetch("https://themes-delta.vercel.app/api/user/findUserByToken", {
+        const res = await themeRequest("/user/findUserByToken", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

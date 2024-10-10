@@ -8,6 +8,7 @@ import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
+import { getCurrentChannel } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
 import { UserStore } from "@webpack/common";
@@ -15,6 +16,7 @@ import { UserStore } from "@webpack/common";
 let ChannelTextAreaClasses;
 let shouldShowColorEffects: boolean;
 let position: boolean;
+let forceLeft = false;
 
 waitFor(["buttonContainer", "channelTextArea"], m => (ChannelTextAreaClasses = m));
 
@@ -68,7 +70,7 @@ export default definePlugin({
                 charCounterDiv = document.createElement("div");
                 charCounterDiv.classList.add("char-counter");
 
-                if (position) charCounterDiv.classList.add("left");
+                if (position || forceLeft) charCounterDiv.classList.add("left");
 
                 charCounterDiv.innerHTML = `<span class="char-count">0</span>/<span class="char-max">${charMax}</span>`;
             }
@@ -120,7 +122,10 @@ export default definePlugin({
         const observeDOMChanges = () => {
             const observer = new MutationObserver(() => {
                 const chatTextArea = document.querySelector(`.${ChannelTextAreaClasses?.channelTextArea}`);
-                if (chatTextArea) {
+                if (chatTextArea && !document.querySelector(".char-counter")) {
+                    const currentChannel = getCurrentChannel();
+                    forceLeft = currentChannel?.rateLimitPerUser !== 0;
+
                     addCharCounter();
                 }
             });

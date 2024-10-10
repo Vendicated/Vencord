@@ -3,7 +3,7 @@
     color: var(--text-muted);
     text-align: right;
     position: absolute;
-    bottom: 0;
+    bottom: -15px;
     right: 0;
     pointer-events: none;
     z-index: 1;

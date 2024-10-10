@@ -89,3 +89,41 @@
     border-radius: 8px;
     padding: 0.5em;
 }
+
+.vce-image-paste {
+    border-radius: 8px;
+    border: 3px dashed var(--background-modifier-accent);
+    background-color: var(--background-secondary);
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: border 0.3s ease;
+}
+
+.vce-image-paste:hover {
+    border: 3px dashed var(--brand-500);
+    transition: border 0.3s ease;
+}
+
+.vce-styled-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.vce-styled-list li {
+    padding: 10px 0;
+    border-bottom: thin solid var(--background-modifier-accent);
+}
+
+.vce-styled-list li:last-child {
+    border-bottom: none;
+}
+
+.vce-divider-border {
+    border-bottom: thin solid var(--background-modifier-accent);
+    padding: 10px 0;
+    width: 100%;
+}
