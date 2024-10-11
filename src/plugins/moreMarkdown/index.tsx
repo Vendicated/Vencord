@@ -50,6 +50,40 @@ const characterReact = (data, output, className, animLength) => {
     return traverse(output(data.content));
 };
 
+const delayReact = (data, output, className, delay) => {
+    let offset = 0;
+    const traverse = raw => {
+        const children = !Array.isArray(raw) ? [raw] : raw;
+        let modified = false;
+
+        let j = -1;
+        for (const child of children) {
+            j++;
+            if (typeof child === "string") {
+                modified = true;
+                children[j] = child.split("").map((x, i) => (
+                    <span key={i}>
+                        <span
+                            className={className}
+                            style={{
+                                animationDelay: `${offset++ * delay}ms`,
+                            }}
+                        >
+                            {x}
+                        </span>
+                    </span>
+                ));
+            } else if (child?.props?.children) {
+                child.props.children = traverse(child.props.children);
+            }
+        }
+
+        return modified ? children : raw;
+    };
+
+    return traverse(output(data.content));
+};
+
 const ShadowDomComponent = ({ children, ...props }) => {
     const hostRef = useRef<HTMLDivElement>(null);
 
@@ -97,9 +131,10 @@ const createRule = (name, order, charList, type, animLength = 0) => {
         type === "block" ? blockReact :
             type === "character" ? characterReact :
                 type === "html" ? HTMLReact :
-                    () => {
-                        throw new Error(`Unsupported type: ${type}`);
-                    };
+                    type === "delay" ? delayReact :
+                        () => {
+                            throw new Error(`Unsupported type: ${type}`);
+                        };
     const rule = {
         name: name,
         order: order,
@@ -228,6 +263,24 @@ span.HTMLMessageContent {
     0% { transform: translateY(-5px) }
     100% { transform: translateY(5px) }
 }
+
+.slam {
+    display: inline-block;
+    transform: translateY(-100px) scale(10);
+    animation: slam 0.2s forwards;
+    opacity: 0;
+}
+
+@keyframes slam {
+    0% {
+        transform: translateY(-100px) scale(10);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
 `;
 };
 
@@ -241,6 +294,7 @@ const rules = [
     createRule("scaling", 24, ["+-", "-+"], "character", 2400),
     createRule("bouncing", 24, ["^^", "^^"], "block"),
     createRule("html", 24, ["{{", "}}"], "html"),
+    createRule("slam", 24, ["##", "##"], "delay", 250),
 ];
 
 const rulesByName = {};
