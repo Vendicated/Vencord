@@ -294,7 +294,7 @@ const rules = [
     createRule("scaling", 24, ["+-", "-+"], "character", 2400),
     createRule("bouncing", 24, ["^^", "^^"], "block"),
     createRule("html", 24, ["{{", "}}"], "html"),
-    createRule("slam", 24, ["##", "##"], "delay", 250),
+    createRule("slam", 24, ["!!", "!!"], "delay", 250),
 ];
 
 const rulesByName = {};
