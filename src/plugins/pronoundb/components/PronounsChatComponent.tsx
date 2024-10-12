@@ -19,7 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
-import { UserStore } from "@webpack/common";
+import { Timestamp, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import { useFormattedPronouns } from "../api";
@@ -40,14 +40,14 @@ function shouldShow(message: Message): boolean {
     return true;
 }
 
-export const PronounsChatComponentWrapper = ErrorBoundary.wrap(({ message }: { message: Message; }) => {
-    return shouldShow(message)
+export const PronounsChatComponentWrapper = ErrorBoundary.wrap(({ message, compact }: { message: Message, compact: bool }) => {
+    return !compact && shouldShow(message)
         ? <PronounsChatComponent message={message} />
         : null;
 }, { noop: true });
 
-export const CompactPronounsChatComponentWrapper = ErrorBoundary.wrap(({ message }: { message: Message; }) => {
-    return shouldShow(message)
+export const CompactPronounsChatComponentWrapper = ErrorBoundary.wrap(({ message, compact }: { message: Message, compact: bool }) => {
+    return compact && shouldShow(message)
         ? <CompactPronounsChatComponent message={message} />
         : null;
 }, { noop: true });
