@@ -7,12 +7,14 @@
 import "./style.css";
 
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { PluginNative } from "@utils/types";
+
+const Native = VencordNative.pluginHelpers.VoiceDownload as PluginNative<typeof import("./native")>;
 
 export default definePlugin({
     name: "VoiceDownload",
-    description: "Adds a download to voice messages. (Opens a new browser tab)",
-    authors: [Devs.puv],
+    description: "Adds a download to voice messages.",
+    authors: [Devs.puv, Devs.sobek],
     patches: [
         {
             find: "rippleContainer,children",
@@ -28,11 +30,16 @@ export default definePlugin({
             <a
                 className="vc-voice-download"
                 href={src}
-                onClick={e => e.stopPropagation()}
+                onClick={async e => {
+                    e.stopPropagation();
+                    if (IS_DISCORD_DESKTOP) {
+                        const data = await Native.downloadVoice(src);
+                        if (data) DiscordNative.fileManager.saveWithDialog(data, "voice-message.ogg");
+                    }
+                }}
                 aria-label="Download voice message"
-                {...IS_DISCORD_DESKTOP
-                    ? { target: "_blank" } // open externally
-                    : { download: "voice-message.ogg" } // download directly (not supported on discord desktop)
+                {...!IS_DISCORD_DESKTOP
+                && { download: "voice-message.ogg" } // download directly (not supported on discord desktop)
                 }
             >
                 <this.Icon />
