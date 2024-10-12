@@ -91,7 +91,7 @@ const ShadowDomComponent = ({ children, ...props }) => {
         if (hostRef.current) {
             try {
                 const shadowRoot = hostRef.current.shadowRoot || hostRef.current.attachShadow({ mode: "open" });
-                shadowRoot.innerHTML = DOMPurify.sanitize(children.__html, { ADD_TAGS: ["style", "link"] });
+                shadowRoot.innerHTML = DOMPurify.sanitize(children.__html, { ADD_TAGS: ["style", "link"], FORBID_TAGS: ["video"] });
             } catch (e) {
                 if (!(e instanceof DOMException && e.name === "NotSupportedError")) {
                     console.error(e);
