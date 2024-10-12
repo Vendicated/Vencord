@@ -33,10 +33,8 @@ export default definePlugin({
                 onClick={async e => {
                     e.stopPropagation();
                     if (IS_DISCORD_DESKTOP) {
-                        const { canceled, filePath } = await Native.showDialog();
-                        if (!canceled) {
-                            Native.saveFile(filePath!, src);
-                        }
+                        const data = await Native.downloadVoice(src);
+                        if (data) DiscordNative.fileManager.saveWithDialog(data, "voice-message.ogg");
                     }
                 }}
                 aria-label="Download voice message"
