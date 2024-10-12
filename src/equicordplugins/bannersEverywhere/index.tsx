@@ -21,7 +21,7 @@ interface iUSRBG extends Plugin {
 
 const settings = definePluginSettings({
     animate: {
-        description: "Animate Discord banners (NOT USRBG)",
+        description: "Animate banners",
         type: OptionType.BOOLEAN,
         default: false
     },
@@ -73,11 +73,57 @@ export default definePlugin({
     memberListBannerHook(user: User) {
         let url = this.getBanner(user.id);
         if (!url) return;
-        if (!settings.store.animate) url = url.replace(".gif", ".png");
+        if (!settings.store.animate) {
+            // Discord Banners
+            url = url.replace(".gif", ".png");
+            // Usrbg Banners
+            this.gifToPng(url)
+                .then(pngUrl => {
+                    const imgElement = document.getElementById(`vc-banners-everywhere-${user.id}`) as HTMLImageElement;
+                    if (imgElement) {
+                        imgElement.src = pngUrl;
+                    }
+                })
+                .catch();
+        }
 
         return (
-            <img src={url} className="vc-banners-everywhere-memberlist"></img>
+            <img id={`vc-banners-everywhere-${user.id}`} src={url} className="vc-banners-everywhere-memberlist"></img>
         );
+    },
+
+    async checkImageExists(url: string): Promise<boolean> {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = url;
+        });
+    },
+
+    async gifToPng(url: string): Promise<string> {
+        const exists = await this.checkImageExists(url);
+        if (!exists) return "";
+
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext("2d");
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0);
+                    const pngDataUrl = canvas.toDataURL("image/png");
+                    resolve(pngDataUrl);
+                } else {
+                    reject(new Error("Failed to get canvas context."));
+                }
+            };
+            img.onerror = err => reject(err);
+            img.src = url;
+        });
     },
 
     getBanner(userId: string): string | undefined {
