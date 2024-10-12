@@ -314,7 +314,6 @@ export default definePlugin({
     name: "MoreMarkdown",
     description: "More markdown capabilities for Zoidcord",
     authors: [Devs.Zoid],
-    required: true,
     rulesByName: rulesByName,
 
     patches: [
