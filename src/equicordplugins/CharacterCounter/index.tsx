@@ -8,17 +8,13 @@ import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
-import { getCurrentChannel } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
-import { UserStore } from "@webpack/common";
+import { SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
 
-let ChannelTextAreaClasses;
+let ChannelTextAreaClasses: Record<string, string> | null = null;
 let shouldShowColorEffects: boolean;
 let position: boolean;
-let forceLeft = false;
-
-waitFor(["buttonContainer", "channelTextArea"], m => (ChannelTextAreaClasses = m));
 
 const settings = definePluginSettings({
     colorEffects: {
@@ -36,108 +32,119 @@ const settings = definePluginSettings({
         onChange: value => {
             position = value;
 
-            const charCounterDiv = document.querySelector(".char-counter");
+            const charCounterDiv = document.querySelector(".vc-char-counter");
             if (charCounterDiv) {
-                if (value) {
-                    charCounterDiv.classList.add("left");
-                } else {
-                    charCounterDiv.classList.remove("left");
-                }
+                if (value) charCounterDiv.classList.add("left");
+                else charCounterDiv.classList.remove("left");
             }
         }
     }
 });
 
-export default definePlugin({
-    name: "CharacterCounter",
-    description: "Adds a character counter to the chat input",
-    authors: [EquicordDevs.creations],
-    settings: settings,
+const updateCharCounterOnChannelChange = async () => {
+    await waitForChatInput();
+    addCharCounter();
+};
 
-    start() {
+const waitForChatInput = async () => {
+    return waitFor([`${ChannelTextAreaClasses?.channelTextArea}`], () => document.querySelector(`.${ChannelTextAreaClasses?.channelTextArea}`));
+};
+
+const addCharCounter = () => {
+    const chatTextArea: HTMLElement | null = document.querySelector(`.${ChannelTextAreaClasses?.channelTextArea}`);
+    if (!chatTextArea) return;
+
+    let charCounterDiv: HTMLElement | null = document.querySelector(".vc-char-counter");
+    if (!charCounterDiv) {
+        charCounterDiv = document.createElement("div");
+        charCounterDiv.classList.add("vc-char-counter");
+
+        if (position) charCounterDiv.classList.add("left");
+
         const premiumType = (UserStore.getCurrentUser().premiumType ?? 0);
         const charMax = premiumType === 2 ? 4000 : 2000;
 
+        charCounterDiv.innerHTML = `<span class="vc-char-count">0</span>/<span class="vc-char-max">${charMax}</span>`;
+        charCounterDiv.style.opacity = "0";
+    }
+
+    const chatInputContainer: HTMLElement | null = chatTextArea.closest("form");
+    if (chatInputContainer && !chatInputContainer.contains(charCounterDiv)) {
+        chatTextArea.style.display = "flex";
+        chatTextArea.style.flexDirection = "column";
+        chatCounterPositionUpdate(chatInputContainer, chatTextArea, charCounterDiv);
+
+        chatTextArea.appendChild(charCounterDiv);
+    }
+
+    const chatInput: HTMLElement | null = chatTextArea.querySelector('div[contenteditable="true"]');
+
+    const updateCharCount = () => {
+        const text = chatInput?.textContent?.replace(/[\uFEFF\xA0]/g, "") || "";
+        const charCount = text.trim().length;
+
+        if (charCount !== 0) charCounterDiv.style.opacity = "1";
+        else charCounterDiv.style.opacity = "0";
+
+        const charCountSpan: HTMLElement | null = charCounterDiv!.querySelector(".vc-char-count");
+        charCountSpan!.textContent = `${charCount}`;
+
+        const bottomPos = chatInputContainer!.offsetHeight;
+        charCounterDiv.style.bottom = `${bottomPos.toString()}px`;
+
+        if (shouldShowColorEffects) {
+            const premiumType = (UserStore.getCurrentUser().premiumType ?? 0);
+            const charMax = premiumType === 2 ? 4000 : 2000;
+            const percentage = (charCount / charMax) * 100;
+            let color;
+            if (percentage < 50) {
+                color = "var(--text-muted)";
+            } else if (percentage < 75) {
+                color = "var(--yellow-330)";
+            } else if (percentage < 90) {
+                color = "var(--orange-330)";
+            } else {
+                color = "var(--red-360)";
+            }
+            charCountSpan!.style.color = color;
+        }
+    };
+
+    chatInput?.addEventListener("input", updateCharCount);
+    chatInput?.addEventListener("keydown", () => setTimeout(updateCharCount, 0));
+    chatInput?.addEventListener("paste", () => setTimeout(updateCharCount, 0));
+};
+
+const chatCounterPositionUpdate = (chatInputContainer: HTMLElement, chatTextArea: HTMLElement, charCounterDiv: HTMLElement) => {
+    chatTextArea.style.justifyContent = "flex-end";
+    charCounterDiv.style.position = "absolute";
+
+    const bottomPos = (chatInputContainer.offsetHeight) - 10; // onload 68px, minus 10 to fix
+    charCounterDiv.style.bottom = `${bottomPos.toString()}px`;
+};
+
+export default definePlugin({
+    name: "CharacterCounter",
+    description: "Adds a character counter to the chat input",
+    authors: [EquicordDevs.creations, EquicordDevs.Panniku],
+    settings: settings,
+
+    start: async () => {
         shouldShowColorEffects = settings.store.colorEffects;
         position = settings.store.position;
 
-        const addCharCounter = () => {
-            const chatTextArea: HTMLElement | null = document.querySelector(`.${ChannelTextAreaClasses?.channelTextArea}`);
-            if (!chatTextArea) return;
+        waitFor(["buttonContainer", "channelTextArea"], m => (ChannelTextAreaClasses = m));
+        await updateCharCounterOnChannelChange();
 
-            let charCounterDiv: HTMLElement | null = document.querySelector(".char-counter");
-            if (!charCounterDiv) {
-                charCounterDiv = document.createElement("div");
-                charCounterDiv.classList.add("char-counter");
-
-                if (position || forceLeft) charCounterDiv.classList.add("left");
-
-                charCounterDiv.innerHTML = `<span class="char-count">0</span>/<span class="char-max">${charMax}</span>`;
-            }
-
-            const chatInputContainer: HTMLElement | null = chatTextArea.closest("form");
-            if (chatInputContainer && !chatInputContainer.contains(charCounterDiv)) {
-                chatTextArea.style.display = "flex";
-                chatTextArea.style.flexDirection = "column";
-                chatCounterPositionUpdate(chatTextArea, charCounterDiv);
-
-                chatTextArea.appendChild(charCounterDiv);
-            }
-
-            const chatInput: HTMLElement | null = chatTextArea.querySelector('div[contenteditable="true"]');
-
-            const updateCharCount = () => {
-                const text = chatInput?.textContent?.replace(/[\uFEFF\xA0]/g, "") || "";
-                const charCount = text.trim().length;
-                const charCountSpan: HTMLElement | null = charCounterDiv!.querySelector(".char-count");
-                charCountSpan!.textContent = `${charCount}`;
-
-                if (shouldShowColorEffects) {
-                    const percentage = (charCount / charMax) * 100;
-                    let color;
-                    if (percentage < 50) {
-                        color = "#888";
-                    } else if (percentage < 75) {
-                        color = "#ff9900";
-                    } else if (percentage < 90) {
-                        color = "#ff6600";
-                    } else {
-                        color = "#ff0000";
-                    }
-                    charCountSpan!.style.color = color;
-                }
-            };
-
-            chatInput?.addEventListener("input", updateCharCount);
-            chatInput?.addEventListener("keydown", () => setTimeout(updateCharCount, 0));
-            chatInput?.addEventListener("paste", () => setTimeout(updateCharCount, 0));
-        };
-
-        const chatCounterPositionUpdate = (chatTextArea: HTMLElement, charCounterDiv: HTMLElement) => {
-            const position = "flex-end";
-            chatTextArea.style.justifyContent = position;
-            charCounterDiv.style.position = "absolute";
-        };
-
-        const observeDOMChanges = () => {
-            const observer = new MutationObserver(() => {
-                const chatTextArea = document.querySelector(`.${ChannelTextAreaClasses?.channelTextArea}`);
-                if (chatTextArea && !document.querySelector(".char-counter")) {
-                    const currentChannel = getCurrentChannel();
-                    forceLeft = currentChannel?.rateLimitPerUser !== 0;
-
-                    addCharCounter();
-                }
-            });
-
-            observer.observe(document.body, { childList: true, subtree: true });
-        };
-
-        observeDOMChanges();
+        SelectedChannelStore.addChangeListener(updateCharCounterOnChannelChange);
+        SelectedGuildStore.addChangeListener(updateCharCounterOnChannelChange);
     },
 
     stop() {
-        const charCounterDiv = document.querySelector(".char-counter");
+        const charCounterDiv = document.querySelector(".vc-char-counter");
         if (charCounterDiv) charCounterDiv.remove();
+
+        SelectedChannelStore.removeChangeListener(updateCharCounterOnChannelChange);
+        SelectedGuildStore.removeChangeListener(updateCharCounterOnChannelChange);
     }
 });
