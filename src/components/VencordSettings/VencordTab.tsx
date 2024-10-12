@@ -27,7 +27,7 @@ import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { Button, Card, Forms, React, Select, Switch } from "@webpack/common";
 
-import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon, boykisserIcon } from "..";
+import { boykisserIcon, Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "..";
 import { openNotificationSettingsModal } from "./NotificationSettings";
 import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
@@ -132,23 +132,9 @@ function VencordSettings() {
                     />
                     <QuickAction
                         Icon={boykisserIcon}
-                        text="Play theme song"
+                        text="i will give this button purpose at some point"
                         action={function () {
-                            const video = document.createElement('video');
-                            video.src = 'https://github.com/Zoidcord/assets/raw/main/zoidcord.mp4';
-                            video.autoplay = true;
-                            video.loop = false;
-                            video.style.width = '100%';
-                            video.style.height = '100%';
-                            video.style.objectFit = 'cover';
-                            video.style.position = 'fixed';
-                            video.style.top = '0';
-                            video.style.left = '0';
-                            video.style.zIndex = '1000000000';
-                            document.body.appendChild(video);
-                            video.addEventListener('ended', () => {
-                                document.body.removeChild(video);
-                            });
+                            console.warn("you silly goober");
                         }}
                     />
                 </QuickActionCard>
