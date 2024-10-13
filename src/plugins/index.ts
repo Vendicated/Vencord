@@ -55,7 +55,6 @@ export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
     patch.plugin = pluginName;
 
     if (IS_REPORTER) {
-        Settings.plugins.CharacterCounter.enabled = false;
         delete patch.predicate;
         delete patch.group;
     }
