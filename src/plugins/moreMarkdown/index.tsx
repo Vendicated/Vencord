@@ -281,6 +281,11 @@ span.HTMLMessageContent {
         opacity: 1;
     }
 }
+
+.cursive {
+    font-family: 'Times New Roman', Times, cursive;
+}
+}
 `;
 };
 
@@ -295,6 +300,7 @@ const rules = [
     createRule("bouncing", 24, ["^^", "^^"], "block"),
     createRule("html", 24, ["[[", "]]"], "html"),
     createRule("slam", 24, ["!!", "!!"], "delay", 250),
+    createRule("cursive", 24, ["&&", "&&"], "block"),
 ];
 
 const rulesByName = {};
