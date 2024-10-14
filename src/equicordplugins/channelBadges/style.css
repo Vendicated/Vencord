@@ -1,0 +1,69 @@
+.channel-badge {
+    margin-left: 0.2rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
+    color: var(--white);
+    order: 2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+.badge-container {
+    display: flex;
+    gap: 0.1rem;
+    align-items: center;
+    margin-left: 0.2rem;
+    order: 2;
+}
+
+.channel-badge-text {
+    background-color: #5865F2;
+}
+
+.channel-badge-voice {
+    background-color: #3BA55D;
+}
+
+.channel-badge-category {
+    background-color: #4F545C;
+}
+
+.channel-badge-directory {
+    background-color: #FAA61A;
+}
+
+.channel-badge-thread,
+.channel-badge-public-thread,
+.channel-badge-announcement-thread,
+.channel-badge-private-thread {
+    background-color: #7289DA;
+}
+
+.channel-badge-announcement,
+.channel-badge-announcement-channel {
+    background-color: #FAA61A;
+}
+
+.channel-badge-rules,
+.channel-badge-stage,
+.channel-badge-media,
+.channel-badge-forum {
+    background-color: #5865F2;
+}
+
+.channel-badge-nsfw {
+    background-color: #E91E63;
+}
+
+.channel-badge-locked {
+    background-color: #B9BBBE;
+}
+
+.channel-badge-unknown {
+    background-color: #747F8D;
+}
