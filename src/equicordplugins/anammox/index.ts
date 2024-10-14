@@ -89,11 +89,12 @@ export default definePlugin({
         },
         {
             // Gift button
-            find: ".gifts)||void 0===",
+            find: "GIFT_BUTTON)",
             replacement: {
-                match: /let\{disabled:\i,channel:\i\}=\i/,
-                replace: "return null;$&",
+                match: /if\(\i\)return null;/,
+                replace: "return null;",
             },
+            all: true,
             predicate: () => settings.store.gift,
         },
         {
