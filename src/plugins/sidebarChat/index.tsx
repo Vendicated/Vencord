@@ -55,12 +55,10 @@ function MakeContextCallback(name: "user" | "channel"): NavContextMenuPatchCallb
         if (isUser && user.id === UserStore.getCurrentUser().id) return;
         if (!isUser && (!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) && channel.type !== 3)) return;
 
-        const channelTypeText = isUser ? "User" : channel.type === 3 ? "Group DM" : "Channel";
-
         children.push(
             <Menu.MenuItem
                 id={`vc-sidebar-chat-${name}`}
-                label={`Open ${channelTypeText} Sidebar Chat`}
+                label={"Open Sidebar Chat"}
                 action={() => {
                     FluxDispatcher.dispatch({
                         // @ts-ignore

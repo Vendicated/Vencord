@@ -9,7 +9,8 @@ import { findByPropsLazy } from "@webpack";
 import { ChannelStore, Flux, FluxDispatcher, GuildStore } from "@webpack/common";
 import { Channel, Guild } from "discord-types/general";
 
-const { ensurePrivateChannel } = findByPropsLazy("ensurePrivateChannel");
+// cant destructure, otherwise context is lost
+const DMChannelHandler = findByPropsLazy("getOrEnsurePrivateChannel");
 
 interface SidebarData {
     isUser: boolean;
@@ -25,7 +26,7 @@ export const SidebarStore = proxyLazy(() => {
 
     const store = new SidebarStore(FluxDispatcher, {
         // @ts-ignore
-        NEW_SIDEBAR_CHAT({ isUser, guildId, id }: SidebarData) {
+        async NEW_SIDEBAR_CHAT({ isUser, guildId, id }: SidebarData) {
             store.guild = guildId ? GuildStore.getGuild(guildId) : null;
 
             if (!isUser) {
@@ -33,17 +34,9 @@ export const SidebarStore = proxyLazy(() => {
                 return;
             }
 
-            // @ts-expect-error outdated type
-            const existingDm = ChannelStore.getDMChannelFromUserId(id);
-
-            if (existingDm) {
-                store.channel = existingDm;
-                return;
-            }
-
-            ensurePrivateChannel(id).then((channelId: string) => {
-                store.channel = ChannelStore.getChannel(channelId);
-            });
+            const channelId = await DMChannelHandler.getOrEnsurePrivateChannel(id);
+            store.channel = ChannelStore.getChannel(channelId);
+            store.emitChange();
         },
         // @ts-ignore
         CLOSE_SIDEBAR_CHAT() {
