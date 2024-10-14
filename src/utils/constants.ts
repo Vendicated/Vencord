@@ -913,6 +913,10 @@ export const EquicordDevs = Object.freeze({
         name: "arHSM",
         id: 841509053422632990n
     },
+    iamme: {
+        name: "i am me",
+        id: 984392761929256980n
+    },
     creations: {
         name: "Creation's",
         id: 209830981060788225n
