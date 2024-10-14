@@ -10,7 +10,6 @@ import { findByCode } from "@webpack";
 import { ChannelStore, FluxDispatcher, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-import { Member, MemberGuildSettings, PKAPI, System, SystemGuildSettings } from "./api";
 import pluralKit, { settings } from "./index";
 
 
@@ -30,19 +29,19 @@ export interface Author {
     systemSettings: Map<string, SystemGuildSettings>;
 }
 
-export function isPk(msg: Message) {
-    return (msg && msg.applicationId === "466378653216014359");
+export function isPk(msg: Message): boolean {
+    return msg?.applicationId === "466378653216014359";
 }
 
 export function isOwnPkMessage(message: Message): boolean {
-    if (!isPk(message)) return false;
-    if (["[]", "{}", undefined].includes(localSystemJson)) return false;
+    if (!isPk(message) || ["[]", "{}", undefined].includes(localSystemJson)) return false;
 
-    return (localSystem??[]).map(author => author.member.id).some(id => id === getAuthorOfMessage(message, new PKAPI()).member.id);
+    const authorId = getAuthorOfMessage(message).member.id;
+    return (localSystem).some(author => author.member.id === authorId);
 }
 
 export function replaceTags(content: string, message: Message, localSystemData: string) {
-    const author = getAuthorOfMessage(message, new PKAPI());
+    const author = getAuthorOfMessage(message);
     const localSystem: Author[] = JSON.parse(localSystemData);
 
     const systemSettings: SystemGuildSettings = author.systemSettings[ChannelStore.getChannel(message.channel_id).guild_id];
@@ -52,7 +51,7 @@ export function replaceTags(content: string, message: Message, localSystemData: 
     // prioritize guild settings, then system/member settings
     const { tag } = systemSettings??system;
     const name = memberSettings.display_name || (author.member.display_name??author.member.name);
-    const avatar = memberSettings ? memberSettings.avatar_url : author.member.avatar;
+    const avatar = memberSettings ? memberSettings.avatar_url : (author.member.avatar_url ?? author.member.webhook_avatar_url ?? author.system.avatar_url ?? "");
 
     return content
         .replace(/{tag}/g, tag??"")
@@ -74,14 +73,14 @@ export async function loadAuthors() {
 }
 
 export async function loadData() {
-    const system = await pluralKit.api.getSystem({ system: UserStore.getCurrentUser().id });
+    const system = await getSystem(UserStore.getCurrentUser().id);
     if (!system) {
         settings.store.data = "{}";
         return;
     }
     const localSystem: Author[] = [];
 
-    (system.members??(await system.getMembers())).forEach((member: Member) => {
+    (await getMembers(system.id)).forEach((member: Member) => {
         localSystem.push({
             messageIds: [],
             member,
@@ -119,7 +118,7 @@ export function generateAuthorData(message: Message) {
     return `${message.author.username}##${message.author.avatar}`;
 }
 
-export function getAuthorOfMessage(message: Message, pk: PKAPI) {
+export function getAuthorOfMessage(message: Message) {
     const authorData = generateAuthorData(message);
     let author: Author = authors[authorData]??undefined;
 
@@ -130,13 +129,13 @@ export function getAuthorOfMessage(message: Message, pk: PKAPI) {
         return author;
     }
 
-    pk.getMessage({ message: message.id }).then(msg => {
+    getMessage(message.id).then((msg: PKMessage) => {
         author = ({ messageIds: [msg.id], member: msg.member as Member, system: msg.system as System, systemSettings: new Map(), guildSettings: new Map() });
-        author.member.getGuildSettings(ChannelStore.getChannel(msg.channel).guild_id).then(guildSettings => {
+        getMemberGuildSettings(author.member.id, ChannelStore.getChannel(msg.channel).guild_id).then(guildSettings => {
             author.guildSettings?.set(ChannelStore.getChannel(msg.channel).guild_id, guildSettings);
         });
 
-        author.system.getGuildSettings(ChannelStore.getChannel(msg.channel).guild_id).then(guildSettings => {
+        getSystemGuildSettings(author.system.id, ChannelStore.getChannel(msg.channel).guild_id).then(guildSettings => {
             author.systemSettings?.set(ChannelStore.getChannel(msg.channel).guild_id, guildSettings);
         });
 

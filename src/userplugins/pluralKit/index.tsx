@@ -25,12 +25,10 @@ import {
     Button,
     ChannelStore,
     MessageActions,
-    MessageStore, UserStore
+    MessageStore, Toasts, UserStore
 } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-import { PKAPI } from "./api";
-import pluralKit from "./index";
 import {
     deleteMessage,
     getAuthorOfMessage,
@@ -39,6 +37,7 @@ import {
     loadAuthors, loadData,
     replaceTags,
 } from "./utils";
+import { copyWithToast } from "@utils/misc";
 
 const EditIcon = () => {
     return <svg role={"img"} width={"16"} height={"16"} fill={"none"} viewBox={"0 0 24 24"}>
@@ -68,7 +67,13 @@ export const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: () => {
             return <Button label={"Load"} onClick = {async () => {
-                await loadData();
+                await loadData().then(value => {
+                    Toasts.show({
+                        message: "Loaded data successfully!",
+                        id: Toasts.genId(),
+                        type: Toasts.Type.SUCCESS
+                    });
+                });
             }}>LOAD</Button>;
         },
         description: "Load local system into memory"
@@ -116,7 +121,7 @@ export default definePlugin({
             find: "getLastEditableMessage",
             replacement: {
                 match: /return (.)\(\)\(this.getMessages\((.)\).{10,100}:.\.id\)/,
-                replace: "return $1()(this.getMessages($2).toArray()).reverse().find(msg => $self.isOwnMessage(msg)"
+                replace: "return $1()(this.getMessages($2).toArray()).reverse().find(msg=>$self.isOwnMessage(msg)"
             }
         },
     ],
@@ -133,7 +138,7 @@ export default definePlugin({
 
 
             let color: string = "666666";
-            const pkAuthor = getAuthorOfMessage(message, pluralKit.api);
+            const pkAuthor = getAuthorOfMessage(message);
 
             if (pkAuthor.member && settings.store.colorNames) {
                 color = pkAuthor.member.color??color;
@@ -149,8 +154,6 @@ export default definePlugin({
             return <>{prefix}{author?.nick}</>;
         }
     },
-
-    api: new PKAPI({}),
 
     async start() {
         await loadData();
