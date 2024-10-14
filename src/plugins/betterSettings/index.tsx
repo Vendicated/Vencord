@@ -84,19 +84,22 @@ export default definePlugin({
         {
             find: "this.renderArtisanalHack()",
             replacement: [
-                { // Fade in on layer
+                {
+                    // Fade in on layer
                     match: /(?<=\((\i),"contextType",\i\.\i\);)/,
                     replace: "$1=$self.Layer;",
                     predicate: () => settings.store.disableFade
                 },
-                { // Lazy-load contents
+                {
+                    // Lazy-load contents
                     match: /createPromise:\(\)=>([^:}]*?),webpackId:"?\d+"?,name:(?!="CollectiblesShop")"[^"]+"/g,
                     replace: "$&,_:$1",
                     predicate: () => settings.store.eagerLoad
                 }
             ]
         },
-        { // For some reason standardSidebarView also has a small fade-in
+        {
+            // For some reason standardSidebarView also has a small fade-in
             find: 'minimal:"contentColumnMinimal"',
             replacement: [
                 {
@@ -110,7 +113,8 @@ export default definePlugin({
             ],
             predicate: () => settings.store.disableFade
         },
-        { // Load menu TOC eagerly
+        {
+            // Load menu TOC eagerly
             find: "Messages.USER_SETTINGS_WITH_BUILD_OVERRIDE.format",
             replacement: {
                 match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?null!=\i&&.{0,100}?(await Promise\.all[^};]*?\)\)).*?,(?=\1\(this)/,
@@ -118,7 +122,8 @@ export default definePlugin({
             },
             predicate: () => settings.store.eagerLoad
         },
-        { // Settings cog context menu
+        {
+            // Settings cog context menu
             find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
             replacement: [
                 {

@@ -135,7 +135,8 @@ function jumpIfOffScreen(channelId: string, messageId: string) {
 
 function getNextMessage(isUp: boolean, isReply: boolean) {
     let messages: Array<Message & { deleted?: boolean; }> = MessageStore.getMessages(SelectedChannelStore.getChannelId())._array;
-    if (!isReply) { // we are editing so only include own
+    if (!isReply) {
+        // we are editing so only include own
         const meId = UserStore.getCurrentUser().id;
         messages = messages.filter(m => m.author.id === meId);
     }

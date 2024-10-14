@@ -108,7 +108,8 @@ export default definePlugin({
 
         // Old Discord Android clients have a delay of around 17 days
         // This is a workaround for that
-        if (-delta >= DISCORD_KT_DELAY - 86400000) { // One day of padding for good measure
+        if (-delta >= DISCORD_KT_DELAY - 86400000) {
+            // One day of padding for good measure
             isDiscordKotlin = detectDiscordKotlin;
             delta += DISCORD_KT_DELAY;
         }

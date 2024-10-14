@@ -163,7 +163,8 @@ function ChannelTabContent(props: ChannelTabsProps & {
                     {!showStatusIndicators && <TypingIndicator isTyping={isTyping} />}
                 </>
             );
-        } else { // Group DM
+        } else {
+            // Group DM
             return (
                 <>
                     <ChannelIcon channel={channel} />

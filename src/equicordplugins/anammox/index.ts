@@ -37,12 +37,13 @@ export const settings = definePluginSettings({
 
 export default definePlugin({
     name: "Anammox",
-    description: "Remove Some Discord Settings",
+    description: "A microbial process that plays an important part in the nitrogen cycle",
     authors: [Devs.Kyuuhachi],
     settings,
 
     patches: [
-        { // Above DMs, mouse nav
+        {
+            // Above DMs, mouse nav
             find: 'tutorialId:"direct-messages"',
             replacement: [
                 {
@@ -56,7 +57,8 @@ export default definePlugin({
             ],
             predicate: () => settings.store.dms,
         },
-        { // Above DMs, keyboard nav
+        {
+            // Above DMs, keyboard nav
             find: ".hasLibraryApplication()&&!",
             replacement: [
                 {
@@ -70,7 +72,8 @@ export default definePlugin({
             ],
             predicate: () => settings.store.dms,
         },
-        { // Settings, sidebar
+        {
+            // Settings, sidebar
             find: "Messages.BILLING_SETTINGS",
             replacement: [
                 {
@@ -84,23 +87,26 @@ export default definePlugin({
             ],
             predicate: () => settings.store.billing,
         },
-        { // Gift button
-            find: 'Messages.PREMIUM_GIFT_BUTTON_LABEL,"aria-haspopup":"dialog",onClick:',
+        {
+            // Gift button
+            find: ".gifts)||void 0===",
             replacement: {
-                match: /if\(\i\)return null;/,
-                replace: "return null;",
+                match: /let\{disabled:\i,channel:\i\}=\i/,
+                replace: "return null;$&",
             },
             predicate: () => settings.store.gift,
         },
-        { // Emoji list
+        {
+            // Emoji list
             find: "Messages.EMOJI_PICKER_CREATE_EMOJI_TITLE,size:",
             replacement: {
-                match: /(\i)=\i\|\|!\i&&\i.\i\i.isEmojiCategoryNitroLocked\(\{[^}]*\}\);/,
+                match: /(\i)=\i\|\|!\i&&\i.\i.isEmojiCategoryNitroLocked\(\{[^}]*\}\);/,
                 replace: "$&$1||"
             },
             predicate: () => settings.store.emojiList,
         },
-        { // Emoji category list
+        {
+            // Emoji category list
             find: "Messages.EMOJI_CATEGORY_TOP_GUILD_EMOJI.format({",
             replacement: {
                 match: /(?<=(\i)\.unshift\((\i)\):)(?=\1\.push\(\2\))/,

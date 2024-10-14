@@ -25,7 +25,7 @@ const mimeTypes = {
     mov: "video/quicktime",
 };
 
-const formatDimension = (value) => value % 1 === 0 ? value : value.toFixed(2);
+const formatDimension = value => value % 1 === 0 ? value : value.toFixed(2);
 
 function getMimeType(extension: string | undefined): [boolean, string] {
     if (!extension) return [false, ""];
@@ -389,7 +389,7 @@ export default definePlugin({
 
     start() {
         let timeout: number | undefined;
-        let previewDiv: HTMLDivElement | null = null;
+        const previewDiv: HTMLDivElement | null = null;
 
         function initialScan() {
             const appContainer = document.querySelector('[class*="app-"]');

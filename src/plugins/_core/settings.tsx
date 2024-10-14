@@ -218,7 +218,8 @@ export default definePlugin({
                 // @ts-ignore Typescript will add userAgentData IMMEDIATELY
                 || navigator.userAgentData?.brands?.find(b => b.brand === "Chromium" || b.brand === "Google Chrome")?.version
                 || null;
-        } catch { // inb4 some stupid browser throws unsupported error for navigator.userAgentData, it's only in chromium
+        } catch {
+            // inb4 some stupid browser throws unsupported error for navigator.userAgentData, it's only in chromium
             return null;
         }
     },
