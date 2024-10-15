@@ -30,7 +30,7 @@ import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Clickable, FluxDispatcher, Forms, React, Text, Tooltip, UserStore, UserUtils } from "@webpack/common";
+import { Button, Clickable, FluxDispatcher, Forms, React, Text, Toasts, Tooltip, UserStore, UserUtils } from "@webpack/common";
 import { User } from "discord-types/general";
 import { Constructor } from "type-fest";
 
@@ -137,6 +137,10 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         }
         if (restartNeeded) onRestartNeeded();
         onClose();
+    }
+
+    function handleResetClick() {
+        openWarningModal(plugin, { onClose, transitionState }, onRestartNeeded);
     }
 
     function renderSettings() {
@@ -279,29 +283,45 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             </ModalContent>
             {hasSettings && <ModalFooter>
                 <Flex flexDirection="column" style={{ width: "100%" }}>
-                    <Flex style={{ marginLeft: "auto" }}>
-                        <Button
-                            onClick={onClose}
-                            size={Button.Sizes.SMALL}
-                            color={Button.Colors.PRIMARY}
-                            look={Button.Looks.LINK}
-                        >
-                            Cancel
-                        </Button>
-                        <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
+                    <Flex style={{ justifyContent: "space-between" }}>
+                        <Tooltip text="Reset to default settings" shouldShow={!isObjectEmpty(tempSettings)}>
                             {({ onMouseEnter, onMouseLeave }) => (
                                 <Button
                                     size={Button.Sizes.SMALL}
                                     color={Button.Colors.BRAND}
-                                    onClick={saveAndClose}
+                                    onClick={handleResetClick}
                                     onMouseEnter={onMouseEnter}
                                     onMouseLeave={onMouseLeave}
-                                    disabled={!canSubmit()}
+                                    style={{ backgroundColor: "var(--button-danger-background)" }}
                                 >
-                                    Save & Close
+                                    Reset
                                 </Button>
                             )}
                         </Tooltip>
+                        <Flex style={{ marginLeft: "auto" }}>
+                            <Button
+                                onClick={onClose}
+                                size={Button.Sizes.SMALL}
+                                color={Button.Colors.PRIMARY}
+                                look={Button.Looks.LINK}
+                            >
+                                Cancel
+                            </Button>
+                            <Tooltip text="You must fix all errors before saving" shouldShow={!canSubmit()}>
+                                {({ onMouseEnter, onMouseLeave }) => (
+                                    <Button
+                                        size={Button.Sizes.SMALL}
+                                        color={Button.Colors.BRAND}
+                                        onClick={saveAndClose}
+                                        onMouseEnter={onMouseEnter}
+                                        onMouseLeave={onMouseLeave}
+                                        disabled={!canSubmit()}
+                                    >
+                                        Save & Close
+                                    </Button>
+                                )}
+                            </Tooltip>
+                        </Flex>
                     </Flex>
                     {saveError && <Text variant="text-md/semibold" style={{ color: "var(--text-danger)" }}>Error while saving: {saveError}</Text>}
                 </Flex>
@@ -317,5 +337,127 @@ export function openPluginModal(plugin: Plugin, onRestartNeeded?: (pluginName: s
             plugin={plugin}
             onRestartNeeded={() => onRestartNeeded?.(plugin.name)}
         />
+    ));
+}
+
+function resetSettings(plugin: Plugin, warningModalProps?: ModalProps, pluginModalProps?: ModalProps, onRestartNeeded?: (pluginName: string) => void) {
+    const defaultSettings = plugin.settings?.def;
+    const pluginName = plugin.name;
+
+    if (!defaultSettings) {
+        console.error(`No default settings found for ${pluginName}`);
+        return;
+    }
+
+    const newSettings: Record<string, any> = {};
+    let restartNeeded = false;
+
+    for (const key in defaultSettings) {
+        if (key === "enabled") continue;
+
+        const setting = defaultSettings[key];
+        setting.type = setting.type ?? OptionType.STRING;
+
+        if (setting.type === OptionType.STRING) {
+            newSettings[key] = setting.default !== undefined && setting.default !== "" ? setting.default : "";
+        } else if ("default" in setting && setting.default !== undefined) {
+            newSettings[key] = setting.default;
+        }
+
+        if (setting?.restartNeeded) {
+            restartNeeded = true;
+        }
+    }
+
+
+    const currentSettings = plugin.settings?.store;
+    if (currentSettings) {
+        Object.assign(currentSettings, newSettings);
+    }
+
+    if (plugin.afterSave) {
+        plugin.afterSave();
+    }
+
+    if (restartNeeded) {
+        onRestartNeeded?.(plugin.name);
+    }
+
+    Toasts.show({
+        message: `Settings for ${pluginName} have been reset.`,
+        id: Toasts.genId(),
+        type: Toasts.Type.SUCCESS,
+        options: {
+            position: Toasts.Position.TOP
+        }
+    });
+
+    warningModalProps?.onClose();
+    pluginModalProps?.onClose();
+}
+
+export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, onRestartNeeded?: (pluginName: string) => void) {
+    openModal(warningModalProps => (
+        <ModalRoot
+            {...warningModalProps}
+            size={ModalSize.SMALL}
+            className="vc-text-selectable"
+            transitionState={warningModalProps.transitionState}
+        >
+            <ModalHeader separator={false}>
+                <Text style={{ flexGrow: 1, color: "var(--text-danger)", fontSize: "1.4rem", fontWeight: "bold" }}>Warning: Dangerous Action</Text>
+                <ModalCloseButton onClick={warningModalProps.onClose} />
+            </ModalHeader>
+            <ModalContent>
+                <Forms.FormSection>
+                    <Flex className="vc-warning-info" style={{ gap: "15px", flexDirection: "column", userSelect: "none" }}>
+                        <img
+                            src="https://media.tenor.com/Y6DXKZiBCs8AAAAi/stavario-josefbenes.gif"
+                            alt="Warning"
+                            style={{ width: "60%", height: "auto", marginBottom: "10px", display: "block", margin: "auto" }}
+                        />
+                        <Text style={{ fontSize: "1.2rem", color: "var(--text-normal)" }}>
+                            You are about to reset all settings for <strong>{plugin.name}</strong> to their default values.
+                        </Text>
+                        <Text style={{ fontSize: "1.2rem", color: "var(--text-danger)", fontWeight: "bold" }}>
+                            This action is irreversible.
+                        </Text>
+                        <Text style={{ fontSize: "1.2rem", color: "var(--text-normal)", marginBottom: "10px" }}>
+                            If you are certain you want to proceed, click <strong>Confirm Reset</strong>. Otherwise, click <strong>Cancel</strong>.
+                        </Text>
+                    </Flex>
+                </Forms.FormSection>
+            </ModalContent>
+            <ModalFooter>
+                <Flex flexDirection="column" style={{ width: "100%" }}>
+                    <Flex style={{ justifyContent: "space-between" }}>
+                        <Button
+                            size={Button.Sizes.SMALL}
+                            color={Button.Colors.PRIMARY}
+                            onClick={warningModalProps.onClose}
+                            look={Button.Looks.LINK}
+                        >
+                            Cancel
+                        </Button>
+                        <Tooltip text="This action cannot be undone. Are you sure?" shouldShow={true}>
+                            {({ onMouseEnter, onMouseLeave }) => (
+                                <Button
+                                    size={Button.Sizes.SMALL}
+                                    color={Button.Colors.BRAND}
+                                    onClick={() => {
+                                        resetSettings(plugin, warningModalProps, pluginModalProps, onRestartNeeded);
+                                    }}
+                                    onMouseEnter={onMouseEnter}
+                                    onMouseLeave={onMouseLeave}
+                                    style={{ marginLeft: "10px", backgroundColor: "var(--button-danger-background)" }}
+                                >
+                                    Confirm Reset
+                                </Button>
+                            )}
+                        </Tooltip>
+                    </Flex>
+                </Flex>
+            </ModalFooter>
+        </ModalRoot>
     ));
 }

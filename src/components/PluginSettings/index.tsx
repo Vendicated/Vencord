@@ -386,6 +386,76 @@ export default function PluginSettings() {
             </div>
 
             <Forms.FormTitle className={Margins.top20}>Plugins</Forms.FormTitle>
+            {enabledPlugins.length > 0 && (
+                <Button
+                    size={Button.Sizes.SMALL}
+                    style={{ backgroundColor: "var(--button-danger-background)", margin: "20px 0" }}
+                    onClick={() => {
+                        return Alerts.show({
+                            title: "Disable All Plugins",
+                            body: (
+                                <>
+                                    <img
+                                        src="https://media.tenor.com/Y6DXKZiBCs8AAAAi/stavario-josefbenes.gif"
+                                        alt="Warning"
+                                        style={{ width: "60%", height: "auto", marginBottom: "10px", display: "block", margin: "auto" }}
+                                    />
+                                    <p style={{ fontSize: "1.2rem", color: "var(--text-danger)", fontWeight: "bold" }}>
+                                        WARNING: You are about to disable <span style={{ textDecoration: "underline" }}>{enabledPlugins.length}</span> plugins!
+                                    </p>
+                                    <p style={{ fontSize: "1rem" }}>
+                                        Are you absolutely sure you want to proceed? You can always enable them back later.
+                                    </p>
+                                </>
+                            ),
+                            confirmText: "Disable All",
+                            cancelText: "Cancel",
+                            onConfirm: () => {
+                                let restartNeeded = false;
+
+                                for (const plugin of enabledPlugins) {
+                                    const pluginSettings = settings.plugins[plugin];
+
+                                    if (Plugins[plugin].patches?.length) {
+                                        pluginSettings.enabled = false;
+                                        changes.handleChange(plugin);
+                                        restartNeeded = true;
+                                        continue;
+                                    }
+
+                                    const result = stopPlugin(Plugins[plugin]);
+
+                                    if (!result) {
+                                        logger.error(`Error while stopping plugin ${plugin}`);
+                                        showErrorToast(`Error while stopping plugin ${plugin}`);
+                                        continue;
+                                    }
+
+                                    pluginSettings.enabled = false;
+                                }
+
+                                if (restartNeeded) {
+                                    Alerts.show({
+                                        title: "Restart Required",
+                                        body: (
+                                            <>
+                                                <p>Some plugins require a restart to fully disable.</p>
+                                                <p>Would you like to restart now?</p>
+                                            </>
+                                        ),
+                                        confirmText: "Restart Now",
+                                        cancelText: "Later",
+                                        onConfirm: () => location.reload()
+                                    });
+                                }
+                            }
+                        });
+                    }}
+                >
+                    Disable All Plugins
+                </Button>
+            )}
+
 
             {plugins.length || requiredPlugins.length
                 ? (
