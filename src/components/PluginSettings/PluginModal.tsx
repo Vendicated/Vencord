@@ -19,7 +19,7 @@
 import "./PluginModal.css";
 
 import { generateId } from "@api/Commands";
-import { useSettings } from "@api/Settings";
+import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -397,6 +397,8 @@ function resetSettings(plugin: Plugin, warningModalProps?: ModalProps, pluginMod
 }
 
 export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, onRestartNeeded?: (pluginName: string) => void) {
+    if (Settings.ignoreResetWarning) return resetSettings(plugin, pluginModalProps, pluginModalProps, onRestartNeeded);
+    
     openModal(warningModalProps => (
         <ModalRoot
             {...warningModalProps}
@@ -425,6 +427,21 @@ export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, o
                         <Text style={{ fontSize: "1.2rem", color: "var(--text-normal)", marginBottom: "10px" }}>
                             If you are certain you want to proceed, click <strong>Confirm Reset</strong>. Otherwise, click <strong>Cancel</strong>.
                         </Text>
+                        {!Settings.ignoreResetWarning && (
+                            <Button style={{
+                                fontSize: "0.8rem",
+                                backgroundColor: "transparent",
+                                color: "red",
+                                cursor: "pointer",
+                                margin: "0 auto",
+                                width: "fit-content",
+                                textDecoration: "underline"
+                            }} onClick={() => {
+                                Settings.ignoreResetWarning = true;
+                            }}>
+                                Disable this warning forever
+                            </Button>
+                        )}
                     </Flex>
                 </Forms.FormSection>
             </ModalContent>

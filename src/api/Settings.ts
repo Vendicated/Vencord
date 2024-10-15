@@ -76,6 +76,8 @@ export interface Settings {
         settingsSyncVersion: number;
     };
 
+    ignoreResetWarning: boolean;
+
     userCssVars: {
         [themeId: string]: {
             [varName: string]: string;
@@ -112,6 +114,8 @@ const DefaultSettings: Settings = {
         settingsSync: false,
         settingsSyncVersion: 0
     },
+
+    ignoreResetWarning: false,
 
     userCssVars: {}
 };
