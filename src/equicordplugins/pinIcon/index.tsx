@@ -27,10 +27,10 @@ export default definePlugin({
     authors: [EquicordDevs.iamme],
     patches: [
         {
-            find: ".Messages.MESSAGE_EDITED,",
+            find: "Messages.MESSAGE_EDITED,",
             replacement: {
-                match: /(children:\[null!=\i.+?(?:[^}]*[}]){3}\))/,
-                replace: "$1,$self.PinnedIcon(arguments[0].message)"
+                match: /Messages\.MESSAGE_EDITED,(?:[^}]*[}]){3}\)/,
+                replace: "$&,$self.PinnedIcon(arguments[0].message)"
             }
         }
     ],
