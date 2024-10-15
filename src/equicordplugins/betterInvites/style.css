@@ -1,0 +1,18 @@
+h3[class^="h5"]:has([class="vc-bi-header-inner"]) {
+    display: flex;
+    margin: 0 !important;
+}
+
+.vc-bi-inviter-avatar {
+    margin: 0;
+    margin-right: 5px;
+    height: 16px;
+    width: 16px;
+    position: static;
+}
+
+.vc-bi-header-inner {
+    display: flex;
+    margin: 0;
+    margin-bottom: 5px;
+}
