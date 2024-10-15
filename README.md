@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>127 additional plugins</summary>
+<summary>130 additional plugins</summary>
 
 - AllCallTimers by MaxHerbold & D3SOX
 - AltKrispSwitch by newwares
@@ -35,6 +35,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - CuteAnimeBoys by ShadyGoat
 - CuteNekos by echo
 - CutePats by thororen
+- ChannelBadges by Creations
 - CharacterCounter by Creations
 - Demonstration by Samwich
 - DisableCameras by Joona
@@ -97,6 +98,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - OnePingPerDM by ProffDea
 - PlatformSpoofer by Drag
 - PurgeMessages by bhop & nyx
+- PinIcon by iamme
 - QuestCompleter by HappyEnderman & SerStars (Maintained by thororen)
 - QuestionMarkReplacement by nyx
 - Quoter by Samwich
