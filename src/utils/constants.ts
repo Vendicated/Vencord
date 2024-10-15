@@ -577,7 +577,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     Stage: {
         name: "stage cleared",
-        id: 328768008669495296n
+        id: 328768008669495296n,
     },
 } satisfies Record<string, Dev>);
 
