@@ -195,7 +195,7 @@ function registerStyleChange(style) {
 }
 
 async function setIsUserCustomCapable() {
-    const allowList: string[] = await fetch("https://raw.githubusercontent.com/Equicord/Equibored/main/quoterusers.json").then(e => e.json());
+    const allowList: string[] = await fetch("https://raw.githubusercontent.com/Equicord/Equibored/main/misc/quoterusers.json").then(e => e.json());
     isUserCustomCapable = allowList.includes(UserStore.getCurrentUser().id);
 }
 
