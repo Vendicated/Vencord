@@ -398,7 +398,7 @@ function resetSettings(plugin: Plugin, warningModalProps?: ModalProps, pluginMod
 
 export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, onRestartNeeded?: (pluginName: string) => void) {
     if (Settings.ignoreResetWarning) return resetSettings(plugin, pluginModalProps, pluginModalProps, onRestartNeeded);
-    
+
     openModal(warningModalProps => (
         <ModalRoot
             {...warningModalProps}
