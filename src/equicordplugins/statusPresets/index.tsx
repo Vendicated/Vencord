@@ -131,14 +131,14 @@ export default definePlugin({
     dependencies: ["UserSettingsAPI"],
     patches: [
         {
-            find: ".Messages.CUSTOM_STATUS_CLEAR_AFTER",
+            find: "Messages.CUSTOM_STATUS_SET_CUSTOM_STATUS}",
             replacement: {
                 match: /\.ModalFooter,.{0,70}\.Messages\.SAVE\}\)/,
                 replace: "$&,$self.renderRememberButton(this.state)"
             }
         },
         {
-            find: ".Messages.STATUS_MENU_LABEL",
+            find: "Messages.STATUS_MENU_LABEL",
             replacement: {
                 match: /!\i&&(.{0,15}\i\.Fragment.{0,55}null==(\i).{0,200}customEmojiPlaceholder\}\),onClick:([^}]+}))/,
                 replace: "$self.render($2, $3),false&&$1"
