@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>130 additional plugins</summary>
+<summary>131 additional plugins</summary>
 
 - AllCallTimers by MaxHerbold & D3SOX
 - AltKrispSwitch by newwares
@@ -113,6 +113,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ShowBadgesInChat by Inbestigator & KrystalSkull
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo (Maintained by thororen)
+- StatusPresets by iamme
 - StatusWhilePlaying by thororen (Desktop app only)
 - SteamStatusSync by niko
 - StickerBlocker by Samwich

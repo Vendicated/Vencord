@@ -478,7 +478,7 @@ export type Clickable = ComponentType<PropsWithChildren<{
     href?: string;
     ignoreKeyPress?: boolean;
 
-    onClick?(): void;
+    onClick?(e: React.MouseEvent<any>): void;
     onKeyPress?(): void;
 }>>;
 
