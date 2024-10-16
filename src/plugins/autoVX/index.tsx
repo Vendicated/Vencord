@@ -64,7 +64,6 @@ export default definePlugin({
             });
 
 
-            console.log("finished");
             mobj.content = p_content;
 
             return { cancel: false };
