@@ -4,6 +4,6 @@
         "EditorConfig.EditorConfig",
         "GregorBiswanger.json2ts",
         "stylelint.vscode-stylelint",
-        "Vendicated.vencord-companion"
+        "thororen.equicord-companion"
     ]
 }
