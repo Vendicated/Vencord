@@ -70,6 +70,7 @@ function htmlPlaceholders(htmlText: string, replacements: [string]) {
     return result;
 }
 
+// burn this function while you still have the chance
 function getLatestMessage() {
     const messageList = document.querySelectorAll(`.messageListItem_d5deea`);
     return messageList[messageList.length - 1];
@@ -111,7 +112,7 @@ export default definePlugin({
         },
         {
             name: "toyota-yaris",
-            description: "Bouncing Toyota Yaris. (Includes Audio)",
+            description: "Bouncing Toyota Yaris.",
             execute: () => ({
                 content: html(presets.yaris)
             })
