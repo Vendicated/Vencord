@@ -19,12 +19,11 @@
         "noImplicitAny": false,
         "target": "ESNEXT",
         "jsx": "preserve",
-        
+
         "baseUrl": "./src/",
         "paths": {
             "@main/*": ["./main/*"],
             "@api/*": ["./api/*"],
-            "@zapi/*": ["./zapi/*"],
             "@components/*": ["./components/*"],
             "@utils/*": ["./utils/*"],
             "@shared/*": ["./shared/*"],
@@ -32,7 +31,7 @@
             "@webpack/common": ["./webpack/common"],
             "@webpack": ["./webpack/webpack"]
         },
-        
+
         "plugins": [
             // Transform paths in output .d.ts files (Include this line if you output declarations files)
             {
@@ -42,10 +41,5 @@
         ],
         "outDir": "who-fucking-cares-dude"
     },
-    "include": [
-        "src/**/*",
-        "browser/**/*",
-        "scripts/**/*",
-        "eslint.config.mjs"
-    ],
+    "include": ["src/**/*", "browser/**/*", "scripts/**/*", "eslint.config.mjs"],
 }
