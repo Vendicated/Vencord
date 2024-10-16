@@ -48,7 +48,11 @@ export async function checkForUpdates() {
 
 export async function checkImportantUpdate() {
     changes = await Unwrap(VencordNative.updater.getUpdates());
-    return changes[0].message.includes("IMPORTANT");
+    let important = false;
+    changes.forEach(c => {
+        if (c.message.includes("IMPORTANT")) important = true;
+    });
+    return important;
 }
 
 export async function update() {
