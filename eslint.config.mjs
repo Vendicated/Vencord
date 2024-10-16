@@ -31,9 +31,7 @@ export default tseslint.config(
                     ["@webpack", "./src/webpack"],
                     ["@webpack/common", "./src/webpack/common"],
                     ["@utils", "./src/utils"],
-                    ["@zutils", "./src/zutils"],
                     ["@api", "./src/api"],
-                    ["@zapi", "./src/zapi"],
                     ["@components", "./src/components"]
                 ]
             }
