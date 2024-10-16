@@ -1,15 +1,14 @@
-/* backdoor? pfft... unless..? */
-
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors*
+ * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
-*/
+ */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage } from "@api/Commands";
+/* backdoor? what backdoor? idk what youre yapping about */
+
+import { ApplicationCommandOptionType, findOption, RequiredMessageOption } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { string } from "ts-pattern/dist/patterns";
 
 // place html presets here cause that makes the code more readable
 const presets = {
@@ -62,8 +61,8 @@ function html(htmlText: string) {
 function htmlPlaceholder(htmlText: string, replacement: string) {
     return `[[${htmlText.replace("%TEXT%", replacement)}]]`;
 }
-function htmlPlaceholders(htmlText: string, replacements: [string]) {
-    let result = `[[${htmlText}]]`;
+function htmlPlaceholders(htmlText: string, replacements: string[]) {
+    const result = `[[${htmlText}]]`;
     for (let i = 0; i < replacements.length; i++) {
         result.replace(`%TEXT${i + 1}%`, replacements[i]);
     }
@@ -72,8 +71,11 @@ function htmlPlaceholders(htmlText: string, replacements: [string]) {
 
 // burn this function while you still have the chance
 function getLatestMessage() {
-    const messageList = document.querySelectorAll(`.messageListItem_d5deea`);
+    const messageList = document.querySelectorAll(".messageListItem_d5deea");
     return messageList[messageList.length - 1];
+}
+function emojiToImg(id: string) {
+    return `imagine getting a normal respons :3 ${id}`;
 }
 
 export default definePlugin({
@@ -99,7 +101,7 @@ export default definePlugin({
                     type: ApplicationCommandOptionType.STRING
                 }
             ],
-            execute: (opts) => ({
+            execute: opts => ({
                 content: htmlPlaceholder(presets.emojiGift, findOption(opts, "emoji", ""))
             })
         },
@@ -120,8 +122,17 @@ export default definePlugin({
         {
             name: "thoughts",
             description: "Generate a thought bubble over the previous message (adjust the values after sending as needed.)",
-            execute: (opts) => ({
+            execute: () => ({
                 content: htmlPlaceholder(presets.thoughts, (getLatestMessage()?.getBoundingClientRect().height + 96).toString())
+            })
+        },
+        {
+            name: "html-emoji-dbg",
+            description: "Test out getting the emoji source",
+            options: [RequiredMessageOption],
+            devOnly: true,
+            execute: opts => ({
+                content: emojiToImg(findOption(opts, "emoji", ""))
             })
         }
     ]
