@@ -67,7 +67,7 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
 
 export default definePlugin({
     name: "VoiceMessages",
-    description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
+    description: "Allows you to send voice messages like on mobile. To do so, left click the upload button and click Send Voice Message",
     authors: [Devs.Ven, Devs.Vap, Devs.Nickyux],
     settings,
     contextMenus: {
