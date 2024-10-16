@@ -17,7 +17,6 @@
 */
 
 import { registerCommand, unregisterCommand } from "@api/Commands";
-import { registerZCommand, unregisterZCommand } from "@zapi/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
@@ -216,7 +215,7 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 }
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
-    const { name, commands, zcommands, contextMenus } = p;
+    const { name, commands, contextMenus } = p;
 
     if (p.start) {
         logger.info("Starting plugin", name);
@@ -245,17 +244,6 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
             }
         }
     }
-    if (zcommands?.length) {
-        logger.debug("Registering commands of plugin", name);
-        for (const cmd of zcommands) {
-            try {
-                registerZCommand(cmd, name);
-            } catch (e) {
-                logger.error(`Failed to register command ${cmd.name}\n`, e);
-                return false;
-            }
-        }
-    }
 
     if (enabledPluginsSubscribedFlux) {
         subscribePluginFluxEvents(p, FluxDispatcher);
@@ -273,7 +261,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 }, p => `startPlugin ${p.name}`);
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
-    const { name, commands, zcommands, contextMenus } = p;
+    const { name, commands, contextMenus } = p;
 
     if (p.stop) {
         logger.info("Stopping plugin", name);
@@ -296,17 +284,6 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
         for (const cmd of commands) {
             try {
                 unregisterCommand(cmd.name);
-            } catch (e) {
-                logger.error(`Failed to unregister command ${cmd.name}\n`, e);
-                return false;
-            }
-        }
-    }
-    if (zcommands?.length) {
-        logger.debug("Unregistering commands of plugin", name);
-        for (const cmd of zcommands) {
-            try {
-                unregisterZCommand(cmd.name);
             } catch (e) {
                 logger.error(`Failed to unregister command ${cmd.name}\n`, e);
                 return false;
