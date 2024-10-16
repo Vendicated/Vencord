@@ -17,6 +17,7 @@
 */
 
 import { Command } from "@api/Commands";
+import { ZCommand } from "@zapi/Commands";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { FluxEvents } from "@webpack/types";
 import { Promisable } from "type-fest";
@@ -75,6 +76,10 @@ export interface PluginDef {
      * List of commands that your plugin wants to register
      */
     commands?: Command[];
+    /**
+     * List of zoidcord commands that your plugin wants to register
+     */
+    zcommands?: ZCommand[];
     /**
      * A list of other plugins that your plugin depends on.
      * These will automatically be enabled and loaded before your plugin
