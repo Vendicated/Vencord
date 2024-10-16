@@ -1,0 +1,32 @@
+name: test
+on:
+    push:
+    pull_request:
+        branches:
+            - main
+            - dev
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
+
+            - name: Use Node.js 20
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "pnpm"
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Lint & Test if desktop version compiles
+              run: pnpm test
+
+            - name: Test if web version compiles
+              run: pnpm buildWeb
+
+            - name: Test if plugin structure is valid
+              run: pnpm generatePluginJson
