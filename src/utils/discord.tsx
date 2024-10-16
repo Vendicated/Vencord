@@ -21,6 +21,7 @@ import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore,
 import { Channel, Guild, Message, User } from "discord-types/general";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
+import { find } from "@webpack";
 
 /**
  * Open the invite modal
@@ -109,24 +110,24 @@ export function sendMessage(
 }
 
 export function openImageModal(url: string, props?: Partial<React.ComponentProps<ImageModal>>): string {
+    console.log(props);
     return openModal(modalProps => (
-        <ModalRoot
+        <ImageModal
             {...modalProps}
-            className={ModalImageClasses.modal}
-            size={ModalSize.DYNAMIC}>
-            <ImageModal
-                className={ModalImageClasses.image}
-                original={url}
-                placeholder={url}
-                src={url}
-                renderLinkComponent={props => <MaskedLink {...props} />}
-                // Don't render forward message button
-                renderForwardComponent={() => null}
-                shouldHideMediaOptions={false}
-                shouldAnimate
-                {...props}
-            />
-        </ModalRoot>
+            className={find(x => x.modal && Object.entries(x).length === 1).modal}
+            renderLinkComponent={props => <MaskedLink {...props} />}
+            // Don't render forward message button
+            renderForwardComponent={() => null}
+            shouldHideMediaOptions={false}
+            shouldAnimate={true}
+            //@ts-ignore
+            items={[{
+                ...props,
+                type: "IMAGE",
+                url,
+                width: props?.width ?? props?.height,
+            }]}
+        />
     ));
 }
 

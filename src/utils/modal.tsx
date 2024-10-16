@@ -119,7 +119,7 @@ export type ImageModal = ComponentType<{
     shouldHideMediaOptions?: boolean;
 }>;
 
-export const ImageModal = findComponentByCodeLazy(".MEDIA_MODAL_CLOSE", "responsive") as ImageModal;
+export const ImageModal = findComponentByCodeLazy(".MEDIA_MODAL_CLOSE") as ImageModal;
 
 export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
 export const ModalHeader = LazyComponent(() => Modals.ModalHeader);
