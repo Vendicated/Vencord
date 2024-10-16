@@ -134,6 +134,9 @@ export function registerCommand<C extends Command>(command: C, plugin: string) {
         );
         return;
     }
+    if (command.devOnly && !IS_DEV) {
+        return;
+    }
 
     if (BUILT_IN.some(c => c.name === command.name))
         throw new Error(`Command '${command.name}' already exists.`);

@@ -91,6 +91,7 @@ export interface Command {
     inputType?: ApplicationCommandInputType;
     plugin?: string;
     isVencordCommand?: boolean;
+    devOnly?: boolean;
 
     name: string;
     untranslatedName?: string;
