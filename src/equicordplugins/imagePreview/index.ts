@@ -114,6 +114,7 @@ function loadImagePreview(url: string) {
 
     if (!allowed) return;
 
+    const [maxWidth, maxHeight] = settings.store.defaultMaxSize === "0" ? [Infinity, Infinity] : settings.store.defaultMaxSize.split("x").map(Number);
     currentPreviewType = mimeType.includes("video") ? "video" : "image";
 
     const preview = document.createElement("div");
@@ -140,6 +141,22 @@ function loadImagePreview(url: string) {
         if (lastMouseEvent && currentPreview) {
             updatePreviewPosition(lastMouseEvent, currentPreview);
         }
+    };
+
+    const resizeMedia = (mediaWidth: number, mediaHeight: number) => {
+        const mediaElement = currentPreviewFile as HTMLImageElement | HTMLVideoElement | null;
+        if (!mediaElement) return;
+
+        if (mediaWidth > maxWidth || mediaHeight > maxHeight) {
+            const widthRatio = maxWidth / mediaWidth;
+            const heightRatio = maxHeight / mediaHeight;
+            const scale = Math.min(widthRatio, heightRatio);
+
+            mediaElement.style.width = `${mediaWidth * scale}px`;
+            mediaElement.style.height = `${mediaHeight * scale}px`;
+        }
+
+        updatePositionAfterLoad();
     };
 
     fileName.textContent = url.split("/").pop()?.split("?")[0] || "";
@@ -176,7 +193,7 @@ function loadImagePreview(url: string) {
             if (loadingSpinner) loadingSpinner.remove();
             video.style.display = "block";
 
-            updatePositionAfterLoad();
+            resizeMedia(video.videoWidth, video.videoHeight);
         };
 
 
@@ -204,7 +221,7 @@ function loadImagePreview(url: string) {
             if (loadingSpinner) loadingSpinner.remove();
             img.style.display = "block";
 
-            updatePositionAfterLoad();
+            resizeMedia(img.naturalWidth, img.naturalHeight);
         };
 
         preview.appendChild(img);

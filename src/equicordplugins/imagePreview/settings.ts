@@ -6,6 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
+import { showToast, Toasts } from "@webpack/common";
 
 const settings = definePluginSettings({
     messageImages: {
@@ -48,6 +49,19 @@ const settings = definePluginSettings({
         description: "Speed at which the image zooms in",
         default: 1.5,
         markers: [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5],
+    },
+    defaultMaxSize: {
+        type: OptionType.STRING,
+        description: "Default max size for images, requires WxH format",
+        default: "0",
+        onChange: (value: string) => {
+            if (value === "0") return;
+
+            if (!/^\d+x\d+$/.test(value)) {
+                settings.store.defaultMaxSize = "0";
+                showToast("Invalid format, please use WxH format. Resetting to default.", Toasts.Type.FAILURE);
+            }
+        }
     },
 });
 
