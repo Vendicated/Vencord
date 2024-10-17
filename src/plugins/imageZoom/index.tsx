@@ -163,7 +163,7 @@ export default definePlugin({
                 // also idk if this patch is good, should it be more specific?
                 // https://regex101.com/r/xfvNvV/1
                 match: /return.{1,200}\.wrapper.{1,200}src:\i,/g,
-                replace: "$&id: 'vc-imgzoom-magnify-modal',"
+                replace: `$&id: '${ELEMENT_ID}',`
             }
         },
 
