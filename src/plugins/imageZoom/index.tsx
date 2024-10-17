@@ -156,14 +156,14 @@ export default definePlugin({
 
     patches: [
         {
-            find: "Messages.OPEN_IN_BROWSER",
+            find: "ACTIVITY_COACH_MARK_NITRO,",
             replacement: {
                 // there are 2 image thingies. one for carosuel and one for the single image.
                 // so thats why i added global flag.
                 // also idk if this patch is good, should it be more specific?
                 // https://regex101.com/r/xfvNvV/1
                 match: /return.{1,200}\.wrapper.{1,200}src:\i,/g,
-                replace: `$&id: '${ELEMENT_ID}',`
+                replace: "$&id: 'vc-imgzoom-magnify-modal',"
             }
         },
 
