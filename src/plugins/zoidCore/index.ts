@@ -19,6 +19,15 @@ export default definePlugin({
     description: "Extra core functions for Zoidcord",
     authors: [Devs.Zoid],
     required: true,
+    flux: {
+        async CHANNEL_SELECT({ channelId, guildId }) {
+            const oldClasses = Array.from(document.body.classList);
+            oldClasses.filter(c => c.startsWith("guild-") || c.startsWith("channel-")).forEach(c => document.body.classList.remove(c));
+            if (channelId) {
+                document.body.classList.add(`guild-${guildId}`, `channel-${channelId}`);
+            }
+        }
+    },
     start() {
         setInterval(async function () {
             if (!IS_WEB && !IS_UPDATER_DISABLED) {
