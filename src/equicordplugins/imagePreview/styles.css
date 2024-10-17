@@ -1,7 +1,7 @@
 .image-preview {
     position: fixed;
     z-index: 1000;
-    pointer-events: none;
+    pointer-events: auto;
     border: 2px solid var(--background-secondary);
     background-color: var(--background-primary);
     border-radius: 4px;
