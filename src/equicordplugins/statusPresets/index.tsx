@@ -138,7 +138,7 @@ export default definePlugin({
             }
         },
         {
-            find: "Messages.STATUS_MENU_LABEL",
+            find: /"aria-label":.{0,3}\.Messages.STATUS_MENU_LABEL/,
             replacement: {
                 match: /!\i&&(.{0,15}\i\.Fragment.{0,55}null==(\i).{0,200}customEmojiPlaceholder\}\),onClick:([^}]+}))/,
                 replace: "$self.render($2, $3),false&&$1"

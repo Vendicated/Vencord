@@ -189,8 +189,8 @@ export default definePlugin({
             find: "PrivateChannel.renderAvatar",
             replacement: {
                 // horror but it works
-                match: /function\(\i,(\i),\i\){.*,\[\i,\i,\i\]\);/,
-                replace: "$&if($1.rawRecipients[0] != null){if($1.rawRecipients[0].id != null){if($self.shouldHideUser($1.rawRecipients[0].id)) return null;}}"
+                match: /(function\(\i,(\i),\i\){.*)(return \i\.isMultiUserDM\(\))/,
+                replace: "$1if($2.rawRecipients[0] != null){if($2.rawRecipients[0].id != null){if($self.shouldHideUser($2.rawRecipients[0].id)) return null;}}$3"
             }
         },
 
