@@ -1,7 +1,7 @@
 .image-preview {
     position: fixed;
     z-index: 1000;
-    pointer-events: auto;
+    pointer-events: none;
     border: 2px solid var(--background-secondary);
     background-color: var(--background-primary);
     border-radius: 4px;
@@ -16,6 +16,7 @@
 .image-preview.allow-zoom-and-drag {
     background-color: transparent;
     border: none;
+    pointer-events: auto;
 }
 
 .image-preview .file-info {
@@ -38,6 +39,21 @@
     margin: 0 5px;
     box-shadow: 0 0 0 1px var(--background-secondary);
     border: 1px solid var(--background-secondary);
+}
+
+.file-size {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.image-preview .file-info span p {
+    padding: 0;
+    margin: 0;
+}
+
+.image-preview .file-info span p:last-child:not(:first-child) {
+    color: var(--text-muted);
 }
 
 .image-preview.allow-zoom-and-drag .file-info {

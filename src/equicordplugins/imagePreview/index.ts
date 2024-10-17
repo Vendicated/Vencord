@@ -24,17 +24,22 @@ let isDragging: boolean = false;
 let shouldKeepPreviewOpenTimeout: NodeJS.Timeout | null = null;
 let shouldKeepPreviewOpen: boolean = false;
 let hoverDelayTimeout: NodeJS.Timeout | null = null;
+let lastMouseEvent: MouseEvent | null = null;
 
 let observer: MutationObserver | null = null;
 
 function deleteCurrentPreview() {
-    if (!currentPreview || !currentPreviewFile || !currentPreviewFileSize || !currentPreviewType) return;
+    if (!currentPreview || !currentPreviewFile || !currentPreviewFileSize || !currentPreviewType || !loadingSpinner) return;
 
     currentPreview.remove();
+    loadingSpinner = null;
+    lastMouseEvent = null;
     currentPreview = null;
     currentPreviewFile = null;
     currentPreviewFileSize = null;
     currentPreviewType = null;
+    lastMouseEvent = null;
+    loadingSpinner = null;
     zoomLevel = 1;
 }
 
@@ -126,9 +131,19 @@ function loadImagePreview(url: string) {
 
     const fileName = document.createElement("span");
     const fileSize = document.createElement("span");
+    fileSize.className = "file-size";
+    const fileSizeSpan = document.createElement("p");
+    const showingSize = document.createElement("p");
     const mimeTypeSpan = document.createElement("span");
 
+    const updatePositionAfterLoad = () => {
+        if (lastMouseEvent && currentPreview) {
+            updatePreviewPosition(lastMouseEvent, currentPreview);
+        }
+    };
+
     fileName.textContent = url.split("/").pop()?.split("?")[0] || "";
+
     mimeTypeSpan.textContent = mimeType;
 
     if (currentPreviewType === "video") {
@@ -146,10 +161,24 @@ function loadImagePreview(url: string) {
 
         video.onloadeddata = () => {
             currentPreviewFileSize = [video.videoWidth, video.videoHeight];
-            fileSize.textContent = `${currentPreviewFileSize[0]}x${currentPreviewFileSize[1]}`;
+            fileSizeSpan.textContent = `${currentPreviewFileSize[0]}x${currentPreviewFileSize[1]}`;
+            fileSize.appendChild(fileSizeSpan);
+
+            requestAnimationFrame(() => {
+                if (!currentPreviewFileSize) return;
+                const showingMediaSize = [video.clientWidth, video.clientHeight];
+                if (showingMediaSize[0] !== currentPreviewFileSize[0] && showingMediaSize[1] !== currentPreviewFileSize[1]) {
+                    showingSize.textContent = showingMediaSize ? `(${showingMediaSize[0]}x${showingMediaSize[1]})` : "";
+                    fileSize.appendChild(showingSize);
+                }
+            });
+
             if (loadingSpinner) loadingSpinner.remove();
             video.style.display = "block";
+
+            updatePositionAfterLoad();
         };
+
 
         preview.appendChild(video);
         currentPreviewFile = video;
@@ -159,10 +188,25 @@ function loadImagePreview(url: string) {
         img.className = "preview-media";
         img.onload = () => {
             currentPreviewFileSize = [img.naturalWidth, img.naturalHeight];
-            fileSize.textContent = `${currentPreviewFileSize[0]}x${currentPreviewFileSize[1]}`;
+            fileSizeSpan.textContent = `${currentPreviewFileSize[0]}x${currentPreviewFileSize[1]}`;
+            fileSize.appendChild(fileSizeSpan);
+
+            requestAnimationFrame(() => {
+                if (!currentPreviewFileSize) return;
+
+                const showingMediaSize = [img.clientWidth, img.clientHeight];
+                if (showingMediaSize[0] !== currentPreviewFileSize[0] && showingMediaSize[1] !== currentPreviewFileSize[1]) {
+                    showingSize.textContent = showingMediaSize ? `(${showingMediaSize[0]}x${showingMediaSize[1]})` : "";
+                    fileSize.appendChild(showingSize);
+                }
+            });
+
             if (loadingSpinner) loadingSpinner.remove();
             img.style.display = "block";
+
+            updatePositionAfterLoad();
         };
+
         preview.appendChild(img);
         currentPreviewFile = img;
     }
@@ -172,26 +216,29 @@ function loadImagePreview(url: string) {
     fileInfo.appendChild(fileSize);
     preview.appendChild(fileInfo);
 
-    currentPreviewFile.addEventListener("mouseover", () => {
-        if (currentPreview && !isCtrlHeld) {
-            shouldKeepPreviewOpen = true;
-            currentPreview.classList.add("allow-zoom-and-drag");
-        }
-    });
+    if (settings.store.mouseOnlyMode) {
+        currentPreviewFile.addEventListener("mouseover", () => {
+            if (currentPreview && !isCtrlHeld) {
+                shouldKeepPreviewOpen = true;
+                currentPreview.classList.add("allow-zoom-and-drag");
+            }
+        });
 
-    currentPreviewFile.addEventListener("mouseout", () => {
-        if (currentPreview && !isCtrlHeld && shouldKeepPreviewOpen) {
-            deleteCurrentPreview();
-            shouldKeepPreviewOpen = false;
-        }
-    });
+        currentPreviewFile.addEventListener("mouseout", () => {
+            if (currentPreview && !isCtrlHeld && shouldKeepPreviewOpen) {
+                deleteCurrentPreview();
+                shouldKeepPreviewOpen = false;
+            }
+        });
+    }
 
     currentPreview.addEventListener("wheel", (event: WheelEvent) => {
-        const zoomSpeed = 0.0005;
+        const [{ zoomFactor }, zoomSpeed] = [settings.store, 0.0005];
 
         if (isCtrlHeld || event.target === currentPreview || event.target === currentPreviewFile) {
             event.preventDefault();
-            zoomLevel += event.deltaY * -zoomSpeed;
+
+            zoomLevel += event.deltaY * -zoomSpeed * zoomFactor;
 
             zoomLevel = Math.min(Math.max(zoomLevel, 0.5), 10);
 
@@ -209,6 +256,7 @@ function loadImagePreview(url: string) {
             }
         }
     });
+
 
     currentPreview.addEventListener("mousedown", (event: MouseEvent) => {
         if ((isCtrlHeld || shouldKeepPreviewOpen) && currentPreview) {
@@ -244,9 +292,12 @@ function updatePreviewPosition(mouseEvent: MouseEvent, element: HTMLElement) {
 
         if (top + previewHeight > window.innerHeight) {
             top = mouseEvent.pageY - previewHeight - padding;
+
             if (top < padding) {
-                top = window.innerHeight - previewHeight - padding;
+                top = window.innerHeight - previewHeight - padding * 2;
             }
+        } else {
+            top = Math.min(top, window.innerHeight - previewHeight - padding * 2);
         }
 
         currentPreview.style.left = `${left}px`;
@@ -263,10 +314,8 @@ function updatePreviewPosition(mouseEvent: MouseEvent, element: HTMLElement) {
 function addHoverListener(element: Element) {
     element.setAttribute("data-processed", "true");
 
-    let lastMouseEvent: MouseEvent | null = null;
-
     element.addEventListener("mouseover", event => {
-        if (currentPreview) {
+        if (currentPreview || loadingSpinner) {
             if (isCtrlHeld) return;
 
             deleteCurrentPreview();
@@ -334,11 +383,9 @@ function addHoverListener(element: Element) {
 }
 
 function handleKeydown(event: KeyboardEvent) {
-    if (event.key === "Control") {
+    if (event.key === "Control" && currentPreview) {
         isCtrlHeld = true;
-        if (currentPreview) {
-            currentPreview.classList.add("allow-zoom-and-drag");
-        }
+        currentPreview.classList.add("allow-zoom-and-drag");
     }
 }
 
@@ -373,6 +420,7 @@ function removeHoverListeners() {
     processedElements.forEach(element => {
         const clone = element.cloneNode(true);
         element.replaceWith(clone);
+        element.removeAttribute("data-processed");
     });
 }
 

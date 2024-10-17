@@ -43,6 +43,12 @@ const settings = definePluginSettings({
         default: 0.5,
         markers: [0, 1, 2, 3, 4, 5],
     },
+    zoomFactor: {
+        type: OptionType.SLIDER,
+        description: "Speed at which the image zooms in",
+        default: 1.5,
+        markers: [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5],
+    },
 });
 
 const mimeTypes = {
