@@ -156,7 +156,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "ACTIVITY_COACH_MARK_NITRO,",
+            find: "Messages.OPEN_IN_BROWSER",
             replacement: {
                 // there are 2 image thingies. one for carosuel and one for the single image.
                 // so thats why i added global flag.
