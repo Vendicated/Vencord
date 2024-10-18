@@ -130,7 +130,13 @@ export default definePlugin({
         {
             name: "html-emoji-dbg",
             description: "Test out getting the emoji source",
-            options: [RequiredMessageOption],
+            options: [
+                {
+                    name: "emoji",
+                    description: "Emoji for testing",
+                    type: ApplicationCommandOptionType.STRING
+                }
+            ],
             devOnly: true,
             execute: opts => ({
                 content: emojiToImg(findOption(opts, "emoji", ""))
