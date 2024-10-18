@@ -36,6 +36,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ZoidCore",
     description: "Extra core functions for Zoidcord",
+    zoidcord: true,
     authors: [Devs.Zoid],
     required: true,
 

@@ -50,6 +50,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "DecTalk",
     description: "Adds a DecTalk reader to codeblocks! Used by setting the codeblock language to 'dectalk' or 'dt'.",
+    zoidcord: true,
     authors: [Devs.Zoid],
 
     settings,

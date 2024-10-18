@@ -319,6 +319,7 @@ declare const DOMPurify: any;
 export default definePlugin({
     name: "MoreMarkdown",
     description: "More markdown capabilities for Zoidcord",
+    zoidcord: true,
     authors: [Devs.Zoid],
     rulesByName: rulesByName,
 
