@@ -5,27 +5,72 @@
  */
 
 import { showNotification } from "@api/Notifications";
-import { Settings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
 import { Devs } from "@utils/constants";
 import { relaunch } from "@utils/native";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { checkForUpdates, checkImportantUpdate, update, UpdateLogger } from "@utils/updater";
+import { GuildChannelStore, MessageStore } from "@webpack/common";
 
 var update_found = false;
+
+const settings = definePluginSettings({
+    serverStyling: {
+        type: OptionType.BOOLEAN,
+        description: "Enable server styles.",
+        default: true
+    },
+    serverBlockList: {
+        type: OptionType.STRING,
+        description: "List of server IDs to block. (server styling)",
+        default: ""
+    },
+    messageBlockList: {
+        type: OptionType.STRING,
+        description: "List of message IDs to block. (server styling)",
+        default: ""
+    }
+});
 
 export default definePlugin({
     name: "ZoidCore",
     description: "Extra core functions for Zoidcord",
     authors: [Devs.Zoid],
     required: true,
+
+    settings,
+
     flux: {
         async CHANNEL_SELECT({ channelId, guildId }) {
+            if (settings.store.serverBlockList.includes(guildId) || !settings.store.serverStyling) return;
             const oldClasses = Array.from(document.body.classList);
             oldClasses.filter(c => c.startsWith("guild-") || c.startsWith("channel-")).forEach(c => document.body.classList.remove(c));
             if (channelId) {
                 document.body.classList.add(`guild-${guildId}`, `channel-${channelId}`);
             }
+            document.querySelector(".zoidcord-server-style")?.remove();
+            GuildChannelStore.getChannels(guildId).SELECTABLE.forEach(c => {
+                if (c.channel.name === "zoidcord-config") {
+                    console.log("Found config channel, updating css...");
+                    const style = document.createElement("style");
+                    style.className = "zoidcord-server-style";
+                    let styleText = "";
+                    MessageStore.getMessages(c.channel.id).forEach(m => {
+                        if (settings.store.messageBlockList.includes(m.id)) return;
+                        const cssCodeblockRegex = /```css([\s\S]*?)```/;
+                        const match = m.content.match(cssCodeblockRegex);
+
+                        if (match) {
+                            styleText += match[1].trim();
+                        }
+                    });
+                    style.textContent = styleText;
+                    document.head.appendChild(style);
+                    return;
+                }
+            });
+
         }
     },
     start() {
@@ -79,3 +124,4 @@ export default definePlugin({
         }, 300000);
     },
 });
+

@@ -254,7 +254,7 @@ function DonateCard({ image }: DonateCardProps) {
         <Card className={cl("card", "donate")}>
             <div>
                 <Forms.FormTitle tag="h5">No need to support Zoidcord</Forms.FormTitle>
-                <Forms.FormText>Zoidcord is a mostly private project and doesn't need any donations!</Forms.FormText>
+                <Forms.FormText>Zoidcord doesn't need donations! (mostly because i dont have a way to recieve them lmao)</Forms.FormText>
             </div>
             <img
                 role="presentation"
