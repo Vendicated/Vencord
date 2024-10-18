@@ -17,12 +17,13 @@
 */
 
 import { MessageObject } from "@api/MessageEvents";
-import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
 
 import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
 import { find } from "@webpack";
 
+import "./discord.css";
 /**
  * Open the invite modal
  * @param code The invite code
@@ -109,23 +110,24 @@ export function sendMessage(
     return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
 }
 
+const FIX_CLASS_NAME = "vc-imagemodal-fix";
+
 export function openImageModal(url: string, props?: Partial<React.ComponentProps<ImageModal>>): string {
-    console.log(props);
     return openModal(modalProps => (
         <ImageModal
             {...modalProps}
-            className={find(x => x.modal && Object.entries(x).length === 1).modal}
             renderLinkComponent={props => <MaskedLink {...props} />}
-            // Don't render forward message button
+            // Don't render forward message button scaleDown_f97a12 contain_f97a12
             renderForwardComponent={() => null}
             shouldHideMediaOptions={false}
             shouldAnimate={true}
+            //@ts-ignore
+            fit={FIX_CLASS_NAME}
             //@ts-ignore
             items={[{
                 ...props,
                 type: "IMAGE",
                 url,
-                width: props?.width ?? props?.height,
             }]}
         />
     ));
