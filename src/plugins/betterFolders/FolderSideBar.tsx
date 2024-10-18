@@ -27,17 +27,24 @@ const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
 const Animations = findByPropsLazy("a", "animated", "useTransition");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
+function generateSidebar(guildsBarProps, expandedFolders, id: number) {
+    return (
+        <GuildsBar
+            {...guildsBarProps}
+            betterFoldersId={id}
+            betterFoldersExpandedIds={expandedFolders}
+        />
+    );
+}
+
 export default ErrorBoundary.wrap(guildsBarProps => {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
     const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 
-    const Sidebar = (
-        <GuildsBar
-            {...guildsBarProps}
-            isBetterFolders={true}
-            betterFoldersExpandedIds={expandedFolders}
-        />
-    );
+    console.log("EXPANDED FOLDERS");
+    console.log(expandedFolders);
+
+    const Sidebars = Array.from(expandedFolders).map(e => generateSidebar(guildsBarProps, new Set([e]), 1));
 
     const visible = !!expandedFolders.size;
     const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));
@@ -50,25 +57,18 @@ export default ErrorBoundary.wrap(guildsBarProps => {
 
     if (!guilds || !settings.store.sidebarAnim) {
         return visible
-            ? <div style={barStyle}>{Sidebar}</div>
+            ? <div style={barStyle}>{Sidebars}</div>
             : null;
     }
 
+    const animStyle = {
+        width: guilds.getBoundingClientRect().width * Sidebars.length,
+        transition: "width .2s ease-out"
+    } as CSSProperties;
+
     return (
-        <Animations.Transition
-            items={visible}
-            from={{ width: 0 }}
-            enter={{ width: guilds.getBoundingClientRect().width }}
-            leave={{ width: 0 }}
-            config={{ duration: 200 }}
-        >
-            {(animationStyle, show) =>
-                show && (
-                    <Animations.animated.div style={{ ...animationStyle, ...barStyle }}>
-                        {Sidebar}
-                    </Animations.animated.div>
-                )
-            }
-        </Animations.Transition>
+        <div style={{ ...animStyle, ...barStyle }}>
+            {Sidebars}
+        </div>
     );
 }, { noop: true });
