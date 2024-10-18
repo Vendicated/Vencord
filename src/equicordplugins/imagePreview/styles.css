@@ -36,9 +36,12 @@
     padding: 2px 5px;
     border-radius: 4px;
     font-size: 12px;
-    margin: 0 5px;
     box-shadow: 0 0 0 1px var(--background-secondary);
     border: 1px solid var(--background-secondary);
+}
+
+.image-preview .file-info span:last-child:not(:first-child) {
+    margin: 0 5px;
 }
 
 .file-size {

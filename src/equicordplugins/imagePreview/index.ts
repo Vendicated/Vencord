@@ -29,17 +29,23 @@ let lastMouseEvent: MouseEvent | null = null;
 let observer: MutationObserver | null = null;
 
 function deleteCurrentPreview() {
-    if (!currentPreview || !currentPreviewFile || !currentPreviewFileSize || !currentPreviewType || !loadingSpinner) return;
+    if (!currentPreview) return;
 
     currentPreview.remove();
-    loadingSpinner = null;
     lastMouseEvent = null;
     currentPreview = null;
     currentPreviewFile = null;
     currentPreviewFileSize = null;
     currentPreviewType = null;
     lastMouseEvent = null;
-    loadingSpinner = null;
+    isDragging = false;
+    shouldKeepPreviewOpen = false;
+
+    if (loadingSpinner) {
+        loadingSpinner.remove();
+        loadingSpinner = null;
+    }
+
     zoomLevel = 1;
 }
 
@@ -163,6 +169,10 @@ function loadImagePreview(url: string) {
 
     mimeTypeSpan.textContent = mimeType;
 
+    fileInfo.appendChild(mimeTypeSpan);
+    fileInfo.appendChild(fileName);
+    fileInfo.appendChild(fileSize);
+
     if (currentPreviewType === "video") {
         const video = document.createElement("video");
         video.src = url;
@@ -170,7 +180,6 @@ function loadImagePreview(url: string) {
         video.autoplay = true;
         video.muted = true;
         video.loop = true;
-        video.style.pointerEvents = "none";
 
         video.onplay = () => {
             video.removeAttribute("controls");
@@ -188,6 +197,8 @@ function loadImagePreview(url: string) {
                     showingSize.textContent = showingMediaSize ? `(${showingMediaSize[0]}x${showingMediaSize[1]})` : "";
                     fileSize.appendChild(showingSize);
                 }
+
+                preview.appendChild(fileInfo);
             });
 
             if (loadingSpinner) loadingSpinner.remove();
@@ -216,6 +227,8 @@ function loadImagePreview(url: string) {
                     showingSize.textContent = showingMediaSize ? `(${showingMediaSize[0]}x${showingMediaSize[1]})` : "";
                     fileSize.appendChild(showingSize);
                 }
+
+                preview.appendChild(fileInfo);
             });
 
             if (loadingSpinner) loadingSpinner.remove();
@@ -227,11 +240,6 @@ function loadImagePreview(url: string) {
         preview.appendChild(img);
         currentPreviewFile = img;
     }
-
-    fileInfo.appendChild(mimeTypeSpan);
-    fileInfo.appendChild(fileName);
-    fileInfo.appendChild(fileSize);
-    preview.appendChild(fileInfo);
 
     if (settings.store.mouseOnlyMode) {
         currentPreviewFile.addEventListener("mouseover", () => {
@@ -257,23 +265,17 @@ function loadImagePreview(url: string) {
 
             zoomLevel += event.deltaY * -zoomSpeed * zoomFactor;
 
-            zoomLevel = Math.min(Math.max(zoomLevel, 0.5), 10);
-
             const previewMedia = currentPreviewFile as HTMLImageElement | HTMLVideoElement | null;
             if (previewMedia) {
                 const rect = previewMedia.getBoundingClientRect();
-                let offsetX = (event.clientX - rect.left) / rect.width;
-                let offsetY = (event.clientY - rect.top) / rect.height;
-
-                offsetX = Math.min(Math.max(offsetX, 0.1), 0.9);
-                offsetY = Math.min(Math.max(offsetY, 0.1), 0.9);
+                const offsetX = (event.clientX - rect.left) / rect.width;
+                const offsetY = (event.clientY - rect.top) / rect.height;
 
                 previewMedia.style.transformOrigin = `${offsetX * 100}% ${offsetY * 100}%`;
                 previewMedia.style.transform = `scale(${zoomLevel})`;
             }
         }
     });
-
 
     currentPreview.addEventListener("mousedown", (event: MouseEvent) => {
         if ((isCtrlHeld || shouldKeepPreviewOpen) && currentPreview) {
@@ -290,31 +292,36 @@ function loadImagePreview(url: string) {
 
 function updatePreviewPosition(mouseEvent: MouseEvent, element: HTMLElement) {
     if (currentPreview && !isCtrlHeld) {
-        const padding = 15;
-        const maxWidth = window.innerWidth * 0.9;
-        const maxHeight = window.innerHeight * 0.9;
+        const basePadding = 15;
+        const topPadding = 40;
+        const maxWidth: number = window.innerWidth * 0.9;
+        const maxHeight: number = window.innerHeight * 0.9;
 
-        const previewWidth = currentPreview.offsetWidth;
-        const previewHeight = currentPreview.offsetHeight;
+        const previewWidth: number = currentPreview.offsetWidth;
+        const previewHeight: number = currentPreview.offsetHeight;
 
-        let left = mouseEvent.pageX + padding;
-        let top = mouseEvent.pageY + padding;
+        let left: number;
+        let top: number = mouseEvent.pageY + basePadding;
 
-        if (left + previewWidth > window.innerWidth) {
-            left = mouseEvent.pageX - previewWidth - padding;
-            if (left < padding) {
-                left = window.innerWidth - previewWidth - padding;
-            }
+        const spaceOnRight = window.innerWidth - mouseEvent.pageX - previewWidth - basePadding;
+        const spaceOnLeft = mouseEvent.pageX - previewWidth - basePadding;
+
+        if (spaceOnRight >= basePadding) {
+            left = mouseEvent.pageX + basePadding;
+        } else if (spaceOnLeft >= basePadding) {
+            left = mouseEvent.pageX - previewWidth - basePadding;
+        } else {
+            left = Math.max(basePadding, Math.min(mouseEvent.pageX + basePadding, window.innerWidth - previewWidth - basePadding));
         }
 
         if (top + previewHeight > window.innerHeight) {
-            top = mouseEvent.pageY - previewHeight - padding;
+            top = mouseEvent.pageY - previewHeight - topPadding;
 
-            if (top < padding) {
-                top = window.innerHeight - previewHeight - padding * 2;
+            if (top < topPadding) {
+                top = window.innerHeight - previewHeight - topPadding * 2;
             }
         } else {
-            top = Math.min(top, window.innerHeight - previewHeight - padding * 2);
+            top = Math.min(top, window.innerHeight - previewHeight - basePadding * 2);
         }
 
         currentPreview.style.left = `${left}px`;
@@ -332,20 +339,15 @@ function addHoverListener(element: Element) {
     element.setAttribute("data-processed", "true");
 
     element.addEventListener("mouseover", event => {
+        if (isCtrlHeld && currentPreview) return;
+
         if (currentPreview || loadingSpinner) {
-            if (isCtrlHeld) return;
-
             deleteCurrentPreview();
-
-            if (shouldKeepPreviewOpenTimeout) {
-                clearTimeout(shouldKeepPreviewOpenTimeout);
-                shouldKeepPreviewOpenTimeout = null;
-            }
         }
 
-        if (hoverDelayTimeout) {
-            clearTimeout(hoverDelayTimeout);
-            hoverDelayTimeout = null;
+        if (shouldKeepPreviewOpenTimeout) {
+            clearTimeout(shouldKeepPreviewOpenTimeout);
+            shouldKeepPreviewOpenTimeout = null;
         }
 
         const mouseEvent = event as MouseEvent;
