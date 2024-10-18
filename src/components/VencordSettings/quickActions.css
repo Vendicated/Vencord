@@ -3,23 +3,24 @@
     grid-template-columns: repeat(auto-fill, minmax(200px, max-content));
     gap: 0.5em;
     justify-content: center;
-    padding: 0.5em 0;
+    padding: 0.5em; /* padding: 0.5em 0; WHO CHOSE TO PUT NO PADDING ON THE SIDE!?!??? */
     margin-bottom: 1em;
 }
 
 .vc-settings-quickActions-pill {
     all: unset;
-    background: var(--background-secondary);
-    color: var(--header-secondary);
+    background-color: var(--button-secondary-background);
+    color: var(--white-500);
     display: flex;
     align-items: center;
     gap: 0.5em;
     padding: 8px 12px;
-    border-radius: 9999px;
+    border-radius: 4px; /* original: border-radius: 9999px; */
+    height: 24px;
 }
 
 .vc-settings-quickActions-pill:hover {
-    background: var(--background-secondary-alt);
+    background-color: var(--button-secondary-background-hover);
 }
 
 .vc-settings-quickActions-pill:focus-visible {
