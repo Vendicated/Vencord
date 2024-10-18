@@ -26,6 +26,10 @@ async function getAppAsset(key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds(settings.store.client_id!, [key]))[0];
 }
 
+function celsiusToFahrenheit(celsius: number): number {
+    return (celsius * 9) / 5 + 32;
+}
+
 function onChange() {
     updateRichPresence();
 }
@@ -75,6 +79,17 @@ const settings = definePluginSettings({
         onChange: onChange,
         isValid: isImageKeyValid,
         default: "https://i.imgur.com/emqoY01.png"
+    },
+    temp_format: {
+        type: OptionType.SELECT,
+        description: "Temperature Format",
+        options: [
+            { label: "Celsius (°C)", value: "C" },
+            { label: "Fahrenheit (°F)", value: "F" },
+            { label: "Both (°C / °F)", value: "Both" }
+        ],
+        default: "C",
+        onChange: onChange,
     }
 });
 
@@ -105,14 +120,24 @@ async function fetchWeatherData(location: string) {
 
 async function updateRichPresence() {
     const weatherData = await fetchWeatherData(settings.store.location);
-    const temp = weatherData.hourly.temperature_2m[0];
+    const tempC = weatherData.hourly.temperature_2m[0];
+    const tempF = celsiusToFahrenheit(tempC);
     const rainChance = weatherData.hourly.precipitation_probability[0];
+
+    let tempDisplay;
+    if (settings.store.temp_format === "C") {
+        tempDisplay = `🌡️ Temp: ${tempC}°C`;
+    } else if (settings.store.temp_format === "F") {
+        tempDisplay = `🌡️ Temp: ${tempF.toFixed(1)}°F`;
+    } else {
+        tempDisplay = `🌡️ Temp: ${tempC}°C / ${tempF.toFixed(1)}°F`;
+    }
 
     const activity = {
         application_id: settings.store.client_id,
         name: settings.store.app_name,
-        details: `🌡️ Temp: ${temp}°C`,
-        state: `🌧️ Rain: ${rainChance}%`,
+        details: tempDisplay,
+        state: rainChance > 0 ? `🌧️ Rain: ${rainChance}%` : "No rain expected",
         type: 0,
         assets: {
             large_image: await getAppAsset(settings.store.imageBig),
