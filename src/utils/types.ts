@@ -86,6 +86,10 @@ export interface PluginDef {
      */
     required?: boolean;
     /**
+     * Whether this plugin is exclusive to Zoidcord or not
+     */
+    zoidcord?: boolean;
+    /**
      * Whether this plugin should be hidden from the user
      */
     hidden?: boolean;
