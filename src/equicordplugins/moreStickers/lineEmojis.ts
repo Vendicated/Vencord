@@ -113,7 +113,7 @@ export function parseHtml(html: string): LineEmojiPack {
     const { id } = mainImage;
 
     const stickers =
-        [...doc.querySelectorAll('.FnStickerPreviewItem')]
+        [...doc.querySelectorAll(".FnStickerPreviewItem")]
             .map(x => JSON.parse((x as HTMLElement).dataset.preview ?? "null"))
             .filter(x => x !== null)
             .map(x => ({ ...x, stickerPackId: id })) as LineEmoji[];

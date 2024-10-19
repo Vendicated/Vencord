@@ -1,64 +1,95 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-import { React } from "@webpack/common";
+import { debounce } from "@shared/debounce";
+import { ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { React, Text, TextInput } from "@webpack/common";
 
-import { Sticker, StickerPack } from "../types";
+import { PickerContent, PickerContentHeader, PickerContentRow, PickerContentRowGrid, PickerHeaderProps, SidebarProps, Sticker, StickerCategoryType, StickerPack } from "../types";
 import { sendSticker } from "../upload";
-import { RecentlyUsedIcon } from "./icons";
-import { addRecentSticker, getRecentStickers, RECENT_STICKERS_ID, RECENT_STICKERS_TITLE } from "./recent";
 import { clPicker, FFmpegStateContext } from "../utils";
+import { CategoryImage, CategoryScroller, CategoryWrapper, StickerCategory } from "./categories";
+import { CancelIcon, CogIcon, IconContainer, RecentlyUsedIcon, SearchIcon } from "./icons";
+import { addRecentSticker, getRecentStickers, Header, RECENT_STICKERS_ID, RECENT_STICKERS_TITLE, Settings } from "./misc";
 
-export interface PickerContent {
-    stickerPacks: StickerPack[];
-    selectedStickerPackId?: string | null;
-    setSelectedStickerPackId: React.Dispatch<React.SetStateAction<string | null>>;
-    channelId: string;
-    closePopout: () => void;
-    query?: string;
-}
+const debounceQueryChange = debounce((cb: Function, ...args: any) => cb(...args), 150);
 
-export interface PickerContentHeader {
-    image: string | React.ReactNode;
-    title: string;
-    children?: React.ReactNode;
-    isSelected?: boolean;
-    afterScroll?: () => void;
-    beforeScroll?: () => void;
-}
+export const RecentPack = {
+    id: RECENT_STICKERS_ID,
+    name: RECENT_STICKERS_TITLE,
+} as StickerCategoryType;
 
-export interface PickerContentRow {
-    rowIndex: number;
-    grid1: PickerContentRowGrid;
-    grid2?: PickerContentRowGrid;
-    grid3?: PickerContentRowGrid;
-    channelId: string;
-}
+export const PickerSidebar = ({ packMetas, onPackSelect }: SidebarProps) => {
+    const [activePack, setActivePack] = React.useState<StickerCategoryType>(RecentPack);
+    const [hovering, setHovering] = React.useState(false);
 
-export interface PickerContentRowGrid {
-    rowIndex: number;
-    colIndex: number;
-    sticker: Sticker;
-    onHover: (sticker: Sticker | null) => void;
-    isHovered?: boolean;
-    channelId?: string;
-    onSend?: (sticker?: Sticker, shouldClose?: boolean) => void;
-}
+    return (
+        <CategoryWrapper>
+            <CategoryScroller categoryLength={packMetas.length}>
+                <StickerCategory
+                    style={{ padding: "4px", boxSizing: "border-box", width: "32px" }}
+                    isActive={activePack === RecentPack}
+                    onClick={() => {
+                        if (activePack === RecentPack) return;
+
+                        onPackSelect(RecentPack);
+                        setActivePack(RecentPack);
+                    }}
+                >
+                    <RecentlyUsedIcon width={24} height={24} color={
+                        activePack === RecentPack ? " var(--interactive-active)" : "var(--interactive-normal)"
+                    } />
+                </StickerCategory>
+                {
+                    ...packMetas.map(pack => {
+                        return (
+                            <StickerCategory
+                                key={pack.id}
+                                onClick={() => {
+                                    if (activePack?.id === pack.id) return;
+
+                                    onPackSelect(pack);
+                                    setActivePack(pack);
+                                }}
+                                isActive={activePack?.id === pack.id}
+                            >
+                                <CategoryImage src={pack.iconUrl!} alt={pack.name} isActive={activePack?.id === pack.id} />
+                            </StickerCategory>
+                        );
+                    })
+                }
+            </CategoryScroller>
+            <div className={clPicker("settings-cog-container")}>
+                <button
+                    className={clPicker("settings-cog") + (
+                        hovering ? ` ${clPicker("settings-cog-active")}` : ""
+                    )}
+                    onClick={() => {
+                        openModal(modalProps => {
+                            return (
+                                <ModalRoot size={ModalSize.LARGE} {...modalProps}>
+                                    <ModalHeader>
+                                        <Text tag="h2">Stickers+</Text>
+                                    </ModalHeader>
+                                    <ModalContent>
+                                        <Settings />
+                                    </ModalContent>
+                                </ModalRoot>
+                            );
+                        });
+                    }}
+                    onMouseEnter={() => setHovering(true)}
+                    onMouseLeave={() => setHovering(false)}
+                >
+                    <CogIcon width={20} height={20} />
+                </button>
+            </div>
+        </CategoryWrapper>
+    );
+};
 
 function PickerContentRowGrid({
     rowIndex,
@@ -400,3 +431,43 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
         </div>
     );
 }
+
+
+export const PickerHeader = ({ onQueryChange }: PickerHeaderProps) => {
+    const [query, setQuery] = React.useState<string | undefined>();
+
+    const setQueryDebounced = (value: string, immediate = false) => {
+        setQuery(value);
+        if (immediate) onQueryChange(value);
+        else debounceQueryChange(onQueryChange, value);
+    };
+
+    return (
+        <Header>
+            <div className={clPicker("container")}>
+                <div>
+                    <div className={clPicker("search-box")}>
+                        <TextInput
+                            style={{ height: "30px" }}
+
+                            placeholder="Search stickers"
+                            autoFocus={true}
+                            value={query}
+
+                            onChange={(value: string) => setQueryDebounced(value)}
+                        />
+                    </div>
+                    <div className={clPicker("search-icon")}>
+                        <IconContainer>
+                            {
+                                (query && query.length > 0) ?
+                                    <CancelIcon className={clPicker("clear-icon")} width={20} height={20} onClick={() => setQueryDebounced("", true)} /> :
+                                    <SearchIcon width={20} height={20} color="var(--text-muted)" />
+                            }
+                        </IconContainer>
+                    </div>
+                </div>
+            </div>
+        </Header>
+    );
+};

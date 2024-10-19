@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile } from "@ffmpeg/util";
 import { findByPropsLazy, findLazy } from "@webpack";
 import { ChannelStore } from "@webpack/common";
+
 import { FFmpegState, Sticker } from "./types";
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
 
 const MessageUpload = findByPropsLazy("instantBatchUpload");
@@ -103,7 +104,7 @@ async function toGIF(url: string, ffmpeg: FFmpeg): Promise<File> {
     if (typeof data === "string") {
         throw new Error("Could not read file");
     }
-    return new File([data.buffer], outputFilename, { type: 'image/gif' });
+    return new File([data.buffer], outputFilename, { type: "image/gif" });
 }
 
 export async function sendSticker({

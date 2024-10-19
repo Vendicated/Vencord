@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { setRecentStickers } from "./components/recent";
+import { setRecentStickers } from "./components";
 import {
     convert,
     getStickerPackById
@@ -44,11 +44,11 @@ export async function initTest() {
     // Add test sticker packs
     console.log("Adding test sticker packs.");
     const lineStickerPackIds = [
-        "22814489", // LV.47 野生喵喵怪
-        "22567773", // LV.46 野生喵喵怪
-        "22256215", // LV.45 野生喵喵怪
-        "21936635", // LV.44 野生喵喵怪
-        "21836565", // LV.43 野生喵喵怪
+        "22814489", // LV.47
+        "22567773", // LV.46
+        "22256215", // LV.45
+        "21936635", // LV.44
+        "21836565", // LV.43
     ];
     const ps: Promise<StickerPack | null>[] = [];
     for (const id of lineStickerPackIds) {

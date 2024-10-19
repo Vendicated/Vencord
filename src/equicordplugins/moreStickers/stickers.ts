@@ -18,7 +18,7 @@
 
 import * as DataStore from "@api/DataStore";
 
-import { removeRecentStickerByPackId } from "./components/recent";
+import { removeRecentStickerByPackId } from "./components";
 import { StickerPack, StickerPackMeta } from "./types";
 import { Mutex } from "./utils";
 const mutex = new Mutex();

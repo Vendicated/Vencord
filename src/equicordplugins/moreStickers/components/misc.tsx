@@ -16,21 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import * as DataStore from "@api/DataStore";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Flex } from "@components/Flex";
 import { Button, Forms, React, TabBar, Text, TextArea, Toasts } from "@webpack/common";
 
-import { convert as convertLineSP, getIdFromUrl as getLineStickerPackIdFromUrl, getStickerPackById as getLineStickerPackById, parseHtml as getLineSPFromHtml, isLineStickerPackHtml } from "../lineStickers";
-import { convert as convertLineEP, getIdFromUrl as getLineEmojiPackIdFromUrl, getStickerPackById as getLineEmojiPackById, parseHtml as getLineEPFromHtml, isLineEmojiPackHtml } from "../lineEmojis";
+import { convert as convertLineEP, getIdFromUrl as getLineEmojiPackIdFromUrl, getStickerPackById as getLineEmojiPackById, isLineEmojiPackHtml, parseHtml as getLineEPFromHtml } from "../lineEmojis";
+import { convert as convertLineSP, getIdFromUrl as getLineStickerPackIdFromUrl, getStickerPackById as getLineStickerPackById, isLineStickerPackHtml, parseHtml as getLineSPFromHtml } from "../lineStickers";
 import { deleteStickerPack, getStickerPackMetas, saveStickerPack } from "../stickers";
-import { StickerPack, StickerPackMeta } from "../types";
-import { cl, clPicker } from "../utils";
+import { SettingsTabsKey, Sticker, StickerPack, StickerPackMeta } from "../types";
+import { cl, clPicker, Mutex } from "../utils";
 
-enum SettingsTabsKey {
-    ADD_STICKER_PACK_URL = "Add from URL",
-    ADD_STICKER_PACK_HTML = "Add from HTML",
-    ADD_STICKER_PACK_FILE = "Add from File",
-}
+const mutex = new Mutex();
+
+// The ID of recent sticker and recent sticker pack
+export const RECENT_STICKERS_ID = "recent";
+export const RECENT_STICKERS_TITLE = "Recently Used";
+
+const KEY = "Vencord-MoreStickers-RecentStickers";
 
 const noDrag = {
     onMouseDown: e => { e.preventDefault(); return false; },
@@ -189,7 +192,7 @@ export const Settings = () => {
                                             errorMessage = e.message;
                                         }
                                         break;
-                                    };
+                                    }
                                     case "LineEmojiPack": {
                                         try {
                                             const id = getLineEmojiPackIdFromUrl(addStickerUrl);
@@ -395,3 +398,56 @@ export const Settings = () => {
         </div>
     );
 };
+
+
+export function Header(props: { children: JSX.Element | JSX.Element[]; }) {
+    return (
+        <div className={cl("header")}>
+            {props.children}
+        </div>
+    );
+}
+
+export function Wrapper(props: { children: JSX.Element | JSX.Element[]; }) {
+    return (
+        <div style={{
+            position: "relative",
+            display: "grid",
+            gridTemplateColumns: "48px auto",
+            gridTemplateRows: "auto 1fr auto",
+        }}>
+            {props.children}
+        </div>
+    );
+}
+
+export async function getRecentStickers(): Promise<Sticker[]> {
+    return (await DataStore.get(KEY)) ?? [];
+}
+
+export async function setRecentStickers(stickers: Sticker[]): Promise<void> {
+    const unlock = await mutex.lock();
+    try {
+        await DataStore.set(KEY, stickers);
+    } finally {
+        unlock();
+    }
+}
+
+export async function addRecentSticker(sticker: Sticker): Promise<void> {
+    const stickers = await getRecentStickers();
+    const index = stickers.findIndex(s => s.id === sticker.id);
+    if (index !== -1) {
+        stickers.splice(index, 1);
+    }
+    stickers.unshift(sticker);
+    while (stickers.length > 16) {
+        stickers.pop();
+    }
+    await setRecentStickers(stickers);
+}
+
+export async function removeRecentStickerByPackId(packId: string): Promise<void> {
+    const stickers = await getRecentStickers();
+    await setRecentStickers(stickers.filter(s => s.stickerPackId !== packId));
+}

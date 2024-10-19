@@ -18,20 +18,15 @@
 
 import "./style.css";
 
+import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-
-import { PickerSidebar } from "./components/PickerCategoriesSidebar";
-import { PickerContent } from "./components/PickerContent";
-import { PickerHeader } from "./components/PickerHeader";
-import { Settings } from "./components/settings";
-import { Wrapper } from "./components/wrapper";
+import { PickerContent, PickerHeader, PickerSidebar, Settings, Wrapper } from "./components";
 import { getStickerPack, getStickerPackMetas } from "./stickers";
-import { StickerPack, StickerPackMeta, FFmpegState } from "./types";
+import { StickerPack, StickerPackMeta } from "./types";
 import { cl, FFmpegStateContext, loadFFmpeg } from "./utils";
 
 export default definePlugin({
@@ -57,7 +52,7 @@ export default definePlugin({
                     return `${head}${isMoreStickers}?$self.stickerButton:${button}${tail}`;
                 }
             }, {
-                match: /(\w=)(\w\.useCallback\(\(\)=>\{\(0,\w+\.\w+\)\([\w\.]*?\.STICKER,.*?);/,
+                match: /(\w=)(\w\.useCallback\(\(\)=>\{\(0,\w+\.\w+\)\([\w.]*?\.STICKER,.*?);/,
                 replace: (_, decl, cb) => {
                     const newCb = cb.replace(/(?<=\(\)=>\{\(.*?\)\().+?\.STICKER/, "\"stickers+\"");
                     return `${decl}arguments[0]?.stickersType?${newCb}:${cb};`;
@@ -71,7 +66,7 @@ export default definePlugin({
             }]
         },
         {
-            find: '.gifts)',
+            find: ".gifts)",
             replacement: {
                 match: /,\(null===\(\w=\w\.stickers\)\|\|void 0.*?(\w)\.push\((\(0,\w\.jsx\))\((.+?),{disabled:\w,type:(\w)},"sticker"\)\)/,
                 replace: (m, _, jsx, compo, type) => {
