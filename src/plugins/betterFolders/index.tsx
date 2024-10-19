@@ -375,11 +375,15 @@ export default definePlugin({
 
         switch (settings.store.showFolderIcon) {
             case FolderIconDisplay.Never:
-                return settings.store.nestMode == NestMode.NESTED && props.folderNode?.id != props.betterFoldersId;
+                return settings.store.nestMode == NestMode.NESTED && props.folderNode?.id !== props.betterFoldersId;
             case FolderIconDisplay.Always:
                 return true;
             case FolderIconDisplay.MoreThanOneFolderExpanded:
-                return (expandedFolderIds?.size ?? 0) > 1 || (settings.store.nestMode == NestMode.NESTED && props.folderNode?.id !== props.betterFoldersId);
+                if (settings.store.nestMode !== NestMode.DISABLED) {
+                    return props.folderNode?.id !== props.betterFoldersId;
+                } else {
+                    return (expandedFolderIds?.size ?? 0) > 1;
+                }
             default:
                 return true;
         }
