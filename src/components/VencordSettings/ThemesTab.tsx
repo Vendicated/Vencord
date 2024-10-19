@@ -34,7 +34,7 @@ import type { ComponentType, Ref, SyntheticEvent } from "react";
 import Plugins from "~plugins";
 
 import { AddonCard } from "./AddonCard";
-import { QuickAction, QuickActionContainer } from "./quickActions";
+import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
 
 type FileInput = ComponentType<{
@@ -220,7 +220,7 @@ function ThemesTab() {
                 </Card>
 
                 <Forms.FormSection title="Local Themes">
-                    <QuickActionContainer title="Theme-related Quick Actions">
+                    <QuickActionCard>
                         <>
                             {IS_WEB ?
                                 (
@@ -265,7 +265,7 @@ function ThemesTab() {
                                 />
                             )}
                         </>
-                    </QuickActionContainer>
+                    </QuickActionCard>
 
                     <div className={cl("grid")}>
                         {userThemes?.map(theme => (

@@ -1,33 +1,13 @@
-.vc-settings-quickActions-container {
+.vc-settings-quickActions-card {
     display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    justify-content: center;
-    margin-bottom: 1em;
-    padding: 24px;
-    padding-top: 16px;
-    background-color: var(--background-secondary) !important;
-    box-shadow: var(--elevation-low) !important;
-    border-radius: 12px !important;
-    border: none !important;
-}
-
-.vc-settings-quickActions-title {
-    margin-bottom: 16px;
-    color: var(--text-normal);
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    line-height: 2; /* i hate this i hate this i hate this i hate this */
-}
-
-.vc-settings-quickActions-containerButtons {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, max-content));
     gap: 0.5em;
+    justify-content: center;
+    padding: 0.5em; /* padding: 0.5em 0; WHO CHOSE TO PUT NO PADDING ON THE SIDE!?!??? */
+    margin-bottom: 1em;
 }
 
-.vc-settings-quickActions-button {
+.vc-settings-quickActions-pill {
     all: unset;
     background-color: var(--button-secondary-background);
     color: var(--white-500);
@@ -39,11 +19,11 @@
     height: 24px;
 }
 
-.vc-settings-quickActions-button:hover {
+.vc-settings-quickActions-pill:hover {
     background-color: var(--button-secondary-background-hover);
 }
 
-.vc-settings-quickActions-button:focus-visible {
+.vc-settings-quickActions-pill:focus-visible {
     outline: 2px solid var(--focus-primary);
     outline-offset: 2px;
 }
@@ -51,12 +31,4 @@
 .vc-settings-quickActions-img {
     width: 24px;
     height: 24px;
-}
-
-.vc-settings-quickActions-info-button {
-    height: 24px;
-    width: 24px;
-    padding: 0;
-    background: transparent;
-    margin: 0;
 }
