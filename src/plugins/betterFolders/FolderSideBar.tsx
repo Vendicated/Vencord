@@ -21,23 +21,55 @@ import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpac
 import { useStateFromStores } from "@webpack/common";
 import type { CSSProperties } from "react";
 
-import { ExpandedGuildFolderStore, settings } from ".";
+import { ExpandedGuildFolderStore, settings, SortedGuildStore, NestMode } from ".";
 
 const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
 const Animations = findByPropsLazy("a", "animated", "useTransition");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
+function generateSidebar(guildsBarProps, expandedFolders, id: number) {
+    return (
+        <GuildsBar
+            {...guildsBarProps}
+            betterFoldersId={id}
+            betterFoldersExpandedIds={new Set(expandedFolders)}
+        />
+    );
+}
+
 export default ErrorBoundary.wrap(guildsBarProps => {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
     const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 
-    const Sidebar = (
-        <GuildsBar
-            {...guildsBarProps}
-            isBetterFolders={true}
-            betterFoldersExpandedIds={expandedFolders}
-        />
-    );
+
+    let Sidebars;
+    switch (settings.store.nestMode) {
+        case NestMode.DISABLED:
+            Sidebars = generateSidebar(guildsBarProps, expandedFolders, 1);
+            break;
+        case NestMode.SEPERATE_COLUMNS:
+            Sidebars = Array.from(expandedFolders).map(e => generateSidebar(guildsBarProps, [e], e as number));
+            break;
+        case NestMode.NESTED:
+            const allFolders = SortedGuildStore.getGuildFolders();
+            Sidebars = Array.from(expandedFolders).map(e => {
+                const current = allFolders.filter(it => it.folderId == e)[0];
+                const folders: any[] = !current ? [] : allFolders.filter(it => {
+                    if (!it.folderName?.startsWith(`${current.folderName}/`)) return false;
+                    const subName = it.folderName.substring(current.folderName.length + 1);
+                    if (subName.includes("/")) {
+                        // check if parent actually exists.
+                        const parentName = `${current.folderName}/${subName.substring(0, subName.indexOf("/"))}`;
+                        return !allFolders.find(f => f.folderName == parentName);
+                    } else {
+                        return true;
+                    }
+                }).map(it => it.folderId);
+                folders.push(e);
+                return generateSidebar(guildsBarProps, folders, e as number);
+            });
+            break;
+    }
 
     const visible = !!expandedFolders.size;
     const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));
@@ -50,25 +82,18 @@ export default ErrorBoundary.wrap(guildsBarProps => {
 
     if (!guilds || !settings.store.sidebarAnim) {
         return visible
-            ? <div style={barStyle}>{Sidebar}</div>
+            ? <div style={barStyle}>{Sidebars}</div>
             : null;
     }
 
+    const animStyle = {
+        width: guilds.getBoundingClientRect().width * Sidebars.length,
+        transition: "width .2s ease-out"
+    } as CSSProperties;
+
     return (
-        <Animations.Transition
-            items={visible}
-            from={{ width: 0 }}
-            enter={{ width: guilds.getBoundingClientRect().width }}
-            leave={{ width: 0 }}
-            config={{ duration: 200 }}
-        >
-            {(animationStyle, show) =>
-                show && (
-                    <Animations.animated.div style={{ ...animationStyle, ...barStyle }}>
-                        {Sidebar}
-                    </Animations.animated.div>
-                )
-            }
-        </Animations.Transition>
+        <div style={{ ...animStyle, ...barStyle }}>
+            {Sidebars}
+        </div>
     );
 }, { noop: true });
