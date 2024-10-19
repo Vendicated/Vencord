@@ -3,6 +3,7 @@ on:
     push:
         branches:
             - main
+    workflow_dispatch:
 env:
     FORCE_COLOR: true
     GITHUB_TOKEN: ${{ secrets.ETOKEN }}
@@ -30,7 +31,7 @@ jobs:
               run: pnpm buildWebStandalone
 
             - name: Build
-              run: pnpm build --standalone
+              run: pnpm buildStandalone
 
             - name: Generate plugin list
               run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
@@ -65,9 +66,15 @@ jobs:
                   rm release/package.json
                   rm release/*.map
 
-            - name: Upload Equicord
+            - name: Upload Equicord Stable
+              if: ${{ github.event_name == 'push' }}
               run: |
                 gh release upload latest --clobber dist/release/*
+
+            - name: Upload Equicord Dev
+              if: ${{ github.event_name == 'workflow_dispatch' }}
+              run: |
+                gh release upload devbuild --clobber dist/release/*
 
             - name: Upload Plugins JSON to Equibored repo
               run: |
