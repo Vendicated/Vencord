@@ -13,6 +13,25 @@
             }
         },
         {
+            // for use with the vencord companion extension
+            "label": "Build Companion Reporter",
+            "type": "shell",
+            "command": "pnpm build --dev --reporter --companion-test",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Build Dev",
+            "type": "shell",
+            "command": "pnpm build --dev",
+            "group": "build"
+        },
+        {
             "label": "Watch",
             "type": "shell",
             "command": "pnpm watch",
