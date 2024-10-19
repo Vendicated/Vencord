@@ -82,10 +82,10 @@ export default definePlugin({
         },
         {
             predicate: () => settings.store.showPanel,
-            find: "this.isJoinableActivity()||",
+            find: "this.renderEmbeddedActivity()",
             replacement: {
-                match: /(this\.isJoinableActivity\(\).{0,200}children:.{0,50})"div"/,
-                replace: "$1$self.WrapperComponent"
+                match: /(?<=children.{0,50})"div"(?=.{0,500}this\.renderEmbeddedActivity\(\))/,
+                replace: "$self.WrapperComponent"
             }
         }
     ],
