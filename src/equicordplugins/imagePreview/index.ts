@@ -138,10 +138,11 @@ function loadImagePreview(url: string) {
 
     const fileName = document.createElement("span");
     const fileSize = document.createElement("span");
-    fileSize.className = "file-size";
     const fileSizeSpan = document.createElement("p");
     const showingSize = document.createElement("p");
     const mimeTypeSpan = document.createElement("span");
+
+    fileSize.className = "file-size";
 
     const updatePositionAfterLoad = () => {
         if (lastMouseEvent && currentPreview) {
@@ -242,14 +243,14 @@ function loadImagePreview(url: string) {
     }
 
     if (settings.store.mouseOnlyMode) {
-        currentPreviewFile.addEventListener("mouseover", () => {
+        currentPreview.addEventListener("mouseover", () => {
             if (currentPreview && !isCtrlHeld) {
                 shouldKeepPreviewOpen = true;
                 currentPreview.classList.add("allow-zoom-and-drag");
             }
         });
 
-        currentPreviewFile.addEventListener("mouseout", () => {
+        currentPreview.addEventListener("mouseout", () => {
             if (currentPreview && !isCtrlHeld && shouldKeepPreviewOpen) {
                 deleteCurrentPreview();
                 shouldKeepPreviewOpen = false;
@@ -376,7 +377,7 @@ function addHoverListener(element: Element) {
 
         lastMouseEvent = event as MouseEvent;
 
-        if (currentPreview && !isCtrlHeld) {
+        if (currentPreview && !isCtrlHeld && !settings.store.fixedImage) {
             updatePreviewPosition(lastMouseEvent, element as HTMLElement);
         }
     });

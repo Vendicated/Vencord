@@ -38,6 +38,11 @@ const settings = definePluginSettings({
         description: "Allows you to skip having to hold control to zoom in and move images",
         default: false
     },
+    fixedImage: {
+        type: OptionType.BOOLEAN,
+        description: "Fixes the image preview to the initial point of hover",
+        default: false
+    },
     hoverDelay: {
         type: OptionType.SLIDER,
         description: "Delay in seconds before the image preview appears",

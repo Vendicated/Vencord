@@ -40,8 +40,8 @@
     border: 1px solid var(--background-secondary);
 }
 
-.image-preview .file-info span:last-child:not(:first-child) {
-    margin: 0 5px;
+.image-preview .file-info span:not(:last-child) {
+    margin: 0 5px 0 0;
 }
 
 .file-size {
