@@ -94,7 +94,7 @@ export const settings = definePluginSettings({
     },
     nestMode: {
         type: OptionType.SELECT,
-        description: "Use nested extra columns (folders split by `/`) for displaying folder contents",
+        description: "Use multiple columns for displaying folder contents. When enabled folder names will be split by `/` and nested",
         options: [
             { label: "Disabled", value: NestMode.DISABLED, default: true },
             { label: "Seperate Columns", value: NestMode.SEPERATE_COLUMNS },
