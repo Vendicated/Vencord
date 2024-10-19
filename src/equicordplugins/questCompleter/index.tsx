@@ -226,7 +226,7 @@ export default definePlugin({
         }
     ],
     renderQuestButton() {
-        const ToolTipButton = findByCode("}),color:\"currentColor\"})})}}");
+        const ToolTipButton = findByCode(",color:\"currentColor\"})})}}");
         return (
             <>
                 <ToolTipButton
