@@ -25,7 +25,7 @@ export default definePlugin({
     options: {
         settings: {
             type: OptionType.COMPONENT,
-            description: "Why is this here? Who is going to read this on a custom component? It isn't even rendered? What is its purpose?",
+            description: "Packs",
             component: Settings
         }
     },
@@ -103,7 +103,8 @@ export default definePlugin({
                 onClick={onClick}
                 style={{ backgroundColor: "transparent" }}
             >
-                {/* Icon taken from: https://github.com/Pitu/Magane/blob/0ebb09acf9901933ebebe19fbd473ec08cf917b3/src/Button.svelte#L29 */}
+                {
+                /* Icon taken from: https://github.com/Pitu/Magane/blob/0ebb09acf9901933ebebe19fbd473ec08cf917b3/src/Button.svelte#L29 */}
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
