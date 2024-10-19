@@ -55,6 +55,7 @@ export function QuickActionContainer({ title, children }: PropsWithChildren<Quic
                                 <>
                                     <p>this corner looked empty so we put an info button here</p>
                                     <img src="https://media.discordapp.net/stickers/1258484151670018220.gif"></img>
+                                    <h6><i>Jae & Zoid were here</i></h6>
                                 </>
                             ),
                             confirmText: "Okiiiii :3",

@@ -59,4 +59,9 @@
     padding: 0;
     background: transparent;
     margin: 0;
+    color: var(--interactive-normal);
+}
+
+.vc-settings-quickActions-info-button:hover {
+    color: var(--text-muted);
 }
