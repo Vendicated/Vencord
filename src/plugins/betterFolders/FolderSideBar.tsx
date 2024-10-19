@@ -21,7 +21,7 @@ import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpac
 import { useStateFromStores } from "@webpack/common";
 import type { CSSProperties } from "react";
 
-import { ExpandedGuildFolderStore, settings } from ".";
+import { ExpandedGuildFolderStore, settings, SortedGuildStore } from ".";
 
 const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
 const Animations = findByPropsLazy("a", "animated", "useTransition");
@@ -32,7 +32,7 @@ function generateSidebar(guildsBarProps, expandedFolders, id: number) {
         <GuildsBar
             {...guildsBarProps}
             betterFoldersId={id}
-            betterFoldersExpandedIds={expandedFolders}
+            betterFoldersExpandedIds={new Set(expandedFolders)}
         />
     );
 }
@@ -41,10 +41,14 @@ export default ErrorBoundary.wrap(guildsBarProps => {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
     const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 
-    console.log("EXPANDED FOLDERS");
-    console.log(expandedFolders);
+    const allFolders = SortedGuildStore.getGuildFolders();
 
-    const Sidebars = Array.from(expandedFolders).map(e => generateSidebar(guildsBarProps, new Set([e]), 1));
+    const Sidebars = Array.from(expandedFolders).map(e => {
+        const current = allFolders.filter(it => it.folderId == e)[0];
+        const folders: any[] = !current ? [] : allFolders.filter(it => it.folderName?.startsWith(`${current.folderName}/`) && !it.folderName.substring(current.folderName.length + 1).includes("/")).map(it => it.folderId);
+        folders.push(e);
+        return generateSidebar(guildsBarProps, folders, e as number);
+    });
 
     const visible = !!expandedFolders.size;
     const guilds = document.querySelector(guildsBarProps.className.split(" ").map(c => `.${c}`).join(""));

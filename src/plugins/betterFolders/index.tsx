@@ -31,7 +31,7 @@ enum FolderIconDisplay {
 }
 
 export const ExpandedGuildFolderStore = findStoreLazy("ExpandedGuildFolderStore");
-const SortedGuildStore = findStoreLazy("SortedGuildStore");
+export const SortedGuildStore = findStoreLazy("SortedGuildStore");
 const GuildsTree = findLazy(m => m.prototype?.moveNextTo);
 const FolderUtils = findByPropsLazy("move", "toggleGuildFolderExpand");
 
@@ -185,13 +185,13 @@ export default definePlugin({
                     // Decide if we should render the expanded folder background if we are rendering the Better Folders sidebar
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
                     match: /(?<=\.wrapper,children:\[)/,
-                    replace: "$self.shouldShowFolderIconAndBackground(!!arguments[0]?.betterFoldersId ?? 0,arguments[0]?.betterFoldersExpandedIds)&&"
+                    replace: "$self.shouldShowFolderIconAndBackground(arguments[0],arguments[0]?.betterFoldersExpandedIds)&&"
                 },
                 {
                     // Decide if we should render the expanded folder icon if we are rendering the Better Folders sidebar
-                    predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
+                    // predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
                     match: /(?<=\.expandedFolderBackground.+?}\),)(?=\i,)/,
-                    replace: "!$self.shouldShowFolderIconAndBackground(!!arguments[0]?.betterFoldersId ?? 0,arguments[0]?.betterFoldersExpandedIds)?null:"
+                    replace: "!$self.shouldShowFolderIconAndBackground(arguments[0],arguments[0]?.betterFoldersExpandedIds)?null:"
                 }
             ]
         },
@@ -222,11 +222,33 @@ export default definePlugin({
 
             if (lastGuildId !== data.guildId) {
                 lastGuildId = data.guildId;
+
+                const allFolders = SortedGuildStore.getGuildFolders();
                 const guildFolder = getGuildFolder(data.guildId);
 
                 if (guildFolder?.folderId) {
-                    if (settings.store.forceOpen && !ExpandedGuildFolderStore.isFolderExpanded(guildFolder.folderId)) {
-                        FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
+
+                    if (settings.store.forceOpen) {
+                        if (guildFolder.folderName?.includes("/")) {
+                            // open all folders in tree in the right order
+                            const parts = guildFolder.folderName.split("/");
+                            for (let i = 1; i <= parts.length; i++) {
+                                const f = allFolders.find(e => e.folderName == parts.slice(0, i).join("/"));
+                                console.log(f, parts.slice(0, i).join("/"));
+                                if (!!f && !ExpandedGuildFolderStore.isFolderExpanded(f.folderId)) {
+                                    FolderUtils.toggleGuildFolderExpand(f.folderId);
+                                }
+                            }
+                        } else if (!ExpandedGuildFolderStore.isFolderExpanded(guildFolder.folderId)) {
+                            FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
+                        }
+
+                        // close subfolders
+                        for (const fd of allFolders) {
+                            if (fd.folderName?.startsWith(`${guildFolder.folderName}/`) && ExpandedGuildFolderStore.isFolderExpanded(fd.folderId)) {
+                                FolderUtils.toggleGuildFolderExpand(fd.folderId);
+                            }
+                        }
                     }
                 } else if (settings.store.closeAllFolders) {
                     closeFolders();
@@ -235,15 +257,38 @@ export default definePlugin({
         },
 
         TOGGLE_GUILD_FOLDER_EXPAND(data) {
-            if (settings.store.closeOthers && !dispatchingFoldersClose) {
+            if (!dispatchingFoldersClose) {
                 dispatchingFoldersClose = true;
-
                 FluxDispatcher.wait(() => {
                     const expandedFolders = ExpandedGuildFolderStore.getExpandedFolders();
 
-                    if (expandedFolders.size > 1) {
-                        for (const id of expandedFolders) if (id !== data.folderId)
-                            FolderUtils.toggleGuildFolderExpand(id);
+                    const allFolders = SortedGuildStore.getGuildFolders();
+                    const currentFolder = allFolders.find(e => e.folderId == data.folderId);
+
+                    if (!expandedFolders.has(data.folderId)) {
+                        for (const fd of allFolders) {
+                            if (fd.folderId == data.folderId) continue;
+                            if (fd.folderName?.startsWith(`${currentFolder.folderName}/`) && expandedFolders.has(fd.folderId)) {
+                                FolderUtils.toggleGuildFolderExpand(fd.folderId);
+                                console.log("closing", fd);
+                            }
+                        }
+                    } else {
+                        for (const fd of allFolders) {
+                            if (fd.folderId == data.folderId) continue;
+                            if (expandedFolders.has(fd.folderId)) {
+                                if (fd.folderName.startsWith(`${currentFolder.folderName}/`)) continue;
+                                if (settings.store.closeOthers && !(currentFolder.folderName?.startsWith(fd.folderName) && currentFolder.folderName?.charAt(fd.folderName?.length) == "/")) {
+                                    FolderUtils.toggleGuildFolderExpand(fd.folderId);
+                                    console.log("closing2", fd);
+                                }
+                            } else {
+                                if (currentFolder.folderName?.startsWith(fd.folderName) && currentFolder.folderName?.charAt(fd.folderName?.length) == "/") {
+                                    FolderUtils.toggleGuildFolderExpand(fd.folderId);
+                                    console.log("opening", fd);
+                                }
+                            }
+                        }
                     }
 
                     dispatchingFoldersClose = false;
@@ -259,8 +304,8 @@ export default definePlugin({
     getGuildTree(betterFoldersId: number, originalTree: any, expandedFolderIds?: Set<any>) {
         return useMemo(() => {
             if (!betterFoldersId || expandedFolderIds == null) return originalTree;
-
             const newTree = new GuildsTree();
+
             // Children is every folder and guild which is not in a folder, this filters out only the expanded folders
             newTree.root.children = originalTree.root.children.filter(guildOrFolder => expandedFolderIds.has(guildOrFolder.id));
             // Nodes is every folder and guild, even if it's in a folder, this filters out only the expanded folders and guilds inside them
@@ -291,16 +336,16 @@ export default definePlugin({
         };
     },
 
-    shouldShowFolderIconAndBackground(betterFoldersId: number, expandedFolderIds?: Set<any>) {
-        if (!betterFoldersId) return true;
+    shouldShowFolderIconAndBackground(props: any, expandedFolderIds?: Set<any>) {
+        if (!props.betterFoldersId) return !props.folderNode?.name?.includes("/");
 
         switch (settings.store.showFolderIcon) {
             case FolderIconDisplay.Never:
-                return false;
+                return props.folderNode?.id != props.betterFoldersId;
             case FolderIconDisplay.Always:
                 return true;
             case FolderIconDisplay.MoreThanOneFolderExpanded:
-                return (expandedFolderIds?.size ?? 0) > 1;
+                return (expandedFolderIds?.size ?? 0) > 1 || props.folderNode?.id != props.betterFoldersId;
             default:
                 return true;
         }
@@ -310,14 +355,14 @@ export default definePlugin({
         // Pending guilds
         if (props?.folderNode?.id === 1) return true;
 
-        return !!props?.betterFoldersId;
+        return props?.betterFoldersId == props?.folderNode?.id;
     },
 
     shouldRenderContents(props: any, isExpanded: boolean) {
         // Pending guilds
         if (props?.folderNode?.id === 1) return false;
 
-        return !props?.betterFoldersId && isExpanded;
+        return props?.betterFoldersId != props?.folderNode?.id && isExpanded;
     },
 
     FolderSideBar,
