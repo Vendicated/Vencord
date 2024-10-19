@@ -360,7 +360,18 @@ export default definePlugin({
     },
 
     shouldShowFolderIconAndBackground(props: any, expandedFolderIds?: Set<any>) {
-        if (!props.betterFoldersId) return settings.store.nestMode != NestMode.NESTED || !props.folderNode?.name?.includes("/");
+        if (!props.betterFoldersId) {
+            if (settings.store.nestMode != NestMode.NESTED) {
+                return true;
+            }
+            if (props.folderNode?.name?.includes("/")) {
+                // check if parent folder exists
+                const parentName = props.folderNode.name.substring(0, props.folderNode.name.lastIndexOf("/"));
+                const allFolders = SortedGuildStore.getGuildFolders();
+                return !allFolders.find(e => e.folderName === parentName);
+            }
+            return true;
+        }
 
         switch (settings.store.showFolderIcon) {
             case FolderIconDisplay.Never:
