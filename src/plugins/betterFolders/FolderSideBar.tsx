@@ -41,7 +41,6 @@ export default ErrorBoundary.wrap(guildsBarProps => {
     const expandedFolders = useStateFromStores([ExpandedGuildFolderStore], () => ExpandedGuildFolderStore.getExpandedFolders());
     const isFullscreen = useStateFromStores([ChannelRTCStore], () => ChannelRTCStore.isFullscreenInContext());
 
-    const allFolders = SortedGuildStore.getGuildFolders();
 
     let Sidebars;
     switch (settings.store.nestMode) {
@@ -52,9 +51,20 @@ export default ErrorBoundary.wrap(guildsBarProps => {
             Sidebars = Array.from(expandedFolders).map(e => generateSidebar(guildsBarProps, [e], e as number));
             break;
         case NestMode.NESTED:
+            const allFolders = SortedGuildStore.getGuildFolders();
             Sidebars = Array.from(expandedFolders).map(e => {
                 const current = allFolders.filter(it => it.folderId == e)[0];
-                const folders: any[] = !current ? [] : allFolders.filter(it => it.folderName?.startsWith(`${current.folderName}/`) && !it.folderName.substring(current.folderName.length + 1).includes("/")).map(it => it.folderId);
+                const folders: any[] = !current ? [] : allFolders.filter(it => {
+                    if (!it.folderName?.startsWith(`${current.folderName}/`)) return false;
+                    const subName = it.folderName.substring(current.folderName.length + 1);
+                    if (subName.includes("/")) {
+                        // check if parent actually exists.
+                        const parentName = `${current.folderName}/${subName.substring(0, subName.indexOf("/"))}`;
+                        return !allFolders.find(f => f.folderName == parentName);
+                    } else {
+                        return true;
+                    }
+                }).map(it => it.folderId);
                 folders.push(e);
                 return generateSidebar(guildsBarProps, folders, e as number);
             });
