@@ -55,7 +55,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Glide by Samwich
 - GlobalBadges by HypedDomi & Hosted by Wolfie
 - GodMode by Tolgchu
-- GoodPerson by nin0dev
+- GoodPerson by nin0dev & mantikafasi
 - GoogleThat by Samwich
 - Grammar by Samwich
 - GrammarFix by unstream

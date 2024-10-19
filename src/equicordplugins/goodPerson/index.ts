@@ -25,6 +25,9 @@ import { FluxDispatcher } from "@webpack/common";
 /** * SEXUAL ***/
 const badVerbsSexual = ["fuck", "cum"];
 const badNounsSexual = ["cunt", "yuri", "whore", "dick", "pussy", "slut", "tit", "cum", "cock", "blowjob", "sex", "ass", "furry", "bewbs", "boob", "booba", "boobies", "boobs", "booby", "porn", "pron", "pronhub", "r34", "rape", "raped", "raping", "rapist"];
+/** * FURRY ***/
+const badNounsFurry = ["<a:meowing:1284972816906846298>", "meowing", "meow", "miau", "mreow", "mrow", "woof", "nya", ":pleading_catgirl", "purr", "oomf", "oomfie"];
+const badRegexesFurry = ["mr*eo*w+, mr+p, nya+, mrow+, purr+"];
 /** * BRAINROT ***/
 const badNounsBrainrot = ["mewing", "mew", "skibidi", "gyat", "gyatt", "rizzler", "nettspend", "boykisser", "ohio", "rizz", "tickle my toes bruh", "crack my spine like a whip", "hawk tuah"];
 /** * SLURS ***/
@@ -53,6 +56,11 @@ export default definePlugin({
         blockSexual: {
             type: OptionType.BOOLEAN,
             description: "Block sexual words/hornyspeak",
+            default: true
+        },
+        blockFurryspeak: {
+            type: OptionType.BOOLEAN,
+            description: "Block furryspeak/meowing",
             default: true
         },
         blockBrainrot: {
