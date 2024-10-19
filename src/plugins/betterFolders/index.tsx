@@ -330,9 +330,12 @@ export default definePlugin({
             if (!betterFoldersId || expandedFolderIds == null) return originalTree;
             const newTree = new GuildsTree();
 
-            // Children is every folder and guild which is not in a folder, this filters out only the expanded folders
-            newTree.root.children = originalTree.root.children.filter(guildOrFolder => expandedFolderIds.has(guildOrFolder.id));
-            // Nodes is every folder and guild, even if it's in a folder, this filters out only the expanded folders and guilds inside them
+            // Children is every folder and guild which is not in a folder, this filters out the folders
+            const children = originalTree.root.children.filter(guildOrFolder => expandedFolderIds.has(guildOrFolder.id) && guildOrFolder.id !== betterFoldersId);
+            children.push(originalTree.root.children.find(guildOrFolder => guildOrFolder.id === betterFoldersId));
+            newTree.root.children = children;
+
+            // Nodes is every folder and guild, even if it's in a folder, this filters out folders and guilds inside them
             newTree.nodes = Object.fromEntries(
                 Object.entries(originalTree.nodes)
                     .filter(([_, guildOrFolder]: any[]) => expandedFolderIds.has(guildOrFolder.id) || expandedFolderIds.has(guildOrFolder.parentId))
