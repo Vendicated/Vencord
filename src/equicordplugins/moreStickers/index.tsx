@@ -1,37 +1,20 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import "./style.css";
 
+import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-
-import { PickerSidebar } from "./components/PickerCategoriesSidebar";
-import { PickerContent } from "./components/PickerContent";
-import { PickerHeader } from "./components/PickerHeader";
-import { Settings } from "./components/settings";
-import { Wrapper } from "./components/wrapper";
+import { PickerContent, PickerHeader, PickerSidebar, Settings, Wrapper } from "./components";
 import { getStickerPack, getStickerPackMetas } from "./stickers";
-import { StickerPack, StickerPackMeta, FFmpegState } from "./types";
+import { StickerPack, StickerPackMeta } from "./types";
 import { cl, FFmpegStateContext, loadFFmpeg } from "./utils";
 
 export default definePlugin({
@@ -57,7 +40,7 @@ export default definePlugin({
                     return `${head}${isMoreStickers}?$self.stickerButton:${button}${tail}`;
                 }
             }, {
-                match: /(\w=)(\w\.useCallback\(\(\)=>\{\(0,\w+\.\w+\)\([\w\.]*?\.STICKER,.*?);/,
+                match: /(\w=)(\w\.useCallback\(\(\)=>\{\(0,\w+\.\w+\)\([\w.]*?\.STICKER,.*?);/,
                 replace: (_, decl, cb) => {
                     const newCb = cb.replace(/(?<=\(\)=>\{\(.*?\)\().+?\.STICKER/, "\"stickers+\"");
                     return `${decl}arguments[0]?.stickersType?${newCb}:${cb};`;
@@ -71,7 +54,7 @@ export default definePlugin({
             }]
         },
         {
-            find: '.gifts)',
+            find: ".gifts)",
             replacement: {
                 match: /,\(null===\(\w=\w\.stickers\)\|\|void 0.*?(\w)\.push\((\(0,\w\.jsx\))\((.+?),{disabled:\w,type:(\w)},"sticker"\)\)/,
                 replace: (m, _, jsx, compo, type) => {

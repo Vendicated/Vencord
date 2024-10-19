@@ -1,22 +1,10 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-import { setRecentStickers } from "./components/recent";
+import { setRecentStickers } from "./components";
 import {
     convert,
     getStickerPackById
@@ -44,11 +32,11 @@ export async function initTest() {
     // Add test sticker packs
     console.log("Adding test sticker packs.");
     const lineStickerPackIds = [
-        "22814489", // LV.47 野生喵喵怪
-        "22567773", // LV.46 野生喵喵怪
-        "22256215", // LV.45 野生喵喵怪
-        "21936635", // LV.44 野生喵喵怪
-        "21836565", // LV.43 野生喵喵怪
+        "22814489", // LV.47
+        "22567773", // LV.46
+        "22256215", // LV.45
+        "21936635", // LV.44
+        "21836565", // LV.43
     ];
     const ps: Promise<StickerPack | null>[] = [];
     for (const id of lineStickerPackIds) {

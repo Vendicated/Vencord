@@ -1,26 +1,15 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile } from "@ffmpeg/util";
 import { findByPropsLazy, findLazy } from "@webpack";
 import { ChannelStore } from "@webpack/common";
+
 import { FFmpegState, Sticker } from "./types";
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
 
 const MessageUpload = findByPropsLazy("instantBatchUpload");
@@ -103,7 +92,7 @@ async function toGIF(url: string, ffmpeg: FFmpeg): Promise<File> {
     if (typeof data === "string") {
         throw new Error("Could not read file");
     }
-    return new File([data.buffer], outputFilename, { type: 'image/gif' });
+    return new File([data.buffer], outputFilename, { type: "image/gif" });
 }
 
 export async function sendSticker({
