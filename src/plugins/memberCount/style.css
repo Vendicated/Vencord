@@ -1,4 +1,5 @@
 .vc-membercount-widget {
+    gap: 10px;
     display: flex;
     align-content: center;
 
@@ -13,8 +14,15 @@
 
 .vc-membercount-member-list {
     justify-content: center;
+    flex-wrap: wrap;
     margin-top: 1em;
     padding-inline: 1em;
+}
+
+.vc-membercount-block {
+    gap: 5px 10px;
+    display: flex;
+    align-items: center;
 }
 
 .vc-membercount-online {
@@ -31,7 +39,6 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    margin-right: 0.5em;
 }
 
 .vc-membercount-total-dot {
@@ -40,5 +47,9 @@
     height: 6px;
     border-radius: 50%;
     border: 3px solid var(--color-total);
-    margin: 0 0.5em 0 1em;
+}
+
+.vc-membercount-voice-icon {
+    width: 18px;
+    height: 18px;
 }
