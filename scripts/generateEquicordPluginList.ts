@@ -250,6 +250,7 @@ function isPluginFile({ name }: { name: string; }) {
                 plugins.push(data);
                 if (readme) readmes[data.name] = readme;
             })
+            .sort()
     ));
 
     const data = JSON.stringify(plugins);
