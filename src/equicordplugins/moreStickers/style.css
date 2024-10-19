@@ -142,9 +142,9 @@
 
 .vc-more-stickers-category-scroller::-webkit-scrollbar-track,
 .vc-more-stickers-picker-content-scroller::-webkit-scrollbar-track {
+    border: 2px solid var(--scrollbar-thin-track);
     border-color: var(--scrollbar-thin-track);
     background-color: var(--scrollbar-thin-track);
-    border: 2px solid var(--scrollbar-thin-track);
 }
 
 .vc-more-stickers-header {
@@ -316,8 +316,6 @@
     position: absolute;
     left: 0;
     top: 0;
-
-    /* prettier-ignore */
     mask: url("https://discord.com/assets/7d65d61e6cd25bf1847ec2d3e4a0144d.svg") 0 0/100% 100%;
     transition: background-color 0.08s ease-out, color 0.08s ease-out;
     z-index: -1;
@@ -337,7 +335,6 @@
 }
 
 .vc-more-stickers-picker-content-row-grid-asset-wrapper:hover {
-    /* prettier-ignore */
     mask: url("https://discord.com/assets/7d65d61e6cd25bf1847ec2d3e4a0144d.svg") 0 0/100% 100%;
 }
 
