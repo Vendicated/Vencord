@@ -1,0 +1,7 @@
+.toneIndicator {
+    text-align: center !important;
+}
+
+.inChatText {
+    color: var(--text-muted);
+}
