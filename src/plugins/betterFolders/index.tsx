@@ -30,6 +30,12 @@ enum FolderIconDisplay {
     MoreThanOneFolderExpanded
 }
 
+export enum NestMode {
+    DISABLED,
+    SEPERATE_COLUMNS,
+    NESTED
+}
+
 export const ExpandedGuildFolderStore = findStoreLazy("ExpandedGuildFolderStore");
 export const SortedGuildStore = findStoreLazy("SortedGuildStore");
 const GuildsTree = findLazy(m => m.prototype?.moveNextTo);
@@ -86,6 +92,16 @@ export const settings = definePluginSettings({
         restartNeeded: true,
         default: false
     },
+    nestMode: {
+        type: OptionType.SELECT,
+        description: "Use nested extra columns (folders split by `/`) for displaying folder contents",
+        options: [
+            { label: "Disabled", value: NestMode.DISABLED, default: true },
+            { label: "Seperate Columns", value: NestMode.SEPERATE_COLUMNS },
+            { label: "Enabled", value: NestMode.NESTED }
+        ],
+        restartNeeded: true,
+    },
     showFolderIcon: {
         type: OptionType.SELECT,
         description: "Show the folder icon above the folder guilds in the BetterFolders sidebar",
@@ -101,7 +117,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "BetterFolders",
     description: "Shows server folders on dedicated sidebar and adds folder related improvements",
-    authors: [Devs.juby, Devs.AutumnVN, Devs.Nuckyz],
+    authors: [Devs.juby, Devs.AutumnVN, Devs.Nuckyz, Devs.Wagyourtail],
 
     settings,
 
@@ -229,7 +245,7 @@ export default definePlugin({
                 if (guildFolder?.folderId) {
 
                     if (settings.store.forceOpen) {
-                        if (guildFolder.folderName?.includes("/")) {
+                        if (settings.store.nestMode == NestMode.NESTED && guildFolder.folderName?.includes("/")) {
                             // open all folders in tree in the right order
                             const parts = guildFolder.folderName.split("/");
                             for (let i = 1; i <= parts.length; i++) {
@@ -243,10 +259,12 @@ export default definePlugin({
                             FolderUtils.toggleGuildFolderExpand(guildFolder.folderId);
                         }
 
-                        // close subfolders
-                        for (const fd of allFolders) {
-                            if (fd.folderName?.startsWith(`${guildFolder.folderName}/`) && ExpandedGuildFolderStore.isFolderExpanded(fd.folderId)) {
-                                FolderUtils.toggleGuildFolderExpand(fd.folderId);
+                        if (settings.store.nestMode == NestMode.NESTED) {
+                            // close subfolders
+                            for (const fd of allFolders) {
+                                if (fd.folderName?.startsWith(`${guildFolder.folderName}/`) && ExpandedGuildFolderStore.isFolderExpanded(fd.folderId)) {
+                                    FolderUtils.toggleGuildFolderExpand(fd.folderId);
+                                }
                             }
                         }
                     }
@@ -257,37 +275,42 @@ export default definePlugin({
         },
 
         TOGGLE_GUILD_FOLDER_EXPAND(data) {
-            if (!dispatchingFoldersClose) {
+            if ((settings.store.closeOthers || settings.store.nestMode == NestMode.NESTED) && !dispatchingFoldersClose) {
                 dispatchingFoldersClose = true;
+
                 FluxDispatcher.wait(() => {
                     const expandedFolders = ExpandedGuildFolderStore.getExpandedFolders();
 
                     const allFolders = SortedGuildStore.getGuildFolders();
                     const currentFolder = allFolders.find(e => e.folderId == data.folderId);
 
-                    if (!expandedFolders.has(data.folderId)) {
-                        for (const fd of allFolders) {
-                            if (fd.folderId == data.folderId) continue;
-                            if (fd.folderName?.startsWith(`${currentFolder.folderName}/`) && expandedFolders.has(fd.folderId)) {
-                                FolderUtils.toggleGuildFolderExpand(fd.folderId);
-                                console.log("closing", fd);
+                    if (settings.store.nestMode == NestMode.NESTED) {
+                        if (!expandedFolders.has(data.folderId)) {
+                            for (const fd of allFolders) {
+                                if (fd.folderId == data.folderId) continue;
+                                if (fd.folderName?.startsWith(`${currentFolder.folderName}/`) && expandedFolders.has(fd.folderId)) {
+                                    FolderUtils.toggleGuildFolderExpand(fd.folderId);
+                                    console.log("closing", fd);
+                                }
+                            }
+                        } else {
+                            for (const fd of allFolders) {
+                                if (fd.folderId == data.folderId) continue;
+                                if (expandedFolders.has(fd.folderId)) {
+                                    if (fd.folderName.startsWith(`${currentFolder.folderName}/`)) continue;
+                                    if (settings.store.closeOthers && !(currentFolder.folderName?.startsWith(fd.folderName) && currentFolder.folderName?.charAt(fd.folderName?.length) === "/")) {
+                                        FolderUtils.toggleGuildFolderExpand(fd.folderId);
+                                    }
+                                } else {
+                                    if (currentFolder.folderName?.startsWith(fd.folderName) && currentFolder.folderName?.charAt(fd.folderName?.length) === "/") {
+                                        FolderUtils.toggleGuildFolderExpand(fd.folderId);
+                                    }
+                                }
                             }
                         }
-                    } else {
-                        for (const fd of allFolders) {
-                            if (fd.folderId == data.folderId) continue;
-                            if (expandedFolders.has(fd.folderId)) {
-                                if (fd.folderName.startsWith(`${currentFolder.folderName}/`)) continue;
-                                if (settings.store.closeOthers && !(currentFolder.folderName?.startsWith(fd.folderName) && currentFolder.folderName?.charAt(fd.folderName?.length) == "/")) {
-                                    FolderUtils.toggleGuildFolderExpand(fd.folderId);
-                                    console.log("closing2", fd);
-                                }
-                            } else {
-                                if (currentFolder.folderName?.startsWith(fd.folderName) && currentFolder.folderName?.charAt(fd.folderName?.length) == "/") {
-                                    FolderUtils.toggleGuildFolderExpand(fd.folderId);
-                                    console.log("opening", fd);
-                                }
-                            }
+                    } else if (expandedFolders.size > 1) {
+                        for (const id of expandedFolders) if (id !== data.folderId) {
+                            FolderUtils.toggleGuildFolderExpand(id);
                         }
                     }
 
@@ -337,15 +360,15 @@ export default definePlugin({
     },
 
     shouldShowFolderIconAndBackground(props: any, expandedFolderIds?: Set<any>) {
-        if (!props.betterFoldersId) return !props.folderNode?.name?.includes("/");
+        if (!props.betterFoldersId) return settings.store.nestMode != NestMode.NESTED || !props.folderNode?.name?.includes("/");
 
         switch (settings.store.showFolderIcon) {
             case FolderIconDisplay.Never:
-                return props.folderNode?.id != props.betterFoldersId;
+                return settings.store.nestMode == NestMode.NESTED && props.folderNode?.id != props.betterFoldersId;
             case FolderIconDisplay.Always:
                 return true;
             case FolderIconDisplay.MoreThanOneFolderExpanded:
-                return (expandedFolderIds?.size ?? 0) > 1 || props.folderNode?.id != props.betterFoldersId;
+                return (expandedFolderIds?.size ?? 0) > 1 || (settings.store.nestMode == NestMode.NESTED && props.folderNode?.id !== props.betterFoldersId);
             default:
                 return true;
         }
@@ -355,14 +378,22 @@ export default definePlugin({
         // Pending guilds
         if (props?.folderNode?.id === 1) return true;
 
-        return props?.betterFoldersId == props?.folderNode?.id;
+        if (settings.store.nestMode == NestMode.NESTED) {
+            return props?.betterFoldersId === props?.folderNode?.id;
+        } else {
+            return !!props?.betterFoldersId;
+        }
     },
 
     shouldRenderContents(props: any, isExpanded: boolean) {
         // Pending guilds
         if (props?.folderNode?.id === 1) return false;
 
-        return props?.betterFoldersId != props?.folderNode?.id && isExpanded;
+        if (settings.store.nestMode == NestMode.NESTED) {
+            return props?.betterFoldersId !== props?.folderNode?.id && isExpanded;
+        } else {
+            return !props?.betterFoldersId && isExpanded;
+        }
     },
 
     FolderSideBar,
