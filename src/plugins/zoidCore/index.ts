@@ -63,7 +63,7 @@ export default definePlugin({
                         const match = m.content.match(cssCodeblockRegex);
 
                         if (match) {
-                            styleText += match[1].trim();
+                            styleText += match[1].trim() + "\n\n";
                         }
                     });
                     style.textContent = styleText;
