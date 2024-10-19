@@ -27,3 +27,40 @@ export async function makeDeeplTranslateRequest(_: IpcMainInvokeEvent, pro: bool
         return { status: -1, data: String(e) };
     }
 }
+
+export async function makeOpenAIAPITranslateRequest(_: IpcMainInvokeEvent, apiKey: string, prompt: string, model: string) {
+    const url = "https://api.openai.com/v1/chat/completions";
+
+    const payload = {
+        model: model,
+        messages: [
+            {
+                role: "user",
+                content: prompt
+            }
+        ],
+        max_tokens: 200, // Adjust as per requirement
+        temperature: 0.5 // Can be adjusted for more/less randomness
+    };
+
+    try {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(`Error ${res.status}: ${errorData.error.message}`);
+        }
+
+        const data: OpenAIResponse = await res.json();
+        return { status: res.status, data };
+    } catch (e) {
+        return { status: -1, data: String(e) };
+    }
+}
