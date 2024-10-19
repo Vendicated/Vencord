@@ -286,18 +286,19 @@ export default definePlugin({
 
                     if (settings.store.nestMode == NestMode.NESTED) {
                         if (!expandedFolders.has(data.folderId)) {
+                            // close children
                             for (const fd of allFolders) {
                                 if (fd.folderId == data.folderId) continue;
                                 if (fd.folderName?.startsWith(`${currentFolder.folderName}/`) && expandedFolders.has(fd.folderId)) {
                                     FolderUtils.toggleGuildFolderExpand(fd.folderId);
-                                    console.log("closing", fd);
                                 }
                             }
                         } else {
+                            // close others not in current's hierarchy
                             for (const fd of allFolders) {
                                 if (fd.folderId == data.folderId) continue;
                                 if (expandedFolders.has(fd.folderId)) {
-                                    if (fd.folderName.startsWith(`${currentFolder.folderName}/`)) continue;
+                                    if (fd.folderName?.startsWith(`${currentFolder.folderName}/`)) continue;
                                     if (settings.store.closeOthers && !(currentFolder.folderName?.startsWith(fd.folderName) && currentFolder.folderName?.charAt(fd.folderName?.length) === "/")) {
                                         FolderUtils.toggleGuildFolderExpand(fd.folderId);
                                     }
