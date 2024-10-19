@@ -51,6 +51,8 @@ export let ScrollerThin: t.ScrollerThin;
 export let Clickable: t.Clickable;
 export let Avatar: t.Avatar;
 export let FocusLock: t.FocusLock;
+export let Spinner: t.Spinner;
+export let SpinnerType: t.SpinnerType;
 // token lagger real
 /** css colour resolver stuff, no clue what exactly this does, just copied usage from Discord */
 export let useToken: t.useToken;
@@ -84,7 +86,9 @@ waitFor(["FormItem", "Button"], m => {
         Clickable,
         Avatar,
         FocusLock,
-        Heading
+        Heading,
+        Spinner,
+        SpinnerType,
     } = m);
     Forms = m;
     Icons = m;
