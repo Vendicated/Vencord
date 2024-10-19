@@ -247,10 +247,9 @@ function isPluginFile({ name }: { name: string; }) {
             .filter(isPluginFile)
             .map(async dirent => {
                 const [data, readme] = await parseFile(await getEntryPoint(dir, dirent));
-                plugins.push(data);
+                plugins.sort().push(data);
                 if (readme) readmes[data.name] = readme;
             })
-            .sort()
     ));
 
     const data = JSON.stringify(plugins);
