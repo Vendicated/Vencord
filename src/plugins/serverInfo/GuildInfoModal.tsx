@@ -7,7 +7,7 @@
 import "./styles.css";
 
 import { classNameFactory } from "@api/Styles";
-import { openImageModal, openUserProfile } from "@utils/discord";
+import { openMediaModal, openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
@@ -80,7 +80,7 @@ function GuildInfoModal({ guild }: GuildProps) {
                     className={cl("banner")}
                     src={bannerUrl}
                     alt=""
-                    onClick={() => openImageModal(bannerUrl)}
+                    onClick={() => openMediaModal(bannerUrl)}
                 />
             )}
 
@@ -89,7 +89,7 @@ function GuildInfoModal({ guild }: GuildProps) {
                     ? <img
                         src={iconUrl}
                         alt=""
-                        onClick={() => openImageModal(iconUrl)}
+                        onClick={() => openMediaModal(iconUrl)}
                     />
                     : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{guild.acronym}</div>
                 }
@@ -151,7 +151,7 @@ function Owner(guildId: string, owner: User) {
 
     return (
         <div className={cl("owner")}>
-            <img src={ownerAvatarUrl} alt="" onClick={() => openImageModal(ownerAvatarUrl)} />
+            <img src={ownerAvatarUrl} alt="" onClick={() => openMediaModal(ownerAvatarUrl)} />
             {Parser.parse(`<@${owner.id}>`)}
         </div>
     );

@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { getCurrentGuild, openImageModal } from "@utils/discord";
+import { getCurrentGuild, openMediaModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Clipboard, GuildStore, Menu, PermissionStore } from "@webpack/common";
@@ -99,7 +99,7 @@ export default definePlugin({
                         id="vc-view-role-icon"
                         label="View Role Icon"
                         action={() => {
-                            openImageModal(`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.${settings.store.roleIconFileFormat}`);
+                            openMediaModal(`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.${settings.store.roleIconFileFormat}`);
                         }}
                         icon={ImageIcon}
                     />

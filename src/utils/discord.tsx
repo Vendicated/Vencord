@@ -17,10 +17,10 @@
 */
 
 import { MessageObject } from "@api/MessageEvents";
-import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
 
-import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
+import { MediaData, MediaModal, openModal } from "./modal";
 
 /**
  * Open the invite modal
@@ -108,25 +108,22 @@ export function sendMessage(
     return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
 }
 
-export function openImageModal(url: string, props?: Partial<React.ComponentProps<ImageModal>>): string {
+/**
+ *
+ * @param media The url of the media or its data
+ * @param mediaModalProps Additional props for the image modal
+ */
+export function openMediaModal(media: string | MediaData, mediaModalProps?: Partial<React.ComponentProps<MediaModal>>): string {
+    media = typeof media === "string" ? { url: media } : media;
+    media.original ??= media.url;
+    media.type ??= "IMAGE";
     return openModal(modalProps => (
-        <ModalRoot
+        <MediaModal
             {...modalProps}
-            className={ModalImageClasses.modal}
-            size={ModalSize.DYNAMIC}>
-            <ImageModal
-                className={ModalImageClasses.image}
-                original={url}
-                placeholder={url}
-                src={url}
-                renderLinkComponent={props => <MaskedLink {...props} />}
-                // Don't render forward message button
-                renderForwardComponent={() => null}
-                shouldHideMediaOptions={false}
-                shouldAnimate
-                {...props}
-            />
-        </ModalRoot>
+            {...mediaModalProps}
+            shouldAnimateCarousel
+            items={[media]}
+        />
     ));
 }
 
