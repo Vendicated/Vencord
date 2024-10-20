@@ -3,7 +3,7 @@ on:
     push:
         branches:
             - main
-    workflow_dispatch:
+            - dev
 env:
     FORCE_COLOR: true
     GITHUB_TOKEN: ${{ secrets.ETOKEN }}
@@ -67,12 +67,12 @@ jobs:
                   rm release/*.map
 
             - name: Upload Equicord Stable
-              if: ${{ github.event_name == 'push' }}
+              if: ${{ github.ref_name == 'main' }}
               run: |
                 gh release upload latest --clobber dist/release/*
 
             - name: Upload Equicord Dev
-              if: ${{ github.event_name == 'workflow_dispatch' }}
+              if: ${{ github.ref_name == 'dev' }}
               run: |
                 gh release upload devbuild --clobber dist/release/*
 
