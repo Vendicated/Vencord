@@ -84,12 +84,12 @@ export default definePlugin({
         return [
             {
                 section: SectionTypes.HEADER,
-                label: "Zoidcord",
+                label: "Nexulien",
                 className: "vc-settings-header"
             },
             {
                 section: "VencordSettings",
-                label: "Zoidcord",
+                label: "Nexulien",
                 element: VencordTab,
                 className: "vc-settings"
             },
@@ -184,7 +184,7 @@ export default definePlugin({
     options: {
         settingsLocation: {
             type: OptionType.SELECT,
-            description: "Where to put the Zoidcord settings section",
+            description: "Where to put the Nexulien settings section",
             options: [
                 { label: "At the very top", value: "top" },
                 { label: "Above the Nitro section", value: "aboveNitro", default: true },
@@ -222,7 +222,7 @@ export default definePlugin({
     getInfoRows() {
         const { electronVersion, chromiumVersion, additionalInfo } = this;
 
-        const rows = [`Zoidcord ${gitHash}${additionalInfo}`];
+        const rows = [`Nexulien ${gitHash}${additionalInfo}`];
 
         if (electronVersion) rows.push(`Electron ${electronVersion}`);
         if (chromiumVersion) rows.push(`Chromium ${chromiumVersion}`);

@@ -30,10 +30,10 @@ import definePlugin from "@utils/types";
 import { Forms, Toasts, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-const CONTRIBUTOR_BADGE = "https://github.com/Zoidcord/assets/blob/main/badges/contributor.png?raw=true";
+const CONTRIBUTOR_BADGE = "https://github.com/Nexulien/assets/blob/main/badges/contributor.png?raw=true";
 
 const ContributorBadge: ProfileBadge = {
-    description: "Zoidcord Contributor",
+    description: "Nexulien Contributor",
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     shouldShow: ({ userId }) => isPluginDev(userId),
@@ -49,7 +49,7 @@ async function loadBadges(noCache = false) {
     if (noCache)
         init.cache = "no-cache";
 
-    DonorBadges = await fetch("https://raw.githubusercontent.com/Zoidcord/assets/main/badges.json", init)
+    DonorBadges = await fetch("https://raw.githubusercontent.com/Nexulien/assets/main/badges.json", init)
         .then(r => r.json());
 }
 
@@ -138,7 +138,7 @@ export default definePlugin({
                 const modalKey = openModal(props => (
                     <ErrorBoundary noop onError={() => {
                         closeModal(modalKey);
-                        VencordNative.native.openExternal("https://github.com/Zoidcord/assets/blob/main/badges.json");
+                        VencordNative.native.openExternal("https://github.com/Nexulien/assets/blob/main/badges.json");
                     }}>
                         <Modals.ModalRoot {...props}>
                             <Modals.ModalHeader>
@@ -172,7 +172,7 @@ export default definePlugin({
                                 </Flex>
                                 <div style={{ padding: "1em" }}>
                                     <Forms.FormText>
-                                        This Badge is granted to a user by the owner of Zoidcord.
+                                        This Badge is granted to a user by the owner of Nexulien.
                                     </Forms.FormText>
                                     <Forms.FormText className={Margins.top20}>
                                         Currently the only way to get one is by asking @thezoidmaster, or getting a PR accepted on the assets repo.
@@ -182,7 +182,7 @@ export default definePlugin({
                             <Modals.ModalFooter>
                                 <Flex style={{ width: "100%", justifyContent: "center" }}>
                                     <Forms.FormText>
-                                        <Link href="https://github.com/Zoidcord/assets">Visit the assets repo</Link>
+                                        <Link href="https://github.com/Nexulien/assets">Visit the assets repo</Link>
                                     </Forms.FormText>
                                 </Flex>
                             </Modals.ModalFooter>

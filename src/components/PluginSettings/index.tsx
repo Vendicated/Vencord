@@ -170,7 +170,7 @@ const enum SearchStatus {
     ENABLED,
     DISABLED,
     NEW,
-    ZOIDCORD
+    NEXULIEN
 }
 
 function ExcludedPluginsList({ search }: { search: string; }) {
@@ -257,7 +257,7 @@ export default function PluginSettings() {
         if (enabled && status === SearchStatus.DISABLED) return false;
         if (!enabled && status === SearchStatus.ENABLED) return false;
         if (status === SearchStatus.NEW && !newPlugins?.includes(plugin.name)) return false;
-        if (!plugin.zoidcord && status === SearchStatus.ZOIDCORD) return false;
+        if (!plugin.nexulien && status === SearchStatus.NEXULIEN) return false;
         if (!search.length) return true;
 
         return (
@@ -298,7 +298,7 @@ export default function PluginSettings() {
 
         if (isRequired) {
             const tooltipText = p.required || !depMap[p.name]
-                ? "This plugin is required for Zoidcord to function."
+                ? "This plugin is required for Nexulien to function."
                 : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
 
             requiredPlugins.push(
@@ -345,7 +345,7 @@ export default function PluginSettings() {
                             { label: "Show Enabled", value: SearchStatus.ENABLED },
                             { label: "Show Disabled", value: SearchStatus.DISABLED },
                             { label: "Show New", value: SearchStatus.NEW },
-                            { label: "Zoidcord-Exclusives", value: SearchStatus.ZOIDCORD }
+                            { label: "Nexulien-Exclusives", value: SearchStatus.NEXULIEN }
                         ]}
                         serialize={String}
                         select={onStatusChange}

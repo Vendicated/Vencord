@@ -81,7 +81,7 @@ function emojiToImg(id: string) {
 export default definePlugin({
     name: "HtmlMarkdownCommands",
     description: "Adds a couple of presets (as slash commands) for MoreMarkdown's HTML feature.",
-    zoidcord: true,
+    nexulien: true,
     authors: [Devs.Jaegerwald],
     commands: [
         {

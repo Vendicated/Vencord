@@ -101,7 +101,7 @@ function VencordSettings() {
         ];
 
     return (
-        <SettingsTab title="Zoidcord Settings">
+        <SettingsTab title="Nexulien Settings">
             <HeaderCard image={donateImage} />
             <QuickActionContainer title="Quick Actions">
                 <QuickAction
@@ -233,7 +233,7 @@ function VencordSettings() {
                     serialize={identity} />
             </>}
 
-            <Forms.FormSection className={Margins.top16} title="Zoidcord Notifications" tag="h5">
+            <Forms.FormSection className={Margins.top16} title="Nexulien Notifications" tag="h5">
                 <Flex>
                     <Button onClick={openNotificationSettingsModal}>
                         Notification Settings
@@ -255,12 +255,12 @@ function HeaderCard({ image }: HeaderCardProps) {
     return (
         <Card className={cl("card", "header")}>
             <div>
-                <span className={cl("urbanistTitle")}>ZOIDCORD</span>
+                <span className={cl("urbanistTitle")}>NEXULIEN</span>
                 <span>...the best (worst) discord client mod.</span>
-                <span>Zoidcord doesn't need donations! Please go support <a href="https://github.com/sponsors/Vendicated" target="_blank">Vendicated</a> instead!</span>
+                <span>Nexulien doesn't need donations! Please go support <a href="https://github.com/sponsors/Vendicated" target="_blank">Vendicated</a> instead!</span>
                 <div className={cl("buttonRow")}>
                     <button
-                        onClick={() => window.open("https://github.com/Zoidcord")}
+                        onClick={() => window.open("https://github.com/Nexulien")}
                     >Contribute</button>
                     <button
                         onClick={async () => {
@@ -280,7 +280,7 @@ function HeaderCard({ image }: HeaderCardProps) {
             </div>
             <img
                 role="presentation"
-                src="https://raw.githubusercontent.com/Zoidcord/assets/refs/heads/main/zoidcord-smallest.png"
+                src="https://raw.githubusercontent.com/Nexulien/assets/refs/heads/main/zoidcord-smallest.png"
                 alt=""
                 height={192}
                 draggable="false"
@@ -293,4 +293,4 @@ function HeaderCard({ image }: HeaderCardProps) {
     );
 }
 
-export default wrapTab(VencordSettings, "Zoidcord Settings");
+export default wrapTab(VencordSettings, "Nexulien Settings");

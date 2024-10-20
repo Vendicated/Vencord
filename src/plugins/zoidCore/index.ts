@@ -35,8 +35,8 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ZoidCore",
-    description: "Extra core functions for Zoidcord",
-    zoidcord: true,
+    description: "Extra core functions for Nexulien",
+    nexulien: true,
     authors: [Devs.Zoid],
     required: true,
 
@@ -50,12 +50,12 @@ export default definePlugin({
             if (channelId) {
                 document.body.classList.add(`guild-${guildId}`, `channel-${channelId}`);
             }
-            document.querySelector(".zoidcord-server-style")?.remove();
+            document.querySelector(".nexulien-server-style")?.remove();
             GuildChannelStore.getChannels(guildId).SELECTABLE.forEach(c => {
-                if (c.channel.name === "zoidcord-config") {
+                if (c.channel.name === "nexulien-config") {
                     console.log("Found config channel, updating css...");
                     const style = document.createElement("style");
-                    style.className = "zoidcord-server-style";
+                    style.className = "nexulien-server-style";
                     let styleText = "";
                     MessageStore.getMessages(c.channel.id).forEach(m => {
                         if (settings.store.messageBlockList.includes(m.id)) return;
@@ -90,7 +90,7 @@ export default definePlugin({
                         if (Settings.autoUpdateNotification && !isImportant)
                             if (!update_found) {
                                 setTimeout(() => showNotification({
-                                    title: "Zoidcord has been updated!",
+                                    title: "Nexulien has been updated!",
                                     body: "Click here to restart",
                                     permanent: true,
                                     noPersist: true,
@@ -100,7 +100,7 @@ export default definePlugin({
                         if (isImportant) {
                             setTimeout(() => {
                                 showNotification({
-                                    title: "Zoidcord has been updated!",
+                                    title: "Nexulien has been updated!",
                                     body: "Important update prioritized, restarting in 5 seconds.",
                                     permanent: true,
                                     noPersist: true,
@@ -112,7 +112,7 @@ export default definePlugin({
                     }
 
                     setTimeout(() => showNotification({
-                        title: "A Zoidcord update is available!",
+                        title: "A Nexulien update is available!",
                         body: "Click here to view the update",
                         permanent: true,
                         noPersist: true,
