@@ -16,20 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./headerCard.css";
+
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { gitRemote } from "@shared/vencordUserAgent";
+import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
+import { closeAllModals } from "@utils/modal";
 import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { Button, Card, Forms, React, Select, Switch } from "@webpack/common";
+import { Button, Card, FluxDispatcher, Forms, GuildStore, NavigationRouter, React, Select, Switch } from "@webpack/common";
 
 import { boykisserIcon, Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "..";
 import { openNotificationSettingsModal } from "./NotificationSettings";
-import { QuickAction, QuickActionCard } from "./quickActions";
+import { QuickAction, QuickActionContainer } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
 
 const cl = classNameFactory("vc-settings-");
@@ -81,7 +85,7 @@ function VencordSettings() {
             }),
             !IS_WEB && {
                 key: "transparent",
-                title: "Enable window transparency.",
+                title: "Enable window transparency",
                 note: "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart"
             },
             !IS_WEB && isWindows && {
@@ -98,47 +102,45 @@ function VencordSettings() {
 
     return (
         <SettingsTab title="Zoidcord Settings">
-            <DonateCard image={donateImage} />
-            <Forms.FormSection title="Quick Actions">
-                <QuickActionCard>
+            <HeaderCard image={donateImage} />
+            <QuickActionContainer title="Quick Actions">
+                <QuickAction
+                    Icon={LogIcon}
+                    text="Notification Log"
+                    action={openNotificationLogModal}
+                />
+                <QuickAction
+                    Icon={PaintbrushIcon}
+                    text="Edit QuickCSS"
+                    action={() => VencordNative.quickCss.openEditor()}
+                />
+                {!IS_WEB && (
                     <QuickAction
-                        Icon={LogIcon}
-                        text="Notification Log"
-                        action={openNotificationLogModal}
+                        Icon={RestartIcon}
+                        text="Relaunch Discord"
+                        action={relaunch}
                     />
+                )}
+                {!IS_WEB && (
                     <QuickAction
-                        Icon={PaintbrushIcon}
-                        text="Edit QuickCSS"
-                        action={() => VencordNative.quickCss.openEditor()}
+                        Icon={FolderIcon}
+                        text="Settings Folder"
+                        action={() => showItemInFolder(settingsDir)}
                     />
-                    {!IS_WEB && (
-                        <QuickAction
-                            Icon={RestartIcon}
-                            text="Relaunch Discord"
-                            action={relaunch}
-                        />
-                    )}
-                    {!IS_WEB && (
-                        <QuickAction
-                            Icon={FolderIcon}
-                            text="Open Settings Folder"
-                            action={() => showItemInFolder(settingsDir)}
-                        />
-                    )}
-                    <QuickAction
-                        Icon={GithubIcon}
-                        text="View Source Code"
-                        action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
-                    />
-                    <QuickAction
-                        Icon={boykisserIcon}
-                        text="i will give this button purpose at some point"
-                        action={function () {
-                            console.warn("you silly goober");
-                        }}
-                    />
-                </QuickActionCard>
-            </Forms.FormSection>
+                )}
+                <QuickAction
+                    Icon={GithubIcon}
+                    text="View Source Code"
+                    action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
+                />
+                <QuickAction
+                    Icon={boykisserIcon}
+                    text="i will give this button a purpose someday"
+                    action={function () {
+                        console.warn("you silly goober");
+                    }}
+                />
+            </QuickActionContainer>
 
             <Forms.FormDivider />
 
@@ -245,27 +247,47 @@ function VencordSettings() {
     );
 }
 
-interface DonateCardProps {
+interface HeaderCardProps {
     image: string;
 }
 
-function DonateCard({ image }: DonateCardProps) {
+function HeaderCard({ image }: HeaderCardProps) {
     return (
-        <Card className={cl("card", "donate")}>
+        <Card className={cl("card", "header")}>
             <div>
-                <Forms.FormTitle tag="h5">No need to support Zoidcord</Forms.FormTitle>
-                <Forms.FormText>Zoidcord doesn't need donations! (mostly because i dont have a way to recieve them lmao)</Forms.FormText>
+                <span className={cl("urbanistTitle")}>ZOIDCORD</span>
+                <span>...the best (worst) discord client mod.</span>
+                <span>Zoidcord doesn't need donations! Please go support <a href="https://github.com/sponsors/Vendicated" target="_blank">Vendicated</a> instead!</span>
+                <div className={cl("buttonRow")}>
+                    <button
+                        onClick={() => window.open("https://github.com/Zoidcord")}
+                    >Contribute</button>
+                    <button
+                        onClick={async () => {
+                            if (!GuildStore.getGuild("1297010632591278090")) {
+                                const inviteAccepted = await openInviteModal("VS2wePpjnt");
+                                if (inviteAccepted) {
+                                    closeAllModals();
+                                    FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
+                                }
+                            } else {
+                                FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
+                                NavigationRouter.transitionToGuild("1297010632591278090");
+                            }
+                        }}
+                    >Join our Server</button>
+                </div>
             </div>
             <img
                 role="presentation"
-                src={image}
+                src="https://raw.githubusercontent.com/Zoidcord/assets/refs/heads/main/zoidcord-smallest.png"
                 alt=""
-                height={128}
+                height={192}
+                draggable="false"
                 style={{
-                    imageRendering: image === SHIGGY_DONATE_IMAGE ? "pixelated" : void 0,
-                    marginLeft: "auto",
-                    transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : void 0
+                    marginLeft: "auto"
                 }}
+                className={cl("mascot")}
             />
         </Card>
     );

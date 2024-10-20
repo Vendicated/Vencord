@@ -7,7 +7,6 @@
 export * from "./Badge";
 export * from "./CheckedTextInput";
 export * from "./CodeBlock";
-export * from "./DonateButton";
 export { default as ErrorBoundary } from "./ErrorBoundary";
 export * from "./ErrorCard";
 export * from "./ExpandableHeader";
