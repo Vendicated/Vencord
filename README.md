@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>131 additional plugins</summary>
+<summary>132 additional plugins</summary>
 
 - AllCallTimers by MaxHerbold & D3SOX
 - AltKrispSwitch by newwares
@@ -110,6 +110,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ScreenRecorder by AutumnVN (Vesktop & Equibop only)
 - SearchFix by Jaxx
 - SekaiStickers by MaiKokain
+- SidebarChat by Joona
 - Shakespearean by vmohammad (Dev build only)
 - ShowBadgesInChat by Inbestigator & KrystalSkull
 - Slap by Korbo
