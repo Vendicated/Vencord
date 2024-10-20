@@ -16,16 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./headerCard.css";
+
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { gitRemote } from "@shared/vencordUserAgent";
+import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
+import { closeAllModals } from "@utils/modal";
 import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { Button, Card, Forms, React, Select, Switch } from "@webpack/common";
+import { Button, Card, FluxDispatcher, Forms, GuildStore, NavigationRouter, React, Select, Switch } from "@webpack/common";
 
 import { boykisserIcon, Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "..";
 import { openNotificationSettingsModal } from "./NotificationSettings";
@@ -251,19 +255,39 @@ function HeaderCard({ image }: HeaderCardProps) {
     return (
         <Card className={cl("card", "header")}>
             <div>
-                <Forms.FormTitle tag="h5">No need to support Zoidcord</Forms.FormTitle>
-                <Forms.FormText>Zoidcord doesn't need donations! (mostly because i dont have a way to recieve them lmao)</Forms.FormText>
+                <span className={cl("urbanistTitle")}>ZOIDCORD</span>
+                <span>...the best (worst) discord client mod.</span>
+                <span>Zoidcord doesn't need donations! Please go support <a href="https://github.com/sponsors/Vendicated" target="_blank">Vendicated</a> instead!</span>
+                <div className={cl("buttonRow")}>
+                    <button
+                        onClick={() => window.open("https://github.com/Zoidcord")}
+                    >Contribute</button>
+                    <button
+                        onClick={async () => {
+                            if (!GuildStore.getGuild("1297010632591278090")) {
+                                const inviteAccepted = await openInviteModal("VS2wePpjnt");
+                                if (inviteAccepted) {
+                                    closeAllModals();
+                                    FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
+                                }
+                            } else {
+                                FluxDispatcher.dispatch({ type: "LAYER_POP_ALL" });
+                                NavigationRouter.transitionToGuild("1297010632591278090");
+                            }
+                        }}
+                    >Join our Server</button>
+                </div>
             </div>
             <img
                 role="presentation"
-                src={image}
+                src="https://raw.githubusercontent.com/Zoidcord/assets/refs/heads/main/zoidcord-smallest.png"
                 alt=""
-                height={128}
+                height={192}
+                draggable="false"
                 style={{
-                    imageRendering: image === SHIGGY_DONATE_IMAGE ? "pixelated" : void 0,
-                    marginLeft: "auto",
-                    transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : void 0
+                    marginLeft: "auto"
                 }}
+                className={cl("mascot")}
             />
         </Card>
     );

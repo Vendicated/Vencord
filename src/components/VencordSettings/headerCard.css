@@ -1,0 +1,73 @@
+@font-face {
+    font-family: Urbanist;
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url("https://fonts.gstatic.com/s/urbanist/v15/L0xjDF02iFML4hGCyOCpRdycFsGxSrqDSxkvEZmq.woff2") format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+.vc-settings-header {
+    display: flex;
+    flex-direction: row;
+    gap: 64px;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    justify-content: center;
+    margin-bottom: 1em;
+    padding: 24px;
+    background-color: var(--background-secondary) !important;
+    box-shadow: var(--elevation-low) !important;
+    border-radius: 12px !important;
+    border: none !important;
+    color: var(--text-muted);
+    padding-bottom: 0;
+}
+
+.vc-settings-urbanistTitle {
+    color: white;
+    font-family: Urbanist, sans-serif;
+    font-size: 32px;
+    display: block;
+}
+
+.vc-settings-mascot { /* scuffed but hey it works */
+    transform: scale(1.25) translateX(-32px) translateY(-32px);
+}
+
+.vc-settings-header > div {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.vc-settings-buttonRow {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5em;
+}
+
+.vc-settings-buttonRow > button {
+    all: unset;
+    background-color: var(--brand-500);
+    color: var(--white-500);
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 8px 16px;
+    border-radius: 4px;
+    height: 24px;
+    cursor: pointer;
+    transition-duration: 0.1s;
+}
+
+.vc-settings-buttonRow > button:hover {
+    background-color: var(--brand-600);
+    transition-duration: 0.1s;
+}
+
+.vc-settings-buttonRow > button:focus-visible {
+    outline: 2px solid var(--focus-primary);
+    outline-offset: 2px;
+    transition-duration: 0s;
+}

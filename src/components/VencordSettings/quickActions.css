@@ -37,15 +37,18 @@
     padding: 8px 12px;
     border-radius: 4px; /* original: border-radius: 9999px; */
     height: 24px;
+    transition-duration: 0.1s;
 }
 
 .vc-settings-quickActions-button:hover {
     background-color: var(--button-secondary-background-hover);
+    transition-duration: 0.1s;
 }
 
 .vc-settings-quickActions-button:focus-visible {
     outline: 2px solid var(--focus-primary);
     outline-offset: 2px;
+    transition-duration: 0s;
 }
 
 .vc-settings-quickActions-img {
@@ -64,4 +67,10 @@
 
 .vc-settings-quickActions-info-button:hover {
     color: var(--text-muted);
+}
+
+.vc-settings-quickActions-info-button:focus-visible {
+    border-radius: 100%;
+    outline: 2px solid var(--focus-primary);
+    outline-offset: -2px;
 }
