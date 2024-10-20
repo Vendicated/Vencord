@@ -19,9 +19,7 @@
 import { Devs } from "@utils/constants";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-
-const { closeExpressionPicker } = findByPropsLazy("closeExpressionPicker");
+import { ExpressionPickerStore } from "@webpack/common";
 
 export default definePlugin({
     name: "GifPaste",
@@ -29,17 +27,17 @@ export default definePlugin({
     authors: [Devs.Ven],
 
     patches: [{
-        find: ".handleSelectGIF=",
+        find: '"handleSelectGIF",',
         replacement: {
-            match: /\.handleSelectGIF=(\i)=>\{/,
-            replace: ".handleSelectGIF=$1=>{if (!this.props.className) return $self.handleSelect($1);"
+            match: /"handleSelectGIF",(\i)=>\{/,
+            replace: '"handleSelectGIF",$1=>{if (!this.props.className) return $self.handleSelect($1);'
         }
     }],
 
     handleSelect(gif?: { url: string; }) {
         if (gif) {
             insertTextIntoChatInputBox(gif.url + " ");
-            closeExpressionPicker();
+            ExpressionPickerStore.closeExpressionPicker();
         }
     }
 });

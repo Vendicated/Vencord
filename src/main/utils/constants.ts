@@ -35,6 +35,8 @@ export const ALLOWED_PROTOCOLS = [
     "steam:",
     "spotify:",
     "com.epicgames.launcher:",
+    "tidal:",
+    "itunes:",
 ];
 
 export const IS_VANILLA = /* @__PURE__ */ process.argv.includes("--vanilla");

@@ -13,10 +13,10 @@ export default definePlugin({
     authors: [Devs.Samwich],
     patches: [
         {
-            find: ".GIFPickerResultTypes.SEARCH",
+            find: '"state",{resultType:',
             replacement: [{
-                match: "this.state={resultType:null}",
-                replace: 'this.state={resultType:"Favorites"}'
+                match: /(?<="state",{resultType:)null/,
+                replace: '"Favorites"'
             }]
         }
     ]

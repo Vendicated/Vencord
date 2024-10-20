@@ -17,7 +17,6 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { User } from "discord-types/general";
 import { ComponentType, HTMLProps } from "react";
 
 import Plugins from "~plugins";
@@ -36,7 +35,7 @@ export interface ProfileBadge {
     image?: string;
     link?: string;
     /** Action to perform when you click the badge */
-    onClick?(): void;
+    onClick?(event: React.MouseEvent<HTMLButtonElement, MouseEvent>, props: BadgeUserArgs): void;
     /** Should the user display this badge? */
     shouldShow?(userInfo: BadgeUserArgs): boolean;
     /** Optional props (e.g. style) for the badge, ignored for component badges */
@@ -45,6 +44,11 @@ export interface ProfileBadge {
     position?: BadgePosition;
     /** The badge name to display, Discord uses this. Required for component badges */
     key?: string;
+
+    /**
+     * Allows dynamically returning multiple badges
+     */
+    getBadges?(userInfo: BadgeUserArgs): ProfileBadge[];
 }
 
 const Badges = new Set<ProfileBadge>();
@@ -74,22 +78,27 @@ export function _getBadges(args: BadgeUserArgs) {
     const badges = [] as ProfileBadge[];
     for (const badge of Badges) {
         if (!badge.shouldShow || badge.shouldShow(args)) {
+            const b = badge.getBadges
+                ? badge.getBadges(args).map(b => {
+                    b.component &&= ErrorBoundary.wrap(b.component, { noop: true });
+                    return b;
+                })
+                : [{ ...badge, ...args }];
+
             badge.position === BadgePosition.START
-                ? badges.unshift({ ...badge, ...args })
-                : badges.push({ ...badge, ...args });
+                ? badges.unshift(...b)
+                : badges.push(...b);
         }
     }
-    const donorBadges = (Plugins.BadgeAPI as unknown as typeof import("../plugins/_api/badges").default).getDonorBadges(args.user.id);
+    const donorBadges = (Plugins.BadgeAPI as unknown as typeof import("../plugins/_api/badges").default).getDonorBadges(args.userId);
     if (donorBadges) badges.unshift(...donorBadges);
 
     return badges;
 }
 
 export interface BadgeUserArgs {
-    user: User;
-    profile: Profile;
-    premiumSince: Date;
-    premiumGuildSince?: Date;
+    userId: string;
+    guildId: string;
 }
 
 interface ConnectedAccount {

@@ -17,7 +17,7 @@
 */
 
 import { Settings } from "@api/Settings";
-import { findByProps, proxyLazyWebpack } from "@webpack";
+import { findByProps, findByPropsLazy, proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
 export interface Track {
@@ -55,6 +55,7 @@ interface PlayerState {
 
     // added by patch
     actual_repeat: Repeat;
+    shuffle: boolean;
 }
 
 interface Device {
@@ -70,7 +71,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
     const { Store } = Flux;
 
     const SpotifySocket = findByProps("getActiveSocketAndDevice");
-    const SpotifyUtils = findByProps("SpotifyAPI");
+    const SpotifyAPI = findByPropsLazy("vcSpotifyMarker");
 
     const API_BASE = "https://api.spotify.com/v1/me/player";
 
@@ -168,7 +169,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
                 (data.query ??= {}).device_id = this.device.id;
 
             const { socket } = SpotifySocket.getActiveSocketAndDevice();
-            return SpotifyUtils.SpotifyAPI[method](socket.accountId, socket.accessToken, {
+            return SpotifyAPI[method](socket.accountId, socket.accessToken, {
                 url: API_BASE + route,
                 ...data
             });
@@ -182,6 +183,7 @@ export const SpotifyStore = proxyLazyWebpack(() => {
             store.isPlaying = e.isPlaying ?? false;
             store.volume = e.volumePercent ?? 0;
             store.repeat = e.actual_repeat || "off";
+            store.shuffle = e.shuffle ?? false;
             store.position = e.position ?? 0;
             store.isSettingPosition = false;
             store.emitChange();

@@ -18,7 +18,6 @@
 
 import "./spotifyStyles.css";
 
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { debounce } from "@shared/debounce";
@@ -166,7 +165,6 @@ function SeekBar() {
 
     const [position, setPosition] = useState(storePosition);
 
-    // eslint-disable-next-line consistent-return
     useEffect(() => {
         if (isPlaying && !isSettingPosition) {
             setPosition(SpotifyStore.position);
@@ -359,7 +357,7 @@ export function Player() {
     const [shouldHide, setShouldHide] = useState(false);
 
     // Hide player after 5 minutes of inactivity
-    // eslint-disable-next-line consistent-return
+
     React.useEffect(() => {
         setShouldHide(false);
         if (!isPlaying) {
@@ -376,17 +374,10 @@ export function Player() {
     } as React.CSSProperties;
 
     return (
-        <ErrorBoundary fallback={() => (
-            <div className="vc-spotify-fallback">
-                <p>Failed to render Spotify Modal :(</p>
-                <p >Check the console for errors</p>
-            </div>
-        )}>
-            <div id={cl("player")} style={exportTrackImageStyle}>
-                <Info track={track} />
-                <SeekBar />
-                <Controls />
-            </div>
-        </ErrorBoundary>
+        <div id={cl("player")} style={exportTrackImageStyle}>
+            <Info track={track} />
+            <SeekBar />
+            <Controls />
+        </div>
     );
 }

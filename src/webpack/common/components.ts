@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line path-alias/no-relative
 import { filters, findByPropsLazy, waitFor } from "@webpack";
 
 import { waitForComponent } from "./internal";
@@ -29,13 +28,17 @@ export let Forms = {} as {
     FormText: t.FormText,
 };
 
+export let Icons = {} as t.Icons;
+
 export let Card: t.Card;
 export let Button: t.Button;
 export let Switch: t.Switch;
 export let Tooltip: t.Tooltip;
+export let TooltipContainer: t.TooltipContainer;
 export let TextInput: t.TextInput;
 export let TextArea: t.TextArea;
 export let Text: t.Text;
+export let Heading: t.Heading;
 export let Select: t.Select;
 export let SearchableSelect: t.SearchableSelect;
 export let Slider: t.Slider;
@@ -47,6 +50,7 @@ export let Paginator: t.Paginator;
 export let ScrollerThin: t.ScrollerThin;
 export let Clickable: t.Clickable;
 export let Avatar: t.Avatar;
+export let FocusLock: t.FocusLock;
 // token lagger real
 /** css colour resolver stuff, no clue what exactly this does, just copied usage from Discord */
 export let useToken: t.useToken;
@@ -58,6 +62,30 @@ export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"
 export const { OAuth2AuthorizeModal } = findByPropsLazy("OAuth2AuthorizeModal");
 
 waitFor(["FormItem", "Button"], m => {
-    ({ useToken, Card, Button, FormSwitch: Switch, Tooltip, TextInput, TextArea, Text, Select, SearchableSelect, Slider, ButtonLooks, TabBar, Popout, Dialog, Paginator, ScrollerThin, Clickable, Avatar } = m);
+    ({
+        useToken,
+        Card,
+        Button,
+        FormSwitch: Switch,
+        Tooltip,
+        TooltipContainer,
+        TextInput,
+        TextArea,
+        Text,
+        Select,
+        SearchableSelect,
+        Slider,
+        ButtonLooks,
+        TabBar,
+        Popout,
+        Dialog,
+        Paginator,
+        ScrollerThin,
+        Clickable,
+        Avatar,
+        FocusLock,
+        Heading
+    } = m);
     Forms = m;
+    Icons = m;
 });

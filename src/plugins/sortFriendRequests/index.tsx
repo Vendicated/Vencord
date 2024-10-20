@@ -41,22 +41,22 @@ export default definePlugin({
     patches: [{
         find: "getRelationshipCounts(){",
         replacement: {
-            match: /\.sortBy\(\i=>\i\.comparator\)/,
-            replace: ".sortBy((row) => $self.sortList(row))"
+            match: /\}\)\.sortBy\((.+?)\)\.value\(\)/,
+            replace: "}).sortBy(row => $self.wrapSort(($1), row)).value()"
         }
     }, {
         find: ".Messages.FRIEND_REQUEST_CANCEL",
         replacement: {
             predicate: () => settings.store.showDates,
-            match: /subText:(\i)(?=,className:\i\.userInfo}\))(?<=user:(\i).+?)/,
+            match: /subText:(\i)(?<=user:(\i).+?)/,
             replace: (_, subtext, user) => `subText:$self.makeSubtext(${subtext},${user})`
         }
     }],
 
-    sortList(row: any) {
+    wrapSort(comparator: Function, row: any) {
         return row.type === 3 || row.type === 4
             ? -this.getSince(row.user)
-            : row.comparator;
+            : comparator(row);
     },
 
     getSince(user: User) {
@@ -66,7 +66,7 @@ export default definePlugin({
     makeSubtext(text: string, user: User) {
         const since = this.getSince(user);
         return (
-            <Flex flexDirection="row" style={{ gap: 0, flexWrap: "wrap", lineHeight: "0.9rem" }}>
+            <Flex flexDirection="column" style={{ gap: 0, flexWrap: "wrap", lineHeight: "0.9rem" }}>
                 <span>{text}</span>
                 {!isNaN(since.getTime()) && <span>Received &mdash; {since.toDateString()}</span>}
             </Flex>

@@ -16,24 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { useSettings } from "@api/Settings";
+import { Settings, useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
-import { DeleteIcon } from "@components/Icons";
+import { DeleteIcon, FolderIcon, PaintbrushIcon, PencilIcon, PlusIcon, RestartIcon } from "@components/Icons";
 import { Link } from "@components/Link";
-import PluginModal from "@components/PluginSettings/PluginModal";
+import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import type { UserThemeHeader } from "@main/themes";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { classes } from "@utils/misc";
-import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { findByPropsLazy, findLazy } from "@webpack";
-import { Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
+import { findLazy } from "@webpack";
+import { Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
+import Plugins from "~plugins";
+
 import { AddonCard } from "./AddonCard";
+import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
 
 type FileInput = ComponentType<{
@@ -43,9 +44,7 @@ type FileInput = ComponentType<{
     filters?: { name?: string; extensions: string[]; }[];
 }>;
 
-const InviteActions = findByPropsLazy("resolveInvite");
 const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
-const TextAreaProps = findLazy(m => typeof m.textarea === "string");
 
 const cl = classNameFactory("vc-settings-theme-");
 
@@ -78,8 +77,16 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
             <Forms.FormTitle className={Margins.top20} tag="h5">Validator</Forms.FormTitle>
             <Forms.FormText>This section will tell you whether your themes can successfully be loaded</Forms.FormText>
             <div>
-                {themeLinks.map(link => (
-                    <Card style={{
+                {themeLinks.map(rawLink => {
+                    const { label, link } = (() => {
+                        const match = /^@(light|dark) (.*)/.exec(rawLink);
+                        if (!match) return { label: rawLink, link: rawLink };
+
+                        const [, mode, link] = match;
+                        return { label: `[${mode} mode only] ${link}`, link };
+                    })();
+
+                    return <Card style={{
                         padding: ".5em",
                         marginBottom: ".5em",
                         marginTop: ".5em"
@@ -87,11 +94,11 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
                         <Forms.FormTitle tag="h5" style={{
                             overflowWrap: "break-word"
                         }}>
-                            {link}
+                            {label}
                         </Forms.FormTitle>
                         <Validator link={link} />
-                    </Card>
-                ))}
+                    </Card>;
+                })}
             </div>
         </>
     );
@@ -213,60 +220,52 @@ function ThemesTab() {
                 </Card>
 
                 <Forms.FormSection title="Local Themes">
-                    <Card className="vc-settings-quick-actions-card">
+                    <QuickActionCard>
                         <>
                             {IS_WEB ?
                                 (
-                                    <Button
-                                        size={Button.Sizes.SMALL}
-                                        disabled={themeDirPending}
-                                    >
-                                        Upload Theme
-                                        <FileInput
-                                            ref={fileInputRef}
-                                            onChange={onFileUpload}
-                                            multiple={true}
-                                            filters={[{ extensions: ["css"] }]}
-                                        />
-                                    </Button>
+                                    <QuickAction
+                                        text={
+                                            <span style={{ position: "relative" }}>
+                                                Upload Theme
+                                                <FileInput
+                                                    ref={fileInputRef}
+                                                    onChange={onFileUpload}
+                                                    multiple={true}
+                                                    filters={[{ extensions: ["css"] }]}
+                                                />
+                                            </span>
+                                        }
+                                        Icon={PlusIcon}
+                                    />
                                 ) : (
-                                    <Button
-                                        onClick={() => showItemInFolder(themeDir!)}
-                                        size={Button.Sizes.SMALL}
+                                    <QuickAction
+                                        text="Open Themes Folder"
+                                        action={() => showItemInFolder(themeDir!)}
                                         disabled={themeDirPending}
-                                    >
-                                        Open Themes Folder
-                                    </Button>
+                                        Icon={FolderIcon}
+                                    />
                                 )}
-                            <Button
-                                onClick={refreshLocalThemes}
-                                size={Button.Sizes.SMALL}
-                            >
-                                Load missing Themes
-                            </Button>
-                            <Button
-                                onClick={() => VencordNative.quickCss.openEditor()}
-                                size={Button.Sizes.SMALL}
-                            >
-                                Edit QuickCSS
-                            </Button>
+                            <QuickAction
+                                text="Load missing Themes"
+                                action={refreshLocalThemes}
+                                Icon={RestartIcon}
+                            />
+                            <QuickAction
+                                text="Edit QuickCSS"
+                                action={() => VencordNative.quickCss.openEditor()}
+                                Icon={PaintbrushIcon}
+                            />
 
-                            {Vencord.Settings.plugins.ClientTheme.enabled && (
-                                <Button
-                                    onClick={() => openModal(modalProps => (
-                                        <PluginModal
-                                            {...modalProps}
-                                            plugin={Vencord.Plugins.plugins.ClientTheme}
-                                            onRestartNeeded={() => { }}
-                                        />
-                                    ))}
-                                    size={Button.Sizes.SMALL}
-                                >
-                                    Edit ClientTheme
-                                </Button>
+                            {Settings.plugins.ClientTheme.enabled && (
+                                <QuickAction
+                                    text="Edit ClientTheme"
+                                    action={() => openPluginModal(Plugins.ClientTheme)}
+                                    Icon={PencilIcon}
+                                />
                             )}
                         </>
-                    </Card>
+                    </QuickActionCard>
 
                     <div className={cl("grid")}>
                         {userThemes?.map(theme => (
@@ -305,6 +304,7 @@ function ThemesTab() {
                 <Card className="vc-settings-card vc-text-selectable">
                     <Forms.FormTitle tag="h5">Paste links to css files here</Forms.FormTitle>
                     <Forms.FormText>One link per line</Forms.FormText>
+                    <Forms.FormText>You can prefix lines with @light or @dark to toggle them based on your Discord theme</Forms.FormText>
                     <Forms.FormText>Make sure to use direct links to files (raw or github.io)!</Forms.FormText>
                 </Card>
 
@@ -312,7 +312,7 @@ function ThemesTab() {
                     <TextArea
                         value={themeText}
                         onChange={setThemeText}
-                        className={classes(TextAreaProps.textarea, "vc-settings-theme-links")}
+                        className={"vc-settings-theme-links"}
                         placeholder="Theme Links"
                         spellCheck={false}
                         onBlur={onBlur}
