@@ -77,6 +77,7 @@ jobs:
                 gh release upload devbuild --clobber dist/release/*
 
             - name: Upload Plugins JSON to Equibored repo
+              if: ${{ github.ref_name == 'main' }}
               run: |
                 git config --global user.name "$USERNAME"
                 git config --global user.email "78185467+thororen1234@users.noreply.github.com"
