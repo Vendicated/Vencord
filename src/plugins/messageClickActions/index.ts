@@ -27,14 +27,25 @@ const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
 const EditStore = findByPropsLazy("isEditing", "isEditingAny");
 
 let isDeletePressed = false;
-const keydown = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = true);
-const keyup = (e: KeyboardEvent) => e.key === "Backspace" && (isDeletePressed = false);
+
+const keyOptions = [
+    { label: "Backspace", value: "Backspace" },
+    { label: "Delete", value: "Delete" },
+    { label: "Control", value: "Control" },
+    { label: "Shift", value: "Shift" }
+];
 
 const settings = definePluginSettings({
     enableDeleteOnClick: {
         type: OptionType.BOOLEAN,
-        description: "Enable delete on click while holding backspace",
+        description: "Enable delete on click while holding the selected key",
         default: true
+    },
+    deleteKey: {
+        type: OptionType.SELECT,
+        description: "Select the key to hold for delete on click",
+        options: keyOptions,
+        default: "Backspace"
     },
     enableDoubleClickToEdit: {
         type: OptionType.BOOLEAN,
@@ -53,9 +64,23 @@ const settings = definePluginSettings({
     }
 });
 
+const keydown = (e: KeyboardEvent) => {
+    const deleteKey = settings.store.deleteKey ?? "Backspace";
+    if (e.key === deleteKey) {
+        isDeletePressed = true;
+    }
+};
+
+const keyup = (e: KeyboardEvent) => {
+    const deleteKey = settings.store.deleteKey ?? "Backspace";
+    if (e.key === deleteKey) {
+        isDeletePressed = false;
+    }
+};
+
 export default definePlugin({
     name: "MessageClickActions",
-    description: "Hold Backspace and click to delete, double click to edit/reply",
+    description: "Hold the selected key and click to delete, double click to edit/reply",
     authors: [Devs.Ven],
     dependencies: ["MessageEventsAPI"],
 
