@@ -25,9 +25,6 @@ import { FluxDispatcher } from "@webpack/common";
 /** * SEXUAL ***/
 const badVerbsSexual = ["fuck", "cum"];
 const badNounsSexual = ["cunt", "yuri", "whore", "dick", "pussy", "slut", "tit", "cum", "cock", "blowjob", "sex", "ass", "furry", "bewbs", "boob", "booba", "boobies", "boobs", "booby", "porn", "pron", "pronhub", "r34", "rape", "raped", "raping", "rapist"];
-/** * FURRY ***/
-const badNounsFurry = ["<a:meowing:1284972816906846298>", "meowing", "meow", "miau", "mreow", "mrow", "woof", "nya", ":pleading_catgirl", "purr", "oomf", "oomfie"];
-const badRegexesFurry = ["mr*eo*w+, mr+p, nya+, mrow+, purr+"];
 /** * BRAINROT ***/
 const badNounsBrainrot = ["mewing", "mew", "skibidi", "gyat", "gyatt", "rizzler", "nettspend", "boykisser", "ohio", "rizz", "tickle my toes bruh", "crack my spine like a whip", "hawk tuah"];
 /** * SLURS ***/
@@ -37,7 +34,7 @@ const badRegexesSlurs = ["\\bn{1,}(i|!|1){1,}(b|g){2,}(a|@|e|3){1,}?"];
 const badVerbsGeneral = ["kill", "destroy"];
 const badNounsGeneral = ["shit", "bullshit", "bitch", "bastard", "die", "brainless"];
 /** * FUN ***/
-const badNounsFun = ["kotlin", "avast"];
+const badNounsFun = ["kotlin", "avast", "fres"];
 /** * REPLACEMENTS ***/
 const badVerbsReplacements = ["love", "eat", "deconstruct", "marry", "fart", "teach", "display", "plug", "explode", "undress", "finish", "freeze", "beat", "free", "brush", "allocate", "date", "melt", "breed", "educate", "injure", "change"];
 const badNounsReplacements = ["pasta", "kebab", "cake", "potato", "woman", "computer", "java", "hamburger", "monster truck", "osu!", "Ukrainian ball in search of gas game", "Anime", "Anime girl", "good", "keyboard", "NVIDIA RTX 3090 Graphics Card", "storm", "queen", "single", "umbrella", "mosque", "physics", "bath", "virus", "bathroom", "mom", "owner", "airport", "Avast Antivirus Free"];
@@ -56,11 +53,6 @@ export default definePlugin({
         blockSexual: {
             type: OptionType.BOOLEAN,
             description: "Block sexual words/hornyspeak",
-            default: true
-        },
-        blockFurryspeak: {
-            type: OptionType.BOOLEAN,
-            description: "Block furryspeak/meowing",
             default: true
         },
         blockBrainrot: {
@@ -96,7 +88,6 @@ export default definePlugin({
     getEnabledBadNouns() {
         const thingToReturn: string[] = [];
         if (this.settings.store.blockBrainrot) thingToReturn.push(...badNounsBrainrot);
-        if (this.settings.store.blockFurryspeak) thingToReturn.push(...badNounsFurry);
         if (this.settings.store.blockInsults) thingToReturn.push(...badNounsGeneral);
         if (this.settings.store.blockOthers) thingToReturn.push(...badNounsFun);
         if (this.settings.store.blockSexual) thingToReturn.push(...badNounsSexual);
