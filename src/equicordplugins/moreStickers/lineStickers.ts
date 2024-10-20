@@ -66,9 +66,10 @@ function toStickerId(stickerId: string, lineStickerPackId: string): string {
 export function convertSticker(s: LineSticker): Sticker {
     return {
         id: toStickerId(s.id, s.stickerPackId),
-        image: s.staticUrl,
+        image: s.animationUrl || s.staticUrl,
         title: s.id,
-        stickerPackId: toStickerPackId(s.stickerPackId)
+        stickerPackId: toStickerPackId(s.stickerPackId),
+        isAnimated: !!s.animationUrl
     };
 }
 
@@ -106,10 +107,10 @@ export function parseHtml(html: string): LineStickerPack {
             .map(x => ({ ...x, stickerPackId: id })) as LineSticker[];
 
     const stickerPack = {
-        title: doc.querySelector("[data-test=sticker-name-title]")?.textContent ?? "null",
+        title: doc.querySelector("[data-test=\"sticker-name-title\"]")?.textContent ?? "null",
         author: {
-            name: doc.querySelector("[data-test=sticker-author]")?.textContent ?? "null",
-            url: "https://store.line.me/" + (doc.querySelector("[data-test=sticker-author]")?.getAttribute("href") ?? "null")
+            name: doc.querySelector("[data-test=\"sticker-author\"]")?.textContent ?? "null",
+            url: "https://store.line.me/" + (doc.querySelector("[data-test=\"sticker-author\"]")?.getAttribute("href") ?? "null")
         },
         id,
         mainImage,
