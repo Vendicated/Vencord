@@ -27,6 +27,19 @@ const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
 const EditStore = findByPropsLazy("isEditing", "isEditingAny");
 
 let isDeletePressed = false;
+const keydown = (e: KeyboardEvent) => {
+    const deleteKey = settings.store.deleteKey ?? "Backspace";
+    if (e.key === deleteKey) {
+        isDeletePressed = true;
+    }
+};
+
+const keyup = (e: KeyboardEvent) => {
+    const deleteKey = settings.store.deleteKey ?? "Backspace";
+    if (e.key === deleteKey) {
+        isDeletePressed = false;
+    }
+};
 
 const keyOptions = [
     { label: "Backspace", value: "Backspace" },
@@ -63,20 +76,6 @@ const settings = definePluginSettings({
         default: false
     }
 });
-
-const keydown = (e: KeyboardEvent) => {
-    const deleteKey = settings.store.deleteKey ?? "Backspace";
-    if (e.key === deleteKey) {
-        isDeletePressed = true;
-    }
-};
-
-const keyup = (e: KeyboardEvent) => {
-    const deleteKey = settings.store.deleteKey ?? "Backspace";
-    if (e.key === deleteKey) {
-        isDeletePressed = false;
-    }
-};
 
 export default definePlugin({
     name: "MessageClickActions",
