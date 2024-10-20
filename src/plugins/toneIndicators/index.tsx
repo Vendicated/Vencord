@@ -29,17 +29,17 @@ interface ToneIndicator {
 const toneIndicators = [
     toneIndicator(["j"], "joking"),
     toneIndicator(["hj"], "half-joking"),
-    toneIndicator(["s"], "sarcastic"),
+    toneIndicator(["s", "sarc"], "sarcastic"),
     toneIndicator(["gen", "g"], "genuine"),
     toneIndicator(["srs"], "serious"),
     toneIndicator(["nsrs"], "non-serious"),
     toneIndicator(["pos", "pc"], "positive connotation"),
     toneIndicator(["neu"], "neutral connotation"),
-    toneIndicator(["neg", "nc"], "negative connotation"),
+    toneIndicator(["neg", "nc", "ng"], "negative connotation"),
     toneIndicator(["p"], "platonic"),
     toneIndicator(["r"], "romantic"),
     toneIndicator(["c"], "copypasta"),
-    toneIndicator(["l", "ly"], "lyrics"),
+    toneIndicator(["l", "ly", "lyr"], "lyrics"),
     toneIndicator(["lh"], "light-hearted"),
     toneIndicator(["nm"], "not mad"),
     toneIndicator(["lu"], "a little upset"),
@@ -55,7 +55,16 @@ const toneIndicators = [
     toneIndicator(["hyp"], "hyperbole"),
     toneIndicator(["f"], "fake"),
     toneIndicator(["th"], "threat"),
-    toneIndicator(["cb"], "clickbait")
+    toneIndicator(["cb"], "clickbait"),
+    toneIndicator(["nf"], "not forced"),
+    toneIndicator(["nay"], "not at you"),
+    toneIndicator(["ref"], "reference"),
+    toneIndicator(["npa"], "not passive aggressive"),
+    toneIndicator(["pa"], "passive aggressive"),
+    toneIndicator(["genq"], "genuine question"),
+    toneIndicator(["q"], "quote"),
+    toneIndicator(["nav"], "not a vent"),
+    toneIndicator(["a"], "affectionate")
 ];
 const f = toneIndicators.reduce((ret, cur) => {
     return {
