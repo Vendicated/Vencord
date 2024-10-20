@@ -296,7 +296,10 @@ export default definePlugin({
             (isEdit ? !logEdits : !logDeletes) ||
             ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
             // Ignore Venbot in the support channel
-            (message.channel_id === "1026515880080842772" && message.author?.id === "1017176847865352332");
+            (message.channel_id === "1026515880080842772" && message.author?.id === "1017176847865352332") 
+            || // Ignore Gluestick on dev-talk & dev-playground 
+            (message.channel_id === "1297239805972709521" && message.author?.id === "1247291758857949224") ||
+            (message.channel_id === "1297078407653228575" && message.author?.id === "1247291758857949224");
     },
 
     EditMarker({ message, className, children, ...props }: any) {
