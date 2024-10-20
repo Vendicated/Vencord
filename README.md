@@ -1,6 +1,9 @@
-# Nexulien
+> ![WARNING]
+> Nexulien is still pretty young in terms of differences from Vencord. We'll be adding more stuff and features over time, please be patient!
 
-The best (worst) Vencord fork
+<center>
+<img alt="Nexulien" src="./images/github_title.svg">
+</center>
 
 ## Features
 
@@ -24,3 +27,11 @@ Regardless, if your account is very important to you and it getting disabled wou
 Additionally, make sure not to post screenshots with Nexulien in a server where you might get banned for it
 
 </details>
+
+<!-- <table>
+    <tr>
+        <td>Centro comercial Moctezuma</td>
+        <td>Francisco Chang</td>
+        <td>Mexico</td>
+    </tr>
+</table> -->
