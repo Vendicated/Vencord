@@ -106,7 +106,7 @@ export async function migrateLegacyToAsar() {
         app.whenReady().then(() => {
             dialog.showErrorBox(
                 "Legacy Install",
-                "The way Vencord loaded was changed and the updater failed to migrate. Please reinstall using the Vencord Installer!"
+                "The way Equicord loaded was changed and the updater failed to migrate. Please reinstall using the Equicord Installer!"
             );
             app.exit(1);
         });
