@@ -7,7 +7,7 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 import { findByPropsLazy, findLazy } from "@webpack";
-import { ChannelStore } from "@webpack/common";
+import { ChannelStore, UploadHandler } from "@webpack/common";
 
 import { FFmpegState, Sticker } from "./types";
 
@@ -17,7 +17,6 @@ const CloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
 const PendingReplyStore = findByPropsLazy("getPendingReply");
 const MessageUtils = findByPropsLazy("sendMessage");
 const DraftStore = findByPropsLazy("getDraft", "getState");
-const promptToUploadParent = findByPropsLazy("promptToUpload");
 
 
 export const ffmpeg = new FFmpeg();
@@ -161,7 +160,7 @@ export async function sendSticker({
         }
 
         if (ctrlKey) {
-            promptToUploadParent.promptToUpload([file], ChannelStore.getChannel(channelId), 0);
+            UploadHandler.promptToUpload([file], ChannelStore.getChannel(channelId), 0);
             return;
         }
 
