@@ -74,12 +74,14 @@ const mimeTypes = {
     jpg: "image/jpeg",
     jpeg: "image/jpeg",
     png: "image/png",
+    apng: "image/apng",
     gif: "image/gif",
     webp: "image/webp",
     svg: "image/svg+xml",
     mp4: "video/mp4",
     webm: "video/webm",
     mov: "video/quicktime",
+    lottie: "application/json",
 };
 
 function getMimeType(extension: string | undefined): [boolean, string] {
@@ -105,8 +107,12 @@ function stripDiscordParams(url: string) {
         .replace(/\?$/, "")
         .replace(/&{2,}/g, "&");
 
-    if (newUrl.includes("quality=lossless") && !newUrl.includes("?")) {
-        newUrl = newUrl.replace(/&quality=lossless/, "?quality=lossless");
+    if (!newUrl.includes("quality=lossless")) {
+        newUrl += newUrl.includes("?") ? "&quality=lossless" : "?quality=lossless";
+    }
+
+    if (!newUrl.includes("?") && newUrl.includes("&")) {
+        newUrl = newUrl.replace("&", "?");
     }
 
     return newUrl;

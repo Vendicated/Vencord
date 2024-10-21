@@ -7,9 +7,16 @@
 import "./styles.css";
 
 import { EquicordDevs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
+import { findStoreLazy } from "@webpack";
 
 import { getMimeType, isLinkAnImage, settings, stripDiscordParams } from "./settings";
+
+const logger = new Logger("ImagePreview", "#FFFFFF");
+const StickerStore = findStoreLazy("StickersStore") as {
+    getStickerById(id: string): any;
+};
 
 let currentPreview: HTMLDivElement | null = null;
 let currentPreviewFile: HTMLImageElement | HTMLVideoElement | null = null;
@@ -91,7 +98,7 @@ function scanObjects(element: Element) {
         element.querySelectorAll('img[data-type="sticker"]:not([data-processed="true"])').forEach(sticker => {
             const messageParent = sticker.closest("[class^='messageListItem_']");
             if (messageParent) {
-                addHoverListener(sticker);
+                addHoverListener(sticker, true);
             }
         });
     }
@@ -112,10 +119,37 @@ function createObserver() {
     });
 }
 
-function loadImagePreview(url: string) {
+function loadImagePreview(url: string, sticker: boolean) {
+    let stickerType: string | null = null;
+
+    if (sticker) {
+        const stickerId = url.split("/").pop()?.split(".")[0] ?? null;
+        const stickerData = stickerId ? StickerStore.getStickerById(stickerId) : null;
+
+        if (stickerData) {
+            switch (stickerData.type) {
+                case 1:
+                    stickerType = "png";
+                    break;
+                case 2:
+                    stickerType = "apng";
+                    break;
+                case 3:
+                    stickerType = "lottie";
+                    break;
+                case 4:
+                    stickerType = "gif";
+                    break;
+                default:
+                    stickerType = "png";
+                    break;
+            }
+        }
+    }
+
     const urlParams = new URLSearchParams(url.split("?")[1]);
     const formatParam = urlParams.get("format");
-    const extension = formatParam || url.split(".").pop()?.split("?")[0] || "";
+    const extension = stickerType || formatParam || url.split(".").pop()?.split("?")[0] || "";
     const [allowed, mimeType] = getMimeType(extension);
 
     if (!allowed) return;
@@ -166,12 +200,11 @@ function loadImagePreview(url: string) {
         updatePositionAfterLoad();
     };
 
+    fileName.className = "file-name";
     fileName.textContent = url.split("/").pop()?.split("?")[0] || "";
 
     mimeTypeSpan.textContent = mimeType;
-
     fileInfo.appendChild(mimeTypeSpan);
-    fileInfo.appendChild(fileName);
     fileInfo.appendChild(fileSize);
 
     if (currentPreviewType === "video") {
@@ -199,6 +232,7 @@ function loadImagePreview(url: string) {
                     fileSize.appendChild(showingSize);
                 }
 
+                preview.appendChild(fileName);
                 preview.appendChild(fileInfo);
             });
 
@@ -229,6 +263,7 @@ function loadImagePreview(url: string) {
                     fileSize.appendChild(showingSize);
                 }
 
+                preview.appendChild(fileName);
                 preview.appendChild(fileInfo);
             });
 
@@ -243,6 +278,8 @@ function loadImagePreview(url: string) {
     }
 
     if (settings.store.mouseOnlyMode) {
+        preview.style.pointerEvents = "auto";
+
         currentPreview.addEventListener("mouseover", () => {
             if (currentPreview && !isCtrlHeld) {
                 shouldKeepPreviewOpen = true;
@@ -293,36 +330,40 @@ function loadImagePreview(url: string) {
 
 function updatePreviewPosition(mouseEvent: MouseEvent, element: HTMLElement) {
     if (currentPreview && !isCtrlHeld) {
-        const basePadding = 15;
-        const topPadding = 40;
+        const topPadding = 0;
+        const leftPadding = 15;
+        const minTopOffset = 30;
+        const minBottomOffset = 30;
         const maxWidth: number = window.innerWidth * 0.9;
         const maxHeight: number = window.innerHeight * 0.9;
 
         const previewWidth: number = currentPreview.offsetWidth;
         const previewHeight: number = currentPreview.offsetHeight;
 
-        let left: number;
-        let top: number = mouseEvent.pageY + basePadding;
+        let left: number = mouseEvent.pageX + leftPadding;
+        let top: number = mouseEvent.pageY + topPadding;
 
-        const spaceOnRight = window.innerWidth - mouseEvent.pageX - previewWidth - basePadding;
-        const spaceOnLeft = mouseEvent.pageX - previewWidth - basePadding;
+        const spaceOnRight = window.innerWidth - mouseEvent.pageX - previewWidth - leftPadding;
+        const spaceOnLeft = mouseEvent.pageX - previewWidth - leftPadding;
 
-        if (spaceOnRight >= basePadding) {
-            left = mouseEvent.pageX + basePadding;
-        } else if (spaceOnLeft >= basePadding) {
-            left = mouseEvent.pageX - previewWidth - basePadding;
+        if (spaceOnRight >= leftPadding) {
+            left = mouseEvent.pageX + leftPadding;
+        } else if (spaceOnLeft >= leftPadding) {
+            left = mouseEvent.pageX - previewWidth - leftPadding;
         } else {
-            left = Math.max(basePadding, Math.min(mouseEvent.pageX + basePadding, window.innerWidth - previewWidth - basePadding));
+            left = Math.max(leftPadding, Math.min(mouseEvent.pageX + leftPadding, window.innerWidth - previewWidth - leftPadding));
         }
 
-        if (top + previewHeight > window.innerHeight) {
-            top = mouseEvent.pageY - previewHeight - topPadding;
+        if (top + previewHeight > window.innerHeight - minBottomOffset) {
+            top = mouseEvent.pageY - previewHeight;
 
-            if (top < topPadding) {
-                top = window.innerHeight - previewHeight - topPadding * 2;
+            if (top < minTopOffset) {
+                top = minTopOffset;
             }
+        } else if (top + previewHeight + topPadding > window.innerHeight - minBottomOffset) {
+            top = window.innerHeight - previewHeight - minBottomOffset;
         } else {
-            top = Math.min(top, window.innerHeight - previewHeight - basePadding * 2);
+            top = Math.min(top, window.innerHeight - previewHeight - topPadding - minBottomOffset);
         }
 
         currentPreview.style.left = `${left}px`;
@@ -336,7 +377,7 @@ function updatePreviewPosition(mouseEvent: MouseEvent, element: HTMLElement) {
     }
 }
 
-function addHoverListener(element: Element) {
+function addHoverListener(element: Element, sticker: boolean = false) {
     element.setAttribute("data-processed", "true");
 
     element.addEventListener("mouseover", event => {
@@ -365,7 +406,7 @@ function addHoverListener(element: Element) {
         if (!strippedURL) return;
 
         hoverDelayTimeout = setTimeout(() => {
-            loadImagePreview(strippedURL);
+            loadImagePreview(strippedURL, sticker);
             if (lastMouseEvent) {
                 updatePreviewPosition(lastMouseEvent, element as HTMLElement);
             }
@@ -451,17 +492,20 @@ export default definePlugin({
     settings: settings,
 
     start() {
-        const targetNode = document.querySelector('[class*="app-"]');
-        if (!targetNode) return;
+        const targetNode = document.body;
 
-        scanObjects(targetNode);
-        document.addEventListener("keydown", handleKeydown);
-        document.addEventListener("keyup", handleKeyup);
-        document.addEventListener("mousemove", handleMousemove);
-        document.addEventListener("mouseup", handleMouseup);
+        if (targetNode) {
+            scanObjects(targetNode);
+            document.addEventListener("keydown", handleKeydown);
+            document.addEventListener("keyup", handleKeyup);
+            document.addEventListener("mousemove", handleMousemove);
+            document.addEventListener("mouseup", handleMouseup);
 
-        observer = createObserver();
-        observer.observe(targetNode, { childList: true, subtree: true });
+            observer = createObserver();
+            observer.observe(targetNode, { childList: true, subtree: true });
+        } else {
+            logger.info("body wasnt found ?????????");
+        }
     },
 
     stop() {
@@ -476,3 +520,4 @@ export default definePlugin({
         document.removeEventListener("mouseup", handleMouseup);
     }
 });
+

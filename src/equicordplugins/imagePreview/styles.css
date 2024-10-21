@@ -1,10 +1,9 @@
 .image-preview {
     position: fixed;
     z-index: 1000;
-    pointer-events: auto;
+    pointer-events: none;
     border: 2px solid var(--background-secondary);
     background-color: var(--background-primary);
-    border-radius: 4px;
     padding: 1px;
     display: flex;
     justify-content: center;
@@ -19,6 +18,10 @@
     pointer-events: auto;
 }
 
+.image-preview.allow-zoom-and-drag img {
+    cursor: grab;
+}
+
 .image-preview .file-info {
     display: flex;
     justify-content: center;
@@ -29,6 +32,22 @@
     left: 0;
     text-align: center;
 }
+
+.image-preview .file-name {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+    box-shadow: 0 0 0 1px var(--background-secondary);
+    border: 1px solid var(--background-secondary);
+}
+
 
 .image-preview .file-info span {
     background-color: var(--background-primary);
@@ -59,6 +78,7 @@
     color: var(--text-muted);
 }
 
+.image-preview.allow-zoom-and-drag .file-name,
 .image-preview.allow-zoom-and-drag .file-info {
     display: none;
 }
