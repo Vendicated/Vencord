@@ -35,6 +35,6 @@ export default definePlugin({
         }
     ],
     PinnedIcon({ pinned }: Message) {
-        return pinned ? <Icons.PinIcon size="xs" style={{ marginLeft: "5px" }} /> : null;
+        return pinned ? (<Icons.PinIcon size="xs" style={{ position: "absolute", right: "0", top: "0" }} />) : null;
     }
 });
