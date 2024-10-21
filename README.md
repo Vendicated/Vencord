@@ -1,9 +1,16 @@
 > [!WARNING]
 > Nexulien is still pretty young in terms of differences from Vencord. We'll be adding more stuff and features over time, please be patient with us. Thinking is hard!
 
-<p align="center">
-<img alt="Nexulien" src="./images/github_title.svg">
-
+<p>
+<img alt="Nexulien" src="./images/space.png" height="192px" width="64px" align="left">
+<img alt="Nexulien" src="./images/logo.svg" height="192px" align="left">
+<br>
+<br>
+<img alt="Nexulien" src="./images/nexulien.svg"><br>
+...the best (worst) discord client mod.
+<br>
+<br>
+<br>
 </p>
 
 ## Features
