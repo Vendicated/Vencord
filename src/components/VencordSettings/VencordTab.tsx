@@ -255,7 +255,7 @@ function HeaderCard({ image }: HeaderCardProps) {
     return (
         <Card className={cl("card", "header")}>
             <div>
-                <span className={cl("urbanistTitle")}>NEXULIEN</span>
+                <span className={cl("svgTitle")} />
                 <span>...the best (worst) discord client mod.</span>
                 <span>Nexulien doesn't need donations! Please go support <a href="https://github.com/sponsors/Vendicated" target="_blank">Vendicated</a> instead!</span>
                 <div className={cl("buttonRow")}>
