@@ -6,6 +6,7 @@
 
 export interface VoiceChannelLogEntry {
     userId: string;
+    username: string;
     oldChannel: string | null;
     newChannel: string | null;
     timestamp: Date;
