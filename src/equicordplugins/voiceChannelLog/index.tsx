@@ -119,7 +119,6 @@ export default definePlugin({
             const clientUserId = UserStore.getCurrentUser().id;
             voiceStates.forEach(state => {
                 // mmmm hacky workaround
-                console.log(state);
                 const { userId, channelId } = state;
                 const user = UserStore.getUser(userId) as User & { globalName: string; };
                 const username = user.globalName || user.username;
