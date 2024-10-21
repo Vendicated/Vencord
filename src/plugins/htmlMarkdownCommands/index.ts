@@ -40,7 +40,7 @@ span {font-size: 64px; position: absolute;}
 </style><br><span class="surprise">%TEXT%</span><span class="gift">\\🎁</span><br><br><br></body>`,
     maxwell: `<body>
 <style>
-.spin { margin-left: 128px; margin-top: 128px; animation: spin 1s ease-in-out infinite; width: 128px;}
+.spin {margin-left: 128px; margin-top: 128px; animation: spin 1s ease-in-out infinite; width: 128px;}
 @keyframes spin {
 0% {transform: rotate(0deg);}
 25% {transform: rotate(-45deg) translateY(-64px);}
@@ -48,11 +48,28 @@ span {font-size: 64px; position: absolute;}
 75% {transform: rotate(45deg) translateY(-32px) translateX(-24px);}
 100% {transform: rotate(0deg);}
 }
-</style><img class="spin" src="https://jaegerwalddev.github.io/assets/static/my_first_website-2/images/maxwell_transparent.webp" draggable="false"></body>`,
+</style><img class="spin" src="https://jaegerwalddev.github.io/assets/static/school/my_first_website-2/images/maxwell_transparent.webp" draggable="false"></body>`,
     yaris: `<img src="<https://www.fortunacarmats.com/cache/goods/700x700x61ea817c40dc5.png>" class="yaris" draggable="false"/>
 <style>.yaris { animation: bounce 0.22222222222s infinite alternate cubic-bezier(.9,0,.1,1); }
 @keyframes bounce { 0% { transform: translateY(0) scale(1, 1); } 100% { transform: translateY(calc(20%)) scale(1.3, 0.7); } }</style>`,
-    thoughts: `<img src="<https://jaegerwalddev.github.io/assets/images/thoughts.png>" style="position: absolute; display: block; bottom: %TEXT%px; left: 64px;"></img>dawg i can see your thoughts`
+    thoughts: `<img src="<https://jaegerwalddev.github.io/assets/images/thoughts.png>" style="position: absolute; display: block; bottom: %TEXT%px; left: 64px;"></img>dawg i can see your thoughts`,
+    gnarpy: `<body><style>
+.boing {margin-bottom: 256px; margin-left: 128px; transform: translateY(64px); animation: boing 1s ease-in-out infinite; width: 64px;}
+.boing-shadow {position: absolute; display: block; background-color: black; border-radius: 50%; opacity: 0.5; filter: blur(8px);
+width: 128px; height: 32px; margin-left: 96px; transform: translateY(-48px) translateZ(48px); animation: boing-shadow 1s ease-in-out infinite; z-index: -1;}
+@keyframes boing {
+0% {transform: translateY(256px) scaleX(2) scaleY(0.5);}
+40% {transform: translateY(0px) scaleX(1) scaleY(1.5);}
+100% {transform: translateY(256px) scaleX(2) scaleY(0.5);}
+}
+@keyframes boing-shadow {
+0% {opacity: 0.5; filter: blur(8px);}
+40% {opacity: 0.25; filter: blur(16px);}
+100% {opacity: 0.5; filter: blur(8px);}
+}
+</style>
+<img class="boing" src="https://jaegerwalddev.github.io/assets/static/school/my_first_website-2/images/gnarpy_cat.png">
+<span class="boing-shadow"></span></body>`
 };
 
 function html(htmlText: string) {
@@ -75,7 +92,11 @@ function getLatestMessage() {
     return messageList[messageList.length - 1];
 }
 function emojiToImg(id: string) {
-    return `imagine getting a normal respons :3 ${id}`;
+    return `> **Emoji Debug**
+> Source: ${id}
+> ID?: *N/A*
+> Name?: ${id.replace(">", "").split(":")[1]}
+> -# Not fully working yet, whoops`;
 }
 
 export default definePlugin({
@@ -114,6 +135,13 @@ export default definePlugin({
             })
         },
         {
+            name: "gnarpy",
+            description: "Makes a bouncing Gnarpy Cat appear as a message.",
+            execute: () => ({
+                content: html(presets.gnarpy)
+            })
+        },
+        {
             name: "toyota-yaris",
             description: "Bouncing Toyota Yaris.",
             execute: () => ({
@@ -133,8 +161,9 @@ export default definePlugin({
             options: [
                 {
                     name: "emoji",
-                    description: "Emoji for testing",
-                    type: ApplicationCommandOptionType.STRING
+                    description: "Emoji for testing (non-Tweemoji)",
+                    type: ApplicationCommandOptionType.STRING,
+                    required: true
                 }
             ],
             devOnly: true,
