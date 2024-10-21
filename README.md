@@ -1,14 +1,21 @@
 > [!WARNING]
-> Nexulien is still pretty young in terms of differences from Vencord. We'll be adding more stuff and features over time, please be patient!
+> Nexulien is still pretty young in terms of differences from Vencord. We'll be adding more stuff and features over time, please be patient with us. Thinking is hard!
 
 <p align="center">
 <img alt="Nexulien" src="./images/github_title.svg">
+
 </p>
 
 ## Features
 
--   Everything from Vencord
--   Extra plugins and features TBD :eyes:
+- Heavily polished menu redesigns
+- Extra API Functions (ex.: Dev-build only commands)
+- Everything from Vencord ([read more](https://github.com/Vendicated/Vencord/?tab=readme-ov-file#features))
+- More Plugins
+    - Utility (ex.: ToneIndicators)
+    - Fun (ex.: DecTalk)
+    - In-built core functions [ex.: Server Themes (wip)]
+- Alien Cats
 
 ## Disclaimer
 
