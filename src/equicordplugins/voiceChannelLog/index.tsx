@@ -66,7 +66,9 @@ function getMessageFlags(selfInChannel: boolean) {
 }
 
 function sendVoiceStatusMessage(channelId: string, content: string, userId: string, selfInChannel: boolean): Message | null {
+    if (settings.store.mode === 1) return null;
     if (!channelId) return null;
+
     const message: Message = createBotMessage({ channelId, content, embeds: [] });
     message.flags = getMessageFlags(selfInChannel);
     message.author = UserStore.getUser(userId);
