@@ -158,15 +158,15 @@ export default definePlugin({
         {
             name: "equicord-debug",
             description: "Send Equicord debug info",
-            // @ts-expect-error
-            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id) || GUILD_ID === ctx.guild.id,
+            // @ts-ignore
+            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id) || GUILD_ID === ctx?.guild?.id,
             execute: async () => ({ content: await generateDebugInfoMessage() })
         },
         {
             name: "equicord-plugins",
             description: "Send Equicord plugin list",
-            // @ts-expect-error
-            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id) || GUILD_ID === ctx.guild.id,
+            // @ts-ignore
+            predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id) || GUILD_ID === ctx?.guild?.id,
             execute: () => ({ content: generatePluginList() })
         }
     ],
