@@ -134,8 +134,9 @@ export async function sendSticker({
             file = await toGIF(sticker.image, ffmpegState.ffmpeg);
         }
         else {
-            const response = await fetch(sticker.image, { cache: "force-cache" });
-            // const blob = await response.blob();
+            const url = new URL(sticker.image);
+            url.searchParams.set("t", Date.now().toString()); // To prevent caching, in order to avoid CORS bug in Chrome
+            const response = await fetch(sticker.image);
             const orgImageUrl = URL.createObjectURL(await response.blob());
             const processedImage = await resizeImage(orgImageUrl);
 
