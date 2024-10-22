@@ -64,7 +64,8 @@ const toneIndicators = [
     toneIndicator(["genq"], "genuine question"),
     toneIndicator(["q"], "quote"),
     toneIndicator(["nav"], "not a vent"),
-    toneIndicator(["a"], "affectionate")
+    toneIndicator(["a"], "affectionate"),
+    toneIndicator(["nr"], "not rushing")
 ];
 const f = toneIndicators.reduce((ret, cur) => {
     return {
