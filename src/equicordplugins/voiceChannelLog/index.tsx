@@ -66,7 +66,6 @@ function getMessageFlags(selfInChannel: boolean) {
 }
 
 function sendVoiceStatusMessage(channelId: string, content: string, userId: string, selfInChannel: boolean): Message | null {
-    if (settings.store.mode === 1) return null;
     if (!channelId) return null;
 
     const message: Message = createBotMessage({ channelId, content, embeds: [] });
@@ -109,7 +108,7 @@ let clientOldChannelId: string | undefined;
 export default definePlugin({
     name: "VoiceChannelLog",
     description: "Logs who joins and leaves voice channels",
-    authors: [Devs.Sqaaakoi, EquicordDevs.thororen],
+    authors: [Devs.Sqaaakoi, EquicordDevs.thororen, EquicordDevs.nyx],
     contextMenus: {
         "channel-context": patchChannelContextMenu
     },
@@ -139,10 +138,14 @@ export default definePlugin({
                     timestamp: new Date()
                 };
 
-                addLogEntry(logEntry, oldChannelId);
-                addLogEntry(logEntry, channelId);
+
+                if (settings.store.mode !== 2) {
+                    addLogEntry(logEntry, oldChannelId);
+                    addLogEntry(logEntry, channelId);
+                }
 
                 if (!settings.store.voiceChannelChatSelf && userId === clientUserId) return;
+                if (settings.store.mode === 1) return;
                 // Join / Leave
                 if ((!oldChannelId && channelId) || (oldChannelId && !channelId)) {
                     // empty string is to make type checker shut up
