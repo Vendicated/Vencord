@@ -304,11 +304,11 @@ const rules = [
     createRule("spinning", 24, ["@@", "@@"], "block"),
     createRule("glowing", 24, ["++", "++"], "block"),
     createRule("rainbow", 24, ["%%", "%%"], "character", 2400),
-    createRule("blinking", 24, ["--", "--"], "block"),
+    createRule("blinking", 24, [";;", ";;"], "block"),
     createRule("scaling", 24, ["+-", "-+"], "character", 2400),
     createRule("bouncing", 24, ["^^", "^^"], "block"),
     createRule("html", 24, ["[[", "]]"], "html"),
-    createRule("slam", 24, [";;", ";;"], "delay", 250),
+    createRule("slam", 24, ["!!", "!!"], "delay", 250),
     createRule("cursive", 24, ["&&", "&&"], "block"),
 ];
 
