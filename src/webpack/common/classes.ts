@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByPropsLazy, findLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 
 import * as t from "./types/classes";
 
