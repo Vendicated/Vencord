@@ -20,7 +20,7 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { openMediaModal } from "@utils/discord";
+import { openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { GuildMemberStore, IconUtils, Menu } from "@webpack/common";
 import type { Channel, Guild, User } from "discord-types/general";
@@ -78,10 +78,9 @@ function openImage(url: string) {
     u.searchParams.set("size", "4096");
     const originalUrl = u.toString();
 
-    openMediaModal({
-        url,
+    openImageModal(url, {
         original: originalUrl,
-        maxHeight: 256
+        height: 256
     });
 }
 
