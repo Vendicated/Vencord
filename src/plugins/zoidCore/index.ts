@@ -11,9 +11,10 @@ import { Devs } from "@utils/constants";
 import { relaunch } from "@utils/native";
 import definePlugin, { OptionType } from "@utils/types";
 import { checkForUpdates, checkImportantUpdate, update, UpdateLogger } from "@utils/updater";
-import { GuildChannelStore, MessageStore } from "@webpack/common";
+import { GuildStore } from "@webpack/common";
 
 var update_found = false;
+var prev_server = "";
 
 const settings = definePluginSettings({
     serverStyling: {
@@ -24,11 +25,6 @@ const settings = definePluginSettings({
     serverBlockList: {
         type: OptionType.STRING,
         description: "List of server IDs to block. (server styling)",
-        default: ""
-    },
-    messageBlockList: {
-        type: OptionType.STRING,
-        description: "List of message IDs to block. (server styling)",
         default: ""
     }
 });
@@ -50,28 +46,28 @@ export default definePlugin({
             if (channelId) {
                 document.body.classList.add(`guild-${guildId}`, `channel-${channelId}`);
             }
-            document.querySelector(".nexulien-server-style")?.remove();
-            GuildChannelStore.getChannels(guildId).SELECTABLE.forEach(c => {
-                if (c.channel.name === "nexulien-config") {
-                    console.log("Found config channel, updating css...");
-                    const style = document.createElement("style");
-                    style.className = "nexulien-server-style";
-                    let styleText = "";
-                    MessageStore.getMessages(c.channel.id).forEach(m => {
-                        if (settings.store.messageBlockList.includes(m.id)) return;
-                        const cssCodeblockRegex = /```css([\s\S]*?)```/;
-                        const match = m.content.match(cssCodeblockRegex);
-
-                        if (match) {
-                            styleText += match[1].trim() + "\n\n";
-                        }
-                    });
-                    style.textContent = styleText;
-                    document.head.appendChild(style);
-                    return;
+            if (guildId !== prev_server) {
+                document.querySelector(".nexulien-server-style")?.remove();
+                const description = GuildStore.getGuild(guildId)?.description;
+                const urls = description?.match(/\bhttps?:\/\/\S+\b/g);
+                if (urls) {
+                    for (const url of urls) {
+                        fetch(url, { method: "HEAD" })
+                            .then(response => response.url)
+                            .then(resolvedUrl => {
+                                if (resolvedUrl.endsWith(".css")) {
+                                    const link = document.createElement("link");
+                                    link.rel = "stylesheet";
+                                    link.className = "nexulien-server-style";
+                                    link.href = resolvedUrl;
+                                    document.head.appendChild(link);
+                                }
+                            })
+                            .catch(console.error);
+                    }
                 }
-            });
-
+                prev_server = guildId;
+            }
         }
     },
     start() {

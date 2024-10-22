@@ -254,14 +254,23 @@ span.HTMLMessageContent {
     100% { transform: scale(1.2); }
 }
 
-.bouncing {
-    animation: bounce 1s infinite alternate ease-in-out;
+.bouncy {
     display: inline-block;
+    animation-name: boing-text;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
 }
-
-@keyframes bounce {
-    0% { transform: translateY(-5px) }
-    100% { transform: translateY(5px) }
+@keyframes boing-text {
+    0% {
+        transform: translateY(-4px);
+    }
+    50% {
+        transform: translateY(4px);
+    }
+    100% {
+        transform: translateY(-4px);
+    }
 }
 
 .slam {
@@ -299,7 +308,7 @@ const rules = [
     createRule("scaling", 24, ["+-", "-+"], "character", 2400),
     createRule("bouncing", 24, ["^^", "^^"], "block"),
     createRule("html", 24, ["[[", "]]"], "html"),
-    createRule("slam", 24, ["!!", "!!"], "delay", 250),
+    createRule("slam", 24, [";;", ";;"], "delay", 250),
     createRule("cursive", 24, ["&&", "&&"], "block"),
 ];
 
