@@ -49,7 +49,7 @@ const CodeBlockRe = /```js\n(.+?)```/s;
 const AllowedChannelIds = [
     SUPPORT_CHANNEL_ID,
     "1173659827881390160", // Equicord > #dev
-    "1173342942858055721", // Equicord > #support
+    "1297590739911573585", // Equicord > #support
 ];
 
 const TrustedRolesIds = [
