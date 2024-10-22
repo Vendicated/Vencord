@@ -254,7 +254,7 @@ span.HTMLMessageContent {
     100% { transform: scale(1.2); }
 }
 
-.bouncy {
+.bouncing {
     display: inline-block;
     animation-name: boing-text;
     animation-duration: 1s;
