@@ -235,15 +235,6 @@ span.HTMLMessageContent {
     100% { color: magenta; }
 }
 
-.blinking {
-    animation: blink 1s infinite;
-}
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-}
-
 .scaling {
     animation: scale 1.2s infinite alternate ease-in-out;
     display: inline-block;
@@ -304,7 +295,6 @@ const rules = [
     createRule("spinning", 24, ["@@", "@@"], "block"),
     createRule("glowing", 24, ["++", "++"], "block"),
     createRule("rainbow", 24, ["%%", "%%"], "character", 2400),
-    createRule("blinking", 24, [";;", ";;"], "block"),
     createRule("scaling", 24, ["+-", "-+"], "character", 2400),
     createRule("bouncing", 24, ["^^", "^^"], "block"),
     createRule("html", 24, ["[[", "]]"], "html"),
