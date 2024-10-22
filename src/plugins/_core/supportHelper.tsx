@@ -40,21 +40,19 @@ import plugins, { PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
 
-const VENCORD_GUILD_ID = "1015060230222131221";
-const VENBOT_USER_ID = "1017176847865352332";
-const KNOWN_ISSUES_CHANNEL_ID = "1222936386626129920";
+const NEXULIEN_GUILD_ID = "1297010632591278090";
+const GOOBERT_USER_ID = "1298278475744149554";
 const CodeBlockRe = /```js\n(.+?)```/s;
 
 const AllowedChannelIds = [
     SUPPORT_CHANNEL_ID,
-    "1024286218801926184", // Vencord > #bot-spam
-    "1033680203433660458", // Vencord > #v
+    "1297012481042153564", // Nexulien > #bots
+    "1297012256164548720", // Nexulien > #off-topic
+    "1297257937563029534", // Nexulien > #development
 ];
 
 const TrustedRolesIds = [
-    "1026534353167208489", // contributor
-    "1026504932959977532", // regular
-    "1042507929485586532", // donor
+    "1297257553511710842", // developer
 ];
 
 const AsyncFunction = async function () { }.constructor;
@@ -85,8 +83,8 @@ async function generateDebugInfoMessage() {
     })();
 
     const info = {
-        Vencord:
-            `v${VERSION} • [${gitHash}](<https://github.com/Vendicated/Vencord/commit/${gitHash}>)` +
+        Nexulien:
+            `v${VERSION} • [${gitHash}](<https://github.com/Nexulien/Nexulien/commit/${gitHash}>)` +
             `${SettingsPlugin.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${client}`,
         Platform: window.navigator.platform
@@ -99,7 +97,7 @@ async function generateDebugInfoMessage() {
     const commonIssues = {
         "NoRPC enabled": Vencord.Plugins.isPluginEnabled("NoRPC"),
         "Activity Sharing disabled": tryOrElse(() => !ShowCurrentGame.getSetting(), false),
-        "Vencord DevBuild": !IS_STANDALONE,
+        "Nexulien DevBuild": !IS_STANDALONE,
         "Has UserPlugins": Object.values(PluginMeta).some(m => m.userPlugin),
         "More than two weeks out of date": BUILD_TIMESTAMP < Date.now() - 12096e5,
     };
@@ -141,7 +139,7 @@ export default definePlugin({
     name: "SupportHelper",
     required: true,
     description: "Helps us provide support to you",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.Zoid],
     dependencies: ["UserSettingsAPI", "MessageAccessoriesAPI"],
 
     settings,
@@ -156,14 +154,14 @@ export default definePlugin({
 
     commands: [
         {
-            name: "vencord-debug",
-            description: "Send Vencord debug info",
+            name: "nexulien-debug",
+            description: "Send Nexulien debug info",
             predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || AllowedChannelIds.includes(ctx.channel.id),
             execute: async () => ({ content: await generateDebugInfoMessage() })
         },
         {
-            name: "vencord-plugins",
-            description: "Send Vencord plugin list",
+            name: "nexulien-plugins",
+            description: "Send Nexulien plugin list",
             predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || AllowedChannelIds.includes(ctx.channel.id),
             execute: () => ({ content: generatePluginList() })
         }
@@ -183,7 +181,7 @@ export default definePlugin({
                     return Alerts.show({
                         title: "Hold on!",
                         body: <div>
-                            <Forms.FormText>You are using an outdated version of Vencord! Chances are, your issue is already fixed.</Forms.FormText>
+                            <Forms.FormText>You are using an outdated version of Nexulien! Chances are, your issue is already fixed.</Forms.FormText>
                             <Forms.FormText className={Margins.top8}>
                                 Please first update before asking for support!
                             </Forms.FormText>
@@ -198,16 +196,16 @@ export default definePlugin({
             }
 
             // @ts-ignore outdated type
-            const roles = GuildMemberStore.getSelfMember(VENCORD_GUILD_ID)?.roles;
+            const roles = GuildMemberStore.getSelfMember(NEXULIEN_GUILD_ID)?.roles;
             if (!roles || TrustedRolesIds.some(id => roles.includes(id))) return;
 
             if (!IS_WEB && IS_UPDATER_DISABLED) {
                 return Alerts.show({
                     title: "Hold on!",
                     body: <div>
-                        <Forms.FormText>You are using an externally updated Vencord version, which we do not provide support for!</Forms.FormText>
+                        <Forms.FormText>You are using an externally updated Nexulien version, which we do not provide support for!</Forms.FormText>
                         <Forms.FormText className={Margins.top8}>
-                            Please either switch to an <Link href="https://vencord.dev/download">officially supported version of Vencord</Link>, or
+                            Please either switch to an <Link href="https://github.com/Zoidcord/Installer/releases/download/primary/NexulienInstallerCLI.exe">officially supported version of Nexulien</Link>, or
                             contact your package maintainer for support instead.
                         </Forms.FormText>
                     </div>
@@ -218,11 +216,11 @@ export default definePlugin({
                 return Alerts.show({
                     title: "Hold on!",
                     body: <div>
-                        <Forms.FormText>You are using a custom build of Vencord, which we do not provide support for!</Forms.FormText>
+                        <Forms.FormText>You are using a custom build of Nexulien, which we do not provide support for!</Forms.FormText>
 
                         <Forms.FormText className={Margins.top8}>
-                            We only provide support for <Link href="https://vencord.dev/download">official builds</Link>.
-                            Either <Link href="https://vencord.dev/download">switch to an official build</Link> or figure your issue out yourself.
+                            We only provide support for <Link href="https://github.com/Zoidcord/Installer/releases/download/primary/NexulienInstallerCLI.exe">official builds</Link>.
+                            Either <Link href="https://github.com/Zoidcord/Installer/releases/download/primary/NexulienInstallerCLI.exe">switch to an official build</Link> or figure your issue out yourself.
                         </Forms.FormText>
 
                         <Text variant="text-md/bold" className={Margins.top8}>You will be banned from receiving support if you ignore this rule.</Text>
@@ -241,24 +239,21 @@ export default definePlugin({
 
         return (
             <Card className={`vc-plugins-restart-card ${Margins.top8}`}>
-                Please do not private message Vencord plugin developers for support!
+                Please do not private message Nexulien/Vencord plugin developers for support!
                 <br />
-                Instead, use the Vencord support channel: {Parser.parse("https://discord.com/channels/1015060230222131221/1026515880080842772")}
+                Instead, use the Nexulien support channel: {Parser.parse("https://discord.com/channels/1297010632591278090/1297024954121846856")}
                 {!ChannelStore.getChannel(SUPPORT_CHANNEL_ID) && " (Click the link to join)"}
             </Card>
         );
     }, { noop: true }),
 
     start() {
-        addAccessory("vencord-debug", props => {
+        addAccessory("nexulien-debug", props => {
             const buttons = [] as JSX.Element[];
 
             const shouldAddUpdateButton =
                 !IS_UPDATER_DISABLED
-                && (
-                    (props.channel.id === KNOWN_ISSUES_CHANNEL_ID) ||
-                    (props.channel.id === SUPPORT_CHANNEL_ID && props.message.author.id === VENBOT_USER_ID)
-                )
+                && (props.channel.id === SUPPORT_CHANNEL_ID && props.message.author.id === GOOBERT_USER_ID)
                 && props.message.content?.includes("update");
 
             if (shouldAddUpdateButton) {
@@ -284,24 +279,24 @@ export default definePlugin({
             }
 
             if (props.channel.id === SUPPORT_CHANNEL_ID) {
-                if (props.message.content.includes("/vencord-debug") || props.message.content.includes("/vencord-plugins")) {
+                if (props.message.content.includes("/nexulien-debug") || props.message.content.includes("/nexulien-plugins")) {
                     buttons.push(
                         <Button
                             key="vc-dbg"
                             onClick={async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() })}
                         >
-                            Run /vencord-debug
+                            Run /nexulien-debug
                         </Button>,
                         <Button
                             key="vc-plg-list"
                             onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
                         >
-                            Run /vencord-plugins
+                            Run /nexulien-plugins
                         </Button>
                     );
                 }
 
-                if (props.message.author.id === VENBOT_USER_ID) {
+                if (props.message.author.id === GOOBERT_USER_ID) {
                     const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
                     if (match) {
                         buttons.push(
