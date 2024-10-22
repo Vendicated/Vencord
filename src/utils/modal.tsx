@@ -101,7 +101,8 @@ export const Modals = findByPropsLazy("ModalRoot", "ModalCloseButton") as {
     }>;
 };
 
-export type ImageModal = ComponentType<{
+// FIXME: type this
+export type ImageModal = any & ComponentType<{
     className?: string;
     src: string;
     placeholder: string;

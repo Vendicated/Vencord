@@ -1,10 +1,16 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 
 export default definePlugin({
     name: "ImageModalAPI",
-    authors: [Devs.sadan],
+    authors: [Devs.sadan, Devs.Nuckyz],
     description: "Allows you to open Image Modals",
     patches: [
         {

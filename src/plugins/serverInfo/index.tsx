@@ -31,6 +31,7 @@ export default definePlugin({
     description: "Allows you to view info about a server",
     authors: [Devs.Ven, Devs.Nuckyz],
     tags: ["guild", "info", "ServerProfile"],
+    dependencies: ["ImageModalAPI"],
     contextMenus: {
         "guild-context": Patch,
         "guild-header-popout": Patch

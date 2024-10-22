@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./discord.css";
+
 import { MessageObject } from "@api/MessageEvents";
 import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
 
-import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
-import { find } from "@webpack";
-
-import "./discord.css";
+import { ImageModal, openModal } from "./modal";
 /**
  * Open the invite modal
  * @param code The invite code
@@ -121,9 +120,7 @@ export function openImageModal(url: string, props?: Partial<React.ComponentProps
             renderForwardComponent={() => null}
             shouldHideMediaOptions={false}
             shouldAnimate={true}
-            //@ts-ignore
             fit={FIX_CLASS_NAME}
-            //@ts-ignore
             items={[{
                 ...props,
                 type: "IMAGE",

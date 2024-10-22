@@ -89,6 +89,7 @@ export default definePlugin({
     name: "BiggerStreamPreview",
     description: "This plugin allows you to enlarge stream previews",
     authors: [Devs.phil],
+    dependencies: ["ImageModalAPI"],
     contextMenus: {
         "user-context": userContextPatch,
         "stream-context": streamContextPatch
