@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./discord.css";
+
 import { MessageObject } from "@api/MessageEvents";
-import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
 
-import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
+import { ImageModal, openModal } from "./modal";
 
 /**
  * Open the invite modal
@@ -108,25 +110,24 @@ export function sendMessage(
     return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
 }
 
+const FIX_CLASS_NAME = "vc-imagemodal-fix";
+
 export function openImageModal(url: string, props?: Partial<React.ComponentProps<ImageModal>>): string {
     return openModal(modalProps => (
-        <ModalRoot
+        <ImageModal
             {...modalProps}
-            className={ModalImageClasses.modal}
-            size={ModalSize.DYNAMIC}>
-            <ImageModal
-                className={ModalImageClasses.image}
-                original={url}
-                placeholder={url}
-                src={url}
-                renderLinkComponent={props => <MaskedLink {...props} />}
-                // Don't render forward message button
-                renderForwardComponent={() => null}
-                shouldHideMediaOptions={false}
-                shouldAnimate
-                {...props}
-            />
-        </ModalRoot>
+            renderLinkComponent={props => <MaskedLink {...props} />}
+            // Don't render forward message button scaleDown_f97a12 contain_f97a12
+            renderForwardComponent={() => null}
+            shouldHideMediaOptions={false}
+            shouldAnimate={true}
+            fit={FIX_CLASS_NAME}
+            items={[{
+                ...props,
+                type: "IMAGE",
+                url,
+            }]}
+        />
     ));
 }
 

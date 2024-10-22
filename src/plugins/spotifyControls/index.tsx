@@ -33,6 +33,7 @@ export default definePlugin({
     name: "SpotifyControls",
     description: "Adds a Spotify player above the account panel",
     authors: [Devs.Ven, Devs.afn, Devs.KraXen72, Devs.Av32000],
+    dependencies: ["ImageModalAPI"],
     options: {
         hoverControls: {
             description: "Show controls on hover",
