@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./discord.css";
+
 import { MessageObject } from "@api/MessageEvents";
-import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
 
-import { MediaData, MediaModal, openModal } from "./modal";
+import { ImageModal, openModal } from "./modal";
 
 /**
  * Open the invite modal
@@ -108,21 +110,23 @@ export function sendMessage(
     return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
 }
 
-/**
- *
- * @param media The url of the media or its data
- * @param mediaModalProps Additional props for the image modal
- */
-export function openMediaModal(media: string | MediaData, mediaModalProps?: Partial<React.ComponentProps<MediaModal>>): string {
-    media = typeof media === "string" ? { url: media } : media;
-    media.original ??= media.url;
-    media.type ??= "IMAGE";
+const FIX_CLASS_NAME = "vc-imagemodal-fix";
+
+export function openImageModal(url: string, props?: Partial<React.ComponentProps<ImageModal>>): string {
     return openModal(modalProps => (
-        <MediaModal
+        <ImageModal
             {...modalProps}
-            {...mediaModalProps}
-            shouldAnimateCarousel
-            items={[media]}
+            renderLinkComponent={props => <MaskedLink {...props} />}
+            // Don't render forward message button scaleDown_f97a12 contain_f97a12
+            renderForwardComponent={() => null}
+            shouldHideMediaOptions={false}
+            shouldAnimate={true}
+            fit={FIX_CLASS_NAME}
+            items={[{
+                ...props,
+                type: "IMAGE",
+                url,
+            }]}
         />
     ));
 }

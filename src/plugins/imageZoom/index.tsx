@@ -158,10 +158,6 @@ export default definePlugin({
         {
             find: ".contain,SCALE_DOWN:",
             replacement: {
-                // there are 2 image thingies. one for carosuel and one for the single image.
-                // so thats why i added global flag.
-                // also idk if this patch is good, should it be more specific?
-                // https://regex101.com/r/xfvNvV/1
                 match: /\.slide,\i\),/g,
                 replace: `$&id:"${ELEMENT_ID}",`
             }

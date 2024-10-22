@@ -19,7 +19,7 @@
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { ScreenshareIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
-import { openMediaModal } from "@utils/discord";
+import { openImageModal } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { Menu } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
@@ -57,7 +57,7 @@ export const handleViewPreview = async ({ guildId, channelId, ownerId }: Applica
     const previewUrl = await ApplicationStreamPreviewStore.getPreviewURL(guildId, channelId, ownerId);
     if (!previewUrl) return;
 
-    openMediaModal(previewUrl);
+    openImageModal(previewUrl);
 };
 
 export const addViewStreamContext: NavContextMenuPatchCallback = (children, { userId }: { userId: string | bigint; }) => {
@@ -89,6 +89,7 @@ export default definePlugin({
     name: "BiggerStreamPreview",
     description: "This plugin allows you to enlarge stream previews",
     authors: [Devs.phil],
+    dependencies: ["ImageModalAPI"],
     contextMenus: {
         "user-context": userContextPatch,
         "stream-context": streamContextPatch
