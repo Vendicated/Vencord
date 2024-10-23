@@ -22,7 +22,7 @@ import { MessageObject } from "@api/MessageEvents";
 import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
 
-import { ImageModal, ImageModalItem, requireImageModal, openModalLazy } from "./modal";
+import { ImageModal, ImageModalItem, openModalLazy, requireImageModal } from "./modal";
 
 /**
  * Open the invite modal
@@ -117,7 +117,7 @@ export function openImageModal(props: Omit<ImageModalItem, "type">) {
     return openModalLazy(async () => {
         await requireImageModal();
 
-        return (modalProps) => <ImageModal
+        return modalProps => <ImageModal
             {...modalProps}
             className="vc-image-modal"
             fit="vc-position-inherit"
