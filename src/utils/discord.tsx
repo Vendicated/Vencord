@@ -109,6 +109,7 @@ export function sendMessage(
 
     return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
 }
+
 /**
  * You must specify either height or width
  */
@@ -129,8 +130,7 @@ export function openImageModal(props: Omit<ImageModalItem, "type">) {
             shouldHideMediaOptions={false}
             shouldAnimate
         />;
-    }
-    );
+    });
 }
 
 export async function openUserProfile(id: string) {
