@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { extractAndLoadChunksLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
@@ -118,7 +118,9 @@ export type ImageModal = ComponentType<{
     items: ImageModalItem[];
 }>;
 
-export const ImageModal = findComponentByCodeLazy(".MEDIA_MODAL_CLOSE") as ImageModal;
+export const ImageModal = findComponentByCodeLazy(".MEDIA_MODAL_CLOSE", "fit") as ImageModal;
+
+export const requireImageModal = extractAndLoadChunksLazy([/\}=\i\?await/], /:await (\i\.e\("[^"]+?"\))\.then\(\i\.bind\(\i,(\d+?)\)\)/);
 
 export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
 export const ModalHeader = LazyComponent(() => Modals.ModalHeader);

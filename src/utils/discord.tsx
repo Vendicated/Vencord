@@ -22,7 +22,7 @@ import { MessageObject } from "@api/MessageEvents";
 import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
 
-import { ImageModal, ImageModalItem, openModal } from "./modal";
+import { ImageModal, ImageModalItem, requireImageModal, openModalLazy } from "./modal";
 
 /**
  * Open the invite modal
@@ -109,13 +109,14 @@ export function sendMessage(
 
     return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
 }
-
 /**
  * You must specify either height or width
  */
-export function openImageModal(props: Omit<ImageModalItem, "type">): string {
-    return openModal(modalProps => (
-        <ImageModal
+export function openImageModal(props: Omit<ImageModalItem, "type">) {
+    return openModalLazy(async () => {
+        await requireImageModal();
+
+        return (modalProps) => <ImageModal
             {...modalProps}
             className="vc-image-modal"
             fit="vc-position-inherit"
@@ -127,8 +128,9 @@ export function openImageModal(props: Omit<ImageModalItem, "type">): string {
             onClose={modalProps.onClose}
             shouldHideMediaOptions={false}
             shouldAnimate
-        />
-    ));
+        />;
+    }
+    );
 }
 
 export async function openUserProfile(id: string) {
