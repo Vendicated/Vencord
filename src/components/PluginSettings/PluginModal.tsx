@@ -407,36 +407,27 @@ export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, o
             transitionState={warningModalProps.transitionState}
         >
             <ModalHeader separator={false}>
-                <Text style={{ flexGrow: 1, color: "var(--text-danger)", fontSize: "1.4rem", fontWeight: "bold" }}>Warning: Dangerous Action</Text>
-                <ModalCloseButton onClick={warningModalProps.onClose} />
+                <Text className="text-danger">Warning: Dangerous Action</Text>
+                <ModalCloseButton onClick={warningModalProps.onClose} className="vc-modal-close-button" />
             </ModalHeader>
             <ModalContent>
                 <Forms.FormSection>
-                    <Flex className="vc-warning-info" style={{ gap: "15px", flexDirection: "column", userSelect: "none" }}>
+                    <Flex className="vc-warning-info">
                         <img
                             src="https://media.tenor.com/Y6DXKZiBCs8AAAAi/stavario-josefbenes.gif"
                             alt="Warning"
-                            style={{ width: "60%", height: "auto", marginBottom: "10px", display: "block", margin: "auto" }}
                         />
-                        <Text style={{ fontSize: "1.2rem", color: "var(--text-normal)" }}>
+                        <Text className="text-normal">
                             You are about to reset all settings for <strong>{plugin.name}</strong> to their default values.
                         </Text>
-                        <Text style={{ fontSize: "1.2rem", color: "var(--text-danger)", fontWeight: "bold" }}>
+                        <Text className="text-danger">
                             This action is irreversible.
                         </Text>
-                        <Text style={{ fontSize: "1.2rem", color: "var(--text-normal)", marginBottom: "10px" }}>
+                        <Text className="text-normal margin-bottom">
                             If you are certain you want to proceed, click <strong>Confirm Reset</strong>. Otherwise, click <strong>Cancel</strong>.
                         </Text>
                         {!Settings.ignoreResetWarning && (
-                            <Button style={{
-                                fontSize: "0.8rem",
-                                backgroundColor: "transparent",
-                                color: "red",
-                                cursor: "pointer",
-                                margin: "0 auto",
-                                width: "fit-content",
-                                textDecoration: "underline"
-                            }} onClick={() => {
+                            <Button className="disable-warning" onClick={() => {
                                 Settings.ignoreResetWarning = true;
                             }}>
                                 Disable this warning forever
@@ -466,7 +457,7 @@ export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, o
                                     }}
                                     onMouseEnter={onMouseEnter}
                                     onMouseLeave={onMouseLeave}
-                                    style={{ marginLeft: "10px", backgroundColor: "var(--button-danger-background)" }}
+                                    className="button-danger-background-no-margin"
                                 >
                                     Confirm Reset
                                 </Button>
