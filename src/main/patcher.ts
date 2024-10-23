@@ -17,7 +17,7 @@
 */
 
 import { onceDefined } from "@shared/onceDefined";
-import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
+import electron, { app, BrowserWindowConstructorOptions, Menu, nativeTheme } from "electron";
 import { dirname, join } from "path";
 
 import { initIpc } from "./ipcMain";
@@ -100,6 +100,19 @@ if (!IS_VANILLA) {
 
                 super(options);
                 initIpc(this);
+
+                // Workaround for https://github.com/electron/electron/issues/43367. Vesktop also has its own workaround
+                // @TODO: Remove this when the issue is fixed
+                if (IS_DISCORD_DESKTOP) {
+                    this.webContents.on("devtools-opened", () => {
+                        if (!nativeTheme.shouldUseDarkColors) return;
+
+                        nativeTheme.themeSource = "light";
+                        setTimeout(() => {
+                            nativeTheme.themeSource = "dark";
+                        }, 100);
+                    });
+                }
             } else super(options);
         }
     }
