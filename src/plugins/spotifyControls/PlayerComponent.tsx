@@ -229,11 +229,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                 id="view-cover"
                 label="View Album Cover"
                 // trolley
-                action={() => openImageModal({
-                    url: track.album.image.url,
-                    height: 512,
-                    width: 512
-                })}
+                action={() => openImageModal(track.album.image)}
                 icon={ImageIcon}
             />
             <Menu.MenuControlItem

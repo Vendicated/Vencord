@@ -117,6 +117,7 @@ export function openImageModal(props: Omit<ImageModalItem, "type">): string {
     return openModal(modalProps => (
         <ImageModal
             {...modalProps}
+            className="vc-image-modal"
             fit="vc-position-inherit"
             items={[{
                 type: "IMAGE",
