@@ -287,12 +287,12 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         <Tooltip text="Reset to default settings" shouldShow={!isObjectEmpty(tempSettings)}>
                             {({ onMouseEnter, onMouseLeave }) => (
                                 <Button
+                                    className="button-danger-background-no-margin"
                                     size={Button.Sizes.SMALL}
                                     color={Button.Colors.BRAND}
                                     onClick={handleResetClick}
                                     onMouseEnter={onMouseEnter}
                                     onMouseLeave={onMouseLeave}
-                                    style={{ backgroundColor: "var(--button-danger-background)" }}
                                 >
                                     Reset
                                 </Button>
