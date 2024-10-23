@@ -2,6 +2,9 @@
     display: flex;
     align-items: center;
     height: 20px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
 }
 
 .vc-typing-indicator-avatars {

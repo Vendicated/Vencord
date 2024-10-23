@@ -98,7 +98,7 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
         return (
             <Tooltip text={tooltipText!}>
                 {props => (
-                    <div className="vc-typing-indicator" {...props}>
+                    <div className="vc-typing-indicator" {...props} style={{ position: "absolute", bottom: 0, width: "100%" }}>
                         {((settings.store.indicatorMode & IndicatorMode.Avatars) === IndicatorMode.Avatars) && (
                             <UserSummaryItem
                                 users={typingUsersArray.map(id => UserStore.getUser(id))}
