@@ -414,7 +414,7 @@ export default definePlugin({
         {
             find: "canUsePremiumAppIcons:",
             replacement: {
-                match: /(?<=canUsePremiumAppIcons:)\i/,
+                match: /\(?<=canUsePremiumAppIcons:\)\i/,
                 replace: "()=>true"
             }
         },
