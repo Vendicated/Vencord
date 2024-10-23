@@ -410,14 +410,6 @@ export default definePlugin({
                 replace: "$&return true;"
             },
         },
-        // Allow using custom app icons
-        {
-            find: "canUsePremiumAppIcons:",
-            replacement: {
-                match: /\(?<=canUsePremiumAppIcons:\)\i/,
-                replace: "()=>true"
-            }
-        },
         // Separate patch for allowing using custom app icons
         {
             find: /\.getCurrentDesktopIcon.{0,25}\.isPremium/,
