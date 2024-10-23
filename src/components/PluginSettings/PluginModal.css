@@ -64,7 +64,17 @@
 }
 
 .button-danger-background {
-    background-color: var(--button-danger-background);
+    background-color: var(--background-color) !important;
+    border-style: solid;
+    border-width: .1rem;
+    border-color: var(--button-outline-danger-border) !important;
+}
+
+.button-danger-background:hover{
+    background-color: var(--button-outline-danger-background-hover)  !important;
+    border-style: solid;
+    border-width: .1rem;
+    border-color: var(--button-outline-danger-border) !important;
 }
 
 .button-danger-background-no-margin {
@@ -72,6 +82,13 @@
     color: var(--header-primary);
 }
 
+.button-danger-background-no-margin:hover{
+    background-color: var(--button-danger-background-hover) !important;
+    filter: saturate(75%);
+}
+
 .vc-modal-close-button {
     margin-left: auto !important;
 }
+
+
