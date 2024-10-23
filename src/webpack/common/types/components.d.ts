@@ -505,9 +505,29 @@ type FocusLock = ComponentType<PropsWithChildren<{
     containerRef: RefObject<HTMLElement>;
 }>>;
 
+export declare enum SpinnerType {
+    WANDERING_CUBES = "wanderingCubes",
+    CHASING_DOTS = "chasingDots",
+    PULSING_ELLIPSIS = "pulsingEllipsis",
+    SPINNING_CIRCLE = "spinningCircle",
+    SPINNING_CIRCLE_SIMPLE = "spinningCircleSimple",
+    LOW_MOTION = "lowMotion",
+}
+
+export type Spinner = ComponentType<{
+    type?: SpinnerType;
+    animated?: boolean;
+    className?: string;
+    itemClassName?: string;
+    "aria-label"?: string;
+}> & {
+    Type: typeof SpinnerType;
+};
+
 export type Icon = ComponentType<JSX.IntrinsicElements["svg"] & {
     size?: string;
     colorClass?: string;
 } & Record<string, any>>;
 
 export type Icons = Record<IconNames, Icon>;
+
