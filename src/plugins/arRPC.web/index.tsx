@@ -73,8 +73,8 @@ export default definePlugin({
     },
 
     async start() {
-        // ArmCord comes with its own arRPC implementation, so this plugin just confuses users
-        if ("armcord" in window) return;
+        // Legcord comes with its own arRPC implementation, so this plugin just confuses users
+        if ("legcord" in window) return;
 
         if (ws) ws.close();
         ws = new WebSocket("ws://127.0.0.1:1337"); // try to open WebSocket

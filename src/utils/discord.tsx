@@ -19,10 +19,10 @@
 import "./discord.css";
 
 import { MessageObject } from "@api/MessageEvents";
-import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
 
-import { ImageModal, openModal } from "./modal";
+import { ImageModal, ImageModalItem, openModal } from "./modal";
 
 /**
  * Open the invite modal
@@ -110,23 +110,23 @@ export function sendMessage(
     return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
 }
 
-const FIX_CLASS_NAME = "vc-imagemodal-fix";
-
-export function openImageModal(url: string, props?: Partial<React.ComponentProps<ImageModal>>): string {
+/**
+ * You must specify either height or width
+ */
+export function openImageModal(props: Omit<ImageModalItem, "type">): string {
     return openModal(modalProps => (
         <ImageModal
             {...modalProps}
-            renderLinkComponent={props => <MaskedLink {...props} />}
-            // Don't render forward message button scaleDown_f97a12 contain_f97a12
-            renderForwardComponent={() => null}
-            shouldHideMediaOptions={false}
-            shouldAnimate={true}
-            fit={FIX_CLASS_NAME}
+            className="vc-image-modal"
+            fit="vc-position-inherit"
             items={[{
-                ...props,
                 type: "IMAGE",
-                url,
+                original: props.url,
+                ...props,
             }]}
+            onClose={modalProps.onClose}
+            shouldHideMediaOptions={false}
+            shouldAnimate
         />
     ));
 }
