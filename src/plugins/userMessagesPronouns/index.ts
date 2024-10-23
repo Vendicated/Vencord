@@ -19,6 +19,8 @@
 import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { MessageEvents } from "@api/MessageEvents";
+import { fetchAndCachePronouns } from "./utils";
 
 import { CompactPronounsChatComponentWrapper, PronounsChatComponentWrapper } from "./PronounsChatComponent";
 import { settings } from "./settings";
@@ -51,4 +53,11 @@ export default definePlugin({
 
     PronounsChatComponentWrapper,
     CompactPronounsChatComponentWrapper,
+
+    onStart() {
+        MessageEvents.addPreSendListener(async (channelId, messageObj, extra) => {
+            const userId = messageObj.author.id;
+            await fetchAndCachePronouns(userId);
+        });
+    }
 });

@@ -155,3 +155,5 @@ export function addClickListener(listener: ClickListener) {
 export function removeClickListener(listener: ClickListener) {
     return listeners.delete(listener);
 }
+
+export { addPreSendListener as MessageEvents };

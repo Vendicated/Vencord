@@ -1,0 +1,7 @@
+{
+  "tasks": {
+    "test": "pnpm install && pnpm test",
+    "build": "pnpm install --frozen-lockfile && pnpm build",
+    "launch": "pnpm install && pnpm dev"
+  }
+}
