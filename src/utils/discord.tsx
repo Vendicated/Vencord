@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./discord.css";
+
 import { MessageObject } from "@api/MessageEvents";
-import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
 
-import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
+import { ImageModal, ImageModalItem, openModal } from "./modal";
 
 /**
  * Open the invite modal
@@ -108,25 +110,24 @@ export function sendMessage(
     return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
 }
 
-export function openImageModal(url: string, props?: Partial<React.ComponentProps<ImageModal>>): string {
+/**
+ * You must specify either height or width
+ */
+export function openImageModal(props: Omit<ImageModalItem, "type">): string {
     return openModal(modalProps => (
-        <ModalRoot
+        <ImageModal
             {...modalProps}
-            className={ModalImageClasses.modal}
-            size={ModalSize.DYNAMIC}>
-            <ImageModal
-                className={ModalImageClasses.image}
-                original={url}
-                placeholder={url}
-                src={url}
-                renderLinkComponent={props => <MaskedLink {...props} />}
-                // Don't render forward message button
-                renderForwardComponent={() => null}
-                shouldHideMediaOptions={false}
-                shouldAnimate
-                {...props}
-            />
-        </ModalRoot>
+            className="vc-image-modal"
+            fit="vc-position-inherit"
+            items={[{
+                type: "IMAGE",
+                original: props.url,
+                ...props,
+            }]}
+            onClose={modalProps.onClose}
+            shouldHideMediaOptions={false}
+            shouldAnimate
+        />
     ));
 }
 
