@@ -99,7 +99,11 @@ export default definePlugin({
                         id="vc-view-role-icon"
                         label="View Role Icon"
                         action={() => {
-                            openImageModal(`${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.${settings.store.roleIconFileFormat}`);
+                            openImageModal({
+                                url: `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.${settings.store.roleIconFileFormat}`,
+                                height: 128,
+                                width: 128
+                            });
                         }}
                         icon={ImageIcon}
                     />

@@ -57,7 +57,11 @@ export const handleViewPreview = async ({ guildId, channelId, ownerId }: Applica
     const previewUrl = await ApplicationStreamPreviewStore.getPreviewURL(guildId, channelId, ownerId);
     if (!previewUrl) return;
 
-    openImageModal(previewUrl);
+    openImageModal({
+        url: previewUrl,
+        height: 720,
+        width: 1280
+    });
 };
 
 export const addViewStreamContext: NavContextMenuPatchCallback = (children, { userId }: { userId: string | bigint; }) => {
