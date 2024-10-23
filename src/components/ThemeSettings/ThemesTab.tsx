@@ -211,7 +211,7 @@ function ThemesTab() {
         for (const { fileName, content } of themes) {
             if (!fileName.endsWith(".css")) continue;
 
-            if ((!IS_WEB || "armcord" in window) && fileName.endsWith(".user.css")) {
+            if ((!IS_WEB || "legcord" in window) && fileName.endsWith(".user.css")) {
                 // handle it as usercss
                 const header = await usercssParse(content, fileName);
 
