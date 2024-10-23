@@ -57,7 +57,11 @@ export const handleViewPreview = async ({ guildId, channelId, ownerId }: Applica
     const previewUrl = await ApplicationStreamPreviewStore.getPreviewURL(guildId, channelId, ownerId);
     if (!previewUrl) return;
 
-    openImageModal(previewUrl);
+    openImageModal({
+        url: previewUrl,
+        height: 720,
+        width: 1280
+    });
 };
 
 export const addViewStreamContext: NavContextMenuPatchCallback = (children, { userId }: { userId: string | bigint; }) => {
@@ -89,7 +93,6 @@ export default definePlugin({
     name: "BiggerStreamPreview",
     description: "This plugin allows you to enlarge stream previews",
     authors: [Devs.phil],
-    dependencies: ["ImageModalAPI"],
     contextMenus: {
         "user-context": userContextPatch,
         "stream-context": streamContextPatch

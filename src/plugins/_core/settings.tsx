@@ -209,7 +209,7 @@ export default definePlugin({
     },
 
     get electronVersion() {
-        return VencordNative.native.getVersions().electron || window.armcord?.electron || null;
+        return VencordNative.native.getVersions().electron || window.legcord?.electron || null;
     },
 
     get chromiumVersion() {

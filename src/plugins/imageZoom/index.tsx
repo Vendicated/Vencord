@@ -181,13 +181,6 @@ export default definePlugin({
                     replace: "$&$self.unMountMagnifier();"
                 }
             ]
-        },
-        {
-            find: ".carouselModal",
-            replacement: {
-                match: /(?<=\.carouselModal.{0,100}onClick:)\i,/,
-                replace: "()=>{},"
-            }
         }
     ],
 

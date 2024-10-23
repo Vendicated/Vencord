@@ -28,7 +28,7 @@ const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
 const UserUtils = findByPropsLazy("getGlobalName");
 
 const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
-const ExpandableList = findComponentByCodeLazy(".mutualFriendItem]");
+const ExpandableList = findComponentByCodeLazy('"PRESS_SECTION"');
 const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
 
 function getGroupDMName(channel: Channel) {
@@ -142,16 +142,15 @@ export default definePlugin({
         const mutualGDms = getMutualGroupDms(user.id);
         if (mutualGDms.length === 0) return null;
 
-        const header = getMutualGDMCountText(user);
 
         return (
             <>
                 {Divider}
                 <ExpandableList
-                    className={listStyle}
-                    header={header}
-                    isLoadingHeader={false}
-                    children={renderClickableGDMs(mutualGDms, () => { })}
+                    listClassName={listStyle}
+                    header={"Mutual Groups"}
+                    isLoading={false}
+                    items={renderClickableGDMs(mutualGDms, () => { })}
                 />
             </>
         );

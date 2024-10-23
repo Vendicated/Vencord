@@ -5,3 +5,73 @@
 .vc-plugin-modal-description {
     flex-grow: 1;
 }
+
+/* warning modal */
+
+.vc-text-selectable {
+    user-select: none;
+}
+
+.vc-warning-info {
+    gap: 15px;
+    flex-direction: column;
+    user-select: none;
+}
+
+.vc-warning-info img {
+    width: 70%;
+    height: auto;
+    display: block;
+    margin: auto auto 10px;
+}
+
+.vc-warning-info strong {
+    font-weight: bold;
+}
+
+.vc-warning-info button.disable-warning {
+    font-size: 0.8rem;
+    background-color: transparent;
+    color: red;
+    cursor: pointer;
+    margin: 0 auto;
+    width: fit-content;
+    text-decoration: underline;
+}
+
+.vc-warning-info button.disable-warning:hover {
+    background-color: transparent;
+    color: var(--text-danger);
+}
+
+.vc-warning-info button.disable-warning:active {
+    background-color: transparent;
+}
+
+.text-danger {
+    color: var(--text-danger);
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+.text-normal {
+    color: var(--text-normal);
+    font-size: 1.2rem;
+}
+
+.text-normal.margin-bottom {
+    margin-bottom: 10px;
+}
+
+.button-danger-background {
+    background-color: var(--button-danger-background);
+}
+
+.button-danger-background-no-margin {
+    background-color: var(--button-danger-background) !important;
+    color: var(--header-primary);
+}
+
+.vc-modal-close-button {
+    margin-left: auto !important;
+}

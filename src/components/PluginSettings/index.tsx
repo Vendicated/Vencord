@@ -429,35 +429,26 @@ export default function PluginSettings() {
             {enabledPlugins.length > 0 && (
                 <Button
                     size={Button.Sizes.SMALL}
-                    style={{ backgroundColor: "var(--button-danger-background)", margin: "20px 0" }}
+                    className="button-danger-background"
                     onClick={() => {
                         if (Settings.ignoreResetWarning) return resetCheckAndDo();
 
                         return Alerts.show({
                             title: "Disable All Plugins",
                             body: (
-                                <div style={{ textAlign: "center" }}>
+                                <div className="alert-body">
                                     <img
                                         src="https://media.tenor.com/Y6DXKZiBCs8AAAAi/stavario-josefbenes.gif"
                                         alt="Warning"
-                                        style={{ width: "60%", height: "auto", marginBottom: "10px", display: "block", margin: "auto" }}
                                     />
-                                    <p style={{ fontSize: "1.2rem", color: "var(--text-danger)", fontWeight: "bold" }}>
-                                        WARNING: You are about to disable <span style={{ textDecoration: "underline" }}>{enabledPlugins.length}</span> plugins!
+                                    <p className="warning-text">
+                                        WARNING: You are about to disable <span>{enabledPlugins.length}</span> plugins!
                                     </p>
-                                    <p style={{ fontSize: "1rem" }}>
+                                    <p>
                                         Are you absolutely sure you want to proceed? You can always enable them back later.
                                     </p>
                                     {!Settings.ignoreResetWarning && (
-                                        <Button style={{
-                                            fontSize: "0.8rem",
-                                            backgroundColor: "transparent",
-                                            color: "red",
-                                            cursor: "pointer",
-                                            margin: "0 auto",
-                                            width: "fit-content",
-                                            textDecoration: "underline"
-                                        }} onClick={() => {
+                                        <Button className="disable-warning" onClick={() => {
                                             Settings.ignoreResetWarning = true;
                                         }}>
                                             Disable this warning forever
@@ -466,6 +457,7 @@ export default function PluginSettings() {
                                 </div>
                             ),
                             confirmText: "Disable All",
+                            confirmColor: "button-danger-background-no-margin",
                             cancelText: "Cancel",
                             onConfirm: () => {
                                 resetCheckAndDo();
