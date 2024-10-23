@@ -90,7 +90,6 @@ async function addListeners(audioElement: HTMLAudioElement, url: string, parentB
     canvas.classList.add("better-audio-visualizer");
     audioElement.parentElement?.appendChild(canvas);
 
-    console.log(parentBorderRadius);
     if (parentBorderRadius) canvas.style.borderRadius = parentBorderRadius;
 
     function drawVisualizer() {
@@ -203,9 +202,6 @@ function scanForAudioElements(element: HTMLElement) {
         const metadata = getMetadata(audioElement as HTMLElement);
 
         if (!metadata) return;
-
-        console.log(audioElement);
-        console.log(metadata);
 
         addListeners(metadata.audio, metadata.url, metadata.parentBorderRadius);
     });
