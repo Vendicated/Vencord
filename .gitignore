@@ -24,3 +24,4 @@ src/userplugins
 ExtensionCache/
 settings/
 .vscode/settings.json
+src/plugins/betterCamera.desktop
