@@ -179,6 +179,11 @@ export default definePlugin({
                 {
                     match: /componentWillUnmount\(\){/,
                     replace: "$&$self.unMountMagnifier();"
+                },
+
+                {
+                    match: /componentDidUpdate\(\i\){/,
+                    replace: "$&$self.updateMagnifier(this);"
                 }
             ]
         }
@@ -213,6 +218,11 @@ export default definePlugin({
                 this.root.render(this.currentMagnifierElement);
             }
         }
+    },
+
+    updateMagnifier(instance) {
+        this.unMountMagnifier();
+        this.renderMagnifier(instance);
     },
 
     unMountMagnifier() {
