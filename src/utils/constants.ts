@@ -708,6 +708,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 1078392986221678652n,
         name: "pythonplayer123",
     },
+    SomeAspy: {
+        name: "SomeAspy",
+        id: 516750892372852754n,
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly

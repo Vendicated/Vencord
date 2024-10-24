@@ -101,25 +101,24 @@ export const Modals = findByPropsLazy("ModalRoot", "ModalCloseButton") as {
     }>;
 };
 
-export type ImageModal = ComponentType<{
-    className?: string;
-    src: string;
-    placeholder: string;
-    original: string;
+export interface ImageModalItem {
+    type: "IMAGE" | "VIDEO";
+    url: string;
     width?: number;
     height?: number;
-    animated?: boolean;
-    responsive?: boolean;
-    renderLinkComponent(props: any): ReactNode;
-    renderForwardComponent(props: any): ReactNode;
-    maxWidth?: number;
-    maxHeight?: number;
-    shouldAnimate?: boolean;
+    original?: string;
+}
+
+export type ImageModal = ComponentType<{
+    className?: string;
+    fit?: string;
     onClose?(): void;
     shouldHideMediaOptions?: boolean;
+    shouldAnimate?: boolean;
+    items: ImageModalItem[];
 }>;
 
-export const ImageModal = findComponentByCodeLazy(".MEDIA_MODAL_CLOSE", "responsive") as ImageModal;
+export const ImageModal = findComponentByCodeLazy(".MEDIA_MODAL_CLOSE") as ImageModal;
 
 export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
 export const ModalHeader = LazyComponent(() => Modals.ModalHeader);
