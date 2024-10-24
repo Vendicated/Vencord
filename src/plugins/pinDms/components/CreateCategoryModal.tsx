@@ -7,7 +7,7 @@
 import { classNameFactory } from "@api/Styles";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModalLazy } from "@utils/modal";
 import { extractAndLoadChunksLazy, findComponentByCodeLazy, findExportedComponentLazy } from "@webpack";
-import { Button, Forms, Text, TextInput, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, Forms, Switch, Text, TextInput, Toasts, useEffect, useState } from "@webpack/common";
 
 import { DEFAULT_COLOR, SWATCHES } from "../constants";
 import { categories, Category, createCategory, getCategory, updateCategory } from "../data";
@@ -55,6 +55,7 @@ function useCategory(categoryId: string | null, initalChannelId: string | null) 
                 name: `Pin Category ${categories.length + 1}`,
                 color: DEFAULT_COLOR,
                 collapsed: false,
+                displayOnServerList: false,
                 channels: [initalChannelId]
             });
     }, [categoryId, initalChannelId]);
@@ -116,6 +117,17 @@ export function NewCategoryModal({ categoryId, modalProps, initalChannelId }: Pr
                                 />
                             )}
                         />
+                    </Forms.FormSection>
+                    <Forms.FormDivider />
+                    <Forms.FormSection>
+                        <Forms.FormTitle>Other</Forms.FormTitle>
+                        <Switch
+                            key="server-list-display"
+                            value={category.displayOnServerList ?? false}
+                            onChange={v => setCategory({ ...category, displayOnServerList: v })}
+                        >
+                            Display on Server List when expanded
+                        </Switch>
                     </Forms.FormSection>
                 </ModalContent>
                 <ModalFooter>
