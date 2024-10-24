@@ -26,7 +26,9 @@ import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { Button, Card, Forms, React, Select, Switch } from "@webpack/common";
+import { Button, Card, Forms, GuildMemberStore, React, Select, Switch, UserStore } from "@webpack/common";
+
+import Plugins from "~plugins";
 
 import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "..";
 import { openNotificationSettingsModal } from "./NotificationSettings";
@@ -37,7 +39,8 @@ const cl = classNameFactory("vc-settings-");
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
-
+const DONOR_ROLE_ID = "1042507929485586532";
+const VENCORD_GUILD_ID = "1015060230222131221";
 type KeysOfType<Object, Type> = {
     [K in keyof Object]: Object[K] extends Type ? K : never;
 }[keyof Object];
@@ -244,11 +247,14 @@ interface DonateCardProps {
 }
 
 function DonateCard({ image }: DonateCardProps) {
+    const donorBadges = (Plugins.BadgeAPI as unknown as typeof import("../../plugins/_api/badges").default).getDonorBadges(UserStore.getCurrentUser().id);
+    // @ts-ignore outdated type
+    const isDonor = GuildMemberStore.getSelfMember(VENCORD_GUILD_ID)?.roles.includes(DONOR_ROLE_ID) || donorBadges;
     return (
         <Card className={cl("card", "donate")}>
             <div>
                 <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
-                <Forms.FormText>Please consider supporting the development of Vencord by donating!</Forms.FormText>
+                <Forms.FormText>{isDonor ? "Thank you for donating! Your donations help support the continued development of Vencord." : "Please consider supporting the development of Vencord by donating!"}</Forms.FormText>
                 <DonateButton style={{ transform: "translateX(-1em)" }} />
             </div>
             <img
