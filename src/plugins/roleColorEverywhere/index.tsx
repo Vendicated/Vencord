@@ -23,6 +23,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
+import { Channel, User } from "discord-types/general";
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
 
@@ -51,6 +52,12 @@ const settings = definePluginSettings({
         description: "Show role colors in the reactors list",
         restartNeeded: true
     },
+    pollResults: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show role colors in the poll results",
+        restartNeeded: true
+    },
     colorChatMessages: {
         type: OptionType.BOOLEAN,
         default: false,
@@ -68,7 +75,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "RoleColorEverywhere",
-    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi],
+    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi, Devs.jamesbt365],
     description: "Adds the top role color anywhere possible",
     patches: [
         // Chat Mentions
@@ -126,10 +133,18 @@ export default definePlugin({
         {
             find: ".reactorDefault",
             replacement: {
-                match: /,onContextMenu:e=>.{0,15}\((\i),(\i),(\i)\).{0,250}tag:"strong"/,
+                match: /,onContextMenu:\i=>.{0,15}\((\i),(\i),(\i)\).{0,250}tag:"strong"/,
                 replace: "$&,style:{color:$self.getColor($2?.id,$1)}"
             },
             predicate: () => settings.store.reactorsList,
+        },
+        {
+            find: ",reactionVoteCounts",
+            replacement: {
+                match: /,onContextMenu:\i=>.{0,15}\((\i),(\i),(\i)\).{0,300}nickname/,
+                replace: "$&,style:{color:$self.getPollColor($1)}"
+            },
+            predicate: () => settings.store.pollResults,
         },
         {
             find: '.Messages.MESSAGE_EDITED,")"',
@@ -141,6 +156,12 @@ export default definePlugin({
         },
     ],
     settings,
+
+    getPollColor(props: { channel: Channel; user: User; }) {
+        return props.channel?.guild_id
+            ? GuildMemberStore.getMember(props.channel.guild_id, props.user.id)?.colorString ?? null
+            : null;
+    },
 
     getColor(userId: string, { channelId, guildId }: { channelId?: string; guildId?: string; }) {
         if (!(guildId ??= ChannelStore.getChannel(channelId!)?.guild_id)) return null;
