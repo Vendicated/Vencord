@@ -21,8 +21,9 @@ import "./discord.css";
 import { MessageObject } from "@api/MessageEvents";
 import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
+import { Except } from "type-fest";
 
-import { ImageModal, ImageModalItem, openModal } from "./modal";
+import { MediaModalItem, MediaModalProps, openMediaModal } from "./modal";
 
 /**
  * Open the invite modal
@@ -111,24 +112,20 @@ export function sendMessage(
 }
 
 /**
- * You must specify either height or width
+ * You must specify either height or width in the item
  */
-export function openImageModal(props: Omit<ImageModalItem, "type">): string {
-    return openModal(modalProps => (
-        <ImageModal
-            {...modalProps}
-            className="vc-image-modal"
-            fit="vc-position-inherit"
-            items={[{
-                type: "IMAGE",
-                original: props.url,
-                ...props,
-            }]}
-            onClose={modalProps.onClose}
-            shouldHideMediaOptions={false}
-            shouldAnimate
-        />
-    ));
+export function openImageModal(item: Except<MediaModalItem, "type">, mediaModalProps?: Omit<MediaModalProps, "items">) {
+    return openMediaModal({
+        className: "vc-image-modal",
+        fit: "vc-position-inherit",
+        shouldAnimateCarousel: true,
+        items: [{
+            type: "IMAGE",
+            original: item.original ?? item.url,
+            ...item,
+        }],
+        ...mediaModalProps
+    });
 }
 
 export async function openUserProfile(id: string) {
