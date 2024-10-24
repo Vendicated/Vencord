@@ -3,7 +3,6 @@ on:
     push:
         branches:
             - main
-            - Update-source-code-options-for-dev-build
         paths:
             - .github/workflows/build.yml
             - src/**
@@ -51,7 +50,7 @@ jobs:
                   echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
             - name: Upload DevBuild as release
-              # if: github.repository == 'Vendicated/Vencord'
+              if: github.repository == 'Vendicated/Vencord'
               run: |
                   gh release upload devbuild --clobber dist/*
                   gh release edit devbuild --title "DevBuild $RELEASE_TAG"
@@ -60,7 +59,7 @@ jobs:
                   RELEASE_TAG: ${{ env.release_tag }}
 
             - name: Update source code options of DevBuild release
-              # if: github.repository == 'Vendicated/Vencord'
+              if: github.repository == 'Vendicated/Vencord'
               run: |
                   git tag -f devbuild
                   git push -f origin devbuild
