@@ -575,7 +575,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "RamziAH",
         id: 1279957227612147747n,
     },
-        SomeAspy: {
+    Migu: {
+        name: "MiguVT",
+        id: 813034603854037024n,
+    },
+    SomeAspy: {
         name: "SomeAspy",
         id: 516750892372852754n,
     },
