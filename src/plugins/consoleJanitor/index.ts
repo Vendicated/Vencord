@@ -67,6 +67,13 @@ export default definePlugin({
 
     patches: [
         {
+            find: 'react-spring: The "interpolate" function',
+            replacement: {
+                match: /,console.warn\('react-spring: The "interpolate" function is deprecated in v10 \(use "to" instead\)'\)/,
+                replace: ""
+            }
+        },
+        {
             find: 'console.warn("Window state not initialized"',
             replacement: {
                 match: /console\.warn\("Window state not initialized",\i\),/,
