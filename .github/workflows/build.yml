@@ -62,8 +62,8 @@ jobs:
             - name: Update source code options of DevBuild release
               # if: github.repository == 'Vendicated/Vencord'
               run: |
-                  git tag -f ${{ env.release_tag }}
-                  git push -f origin ${{ env.release_tag }}
+                  git tag -f devbuild
+                  git push -f origin devbuild
 
             - name: Upload DevBuild to builds repo
               if: github.repository == 'Vendicated/Vencord'
