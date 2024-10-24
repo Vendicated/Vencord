@@ -19,16 +19,16 @@
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import DonateButton from "@components/DonateButton";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { gitRemote } from "@shared/vencordUserAgent";
+import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { identity } from "@utils/misc";
 import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { Button, Card, Forms, React, Select, Switch } from "@webpack/common";
+import { Button, Card, Forms, React, Select, showToast, Switch } from "@webpack/common";
 
-import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "..";
+import { Flex, FolderIcon, GithubIcon, Heart, LogIcon, PaintbrushIcon, RestartIcon } from "..";
 import { openNotificationSettingsModal } from "./NotificationSettings";
 import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
@@ -49,6 +49,7 @@ function EquicordSettings() {
     });
     const settings = useSettings();
 
+    const discordInvite = "bFp57wxCkv";
     const donateImage = React.useMemo(() => Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE, []);
 
     const isWindows = navigator.platform.toLowerCase().startsWith("win");
@@ -99,7 +100,7 @@ function EquicordSettings() {
 
     return (
         <SettingsTab title="Equicord Settings">
-            <DonateCard image={donateImage} />
+            <DiscordInviteCard invite={discordInvite} image={donateImage} />
             <Forms.FormSection title="Quick Actions">
                 <QuickActionCard>
                     <QuickAction
@@ -239,17 +240,36 @@ function EquicordSettings() {
     );
 }
 
-interface DonateCardProps {
+interface DiscordInviteProps {
+    invite: string;
     image: string;
 }
 
-function DonateCard({ image }: DonateCardProps) {
+
+function DiscordInviteCard({ invite, image }: DiscordInviteProps) {
     return (
-        <Card className={cl("card", "donate")}>
+        <Card className={cl("card", "discordinvite")}>
             <div>
-                <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
-                <Forms.FormText>Please consider supporting the development of Equicord by donating!</Forms.FormText>
-                <DonateButton style={{ transform: "translateX(-1em)" }} />
+                <Forms.FormTitle tag="h5">Join the discord!</Forms.FormTitle>
+                <Forms.FormText>Please consider joining the discord for any news on breaking changes, or new bigger updates!</Forms.FormText>
+                <Forms.FormText>You can also donate to me if you'd like to support this project. <Heart /></Forms.FormText>
+
+                <div className={cl("card-buttons")}>
+                    <Button
+                        onClick={async e => {
+                            e.preventDefault();
+                            openInviteModal(invite).catch(() => showToast("Invalid or expired invite"));
+                        }}
+                    >
+                        Join
+                    </Button>
+
+                    <Button
+                        onClick={() => { VencordNative.native.openExternal("https://github.com/sponsors/verticalsync"); }}
+                    >
+                        Donate
+                    </Button>
+                </div>
             </div>
             <img
                 role="presentation"
@@ -257,9 +277,7 @@ function DonateCard({ image }: DonateCardProps) {
                 alt=""
                 height={128}
                 style={{
-                    imageRendering: image === SHIGGY_DONATE_IMAGE ? "pixelated" : void 0,
                     marginLeft: "auto",
-                    transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : void 0
                 }}
             />
         </Card>
