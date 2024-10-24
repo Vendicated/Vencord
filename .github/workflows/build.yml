@@ -3,6 +3,7 @@ on:
     push:
         branches:
             - main
+            - Update-source-code-options-for-dev-build
         paths:
             - .github/workflows/build.yml
             - src/**
