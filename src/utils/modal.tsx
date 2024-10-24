@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByPropsLazy, findModuleId, proxyLazyWebpack, wreq } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
@@ -101,24 +101,39 @@ export const Modals = findByPropsLazy("ModalRoot", "ModalCloseButton") as {
     }>;
 };
 
-export interface ImageModalItem {
-    type: "IMAGE" | "VIDEO";
+export type MediaModalItem = {
     url: string;
+    type: "IMAGE" | "VIDEO";
+    original?: string;
+    alt?: string;
     width?: number;
     height?: number;
-    original?: string;
-}
+    animated?: boolean;
+    maxWidth?: number;
+    maxHeight?: number;
+} & Record<PropertyKey, any>;
 
-export type ImageModal = ComponentType<{
+export type MediaModalProps = {
+    location?: string;
+    contextKey?: string;
+    onCloseCallback?: () => void;
     className?: string;
+    items: MediaModalItem[];
+    startingIndex?: number;
+    onIndexChange?: (...args: any[]) => void;
     fit?: string;
-    onClose?(): void;
+    shouldRedactExplicitContent?: boolean;
     shouldHideMediaOptions?: boolean;
-    shouldAnimate?: boolean;
-    items: ImageModalItem[];
-}>;
+    shouldAnimateCarousel?: boolean;
+};
 
-export const ImageModal = findComponentByCodeLazy(".MEDIA_MODAL_CLOSE") as ImageModal;
+export const openMediaModal: (props: MediaModalProps) => void = proxyLazyWebpack(() => {
+    const mediaModalKeyModuleId = findModuleId('"Zoomed Media Modal"');
+    if (mediaModalKeyModuleId == null) return;
+
+    const openMediaModalModule = wreq(findModuleId(mediaModalKeyModuleId, "modalKey:") as any);
+    return Object.values<any>(openMediaModalModule).find(v => String(v).includes("modalKey:"));
+});
 
 export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
 export const ModalHeader = LazyComponent(() => Modals.ModalHeader);
