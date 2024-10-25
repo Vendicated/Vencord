@@ -97,12 +97,20 @@ export default definePlugin({
         },
         {
             find: 'section:"MUTUAL_FRIENDS"',
-            replacement: {
-                match: /\.openUserProfileModal.+?\)}\)}\)(?<=(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.divider}\)).+?)/,
-                replace: "$&,$self.renderDMPageList({user: arguments[0].user, Divider: $1, listStyle: $2.list})"
-            }
+            replacement: [
+                {
+                    match: /\i\|\|\i(?=\?\(0,\i\.jsxs?\)\(\i\.\i\.Overlay,)/,
+                    replace: "$&||($self.getMutualGroupDms(arguments[0].user.id).length>0)"
+                },
+                {
+                    match: /\.openUserProfileModal.+?\)}\)}\)(?<=(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.divider}\)).+?)/,
+                    replace: "$&,$self.renderDMPageList({user: arguments[0].user, Divider: $1, listStyle: $2.list})"
+                }
+            ]
         }
     ],
+
+    getMutualGroupDms,
 
     pushSection(sections: any[], user: User) {
         if (isBotOrSelf(user) || sections[IS_PATCHED]) return;
