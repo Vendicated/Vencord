@@ -7,18 +7,18 @@
 **/
 
 .vc-image-modal {
-    background: transparent!important;
-    box-shadow: none!important;
+    background: transparent !important;
+    box-shadow: none !important;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 0
+    border-radius: 0;
 }
 
 @media(width <= 485px) {
     .vc-image-modal {
-        display:relative;
+        display: relative;
         overflow: visible;
-        overflow: initial
+        overflow: initial;
     }
 }
