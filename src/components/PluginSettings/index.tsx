@@ -31,10 +31,11 @@ import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
+import { Alerts, Button, Card, Flex, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
@@ -60,7 +61,7 @@ function showErrorToast(message: string) {
     });
 }
 
-function ReloadRequiredCard({ required }: { required: boolean; }) {
+function ReloadRequiredCard({ required, enabledPlugins, openDisablePluginsModal, resetCheckAndDo }) {
     return (
         <Card className={cl("info-card", { "restart-card": required })}>
             {required ? (
@@ -79,6 +80,19 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
                     <Forms.FormText>Press the cog wheel or info icon to get more info on a plugin</Forms.FormText>
                     <Forms.FormText>Plugins with a cog wheel have settings you can modify!</Forms.FormText>
                 </>
+            )}
+            {enabledPlugins.length > 0 && !required && (
+                <Button
+                    size={Button.Sizes.SMALL}
+                    className="button-danger-background disable-all-button"
+                    onClick={() => {
+                        if (Settings.ignoreResetWarning) return resetCheckAndDo();
+
+                        return openDisablePluginsModal(enabledPlugins, resetCheckAndDo);
+                    }}
+                >
+                    Disable All Plugins
+                </Button>
             )}
         </Card>
     );
@@ -368,6 +382,82 @@ export default function PluginSettings() {
         }
     }
 
+    function openDisablePluginsModal(enabledPlugins: String[], resetCheckAndDo: () => void) {
+        if (Settings.ignoreResetWarning) return resetCheckAndDo();
+
+        openModal(warningModalProps => (
+            <ModalRoot
+                {...warningModalProps}
+                size={ModalSize.SMALL}
+                className="vc-text-selectable"
+                transitionState={warningModalProps.transitionState}
+            >
+                <ModalHeader separator={false}>
+                    <Text className="text-danger">Dangerous Action</Text>
+                    <ModalCloseButton onClick={warningModalProps.onClose} className="vc-modal-close-button" />
+                </ModalHeader>
+                <ModalContent>
+                    <Forms.FormSection>
+                        <Flex className="vc-warning-info">
+                            <img
+                                src="https://media.tenor.com/Y6DXKZiBCs8AAAAi/stavario-josefbenes.gif"
+                                alt="Warning"
+                            />
+                            <Text className="warning-text">
+                                WARNING: You are about to disable <span>{enabledPlugins.length}</span> plugins!
+                            </Text>
+                            <Text className="warning-text">
+                                THIS ACTION IS IRREVERSIBLE
+                            </Text>
+                            <Text className="text-normal margin-bottom">
+                                Are you absolutely sure you want to proceed? You can always enable them back later.
+                            </Text>
+                        </Flex>
+                    </Forms.FormSection>
+                </ModalContent>
+                <ModalFooter className="modal-footer">
+                    <Flex className="button-container">
+                        <Button
+                            size={Button.Sizes.SMALL}
+                            color={Button.Colors.PRIMARY}
+                            onClick={warningModalProps.onClose}
+                            look={Button.Looks.LINK}
+                        >
+                            Cancel
+                        </Button>
+                        <Flex className="button-group">
+                            {!Settings.ignoreResetWarning && (
+                                <Button
+                                    size={Button.Sizes.SMALL}
+                                    className="button-danger-background"
+                                    onClick={() => {
+                                        Settings.ignoreResetWarning = true;
+                                    }}
+                                >
+                                    Disable Warning Forever
+                                </Button>
+                            )}
+                            <Tooltip text="This action cannot be undone. Are you sure?" shouldShow={true}>
+                                {({ onMouseEnter, onMouseLeave }) => (
+                                    <Button
+                                        size={Button.Sizes.SMALL}
+                                        className="button-danger-background-no-margin"
+                                        onClick={resetCheckAndDo}
+                                        onMouseEnter={onMouseEnter}
+                                        onMouseLeave={onMouseLeave}
+                                    >
+                                        Disable All
+                                    </Button>
+                                )}
+                            </Tooltip>
+                        </Flex>
+                    </Flex>
+                </ModalFooter>
+            </ModalRoot>
+        ));
+    }
+
+
     // Code directly taken from supportHelper.tsx
     const isApiPlugin = (plugin: string) => plugin.endsWith("API") || Plugins[plugin].required;
 
@@ -382,7 +472,7 @@ export default function PluginSettings() {
     return (
         <SettingsTab title="Plugins">
 
-            <ReloadRequiredCard required={changes.hasChanges} />
+            <ReloadRequiredCard required={changes.hasChanges} enabledPlugins={enabledPlugins} openDisablePluginsModal={openDisablePluginsModal} resetCheckAndDo={resetCheckAndDo} />
 
             <div className={cl("stats-container")} style={{
                 marginTop: "16px",
@@ -400,7 +490,6 @@ export default function PluginSettings() {
                     enabledUserPlugins={enabledUserPlugins}
                 />
             </div>
-
 
             <Forms.FormTitle tag="h5" className={classes(Margins.top20, Margins.bottom8)}>
                 Filters
@@ -426,48 +515,6 @@ export default function PluginSettings() {
             </div>
 
             <Forms.FormTitle className={Margins.top20}>Plugins</Forms.FormTitle>
-            {enabledPlugins.length > 0 && (
-                <Button
-                    size={Button.Sizes.SMALL}
-                    className="button-danger-background"
-                    onClick={() => {
-                        if (Settings.ignoreResetWarning) return resetCheckAndDo();
-
-                        return Alerts.show({
-                            title: "Disable All Plugins",
-                            body: (
-                                <div className="alert-body">
-                                    <img
-                                        src="https://media.tenor.com/Y6DXKZiBCs8AAAAi/stavario-josefbenes.gif"
-                                        alt="Warning"
-                                    />
-                                    <p className="warning-text">
-                                        WARNING: You are about to disable <span>{enabledPlugins.length}</span> plugins!
-                                    </p>
-                                    <p>
-                                        Are you absolutely sure you want to proceed? You can always enable them back later.
-                                    </p>
-                                    {!Settings.ignoreResetWarning && (
-                                        <Button className="disable-warning" onClick={() => {
-                                            Settings.ignoreResetWarning = true;
-                                        }}>
-                                            Disable this warning forever
-                                        </Button>
-                                    )}
-                                </div>
-                            ),
-                            confirmText: "Disable All",
-                            confirmColor: "button-danger-background-no-margin",
-                            cancelText: "Cancel",
-                            onConfirm: () => {
-                                resetCheckAndDo();
-                            }
-                        });
-                    }}
-                >
-                    Disable All Plugins
-                </Button>
-            )}
 
             {plugins.length || requiredPlugins.length
                 ? (

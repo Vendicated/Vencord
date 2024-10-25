@@ -256,6 +256,7 @@ function DiscordInviteCard({ invite, image }: DiscordInviteProps) {
 
                 <div className={cl("card-buttons")}>
                     <Button
+                        className="vc-joindiscordbutton vc-settingbuttons"
                         onClick={async e => {
                             e.preventDefault();
                             openInviteModal(invite).catch(() => showToast("Invalid or expired invite"));
@@ -265,6 +266,7 @@ function DiscordInviteCard({ invite, image }: DiscordInviteProps) {
                     </Button>
 
                     <Button
+                        className="vc-donatebutton vc-settingbuttons"
                         onClick={() => { VencordNative.native.openExternal("https://github.com/sponsors/verticalsync"); }}
                     >
                         Donate
