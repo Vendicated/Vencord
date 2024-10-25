@@ -33,7 +33,7 @@ interface URLReplacementRule {
 // Do not forget to add protocols to the ALLOWED_PROTOCOLS constant
 const UrlReplacementRules: Record<string, URLReplacementRule> = {
     spotify: {
-        match: /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|artist|playlist|user|episode)\/(.+)(?:\?.+?)?$/,
+        match: /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|artist|playlist|user|episode|prerelease)\/(.+)(?:\?.+?)?$/,
         replace: (_, type, id) => `spotify://${type}/${id}`,
         description: "Open Spotify links in the Spotify app",
         shortlinkMatch: /^https:\/\/spotify\.link\/.+$/,
@@ -91,14 +91,19 @@ export default definePlugin({
                 replace: "async function $1 if(await $self.handleLink(...arguments)) return;"
             }
         },
-        // Make Spotify profile activity links open in app on web
         {
-            find: "WEB_OPEN(",
+            find: "no artist ids in metadata",
             predicate: () => !IS_DISCORD_DESKTOP && pluginSettings.store.spotify,
-            replacement: {
-                match: /\i\.\i\.isProtocolRegistered\(\)(.{0,100})window.open/g,
-                replace: "true$1VencordNative.native.openExternal"
-            }
+            replacement: [
+                {
+                    match: /\i\.\i\.isProtocolRegistered\(\)/g,
+                    replace: "true"
+                },
+                {
+                    match: /!\(0,\i\.isDesktop\)\(\)/,
+                    replace: "false"
+                }
+            ]
         },
         {
             find: ".CONNECTED_ACCOUNT_VIEWED,",
