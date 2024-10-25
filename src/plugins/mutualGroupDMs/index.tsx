@@ -103,8 +103,8 @@ export default definePlugin({
                     replace: "$&||($self.getMutualGroupDms(arguments[0].user.id).length>0)"
                 },
                 {
-                    match: /\.openUserProfileModal.+?\)}\)}\)(?<=(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.divider}\)).+?)/,
-                    replace: "$&,$self.renderDMPageList({user: arguments[0].user, Divider: $1, listStyle: $2.list})"
+                    match: /\.openUserProfileModal.+?\)}\)}\)(?<=,(\i)&&(\i)&&(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.divider}\)).+?)/,
+                    replace: "$&,$self.renderDMPageList({user: arguments[0].user, hasDivider: $1 || $2, Divider: $3, listStyle: $4.list})"
                 }
             ]
         }
@@ -146,14 +146,14 @@ export default definePlugin({
         );
     }),
 
-    renderDMPageList: ErrorBoundary.wrap(({ user, Divider, listStyle }: { user: User, Divider: JSX.Element, listStyle: string; }) => {
+    renderDMPageList: ErrorBoundary.wrap(({ user, hasDivider, Divider, listStyle }: { user: User, hasDivider: boolean, Divider: JSX.Element, listStyle: string; }) => {
         const mutualGDms = getMutualGroupDms(user.id);
         if (mutualGDms.length === 0) return null;
 
 
         return (
             <>
-                {Divider}
+                {hasDivider && Divider}
                 <ExpandableList
                     listClassName={listStyle}
                     header={"Mutual Groups"}
