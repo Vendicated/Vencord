@@ -34,6 +34,10 @@ export interface Dev {
  */
 export const Devs = /* #__PURE__*/ Object.freeze({
     Ven: {
+        name: "Baldy09",
+        id: 690641684337393724n
+    },
+    Ven: {
         name: "Vee",
         id: 343383572805058560n
     },
