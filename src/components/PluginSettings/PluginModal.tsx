@@ -287,7 +287,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         <Tooltip text="Reset to default settings" shouldShow={!isObjectEmpty(tempSettings)}>
                             {({ onMouseEnter, onMouseLeave }) => (
                                 <Button
-                                    className="button-danger-background-no-margin"
+                                    className="button-danger-background"
                                     size={Button.Sizes.SMALL}
                                     color={Button.Colors.BRAND}
                                     onClick={handleResetClick}
@@ -407,7 +407,7 @@ export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, o
             transitionState={warningModalProps.transitionState}
         >
             <ModalHeader separator={false}>
-                <Text className="text-danger">Warning: Dangerous Action</Text>
+                <Text className="text-danger">Dangerous Action</Text>
                 <ModalCloseButton onClick={warningModalProps.onClose} className="vc-modal-close-button" />
             </ModalHeader>
             <ModalContent>
@@ -421,39 +421,42 @@ export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, o
                             You are about to reset all settings for <strong>{plugin.name}</strong> to their default values.
                         </Text>
                         <Text className="text-danger">
-                            This action is irreversible.
+                            THIS ACTION IS IRREVERSIBLE
                         </Text>
                         <Text className="text-normal margin-bottom">
                             If you are certain you want to proceed, click <strong>Confirm Reset</strong>. Otherwise, click <strong>Cancel</strong>.
                         </Text>
-                        {!Settings.ignoreResetWarning && (
-                            <Button className="disable-warning" onClick={() => {
-                                Settings.ignoreResetWarning = true;
-                            }}>
-                                Disable this warning forever
-                            </Button>
-                        )}
                     </Flex>
                 </Forms.FormSection>
             </ModalContent>
-            <ModalFooter>
-                <Flex flexDirection="column" style={{ width: "100%" }}>
-                    <Flex style={{ justifyContent: "space-between" }}>
-                        <Button
-                            size={Button.Sizes.SMALL}
-                            color={Button.Colors.PRIMARY}
-                            onClick={warningModalProps.onClose}
-                            look={Button.Looks.LINK}
-                        >
-                            Cancel
-                        </Button>
+            <ModalFooter className="modal-footer">
+                <Flex className="button-container">
+                    <Button
+                        size={Button.Sizes.SMALL}
+                        color={Button.Colors.PRIMARY}
+                        onClick={warningModalProps.onClose}
+                        look={Button.Looks.LINK}
+                    >
+                        Cancel
+                    </Button>
+                    <Flex className="button-group">
+                        {!Settings.ignoreResetWarning && (
+                            <Button
+                                size={Button.Sizes.SMALL}
+                                className="button-danger-background"
+                                onClick={() => {
+                                    Settings.ignoreResetWarning = true;
+                                }}
+                            >
+                                Disable Warning Forever
+                            </Button>
+                        )}
                         <Tooltip text="This action cannot be undone. Are you sure?" shouldShow={true}>
                             {({ onMouseEnter, onMouseLeave }) => (
                                 <Button
                                     size={Button.Sizes.SMALL}
-                                    color={Button.Colors.BRAND}
                                     onClick={() => {
-                                        resetSettings(plugin, warningModalProps, pluginModalProps, onRestartNeeded);
+                                        resetSettings(plugin, pluginModalProps, pluginModalProps, onRestartNeeded);
                                     }}
                                     onMouseEnter={onMouseEnter}
                                     onMouseLeave={onMouseLeave}

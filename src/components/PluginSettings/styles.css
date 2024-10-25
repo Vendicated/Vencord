@@ -60,7 +60,7 @@
 
 .vc-plugins-info-card {
     padding: 1em;
-    height: 8em;
+    height: fit-content;
     display: flex;
     flex-direction: column;
     background-color: var(--background-secondary-alt) !important;
@@ -125,11 +125,61 @@
     margin: 0 10px;
 }
 
-/* disable all modal */
+/* Shared styles for warning modal and disable all modal */
+
+.vc-text-selectable {
+    user-select: none;
+}
+
+.vc-warning-info {
+    gap: 15px;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+}
+
+.vc-warning-info img {
+    width: 70%;
+    height: auto;
+    display: block;
+    margin: auto auto 10px;
+}
+
+.vc-warning-info strong {
+    font-weight: bold;
+}
+
+.text-danger {
+    color: var(--text-danger);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.text-normal {
+    color: var(--text-normal);
+    font-size: 1.2rem;
+}
+
+.text-normal.margin-bottom {
+    margin-bottom: 10px;
+}
 
 .button-danger-background {
-    background-color: var(--button-danger-background) !important;
-    margin: 20px 0;
+    background-color: var(--background-color) !important;
+    border-style: solid;
+    border-width: .1rem;
+    border-color: var(--button-outline-danger-border) !important;
+}
+
+.button-danger-background.top-margin {
+    margin-top: 10px;
+}
+
+.button-danger-background:hover {
+    background-color: var(--button-outline-danger-background-hover) !important;
+    border-style: solid;
+    border-width: .1rem;
+    border-color: var(--button-outline-danger-border) !important;
 }
 
 .button-danger-background-no-margin {
@@ -137,53 +187,51 @@
     color: var(--header-primary);
 }
 
-.button-danger-background:hover {
-    background-color: var(--button-danger-background-hover);
+.button-danger-background-no-margin:hover {
+    background-color: var(--button-danger-background-hover) !important;
+    filter: saturate(75%);
 }
 
-.alert-body {
-    text-align: center;
+.vc-modal-close-button {
+    margin-left: auto !important;
 }
 
-.alert-body img {
-    width: 60%;
-    height: auto;
-    display: block;
-    margin: auto auto 10px;
-    border-radius: 8px;
+.modal-footer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.alert-body p.warning-text {
+.modal-footer .button-container {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.button-group {
+    display: flex !important;
+    gap: 10px;
+    align-items: center;
+    justify-content: end !important;
+}
+
+/* Specific to disable all modal */
+
+.warning-text {
+    color: var(--text-danger);
     font-size: 1.2rem;
-    color: var(--text-danger);
+}
+
+.warning-text span {
     font-weight: bold;
-}
-
-.alert-body p {
-    font-size: 1rem;
-}
-
-.alert-body span {
     text-decoration: underline;
 }
 
-.disable-warning {
-    font-size: 0.8rem;
-    background-color: transparent !important;
-    color: var(--text-danger) !important;
-    cursor: pointer;
-    margin: 0 auto;
-    width: fit-content;
-    text-decoration: underline;
-    transition: color 0.2s ease;
-}
-
-.disable-warning:hover {
-    color: var(--text-danger);
-    background-color: transparent;
-    opacity: 0.8;
-}
-
-.disable-warning:active {
-    background-color: transparent;
+.disable-all-button {
+    color: var(--header-primary);
+    width: 150px;
+    margin-left: auto;
+    margin-right: 4.5px !important;
 }
