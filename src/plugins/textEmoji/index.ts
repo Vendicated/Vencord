@@ -28,7 +28,7 @@ export default definePlugin({
     patches: [
         // Reactions
         {
-            find: "getSrc(){",
+            find: 'throw Error("Unknown Src for Emoji")',
             replacement: {
                 match: /(if\(null!=\i\))return \i\.\i\.getURL\(\i\)/,
                 replace: "$1return null",
