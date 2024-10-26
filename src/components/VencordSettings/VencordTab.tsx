@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./VencordTab.css";
+
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
@@ -60,41 +62,49 @@ function EquicordSettings() {
         key: KeysOfType<typeof settings, boolean>;
         title: string;
         note: string;
+        warning: { enabled: boolean; message?: string; };
     }> =
         [
             {
                 key: "useQuickCss",
                 title: "Enable Custom CSS",
-                note: "Loads your Custom CSS"
+                note: "Loads your Custom CSS",
+                warning: { enabled: false }
             },
             !IS_WEB && {
                 key: "enableReactDevtools",
                 title: "Enable React Developer Tools",
-                note: "Requires a full restart"
+                note: "Requires a full restart",
+                warning: { enabled: false }
             },
             !IS_WEB && (!IS_DISCORD_DESKTOP || !isWindows ? {
                 key: "frameless",
                 title: "Disable the window frame",
-                note: "Requires a full restart"
+                note: "Requires a full restart",
+                warning: { enabled: false }
             } : {
                 key: "winNativeTitleBar",
                 title: "Use Windows' native title bar instead of Discord's custom one",
-                note: "Requires a full restart"
+                note: "Requires a full restart",
+                warning: { enabled: false }
             }),
             !IS_WEB && {
                 key: "transparent",
                 title: "Enable window transparency.",
-                note: "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart"
+                note: "You need a theme that supports transparency or this will do nothing. Requires a full restart",
+                warning: { enabled: true, message: "This will stop the window from being resizable" }
             },
             !IS_WEB && isWindows && {
                 key: "winCtrlQ",
                 title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
-                note: "Requires a full restart"
+                note: "Requires a full restart",
+                warning: { enabled: false }
             },
             IS_DISCORD_DESKTOP && {
                 key: "disableMinSize",
                 title: "Disable minimum window size",
-                note: "Requires a full restart"
+                note: "Requires a full restart",
+                warning: { enabled: false }
             },
         ];
 
@@ -154,7 +164,14 @@ function EquicordSettings() {
                         key={s.key}
                         value={settings[s.key]}
                         onChange={v => settings[s.key] = v}
-                        note={s.note}
+                        note={
+                            s.warning.enabled ? <>
+                                {s.note}
+                                <div className="form-switch-warning">
+                                    {s.warning.message}
+                                </div>
+                            </> : s.note
+                        }
                     >
                         {s.title}
                     </Switch>

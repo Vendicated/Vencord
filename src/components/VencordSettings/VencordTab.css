@@ -1,0 +1,49 @@
+:root{
+    --vc-donatebutton: #ffc1cbc2;
+    --vc-donatebutton-secondary: #f7536fe5;
+}
+
+.vc-donatebutton{
+    background-color: var(--background-color) !important;
+    border-color: var(--vc-donatebutton);
+    filter: brightness(1);
+    border-width: .1rem;
+    border-style: solid;
+}
+
+.vc-donatebutton:hover{
+    background-color: var(--vc-donatebutton) !important;
+    border-color: transparent !important;
+}
+
+
+.vc-joindiscordbutton{
+    background-color: var(--button-secondary-background) !important;
+}
+
+.vc-joindiscordbutton:hover{
+    background-color: var(--button-secondary-background-hover) !important;
+}
+
+.vc-settings-card-buttons{
+    display: flex;
+    gap: 1em !important;
+    margin-left: .2rem;
+    margin-bottom: .2rem;
+}
+
+.vc-settingbuttons{
+    border-radius: 5px !important;
+}
+
+.form-switch-warning {
+    font-size: 16px;
+    background-color: rgb(240 71 71 / 10%);
+    color: rgb(240 71 71);
+    border: 1px solid rgb(240 71 71 / 60%);
+    border-radius: 4px;
+    font-weight: 500;
+    padding: 6px 10px;
+    text-align: center;
+    margin-top: 10px;
+}

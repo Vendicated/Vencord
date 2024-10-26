@@ -169,6 +169,7 @@
     border-style: solid;
     border-width: .1rem;
     border-color: var(--button-outline-danger-border) !important;
+    border-radius: 5px;
 }
 
 .button-danger-background.top-margin {
