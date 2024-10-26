@@ -1,0 +1,5 @@
+a[href^="/channels/@me"] [class^="layout"] {
+    min-height: 42px;
+    max-height: 50px;
+    height: unset;
+}
