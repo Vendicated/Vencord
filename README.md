@@ -51,6 +51,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - FriendshipRanks by Samwich
 - FriendTags by Samwich
 - GensokyoRadioRPC by RyanCaoDev & Prince527
+- GifCollections by Aria & creations
 - GifRoulette by Samwich
 - Glide by Samwich
 - GlobalBadges by HypedDomi & Hosted by Wolfie
