@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "minimum_chrome_version": "91",
+    "minimum_chrome_version": "111",
 
     "name": "Vencord Web",
     "description": "The cutest Discord mod now in your browser",

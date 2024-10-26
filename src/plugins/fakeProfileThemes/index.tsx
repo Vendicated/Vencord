@@ -57,7 +57,7 @@ function decode(bio: string): Array<number> | null {
     if (bio == null) return null;
 
     const colorString = bio.match(
-        /\u{e005b}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e002c}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]+?)\u{e005d}/u,
+        /\u{e005b}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]{1,6})\u{e002c}\u{e0023}([\u{e0061}-\u{e0066}\u{e0041}-\u{e0046}\u{e0030}-\u{e0039}]{1,6})\u{e005d}/u,
     );
     if (colorString != null) {
         const parsed = [...colorString[0]]
@@ -109,9 +109,9 @@ interface ProfileModalProps {
 }
 
 const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
-const ProfileModal = findComponentByCodeLazy<ProfileModalProps>('"ProfileCustomizationPreview"');
+const ProfileModal = findComponentByCodeLazy<ProfileModalProps>("isTryItOutFlow:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
 
-const requireColorPicker = extractAndLoadChunksLazy(["USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format"], /createPromise:\(\)=>\i\.\i\("?(.+?)"?\).then\(\i\.bind\(\i,"?(.+?)"?\)\)/);
+const requireColorPicker = extractAndLoadChunksLazy(["USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format"], /createPromise:\(\)=>\i\.\i(\("?.+?"?\)).then\(\i\.bind\(\i,"?(.+?)"?\)\)/);
 
 export default definePlugin({
     name: "FakeProfileThemes",
@@ -121,7 +121,7 @@ export default definePlugin({
         {
             find: "UserProfileStore",
             replacement: {
-                match: /(?<=getUserProfile\(\i\){return )(\i\[\i\])/,
+                match: /(?<=getUserProfile\(\i\){return )(.+?)(?=})/,
                 replace: "$self.colorDecodeHook($1)"
             }
         },
