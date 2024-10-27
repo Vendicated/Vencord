@@ -18,11 +18,12 @@
 
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import { showNotice } from "@api/Notices";
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind } from "@utils/patches";
 import { Patch, Plugin, ReporterTestable, StartAt } from "@utils/types";
-import { FluxDispatcher } from "@webpack/common";
+import { FluxDispatcher, Toasts } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
 
 import Plugins from "~plugins";
@@ -302,3 +303,62 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
 
     return true;
 }, p => `stopPlugin ${p.name}`);
+
+const pluginToggleLogger = new Logger("PluginSettings", "#a6d189");
+
+function showErrorToast(message: string) {
+    Toasts.show({
+        message,
+        type: Toasts.Type.FAILURE,
+        id: Toasts.genId(),
+        options: {
+            position: Toasts.Position.BOTTOM
+        }
+    });
+}
+
+export function togglePluginEnabled(isEnabled: boolean, plugin: Plugin, onRestartNeeded: (pluginName: string) => void) {
+    const settings = Settings.plugins[plugin.name];
+    const wasEnabled = isEnabled;
+
+    // If we're enabling a plugin, make sure all deps are enabled recursively.
+    if (!wasEnabled) {
+        const { restartNeeded, failures } = startDependenciesRecursive(plugin);
+        if (failures.length) {
+            pluginToggleLogger.error(`Failed to start dependencies for ${plugin.name}: ${failures.join(", ")}`);
+            showNotice("Failed to start dependencies: " + failures.join(", "), "Close", () => null);
+            return;
+        } else if (restartNeeded) {
+            // If any dependencies have patches, don't start the plugin yet.
+            settings.enabled = true;
+            onRestartNeeded(plugin.name);
+            return;
+        }
+    }
+
+    // if the plugin has patches, dont use stopPlugin/startPlugin. Wait for restart to apply changes.
+    if (plugin.patches?.length) {
+        settings.enabled = !wasEnabled;
+        onRestartNeeded(plugin.name);
+        return;
+    }
+
+    // If the plugin is enabled, but hasn't been started, then we can just toggle it off.
+    if (wasEnabled && !plugin.started) {
+        settings.enabled = !wasEnabled;
+        return;
+    }
+
+    const result = wasEnabled ? stopPlugin(plugin) : startPlugin(plugin);
+
+    if (!result) {
+        settings.enabled = false;
+
+        const msg = `Error while ${wasEnabled ? "stopping" : "starting"} plugin ${plugin.name}`;
+        pluginToggleLogger.error(msg);
+        showErrorToast(msg);
+        return;
+    }
+
+    settings.enabled = !wasEnabled;
+}

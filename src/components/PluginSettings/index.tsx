@@ -19,7 +19,7 @@
 import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
-import { Settings, useSettings } from "@api/Settings";
+import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
@@ -35,13 +35,18 @@ import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextI
 
 import Plugins, { ExcludedPlugins } from "~plugins";
 
-import { ExcludedReasons, togglePluginEnabled } from "./utils";
-
-
 const cl = classNameFactory("vc-plugins-");
 
 const InputStyles = findByPropsLazy("inputWrapper", "inputDefault", "error");
 const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
+
+export const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop" | "desktop" | "dev", string> = {
+    desktop: "Discord Desktop app or Vesktop",
+    discordDesktop: "Discord Desktop app",
+    vencordDesktop: "Vesktop app",
+    web: "Vesktop app and the Web version of Discord",
+    dev: "Developer version of Vencord"
+};
 
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
@@ -76,9 +81,9 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 }
 
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
-    const isEnabled = () => Settings.plugins[plugin.name].enabled ?? false;
+    const isEnabled = () => Vencord.Plugins.isPluginEnabled(plugin.name);
 
-    const togglePlugin = () => togglePluginEnabled(isEnabled(), plugin, onRestartNeeded);
+    const togglePlugin = () => Vencord.Plugins.togglePluginEnabled(isEnabled(), plugin, onRestartNeeded);
 
     return (
         <AddonCard

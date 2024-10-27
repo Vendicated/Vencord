@@ -22,14 +22,13 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { openPluginModal } from "@components/PluginSettings/PluginModal";
-import { ExcludedReasons, togglePluginEnabled } from "@components/PluginSettings/utils";
+import { ExcludedReasons, PluginCard } from "@components/PluginSettings";
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
 import { Devs, SUPPORT_CHANNEL_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
-import { isObjectEmpty, isPluginDev, tryOrElse } from "@utils/misc";
+import { isPluginDev, tryOrElse } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
@@ -303,74 +302,64 @@ export default definePlugin({
                         </Button>
                     );
                 }
+            }
 
-                if (props.message.author.id === VENBOT_USER_ID) {
-                    const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
-                    if (match) {
+            if (props.message.author.id === VENBOT_USER_ID) {
+                const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
+                if (match) {
+                    buttons.push(
+                        <Button
+                            key="vc-run-snippet"
+                            onClick={async () => {
+                                try {
+                                    await AsyncFunction(match[1])();
+                                    showToast("Success!", Toasts.Type.SUCCESS);
+                                } catch (e) {
+                                    new Logger(this.name).error("Error while running snippet:", e);
+                                    showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
+                                }
+                            }}
+                        >
+                            Run Snippet
+                        </Button>
+                    );
+                }
+                if (props.message.embeds[0]?.url?.includes("/plugins/")) {
+                    const pluginName = props.message.embeds[0].rawTitle;
+                    const excludedPlugin = ExcludedPlugins[pluginName];
+                    if (excludedPlugin) {
                         buttons.push(
                             <Button
-                                key="vc-run-snippet"
-                                onClick={async () => {
-                                    try {
-                                        await AsyncFunction(match[1])();
-                                        showToast("Success!", Toasts.Type.SUCCESS);
-                                    } catch (e) {
-                                        new Logger(this.name).error("Error while running snippet:", e);
-                                        showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
-                                    }
-                                }}
+                                key="vc-plugin-notice"
+                                color={Button.Colors.RED}
                             >
-                                Run Snippet
+                                Only available on {ExcludedReasons[excludedPlugin]}
                             </Button>
                         );
-                    }
-                    if (props.message.embeds[0]?.url?.includes("/plugins/")) {
-                        const pluginName = props.message.embeds[0].rawTitle;
-                        const excludedPlugin = ExcludedPlugins[pluginName];
-                        if (excludedPlugin) {
+                        // button really wide, good ideas?
+                    } else {
+                        const isEnabled = Vencord.Plugins.isPluginEnabled(pluginName);
+                        const toggle = isEnabled ? "Disable" : "Enable";
+                        const plugin = plugins[pluginName];
+                        const onRestartNeeded = () => showToast("Restart to apply changes!");
+                        const togglePlugin = () => Vencord.Plugins.togglePluginEnabled(isEnabled, plugin, onRestartNeeded);
+                        if (plugin.required) {
                             buttons.push(
                                 <Button
-                                    key="vc-plugin-notice"
-                                    color={Button.Colors.RED}
+                                    key="vc-required-plugin"
                                 >
-                                    Only available on {ExcludedReasons[excludedPlugin]}
+                                    {pluginName} is required
                                 </Button>
                             );
-                            // button really wide, good ideas?
                         } else {
-                            const isEnabled = Vencord.Plugins.isPluginEnabled(pluginName);
-                            const toggle = isEnabled ? "Disable" : "Enable";
-                            const plugin = plugins[pluginName];
-                            const onRestartNeeded = () => showToast("Restart to apply changes!");
-                            const togglePlugin = () => togglePluginEnabled(isEnabled, plugin, onRestartNeeded);
-                            if (plugin.required) {
-                                buttons.push(
-                                    <Button
-                                        key="vc-required-plugin"
-                                    >
-                                        {pluginName} is required
-                                    </Button>
-                                );
-                            } else {
-                                buttons.push(
-                                    <Button
-                                        key="vc-enable-plugin"
-                                        onClick={togglePlugin}
-                                    >
-                                        {toggle} {pluginName}
-                                    </Button>
-                                );
-                            }
-                            if (plugin.options && !isObjectEmpty(plugin.options)) {
-                                buttons.push(
-                                    <Button
-                                        key="vc-plugin-settings"
-                                        onClick={() => openPluginModal(plugin, onRestartNeeded)}
-                                    >
-                                        Open plugin Settings
-                                    </Button>
-                                );
-                            }
+                            buttons.push(
+                                <PluginCard
+                                    onRestartNeeded={name => console.log("Restart needed for", name)}
+                                    disabled={false}
+                                    plugin={plugin}
+                                    key={pluginName}
+                                />
+                            );
                         }
                     }
                 }
