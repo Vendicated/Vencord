@@ -88,7 +88,7 @@ export default definePlugin({
     name: "SilentTyping",
     authors: [Devs.Ven, Devs.Rini, Devs.ImBanana],
     description: "Hide that you are typing",
-    dependencies: ["CommandsAPI", "ChatInputButtonAPI"],
+    dependencies: ["ChatInputButtonAPI"],
     settings,
     contextMenus: {
         "textarea-context": ChatBarContextCheckbox
