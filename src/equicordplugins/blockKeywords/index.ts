@@ -7,10 +7,7 @@
 import { definePluginSettings, Settings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
 import { MessageJSON } from "discord-types/general";
-
-const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 
 let blockedKeywords: Array<RegExp>;
 
