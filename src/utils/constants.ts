@@ -31,21 +31,6 @@ export interface Dev {
     badge?: boolean;
 }
 
-// No clue where to put these
-const extensionMap = {
-    "ogg": [".ogv", ".oga", ".ogx", ".ogm", ".spx", ".opus"],
-    "jpg": [".jpg", ".jpeg", ".jfif", ".jpe", ".jif", ".jfi", ".pjpeg", ".pjp"],
-    "svg": [".svgz"],
-    "mp4": [".m4v", ".m4a", ".m4r", ".m4b", ".m4p"],
-    "mov": [".movie", ".qt"],
-};
-
-export const reverseExtensionMap = Object.entries(extensionMap).reduce((acc, [target, exts]) => {
-    exts.forEach(ext => acc[ext] = `.${target}`);
-    return acc;
-}, {} as Record<string, string>);
-
-
 /**
  * If you made a plugin or substantial contribution, add yourself here.
  * This object is used for the plugin author list, as well as to add a contributor badge to your profile.
