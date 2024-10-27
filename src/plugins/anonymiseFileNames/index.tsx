@@ -122,7 +122,7 @@ export default definePlugin({
         const fileName = extIdx !== -1 ? file.substring(0, extIdx) : "";
         let ext = extIdx !== -1 ? file.slice(extIdx) : "";
         if (Settings.plugins.FixFileExtensions.enabled) {
-            ext = reverseExtensionMap[ext];
+            ext = reverseExtensionMap[ext] || ext;
         }
         if ((upload.anonymise ?? settings.store.anonymiseByDefault) === false) return fileName + ext;
 
