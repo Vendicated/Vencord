@@ -323,9 +323,9 @@ export default definePlugin({
                         );
                     }
 
-                    const plugin_name = props.message.embeds[0]?.url?.match(/vencord.dev\/plugins\/([^/?#]+)/);
-                    if (plugin_name) {
-                        const pluginKey = plugin_name[1];
+                    const pluginName = props.message.embeds[0]?.url?.match(/vencord.dev\/plugins\/([^/?#]+)/);
+                    if (pluginName) {
+                        const pluginKey = pluginName[1];
                         buttons.push(
                             <Button
                                 key="vc-enable-plugin"
