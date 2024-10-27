@@ -16,6 +16,7 @@ export default definePlugin({
     authors: [EquicordDevs.thororen],
     description: "Fixes file extensions by renaming them to a compatible supported format if possible",
     patches: [
+        // Taken from AnonymiseFileNames
         {
             find: "instantBatchUpload:",
             predicate: () => !Settings.plugins.AnonymiseFileNames.enabled,
@@ -25,6 +26,7 @@ export default definePlugin({
                     "uploadFiles:(...args)=>(args[0].uploads.forEach(f=>f.filename=$self.fixExt(f)),$1(...args)),",
             },
         },
+        // Also taken from AnonymiseFileNames
         {
             find: 'addFilesTo:"message.attachments"',
             predicate: () => !Settings.plugins.AnonymiseFileNames.enabled,
