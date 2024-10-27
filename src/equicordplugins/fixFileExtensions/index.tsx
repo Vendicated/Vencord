@@ -7,8 +7,9 @@
 import { Upload } from "@api/MessageEvents";
 import { Settings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
-import { reverseExtensionMap } from "./components";
 import definePlugin from "@utils/types";
+
+import { reverseExtensionMap } from "./components";
 
 type ExtUpload = Upload & { fixExtension?: boolean; };
 
