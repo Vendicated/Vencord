@@ -205,11 +205,7 @@ async function parseFile(fileName: string) {
             .replace(/\/index\.([jt]sx?)$/, "")
             .replace(/^src\/plugins\//, "");
 
-        let readme = "";
-        try {
-            readme = readFileSync(join(fileName, "..", "README.md"), "utf-8");
-        } catch { }
-        return [data, readme] as const;
+        return [data] as const;
     }
 
     throw fail("no default export called 'definePlugin' found");
@@ -240,15 +236,13 @@ function isPluginFile({ name }: { name: string; }) {
     parseEquicordDevs();
 
     const plugins = [] as PluginData[];
-    const readmes = {} as Record<string, string>;
 
     await Promise.all(["src/equicordplugins"].flatMap(dir =>
         readdirSync(dir, { withFileTypes: true })
             .filter(isPluginFile)
             .map(async dirent => {
-                const [data, readme] = await parseFile(await getEntryPoint(dir, dirent));
+                const [data] = await parseFile(await getEntryPoint(dir, dirent));
                 plugins.sort().push(data);
-                if (readme) readmes[data.name] = readme;
             })
     ));
 
