@@ -42,7 +42,7 @@ export function getIdFromUrl(url: string): string {
  */
 
 function toStickerPackId(id: string): string {
-    return "Vencord-MoreStickers-Line-Emoji-Pack-" + id;
+    return "MoreStickers:Line:Emoji-Pack:" + id;
 }
 
 /**
@@ -54,7 +54,7 @@ function toStickerPackId(id: string): string {
  */
 
 function toStickerId(stickerId: string, lineEmojiPackId: string): string {
-    return "Vencord-MoreStickers-Line-Emoji" + lineEmojiPackId + "-" + stickerId;
+    return "MoreStickers:Line-Emoji:" + lineEmojiPackId + ":" + stickerId;
 }
 
 /**

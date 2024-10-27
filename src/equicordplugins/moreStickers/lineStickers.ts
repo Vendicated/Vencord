@@ -42,7 +42,7 @@ export function getIdFromUrl(url: string): string {
  */
 
 function toStickerPackId(id: string): string {
-    return "Vencord-MoreStickers-Line-Pack-" + id;
+    return "MoreStickers:Line:Pack:" + id;
 }
 
 /**
@@ -54,7 +54,7 @@ function toStickerPackId(id: string): string {
  */
 
 function toStickerId(stickerId: string, lineStickerPackId: string): string {
-    return "Vencord-MoreStickers-Line-Sticker" + lineStickerPackId + "-" + stickerId;
+    return "MoreStickers:Line:Sticker:" + lineStickerPackId + ":" + stickerId;
 }
 
 /**

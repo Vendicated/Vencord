@@ -11,7 +11,8 @@ import { Button, Forms, React, TabBar, Text, TextArea, Toasts } from "@webpack/c
 
 import { convert as convertLineEP, getIdFromUrl as getLineEmojiPackIdFromUrl, getStickerPackById as getLineEmojiPackById, isLineEmojiPackHtml, parseHtml as getLineEPFromHtml } from "../lineEmojis";
 import { convert as convertLineSP, getIdFromUrl as getLineStickerPackIdFromUrl, getStickerPackById as getLineStickerPackById, isLineStickerPackHtml, parseHtml as getLineSPFromHtml } from "../lineStickers";
-import { deleteStickerPack, getStickerPackMetas, saveStickerPack } from "../stickers";
+import { migrate } from "../migrate-v1";
+import { deleteStickerPack, getStickerPack, getStickerPackMetas, saveStickerPack } from "../stickers";
 import { SettingsTabsKey, Sticker, StickerPack, StickerPackMeta } from "../types";
 import { cl, clPicker, Mutex } from "../utils";
 
@@ -21,7 +22,7 @@ const mutex = new Mutex();
 export const RECENT_STICKERS_ID = "recent";
 export const RECENT_STICKERS_TITLE = "Recently Used";
 
-const KEY = "Vencord-MoreStickers-RecentStickers";
+const KEY = "MoreStickers:RecentStickers";
 
 const noDrag = {
     onMouseDown: e => { e.preventDefault(); return false; },
@@ -122,8 +123,8 @@ export const Settings = () => {
                     <Forms.FormTitle tag="h5">Add Sticker Pack from URL</Forms.FormTitle>
                     <Forms.FormText>
                         <p>
-                            Currently LINE stickers supported only. <br />
-                            Telegram stickers support is planned, but due to the lack of a public API, it is most likely to be provided by sticker pack files instead of adding by URL.
+                            Currently LINE stickers/emojis supported only. <br />
+                            Get Telegram stickers with <a href="https://github.com/lekoOwO/MoreStickersConverter">MoreStickersConverter</a>.
                         </p>
                     </Forms.FormText>
                     <Flex flexDirection="row" style={{
@@ -357,6 +358,51 @@ export const Settings = () => {
                     </Button>
                 </div>
             }
+            {
+                tab === SettingsTabsKey.MISC &&
+                <div className="section">
+                    <Forms.FormTitle tag="h5">Misc tools</Forms.FormTitle>
+
+                    <Flex flexDirection="row" style={{
+                        alignItems: "center",
+                        justifyContent: "center"
+                    }} >
+                        <Button
+                            size={Button.Sizes.SMALL}
+                            onClick={async e => {
+                                const result: StickerPack[] = [];
+                                const stickerPacks = await getStickerPackMetas();
+                                for (const stickerPack of stickerPacks) {
+                                    const sp = await getStickerPack(stickerPack.id);
+                                    if (sp) {
+                                        result.push(sp);
+                                    }
+                                }
+
+                                const a = document.createElement("a");
+                                a.href = URL.createObjectURL(new Blob([JSON.stringify(result)], { type: "application/json" }));
+                                a.download = "MoreStickers.stickerpacks";
+                                a.click();
+
+                                Toasts.show({
+                                    message: "Sticker Packs exported",
+                                    type: Toasts.Type.SUCCESS,
+                                    id: Toasts.genId(),
+                                    options: {
+                                        duration: 1000
+                                    }
+                                });
+                            }}
+                        >Export Sticker Packs</Button>
+                        <Button
+                            size={Button.Sizes.SMALL}
+                            onClick={async e => {
+                                await migrate();
+                            }}
+                        >Migrate from v1</Button>
+                    </Flex>
+                </div>
+            }
             <Forms.FormDivider style={{
                 marginTop: "8px",
                 marginBottom: "8px"
@@ -409,14 +455,14 @@ export function Wrapper(props: { children: JSX.Element | JSX.Element[]; }) {
     );
 }
 
-export async function getRecentStickers(): Promise<Sticker[]> {
-    return (await DataStore.get(KEY)) ?? [];
+export async function getRecentStickers(key: string = KEY): Promise<Sticker[]> {
+    return (await DataStore.get(key)) ?? [];
 }
 
-export async function setRecentStickers(stickers: Sticker[]): Promise<void> {
+export async function setRecentStickers(stickers: Sticker[], key: string = KEY): Promise<void> {
     const unlock = await mutex.lock();
     try {
-        await DataStore.set(KEY, stickers);
+        await DataStore.set(key, stickers);
     } finally {
         unlock();
     }

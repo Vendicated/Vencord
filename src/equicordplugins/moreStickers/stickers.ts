@@ -11,7 +11,7 @@ import { StickerPack, StickerPackMeta } from "./types";
 import { Mutex } from "./utils";
 const mutex = new Mutex();
 
-const PACKS_KEY = "Vencord-MoreStickers-Packs";
+const PACKS_KEY = "MoreStickers:Packs";
 
 /**
   * Convert StickerPack to StickerPackMeta
@@ -34,7 +34,7 @@ function stickerPackToMeta(sp: StickerPack): StickerPackMeta {
   * @param {StickerPack} sp The StickerPack to save.
   * @return {Promise<void>}
   */
-export async function saveStickerPack(sp: StickerPack): Promise<void> {
+export async function saveStickerPack(sp: StickerPack, packsKey: string = PACKS_KEY): Promise<void> {
     const meta = stickerPackToMeta(sp);
 
     await Promise.all([
@@ -43,8 +43,8 @@ export async function saveStickerPack(sp: StickerPack): Promise<void> {
             const unlock = await mutex.lock();
 
             try {
-                const packs = (await DataStore.get(PACKS_KEY) ?? null) as (StickerPackMeta[] | null);
-                await DataStore.set(PACKS_KEY, packs === null ? [meta] : [...packs, meta]);
+                const packs = (await DataStore.get(packsKey) ?? null) as (StickerPackMeta[] | null);
+                await DataStore.set(packsKey, packs === null ? [meta] : [...packs, meta]);
             } finally {
                 unlock();
             }
@@ -57,8 +57,8 @@ export async function saveStickerPack(sp: StickerPack): Promise<void> {
   *
   * @return {Promise<StickerPackMeta[]>}
   */
-export async function getStickerPackMetas(): Promise<StickerPackMeta[]> {
-    const packs = (await DataStore.get(PACKS_KEY)) ?? null as (StickerPackMeta[] | null);
+export async function getStickerPackMetas(packsKey: string | undefined = PACKS_KEY): Promise<StickerPackMeta[]> {
+    const packs = (await DataStore.get(packsKey)) ?? null as (StickerPackMeta[] | null);
     return packs ?? [];
 }
 
@@ -89,7 +89,7 @@ export async function getStickerPackMeta(id: string): Promise<StickerPackMeta | 
  * @param {string} id The id of the sticker pack.
  * @return {Promise<void>}
  * */
-export async function deleteStickerPack(id: string): Promise<void> {
+export async function deleteStickerPack(id: string, packsKey: string = PACKS_KEY): Promise<void> {
     await Promise.all([
         DataStore.del(id),
         removeRecentStickerByPackId(id),
@@ -97,9 +97,9 @@ export async function deleteStickerPack(id: string): Promise<void> {
             const unlock = await mutex.lock();
 
             try {
-                const packs = (await DataStore.get(PACKS_KEY) ?? null) as (StickerPackMeta[] | null);
+                const packs = (await DataStore.get(packsKey) ?? null) as (StickerPackMeta[] | null);
                 if (packs === null) return;
-                await DataStore.set(PACKS_KEY, packs.filter(p => p.id !== id));
+                await DataStore.set(packsKey, packs.filter(p => p.id !== id));
             } finally {
                 unlock();
             }
