@@ -19,7 +19,8 @@
 import { Upload } from "@api/MessageEvents";
 import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs, reverseExtensionMap } from "@utils/constants";
+import { Devs } from "@utils/constants";
+import { reverseExtensionMap } from "../../equicordplugins/fixFileExtensions/components";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 
