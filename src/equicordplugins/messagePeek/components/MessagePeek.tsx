@@ -15,6 +15,12 @@ import { MessagePeekProps } from "../types";
 const ChannelWrapperStyles = findByPropsLazy("muted", "subText");
 const ChannelStyles = findByPropsLazy("closeButton", "subtext");
 
+declare module "discord-types/general" {
+    interface User {
+        globalName?: string;
+    }
+}
+
 export default function MessagePeek(props: MessagePeekProps) {
     const { channel, channel_url } = props;
     if (!channel && !channel_url) return null;
@@ -38,7 +44,7 @@ export default function MessagePeek(props: MessagePeekProps) {
         >
             <TooltipContainer text={content.length > 256 ? Parser.parse(content.slice(0, 256).trim()) : Parser.parse(content)}>
                 <div className={ChannelStyles.subtext}>
-                    {`${(lastMessage.author as any).globalName || lastMessage.author.username}: `}
+                    {`${lastMessage.author.globalName || lastMessage.author.username}: `}
                     {Parser.parseInlineReply(content)}
                 </div>
             </TooltipContainer>

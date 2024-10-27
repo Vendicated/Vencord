@@ -9,12 +9,16 @@ import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 import MessagePeek from "./components/MessagePeek";
+import { settings } from "./settings";
 import { MessagePeekProps } from "./types";
 
 export default definePlugin({
     name: "MessagePeek",
     description: "See the last message in a Channel like on mobile",
     authors: [EquicordDevs.HypedDomi],
+
+    settings: settings,
+
     patches: [
         {
             // DMs
@@ -28,7 +32,8 @@ export default definePlugin({
                             $self.renderMessagePeek({ channel_url: $1.children.props.children[0].props.to })
                         ];
                 `.replace(/\s+/g, "")
-            }
+            },
+            predicate: () => settings.store.dms === true
         },
         {
             // Guild channels
@@ -40,7 +45,8 @@ export default definePlugin({
                         $1[0].props.children[1].props.children,
                         $self.renderMessagePeek({ channel: $1[0].props.children[0].props.channel })
                     ];`.replace(/\s+/g, "")
-            }
+            },
+            predicate: () => settings.store.guildChannels === true
         }
     ],
     renderMessagePeek: (props: MessagePeekProps) => {
