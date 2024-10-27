@@ -35,6 +35,7 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Embed } from "discord-types/general";
 
 import gitHash from "~git-hash";
 import plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
@@ -147,13 +148,22 @@ export default definePlugin({
 
     settings,
 
-    patches: [{
-        find: ".BEGINNING_DM.format",
-        replacement: {
-            match: /BEGINNING_DM\.format\(\{.+?\}\),(?=.{0,300}(\i)\.isMultiUserDM)/,
-            replace: "$& $self.renderContributorDmWarningCard({ channel: $1 }),"
+    patches: [
+        {
+            find: ".BEGINNING_DM.format",
+            replacement: {
+                match: /BEGINNING_DM\.format\(\{.+?\}\),(?=.{0,300}(\i)\.isMultiUserDM)/,
+                replace: "$& $self.renderContributorDmWarningCard({ channel: $1 }),"
+            },
+        },
+        {
+            find: "this.renderInlineMediaEmbed",
+            replacement: {
+                match: /return null(?<=var \i;let{embed:.{1,80})/,
+                replace: "if(this.props?.embed?.url.includes('https://vencord.dev/plugins/')){return $self.renderPluginCard({embed:this.props.embed})}$&"
+            }
         }
-    }],
+    ],
 
     commands: [
         {
@@ -251,6 +261,35 @@ export default definePlugin({
         );
     }, { noop: true }),
 
+    renderPluginCard: ErrorBoundary.wrap(({ embed }: { embed: Embed; }) => {
+        const pluginName = embed.rawTitle;
+        const excludedPlugin = ExcludedPlugins[pluginName];
+        if (excludedPlugin) {
+            return (
+                <Button
+                    key="vc-plugin-notice"
+                    color={Button.Colors.RED}
+                >
+                    Only available on {ExcludedReasons[excludedPlugin]}
+                </Button>
+            );
+            // button really wide, good ideas?
+        } else {
+            const plugin = plugins[pluginName];
+            return (
+                <div style={{ width: "40%" }}>
+                    <PluginCard
+                        onRestartNeeded={() => showToast("Restart to apply changes!")}
+                        disabled={plugin.required ?? false}
+                        plugin={plugin}
+                        key={pluginName}
+                    />
+                </div>
+            );
+
+        }
+    }, { noop: true }),
+
     start() {
         addAccessory("vencord-debug", props => {
             const buttons = [] as JSX.Element[];
@@ -323,45 +362,6 @@ export default definePlugin({
                             Run Snippet
                         </Button>
                     );
-                }
-                if (props.message.embeds[0]?.url?.includes("/plugins/")) {
-                    const pluginName = props.message.embeds[0].rawTitle;
-                    const excludedPlugin = ExcludedPlugins[pluginName];
-                    if (excludedPlugin) {
-                        buttons.push(
-                            <Button
-                                key="vc-plugin-notice"
-                                color={Button.Colors.RED}
-                            >
-                                Only available on {ExcludedReasons[excludedPlugin]}
-                            </Button>
-                        );
-                        // button really wide, good ideas?
-                    } else {
-                        const isEnabled = Vencord.Plugins.isPluginEnabled(pluginName);
-                        const toggle = isEnabled ? "Disable" : "Enable";
-                        const plugin = plugins[pluginName];
-                        const onRestartNeeded = () => showToast("Restart to apply changes!");
-                        const togglePlugin = () => Vencord.Plugins.togglePluginEnabled(isEnabled, plugin, onRestartNeeded);
-                        if (plugin.required) {
-                            buttons.push(
-                                <Button
-                                    key="vc-required-plugin"
-                                >
-                                    {pluginName} is required
-                                </Button>
-                            );
-                        } else {
-                            buttons.push(
-                                <PluginCard
-                                    onRestartNeeded={name => console.log("Restart needed for", name)}
-                                    disabled={false}
-                                    plugin={plugin}
-                                    key={pluginName}
-                                />
-                            );
-                        }
-                    }
                 }
             }
 
