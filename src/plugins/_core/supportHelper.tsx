@@ -322,6 +322,26 @@ export default definePlugin({
                             </Button>
                         );
                     }
+
+                    const plugin_name = props.message.embeds[0]?.url?.match(/vencord.dev\/plugins\/([^/?#]+)/);
+                    if (plugin_name) {
+                        const pluginKey = plugin_name[1];
+                        buttons.push(
+                            <Button
+                                key="vc-enable-plugin"
+                                onClick={async () => {
+                                    if (Vencord.Settings.plugins[pluginKey]) {
+                                        Vencord.Settings.plugins[pluginKey].enabled = true;
+                                        showToast("Plugin enabled successfully! Please restart your discord to see effects!", Toasts.Type.SUCCESS);
+                                    } else {
+                                        showToast("Plugin not found. Update Vencord?", Toasts.Type.FAILURE);
+                                    }
+                                }}
+                            >
+                                Enable Plugin
+                            </Button>
+                        );
+                    }
                 }
             }
 
