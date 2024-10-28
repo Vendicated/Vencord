@@ -69,6 +69,8 @@ export default {
 
     native: {
         getVersions: () => process.versions as Partial<NodeJS.ProcessVersions>,
+        systemMemoryInfo: () => (process.getSystemMemoryInfo()),
+        heapUsuage: () => (process.getHeapStatistics()),
         openExternal: (url: string) => invoke<void>(IpcEvents.OPEN_EXTERNAL, url)
     },
 

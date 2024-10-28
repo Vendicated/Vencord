@@ -54,6 +54,8 @@ window.VencordNative = {
 
     native: {
         getVersions: () => ({}),
+        systemMemoryInfo: () => (process.getSystemMemoryInfo()),
+        heapUsuage: () => (process.getHeapStatistics()),
         openExternal: async (url) => void open(url, "_blank")
     },
 
