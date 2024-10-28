@@ -22,7 +22,7 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { ExcludedReasons, PluginCard } from "@components/PluginSettings";
+import { ExcludedPluginCard, PluginCard, showRestartAlert } from "@components/PluginSettings";
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
 import { Devs, SUPPORT_CHANNEL_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
@@ -31,10 +31,11 @@ import { Margins } from "@utils/margins";
 import { isPluginDev, tryOrElse } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { onlyOnce } from "@utils/onlyOnce";
+import { useForceUpdater } from "@utils/react";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Embed } from "discord-types/general";
 
 import gitHash from "~git-hash";
@@ -160,7 +161,7 @@ export default definePlugin({
             find: "this.renderInlineMediaEmbed",
             replacement: {
                 match: /return null(?<=var \i;let{embed:.{1,80})/,
-                replace: "if(this.props?.embed?.url.includes('https://vencord.dev/plugins/')){return $self.renderPluginCard({embed:this.props.embed})}$&"
+                replace: `if(this.props?.message?.author?.id==='${VENBOT_USER_ID}'&&this.props?.embed?.url?.startsWith('https://vencord.dev/plugins/')){return $self.renderPluginCard({embed:this.props.embed})}$&`
             }
         }
     ],
@@ -262,32 +263,52 @@ export default definePlugin({
     }, { noop: true }),
 
     renderPluginCard: ErrorBoundary.wrap(({ embed }: { embed: Embed; }) => {
-        const pluginName = embed.rawTitle;
+        const pluginName = embed.url!.slice(28);
+        const plugin = plugins[pluginName];
         const excludedPlugin = ExcludedPlugins[pluginName];
+
         if (excludedPlugin) {
             return (
-                <Button
-                    key="vc-plugin-notice"
-                    color={Button.Colors.RED}
-                >
-                    Only available on {ExcludedReasons[excludedPlugin]}
-                </Button>
-            );
-            // button really wide, good ideas?
-        } else {
-            const plugin = plugins[pluginName];
-            return (
                 <div style={{ width: "40%" }}>
-                    <PluginCard
-                        onRestartNeeded={() => showToast("Restart to apply changes!")}
-                        disabled={plugin.required ?? false}
-                        plugin={plugin}
+                    <ExcludedPluginCard
+                        name={pluginName}
+                        description={embed.rawDescription}
                         key={pluginName}
                     />
                 </div>
             );
-
         }
+
+        const onRestartNeeded = () => showRestartAlert(<p>You have to restart Vencord to apply the changes!</p>);
+        const update = useForceUpdater();
+
+        return (
+            <div style={{ width: "40%" }}>
+                {plugin.required ? (
+                    <Tooltip text={"This plugin is required for Vencord to function."} key={plugin.name}>
+                        {({ onMouseLeave, onMouseEnter }) => (
+                            <PluginCard
+                                onMouseLeave={onMouseLeave}
+                                onMouseEnter={onMouseEnter}
+                                onRestartNeeded={onRestartNeeded}
+                                update={update}
+                                disabled={true}
+                                plugin={plugin}
+                                key={pluginName}
+                            />
+                        )}
+                    </Tooltip>
+                ) : (
+                    <PluginCard
+                        onRestartNeeded={onRestartNeeded}
+                        disabled={plugin.required ?? false}
+                        update={update}
+                        plugin={plugin}
+                        key={pluginName}
+                    />
+                )}
+            </div>
+        );
     }, { noop: true }),
 
     start() {

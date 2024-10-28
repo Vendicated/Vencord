@@ -21,7 +21,7 @@ import "./styles.css";
 import * as DataStore from "@api/DataStore";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { CogWheel, InfoIcon } from "@components/Icons";
+import { CogWheel, InfoIcon, WarningIcon } from "@components/Icons";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab } from "@components/VencordSettings/shared";
@@ -31,7 +31,7 @@ import { classes, isObjectEmpty } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, useMemo } from "@webpack/common";
+import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, TooltipContainer, useMemo } from "@webpack/common";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
 
@@ -40,7 +40,7 @@ const cl = classNameFactory("vc-plugins-");
 const InputStyles = findByPropsLazy("inputWrapper", "inputDefault", "error");
 const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
-export const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop" | "desktop" | "dev", string> = {
+const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop" | "desktop" | "dev", string> = {
     desktop: "Discord Desktop app or Vesktop",
     discordDesktop: "Discord Desktop app",
     vencordDesktop: "Vesktop app",
@@ -78,12 +78,16 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     disabled: boolean;
     onRestartNeeded(name: string): void;
     isNew?: boolean;
+    update?: () => void;
 }
 
-export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
+export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew, update }: PluginCardProps) {
     const isEnabled = () => Vencord.Plugins.isPluginEnabled(plugin.name);
 
-    const togglePlugin = () => Vencord.Plugins.togglePluginEnabled(isEnabled(), plugin, onRestartNeeded);
+    const togglePlugin = () => {
+        Vencord.Plugins.togglePluginEnabled(isEnabled(), plugin, onRestartNeeded);
+        update?.();
+    };
 
     return (
         <AddonCard
@@ -105,6 +109,23 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
                         ? <CogWheel />
                         : <InfoIcon />}
                 </button>
+            }
+        />
+    );
+}
+
+export function ExcludedPluginCard({ name, description }: { name: string; description: string; }) {
+    return (
+        <AddonCard
+            name={name}
+            description={description}
+            enabled={false}
+            setEnabled={() => { }}
+            disabled={true}
+            infoButton={
+                <TooltipContainer text={`${name} is only available on ${ExcludedReasons[ExcludedPlugins[name]]}`}>
+                    <WarningIcon />
+                </TooltipContainer>
             }
         />
     );
@@ -140,14 +161,18 @@ function ExcludedPluginsList({ search }: { search: string; }) {
     );
 }
 
-export default function PluginSettings() {
-    const settings = useSettings();
-    const changes = React.useMemo(() => new ChangeList<string>(), []);
+export const showRestartAlert = (body: React.ReactNode) => Alerts.show({
+    title: "Restart required",
+    body,
+    confirmText: "Restart now",
+    cancelText: "Later!",
+    onConfirm: () => location.reload()
+});
 
+const restartRequiredAlert = (changes: ChangeList<string>) => {
     React.useEffect(() => {
-        return () => void (changes.hasChanges && Alerts.show({
-            title: "Restart required",
-            body: (
+        return () => void (changes.hasChanges && showRestartAlert(
+            (
                 <>
                     <p>The following plugins require a restart:</p>
                     <div>{changes.map((s, i) => (
@@ -158,11 +183,15 @@ export default function PluginSettings() {
                     ))}</div>
                 </>
             ),
-            confirmText: "Restart now",
-            cancelText: "Later!",
-            onConfirm: () => location.reload()
-        }));
+        ));
     }, []);
+};
+
+export default function PluginSettings() {
+    const settings = useSettings();
+    const changes = React.useMemo(() => new ChangeList<string>(), []);
+
+    restartRequiredAlert(changes);
 
     const depMap = React.useMemo(() => {
         const o = {} as Record<string, string[]>;
