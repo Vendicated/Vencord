@@ -45,6 +45,7 @@ import { SettingsRouter } from "./webpack/common";
 if (IS_REPORTER) {
     require("./debug/runReporter");
     Settings.plugins.CharacterCounter.enabled = false;
+    Settings.plugins.FixFileExtensions.enabled = false;
 }
 
 async function syncSettings() {

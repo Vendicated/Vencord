@@ -20,9 +20,10 @@ import { Upload } from "@api/MessageEvents";
 import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { reverseExtensionMap } from "../../equicordplugins/fixFileExtensions/components";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
+
+import { reverseExtensionMap } from "../../equicordplugins/fixFileExtensions/components";
 
 type AnonUpload = Upload & { anonymise?: boolean; };
 
