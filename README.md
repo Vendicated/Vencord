@@ -10,15 +10,16 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>132 additional plugins</summary>
+<summary>147 additional plugins</summary>
 
 - AllCallTimers by MaxHerbold & D3SOX
 - AltKrispSwitch by newwares
 - AmITyping by MrDiamond
 - Anammox by Kyuuhachi
 - AtSomeone by Joona
-- DecodeBase64 by ThePirateStoner
+- BannersEverywhere by ImLvna & AutumnVN
 - BetterActivities by D3SOX, Arjix, AutumnVN
+- BetterAudioPlayer by Creations
 - BetterBanReasons by Inbestigator
 - BetterInvites by iamme
 - BetterQuickReact by Ven & Sqaaakoi
@@ -26,17 +27,20 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - BlockKeywords by catcraft
 - BlockKrsip by D3SOX
 - BypassStatus by Inbestigator & thororen
+- ChannelBadges by Creations
 - ChannelTabs by TheSun, TheKodeToad, keifufu, Nickyux
+- CharacterCounter by Creations & Panniku
 - CleanChannelName by AutumnVN
 - ClientSideBlock by Samwich
 - CommandPalette by Ethan
 - CopyUserMention by Cortex & castdrian
 - CustomSounds by TheKodeToad & SpikeHD
+- CustomTimestamps by Rini & nvhrr
 - CuteAnimeBoys by ShadyGoat
 - CuteNekos by echo
 - CutePats by thororen
-- ChannelBadges by Creations
-- CharacterCounter by Creations
+- DecodeBase64 by ThePirateStoner
+- DeadMembers by Kyuuhachi
 - Demonstration by Samwich
 - DisableCameras by Joona
 - DoNotLeak by Perny
@@ -47,13 +51,15 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - EquicordCSS by thororen, Panniku, Dablulite, Coolesding, MiniDiscordThemes, LuckFire, gold_me
 - Equifetch by nin0dev
 - ExportContacts by dat_insanity
+- FakeProfileThemesAndEffects by ryan
 - FindReply by newwares
 - FixFileExtensions by thororen
 - FrequentQuickSwitcher by Samwich
 - FriendshipRanks by Samwich
 - FriendTags by Samwich
+- FullUserInChatbox by sadan
 - GensokyoRadioRPC by RyanCaoDev & Prince527
-- GifCollections by Aria & creations
+- GifCollections by Aria & Creations
 - GifRoulette by Samwich
 - Glide by Samwich
 - GlobalBadges by HypedDomi & Hosted by Wolfie
@@ -71,10 +77,10 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Husk by nin0dev
 - Identity by Samwich
 - IgnoreTerms by D3SOX
+- ImagePreview by Creations
 - InRole by nin0dev
 - IrcColors by Grzesiek11
 - IRememberYou by zoodogood
-- ImagePreview by Creations
 - Jumpscare by Surgedevs
 - JumpToStart by Samwich
 - KeyboardSounds by HypedDomi
@@ -91,6 +97,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - MessageTranslate by Samwich
 - ModalFade by Kyuuhachi
 - MoreStickers by Leko & Arjix
+- MoreThemes by Kyuuhachi
 - NewPluginsManager by Sqaaakoi
 - NoAppsAllowed by kvba
 - NoBulletPoints by Samwich
@@ -102,12 +109,13 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - NoRoleHeaders by Samwich
 - NotificationTitle by Kyuuhachi
 - OnePingPerDM by ProffDea
+- PinIcon by iamme
 - PlatformSpoofer by Drag
 - PurgeMessages by bhop & nyx
-- PinIcon by iamme
 - QuestCompleter by HappyEnderman & SerStars (Maintained by thororen)
 - QuestionMarkReplacement by nyx
 - Quoter by Samwich
+- RemixMe by kvba
 - RepeatMessage by Tolgchu
 - ReplaceActivityTypes by Nyako
 - ReplyPingControl by ant0n & MrDiamond
@@ -115,9 +123,10 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ScreenRecorder by AutumnVN (Vesktop & Equibop only)
 - SearchFix by Jaxx
 - SekaiStickers by MaiKokain
-- SidebarChat by Joona
+- ServerSearch by camila314
 - Shakespearean by vmohammad (Dev build only)
 - ShowBadgesInChat by Inbestigator & KrystalSkull
+- SidebarChat by Joona
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo (Maintained by thororen)
 - StatusPresets by iamme
