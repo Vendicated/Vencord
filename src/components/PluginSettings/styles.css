@@ -150,7 +150,7 @@
 }
 
 .text-danger {
-    color: var(--text-danger);
+    color: var(--text-danger) !important;
     font-size: 1.2rem;
     font-weight: bold;
 }
@@ -166,10 +166,10 @@
 
 .button-danger-background {
     background-color: var(--background-color) !important;
-    border-style: solid;
-    border-width: .1rem;
+    border-style: solid !important;
+    border-width: .1rem !important;
     border-color: var(--button-outline-danger-border) !important;
-    border-radius: 5px;
+    border-radius: 5px !important;
 }
 
 .button-danger-background.top-margin {
