@@ -77,6 +77,7 @@ export default definePlugin({
     },
 
     shouldHide(props: MessageDeleteProps) {
-        return !props?.collapsedReason?.message.includes("deleted");
+        const message = props?.collapsedReason?.message;
+        return !message.includes("deleted") && !message.includes("spammer");
     }
 });
