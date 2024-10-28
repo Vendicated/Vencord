@@ -61,6 +61,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - GoogleThat by Samwich
 - Grammar by Samwich
 - GrammarFix by unstream
+- HideChatButtons by iamme
 - HideMessage by Hanzy
 - HideServers by bepvte
 - HolyNotes by Wolfie

@@ -81,7 +81,7 @@ function buttonsInner(buttons: ButtonReactNode[]) {
 
 
 export default definePlugin({
-    name: "hideChatButtons",
+    name: "HideChatButtons",
     description: "able to hide the chat buttons",
     settings: settings,
     authors: [EquicordDevs.iamme],
