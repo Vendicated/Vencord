@@ -86,8 +86,8 @@ export default definePlugin({
         {
             find: ".Messages.EMOJI_MATCHING",
             replacement: {
-                match: /renderResults\(e\){/,
-                replace: "renderResults(e){ e.results.emojis = e.results.emojis.filter(emoji => !emoji.uniqueName || Vencord.Settings.plugins.NoDefaultEmojis.except.split(',\\ ').includes(emoji.uniqueName));"
+                match: /renderResults\((\i)\){/,
+                replace: "renderResults($1){ $1.results.emojis = $1.results.emojis.filter(emoji => !emoji.uniqueName || Vencord.Settings.plugins.NoDefaultEmojis.except.split(',\\ ').includes(emoji.uniqueName));"
             }
         }
     ],
