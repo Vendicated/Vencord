@@ -769,12 +769,12 @@ async function uploadFileToGofile(file: File, channelId: string) {
 
         const uploadResult = await Native.uploadFileToGofileNative(`https://${server}.gofile.io/uploadFile`, arrayBuffer, fileName, fileType);
 
-        if (uploadResult.status === "ok") {
-            const { downloadPage } = uploadResult.data;
+        if ((uploadResult as any).status === "ok") {
+            const { downloadPage } = (uploadResult as any).data;
             setTimeout(() => sendTextToChat(`${downloadPage} `), 10);
-            showToast("File Successfully Uploaded!", Toasts.Type.SUCCESS);
             UploadManager.clearAll(channelId, DraftType.SlashCommand);
-        } else {
+        }
+        else {
             console.error("Error uploading file:", uploadResult);
             sendBotMessage(channelId, { content: "Error uploading file. Check the console for more info." });
             UploadManager.clearAll(channelId, DraftType.SlashCommand);
