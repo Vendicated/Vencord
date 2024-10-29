@@ -1,0 +1,105 @@
+.emoji-container {
+    display: grid;
+    gap: 10px;
+    background-color: var(--background-secondary);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.guild-section {
+    border: 1px solid var(--background-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.guild-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: var(--background-tertiary);
+    cursor: pointer;
+}
+
+.guild-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--white-500);
+    margin: 0;
+}
+
+.remove-all-button {
+    cursor: pointer;
+    background-color: var(--button-danger-background);
+    color: var(--white-500);
+    transition: background-color 0.2s ease;
+}
+
+.remove-all-button:hover {
+    filter: saturate(75%);
+}
+
+.guild-emojis {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    padding: 10px;
+}
+
+.emoji-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    background-color: var(--background-secondary-alt);
+    border-radius: 4px;
+}
+
+.emoji-image {
+    max-height: 32px;
+    width: auto;
+    height: auto;
+}
+
+.emoji-surrogate {
+    font-size: 32px;
+}
+
+.emoji-name {
+    font-weight: bold;
+    color: var(--white-500);
+    margin-bottom: 10px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.remove-button {
+    cursor: pointer;
+    background-color: var(--button-danger-background);
+    color: var(--white-500);
+    transition: background-color 0.2s ease;
+    margin-top: 10px;
+}
+
+.remove-button:hover {
+    filter: saturate(75%);
+}
+
+.emoji-container::-webkit-scrollbar {
+    background-color: #fff1;
+    width: 10px;
+}
+
+.emoji-container::-webkit-scrollbar-thumb {
+    background-color: #fff3;
+}
+
+.no-emoji-message {
+    font-size: 25px;
+    color: var(--white-500);
+    text-align: center;
+    margin: 20px;
+}
