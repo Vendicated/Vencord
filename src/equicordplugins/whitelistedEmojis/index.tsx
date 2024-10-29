@@ -604,7 +604,7 @@ export default definePlugin({
             find: ".Messages.EMOJI_MATCHING",
             replacement: {
                 match: /renderResults\((\i)\){/,
-                replace: "renderResults($1){ $1.results.emojis = $self.filterEmojis($1);"
+                replace: "$&$1.results.emojis=$self.filterEmojis($1);if($1.results.emojis.length===0)return;"
             }
         }
     ],
