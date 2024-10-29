@@ -10,8 +10,9 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>147 additional plugins</summary>
+<summary>146 additional plugins</summary>
 
+### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
 - AltKrispSwitch by newwares
 - AmITyping by MrDiamond
@@ -84,9 +85,8 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - JumpToStart by Samwich
 - KeyboardSounds by HypedDomi
 - KeywordNotify by camila314 & x3rt
-- LimitMiddleClickPaste by nobody (Dev didnt put an author)
+- LimitMiddleClickPaste by no dev listed
 - LoginWithQR by nexpid
-- MediaDownloader by Colorman (Discord desktop only)
 - MediaPlaybackSpeed by D3SOX
 - Meow by Samwich
 - MessageColors by Hen
@@ -111,7 +111,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - PinIcon by iamme
 - PlatformSpoofer by Drag
 - PurgeMessages by bhop & nyx
-- QuestCompleter by HappyEnderman & SerStars (Maintained by thororen)
 - QuestionMarkReplacement by nyx
 - Quoter by Samwich
 - RemixMe by kvba
@@ -119,17 +118,14 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ReplaceActivityTypes by Nyako
 - ReplyPingControl by ant0n & MrDiamond
 - RPCStats by Samwich
-- ScreenRecorder by AutumnVN (Vesktop & Equibop only)
 - SearchFix by Jaxx
 - SekaiStickers by MaiKokain
 - ServerSearch by camila314
-- Shakespearean by vmohammad (Dev build only)
 - ShowBadgesInChat by Inbestigator & KrystalSkull
 - SidebarChat by Joona
 - Slap by Korbo
-- SoundBoardLogger by Moxxie, fres, echo (Maintained by thororen)
+- SoundBoardLogger by Moxxie, fres, echo, maintained by thororen
 - StatusPresets by iamme
-- StatusWhilePlaying by thororen (Desktop app only)
 - SteamStatusSync by niko
 - StickerBlocker by Samwich
 - TalkInReverse by Tolgchu
@@ -149,15 +145,29 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - VencordRPC by AutumnVN
 - VideoSpeed by Samwich
 - ViewRaw2 by Kyuuhachi
-- VoiceChannelLog by Sqaaakoi (Maintained by thororen)
+- VoiceChannelLog by Sqaaakoi & maintained by thororen
 - VoiceChatUtilities by D3SOX
-- VoiceJoinMessages by Sqaaakoi (Maintained by thororen & Dev build only)
 - WebpackTarball by Kyuuhachi
 - WhosWatching by fres
 - WigglyText by nexpid
 - Woof by Samwich
 - WriteUpperCase by Samwich & KrystalSkull
 - YoutubeDescription by arHSM
+
+### Web Only
+- None At This Time
+
+### Vesktop & Equibop Only
+- None At This Time
+
+### Discord Desktop Only
+- MediaDownloader by Colorman
+- QuestCompleter by HappyEnderman, SerStars, maintained by thororen
+- StatusWhilePlaying by thororen
+
+### Equicord Devbuilds Only
+- Shakespearean by vmohammad
+- VoiceJoinMessages by Sqaaakoi & maintained by thororen
 
 </details>
 

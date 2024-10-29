@@ -23,7 +23,7 @@ import { getTheme, Theme } from "@utils/discord";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByProps, findExportedComponentLazy } from "@webpack";
-import { Button, FluxDispatcher, RestAPI, Text, Tooltip, UserStore } from "@webpack/common";
+import { Button, FluxDispatcher, RestAPI, Tooltip, UserStore } from "@webpack/common";
 const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
 const isApp = navigator.userAgent.includes("Electron/");
 
@@ -66,12 +66,7 @@ async function openCompleteQuestUI() {
     const QuestsStore = findByProps("getQuest");
     const quest = [...QuestsStore.quests.values()].find(x => x.id !== "1248385850622869556" && x.userStatus?.enrolledAt && !x.userStatus?.completedAt && new Date(x.config.expiresAt).getTime() > Date.now());
 
-    if (!isApp) {
-        showNotification({
-            title: "Quests Completer",
-            body: "This no longer works in browser. Use the desktop app!",
-        });
-    } else if (!quest) {
+    if (!quest) {
         showNotification({
             title: "Quests Completer",
             body: "No Quests To Complete",
@@ -197,8 +192,8 @@ export default definePlugin({
         {
             find: "\"invite-button\"",
             replacement: {
-                match: /(function .+?\(.+?\){let{inPopout:.+allowIdle.+?}=.+?\.\i\)\("popup"\),(.+?)=\[\];if\(.+?\){.+"chat-spacer"\)\)\),\(\d,.+?\.jsx\)\(.+?,{children:).+?}}/,
-                replace: "$1[$self.renderQuestButton(),...$2]})}}"
+                match: /(\i\.Fragment,{children:)(\i\i)/,
+                replace: "$1[$self.renderQuestButton(),...$2]"
             }
         },
         {
@@ -239,19 +234,5 @@ export default definePlugin({
             </ErrorBoundary>,
             e.toolbar,
         ];
-    },
-    settingsAboutComponent() {
-        return (<>
-            {
-                isApp ?
-                    <Text variant="text-lg/bold">
-                        The plugin should work properly because you are on the Desktop Client.
-                    </Text>
-                    :
-                    <Text variant="text-lg/bold">
-                        This plugin won't work because you are not on the Desktop Client.
-                    </Text>
-            }
-        </>);
     }
 });

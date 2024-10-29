@@ -196,7 +196,7 @@ function ExcludedPluginsList({ search }: { search: string; }) {
         discordDesktop: "Discord Desktop app",
         vencordDesktop: "Vesktop app",
         equicordDesktop: "Equibop app",
-        web: "Vesktop app and the Web version of Discord",
+        web: "Vesktop & Equibop apps as well as the Web version of Discord",
         dev: "Developer version of Equicord"
     };
 
