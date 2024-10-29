@@ -8,7 +8,7 @@ import "./style.css";
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Alerts, Button, EmojiStore, GuildStore, Menu, Toasts, useEffect, useState } from "@webpack/common";
@@ -594,19 +594,20 @@ const settings = definePluginSettings({
     }
 });
 
+migratePluginSettings("WhitelistedEmojis", "NoDefaultEmojis");
 export default definePlugin({
     name: "WhitelistedEmojis",
     description: "Adds the ability to disable all message emojis except for a whitelisted set.",
+    authors: [EquicordDevs.creations],
     patches: [
         {
             find: ".Messages.EMOJI_MATCHING",
             replacement: {
-                match: /renderResults\(e\){/,
-                replace: "renderResults(e){ e.results.emojis = $self.filterEmojis(e);"
+                match: /renderResults\((\i)\){/,
+                replace: "renderResults($1){ $1.results.emojis = $self.filterEmojis($1);"
             }
         }
     ],
-    authors: [EquicordDevs.creations],
     settings: settings,
     async start() {
         cache_allowedList = await getAllowedList();
@@ -617,9 +618,8 @@ export default definePlugin({
         removeContextMenuPatch("expression-picker", expressionPickerPatch);
         removeContextMenuPatch("guild-context", guildContextPatch);
     },
-
-    filterEmojis: (e: { results: { emojis: (CustomEmoji | UnicodeEmoji)[]; }; }) => {
-        const { emojis } = e.results;
+    filterEmojis: (data: { results: { emojis: (CustomEmoji | UnicodeEmoji)[]; }; }) => {
+        const { emojis } = data.results;
         let modifiedEmojis = emojis;
 
         if (settings.store.defaultEmojis) {

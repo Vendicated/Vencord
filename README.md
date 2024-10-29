@@ -100,7 +100,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - NewPluginsManager by Sqaaakoi
 - NoAppsAllowed by kvba
 - NoBulletPoints by Samwich
-- NoDefaultEmojis by Samwich
 - NoDeleteSafety by Samwich
 - NoMirroredCamera by Nyx
 - NoModalAnimation by AutumnVN
@@ -148,6 +147,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - VoiceChannelLog by Sqaaakoi & maintained by thororen
 - VoiceChatUtilities by D3SOX
 - WebpackTarball by Kyuuhachi
+- WhitelistedEmojis by Creations
 - WhosWatching by fres
 - WigglyText by nexpid
 - Woof by Samwich
