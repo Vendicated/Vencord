@@ -162,7 +162,7 @@ export default definePlugin({
 
                     "Vencord Donor": getDonorStatus() ? "yes" : "no",
                     "Vencord Contributor": getContribStatus() ? "yes" : "no",
-                    "Equicord Dev": getEquicordDevStatus() ? "yes" : "no",
+                    "Equicord Team": getEquicordDevStatus() ? "yes" : "no",
                     "Equicord Donor": getEquicordDonorStatus() ? "yes" : "no",
                     "Equicord Contributor": getEquicordContribStatus() ? "yes" : "no",
                     "Equibop Contributor": getEquibopContribStatus() ? "yes" : "no",
