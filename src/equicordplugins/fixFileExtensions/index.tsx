@@ -7,7 +7,7 @@
 import { Upload } from "@api/MessageEvents";
 import { Settings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { ReporterTestable } from "@utils/types";
 
 import { reverseExtensionMap } from "./components";
 
@@ -17,6 +17,7 @@ export default definePlugin({
     name: "FixFileExtensions",
     authors: [EquicordDevs.thororen],
     description: "Fixes file extensions by renaming them to a compatible supported format if possible",
+    reporterTestable: ReporterTestable.None,
     patches: [
         // Taken from AnonymiseFileNames
         {
