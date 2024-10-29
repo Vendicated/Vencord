@@ -16,7 +16,7 @@ export async function downloadCollections() {
     const exportData = await exportCollections();
     const data = new TextEncoder().encode(exportData);
 
-    if (IS_WEB) {
+    if (IS_WEB || IS_EQUIBOP || IS_VESKTOP) {
         const file = new File([data], filename, { type: "application/json" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(file);
@@ -57,7 +57,7 @@ export async function importCollections(data: string) {
 
 
 export async function uploadGifCollections(showToast = true): Promise<void> {
-    if (IS_WEB) {
+    if (IS_WEB || IS_EQUIBOP || IS_VESKTOP) {
         const input = document.createElement("input");
         input.type = "file";
         input.style.display = "none";
