@@ -91,14 +91,19 @@ export default definePlugin({
                 replace: "async function $1 if(await $self.handleLink(...arguments)) return;"
             }
         },
-        // Make Spotify profile activity links open in app on web
         {
-            find: "WEB_OPEN(",
+            find: "no artist ids in metadata",
             predicate: () => !IS_DISCORD_DESKTOP && pluginSettings.store.spotify,
-            replacement: {
-                match: /\i\.\i\.isProtocolRegistered\(\)(.{0,100})window.open/g,
-                replace: "true$1VencordNative.native.openExternal"
-            }
+            replacement: [
+                {
+                    match: /\i\.\i\.isProtocolRegistered\(\)/g,
+                    replace: "true"
+                },
+                {
+                    match: /!\(0,\i\.isDesktop\)\(\)/,
+                    replace: "false"
+                }
+            ]
         },
         {
             find: ".CONNECTED_ACCOUNT_VIEWED,",
