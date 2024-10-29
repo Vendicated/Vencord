@@ -17,8 +17,11 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 *.tsbuildinfo
+.prettierrc
 
-src/userplugins
+src/userplugins 
 
 ExtensionCache/
 settings/
+.vscode/settings.json
+src/plugins/betterCamera.desktop

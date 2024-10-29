@@ -21,9 +21,9 @@ export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 
 export interface Dev {
-    name: string;
-    id: bigint;
-    badge?: boolean;
+	name: string;
+	id: bigint;
+	badge?: boolean;
 }
 
 /**
@@ -259,6 +259,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "skyevg",
         id: 1090310844283363348n
     },
+    philhk: {
+        name: "philhk",
+        id: 305288513941667851n
+    },
     Dziurwa: {
         name: "Dziurwa",
         id: 1001086404203389018n
@@ -290,6 +294,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     FieryFlames: {
         name: "Fiery",
         id: 890228870559698955n
+    },
+    Leko: {
+        name: "Leko",
+        id: 108153734541942784n
     },
     KannaDev: {
         name: "Kanna",
@@ -343,6 +351,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Rini",
         id: 1079479184478441643n
     },
+    DaBluLite: {
+        name: "DaBluLite",
+        id: 582170007505731594n
+    },
     castdrian: {
         name: "castdrian",
         id: 224617799434108928n
@@ -375,6 +387,14 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "ProffDea",
         id: 609329952180928513n
     },
+    camila314: {
+        name: "camila314",
+        id: 738592270617542716n
+    },
+    x3rt: {
+        name: "x3rt",
+        id: 131602100332396544n
+    },
     UlyssesZhan: {
         name: "UlyssesZhan",
         id: 586808226058862623n
@@ -382,6 +402,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     ant0n: {
         name: "ant0n",
         id: 145224646868860928n
+    },
+    MrDiamond: {
+        name: "MrDiamond",
+        id: 523338295644782592n
     },
     Board: {
         name: "BoardTM",
@@ -406,7 +430,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Mopi: {
         name: "Mopi",
         id: 1022189106614243350n
-    },
+	},
     Grzesiek11: {
         name: "Grzesiek11",
         id: 368475654662127616n,
@@ -415,13 +439,25 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Samwich",
         id: 976176454511509554n,
     },
+    Perny: {
+        name: "Perny",
+        id: 1101508982570504244n,
+    },
     coolelectronics: {
         name: "coolelectronics",
         id: 696392247205298207n,
     },
+    Max: {
+        name: "Max",
+        id: 1189527130611138663n,
+	},
     Av32000: {
         name: "Av32000",
         id: 593436735380127770n,
+    },
+    catcraft: {
+        name: "catcraft",
+        id: 290162449213292546n,
     },
     Noxillio: {
         name: "Noxillio",
@@ -431,6 +467,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Kyuuhachi",
         id: 236588665420251137n,
     },
+    Wolfie: {
+        name: "Wolfie",
+        id: 347096063569559553n
+    },
+
     nin0dev: {
         name: "nin0dev",
         id: 886685857560539176n
@@ -475,6 +516,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Sqaaakoi",
         id: 259558259491340288n
     },
+    iamme: {
+        name: "i am me",
+        id: 984392761929256980n
+    },
     Byron: {
         name: "byeoon",
         id: 1167275288036655133n
@@ -486,6 +531,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     PolisanTheEasyNick: {
         name: "Oleh Polisan",
         id: 242305263313485825n
+    },
+    nickwoah: {
+        name: "nickwoah",
+        id: 644298972420374528n
     },
     HAHALOSAH: {
         name: "HAHALOSAH",
@@ -507,6 +556,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "ScattrdBlade",
         id: 678007540608532491n
     },
+    Blackilykat: {
+        name: "Blackilykat",
+        id: 442033332952498177n
+    },
     goodbee: {
         name: "goodbee",
         id: 658968552606400512n
@@ -523,25 +576,49 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "verticalsync",
         id: 328165170536775680n
     },
+    hen: {
+        id: 279266228151779329n,
+        name: "Hen"
+    },
     nekohaxx: {
         name: "nekohaxx",
         id: 1176270221628153886n
+    },
+    keifufu: {
+        name: "keifufu",
+        id: 469588398110146590n
+	},
+    sadan: {
+        name: "sadan",
+        id: 521819891141967883n
+    },
+    Magix: {
+        name: "Magix",
+        id: 252090676068614145n
     },
     Antti: {
         name: "Antti",
         id: 312974985876471810n
     },
+    coopeeo: {
+        name: "Cooper",
+        id: 594864203102158859n
+    },
     Joona: {
         name: "Joona",
         id: 297410829589020673n
-    },
-    sadan: {
-        name: "sadan",
-        id: 521819891141967883n,
+    },  
+    vappster: {
+        name: "vappster",
+        id: 747192967311261748n
     },
     Kylie: {
         name: "Cookie",
         id: 721853658941227088n
+    },
+    iilwy: {
+        name: "iminlikewithyou",
+        id: 971202946895339550n
     },
     AshtonMemer: {
         name: "AshtonMemer",
@@ -550,6 +627,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     surgedevs: {
         name: "Chloe",
         id: 1084592643784331324n
+    },
+    redbaron2k7: {
+        name: "redbaron2k7",
+        id: 1142923640778797157n
     },
     Lumap: {
         name: "Lumap",
@@ -575,7 +656,63 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "RamziAH",
         id: 1279957227612147747n,
     },
-        SomeAspy: {
+    DamsDev1: {
+        name: "! 𝕯'𝖆𝖒𝖘",
+        id: 769939285792653325n,
+    },
+	Skully: {
+		name: "Skully",
+		id: 150298098516754432n
+	},
+    ryan: {
+        name: "ryan",
+        id: 479403382994632704n
+	},
+    Fres: {
+        name: "fres",
+        id: 843448897737064448n
+	},
+    KrystalSkull: {
+      name: "KrystalSkullOfficial",
+      id: 929208515883569182n
+    },
+    Eloelle: {
+        name: "Eloelle",
+        id: 90987261205696512n,
+	},
+    KawaiianPizza: {
+        name: "KawaiianPizza",
+        id: 501000986735673347n
+	},
+    williamist: {
+        name: "williamist",
+        id: 730129626139066449n
+	},
+    soul_fire_: {
+        name: "soul_fire_",
+        id: 727416368827334778n
+    },
+    PWall: {
+        name: "PWall",
+        id: 0n
+	},
+    Scyye: {
+        name: "Scyye",
+        id: 553652308295155723n
+	},
+    thororen: {
+        name: "thororen",
+        id: 848339671629299742n,
+    },
+    z1xus: {
+        name: "z1xus",
+        id: 377450600797044746n
+    },
+    pythonplayer123: {
+        id: 1078392986221678652n,
+        name: "pythonplayer123",
+    },
+    SomeAspy: {
         name: "SomeAspy",
         id: 516750892372852754n,
     },
@@ -583,9 +720,9 @@ export const Devs = /* #__PURE__*/ Object.freeze({
 
 // iife so #__PURE__ works correctly
 export const DevsById = /* #__PURE__*/ (() =>
-    Object.freeze(Object.fromEntries(
-        Object.entries(Devs)
-            .filter(d => d[1].id !== 0n)
-            .map(([_, v]) => [v.id, v] as const)
-    ))
+	Object.freeze(Object.fromEntries(
+		Object.entries(Devs)
+			.filter(d => d[1].id !== 0n)
+			.map(([_, v]) => [v.id, v] as const)
+	))
 )() as Record<string, Dev>;

@@ -35,6 +35,8 @@
         "testTsc": "tsc --noEmit"
     },
     "dependencies": {
+        "@ffmpeg/ffmpeg": "^0.12.10",
+        "@ffmpeg/util": "^0.12.1",
         "@sapphi-red/web-noise-suppressor": "0.3.5",
         "@vap/core": "0.0.12",
         "@vap/shiki": "0.10.5",
@@ -73,6 +75,7 @@
         "ts-pattern": "^5.3.1",
         "tsx": "^4.16.5",
         "type-fest": "^4.23.0",
+        "typed-emitter": "^2.1.0",
         "typescript": "^5.5.4",
         "typescript-eslint": "^8.0.0",
         "typescript-transform-paths": "^3.4.7",
