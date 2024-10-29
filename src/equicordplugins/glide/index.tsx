@@ -294,7 +294,7 @@ function getCSS(fontName) {
                 .header_f9f2ca,
                 .container_ee69e0,
                 .title_a7d72e,
-                .layout_f9647d,
+                .layout_ec8679,
                 [aria-label="Members"] {
                 filter: blur(0);
                 transition: filter 0.2s ease-in-out;
@@ -304,7 +304,7 @@ function getCSS(fontName) {
                 body:not(:hover) .container_ee69e0,
                 body:not(:hover) .title_a7d72e,
                 body:not(:hover) [aria-label="Members"],
-                body:not(:hover) .layout_f9647d {
+                body:not(:hover) .layout_ec8679 {
                 filter: blur(5px);
                 }
         ` : ""}
@@ -439,7 +439,7 @@ function getCSS(fontName) {
                     border-top-color: var(--mutedaccent) !important;
                 }
                 /*sorry, forgot to document what these are when i was adding them*/
-                .inspector_c3120f, .scroller_dcade6, .unicodeShortcut_dfa278
+                .inspector_c3120f, .scroller_d53d65, .unicodeShortcut_dfa278
                 {
                     background-color: var(--bgcol);
                 }
@@ -551,7 +551,7 @@ function getCSS(fontName) {
         /*ROUNDING (rounding)*/
 
                 /*round message bar, some buttons, dm list button, new messages notif bar, channel buttons, emoji menu search bar, context menus, account connections(in that order)*/
-                .scrollableContainer_d0696b, .button_dd4f85, .interactive_f5eb4b, .newMessagesBar_cf58b5, .link_d8bfb3, .searchBar_c6ee36, .menu_d90b3d, .connectedAccountContainer_f3eb60
+                .scrollableContainer_bdf0de, .button_dd4f85, .interactive_f5eb4b, .newMessagesBar_cf58b5, .link_d8bfb3, .searchBar_c6ee36, .menu_d90b3d, .connectedAccountContainer_ab12c6
                 {
                     border-radius: 25px;
                 }
@@ -630,7 +630,7 @@ function getCSS(fontName) {
                   display: none;
                 }
                 /*pad the message bar right slightly. Not sure what caused the buttons to flow out of it, might be something in the theme :shrug:*/
-                .inner_d0696b
+                .inner_bdf0de
                 {
                     padding-right: 10px;
                 }
@@ -685,7 +685,7 @@ function getCSS(fontName) {
                 }
 
                 /*round banners in profile popout*/
-                .banner_c3e427:not(.panelBanner_c3e427)
+                .banner_d5fdb1:not(.panelBanner_c3e427)
                 {
                   border-radius: 20px;
                 }
@@ -713,7 +713,7 @@ function getCSS(fontName) {
                 transform: scale(0.95);
                 }
                 /*add a soft glow to message bar contents, user panel, dms, channel names (in that order)*/
-                .inner_d0696b .layout_f9647d, .name_d8bfb3
+                .inner_bdf0de .layout_ec8679, .name_d8bfb3
                 {
                 filter: drop-shadow(0px 0px 3px var(--glowcol));
                 }
@@ -757,7 +757,7 @@ function getCSS(fontName) {
                     text-shadow: 0px 0px 2px var(--highlightcol);
                 }
                 /*hide the line between connections and note*/
-                [class="connectedAccounts_f3eb60 userInfoSection_a24910"]
+                [class="connectedAccounts_ab12c6 userInfoSection_a24910"]
                 {
                     border-top: transparent !important;
                 }
