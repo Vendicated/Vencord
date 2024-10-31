@@ -25,23 +25,93 @@ export default definePlugin({
     description: "Adds more Kaomoji to discord. ヽ(´▽`)/",
     authors: [Devs.JacobTm],
     commands: [
-        { name: "dissatisfaction", description: " ＞﹏＜" },
-        { name: "smug", description: "ಠ_ಠ" },
-        { name: "happy", description: "ヽ(´▽`)/" },
-        { name: "crying", description: "ಥ_ಥ" },
-        { name: "angry", description: "ヽ(｀Д´)ﾉ" },
-        { name: "anger", description: "ヽ(ｏ`皿′ｏ)ﾉ" },
-        { name: "joy", description: "<(￣︶￣)>" },
-        { name: "blush", description: "૮ ˶ᵔ ᵕ ᵔ˶ ა" },
-        { name: "confused", description: "(•ิ_•ิ)?" },
-        { name: "sleeping", description: "(ᴗ_ᴗ)" },
-        { name: "laughing", description: "o(≧▽≦)o" },
-
-    ].map(data => ({
-        ...data,
-        options: [OptionalMessageOption],
-        execute: opts => ({
-            content: findOption(opts, "message", "") + " " + data.description
-        })
-    }))
+        {
+            name: "dissatisfaction",
+            description: " ＞﹏＜",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + " ＞﹏＜",
+            }),
+        },
+        {
+            name: "smug",
+            description: "ಠ_ಠ",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "ಠ_ಠ",
+            }),
+        },
+        {
+            name: "happy",
+            description: "ヽ(´▽`)/",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "ヽ(´▽`)/",
+            }),
+        },
+        {
+            name: "crying",
+            description: "ಥ_ಥ",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "ಥ_ಥ",
+            }),
+        },
+        {
+            name: "angry",
+            description: "ヽ(｀Д´)ﾉ",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "ヽ(｀Д´)ﾉ",
+            }),
+        },
+        {
+            name: "anger",
+            description: "ヽ(ｏ`皿′ｏ)ﾉ",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "ヽ(ｏ`皿′ｏ)ﾉ",
+            }),
+        },
+        {
+            name: "joy",
+            description: "<(￣︶￣)>",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "<(￣︶￣)>",
+            }),
+        },
+        {
+            name: "blush",
+            description: "૮ ˶ᵔ ᵕ ᵔ˶ ა",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "૮ ˶ᵔ ᵕ ᵔ˶ ა",
+            }),
+        },
+        {
+            name: "confused",
+            description: "(•ิ_•ิ)?",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "(•ิ_•ิ)?",
+            }),
+        },
+        {
+            name: "sleeping",
+            description: "(ᴗ_ᴗ)",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "(ᴗ_ᴗ)",
+            }),
+        },
+        {
+            name: "laughing",
+            description: "o(≧▽≦)o",
+            options: [OptionalMessageOption],
+            execute: opts => ({
+                content: findOption(opts, "message", "") + " " + "o(≧▽≦)o",
+            }),
+        }
+    ]
 });

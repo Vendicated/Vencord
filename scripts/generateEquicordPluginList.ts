@@ -23,7 +23,6 @@ import { normalize as posixNormalize, sep as posixSep } from "path/posix";
 import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, PropertyAssignment, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
 
 import { getPluginTarget } from "./utils.mjs";
-import { ApplicationCommandOptionType } from "@api/Commands";
 
 interface Dev {
     name: string;

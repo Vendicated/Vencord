@@ -20,13 +20,18 @@ import { Dirent, readdirSync, readFileSync, writeFileSync } from "fs";
 import { access, readFile } from "fs/promises";
 import { join, sep } from "path";
 import { normalize as posixNormalize, sep as posixSep } from "path/posix";
-import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
+import { BigIntLiteral, createSourceFile, Identifier, isArrayLiteralExpression, isCallExpression, isExportAssignment, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyAssignment, isSatisfiesExpression, isStringLiteral, isVariableStatement, NamedDeclaration, NodeArray, ObjectLiteralExpression, PropertyAssignment, ScriptTarget, StringLiteral, SyntaxKind } from "typescript";
 
 import { getPluginTarget } from "./utils.mjs";
 
 interface Dev {
     name: string;
     id: string;
+}
+
+interface Command {
+    name: string;
+    description: string;
 }
 
 interface PluginData {
@@ -37,6 +42,7 @@ interface PluginData {
     dependencies: string[];
     hasPatches: boolean;
     hasCommands: boolean;
+    commands: Command[];
     required: boolean;
     enabledByDefault: boolean;
     target: "discordDesktop" | "vencordDesktop" | "equicordDesktop" | "desktop" | "web" | "dev";
@@ -161,6 +167,20 @@ async function parseFile(fileName: string) {
                     break;
                 case "commands":
                     data.hasCommands = true;
+                    if (!isArrayLiteralExpression(value)) throw fail("commands is not an array literal");
+                    data.commands = value.elements.map((e) => {
+                        if (!isObjectLiteralExpression(e)) throw fail("commands array contains non-object literals");
+                        const nameProperty = e.properties.find((p): p is PropertyAssignment => {
+                            return isPropertyAssignment(p) && isIdentifier(p.name) && p.name.escapedText === 'name';
+                        });
+                        const descriptionProperty = e.properties.find((p): p is PropertyAssignment => {
+                            return isPropertyAssignment(p) && isIdentifier(p.name) && p.name.escapedText === 'description';
+                        });
+                        if (!nameProperty || !descriptionProperty) throw fail("Command missing required properties");
+                        const name = isStringLiteral(nameProperty.initializer) ? nameProperty.initializer.text : '';
+                        const description = isStringLiteral(descriptionProperty.initializer) ? descriptionProperty.initializer.text : '';
+                        return { name, description };
+                    });
                     break;
                 case "authors":
                     if (!isArrayLiteralExpression(value)) throw fail("authors is not an array literal");
