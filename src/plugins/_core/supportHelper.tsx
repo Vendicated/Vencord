@@ -22,7 +22,7 @@ import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
-import { ExcludedPluginCard, PluginCard, showRestartAlert } from "@components/PluginSettings";
+import { PluginCard, showRestartAlert, UnavailablePluginCard } from "@components/PluginSettings";
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
 import { Devs, SUPPORT_CHANNEL_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
@@ -160,8 +160,8 @@ export default definePlugin({
         {
             find: "this.renderInlineMediaEmbed",
             replacement: {
-                match: /return null(?<=var \i;let{embed:.{1,80})/,
-                replace: `if(this.props?.message?.author?.id==='${VENBOT_USER_ID}'&&this.props?.embed?.url?.startsWith('https://vencord.dev/plugins/')){return $self.renderPluginCard({embed:this.props.embed})}$&`
+                match: /render\(\).+?this\.props;/,
+                replace: "$&if($self.shouldRenderPluginCard(this.props)){return $self.renderPluginCard({embed:this.props.embed})};"
             }
         }
     ],
@@ -262,25 +262,30 @@ export default definePlugin({
         );
     }, { noop: true }),
 
+    shouldRenderPluginCard(props) {
+        return (props?.message?.author?.id === VENBOT_USER_ID || props?.embed?.type === "link") && props?.embed?.url?.startsWith("https://vencord.dev/plugins/");
+    },
+
     renderPluginCard: ErrorBoundary.wrap(({ embed }: { embed: Embed; }) => {
-        const pluginName = embed.url!.slice(28);
-        const plugin = plugins[pluginName];
+        const pluginName = new URL(embed.url!).pathname.split("/").pop()!;
+        const plugin = plugins?.[pluginName];
         const excludedPlugin = ExcludedPlugins[pluginName];
 
-        if (excludedPlugin) {
+        const onRestartNeeded = () => showRestartAlert(<p>You need to restart Vencord to {Vencord.Plugins.isPluginEnabled(pluginName) ? "enable" : "disable"} {pluginName}!</p>);
+        const update = useForceUpdater();
+
+        if (excludedPlugin || !plugin) {
             return (
                 <div style={{ width: "40%" }}>
-                    <ExcludedPluginCard
+                    <UnavailablePluginCard
                         name={pluginName}
                         description={embed.rawDescription}
                         key={pluginName}
+                        isMissing={!plugin}
                     />
                 </div>
             );
         }
-
-        const onRestartNeeded = () => showRestartAlert(<p>You have to restart Vencord to apply the changes!</p>);
-        const update = useForceUpdater();
 
         return (
             <div style={{ width: "40%" }}>

@@ -114,7 +114,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
     );
 }
 
-export function ExcludedPluginCard({ name, description }: { name: string; description: string; }) {
+export function UnavailablePluginCard({ name, description, isMissing }: { name: string; description: string, isMissing: boolean; }) {
     return (
         <AddonCard
             name={name}
@@ -123,7 +123,10 @@ export function ExcludedPluginCard({ name, description }: { name: string; descri
             setEnabled={() => { }}
             disabled={true}
             infoButton={
-                <TooltipContainer text={`${name} is only available on ${ExcludedReasons[ExcludedPlugins[name]]}`}>
+                <TooltipContainer text={isMissing
+                    ? "This plugin is not available - Try updating!"
+                    : `${name} is only available on ${ExcludedReasons[ExcludedPlugins[name]]}`
+                }>
                     <WarningIcon />
                 </TooltipContainer>
             }
@@ -169,7 +172,10 @@ export const showRestartAlert = (body: React.ReactNode) => Alerts.show({
     onConfirm: () => location.reload()
 });
 
-const restartRequiredAlert = (changes: ChangeList<string>) => {
+export default function PluginSettings() {
+    const settings = useSettings();
+    const changes = React.useMemo(() => new ChangeList<string>(), []);
+
     React.useEffect(() => {
         return () => void (changes.hasChanges && showRestartAlert(
             (
@@ -185,14 +191,6 @@ const restartRequiredAlert = (changes: ChangeList<string>) => {
             ),
         ));
     }, []);
-};
-
-export default function PluginSettings() {
-    const settings = useSettings();
-    const changes = React.useMemo(() => new ChangeList<string>(), []);
-
-    restartRequiredAlert(changes);
-
     const depMap = React.useMemo(() => {
         const o = {} as Record<string, string[]>;
         for (const plugin in Plugins) {
