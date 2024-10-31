@@ -124,7 +124,7 @@ export function UnavailablePluginCard({ name, description, isMissing }: { name: 
             disabled={true}
             infoButton={
                 <TooltipContainer text={isMissing
-                    ? "This plugin is not available - Try updating!"
+                    ? "This plugin is not available Try updating!"
                     : `${name} is only available on ${ExcludedReasons[ExcludedPlugins[name]]}`
                 }>
                     <WarningIcon />
