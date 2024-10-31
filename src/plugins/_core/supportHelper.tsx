@@ -367,27 +367,27 @@ export default definePlugin({
                         </Button>
                     );
                 }
-            }
 
-            if (props.message.author.id === VENBOT_USER_ID) {
-                const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
-                if (match) {
-                    buttons.push(
-                        <Button
-                            key="vc-run-snippet"
-                            onClick={async () => {
-                                try {
-                                    await AsyncFunction(match[1])();
-                                    showToast("Success!", Toasts.Type.SUCCESS);
-                                } catch (e) {
-                                    new Logger(this.name).error("Error while running snippet:", e);
-                                    showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
-                                }
-                            }}
-                        >
-                            Run Snippet
-                        </Button>
-                    );
+                if (props.message.author.id === VENBOT_USER_ID) {
+                    const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
+                    if (match) {
+                        buttons.push(
+                            <Button
+                                key="vc-run-snippet"
+                                onClick={async () => {
+                                    try {
+                                        await AsyncFunction(match[1])();
+                                        showToast("Success!", Toasts.Type.SUCCESS);
+                                    } catch (e) {
+                                        new Logger(this.name).error("Error while running snippet:", e);
+                                        showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
+                                    }
+                                }}
+                            >
+                                Run Snippet
+                            </Button>
+                        );
+                    }
                 }
             }
 
