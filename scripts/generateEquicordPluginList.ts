@@ -170,33 +170,18 @@ async function parseFile(fileName: string) {
                     data.hasCommands = true;
                     if (!isArrayLiteralExpression(value)) throw fail("commands is not an array literal");
                     data.commands = value.elements.map((e) => {
-                        if (!isObjectLiteralExpression(e)) {
-                            throw fail("commands array contains non-object literals");
-                        }
-
+                        if (!isObjectLiteralExpression(e)) throw fail("commands array contains non-object literals");
                         const nameProperty = e.properties.find((p): p is PropertyAssignment => {
                             return isPropertyAssignment(p) && isIdentifier(p.name) && p.name.escapedText === 'name';
                         });
-
                         const descriptionProperty = e.properties.find((p): p is PropertyAssignment => {
                             return isPropertyAssignment(p) && isIdentifier(p.name) && p.name.escapedText === 'description';
                         });
-
                         if (!nameProperty || !descriptionProperty) throw fail("Command missing required properties");
-
-                        const name = isStringLiteral(nameProperty.initializer)
-                            ? nameProperty.initializer.text
-                            : '';
-                        const description = isStringLiteral(descriptionProperty.initializer)
-                            ? descriptionProperty.initializer.text
-                            : '';
-
-                        return {
-                            name,
-                            description
-                        };
+                        const name = isStringLiteral(nameProperty.initializer) ? nameProperty.initializer.text : '';
+                        const description = isStringLiteral(descriptionProperty.initializer) ? descriptionProperty.initializer.text : '';
+                        return { name, description };
                     });
-
                     break;
                 case "authors":
                     if (!isArrayLiteralExpression(value)) throw fail("authors is not an array literal");
