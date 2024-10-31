@@ -18,10 +18,10 @@ async function getcuteneko(): Promise<string> {
 export default definePlugin({
     name: "CuteNekos",
     authors: [Devs.echo],
-    description: "Neko Command",
+    description: "Send Nekos to others",
     commands: [{
         name: "nekos",
-        description: "Baby don't hurt me no more",
+        description: "Send Neko",
         execute: async opts => ({
             content: await getcuteneko()
         })

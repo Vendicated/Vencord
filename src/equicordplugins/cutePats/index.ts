@@ -8,7 +8,6 @@ import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 async function getcutepats(): Promise<string> {
-    // Indi wants bad things
     const res = await fetch("https://api.waifu.pics/sfw/pat");
     const url = (await res.json()).url as string;
     return url;
@@ -19,10 +18,10 @@ async function getcutepats(): Promise<string> {
 export default definePlugin({
     name: "CutePats",
     authors: [EquicordDevs.thororen],
-    description: "Pat Command",
+    description: "Sending Head Pats",
     commands: [{
         name: "pat",
-        description: "Baby don't hurt me no more",
+        description: "Sends a headpat gif",
         execute: async opts => ({
             content: await getcutepats()
         })

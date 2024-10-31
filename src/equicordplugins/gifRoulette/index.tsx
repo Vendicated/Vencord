@@ -44,7 +44,7 @@ export default definePlugin({
     commands: [
         {
             name: "gifroulette",
-            description: "Time to tempt your fate",
+            description: "Tempt fate and send a gif",
             execute: (opts, other) => ({
                 content: getMessage(opts, other)
             }),
