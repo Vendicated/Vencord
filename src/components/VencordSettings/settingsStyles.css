@@ -32,9 +32,9 @@
 }
 
 .vc-backup-restore-card {
-    background-color: var(--info-warning-background);
-    border-color: var(--info-warning-foreground);
-    color: var(--info-warning-text);
+    background-color: var(--info-warning-background) !important;
+    border-color: var(--info-warning-foreground) !important;
+    color: var(--info-warning-text) !important;
 }
 
 .vc-settings-theme-links {

@@ -89,7 +89,7 @@
 
 .vc-restart-button {
     background-color: var(--background-color) !important;
-    border: 1px solid var(--info-warning-foreground);
+    border: 1px solid var(--info-warning-foreground) !important;
 }
 
 .vc-restart-button:hover {

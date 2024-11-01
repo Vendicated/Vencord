@@ -1,9 +1,9 @@
 .purge-warning {
-    font-size: 16px;
-    background-color: rgb(240 71 71 / 10%);
-    color: rgb(240 71 71);
-    border: 1px solid rgb(240 71 71 / 60%);
-    border-radius: 4px;
+    font-size: 16px !important;
+    background-color: rgb(240 71 71 / 10%) !important;
+    color: rgb(240 71 71) !important;
+    border: 1px solid rgb(240 71 71 / 60%) !important;
+    border-radius: 5px !important;
     font-weight: 500;
     padding: 6px 10px;
     text-align: center;
