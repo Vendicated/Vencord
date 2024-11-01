@@ -141,7 +141,7 @@
 
 .vc-warning-info {
     gap: 15px;
-    display: flex;
+    display: grid !important;
     flex-direction: column;
     user-select: none;
 }
