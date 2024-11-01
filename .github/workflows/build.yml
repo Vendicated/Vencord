@@ -8,6 +8,8 @@ env:
     FORCE_COLOR: true
     GITHUB_TOKEN: ${{ secrets.ETOKEN }}
 
+permissions: write-all
+
 jobs:
     Build:
         name: Build Equicord
@@ -16,7 +18,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
+            - uses: pnpm/action-setup@v3
 
             - name: Use Node.js 20
               uses: actions/setup-node@v4
@@ -34,7 +36,7 @@ jobs:
               run: pnpm buildStandalone
 
             - name: Generate plugin list
-              run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
+              run: pnpm generatePluginJson dist/vencordplugins.json
 
             - name: Generate Equicord plugin list
               run: pnpm generateEquicordPluginJson dist/equicordplugins.json
@@ -69,26 +71,15 @@ jobs:
             - name: Upload Equicord Stable
               if: ${{ github.ref_name == 'main' }}
               run: |
-                gh release upload latest --clobber dist/release/*
+                  gh release upload latest --clobber dist/release/*
 
             - name: Upload Equicord Dev
               if: ${{ github.ref_name == 'dev' }}
               run: |
-                gh release upload devbuild --clobber dist/release/*
+                  gh release upload devbuild --clobber dist/release/*
 
-            - name: Upload Plugins JSON to Equibored repo
-              if: ${{ github.ref_name == 'main' }}
-              run: |
-                git config --global user.name "$USERNAME"
-                git config --global user.email "78185467+thororen1234@users.noreply.github.com"
-                git clone https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git upload
-                cd upload
-                rm plugins.json
-                cp -r ../dist/equicordplugins.json plugins.json
-                git add -A
-                git commit -m "Plugins for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
-                git push --force https://$USERNAME:$API_TOKEN@github.com/$GH_REPO.git
-              env:
-                API_TOKEN: ${{ secrets.ETOKEN }}
-                GH_REPO: Equicord/Equibored
-                USERNAME: thororen1234
+            - name: Upload build artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: "build"
+                  path: "dist/release/*"
