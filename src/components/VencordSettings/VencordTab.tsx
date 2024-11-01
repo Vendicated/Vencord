@@ -329,8 +329,8 @@ function DiscordInviteCard({ invite, image }: DiscordInviteProps) {
           or new bigger updates!
         </Forms.FormText>
         <Forms.FormText>
-          <Heart /> You can also donate to me if you'd like to support this
-          project.
+          <Heart />
+          You can also donate to me if you'd like to support this project.
         </Forms.FormText>
 
         <div className={cl("card-buttons")}>
