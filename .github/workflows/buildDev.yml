@@ -102,7 +102,7 @@ jobs:
             - name: Move Files To Date Time dir
               run: |
                 mkdir -p $DATE/$TIME
-                mv /dist/release/* $DATE/$TIME
+                mv dist/release/* $DATE/$TIME
                 cd $DATE/$TIME
                 echo '$DATE/$TIME' >> time.txt
 
