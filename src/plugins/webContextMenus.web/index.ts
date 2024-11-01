@@ -36,6 +36,8 @@ if (IS_VESKTOP) {
     result = IS_VESKTOP;
 } else if (IS_EQUIBOP) {
     result = IS_EQUIBOP;
+} else if (IS_WEB) {
+    result = IS_WEB;
 } else {
     result = false;
 }
