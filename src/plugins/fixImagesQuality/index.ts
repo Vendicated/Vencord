@@ -9,7 +9,7 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "FixImagesQuality",
-    description: "Prevents images from being loaded as webp, which can cause quality loss",
+    description: "Prevents images from being loaded as webp, which can cause quality loss. Will increase image load times, and will not always improve picture quality.",
     authors: [Devs.Nuckyz],
     patches: [
         {
