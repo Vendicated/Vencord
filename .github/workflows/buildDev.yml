@@ -1,8 +1,8 @@
-name: Release Stable
+name: Release Dev
 on:
     push:
         branches:
-            - main
+            - dev
 env:
     FORCE_COLOR: true
     GITHUB_TOKEN: ${{ secrets.ETOKEN }}
@@ -38,7 +38,7 @@ jobs:
                   SECONDS: ${{ steps.date.outputs.seconds }}
 
     Build:
-        name: Build Equicord Stable
+        name: Build Equicord Dev
         runs-on: ubuntu-latest
         needs: Date
         env:
@@ -60,16 +60,13 @@ jobs:
               run: pnpm install --frozen-lockfile
 
             - name: Build web
-              run: pnpm buildWebStandalone
+              run: pnpm buildWeb
 
             - name: Build
-              run: pnpm buildStandalone
+              run: pnpm build
 
             - name: Generate plugin list
               run: pnpm generatePluginJson dist/allplugins.json
-
-            - name: Generate Equicord plugin list
-              run: pnpm generateEquicordPluginJson dist/equicordplugins.json
 
             - name: Collect files to be released
               run: |
@@ -98,9 +95,9 @@ jobs:
                   rm release/package.json
                   rm release/*.map
 
-            - name: Upload Equicord Stable
+            - name: Upload Equicord Dev
               run: |
-                  gh release upload latest --clobber dist/release/*
+                  gh release upload devbuild --clobber dist/release/*
 
             - name: Move Files To Date Time dir
               run: |
@@ -112,5 +109,5 @@ jobs:
             - name: Upload build artifact
               uses: actions/upload-artifact@v4
               with:
-                  name: "buildStable"
+                  name: "buildDev"
                   path: "$DATE/$TIME/*"

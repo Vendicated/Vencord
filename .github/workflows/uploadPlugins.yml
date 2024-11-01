@@ -1,9 +1,11 @@
 name: Upload Plugins JSONs
 on:
+    workflow_dispatch:
     workflow_run:
-        workflows: [Release]
+        workflows: [Release Stable]
         types: [completed]
-        branches: [main]
+    schedule:
+        - cron: 0 0 * * *
 env:
     FORCE_COLOR: true
     REPO: Equicord/Equibored
@@ -16,7 +18,6 @@ jobs:
     Upload:
         name: Upload Plugins
         runs-on: ubuntu-latest
-        if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
         steps:
             - uses: actions/checkout@v4
