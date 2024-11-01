@@ -1,0 +1,46 @@
+name: Upload Plugins JSONs
+on:
+    workflow_run:
+        workflows: [Release]
+        types: [completed]
+        branches: [main]
+env:
+    FORCE_COLOR: true
+    REPO: Equicord/Equibored
+    TOKEN: ${{ secrets.ETOKEN }}
+    USERNAME: GitHub-Actions
+
+permissions: write-all
+
+jobs:
+    Upload:
+        name: Upload Plugins
+        runs-on: ubuntu-latest
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Setup Actions User
+              run: |
+                  git config --global user.name "GitHub-Actions"
+                  git config --global user.email actions@github.com
+
+            - name: Download build artifact from triggered workflow
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                run_id: ${{ github.event.workflow_run.id }}
+                name: build
+                path: ./release
+                search_artifacts: true
+
+            - name: Upload Plugins JSON to Equibored repo
+              run: |
+                  git clone https://$USERNAME:$TOKEN@github.com/$REPO.git plugins
+                  cd plugins
+
+                  cp ../release/*plugins.json .
+                  git add -A
+
+                  git commit -m "Plugins for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+                  git push --force https://$USERNAME:$TOKEN@github.com/$REPO.git

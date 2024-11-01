@@ -1,25 +1,25 @@
 name: Sync Vencord Main
 
 env:
-  WORKFLOW_TOKEN: ${{ secrets.ETOKEN }}
-  UPSTREAM_URL: "https://github.com/Vendicated/Vencord.git"
-  UPSTREAM_BRANCH: "main"
-  DOWNSTREAM_BRANCH: "main"
+    WORKFLOW_TOKEN: ${{ secrets.ETOKEN }}
+    UPSTREAM_URL: "https://github.com/Vendicated/Vencord.git"
+    UPSTREAM_BRANCH: "main"
+    DOWNSTREAM_BRANCH: "main"
 
 on:
-  schedule:
-    - cron: "0 * * * *"
-  workflow_dispatch:
+    schedule:
+        - cron: "0 * * * *"
+    workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Sync Vencord Main
-        id: sync
-        uses: verticalsync/sync-upstream-repo@master
-        with:
-          upstream_repo: ${{ env.UPSTREAM_URL }}
-          upstream_branch: ${{ env.UPSTREAM_BRANCH }}
-          downstream_branch: ${{ env.DOWNSTREAM_BRANCH }}
-          token: ${{ env.WORKFLOW_TOKEN }}
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Sync Vencord Main
+              id: sync
+              uses: verticalsync/sync-upstream-repo@master
+              with:
+                  upstream_repo: ${{ env.UPSTREAM_URL }}
+                  upstream_branch: ${{ env.UPSTREAM_BRANCH }}
+                  downstream_branch: ${{ env.DOWNSTREAM_BRANCH }}
+                  token: ${{ env.WORKFLOW_TOKEN }}

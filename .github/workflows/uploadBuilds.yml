@@ -1,0 +1,94 @@
+name: Upload Builds
+on:
+    workflow_run:
+        workflows: [Release]
+        types: [completed]
+        branches: [main, dev]
+env:
+    FORCE_COLOR: true
+    REPO: Equicord/Builds
+    TOKEN: ${{ secrets.ETOKEN }}
+    USERNAME: GitHub-Actions
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+
+permissions: write-all
+
+jobs:
+    Date:
+        name: Date
+        runs-on: ubuntu-latest
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        outputs:
+            DATE: ${{ steps.combined.outputs.DATE }}
+            TIME: ${{ steps.combined.outputs.TIME }}
+
+        steps:
+            - name: Get Month Day Year
+              id: date
+              uses: Kaven-Universe/github-action-current-date-time@v1
+              with:
+                  timezone-offset: 240
+
+            - name: Combine Time
+              id: combined
+              run: |
+                  echo "DATE=$YEAR/$MONTH/$DAY" >> $GITHUB_OUTPUT
+                  echo "TIME=$HOURS-$MINUTES-$SECONDS" >> $GITHUB_OUTPUT
+              env:
+                  YEAR: ${{ steps.date.outputs.year }}
+                  MONTH: ${{ steps.date.outputs.month }}
+                  DAY: ${{ steps.date.outputs.day }}
+                  HOURS: ${{ steps.date.outputs.hours }}
+                  MINUTES: ${{ steps.date.outputs.minutes }}
+                  SECONDS: ${{ steps.date.outputs.seconds }}
+
+    Upload:
+        name: Upload Build
+        runs-on: ubuntu-latest
+        needs: Date
+        env:
+            DATE: ${{ needs.Date.outputs.DATE }}
+            TIME: ${{ needs.Date.outputs.TIME }}
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Setup Actions User
+              run: |
+                  git config --global user.name "GitHub-Actions"
+                  git config --global user.email actions@github.com
+
+            - name: Download build artifact from triggered workflow
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                run_id: ${{ github.event.workflow_run.id }}
+                name: build
+                path: ./release
+                search_artifacts: true
+
+            - name: Upload Stable Build to Builds repo
+              if: ${{ github.event.workflow_run.head_branch == 'main' }}
+              run: |
+                  git clone https://$USERNAME:$TOKEN@github.com/$REPO.git builds
+                  cd builds
+
+                  mkdir -p stable/$DATE/$TIME
+                  cp -r ../release/* ./stable/$DATE/$TIME
+
+                  git add -A
+                  git commit -m "Stable Build for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+                  git push --force https://$USERNAME:$TOKEN@github.com/$REPO.git
+
+            - name: Upload Dev Build To Builds Repo
+              if: ${{ github.event.workflow_run.head_branch == 'dev' }}
+              run: |
+                  git clone https://$USERNAME:$TOKEN@github.com/$REPO.git builds
+                  cd builds
+
+                  mkdir -p devbuilds/$DATE/$TIME
+                  cp -r ../release/* ./devbuilds/$DATE/$TIME
+
+                  git add -A
+                  git commit -m "Dev Build for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+                  git push --force https://$USERNAME:$TOKEN@github.com/$REPO.git
