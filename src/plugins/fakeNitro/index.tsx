@@ -350,7 +350,7 @@ export default definePlugin({
                 {
                     // Filter attachments to remove fake nitro stickers or emojis
                     predicate: () => settings.store.transformStickers,
-                    match: /renderAttachments\(\i\){let{attachments:(\i).+?;/,
+                    match: /renderAttachments\(\i\){.+?{attachments:(\i).+?;/,
                     replace: (m, attachments) => `${m}${attachments}=$self.filterAttachments(${attachments});`
                 }
             ]
