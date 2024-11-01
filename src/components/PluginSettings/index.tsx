@@ -70,7 +70,10 @@ function ReloadRequiredCard({ required, enabledPlugins, openDisablePluginsModal,
                     <Forms.FormText className={cl("dep-text")}>
                         Restart now to apply new plugins and their settings
                     </Forms.FormText>
-                    <Button onClick={() => location.reload()}>
+                    <Button
+                        className="vc-restart-button"
+                        onClick={() => location.reload()}
+                    >
                         Restart
                     </Button>
                 </>
@@ -400,14 +403,14 @@ export default function PluginSettings() {
                     <Forms.FormSection>
                         <Flex className="vc-warning-info">
                             <img
-                                src="https://media.tenor.com/Y6DXKZiBCs8AAAAi/stavario-josefbenes.gif"
+                                src="https://media.tenor.com/hapjxf8y50YAAAAi/stop-sign.gif"
                                 alt="Warning"
                             />
                             <Text className="warning-text">
                                 WARNING: You are about to disable <span>{enabledPlugins.length}</span> plugins!
                             </Text>
                             <Text className="warning-text">
-                                THIS ACTION IS IRREVERSIBLE
+                                THIS ACTION IS IRREVERSIBLE!
                             </Text>
                             <Text className="text-normal margin-bottom">
                                 Are you absolutely sure you want to proceed? You can always enable them back later.

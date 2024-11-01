@@ -75,17 +75,25 @@
 .vc-plugins-restart-card {
     padding: 1em;
     background: var(--info-warning-background);
-    border: 1px solid var(--info-warning-foreground);
+    border: inherit !important;
     color: var(--info-warning-text);
 }
 
 .vc-plugins-restart-card button {
     margin-top: 0.5em;
-    background: var(--info-warning-foreground) !important;
 }
 
 .vc-plugins-info-button svg:not(:hover, :focus) {
     color: var(--text-muted);
+}
+
+.vc-restart-button {
+    background-color: var(--background-color) !important;
+    border: 1px solid var(--info-warning-foreground);
+}
+
+.vc-restart-button:hover {
+    background-color: var(--info-warning-foreground) !important;
 }
 
 .vc-plugin-stats {
@@ -221,8 +229,8 @@
 /* Specific to disable all modal */
 
 .warning-text {
-    color: var(--text-danger);
-    font-size: 1.2rem;
+    color: var(--text-danger) !important;
+    font-size: 1.2rem !important;
 }
 
 .warning-text span {

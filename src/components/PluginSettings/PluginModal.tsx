@@ -414,14 +414,14 @@ export function openWarningModal(plugin: Plugin, pluginModalProps: ModalProps, o
                 <Forms.FormSection>
                     <Flex className="vc-warning-info">
                         <img
-                            src="https://media.tenor.com/Y6DXKZiBCs8AAAAi/stavario-josefbenes.gif"
+                            src="https://media.tenor.com/hapjxf8y50YAAAAi/stop-sign.gif"
                             alt="Warning"
                         />
                         <Text className="text-normal">
                             You are about to reset all settings for <strong>{plugin.name}</strong> to their default values.
                         </Text>
-                        <Text className="text-danger">
-                            THIS ACTION IS IRREVERSIBLE
+                        <Text className="warning-text">
+                            THIS ACTION IS IRREVERSIBLE!
                         </Text>
                         <Text className="text-normal margin-bottom">
                             If you are certain you want to proceed, click <strong>Confirm Reset</strong>. Otherwise, click <strong>Cancel</strong>.

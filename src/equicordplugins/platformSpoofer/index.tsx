@@ -4,9 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./style.css";
+
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Forms } from "@webpack/common";
 
 const settings = definePluginSettings({
     platform: {
@@ -39,6 +42,11 @@ export default definePlugin({
     name: "PlatformSpoofer",
     description: "Spoof what platform or device you're on",
     authors: [EquicordDevs.Drag],
+    settingsAboutComponent: () => <>
+        <Forms.FormText className="platform-warning">
+            We can't guarantee this plugin won't get you warned or banned.
+        </Forms.FormText>
+    </>,
     settings: settings,
     patches: [
         {

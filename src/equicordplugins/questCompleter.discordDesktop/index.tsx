@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { showNotification } from "@api/Notifications";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
@@ -23,7 +25,7 @@ import { getTheme, Theme } from "@utils/discord";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByProps, findExportedComponentLazy } from "@webpack";
-import { Button, FluxDispatcher, RestAPI, Tooltip, UserStore } from "@webpack/common";
+import { Button, FluxDispatcher, Forms, RestAPI, Tooltip, UserStore } from "@webpack/common";
 const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
 const isApp = navigator.userAgent.includes("Electron/");
 
@@ -188,6 +190,11 @@ export default definePlugin({
     name: "QuestCompleter",
     description: "A plugin to complete quests without having the game installed.",
     authors: [Devs.HappyEnderman, EquicordDevs.SerStars, EquicordDevs.thororen],
+    settingsAboutComponent: () => <>
+        <Forms.FormText className="remixme-warning">
+            We can't guarantee this plugin won't get you warned or banned.
+        </Forms.FormText>
+    </>,
     patches: [
         {
             find: "\"invite-button\"",

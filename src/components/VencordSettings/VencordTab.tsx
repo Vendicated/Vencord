@@ -91,8 +91,8 @@ function EquicordSettings() {
             !IS_WEB && {
                 key: "transparent",
                 title: "Enable window transparency.",
-                note: "You need a theme that supports transparency or this will do nothing. Requires a full restart",
-                warning: { enabled: true, message: "This will stop the window from being resizable" }
+                note: "You need a theme that supports transparency or this will do nothing. Requires a full restart!",
+                warning: { enabled: true, message: "This will stop the window from being resizable." }
             },
             !IS_WEB && isWindows && {
                 key: "winCtrlQ",

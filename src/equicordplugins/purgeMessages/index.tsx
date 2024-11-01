@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { MessageStore, UserStore } from "@webpack/common";
+import { Forms, MessageStore, UserStore } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
 import { loggedMessages } from "../messageLoggerEnhanced/LoggedMessageManager";
@@ -48,6 +50,11 @@ export default definePlugin({
     name: "PurgeMessages",
     description: "Purges messages from a channel",
     authors: [EquicordDevs.bhop, Devs.nyx],
+    settingsAboutComponent: () => <>
+        <Forms.FormText className="purge-warning">
+            We can't guarantee this plugin won't get you warned or banned.
+        </Forms.FormText>
+    </>,
     commands: [
         {
             name: "purge",
