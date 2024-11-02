@@ -43,6 +43,11 @@ const settings = definePluginSettings({
         description: "Fixes the image preview to the initial point of hover",
         default: false
     },
+    fileInformation: {
+        type: OptionType.BOOLEAN,
+        description: "Show file information on hover",
+        default: true
+    },
     hoverDelay: {
         type: OptionType.SLIDER,
         description: "Delay in seconds before the image preview appears",
