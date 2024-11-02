@@ -24,21 +24,33 @@ let style: HTMLStyleElement;
 
 function setCss() {
     style.textContent = `
+        /* Blur for NSFW channels */
         .vc-nsfw-img [class^=imageWrapper] img,
         .vc-nsfw-img [class^=wrapperPaused] video {
             filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
             transition: filter 0.2s;
         }
+        
+        /* Blur for DMs when enabled */
+        .vc-dm-blur [class^=imageWrapper] img,
+        .vc-dm-blur [class^=wrapperPaused] video {
+            filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
+            transition: filter 0.2s;
+        }
+        
+        /* Remove blur on hover for both NSFW and DMs */
         .vc-nsfw-img [class^=imageWrapper]:hover img,
-        .vc-nsfw-img [class^=wrapperPaused]:hover video {
+        .vc-nsfw-img [class^=wrapperPaused]:hover video,
+        .vc-dm-blur [class^=imageWrapper]:hover img,
+        .vc-dm-blur [class^=wrapperPaused]:hover video {
             filter: unset;
         }
-        `;
+    `;
 }
 
 export default definePlugin({
     name: "BlurNSFW",
-    description: "Blur attachments in NSFW channels until hovered",
+    description: "Blur attachments in NSFW channels and DMs until hovered",
     authors: [Devs.Ven],
 
     patches: [
@@ -46,7 +58,7 @@ export default definePlugin({
             find: ".embedWrapper,embed",
             replacement: [{
                 match: /\.container/,
-                replace: "$&+(this.props.channel.nsfw? ' vc-nsfw-img': '')"
+                replace: "$&+(this.props.channel.nsfw?' vc-nsfw-img':'')+(this.props.channel.type===1&&Settings.plugins.BlurNSFW.blurDirectMessage?' vc-dm-blur':'')"
             }]
         }
     ],
@@ -57,14 +69,19 @@ export default definePlugin({
             description: "Blur Amount",
             default: 10,
             onChange: setCss
+        },
+        blurDirectMessage: {
+            type: OptionType.BOOLEAN,
+            description: "Blur Images in Direct Messages",
+            default: false,
+            onChange: setCss
         }
     },
 
     start() {
         style = document.createElement("style");
-        style.id = "VcBlurNsfw";
+        style.id = "VcBlurNSFW";
         document.head.appendChild(style);
-
         setCss();
     },
 
