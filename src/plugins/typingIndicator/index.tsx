@@ -73,8 +73,6 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
     const typingUsersArray = Object.keys(typingUsers).filter(id => id !== myId && !(RelationshipStore.isBlocked(id) && !settings.store.includeBlockedUsers));
     let tooltipText: string;
 
-    // the new syntax is getIntlMessage("ONE_USER_TYPING", { a: getDisplayName(guildId, typingUsersArray[0]) });
-
     switch (typingUsersArray.length) {
         case 0: break;
         case 1: {

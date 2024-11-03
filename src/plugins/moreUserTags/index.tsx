@@ -192,9 +192,9 @@ export default definePlugin({
             replacement: [
                 // make the tag show the right text
                 {
-                    match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=.{0,40}#{intl::APP_TAG}"\]\)/,
-                    replace: (_, origSwitch, variant, tags, displayedText) =>
-                        `${origSwitch}default:{${displayedText} = $self.getTagText(${tags}[${variant}])}`
+                    match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=(.{0,40}#{intl::APP_TAG}"\]\))/,
+                    replace: (_, origSwitch, variant, tags, displayedText, originalText) =>
+                        `${origSwitch}default:{${displayedText} = $self.getTagText(${tags}[${variant}],${originalText})}`
                 },
                 // show OP tags correctly
                 {
@@ -296,21 +296,25 @@ export default definePlugin({
 
     isOPTag: (tag: number) => tag === Tag.Types.ORIGINAL_POSTER || tags.some(t => tag === Tag.Types[`${t.name}-OP`]),
 
-    getTagText(passedTagName: string) {
-        if (!passedTagName) return getIntlMessage("APP_TAG");
-        const [tagName, variant] = passedTagName.split("-");
-        const tag = tags.find(({ name }) => tagName === name);
-        if (!tag) return getIntlMessage("APP_TAG");
-        if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return getIntlMessage("APP_TAG");
+    getTagText(passedTagName: string, originalText: string) {
+        try {
+            const [tagName, variant] = passedTagName.split("-");
+            if (!passedTagName) return getIntlMessage("APP_TAG");
+            const tag = tags.find(({ name }) => tagName === name);
+            if (!tag) return getIntlMessage("APP_TAG");
+            if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return getIntlMessage("APP_TAG");
 
-        const tagText = settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
-        switch (variant) {
-            case "OP":
-                return `${getIntlMessage("BOT_TAG_FORUM_ORIGINAL_POSTER")} • ${tagText}`;
-            case "BOT":
-                return `${getIntlMessage("APP_TAG")} • ${tagText}`;
-            default:
-                return tagText;
+            const tagText = settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
+            switch (variant) {
+                case "OP":
+                    return `${getIntlMessage("BOT_TAG_FORUM_ORIGINAL_POSTER")} • ${tagText}`;
+                case "BOT":
+                    return `${getIntlMessage("APP_TAG")} • ${tagText}`;
+                default:
+                    return tagText;
+            }
+        } catch {
+            return originalText;
         }
     },
 
