@@ -232,7 +232,7 @@ export default definePlugin({
             }
         },
         {
-            find: "#{ìntl::USER_PROFILE_PRONOUNS}",
+            find: "#{intl::USER_PROFILE_PRONOUNS}",
             replacement: {
                 match: /(?=,hideBotTag:!0)/,
                 replace: ",moreTags_channelId:arguments[0].moreTags_channelId"
