@@ -6,7 +6,7 @@ on:
 
 jobs:
     Publish:
-        if: github.repository == 'Vendicated/Vencord'
+        if: github.repository == 'enzomtpYT/VencordOverpowah'
         runs-on: ubuntu-latest
 
         steps:
