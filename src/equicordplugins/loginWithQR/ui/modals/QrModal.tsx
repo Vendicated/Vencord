@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { getIntlMessage } from "@utils/discord";
 import {
     ModalContent,
     ModalHeader,
@@ -15,7 +16,6 @@ import {
 import { findByPropsLazy } from "@webpack";
 import {
     Button,
-    i18n,
     RestAPI,
     Text,
     useEffect,
@@ -372,7 +372,7 @@ function QrModal(props: ModalProps) {
                     tag="h1"
                     style={{ flexGrow: 1 }}
                 >
-                    {i18n.Messages.USER_SETTINGS_SCAN_QR_CODE}
+                    {getIntlMessage("USER_SETTINGS_SCAN_QR_CODE")}
                 </Text>
             </ModalHeader>
             <ModalContent scrollbarType="none">

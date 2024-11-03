@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { getIntlMessage } from "@utils/discord";
 import {
     ModalContent,
     ModalFooter,
@@ -15,7 +16,6 @@ import {
 import { findByPropsLazy } from "@webpack";
 import {
     Button,
-    i18n,
     RestAPI,
     Text,
     useEffect,
@@ -131,14 +131,14 @@ function VerifyModal({
                             tag="h1"
                             className={cl("device-header")}
                         >
-                            {i18n.Messages.QR_CODE_LOGIN_SUCCESS}
+                            {getIntlMessage("QR_CODE_LOGIN_SUCCESS")}
                         </Text>
                         <Text
                             variant="text-md/semibold"
                             color="text-normal"
                             style={{ width: "30rem" }}
                         >
-                            {i18n.Messages.QR_CODE_LOGIN_SUCCESS_FLAVOR}
+                            {getIntlMessage("QR_CODE_LOGIN_SUCCESS_FLAVOR")}
                         </Text>
                     </>
                 ) : state === VerifyState.NotFound ? (
@@ -155,14 +155,14 @@ function VerifyModal({
                             tag="h1"
                             className={cl("device-header")}
                         >
-                            {i18n.Messages.QR_CODE_NOT_FOUND}
+                            {getIntlMessage("QR_CODE_NOT_FOUND")}
                         </Text>
                         <Text
                             variant="text-md/semibold"
                             color="text-normal"
                             style={{ width: "30rem" }}
                         >
-                            {i18n.Messages.QR_CODE_NOT_FOUND_DESCRIPTION}
+                            {getIntlMessage("QR_CODE_NOT_FOUND_DESCRIPTION")}
                         </Text>
                     </>
                 ) : (
@@ -179,7 +179,7 @@ function VerifyModal({
                             tag="h1"
                             className={cl("device-header")}
                         >
-                            {i18n.Messages.QR_CODE_LOGIN_CONFIRM}
+                            {getIntlMessage("QR_CODE_LOGIN_CONFIRM")}
                         </Text>
                         <Text variant="text-md/semibold" color="text-danger">
                             Never scan a login QR code from another user or application.
@@ -205,7 +205,7 @@ function VerifyModal({
             <ModalFooter className={cl("device-footer")}>
                 {state === VerifyState.LoggedIn ? (
                     <Button onClick={props.onClose}>
-                        {i18n.Messages.QR_CODE_LOGIN_FINISH_BUTTON}
+                        {getIntlMessage("QR_CODE_LOGIN_FINISH_BUTTON")}
                     </Button>
                 ) : (
                     <Button
@@ -214,8 +214,8 @@ function VerifyModal({
                         onClick={props.onClose}
                     >
                         {state === VerifyState.NotFound
-                            ? i18n.Messages.CLOSE
-                            : i18n.Messages.CANCEL}
+                            ? getIntlMessage("CLOSE")
+                            : getIntlMessage("CANCEL")}
                     </Button>
                 )}
             </ModalFooter>

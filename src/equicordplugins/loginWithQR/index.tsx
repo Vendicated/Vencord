@@ -6,8 +6,9 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, i18n, Menu } from "@webpack/common";
+import { Button, Forms, Menu } from "@webpack/common";
 import { ReactElement } from "react";
 
 import { preload, unload } from "./images";
@@ -33,7 +34,7 @@ export default definePlugin({
 
                 return (
                     <Button size={Button.Sizes.SMALL} onClick={openQrModal}>
-                        {i18n.Messages.USER_SETTINGS_SCAN_QR_CODE}
+                        {getIntlMessage("USER_SETTINGS_SCAN_QR_CODE")}
                     </Button>
                 );
             },
@@ -94,21 +95,21 @@ export default definePlugin({
     insertScanQrButton: (button: ReactElement) => (
         <div className={cl("settings-btns")}>
             <Button size={Button.Sizes.SMALL} onClick={openQrModal}>
-                {i18n.Messages.USER_SETTINGS_SCAN_QR_CODE}
+                {getIntlMessage("USER_SETTINGS_SCAN_QR_CODE")}
             </Button>
             {button}
         </div>
     ),
     get ScanQrMenuItem() {
-        return <Menu.MenuItem id="scan-qr" label={i18n.Messages.USER_SETTINGS_SCAN_QR_CODE} action={openQrModal} />;
+        return <Menu.MenuItem id="scan-qr" label={getIntlMessage("USER_SETTINGS_SCAN_QR_CODE")} action={openQrModal} />;
     },
     get ScanQrSettingsSheet() {
         return {
-            section: i18n.Messages.USER_SETTINGS_SCAN_QR_CODE,
+            section: getIntlMessage("USER_SETTINGS_SCAN_QR_CODE"),
             onClick: openQrModal,
-            searchableTitles: [i18n.Messages.USER_SETTINGS_SCAN_QR_CODE],
-            label: i18n.Messages.USER_SETTINGS_SCAN_QR_CODE,
-            ariaLabel: i18n.Messages.USER_SETTINGS_SCAN_QR_CODE
+            searchableTitles: [getIntlMessage("USER_SETTINGS_SCAN_QR_CODE")],
+            label: getIntlMessage("USER_SETTINGS_SCAN_QR_CODE"),
+            ariaLabel: getIntlMessage("USER_SETTINGS_SCAN_QR_CODE")
         };
     },
 

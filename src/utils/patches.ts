@@ -25,12 +25,12 @@ export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
         const hashed = runtimeHashMessageKey(key);
 
         const isString = typeof match === "string";
-        const hasSpecialChars = /^[\d]/.test(hashed) || !/^[\w$]+$/.test(hashed);
+        const hasSpecialChars = !Number.isNaN(Number(hashed[0])) || hashed.includes("+") || hashed.includes("/");
 
         if (hasSpecialChars) {
             return isString
-                ? `["${hashed}`
-                : String.raw`(?:\["${hashed})`.replaceAll("+", "\\+");
+                ? `["${hashed}"]`
+                : String.raw`(?:\["${hashed}"\])`.replaceAll("+", "\\+");
         }
 
         return isString ? `.${hashed}` : String.raw`(?:\.${hashed})`;

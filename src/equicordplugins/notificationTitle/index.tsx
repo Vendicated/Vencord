@@ -5,9 +5,10 @@
  */
 
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { ChannelStore, GuildStore, i18n, RelationshipStore, UserStore } from "@webpack/common";
+import { ChannelStore, GuildStore, RelationshipStore, UserStore } from "@webpack/common";
 
 const { getName } = findByPropsLazy("getName", "useName", "getNickname");
 const computeChannelName = findByCodeLazy(".isThread())return'\"'.concat(");
@@ -39,7 +40,7 @@ export default definePlugin({
         if (message.type === MessageTypes.REPLY && message.referenced_message?.author) {
             const replyUser = UserStore.getUser(message.referenced_message.author.id);
             const replyUsername = getName(channel.guild_id, channel.id, replyUser);
-            title = i18n.Messages.CHANNEL_MESSAGE_REPLY_A11Y_LABEL.format({
+            title = getIntlMessage("CHANNEL_MESSAGE_REPLY_A11Y_LABEL", {
                 author: username,
                 repliedAuthor: replyUsername,
             });
