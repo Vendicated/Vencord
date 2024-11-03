@@ -14,7 +14,7 @@ import { Devs } from "@utils/constants";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { i18n, Menu, Tooltip, useEffect, useState } from "@webpack/common";
+import { Menu, Tooltip, useEffect, useState } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 import { SetTimezoneModal } from "./TimezoneModal";
@@ -27,6 +27,7 @@ export let timezones: Record<string, string | null> = {};
 })();
 
 const classes = findByPropsLazy("timestamp", "compact", "contentOnly");
+const locale = findByPropsLazy("getLocale");
 
 export const settings = definePluginSettings({
     "24h Time": {
@@ -50,7 +51,7 @@ export const settings = definePluginSettings({
 
 function getTime(timezone: string, timestamp: string | number, props: Intl.DateTimeFormatOptions = {}) {
     const date = new Date(timestamp);
-    const formatter = new Intl.DateTimeFormat(i18n?.getLocale?.() ?? "en-US", {
+    const formatter = new Intl.DateTimeFormat(locale.getLocale() ?? "en-US", {
         hour12: !settings.store["24h Time"],
         timeZone: timezone,
         ...props
