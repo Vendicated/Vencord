@@ -155,4 +155,5 @@ export const defaultRules = [
     "igshid",
     "igsh",
     "share_id@reddit.com",
+    "si@soundcloud.com",
 ];
