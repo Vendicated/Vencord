@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/Settings";
 import BackupAndRestoreTab from "@components/VencordSettings/BackupAndRestoreTab";
 import CloudTab from "@components/VencordSettings/CloudTab";
 import PatchHelperTab from "@components/VencordSettings/PatchHelperTab";
@@ -24,7 +25,7 @@ import UpdaterTab from "@components/VencordSettings/UpdaterTab";
 import VencordTab from "@components/VencordSettings/VencordTab";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { React } from "@webpack/common";
+import { i18n, React } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
@@ -55,7 +56,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "#{intl::ACTIVITY_SETTINGS}",
+            find: ".SEARCH_NO_RESULTS&&0===",
             replacement: [
                 {
                     match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
@@ -145,6 +146,31 @@ export default definePlugin({
                 section: SectionTypes.DIVIDER
             }
         ].filter(Boolean);
+    },
+
+    isRightSpot({ header, settings }: { header?: string; settings?: string[]; }) {
+        const firstChild = settings?.[0];
+        // lowest two elements... sanity backup
+        if (firstChild === "LOGOUT" || firstChild === "SOCIAL_LINKS") return true;
+
+        const { settingsLocation } = Settings.plugins.Settings;
+
+        if (settingsLocation === "bottom") return firstChild === "LOGOUT";
+        if (settingsLocation === "belowActivity") return firstChild === "CHANGELOG";
+
+        if (!header) return;
+
+        try {
+            const names = {
+                top: i18n.Messages.USER_SETTINGS,
+                aboveNitro: i18n.Messages.BILLING_SETTINGS,
+                belowNitro: i18n.Messages.APP_SETTINGS,
+                aboveActivity: i18n.Messages.ACTIVITY_SETTINGS
+            };
+            return header === names[settingsLocation];
+        } catch {
+            return firstChild === "PREMIUM";
+        }
     },
 
     patchedSettings: new WeakSet(),
