@@ -23,11 +23,17 @@ export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
     let partialCanon = typeof match === "string" ? match : match.source;
     partialCanon = partialCanon.replaceAll(/#{intl::([A-Za-z_$][\w$]*)}/g, (_, key) => {
         const hashed = runtimeHashMessageKey(key);
-        const isStr = typeof match === "string";
 
-        return /^[\d]/.test(hashed) || !/^[\w$]+$/.test(hashed)
-            ? isStr ? `["${hashed}` : String.raw`(?:\["${hashed}"\])`
-            : isStr ? `.${hashed}` : String.raw`(?:\.${hashed})`;
+        const isString = typeof match === "string";
+        const hasSpecialChars = /^[\d]/.test(hashed) || !/^[\w$]+$/.test(hashed);
+
+        if (hasSpecialChars) {
+            return isString
+                ? `["${hashed}`
+                : String.raw`(?:\["${hashed})`.replaceAll("+", "\\+");
+        }
+
+        return isString ? `.${hashed}` : String.raw`(?:\.${hashed})`;
     });
 
     if (typeof match === "string") {
