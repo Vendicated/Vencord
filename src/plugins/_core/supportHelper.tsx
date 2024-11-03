@@ -147,7 +147,7 @@ export default definePlugin({
     settings,
 
     patches: [{
-        find: ".BEGINNING_DM.format",
+        find: "#intl<BEGINNING_DM>",
         replacement: {
             match: /BEGINNING_DM\.format\(\{.+?\}\),(?=.{0,300}(\i)\.isMultiUserDM)/,
             replace: "$& $self.renderContributorDmWarningCard({ channel: $1 }),"

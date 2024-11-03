@@ -16,12 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { runtimeHashMessageKey } from "./intlHash";
 import { Patch, PatchReplacement, ReplaceFn } from "./types";
 
 export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
-    if (typeof match === "string") return match;
-    const canonSource = match.source
-        .replaceAll("\\i", "[A-Za-z_$][\\w$]*");
+    let partialCanon = typeof match === "string" ? match : match.source;
+    partialCanon = partialCanon.replaceAll(/#intl?<([A-Za-z_$][\w$]*)>/g, (_, key) => {
+        const hashed = runtimeHashMessageKey(key);
+        const isStr = typeof match === "string";
+
+        return /^[\d]/.test(hashed) || !/^[\w$]+$/.test(hashed)
+            ? isStr ? `["${hashed}` : `(?:\\["${hashed}"\\])`
+            : isStr ? `.${hashed}` : `(?:\\.${hashed})`;
+    });
+
+    if (typeof match === "string") return partialCanon as T;
+
+    const canonSource = partialCanon
+        .replaceAll(String.raw`\i`, String.raw`(?:[A-Za-z_$][\w$]*)`);
     return new RegExp(canonSource, match.flags) as T;
 }
 
