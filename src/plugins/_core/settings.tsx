@@ -56,7 +56,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "Messages.ACTIVITY_SETTINGS",
+            find: "#{intl::ACTIVITY_SETTINGS}",
             replacement: [
                 {
                     match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
@@ -69,7 +69,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
+            find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: {
                 match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.\i\).*?(\i\.\i)\.open\()/,
                 replace: "$2.open($1);return;"

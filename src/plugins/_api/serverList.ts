@@ -25,9 +25,9 @@ export default definePlugin({
     description: "Api required for plugins that modify the server list",
     patches: [
         {
-            find: "Messages.DISCODO_DISABLED",
+            find: "#{intl::DISCODO_DISABLED}",
             replacement: {
-                match: /(?<=Messages\.DISCODO_DISABLED.+?return)(\(.{0,75}?tutorialContainer.+?}\))(?=}function)/,
+                match: /(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,75}?tutorialContainer.+?}\))(?=}function)/,
                 replace: "[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"
             }
         },

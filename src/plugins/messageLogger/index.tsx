@@ -505,7 +505,7 @@ export default definePlugin({
 
         {
             // Message content renderer
-            find: 'Messages.MESSAGE_EDITED,")"',
+            find: "#{intl::MESSAGE_EDITED}",
             replacement: [
                 {
                     // Render editHistory in the deepest div for message content
@@ -558,7 +558,7 @@ export default definePlugin({
         },
         {
             // Message group rendering
-            find: "Messages.NEW_MESSAGES_ESTIMATED_WITH_DATE",
+            find: "#{intl::NEW_MESSAGES_ESTIMATED_WITH_DATE}",
             replacement: [
                 {
                     match: /(\i).type===\i\.\i\.MESSAGE_GROUP_BLOCKED\|\|/,

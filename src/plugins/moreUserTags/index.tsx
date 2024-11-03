@@ -187,7 +187,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP_OFFICIAL,",
+            find: "#{intl::DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP_OFFICIAL}",
             replacement: [
                 // make the tag show the right text
                 {
@@ -217,7 +217,7 @@ export default definePlugin({
         },
         // in the member list
         {
-            find: ".Messages.GUILD_OWNER,",
+            find: "#{intl::GUILD_OWNER}",
             replacement: {
                 match: /(?<type>\i)=\(null==.{0,100}\.BOT;return null!=(?<user>\i)&&\i\.bot/,
                 replace: "$<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }); return typeof $<type> === 'number'"
@@ -232,7 +232,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.USER_PROFILE_PRONOUNS",
+            find: "#{ìntl::USER_PROFILE_PRONOUNS}",
             replacement: {
                 match: /(?=,hideBotTag:!0)/,
                 replace: ",moreTags_channelId:arguments[0].moreTags_channelId"
