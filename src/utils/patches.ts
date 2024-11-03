@@ -26,7 +26,7 @@ export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
         const isStr = typeof match === "string";
 
         return /^[\d]/.test(hashed) || !/^[\w$]+$/.test(hashed)
-            ? isStr ? `["${hashed}` : String.raw`(?:\["${hashed}"\])`
+            ? isStr ? `["${hashed}` : String.raw`(?:\["${hashed})`
             : isStr ? `.${hashed}` : String.raw`(?:\.${hashed})`;
     });
 
