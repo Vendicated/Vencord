@@ -601,7 +601,7 @@ export default definePlugin({
     authors: [EquicordDevs.creations],
     patches: [
         {
-            find: ".Messages.EMOJI_MATCHING",
+            find: "null,titleWithoutQuery",
             replacement: {
                 match: /renderResults\((\i)\){/,
                 replace: "$&$1.results.emojis=$self.filterEmojis($1);if($1.results.emojis.length===0)return;"

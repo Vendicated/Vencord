@@ -59,7 +59,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".ADD_REACTION_NAMED.format",
+            find: "allNamesString,hideOnClick",
             group: true,
             replacement: [
                 // Override limit of emojis to display with offset hook.

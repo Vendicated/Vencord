@@ -27,9 +27,9 @@ export default definePlugin({
     authors: [EquicordDevs.iamme],
     patches: [
         {
-            find: "Messages.MESSAGE_EDITED,",
+            find: "editedTimestamp,isEdited",
             replacement: {
-                match: /Messages\.MESSAGE_EDITED,(?:[^}]*[}]){3}\)/,
+                match: /editedTimestamp,isEdited(?:[^}]*[}]){3}\)/,
                 replace: "$&,$self.PinnedIcon(arguments[0].message)"
             }
         }

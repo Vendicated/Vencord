@@ -14,10 +14,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: ",APP_TAG:\"",
+            find: "BOT:default:",
             replacement: {
-                match: /APP_TAG:".*?"/,
-                replace: "APP_TAG:\"BOT\""
+                match: /(default:\i)=.{0,30}\)/,
+                replace: "$1=\"BOT\""
             }
         }
     ],

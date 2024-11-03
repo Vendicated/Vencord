@@ -41,7 +41,7 @@ export default definePlugin({
     generateSearchResults: generateSearchResults,
     patches: [
         {
-            find: ".QUICKSWITCHER_PLACEHOLDER",
+            find: "uery,spellCheck:!1,autoFocus",
             replacement: {
                 match: /let{selectedIndex:\i,results:\i}/,
                 replace: "this.props.results = $self.generateSearchResults(this.state.query);$&"

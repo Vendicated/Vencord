@@ -64,11 +64,11 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.EXPRESSION_PICKER_GIF",
+            find: "GIF,children",
             replacement: {
-                match: /role:"tablist",.+?\.Messages\.EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL,children:(\[.*?\)\]}\)}\):null,)(.*?closePopout:\w.*?:null)/s,
+                match: /role:"tablist","aria-label":.{0,50},children:(\[.*?\)\]}\)}\):null,)(.*?closePopout:\w.*?:null)/s,
                 replace: m => {
-                    const stickerTabRegex = /(\w+?)\?(\([^()]+?\))\((.{1,2}),{.{0,128},isActive:(.{1,2})===.{1,150},children:(.{1,10}Messages.EXPRESSION_PICKER_STICKER).*?:null/s;
+                    const stickerTabRegex = /(\w+?)\?(\([^()]+?\))\((.{1,2}),{.{0,128},isActive:(.{1,2})===.{1,150},children:(.{1,50}]\)).*?:null/s;
                     const res = m.replace(stickerTabRegex, (_m, canUseStickers, jsx, tabHeaderComp, currentTab, stickerText) => {
                         const isActive = `${currentTab}==="stickers+"`;
                         return (
