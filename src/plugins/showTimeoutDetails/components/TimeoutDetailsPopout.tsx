@@ -5,9 +5,9 @@
  */
 
 import { SafetyIcon } from "@components/Icons";
-import { classes, Margins } from "@utils/index";
+import { classes, getIntlMessage, Margins } from "@utils/index";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, Dialog, GuildMemberStore, GuildStore, i18n, Parser, PermissionsBits, PermissionStore, Text, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { Button, Dialog, GuildMemberStore, GuildStore, Parser, PermissionsBits, PermissionStore, Text, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import { CountDown } from "..";
@@ -59,7 +59,7 @@ export default function TimeoutDetailsPopout({ closePopout, guildId, userId, mes
             icon={SafetyIcon}
             condition={!!(reason.moderator || reason.automod)}
         >
-            {reason.automod ? i18n.Messages.GUILD_SETTINGS_AUTOMOD_TITLE : parse(`<@${reason.moderator}>`)}
+            {reason.automod ? getIntlMessage("GUILD_SETTINGS_AUTOMOD_TITLE") : parse(`<@${reason.moderator}>`)}
         </TimeoutDetailsRow>
 
         <TimeoutDetailsRow
@@ -102,7 +102,7 @@ export default function TimeoutDetailsPopout({ closePopout, guildId, userId, mes
             }}
             submitting={cancelling}
         >
-            {i18n.Messages.REMOVE_TIME_OUT}
+            {getIntlMessage("REMOVE_TIME_OUT")}
         </Button></div>}
     </Dialog>;
 }
