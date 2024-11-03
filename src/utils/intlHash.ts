@@ -8,7 +8,6 @@
  * @license MIT
  */
 
-
 import { hash as h64 } from "@intrnl/xxhash64";
 
 const BASE64_TABLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".split("");
