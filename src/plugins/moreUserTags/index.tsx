@@ -192,7 +192,7 @@ export default definePlugin({
             replacement: [
                 // make the tag show the right text
                 {
-                    match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=(.{0,40}#{intl::APP_TAG}"\]\))/,
+                    match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=(.{0,40}#{intl::APP_TAG}\))/,
                     replace: (_, origSwitch, variant, tags, displayedText, originalText) =>
                         `${origSwitch}default:{${displayedText} = $self.getTagText(${tags}[${variant}],${originalText})}`
                 },
