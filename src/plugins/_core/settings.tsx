@@ -58,7 +58,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "#{intl::ACTIVITY_SETTINGS}",
+            find: ".SEARCH_NO_RESULTS&&0===",
             replacement: [
                 {
                     match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
