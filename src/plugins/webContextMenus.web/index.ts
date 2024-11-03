@@ -127,11 +127,11 @@ export default definePlugin({
                     replace: "return [true"
                 },
                 {
-                    match: /(?<=#intl<COPY_IMAGE_MENU_ITEM>,)action:/,
+                    match: /(?<=#{intl::COPY_IMAGE_MENU_ITEM},)action:/,
                     replace: "action:()=>$self.copyImage(arguments[0]),oldAction:"
                 },
                 {
-                    match: /(?<=#intl<SAVE_IMAGE_MENU_ITEM>,)action:/,
+                    match: /(?<=#{intl::SAVE_IMAGE_MENU_ITEM},)action:/,
                     replace: "action:()=>$self.saveImage(arguments[0]),oldAction:"
                 },
             ]
