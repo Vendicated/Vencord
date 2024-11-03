@@ -117,7 +117,7 @@ export default definePlugin({
 
     wrapSort(comparator: Function, row: any) {
         return row.type === 5
-            ? -UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0
+            ? -(UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0)
             : comparator(row);
     },
 
