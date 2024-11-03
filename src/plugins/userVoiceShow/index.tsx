@@ -57,7 +57,7 @@ export default definePlugin({
     patches: [
         // User Popout, Full Size Profile, Direct Messages Side Profile
         {
-            find: ".Messages.USER_PROFILE_LOAD_ERROR",
+            find: "#{intl::USER_PROFILE_LOAD_ERROR}",
             replacement: {
                 match: /(\.fetchError.+?\?)null/,
                 replace: (_, rest) => `${rest}$self.VoiceChannelIndicator({userId:arguments[0]?.userId,isProfile:true})`

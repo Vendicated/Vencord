@@ -43,15 +43,15 @@ export default definePlugin({
 
     patches: [
         {
-            find: "Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION",
+            find: "#{intl::GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}",
             group: true,
             replacement: [
                 {
-                    match: /children:\i\.\i\.\i\.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION/,
+                    match: /children:\i\.\i\.string\(\i\.\i#{intl::GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}\)/,
                     replace: "children: $self.renderInvitesLabel({guildId:arguments[0].guildId,setChecked})",
                 },
                 {
-                    match: /\.INVITES_DISABLED\)(?=.+?\.Messages\.INVITES_PERMANENTLY_DISABLED_TIP.+?checked:(\i)).+?\[\1,(\i)\]=\i.useState\(\i\)/,
+                    match: /\.INVITES_DISABLED\)(?=.+?#{intl::INVITES_PERMANENTLY_DISABLED_TIP}.+?checked:(\i)).+?\[\1,(\i)\]=\i.useState\(\i\)/,
                     replace: "$&,setChecked=$2"
                 }
             ]
