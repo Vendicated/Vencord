@@ -25,6 +25,7 @@ import ThemesTab from "@components/VencordSettings/ThemesTab";
 import UpdaterTab from "@components/VencordSettings/UpdaterTab";
 import VencordTab from "@components/VencordSettings/VencordTab";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 
@@ -148,13 +149,13 @@ export default definePlugin({
 
         if (!header) return;
 
-        /* const names = {
-            top: i18n.Messages.USER_SETTINGS,
-            aboveNitro: i18n.Messages.BILLING_SETTINGS,
-            belowNitro: i18n.Messages.APP_SETTINGS,
-            aboveActivity: i18n.Messages.ACTIVITY_SETTINGS
+        const names = {
+            top: getIntlMessage("USER_SETTINGS"),
+            aboveNitro: getIntlMessage("BILLING_SETTINGS"),
+            belowNitro: getIntlMessage("APP_SETTINGS"),
+            aboveActivity: getIntlMessage("ACTIVITY_SETTINGS")
         };
-        return header === names[settingsLocation]; */
+        return header === names[settingsLocation];
     },
 
     patchedSettings: new WeakSet(),

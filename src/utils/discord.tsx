@@ -19,11 +19,30 @@
 import "./discord.css";
 
 import { MessageObject } from "@api/MessageEvents";
-import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
 import { Except } from "type-fest";
 
+import { runtimeHashMessageKey } from "./intlHash";
 import { MediaModalItem, MediaModalProps, openMediaModal } from "./modal";
+
+/**
+ * Get an internationalized message from a non hashed key
+ * @param key The plain message key
+ * @param values The values to interpolate, if it's a rich message
+ */
+export function getIntlMessage(key: string, values?: Record<PropertyKey, any>): string {
+    return getIntlMessageFromHash(runtimeHashMessageKey(key), values);
+}
+
+/**
+ * Get an internationalized message from a hashed key
+ * @param key The hashed message key
+ * @param values The values to interpolate, if it's a rich message
+ */
+export function getIntlMessageFromHash(key: string, values?: Record<PropertyKey, any>): string {
+    return values == null ? i18n.intl.string(i18n.t[key]) : i18n.intl.format(i18n.t[key], values);
+}
 
 /**
  * Open the invite modal
