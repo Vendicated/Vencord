@@ -37,10 +37,10 @@ export default definePlugin({
     authors: [EquicordDevs.iamme],
     patches: [
         {
-            find: ".GuildSplash,{guild",
+            find: "#{intl::HUB_INVITE_ANOTHER_SCHOOL_LINK}",
             replacement: [
                 {
-                    match: /,(\i)&&(\(.{0,15}\i\.TooltipContainer.{0,50}text:)(\i.{0,50}]\))/,
+                    match: /,(\i)&&(\(.{0,15}\i\.TooltipContainer.+)(#{intl::Messages.GUEST_MEMBERSHIP_EXPLANATION})/,
                     replace: ",($1||((!$1)&&arguments[0].invite.expires_at)) && $2$self.RenderTip($1, $3, arguments[0].invite.expires_at)"
                 },
                 {

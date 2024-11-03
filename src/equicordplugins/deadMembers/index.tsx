@@ -22,7 +22,7 @@ export default definePlugin({
             }
         },
         {
-            find: "stopPropagation:!0,ariaLabel",
+            find: "#{intl::FORUM_POST_AUTHOR_A11Y_LABEL}",
             replacement: {
                 match: /(?<=\}=(\i),\{(user:\i,author:\i)\}=.{0,400}?\(\i\.Fragment,{children:)\i(?=}\),)/,
                 replace: "$self.wrapForumAuthor({...$1,$2},$&)"

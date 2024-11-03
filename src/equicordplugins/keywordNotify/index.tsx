@@ -33,7 +33,7 @@ const recentMentionsPopoutClass = findByPropsLazy("recentMentionsPopout");
 const tabClass = findByPropsLazy("inboxTitle", "tab");
 const buttonClass = findByPropsLazy("size36");
 const MenuHeader = findByCodeLazy(".getUnseenInviteCount())");
-const Popout = findByCodeLazy(".trackJump", "canCloseAllMessages:");
+const Popout = findByCodeLazy("#{intl::UNBLOCK_TO_JUMP_TITLE}", "canCloseAllMessages:");
 const createMessageRecord = findByCodeLazy(".createFromServer(", ".isBlockedForMessage", "messageReference:");
 const KEYWORD_ENTRIES_KEY = "KeywordNotify_keywordEntries";
 const KEYWORD_LOG_KEY = "KeywordNotify_log";
@@ -313,7 +313,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "TODOS,className",
+            find: "#{intl::UNREADS_TAB_LABEL}",
             replacement: {
                 match: /\i\?\(0,\i\.jsxs\)\(\i\.TabBar\.Item/,
                 replace: "$self.keywordTabBar(),$&"

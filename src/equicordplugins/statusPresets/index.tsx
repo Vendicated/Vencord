@@ -131,14 +131,14 @@ export default definePlugin({
     dependencies: ["UserSettingsAPI"],
     patches: [
         {
-            find: "analyticsLocation,children",
+            find: "#{intl::CUSTOM_STATUS_SET_CUSTOM_STATUS}",
             replacement: {
-                match: /\.ModalFooter,.{0,70}\.handleSubmit.{0,50}\}\)/,
+                match: /\.ModalFooter,.{0,70}\.Messages\.SAVE\}\)/,
                 replace: "$&,$self.renderRememberButton(this.state)"
             }
         },
         {
-            find: /statusPickerModalMenu,"aria-label":.{0,1}\..{0,50}\)/,
+            find: '"aria-label":#{intl::STATUS_MENU_LABEL}',
             replacement: {
                 match: /!\i&&(.{0,15}\i\.Fragment.{0,55}null==(\i).{0,200}customEmojiPlaceholder\}\),onClick:([^}]+}))/,
                 replace: "$self.render($2, $3),false&&$1"

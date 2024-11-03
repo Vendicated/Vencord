@@ -13,7 +13,7 @@ export default definePlugin({
     authors: [Devs.D3SOX],
     patches: [
         {
-            find: "USER_AGREEMENTS,properties",
+            find: "#{intl::NEW_TERMS_TITLE}",
             replacement: {
                 match: /function (\i)\((\i)\)\{let\{transitionState:(\i)\}=(\i)/g,
                 replace: "function $1($2){return $self.closeModal($2);let{transitionState:$3}=$4"

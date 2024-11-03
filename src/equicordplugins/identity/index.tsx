@@ -140,7 +140,7 @@ export default definePlugin({
         {
             find: "DefaultCustomizationSections",
             replacement: {
-                match: /(?<=sectionTitle:.{0,50}]\)},"decoration"\),)/,
+                match: /(?<=#{intl::USER_SETTINGS_AVATAR_DECORATION}},"decoration"\),)/,
                 replace: "$self.ResetCard(),"
             }
         },

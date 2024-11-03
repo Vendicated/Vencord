@@ -26,7 +26,7 @@ export default definePlugin({
     },
     patches: [
         {
-            find: "downloadProgress,determineOwnVisibility",
+            find: "#{intl::DISCODO_DISABLED}",
             replacement:
                 [
                     {

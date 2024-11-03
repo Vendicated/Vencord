@@ -212,7 +212,7 @@ export default definePlugin({
     queryFriendTags: queryFriendTags,
     patches: [
         {
-            find: "query,spellCheck:!1,autoFocus",
+            find: "#{intl::QUICKSWITCHER_PLACEHOLDER}",
             replacement: {
                 match: /let{selectedIndex:\i,results:\i}/,
                 replace: "if(this.state.query.includes(\"&\")){ this.props.results = $self.queryFriendTags(this.state.query); }$&"
