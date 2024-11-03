@@ -1,0 +1,11 @@
+/* Download Desktop button in guilds list */
+[class^="listItem_"]:has([data-list-item-id="guildsnav___app-download-button"]),
+[class^="listItem_"]:has(+ [class^="listItem_"] [data-list-item-id="guildsnav___app-download-button"]) {
+  display: none;
+}
+
+/* Workaround for making things in the draggable area clickable again on macOS */
+.platform-osx [class*="topic_"],
+.platform-osx [class*="notice_"] button {
+  -webkit-app-region: no-drag;
+}
