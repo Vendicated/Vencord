@@ -78,7 +78,7 @@ export default definePlugin({
         {
             find: "PrivateChannel.renderAvatar",
             replacement: {
-                match: /\.Messages\.CLOSE_DM.+?}\)(?=])/,
+                match: /#{intl::CLOSE_DM}.+?}\)(?=])/,
                 replace: "$&,$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id})"
             },
             predicate: () => settings.store.showVoiceChannelIndicator

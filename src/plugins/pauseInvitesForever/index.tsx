@@ -18,8 +18,9 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { Constants, GuildStore, i18n, RestAPI } from "@webpack/common";
+import { Constants, GuildStore, RestAPI } from "@webpack/common";
 
 function showDisableInvites(guildId: string) {
     // @ts-ignore
@@ -61,7 +62,7 @@ export default definePlugin({
     renderInvitesLabel: ErrorBoundary.wrap(({ guildId, setChecked }) => {
         return (
             <div>
-                {i18n.Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}
+                {getIntlMessage("GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION")}
                 {showDisableInvites(guildId) && <a role="button" onClick={() => {
                     setChecked(true);
                     disableInvites(guildId);

@@ -18,9 +18,10 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { FluxDispatcher, i18n, useMemo } from "@webpack/common";
+import { FluxDispatcher, useMemo } from "@webpack/common";
 
 import FolderSideBar from "./FolderSideBar";
 
@@ -276,7 +277,7 @@ export default definePlugin({
     makeGuildsBarGuildListFilter(isBetterFolders: boolean) {
         return child => {
             if (isBetterFolders) {
-                return child?.props?.["aria-label"] === i18n.Messages.SERVERS;
+                return child?.props?.["aria-label"] === getIntlMessage("SERVERS");
             }
             return true;
         };

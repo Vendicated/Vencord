@@ -31,7 +31,7 @@ import { MediaModalItem, MediaModalProps, openMediaModal } from "./modal";
  * @param key The plain message key
  * @param values The values to interpolate, if it's a rich message
  */
-export function getIntlMessage(key: string, values?: Record<PropertyKey, any>): string {
+export function getIntlMessage(key: string, values?: Record<PropertyKey, any>): any {
     return getIntlMessageFromHash(runtimeHashMessageKey(key), values);
 }
 
@@ -40,7 +40,7 @@ export function getIntlMessage(key: string, values?: Record<PropertyKey, any>): 
  * @param key The hashed message key
  * @param values The values to interpolate, if it's a rich message
  */
-export function getIntlMessageFromHash(key: string, values?: Record<PropertyKey, any>): string {
+export function getIntlMessageFromHash(key: string, values?: Record<PropertyKey, any>): any {
     return values == null ? i18n.intl.string(i18n.t[key]) : i18n.intl.format(i18n.t[key], values);
 }
 

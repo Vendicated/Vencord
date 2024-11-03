@@ -9,10 +9,11 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, i18n, Text, Tooltip } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, Text, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
 import { FunctionComponent, ReactNode } from "react";
 
@@ -50,9 +51,14 @@ function renderTimeout(message: Message, inline: boolean) {
         />
     );
 
+    getIntlMessage("GUILD_ENABLE_COMMUNICATION_TIME_REMAINING", {
+        username: message.author.username,
+        countdown
+    });
+
     return inline
         ? countdown()
-        : i18n.Messages.GUILD_ENABLE_COMMUNICATION_TIME_REMAINING.format({
+        : getIntlMessage("GUILD_ENABLE_COMMUNICATION_TIME_REMAINING", {
             username: message.author.username,
             countdown
         });
