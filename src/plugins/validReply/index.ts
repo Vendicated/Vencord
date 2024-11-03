@@ -39,7 +39,7 @@ export default definePlugin({
         {
             find: "#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}",
             replacement: {
-                match: /#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}"]\)/,
+                match: /#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}"\]\)/,
                 replace: "$&,onMouseEnter:()=>$self.fetchReply(arguments[0])"
             }
         },
