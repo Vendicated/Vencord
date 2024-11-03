@@ -62,16 +62,7 @@ export default definePlugin({
                 replace: "return 0;"
             }
         },
-        // New message requests hook
-        {
-            find: 'location:"use-message-requests-count"',
-            predicate: () => settings.store.hideMessageRequestsCount,
-            replacement: {
-                match: /getNonChannelAckId\(\i\.\i\.MESSAGE_REQUESTS\).+?return /,
-                replace: "$&0;"
-            }
-        },
-        // Old message requests hook
+        // Message requests hook
         {
             find: "getMessageRequestsCount(){",
             predicate: () => settings.store.hideMessageRequestsCount,
@@ -83,7 +74,7 @@ export default definePlugin({
         // This prevents the Message Requests tab from always hiding due to the previous patch (and is compatible with spam requests)
         // In short, only the red badge is hidden. Button visibility behavior isn't changed.
         {
-            find: ".getSpamChannelsCount(),",
+            find: ".getSpamChannelsCount()",
             predicate: () => settings.store.hideMessageRequestsCount,
             replacement: {
                 match: /(?<=getSpamChannelsCount\(\),\i=)\i\.getMessageRequestsCount\(\)/,
@@ -96,7 +87,7 @@ export default definePlugin({
             replacement: {
                 // The two groups inside the first group grab the minified names of the variables,
                 // they are then referenced later to find unviewedTrialCount + unviewedDiscountCount.
-                match: /(?<=\{unviewedTrialCount:(\i),unviewedDiscountCount:(\i)\}.{0,200}\i=)\1\+\2/,
+                match: /(?<=\{unviewedTrialCount:(\i),unviewedDiscountCount:(\i)\}.{0,300}\i=)\1\+\2/,
                 replace: "0"
             }
         }

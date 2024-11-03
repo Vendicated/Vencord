@@ -18,46 +18,70 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType, PluginNative } from "@utils/types";
+import definePlugin, { OptionType, PluginNative, SettingsDefinition } from "@utils/types";
 import { showToast, Toasts } from "@webpack/common";
 import type { MouseEvent } from "react";
 
-const ShortUrlMatcher = /^https:\/\/(spotify\.link|s\.team)\/.+$/;
-const SpotifyMatcher = /^https:\/\/open\.spotify\.com\/(track|album|artist|playlist|user|episode)\/(.+)(?:\?.+?)?$/;
-const SteamMatcher = /^https:\/\/(steamcommunity\.com|(?:help|store)\.steampowered\.com)\/.+$/;
-const EpicMatcher = /^https:\/\/store\.epicgames\.com\/(.+)$/;
-const TidalMatcher = /^https:\/\/tidal\.com\/browse\/(track|album|artist|playlist|user|video|mix)\/(.+)(?:\?.+?)?$/;
+interface URLReplacementRule {
+    match: RegExp;
+    replace: (...matches: string[]) => string;
+    description: string;
+    shortlinkMatch?: RegExp;
+    accountViewReplace?: (userId: string) => string;
+}
 
-const settings = definePluginSettings({
+// Do not forget to add protocols to the ALLOWED_PROTOCOLS constant
+const UrlReplacementRules: Record<string, URLReplacementRule> = {
     spotify: {
-        type: OptionType.BOOLEAN,
+        match: /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|artist|playlist|user|episode|prerelease)\/(.+)(?:\?.+?)?$/,
+        replace: (_, type, id) => `spotify://${type}/${id}`,
         description: "Open Spotify links in the Spotify app",
-        default: true,
+        shortlinkMatch: /^https:\/\/spotify\.link\/.+$/,
+        accountViewReplace: userId => `spotify:user:${userId}`,
     },
     steam: {
-        type: OptionType.BOOLEAN,
+        match: /^https:\/\/(steamcommunity\.com|(?:help|store)\.steampowered\.com)\/.+$/,
+        replace: match => `steam://openurl/${match}`,
         description: "Open Steam links in the Steam app",
-        default: true,
+        shortlinkMatch: /^https:\/\/s.team\/.+$/,
+        accountViewReplace: userId => `steam://openurl/https://steamcommunity.com/profiles/${userId}`,
     },
     epic: {
-        type: OptionType.BOOLEAN,
+        match: /^https:\/\/store\.epicgames\.com\/(.+)$/,
+        replace: (_, id) => `com.epicgames.launcher://store/${id}`,
         description: "Open Epic Games links in the Epic Games Launcher",
-        default: true,
     },
     tidal: {
-        type: OptionType.BOOLEAN,
+        match: /^https:\/\/tidal\.com\/browse\/(track|album|artist|playlist|user|video|mix)\/(.+)(?:\?.+?)?$/,
+        replace: (_, type, id) => `tidal://${type}/${id}`,
         description: "Open Tidal links in the Tidal app",
-        default: true,
-    }
-});
+    },
+    itunes: {
+        match: /^https:\/\/music\.apple\.com\/([a-z]{2}\/)?(album|artist|playlist|song|curator)\/([^/?#]+)\/?([^/?#]+)?(?:\?.*)?(?:#.*)?$/,
+        replace: (_, lang, type, name, id) => id ? `itunes://music.apple.com/us/${type}/${name}/${id}` : `itunes://music.apple.com/us/${type}/${name}`,
+        description: "Open Apple Music links in the iTunes app"
+    },
+};
+
+const pluginSettings = definePluginSettings(
+    Object.entries(UrlReplacementRules).reduce((acc, [key, rule]) => {
+        acc[key] = {
+            type: OptionType.BOOLEAN,
+            description: rule.description,
+            default: true,
+        };
+        return acc;
+    }, {} as SettingsDefinition)
+);
+
 
 const Native = VencordNative.pluginHelpers.OpenInApp as PluginNative<typeof import("./native")>;
 
 export default definePlugin({
     name: "OpenInApp",
-    description: "Open Spotify, Tidal, Steam and Epic Games URLs in their respective apps instead of your browser",
-    authors: [Devs.Ven],
-    settings,
+    description: "Open links in their respective apps instead of your browser",
+    authors: [Devs.Ven, Devs.surgedevs],
+    settings: pluginSettings,
 
     patches: [
         {
@@ -67,20 +91,25 @@ export default definePlugin({
                 replace: "async function $1 if(await $self.handleLink(...arguments)) return;"
             }
         },
-        // Make Spotify profile activity links open in app on web
         {
-            find: "WEB_OPEN(",
-            predicate: () => !IS_DISCORD_DESKTOP && settings.store.spotify,
-            replacement: {
-                match: /\i\.\i\.isProtocolRegistered\(\)(.{0,100})window.open/g,
-                replace: "true$1VencordNative.native.openExternal"
-            }
+            find: "no artist ids in metadata",
+            predicate: () => !IS_DISCORD_DESKTOP && pluginSettings.store.spotify,
+            replacement: [
+                {
+                    match: /\i\.\i\.isProtocolRegistered\(\)/g,
+                    replace: "true"
+                },
+                {
+                    match: /!\(0,\i\.isDesktop\)\(\)/,
+                    replace: "false"
+                }
+            ]
         },
         {
             find: ".CONNECTED_ACCOUNT_VIEWED,",
             replacement: {
-                match: /(?<=href:\i,onClick:\i=>\{)(?=.{0,10}\i=(\i)\.type,.{0,100}CONNECTED_ACCOUNT_VIEWED)/,
-                replace: "$self.handleAccountView(arguments[0],$1.type,$1.id);"
+                match: /(?<=href:\i,onClick:(\i)=>\{)(?=.{0,10}\i=(\i)\.type,.{0,100}CONNECTED_ACCOUNT_VIEWED)/,
+                replace: "if($self.handleAccountView($1,$2.type,$2.id)) return;"
             }
         }
     ],
@@ -89,61 +118,25 @@ export default definePlugin({
         if (!data) return false;
 
         let url = data.href;
-        if (!IS_WEB && ShortUrlMatcher.test(url)) {
-            event?.preventDefault();
-            // CORS jumpscare
-            url = await Native.resolveRedirect(url);
-        }
+        if (!url) return false;
 
-        spotify: {
-            if (!settings.store.spotify) break spotify;
+        for (const [key, rule] of Object.entries(UrlReplacementRules)) {
+            if (!pluginSettings.store[key]) continue;
 
-            const match = SpotifyMatcher.exec(url);
-            if (!match) break spotify;
+            if (rule.shortlinkMatch?.test(url)) {
+                event?.preventDefault();
+                url = await Native.resolveRedirect(url);
+            }
 
-            const [, type, id] = match;
-            VencordNative.native.openExternal(`spotify:${type}:${id}`);
+            if (rule.match.test(url)) {
+                showToast("Opened link in native app", Toasts.Type.SUCCESS);
 
-            event?.preventDefault();
-            return true;
-        }
+                const newUrl = url.replace(rule.match, rule.replace);
+                VencordNative.native.openExternal(newUrl);
 
-        steam: {
-            if (!settings.store.steam) break steam;
-
-            if (!SteamMatcher.test(url)) break steam;
-
-            VencordNative.native.openExternal(`steam://openurl/${url}`);
-            event?.preventDefault();
-
-            // Steam does not focus itself so show a toast so it's slightly less confusing
-            showToast("Opened link in Steam", Toasts.Type.SUCCESS);
-            return true;
-        }
-
-        epic: {
-            if (!settings.store.epic) break epic;
-
-            const match = EpicMatcher.exec(url);
-            if (!match) break epic;
-
-            VencordNative.native.openExternal(`com.epicgames.launcher://store/${match[1]}`);
-            event?.preventDefault();
-
-            return true;
-        }
-
-        tidal: {
-            if (!settings.store.tidal) break tidal;
-
-            const match = TidalMatcher.exec(url);
-            if (!match) break tidal;
-
-            const [, type, id] = match;
-            VencordNative.native.openExternal(`tidal://${type}/${id}`);
-
-            event?.preventDefault();
-            return true;
+                event?.preventDefault();
+                return true;
+            }
         }
 
         // in case short url didn't end up being something we can handle
@@ -155,14 +148,12 @@ export default definePlugin({
         return false;
     },
 
-    handleAccountView(event: { preventDefault(): void; }, platformType: string, userId: string) {
-        if (platformType === "spotify" && settings.store.spotify) {
-            VencordNative.native.openExternal(`spotify:user:${userId}`);
-            event.preventDefault();
-        } else if (platformType === "steam" && settings.store.steam) {
-            VencordNative.native.openExternal(`steam://openurl/https://steamcommunity.com/profiles/${userId}`);
-            showToast("Opened link in Steam", Toasts.Type.SUCCESS);
-            event.preventDefault();
+    handleAccountView(e: MouseEvent, platformType: string, userId: string) {
+        const rule = UrlReplacementRules[platformType];
+        if (rule?.accountViewReplace && pluginSettings.store[platformType]) {
+            VencordNative.native.openExternal(rule.accountViewReplace(userId));
+            e.preventDefault();
+            return true;
         }
     }
 });

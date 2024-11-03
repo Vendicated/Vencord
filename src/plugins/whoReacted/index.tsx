@@ -43,14 +43,23 @@ function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
         },
         oldFormErrors: true
     })
-        .then(res => FluxDispatcher.dispatch({
-            type: "MESSAGE_REACTION_ADD_USERS",
-            channelId: msg.channel_id,
-            messageId: msg.id,
-            users: res.body,
-            emoji,
-            reactionType: type
-        }))
+        .then(res => {
+            for (const user of res.body) {
+                FluxDispatcher.dispatch({
+                    type: "USER_UPDATE",
+                    user
+                });
+            }
+
+            FluxDispatcher.dispatch({
+                type: "MESSAGE_REACTION_ADD_USERS",
+                channelId: msg.channel_id,
+                messageId: msg.id,
+                users: res.body,
+                emoji,
+                reactionType: type
+            });
+        })
         .catch(console.error)
         .finally(() => sleep(250));
 }
@@ -100,7 +109,8 @@ export default definePlugin({
                 match: /(\i)\?null:\(0,\i\.jsx\)\(\i\.\i,{className:\i\.reactionCount,.*?}\),/,
                 replace: "$&$1?null:$self.renderUsers(this.props),"
             }
-        }, {
+        },
+        {
             find: '"MessageReactionsStore"',
             replacement: {
                 match: /(?<=CONNECTION_OPEN:function\(\){)(\i)={}/,
@@ -147,13 +157,6 @@ export default definePlugin({
 
         const reactions = getReactionsWithQueue(message, emoji, type);
         const users = Object.values(reactions).filter(Boolean) as User[];
-
-        for (const user of users) {
-            FluxDispatcher.dispatch({
-                type: "USER_UPDATE",
-                user
-            });
-        }
 
         return (
             <div

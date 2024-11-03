@@ -28,6 +28,7 @@ import { join, relative } from "path";
 import { promisify } from "util";
 
 import { getPluginTarget } from "../utils.mjs";
+import { builtinModules } from "module";
 
 /** @type {import("../../package.json")} */
 const PackageJSON = JSON.parse(readFileSync("package.json"));
@@ -293,6 +294,18 @@ export const stylePlugin = {
 };
 
 /**
+ * @type {(filter: RegExp, message: string) => import("esbuild").Plugin}
+ */
+export const banImportPlugin = (filter, message) => ({
+    name: "ban-imports",
+    setup: build => {
+        build.onResolve({ filter }, () => {
+            return { errors: [{ text: message }] };
+        });
+    }
+});
+
+/**
  * @type {import("esbuild").BuildOptions}
  */
 export const commonOpts = {
@@ -311,3 +324,16 @@ export const commonOpts = {
     // Work around https://github.com/evanw/esbuild/issues/2460
     tsconfig: "./scripts/build/tsconfig.esbuild.json"
 };
+
+const escapedBuiltinModules = builtinModules
+    .map(m => m.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"))
+    .join("|");
+const builtinModuleRegex = new RegExp(`^(node:)?(${escapedBuiltinModules})$`);
+
+export const commonRendererPlugins = [
+    banImportPlugin(builtinModuleRegex, "Cannot import node inbuilt modules in browser code. You need to use a native.ts file"),
+    banImportPlugin(/^react$/, "Cannot import from react. React and hooks should be imported from @webpack/common"),
+    banImportPlugin(/^electron(\/.*)?$/, "Cannot import electron in browser code. You need to use a native.ts file"),
+    banImportPlugin(/^ts-pattern$/, "Cannot import from ts-pattern. match and P should be imported from @webpack/common"),
+    ...commonOpts.plugins
+];

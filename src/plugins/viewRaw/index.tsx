@@ -55,6 +55,7 @@ function cleanMessage(msg: Message) {
     const cloneAny = clone as any;
     delete cloneAny.editHistory;
     delete cloneAny.deleted;
+    delete cloneAny.firstEditTimestamp;
     cloneAny.attachments?.forEach(a => delete a.deleted);
 
     return clone;
@@ -152,6 +153,7 @@ export default definePlugin({
     contextMenus: {
         "guild-context": MakeContextCallback("Guild"),
         "channel-context": MakeContextCallback("Channel"),
+        "thread-context": MakeContextCallback("Channel"),
         "user-context": MakeContextCallback("User")
     },
 

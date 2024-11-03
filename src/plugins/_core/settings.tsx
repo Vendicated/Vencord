@@ -64,7 +64,7 @@ export default definePlugin({
                     replace: (_, sectionTypes, commaOrSemi, elements, element) => `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`
                 },
                 {
-                    match: /({(?=.+?function (\i).{0,120}(\i)=\i\.useMemo.{0,30}return \i\.useMemo\(\(\)=>\i\(\3).+?function\(\){return )\2(?=})/,
+                    match: /({(?=.+?function (\i).{0,120}(\i)=\i\.useMemo.{0,60}return \i\.useMemo\(\(\)=>\i\(\3).+?function\(\){return )\2(?=})/,
                     replace: (_, rest, settingsHook) => `${rest}$self.wrapSettingsHook(${settingsHook})`
                 }
             ]
@@ -197,7 +197,7 @@ export default definePlugin({
     },
 
     get electronVersion() {
-        return VencordNative.native.getVersions().electron || window.armcord?.electron || null;
+        return VencordNative.native.getVersions().electron || window.legcord?.electron || null;
     },
 
     get chromiumVersion() {

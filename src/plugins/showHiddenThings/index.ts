@@ -53,7 +53,7 @@ export default definePlugin({
             },
         },
         {
-            find: "2022-07_invites_disabled",
+            find: "INVITES_DISABLED))||",
             predicate: () => settings.store.showInvitesPaused,
             replacement: {
                 match: /\i\.\i\.can\(\i\.\i.MANAGE_GUILD,\i\)/,
@@ -66,6 +66,15 @@ export default definePlugin({
             replacement: {
                 match: /return \i\.\i\(\i\.\i\(\{user:\i,context:\i,checkElevated:!1\}\),\i\.\i\)/,
                 replace: "return true",
+            }
+        },
+        // fixes a bug where Members page must be loaded to see highest role, why is Discord depending on MemberSafetyStore.getEnhancedMember for something that can be obtained here?
+        {
+            find: "Messages.GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL,allowOverflow",
+            predicate: () => settings.store.showModView,
+            replacement: {
+                match: /(role:)\i(?=,guildId.{0,100}role:(\i\[))/,
+                replace: "$1$2arguments[0].member.highestRoleId]",
             }
         },
         {
@@ -85,16 +94,7 @@ export default definePlugin({
                 replace: '">0"'
             }
         },
-        // empty word filter (why would anyone search "horny" in fucking server discovery... please... why are we patching this again??)
-        {
-            find: '"horny","fart"',
-            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
-            replacement: {
-                match: /=\["egirl",.+?\]/,
-                replace: "=[]"
-            }
-        },
-        // empty 2nd word filter
+        // empty word filter
         {
             find: '"pepe","nude"',
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
@@ -105,12 +105,12 @@ export default definePlugin({
         },
         // patch request that queries if term is allowed
         {
-            find: ".GUILD_DISCOVERY_VALID_TERM",
+            find: ".GUILD_DISCOVERY_VALID_TERM,query:",
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
             all: true,
             replacement: {
-                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\);/g,
-                replace: "Promise.resolve({ body: { valid: true } });"
+                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\)/g,
+                replace: "Promise.resolve({ body: { valid: true } })"
             }
         },
         {
