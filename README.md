@@ -1,4 +1,4 @@
-# Vencord
+# VencordOverpowah
 
 ## Note, this is an unofficial fork of Vencord for an offcial port of the DiscordColorways plugin from BetterDiscord. This repo might be behind the main repo at times and its usage is meant for development purposes ONLY.
 
@@ -24,7 +24,7 @@ The cutest Discord client mod
 
 ## Installing / Uninstalling
 
-Download at https://github.com/Piripe/VencordPlusPlusInstaller/releases
+Download at https://github.com/enzomtpYT/VencordOverpowahInstaller/releases
 
 ## Join our Support/Community Server
 
