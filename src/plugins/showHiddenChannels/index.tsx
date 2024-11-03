@@ -149,7 +149,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.CHANNEL_TOOLTIP_DIRECTORY",
+            find: "#{intl::CHANNEL_TOOLTIP_DIRECTORY}",
             predicate: () => settings.store.showMode === ShowMode.LockIcon,
             replacement: {
                 // Lock Icon

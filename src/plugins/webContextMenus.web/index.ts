@@ -202,14 +202,14 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.SEARCH_WITH_GOOGLE",
+            find: "#{intl::SEARCH_WITH_GOOGLE}",
             replacement: {
                 match: /\i\.isPlatformEmbedded/,
                 replace: "true"
             }
         },
         {
-            find: ".Messages.COPY,hint:",
+            find: "#{intl::COPY}),hint:",
             replacement: [
                 {
                     match: /\i\.isPlatformEmbedded/,

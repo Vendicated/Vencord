@@ -37,7 +37,7 @@ export default definePlugin({
     authors: [Devs.newwares],
     patches: [
         {
-            find: "#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED",
+            find: "#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}",
             replacement: {
                 match: /#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}\)/,
                 replace: "$&,onMouseEnter:()=>$self.fetchReply(arguments[0])"
