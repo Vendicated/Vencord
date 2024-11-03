@@ -6,9 +6,10 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { extractAndLoadChunksLazy, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { i18n, useEffect, useState } from "@webpack/common";
+import { useEffect, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const useNote = findByCodeLazy(".getNote(");
@@ -64,7 +65,7 @@ function NotesSection(props: NoteHook & NotesSectionProps) {
     }, []);
     if (!props.visible || !loaded) return null;
     return <Section
-        heading={i18n.Messages.NOTE}
+        heading={getIntlMessage("NOTE")}
         scrollIntoView={props.autoFocus}
         headingColor={props.headingColor}
     >
@@ -94,9 +95,9 @@ export default definePlugin({
         },
         {
             // DM Sidebar
-            find: /getRelationshipType.{0,800}?\.Overlay.{0,400}?Messages\.USER_POPOUT_ABOUT_ME/,
+            find: ".PANEL}),nicknameIcons",
             replacement: {
-                match: /(\(0,.{0,50}?Messages\.BOT_PROFILE_CREATED_ON.{0,100}?userId:(\i)\.id}\)\}\))(.{0,200}?)\]\}/,
+                match: /(\(0,.{0,100}?#{intl::BOT_PROFILE_CREATED_ON}.{0,100}?userId:(\i)\.id}\)\}\))(.{0,200}?)\]\}/,
                 replace: "$1$3,$self.NotesSection({ headingColor: 'header-primary', user: $2, ...vencordNotesHook })]}"
             }
         }
