@@ -16,11 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { MessageObject } from "@api/MessageEvents";
-import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MaskedLink, MessageActions, ModalImageClasses, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
-import { Guild, Message, User } from "discord-types/general";
+import "./discord.css";
 
-import { ImageModal, ModalRoot, ModalSize, openModal } from "./modal";
+import { MessageObject } from "@api/MessageEvents";
+import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { Channel, Guild, Message, User } from "discord-types/general";
+import { Except } from "type-fest";
+
+import { MediaModalItem, MediaModalProps, openMediaModal } from "./modal";
 
 /**
  * Open the invite modal
@@ -54,12 +57,12 @@ export async function openInviteModal(code: string) {
     });
 }
 
-export function getCurrentChannel() {
+export function getCurrentChannel(): Channel | undefined {
     return ChannelStore.getChannel(SelectedChannelStore.getChannelId());
 }
 
 export function getCurrentGuild(): Guild | undefined {
-    return GuildStore.getGuild(getCurrentChannel()?.guild_id);
+    return GuildStore.getGuild(getCurrentChannel()?.guild_id!);
 }
 
 export function openPrivateChannel(userId: string) {
@@ -108,26 +111,21 @@ export function sendMessage(
     return MessageActions.sendMessage(channelId, messageData, waitForChannelReady, extra);
 }
 
-export function openImageModal(url: string, props?: Partial<React.ComponentProps<ImageModal>>): string {
-    return openModal(modalProps => (
-        <ModalRoot
-            {...modalProps}
-            className={ModalImageClasses.modal}
-            size={ModalSize.DYNAMIC}>
-            <ImageModal
-                className={ModalImageClasses.image}
-                original={url}
-                placeholder={url}
-                src={url}
-                renderLinkComponent={props => <MaskedLink {...props} />}
-                // Don't render forward message button
-                renderForwardComponent={() => null}
-                shouldHideMediaOptions={false}
-                shouldAnimate
-                {...props}
-            />
-        </ModalRoot>
-    ));
+/**
+ * You must specify either height or width in the item
+ */
+export function openImageModal(item: Except<MediaModalItem, "type">, mediaModalProps?: Omit<MediaModalProps, "items">) {
+    return openMediaModal({
+        className: "vc-image-modal",
+        fit: "vc-position-inherit",
+        shouldAnimateCarousel: true,
+        items: [{
+            type: "IMAGE",
+            original: item.original ?? item.url,
+            ...item,
+        }],
+        ...mediaModalProps
+    });
 }
 
 export async function openUserProfile(id: string) {
