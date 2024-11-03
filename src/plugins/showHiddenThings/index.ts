@@ -114,7 +114,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".GUILD_SETTINGS_SAFETY_MODERATION_EXPERIENCE_ENABLED",
+            find: ".GUILD_SETTINGS_MEMBERS_PAGE),",
             predicate: () => settings.store.showMembersPageInSettings,
             replacement: {
                 match: /\i\.hasFeature\(\i\.\i\.ENABLED_MODERATION_EXPERIENCE_FOR_NON_COMMUNITY\)/,
