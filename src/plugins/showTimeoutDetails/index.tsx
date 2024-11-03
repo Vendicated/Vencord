@@ -9,13 +9,15 @@ import "./styles.css";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentLazy } from "@webpack";
 
 import TooltipWrapper from "./components/TooltipWrapper";
 import { TimeoutReasonStore } from "./TimeoutReasonStore";
 
-export const CountDown = findComponentLazy(m => m.prototype?.render?.toString().includes(".MAX_AGE_NEVER"));
+const countDownFilter = canonicalizeMatch("#{intl::MAX_AGE_NEVER}");
+export const CountDown = findComponentLazy(m => m.prototype?.render?.toString().includes(countDownFilter));
 
 export const enum DisplayStyle {
     Tooltip = "tooltip",
