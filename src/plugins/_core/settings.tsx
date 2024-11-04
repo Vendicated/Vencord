@@ -56,7 +56,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "Messages.ACTIVITY_SETTINGS",
+            find: ".SEARCH_NO_RESULTS&&0===",
             replacement: [
                 {
                     match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
@@ -160,13 +160,17 @@ export default definePlugin({
 
         if (!header) return;
 
-        const names = {
-            top: i18n.Messages.USER_SETTINGS,
-            aboveNitro: i18n.Messages.BILLING_SETTINGS,
-            belowNitro: i18n.Messages.APP_SETTINGS,
-            aboveActivity: i18n.Messages.ACTIVITY_SETTINGS
-        };
-        return header === names[settingsLocation];
+        try {
+            const names = {
+                top: i18n.Messages.USER_SETTINGS,
+                aboveNitro: i18n.Messages.BILLING_SETTINGS,
+                belowNitro: i18n.Messages.APP_SETTINGS,
+                aboveActivity: i18n.Messages.ACTIVITY_SETTINGS
+            };
+            return header === names[settingsLocation];
+        } catch {
+            return firstChild === "PREMIUM";
+        }
     },
 
     patchedSettings: new WeakSet(),
