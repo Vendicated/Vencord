@@ -16,7 +16,7 @@ import style from "./style.css?managed";
 const MANIFEST = {
   name: "Discord",
   short_name: "Discord",
-  start_url: "https://discord.com/app", // URL when PWA launches
+  start_url: location.origin + "/app", // URL when PWA launches
   display: "fullscreen",
   display_override: ["window-controls-overlay"],
   lang: "en-US",
