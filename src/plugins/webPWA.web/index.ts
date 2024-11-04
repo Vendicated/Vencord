@@ -11,7 +11,7 @@ import { findStoreLazy } from "@webpack";
 import { RelationshipStore } from "@webpack/common";
 import type { FluxStore } from "@webpack/types";
 
-import style from "./style.css?managed";
+import style from "./styles.css?managed";
 
 const MANIFEST = {
   name: "Discord",
