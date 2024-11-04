@@ -15,6 +15,8 @@ import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 import { Guild, User } from "discord-types/general";
 
+import { settings } from ".";
+
 const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
 const FriendRow = findComponentByCodeLazy(".listName,discriminatorClass");
 
@@ -31,7 +33,8 @@ export function openGuildInfoModal(guild: Guild) {
 const enum Tabs {
     ServerInfo,
     Friends,
-    BlockedUsers
+    BlockedUsers,
+    MutualMembers
 }
 
 interface GuildProps {
@@ -56,6 +59,7 @@ function renderTimestamp(timestamp: number) {
 function GuildInfoModal({ guild }: GuildProps) {
     const [friendCount, setFriendCount] = useState<number>();
     const [blockedCount, setBlockedCount] = useState<number>();
+    const [mutualMembersCount, setMutualMembersCount] = useState<number>();
 
     useEffect(() => {
         fetched.friends = false;
@@ -127,6 +131,12 @@ function GuildInfoModal({ guild }: GuildProps) {
                     Friends{friendCount !== undefined ? ` (${friendCount})` : ""}
                 </TabBar.Item>
                 <TabBar.Item
+                    className={cl("tab", { selected: currentTab === Tabs.MutualMembers })}
+                    id={Tabs.MutualMembers}
+                >
+                    Mutual Server Members{mutualMembersCount !== undefined ? ` (${mutualMembersCount})` : ""}
+                </TabBar.Item>
+                <TabBar.Item
                     className={cl("tab", { selected: currentTab === Tabs.BlockedUsers })}
                     id={Tabs.BlockedUsers}
                 >
@@ -137,6 +147,7 @@ function GuildInfoModal({ guild }: GuildProps) {
             <div className={cl("tab-content")}>
                 {currentTab === Tabs.ServerInfo && <ServerInfoTab guild={guild} />}
                 {currentTab === Tabs.Friends && <FriendsTab guild={guild} setCount={setFriendCount} />}
+                {currentTab === Tabs.MutualMembers && <MutualMembersTab guild={guild} setCount={setMutualMembersCount} />}
                 {currentTab === Tabs.BlockedUsers && <BlockedUsersTab guild={guild} setCount={setBlockedCount} />}
             </div>
         </div>
@@ -243,16 +254,152 @@ function UserList(type: "friends" | "blocked", guild: Guild, ids: string[], setC
 
     useEffect(() => setCount(members.length), [members.length]);
 
+    const sortedMembers = members
+        .map(id => UserStore.getUser(id))
+        .sort(
+            (a, b) => {
+                switch (settings.store.sorting) {
+                    case "username":
+                        return a.username.localeCompare(b.username);
+                    case "displayname":
+                        return a?.globalName?.localeCompare(b?.globalName || b.username)
+                            || a.username.localeCompare(b?.globalName || b.username);
+                    default:
+                        return 0;
+                }
+            }
+        );
+
+
     return (
         <ScrollerThin fade className={cl("scroller")}>
-            {members.map(id =>
+            {sortedMembers.map(user => (
                 <FriendRow
-                    user={UserStore.getUser(id)}
-                    status={PresenceStore.getStatus(id) || "offline"}
-                    onSelect={() => openUserProfile(id)}
+                    user={user}
+                    status={PresenceStore.getStatus(user.id) || "offline"}
+                    onSelect={() => openUserProfile(user.id)}
                     onContextMenu={() => { }}
                 />
+            ))}
+        </ScrollerThin>
+    );
+}
+
+interface MemberWithMutuals {
+    id: string;
+    mutualCount: number;
+    mutualGuilds: Array<{
+        guild: Guild;
+        iconUrl: string | null;
+    }>;
+}
+
+function getMutualGuilds(id: string): MemberWithMutuals {
+    const mutualGuilds: Array<{ guild: Guild; iconUrl: string | null; }> = [];
+
+    for (const guild of Object.values(GuildStore.getGuilds())) {
+        if (GuildMemberStore.isMember(guild.id, id)) {
+            const iconUrl = guild.icon
+                ? IconUtils.getGuildIconURL({
+                    id: guild.id,
+                    icon: guild.icon,
+                    canAnimate: true,
+                    size: 20
+                }) ?? null
+                : null;
+
+            mutualGuilds.push({ guild, iconUrl });
+        }
+    }
+
+    return {
+        id,
+        mutualCount: mutualGuilds.length,
+        mutualGuilds
+    };
+}
+
+function MutualServerIcons({ member }: { member: MemberWithMutuals; }) {
+    const MAX_ICONS = 3;
+    const { mutualGuilds, mutualCount } = member;
+
+    return (
+        <div className={cl("mutual-guilds")}>
+            {mutualGuilds.slice(0, MAX_ICONS).map(({ guild, iconUrl }) => (
+                <div key={guild.id} className={cl("guild-icon")} role="img" aria-label={guild.name}>
+                    {iconUrl ? (
+                        <img src={iconUrl} alt="" />
+                    ) : (
+                        <div className={cl("guild-acronym")}>{guild.acronym}</div>
+                    )}
+                </div>
+            ))}
+            {mutualCount > MAX_ICONS && (
+                <div className={cl("guild-count")}>
+                    +{mutualCount - MAX_ICONS}
+                </div>
             )}
+        </div>
+    );
+}
+
+function MutualMembersTab({ guild, setCount }: RelationshipProps) {
+    const [members, setMembers] = useState<MemberWithMutuals[]>([]);
+    const currentUserId = UserStore.getCurrentUser().id;
+
+    useEffect(() => {
+        const guildMembers = GuildMemberStore.getMemberIds(guild.id);
+        const membersWithMutuals = guildMembers
+            .map(id => getMutualGuilds(id))
+            // dont show yourself and members that are only in this server
+            .filter(member => member.mutualCount > 1 && member.id !== currentUserId);
+
+        // sort by mutual server count (descending)
+        membersWithMutuals.sort((a, b) => b.mutualCount - a.mutualCount);
+
+        setMembers(membersWithMutuals);
+        setCount(membersWithMutuals.length);
+    }, [guild.id]);
+
+    return (
+        <ScrollerThin fade className={cl("scroller")}>
+            {members
+                .map(member => {
+                    const user = UserStore.getUser(member.id);
+                    return { ...member, user };
+                })
+                .filter(Boolean)
+                .sort((a, b) => {
+                    switch (settings.store.sorting) {
+                        case "username":
+                            return a.user.username.localeCompare(b.user.username);
+                        case "displayname":
+                            return a.user?.globalName?.localeCompare(b.user?.globalName || b.user.username)
+                                || a.user.username.localeCompare(b.user?.globalName || b.user.username);
+                        default:
+                            return 0;
+                    }
+                })
+                .map(member => (
+                    <div
+                        className={cl("member-row")}
+                        key={member.id}
+                        onClick={() => openUserProfile(member.id)}
+                    >
+                        <div className={cl("member-content")}>
+                            <FriendRow
+                                user={member.user}
+                                status={PresenceStore.getStatus(member.id) || "offline"}
+                                onSelect={() => { }}
+                                onContextMenu={() => { }}
+                                mutualGuilds={member.mutualCount}
+                            />
+                        </div>
+                        <div className={cl("member-icons")} onClick={e => e.stopPropagation()}>
+                            <MutualServerIcons member={member} />
+                        </div>
+                    </div>
+                ))}
         </ScrollerThin>
     );
 }
