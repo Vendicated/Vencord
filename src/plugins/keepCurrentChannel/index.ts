@@ -45,6 +45,16 @@ export default definePlugin({
     description: "Attempt to navigate to the channel you were in before switching accounts or loading Discord.",
     authors: [Devs.Nuckyz],
 
+    patches: [
+        {
+            find: '"Switching accounts"',
+            replacement: {
+                match: /goHomeAfterSwitching:\i/,
+                replace: "goHomeAfterSwitching:!1"
+            }
+        }
+    ],
+
     flux: {
         LOGOUT(e: LogoutEvent) {
             ({ isSwitchingAccount } = e);
