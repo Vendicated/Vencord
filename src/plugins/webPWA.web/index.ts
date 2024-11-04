@@ -65,6 +65,7 @@ export default definePlugin({
     this.linkEl = document.createElement("link");
     this.linkEl.rel = "manifest";
     this.linkEl.href = url;
+    document.head.appendChild(this.linkEl);
 
     NotificationSettingsStore.addChangeListener(this.setBadge);
     GuildReadStateStore.addChangeListener(this.setBadge);
