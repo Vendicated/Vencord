@@ -19,7 +19,7 @@
 import * as DataStore from "@api/DataStore";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelRouter, SelectedChannelStore, SelectedGuildStore } from "@webpack/common";
+import { ChannelRouter, ChannelStore, NavigationRouter, SelectedChannelStore, SelectedGuildStore } from "@webpack/common";
 
 export interface LogoutEvent {
     type: "LOGOUT";
@@ -65,7 +65,11 @@ export default definePlugin({
             isSwitchingAccount = false;
 
             if (previousCache?.channelId) {
-                ChannelRouter.transitionToChannel(previousCache.channelId);
+                if (ChannelStore.hasChannel(previousCache.channelId)) {
+                    ChannelRouter.transitionToChannel(previousCache.channelId);
+                } else {
+                    NavigationRouter.transitionToGuild("@me");
+                }
             }
         },
 
