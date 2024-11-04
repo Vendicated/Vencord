@@ -4,24 +4,25 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./styles.css";
-
+import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { filters, waitFor } from "@webpack";
+import { findStoreLazy } from "@webpack";
 import { RelationshipStore } from "@webpack/common";
 import type { FluxStore } from "@webpack/types";
+
+import style from "./style.css?managed";
 
 const MANIFEST = {
   name: "Discord",
   short_name: "Discord",
-  start_url: "https://discord.com/channels/@me", // URL when PWA launches
+  start_url: "https://discord.com/app", // URL when PWA launches
   display: "fullscreen",
   display_override: ["window-controls-overlay"],
   lang: "en-US",
   background_color: "#2a2a2f",
   theme_color: "#2a2a2f",
-  scope: "https://discord.com", // scope of all possible URL"s
+  scope: "/", // scope of all possible URL"s
   description: "Imagine a place...",
   orientation: "landscape",
   icons: [
@@ -35,8 +36,8 @@ const MANIFEST = {
 
 const isMac = navigator.platform.startsWith("Mac");
 
-let GuildReadStateStore: FluxStore & { getTotalMentionCount: () => number; hasAnyUnread: () => boolean; };
-let NotificationSettingsStore: FluxStore & { getDisableUnreadBadge: () => boolean; };
+const GuildReadStateStore: FluxStore & { getTotalMentionCount: () => number; hasAnyUnread: () => boolean; } = findStoreLazy("GuildReadStateStore");
+const NotificationSettingsStore: FluxStore & { getDisableUnreadBadge: () => boolean; } = findStoreLazy("NotificationSettingsStore");
 
 export default definePlugin({
   name: "WebPWA",
@@ -59,33 +60,23 @@ export default definePlugin({
     }
   },
   start() {
+    enableStyle(style);
     const url = URL.createObjectURL(new Blob([JSON.stringify(MANIFEST)], { type: "application/json" }));
     this.linkEl = document.createElement("link");
     this.linkEl.rel = "manifest";
     this.linkEl.href = url;
 
-    let toFind = 3;
-
-    const waitForAndSubscribeToStore = (name: string, cb?: (m: any) => void) => {
-      waitFor(filters.byStoreName(name), (store: FluxStore) => {
-        if (!this.started) return;
-        cb?.(store);
-        store.addChangeListener(this.setBadge);
-
-        toFind--;
-        if (toFind === 0) this.setBadge();
-      });
-    };
-    waitForAndSubscribeToStore("GuildReadStateStore", store => (GuildReadStateStore = store));
-    waitForAndSubscribeToStore("NotificationSettingsStore", store => (NotificationSettingsStore = store));
-    waitForAndSubscribeToStore("RelationshipStore");
+    NotificationSettingsStore.addChangeListener(this.setBadge);
+    GuildReadStateStore.addChangeListener(this.setBadge);
+    RelationshipStore.addChangeListener(this.setBadge);
   },
   stop() {
+    disableStyle(style);
     this.linkEl?.remove();
     navigator.setAppBadge(0);
-    NotificationSettingsStore?.removeChangeListener(this.setBadge);
-    GuildReadStateStore?.removeChangeListener(this.setBadge);
-    RelationshipStore?.removeChangeListener(this.setBadge);
+    NotificationSettingsStore.removeChangeListener(this.setBadge);
+    GuildReadStateStore.removeChangeListener(this.setBadge);
+    RelationshipStore.removeChangeListener(this.setBadge);
   },
   patches: [
     {
