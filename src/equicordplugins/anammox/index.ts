@@ -77,7 +77,7 @@ export default definePlugin({
             find: "#{intl::BILLING_SETTINGS}",
             replacement: [
                 {
-                    match: /(?<=#{intl::BILLING_SETTINGS},)/,
+                    match: /(?<=#{intl::BILLING_SETTINGS}\),)/,
                     replace: "capitalism:true,"
                 },
                 {
@@ -99,7 +99,7 @@ export default definePlugin({
         },
         {
             // Emoji list
-            find: "#{intl::EMOJI_PICKER_CREATE_EMOJI_TITLE},size:",
+            find: "#{intl::EMOJI_PICKER_CREATE_EMOJI_TITLE}),size:",
             replacement: {
                 match: /(\i)=\i\|\|!\i&&\i.\i.isEmojiCategoryNitroLocked\(\{[^}]*\}\);/,
                 replace: "$&$1||"

@@ -75,7 +75,7 @@ export default definePlugin({
         {
             find: "#{intl::BAN_MULTIPLE_CONFIRM_TITLE}",
             replacement: [{
-                match: /\[\{name:#{intl::BAN_REASON_OPTION_SPAM_ACCOUNT}.+?\}\]/,
+                match: /\[\{name:\i\.\i\.string\(\i\.\i#{intl::BAN_REASON_OPTION_SPAM_ACCOUNT}\).+?\}\]/,
                 replace: "$self.getReasons()"
             },
             {

@@ -133,12 +133,12 @@ export default definePlugin({
         {
             find: "#{intl::CUSTOM_STATUS_SET_CUSTOM_STATUS}",
             replacement: {
-                match: /\.ModalFooter,.{0,70}\.Messages\.SAVE\}\)/,
+                match: /\.ModalFooter,.{0,70}\i\.\i\.string\(\i\.\i#{intl::SAVE}\)\}\)/,
                 replace: "$&,$self.renderRememberButton(this.state)"
             }
         },
         {
-            find: '"aria-label":#{intl::STATUS_MENU_LABEL}',
+            find: /"aria-label":.{0,1}\.\i\.string\(\i\.\i#{intl::STATUS_MENU_LABEL}/,
             replacement: {
                 match: /!\i&&(.{0,15}\i\.Fragment.{0,55}null==(\i).{0,200}customEmojiPlaceholder\}\),onClick:([^}]+}))/,
                 replace: "$self.render($2, $3),false&&$1"

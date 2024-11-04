@@ -14,9 +14,9 @@ export default definePlugin({
 
     patches: [
         {
-            find: "BOT:default:",
+            find: "#{intl::APP_TAG})",
             replacement: {
-                match: /(default:\i)=.{0,30}\)/,
+                match: /(default:\i)=\i\.\i\.string\(\i\.\i#{intl::APP_TAG}\)/,
                 replace: "$1=\"BOT\""
             }
         }
