@@ -5,9 +5,9 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { migratePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { Devs, EquicordDevs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
 import { Menu } from "@webpack/common";
 import { Guild } from "discord-types/general";
 
@@ -25,15 +25,38 @@ const Patch: NavContextMenuPatchCallback = (children, { guild }: { guild: Guild;
     );
 };
 
+export const settings = definePluginSettings({
+    sorting: {
+        type: OptionType.SELECT,
+        description: "Username or if applicable Display Name",
+        options: [
+            {
+                label: "Username",
+                value: "username"
+            },
+            {
+                label: "Display Name",
+                value: "displayname",
+                default: true
+            },
+            {
+                label: "Dont Sort",
+                value: "none",
+            }
+        ]
+    }
+});
+
 migratePluginSettings("ServerInfo", "ServerProfile"); // what was I thinking with this name lmao
 export default definePlugin({
     name: "ServerInfo",
     description: "Allows you to view info about a server",
-    authors: [Devs.Ven, Devs.Nuckyz],
+    authors: [Devs.Ven, Devs.Nuckyz, EquicordDevs.Z1xus],
     dependencies: ["DynamicImageModalAPI"],
     tags: ["guild", "info", "ServerProfile"],
     contextMenus: {
         "guild-context": Patch,
         "guild-header-popout": Patch
-    }
+    },
+    settings
 });

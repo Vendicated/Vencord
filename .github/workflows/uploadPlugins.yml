@@ -1,7 +1,7 @@
 name: Upload Plugins JSONs
 on:
     workflow_run:
-        workflows: [Release]
+        workflows: [Release, Test]
         types: [completed]
         branches: [main]
 env:
