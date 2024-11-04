@@ -16,8 +16,8 @@ export default definePlugin({
         {
             find: "#{intl::APP_TAG})",
             replacement: {
-                match: /(default:\i)=\i\.\i\.string\(\i\.\i#{intl::APP_TAG}\)/,
-                replace: "$1=\"BOT\""
+                match: /\i\.\i\.string\(\i\.\i#{intl::APP_TAG}\)/,
+                replace: '"BOT"'
             }
         }
     ],
