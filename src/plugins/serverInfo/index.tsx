@@ -29,7 +29,7 @@ migratePluginSettings("ServerInfo", "ServerProfile"); // what was I thinking wit
 export default definePlugin({
     name: "ServerInfo",
     description: "Allows you to view info about a server",
-    authors: [Devs.Ven, Devs.Nuckyz],
+    authors: [Devs.Ven, Devs.Nuckyz, Devs.Z1xus],
     dependencies: ["DynamicImageModalAPI"],
     tags: ["guild", "info", "ServerProfile"],
 
