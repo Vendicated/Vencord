@@ -13,27 +13,6 @@ import type { FluxStore } from "@webpack/types";
 
 import style from "./styles.css?managed";
 
-const MANIFEST = {
-  name: "Discord",
-  short_name: "Discord",
-  start_url: location.origin + "/app", // URL when PWA launches
-  display: "fullscreen",
-  display_override: ["window-controls-overlay"],
-  lang: "en-US",
-  background_color: "#2a2a2f",
-  theme_color: "#2a2a2f",
-  scope: "/", // scope of all possible URL"s
-  description: "Imagine a place...",
-  orientation: "landscape",
-  icons: [
-    {
-      src: document.querySelector<HTMLLinkElement>('link[rel="icon"]')!.href,
-      sizes: "256x256",
-      type: "image/png"
-    }
-  ]
-};
-
 const isMac = navigator.platform.startsWith("Mac");
 
 const GuildReadStateStore: FluxStore & { getTotalMentionCount: () => number; hasAnyUnread: () => boolean; } = findStoreLazy("GuildReadStateStore");
@@ -43,7 +22,6 @@ export default definePlugin({
   name: "WebPWA",
   description: "Allows Discord to be installable and usable as a PWA.",
   authors: [Devs.ThaUnknown],
-  manifest: null,
   setBadge: () => {
     try {
       const mentionCount = GuildReadStateStore.getTotalMentionCount();
@@ -61,7 +39,27 @@ export default definePlugin({
   },
   start() {
     enableStyle(style);
-    const url = URL.createObjectURL(new Blob([JSON.stringify(MANIFEST)], { type: "application/json" }));
+    const manifest = {
+      name: "Discord",
+      short_name: "Discord",
+      start_url: location.origin + "/app", // URL when PWA launches
+      display: "fullscreen",
+      display_override: ["window-controls-overlay"],
+      lang: "en-US",
+      background_color: "#2a2a2f",
+      theme_color: "#2a2a2f",
+      scope: "/", // scope of all possible URL"s
+      description: "Imagine a place...",
+      orientation: "landscape",
+      icons: [
+        {
+          src: document.querySelector<HTMLLinkElement>('link[rel="icon"]')!.href,
+          sizes: "256x256",
+          type: "image/png"
+        }
+      ]
+    };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: "application/json" }));
     this.linkEl = document.createElement("link");
     this.linkEl.rel = "manifest";
     this.linkEl.href = url;
