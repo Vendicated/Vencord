@@ -69,7 +69,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".Messages.ACCOUNT_SPEAKING_WHILE_MUTED",
+            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
             group: true,
             replacement: [
                 {
