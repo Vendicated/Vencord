@@ -42,7 +42,7 @@ export default definePlugin({
     const manifest = {
       name: "Discord",
       short_name: "Discord",
-      start_url: location.origin + "/app", // URL when PWA launches
+      start_url: 'https' + window.GLOBAL_ENV.WEBAPP_ENDPOINT + "/app", // URL when PWA launches
       display: "fullscreen",
       display_override: ["window-controls-overlay"],
       lang: "en-US",
