@@ -18,6 +18,7 @@
 
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -77,6 +78,6 @@ export default definePlugin({
     },
 
     shouldHide(props: MessageDeleteProps) {
-        return props.collapsedReason() === i18n.t["+FcYMz"]();
+        return props.collapsedReason() === i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
     }
 });
