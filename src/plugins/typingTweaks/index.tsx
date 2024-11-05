@@ -133,9 +133,8 @@ export default definePlugin({
 
         let element = 0;
 
-        // typeof c?.username === "string" is a workaround for broken Japanese i18n
         return children.map(c =>
-            c.type === "strong" || typeof c?.username === "string"
+            c.type === "strong" || !React.isValidElement(c)
                 ? <TypingUser {...props} user={users[element++]} />
                 : c
         );
