@@ -24,7 +24,10 @@ import { Channel, Guild, Message, User } from "discord-types/general";
 import { Except } from "type-fest";
 
 import { runtimeHashMessageKey } from "./intlHash";
+import { Logger } from "./Logger";
 import { MediaModalItem, MediaModalProps, openMediaModal } from "./modal";
+
+const IntlManagerLogger = new Logger("IntlManager");
 
 /**
  * Get an internationalized message from a non hashed key
@@ -32,16 +35,21 @@ import { MediaModalItem, MediaModalProps, openMediaModal } from "./modal";
  * @param values The values to interpolate, if it's a rich message
  */
 export function getIntlMessage(key: string, values?: Record<PropertyKey, any>): any {
-    return getIntlMessageFromHash(runtimeHashMessageKey(key), values);
+    return getIntlMessageFromHash(runtimeHashMessageKey(key), values, key);
 }
 
 /**
  * Get an internationalized message from a hashed key
- * @param key The hashed message key
+ * @param hashedKey The hashed message key
  * @param values The values to interpolate, if it's a rich message
  */
-export function getIntlMessageFromHash(key: string, values?: Record<PropertyKey, any>): any {
-    return values == null ? i18n.intl.string(i18n.t[key]) : i18n.intl.format(i18n.t[key], values);
+export function getIntlMessageFromHash(hashedKey: string, values?: Record<PropertyKey, any>, originalKey?: string): any {
+    try {
+        return values == null ? i18n.intl.string(i18n.t[hashedKey]) : i18n.intl.format(i18n.t[hashedKey], values);
+    } catch (e) {
+        IntlManagerLogger.error(`Failed to get intl message for key: ${originalKey ?? hashedKey}`, e);
+        return originalKey ?? "";
+    }
 }
 
 /**
