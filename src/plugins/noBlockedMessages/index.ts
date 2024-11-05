@@ -21,14 +21,14 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
+import { i18n } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 
 interface MessageDeleteProps {
-    collapsedReason: {
-        message: string;
-    };
+    // i18n message i18n.t["+FcYMz"] if deleted, with args
+    collapsedReason: () => any
 }
 
 export default definePlugin({
@@ -77,6 +77,6 @@ export default definePlugin({
     },
 
     shouldHide(props: MessageDeleteProps) {
-        return !props?.collapsedReason?.message.includes("deleted");
+        return props.collapsedReason() === i18n.t["+FcYMz"]();
     }
 });
