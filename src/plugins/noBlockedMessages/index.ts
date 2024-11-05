@@ -38,7 +38,7 @@ export default definePlugin({
     authors: [Devs.rushii, Devs.Samu, Devs.F53],
     patches: [
         {
-            find: "Messages.BLOCKED_MESSAGES_HIDE",
+            find: "#{intl::BLOCKED_MESSAGES_HIDE}",
             replacement: [
                 {
                     match: /let\{[^}]*collapsedReason[^}]*\}/,

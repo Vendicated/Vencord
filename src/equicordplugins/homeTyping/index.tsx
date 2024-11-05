@@ -26,7 +26,7 @@ export default definePlugin({
     },
     patches: [
         {
-            find: ".Messages.DISCODO_DISABLED",
+            find: "#{intl::DISCODO_DISABLED}",
             replacement:
                 [
                     {

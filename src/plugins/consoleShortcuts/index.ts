@@ -18,6 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, getCurrentGuild } from "@utils/discord";
+import { runtimeHashMessageKey } from "@utils/intlHash";
 import { SYM_LAZY_CACHED, SYM_LAZY_GET } from "@utils/lazy";
 import { relaunch } from "@utils/native";
 import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from "@utils/patches";
@@ -104,6 +105,7 @@ function makeShortcuts() {
         canonicalizeMatch,
         canonicalizeReplace,
         canonicalizeReplacement,
+        runtimeHashMessageKey,
         fakeRender: (component: ComponentType, props: any) => {
             const prevWin = fakeRenderWin?.deref();
             const win = prevWin?.closed === false

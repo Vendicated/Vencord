@@ -34,7 +34,7 @@ const { HeaderBar, HeaderBarIcon } = mapMangledModuleLazy(".themedMobile]:", {
 });
 const Chat = findComponentByCodeLazy("filterAfterTimestamp:", "chatInputType");
 const Resize = findComponentByCodeLazy("sidebarType:", "homeSidebarWidth");
-const ChannelHeader = findComponentByCodeLazy(".Messages.HUB_DIRECTORY_CHANNEL_TITLE.format({");
+const ChannelHeader = findComponentByCodeLazy("#{intl::HUB_DIRECTORY_CHANNEL_TITLE}");
 const ChatInputTypes = findByPropsLazy("FORM", "NORMAL");
 const Sidebars = findByPropsLazy("ThreadSidebar", "MessageRequestSidebar");
 

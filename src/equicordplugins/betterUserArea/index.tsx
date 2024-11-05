@@ -15,7 +15,7 @@ export default definePlugin({
     description: "Reworks the user area styling to fit more buttons and overall look nicer",
     authors: [Devs.Samwich],
     patches: [{
-        find: ".Messages.ACCOUNT_SPEAKING_WHILE_MUTED",
+        find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
         replacement:
             [
                 // add a custom class to make things easier
