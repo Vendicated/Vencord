@@ -25,7 +25,6 @@ import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
-import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
@@ -315,6 +314,7 @@ export default definePlugin({
 
     Messages: {
         // DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
+        // TODO: find a better way to generate intl messages
         DELETED_MESSAGE_COUNT: () => ({
             ast: [[
                 6,
