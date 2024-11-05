@@ -5,10 +5,10 @@
  */
 
 import { classNameFactory } from "@api/Styles";
-import { getUniqueUsername } from "@utils/discord";
+import { getIntlMessage, getUniqueUsername } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Avatar, ChannelStore, ContextMenuApi, Dots, GuildStore, i18n, PresenceStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useRef, UserStore, useStateFromStores } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenuApi, Dots, GuildStore, PresenceStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, CircleQuestionIcon, closeTab, isTabSelected, moveDraggedTabs, moveToTab, openedTabs, settings } from "../util";
@@ -113,22 +113,22 @@ function ChannelTabContent(props: ChannelTabsProps & {
                 </>
             );
         else {
-            let name = `${i18n.Messages.UNKNOWN_CHANNEL} (${channelId})`;
+            let name = `${getIntlMessage("UNKNOWN_CHANNEL")} (${channelId})`;
             switch (channelId) {
                 case "customize-community":
-                    name = i18n.Messages.CHANNELS_AND_ROLES;
+                    name = getIntlMessage("CHANNELS_AND_ROLES");
                     break;
                 case "channel-browser":
-                    name = i18n.Messages.GUILD_SIDEBAR_CHANNEL_BROWSER;
+                    name = getIntlMessage("GUILD_SIDEBAR_CHANNEL_BROWSER");
                     break;
                 case "shop":
-                    name = i18n.Messages.GUILD_SHOP_CHANNEL_LABEL;
+                    name = getIntlMessage("GUILD_SHOP_CHANNEL_LABEL");
                     break;
                 case "member-safety":
-                    name = i18n.Messages.MEMBER_SAFETY_CHANNEL_TITLE;
+                    name = getIntlMessage("MEMBER_SAFETY_CHANNEL_TITLE");
                     break;
                 case "@home":
-                    name = i18n.Messages.SERVER_GUIDE;
+                    name = getIntlMessage("SERVER_GUIDE");
                     break;
             }
             return (
@@ -168,7 +168,7 @@ function ChannelTabContent(props: ChannelTabsProps & {
             return (
                 <>
                     <ChannelIcon channel={channel} />
-                    {!compact && <Text className={cl("name-text")}>{channel?.name || i18n.Messages.GROUP_DM}</Text>}
+                    {!compact && <Text className={cl("name-text")}>{channel?.name || getIntlMessage("GROUP_DM")}</Text>}
                     <NotificationDot channelIds={[channel.id]} />
                     <TypingIndicator isTyping={isTyping} />
                 </>
@@ -180,14 +180,14 @@ function ChannelTabContent(props: ChannelTabsProps & {
         return (
             <>
                 <FriendsIcon />
-                {!compact && <Text className={cl("name-text")}>{i18n.Messages.FRIENDS}</Text>}
+                {!compact && <Text className={cl("name-text")}>{getIntlMessage("FRIENDS")}</Text>}
             </>
         );
 
     return (
         <>
             <CircleQuestionIcon />
-            {!compact && <Text className={cl("name-text")}>{i18n.Messages.UNKNOWN_CHANNEL}</Text>}
+            {!compact && <Text className={cl("name-text")}>{getIntlMessage("UNKNOWN_CHANNEL")}</Text>}
         </>
     );
 }

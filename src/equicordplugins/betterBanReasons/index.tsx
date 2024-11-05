@@ -8,8 +8,9 @@ import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, i18n, TextInput } from "@webpack/common";
+import { Button, Forms, TextInput } from "@webpack/common";
 
 function ReasonsComponent() {
     const { reasons } = settings.use(["reasons"]);
@@ -72,9 +73,9 @@ export default definePlugin({
     authors: [Devs.Inbestigator],
     patches: [
         {
-            find: "Messages.BAN_MULTIPLE_CONFIRM_TITLE",
+            find: "#{intl::BAN_MULTIPLE_CONFIRM_TITLE}",
             replacement: [{
-                match: /\[\{name:\i\.\i\.Messages\.BAN_REASON_OPTION_SPAM_ACCOUNT.+?\}\]/,
+                match: /\[\{name:\i\.\i\.string\(\i\.\i#{intl::BAN_REASON_OPTION_SPAM_ACCOUNT}\).+?\}\]/,
                 replace: "$self.getReasons()"
             },
             {
@@ -87,9 +88,9 @@ export default definePlugin({
         const reasons = settings.store.reasons.length
             ? settings.store.reasons
             : [
-                i18n.Messages.BAN_REASON_OPTION_SPAM_ACCOUNT,
-                i18n.Messages.BAN_REASON_OPTION_HACKED_ACCOUNT,
-                i18n.Messages.BAN_REASON_OPTION_BREAKING_RULES
+                getIntlMessage("BAN_REASON_OPTION_SPAM_ACCOUNT"),
+                getIntlMessage("BAN_REASON_OPTION_HACKED_ACCOUNT"),
+                getIntlMessage("BAN_REASON_OPTION_BREAKING_RULES")
             ];
         return reasons.map(s => ({ name: s, value: s }));
     },

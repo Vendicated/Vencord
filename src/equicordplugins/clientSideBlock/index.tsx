@@ -167,7 +167,7 @@ export default definePlugin({
         },
         // "1 blocked message"
         {
-            find: "Messages.BLOCKED_MESSAGES_HIDE.format",
+            find: "#{intl::BLOCKED_MESSAGES_HIDE}",
             replacement: {
                 match: /\i.memo\(function\(\i\){/,
                 replace: "$&return null;"

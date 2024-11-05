@@ -39,7 +39,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ".Messages.GUILD_OWNER,",
+            find: "#{intl::GUILD_OWNER}),",
             replacement:
             {
                 // We add the banner as a property while we can still access the user id

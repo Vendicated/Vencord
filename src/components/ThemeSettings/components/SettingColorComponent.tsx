@@ -15,7 +15,7 @@ interface ColorPickerProps {
     showEyeDropper?: boolean;
     onChange(value: number | null): void;
 }
-const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
+const ColorPicker = findComponentByCodeLazy<ColorPickerProps>("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", ".BACKGROUND_PRIMARY)");
 
 // TinyColor is completely unmangled and it's duplicated in two modules! Fun!
 const TinyColor: tinycolor.Constructor = findByCodeLazy("this._gradientType=");

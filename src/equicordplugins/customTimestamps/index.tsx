@@ -67,7 +67,7 @@ export default definePlugin({
         </>
     ),
     patches: [{
-        find: "MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format",
+        find: "#{intl::MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL}",
         replacement: [
             {
                 match: /(?<=\i=\i\?)\(0,\i\.\i\)\((\i),"LT"\):\(0,\i\.\i\)\(\i\)/,

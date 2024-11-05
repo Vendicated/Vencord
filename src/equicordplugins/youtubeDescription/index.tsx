@@ -18,7 +18,7 @@ export default definePlugin({
     authors: [Devs.arHSM],
     patches: [
         {
-            find: ".Messages.SUPPRESS_ALL_EMBEDS",
+            find: "#{intl::SUPPRESS_ALL_EMBEDS}",
             replacement: {
                 match: /case (\i\.\i\.VIDEO):(case \i\.\i\.\i:)*break;default:(\i)=(?:(this\.renderDescription)\(\))\}/,
                 replace: "$2 break; case $1: $3 = $self.ToggleableDescriptionWrapper({ embed: this.props.embed, original: $4.bind(this) }); break; default: $3 = $4() }"

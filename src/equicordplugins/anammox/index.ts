@@ -74,10 +74,10 @@ export default definePlugin({
         },
         {
             // Settings, sidebar
-            find: "Messages.BILLING_SETTINGS",
+            find: "#{intl::BILLING_SETTINGS}",
             replacement: [
                 {
-                    match: /(?<=Messages.BILLING_SETTINGS,)/,
+                    match: /(?<=#{intl::BILLING_SETTINGS}\),)/,
                     replace: "capitalism:true,"
                 },
                 {
@@ -99,7 +99,7 @@ export default definePlugin({
         },
         {
             // Emoji list
-            find: "Messages.EMOJI_PICKER_CREATE_EMOJI_TITLE,size:",
+            find: "#{intl::EMOJI_PICKER_CREATE_EMOJI_TITLE}),size:",
             replacement: {
                 match: /(\i)=\i\|\|!\i&&\i.\i.isEmojiCategoryNitroLocked\(\{[^}]*\}\);/,
                 replace: "$&$1||"
@@ -108,7 +108,7 @@ export default definePlugin({
         },
         {
             // Emoji category list
-            find: "Messages.EMOJI_CATEGORY_TOP_GUILD_EMOJI.format({",
+            find: "#{intl::EMOJI_CATEGORY_TOP_GUILD_EMOJI}",
             replacement: {
                 match: /(?<=(\i)\.unshift\((\i)\):)(?=\1\.push\(\2\))/,
                 replace: "$2.isNitroLocked||"

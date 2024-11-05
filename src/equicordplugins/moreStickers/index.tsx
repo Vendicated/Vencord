@@ -32,7 +32,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "STICKER_BUTTON_LABEL,",
+            find: "#{intl::STICKER_BUTTON_LABEL}",
             replacement: [{
                 match: /(children:\(0,\w\.jsx\)\()([\w.]+?)(,{innerClassName.{10,30}\.stickerButton)/,
                 replace: (_, head, button, tail) => {
@@ -64,11 +64,11 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.EXPRESSION_PICKER_GIF",
+            find: "#{intl::EXPRESSION_PICKER_GIF}",
             replacement: {
-                match: /role:"tablist",.+?\.Messages\.EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL,children:(\[.*?\)\]}\)}\):null,)(.*?closePopout:\w.*?:null)/s,
+                match: /role:"tablist",.+?#{intl::EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL}\),children:(\[.*?\)\]}\)}\):null,)(.*?closePopout:\w.*?:null)/s,
                 replace: m => {
-                    const stickerTabRegex = /(\w+?)\?(\([^()]+?\))\((.{1,2}),{.{0,128},isActive:(.{1,2})===.{1,150},children:(.{1,10}Messages.EXPRESSION_PICKER_STICKER).*?:null/s;
+                    const stickerTabRegex = /(\w+?)\?(\([^()]+?\))\((.{1,2}),{.{0,128},isActive:(.{1,2})===.{1,150},children:(.{1,10}#{intl::EXPRESSION_PICKER_STICKER}).*?:null/s;
                     const res = m.replace(stickerTabRegex, (_m, canUseStickers, jsx, tabHeaderComp, currentTab, stickerText) => {
                         const isActive = `${currentTab}==="stickers+"`;
                         return (
