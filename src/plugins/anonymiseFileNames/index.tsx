@@ -15,7 +15,7 @@ const enum Methods {
     Random,
     Consistent,
     Timestamp,
-    SHA256,  // Yeni yöntem eklendi
+    SHA256, 
 }
 
 const tarExtMatcher = /\.tar\.\w+$/;
@@ -33,7 +33,7 @@ const settings = definePluginSettings({
             { label: "Random Characters", value: Methods.Random, default: true },
             { label: "Consistent", value: Methods.Consistent },
             { label: "Timestamp", value: Methods.Timestamp },
-            { label: "SHA-256 Hash", value: Methods.SHA256 }, // SHA-256 yöntemi eklendi
+            { label: "SHA-256 Hash", value: Methods.SHA256 }, 
         ],
     },
     randomisedLength: {
@@ -110,7 +110,7 @@ export default definePlugin({
                 return `${settings.store.consistent}${upload.extension}`;
             case Methods.Timestamp:
                 return `${Date.now()}${upload.extension}`;
-            case Methods.SHA256:  // SHA-256 şifreleme yöntemi
+            case Methods.SHA256: 
                 const hash = crypto.createHash("sha256");
                 hash.update(upload.filename);
                 return `${hash.digest("hex")}${upload.extension}`;
