@@ -1,0 +1,508 @@
+/* stylelint-disable function-url-quotes */
+.vc-more-stickers-icon {
+    fill: #b9bbbe;
+    margin-top: 20%;
+}
+
+.vc-more-stickers-icon:hover,
+.vc-more-stickers-icon:focus-visible,
+.vc-more-stickers-icon-active {
+    fill: #fff;
+}
+
+.vc-more-stickers-picker-container {
+    background-color: var(--background-tertiary);
+    overflow: hidden;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.vc-more-stickers-picker-container>div:first-child {
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: wrap;
+    padding: 1px 0 1px 1px;
+    overflow: hidden;
+}
+
+.vc-more-stickers-picker-search-box {
+    height: 30px;
+    line-height: 32px;
+    font-size: 16px;
+    flex: 1;
+    min-width: 48px;
+    margin: 1px;
+}
+
+.vc-more-stickers-picker-search-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: text;
+    box-sizing: border-box;
+    margin-right: 8px;
+}
+
+.vc-more-stickers-foreign-object>img {
+    text-indent: -9999px;
+    align-items: center;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    width: 100%;
+}
+
+.vc-more-stickers-foreign-object {
+    mask: url(#svg-mask-avatar-default) !important;
+}
+
+.vc-more-stickers-foreign-object:hover,
+.vc-more-stickers-foreign-object-active {
+    mask: url(#svg-mask-squircle) !important;
+}
+
+.vc-more-stickers-category-wrapper {
+    background-color: var(--background-tertiary);
+    position: absolute;
+    overflow: hidden;
+    width: 48px;
+    top: 50px;
+    left: 0;
+    height: calc(100% - 50px);
+}
+
+.vc-more-stickers-picker-content {
+    position: absolute;
+    margin-left: 48px;
+}
+
+.vc-more-stickers-picker-content:has(.temporary-text-will-be-removed) {
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    width: 90%;
+    height: 80%;
+}
+
+.vc-more-stickers-category-scroller {
+    overflow: hidden scroll;
+    padding-right: 0;
+    height: 100%;
+    position: relative;
+    box-sizing: border-box;
+    min-height: 0;
+    flex: 1 1 auto;
+}
+
+.vc-more-stickers-category-scroller> :first-child {
+    inset: 8px;
+    contain: layout;
+    position: absolute;
+}
+
+.vc-more-stickers-category-scroller> :last-child {
+    position: "absolute";
+    pointer-events: none;
+    min-height: 0;
+    min-width: 1px;
+    flex: 0 0 auto;
+    height: 0;
+}
+
+.vc-more-stickers-category-scroller,
+.vc-more-stickers-picker-content-scroller {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thin-thumb) var(--scrollbar-thin-track);
+}
+
+.vc-more-stickers-category-scroller::-webkit-scrollbar,
+.vc-more-stickers-picker-content-scroller::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.vc-more-stickers-category-scroller::-webkit-scrollbar-corner,
+.vc-more-stickers-picker-content-scroller::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+.vc-more-stickers-category-scroller::-webkit-scrollbar-thumb,
+.vc-more-stickers-picker-content-scroller::-webkit-scrollbar-thumb {
+    background-clip: padding-box;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    background-color: var(--scrollbar-thin-thumb);
+    min-height: 40px;
+}
+
+.vc-more-stickers-category-scroller::-webkit-scrollbar-track,
+.vc-more-stickers-picker-content-scroller::-webkit-scrollbar-track {
+    border-color: var(--scrollbar-thin-track);
+    background-color: var(--scrollbar-thin-track);
+    border: 2px solid var(--scrollbar-thin-track);
+}
+
+.vc-more-stickers-header {
+    box-shadow: var(--elevation-low);
+    grid-column: 1/3;
+    grid-row: 1/2;
+    min-height: 1px;
+    z-index: 1;
+    padding: 0 16px 16px;
+    display: flex;
+    align-items: center;
+}
+
+.vc-more-stickers-sticker-category {
+    border-radius: 4px;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    height: 32px;
+    margin-bottom: 8px;
+}
+
+.vc-more-stickers-sticker-category:hover,
+.vc-more-stickers-sticker-category-active {
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-more-stickers-clear-icon {
+    color: var(--interactive-normal);
+    cursor: pointer;
+}
+
+.vc-more-stickers-clear-icon:hover {
+    color: var(--interactive-hover);
+}
+
+.vc-more-stickers-picker-content-list-wrapper {
+    grid-row: 2/2;
+    grid-column: 2/2;
+    overflow: hidden;
+    position: relative;
+}
+
+.vc-more-stickers-picker-content-wrapper {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+}
+
+.vc-more-stickers-picker-content-scroller {
+    overflow: hidden scroll;
+    padding-right: 0;
+    height: 100%;
+    position: relative;
+    box-sizing: border-box;
+    min-height: 0;
+    -webkit-box-flex: 1;
+    flex: 1 1 auto;
+}
+
+.vc-more-stickers-picker-content-list-items {
+    contain: layout;
+    position: absolute;
+    inset: 0 0 0 8px;
+}
+
+.vc-more-stickers-picker-content-header-wrapper {
+    position: sticky;
+    top: 0;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    background-color: var(--background-secondary);
+    box-sizing: border-box;
+    display: flex;
+    height: 32px;
+    padding: 0 4px;
+    z-index: 1;
+}
+
+.vc-more-stickers-picker-content-header-header {
+    color: var(--header-secondary);
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: start;
+    -ms-flex-pack: start;
+    justify-content: flex-start;
+    font-size: 12px;
+    font-weight: 600;
+    transition: color 0.125s;
+}
+
+.vc-more-stickers-picker-content-header-header-icon {
+    display: contents;
+    height: 100%;
+    margin-right: 8px;
+}
+
+.vc-more-stickers-picker-content-header-svg {
+    display: block;
+    contain: paint;
+}
+
+.vc-more-stickers-picker-content-header-guild-icon,
+.vc-more-stickers-picker-content-inspector-graphic-secondary img {
+    text-indent: -9999px;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    display: flex;
+    height: 100%;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.vc-more-stickers-picker-content-header-header-label {
+    margin-left: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+    margin-right: 8px;
+}
+
+.vc-more-stickers-picker-content-header-header:hover {
+    color: var(--interactive-active);
+    cursor: pointer;
+}
+
+.vc-more-stickers-picker-content-row {
+    column-gap: 67px;
+    grid-template-columns: repeat(auto-fill, 96px);
+    height: 96px;
+    position: relative;
+    display: grid;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.vc-more-stickers-picker-content-row-grid-sticker {
+    width: 96px;
+    height: 96px;
+    padding: 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    position: relative;
+}
+
+.vc-more-stickers-picker-content-row-grid-hidden-visually {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+
+.vc-more-stickers-picker-content-row-grid-inspected-indicator {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    /* prettier-ignore */
+    mask: url("https://discord.com/assets/7d65d61e6cd25bf1847ec2d3e4a0144d.svg") 0 0/100% 100%;
+    transition: background-color 0.08s ease-out, color 0.08s ease-out;
+    z-index: -1;
+}
+
+.vc-more-stickers-picker-content-row-grid-inspected-indicator.inspected {
+    background-color: var(--background-accent);
+}
+
+.vc-more-stickers-picker-content-row-grid-sticker-node {
+    transition: opacity 0.25s;
+}
+
+.vc-more-stickers-picker-content-row-grid-asset-wrapper {
+    position: relative;
+    user-select: none;
+}
+
+.vc-more-stickers-picker-content-row-grid-asset-wrapper:hover {
+    /* prettier-ignore */
+    mask: url("https://discord.com/assets/7d65d61e6cd25bf1847ec2d3e4a0144d.svg") 0 0/100% 100%;
+}
+
+.vc-more-stickers-picker-content-row-grid-img,
+.vc-more-stickers-picker-content-inspector-img {
+    text-indent: -9999px;
+    display: block;
+    object-fit: contain;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+.vc-more-stickers-picker-content-inspector {
+    box-sizing: border-box;
+    height: 48px;
+    width: 100%;
+    padding: 0 16px;
+    background-color: var(--background-secondary-alt);
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    overflow: hidden;
+}
+
+.vc-more-stickers-picker-content-inspector-graphic-primary {
+    height: 28px;
+    width: 28px;
+}
+
+.vc-more-stickers-picker-content-inspector-text-wrapper {
+    flex: 1;
+    margin-left: 8px;
+    overflow: hidden;
+}
+
+.vc-more-stickers-picker-content-inspector-title-primary {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-family: var(--font-primary);
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 600;
+    color: var(--text-normal);
+}
+
+.vc-more-stickers-picker-content-inspector-title-secondary {
+    color: var(--interactive-normal);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-family: var(--font-primary);
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 400;
+}
+
+.vc-more-stickers-picker-content-inspector-graphic-secondary {
+    height: 32px;
+    margin-left: 8px;
+    width: 32px;
+}
+
+.vc-more-stickers-picker-content-inspector-graphic-secondary svg {
+    display: block;
+    contain: paint;
+}
+
+.vc-more-stickers-picker-settings-cog-container {
+    position: fixed;
+    transform: translateY(-100%);
+    background-color: var(--background-tertiary);
+    padding: 8px;
+    padding-right: 4px;
+    border-bottom-left-radius: 5px;
+}
+
+.vc-more-stickers-picker-settings-cog {
+    cursor: pointer;
+    border-radius: 2em;
+    background-color: var(--background-primary);
+    padding: 8px;
+    transform: translate(-5%, 10%);
+    transition: all 0.15s ease-out;
+}
+
+.vc-more-stickers-picker-settings-cog-active {
+    border-radius: 1em;
+    background-color: var(--green-300);
+}
+
+.vc-more-stickers-picker-settings-cog>svg {
+    color: var(--green-360) !important;
+    width: 100%;
+    height: 100%;
+    transform: translateY(10%);
+}
+
+/* prettier-ignore */
+.vc-more-stickers-picker-settings-cog-active>svg {
+    color: var(--white-360) !important;
+}
+
+.vc-more-stickers-picker-content-header-collapse-icon {
+    transition: transform 0.1s ease-out;
+}
+
+.vc-more-stickers-settings {
+    margin-top: 16px;
+}
+
+.vc-more-stickers-settings .bg {
+    border-radius: 8px;
+    background-color: var(--background-secondary);
+    padding: 16px;
+    margin: 8px 16px 16px;
+}
+
+.vc-more-stickers-settings .sticker-pack {
+    position: relative;
+    text-align: center;
+}
+
+.vc-more-stickers-settings .sticker-pack button {
+    display: flex;
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-radius: 8px;
+    background: var(--background-secondary);
+    width: 26px;
+    height: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    opacity: 0;
+}
+
+.vc-more-stickers-settings button.show {
+    height: 26px;
+    opacity: 1;
+    transition: opacity 0.25s linear;
+}
+
+.vc-more-stickers-settings .section {
+    margin-top: 8px;
+}
+
+.vc-more-stickers-settings .tab-bar {
+    margin-bottom: 16px;
+}
+
+.vc-more-stickers-settings .tab-bar-item {
+    margin-right: 16px;
+    padding-bottom: 4px;
+    margin-bottom: -4px;
+}
+
+.vc-more-stickers-pack-title {
+    font-family: var(--font-primary);
+    font-size: 8pt;
+    font-weight: 600;
+    color: var(--text-normal);
+}
