@@ -1,7 +1,7 @@
 name: Upload Builds
 on:
     workflow_run:
-        workflows: [Release, Test]
+        workflows: [Release]
         types: [completed]
         branches: [main, dev]
 env:
