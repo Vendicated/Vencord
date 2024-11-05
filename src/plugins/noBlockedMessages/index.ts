@@ -78,6 +78,11 @@ export default definePlugin({
     },
 
     shouldHide(props: MessageDeleteProps) {
-        return props.collapsedReason() === i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
+        try {
+            return props.collapsedReason() === i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
+        } catch (e) {
+            console.error(e);
+        }
+        return false;
     }
 });

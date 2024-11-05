@@ -313,9 +313,34 @@ export default definePlugin({
         );
     },
 
-    Messages: proxyLazy(() => ({
-        DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
-    })),
+    Messages: {
+        // DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
+        DELETED_MESSAGE_COUNT: () => ({
+            ast: [[
+                6,
+                "count",
+                {
+                    "=0": ["No deleted messages"],
+                    one: [
+                        [
+                            1,
+                            "count"
+                        ],
+                        " deleted message"
+                    ],
+                    other: [
+                        [
+                            1,
+                            "count"
+                        ],
+                        " deleted messages"
+                    ]
+                },
+                0,
+                "cardinal"
+            ]]
+        })
+    },
 
     patches: [
         {
