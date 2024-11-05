@@ -25,7 +25,7 @@ export default definePlugin({
     authors: [Devs.Obsidian, Devs.Nuckyz],
     patches: [
         {
-            find: ".Messages.PREVIEW_BYTES_LEFT.format(",
+            find: "#{intl::PREVIEW_BYTES_LEFT}",
             replacement: {
                 match: /\.footerGap.+?url:\i,fileName:\i,fileSize:\i}\),(?<=fileContents:(\i),bytesLeft:(\i).+?)/g,
                 replace: "$&$self.addCopyButton({fileContents:$1,bytesLeft:$2}),"

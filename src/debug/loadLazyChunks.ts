@@ -31,9 +31,7 @@ export async function loadLazyChunks() {
             const lazyChunks = factoryCode.matchAll(LazyChunkRegex);
             const validChunkGroups = new Set<[chunkIds: number[], entryPoint: number]>();
 
-            // Workaround for a chunk that depends on the ChannelMessage component but may be be force loaded before
-            // the chunk containing the component
-            const shouldForceDefer = factoryCode.includes(".Messages.GUILD_FEED_UNFEATURE_BUTTON_TEXT");
+            const shouldForceDefer = false;
 
             await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
                 const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Webpack.ChunkIdsRegex)).map(m => Number(m[1])) : [];

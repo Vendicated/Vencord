@@ -16,6 +16,9 @@ importers:
 
   .:
     dependencies:
+      '@intrnl/xxhash64':
+        specifier: ^0.1.2
+        version: 0.1.2
       '@sapphi-red/web-noise-suppressor':
         specifier: 0.3.5
         version: 0.3.5
@@ -536,6 +539,9 @@ packages:
   '@humanwhocodes/retry@0.3.0':
     resolution: {integrity: sha512-d2CGZR2o7fS6sWB7DG/3a95bGKQyHMACZ5aW8qGkkqQpUoZV6C0X7Pc7l4ZNMZkfNBf4VWNe9E1jRsf0G146Ew==}
     engines: {node: '>=18.18'}
+
+  '@intrnl/xxhash64@0.1.2':
+    resolution: {integrity: sha512-1+lx7j99fdph+uy3EnjQyr39KQZ7LP56+aWOr6finJWpgYpvb7XrhFUqDwnEk/wpPC98nCjAT6RulpW3crWjlg==}
 
   '@jridgewell/gen-mapping@0.3.5':
     resolution: {integrity: sha512-IzL8ZoEDIBRWEzlCcRhOaCupYyN5gdIK+Q6fbFdPDg6HqX6jpkItn7DFIpW9LQzXG6Df9sA7+OKnq0qlz/GaQg==}
@@ -2938,6 +2944,8 @@ snapshots:
   '@humanwhocodes/module-importer@1.0.1': {}
 
   '@humanwhocodes/retry@0.3.0': {}
+
+  '@intrnl/xxhash64@0.1.2': {}
 
   '@jridgewell/gen-mapping@0.3.5':
     dependencies:

@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { runtimeHashMessageKey } from "@utils/intlHash";
 import type { Channel } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
@@ -56,7 +57,10 @@ export const { match, P }: Pick<typeof import("ts-pattern"), "match" | "P"> = ma
 
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
-export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
+export const i18n = mapMangledModuleLazy('defaultLocale:"en-US"', {
+    intl: filters.byProps("string", "format"),
+    t: filters.byProps(runtimeHashMessageKey("DISCORD"))
+});
 
 export let SnowflakeUtils: t.SnowflakeUtils;
 waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
@@ -131,7 +135,7 @@ export const UserUtils = {
 
 export const UploadManager = findByPropsLazy("clearAll", "addFile");
 export const UploadHandler = {
-    promptToUpload: findByCodeLazy(".ATTACHMENT_TOO_MANY_ERROR_TITLE,") as (files: File[], channel: Channel, draftType: Number) => void
+    promptToUpload: findByCodeLazy("#{intl::ATTACHMENT_TOO_MANY_ERROR_TITLE}") as (files: File[], channel: Channel, draftType: Number) => void
 };
 
 export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetImage") as {

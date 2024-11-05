@@ -27,7 +27,7 @@ export default definePlugin({
     authors: [Devs.D3SOX, Devs.Nickyux],
     patches: [
         {
-            find: ".Messages.GUILD_OWNER,",
+            find: "#{intl::GUILD_OWNER}",
             replacement: {
                 match: /,isOwner:(\i),/,
                 replace: ",_isOwner:$1=$self.isGuildOwner(e),"

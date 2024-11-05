@@ -25,8 +25,9 @@ import ThemesTab from "@components/VencordSettings/ThemesTab";
 import UpdaterTab from "@components/VencordSettings/UpdaterTab";
 import VencordTab from "@components/VencordSettings/VencordTab";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { i18n, React } from "@webpack/common";
+import { React } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
@@ -70,7 +71,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
+            find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: {
                 match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.\i\).*?(\i\.\i)\.open\()/,
                 replace: "$2.open($1);return;"
@@ -150,11 +151,12 @@ export default definePlugin({
 
         try {
             const names = {
-                top: i18n.Messages.USER_SETTINGS,
-                aboveNitro: i18n.Messages.BILLING_SETTINGS,
-                belowNitro: i18n.Messages.APP_SETTINGS,
-                aboveActivity: i18n.Messages.ACTIVITY_SETTINGS
+                top: getIntlMessage("USER_SETTINGS"),
+                aboveNitro: getIntlMessage("BILLING_SETTINGS"),
+                belowNitro: getIntlMessage("APP_SETTINGS"),
+                aboveActivity: getIntlMessage("ACTIVITY_SETTINGS")
             };
+
             return header === names[settingsLocation];
         } catch {
             return firstChild === "PREMIUM";

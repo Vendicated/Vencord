@@ -26,7 +26,7 @@ export default definePlugin({
     description: "Adds Startup Timings to the Settings menu",
     authors: [Devs.Megu],
     patches: [{
-        find: "Messages.ACTIVITY_SETTINGS",
+        find: "#{intl::ACTIVITY_SETTINGS}",
         replacement: {
             match: /(?<=}\)([,;])(\i\.settings)\.forEach.+?(\i)\.push.+}\)}\))/,
             replace: (_, commaOrSemi, settings, elements) => "" +

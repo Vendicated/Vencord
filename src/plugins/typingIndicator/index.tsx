@@ -21,9 +21,10 @@ import "./style.css";
 import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, i18n, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "../typingTweaks";
 
@@ -75,21 +76,21 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
     switch (typingUsersArray.length) {
         case 0: break;
         case 1: {
-            tooltipText = i18n.Messages.ONE_USER_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]) });
+            tooltipText = getIntlMessage("ONE_USER_TYPING", { a: getDisplayName(guildId, typingUsersArray[0]) });
             break;
         }
         case 2: {
-            tooltipText = i18n.Messages.TWO_USERS_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]) });
+            tooltipText = getIntlMessage("TWO_USERS_TYPING", { a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]) });
             break;
         }
         case 3: {
-            tooltipText = i18n.Messages.THREE_USERS_TYPING.format({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: getDisplayName(guildId, typingUsersArray[2]) });
+            tooltipText = getIntlMessage("THREE_USERS_TYPING", { a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), c: getDisplayName(guildId, typingUsersArray[2]) });
             break;
         }
         default: {
             tooltipText = Settings.plugins.TypingTweaks.enabled
                 ? buildSeveralUsers({ a: getDisplayName(guildId, typingUsersArray[0]), b: getDisplayName(guildId, typingUsersArray[1]), count: typingUsersArray.length - 2 })
-                : i18n.Messages.SEVERAL_USERS_TYPING;
+                : getIntlMessage("SEVERAL_USERS_TYPING");
             break;
         }
     }

@@ -36,7 +36,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "BAN_CONFIRM_TITLE.",
+            find: "#{intl::BAN_CONFIRM_TITLE}",
             replacement: {
                 match: /src:\i\("?\d+"?\)/g,
                 replace: "src:$self.source"

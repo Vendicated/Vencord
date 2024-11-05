@@ -18,9 +18,10 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ExpandableHeader } from "@components/ExpandableHeader";
+import { getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
-import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
+import { PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
 import type { Guild, GuildMember } from "discord-types/general";
 
 import { PermissionsSortOrder, settings } from "..";
@@ -105,7 +106,7 @@ function UserPermissionsComponent({ guild, guildMember, forceOpen = false }: { g
                 permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
             });
 
-            const OWNER = i18n.Messages.GUILD_OWNER || "Server Owner";
+            const OWNER = getIntlMessage("GUILD_OWNER") || "Server Owner";
             userPermissions.push({
                 permission: OWNER,
                 roleName: "Owner",

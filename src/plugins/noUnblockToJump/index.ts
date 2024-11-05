@@ -28,21 +28,21 @@ export default definePlugin({
         {
             find: '.id,"Search Results"',
             replacement: {
-                match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}UNBLOCK_TO_JUMP_TITLE)/,
+                match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,
                 replace: "if(false)$1"
             }
         },
         {
             find: "renderJumpButton()",
             replacement: {
-                match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}UNBLOCK_TO_JUMP_TITLE)/,
+                match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,
                 replace: "if(false)$1"
             }
         },
         {
             find: "flash:!0,returnMessageId",
             replacement: {
-                match: /.\?(.{1,10}\.show\({.{1,50}UNBLOCK_TO_JUMP_TITLE)/,
+                match: /.\?(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,
                 replace: "false?$1"
             }
         }

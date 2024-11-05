@@ -7,10 +7,11 @@
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
-import { ComponentDispatch, FocusLock, i18n, Menu, useEffect, useRef } from "@webpack/common";
+import { ComponentDispatch, FocusLock, Menu, useEffect, useRef } from "@webpack/common";
 import type { HTMLAttributes, ReactElement } from "react";
 
 import PluginsSubmenu from "./PluginsSubmenu";
@@ -111,7 +112,7 @@ export default definePlugin({
             predicate: () => settings.store.disableFade
         },
         { // Load menu TOC eagerly
-            find: "Messages.USER_SETTINGS_WITH_BUILD_OVERRIDE.format",
+            find: "#{intl::USER_SETTINGS_WITH_BUILD_OVERRIDE}",
             replacement: {
                 match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?null!=\i&&.{0,100}?(await Promise\.all[^};]*?\)\)).*?,(?=\1\(this)/,
                 replace: "$&(async ()=>$2)(),"
@@ -119,7 +120,7 @@ export default definePlugin({
             predicate: () => settings.store.eagerLoad
         },
         { // Settings cog context menu
-            find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
+            find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
             replacement: [
                 {
                     match: /(EXPERIMENTS:.+?)(\(0,\i.\i\)\(\))(?=\.filter\(\i=>\{let\{section:\i\}=)/,
@@ -159,7 +160,7 @@ export default definePlugin({
             if (item.section === "HEADER") {
                 items.push({ label: item.label, items: [] });
             } else if (item.section === "DIVIDER") {
-                items.push({ label: i18n.Messages.OTHER_OPTIONS, items: [] });
+                items.push({ label: getIntlMessage("OTHER_OPTIONS"), items: [] });
             } else {
                 items.at(-1)!.items.push(item);
             }

@@ -108,10 +108,10 @@ interface ProfileModalProps {
     isTryItOutFlow: boolean;
 }
 
-const ColorPicker = findComponentByCodeLazy<ColorPickerProps>(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
+const ColorPicker = findComponentByCodeLazy<ColorPickerProps>("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", ".BACKGROUND_PRIMARY)");
 const ProfileModal = findComponentByCodeLazy<ProfileModalProps>("isTryItOutFlow:", "pendingThemeColors:", "pendingAvatarDecoration:", "EDIT_PROFILE_BANNER");
 
-const requireColorPicker = extractAndLoadChunksLazy(["USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON.format"], /createPromise:\(\)=>\i\.\i(\("?.+?"?\)).then\(\i\.bind\(\i,"?(.+?)"?\)\)/);
+const requireColorPicker = extractAndLoadChunksLazy(["#{intl::USER_SETTINGS_PROFILE_COLOR_DEFAULT_BUTTON}"], /createPromise:\(\)=>\i\.\i(\("?.+?"?\)).then\(\i\.bind\(\i,"?(.+?)"?\)\)/);
 
 export default definePlugin({
     name: "FakeProfileThemes",
@@ -126,9 +126,9 @@ export default definePlugin({
             }
         },
         {
-            find: ".USER_SETTINGS_RESET_PROFILE_THEME",
+            find: "#{intl::USER_SETTINGS_RESET_PROFILE_THEME}",
             replacement: {
-                match: /RESET_PROFILE_THEME}\)(?<=color:(\i),.{0,500}?color:(\i),.{0,500}?)/,
+                match: /#{intl::USER_SETTINGS_RESET_PROFILE_THEME}\)}\)(?<=color:(\i),.{0,500}?color:(\i),.{0,500}?)/,
                 replace: "$&,$self.addCopy3y3Button({primary:$1,accent:$2})"
             }
         }

@@ -57,7 +57,7 @@ export default definePlugin({
     patches: [
         // Change the max volume for sliders to allow for values above 200
         ...[
-            ".Messages.USER_VOLUME",
+            "#{intl::USER_VOLUME}",
             "currentVolume:"
         ].map(find => ({
             find,

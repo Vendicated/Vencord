@@ -19,7 +19,6 @@
 export * from "./classes";
 export * from "./components";
 export * from "./fluxEvents";
-export * from "./i18nMessages";
 export * from "./menu";
 export * from "./stores";
 export * from "./utils";

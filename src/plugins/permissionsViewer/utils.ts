@@ -17,8 +17,9 @@
 */
 
 import { classNameFactory } from "@api/Styles";
+import { getIntlMessage } from "@utils/discord";
 import { wordsToTitle } from "@utils/text";
-import { GuildStore, i18n, Parser } from "@webpack/common";
+import { GuildStore, Parser } from "@webpack/common";
 import { Guild, GuildMember, Role } from "discord-types/general";
 import type { ReactNode } from "react";
 
@@ -44,7 +45,7 @@ const PermissionKeyMap = {
 export function getPermissionString(permission: string) {
     permission = PermissionKeyMap[permission] || permission;
 
-    return i18n.Messages[permission] ||
+    return getIntlMessage(permission) ||
         // shouldn't get here but just in case
         formatPermissionWithoutMatchingString(permission);
 }
@@ -58,7 +59,7 @@ export function getPermissionDescription(permission: string): ReactNode {
     else if (permission !== "STREAM")
         permission = PermissionKeyMap[permission] || permission;
 
-    const msg = i18n.Messages[`ROLE_PERMISSIONS_${permission}_DESCRIPTION`] as any;
+    const msg = getIntlMessage(`ROLE_PERMISSIONS_${permission}_DESCRIPTION`) as any;
     if (msg?.hasMarkdown)
         return Parser.parse(msg.message);
 

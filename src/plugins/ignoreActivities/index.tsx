@@ -260,9 +260,9 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.SETTINGS_GAMES_TOGGLE_OVERLAY",
+            find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
             replacement: {
-                match: /\.Messages\.SETTINGS_GAMES_TOGGLE_OVERLAY.+?}\(\),(?<={overlay:\i,.+?=(\i),.+?)(?=!(\i))/,
+                match: /#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}.+?}\(\),(?<={overlay:\i,.+?=(\i),.+?)(?=!(\i))/,
                 replace: (m, props, nowPlaying) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`
             }
         },

@@ -21,7 +21,6 @@ import type { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
 import type { FluxEvents } from "./fluxEvents";
-import { i18nMessages } from "./i18nMessages";
 
 export { FluxEvents };
 
@@ -146,19 +145,6 @@ export interface LocaleInfo {
     name: string;
     englishName: string;
     postgresLang: string;
-}
-
-export interface i18n {
-    getAvailableLocales(): Locale[];
-    getLanguages(): LocaleInfo[];
-    getDefaultLocale(): string;
-    getLocale(): string;
-    getLocaleInfo(): LocaleInfo;
-    setLocale(locale: string): void;
-
-    loadPromise: Promise<void>;
-
-    Messages: Record<i18nMessages, any>;
 }
 
 export interface Clipboard {
