@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
@@ -309,6 +309,7 @@ export default definePlugin({
                 case "OP":
                     return `${getIntlMessage("BOT_TAG_FORUM_ORIGINAL_POSTER")} • ${tagText}`;
                 case "BOT":
+                    if (Settings.plugins.NoAppsAllowed.enabled) return `BOT • ${tagText}`;
                     return `${getIntlMessage("APP_TAG")} • ${tagText}`;
                 default:
                     return tagText;
