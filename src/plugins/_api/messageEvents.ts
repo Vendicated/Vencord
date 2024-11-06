@@ -25,7 +25,7 @@ export default definePlugin({
     authors: [Devs.Arjix, Devs.hunt, Devs.Ven],
     patches: [
         {
-            find: ".Messages.EDIT_TEXTAREA_HELP",
+            find: "#{intl::EDIT_TEXTAREA_HELP}",
             replacement: {
                 match: /(?<=,channel:\i\}\)\.then\().+?(?=return \i\.content!==this\.props\.message\.content&&\i\((.+?)\))/,
                 replace: (match, args) => "" +
