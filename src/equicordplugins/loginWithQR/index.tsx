@@ -59,7 +59,7 @@ export default definePlugin({
             replacement: {
                 // Find the Edit User Profile button and insert our custom button.
                 // A bit jank, but whatever
-                match: /,(.{0,20}\.Button,.{0,100}#{intl::USER_SETTINGS_EDIT_USER_PROFILE}\)}\))/,
+                match: /,(\(.{1,90}#{intl::USER_SETTINGS_EDIT_USER_PROFILE}\)}\))/,
                 replace: ",$self.insertScanQrButton($1)",
             },
         },

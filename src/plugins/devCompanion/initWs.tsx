@@ -282,11 +282,11 @@ export function initWs(isManual = false) {
                 const { find, replacement } = data as PatchData;
 
                 let candidates;
-                if (data.findType === FindType.STRING)
-                    candidates = search(find.toString());
+                if (data.findType === FindType.REGEX)
+                    candidates = search(...mkRegexFind(find));
 
                 else
-                    candidates = search(...mkRegexFind(find));
+                    candidates = search(find.toString());
 
                 // const candidates = search(find);
                 const keys = Object.keys(candidates);
