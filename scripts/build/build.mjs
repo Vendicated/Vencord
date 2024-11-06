@@ -216,7 +216,7 @@ await Promise.all([
         ...nodeCommonOpts,
         entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/main/index.ts")],
         outfile: "dist/equibop/main.js",
-        footer: { js: "//# sourceURL=EquicordMain\n" + sourceMapFooter("main") },
+        footer: { js: "//# sourceURL=VencordMain\n" + sourceMapFooter("main") },
         sourcemap,
         define: {
             ...defines,
@@ -235,12 +235,11 @@ await Promise.all([
         outfile: "dist/equibop/renderer.js",
         format: "iife",
         target: ["esnext"],
-        footer: { js: "//# sourceURL=EquicordRenderer\n" + sourceMapFooter("renderer") },
+        footer: { js: "//# sourceURL=VencordRenderer\n" + sourceMapFooter("renderer") },
         globalName: "Vencord",
         sourcemap,
         plugins: [
             globPlugins("equicordDesktop"),
-            globPlugins("vencordDesktop"),
             ...commonOpts.plugins
         ],
         define: {
@@ -254,7 +253,7 @@ await Promise.all([
         ...nodeCommonOpts,
         entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/preload.ts")],
         outfile: "dist/equibop/preload.js",
-        footer: { js: "//# sourceURL=EquicordPreload\n" + sourceMapFooter("preload") },
+        footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
         sourcemap,
         define: {
             ...defines,
