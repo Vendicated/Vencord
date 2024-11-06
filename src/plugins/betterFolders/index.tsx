@@ -275,16 +275,16 @@ export default definePlugin({
     },
 
     makeGuildsBarGuildListFilter(isBetterFolders: boolean) {
-        try {
             return child => {
                 if (isBetterFolders) {
-                    return child?.props?.["aria-label"] === getIntlMessage("SERVERS");
+                    try {
+                        return child?.props?.["aria-label"] === getIntlMessage("SERVERS");
+                    } catch (e) {
+                        console.error(e);
+                    }
                 }
                 return true;
             };
-        } catch {
-            return true;
-        }
     },
 
     makeGuildsBarTreeFilter(isBetterFolders: boolean) {
