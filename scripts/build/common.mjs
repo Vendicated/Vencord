@@ -140,8 +140,8 @@ export const globPlugins = kind => ({
                             (target === "web" && kind === "discordDesktop") ||
                             (target === "desktop" && kind === "web") ||
                             (target === "discordDesktop" && kind !== "discordDesktop") ||
-                            (target === "vencordDesktop" && kind !== "vencordDesktop") ||
-                            (target === "equicordDesktop" && kind !== "equicordDesktop");
+                            (target === "vencordDesktop" && kind !== "vencordDesktop" && kind !== "equicordDesktop") ||
+                            (target === "equicordDesktop" && kind !== "equicordDesktop" && kind !== "vencordDesktop");
 
                         if (excluded) {
                             const name = await resolvePluginName(fullDir, file);
