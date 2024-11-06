@@ -36,7 +36,13 @@ export default definePlugin({
             id: "ThemeSection",
         });
 
-        customSettingsSections.push(ThemeSection);
+        customSettingsSections.push(_ => ({
+            section: "ThemeLibrary",
+            label: "Theme Library",
+            searchableTitles: ["Theme Library"],
+            element: require("./components/ThemeTab").default,
+            id: "ThemeSection",
+        }));
     },
 
     stop() {
