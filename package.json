@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.10.5",
+    "version": "1.10.6",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -35,6 +35,7 @@
         "testTsc": "tsc --noEmit"
     },
     "dependencies": {
+        "@intrnl/xxhash64": "^0.1.2",
         "@sapphi-red/web-noise-suppressor": "0.3.5",
         "@vap/core": "0.0.12",
         "@vap/shiki": "0.10.5",
