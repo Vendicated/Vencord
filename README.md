@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>146 additional plugins</summary>
+<summary>147 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -158,7 +158,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - None At This Time
 
 ### Vesktop & Equibop Only
-- None At This Time
+- ScreenRecorder by AutumnVN
 
 ### Discord Desktop Only
 - MediaDownloader by Colorman

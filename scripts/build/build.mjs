@@ -187,6 +187,7 @@ await Promise.all([
         sourcemap,
         plugins: [
             globPlugins("vencordDesktop"),
+            globPlugins("equicordDesktop"),
             ...commonOpts.plugins
         ],
         define: {
@@ -239,6 +240,7 @@ await Promise.all([
         sourcemap,
         plugins: [
             globPlugins("equicordDesktop"),
+            globPlugins("vencordDesktop"),
             ...commonOpts.plugins
         ],
         define: {

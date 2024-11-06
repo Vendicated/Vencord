@@ -301,6 +301,7 @@ export default definePlugin({
             const [tagName, variant] = passedTagName.split("-");
             if (!passedTagName) return getIntlMessage("APP_TAG");
             const tag = tags.find(({ name }) => tagName === name);
+            if (!tag && Settings.plugins.NoAppsAllowed.enabled) return "BOT";
             if (!tag) return getIntlMessage("APP_TAG");
             if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return getIntlMessage("APP_TAG");
 

@@ -197,8 +197,8 @@ function ExcludedPluginsList({ search }: { search: string; }) {
     const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop" | "equicordDesktop" | "desktop" | "dev", string> = {
         desktop: "Discord Desktop app or Vesktop",
         discordDesktop: "Discord Desktop app",
-        vencordDesktop: "Vesktop app",
-        equicordDesktop: "Equibop app",
+        vencordDesktop: "Vesktop app & Equibop app",
+        equicordDesktop: "Vesktop app & Equibop app",
         web: "Vesktop & Equibop apps as well as the Web version of Discord",
         dev: "Developer version of Equicord"
     };
