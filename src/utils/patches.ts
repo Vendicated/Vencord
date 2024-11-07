@@ -27,6 +27,8 @@ export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
         const isString = typeof match === "string";
         const hasSpecialChars = !Number.isNaN(Number(hashed[0])) || hashed.includes("+") || hashed.includes("/");
 
+        if (modifier === "hash") return hashed;
+
         if (hasSpecialChars) {
             return isString
                 ? `["${hashed}"]`
