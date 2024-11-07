@@ -14,6 +14,7 @@
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { LogIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
@@ -72,6 +73,7 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
 
     children.push(
         <Menu.MenuItem
+            icon={LogIcon}
             label={lbl}
             id="vc-hu"
             action={action}
@@ -215,6 +217,7 @@ export default definePlugin({
                     className={classes(RoleButtonClasses.button, RoleButtonClasses.icon, RoleButtonClasses.banner)}
                     innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.icon, RoleButtonClasses.banner)}
                 >
+                    <LogIcon height={16} width={16} />
                     {lbl} {/* Display the label */}
                 </Button>
             </TooltipContainer>
