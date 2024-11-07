@@ -91,7 +91,7 @@ class Uwuifier {
     }
 
     uwuifySentence(sentence: string): string {
-        let uwuifiedString = sentence;
+        let uwuifiedString = owoify(sentence);
         uwuifiedString = this.uwuifyWords(uwuifiedString);
         uwuifiedString = this.uwuifyExclamations(uwuifiedString);
         uwuifiedString = this.uwuifySpaces(uwuifiedString);
@@ -100,3 +100,75 @@ class Uwuifier {
 }
 
 export default Uwuifier;
+function owoify(text) {
+    const wordMap = {
+        love: 'wuv',
+        mr: 'mistuh',
+        dog: 'doggo',
+        cat: 'kitteh',
+        hello: 'henwo',
+        hell: 'heck',
+        fuck: 'fwick',
+        fuk: 'fwick',
+        shit: 'shoot',
+        friend: 'fwend',
+        stop: 'stawp',
+        god: 'gosh',
+        dick: 'peepee',
+        penis: 'peepee',
+        damn: 'darn'
+    };
+    const prefixes = [
+        'OwO',
+        '*nuzzles*',
+        '*blushes*',
+        '*giggles*',
+        'hehe'
+    ];
+    const suffixes = [
+        '(ﾉ´ з `)ノ',
+        '( ´ ▽ ` ).｡ｏ♡',
+        '(´,,•ω•,,)♡',
+        '(*≧▽≦)',
+        'ɾ⚈▿⚈ɹ',
+        '( ﾟ∀ ﾟ)',
+        '( ・ ̫・)',
+        '( •́ .̫ •̀ )',
+        '(▰˘v˘▰)',
+        '(・ω・)',
+        '✾(〜 ☌ω☌)〜✾',
+        '(ᗒᗨᗕ)',
+        '(・`ω´・)',
+        ':3',
+        '>:3',
+        'hehe',
+        'xox',
+        '>3<',
+        'murr~',
+        'UwU',
+        '*gwomps*'
+    ];
+
+    // Word wepwacement
+    text = text.replace(/\b\w+\b/g, word => {
+        const lower = word.toLowerCase();
+        return wordMap[lower] ? wordMap[lower] : word;
+    });
+
+    // `w` fow `l` and `r`
+    text = text.replace(/[rl]/gi, match =>
+        match.charCodeAt(0) < 97 ? 'W' : 'w'
+    );
+
+    // Stuttew
+    text = text
+        .split(' ')
+        .map(word => (Math.random() < 0.1 ? `${word[0]}-${word}` : word))
+        .join(' ');
+
+    // Pwobabiwistic Pwefix and Suffix
+    if (Math.random() < 0.05) text = `${prefixes[Math.floor(Math.random() * prefixes.length)]} ${text}`;
+    if (Math.random() < 0.15) text = `${text} ${suffixes[Math.floor(Math.random() * suffixes.length)]}`;
+
+    return text;
+}
