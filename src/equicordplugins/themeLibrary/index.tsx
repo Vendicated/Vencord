@@ -28,15 +28,13 @@ export default definePlugin({
             }
         ).customSections;
 
-        const ThemeSection = () => ({
+        customSettingsSections.push(_ => ({
             section: "ThemeLibrary",
             label: "Theme Library",
             searchableTitles: ["Theme Library"],
             element: require("./components/ThemeTab").default,
             id: "ThemeSection",
-        });
-
-        customSettingsSections.push(ThemeSection);
+        }));
     },
 
     stop() {

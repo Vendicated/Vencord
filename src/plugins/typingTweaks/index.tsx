@@ -134,7 +134,7 @@ export default definePlugin({
         let element = 0;
 
         return children.map(c =>
-            c.type === "strong"
+            c.type === "strong" || (typeof c !== "string" && !React.isValidElement(c))
                 ? <TypingUser {...props} user={users[element++]} />
                 : c
         );

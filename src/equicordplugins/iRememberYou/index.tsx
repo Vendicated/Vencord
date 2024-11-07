@@ -366,8 +366,13 @@ export default definePlugin({
         );
         data.storageAutoSaveProtocol();
 
-        // @ts-ignore
-        Vencord.Plugins.plugins.Settings.customSections.push(ID => ({
+        const customSettingsSections = (
+            Vencord.Plugins.plugins.Settings as any as {
+                customSections: ((ID: Record<string, unknown>) => any)[];
+            }
+        ).customSections;
+
+        customSettingsSections.push(_ => ({
             section: "iremeberyou.display-data",
             label: "IRememberYou",
             element: () => ui.toElement(data.usersCollection),

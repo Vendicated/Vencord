@@ -103,42 +103,49 @@ export default definePlugin({
             {
                 section: "EquicordSettings",
                 label: "Equicord",
+                searchableTitles: ["Equicord", "Settings", "Equicord Settings"],
                 element: VencordTab,
                 className: "vc-settings"
             },
             {
                 section: "EquicordPlugins",
                 label: "Plugins",
+                searchableTitles: ["Plugins"],
                 element: PluginsTab,
                 className: "vc-plugins"
             },
             {
                 section: "EquicordThemes",
                 label: "Themes",
+                searchableTitles: ["Themes"],
                 element: require("@components/ThemeSettings/ThemesTab").default,
                 className: "vc-themes"
             },
             !IS_UPDATER_DISABLED && {
                 section: "EquicordUpdater",
                 label: "Updater",
+                searchableTitles: ["Updater"],
                 element: UpdaterTab,
                 className: "vc-updater"
             },
             {
                 section: "EquicordCloud",
                 label: "Cloud",
+                searchableTitles: ["Cloud"],
                 element: CloudTab,
                 className: "vc-cloud"
             },
             {
                 section: "EquicordSettingsSync",
                 label: "Backup & Restore",
+                searchableTitles: ["Backup & Restore"],
                 element: BackupAndRestoreTab,
                 className: "vc-backup-restore"
             },
             {
                 section: "EquicordPatchHelper",
                 label: "Patch Helper",
+                searchableTitles: ["Patch Helper"],
                 element: PatchHelperTab,
                 className: "vc-patch-helper"
             },

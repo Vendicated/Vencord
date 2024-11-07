@@ -21,11 +21,13 @@ import { Patch, PatchReplacement, ReplaceFn } from "./types";
 
 export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
     let partialCanon = typeof match === "string" ? match : match.source;
-    partialCanon = partialCanon.replaceAll(/#{intl::([A-Za-z_$][\w$]*)}/g, (_, key) => {
-        const hashed = runtimeHashMessageKey(key);
+    partialCanon = partialCanon.replaceAll(/#{intl::([\w$+/]*)(?:::(\w+))?}/g, (_, key, modifier) => {
+        const hashed = modifier === "raw" ? key : runtimeHashMessageKey(key);
 
         const isString = typeof match === "string";
         const hasSpecialChars = !Number.isNaN(Number(hashed[0])) || hashed.includes("+") || hashed.includes("/");
+
+        if (modifier === "hash") return hashed;
 
         if (hasSpecialChars) {
             return isString
@@ -40,7 +42,7 @@ export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
         return partialCanon as T;
     }
 
-    const canonSource = partialCanon.replaceAll(String.raw`\i`, String.raw`(?:[A-Za-z_$][\w$]*)`);
+    const canonSource = partialCanon.replaceAll("\\i", String.raw`(?:[A-Za-z_$][\w$]*)`);
     return new RegExp(canonSource, match.flags) as T;
 }
 

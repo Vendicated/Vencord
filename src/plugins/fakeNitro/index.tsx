@@ -928,6 +928,9 @@ export default definePlugin({
                     const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
                     url.searchParams.set("size", s.emojiSize.toString());
                     url.searchParams.set("name", emoji.name);
+                    if (emoji.animated) {
+                        url.pathname = url.pathname.replace(".webp", ".gif");
+                    }
 
                     const linkText = s.hyperLinkText.replaceAll("{{NAME}}", emoji.name);
 
