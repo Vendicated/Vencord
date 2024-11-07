@@ -79,7 +79,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     authors: [Devs.RedCrafter07],
-    description: "Quickly toggle the Vencord themes with a hotkey",
+    description: "Toggle your themes with a hotkey",
     name: "ThemeToggler",
     async start() {
         currentKey = settings.store.hotkey;
