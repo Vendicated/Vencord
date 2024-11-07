@@ -4,13 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/**
- * I got told to create a new plugin for that!
- * I had the option to add this as a new* feature for src/plugins/noBlockedMessages
- * But I also didnt like the name noBlockedMessages as this does nothing about messages. Only transforms a block to a "real" block.
- * I asked if I should add this as a feature and maybe rename the plugin to noBlockedUsers but this was unofficially denied (not by a mantainer).
- */
-
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
