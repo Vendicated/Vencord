@@ -20,17 +20,9 @@ const { isLocalMute } = findByPropsLazy("isLocalMute");
 const { addRelationship } = findByPropsLazy("addRelationship");
 const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
 
+const blockedUserIds: Set<string> = new Set();
+let blockedUserCount = 0;
 
-/**
- * Adds a "Mute and Block" or "Unmute and Unblock" item to user context menus.
- *
- * If the user is blocked, the action will unmute and unblock the user. Otherwise,
- * the action will mute and block the user.
- *
- * @param children The menu items to add the new item to.
- * @param props The props passed to the user context menu.
- * @returns The modified children with the new item added.
- */
 const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { user?: User, onClose(): void; }) => {
     if (!user) return;
 
@@ -38,27 +30,16 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
     const isBlocked = RelationshipStore.isBlocked(user.id);
     const lbl = isBlocked ? "Unmute and Unblock" : "Mute and Block";
 
-    /**
-     * Handles the logic for toggling mute and block/unblock when the user
-     * clicks the "Mute and Block" or "Unmute and Unblock" context menu item.
-     *
-     * If the user is currently blocked, the action will unmute and unblock.
-     * Otherwise, the action will mute and block.
-     *
-     * @private
-     */
     const action = () => {
         // Toggle mute and handle block/unblock logic
         if (isBlocked) {
-            // Logic to unblock the user
             if (isLocalMute(user.id)) {
-                toggleLocalMute(user.id); // Unmute the user
+                toggleLocalMute(user.id);
             }
             unblockUser(user);
         } else {
-            // Logic to block the user
             if (!isLocalMute(user.id)) {
-                toggleLocalMute(user.id); // Mute the user
+                toggleLocalMute(user.id);
             }
             blockUser(user);
         }
@@ -74,16 +55,11 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
     );
 };
 
-/**
- * Blocks a user by adding a relationship with type 2.
- *
- * This function updates the relationship store to mark the specified
- * user as blocked. The block action is associated with the "ContextMenu"
- * location.
- *
- * @param user The user to block.
- */
 function blockUser(user: User) {
+    if (!isLocalMute(user.id)) {
+        toggleLocalMute(user.id);
+    }
+
     addRelationship({
         userId: user.id, type: 2, context: {
             location: "ContextMenu"
@@ -91,17 +67,11 @@ function blockUser(user: User) {
     });
 }
 
-
-/**
- * Unblocks a user by adding a relationship with type 0.
- *
- * This function updates the relationship store to mark the specified
- * user as unblocked. The unblock action is associated with the "ContextMenu"
- * location.
- *
- * @param user The user to unblock.
- */
 function unblockUser(user: User) {
+    if (isLocalMute(user.id)) {
+        toggleLocalMute(user.id);
+    }
+
     addRelationship({
         userId: user.id, type: 0, context: {
             location: "ContextMenu"
@@ -128,55 +98,41 @@ export default definePlugin({
         "user-profile-actions": userContextPatch,
         "user-profile-overflow-menu": userContextPatch
     },
-    /**
-     * Attaches a listener to the RelationshipStore and runs the automatic muted user check once.
-     *
-     * The listener is needed to detect when a user is blocked and should be muted.
-     * The initial function call is needed to mute users that are already blocked when the plugin is started.
-     */
     start() {
         RelationshipStore.addChangeListener(() => {
             this.automaticMuteBlockedUsers();
         });
         this.automaticMuteBlockedUsers();
     },
-    /**
-     * Automatically mutes all blocked users and unmutes all unblocked users.
-     *
-     * This function is called whenever the RelationshipStore changes. It is
-     * also called once when the plugin is started. It is responsible for
-     * updating the mute status of users based on their blocked status.
-     *
-     * @private
-     */
     automaticMuteBlockedUsers() {
         const { autoMuteBlocked } = settings.store;
         if (!autoMuteBlocked) return;
 
         // Get all relationships and filter for blocked users
         const blockedIds = Object.entries(RelationshipStore.getRelationships())
-            .filter(([_, v]) => v === 2) // 2 represents blocked
-            .map(([k]) => UserStore.getUser(k).id); // Get user IDs of blocked users
+            .filter(([_, v]) => v === 2)
+            .map(([k]) => UserStore.getUser(k).id);
 
         // Mute blocked users
         for (const ID of blockedIds) {
             if (!isLocalMute(ID)) {
                 toggleLocalMute(ID);
             }
+            blockedUserIds.add(ID);
         }
 
-        // Check for unblocked users
-        const allUsers = UserStore.getUsers(); // Get all users as a Record<string, User>
-        const allUserIds = Object.keys(allUsers);
+        if (blockedUserCount > blockedIds.length) {
+            const unblockedUsers = [...blockedUserIds].filter(id => !blockedIds.includes(id));
 
-        for (const ID of allUserIds) {
-            if (!RelationshipStore.isBlocked(ID)) {
-                // Unmute the user if they are unblocked
+            for (const ID of unblockedUsers) {
                 if (isLocalMute(ID)) {
                     toggleLocalMute(ID);
                 }
+                blockedUserIds.delete(ID);
             }
         }
+
+        blockedUserCount = blockedIds.length;
     },
     BlockUnblockButton: ErrorBoundary.wrap(({ user }: { user: User; }) => {
         if (!user) return null; // Return null if no user is provided
@@ -192,13 +148,13 @@ export default definePlugin({
                         if (isBlocked) {
                             // If the user is blocked, unmute and unblock
                             if (isLocalMute(user.id)) {
-                                toggleLocalMute(user.id); // Unmute the user
+                                toggleLocalMute(user.id);
                             }
                             unblockUser(user);
                         } else {
                             // If the user is not blocked, mute and block
                             if (!isLocalMute(user.id)) {
-                                toggleLocalMute(user.id); // Mute the user
+                                toggleLocalMute(user.id);
                             }
                             blockUser(user);
                         }
