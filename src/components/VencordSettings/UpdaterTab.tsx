@@ -163,6 +163,9 @@ function Updatable(props: CommonProps) {
                 <>
                     <Forms.FormText>Failed to check updates. Check the console for more info</Forms.FormText>
                     <ErrorCard style={{ padding: "1em" }}>
+                        <p>{updateError.stderr || updateError.stdout || "An unknown error occurred"}</p>
+                    </ErrorCard>
+                </>
             ) : (
                 <Forms.FormText className={Margins.bottom8}>
                     {isOutdated ? (updates.length === 1 ? "There is 1 Update" : `There are ${updates.length} Updates`) : "Up to Date!"}
