@@ -24,7 +24,7 @@ import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
+import { GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "../typingTweaks";
 
@@ -44,7 +44,7 @@ function getDisplayName(guildId: string, userId: string) {
     return GuildMemberStore.getNick(guildId, userId) ?? (user as any).globalName ?? user.username;
 }
 
-function TypingIndicator({ channelId }: { channelId: string; }) {
+function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: string; }) {
     const typingUsers: Record<string, number> = useStateFromStores(
         [TypingStore],
         () => ({ ...TypingStore.getTypingUsers(channelId) as Record<string, number> }),
@@ -57,7 +57,6 @@ function TypingIndicator({ channelId }: { channelId: string; }) {
         }
     );
     const currentChannelId: string = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getChannelId());
-    const guildId = ChannelStore.getChannel(channelId).guild_id;
 
     if (!settings.store.includeMutedChannels) {
         const isChannelMuted = UserGuildSettingsStore.isChannelMuted(guildId, channelId);
@@ -165,7 +164,7 @@ export default definePlugin({
             find: "UNREAD_IMPORTANT:",
             replacement: {
                 match: /\.name\),.{0,120}\.children.+?:null(?<=,channel:(\i).+?)/,
-                replace: "$&,$self.TypingIndicator($1.id)"
+                replace: "$&,$self.TypingIndicator($1.id,$1.getGuildId())"
             }
         },
         // Theads
@@ -174,14 +173,14 @@ export default definePlugin({
             find: "M11 9H4C2.89543 9 2 8.10457 2 7V1C2 0.447715 1.55228 0 1 0C0.447715 0 0 0.447715 0 1V7C0 9.20914 1.79086 11 4 11H11C11.5523 11 12 10.5523 12 10C12 9.44771 11.5523 9 11 9Z",
             replacement: {
                 match: /mentionsCount:\i.+?null(?<=channel:(\i).+?)/,
-                replace: "$&,$self.TypingIndicator($1.id)"
+                replace: "$&,$self.TypingIndicator($1.id,$1.getGuildId())"
             }
         }
     ],
 
-    TypingIndicator: (channelId: string) => (
+    TypingIndicator: (channelId: string, guildId: string) => (
         <ErrorBoundary noop>
-            <TypingIndicator channelId={channelId} />
+            <TypingIndicator channelId={channelId} guildId={guildId} />
         </ErrorBoundary>
     ),
 });
