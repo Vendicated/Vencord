@@ -28,8 +28,8 @@ import { Message } from "discord-types/general";
 const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 
 interface MessageDeleteProps {
-    // i18n message i18n.t["+FcYMz"] if deleted, with args
-    collapsedReason: () => any
+    // Internal intl message for BLOCKED_MESSAGE_COUNT
+    collapsedReason: () => any;
 }
 
 export default definePlugin({

@@ -130,6 +130,52 @@ export default definePlugin({
                 replace: ""
             }
         },
+        // Zustand section
+        {
+            find: "[DEPRECATED] Default export is deprecated. Instead use `import { create } from 'zustand'",
+            replacement: [
+                {
+                    match: /console\.warn\("\[DEPRECATED\] Default export is deprecated\. Instead use `import { create } from 'zustand'`\."\),/,
+                    replace: ""
+                },
+                {
+                    match: /&&console\.warn\("\[DEPRECATED\] Passing a vanilla store will be unsupported in a future version\. Instead use `import { useStore } from 'zustand'`\."\)/,
+                    replace: ""
+                },
+                {
+                    match: /console\.warn\("\[DEPRECATED\] Use `createWithEqualityFn` instead of `create` or use `useStoreWithEqualityFn` instead of `useStore`\. They can be imported from 'zustand\/traditional'\. https:\/\/github\.com\/pmndrs\/zustand\/discussions\/1937"\),/,
+                    replace: ""
+                }
+            ]
+        },
+        {
+            find: "[DEPRECATED] `getStorage`, `serialize` and `deserialize` options are deprecated. Use `storage` option instead.",
+            replacement: {
+                match: /console\.warn\("\[DEPRECATED\] `getStorage`, `serialize` and `deserialize` options are deprecated\. Use `storage` option instead\."\),/,
+                replace: ""
+            }
+        },
+        {
+            find: "[DEPRECATED] Default export is deprecated. Instead use import { createStore } from 'zustand/vanilla'.",
+            replacement: {
+                match: /console\.warn\("\[DEPRECATED\] Default export is deprecated\. Instead use import { createStore } from 'zustand\/vanilla'\."\),/,
+                replace: ""
+            }
+        },
+        {
+            find: "[DEPRECATED] `context` will be removed in a future version. Instead use `import { createStore, useStore } from 'zustand'`. See: https://github.com/pmndrs/zustand/discussions/1180.",
+            replacement: {
+                match: /console\.warn\("\[DEPRECATED\] `context` will be removed in a future version\. Instead use `import { createStore, useStore } from 'zustand'`\. See: https:\/\/github\.com\/pmndrs\/zustand\/discussions\/1180\."\);/,
+                replace: ""
+            }
+        },
+        {
+            find: "[DEPRECATED] Default export is deprecated. Instead use `import { shallow } from 'zustand/shallow'`.",
+            replacement: {
+                match: /console\.warn\("\[DEPRECATED\] Default export is deprecated\. Instead use `import { shallow } from 'zustand\/shallow'`\."\),/,
+                replace: ""
+            }
+        },
         // Patches discords generic logger function
         {
             find: "Σ:",
@@ -147,5 +193,5 @@ export default definePlugin({
                 replace: "$self.NoopLogger()"
             }
         }
-    ],
+    ]
 });
