@@ -24,12 +24,12 @@ import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { proxyLazy } from "@utils/lazy";
+import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, i18n, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import overlayStyle from "./deleteStyleOverlay.css?managed";
@@ -178,7 +178,7 @@ export default definePlugin({
                             isEdited={true}
                             isInline={false}
                         >
-                            <span className={styles.edited}>{" "}({i18n.Messages.MESSAGE_EDITED})</span>
+                            <span className={styles.edited}>{" "}({getIntlMessage("MESSAGE_EDITED")})</span>
                         </Timestamp>
                     </div>
                 ))}
@@ -312,9 +312,35 @@ export default definePlugin({
         );
     },
 
-    Messages: proxyLazy(() => ({
-        DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
-    })),
+    Messages: {
+        // DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
+        // TODO: find a better way to generate intl messages
+        DELETED_MESSAGE_COUNT: () => ({
+            ast: [[
+                6,
+                "count",
+                {
+                    "=0": ["No deleted messages"],
+                    one: [
+                        [
+                            1,
+                            "count"
+                        ],
+                        " deleted message"
+                    ],
+                    other: [
+                        [
+                            1,
+                            "count"
+                        ],
+                        " deleted messages"
+                    ]
+                },
+                0,
+                "cardinal"
+            ]]
+        })
+    },
 
     patches: [
         {
@@ -445,7 +471,7 @@ export default definePlugin({
 
         {
             // Message content renderer
-            find: "Messages.MESSAGE_EDITED,\")\"",
+            find: "#{intl::MESSAGE_EDITED}",
             replacement: [
                 {
                     // Render editHistory in the deepest div for message content
@@ -497,7 +523,7 @@ export default definePlugin({
         },
         {
             // Message group rendering
-            find: "Messages.NEW_MESSAGES_ESTIMATED_WITH_DATE",
+            find: "#{intl::NEW_MESSAGES_ESTIMATED_WITH_DATE}",
             replacement: [
                 {
                     match: /(\i).type===\i\.\i\.MESSAGE_GROUP_BLOCKED\|\|/,

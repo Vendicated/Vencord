@@ -18,9 +18,10 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { FluxDispatcher, i18n, useMemo } from "@webpack/common";
+import { FluxDispatcher, useMemo } from "@webpack/common";
 
 import FolderSideBar from "./FolderSideBar";
 
@@ -188,7 +189,7 @@ export default definePlugin({
                 // Disable expanding and collapsing folders transition in the normal GuildsBar sidebar
                 {
                     predicate: () => !settings.store.keepIcons,
-                    match: /(?<=\.Messages\.SERVER_FOLDER_PLACEHOLDER.+?useTransition\)\()/,
+                    match: /(?<=#{intl::SERVER_FOLDER_PLACEHOLDER}.+?useTransition\)\()/,
                     replace: "$self.shouldShowTransition(arguments[0])&&"
                 },
                 // If we are rendering the normal GuildsBar sidebar, we avoid rendering guilds from folders that are expanded
@@ -221,7 +222,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.DISCODO_DISABLED",
+            find: "#{intl::DISCODO_DISABLED}",
             predicate: () => settings.store.closeAllHomeButton,
             replacement: {
                 // Close all folders when clicking the home button
@@ -348,7 +349,7 @@ export default definePlugin({
     makeGuildsBarGuildListFilter(betterFoldersId: number) {
         return child => {
             if (betterFoldersId) {
-                return child?.props?.["aria-label"] === i18n.Messages.SERVERS;
+                return child?.props?.["aria-label"] === getIntlMessage("SERVERS");
             }
             return true;
         };
