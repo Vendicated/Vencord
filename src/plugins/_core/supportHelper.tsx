@@ -77,7 +77,7 @@ async function generateDebugInfoMessage() {
     const client = (() => {
         if (IS_DISCORD_DESKTOP) return `Discord Desktop v${DiscordNative.app.getVersion()}`;
         if (IS_VESKTOP) return `Vesktop v${VesktopNative.app.getVersion()}`;
-        if ("armcord" in window) return `ArmCord v${window.armcord.version}`;
+        if ("legcord" in window) return `Legcord v${window.legcord.version}`;
 
         // @ts-expect-error
         const name = typeof unsafeWindow !== "undefined" ? "UserScript" : "Web";
@@ -147,9 +147,9 @@ export default definePlugin({
     settings,
 
     patches: [{
-        find: ".BEGINNING_DM.format",
+        find: "#{intl::BEGINNING_DM}",
         replacement: {
-            match: /BEGINNING_DM\.format\(\{.+?\}\),(?=.{0,300}(\i)\.isMultiUserDM)/,
+            match: /#{intl::BEGINNING_DM},{.+?}\),(?=.{0,300}(\i)\.isMultiUserDM)/,
             replace: "$& $self.renderContributorDmWarningCard({ channel: $1 }),"
         }
     }],
