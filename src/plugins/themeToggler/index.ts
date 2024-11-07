@@ -21,15 +21,62 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Toasts, UserStore } from "@webpack/common";
 
-let themeEnabled = true;
-let currentKey = "F10";
+let themeEnabled = true; // check if theme is enabled to implement toggle functionality
+let currentKey = "F10"; // gets replaced by settings
 
-const keydown = (key: string) => {
+const keydown = (keys: string) => {
+    const components = checkKeyComponents(splitKeys(keys));
+    return handleKey(components);
+};
+
+const handleKey = (listener: ReturnType<typeof checkKeyComponents>) => {
     return async (e: KeyboardEvent) => {
+        const { key, ctrlKey, shiftKey, altKey } = e;
+
+        if (key.toLowerCase() !== listener.key.toLowerCase()) return;
+        if (listener.requiresCtrl && !ctrlKey) return;
+        if (listener.requiresShift && !shiftKey) return;
+        if (listener.requiresAlt && !altKey) return;
+
         themeEnabled = !themeEnabled;
-        // if key is F10
-        e.key === key &&
-            await toggleTheme();
+
+        await toggleTheme();
+    };
+};
+
+const splitKeys = (keys: string) => keys.split("+");
+
+const checkKeyComponents = (keys: string[]) => {
+    const mappedKeys = keys.map(k => {
+        let newK = k;
+        if (k.length === 1) newK = newK = k.toLowerCase();
+        if (k.length > 1) newK = newK.toUpperCase();
+
+        return newK;
+    });
+
+    const requiresShift = mappedKeys.includes("SHIFT");
+    const requiresCtrl = mappedKeys.includes("CTRL");
+    const requiresAlt = mappedKeys.includes("ALT");
+
+    if (requiresShift) {
+        const index = mappedKeys.findIndex(k => k === "SHIFT");
+        mappedKeys.splice(index, 1);
+    }
+    if (requiresCtrl) {
+        const index = mappedKeys.findIndex(k => k === "CTRL");
+        mappedKeys.splice(index, 1);
+    }
+    if (requiresAlt) {
+        const index = mappedKeys.findIndex(k => k === "ALT");
+        mappedKeys.splice(index, 1);
+    }
+
+    return {
+        requiresShift,
+        requiresCtrl,
+        requiresAlt,
+        key: mappedKeys[0]
     };
 };
 
