@@ -50,6 +50,8 @@ async function runMigrations() {
 
 export async function syncAndRunChecks() {
     await runMigrations();
+    if (UserStore.getCurrentUser() == null) return;
+
     const [oldGuilds, oldGroups, oldFriends] = await DataStore.getMany([
         guildsKey(),
         groupsKey(),
