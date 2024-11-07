@@ -123,7 +123,6 @@ export default definePlugin({
     description: `Automatically voice-mute blocked users for better visibility and manageability in your Discord experience. Transform normal blocks into "real" ones with ease, ensuring a smoother and more organized communication environment.`,
     authors: [Devs.notvexi],
     settings,
-    patches: [],
     contextMenus: {
         "user-context": userContextPatch,
         "user-profile-actions": userContextPatch,
