@@ -27,7 +27,7 @@ export default definePlugin({
     authors: [Devs.Nuckyz],
     patches: [
         {
-            find: ".Messages.BOT_CALL_IDLE_DISCONNECT",
+            find: "#{intl::BOT_CALL_IDLE_DISCONNECT_2}",
             replacement: {
                 match: /,?(?=\i\(this,"idleTimeout",new \i\.\i\))/,
                 replace: ";return;"

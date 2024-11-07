@@ -24,9 +24,9 @@ export default definePlugin({
     description: "API to add buttons to message popovers.",
     authors: [Devs.KingFish, Devs.Ven, Devs.Nuckyz],
     patches: [{
-        find: "Messages.MESSAGE_UTILITIES_A11Y_LABEL",
+        find: "#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",
         replacement: {
-            match: /\.jsx\)\((\i\.\i),\{label:\i\.\i\.Messages\.MESSAGE_ACTION_REPLY.{0,200}?"reply-self".{0,50}?\}\):null(?=,.+?message:(\i))/,
+            match: /\.jsx\)\((\i\.\i),\{label:\i\.\i\.string\(\i\.\i#{intl::MESSAGE_ACTION_REPLY}.{0,200}?"reply-self".{0,50}?\}\):null(?=,.+?message:(\i))/,
             replace: "$&,Vencord.Api.MessagePopover._buildPopoverElements($1,$2)"
         }
     }],

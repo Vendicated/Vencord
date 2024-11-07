@@ -67,7 +67,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".REPLY_QUOTE_MESSAGE_BLOCKED",
+            find: "#{intl::REPLY_QUOTE_MESSAGE_BLOCKED}",
             replacement: {
                 match: /\.onClickReply,.+?}\),(?=\i,\i,\i\])/,
                 replace: "$&$self.ReplyTimestamp(arguments[0]),"
