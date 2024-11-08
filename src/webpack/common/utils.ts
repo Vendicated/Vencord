@@ -187,7 +187,7 @@ export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModuleLa
     toggleExpressionPicker: filters.byCode(/getState\(\)\.activeView===\i\?\i\(\):\i\(/),
     setExpressionPickerView: filters.byCode(/setState\({activeView:\i,lastActiveView:/),
     setSearchQuery: filters.byCode("searchQuery:"),
-    useExpressionPickerStore: filters.byCode(".getInitialState")
+    useExpressionPickerStore: filters.byCode("Object.is")
 });
 
 export const PopoutActions: t.PopoutActions = mapMangledModuleLazy('type:"POPOUT_WINDOW_OPEN"', {
