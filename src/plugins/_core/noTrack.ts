@@ -60,14 +60,17 @@ export default definePlugin({
                 }
             ]
         },
-        {
-            find: ".installedLogHooks)",
+        // TEMP Work until Vencord Fix
+        ...[
+            ".DEBUG_LOGGING)",
+            ".inputDeviceId)||"
+        ].map(find => ({
+            find,
             replacement: {
-                // if getDebugLogging() returns false, the hooks don't get installed.
                 match: "getDebugLogging(){",
                 replace: "getDebugLogging(){return false;"
             }
-        },
+        })),
     ],
 
     startAt: StartAt.Init,

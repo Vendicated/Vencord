@@ -19,7 +19,7 @@ import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 import { Message } from "discord-types/general";
 
@@ -33,12 +33,7 @@ interface MLMessage extends Message {
     firstEditTimestamp?: Date;
 }
 
-const styles = findByPropsLazy(
-    "edited",
-    "communicationDisabled",
-    "isSystemMessage",
-);
-const getMessage = findByCodeLazy('replace(/^\\n+|\\n+$/g,"")');
+const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -348,35 +343,33 @@ export default definePlugin({
         );
     },
 
-    Messages: {
-        // DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
-        // TODO: find a better way to generate intl messages
-        DELETED_MESSAGE_COUNT: () => ({
-            ast: [[
-                6,
-                "count",
-                {
-                    "=0": ["No deleted messages"],
-                    one: [
-                        [
-                            1,
-                            "count"
-                        ],
-                        " deleted message"
+    // DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
+    // TODO: Find a better way to generate intl messages
+    DELETED_MESSAGE_COUNT: () => ({
+        ast: [[
+            6,
+            "count",
+            {
+                "=0": ["No deleted messages"],
+                one: [
+                    [
+                        1,
+                        "count"
                     ],
-                    other: [
-                        [
-                            1,
-                            "count"
-                        ],
-                        " deleted messages"
-                    ]
-                },
-                0,
-                "cardinal"
-            ]]
-        })
-    },
+                    " deleted message"
+                ],
+                other: [
+                    [
+                        1,
+                        "count"
+                    ],
+                    " deleted messages"
+                ]
+            },
+            0,
+            "cardinal"
+        ]]
+    }),
 
     patches: [
         {
@@ -572,8 +565,7 @@ export default definePlugin({
                 },
                 {
                     match: /(\i).type===\i\.\i\.MESSAGE_GROUP_BLOCKED\?.*?:/,
-                    replace:
-                        '$&$1.type==="MESSAGE_GROUP_DELETED"?$self.Messages.DELETED_MESSAGE_COUNT:',
+                    replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$self.DELETED_MESSAGE_COUNT:',
                 },
             ],
             predicate: () => Settings.plugins.MessageLogger.collapseDeleted,
