@@ -93,7 +93,7 @@ export const useAuthorizationStore = proxyLazy(() => zustandCreate(
         } as AuthorizationState),
         {
             name: "decor-auth",
-            storage: indexedDBStorage,
+            getStorage: () => indexedDBStorage,
             partialize: state => ({ tokens: state.tokens }),
             onRehydrateStorage: () => state => state?.init()
         }
