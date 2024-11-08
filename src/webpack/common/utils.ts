@@ -165,13 +165,9 @@ waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
 export const PermissionsBits: t.PermissionsBits = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
 
-export const { zustandCreate } = mapMangledModuleLazy(["useSyncExternalStoreWithSelector:", "Object.assign"], {
-    zustandCreate: m => typeof m === "function"
-});
+export const zustandCreate = findByCodeLazy("will be removed in v4");
 
-export const { zustandPersist } = mapMangledModuleLazy(".onRehydrateStorage)?", {
-    zustandPersist: m => typeof m === "function"
-});
+export const zustandPersist = findByCodeLazy("[zustand persist middleware]");
 
 export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 export const MessageCache = findByPropsLazy("clearCache", "_channelMessages");
