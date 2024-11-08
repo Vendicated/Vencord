@@ -13,141 +13,142 @@ patchedDependencies:
         path: patches/eslint@9.8.0.patch
 
 importers:
-    .:
-        dependencies:
-            "@ffmpeg/ffmpeg":
-                specifier: ^0.12.10
-                version: 0.12.10
-            "@ffmpeg/util":
-                specifier: ^0.12.1
-                version: 0.12.1
-            "@intrnl/xxhash64":
-                specifier: ^0.1.2
-                version: 0.1.2
-            "@sapphi-red/web-noise-suppressor":
-                specifier: 0.3.5
-                version: 0.3.5
-            "@vap/core":
-                specifier: 0.0.12
-                version: 0.0.12
-            "@vap/shiki":
-                specifier: 0.10.5
-                version: 0.10.5
-            fflate:
-                specifier: ^0.8.2
-                version: 0.8.2
-            gifenc:
-                specifier: github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3
-                version: https://codeload.github.com/mattdesl/gifenc/tar.gz/64842fca317b112a8590f8fef2bf3825da8f6fe3
-            monaco-editor:
-                specifier: ^0.50.0
-                version: 0.50.0
-            nanoid:
-                specifier: ^5.0.7
-                version: 5.0.7
-            virtual-merge:
-                specifier: ^1.0.1
-                version: 1.0.1
-        devDependencies:
-            "@stylistic/eslint-plugin":
-                specifier: ^2.6.1
-                version: 2.6.1(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))(typescript@5.5.4)
-            "@types/chrome":
-                specifier: ^0.0.269
-                version: 0.0.269
-            "@types/diff":
-                specifier: ^5.2.1
-                version: 5.2.1
-            "@types/lodash":
-                specifier: ^4.17.7
-                version: 4.17.7
-            "@types/node":
-                specifier: ^22.0.3
-                version: 22.0.3
-            "@types/react":
-                specifier: ^18.3.3
-                version: 18.3.3
-            "@types/react-dom":
-                specifier: ^18.3.0
-                version: 18.3.0
-            "@types/yazl":
-                specifier: ^2.4.5
-                version: 2.4.5
-            diff:
-                specifier: ^5.2.0
-                version: 5.2.0
-            discord-types:
-                specifier: ^1.3.26
-                version: 1.3.26
-            esbuild:
-                specifier: ^0.15.18
-                version: 0.15.18
-            eslint:
-                specifier: ^9.8.0
-                version: 9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4)
-            eslint-import-resolver-alias:
-                specifier: ^1.1.2
-                version: 1.1.2(eslint-plugin-import@2.29.1(@typescript-eslint/parser@8.0.0(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))(typescript@5.5.4))(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4)))
-            eslint-plugin-path-alias:
-                specifier: 2.1.0
-                version: 2.1.0(patch_hash=japuwsqfkulviwgkm4kd2oi3ky)(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))
-            eslint-plugin-simple-header:
-                specifier: ^1.1.1
-                version: 1.1.1
-            eslint-plugin-simple-import-sort:
-                specifier: ^12.1.1
-                version: 12.1.1(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))
-            eslint-plugin-unused-imports:
-                specifier: ^4.0.1
-                version: 4.0.1(@typescript-eslint/eslint-plugin@8.0.0(@typescript-eslint/parser@8.0.0(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))(typescript@5.5.4))(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))(typescript@5.5.4))(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))
-            highlight.js:
-                specifier: 10.7.3
-                version: 10.7.3
-            html-minifier-terser:
-                specifier: ^7.2.0
-                version: 7.2.0
-            moment:
-                specifier: ^2.30.1
-                version: 2.30.1
-            puppeteer-core:
-                specifier: ^22.15.0
-                version: 22.15.0
-            standalone-electron-types:
-                specifier: ^1.0.0
-                version: 1.0.0
-            stylelint:
-                specifier: ^16.8.1
-                version: 16.8.1(typescript@5.5.4)
-            stylelint-config-standard:
-                specifier: ^36.0.1
-                version: 36.0.1(stylelint@16.8.1(typescript@5.5.4))
-            ts-patch:
-                specifier: ^3.2.1
-                version: 3.2.1
-            ts-pattern:
-                specifier: ^5.3.1
-                version: 5.3.1
-            tsx:
-                specifier: ^4.16.5
-                version: 4.16.5
-            type-fest:
-                specifier: ^4.23.0
-                version: 4.23.0
-            typed-emitter:
-                specifier: ^2.1.0
-                version: 2.1.0
-            typescript:
-                specifier: ^5.5.4
-                version: 5.5.4
-            typescript-eslint:
-                specifier: ^8.0.0
-                version: 8.0.0(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))(typescript@5.5.4)
-            typescript-transform-paths:
-                specifier: ^3.4.7
-                version: 3.4.7(typescript@5.5.4)
-            zip-local:
-                specifier: ^0.3.5
-                version: 0.3.5
+
+  .:
+    dependencies:
+      "@ffmpeg/ffmpeg":
+          specifier: ^0.12.10
+          version: 0.12.10
+      "@ffmpeg/util":
+          specifier: ^0.12.1
+          version: 0.12.1
+      '@intrnl/xxhash64':
+        specifier: ^0.1.2
+        version: 0.1.2
+      '@sapphi-red/web-noise-suppressor':
+        specifier: 0.3.5
+        version: 0.3.5
+      '@vap/core':
+        specifier: 0.0.12
+        version: 0.0.12
+      '@vap/shiki':
+        specifier: 0.10.5
+        version: 0.10.5
+      fflate:
+        specifier: ^0.8.2
+        version: 0.8.2
+      gifenc:
+        specifier: github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3
+        version: https://codeload.github.com/mattdesl/gifenc/tar.gz/64842fca317b112a8590f8fef2bf3825da8f6fe3
+      monaco-editor:
+        specifier: ^0.50.0
+        version: 0.50.0
+      nanoid:
+        specifier: ^5.0.7
+        version: 5.0.7
+      virtual-merge:
+        specifier: ^1.0.1
+        version: 1.0.1
+    devDependencies:
+      '@stylistic/eslint-plugin':
+        specifier: ^2.6.1
+        version: 2.6.1(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))(typescript@5.5.4)
+      '@types/chrome':
+        specifier: ^0.0.269
+        version: 0.0.269
+      '@types/diff':
+        specifier: ^5.2.1
+        version: 5.2.1
+      '@types/lodash':
+        specifier: ^4.17.7
+        version: 4.17.7
+      '@types/node':
+        specifier: ^22.0.3
+        version: 22.0.3
+      '@types/react':
+        specifier: ^18.3.3
+        version: 18.3.3
+      '@types/react-dom':
+        specifier: ^18.3.0
+        version: 18.3.0
+      '@types/yazl':
+        specifier: ^2.4.5
+        version: 2.4.5
+      diff:
+        specifier: ^5.2.0
+        version: 5.2.0
+      discord-types:
+        specifier: ^1.3.26
+        version: 1.3.26
+      esbuild:
+        specifier: ^0.15.18
+        version: 0.15.18
+      eslint:
+        specifier: ^9.8.0
+        version: 9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4)
+      eslint-import-resolver-alias:
+        specifier: ^1.1.2
+        version: 1.1.2(eslint-plugin-import@2.29.1(@typescript-eslint/parser@8.0.0(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))(typescript@5.5.4))(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4)))
+      eslint-plugin-path-alias:
+        specifier: 2.1.0
+        version: 2.1.0(patch_hash=japuwsqfkulviwgkm4kd2oi3ky)(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))
+      eslint-plugin-simple-header:
+        specifier: ^1.1.1
+        version: 1.1.1
+      eslint-plugin-simple-import-sort:
+        specifier: ^12.1.1
+        version: 12.1.1(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))
+      eslint-plugin-unused-imports:
+        specifier: ^4.0.1
+        version: 4.0.1(@typescript-eslint/eslint-plugin@8.0.0(@typescript-eslint/parser@8.0.0(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))(typescript@5.5.4))(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))(typescript@5.5.4))(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))
+      highlight.js:
+        specifier: 10.7.3
+        version: 10.7.3
+      html-minifier-terser:
+        specifier: ^7.2.0
+        version: 7.2.0
+      moment:
+        specifier: ^2.30.1
+        version: 2.30.1
+      puppeteer-core:
+        specifier: ^22.15.0
+        version: 22.15.0
+      standalone-electron-types:
+        specifier: ^1.0.0
+        version: 1.0.0
+      stylelint:
+        specifier: ^16.8.1
+        version: 16.8.1(typescript@5.5.4)
+      stylelint-config-standard:
+        specifier: ^36.0.1
+        version: 36.0.1(stylelint@16.8.1(typescript@5.5.4))
+      ts-patch:
+        specifier: ^3.2.1
+        version: 3.2.1
+      ts-pattern:
+        specifier: ^5.3.1
+        version: 5.3.1
+      tsx:
+        specifier: ^4.16.5
+        version: 4.16.5
+      type-fest:
+        specifier: ^4.23.0
+        version: 4.23.0
+      typed-emitter:
+          specifier: ^2.1.0
+          version: 2.1.0
+      typescript:
+        specifier: ^5.5.4
+        version: 5.5.4
+      typescript-eslint:
+        specifier: ^8.0.0
+        version: 8.0.0(eslint@9.8.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))(typescript@5.5.4)
+      typescript-transform-paths:
+        specifier: ^3.4.7
+        version: 3.4.7(typescript@5.5.4)
+      zip-local:
+        specifier: ^0.3.5
+        version: 0.3.5
 
     packages/vencord-types:
         dependencies:
@@ -765,25 +766,16 @@ packages:
             }
         engines: { node: ">=12.22" }
 
-    "@humanwhocodes/retry@0.3.0":
-        resolution:
-            {
-                integrity: sha512-d2CGZR2o7fS6sWB7DG/3a95bGKQyHMACZ5aW8qGkkqQpUoZV6C0X7Pc7l4ZNMZkfNBf4VWNe9E1jRsf0G146Ew==,
-            }
-        engines: { node: ">=18.18" }
+  '@humanwhocodes/retry@0.3.0':
+    resolution: {integrity: sha512-d2CGZR2o7fS6sWB7DG/3a95bGKQyHMACZ5aW8qGkkqQpUoZV6C0X7Pc7l4ZNMZkfNBf4VWNe9E1jRsf0G146Ew==}
+    engines: {node: '>=18.18'}
 
-    "@intrnl/xxhash64@0.1.2":
-        resolution:
-            {
-                integrity: sha512-1+lx7j99fdph+uy3EnjQyr39KQZ7LP56+aWOr6finJWpgYpvb7XrhFUqDwnEk/wpPC98nCjAT6RulpW3crWjlg==,
-            }
+  '@intrnl/xxhash64@0.1.2':
+    resolution: {integrity: sha512-1+lx7j99fdph+uy3EnjQyr39KQZ7LP56+aWOr6finJWpgYpvb7XrhFUqDwnEk/wpPC98nCjAT6RulpW3crWjlg==}
 
-    "@jridgewell/gen-mapping@0.3.5":
-        resolution:
-            {
-                integrity: sha512-IzL8ZoEDIBRWEzlCcRhOaCupYyN5gdIK+Q6fbFdPDg6HqX6jpkItn7DFIpW9LQzXG6Df9sA7+OKnq0qlz/GaQg==,
-            }
-        engines: { node: ">=6.0.0" }
+  '@jridgewell/gen-mapping@0.3.5':
+    resolution: {integrity: sha512-IzL8ZoEDIBRWEzlCcRhOaCupYyN5gdIK+Q6fbFdPDg6HqX6jpkItn7DFIpW9LQzXG6Df9sA7+OKnq0qlz/GaQg==}
+    engines: {node: '>=6.0.0'}
 
     "@jridgewell/resolve-uri@3.1.2":
         resolution:
@@ -4823,6 +4815,10 @@ snapshots:
             "@ffmpeg/types": 0.12.2
 
     "@ffmpeg/types@0.12.2": {}
+
+  '@humanwhocodes/retry@0.3.0': {}
+
+  '@intrnl/xxhash64@0.1.2': {}
 
     "@ffmpeg/util@0.12.1": {}
 

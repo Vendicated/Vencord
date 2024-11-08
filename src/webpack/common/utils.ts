@@ -58,10 +58,6 @@ export const { match, P }: Pick<typeof import("ts-pattern"), "match" | "P"> = ma
 
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
-export const useDrag = findByCodeLazy("useDrag::spec.begin was deprecated");
-// you cant make a better finder i love that they remove display names sm
-export const useDrop = findByCodeLazy(".options);return", ".collect,");
-
 export const i18n = mapMangledModuleLazy('defaultLocale:"en-US"', {
     intl: filters.byProps("string", "format"),
     t: filters.byProps(runtimeHashMessageKey("DISCORD"))
