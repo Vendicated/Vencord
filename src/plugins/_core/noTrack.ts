@@ -59,18 +59,7 @@ export default definePlugin({
                     replace: "$&return;"
                 }
             ]
-        },
-        // TEMP Work until Vencord Fix
-        ...[
-            ".DEBUG_LOGGING)",
-            ".inputDeviceId)||"
-        ].map(find => ({
-            find,
-            replacement: {
-                match: "getDebugLogging(){",
-                replace: "getDebugLogging(){return false;"
-            }
-        })),
+        }
     ],
 
     startAt: StartAt.Init,
