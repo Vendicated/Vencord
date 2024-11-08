@@ -59,15 +59,7 @@ export default definePlugin({
                     replace: "$&return;"
                 }
             ]
-        },
-        {
-            find: ".installedLogHooks)",
-            replacement: {
-                // if getDebugLogging() returns false, the hooks don't get installed.
-                match: "getDebugLogging(){",
-                replace: "getDebugLogging(){return false;"
-            }
-        },
+        }
     ],
 
     startAt: StartAt.Init,
