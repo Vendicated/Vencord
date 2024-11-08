@@ -12,7 +12,7 @@ import { Logger } from "@utils/Logger";
 import { parseUrl } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ChannelStore, Constants, Menu, React, RestAPI, showToast, Toasts } from "@webpack/common";
+import { ChannelStore, Constants, Menu, MessageStore, React, RestAPI, showToast, Toasts } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 const logger = new Logger("ShowMessageEmbeds");
@@ -22,22 +22,47 @@ export default definePlugin({
     description: "Adds a context menu option to show embeds for links that don't have one",
     authors: [Devs.Suffocate],
 
+    patches: [
+        {
+            find: "className:\"attachmentLink\",",
+            replacement: {
+                match: /(?:(\i).noStyleAndInteraction.*?)attachmentName:\i.attachmentName/,
+                replace: "$&,channelId:$1.channelId,messageId:$1.messageId",
+            }
+        }
+    ],
+
     contextMenus: {
-        "message": addShowEmbedButton
+        "message": addShowEmbedButton,
+        "attachment-link-context": addShowAttachmentEmbedButton
     }
 });
 
 function addShowEmbedButton(children, props) {
     if (props.itemSrc || !props.itemHref || !props.message) return; // itemSrc means the right clicked item is an image/attachment
+
     const group = findGroupChildrenByChildId("copy-native-link", children);
     if (!group) return;
 
     const { message } = props;
 
-    const url = normaliseUrl(props.itemHref);
+    addButton(group, message, props.itemHref);
+}
+
+function addShowAttachmentEmbedButton(children, props) {
+    if (!props.attachmentUrl || !props.channelId || !props.messageId) return;
+
+    const message = MessageStore.getMessage(props?.channelId, props?.messageId);
+    if (!message) return;
+
+    addButton(children, message, props.attachmentUrl);
+}
+
+function addButton(menu, message, url) {
+    url = normaliseUrl(url);
 
     if (!isEmbedInMessage(message, url)) {
-        group.splice(0, 0,
+        menu.splice(0, 0,
             <Menu.MenuItem
                 id="unfurl-url"
                 label="Show Embed"
