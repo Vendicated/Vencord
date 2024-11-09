@@ -13,7 +13,7 @@ export default definePlugin({
     authors: [Devs.bb010g],
     patches: [
         {
-            find: ".Messages.COPY_MESSAGE_LINK,",
+            find: "#{intl::COPY_MESSAGE_LINK}",
             replacement: {
                 match: /\.concat\(location\.host\)/,
                 replace: ".concat($self.normalizeHost(location.host))",
