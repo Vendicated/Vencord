@@ -17,10 +17,11 @@
 */
 
 import { classNameFactory } from "@api/Styles";
+import { getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { closeModal, openModal } from "@utils/modal";
 import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, i18n, Menu, ReadStateStore, ReadStateUtils, Text, Tooltip, useDrag, useDrop, useEffect, useRef, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, Menu, ReadStateStore, ReadStateUtils, Text, Tooltip, useEffect, useRef, UserStore } from "@webpack/common";
 
 import { BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, CircleQuestionIcon, isBookmarkFolder, settings, switchChannel, useBookmarks } from "../util";
 import { NotificationDot } from "./ChannelTab";
@@ -120,7 +121,7 @@ function BookmarkFolderOpenMenu(props: BookmarkProps) {
                             <Menu.MenuItem
                                 key="mark-as-read"
                                 id="mark-as-read"
-                                label={i18n.Messages.MARK_AS_READ}
+                                label={getIntlMessage("MARK_AS_READ")}
                                 disabled={!ReadStateStore.hasUnread(b.channelId)}
                                 action={() => ReadStateUtils.ackChannel(ChannelStore.getChannel(b.channelId))}
                             />
@@ -180,40 +181,40 @@ function Bookmark(props: BookmarkProps) {
 
     const ref = useRef<HTMLDivElement>(null);
 
-    const [, drag] = useDrag(() => ({
-        type: "vc_Bookmark",
-        item: () => {
-            return { index };
-        },
-        collect: monitor => ({
-            isDragging: !!monitor.isDragging()
-        }),
-    }));
+    // const [, drag] = useDrag(() => ({
+    //     type: "vc_Bookmark",
+    //     item: () => {
+    //         return { index };
+    //     },
+    //     collect: monitor => ({
+    //         isDragging: !!monitor.isDragging()
+    //     }),
+    // }));
 
-    const [, drop] = useDrop(() => ({
-        accept: "vc_Bookmark",
-        hover: (item, monitor) => {
-            if (!ref.current) return;
+    // const [, drop] = useDrop(() => ({
+    //     accept: "vc_Bookmark",
+    //     hover: (item, monitor) => {
+    //         if (!ref.current) return;
 
-            const dragIndex = item.index;
-            const hoverIndex = index;
-            if (dragIndex === hoverIndex) return;
+    //         const dragIndex = item.index;
+    //         const hoverIndex = index;
+    //         if (dragIndex === hoverIndex) return;
 
-            const hoverBoundingRect = ref.current?.getBoundingClientRect();
-            const hoverMiddleX =
-                (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
-            const clientOffset = monitor.getClientOffset();
-            const hoverClientX = clientOffset.x - hoverBoundingRect.left;
-            if (dragIndex < hoverIndex && hoverClientX < hoverMiddleX
-                || dragIndex > hoverIndex && hoverClientX > hoverMiddleX) {
-                return;
-            }
+    //         const hoverBoundingRect = ref.current?.getBoundingClientRect();
+    //         const hoverMiddleX =
+    //             (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
+    //         const clientOffset = monitor.getClientOffset();
+    //         const hoverClientX = clientOffset.x - hoverBoundingRect.left;
+    //         if (dragIndex < hoverIndex && hoverClientX < hoverMiddleX
+    //             || dragIndex > hoverIndex && hoverClientX > hoverMiddleX) {
+    //             return;
+    //         }
 
-            methods.moveDraggedBookmarks(dragIndex, hoverIndex);
-            item.index = hoverIndex;
-        },
-    }), []);
-    drag(drop(ref));
+    //         methods.moveDraggedBookmarks(dragIndex, hoverIndex);
+    //         item.index = hoverIndex;
+    //     },
+    // }), []);
+    // drag(drop(ref));
 
     return (
         <div
