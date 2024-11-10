@@ -138,6 +138,16 @@ export interface StickerPackMeta {
         url?: string;
     };
     logo: Sticker;
+
+    dynamic?: DynamicStickerPackMeta["dynamic"];
+}
+
+export interface DynamicStickerPackMeta extends StickerPackMeta {
+    dynamic: {
+        version?: string;
+        refreshUrl: string;
+        authHeaders?: Record<string, string>;
+    };
 }
 
 export interface StickerPack extends StickerPackMeta {
@@ -147,4 +157,19 @@ export interface StickerPack extends StickerPackMeta {
 export interface FFmpegState {
     ffmpeg?: FFmpeg;
     isLoaded: boolean;
+}
+
+export interface DynamicPackSetMeta {
+    id: string;
+    version?: string;
+
+    title?: string;
+    author?: {
+        name: string;
+        url?: string;
+    };
+
+    packs: DynamicStickerPackMeta[];
+    refreshUrl: string;
+    authHeaders?: Record<string, string>;
 }

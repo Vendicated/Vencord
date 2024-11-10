@@ -57,6 +57,20 @@ function migrateStickerPack(oldStickerPack: StickerPack): StickerPack {
     };
 }
 
+export async function isV1() {
+    const newPackMetas = await getStickerPackMetas(PACKS_KEY);
+    if (newPackMetas.length > 0) {
+        return false;
+    }
+
+    const oldPackMetas = await getStickerPackMetas(PACKS_KEY_OLD);
+    if (oldPackMetas.length === 0) {
+        return false;
+    }
+
+    return true;
+}
+
 export async function migrate() {
     const newPackMetas = await getStickerPackMetas(PACKS_KEY);
     if (newPackMetas.length > 0) {
