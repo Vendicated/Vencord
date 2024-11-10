@@ -26,24 +26,26 @@ export default definePlugin({
     description: "Sorts friends by date of addition",
     settings,
 
-    patches: [{
+    patches: [
+        {
             find: "getRelationshipCounts(){",
             replacement: {
                 match: /\}\)\.sortBy\((.+?)\)\.value\(\)/,
                 replace: "}).sortBy(row => $self.wrapSort(($1), row)).value()"
             }
-        }, {
+        },
+        {
             find: "peopleListItemRef",
             replacement: {
                 predicate: () => settings.store.showDates,
                 match: /(?<=children:.*user:(\i),.*subText:).+?(?=,hovered:\i,showAccountIdentifier)/,
                 replace: "$self.makeSubtext($1, $&)"
             }
-        }        
+        }
     ],
 
     wrapSort(comparator: Function, row: any) {
-        return row.type === 3 || row.type === 4
+        return row.type === 1
             ? -this.getSince(row.user)
             : comparator(row);
     },
@@ -57,7 +59,7 @@ export default definePlugin({
         if (isNaN(since.getTime())) {
             return null;
         }
-    
+
         return (
             <Flex
                 flexDirection="column"
@@ -87,6 +89,7 @@ export default definePlugin({
                     </div>
                 </span>
             </Flex>
-        );       
+        );
     },
 });
+
