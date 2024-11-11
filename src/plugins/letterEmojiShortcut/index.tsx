@@ -34,7 +34,7 @@ const settings = definePluginSettings({
     },
     alias: {
         type: OptionType.BOOLEAN,
-        default: true,
+        default: false,
         description: "Makes e.g. :bb: alias to 🇧. This makes just typing :bb: work (and it sends the real 🇧), but has the side effect of rendering the plaintext of :bb: as an emoji.",
         restartNeeded: false
     },
