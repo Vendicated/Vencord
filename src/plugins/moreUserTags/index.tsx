@@ -19,10 +19,11 @@
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findLazy } from "@webpack";
-import { Card, ChannelStore, Forms, GuildStore, PermissionsBits, Switch, TextInput, Tooltip, useState } from "@webpack/common";
+import { Card, ChannelStore, Forms, GuildStore, PermissionsBits, Switch, TextInput, Tooltip } from "@webpack/common";
 import type { Permissions, RC } from "@webpack/types";
 import type { Channel, Guild, Message, User } from "discord-types/general";
 
@@ -107,14 +108,8 @@ const defaultSettings = Object.fromEntries(
     tags.map(({ name, displayName }) => [name, { text: displayName, showInChat: true, showInNotChat: true }])
 ) as TagSettings;
 
-function SettingsComponent(props: { setValue(v: any): void; }) {
-    settings.store.tagSettings ??= defaultSettings;
-
-    const [tagSettings, setTagSettings] = useState(settings.store.tagSettings as TagSettings);
-    const setValue = (v: TagSettings) => {
-        setTagSettings(v);
-        props.setValue(v);
-    };
+function SettingsComponent() {
+    const tagSettings = settings.store.tagSettings ??= defaultSettings;
 
     return (
         <Flex flexDirection="column">
@@ -137,19 +132,13 @@ function SettingsComponent(props: { setValue(v: any): void; }) {
                         type="text"
                         value={tagSettings[t.name]?.text ?? t.displayName}
                         placeholder={`Text on tag (default: ${t.displayName})`}
-                        onChange={v => {
-                            tagSettings[t.name].text = v;
-                            setValue(tagSettings);
-                        }}
+                        onChange={v => tagSettings[t.name].text = v}
                         className={Margins.bottom16}
                     />
 
                     <Switch
                         value={tagSettings[t.name]?.showInChat ?? true}
-                        onChange={v => {
-                            tagSettings[t.name].showInChat = v;
-                            setValue(tagSettings);
-                        }}
+                        onChange={v => tagSettings[t.name].showInChat = v}
                         hideBorder
                     >
                         Show in messages
@@ -157,10 +146,7 @@ function SettingsComponent(props: { setValue(v: any): void; }) {
 
                     <Switch
                         value={tagSettings[t.name]?.showInNotChat ?? true}
-                        onChange={v => {
-                            tagSettings[t.name].showInNotChat = v;
-                            setValue(tagSettings);
-                        }}
+                        onChange={v => tagSettings[t.name].showInNotChat = v}
                         hideBorder
                     >
                         Show in member list and profiles
@@ -183,7 +169,7 @@ const settings = definePluginSettings({
     tagSettings: {
         type: OptionType.COMPONENT,
         component: SettingsComponent,
-        description: "fill me",
+        description: "fill me"
     }
 });
 
@@ -202,13 +188,13 @@ export default definePlugin({
             }
         },
         {
-            find: ".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP_OFFICIAL,",
+            find: "#{intl::DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP_OFFICIAL}",
             replacement: [
                 // make the tag show the right text
                 {
-                    match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=.{0,40}(\i\.\i\.Messages)\.APP_TAG/,
-                    replace: (_, origSwitch, variant, tags, displayedText, strings) =>
-                        `${origSwitch}default:{${displayedText} = $self.getTagText(${tags}[${variant}], ${strings})}`
+                    match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=(.{0,40}#{intl::APP_TAG}\))/,
+                    replace: (_, origSwitch, variant, tags, displayedText, originalText) =>
+                        `${origSwitch}default:{${displayedText} = $self.getTagText(${tags}[${variant}],${originalText})}`
                 },
                 // show OP tags correctly
                 {
@@ -232,7 +218,7 @@ export default definePlugin({
         },
         // in the member list
         {
-            find: ".Messages.GUILD_OWNER,",
+            find: "#{intl::GUILD_OWNER}",
             replacement: {
                 match: /(?<type>\i)=\(null==.{0,100}\.BOT;return null!=(?<user>\i)&&\i\.bot/,
                 replace: "$<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }); return typeof $<type> === 'number'"
@@ -247,9 +233,9 @@ export default definePlugin({
             }
         },
         {
-            find: 'copyMetaData:"User Tag"',
+            find: "#{intl::USER_PROFILE_PRONOUNS}",
             replacement: {
-                match: /(?=,botClass:)/,
+                match: /(?=,hideBotTag:!0)/,
                 replace: ",moreTags_channelId:arguments[0].moreTags_channelId"
             }
         },
@@ -264,8 +250,8 @@ export default definePlugin({
                     match: /user:\i,nick:\i,/,
                     replace: "$&moreTags_channelId,"
                 }, {
-                    match: /,botType:(\i),(?<=user:(\i).+?)/g,
-                    replace: ",botType:$self.getTag({user:$2,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),"
+                    match: /,botType:(\i),botVerified:(\i),(?!discriminatorClass:)(?<=user:(\i).+?)/g,
+                    replace: ",botType:$self.getTag({user:$3,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),botVerified:$2,"
                 }
             ]
         },
@@ -310,21 +296,25 @@ export default definePlugin({
 
     isOPTag: (tag: number) => tag === Tag.Types.ORIGINAL_POSTER || tags.some(t => tag === Tag.Types[`${t.name}-OP`]),
 
-    getTagText(passedTagName: string, strings: Record<string, string>) {
-        if (!passedTagName) return strings.APP_TAG;
-        const [tagName, variant] = passedTagName.split("-");
-        const tag = tags.find(({ name }) => tagName === name);
-        if (!tag) return strings.APP_TAG;
-        if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return strings.APP_TAG;
+    getTagText(passedTagName: string, originalText: string) {
+        try {
+            const [tagName, variant] = passedTagName.split("-");
+            if (!passedTagName) return getIntlMessage("APP_TAG");
+            const tag = tags.find(({ name }) => tagName === name);
+            if (!tag) return getIntlMessage("APP_TAG");
+            if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return getIntlMessage("APP_TAG");
 
-        const tagText = settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
-        switch (variant) {
-            case "OP":
-                return `${strings.BOT_TAG_FORUM_ORIGINAL_POSTER} • ${tagText}`;
-            case "BOT":
-                return `${strings.APP_TAG} • ${tagText}`;
-            default:
-                return tagText;
+            const tagText = settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
+            switch (variant) {
+                case "OP":
+                    return `${getIntlMessage("BOT_TAG_FORUM_ORIGINAL_POSTER")} • ${tagText}`;
+                case "BOT":
+                    return `${getIntlMessage("APP_TAG")} • ${tagText}`;
+                default:
+                    return tagText;
+            }
+        } catch {
+            return originalText;
         }
     },
 

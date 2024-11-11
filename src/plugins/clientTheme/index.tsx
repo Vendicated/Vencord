@@ -12,9 +12,9 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Button, Forms, useStateFromStores } from "@webpack/common";
+import { Button, Forms, ThemeStore, useStateFromStores } from "@webpack/common";
 
-const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
+const ColorPicker = findComponentByCodeLazy("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", ".BACKGROUND_PRIMARY)");
 
 const colorPresets = [
     "#1E1514", "#172019", "#13171B", "#1C1C28", "#402D2D",
@@ -36,7 +36,6 @@ function setTheme(theme: string) {
     saveClientTheme({ theme });
 }
 
-const ThemeStore = findStoreLazy("ThemeStore");
 const NitroThemeStore = findStoreLazy("ClientThemesBackgroundStore");
 
 function ThemeSettings() {

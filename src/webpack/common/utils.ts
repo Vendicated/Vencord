@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { canonicalizeMatch } from "@utils/patches";
+import { runtimeHashMessageKey } from "@utils/intlHash";
 import type { Channel } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
@@ -50,9 +50,17 @@ export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYea
 
 export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", "registerLanguage");
 
+export const { match, P }: Pick<typeof import("ts-pattern"), "match" | "P"> = mapMangledModuleLazy("@ts-pattern/matcher", {
+    match: filters.byCode("return new"),
+    P: filters.byProps("when")
+});
+
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
-export const i18n: t.i18n = findLazy(m => m.Messages?.["en-US"]);
+export const i18n = mapMangledModuleLazy('defaultLocale:"en-US"', {
+    intl: filters.byProps("string", "format"),
+    t: filters.byProps(runtimeHashMessageKey("DISCORD"))
+});
 
 export let SnowflakeUtils: t.SnowflakeUtils;
 waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
@@ -127,7 +135,7 @@ export const UserUtils = {
 
 export const UploadManager = findByPropsLazy("clearAll", "addFile");
 export const UploadHandler = {
-    promptToUpload: findByCodeLazy(".ATTACHMENT_TOO_MANY_ERROR_TITLE,") as (files: File[], channel: Channel, draftType: Number) => void
+    promptToUpload: findByCodeLazy("#{intl::ATTACHMENT_TOO_MANY_ERROR_TITLE}") as (files: File[], channel: Channel, draftType: Number) => void
 };
 
 export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetImage") as {
@@ -144,6 +152,10 @@ export const NavigationRouter: t.NavigationRouter = mapMangledModuleLazy("Transi
     transitionToGuild: filters.byCode("transitionToGuild -"),
     back: filters.byCode("goBack()"),
     forward: filters.byCode("goForward()"),
+});
+export const ChannelRouter: t.ChannelRouter = mapMangledModuleLazy('"Thread must have a parent ID."', {
+    transitionToChannel: filters.byCode(".preload"),
+    transitionToThread: filters.byCode('"Thread must have a parent ID."')
 });
 
 export let SettingsRouter: any;
@@ -162,11 +174,14 @@ export const InviteActions = findByPropsLazy("resolveInvite");
 
 export const IconUtils: t.IconUtils = findByPropsLazy("getGuildBannerURL", "getUserAvatarURL");
 
-const openExpressionPickerMatcher = canonicalizeMatch(/setState\({activeView:\i,activeViewType:/);
-// TODO: type
 export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModuleLazy("expression-picker-last-active-view", {
+    openExpressionPicker: filters.byCode(/setState\({activeView:(?:(?!null)\i),activeViewType:/),
     closeExpressionPicker: filters.byCode("setState({activeView:null"),
-    openExpressionPicker: m => typeof m === "function" && openExpressionPickerMatcher.test(m.toString()),
+    toggleMultiExpressionPicker: filters.byCode(".EMOJI,"),
+    toggleExpressionPicker: filters.byCode(/getState\(\)\.activeView===\i\?\i\(\):\i\(/),
+    setExpressionPickerView: filters.byCode(/setState\({activeView:\i,lastActiveView:/),
+    setSearchQuery: filters.byCode("searchQuery:"),
+    useExpressionPickerStore: filters.byCode("Object.is")
 });
 
 export const PopoutActions: t.PopoutActions = mapMangledModuleLazy('type:"POPOUT_WINDOW_OPEN"', {

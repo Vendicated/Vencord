@@ -16,12 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Guild, GuildMember, User } from "discord-types/general";
+import { Channel, Guild, GuildMember, User } from "discord-types/general";
 import type { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
 import type { FluxEvents } from "./fluxEvents";
-import { i18nMessages } from "./i18nMessages";
 
 export { FluxEvents };
 
@@ -148,19 +147,6 @@ export interface LocaleInfo {
     postgresLang: string;
 }
 
-export interface i18n {
-    getAvailableLocales(): Locale[];
-    getLanguages(): LocaleInfo[];
-    getDefaultLocale(): string;
-    getLocale(): string;
-    getLocaleInfo(): LocaleInfo;
-    setLocale(locale: string): void;
-
-    loadPromise: Promise<void>;
-
-    Messages: Record<i18nMessages, any>;
-}
-
 export interface Clipboard {
     copy(text: string): void;
     SUPPORTS_COPY: boolean;
@@ -171,6 +157,11 @@ export interface NavigationRouter {
     forward(): void;
     transitionTo(path: string, ...args: unknown[]): void;
     transitionToGuild(guildId: string, ...args: unknown[]): void;
+}
+
+export interface ChannelRouter {
+    transitionToChannel: (channelId: string) => void;
+    transitionToThread: (channel: Channel) => void;
 }
 
 export interface IconUtils {
@@ -223,9 +214,26 @@ export interface Constants {
     FriendsSections: Record<string, string>;
 }
 
+export type ActiveView = LiteralUnion<"emoji" | "gif" | "sticker" | "soundboard", string>;
+
+export interface ExpressionPickerStoreState extends Record<PropertyKey, any> {
+    activeView: ActiveView | null;
+    lastActiveView: ActiveView | null;
+    activeViewType: any | null;
+    searchQuery: string;
+    isSearchSuggestion: boolean,
+    pickerId: string;
+}
+
 export interface ExpressionPickerStore {
+    openExpressionPicker(activeView: ActiveView, activeViewType?: any): void;
     closeExpressionPicker(activeViewType?: any): void;
-    openExpressionPicker(activeView: LiteralUnion<"emoji" | "gif" | "sticker", string>, activeViewType?: any): void;
+    toggleMultiExpressionPicker(activeViewType?: any): void;
+    toggleExpressionPicker(activeView: ActiveView, activeViewType?: any): void;
+    setExpressionPickerView(activeView: ActiveView): void;
+    setSearchQuery(searchQuery: string, isSearchSuggestion?: boolean): void;
+    useExpressionPickerStore(): ExpressionPickerStoreState;
+    useExpressionPickerStore<T>(selector: (state: ExpressionPickerStoreState) => T): T;
 }
 
 export interface BrowserWindowFeatures {
