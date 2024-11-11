@@ -1,6 +1,6 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2023 Vendicated and contributors
+ * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -10,17 +10,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 
 const EmojiLib = findByPropsLazy("getByName", "getCategories", "getDefaultDiversitySurrogate", "convertNameToSurrogate");
-
-/* old method of just adding emojis
-   may have better compatibility? keeping for future refrence
-{
-    find: "\"raised_hand_with_part_between_middle_and_ring_fingers\"",
-    replacement: {
-        match: /"regional_indicator_([a-z])"/g,
-        replace: "$&,\"$1$1\""
-    }
-}
-*/
 
 const alphabet = [..."abcdefghijklmnopqrstuvwxyz"];
 const singleOrDoubleMatch = /^([a-zA-Z])\1?$/;
@@ -48,7 +37,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "LetterEmojiShortcut",
+    name: "LetterEmojiShortcuts",
     description: "Adds shortcuts for typing the blue letter emojis",
     authors: [Devs.UnmatchedBracket],
     settings,
