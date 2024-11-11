@@ -23,7 +23,8 @@ const EmojiLib = findByPropsLazy("getByName", "getCategories", "getDefaultDivers
 */
 
 const alphabet = [..."abcdefghijklmnopqrstuvwxyz"];
-const doubleMatch = /^([a-zA-Z])\1?$/;
+const singleOrDoubleMatch = /^([a-zA-Z])\1?$/;
+const doubleMatch = /^([a-zA-Z])\1$/;
 
 const settings = definePluginSettings({
     autocomplete: {
@@ -69,7 +70,7 @@ export default definePlugin({
     ],
     addEmojiToList(list: Object[], query: { query: string; }) {
         if (Vencord.Settings.plugins.LetterEmojiShortcut.autocomplete) {
-            let match = doubleMatch.exec(query.query);
+            let match = singleOrDoubleMatch.exec(query.query);
             if (match) {
                 let emoji = EmojiLib.getByName("regional_indicator_" + match[1]);
                 if (emoji) {
