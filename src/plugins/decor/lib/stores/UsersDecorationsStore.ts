@@ -99,19 +99,28 @@ export function useUserDecorAvatarDecoration(user?: User): AvatarDecoration | nu
         const [decorAvatarDecoration, setDecorAvatarDecoration] = useState<string | null>(user ? useUsersDecorationsStore.getState().getAsset(user.id) ?? null : null);
 
         useEffect(() => {
-            const destructor = useUsersDecorationsStore.subscribe(
-                state => {
-                    if (!user) return;
-                    const newDecorAvatarDecoration = state.getAsset(user.id);
-                    if (!newDecorAvatarDecoration) return;
-                    if (decorAvatarDecoration !== newDecorAvatarDecoration) setDecorAvatarDecoration(newDecorAvatarDecoration);
+            const destructor = (() => {
+                try {
+                    return useUsersDecorationsStore.subscribe(
+                        state => {
+                            if (!user) return;
+                            const newDecorAvatarDecoration = state.getAsset(user.id);
+                            if (!newDecorAvatarDecoration) return;
+                            if (decorAvatarDecoration !== newDecorAvatarDecoration) setDecorAvatarDecoration(newDecorAvatarDecoration);
+                        }
+                    );
+                } catch {
+                    return () => { };
                 }
-            );
+            })();
 
-            if (user) {
-                const { fetch: fetchUserDecorAvatarDecoration } = useUsersDecorationsStore.getState();
-                fetchUserDecorAvatarDecoration(user.id);
-            }
+            try {
+                if (user) {
+                    const { fetch: fetchUserDecorAvatarDecoration } = useUsersDecorationsStore.getState();
+                    fetchUserDecorAvatarDecoration(user.id);
+                }
+            } catch { }
+
             return destructor;
         }, []);
 
