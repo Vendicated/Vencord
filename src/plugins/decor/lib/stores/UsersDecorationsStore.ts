@@ -95,24 +95,30 @@ export const useUsersDecorationsStore = proxyLazy(() => zustandCreate((set: any,
 } as UsersDecorationsState)));
 
 export function useUserDecorAvatarDecoration(user?: User): AvatarDecoration | null | undefined {
-    const [decorAvatarDecoration, setDecorAvatarDecoration] = useState<string | null>(user ? useUsersDecorationsStore.getState().getAsset(user.id) ?? null : null);
+    try {
+        const [decorAvatarDecoration, setDecorAvatarDecoration] = useState<string | null>(user ? useUsersDecorationsStore.getState().getAsset(user.id) ?? null : null);
 
-    useEffect(() => {
-        const destructor = useUsersDecorationsStore.subscribe(
-            state => {
-                if (!user) return;
-                const newDecorAvatarDecoration = state.getAsset(user.id);
-                if (!newDecorAvatarDecoration) return;
-                if (decorAvatarDecoration !== newDecorAvatarDecoration) setDecorAvatarDecoration(newDecorAvatarDecoration);
+        useEffect(() => {
+            const destructor = useUsersDecorationsStore.subscribe(
+                state => {
+                    if (!user) return;
+                    const newDecorAvatarDecoration = state.getAsset(user.id);
+                    if (!newDecorAvatarDecoration) return;
+                    if (decorAvatarDecoration !== newDecorAvatarDecoration) setDecorAvatarDecoration(newDecorAvatarDecoration);
+                }
+            );
+
+            if (user) {
+                const { fetch: fetchUserDecorAvatarDecoration } = useUsersDecorationsStore.getState();
+                fetchUserDecorAvatarDecoration(user.id);
             }
-        );
+            return destructor;
+        }, []);
 
-        if (user) {
-            const { fetch: fetchUserDecorAvatarDecoration } = useUsersDecorationsStore.getState();
-            fetchUserDecorAvatarDecoration(user.id);
-        }
-        return destructor;
-    }, []);
+        return decorAvatarDecoration ? { asset: decorAvatarDecoration, skuId: SKU_ID } : null;
+    } catch (e) {
+        console.error(e);
+    }
 
-    return decorAvatarDecoration ? { asset: decorAvatarDecoration, skuId: SKU_ID } : null;
+    return null;
 }
