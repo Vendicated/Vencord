@@ -147,5 +147,5 @@ export default definePlugin({
                 replace: "$self.NoopLogger()"
             }
         }
-    ],
+    ]
 });
