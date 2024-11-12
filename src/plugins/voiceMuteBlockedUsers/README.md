@@ -14,8 +14,8 @@ The **Voice Mute Blocked Users** plugin automatically mutes users that you have 
 
 Before:
 
-![Before Image](before.png "Title for Before Image")
+![Before Image](https://github.com/user-attachments/assets/53278a50-86cb-4f17-a6cb-db5ac380e267)
 
 After:
 
-![After Image](after.png "Title for After Image")
+![After Image](https://github.com/user-attachments/assets/886ec3dd-1b63-4028-bb9e-4c3148e903e8)
