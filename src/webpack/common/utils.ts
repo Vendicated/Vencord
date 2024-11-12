@@ -163,9 +163,13 @@ waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
 export const PermissionsBits: t.PermissionsBits = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
 
-export const zustandCreate = findByCodeLazy("will be removed in v4");
+export const { zustandCreate } = mapMangledModuleLazy(["useSyncExternalStoreWithSelector:", "Object.assign", /(\i)\?(\i)\(\1\):\2/], {
+    zustandCreate: filters.byCode(/(\i)\?(\i)\(\1\):\2/)
+});
 
-export const zustandPersist = findByCodeLazy("[zustand persist middleware]");
+export const { zustandPersist } = mapMangledModuleLazy(".onRehydrateStorage)?", {
+    zustandPersist: filters.byCode(/(\(\i,\i\))=>.+?\i\1/)
+});
 
 export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 export const MessageCache = findByPropsLazy("clearCache", "_channelMessages");
@@ -181,7 +185,7 @@ export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModuleLa
     toggleExpressionPicker: filters.byCode(/getState\(\)\.activeView===\i\?\i\(\):\i\(/),
     setExpressionPickerView: filters.byCode(/setState\({activeView:\i,lastActiveView:/),
     setSearchQuery: filters.byCode("searchQuery:"),
-    useExpressionPickerStore: filters.byCode("Object.is")
+    useExpressionPickerStore: filters.byCode(/\(\i,\i=\i\)=>/)
 });
 
 export const PopoutActions: t.PopoutActions = mapMangledModuleLazy('type:"POPOUT_WINDOW_OPEN"', {
