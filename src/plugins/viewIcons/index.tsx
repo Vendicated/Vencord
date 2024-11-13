@@ -209,10 +209,11 @@ export default definePlugin({
         },
         // Group DMs top small & large icon
         {
-            find: /\.recipients\.length>=2(?!<isMultiUserDM.{0,50})/,
+            find: "[\"aria-hidden\"],\"aria-label\":",
             replacement: {
-                match: /null==\i\.icon\?.+?src:(\(0,\i\.\i\).+?\))(?=[,}])/,
-                replace: (m, iconUrl) => `${m},onClick:()=>$self.openAvatar(${iconUrl})`
+                match: /(src:(.*?))(?=})/,
+                // we have to check that icon is not an unread gdm in the server bar
+                replace: "$1,onClick:()=> arguments[0].size !== 'SIZE_48' && $self.openAvatar($2)"
             }
         },
         // User DMs top small icon
