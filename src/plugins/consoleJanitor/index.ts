@@ -151,13 +151,6 @@ export default definePlugin({
                 replace: ""
             }
         },
-        {
-            find: "[DEPRECATED] `context` will be removed in a future version. Instead use `import { createStore, useStore } from 'zustand'`. See: https://github.com/pmndrs/zustand/discussions/1180.",
-            replacement: {
-                match: /console\.warn\("\[DEPRECATED\] `context` will be removed in a future version\. Instead use `import { createStore, useStore } from 'zustand'`\. See: https:\/\/github\.com\/pmndrs\/zustand\/discussions\/1180\."\);/,
-                replace: ""
-            }
-        },
         // Patches discords generic logger function
         {
             find: "Σ:",
