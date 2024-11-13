@@ -14,14 +14,14 @@ import { Channel } from "discord-types/general";
 const cl = classNameFactory("vc-uvs-");
 
 const { selectVoiceChannel } = findByPropsLazy("selectVoiceChannel", "selectChannel");
-const { useChannelName } = mapMangledModuleLazy(".Messages.GROUP_DM_ALONE", {
+const { useChannelName } = mapMangledModuleLazy("#{intl::GROUP_DM_ALONE}", {
     useChannelName: filters.byCode("()=>null==")
 });
 const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
 const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-const Avatar = findComponentByCodeLazy(".AVATAR_STATUS_TYPING_16;");
+const Avatar = findComponentByCodeLazy(".status)/2):0");
 const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarURL");
 
 const ActionButtonClasses = findByPropsLazy("actionButton", "highlight");

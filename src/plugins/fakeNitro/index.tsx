@@ -22,7 +22,7 @@ import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, Patch } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
 import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Emoji } from "@webpack/types";
@@ -194,6 +194,26 @@ const hasExternalStickerPerms = (channelId: string) => hasPermission(channelId, 
 const hasEmbedPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.EMBED_LINKS);
 const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.ATTACH_FILES);
 
+function makeBypassPatches(): Omit<Patch, "plugin"> {
+    const mapping: Array<{ func: string, predicate?: () => boolean; }> = [
+        { func: "canUseCustomStickersEverywhere", predicate: () => settings.store.enableStickerBypass },
+        { func: "canUseHighVideoUploadQuality", predicate: () => settings.store.enableStreamQualityBypass },
+        { func: "canStreamQuality", predicate: () => settings.store.enableStreamQualityBypass },
+        { func: "canUseClientThemes" },
+        { func: "canUseCustomNotificationSounds" },
+        { func: "canUsePremiumAppIcons" }
+    ];
+
+    return {
+        find: "canUseCustomStickersEverywhere:",
+        replacement: mapping.map(({ func, predicate }) => ({
+            match: new RegExp(String.raw`(?<=${func}:function\(\i(?:,\i)?\){)`),
+            replace: "return true;",
+            predicate
+        }))
+    };
+}
+
 export default definePlugin({
     name: "FakeNitro",
     authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
@@ -203,6 +223,8 @@ export default definePlugin({
     settings,
 
     patches: [
+        // General bypass patches
+        makeBypassPatches(),
         // Patch the emoji picker in voice calls to not be bypassed by fake nitro
         {
             find: "emojiItemDisabled]",
@@ -252,15 +274,6 @@ export default definePlugin({
                 replace: (_, rest1, rest2) => `${rest1},fakeNitroOriginal){if(!fakeNitroOriginal)return false;${rest2}`
             }
         },
-        // Allow stickers to be sent everywhere
-        {
-            find: "canUseCustomStickersEverywhere:function",
-            predicate: () => settings.store.enableStickerBypass,
-            replacement: {
-                match: /canUseCustomStickersEverywhere:function\(\i\){/,
-                replace: "$&return true;"
-            },
-        },
         // Make stickers always available
         {
             find: '"SENDABLE"',
@@ -270,35 +283,13 @@ export default definePlugin({
                 replace: "true?"
             }
         },
-        // Allow streaming with high quality
-        {
-            find: "canUseHighVideoUploadQuality:function",
-            predicate: () => settings.store.enableStreamQualityBypass,
-            replacement: [
-                "canUseHighVideoUploadQuality",
-                "canStreamQuality",
-            ].map(func => {
-                return {
-                    match: new RegExp(`${func}:function\\(\\i(?:,\\i)?\\){`, "g"),
-                    replace: "$&return true;"
-                };
-            })
-        },
         // Remove boost requirements to stream with high quality
         {
-            find: "STREAM_FPS_OPTION.format",
+            find: "#{intl::STREAM_FPS_OPTION}",
             predicate: () => settings.store.enableStreamQualityBypass,
             replacement: {
                 match: /guildPremiumTier:\i\.\i\.TIER_\d,?/g,
                 replace: ""
-            }
-        },
-        // Allow client themes to be changeable
-        {
-            find: "canUseClientThemes:function",
-            replacement: {
-                match: /canUseClientThemes:function\(\i\){/,
-                replace: "$&return true;"
             }
         },
         {
@@ -359,13 +350,13 @@ export default definePlugin({
                 {
                     // Filter attachments to remove fake nitro stickers or emojis
                     predicate: () => settings.store.transformStickers,
-                    match: /renderAttachments\(\i\){let{attachments:(\i).+?;/,
+                    match: /renderAttachments\(\i\){.+?{attachments:(\i).+?;/,
                     replace: (m, attachments) => `${m}${attachments}=$self.filterAttachments(${attachments});`
                 }
             ]
         },
         {
-            find: ".Messages.STICKER_POPOUT_UNJOINED_PRIVATE_GUILD_DESCRIPTION.format",
+            find: "#{intl::STICKER_POPOUT_UNJOINED_PRIVATE_GUILD_DESCRIPTION}",
             predicate: () => settings.store.transformStickers,
             replacement: [
                 {
@@ -390,20 +381,12 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION",
+            find: "#{intl::EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION}",
             predicate: () => settings.store.transformEmojis,
             replacement: {
                 // Add the fake nitro emoji notice
                 match: /(?<=emojiDescription:)(\i)(?<=\1=\i\((\i)\).+?)/,
                 replace: (_, reactNode, props) => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!${props}?.fakeNitroNode?.fake)`
-            }
-        },
-        // Allow using custom app icons
-        {
-            find: "canUsePremiumAppIcons:function",
-            replacement: {
-                match: /canUsePremiumAppIcons:function\(\i\){/,
-                replace: "$&return true;"
             }
         },
         // Separate patch for allowing using custom app icons
@@ -420,14 +403,6 @@ export default definePlugin({
             replacement: {
                 match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
-            }
-        },
-        // Allow using custom notification sounds
-        {
-            find: "canUseCustomNotificationSounds:function",
-            replacement: {
-                match: /canUseCustomNotificationSounds:function\(\i\){/,
-                replace: "$&return true;"
             }
         }
     ],
