@@ -155,6 +155,7 @@ export default definePlugin({
         "guild-context": MakeContextCallback("Guild"),
         "channel-context": MakeContextCallback("Channel"),
         "thread-context": MakeContextCallback("Channel"),
+        "gdm-context": MakeContextCallback("Channel"),
         "user-context": MakeContextCallback("User")
     },
 
