@@ -22,6 +22,7 @@ export * from "./ChangeList";
 export * from "./constants";
 export * from "./discord";
 export * from "./guards";
+export * from "./intlHash";
 export * from "./lazy";
 export * from "./lazyReact";
 export * from "./localStorage";

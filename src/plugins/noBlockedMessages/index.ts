@@ -18,12 +18,19 @@
 
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
+import { i18n } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
+
+interface MessageDeleteProps {
+    // Internal intl message for BLOCKED_MESSAGE_COUNT
+    collapsedReason: () => any;
+}
 
 export default definePlugin({
     name: "NoBlockedMessages",
@@ -31,24 +38,24 @@ export default definePlugin({
     authors: [Devs.rushii, Devs.Samu],
     patches: [
         {
-            find: "Messages.BLOCKED_MESSAGES_HIDE",
+            find: "#{intl::BLOCKED_MESSAGES_HIDE}",
             replacement: [
                 {
                     match: /let\{[^}]*collapsedReason[^}]*\}/,
-                    replace: "return null;$&"
+                    replace: "if($self.shouldHide(arguments[0]))return null;$&"
                 }
             ]
         },
         ...[
             '"MessageStore"',
-            '"displayName","ReadStateStore")'
+            '"ReadStateStore"'
         ].map(find => ({
             find,
             predicate: () => Settings.plugins.NoBlockedMessages.ignoreBlockedMessages === true,
             replacement: [
                 {
-                    match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
-                    replace: (_, _funcName, props) => `if($self.isBlocked(${props}.message))return;`
+                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
+                    replace: (_, props) => `if($self.isBlocked(${props}.message))return;`
                 }
             ]
         }))
@@ -68,5 +75,14 @@ export default definePlugin({
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if user is blocked:", e);
         }
+    },
+
+    shouldHide(props: MessageDeleteProps) {
+        try {
+            return props.collapsedReason() === i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
+        } catch (e) {
+            console.error(e);
+        }
+        return false;
     }
 });
