@@ -30,7 +30,7 @@ export default definePlugin({
         {
             find: ".removeMosaicItemHoverButton),",
             replacement: {
-                match: /\.nonMediaMosaicItem\]:!(\i).{0,50}?children:\[\S,\S,(\S)/,
+                match: /\.nonMediaMosaicItem\]:.{0,40}children:\[(?<=showDownload:(\i).+?isVisualMediaType:(\i).+?)/,
                 replace: "$&,$1&&$2&&$self.renderPiPButton(),"
             },
         },
