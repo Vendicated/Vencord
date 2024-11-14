@@ -141,8 +141,8 @@ export default definePlugin({
         {
             find: ",reactionVoteCounts",
             replacement: {
-                match: /,onContextMenu:\i=>.{0,15}\((\i),(\i),(\i)\).{0,300}nickname/,
-                replace: "$&,style:{color:$self.getPollColor($1)}"
+                match: /\.nickname,(?=children:)/,
+                replace: "$&style:{color:$self.getColor(arguments[0]?.user?.id,{channelId:arguments[0]?.channel.id})},"
             },
             predicate: () => settings.store.pollResults,
         },
@@ -156,12 +156,6 @@ export default definePlugin({
         },
     ],
     settings,
-
-    getPollColor(props: { channel: Channel; user: User; }) {
-        return props.channel?.guild_id
-            ? GuildMemberStore.getMember(props.channel.guild_id, props.user.id)?.colorString ?? null
-            : null;
-    },
 
     getColor(userId: string, { channelId, guildId }: { channelId?: string; guildId?: string; }) {
         if (!(guildId ??= ChannelStore.getChannel(channelId!)?.guild_id)) return null;
