@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2024 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@
 
 import { IShikiTheme } from "@vap/shiki";
 
-export const SHIKI_REPO = "shikijs/shiki";
-export const SHIKI_REPO_COMMIT = "0b28ad8ccfbf2615f2d9d38ea8255416b8ac3043";
-export const shikiRepoTheme = (name: string) => `https://raw.githubusercontent.com/${SHIKI_REPO}/${SHIKI_REPO_COMMIT}/packages/shiki/themes/${name}.json`;
+export const SHIKI_REPO = "shikijs/textmate-grammars-themes";
+export const SHIKI_REPO_COMMIT = "2d87559c7601a928b9f7e0f0dda243d2fb6d4499";
+export const shikiRepoTheme = (name: string) => `https://raw.githubusercontent.com/${SHIKI_REPO}/${SHIKI_REPO_COMMIT}/packages/tm-themes/themes/${name}.json`;
 
 export const themes = {
     // Default
@@ -30,33 +30,59 @@ export const themes = {
     MaterialCandy: "https://raw.githubusercontent.com/millsp/material-candy/master/material-candy.json",
 
     // More from Shiki repo
+    Andromeeda: shikiRepoTheme("andromeeda"),
+    AuroraX: shikiRepoTheme("aurora-x"),
+    AyuDark: shikiRepoTheme("ayu-dark"),
+    CatppuccinLatte: shikiRepoTheme("catppuccin-latte"),
+    CatppuccinFrappe: shikiRepoTheme("catppuccin-frappe"),
+    CatppuccinMacchiato: shikiRepoTheme("catppuccin-macchiato"),
+    CatppuccinMocha: shikiRepoTheme("catppuccin-mocha"),
     DraculaSoft: shikiRepoTheme("dracula-soft"),
     Dracula: shikiRepoTheme("dracula"),
+    EverforestDark: shikiRepoTheme("everforest-dark"),
+    EverforestLight: shikiRepoTheme("everforest-light"),
+    GithubDarkDefault: shikiRepoTheme("github-dark-default"),
     GithubDarkDimmed: shikiRepoTheme("github-dark-dimmed"),
+    GithubDarkHighContrast: shikiRepoTheme("github-dark-high-contrast"),
     GithubDark: shikiRepoTheme("github-dark"),
+    GithubLightDefault: shikiRepoTheme("github-light-default"),
+    GithubLightHighContrast: shikiRepoTheme("github-light-high-contrast"),
     GithubLight: shikiRepoTheme("github-light"),
+    Houston: shikiRepoTheme("houston"),
+    KanagawaDragon: shikiRepoTheme("kanagawa-dragon"),
+    KanagawaLotus: shikiRepoTheme("kanagawa-lotus"),
+    KanagawaWave: shikiRepoTheme("kanagawa-wave"),
+    LaserWave: shikiRepoTheme("laserwave"),
     LightPlus: shikiRepoTheme("light-plus"),
-    MaterialDarker: shikiRepoTheme("material-darker"),
-    MaterialDefault: shikiRepoTheme("material-default"),
-    MaterialLighter: shikiRepoTheme("material-lighter"),
-    MaterialOcean: shikiRepoTheme("material-ocean"),
-    MaterialPalenight: shikiRepoTheme("material-palenight"),
+    MaterialDarker: shikiRepoTheme("material-theme-darker"),
+    MaterialDefault: shikiRepoTheme("material-theme"),
+    MaterialLighter: shikiRepoTheme("material-theme-lighter"),
+    MaterialOcean: shikiRepoTheme("material-theme-ocean"),
+    MaterialPalenight: shikiRepoTheme("material-theme-palenight"),
     MinDark: shikiRepoTheme("min-dark"),
     MinLight: shikiRepoTheme("min-light"),
     Monokai: shikiRepoTheme("monokai"),
+    NightOwl: shikiRepoTheme("night-owl"),
     Nord: shikiRepoTheme("nord"),
     OneDarkPro: shikiRepoTheme("one-dark-pro"),
+    OneLight: shikiRepoTheme("one-light"),
+    Plastic: shikiRepoTheme("plastic"),
     Poimandres: shikiRepoTheme("poimandres"),
+    Red: shikiRepoTheme("red"),
     RosePineDawn: shikiRepoTheme("rose-pine-dawn"),
     RosePineMoon: shikiRepoTheme("rose-pine-moon"),
     RosePine: shikiRepoTheme("rose-pine"),
     SlackDark: shikiRepoTheme("slack-dark"),
     SlackOchin: shikiRepoTheme("slack-ochin"),
+    SnazzyLight: shikiRepoTheme("snazzy-light"),
     SolarizedDark: shikiRepoTheme("solarized-dark"),
     SolarizedLight: shikiRepoTheme("solarized-light"),
+    Synthwave84: shikiRepoTheme("synthwave-84"),
+    TokyoNight: shikiRepoTheme("tokyo-night"),
+    Vesper: shikiRepoTheme("vesper"),
+    VitesseBlack: shikiRepoTheme("vitesse-black"),
     VitesseDark: shikiRepoTheme("vitesse-dark"),
     VitesseLight: shikiRepoTheme("vitesse-light"),
-    CssVariables: shikiRepoTheme("css-variables"),
 };
 
 export const themeCache = new Map<string, IShikiTheme>();
