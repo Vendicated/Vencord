@@ -129,14 +129,22 @@ export default definePlugin({
     buildSeveralUsers,
 
     mutateChildren(props: any, users: User[], children: any) {
-        if (!Array.isArray(children)) return children;
+        try {
+            if (!Array.isArray(children)) {
+                return children;
+            }
 
-        let element = 0;
+            let element = 0;
 
-        return children.map(c =>
-            c.type === "strong"
-                ? <TypingUser {...props} user={users[element++]} />
-                : c
-        );
+            return children.map(c =>
+                c.type === "strong" || (typeof c !== "string" && !React.isValidElement(c))
+                    ? <TypingUser {...props} user={users[element++]} />
+                    : c
+            );
+        } catch (e) {
+            console.error(e);
+        }
+
+        return children;
     }
 });
