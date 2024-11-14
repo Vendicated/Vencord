@@ -23,8 +23,6 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
-import { Channel, User } from "discord-types/general";
-
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
 
 const settings = definePluginSettings({
