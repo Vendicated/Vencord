@@ -20,11 +20,11 @@ import { addPreEditListener, addPreSendListener, removePreEditListener, removePr
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
-import { getCurrentGuild } from "@utils/discord";
+import { getCurrentGuild, getEmojiURL } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, Patch } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Emoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
@@ -285,7 +285,7 @@ export default definePlugin({
         },
         // Remove boost requirements to stream with high quality
         {
-            find: "STREAM_FPS_OPTION.format",
+            find: "#{intl::STREAM_FPS_OPTION}",
             predicate: () => settings.store.enableStreamQualityBypass,
             replacement: {
                 match: /guildPremiumTier:\i\.\i\.TIER_\d,?/g,
@@ -356,7 +356,7 @@ export default definePlugin({
             ]
         },
         {
-            find: ".Messages.STICKER_POPOUT_UNJOINED_PRIVATE_GUILD_DESCRIPTION.format",
+            find: "#{intl::STICKER_POPOUT_UNJOINED_PRIVATE_GUILD_DESCRIPTION}",
             predicate: () => settings.store.transformStickers,
             replacement: [
                 {
@@ -381,7 +381,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION",
+            find: "#{intl::EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION}",
             predicate: () => settings.store.transformEmojis,
             replacement: {
                 // Add the fake nitro emoji notice
@@ -920,7 +920,7 @@ export default definePlugin({
 
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
 
-                    const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
+                    const url = new URL(getEmojiURL(emoji.id, emoji.animated, s.emojiSize));
                     url.searchParams.set("size", s.emojiSize.toString());
                     url.searchParams.set("name", emoji.name);
 
@@ -953,7 +953,7 @@ export default definePlugin({
 
                 hasBypass = true;
 
-                const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
+                const url = new URL(getEmojiURL(emoji.id, emoji.animated, s.emojiSize));
                 url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
 
