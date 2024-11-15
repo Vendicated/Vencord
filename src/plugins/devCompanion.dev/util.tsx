@@ -26,10 +26,6 @@ export interface RegexNode {
         flags: string;
     };
 }
-export enum FindType {
-    STRING,
-    REGEX
-}
 export interface FunctionNode {
     type: "function";
     value: string;
