@@ -58,7 +58,7 @@ export async function toggle(isEnabled: boolean) {
 async function initThemes() {
     themesStyle ??= createStyle("vencord-themes");
 
-    const { themeLinks, enabledThemes } = Settings;
+    const { themeLinks, enabledThemes, onlineThemeOverrides } = Settings;
 
     // "darker" and "midnight" both count as dark
     const activeTheme = ThemeStore.theme === "light" ? "light" : "dark";
@@ -85,7 +85,8 @@ async function initThemes() {
         links.push(...localThemes);
     }
 
-    themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
+    themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n") +
+        "\n" + Object.values(onlineThemeOverrides).join("\n");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -97,6 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     SettingsStore.addChangeListener("themeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
+    SettingsStore.addChangeListener("onlineThemeOverrides", initThemes);
     ThemeStore.addChangeListener(initThemes);
 
     if (!IS_WEB)
