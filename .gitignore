@@ -22,3 +22,6 @@ src/userplugins
 
 ExtensionCache/
 settings/
+
+# vencord companion module cache
+.modules
