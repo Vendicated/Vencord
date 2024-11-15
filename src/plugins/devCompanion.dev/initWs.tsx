@@ -56,14 +56,21 @@ export function initWs(isManual = false) {
         }
 
 
-        (settings.store.notifyOnAutoConnect || isManual) && Toasts.show({
-            message: "Connected to WebSocket",
-            id: Toasts.genId(),
-            type: Toasts.Type.SUCCESS,
-            options: {
-                position: Toasts.Position.TOP
+        try {
+            if (settings.store.notifyOnAutoConnect || isManual) {
+                Toasts.show({
+                    message: "Connected to WebSocket",
+                    id: Toasts.genId(),
+                    type: Toasts.Type.SUCCESS,
+                    options: {
+                        position: Toasts.Position.TOP
+                    }
+                });
             }
-        });
+        }
+        catch (e) {
+            console.error(e);
+        }
     });
 
     ws.addEventListener("error", e => {
