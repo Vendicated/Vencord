@@ -112,8 +112,8 @@ export default definePlugin({
         {
             find: "getCooldownTextStyle",
             replacement: {
-                match: /(?<=(\i)\.length\?\i.\i\.Messages.THREE_USERS_TYPING\.format\({\i:(\i),(?:\i:)?(\i),\i:\i}\):)\i\.\i\.Messages\.SEVERAL_USERS_TYPING/,
-                replace: (_, users, a, b) => `$self.buildSeveralUsers({ a: ${a}, b: ${b}, count: ${users}.length - 2 })`
+                match: /(,{a:(\i),b:(\i),c:\i}\):)\i\.\i\.string\(\i\.\i#{intl::SEVERAL_USERS_TYPING}\)(?<=(\i)\.length.+?)/,
+                replace: (_, rest, a, b, users) => `${rest}$self.buildSeveralUsers({ a: ${a}, b: ${b}, count: ${users}.length - 2 })`
             },
             predicate: () => settings.store.alternativeFormatting
         }
@@ -129,14 +129,22 @@ export default definePlugin({
     buildSeveralUsers,
 
     mutateChildren(props: any, users: User[], children: any) {
-        if (!Array.isArray(children)) return children;
+        try {
+            if (!Array.isArray(children)) {
+                return children;
+            }
 
-        let element = 0;
+            let element = 0;
 
-        return children.map(c =>
-            c.type === "strong"
-                ? <TypingUser {...props} user={users[element++]} />
-                : c
-        );
+            return children.map(c =>
+                c.type === "strong" || (typeof c !== "string" && !React.isValidElement(c))
+                    ? <TypingUser {...props} user={users[element++]} />
+                    : c
+            );
+        } catch (e) {
+            console.error(e);
+        }
+
+        return children;
     }
 });
