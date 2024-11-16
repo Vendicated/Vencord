@@ -8,7 +8,7 @@ const extensionMap = {
     "ogg": [".ogv", ".oga", ".ogx", ".ogm", ".spx", ".opus"],
     "jpg": [".jpg", ".jpeg", ".jfif", ".jpe", ".jif", ".jfi", ".pjpeg", ".pjp"],
     "svg": [".svgz"],
-    "mp4": [".m4v", ".m4a", ".m4r", ".m4b", ".m4p"],
+    "mp4": [".m4v", ".m4r", ".m4b", ".m4p"],
     "mov": [".movie", ".qt"],
 };
 
