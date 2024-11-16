@@ -575,9 +575,21 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "RamziAH",
         id: 1279957227612147747n,
     },
-        SomeAspy: {
+    SomeAspy: {
         name: "SomeAspy",
         id: 516750892372852754n,
+    },
+    layered: {
+        name: "layered",
+        id: 683416430510866482n,
+    },
+    koqel: {
+        name: "koqel",
+        id: 666061601610268713n,
+    },
+    herbert__: {
+        name: "herbert__",
+        id: 832032090149093447n,
     },
 } satisfies Record<string, Dev>);
 
