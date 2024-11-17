@@ -75,7 +75,6 @@ const enum StickerType {
     PNG = 1,
     APNG = 2,
     LOTTIE = 3,
-    // don't think you can even have gif stickers but the docs have it
     GIF = 4
 }
 
