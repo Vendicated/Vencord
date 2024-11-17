@@ -1,0 +1,129 @@
+[data-tab-id="ThemeLibrary"]::before {
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-mask: var(--si-widget) center/contain no-repeat !important;
+  mask: var(--si-widget) center/contain no-repeat !important;
+}
+
+.vce-theme-info {
+  padding: 0.5rem;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-direction: row;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.vce-theme-info-preview {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 5px;
+  margin: 0.5rem;
+}
+
+.vce-theme-info-preview img {
+  width: 1080px !important;
+  height: 1920px !important;
+  object-fit: cover;
+}
+
+.vce-theme-text {
+  padding: 0.5rem;
+}
+
+.vce-theme-info-tag {
+  background: var(--background-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--background-tertiary);
+  padding: 0.25rem 0.5rem;
+  display: inline-block;
+  border-radius: 5px;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.vce-text-input {
+  display: inline-block !important;
+  color: var(--text-normal) !important;
+  font-size: 16px !important;
+  padding: 0.5em;
+  border: 2px solid var(--background-tertiary);
+  line-height: 1.2;
+  max-height: unset;
+}
+
+.vce-likes-icon {
+  overflow: visible;
+  margin-right: 0.5rem;
+  transition: fill 0.3s ease;
+}
+
+.vce-button-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.vce-warning-button {
+  display: flex;
+  width: 100%;
+}
+
+.vce-search-grid {
+  display: grid;
+  height: 40px;
+  gap: 10px;
+  grid-template-columns: 1fr 200px;
+}
+
+.vce-button {
+  white-space: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vce-overwrite-modal {
+  border: 1px solid var(--background-modifier-accent);
+  border-radius: 8px;
+  padding: 0.5em;
+}
+
+.vce-image-paste {
+  border-radius: 8px;
+  border: 3px dashed var(--background-modifier-accent);
+  background-color: var(--background-secondary);
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: border 0.3s ease;
+}
+
+.vce-image-paste:hover {
+  border: 3px dashed var(--brand-500);
+  transition: border 0.3s ease;
+}
+
+.vce-styled-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.vce-styled-list li {
+  padding: 10px 0;
+  border-bottom: thin solid var(--background-modifier-accent);
+}
+
+.vce-styled-list li:last-child {
+  border-bottom: none;
+}
+
+.vce-divider-border {
+  border-bottom: thin solid var(--background-modifier-accent);
+  padding: 10px 0;
+  width: 100%;
+}

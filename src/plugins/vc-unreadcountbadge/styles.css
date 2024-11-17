@@ -1,0 +1,19 @@
+.vc-unreadCountBadge {
+    margin-left: 4px;
+}
+
+.vc-unreadCountBadge-dot {
+    position: absolute;
+    top: 25%;
+    margin-left: -3%;
+    scale: 0.9;
+    z-index: 1;
+}
+
+.vc-unreadCountBadge-dot-thread {
+    position: absolute;
+    top: 20%;
+    margin-left: -18%;
+    scale: 0.9;
+    z-index: 1;
+}
