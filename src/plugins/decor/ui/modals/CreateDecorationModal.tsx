@@ -138,7 +138,7 @@ function CreateDecorationModal(props: ModalProps) {
                         }}
                     >
                         Decor's Discord server
-                    </Link> and enable your direct messages.
+                    </Link> and allow direct messages.
                 </HelpMessage>
             </ErrorBoundary>
         </ModalContent>
