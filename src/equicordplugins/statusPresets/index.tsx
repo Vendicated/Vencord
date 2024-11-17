@@ -138,11 +138,12 @@ export default definePlugin({
             }
         },
         {
-            find: /"aria-label":.{0,1}\.\i\.string\(\i\.\i#{intl::STATUS_MENU_LABEL}/,
+            find: "#{intl::STATUS_MENU_LABEL}",
             replacement: {
-                match: /!\i&&(.{0,15}\i\.Fragment.{0,55}null==(\i).{0,200}customEmojiPlaceholder\}\),onClick:([^}]+}))/,
+                match: /!\i\i&&(.{0,20}\i\.Fragment.{0,100}null==(\i).{0,200}customEmojiPlaceholder\}\),onClick:(.*?}))/,
                 replace: "$self.render($2, $3),false&&$1"
-            }
+            },
+            all: true
         }
     ],
     render(status: null | { emoji: Emoji | null; }, openCustomStatusModal: () => void) {

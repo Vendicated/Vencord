@@ -11,7 +11,7 @@ import { Button, Forms, React, TabBar, Text, TextArea, Toasts } from "@webpack/c
 
 import { convert as convertLineEP, getIdFromUrl as getLineEmojiPackIdFromUrl, getStickerPackById as getLineEmojiPackById, isLineEmojiPackHtml, parseHtml as getLineEPFromHtml } from "../lineEmojis";
 import { convert as convertLineSP, getIdFromUrl as getLineStickerPackIdFromUrl, getStickerPackById as getLineStickerPackById, isLineStickerPackHtml, parseHtml as getLineSPFromHtml } from "../lineStickers";
-import { migrate } from "../migrate-v1";
+import { isV1, migrate } from "../migrate-v1";
 import { deleteStickerPack, getStickerPack, getStickerPackMetas, saveStickerPack } from "../stickers";
 import { SettingsTabsKey, Sticker, StickerPack, StickerPackMeta } from "../types";
 import { cl, clPicker, Mutex } from "../utils";
@@ -92,12 +92,16 @@ export const Settings = () => {
     const [addStickerHtml, setAddStickerHtml] = React.useState<string>("");
     const [tab, setTab] = React.useState<SettingsTabsKey>(SettingsTabsKey.ADD_STICKER_PACK_URL);
     const [hoveredStickerPackId, setHoveredStickerPackId] = React.useState<string | null>(null);
+    const [_isV1, setV1] = React.useState<boolean>(false);
 
     async function refreshStickerPackMetas() {
         setstickerPackMetas(await getStickerPackMetas());
     }
     React.useEffect(() => {
         refreshStickerPackMetas();
+    }, []);
+    React.useEffect(() => {
+        isV1().then(setV1);
     }, []);
 
     return (
@@ -365,7 +369,7 @@ export const Settings = () => {
 
                     <Flex flexDirection="row" style={{
                         alignItems: "center",
-                        justifyContent: "center"
+                        justifyContent: "start"
                     }} >
                         <Button
                             size={Button.Sizes.SMALL}
@@ -398,6 +402,9 @@ export const Settings = () => {
                             size={Button.Sizes.SMALL}
                             onClick={async e => {
                                 await migrate();
+                            }}
+                            style={{
+                                display: _isV1 ? "unset" : "none"
                             }}
                         >Migrate from v1</Button>
                     </Flex>
