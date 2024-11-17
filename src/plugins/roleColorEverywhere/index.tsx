@@ -214,9 +214,9 @@ export default definePlugin({
     RoleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
         const role = GuildStore.getRole(guildId, id);
 
-        return role != null && (
+        return (
             <span style={{
-                color: role.colorString,
+                color: role?.colorString,
                 fontWeight: "unset",
                 letterSpacing: ".05em"
             }}>
