@@ -31,9 +31,19 @@ const PHRASES = [
 
 function uwufyString(input: string): string {
     const stringLength = input.length;
+
+    // Regular expression to match URLs
     const urlRegex = /https?:\/\/[^\s]+/g;
-    const urls = input.match(urlRegex) || [];
-    input = input.replace(urlRegex, "URL_PLACEHOLDER");
+    const urls: { url: string; position: number; }[] = [];
+    let match;
+
+    // Store URLs and their positions
+    while ((match = urlRegex.exec(input)) !== null) {
+        urls.push({ url: match[0], position: match.index });
+    }
+
+    // Remove URLs from the input
+    input = input.replace(urlRegex, "");
 
     input = input
         .replace(/[rl]/g, "w").replace(/[RL]/g, "W")
@@ -56,8 +66,11 @@ function uwufyString(input: string): string {
 
     input = input + " " + PHRASES[stringLength % PHRASES.length];
 
-    urls.forEach(url => {
-        input = input.replace("URL_PLACEHOLDER", url);
+    // Reinsert URLs at their original positions with the desired format
+    urls.forEach(({ url, position }) => {
+        const uwufiedUrl = url.replace(/https?:\/\//, "").replace(/[rl]/g, "w").replace(/[RL]/g, "W");
+        const formattedUrl = `[${uwufiedUrl}](${url})`;
+        input = input.slice(0, position) + formattedUrl + input.slice(position);
     });
 
     return input;
