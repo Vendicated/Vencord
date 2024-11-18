@@ -46,6 +46,25 @@ const FREAKY_PHRASES = [ // NSFW
     "#festundflauschig",
 ];
 
+const EMOJIS = [
+    "🤭",
+    "🥺",
+    "😳",
+    "😊",
+    "😍",
+    "😘",
+    "😚",
+    "😌",
+    "😆",
+    "😋",
+    "😛",
+    "😜",
+    "😝",
+    "😏",
+    "😒",
+    "😞",
+    "💅"
+];
 
 function uwufyString(input: string): string {
     const stringLength = input.length;
@@ -94,10 +113,10 @@ function uwufyString(input: string): string {
     // Only add a phrase if the input without URLs and Emojis is not empty
     if (inputWithoutUrlsAndEmojis.trim().length > 0) {
         if (settings.store.FreakyModeNSFW) {
-            const freakyPhrases = settings.store.CustomFreakyPhrases.split(";");
+            const freakyPhrases = settings.store.CustomFreakyPhrases.split(";") || FREAKY_PHRASES;
             input = input + " " + freakyPhrases[stringLength % freakyPhrases.length];
         } else {
-            const customPhrases = settings.store.CustomPhrases.split(";");
+            const customPhrases = settings.store.CustomPhrases.split(";") || PHRASES;
             input = input + " " + customPhrases[stringLength % customPhrases.length];
         }
     }
@@ -147,6 +166,20 @@ const settings = definePluginSettings({
             FREAKY_PHRASES.length = 0;
             FREAKY_PHRASES.push(...newValue.split(";"));
         }
+    },
+    EnableCustomEmojis: {
+        type: OptionType.BOOLEAN,
+        description: "Enable custom emojis (not implemented yet)",
+        default: false
+    },
+    CustomEmojis: {
+        type: OptionType.STRING,
+        description: "Custom emojis to add to the UwUfy output (separated by ';')",
+        default: EMOJIS.join(";"),
+        onChange(newValue: string) {
+            EMOJIS.length = 0;
+            EMOJIS.push(...newValue.split(";"));
+        }
     }
 });
 
@@ -154,10 +187,17 @@ let lastState = false;
 
 const UwUfyToggle: ChatBarButton = ({ isMainChat }) => {
     const [enabled, setEnabled] = useState(lastState);
+    const [enabledNSFW, setEnabledNSFW] = useState(settings.store.FreakyModeNSFW);
 
     function setEnabledValue(value: boolean) {
         if (settings.store.persistState) lastState = value;
         setEnabled(value);
+    }
+
+    function setNSFWValue(value: boolean) {
+        if (settings.store.persistState) lastState = value;
+        settings.store.FreakyModeNSFW = value;
+        setEnabledNSFW(value);
     }
 
     useEffect(() => {
@@ -177,6 +217,10 @@ const UwUfyToggle: ChatBarButton = ({ isMainChat }) => {
         <ChatBarButton
             tooltip={enabled ? "Disable UwUfy" : "Enable UwUfy"}
             onClick={() => setEnabledValue(!enabled)}
+            onContextMenu={e => {
+                e.preventDefault();
+                setNSFWValue(!enabledNSFW);
+            }}
         >
             <svg
                 width="24"
@@ -190,9 +234,9 @@ const UwUfyToggle: ChatBarButton = ({ isMainChat }) => {
                     dominantBaseline="middle"
                     textAnchor="middle"
                     fontSize="12"
-                    fill="currentColor"
+                    fill={enabledNSFW ? "var(--status-danger)" : "currentColor"}
                 >
-                    UwU
+                    {enabledNSFW ? "XwX" : "UwU"}
                 </text>
                 {!enabled && (
                     <>
