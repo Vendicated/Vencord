@@ -215,7 +215,7 @@ const UwUfyToggle: ChatBarButton = ({ isMainChat }) => {
 
     return (
         <ChatBarButton
-            tooltip={enabled ? "Disable UwUfy" : "Enable UwUfy"}
+            tooltip={enabled ? "Disable " + (enabledNSFW ? "XwXfy" : "UwUfy") : "Enable " + (enabledNSFW ? "XwXfy" : "UwUfy")}
             onClick={() => setEnabledValue(!enabled)}
             onContextMenu={e => {
                 e.preventDefault();
