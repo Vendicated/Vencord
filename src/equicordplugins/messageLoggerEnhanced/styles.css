@@ -11,6 +11,14 @@
     height: 100%;
 }
 
+.msg-logger-modal-info-icon {
+    position: absolute;
+    top: -24px;
+    right: -24px;
+    color: var(--interactive-normal);
+    cursor: pointer;
+}
+
 .msg-logger-modal-header {
     flex-direction: column;
 
@@ -35,12 +43,11 @@
     height: 100%;
 }
 
-.msg-logger-modal-header>div:has(input) {
+.msg-logger-modal-header > div:has(input) {
     width: 100%;
 }
 
 .msg-logger-modal-tab-bar-item {
-    margin-right: 32px;
     padding-bottom: 16px;
     margin-bottom: -2px;
 }
@@ -55,7 +62,7 @@
     color: var(--interactive-normal);
 }
 
-:is(.vc-log-toolbox-btn:hover, .vc-log-toolbox-btn[class*='selected']) svg {
+:is(.vc-log-toolbox-btn:hover, .vc-log-toolbox-btn[class*="selected"]) svg {
     color: var(--interactive-active);
 }
 
@@ -75,32 +82,4 @@
 .folder-upload-button {
     margin: 6px;
     padding: 4px 8px;
-}
-
-.vc-updater-modal-content {
-    padding: 1rem 2rem;
-}
-
-div[class*="messagelogger-deleted"] [class*="contents"] > :is(div, h1, h2, h3, p) {
-    color: var(--text-normal) !important;
-}
-
-/* Markdown title highlighting */
-div[class*="messagelogger-deleted"] [class*="contents"] :is(h1, h2, h3) {
-    color: var(--text-normal) !important;
-}
-
-/* Bot "thinking" text highlighting */
-div[class*="messagelogger-deleted"] [class*="colorStandard"] {
-    color: var(--text-normal) !important;
-}
-
-/* Embed highlighting */
-div[class*="messagelogger-deleted"] article :is(div, span, h1, h2, h3, p) {
-    color: var(--text-normal) !important;
-}
-
-div[class*="messagelogger-deleted"] a {
-    color: var(--text-link) !important;
-    text-decoration: underline;
 }

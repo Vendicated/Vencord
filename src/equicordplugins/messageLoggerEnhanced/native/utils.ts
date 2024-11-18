@@ -24,3 +24,5 @@ export async function ensureDirectoryExists(cacheDir: string) {
 export function getAttachmentIdFromFilename(filename: string) {
     return path.parse(filename).name;
 }
+
+export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

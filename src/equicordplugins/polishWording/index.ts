@@ -59,8 +59,8 @@ function apostrophe(textInput: string): string {
     const words: string[] = corrected.split(", ");
     const wordsInputted = textInput.split(" ");
 
-    wordsInputted.forEach((element) => {
-        words.forEach((wordelement) => {
+    wordsInputted.forEach(element => {
+        words.forEach(wordelement => {
             if (removeApostrophes(wordelement) === element.toLowerCase()) {
                 wordsInputted[wordsInputted.indexOf(element)] = restoreCap(
                     wordelement,
@@ -109,9 +109,9 @@ function cap(textInput: string): string {
         Settings.plugins.PolishWording.blockedWords.split(", ");
 
     return sentences
-        .map((element) => {
+        .map(element => {
             if (
-                !blockedWordsArray.some((word) =>
+                !blockedWordsArray.some(word =>
                     element.toLowerCase().startsWith(word.toLowerCase()),
                 )
             ) {
