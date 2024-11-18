@@ -31,15 +31,15 @@ const PHRASES = [
 
 function uwufyString(input: string): string {
     const stringLength = input.length;
+    const urlRegex = /https?:\/\/[^\s]+/g;
+    const urls = input.match(urlRegex) || [];
+    input = input.replace(urlRegex, "URL_PLACEHOLDER");
+
     input = input
         .replace(/[rl]/g, "w").replace(/[RL]/g, "W")
         .replace(/ove/g, "uv").replace(/OVE/g, "UV")
         .replace(/o/g, "owo").replace(/O/g, "OwO")
-        .replace(/!/g, "!!!").replace(/\?/g, "???")
-        .replace(/no/g, "nyo").replace(/NO/g, "NYO") // no -> nyo
-        .replace(/t/g, "tw").replace(/T/g, "TW") // t -> tw
-        .replace(/s/g, "sh").replace(/S/g, "SH") // s -> sh
-        .replace(/you/g, "yuwu").replace(/YOU/g, "YUWU"); // you -> yuwu
+        .replace(/!/g, "!!!").replace(/\?/g, "???");
 
     if (stringLength % 3 === 0) {
         input = input.toUpperCase();
@@ -54,7 +54,13 @@ function uwufyString(input: string): string {
         input = input.replace(/\b([\p{L}])(\p{L}*)\b/gu, "$1-$1$2");
     }
 
-    return input + " " + PHRASES[stringLength % PHRASES.length];
+    input = input + " " + PHRASES[stringLength % PHRASES.length];
+
+    urls.forEach(url => {
+        input = input.replace("URL_PLACEHOLDER", url);
+    });
+
+    return input;
 }
 
 const settings = definePluginSettings({
