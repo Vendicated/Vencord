@@ -90,6 +90,7 @@ const CookieClickerModalContent = ({ rootProps }: { rootProps: ModalProps; }) =>
                                 alt="Cookie"
                                 className="cookie-clicker-image"
                                 onClick={handleCookieClick}
+                                draggable={false}
                             />
                             {floatingNumbers.map(number => (
                                 <div

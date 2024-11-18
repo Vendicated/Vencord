@@ -31,15 +31,6 @@
     width: 200px;
     cursor: pointer;
     transition: transform 0.2s;
-    /* stylelint-disable-next-line property-no-vendor-prefix */
-    -webkit-user-select: none;
-    /* stylelint-disable-next-line property-no-vendor-prefix */
-    -khtml-user-select: none;
-    /* stylelint-disable-next-line property-no-vendor-prefix */
-    -moz-user-select: none;
-    /* stylelint-disable-next-line property-no-vendor-prefix */
-    -o-user-select: none;
-    user-select: none;
 }
 
 .cookie-clicker-image:hover {
