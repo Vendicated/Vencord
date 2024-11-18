@@ -576,14 +576,13 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 1279957227612147747n,
     },
     SomeAspy: {
-    SomeAspy: {
         name: "SomeAspy",
         id: 516750892372852754n,
     },
     notvexi: {
         name: "lethalfluff",
         id: 337568120028004362n
-    }
+    },
     jamesbt365: {
         name: "jamesbt365",
         id: 158567567487795200n,
