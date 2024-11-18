@@ -43,9 +43,9 @@ function uwufyString(input: string): string {
     }
 
     // Remove URLs from the input
-    input = input.replace(urlRegex, "");
+    const inputWithoutUrls = input.replace(urlRegex, "");
 
-    input = input
+    input = inputWithoutUrls
         .replace(/[rl]/g, "w").replace(/[RL]/g, "W")
         .replace(/ove/g, "uv").replace(/OVE/g, "UV")
         .replace(/o/g, "owo").replace(/O/g, "OwO")
@@ -64,7 +64,10 @@ function uwufyString(input: string): string {
         input = input.replace(/\b([\p{L}])(\p{L}*)\b/gu, "$1-$1$2");
     }
 
-    input = input + " " + PHRASES[stringLength % PHRASES.length];
+    // Only add a phrase if the input without URLs is not empty
+    if (inputWithoutUrls.trim().length > 0) {
+        input = input + " " + PHRASES[stringLength % PHRASES.length];
+    }
 
     // Reinsert URLs at their original positions with the desired format
     urls.forEach(({ url, position }) => {
