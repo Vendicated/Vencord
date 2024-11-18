@@ -82,11 +82,9 @@ function buttonsInner(buttons: ButtonReactNode[]) {
             overflowX: "auto"
         }}>
             {open ? buttons.map(b => {
-                console.log(b.key);
                 return <>{b}</>;
             }) : buttons.map(b => {
-                console.log(b.key);
-                if (settings.store.HideVencordButtons && b.key === "gif" || b.key === "sticker" || b.key === "emoji") {
+                if (settings.store.HideVencordButtons && (b.key === "gif" || b.key === "sticker" || b.key === "emoji")) {
                     return <>{b}</>;
                 }
                 return null;
