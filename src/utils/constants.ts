@@ -21,9 +21,9 @@ export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 
 export interface Dev {
-	name: string;
-	id: bigint;
-	badge?: boolean;
+    name: string;
+    id: bigint;
+    badge?: boolean;
 }
 
 /**
@@ -430,7 +430,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Mopi: {
         name: "Mopi",
         id: 1022189106614243350n
-	},
+    },
     Grzesiek11: {
         name: "Grzesiek11",
         id: 368475654662127616n,
@@ -450,7 +450,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Max: {
         name: "Max",
         id: 1189527130611138663n,
-	},
+    },
     Av32000: {
         name: "Av32000",
         id: 593436735380127770n,
@@ -573,8 +573,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 721717126523781240n,
     },
     nyx: {
-        name: "verticalsync",
-        id: 328165170536775680n
+        name: "verticalsync.",
+        id: 1207087393929171095n
     },
     hen: {
         id: 279266228151779329n,
@@ -587,7 +587,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     keifufu: {
         name: "keifufu",
         id: 469588398110146590n
-	},
+    },
     sadan: {
         name: "sadan",
         id: 521819891141967883n
@@ -607,7 +607,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     Joona: {
         name: "Joona",
         id: 297410829589020673n
-    },  
+    },
     vappster: {
         name: "vappster",
         id: 747192967311261748n
@@ -660,34 +660,34 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "! 𝕯'𝖆𝖒𝖘",
         id: 769939285792653325n,
     },
-	Skully: {
-		name: "Skully",
-		id: 150298098516754432n
-	},
+    Skully: {
+        name: "Skully",
+        id: 150298098516754432n
+    },
     ryan: {
         name: "ryan",
         id: 479403382994632704n
-	},
+    },
     Fres: {
         name: "fres",
         id: 843448897737064448n
-	},
+    },
     KrystalSkull: {
-      name: "KrystalSkullOfficial",
-      id: 929208515883569182n
+        name: "KrystalSkullOfficial",
+        id: 929208515883569182n
     },
     Eloelle: {
         name: "Eloelle",
         id: 90987261205696512n,
-	},
+    },
     KawaiianPizza: {
         name: "KawaiianPizza",
         id: 501000986735673347n
-	},
+    },
     williamist: {
         name: "williamist",
         id: 730129626139066449n
-	},
+    },
     soul_fire_: {
         name: "soul_fire_",
         id: 727416368827334778n
@@ -695,11 +695,11 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     PWall: {
         name: "PWall",
         id: 0n
-	},
+    },
     Scyye: {
         name: "Scyye",
         id: 553652308295155723n
-	},
+    },
     thororen: {
         name: "thororen",
         id: 848339671629299742n,
@@ -716,13 +716,17 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "SomeAspy",
         id: 516750892372852754n,
     },
+    jamesbt365: {
+        name: "jamesbt365",
+        id: 158567567487795200n,
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
 export const DevsById = /* #__PURE__*/ (() =>
-	Object.freeze(Object.fromEntries(
-		Object.entries(Devs)
-			.filter(d => d[1].id !== 0n)
-			.map(([_, v]) => [v.id, v] as const)
-	))
+    Object.freeze(Object.fromEntries(
+        Object.entries(Devs)
+            .filter(d => d[1].id !== 0n)
+            .map(([_, v]) => [v.id, v] as const)
+    ))
 )() as Record<string, Dev>;
