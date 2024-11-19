@@ -60,7 +60,7 @@ function cleanMessage(msg: CustomMessage) {
 }
 
 function openViewRawModal(obj: any, type: string, isMessage?: boolean) {
-    const key = openModal((props) => (
+    const key = openModal(props => (
         <ErrorBoundary>
             <ModalRoot {...props} size={ModalSize.LARGE}>
                 <ModalHeader>
@@ -134,16 +134,16 @@ export default definePlugin({
         "Copy/View raw content of any message, channel, or guild, but show in the right click menu.",
     authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna, Devs.Kyuuhachi],
     contextMenus: {
-        "guild-context": makeContextCallback("guild", (val) =>
+        "guild-context": makeContextCallback("guild", val =>
             openViewRawModal(val, "Guild"),
         ),
-        "channel-context": makeContextCallback("channel", (val) =>
+        "channel-context": makeContextCallback("channel", val =>
             openViewRawModal(val, "Channel"),
         ),
-        "user-context": makeContextCallback("user", (val) =>
+        "user-context": makeContextCallback("user", val =>
             openViewRawModal(val, "User"),
         ),
-        message: makeContextCallback("message", (val) =>
+        message: makeContextCallback("message", val =>
             openViewRawModal(cleanMessage(val), "Message", true),
         ),
     },

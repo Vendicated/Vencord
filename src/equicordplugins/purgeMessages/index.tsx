@@ -25,17 +25,14 @@ import { findByPropsLazy } from "@webpack";
 import { Forms, MessageStore, UserStore } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
-import { loggedMessages } from "../messageLoggerEnhanced/LoggedMessageManager";
-
 const MessageActions = findByPropsLazy("deleteMessage", "startEditMessage");
 
 async function deleteMessages(amount: number, channel: Channel, delay: number = 1500): Promise<number> {
     let deleted = 0;
     const userId = UserStore.getCurrentUser().id;
     const messages: Message[] = JSON.parse(JSON.stringify(MessageStore.getMessages(channel.id)._array.filter((m: Message) => m.author.id === userId).reverse()));
-    const uniqueMessages: Message[] = !loggedMessages.deletedMessages[channel.id] ? messages : messages.filter(message => !loggedMessages.deletedMessages[channel.id].includes(message.id));
 
-    for (const message of uniqueMessages) {
+    for (const message of messages) {
         MessageActions.deleteMessage(channel.id, message.id);
         amount--;
         deleted++;

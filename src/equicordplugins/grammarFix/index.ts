@@ -28,19 +28,19 @@ const settings = definePluginSettings({
     },
 });
 
-const getPresend = (dictionary) => {
+const getPresend = dictionary => {
     const presendObject: SendListener = (_, msg) => {
         msg.content = msg.content.trim();
         if (!msg.content.includes("```") && /\w/.test(msg.content.charAt(0))) {
             if (settings.store.autoWordReplacement) {
                 const re = new RegExp(
                     `(^|(?<=[^A-Z0-9]+))(${Object.keys(dictionary)
-                        .map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+                        .map(k => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
                         .join("|")})((?=[^A-Z0-9]+)|$)`,
                     "gi",
                 );
                 if (re !== null) {
-                    msg.content = msg.content.replace(re, (match) => {
+                    msg.content = msg.content.replace(re, match => {
                         return dictionary[match.toLowerCase()] || match;
                     });
                 }
@@ -62,7 +62,7 @@ const getPresend = (dictionary) => {
 
             // Ensure sentences are capitalized after punctuation
             if (settings.store.autoCapitalization) {
-                msg.content = msg.content.replace(/([.!?])\s*(\w)/g, (match) =>
+                msg.content = msg.content.replace(/([.!?])\s*(\w)/g, match =>
                     match.toUpperCase(),
                 );
 

@@ -1,37 +1,26 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { classNameFactory } from "@api/Styles";
+import { Flex } from "@components/Flex";
+import { InfoIcon } from "@components/Icons";
 import { openUserProfile } from "@utils/discord";
 import { copyWithToast } from "@utils/misc";
 import { closeAllModals, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { LazyComponent, useAwaiter } from "@utils/react";
+import { LazyComponent } from "@utils/react";
 import { find, findByCode, findByCodeLazy } from "@webpack";
-import { Alerts, Button, ChannelStore, ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React, TabBar, Text, TextInput, useCallback, useMemo, useRef, useState } from "@webpack/common";
+import { Alerts, Button, ChannelStore, ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React, TabBar, Text, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
+import { clearMessagesIDB, DBMessageRecord, deleteMessageIDB, deleteMessagesBulkIDB } from "../db";
 import { settings } from "../index";
-import { clearLogs, defaultLoggedMessages, removeLog, removeLogs, savedLoggedMessages } from "../LoggedMessageManager";
-import { LoggedMessage, LoggedMessageJSON, LoggedMessages } from "../types";
-import { isGhostPinged, messageJsonToMessageClass, sortMessagesByDate } from "../utils";
-import { doesMatch, parseQuery } from "../utils/parseQuery";
-
-
+import { LoggedMessage, LoggedMessageJSON } from "../types";
+import { messageJsonToMessageClass } from "../utils";
+import { importLogs } from "../utils/settingsUtils";
+import { useMessages } from "./hooks";
 
 export interface MessagePreviewProps {
     className: string;
@@ -67,7 +56,7 @@ const ChildrenAccessories = LazyComponent<ChildrenAccProops>(() => findByCode("c
 
 const cl = classNameFactory("msg-logger-modal-");
 
-enum LogTabs {
+export enum LogTabs {
     DELETED = "Deleted",
     EDITED = "Edited",
     GHOST_PING = "Ghost Pinged"
@@ -79,73 +68,14 @@ interface Props {
 }
 
 export function LogsModal({ modalProps, initalQuery }: Props) {
-    const [x, setX] = useState(0);
-    const forceUpdate = () => setX(e => e + 1);
-
-    const [logs, _, pending] = useAwaiter(async () => savedLoggedMessages, {
-        fallbackValue: defaultLoggedMessages as LoggedMessages,
-        deps: [x]
-    });
     const [currentTab, setCurrentTab] = useState(LogTabs.DELETED);
     const [queryEh, setQuery] = useState(initalQuery ?? "");
     const [sortNewest, setSortNewest] = useState(settings.store.sortNewest);
-    const [numDisplayedMessages, setNumDisplayedMessages] = useState(50);
+    const [numDisplayedMessages, setNumDisplayedMessages] = useState(settings.store.messagesToDisplayAtOnceInLogs);
     const contentRef = useRef<HTMLDivElement | null>(null);
 
-    const handleLoadMore = useCallback(() => {
-        setNumDisplayedMessages(prevNum => prevNum + 50);
-    }, []);
+    const { messages, total, statusTotal, pending, reset } = useMessages(queryEh, currentTab, sortNewest, numDisplayedMessages);
 
-
-    // Flogger.log(logs, _, pending, contentRef);
-
-    // Flogger.time("hi");
-    const messages: string[][] = currentTab === LogTabs.DELETED || currentTab === LogTabs.GHOST_PING
-        ? Object.values(logs?.deletedMessages ?? {})
-        : Object.values(logs?.editedMessages ?? {});
-
-    const flattendAndfilteredAndSortedMessages = useMemo(() => {
-        const { success, type, id, negate, query } = parseQuery(queryEh);
-
-        if (query === "" && !success) {
-            const result = messages
-                .flat()
-                .filter(m => currentTab === LogTabs.GHOST_PING ? isGhostPinged(logs[m].message!) : true)
-                .sort(sortMessagesByDate);
-            return sortNewest ? result : result.reverse();
-        }
-
-        const result = messages
-            .flat()
-            .filter(m =>
-                currentTab === LogTabs.GHOST_PING
-                    ? isGhostPinged(logs[m].message)
-                    : true
-            )
-            .filter(m =>
-                logs[m]?.message != null &&
-                (
-                    success === false
-                        ? true
-                        : negate
-                            ? !doesMatch(type!, id!, logs[m].message!)
-                            : doesMatch(type!, id!, logs[m].message!)
-                )
-            )
-            .filter(m =>
-                logs[m]?.message?.content?.toLowerCase()?.includes(query.toLowerCase()) ??
-                logs[m].message?.editHistory?.map(m => m.content?.toLowerCase()).includes(query.toLowerCase())
-            )
-            .sort(sortMessagesByDate);
-
-        return sortNewest ? result : result.reverse();
-    }, [currentTab, logs, queryEh, sortNewest]);
-
-    const visibleMessages = flattendAndfilteredAndSortedMessages.slice(0, numDisplayedMessages);
-
-    const canLoadMore = numDisplayedMessages < flattendAndfilteredAndSortedMessages.length;
-
-    // Flogger.timeEnd("hi");
     return (
         <ModalRoot className={cl("root")} {...modalProps} size={ModalSize.LARGE}>
             <ModalHeader className={cl("header")}>
@@ -157,7 +87,7 @@ export function LogsModal({ modalProps, initalQuery }: Props) {
                     selectedItem={currentTab}
                     onItemSelect={e => {
                         setCurrentTab(e);
-                        setNumDisplayedMessages(50);
+                        setNumDisplayedMessages(settings.store.messagesToDisplayAtOnceInLogs);
                         contentRef.current?.firstElementChild?.scrollTo(0, 0);
                         // forceUpdate();
                     }}
@@ -188,21 +118,23 @@ export function LogsModal({ modalProps, initalQuery }: Props) {
                     <ModalContent
                         className={cl("content")}
                     >
-                        {
-                            pending || logs == null || messages.length === 0
-                                ? <EmptyLogs />
-                                : (
-                                    <LogsContentMemo
-                                        visibleMessages={visibleMessages}
-                                        canLoadMore={canLoadMore}
-                                        tab={currentTab}
-                                        logs={logs}
-                                        sortNewest={sortNewest}
-                                        forceUpdate={forceUpdate}
-                                        handleLoadMore={handleLoadMore}
-                                    />
-                                )
-                        }
+                        {messages != null && total === 0 && (
+                            <EmptyLogs
+                                hasQuery={queryEh.length !== 0}
+                                reset={reset}
+                            />
+                        )}
+
+                        {!pending && messages != null && (
+                            <LogsContentMemo
+                                visibleMessages={messages}
+                                canLoadMore={messages.length < statusTotal && messages.length >= settings.store.messagesToDisplayAtOnceInLogs}
+                                tab={currentTab}
+                                sortNewest={sortNewest}
+                                reset={reset}
+                                handleLoadMore={() => setNumDisplayedMessages(e => e + settings.store.messagesToDisplayAtOnceInLogs)}
+                            />
+                        )}
                     </ModalContent>
                 }
             </div>
@@ -216,8 +148,8 @@ export function LogsModal({ modalProps, initalQuery }: Props) {
                         confirmColor: Button.Colors.RED,
                         cancelText: "Cancel",
                         onConfirm: async () => {
-                            await clearLogs();
-                            forceUpdate();
+                            await clearMessagesIDB();
+                            reset();
                         }
 
                     })}
@@ -227,16 +159,16 @@ export function LogsModal({ modalProps, initalQuery }: Props) {
                 <Button
                     style={{ marginRight: "16px" }}
                     color={Button.Colors.YELLOW}
-                    disabled={visibleMessages.length === 0}
+                    disabled={messages?.length === 0}
                     onClick={() => Alerts.show({
                         title: "Clear Logs",
-                        body: `Are you sure you want to clear ${visibleMessages.length} logs`,
+                        body: `Are you sure you want to clear ${messages.length} logs`,
                         confirmText: "Clear",
                         confirmColor: Button.Colors.RED,
                         cancelText: "Cancel",
                         onConfirm: async () => {
-                            await removeLogs(visibleMessages);
-                            forceUpdate();
+                            await deleteMessagesBulkIDB(messages.map(e => e.message_id));
+                            reset();
                         }
                     })}
                 >
@@ -262,28 +194,27 @@ export function LogsModal({ modalProps, initalQuery }: Props) {
 }
 
 interface LogContentProps {
-    logs: LoggedMessages,
     sortNewest: boolean;
     tab: LogTabs;
-    visibleMessages: string[];
+    visibleMessages: DBMessageRecord[];
     canLoadMore: boolean;
-    forceUpdate: () => void;
+    reset: () => void;
     handleLoadMore: () => void;
 }
 
-function LogsContent({ logs, visibleMessages, canLoadMore, sortNewest, tab, forceUpdate, handleLoadMore }: LogContentProps) {
+function LogsContent({ visibleMessages, canLoadMore, sortNewest, tab, reset, handleLoadMore }: LogContentProps) {
     if (visibleMessages.length === 0)
         return <NoResults tab={tab} />;
 
     return (
         <div className={cl("content-inner")}>
             {visibleMessages
-                .map((id, i) => (
+                .map(({ message }, i) => (
                     <LMessage
-                        key={id}
-                        log={logs[id] as { message: LoggedMessageJSON; }}
-                        forceUpdate={forceUpdate}
-                        isGroupStart={isGroupStart(logs[id]?.message, logs[visibleMessages[i - 1]]?.message, sortNewest)}
+                        key={message.id}
+                        log={{ message }}
+                        reset={reset}
+                        isGroupStart={isGroupStart(message, visibleMessages[i - 1]?.message, sortNewest)}
                     />
                 ))}
             {
@@ -330,12 +261,35 @@ function NoResults({ tab }: { tab: LogTabs; }) {
     );
 }
 
-function EmptyLogs() {
+function EmptyLogs({ hasQuery, reset: forceUpdate }: { hasQuery: boolean; reset: () => void; }) {
     return (
         <div className={cl("empty-logs", "content-inner")} style={{ textAlign: "center" }}>
-            <Text variant="text-lg/normal">
-                Empty eh
-            </Text>
+            <Flex flexDirection="column" style={{ position: "relative" }}>
+
+                <Text variant="text-lg/normal">
+                    Empty eh
+                </Text>
+
+                {!hasQuery && (
+                    <>
+                        <Tooltip text="ML Enhanced now stores logs in indexeddb. You need to import your old logs from the logs directory. Importing wont overwrite existing logs">
+                            {({ onMouseEnter, onMouseLeave }) => (
+                                <div
+                                    className={cl("info-icon")}
+                                    onMouseEnter={onMouseEnter}
+                                    onMouseLeave={onMouseLeave}
+                                >
+                                    <InfoIcon />
+                                </div>
+                            )}
+                        </Tooltip>
+
+                        <Button onClick={() => importLogs().then(() => forceUpdate())}>
+                            Import Logs
+                        </Button>
+                    </>
+                )}
+            </Flex>
         </div>
     );
 
@@ -344,10 +298,12 @@ function EmptyLogs() {
 interface LMessageProps {
     log: { message: LoggedMessageJSON; };
     isGroupStart: boolean,
-    forceUpdate: () => void;
+    reset: () => void;
 }
-function LMessage({ log, isGroupStart, forceUpdate, }: LMessageProps) {
+function LMessage({ log, isGroupStart, reset, }: LMessageProps) {
     const message = useMemo(() => messageJsonToMessageClass(log), [log]);
+
+    // console.log(message);
 
     if (!message) return null;
 
@@ -370,7 +326,6 @@ function LMessage({ log, isGroupStart, forceUpdate, }: LMessageProps) {
                                 closeAllModals();
                             }}
                         />
-
                         <Menu.MenuItem
                             key="open-user-profile"
                             id="open-user-profile"
@@ -427,10 +382,7 @@ function LMessage({ log, isGroupStart, forceUpdate, }: LMessageProps) {
                             label="Delete Log"
                             color="danger"
                             action={() =>
-                                removeLog(log.message.id)
-                                    .then(() => {
-                                        forceUpdate();
-                                    })
+                                deleteMessageIDB(log.message.id).then(() => reset())
                             }
                         />
 
@@ -478,6 +430,8 @@ function isGroupStart(
 ) {
     if (!currentMessage || !previousMessage) return true;
 
+    if (currentMessage.id === previousMessage.id) return true;
+
     const [newestMessage, oldestMessage] = sortNewest
         ? [previousMessage, currentMessage]
         : [currentMessage, previousMessage];
@@ -485,7 +439,7 @@ function isGroupStart(
     if (newestMessage.author.id !== oldestMessage.author.id) return true;
 
     const timeDifferenceInMinutes = Math.abs(
-        (new Date(newestMessage.timestamp).getTime() - new Date(oldestMessage.timestamp).getTime()) / (1000 * 60)
+        (new Date(newestMessage.timestamp)?.getTime() - new Date(oldestMessage.timestamp)?.getTime()) / (1000 * 60)
     );
 
     return timeDifferenceInMinutes >= 5;
