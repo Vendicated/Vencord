@@ -7,15 +7,12 @@
 import { readdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { DATA_DIR } from "@main/utils/constants";
+import { Queue } from "@utils/Queue";
 import { dialog, IpcMainInvokeEvent, shell } from "electron";
 
+import { DATA_DIR } from "../../../main/utils/constants";
 import { getSettings, saveSettings } from "./settings";
-export * from "./updater";
-
-import { LoggedAttachment } from "../types";
-import { LOGS_DATA_FILENAME } from "../utils/constants";
-import { ensureDirectoryExists, getAttachmentIdFromFilename, sleep } from "./utils";
+import { ensureDirectoryExists, getAttachmentIdFromFilename } from "./utils";
 
 export { getSettings };
 
@@ -56,13 +53,7 @@ export async function init(_event: IpcMainInvokeEvent) {
 export async function getImageNative(_event: IpcMainInvokeEvent, attachmentId: string): Promise<Uint8Array | Buffer | null> {
     const imagePath = nativeSavedImages.get(attachmentId);
     if (!imagePath) return null;
-
-    try {
-        return await readFile(imagePath);
-    } catch (error: any) {
-        console.error(error);
-        return null;
-    }
+    return await readFile(imagePath);
 }
 
 export async function writeImageNative(_event: IpcMainInvokeEvent, filename: string, content: Uint8Array) {
@@ -90,11 +81,24 @@ export async function deleteFileNative(_event: IpcMainInvokeEvent, attachmentId:
     await unlink(imagePath);
 }
 
+const LOGS_DATA_FILENAME = "message-logger-logs.json";
+const dataWriteQueue = new Queue();
+
+export async function getLogsFromFs(_event: IpcMainInvokeEvent) {
+    const logsDir = await getLogsDir();
+
+    await ensureDirectoryExists(logsDir);
+    try {
+        return JSON.parse(await readFile(path.join(logsDir, LOGS_DATA_FILENAME), "utf-8"));
+    } catch { }
+
+    return null;
+}
 
 export async function writeLogs(_event: IpcMainInvokeEvent, contents: string) {
     const logsDir = await getLogsDir();
 
-    writeFile(path.join(logsDir, LOGS_DATA_FILENAME), contents);
+    dataWriteQueue.push(() => writeFile(path.join(logsDir, LOGS_DATA_FILENAME), contents));
 }
 
 
@@ -132,69 +136,4 @@ export async function chooseDir(event: IpcMainInvokeEvent, logKey: "logsDir" | "
 
 export async function showItemInFolder(_event: IpcMainInvokeEvent, filePath: string) {
     shell.showItemInFolder(filePath);
-}
-
-export async function chooseFile(_event: IpcMainInvokeEvent, title: string, filters: Electron.FileFilter[], defaultPath?: string) {
-    const res = await dialog.showOpenDialog({ title, filters, properties: ["openFile"], defaultPath });
-    const [path] = res.filePaths;
-
-    if (!path) throw Error("Invalid file");
-
-    return await readFile(path, "utf-8");
-}
-
-// doing it in native because you can only fetch images from the renderer
-// other types of files will cause cors issues
-export async function downloadAttachment(_event: IpcMainInvokeEvent, attachemnt: LoggedAttachment, attempts = 0, useOldUrl = false): Promise<{ error: string | null; path: string | null; }> {
-    try {
-        if (!attachemnt?.url || !attachemnt.oldUrl || !attachemnt?.id || !attachemnt?.fileExtension)
-            return { error: "Invalid Attachment", path: null };
-
-        if (attachemnt.id.match(/[\\/.]/)) {
-            return { error: "Invalid Attachment ID", path: null };
-        }
-
-        const existingImage = nativeSavedImages.get(attachemnt.id);
-        if (existingImage)
-            return {
-                error: null,
-                path: existingImage
-            };
-
-        const res = await fetch(useOldUrl ? attachemnt.oldUrl : attachemnt.url);
-
-        if (res.status !== 200) {
-            if (res.status === 404 || res.status === 403)
-                return { error: `Failed to get attachment ${attachemnt.id} for caching, error code ${res.status}`, path: null };
-
-            attempts++;
-            if (attempts > 3) {
-                return {
-                    error: `Failed to get attachment ${attachemnt.id} for caching. too many attempts, error code ${res.status}`,
-                    path: null,
-                };
-            }
-
-            await sleep(1000);
-            return downloadAttachment(_event, attachemnt, attempts, res.status === 415);
-        }
-
-        const ab = await res.arrayBuffer();
-        const imageCacheDir = await getImageCacheDir();
-        await ensureDirectoryExists(imageCacheDir);
-
-        const finalPath = path.join(imageCacheDir, `${attachemnt.id}${attachemnt.fileExtension}`);
-        await writeFile(finalPath, Buffer.from(ab));
-
-        nativeSavedImages.set(attachemnt.id, finalPath);
-
-        return {
-            error: null,
-            path: finalPath
-        };
-
-    } catch (error: any) {
-        console.error(error);
-        return { error: error.message, path: null };
-    }
 }

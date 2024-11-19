@@ -33,7 +33,7 @@ export function cleanupMessage(message: any, removeDetails: boolean = true): Log
     ret.guildId = ret.guild_id ?? getGuildIdByChannel(ret.channel_id);
     ret.embeds = (ret.embeds ?? []).map(cleanupEmbed);
     ret.deleted = ret.deleted ?? false;
-    ret.deletedTimestamp = ret.deleted ? (new Date()).toISOString() : undefined;
+    ret.deletedTimestamp = ret.deleted ? new Date().toISOString() : undefined;
     ret.editHistory = ret.editHistory ?? [];
     if (ret.type === 19) {
         ret.message_reference = message.message_reference || message.messageReference;

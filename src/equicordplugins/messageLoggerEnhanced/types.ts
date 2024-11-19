@@ -24,7 +24,6 @@ export interface LoggedAttachment extends MessageAttachment {
     blobUrl?: string;
     nativefileSystem?: boolean;
     oldUrl?: string;
-    oldProxyUrl?: string;
 }
 
 export type RefrencedMessage = LoggedMessageJSON & { message_id: string; };
@@ -90,27 +89,6 @@ export interface LoadMessagePayload {
     hasMoreAfter: boolean;
     limit: number;
     isStale: boolean;
-}
-
-export interface FetchMessagesResponse {
-    ok: boolean;
-    headers: Headers;
-    body: LoggedMessageJSON[] & {
-        extra?: LoggedMessageJSON[];
-    };
-    text: string;
-    status: number;
-}
-
-export interface PatchAttachmentItem {
-    uniqueId: string;
-    originalItem: LoggedAttachment;
-    type: string;
-    downloadUrl: string;
-    height: number;
-    width: number;
-    spoiler: boolean;
-    contentType: string;
 }
 
 export interface AttachmentData {

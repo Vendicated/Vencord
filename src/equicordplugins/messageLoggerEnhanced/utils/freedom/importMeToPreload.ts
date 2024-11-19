@@ -16,4 +16,4 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const DEFAULT_IMAGE_CACHE_DIR = "savedImages";
+//! hi this file is now usless. but ill keep it here just in case some people forgot to remove it from the preload.ts

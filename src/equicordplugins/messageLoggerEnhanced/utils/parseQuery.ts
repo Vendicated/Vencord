@@ -23,19 +23,21 @@ import { getGuildIdByChannel } from "./index";
 import { memoize } from "./memoize";
 
 
-const validIdSearchTypes = ["server", "guild", "channel", "in", "user", "from", "message", "has", "before", "after", "around", "near", "during"] as const;
+const validIdSearchTypes = ["server", "guild", "channel", "in", "user", "from", "message"] as const;
 type ValidIdSearchTypesUnion = typeof validIdSearchTypes[number];
 
 interface QueryResult {
-    key: ValidIdSearchTypesUnion;
-    value: string;
-    negate: boolean;
+    success: boolean;
+    query: string;
+    type?: ValidIdSearchTypesUnion;
+    id?: string;
+    negate?: boolean;
 }
 
-export const parseQuery = memoize((query: string = ""): QueryResult | string => {
+export const parseQuery = memoize((query: string = ""): QueryResult => {
     let trimmedQuery = query.trim();
     if (!trimmedQuery) {
-        return query;
+        return { success: false, query };
     }
 
     let negate = false;
@@ -46,30 +48,23 @@ export const parseQuery = memoize((query: string = ""): QueryResult | string => 
 
     const [filter, rest] = trimmedQuery.split(" ", 2);
     if (!filter) {
-        return query;
+        return { success: false, query };
     }
 
     const [type, id] = filter.split(":") as [ValidIdSearchTypesUnion, string];
     if (!type || !id || !validIdSearchTypes.includes(type)) {
-        return query;
+        return { success: false, query };
     }
 
     return {
-        key: type,
-        value: id,
+        success: true,
+        type,
+        id,
         negate,
+        query: rest ?? ""
     };
 });
 
-export const tokenizeQuery = (query: string) => {
-    const parts = query.split(" ").map(parseQuery);
-    const queries = parts.filter(p => typeof p !== "string") as QueryResult[];
-    const rest = parts.filter(p => typeof p === "string") as string[];
-
-    return { queries, rest };
-};
-
-const linkRegex = /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
 
 export const doesMatch = (type: typeof validIdSearchTypes[number], value: string, message: LoggedMessageJSON) => {
     switch (type) {
@@ -99,32 +94,6 @@ export const doesMatch = (type: typeof validIdSearchTypes[number], value: string
 
             return guild.id === value
                 || guild.name.toLowerCase().includes(value.toLowerCase());
-        }
-        case "before":
-            return new Date(message.timestamp) < new Date(value);
-        case "after":
-            return new Date(message.timestamp) > new Date(value);
-        case "around":
-        case "near":
-        case "during":
-            return Math.abs(new Date(message.timestamp).getTime() - new Date(value).getTime()) < 1000 * 60 * 60 * 24;
-        case "has": {
-            switch (value) {
-                case "attachment":
-                    return message.attachments.length > 0;
-                case "image":
-                    return message.attachments.some(a => a.content_type?.startsWith("image")) ||
-                        message.embeds.some(e => e.image || e.thumbnail);
-                case "video":
-                    return message.attachments.some(a => a.content_type?.startsWith("video")) ||
-                        message.embeds.some(e => e.video);
-                case "embed":
-                    return message.embeds.length > 0;
-                case "link":
-                    return message.content.match(linkRegex);
-                default:
-                    return false;
-            }
         }
         default:
             return false;
