@@ -8,9 +8,10 @@ import "./style.css";
 
 import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { DataStore } from "@api/index";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { React, useEffect, useState } from "@webpack/common";
 
 const cookieClickerStoreKey = "Vencord.cookieClicker";
@@ -51,8 +52,8 @@ const CookieClickerModalContent = ({ rootProps }: { rootProps: ModalProps; }) =>
             {
                 id,
                 value: 1 + upgrades,
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top,
+                x: e.clientX - rect.left + Math.random() * 40 - 20 + 20,
+                y: e.clientY - rect.top + Math.random() * 40 - 20 - 20,
             },
         ]);
 
@@ -83,13 +84,14 @@ const CookieClickerModalContent = ({ rootProps }: { rootProps: ModalProps; }) =>
                     <h3>Cookie Clicker</h3>
                 </ModalHeader>
                 <ModalContent className="cookie-clicker-content">
-                    <div>
+                    <div style={{ width: "100%" }}>
                         <div className="cookie-clicker-container">
                             <img
-                                src="https://raw.githubusercontent.com/programminglaboratorys/resources/main/Vencord.cookieClicker/cookie.svg"
+                                src={settings.store.CookieImage}
                                 alt="Cookie"
                                 className="cookie-clicker-image"
                                 onClick={handleCookieClick}
+                                onContextMenu={handleCookieClick}
                                 draggable={false}
                             />
                             {floatingNumbers.map(number => (
@@ -106,13 +108,35 @@ const CookieClickerModalContent = ({ rootProps }: { rootProps: ModalProps; }) =>
                             ))}
                         </div>
                         <p className="cookie-clicker-stats">Cookies: {cookies}</p>
-                        <button
-                            className="cookie-clicker-button"
-                            onClick={handleUpgradeClick}
-                            disabled={cookies < upgrades * 26}
-                        >
-                            Upgrade ({upgrades * 26} cookies)
-                        </button>
+
+                        <h2 className="cookie-clicker-upgrades-header">Upgrades</h2>
+                        <div className="cookie-clicker-upgrades">
+                            <button
+                                className="cookie-clicker-button"
+                                onClick={handleUpgradeClick}
+                                disabled={cookies < upgrades * 26}
+                            >
+                                Mouse clicks ({upgrades * 26} cookies)
+                            </button>
+                            <button className="cookie-clicker-button" disabled={true}>
+                                Soon
+                            </button>
+                            <button className="cookie-clicker-button" disabled={true}>
+                                Soon
+                            </button>
+                            <button className="cookie-clicker-button" disabled={true}>
+                                Soon
+                            </button>
+                            <button className="cookie-clicker-button" disabled={true}>
+                                Soon
+                            </button>
+                            <button className="cookie-clicker-button" disabled={true}>
+                                Soon
+                            </button>
+                            <button className="cookie-clicker-button" disabled={true}>
+                                Soon
+                            </button>
+                        </div>
                     </div>
                 </ModalContent>
             </div>
@@ -132,15 +156,28 @@ const CookieClickerButton: ChatBarButton = ({ isMainChat }) => {
             tooltip="Open Cookie Clicker"
             onClick={handleOpenModal}
         >
-            <img src="https://raw.githubusercontent.com/programminglaboratorys/resources/main/Vencord.cookieClicker/cookie.svg" alt="Cookie Icon" style={{ width: "24px", height: "24px" }} />
+            <img src=
+                {settings.store.CookieImage}
+                alt="Cookie Icon" style={{ width: "24px", height: "24px" }} />
         </ChatBarButton>
     );
 };
+
+const settings = definePluginSettings({
+    CookieImage: {
+        type: OptionType.STRING,
+        name: "Cookie Image",
+        description: "URL to the cookie image",
+        defaultValue: "https://raw.githubusercontent.com/programminglaboratorys/resources/main/Vencord.cookieClicker/cookie.svg",
+    }
+});
+
 
 export default definePlugin({
     name: "CookieClicker",
     description: "A simple Cookie Clicker game",
     authors: [Devs.Leonlp9],
+    settings: settings,
     start() {
         addChatBarButton("CookieClickerButton", CookieClickerButton);
     },
