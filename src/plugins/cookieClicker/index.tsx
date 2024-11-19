@@ -87,7 +87,7 @@ const CookieClickerModalContent = ({ rootProps }: { rootProps: ModalProps; }) =>
                     <div style={{ width: "100%" }}>
                         <div className="cookie-clicker-container">
                             <img
-                                src={settings.store.CookieImage}
+                                src={settings.store.CookieImage || "https://raw.githubusercontent.com/programminglaboratorys/resources/main/Vencord.cookieClicker/cookie.svg"}
                                 alt="Cookie"
                                 className="cookie-clicker-image"
                                 onClick={handleCookieClick}
@@ -156,9 +156,11 @@ const CookieClickerButton: ChatBarButton = ({ isMainChat }) => {
             tooltip="Open Cookie Clicker"
             onClick={handleOpenModal}
         >
-            <img src=
-                {settings.store.CookieImage}
-                alt="Cookie Icon" style={{ width: "24px", height: "24px" }} />
+            <img
+                src={settings.store.CookieImage || "https://raw.githubusercontent.com/programminglaboratorys/resources/main/Vencord.cookieClicker/cookie.svg"}
+                alt="Cookie Icon"
+                style={{ width: "24px", height: "24px" }}
+            />
         </ChatBarButton>
     );
 };
