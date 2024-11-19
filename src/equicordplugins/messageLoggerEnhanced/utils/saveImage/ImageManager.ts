@@ -24,9 +24,9 @@ import {
     set,
 } from "@api/DataStore";
 import { sleep } from "@utils/misc";
-import { LoggedAttachment } from "userplugins/vc-message-logger-enhanced/types";
 
 import { Flogger, Native } from "../..";
+import { LoggedAttachment } from "../../types";
 import { DEFAULT_IMAGE_CACHE_DIR } from "../constants";
 
 const ImageStore = createStore("MessageLoggerImageData", "MessageLoggerImageStore");

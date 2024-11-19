@@ -48,6 +48,7 @@
         "fflate": "^0.8.2",
         "gifenc": "github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3",
         "jsqr": "1.4.0",
+        "idb": "8.0.0",
         "monaco-editor": "^0.50.0",
         "nanoid": "^5.0.7",
         "usercss-meta": "^0.12.0",

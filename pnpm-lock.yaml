@@ -49,6 +49,9 @@ importers:
       gifenc:
         specifier: github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3
         version: https://codeload.github.com/mattdesl/gifenc/tar.gz/64842fca317b112a8590f8fef2bf3825da8f6fe3
+      idb:
+        specifier: 8.0.0
+        version: 8.0.0
       jsqr:
         specifier: 1.4.0
         version: 1.4.0
@@ -1543,6 +1546,9 @@ packages:
 
   humanize-ms@1.2.1:
     resolution: {integrity: sha512-Fl70vYtsAFb/C06PTS9dZBo7ihau+Tu/DNCk/OyHhea07S+aeMWpFFkUaXRa8fI+ScZbEI8dfSxwY7gxZ9SAVQ==}
+
+  idb@8.0.0:
+    resolution: {integrity: sha512-l//qvlAKGmQO31Qn7xdzagVPPaHTxXx199MhrAFuVBTPqydcPYBWjkrbv4Y0ktB+GmWOiwHl237UUOrLmQxLvw==}
 
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
@@ -3847,6 +3853,8 @@ snapshots:
   humanize-ms@1.2.1:
     dependencies:
       ms: 2.1.2
+
+  idb@8.0.0: {}
 
   ieee754@1.2.1: {}
 

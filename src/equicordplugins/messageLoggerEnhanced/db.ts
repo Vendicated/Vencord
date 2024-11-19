@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { DBSchema, IDBPDatabase, openDB } from "idb";
+
 import { LoggedMessageJSON } from "./types";
 import { getMessageStatus } from "./utils";
 import { DB_NAME, DB_VERSION } from "./utils/constants";
-import { DBSchema, IDBPDatabase, openDB } from "./utils/idb";
 import { getAttachmentBlobUrl } from "./utils/saveImage";
 
 export enum DBMessageStatus {
