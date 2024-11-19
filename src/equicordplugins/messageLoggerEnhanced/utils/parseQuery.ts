@@ -107,7 +107,7 @@ export const doesMatch = (type: typeof validIdSearchTypes[number], value: string
         case "around":
         case "near":
         case "during":
-            return Math.abs(new Date(message.timestamp).getTime() - new Date(value).getTime()) < 1000 * 60 * 60 * 24;
+            return Math.abs(new Date(message.timestamp)?.getTime() - new Date(value)?.getTime()) < 1000 * 60 * 60 * 24;
         case "has": {
             switch (value) {
                 case "attachment":
