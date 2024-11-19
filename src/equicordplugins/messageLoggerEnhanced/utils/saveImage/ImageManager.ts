@@ -23,23 +23,26 @@ import {
     keys,
     set,
 } from "@api/DataStore";
+import { sleep } from "@utils/misc";
+import { LoggedAttachment } from "userplugins/vc-message-logger-enhanced/types";
 
 import { Flogger, Native } from "../..";
 import { DEFAULT_IMAGE_CACHE_DIR } from "../constants";
 
 const ImageStore = createStore("MessageLoggerImageData", "MessageLoggerImageStore");
 
-interface IDBSavedImages { attachmentId: string, path: string; }
-let idbSavedImages: IDBSavedImages[] = [];
+interface IDBSavedImage { attachmentId: string, path: string; }
+const idbSavedImages = new Map<string, IDBSavedImage>();
 (async () => {
     try {
-        idbSavedImages = (await keys(ImageStore))
-            .map(m => {
-                const str = m.toString();
-                if (!str.startsWith(DEFAULT_IMAGE_CACHE_DIR)) return null;
-                return { attachmentId: str.split("/")?.[1]?.split(".")?.[0], path: str };
-            })
-            .filter(Boolean) as IDBSavedImages[];
+
+        const paths = await keys(ImageStore);
+        paths.forEach(path => {
+            const str = path.toString();
+            if (!str.startsWith(DEFAULT_IMAGE_CACHE_DIR)) return;
+
+            idbSavedImages.set(str.split("/")?.[1]?.split(".")?.[0], { attachmentId: str.split("/")?.[1]?.split(".")?.[0], path: str });
+        });
     } catch (err) {
         Flogger.error("Failed to get idb images", err);
     }
@@ -48,7 +51,7 @@ let idbSavedImages: IDBSavedImages[] = [];
 export async function getImage(attachmentId: string, fileExt?: string | null): Promise<any> {
     // for people who have access to native api but some images are still in idb
     // also for people who dont have native api
-    const idbPath = idbSavedImages.find(m => m.attachmentId === attachmentId)?.path;
+    const idbPath = idbSavedImages.get(attachmentId)?.path;
     if (idbPath)
         return get(idbPath, ImageStore);
 
@@ -57,19 +60,23 @@ export async function getImage(attachmentId: string, fileExt?: string | null): P
     return await Native.getImageNative(attachmentId);
 }
 
-// file name shouldnt have any query param shinanigans
-export async function writeImage(imageCacheDir: string, filename: string, content: Uint8Array): Promise<void> {
+export async function downloadAttachment(attachemnt: LoggedAttachment): Promise<string | undefined> {
     if (IS_WEB) {
-        const path = `${imageCacheDir}/${filename}`;
-        idbSavedImages.push({ attachmentId: filename.split(".")?.[0], path });
-        return set(path, content, ImageStore);
+        return await downloadAttachmentWeb(attachemnt);
     }
 
-    Native.writeImageNative(filename, content);
+    const { path, error } = await Native.downloadAttachment(attachemnt);
+
+    if (error || !path) {
+        Flogger.error("Failed to download attachment", error, path);
+        return;
+    }
+
+    return path;
 }
 
 export async function deleteImage(attachmentId: string): Promise<void> {
-    const idbPath = idbSavedImages.find(m => m.attachmentId === attachmentId)?.path;
+    const idbPath = idbSavedImages.get(attachmentId)?.path;
     if (idbPath)
         return await del(idbPath, ImageStore);
 
@@ -77,4 +84,34 @@ export async function deleteImage(attachmentId: string): Promise<void> {
     if (IS_WEB) return;
 
     await Native.deleteFileNative(attachmentId);
+}
+
+
+async function downloadAttachmentWeb(attachemnt: LoggedAttachment, attempts = 0) {
+    if (!attachemnt?.url || !attachemnt?.id || !attachemnt?.fileExtension) {
+        Flogger.error("Invalid attachment", attachemnt);
+        return;
+    }
+
+    const res = await fetch(attachemnt.url);
+    if (res.status !== 200) {
+        if (res.status === 404 || res.status === 403) return;
+        attempts++;
+        if (attempts > 3) {
+            Flogger.warn(`Failed to get attachment ${attachemnt.id} for caching, error code ${res.status}`);
+            return;
+        }
+
+        await sleep(1000);
+        return downloadAttachmentWeb(attachemnt, attempts);
+    }
+    const ab = await res.arrayBuffer();
+    const path = `${DEFAULT_IMAGE_CACHE_DIR}/${attachemnt.id}${attachemnt.fileExtension}`;
+
+    // await writeImage(imageCacheDir, `${attachmentId}${fileExtension}`, new Uint8Array(ab));
+
+    await set(path, new Uint8Array(ab), ImageStore);
+    idbSavedImages.set(attachemnt.id, { attachmentId: attachemnt.id, path });
+
+    return path;
 }

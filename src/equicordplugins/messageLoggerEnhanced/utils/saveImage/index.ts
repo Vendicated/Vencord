@@ -16,13 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { sleep } from "@utils/misc";
 import { MessageAttachment } from "discord-types/general";
 
-import { Flogger, Native, settings } from "../..";
+import { Flogger, settings } from "../..";
 import { LoggedAttachment, LoggedMessage, LoggedMessageJSON } from "../../types";
 import { memoize } from "../memoize";
-import { deleteImage, getImage, writeImage, } from "./ImageManager";
+import { deleteImage, downloadAttachment, getImage, } from "./ImageManager";
 
 export function getFileExtension(str: string) {
     const matches = str.match(/(\.[a-zA-Z0-9]+)(?:\?.*)?$/);
@@ -31,64 +30,61 @@ export function getFileExtension(str: string) {
     return matches[1];
 }
 
-export function isImage(url: string) {
-    return /\.(jpe?g|png|gif|bmp)(\?.*)?$/i.test(url);
-}
-
-export function isAttachmentImage(attachment: MessageAttachment) {
-    return isImage(attachment.filename ?? attachment.url) || (attachment.content_type?.split("/")[0] === "image");
-}
-
-function transformAttachmentUrl(messageId: string, attachmentUrl: string) {
-    const url = new URL(attachmentUrl);
-    url.searchParams.set("messageId", messageId);
-
-    return url.toString();
-}
-
-export async function cacheImage(url: string, attachmentIdx: number, attachmentId: string, messageId: string, channelId: string, fileExtension: string | null, attempts = 0) {
-    const res = await fetch(url);
-    if (res.status !== 200) {
-        if (res.status === 404 || res.status === 403) return;
-        attempts++;
-        if (attempts > 3) {
-            Flogger.warn(`Failed to get image ${attachmentId} for caching, error code ${res.status}`);
-            return;
-        }
-
-        await sleep(1000);
-        return cacheImage(url, attachmentIdx, attachmentId, messageId, channelId, fileExtension, attempts);
+export function isAttachmentGoodToCache(attachment: MessageAttachment, fileExtension: string) {
+    if (attachment.size > settings.store.attachmentSizeLimitInMegabytes * 1024 * 1024) {
+        Flogger.log("Attachment too large to cache", attachment.filename);
+        return false;
     }
-    const ab = await res.arrayBuffer();
-    const imageCacheDir = settings.store.imageCacheDir ?? await Native.getDefaultNativeImageDir();
-    const path = `${imageCacheDir}/${attachmentId}${fileExtension}`;
+    const attachmentFileExtensionsStr = settings.store.attachmentFileExtensions.trim();
 
-    await writeImage(imageCacheDir, `${attachmentId}${fileExtension}`, new Uint8Array(ab));
+    if (attachmentFileExtensionsStr === "")
+        return true;
 
-    return path;
+    const allowedFileExtensions = attachmentFileExtensionsStr.split(",");
+
+    if (fileExtension.startsWith(".")) {
+        fileExtension = fileExtension.slice(1);
+    }
+
+    if (!fileExtension || !allowedFileExtensions.includes(fileExtension)) {
+        Flogger.log("Attachment not in allowed file extensions", attachment.filename);
+        return false;
+    }
+
+    return true;
 }
-
 
 export async function cacheMessageImages(message: LoggedMessage | LoggedMessageJSON) {
     try {
-        for (let i = 0; i < message.attachments.length; i++) {
-            const attachment = message.attachments[i];
-            if (!isAttachmentImage(attachment)) {
+        for (const attachment of message.attachments) {
+            const fileExtension = getFileExtension(attachment.filename ?? attachment.url) ?? attachment.content_type?.split("/")?.[1] ?? ".png";
+
+            if (!isAttachmentGoodToCache(attachment, fileExtension)) {
                 Flogger.log("skipping", attachment.filename);
                 continue;
             }
-            // apparently proxy urls last longer
-            attachment.url = transformAttachmentUrl(message.id, attachment.proxy_url);
 
-            const fileExtension = getFileExtension(attachment.filename ?? attachment.url) ?? attachment.content_type?.split("/")?.[1] ?? ".png";
-            const path = await cacheImage(attachment.url, i, attachment.id, message.id, message.channel_id, fileExtension);
+            attachment.oldUrl = attachment.url;
+            attachment.oldProxyUrl = attachment.proxy_url;
 
-            if (path == null) {
-                Flogger.error("Failed to save image from attachment. id: ", attachment.id);
-                continue;
+            // only normal urls work if theres a charset in the content type /shrug
+            if (attachment.content_type?.includes(";")) {
+                attachment.proxy_url = attachment.url;
+            } else {
+                // apparently proxy urls last longer
+                attachment.url = attachment.proxy_url;
+                attachment.proxy_url = attachment.url;
             }
 
             attachment.fileExtension = fileExtension;
+
+            const path = await downloadAttachment(attachment);
+
+            if (!path) {
+                Flogger.error("Failed to cache attachment", attachment);
+                continue;
+            }
+
             attachment.path = path;
         }
 

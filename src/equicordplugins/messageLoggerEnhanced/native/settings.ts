@@ -47,3 +47,4 @@ async function getSettingsFilePath() {
 
     return mlSettingsDir;
 }
+
