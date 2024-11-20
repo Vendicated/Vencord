@@ -87,17 +87,8 @@ export default definePlugin({
         {
             find: "trackAnnouncementMessageLinkClicked({",
             replacement: {
-                match: /function (\i\(\i,\i\)\{)(?=.{0,100}trusted:)/,
+                match: /function (\i\(\i,\i\)\{)(?=.{0,150}trusted:)/,
                 replace: "async function $1 if(await $self.handleLink(...arguments)) return;"
-            }
-        },
-        // Make Spotify profile activity links open in app on web
-        {
-            find: "WEB_OPEN(",
-            predicate: () => !IS_DISCORD_DESKTOP && pluginSettings.store.spotify,
-            replacement: {
-                match: /\i\.\i\.isProtocolRegistered\(\)(.{0,100})window.open/g,
-                replace: "true$1VencordNative.native.openExternal"
             }
         },
         {
