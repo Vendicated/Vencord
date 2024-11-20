@@ -121,6 +121,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - SekaiStickers by MaiKokain
 - ServerSearch by camila314
 - ShowBadgesInChat by Inbestigator & KrystalSkull
+- Signature by KrystalSkull
 - SidebarChat by Joona
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo, maintained by thororen
