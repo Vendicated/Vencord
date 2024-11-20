@@ -16,6 +16,16 @@ import { React, useEffect, useState } from "@webpack/common";
 
 const cookieClickerStoreKey = "Vencord.cookieClicker";
 
+function formatCookies(cookies: number) {
+    const names: any[] = ["cookies", "k", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No"];
+    let tier = 0;
+    while (cookies >= 1000) {
+        cookies /= 1000;
+        tier++;
+    }
+    return `${cookies.toFixed(2)} ${names[tier]}`;
+}
+
 const CookieClickerModalContent = ({ rootProps }: { rootProps: ModalProps; }) => {
     const [cookies, setCookies] = useState(0);
     const [upgrades, setUpgrades] = useState(0);
@@ -60,7 +70,7 @@ const CookieClickerModalContent = ({ rootProps }: { rootProps: ModalProps; }) =>
         // Remove the floating number after animation
         setTimeout(() => {
             setFloatingNumbers(prev => prev.filter(num => num.id !== id));
-        }, 1000); // Match animation duration
+        }, 3000); // Match animation duration
     };
 
     const handleUpgradeClick = () => {
@@ -107,7 +117,7 @@ const CookieClickerModalContent = ({ rootProps }: { rootProps: ModalProps; }) =>
                                 </div>
                             ))}
                         </div>
-                        <p className="cookie-clicker-stats">Cookies: {cookies}</p>
+                        <p className="cookie-clicker-stats">Cookies: {formatCookies(cookies)}</p>
 
                         <h2 className="cookie-clicker-upgrades-header">Upgrades</h2>
                         <div className="cookie-clicker-upgrades">
@@ -178,7 +188,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "CookieClicker",
     description: "A simple Cookie Clicker game",
-    authors: [Devs.Leonlp9],
+    authors: [Devs.Leonlp9, Devs.minikomo],
     settings: settings,
     start() {
         addChatBarButton("CookieClickerButton", CookieClickerButton);

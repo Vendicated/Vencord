@@ -87,8 +87,8 @@
 }
 
 .cookie-clicker-button {
+    flex: 0 0 95px;
     height: 100%;
-    width: 95px;
     border-radius: 10px;
     background-color: #007bff;
     color: #f8eeeb;
@@ -112,10 +112,11 @@
 
 .floating-number {
     position: absolute;
-    color: #f8eeeb;
+    color: #ebf0f8;
+    text-shadow: 0 0 5px #000;
     font-size: 18px;
     font-weight: bold;
-    animation: floatDown 1s ease-out forwards;
+    animation: floatDown 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
     pointer-events: none;
 }
 
@@ -123,11 +124,24 @@
 @keyframes floatDown {
     0% {
         opacity: 1;
-        transform: translateY(-20px) scale(1);
+        filter: blur(10px);
+        transform: translateY(-20);
+    }
+    /* stylelint-disable-next-line rule-empty-line-before */
+    20% {
+        opacity: 1;
+        filter: blur(0);
+        transform: translateY(-10px);
+    }
+    /* stylelint-disable-next-line rule-empty-line-before */
+    80% {
+        opacity: 1;
+        filter: blur(0);
+        transform: translateY(-15px);
     }
     /* stylelint-disable-next-line rule-empty-line-before */
     100% {
         opacity: 0;
-        transform: translateY(20px) scale(0.9);
+        transform: translateY(40);
     }
 }
