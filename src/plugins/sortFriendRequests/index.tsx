@@ -45,7 +45,7 @@ export default definePlugin({
             replace: "}).sortBy(row => $self.wrapSort(($1), row)).value()"
         }
     }, {
-        find: ".Messages.FRIEND_REQUEST_CANCEL",
+        find: "#{intl::FRIEND_REQUEST_CANCEL}",
         replacement: {
             predicate: () => settings.store.showDates,
             match: /subText:(\i)(?<=user:(\i).+?)/,
