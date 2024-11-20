@@ -188,7 +188,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "CookieClicker",
     description: "A simple Cookie Clicker game",
-    authors: [Devs.Leonlp9, Devs.minikomo],
+    authors: [Devs.Leonlp9],
     settings: settings,
     start() {
         addChatBarButton("CookieClickerButton", CookieClickerButton);
