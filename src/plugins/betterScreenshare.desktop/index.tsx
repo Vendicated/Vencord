@@ -34,7 +34,7 @@ export default definePlugin({
     dependencies: ["PhilsPluginLibrary"],
     patches: [
         {
-            find: "Messages.SCREENSHARE_RELAUNCH",
+            find: "#{intl::SCREENSHARE_RELAUNCH}",
             replacement: {
                 match: /((?:.*)(?<=function) .{0,8}?(?={).)(.{0,10000}Z.getVoiceChannelId\(\).{0,10000}]}\)}\))(})/,
                 replace: "$1return $self.replacedScreenshareModalComponent(function(){$2}, this, arguments)$3"

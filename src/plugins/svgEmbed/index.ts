@@ -123,7 +123,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.REMOVE_ATTACHMENT_BODY",
+            find: "#{intl::REMOVE_ATTACHMENT_BODY}",
             replacement: [
                 {
                     match: /(?<=renderAttachments\(\i\){)/,

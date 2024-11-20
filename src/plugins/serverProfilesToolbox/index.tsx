@@ -67,14 +67,14 @@ export default definePlugin({
     authors: [Devs.D3SOX],
     description: "Adds a copy/paste/reset button to the server profiles editor",
 
-    patchServerProfiles({ guildId }: { guildId: string }) {
+    patchServerProfiles({ guildId }: { guildId: string; }) {
         const currentUser = UserStore.getCurrentUser();
         const premiumType = currentUser.premiumType ?? 0;
 
         const copy = () => {
             const profile = UserProfileStore.getGuildMemberProfile(currentUser.id, guildId);
             const nick = GuildMemberStore.getNick(guildId, currentUser.id);
-            const selfMember = GuildMemberStore.getMember(guildId, currentUser.id) as GuildMember & { avatarDecoration: string | undefined };
+            const selfMember = GuildMemberStore.getMember(guildId, currentUser.id) as GuildMember & { avatarDecoration: string | undefined; };
             savedProfile.nick = nick ?? "";
             savedProfile.pronouns = profile.pronouns;
             savedProfile.bio = profile.bio;
@@ -179,7 +179,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".PROFILE_CUSTOMIZATION_GUILD_SELECT_TITLE",
+            find: "#{intl::GUILD_TITLE}",
             replacement: {
                 match: /return\(0(.{10,350})\}\)\}\)\}/,
                 replace: "return [(0$1})}),$self.patchServerProfiles(e)]}"
