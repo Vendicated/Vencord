@@ -7,12 +7,11 @@
 import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { MessageEvents } from "@api/index";
+import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, React } from "@webpack/common";
-
 
 // Big thank you too slientTyping
 
@@ -66,8 +65,13 @@ const SignatureToggle: ChatBarButton = ({ isMainChat }) => {
     );
 };
 
-// Big thank you @thororen (discord) who helped me write this const
-const handleMessage = ((channelId, msg) => { if (!settings.store.isEnabled) return ""; return msg.content = textProcessing(msg.content); });
+const handleMessage = ((channelId, msg) => {
+    if (!settings.store.isEnabled) {
+        msg.content = msg.content;
+    } else {
+        msg.content = textProcessing(msg.content);
+    }
+});
 
 const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
     const { isEnabled, contextMenu } = settings.use(["isEnabled", "contextMenu"]);
@@ -89,7 +93,6 @@ const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
     );
 };
 
-// This is usless for the normal user but is helpful for development since I decided to rework to plugin
 migratePluginSettings("Signature", "SentVia");
 
 export default definePlugin({
@@ -103,14 +106,12 @@ export default definePlugin({
     start: () => {
         if (settings.store.isEnabled) true;
         addChatBarButton("Signature", SignatureToggle);
-        // @ts-ignore
-        MessageEvents.addPreSendListener(handleMessage);
+        addPreSendListener(handleMessage);
     },
     stop: () => {
         if (settings.store.isEnabled) false;
         removeChatBarButton("Signature");
-        // @ts-ignore
-        MessageEvents.removePreSendListener(handleMessage);
+        removePreSendListener(handleMessage);
 
     },
 
