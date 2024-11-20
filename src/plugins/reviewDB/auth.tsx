@@ -7,11 +7,14 @@
 import { DataStore } from "@api/index";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
-import { OAuth2AuthorizeModal, showToast, Toasts, UserStore } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { showToast, Toasts, UserStore } from "@webpack/common";
 
 import { ReviewDBAuth } from "./entities";
 
 const DATA_STORE_KEY = "rdb-auth";
+
+const { OAuth2AuthorizeModal } = findByPropsLazy("OAuth2AuthorizeModal");
 
 export let Auth: ReviewDBAuth = {};
 

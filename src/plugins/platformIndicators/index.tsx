@@ -28,7 +28,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
-import { CSSProperties } from "react";
 
 export interface Session {
     sessionId: string;
@@ -132,7 +131,7 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
     }));
 }
 
-export const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; small?: boolean; }) => {
+const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; small?: boolean; }) => {
     if (!user || user.bot) return null;
 
     ensureOwnStatus(user);
