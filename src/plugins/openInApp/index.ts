@@ -87,7 +87,7 @@ export default definePlugin({
         {
             find: "trackAnnouncementMessageLinkClicked({",
             replacement: {
-                match: /function (\i\(\i,\i\)\{)(?=.{0,100}trusted:)/,
+                match: /function (\i\(\i,\i\)\{)(?=.{0,150}trusted:)/,
                 replace: "async function $1 if(await $self.handleLink(...arguments)) return;"
             }
         },

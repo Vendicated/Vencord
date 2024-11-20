@@ -10,6 +10,7 @@ import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { Queue } from "@utils/Queue";
 import { findComponentByCodeLazy } from "@webpack";
 import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, UserUtils, useState } from "@webpack/common";
 import { User } from "discord-types/general";
@@ -49,6 +50,8 @@ interface SectionHeaderProps {
     section: Section;
 }
 
+const fetchAuthorsQueue = new Queue();
+
 function SectionHeader({ section }: SectionHeaderProps) {
     const hasSubtitle = typeof section.subtitle !== "undefined";
     const hasAuthorIds = typeof section.authorIds !== "undefined";
@@ -56,16 +59,17 @@ function SectionHeader({ section }: SectionHeaderProps) {
     const [authors, setAuthors] = useState<User[]>([]);
 
     useEffect(() => {
-        (async () => {
+        fetchAuthorsQueue.push(async () => {
             if (!section.authorIds) return;
 
             for (const authorId of section.authorIds) {
-                const author = UserStore.getUser(authorId) ?? await UserUtils.getUser(authorId);
+                const author = UserStore.getUser(authorId) ?? await UserUtils.getUser(authorId).catch(() => null);
+                if (author == null) continue;
+
                 setAuthors(authors => [...authors, author]);
             }
-        })();
+        });
     }, [section.authorIds]);
-
 
     return <div>
         <Flex>

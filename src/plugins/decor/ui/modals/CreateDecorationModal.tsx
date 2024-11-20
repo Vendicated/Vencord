@@ -119,7 +119,7 @@ function CreateDecorationModal(props: ModalProps) {
                         />
                     </div>
                 </div>
-                <HelpMessage messageType={HelpMessageTypes.INFO}>
+                <HelpMessage messageType={HelpMessageTypes.INFO} className={Margins.bottom8}>
                     To receive updates on your decoration's review, join <Link
                         href={`https://discord.gg/${INVITE_KEY}`}
                         onClick={async e => {
