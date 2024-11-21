@@ -9,42 +9,53 @@ import { Notifications } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
+import { localStorage } from "@utils/localStorage";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, Menu, MessageStore, NavigationRouter, PresenceStore, PrivateChannelsStore, UserStore, WindowStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
 
-interface IMessageCreate {
+interface MessageCreateProps {
     channelId: string;
     guildId: string;
     message: Message;
 }
 
-function Icon(enabled?: boolean): JSX.Element {
-    return <svg
-        width="18"
-        height="18"
-    >
-        <circle cx="9" cy="9" r="8" fill={!enabled ? "var(--status-danger)" : "currentColor"} />
-        <circle cx="9" cy="9" r="3.75" fill={!enabled ? "white" : "black"} />
-    </svg>;
+type Sources = "guild" | "user" | "channel";
+
+function Icon(enabled: boolean) {
+    return (
+        <svg width="18" height="18">
+            <circle cx="9" cy="9" r="8" fill={enabled ? "currentColor" : "var(--status-danger)"} />
+            <circle cx="9" cy="9" r="3.75" fill={enabled ? "black" : "white"} />
+        </svg>
+    );
 }
 
-function processIds(value: string): string {
-    return value.replace(/\s/g, "").split(",").filter(id => id.trim() !== "").join(", ");
+const getBypassed = (source: Sources) =>
+    (JSON.parse(localStorage.getItem("vc-bypass-dnd") ?? '{"guild": [], "user": [], "channel": []}') as Record<Sources, string[]>)[source];
+
+const getAllBypassed = () => ({
+    guild: getBypassed("guild"),
+    user: getBypassed("user"),
+    channel: getBypassed("channel"),
+});
+
+function setLists(source: Sources, value: string[]) {
+    localStorage.setItem("vc-bypass-dnd", JSON.stringify({ ...getAllBypassed(), [source]: value }));
 }
 
-async function showNotification(message: Message, guildId: string | undefined): Promise<void> {
+async function showNotification(message: Message, guildId: string | undefined) {
     try {
         const channel = ChannelStore.getChannel(message.channel_id);
-        const channelRegex = /<#(\d{19})>/g;
-        const userRegex = /<@(\d{18})>/g;
+        const channelRegex = /<#(\d+)>/g;
+        const userRegex = /<@(\d+)>/g;
 
-        message.content = message.content.replace(channelRegex, (match: any, channelId: string) => {
+        message.content = message.content.replace(channelRegex, (_, channelId) => {
             return `#${ChannelStore.getChannel(channelId)?.name}`;
         });
 
-        message.content = message.content.replace(userRegex, (match: any, userId: string) => {
+        message.content = message.content.replace(userRegex, (_, userId) => {
             return `@${(UserStore.getUser(userId) as any).globalName}`;
         });
 
@@ -52,7 +63,7 @@ async function showNotification(message: Message, guildId: string | undefined): 
             title: `${(message.author as any).globalName} ${guildId ? `(#${channel?.name}, ${ChannelStore.getChannel(channel?.parent_id)?.name})` : ""}`,
             body: message.content,
             icon: UserStore.getUser(message.author.id).getAvatarURL(undefined, undefined, false),
-            onClick: function (): void {
+            onClick: () => {
                 NavigationRouter.transitionTo(`/channels/${guildId ?? "@me"}/${message.channel_id}/${message.id}`);
             }
         });
@@ -65,82 +76,64 @@ async function showNotification(message: Message, guildId: string | undefined): 
     }
 }
 
-function ContextCallback(name: "guild" | "user" | "channel"): NavContextMenuPatchCallback {
-    return (children, props) => {
-        const type = props[name];
-        if (!type) return;
-        const enabled = settings.store[`${name}s`].split(", ").includes(type.id);
-        if (name === "user" && type.id === UserStore.getCurrentUser().id) return;
-        children.splice(-1, 0, (
-            <Menu.MenuGroup>
-                <Menu.MenuItem
-                    id={`dnd-${name}-bypass`}
-                    label={`${enabled ? "Remove" : "Add"} DND Bypass`}
-                    icon={() => Icon(enabled)}
-                    action={() => {
-                        let bypasses: string[] = settings.store[`${name}s`].split(", ");
-                        if (enabled) bypasses = bypasses.filter(id => id !== type.id);
-                        else bypasses.push(type.id);
-                        settings.store[`${name}s`] = bypasses.filter(id => id.trim() !== "").join(", ");
-                    }}
-                />
-            </Menu.MenuGroup>
-        ));
-    };
-}
+const ContextCallback = (name: Sources): NavContextMenuPatchCallback => (children, props: Record<Sources, { id: string; }>) => {
+    const data = props[name];
+    if (!data) return;
+    const isEnabled = getBypassed(name).includes(data.id);
+
+    if (name === "user" && data.id === UserStore.getCurrentUser().id) {
+        return;
+    }
+
+    children.splice(-1, 0, (
+        <Menu.MenuGroup>
+            <Menu.MenuItem
+                id={`dnd-${name}-bypass`}
+                label={`${isEnabled ? "Remove" : "Add"} DND Bypass`}
+                icon={() => Icon(isEnabled)}
+                action={() => {
+                    const bypasses = getBypassed(name);
+                    setLists(name, isEnabled ? bypasses.filter(id => id !== data.id) : [...bypasses, data.id]);
+                }}
+            />
+        </Menu.MenuGroup>
+    ));
+};
 
 const settings = definePluginSettings({
-    guilds: {
-        type: OptionType.STRING,
-        description: "Guilds to let bypass (notified when pinged anywhere in guild)",
-        default: "",
-        placeholder: "Separate with commas",
-        onChange: value => settings.store.guilds = processIds(value)
-    },
-    channels: {
-        type: OptionType.STRING,
-        description: "Channels to let bypass (notified when pinged in that channel)",
-        default: "",
-        placeholder: "Separate with commas",
-        onChange: value => settings.store.channels = processIds(value)
-    },
-    users: {
-        type: OptionType.STRING,
-        description: "Users to let bypass (notified for all messages sent in DMs)",
-        default: "",
-        placeholder: "Separate with commas",
-        onChange: value => settings.store.users = processIds(value)
-    },
     allowOutsideOfDms: {
         type: OptionType.BOOLEAN,
-        description: "Allow selected users to bypass DND outside of DMs too (acts like a channel/guild bypass, but it's for all messages sent by the selected users)"
+        description: "Allow selected users to bypass do not disturb outside of DMs (get notified of all messages you're mentioned in from selected users)",
     },
     notificationSound: {
         type: OptionType.BOOLEAN,
         description: "Whether the notification sound should be played",
-        default: true,
     }
 });
 
 export default definePlugin({
     name: "BypassDND",
-    description: "Still get notifications from specific sources when in do not disturb mode. Right-click on users/channels/guilds to set them to bypass do not disturb mode.",
+    description: "Get notifications from specific sources even in do not disturb mode. Right-click on users/channels/guilds to set bypass do not disturb mode.",
     authors: [Devs.Inbestigator],
     flux: {
-        async MESSAGE_CREATE({ message, guildId, channelId }: IMessageCreate): Promise<void> {
+        async MESSAGE_CREATE({ message, guildId, channelId }: MessageCreateProps) {
             try {
                 const currentUser = UserStore.getCurrentUser();
                 const userStatus = await PresenceStore.getStatus(currentUser.id);
                 const currentChannelId = getCurrentChannel()?.id ?? "0";
-                if (message.state === "SENDING" || message.content === "" || message.author.id === currentUser.id || (channelId === currentChannelId && WindowStore.isFocused()) || userStatus !== "dnd") {
+                const isLookingAtChannel = channelId === currentChannelId && WindowStore.isFocused();
+
+                if (message.author.id === currentUser.id || isLookingAtChannel || userStatus !== "dnd") {
                     return;
                 }
-                const mentioned = MessageStore.getMessage(channelId, message.id)?.mentioned;
-                if ((settings.store.guilds.split(", ").includes(guildId) || settings.store.channels.split(", ").includes(channelId)) && mentioned) {
+
+                const isMentioned = MessageStore.getMessage(channelId, message.id)?.mentioned;
+
+                if ((getBypassed("guild").includes(guildId) || getBypassed("channel").includes(channelId)) && isMentioned) {
                     await showNotification(message, guildId);
-                } else if (settings.store.users.split(", ").includes(message.author.id)) {
+                } else if (getBypassed("user").includes(message.author.id)) {
                     const userChannelId = await PrivateChannelsStore.getOrEnsurePrivateChannel(message.author.id);
-                    if (channelId === userChannelId || (mentioned && settings.store.allowOutsideOfDms === true)) {
+                    if (channelId === userChannelId || (isMentioned && settings.store.allowOutsideOfDms === true)) {
                         await showNotification(message, guildId);
                     }
                 }
