@@ -17,7 +17,6 @@
 */
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -149,8 +148,8 @@ export default definePlugin({
     name: "ViewRaw",
     description: "Copy and view the raw content/data of any message, channel or guild",
     authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna],
-    dependencies: ["MessagePopoverAPI"],
     settings,
+
     contextMenus: {
         "guild-context": MakeContextCallback("Guild"),
         "channel-context": MakeContextCallback("Channel"),
@@ -159,44 +158,38 @@ export default definePlugin({
         "user-context": MakeContextCallback("User")
     },
 
-    start() {
-        addMessagePopoverButton("ViewRaw", msg => {
-            const handleClick = () => {
-                if (settings.store.clickMethod === "Right") {
-                    copyWithToast(msg.content);
-                } else {
-                    openViewRawModalMessage(msg);
-                }
-            };
+    renderMessagePopoverButton(msg) {
+        const handleClick = () => {
+            if (settings.store.clickMethod === "Right") {
+                copyWithToast(msg.content);
+            } else {
+                openViewRawModalMessage(msg);
+            }
+        };
 
-            const handleContextMenu = e => {
-                if (settings.store.clickMethod === "Left") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    copyWithToast(msg.content);
-                } else {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openViewRawModalMessage(msg);
-                }
-            };
+        const handleContextMenu = e => {
+            if (settings.store.clickMethod === "Left") {
+                e.preventDefault();
+                e.stopPropagation();
+                copyWithToast(msg.content);
+            } else {
+                e.preventDefault();
+                e.stopPropagation();
+                openViewRawModalMessage(msg);
+            }
+        };
 
-            const label = settings.store.clickMethod === "Right"
-                ? "Copy Raw (Left Click) / View Raw (Right Click)"
-                : "View Raw (Left Click) / Copy Raw (Right Click)";
+        const label = settings.store.clickMethod === "Right"
+            ? "Copy Raw (Left Click) / View Raw (Right Click)"
+            : "View Raw (Left Click) / Copy Raw (Right Click)";
 
-            return {
-                label,
-                icon: CopyIcon,
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: handleClick,
-                onContextMenu: handleContextMenu
-            };
-        });
-    },
-
-    stop() {
-        removeMessagePopoverButton("ViewRaw");
+        return {
+            label,
+            icon: CopyIcon,
+            message: msg,
+            channel: ChannelStore.getChannel(msg.channel_id),
+            onClick: handleClick,
+            onContextMenu: handleContextMenu
+        };
     }
 });

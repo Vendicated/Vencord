@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
-import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -104,7 +103,7 @@ export default definePlugin({
     name: "InvisibleChat",
     description: "Encrypt your Messages in a non-suspicious way!",
     authors: [Devs.SammCheese],
-    dependencies: ["MessagePopoverAPI", "ChatInputButtonAPI", "MessageUpdaterAPI"],
+    dependencies: ["MessageUpdaterAPI"],
     reporterTestable: ReporterTestable.Patches,
     settings,
 
@@ -125,35 +124,30 @@ export default definePlugin({
         /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/,
     ),
     async start() {
-        addMessagePopoverButton("InvisibleChat", message => {
-            return this.INV_REGEX.test(message?.content)
-                ? {
-                    label: "Decrypt Message",
-                    icon: this.popOverIcon,
-                    message: message,
-                    channel: ChannelStore.getChannel(message.channel_id),
-                    onClick: async () => {
-                        const res = await iteratePasswords(message);
-
-                        if (res)
-                            this.buildEmbed(message, res);
-                        else
-                            buildDecModal({ message });
-                    }
-                }
-                : null;
-        });
-
-        addChatBarButton("InvisibleChat", ChatBarIcon);
-
         const { default: StegCloak } = await getStegCloak();
         steggo = new StegCloak(true, false);
     },
 
-    stop() {
-        removeMessagePopoverButton("InvisibleChat");
-        removeMessagePopoverButton("InvisibleChat");
+    renderMessagePopoverButton(message) {
+        return this.INV_REGEX.test(message?.content)
+            ? {
+                label: "Decrypt Message",
+                icon: this.popOverIcon,
+                message: message,
+                channel: ChannelStore.getChannel(message.channel_id),
+                onClick: async () => {
+                    const res = await iteratePasswords(message);
+
+                    if (res)
+                        this.buildEmbed(message, res);
+                    else
+                        buildDecModal({ message });
+                }
+            }
+            : null;
     },
+
+    renderChatBarButton: ChatBarIcon,
 
     // Gets the Embed of a Link
     async getEmbed(url: URL): Promise<Object | {}> {

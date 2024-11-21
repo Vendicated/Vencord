@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { addPreSendListener, MessageSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
@@ -91,9 +91,7 @@ export default definePlugin({
     name: "SilentMessageToggle",
     authors: [Devs.Nuckyz, Devs.CatNoir],
     description: "Adds a button to the chat bar to toggle sending a silent message.",
-    dependencies: ["MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
 
-    start: () => addChatBarButton("SilentMessageToggle", SilentMessageToggle),
-    stop: () => removeChatBarButton("SilentMessageToggle")
+    renderChatBarButton: SilentMessageToggle,
 });
