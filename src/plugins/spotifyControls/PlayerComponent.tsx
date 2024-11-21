@@ -107,10 +107,12 @@ function makeContextMenu(name: string, path: string) {
 }
 
 function Controls() {
-    const [isPlaying, shuffle, repeat] = useStateFromStores(
+    const [isPlaying, shuffle, repeat, storePosition] = useStateFromStores(
         [SpotifyStore],
-        () => [SpotifyStore.isPlaying, SpotifyStore.shuffle, SpotifyStore.repeat]
+        () => [SpotifyStore.isPlaying, SpotifyStore.shuffle, SpotifyStore.repeat, SpotifyStore.mPosition]
     );
+
+    const [position, setPosition] = useState(storePosition);
 
     const [nextRepeat, repeatClassName] = (() => {
         switch (repeat) {
@@ -130,7 +132,14 @@ function Controls() {
             >
                 <Shuffle />
             </Button>
-            <Button onClick={() => SpotifyStore.prev()}>
+            <Button onClick={() => {
+                if (SpotifyStore.position >= 3000) {
+                    setPosition(0);
+                    seek(0);
+                } else {
+                    SpotifyStore.prev();
+                }
+            }}>
                 <SkipPrev />
             </Button>
             <Button onClick={() => SpotifyStore.setPlaying(!isPlaying)}>
