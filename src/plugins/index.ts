@@ -89,6 +89,11 @@ function isReporterTestable(p: Plugin, part: ReporterTestable) {
         : (p.reporterTestable & part) === part;
 }
 
+const pluginKeysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
+    "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
+    "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton"
+];
+
 const neededApiPlugins = new Set<string>();
 
 // First round-trip to mark and force enable dependencies
@@ -122,12 +127,7 @@ for (const p of pluginsValues) if (isPluginEnabled(p.name)) {
     if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
     if (p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
 
-    const keysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
-        "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
-        "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton"
-    ];
-
-    for (const key of keysToBind) {
+    for (const key of pluginKeysToBind) {
         p[key] &&= p[key].bind(p) as any;
     }
 }
