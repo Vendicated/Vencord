@@ -48,11 +48,11 @@ export type MessageDecorationFactory = (props: MessageDecorationProps) => JSX.El
 
 export const decorations = new Map<string, MessageDecorationFactory>();
 
-export function addDecoration(identifier: string, decoration: MessageDecorationFactory) {
+export function addMessageDecoration(identifier: string, decoration: MessageDecorationFactory) {
     decorations.set(identifier, decoration);
 }
 
-export function removeDecoration(identifier: string) {
+export function removeMessageDecoration(identifier: string) {
     decorations.delete(identifier);
 }
 

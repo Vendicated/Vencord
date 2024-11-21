@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addClickListener, removeClickListener } from "@api/MessageEvents";
+import { addMessageClickListener, removeMessageClickListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -65,7 +65,7 @@ export default definePlugin({
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
 
-        this.onClick = addClickListener((msg: any, channel, event) => {
+        this.onClick = addMessageClickListener((msg: any, channel, event) => {
             const isMe = msg.author.id === UserStore.getCurrentUser().id;
             if (!isDeletePressed) {
                 if (event.detail < 2) return;
@@ -115,7 +115,7 @@ export default definePlugin({
     },
 
     stop() {
-        removeClickListener(this.onClick);
+        removeMessageClickListener(this.onClick);
         document.removeEventListener("keydown", keydown);
         document.removeEventListener("keyup", keyup);
     }

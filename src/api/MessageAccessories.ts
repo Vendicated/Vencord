@@ -24,7 +24,7 @@ export type MessageAccessory = {
 
 export const accessories = new Map<String, MessageAccessory>();
 
-export function addAccessory(
+export function addMessageAccessory(
     identifier: string,
     callback: MessageAccessoryFactory,
     position?: number
@@ -35,7 +35,7 @@ export function addAccessory(
     });
 }
 
-export function removeAccessory(identifier: string) {
+export function removeMessageAccessory(identifier: string) {
     accessories.delete(identifier);
 }
 

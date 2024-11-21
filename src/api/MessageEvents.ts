@@ -147,11 +147,11 @@ export function _handleClick(message: Message, channel: Channel, event: MouseEve
     }
 }
 
-export function addClickListener(listener: MessageClickListener) {
+export function addMessageClickListener(listener: MessageClickListener) {
     listeners.add(listener);
     return listener;
 }
 
-export function removeClickListener(listener: MessageClickListener) {
+export function removeMessageClickListener(listener: MessageClickListener) {
     return listeners.delete(listener);
 }

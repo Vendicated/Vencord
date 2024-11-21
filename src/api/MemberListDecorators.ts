@@ -43,11 +43,11 @@ type OnlyIn = "guilds" | "dms";
 
 export const decorators = new Map<string, { decorator: MemberListDecoratorFactory, onlyIn?: OnlyIn; }>();
 
-export function addDecorator(identifier: string, decorator: MemberListDecoratorFactory, onlyIn?: OnlyIn) {
+export function addMemberListDecorator(identifier: string, decorator: MemberListDecoratorFactory, onlyIn?: OnlyIn) {
     decorators.set(identifier, { decorator, onlyIn });
 }
 
-export function removeDecorator(identifier: string) {
+export function removeMemberListDecorator(identifier: string) {
     decorators.delete(identifier);
 }
 

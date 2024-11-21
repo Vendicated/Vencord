@@ -19,10 +19,10 @@
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
-import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
-import { addAccessory, removeAccessory } from "@api/MessageAccessories";
-import { addDecoration, removeDecoration } from "@api/MessageDecorations";
-import { addClickListener, addPreEditListener, addPreSendListener, removeClickListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
+import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
+import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
+import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
+import { addMessageClickListener, addPreEditListener, addPreSendListener, removeMessageClickListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
@@ -279,12 +279,12 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
     if (onBeforeMessageEdit) addPreEditListener(onBeforeMessageEdit);
     if (onBeforeMessageSend) addPreSendListener(onBeforeMessageSend);
-    if (onMessageClick) addClickListener(onMessageClick);
+    if (onMessageClick) addMessageClickListener(onMessageClick);
 
     if (renderChatBarButton) addChatBarButton(name, renderChatBarButton);
-    if (renderMemberListDecorator) addDecorator(name, renderMemberListDecorator);
-    if (renderMessageDecoration) addDecoration(name, renderMessageDecoration);
-    if (renderMessageAccessory) addAccessory(name, renderMessageAccessory);
+    if (renderMemberListDecorator) addMemberListDecorator(name, renderMemberListDecorator);
+    if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
+    if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
     if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
 
     return true;
@@ -336,12 +336,12 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
 
     if (onBeforeMessageEdit) removePreEditListener(onBeforeMessageEdit);
     if (onBeforeMessageSend) removePreSendListener(onBeforeMessageSend);
-    if (onMessageClick) removeClickListener(onMessageClick);
+    if (onMessageClick) removeMessageClickListener(onMessageClick);
 
     if (renderChatBarButton) removeChatBarButton(name);
-    if (renderMemberListDecorator) removeDecorator(name);
-    if (renderMessageDecoration) removeDecoration(name);
-    if (renderMessageAccessory) removeAccessory(name);
+    if (renderMemberListDecorator) removeMemberListDecorator(name);
+    if (renderMessageDecoration) removeMessageDecoration(name);
+    if (renderMessageAccessory) removeMessageAccessory(name);
     if (renderMessagePopoverButton) removeMessagePopoverButton(name);
 
     return true;

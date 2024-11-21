@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addAccessory, removeAccessory } from "@api/MessageAccessories";
+import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
@@ -372,7 +372,7 @@ export default definePlugin({
     settings,
 
     start() {
-        addAccessory("messageLinkEmbed", props => {
+        addMessageAccessory("messageLinkEmbed", props => {
             if (!messageLinkRegex.test(props.message.content))
                 return null;
 
@@ -390,6 +390,6 @@ export default definePlugin({
     },
 
     stop() {
-        removeAccessory("messageLinkEmbed");
+        removeMessageAccessory("messageLinkEmbed");
     }
 });

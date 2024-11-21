@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addAccessory } from "@api/MessageAccessories";
+import { addMessageAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -251,7 +251,7 @@ export default definePlugin({
     }, { noop: true }),
 
     start() {
-        addAccessory("vencord-debug", props => {
+        addMessageAccessory("vencord-debug", props => {
             const buttons = [] as JSX.Element[];
 
             const shouldAddUpdateButton =

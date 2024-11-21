@@ -20,7 +20,7 @@ import "./styles.css";
 
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { addAccessory, removeAccessory } from "@api/MessageAccessories";
+import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
@@ -64,7 +64,7 @@ export default definePlugin({
     translate,
 
     start() {
-        addAccessory("vc-translation", props => <TranslationAccessory message={props.message} />);
+        addMessageAccessory("vc-translation", props => <TranslationAccessory message={props.message} />);
 
         addChatBarButton("vc-translate", TranslateChatBarIcon);
 
@@ -102,6 +102,6 @@ export default definePlugin({
         removePreSendListener(this.preSend);
         removeChatBarButton("vc-translate");
         removeMessagePopoverButton("vc-translate");
-        removeAccessory("vc-translation");
+        removeMessageAccessory("vc-translation");
     },
 });
