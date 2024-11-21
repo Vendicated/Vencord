@@ -27,7 +27,7 @@ import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/Messag
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind } from "@utils/patches";
-import { Patch, Plugin, ReporterTestable, StartAt } from "@utils/types";
+import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
 
@@ -121,6 +121,15 @@ for (const p of pluginsValues) if (isPluginEnabled(p.name)) {
     if (p.renderMessageAccessory) neededApiPlugins.add("MessageAccessoriesAPI");
     if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
     if (p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
+
+    const keysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
+        "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
+        "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton"
+    ];
+
+    for (const key of keysToBind) {
+        p[key] &&= p[key].bind(p) as any;
+    }
 }
 
 for (const p of neededApiPlugins) {
