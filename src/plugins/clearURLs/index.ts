@@ -95,7 +95,7 @@ export default definePlugin({
 
     handleMessage(msg: MessageObject) {
         // Only run on messages that contain URLs
-        if (msg.content.match(/http(s)?:\/\//)) return;
+        if (!msg.content.match(/http(s)?:\/\//)) return;
 
         msg.content = msg.content.replace(
             /(https?:\/\/[^\s<]+[^<.,:;"'>)|\]\s])/g,
