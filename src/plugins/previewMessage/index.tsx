@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
+import { addChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
 import { generateId, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
@@ -73,7 +73,7 @@ const getAttachments = async (channelId: string) =>
     );
 
 
-const PreviewButton: ChatBarButton = ({ isMainChat, isEmpty, type: { attachments } }) => {
+const PreviewButton: ChatBarButtonFactory = ({ isMainChat, isEmpty, type: { attachments } }) => {
     const channelId = SelectedChannelStore.getChannelId();
     const draft = useStateFromStores([DraftStore], () => getDraft(channelId));
 

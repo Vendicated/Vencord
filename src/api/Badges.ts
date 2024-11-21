@@ -100,20 +100,3 @@ export interface BadgeUserArgs {
     userId: string;
     guildId: string;
 }
-
-interface ConnectedAccount {
-    type: string;
-    id: string;
-    name: string;
-    verified: boolean;
-}
-
-interface Profile {
-    connectedAccounts: ConnectedAccount[];
-    premiumType: number;
-    premiumSince: string;
-    premiumGuildSince?: any;
-    lastFetched: number;
-    profileFetchFailed: boolean;
-    application?: any;
-}

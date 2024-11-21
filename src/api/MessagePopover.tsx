@@ -33,13 +33,13 @@ export interface ButtonItem {
     onContextMenu?: MouseEventHandler<HTMLButtonElement>;
 }
 
-export type getButtonItem = (message: Message) => ButtonItem | null;
+export type MessagePopoverButtonFactory = (message: Message) => ButtonItem | null;
 
-export const buttons = new Map<string, getButtonItem>();
+export const buttons = new Map<string, MessagePopoverButtonFactory>();
 
 export function addButton(
     identifier: string,
-    item: getButtonItem,
+    item: MessagePopoverButtonFactory,
 ) {
     buttons.set(identifier, item);
 }

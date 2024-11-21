@@ -18,7 +18,7 @@
 
 import "./styles.css";
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
+import { addChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
@@ -123,7 +123,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
     );
 }
 
-const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
+const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
     if (!isMainChat) return null;
 
     return (

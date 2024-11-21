@@ -16,17 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export type AccessoryCallback = (props: Record<string, any>) => JSX.Element | null | Array<JSX.Element | null>;
-export type Accessory = {
-    callback: AccessoryCallback;
+export type MessageAccessoryFactory = (props: Record<string, any>) => JSX.Element | null | Array<JSX.Element | null>;
+export type MessageAccessory = {
+    callback: MessageAccessoryFactory;
     position?: number;
 };
 
-export const accessories = new Map<String, Accessory>();
+export const accessories = new Map<String, MessageAccessory>();
 
 export function addAccessory(
     identifier: string,
-    callback: AccessoryCallback,
+    callback: MessageAccessoryFactory,
     position?: number
 ) {
     accessories.set(identifier, {

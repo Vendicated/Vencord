@@ -18,7 +18,7 @@
 
 import { Channel, Message } from "discord-types/general/index.js";
 
-interface DecorationProps {
+export interface MessageDecorationProps {
     author: {
         /**
          * Will be username if the user has no nickname
@@ -44,11 +44,11 @@ interface DecorationProps {
     message: Message;
     [key: string]: any;
 }
-export type Decoration = (props: DecorationProps) => JSX.Element | null;
+export type MessageDecorationFactory = (props: MessageDecorationProps) => JSX.Element | null;
 
-export const decorations = new Map<string, Decoration>();
+export const decorations = new Map<string, MessageDecorationFactory>();
 
-export function addDecoration(identifier: string, decoration: Decoration) {
+export function addDecoration(identifier: string, decoration: MessageDecorationFactory) {
     decorations.set(identifier, decoration);
 }
 
@@ -56,7 +56,7 @@ export function removeDecoration(identifier: string) {
     decorations.delete(identifier);
 }
 
-export function __addDecorationsToMessage(props: DecorationProps): (JSX.Element | null)[] {
+export function __addDecorationsToMessage(props: MessageDecorationProps): (JSX.Element | null)[] {
     return [...decorations.values()].map(decoration => {
         return decoration(props);
     });

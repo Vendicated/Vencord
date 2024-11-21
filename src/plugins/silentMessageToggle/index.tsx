@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
-import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
+import { addChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
+import { addPreSendListener, removePreSendListener, MessageSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -41,7 +41,7 @@ const settings = definePluginSettings({
     }
 });
 
-const SilentMessageToggle: ChatBarButton = ({ isMainChat }) => {
+const SilentMessageToggle: ChatBarButtonFactory = ({ isMainChat }) => {
     const [enabled, setEnabled] = useState(lastState);
 
     function setEnabledValue(value: boolean) {
@@ -50,7 +50,7 @@ const SilentMessageToggle: ChatBarButton = ({ isMainChat }) => {
     }
 
     useEffect(() => {
-        const listener: SendListener = (_, message) => {
+        const listener: MessageSendListener = (_, message) => {
             if (enabled) {
                 if (settings.store.autoDisable) setEnabledValue(false);
                 if (!message.content.startsWith("@silent ")) message.content = "@silent " + message.content;

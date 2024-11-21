@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
+import { addChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
@@ -43,7 +43,7 @@ const settings = definePluginSettings({
     }
 });
 
-const SilentTypingToggle: ChatBarButton = ({ isMainChat }) => {
+const SilentTypingToggle: ChatBarButtonFactory = ({ isMainChat }) => {
     const { isEnabled, showIcon } = settings.use(["isEnabled", "showIcon"]);
     const toggle = () => settings.store.isEnabled = !settings.store.isEnabled;
 

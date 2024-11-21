@@ -38,12 +38,12 @@ interface DecoratorProps {
     user: User;
     [key: string]: any;
 }
-export type Decorator = (props: DecoratorProps) => JSX.Element | null;
+export type MemberListDecoratorFactory = (props: DecoratorProps) => JSX.Element | null;
 type OnlyIn = "guilds" | "dms";
 
-export const decorators = new Map<string, { decorator: Decorator, onlyIn?: OnlyIn; }>();
+export const decorators = new Map<string, { decorator: MemberListDecoratorFactory, onlyIn?: OnlyIn; }>();
 
-export function addDecorator(identifier: string, decorator: Decorator, onlyIn?: OnlyIn) {
+export function addDecorator(identifier: string, decorator: MemberListDecoratorFactory, onlyIn?: OnlyIn) {
     decorators.set(identifier, { decorator, onlyIn });
 }
 
