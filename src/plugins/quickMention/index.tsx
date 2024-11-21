@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addButton, removeButton } from "@api/MessagePopover";
+import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
@@ -29,7 +29,7 @@ export default definePlugin({
     dependencies: ["MessagePopoverAPI"],
 
     start() {
-        addButton("QuickMention", msg => {
+        addMessagePopoverButton("QuickMention", msg => {
             const channel = ChannelStore.getChannel(msg.channel_id);
             if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return null;
 
@@ -43,7 +43,7 @@ export default definePlugin({
         });
     },
     stop() {
-        removeButton("QuickMention");
+        removeMessagePopoverButton("QuickMention");
     },
 
     Icon: () => (

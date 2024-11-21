@@ -17,7 +17,7 @@
 */
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { addButton, removeButton } from "@api/MessagePopover";
+import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -160,7 +160,7 @@ export default definePlugin({
     },
 
     start() {
-        addButton("ViewRaw", msg => {
+        addMessagePopoverButton("ViewRaw", msg => {
             const handleClick = () => {
                 if (settings.store.clickMethod === "Right") {
                     copyWithToast(msg.content);
@@ -197,6 +197,6 @@ export default definePlugin({
     },
 
     stop() {
-        removeButton("ViewRaw");
+        removeMessagePopoverButton("ViewRaw");
     }
 });

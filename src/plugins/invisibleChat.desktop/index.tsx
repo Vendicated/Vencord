@@ -17,7 +17,7 @@
 */
 
 import { addChatBarButton, ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
-import { addButton, removeButton } from "@api/MessagePopover";
+import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -125,7 +125,7 @@ export default definePlugin({
         /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/,
     ),
     async start() {
-        addButton("InvisibleChat", message => {
+        addMessagePopoverButton("InvisibleChat", message => {
             return this.INV_REGEX.test(message?.content)
                 ? {
                     label: "Decrypt Message",
@@ -151,8 +151,8 @@ export default definePlugin({
     },
 
     stop() {
-        removeButton("InvisibleChat");
-        removeButton("InvisibleChat");
+        removeMessagePopoverButton("InvisibleChat");
+        removeMessagePopoverButton("InvisibleChat");
     },
 
     // Gets the Embed of a Link

@@ -22,7 +22,7 @@ import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
-import { addButton, removeButton } from "@api/MessagePopover";
+import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, Menu } from "@webpack/common";
@@ -68,7 +68,7 @@ export default definePlugin({
 
         addChatBarButton("vc-translate", TranslateChatBarIcon);
 
-        addButton("vc-translate", message => {
+        addMessagePopoverButton("vc-translate", message => {
             if (!message.content) return null;
 
             return {
@@ -101,7 +101,7 @@ export default definePlugin({
     stop() {
         removePreSendListener(this.preSend);
         removeChatBarButton("vc-translate");
-        removeButton("vc-translate");
+        removeMessagePopoverButton("vc-translate");
         removeAccessory("vc-translation");
     },
 });

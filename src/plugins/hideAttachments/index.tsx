@@ -17,7 +17,7 @@
 */
 
 import { get, set } from "@api/DataStore";
-import { addButton, removeButton } from "@api/MessagePopover";
+import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -48,7 +48,7 @@ export default definePlugin({
         await getHiddenMessages();
         await this.buildCss();
 
-        addButton("HideAttachments", msg => {
+        addMessagePopoverButton("HideAttachments", msg => {
             if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length) return null;
 
             const isHidden = hiddenMessages.has(msg.id);
@@ -66,7 +66,7 @@ export default definePlugin({
     stop() {
         style.remove();
         hiddenMessages.clear();
-        removeButton("HideAttachments");
+        removeMessagePopoverButton("HideAttachments");
     },
 
     async buildCss() {
