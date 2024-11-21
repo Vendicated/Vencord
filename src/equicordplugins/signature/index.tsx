@@ -98,9 +98,7 @@ migratePluginSettings("Signature", "SentVia");
 export default definePlugin({
     name: "Signature",
     description: "Automated fingerprint/end text",
-    authors: [
-        EquicordDevs.KrystalSkull
-    ],
+    authors: [EquicordDevs.KrystalSkull],
     dependencies: ["MessageEventsAPI", "ChatInputButtonAPI"],
 
     start: () => {
