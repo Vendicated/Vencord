@@ -18,7 +18,7 @@
 
 import "./styles.css";
 
-import { addChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
+import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
+import { addChatBarButton, ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";

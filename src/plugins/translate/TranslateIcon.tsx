@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ChatBarButtonFactory } from "@api/ChatButtons";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
 import { Alerts, Forms, Tooltip, useEffect, useState } from "@webpack/common";
