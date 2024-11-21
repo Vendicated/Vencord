@@ -520,8 +520,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 721717126523781240n,
     },
     nyx: {
-        name: "verticalsync",
-        id: 328165170536775680n
+        name: "verticalsync.",
+        id: 1207087393929171095n
     },
     nekohaxx: {
         name: "nekohaxx",
@@ -602,6 +602,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     minikomo: {
         name: "minikomo",
         id: 1004350636822900748n,
+    },
+    jamesbt365: {
+        name: "jamesbt365",
+        id: 158567567487795200n,
     },
 } satisfies Record<string, Dev>);
 
