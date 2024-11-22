@@ -16,16 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { i18n } from "@webpack/common";
+import { i18n, MessageStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
+
+const settings = definePluginSettings({
+    ignoreBlockedMessages: {
+        description: "Completely ignores (recent) incoming messages from blocked users (locally).",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true,
+    },
+    hideRepliesToBlockedMessages: {
+        description: "Hides replies to blocked messages.",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: false,
+    },
+})
 
 interface MessageDeleteProps {
     // Internal intl message for BLOCKED_MESSAGE_COUNT
@@ -35,7 +50,9 @@ interface MessageDeleteProps {
 export default definePlugin({
     name: "NoBlockedMessages",
     description: "Hides all blocked messages from chat completely.",
-    authors: [Devs.rushii, Devs.Samu],
+    authors: [Devs.rushii, Devs.Samu, Devs.Elvyra],
+    settings,
+
     patches: [
         {
             find: "#{intl::BLOCKED_MESSAGES_HIDE}",
@@ -51,22 +68,37 @@ export default definePlugin({
             '"ReadStateStore"'
         ].map(find => ({
             find,
-            predicate: () => Settings.plugins.NoBlockedMessages.ignoreBlockedMessages === true,
+            predicate: () => settings.store.ignoreBlockedMessages === true,
             replacement: [
                 {
                     match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
-                    replace: (_, props) => `if($self.isBlocked(${props}.message))return;`
+                    replace: (_, props) => `if($self.isBlocked(${props}.message)||$self.isReplyToBlocked(${props}.message))return;`
                 }
             ]
-        }))
-    ],
-    options: {
-        ignoreBlockedMessages: {
-            description: "Completely ignores (recent) incoming messages from blocked users (locally).",
-            type: OptionType.BOOLEAN,
-            default: false,
-            restartNeeded: true,
+        })),
+        {
+            find: ".messageListItem",
+            replacement: [
+                {
+                    match: /CUSTOM_GIFT.*?=(?=\(0,\i.jsx\)\(\i.FocusRing)/,
+                    replace: "$&!$self.isReplyToBlocked(arguments[0].message)&&",
+                }
+            ],
         },
+    ],
+
+    isReplyToBlocked(message: Message) {
+        if (!settings.store.hideRepliesToBlockedMessages) return false;
+        try {
+            const { messageReference } = message;
+            if (!messageReference) return false;
+
+            const replyMessage = MessageStore.getMessage(messageReference.channel_id, messageReference.message_id);
+
+            return replyMessage ? this.isBlocked(replyMessage) : false;
+        } catch (e) {
+            new Logger("NoBlockedMessages").error("Failed to check if referenced message is blocked:", e);
+        }
     },
 
     isBlocked(message: Message) {
@@ -81,7 +113,7 @@ export default definePlugin({
         try {
             return props.collapsedReason() === i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
         } catch (e) {
-            console.error(e);
+            new Logger("NoBlockedMessages").error("Failed to hide blocked message:", e);
         }
         return false;
     }
