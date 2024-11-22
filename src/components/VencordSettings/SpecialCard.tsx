@@ -20,12 +20,13 @@ import "./specialCard.css";
 
 import { classNameFactory } from "@api/Styles";
 import { Card, Forms, React } from "@webpack/common";
+import type { PropsWithChildren } from "react";
 
 const cl = classNameFactory("vc-special-");
 
 interface StyledCardProps {
     title: string;
-    subtitle: string;
+    subtitle?: string;
     description: string;
     cardImage?: string;
     backgroundImage?: string;
@@ -34,7 +35,7 @@ interface StyledCardProps {
     buttonOnClick?: () => void;
 }
 
-export function SpecialCard({ title, subtitle, description, cardImage, backgroundImage, backgroundColor, buttonTitle, buttonOnClick: onClick }: StyledCardProps) {
+export function SpecialCard({ title, subtitle, description, cardImage, backgroundImage, backgroundColor, buttonTitle, buttonOnClick: onClick, children }: PropsWithChildren<StyledCardProps>) {
     const cardStyle: React.CSSProperties = {
         backgroundColor: backgroundColor || "#9c85ef",
         backgroundImage: `url(${backgroundImage || ""})`,
@@ -61,15 +62,23 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
                             </React.Fragment>
                         ))}
                     </Forms.FormText>
+
+                    {children}
                 </div>
-                <div className={cl("image-container")}>
-                    <img
-                        role="presentation"
-                        src={cardImage}
-                        alt=""
-                        className={cl("image")}
-                    />
-                </div>
+                {
+                    cardImage && (
+                        <>
+                            <div className={cl("image-container")}>
+                                <img
+                                    role="presentation"
+                                    src={cardImage}
+                                    alt=""
+                                    className={cl("image")}
+                                />
+                            </div>
+                        </>
+                    )
+                }
             </div>
             {
                 buttonTitle && (

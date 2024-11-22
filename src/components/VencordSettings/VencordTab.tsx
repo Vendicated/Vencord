@@ -108,18 +108,37 @@ function VencordSettings() {
     return (
         <SettingsTab title="Vencord Settings">
             {
-                isDonor(user?.id) ? <SpecialCard
-                    title="Donations"
-                    subtitle="Thank you for donating!"
-                    description={"People will be able to see your requested badge through Vencord, you're able to request to change it any time.\n\nDon't worry about your perks running out if you stop your subscription, you're keeping your perks forever!"}
-                    cardImage={VENNIE_DONATOR_IMAGE}
-                    backgroundImage={"https://github.com/user-attachments/assets/2aa0826f-faa4-4bb0-8b59-ca8859f5c7f1"}
-                    backgroundColor="#ED87A9"
-                /> : <DonateCard image={donateImage} />
+                // TODO: change backgroundimage to svg instead
+                isDonor("0")
+                    ?
+                    <SpecialCard
+                        title="Donations"
+                        subtitle="Thank you for donating!"
+                        description={"People will be able to see your requested badge through Vencord, you're able to request to change it any time.\n\nDon't worry about your perks running out if you stop your subscription, you're keeping your perks forever!"}
+                        cardImage={VENNIE_DONATOR_IMAGE}
+                        backgroundImage={"https://github.com/user-attachments/assets/2aa0826f-faa4-4bb0-8b59-ca8859f5c7f1"}
+                        backgroundColor="#ED87A9"
+                    />
+                    :
+                    <SpecialCard
+                        title="Support the Project"
+                        description={"Please consider supporting the development of Vencord by donating!"}
+                        cardImage={donateImage}
+                        backgroundImage={"https://github.com/user-attachments/assets/2aa0826f-faa4-4bb0-8b59-ca8859f5c7f1"}
+                        backgroundColor="#c3a3ce"
+                    >
+                        <DonateButton
+                            look={Button.Looks.FILLED}
+                            color={Button.Colors.WHITE}
+                            style={{ marginTop: "1em" }}
+                        />
+                    </SpecialCard>
             }
             {
-                isPluginDev(user?.id)
-                && <SpecialCard
+                // TODO: change backgroundimage to svg instead
+                isPluginDev("0")
+                &&
+                <SpecialCard
                     title="Contributions"
                     subtitle="Thank you for contributing!"
                     description={"Since you've contributed to Vencord and added yourself to contributors list, you now have a cool new badge!\n\nTo avoid pesky help from people you don't know, theres gonna be a warning on your profile to not ask for support in your DMs."}
@@ -267,33 +286,6 @@ function VencordSettings() {
                 </Flex>
             </Forms.FormSection>
         </SettingsTab>
-    );
-}
-
-interface DonateCardProps {
-    image: string;
-}
-
-function DonateCard({ image }: DonateCardProps) {
-    return (
-        <Card className={cl("card", "donate")}>
-            <div>
-                <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
-                <Forms.FormText>Please consider supporting the development of Vencord by donating!</Forms.FormText>
-                <DonateButton style={{ transform: "translateX(-1em)" }} />
-            </div>
-            <img
-                role="presentation"
-                src={image}
-                alt=""
-                height={128}
-                style={{
-                    imageRendering: image === SHIGGY_DONATE_IMAGE ? "pixelated" : void 0,
-                    marginLeft: "auto",
-                    transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : void 0
-                }}
-            />
-        </Card>
     );
 }
 
