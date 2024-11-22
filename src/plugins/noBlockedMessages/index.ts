@@ -40,7 +40,7 @@ const settings = definePluginSettings({
         default: false,
         restartNeeded: false,
     },
-})
+});
 
 interface MessageDeleteProps {
     // Internal intl message for BLOCKED_MESSAGE_COUNT
