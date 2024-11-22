@@ -109,7 +109,7 @@ function VencordSettings() {
         <SettingsTab title="Vencord Settings">
             {
                 // TODO: change backgroundimage to svg instead
-                isDonor("0")
+                isDonor(user?.id)
                     ?
                     <SpecialCard
                         title="Donations"
@@ -136,7 +136,7 @@ function VencordSettings() {
             }
             {
                 // TODO: change backgroundimage to svg instead
-                isPluginDev("0")
+                isPluginDev(user?.id)
                 &&
                 <SpecialCard
                     title="Contributions"
