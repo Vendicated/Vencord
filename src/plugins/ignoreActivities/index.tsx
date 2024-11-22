@@ -244,7 +244,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: '="LocalActivityStore",',
+            find: '"LocalActivityStore"',
             replacement: [
                 {
                     match: /HANG_STATUS.+?(?=!\i\(\)\(\i,\i\)&&)(?<=(\i)\.push.+?)/,
@@ -253,33 +253,26 @@ export default definePlugin({
             ]
         },
         {
-            find: '="ActivityTrackingStore",',
+            find: '"ActivityTrackingStore"',
             replacement: {
                 match: /getVisibleRunningGames\(\).+?;(?=for)(?<=(\i)=\i\.\i\.getVisibleRunningGames.+?)/,
                 replace: (m, runningGames) => `${m}${runningGames}=${runningGames}.filter(({id,name})=>$self.isActivityNotIgnored({type:0,application_id:id,name}));`
             }
         },
         {
-            find: ".Messages.SETTINGS_GAMES_TOGGLE_OVERLAY",
+            find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
             replacement: {
-                match: /\.Messages\.SETTINGS_GAMES_TOGGLE_OVERLAY.+?}\(\),(?<={overlay:\i,.+?=(\i),.+?)(?=!(\i))/,
+                match: /#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}.+?}\(\),(?<={overlay:\i,.+?=(\i),.+?)(?=!(\i))/,
                 replace: (m, props, nowPlaying) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`
             }
         },
-        // Discord has 3 different components for activities. Currently, the last is the one being used
+        // Discord has 2 different components for activities. Currently, the last is the one being used
         {
             find: ".activityTitleText,variant",
             replacement: {
                 match: /\.activityTitleText.+?children:(\i)\.name.*?}\),/,
                 replace: (m, props) => `${m}$self.renderToggleActivityButton(${props}),`
             },
-        },
-        {
-            find: ".activityCardDetails,children",
-            replacement: {
-                match: /\.activityCardDetails.+?children:(\i\.application)\.name.*?}\),/,
-                replace: (m, props) => `${m}$self.renderToggleActivityButton(${props}),`
-            }
         },
         {
             find: ".promotedLabelWrapperNonBanner,children",

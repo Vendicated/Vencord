@@ -6,7 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, StartAt } from "@utils/types";
 
 const Noop = () => { };
 const NoopLogger = {
@@ -22,10 +22,12 @@ const NoopLogger = {
     fileOnly: Noop
 };
 
+const logAllow = new Set();
+
 const settings = definePluginSettings({
-    disableNoisyLoggers: {
+    disableLoggers: {
         type: OptionType.BOOLEAN,
-        description: "Disable noisy loggers like the MessageActionCreators",
+        description: "Disables Discords loggers",
         default: false,
         restartNeeded: true
     },
@@ -34,18 +36,43 @@ const settings = definePluginSettings({
         description: "Disable the Spotify logger, which leaks account information and access token",
         default: true,
         restartNeeded: true
+    },
+    whitelistedLoggers: {
+        type: OptionType.STRING,
+        description: "Semi colon separated list of loggers to allow even if others are hidden",
+        default: "GatewaySocket; Routing/Utils",
+        onChange(newVal: string) {
+            logAllow.clear();
+            newVal.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
+        }
     }
 });
 
 export default definePlugin({
     name: "ConsoleJanitor",
     description: "Disables annoying console messages/errors",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.sadan],
     settings,
 
+    startAt: StartAt.Init,
+    start() {
+        logAllow.clear();
+        this.settings.store.whitelistedLoggers?.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
+    },
+
     NoopLogger: () => NoopLogger,
+    shouldLog(logger: string) {
+        return logAllow.has(logger);
+    },
 
     patches: [
+        {
+            find: 'react-spring: The "interpolate" function',
+            replacement: {
+                match: /,console.warn\('react-spring: The "interpolate" function is deprecated in v10 \(use "to" instead\)'\)/,
+                replace: ""
+            }
+        },
         {
             find: 'console.warn("Window state not initialized"',
             replacement: {
@@ -103,34 +130,34 @@ export default definePlugin({
                 replace: ""
             }
         },
-        ...[
-            '("MessageActionCreators")', '("ChannelMessages")',
-            '("Routing/Utils")', '("RTCControlSocket")',
-            '("ConnectionEventFramerateReducer")', '("RTCLatencyTestManager")',
-            '("OverlayBridgeStore")', '("RPCServer:WSS")', '("RPCServer:IPC")'
-        ].map(logger => ({
-            find: logger,
-            predicate: () => settings.store.disableNoisyLoggers,
-            all: true,
-            replacement: {
-                match: new RegExp(String.raw`new \i\.\i${logger.replace(/([()])/g, "\\$1")}`),
-                replace: `$self.NoopLogger${logger}`
-            }
-        })),
+        // Zustand section
         {
-            find: '"Experimental codecs: "',
-            predicate: () => settings.store.disableNoisyLoggers,
-            replacement: {
-                match: /new \i\.\i\("Connection\("\.concat\(\i,"\)"\)\)/,
-                replace: "$self.NoopLogger()"
-            }
+            find: "[DEPRECATED] Passing a vanilla store will be unsupported in a future version. Instead use `import { useStore } from 'zustand'`.",
+            replacement: [
+                {
+                    match: /&&console\.warn\("\[DEPRECATED\] Passing a vanilla store will be unsupported in a future version\. Instead use `import { useStore } from 'zustand'`\."\)/,
+                    replace: ""
+                },
+                {
+                    match: /console\.warn\("\[DEPRECATED\] Use `createWithEqualityFn` instead of `create` or use `useStoreWithEqualityFn` instead of `useStore`\. They can be imported from 'zustand\/traditional'\. https:\/\/github\.com\/pmndrs\/zustand\/discussions\/1937"\),/,
+                    replace: ""
+                }
+            ]
         },
         {
-            find: '"Handling ping: "',
-            predicate: () => settings.store.disableNoisyLoggers,
+            find: "[DEPRECATED] `getStorage`, `serialize` and `deserialize` options are deprecated. Use `storage` option instead.",
             replacement: {
-                match: /new \i\.\i\("RTCConnection\("\.concat.+?\)\)(?=,)/,
-                replace: "$self.NoopLogger()"
+                match: /console\.warn\("\[DEPRECATED\] `getStorage`, `serialize` and `deserialize` options are deprecated\. Use `storage` option instead\."\),/,
+                replace: ""
+            }
+        },
+        // Patches discords generic logger function
+        {
+            find: "Σ:",
+            predicate: () => settings.store.disableLoggers,
+            replacement: {
+                match: /(?<=&&)(?=console)/,
+                replace: "$self.shouldLog(arguments[0])&&"
             }
         },
         {
