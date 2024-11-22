@@ -111,7 +111,7 @@ export default definePlugin({
     patches: [
         {
             // Indicator
-            find: ".Messages.MESSAGE_EDITED,",
+            find: "#{intl::MESSAGE_EDITED}",
             replacement: {
                 match: /let\{className:\i,message:\i[^}]*\}=(\i)/,
                 replace: "try {$1 && $self.INV_REGEX.test($1.message.content) ? $1.content.push($self.indicator()) : null } catch {};$&"

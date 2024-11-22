@@ -68,7 +68,7 @@ export default definePlugin({
         },
         // fixes a bug where Members page must be loaded to see highest role, why is Discord depending on MemberSafetyStore.getEnhancedMember for something that can be obtained here?
         {
-            find: "Messages.GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL,allowOverflow",
+            find: "#{intl::GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL}",
             predicate: () => settings.store.showModView,
             replacement: {
                 match: /(role:)\i(?=,guildId.{0,100}role:(\i\[))/,
@@ -92,16 +92,7 @@ export default definePlugin({
                 replace: '">0"'
             }
         },
-        // empty word filter (why would anyone search "horny" in fucking server discovery... please... why are we patching this again??)
-        {
-            find: '"horny","fart"',
-            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
-            replacement: {
-                match: /=\["egirl",.+?\]/,
-                replace: "=[]"
-            }
-        },
-        // empty 2nd word filter
+        // empty word filter
         {
             find: '"pepe","nude"',
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
@@ -116,7 +107,7 @@ export default definePlugin({
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
             all: true,
             replacement: {
-                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\)/g,
+                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0,rejectWithError:!1\}\)/g,
                 replace: "Promise.resolve({ body: { valid: true } })"
             }
         }
