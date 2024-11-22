@@ -69,6 +69,7 @@ export function RoleList({ roleData, onRoleRemove }: { onRoleRemove: (id: string
                 <div className={classes(root, roles)}>
                     {roleData.map(data => (
                         <RoleCard
+                            key={data.id}
                             data={data}
                             onRoleRemove={onRoleRemove}
                             border={false}
