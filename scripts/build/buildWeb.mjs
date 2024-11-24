@@ -31,7 +31,7 @@ import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION,
 const commonOptions = {
     ...commonOpts,
     entryPoints: ["browser/Vencord.ts"],
-    globalName: "PawesomeVencord",
+    globalName: "Vencord",
     format: "iife",
     external: ["~plugins", "~git-hash", "/assets/*"],
     plugins: [
