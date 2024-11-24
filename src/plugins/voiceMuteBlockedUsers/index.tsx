@@ -20,7 +20,7 @@ const { isLocalMute } = findByPropsLazy("isLocalMute");
 const { addRelationship } = findByPropsLazy("addRelationship");
 const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
 
-const blockedUserIds: Set<string> = new Set();
+let blockedUserIds: Set<string> = new Set();
 let blockedUserCount = 0;
 
 const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { user?: User, onClose(): void; }) => {
@@ -109,30 +109,31 @@ export default definePlugin({
         if (!autoMuteBlocked) return;
 
         // Get all relationships and filter for blocked users
-        const blockedIds = Object.entries(RelationshipStore.getRelationships())
-            .filter(([_, v]) => v === 2)
-            .map(([k]) => UserStore.getUser(k).id);
+        const blockedIdsSet = new Set(
+            Object.entries(RelationshipStore.getRelationships())
+                .filter(([_, v]) => v === 2)
+                .map(([k]) => UserStore.getUser(k).id)
+        );
 
-        // Mute blocked users
-        for (const ID of blockedIds) {
-            if (!isLocalMute(ID)) {
-                toggleLocalMute(ID);
-            }
-            blockedUserIds.add(ID);
+        // Mute blocked users in batch
+        const toMute = [...blockedIdsSet].filter(ID => !isLocalMute(ID));
+        if (toMute.length > 0) {
+            toMute.forEach(ID => toggleLocalMute(ID));
+            blockedUserIds = new Set([...blockedUserIds, ...toMute]); // Update blockedUserIds
         }
 
-        if (blockedUserCount > blockedIds.length) {
-            const unblockedUsers = [...blockedUserIds].filter(id => !blockedIds.includes(id));
-
-            for (const ID of unblockedUsers) {
+        // Handle unblocking
+        if (blockedUserCount > blockedIdsSet.size) {
+            const unblockedUsers = [...blockedUserIds].filter(id => !blockedIdsSet.has(id));
+            unblockedUsers.forEach(ID => {
                 if (isLocalMute(ID)) {
                     toggleLocalMute(ID);
                 }
                 blockedUserIds.delete(ID);
-            }
+            });
         }
 
-        blockedUserCount = blockedIds.length;
+        blockedUserCount = blockedIdsSet.size;
     },
     BlockUnblockButton: ErrorBoundary.wrap(({ user }: { user: User; }) => {
         if (!user) return null; // Return null if no user is provided
