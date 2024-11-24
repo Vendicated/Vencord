@@ -34,7 +34,7 @@ import { User } from "discord-types/general";
 const CONTRIBUTOR_BADGE = "https://vencord.dev/assets/favicon.png";
 
 const ContributorBadge: ProfileBadge = {
-    description: "Vencord Contributor",
+    description: "Pawesome/Vencord Contributor",
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     shouldShow: ({ userId }) => isPluginDev(userId),
