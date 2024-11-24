@@ -205,19 +205,19 @@ function Updater() {
     };
 
     return (
-        <SettingsTab title="PawesomeVencord Updater">
+        <SettingsTab title="PawsomeVencord Updater">
             <Forms.FormTitle tag="h5">Updater Settings</Forms.FormTitle>
             <Switch
                 value={settings.autoUpdate}
                 onChange={(v: boolean) => settings.autoUpdate = v}
-                note="Automatically update PawesomeVencord without confirmation prompt"
+                note="Automatically update PawsomeVencord without confirmation prompt"
             >
                 Automatically update
             </Switch>
             <Switch
                 value={settings.autoUpdateNotification}
                 onChange={(v: boolean) => settings.autoUpdateNotification = v}
-                note="Shows a notification when PawesomeVencord automatically updates"
+                note="Shows a notification when PawsomeVencord automatically updates"
                 disabled={!settings.autoUpdate}
             >
                 Get notified when an automatic update completes

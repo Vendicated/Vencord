@@ -98,7 +98,7 @@ function VencordSettings() {
         ];
 
     return (
-        <SettingsTab title="PawesomeVencord Settings">
+        <SettingsTab title="PawsomeVencord Settings">
             <DonateCard image={donateImage} />
             <Forms.FormSection title="Quick Actions">
                 <QuickActionCard>
@@ -225,7 +225,7 @@ function VencordSettings() {
                     serialize={identity} />
             </>}
 
-            <Forms.FormSection className={Margins.top16} title="PawesomeVencord Notifications" tag="h5">
+            <Forms.FormSection className={Margins.top16} title="PawsomeVencord Notifications" tag="h5">
                 <Flex>
                     <Button onClick={openNotificationSettingsModal}>
                         Notification Settings
@@ -266,4 +266,4 @@ function DonateCard({ image }: DonateCardProps) {
     );
 }
 
-export default wrapTab(VencordSettings, "PawesomeVencord Settings");
+export default wrapTab(VencordSettings, "PawsomeVencord Settings");

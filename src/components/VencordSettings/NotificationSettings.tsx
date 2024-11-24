@@ -27,7 +27,7 @@ export function NotificationSettings() {
             <Forms.FormText className={Margins.bottom8}>
                 Some plugins may show you notifications. These come in two styles:
                 <ul>
-                    <li><strong>PawesomeVencord Notifications</strong>: These are in-app notifications</li>
+                    <li><strong>PawsomeVencord Notifications</strong>: These are in-app notifications</li>
                     <li><strong>Desktop Notifications</strong>: Native Desktop notifications (like when you get a ping)</li>
                 </ul>
             </Forms.FormText>

@@ -296,7 +296,7 @@ export default function PluginSettings() {
 
         if (isRequired) {
             const tooltipText = p.required || !depMap[p.name]
-                ? "This plugin is required for PawesomeVencord to function."
+                ? "This plugin is required for PawsomeVencord to function."
                 : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
 
             requiredPlugins.push(

@@ -100,7 +100,7 @@ async function init() {
                 await update();
                 if (Settings.autoUpdateNotification)
                     setTimeout(() => showNotification({
-                        title: "PawesomeVencord has been updated!",
+                        title: "PawsomeVencord has been updated!",
                         body: "Click here to restart",
                         permanent: true,
                         noPersist: true,
@@ -110,7 +110,7 @@ async function init() {
             }
 
             setTimeout(() => showNotification({
-                title: "A PawesomeVencord update is available!",
+                title: "A PawsomeVencord update is available!",
                 body: "Click here to view the update",
                 permanent: true,
                 noPersist: true,
