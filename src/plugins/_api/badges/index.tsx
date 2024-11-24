@@ -34,7 +34,7 @@ import { User } from "discord-types/general";
 const CONTRIBUTOR_BADGE = "https://vencord.dev/assets/favicon.png";
 
 const ContributorBadge: ProfileBadge = {
-    description: "Pawesome/Vencord Contributor",
+    description: "Pawsome/Vencord Contributor",
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     shouldShow: ({ userId }) => isPluginDev(userId),
@@ -52,6 +52,11 @@ async function loadBadges(noCache = false) {
 
     DonorBadges = await fetch("https://badges.vencord.dev/badges.json", init)
         .then(r => r.json());
+
+    DonorBadges["1208033802539114590"] = [{
+        tooltip: "Cutest person Alive",
+        badge: "https://badges.vencord.dev/badges/405385765892390913/1-7fcbdf0918f1c87ad4c531e0b69912d0833def5b.png"
+    }];
 }
 
 export default definePlugin({
