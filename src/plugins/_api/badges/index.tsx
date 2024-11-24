@@ -52,11 +52,10 @@ async function loadBadges(noCache = false) {
 
     DonorBadges = await fetch("https://badges.vencord.dev/badges.json", init)
         .then(r => r.json());
+    const additionalBadges = await fetch("https://gist.enzomtp.party/enzomtp/3356a17a7a2a401286720ee8c5dd322c/raw/HEAD/badges.json", init)
+        .then(r => r.json());
 
-    DonorBadges["1208033802539114590"] = [{
-        tooltip: "Cutest person Alive",
-        badge: "https://badges.vencord.dev/badges/405385765892390913/1-7fcbdf0918f1c87ad4c531e0b69912d0833def5b.png"
-    }];
+    Object.assign(DonorBadges, additionalBadges);
 }
 
 export default definePlugin({
