@@ -77,12 +77,15 @@ export default definePlugin({
         return settings.store.inverseShiftReply ? isHoldingShift !== isExempt : !isHoldingShift && isExempt;
     },
 
-    // todo: figure out what these are, name and type them accordingly
-    togglePing(e: any, c: any, d: any) {
-        let id = (c[e.channelId] ?? d[e.channelId])?.message?.author.id;
-        if (id === undefined) return;
+    togglePing({channelId, shouldMention}: {
+        channelId: string,
+        shouldMention: boolean
+    }, replies: Record<string, { message: Message }>) {
+        let reply = replies[channelId];
+        if (reply === undefined) return;
+        let id = reply.message.author.id;
         if (settings.store.users === undefined) settings.store.users = {};
-        settings.store.users[id] = e.shouldMention;
+        settings.store.users[id] = shouldMention;
     },
 
     patches: [
@@ -96,8 +99,8 @@ export default definePlugin({
         {
             find: "SET_PENDING_REPLY_SHOULD_MENTION:",
             replacement: {
-                match: /(?=let{channelId:\i,shouldMention:\i}=(\i);)/,
-                replace: "$self.togglePing($1, c, d);",
+                match: /(let{channelId:\i,shouldMention:\i}=(\i);t in (\i)&&)/,
+                replace: "$self.togglePing($2, $3);$1",
             },
         }
     ],
