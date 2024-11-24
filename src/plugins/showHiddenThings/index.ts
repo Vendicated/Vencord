@@ -40,7 +40,7 @@ export default definePlugin({
     name: "ShowHiddenThings",
     tags: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters"],
     description: "Displays various hidden & moderator-only things regardless of permissions.",
-    authors: [Devs.Dolfies],
+    authors: [Devs.Dolfies, Devs.sadan],
     patches: [
         {
             find: "showCommunicationDisabledStyles",
@@ -73,6 +73,15 @@ export default definePlugin({
             replacement: {
                 match: /(role:)\i(?=,guildId.{0,100}role:(\i\[))/,
                 replace: "$1$2arguments[0].member.highestRoleId]",
+            }
+        },
+        // Allows you to open mod view on yourself
+        {
+            find: ':"PRESS_MOD_VIEW",',
+            predicate: () => settings.store.showModView,
+            replacement: {
+                match: /\i(?=\?null)/,
+                replace: "false"
             }
         },
         {
