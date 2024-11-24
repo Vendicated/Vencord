@@ -34,7 +34,7 @@ const settings = definePluginSettings({
             },
             {
                 label: "UserPFP Backup DB",
-                value: "https://userpfp.thororen.com/UserPFP/source/data.json"
+                value: "https://userpfp.thororen.com/data.json"
             }
         ]
     }
