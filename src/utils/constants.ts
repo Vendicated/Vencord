@@ -37,6 +37,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "AstralFennex",
         id: 270717743706144789n
     },
+    Enz: {
+        name: "EnzomTP",
+        id: 221273966457782283n
+    },
     Ven: {
         name: "Vee",
         id: 343383572805058560n
