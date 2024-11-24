@@ -127,7 +127,7 @@ await Promise.all([
         format: "iife",
         target: ["esnext"],
         footer: { js: "//# sourceURL=VencordRenderer\n" + sourceMapFooter("renderer") },
-        globalName: "Vencord",
+        globalName: "PawesomeVencord",
         sourcemap,
         plugins: [
             globPlugins("discordDesktop"),
@@ -176,7 +176,7 @@ await Promise.all([
         format: "iife",
         target: ["esnext"],
         footer: { js: "//# sourceURL=VencordDesktopRenderer\n" + sourceMapFooter("vencordDesktopRenderer") },
-        globalName: "Vencord",
+        globalName: "PawesomeVencord",
         sourcemap,
         plugins: [
             globPlugins("vencordDesktop"),
