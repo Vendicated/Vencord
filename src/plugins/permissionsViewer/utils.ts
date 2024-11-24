@@ -19,7 +19,7 @@
 import { classNameFactory } from "@api/Styles";
 import { getIntlMessage } from "@utils/discord";
 import { wordsToTitle } from "@utils/text";
-import { GuildStore, Parser } from "@webpack/common";
+import { GuildStore } from "@webpack/common";
 import { Guild, GuildMember, Role } from "discord-types/general";
 import type { ReactNode } from "react";
 
@@ -59,13 +59,7 @@ export function getPermissionDescription(permission: string): ReactNode {
     else if (permission !== "STREAM")
         permission = PermissionKeyMap[permission] || permission;
 
-    const msg = getIntlMessage(`ROLE_PERMISSIONS_${permission}_DESCRIPTION`) as any;
-    if (msg?.hasMarkdown)
-        return Parser.parse(msg.message);
-
-    if (typeof msg === "string") return msg;
-
-    return "";
+    return getIntlMessage(`ROLE_PERMISSIONS_${permission}_DESCRIPTION`, {}) ?? permission;
 }
 
 export function getSortedRoles({ id }: Guild, member: GuildMember) {
