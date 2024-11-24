@@ -6,16 +6,19 @@
 
 import "./LinkIconButton.css";
 
+import { getTheme, Theme } from "@utils/discord";
 import { MaskedLink, Tooltip } from "@webpack/common";
 
 import { GithubIcon, WebsiteIcon } from "..";
 
 export function GithubLinkIcon() {
-    return <GithubIcon aria-hidden className={"vc-settings-modal-link-icon"} />;
+    const theme = getTheme() === Theme.Light ? "#000000" : "#FFFFFF";
+    return <GithubIcon aria-hidden fill={theme} className={"vc-settings-modal-link-icon"} />;
 }
 
 export function WebsiteLinkIcon() {
-    return <WebsiteIcon aria-hidden className={"vc-settings-modal-link-icon"} />;
+    const theme = getTheme() === Theme.Light ? "#000000" : "#FFFFFF";
+    return <WebsiteIcon aria-hidden fill={theme} className={"vc-settings-modal-link-icon"} />;
 }
 
 interface Props {
