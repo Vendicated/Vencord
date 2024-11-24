@@ -118,7 +118,13 @@ function VencordSettings() {
                         cardImage={VENNIE_DONATOR_IMAGE}
                         backgroundImage={"https://github.com/user-attachments/assets/2aa0826f-faa4-4bb0-8b59-ca8859f5c7f1"}
                         backgroundColor="#ED87A9"
-                    />
+                    >
+                        <DonateButton
+                            look={Button.Looks.FILLED}
+                            color={Button.Colors.WHITE}
+                            style={{ marginTop: "1em" }}
+                        />
+                    </SpecialCard>
                     :
                     <SpecialCard
                         title="Support the Project"
