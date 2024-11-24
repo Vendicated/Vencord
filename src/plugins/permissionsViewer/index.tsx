@@ -56,11 +56,6 @@ export const settings = definePluginSettings({
             { label: "Lowest Role", value: PermissionsSortOrder.LowestRole }
         ]
     },
-    defaultPermissionsDropdownState: {
-        description: "Whether the permissions dropdown on user popouts should be open by default",
-        type: OptionType.BOOLEAN,
-        default: false
-    }
 });
 
 function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
