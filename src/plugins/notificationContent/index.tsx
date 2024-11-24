@@ -53,7 +53,6 @@ export default definePlugin({
         title: string,
         body: string
     ): { icon?: string; title: string; body: string } {
-        console.log("hi");
         return {
             icon: settings.store.mode !== 2 ? icon : undefined,
             title: settings.store.mode !== 2 ? title : "Discord",
