@@ -311,7 +311,7 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
 
 function isGifUrl(url: string) {
     const u = new URL(url);
-    return u.pathname.endsWith(".gif") || u.searchParams.get("animated");
+    return u.pathname.endsWith(".gif") || (u.searchParams.get("animated") === "true");
 }
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
