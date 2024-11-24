@@ -91,7 +91,7 @@ export function ExpandableHeader({
                     }
 
 
-                    <Tooltip text={showContent ? "Hide " + headerText : "Show " + headerText}>
+                    {forceOpen || <Tooltip text={showContent ? "Hide " + headerText : "Show " + headerText}>
                         {tooltipProps => (
                             <button
                                 {...tooltipProps}
@@ -100,7 +100,6 @@ export function ExpandableHeader({
                                     setShowContent(v => !v);
                                     onDropDownClick?.(showContent);
                                 }}
-                                disabled={forceOpen}
                             >
                                 <svg
                                     width="24"
@@ -112,7 +111,7 @@ export function ExpandableHeader({
                                 </svg>
                             </button>
                         )}
-                    </Tooltip>
+                    </Tooltip>}
                 </div>
             </div>
             {showContent && children}
