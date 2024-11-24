@@ -156,7 +156,7 @@ export default definePlugin({
             find: "#{intl::MESSAGE_EDITED}",
             replacement: {
                 match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
-                replace: "style:$self.useMessageColors($1),"
+                replace: "style:$self.useMessageColorsStyle($1),"
             },
             predicate: () => settings.store.colorChatMessages
         }
@@ -188,7 +188,7 @@ export default definePlugin({
         };
     },
 
-    useMessageColors(message: any) {
+    useMessageColorsStyle(message: any) {
         try {
             const { messageSaturation } = settings.use(["messageSaturation"]);
             const author = useMessageAuthor(message);
