@@ -2,6 +2,8 @@
 
 ## Note, this is an unofficial fork of Vencord for an offcial port of the DiscordColorways plugin from BetterDiscord. This repo might be behind the main repo at times and its usage is meant for development purposes ONLY.
 
+- Not to mention that this fork is pretty much only being maintained by 2 people LOL
+
 The cutest Discord client mod
 
 | ![image](https://github.com/Vendicated/Vencord/assets/45497981/706722b1-32de-4d99-bee9-93993b504334) |
