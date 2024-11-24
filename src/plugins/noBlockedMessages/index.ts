@@ -35,7 +35,7 @@ interface MessageDeleteProps {
 export default definePlugin({
     name: "NoBlockedMessages",
     description: "Hides all blocked messages from chat completely.",
-    authors: [Devs.rushii, Devs.Samu, Devs.F53],
+    authors: [Devs.rushii, Devs.Samu],
     patches: [
         {
             find: "#{intl::BLOCKED_MESSAGES_HIDE}",
