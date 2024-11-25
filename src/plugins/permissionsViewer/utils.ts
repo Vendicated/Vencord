@@ -17,56 +17,16 @@
 */
 
 import { classNameFactory } from "@api/Styles";
-import { getIntlMessage } from "@utils/discord";
-import { wordsToTitle } from "@utils/text";
-import { GuildStore, Parser } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { GuildStore } from "@webpack/common";
 import { Guild, GuildMember, Role } from "discord-types/general";
-import type { ReactNode } from "react";
 
 import { PermissionsSortOrder, settings } from ".";
 import { PermissionType } from "./components/RolesAndUsersPermissions";
 
+export const { getGuildPermissionSpecMap } = findByPropsLazy("getGuildPermissionSpecMap");
+
 export const cl = classNameFactory("vc-permviewer-");
-
-function formatPermissionWithoutMatchingString(permission: string) {
-    return wordsToTitle(permission.toLowerCase().split("_"));
-}
-
-// because discord is unable to be consistent with their names
-const PermissionKeyMap = {
-    MANAGE_GUILD: "MANAGE_SERVER",
-    MANAGE_GUILD_EXPRESSIONS: "MANAGE_EXPRESSIONS",
-    CREATE_GUILD_EXPRESSIONS: "CREATE_EXPRESSIONS",
-    MODERATE_MEMBERS: "MODERATE_MEMBER", // HELLOOOO ??????
-    STREAM: "VIDEO",
-    SEND_VOICE_MESSAGES: "ROLE_PERMISSIONS_SEND_VOICE_MESSAGE",
-} as const;
-
-export function getPermissionString(permission: string) {
-    permission = PermissionKeyMap[permission] || permission;
-
-    return getIntlMessage(permission) ||
-        // shouldn't get here but just in case
-        formatPermissionWithoutMatchingString(permission);
-}
-
-export function getPermissionDescription(permission: string): ReactNode {
-    // DISCORD PLEEEEEEEEAAAAASE IM BEGGING YOU :(
-    if (permission === "USE_APPLICATION_COMMANDS")
-        permission = "USE_APPLICATION_COMMANDS_GUILD";
-    else if (permission === "SEND_VOICE_MESSAGES")
-        permission = "SEND_VOICE_MESSAGE_GUILD";
-    else if (permission !== "STREAM")
-        permission = PermissionKeyMap[permission] || permission;
-
-    const msg = getIntlMessage(`ROLE_PERMISSIONS_${permission}_DESCRIPTION`) as any;
-    if (msg?.hasMarkdown)
-        return Parser.parse(msg.message);
-
-    if (typeof msg === "string") return msg;
-
-    return "";
-}
 
 export function getSortedRoles({ id }: Guild, member: GuildMember) {
     const roles = GuildStore.getRoles(id);
