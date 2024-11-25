@@ -69,8 +69,38 @@ const settings = definePluginSettings({
         description: "Intensity of message coloring.",
         markers: makeRange(0, 100, 10),
         default: 30
-    }
+    },
 });
+
+// https://www.w3.org/TR/WCAG20-TECHS/G17.html#G17-procedure
+/**
+    * @param color1 -- hex code, with #
+    * @param color2 -- hex code, with #
+    */
+function calculateContrast(color1: string, color2: string) {
+    return (lumin(color1) + .05) / (lumin(color2) + .05);
+}
+
+/**
+    * @param color -- hex code with #
+    */
+function lumin(color: string) {
+    const c: [number, number, number] = [0, 0, 0];
+    if(color.length === 4) {
+        c[0] = parseInt(color[1], 16);
+        c[1] = parseInt(color[2], 16);
+        c[2] = parseInt(color[3], 16);
+    } else if (color.length === 7) {
+        c[0] = parseInt(color.substring(1, 3), 16);
+        c[1] = parseInt(color.substring(3, 5), 16);
+        c[2] = parseInt(color.substring(5, 7), 16);
+    } else {
+        throw new Error("invalid color");
+    }
+    c.map(x => x / 255).map(x => x <= .03928 ? x / 12.92 : ((x + .055)/1.055)**2.4);
+
+    return (.2126 * c[0]) + (.7152 * c[1]) + (.0722 * c[2]);
+}
 
 export default definePlugin({
     name: "RoleColorEverywhere",
@@ -156,9 +186,24 @@ export default definePlugin({
             find: "#{intl::MESSAGE_EDITED}",
             replacement: {
                 match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
-                replace: "style:$self.useMessageColorsStyle($1),"
+                replace: "style:$self.useMessageColorsStyle($1, vc_ref),"
             },
             predicate: () => settings.store.colorChatMessages
+        },
+        // HORROR
+        {
+            find: "#{intl::MESSAGE_EDITED}",
+            replacement: {
+                match: /(contentRef:(\i).+?(\i)\.useRef.+?)(?=return)/,
+                replace: "$1let vc_ref = $2 ?? $3.useRef(null);"
+            }
+        },
+        {
+            find: "#{intl::MESSAGE_EDITED}",
+            replacement: {
+                match: /(?<=ref:)\i/,
+                replace: "vc_ref"
+            }
         }
     ],
 
@@ -188,12 +233,13 @@ export default definePlugin({
         };
     },
 
-    useMessageColorsStyle(message: any) {
+    useMessageColorsStyle(message: any, test: any | null) {
         try {
             const { messageSaturation } = settings.use(["messageSaturation"]);
             const author = useMessageAuthor(message);
 
             if (author.colorString != null && messageSaturation !== 0) {
+                console.log(author.colorString);
                 const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
 
                 return {
