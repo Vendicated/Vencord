@@ -23,7 +23,9 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore, useEffect } from "@webpack/common";
+import { useState } from "react";
+
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
 
@@ -70,38 +72,37 @@ const settings = definePluginSettings({
         markers: makeRange(0, 100, 10),
         default: 30
     },
+    minColorContrast: {
+        type: OptionType.STRING,
+        description: "the min contrast that colors will be rendered at, `1` to disable",
+        default: "1",
+    }
+}, {
+    minColorContrast: {
+        isValid(value) {
+            if (value === "") return true;
+            return !Number.isNaN(parseFloat(value)) || "Input is not a number";
+        },
+    }
 });
 
-// https://www.w3.org/TR/WCAG20-TECHS/G17.html#G17-procedure
-/**
-    * @param color1 -- hex code, with #
-    * @param color2 -- hex code, with #
-    */
-function calculateContrast(color1: string, color2: string) {
-    return (lumin(color1) + .05) / (lumin(color2) + .05);
+export function clamp(min, max, val) {
+    return Math.max(min, Math.min(max, val));
 }
 
-/**
-    * @param color -- hex code with #
-    */
-function lumin(color: string) {
-    const c: [number, number, number] = [0, 0, 0];
-    if(color.length === 4) {
-        c[0] = parseInt(color[1], 16);
-        c[1] = parseInt(color[2], 16);
-        c[2] = parseInt(color[3], 16);
-    } else if (color.length === 7) {
-        c[0] = parseInt(color.substring(1, 3), 16);
-        c[1] = parseInt(color.substring(3, 5), 16);
-        c[2] = parseInt(color.substring(5, 7), 16);
-    } else {
-        throw new Error("invalid color");
-    }
-    c.map(x => x / 255).map(x => x <= .03928 ? x / 12.92 : ((x + .055)/1.055)**2.4);
-
-    return (.2126 * c[0]) + (.7152 * c[1]) + (.0722 * c[2]);
+export function getContrastValue() {
+    const num = parseFloat(settings.store.minColorContrast);
+    if (Number.isNaN(num)) return 1;
+    return clamp(1, 21, num);
 }
-
+export function useGetContrastValue() {
+    const { minColorContrast } = settings.use(["minColorContrast"]);
+    const [contrast, setContrast] = useState(getContrastValue());
+    useEffect(() => {
+        setContrast(getContrastValue());
+    }, [minColorContrast]);
+    return contrast;
+}
 export default definePlugin({
     name: "RoleColorEverywhere",
     authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi, Devs.jamesbt365],
@@ -234,12 +235,12 @@ export default definePlugin({
     },
 
     useMessageColorsStyle(message: any, test: any | null) {
+        console.log(test);
         try {
             const { messageSaturation } = settings.use(["messageSaturation"]);
             const author = useMessageAuthor(message);
 
-            if (author.colorString != null && messageSaturation !== 0) {
-                console.log(author.colorString);
+            if (author.colorString != null && messageSaturation !== 0 && (!test || parseFloat(settings.store.minColorContrast) === 1)) {
                 const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
 
                 return {
