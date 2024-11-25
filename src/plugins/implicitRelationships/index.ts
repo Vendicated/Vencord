@@ -32,7 +32,7 @@ export default definePlugin({
     patches: [
         // Counts header
         {
-            find: ".FRIENDS_ALL_HEADER",
+            find: "#{intl::FRIENDS_ALL_HEADER}",
             replacement: {
                 match: /toString\(\)\}\);case (\i\.\i)\.BLOCKED/,
                 replace: 'toString()});case $1.IMPLICIT:return "Implicit — "+arguments[1];case $1.BLOCKED'
@@ -48,9 +48,9 @@ export default definePlugin({
         },
         // Sections header
         {
-            find: ".FRIENDS_SECTION_ONLINE",
+            find: "#{intl::FRIENDS_SECTION_ONLINE}",
             replacement: {
-                match: /(\(0,\i\.jsx\)\(\i\.TabBar\.Item,\{id:\i\.\i)\.BLOCKED,className:([^\s]+?)\.item,children:\i\.\i\.Messages\.BLOCKED\}\)/,
+                match: /(\(0,\i\.jsx\)\(\i\.TabBar\.Item,\{id:\i\.\i)\.BLOCKED,className:([^\s]+?)\.item,children:\i\.\i\.string\(\i\.\i#{intl::BLOCKED}\)\}\)/,
                 replace: "$1.IMPLICIT,className:$2.item,children:\"Implicit\"}),$&"
             },
         },
@@ -117,7 +117,7 @@ export default definePlugin({
 
     wrapSort(comparator: Function, row: any) {
         return row.type === 5
-            ? -UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0
+            ? -(UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0)
             : comparator(row);
     },
 
