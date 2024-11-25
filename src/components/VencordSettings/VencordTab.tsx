@@ -28,7 +28,7 @@ import { Margins } from "@utils/margins";
 import { identity, isPluginDev } from "@utils/misc";
 import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { Button, Card, Forms, GuildMemberStore, React, Select, Switch, UserStore } from "@webpack/common";
+import { Button, Forms, GuildMemberStore, React, Select, Switch, UserStore } from "@webpack/common";
 
 import Plugins from "~plugins";
 
@@ -42,8 +42,12 @@ const cl = classNameFactory("vc-settings-");
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
+
 const VENNIE_DONATOR_IMAGE = "https://cdn.discordapp.com/emojis/1238120638020063377.png";
 const COZY_CONTRIB_IMAGE = "https://cdn.discordapp.com/emojis/1026533070955872337.png";
+
+const DONATOR_BACKGROUND_IMAGE = "https://github.com/user-attachments/assets/e66b5170-07b7-4fdb-902e-281b1570b769";
+const CONTRIB_BACKGROUND_IMAGE = "https://github.com/user-attachments/assets/576a7c61-72d9-4f92-8039-b91002894649";
 
 type KeysOfType<Object, Type> = {
     [K in keyof Object]: Object[K] extends Type ? K : never;
@@ -108,7 +112,6 @@ function VencordSettings() {
     return (
         <SettingsTab title="Vencord Settings">
             {
-                // TODO: change backgroundimage to svg instead
                 isDonor(user?.id)
                     ?
                     <SpecialCard
@@ -116,32 +119,27 @@ function VencordSettings() {
                         subtitle="Thank you for donating!"
                         description={"People will be able to see your requested badge through Vencord, you're able to request to change it any time.\n\nDon't worry about your perks running out if you stop your subscription, you're keeping your perks forever!"}
                         cardImage={VENNIE_DONATOR_IMAGE}
-                        backgroundImage={"https://github.com/user-attachments/assets/2aa0826f-faa4-4bb0-8b59-ca8859f5c7f1"}
+                        backgroundImage={DONATOR_BACKGROUND_IMAGE}
                         backgroundColor="#ED87A9"
                     >
-                        <DonateButton
-                            look={Button.Looks.FILLED}
-                            color={Button.Colors.WHITE}
-                            style={{ marginTop: "1em" }}
-                        />
+                        {
+                            DonateButtonComponent()
+                        }
                     </SpecialCard>
                     :
                     <SpecialCard
                         title="Support the Project"
                         description={"Please consider supporting the development of Vencord by donating!"}
                         cardImage={donateImage}
-                        backgroundImage={"https://github.com/user-attachments/assets/2aa0826f-faa4-4bb0-8b59-ca8859f5c7f1"}
+                        backgroundImage={DONATOR_BACKGROUND_IMAGE}
                         backgroundColor="#c3a3ce"
                     >
-                        <DonateButton
-                            look={Button.Looks.FILLED}
-                            color={Button.Colors.WHITE}
-                            style={{ marginTop: "1em" }}
-                        />
+                        {
+                            DonateButtonComponent()
+                        }
                     </SpecialCard>
             }
             {
-                // TODO: change backgroundimage to svg instead
                 isPluginDev(user?.id)
                 &&
                 <SpecialCard
@@ -149,7 +147,7 @@ function VencordSettings() {
                     subtitle="Thank you for contributing!"
                     description={"Since you've contributed to Vencord and added yourself to contributors list, you now have a cool new badge!\n\nTo avoid pesky help from people you don't know, theres gonna be a warning on your profile to not ask for support in your DMs."}
                     cardImage={COZY_CONTRIB_IMAGE}
-                    backgroundImage={"https://github.com/user-attachments/assets/98b19955-1ed7-4c8a-bf4b-986b72217d69"}
+                    backgroundImage={CONTRIB_BACKGROUND_IMAGE}
                     backgroundColor="#EDCC87"
                     buttonTitle="See What You Contributed To"
                     buttonOnClick={() => openContributorModal(user)}
@@ -292,6 +290,16 @@ function VencordSettings() {
                 </Flex>
             </Forms.FormSection>
         </SettingsTab>
+    );
+}
+
+function DonateButtonComponent() {
+    return (
+        <DonateButton
+            look={Button.Looks.FILLED}
+            color={Button.Colors.WHITE}
+            style={{ marginTop: "1em" }}
+        />
     );
 }
 

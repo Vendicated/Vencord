@@ -48,12 +48,8 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
         >
             <div className={cl("card-flex")}>
                 <div className={cl("card-flex-main")}>
-                    <Forms.FormTitle className={cl("title")} tag="h5">
-                        {title}
-                    </Forms.FormTitle>
-                    <Forms.FormText className={cl("subtitle")}>
-                        {subtitle}
-                    </Forms.FormText>
+                    <Forms.FormTitle className={cl("title")} tag="h5">{title}</Forms.FormTitle>
+                    <Forms.FormText className={cl("subtitle")}>{subtitle}</Forms.FormText>
                     <Forms.FormText className={cl("text")}>
                         {description.split("\n").map((line, index) => (
                             <React.Fragment key={index}>
