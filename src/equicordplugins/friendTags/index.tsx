@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "styles.css?managed";
+
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
-import { ExpandableHeader } from "@components/ExpandableHeader";
 import { Devs } from "@utils/constants";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
@@ -108,20 +109,23 @@ function TagConfigCard(props) {
             <TextInput value={tagName} onChange={setTagName}></TextInput>
             <Text variant={"heading-md/normal"}>Users (Seperated by comma)</Text>
             <TextInput value={userIds} onChange={setUserIDs}></TextInput>
-            <ExpandableHeader headerText="User List (Click A User To Remove)" defaultState={true}>
-                {
-                    userIds.split(", ").map(user => {
-                        const userData: any = UserStore.getUser(user);
-                        if (!userData) return null;
-                        return (
-                            <div style={{ display: "flex" }}>
-                                <img src={userData.getAvatarURL()} style={{ height: "20px", borderRadius: "50%", marginRight: "5px" }}></img>
-                                <Text style={{ cursor: "pointer" }} variant={"text-md/normal"} onClick={() => setUserIDs(userIds.replace(`, ${user}`, "").replace(user, ""))}>{userData.globalName || userData.username}</Text>
-                            </div>
-                        );
-                    })
-                }
-            </ExpandableHeader>
+            <div className={"vc-friend-tags-user-header-container"}>
+                <Text variant="eyebrow">User List (Click A User To Remove)</Text>
+                <div className={"vc-friend-tags-user-header-btns"}>
+                    {
+                        userIds.split(", ").map(user => {
+                            const userData: any = UserStore.getUser(user);
+                            if (!userData) return null;
+                            return (
+                                <div style={{ display: "flex" }}>
+                                    <img src={userData.getAvatarURL()} style={{ height: "20px", borderRadius: "50%", marginRight: "5px" }}></img>
+                                    <Text style={{ cursor: "pointer" }} variant={"text-md/normal"} onClick={() => setUserIDs(userIds.replace(`, ${user}`, "").replace(user, ""))}>{userData.globalName || userData.username}</Text>
+                                </div>
+                            );
+                        })
+                    }
+                </div>
+            </div>
             <Button onClick={async () => {
                 SavedData = SavedData.filter(data => (data.tagName !== tagName));
                 await SetData();
