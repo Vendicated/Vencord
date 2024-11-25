@@ -177,9 +177,9 @@ export default definePlugin({
         <Popout
             position="bottom"
             align="center"
-            renderPopout={() => (
+            renderPopout={({ closePopout }) => (
                 <Dialog className={PopoutClasses.container} style={{ width: "500px" }}>
-                    <UserPermissions guild={guild} guildMember={guildMember} forceOpen />
+                    <UserPermissions guild={guild} guildMember={guildMember} closePopout={closePopout} />
                 </Dialog>
             )}
         >
