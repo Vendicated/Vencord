@@ -6,7 +6,7 @@
     margin-bottom: 1em;
 }
 
-@media (max-width: 1040px) {
+@media (width <=1040px) {
     .vc-settings-quickActions-card {
         grid-template-columns: repeat(2, 1fr);
     }
