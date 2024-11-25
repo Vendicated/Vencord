@@ -1,0 +1,11 @@
+.vc-i-remember-you-user-header-container {
+    display: contents;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.vc-i-remember-you-user-header-btns {
+    display: none;
+    gap: 8px;
+}
