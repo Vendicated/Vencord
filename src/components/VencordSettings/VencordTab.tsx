@@ -46,8 +46,8 @@ const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209
 const VENNIE_DONATOR_IMAGE = "https://cdn.discordapp.com/emojis/1238120638020063377.png";
 const COZY_CONTRIB_IMAGE = "https://cdn.discordapp.com/emojis/1026533070955872337.png";
 
-const DONATOR_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311064411275788390.png?size=4096";
-const CONTRIB_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311064464690384927.png?size=4096";
+const DONATOR_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070116305436712.png?size=2048";
+const CONTRIB_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070166481895484.png?size=2048";
 
 type KeysOfType<Object, Type> = {
     [K in keyof Object]: Object[K] extends Type ? K : never;
