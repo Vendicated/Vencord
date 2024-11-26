@@ -265,10 +265,12 @@ export default definePlugin({
                         throw new Error("No background color found");
                     }
                     const bg = new Contrast(Color.parse(bgOverlayChat || backgroundPrimary));
+                    const rc = Color.parse(author.colorString);
+                    const mkColor = c => bg.calculateMinContrastColor(rc.mix("oklab", messageSaturation / 100, Color.parse(c)), contrast);
                     return {
-                        color: bg.calculateMinContrastColor(Color.mixokl(author.colorString, textNormal, messageSaturation), contrast),
-                        "--header-primary": bg.calculateMinContrastColor(Color.mixokl(author.colorString, headerPrimary, messageSaturation), contrast),
-                        "--text-muted": bg.calculateMinContrastColor(Color.mixokl(author.colorString, textMuted, messageSaturation), contrast)
+                        color: mkColor(textNormal),
+                        "--header-primary": mkColor(headerPrimary),
+                        "--text-muted": mkColor(textMuted)
                     };
                 }
             } catch (e) {

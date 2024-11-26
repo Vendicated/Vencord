@@ -9,9 +9,8 @@ const clamp = (min: number, max: number) => (num: number) =>
 const clampContrast = clamp(1, 21);
 const snap = (mult: number, num: number) =>
     Math.floor((num % mult) / (mult / 2)) * mult + (num - (num % mult));
-/**
- * 0-1
- */
+
+// NOTE: All color values are 0-1 and multiplied when stringified
 interface sRGB {
     type: "srgb";
     r: number;
@@ -27,13 +26,7 @@ interface lRGB {
 interface HSL {
     type: "hsl";
     h: number;
-    /**
-     * 0-1
-     */
     s: number;
-    /**
-     * 0-1
-     */
     l: number;
 }
 interface OKLAB {
@@ -42,8 +35,9 @@ interface OKLAB {
     a: number;
     b: number;
 }
-type AnyColor = sRGB | lRGB | HSL | OKLAB;
+
 const RGB_REGEX = /rgb\((?:(\d+(?:\.\d+)?),? ?)(?:(\d+(?:\.\d+)?),? ?)(?:(\d+(?:\.\d+)?),? ?)\)/;
+
 export class Color {
     private sRGB: sRGB;
     private get lRGB(): lRGB {
@@ -122,10 +116,6 @@ export class Color {
         return `rgb(${this.sRGB.r * 255}, ${this.sRGB.g * 255}, ${this.sRGB.b * 255})`;
     }
 
-    public get hslString(): string {
-        return `hsl(${this.HSL.h}, ${(this.HSL.s * 100).toFixed(1)}%, ${(this.HSL.l * 100).toFixed(1)}%)`;
-    }
-
     public get lightness(): number {
         return this.HSL.l;
     }
@@ -171,10 +161,6 @@ export class Color {
 
     public static contrast(fg: Color, bg: Color): number {
         return (fg.lumin + 0.05) / (bg.lumin + 0.05);
-    }
-
-    public static mixokl(c1: string, c2: string, pc1: number): Color {
-        return Color.parse(c1).mix("oklab", pc1 / 100, Color.parse(c2));
     }
 
     public mix(colorspace: "oklab", thisPercent: number, other: Color, otherPercent = 1 - thisPercent): Color {
