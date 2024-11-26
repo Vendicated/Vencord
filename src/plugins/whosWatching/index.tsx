@@ -8,6 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Devs } from "@utils/constants";
 import { getIntlMessage, openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
@@ -45,7 +46,7 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
         <div className={cl("content")}>
             {userIds.length ?
                 (<>
-                    <Forms.FormTitle>{getIntlMessage("SPECTATORS", { numViewers: userIds.length })}</Forms.FormTitle>
+                    <Forms.FormTitle>{getIntlMessage("SPECTATORS.format({ numViewers: userIds.length })")}</Forms.FormTitle>
                     <Flex flexDirection="column" style={{ gap: 6 }} >
                         {users.map(user => (
                             <Flex flexDirection="row" style={{ gap: 6, alignContent: "center" }} className={cl("user")} >
@@ -53,7 +54,7 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
                                 {getUsername(user)}
                             </Flex>
                         ))}
-                        {missingUsers > 0 && <span className={cl("more_users")}>{`+${getIntlMessage("NUM_USERS", { num: missingUsers })}`}</span>}
+                        {missingUsers > 0 && <span className={cl("more_users")}>{`+${getIntlMessage("NUM_USERS.format({ num: missingUsers })")}`}</span>}
                     </Flex>
                 </>)
                 : (<span className={cl("no_viewers")}>No spectators</span>)}
@@ -70,10 +71,7 @@ export default definePlugin({
     name: "WhosWatching",
     description: "Hover over the screenshare icon to view what users are watching your stream",
     authors: [
-        {
-            name: "fres",
-            id: 843448897737064448n
-        }
+        Devs.Fres
     ],
     settings: settings,
     patches: [
@@ -86,10 +84,10 @@ export default definePlugin({
         },
         {
             predicate: () => settings.store.showPanel,
-            find: "this.renderEmbeddedActivity()",
+            find: "this.isJoinableActivity()||",
             replacement: {
-                match: /(?<=children.{0,50})"div"(?=.{0,500}this\.renderEmbeddedActivity\(\))/,
-                replace: "$self.WrapperComponent"
+                match: /(this\.isJoinableActivity\(\).{0,200}children:.{0,50})"div"/,
+                replace: "$1$self.WrapperComponent"
             }
         }
     ],
@@ -125,7 +123,7 @@ export default definePlugin({
                     {users.length ?
                         <>
                             <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
-                                {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
+                                {getIntlMessage("SPECTATORS.format({ numViewers: userIds.length })")}
                             </Forms.FormTitle>
                             <UserSummaryItem
                                 users={users}
