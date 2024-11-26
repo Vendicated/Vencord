@@ -227,9 +227,12 @@ export default definePlugin({
                     replace: "true"
                 },
                 {
-                    match: /\i\.\i\.copy/,
+                    match: /\i\.\i\.copy(?=\(\i)/,
                     replace: "Vencord.Webpack.Common.Clipboard.copy"
-                }]
+                }
+            ],
+            all: true,
+            noWarn: true
         },
         // Automod add filter words
         {
