@@ -23,8 +23,9 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, GuildStore, useEffect } from "@webpack/common";
-import { useState } from "react";
+import { ChannelStore, GuildMemberStore, GuildStore, useEffect, useState } from "@webpack/common";
+
+import { Color, Contrast } from "./color";
 
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
@@ -234,19 +235,37 @@ export default definePlugin({
         };
     },
 
-    useMessageColorsStyle(message: any, test: any | null) {
-        console.log(test);
+    useMessageColorsStyle(message: any, ref: any | null) {
         try {
             const { messageSaturation } = settings.use(["messageSaturation"]);
             const author = useMessageAuthor(message);
+            const contrast = useGetContrastValue();
 
-            if (author.colorString != null && messageSaturation !== 0 && (!test || parseFloat(settings.store.minColorContrast) === 1)) {
-                const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
+            if (author.colorString != null && messageSaturation !== 0) {
+                if (contrast === 1) {
+                    const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
 
+                    return {
+                        color: value.replace("{DEFAULT}", "--text-normal"),
+                        "--header-primary": value.replace("{DEFAULT}", "--header-primary"),
+                        "--text-muted": value.replace("{DEFAULT}", "--text-muted")
+                    };
+                }
+                if (!ref.current) return;
+                const computed = window.getComputedStyle(ref.current);
+                const textNormal = computed.getPropertyValue("--text-normal"),
+                    headerPrimary = computed.getPropertyValue("--header-primary"),
+                    textMuted = computed.getPropertyValue("--text-muted");
+                const bgOverlayChat = computed.getPropertyValue("--bg-overlay-chat"),
+                    backgroundPrimary = computed.getPropertyValue("--background-primary");
+                if (!(bgOverlayChat || backgroundPrimary)) {
+                    throw new Error("No background color found");
+                }
+                const bg = new Contrast(Color.parse(bgOverlayChat || backgroundPrimary));
                 return {
-                    color: value.replace("{DEFAULT}", "--text-normal"),
-                    "--header-primary": value.replace("{DEFAULT}", "--header-primary"),
-                    "--text-muted": value.replace("{DEFAULT}", "--text-muted")
+                    color: bg.calculateMinContrastColor(Color.mixokl(author.colorString, textNormal, messageSaturation), contrast),
+                    "--header-primary": bg.calculateMinContrastColor(Color.mixokl(author.colorString, headerPrimary, messageSaturation), contrast),
+                    "--text-muted": bg.calculateMinContrastColor(Color.mixokl(author.colorString, textMuted, messageSaturation), contrast)
                 };
             }
         } catch (e) {

@@ -43,7 +43,8 @@ interface OKLAB {
     b: number;
 }
 type AnyColor = sRGB | lRGB | HSL | OKLAB;
-class Color {
+const RGB_REGEX = /rgb\((?:(\d+(?:\.\d+)?),? ?)(?:(\d+(?:\.\d+)?),? ?)(?:(\d+(?:\.\d+)?),? ?)\)/;
+export class Color {
     private sRGB: sRGB;
     private get lRGB(): lRGB {
         return {
@@ -144,12 +145,36 @@ class Color {
         }
     }
 
-    public static fromHex(color: string): Color {
-        return new Color(Color.hexToRGB(color));
+    public static parse(color: string): Color {
+        {
+            const c = color.replaceAll("#", "");
+            if (c.length === 3 || c.length === 6)
+                return new Color(Color.hexToRGB(color));
+        }
+        rgb: {
+            const c = color.match(RGB_REGEX);
+            if (!c) break rgb;
+            const r = parseFloat(c[1]),
+                g = parseFloat(c[2]),
+                b = parseFloat(c[3]);
+            if (Number.isNaN(r + g + b))
+                throw new Error("invalid rgb value. got: " + color);
+            return new Color({
+                type: "srgb",
+                r: r / 255,
+                g: g / 255,
+                b: b / 255
+            });
+        }
+        throw new Error("Color not recognized. got: " + color);
     }
 
     public static contrast(fg: Color, bg: Color): number {
         return (fg.lumin + 0.05) / (bg.lumin + 0.05);
+    }
+
+    public static mixokl(c1: string, c2: string, pc1: number): Color {
+        return Color.parse(c1).mix("oklab", pc1 / 100, Color.parse(c2));
     }
 
     public mix(colorspace: "oklab", thisPercent: number, other: Color, otherPercent = 1 - thisPercent): Color {
@@ -212,9 +237,9 @@ class Color {
     }
 
     private static HSLtosRGB({ h, s, l }: HSL): sRGB {
-        const k = n => (n + h / 30) % 12;
+        const k = (n: number) => (n + h / 30) % 12;
         const a = s * Math.min(l, 1 - l);
-        const f = n => l - a * Math.max(Math.min(k(n) - 3, 9 - k(n), 1), -1);
+        const f = (n: number) => l - a * Math.max(Math.min(k(n) - 3, 9 - k(n), 1), -1);
 
         const r = f(0);
         const g = f(8);
@@ -250,24 +275,25 @@ class Color {
     }
 }
 
-class Contrast {
-    public constructor(private fg: Color, private bg: Color) { }
+export class Contrast {
+    public constructor(private bg: Color) {
+    }
 
     private ratio(c: Color) {
         return Color.contrast(c, this.bg);
     }
 
-    public calculateMinContrastColor(contrast: number, step: number): string {
+    public calculateMinContrastColor(fg: Color, contrast: number, step: number = .01): string {
         step = Math.abs(step);
         step = this.bg.lightness > 0.5 ? -step : step;
         const snapStep = snap.bind(null, step);
         contrast = clampContrast(contrast);
         contrast = snapStep(contrast);
-        const startingContrast = this.ratio(this.fg);
-        if (startingContrast >= contrast) return this.fg.rbgString;
-        let currentColor: Color = this.fg;
+        const startingContrast = this.ratio(fg);
+        if (startingContrast >= contrast) return fg.rbgString;
+        let currentColor: Color = fg;
         let tries =
-            (snapStep(this.bg.lightness) - snapStep(this.fg.lightness)) / step +
+            (snapStep(this.bg.lightness) - snapStep(fg.lightness)) / step +
             (Math.abs(.5 - snapStep(this.bg.lightness)) + .5) / Math.abs(step);
         while (this.ratio(currentColor) <= contrast && tries--) {
             currentColor = currentColor.bumpLightness(step);
