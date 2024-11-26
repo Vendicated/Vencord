@@ -16,12 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Guild, GuildMember, User } from "discord-types/general";
+import { Channel, Guild, GuildMember, User } from "discord-types/general";
 import type { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
 import type { FluxEvents } from "./fluxEvents";
-import { i18nMessages } from "./i18nMessages";
 
 export { FluxEvents };
 
@@ -148,19 +147,6 @@ export interface LocaleInfo {
     postgresLang: string;
 }
 
-export interface i18n {
-    getAvailableLocales(): Locale[];
-    getLanguages(): LocaleInfo[];
-    getDefaultLocale(): string;
-    getLocale(): string;
-    getLocaleInfo(): LocaleInfo;
-    setLocale(locale: string): void;
-
-    loadPromise: Promise<void>;
-
-    Messages: Record<i18nMessages, any>;
-}
-
 export interface Clipboard {
     copy(text: string): void;
     SUPPORTS_COPY: boolean;
@@ -171,6 +157,11 @@ export interface NavigationRouter {
     forward(): void;
     transitionTo(path: string, ...args: unknown[]): void;
     transitionToGuild(guildId: string, ...args: unknown[]): void;
+}
+
+export interface ChannelRouter {
+    transitionToChannel: (channelId: string) => void;
+    transitionToThread: (channel: Channel) => void;
 }
 
 export interface IconUtils {
