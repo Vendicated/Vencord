@@ -14,7 +14,7 @@ export default definePlugin({
     authors: [Devs.Suffocate],
     patches: [
         {
-            find: ")(\"attachments\",",
+            find: ')("attachments",',
             replacement: [
                 {
                     match: /return\(0,\i.jsx\)\("ul",\{(?=.*?:(\i).map\()/,
@@ -89,6 +89,7 @@ export default definePlugin({
             }
 
             setList([...items]);
+            heldItem.current = null;
 
             window.removeEventListener("mousemove", handleMouseMove);
         };
