@@ -24,9 +24,10 @@ import { Logger } from "@utils/Logger";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, GuildStore, useEffect, useMemo, useState } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore, useEffect, useMemo, useRef, useState } from "@webpack/common";
+import Message from "discord-types/general/Message";
 
-import { Color, Contrast } from "./color";
+import { Color, Contrast, getBackgroundColor } from "./color";
 
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
@@ -193,7 +194,7 @@ export default definePlugin({
             },
             predicate: () => settings.store.colorChatMessages
         },
-        // HORROR
+        // HORROR: ref for message content to get background colors
         {
             find: "#{intl::MESSAGE_EDITED}",
             replacement: {
@@ -207,8 +208,44 @@ export default definePlugin({
                 match: /(?<=ref:)\i/,
                 replace: "vc_ref"
             }
+        },
+        // cap contrast of usernames
+        {
+            find: "style:\"username\"",
+            replacement: {
+                match: /(?<=message:(\i).*)(?<=color:(\i).*)(?<=void 0,)/,
+                replace: "...$self.capContrast($2, $1),"
+            }
         }
     ],
+
+    capContrast(color: string, { mentioned }: Message) {
+        const ref = useRef<{ ref: Element; }>(null);
+        const contrast = useGetContrastValue();
+        const [dep, update] = useForceUpdater(true);
+        return useMemo(() => {
+            try {
+                if (color == null || contrast === 1) return {};
+                if (!ref.current?.ref) {
+                    console.log("updating");
+                    setTimeout(update, 0);
+                    return { ref };
+                }
+                const computed = getComputedStyle(ref.current.ref);
+                const standardBG = getBackgroundColor(computed);
+                const bgColor = mentioned ? computed.getPropertyValue("--background-mentioned") : standardBG;
+                if (!bgColor) throw new Error("Background color not found");
+                return {
+                    ref,
+                    style: {
+                        color: new Contrast(Color.parse(bgColor, standardBG)).calculateMinContrastColor(Color.parse(color), contrast)
+                    }
+                };
+            } catch (error) {
+                console.error(error);
+            }
+        }, [ref?.current?.ref, contrast, color, dep, mentioned]);
+    },
 
     getColorString(userId: string, channelOrGuildId: string) {
         try {
@@ -254,17 +291,16 @@ export default definePlugin({
                         };
                     }
                     // why
-                    if (!ref.current) setTimeout(update, 0);
+                    if (!ref.current) {
+                        setTimeout(update, 0);
+                        return {};
+                    }
                     const computed = window.getComputedStyle(ref.current);
                     const textNormal = computed.getPropertyValue("--text-normal"),
                         headerPrimary = computed.getPropertyValue("--header-primary"),
                         textMuted = computed.getPropertyValue("--text-muted");
-                    const bgOverlayChat = computed.getPropertyValue("--bg-overlay-chat"),
-                        backgroundPrimary = computed.getPropertyValue("--background-primary");
-                    if (!(bgOverlayChat || backgroundPrimary)) {
-                        throw new Error("No background color found");
-                    }
-                    const bg = new Contrast(Color.parse(bgOverlayChat || backgroundPrimary));
+
+                    const bg = new Contrast(Color.parse(getBackgroundColor(computed)));
                     const rc = Color.parse(author.colorString);
                     const mkColor = c => bg.calculateMinContrastColor(rc.mix("oklab", messageSaturation / 100, Color.parse(c)), contrast);
                     return {

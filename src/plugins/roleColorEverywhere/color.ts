@@ -37,7 +37,21 @@ interface OKLAB {
 }
 
 const RGB_REGEX = /rgb\((?:(\d+(?:\.\d+)?),? ?)(?:(\d+(?:\.\d+)?),? ?)(?:(\d+(?:\.\d+)?),? ?)\)/;
-
+/**
+ * 1: colorspace
+ *
+ * 2: color 1 val
+ *
+ * 3?: color 1 percentage
+ *
+ * 4: color 2
+ *
+ * 5?: color 2 percentage
+ */
+const COLOR_MIX_REGEX = /color-mix\( ?in ([^,]+), ?([^,]+?) ?(\d+)?%? ?, (.+?) ?(\d+)?%? ?\)$/;
+const color_mix_cleanup = (str: string) => str.replaceAll(/ +/g, " ").replaceAll("\n", "").replaceAll(/calc\(1 ?\* ? ([^)]+) \)/g, "$1");
+const HSL_REGEX = /hsl\((\d+(?:\.\d+)?)(?<hueunits>turn|deg)?(?:, ?|,? )(\d+(?:\.\d+)?)%?(?:, ?|,? )(\d+(?:\.\d+)?)%?(?: ?\)$| ?\/ ?(\d?(?:\.\d+)?)\)$)/;
+const hsl_cleanup = (str: string) => str.replaceAll(/calc\(1 ?\* ?([^)]+?)\)/g, "$1");
 export class Color {
     private sRGB: sRGB;
     private get lRGB(): lRGB {
@@ -135,11 +149,39 @@ export class Color {
         }
     }
 
-    public static parse(color: string): Color {
-        {
+    /**
+     *
+     * @param withBG **If color has transparnecy, this needs to be provided**
+     * @returns
+     */
+    public static parse(color: string, withBG: string = ""): Color {
+        /* hex: */{
             const c = color.replaceAll("#", "");
             if (c.length === 3 || c.length === 6)
                 return new Color(Color.hexToRGB(color));
+        }
+        hsl: {
+            if (!color.startsWith("hsl(")) break hsl;
+            color = hsl_cleanup(color);
+            const parsed = color.match(HSL_REGEX);
+            if (!parsed) throw new Error("failed to parse HSL(): " + color);
+            // eslint-disable-next-line prefer-const
+            let [, hue, units, sat, lig, alpha]: any = parsed;
+            hue = parseFloat(hue);
+            hue = units === "turn" ? hue * 360 : hue;
+            sat = parseFloat(sat);
+            lig = parseFloat(lig);
+            sat /= 100;
+            lig /= 100;
+            if (Number.isNaN(hue + sat + lig))
+                throw new Error("invalid hsl value. got: " + color);
+            const toRet = new Color({
+                type: "hsl",
+                h: hue,
+                s: sat,
+                l: lig,
+            });
+            return alpha ? toRet.withOpacity(Color.parse(withBG), alpha) : toRet;
         }
         rgb: {
             const c = color.match(RGB_REGEX);
@@ -156,6 +198,44 @@ export class Color {
                 b: b / 255
             });
         }
+        colormix: {
+            if (!color.startsWith("color-mix(")) break colormix;
+            color = color_mix_cleanup(color);
+            const parsed = color.match(COLOR_MIX_REGEX);
+            if (!parsed?.[3]) throw new Error("Error parsing color-mix: " + color);
+            const color1 = parsed[2],
+                colorSpace = parsed[1];
+            let color2: string, p1: string | undefined, p2: string | undefined;
+            switch (parsed.length) {
+                case 4: {
+                    const [, , , c2] = parsed;
+                    color2 = c2;
+                    break;
+                }
+                case 5: {
+                    const [, , , c1P, c2] = parsed;
+                    color2 = c2;
+                    p1 = c1P;
+                    break;
+                }
+                case 6: {
+                    const [, , , c1P, c2, c2P] = parsed;
+                    color2 = c2;
+                    p1 = c1P;
+                    p2 = c2P;
+                    break;
+                }
+                default: {
+                    throw new Error("Error parsing color-mix" + color);
+                }
+            }
+            if (p1 && p2 && +p1 + +p2 !== 100) {
+                throw new Error("percents do not add up to 100. percents that add up to less than 100 are not supported at this time");
+            }
+            const parsedColor1 = Color.parse(color1, withBG);
+            const parsedColor2 = Color.parse(color2, withBG);
+            return parsedColor1.mix(colorSpace, parseFloat(p1 || "50") / 100, parsedColor2);
+        }
         throw new Error("Color not recognized. got: " + color);
     }
 
@@ -163,7 +243,7 @@ export class Color {
         return (fg.lumin + 0.05) / (bg.lumin + 0.05);
     }
 
-    public mix(colorspace: "oklab", thisPercent: number, other: Color, otherPercent = 1 - thisPercent): Color {
+    public mix(colorspace: "oklab" | (string & {}), thisPercent: number, other: Color, otherPercent = 1 - thisPercent): Color {
         switch (colorspace) {
             case "oklab": {
                 const okl1 = this.OKLAB;
@@ -193,6 +273,17 @@ export class Color {
         });
     }
 
+    private withOpacity(bg: Color, alpha: number): Color {
+        const r = (this.sRGB.r * alpha) + (bg.sRGB.r * (1 - alpha));
+        const g = (this.sRGB.g * alpha) + (bg.sRGB.g * (1 - alpha));
+        const b = (this.sRGB.b * alpha) + (bg.sRGB.b * (1 - alpha));
+        return new Color({
+            type: "srgb",
+            r,
+            g,
+            b
+        });
+    }
     private static OKLABtolRGB({ l, a, b }: OKLAB): lRGB {
         const l1 = Math.pow(l + 0.3963377774 * a + 0.2158037573 * b, 3);
         const m1 = Math.pow(l - 0.1055613458 * a - 0.0638541728 * b, 3);
@@ -291,3 +382,6 @@ export class Contrast {
     }
 }
 
+export const getBackgroundColor = (c: CSSStyleDeclaration) => {
+    return c.getPropertyValue("--bg-overlay-chat") || c.getPropertyValue("--background-primary") || (() => { throw new Error("no background color found"); })();
+};
