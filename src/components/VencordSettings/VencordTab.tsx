@@ -46,8 +46,8 @@ const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209
 const VENNIE_DONATOR_IMAGE = "https://cdn.discordapp.com/emojis/1238120638020063377.png";
 const COZY_CONTRIB_IMAGE = "https://cdn.discordapp.com/emojis/1026533070955872337.png";
 
-const DONATOR_BACKGROUND_IMAGE = "https://github.com/user-attachments/assets/e66b5170-07b7-4fdb-902e-281b1570b769";
-const CONTRIB_BACKGROUND_IMAGE = "https://github.com/user-attachments/assets/576a7c61-72d9-4f92-8039-b91002894649";
+const DONATOR_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311064411275788390.png?size=4096";
+const CONTRIB_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311064464690384927.png?size=4096";
 
 type KeysOfType<Object, Type> = {
     [K in keyof Object]: Object[K] extends Type ? K : never;
@@ -117,7 +117,7 @@ function VencordSettings() {
                     <SpecialCard
                         title="Donations"
                         subtitle="Thank you for donating!"
-                        description={"People will be able to see your requested badge through Vencord, you're able to request to change it any time.\n\nDon't worry about your perks running out if you stop your subscription, you're keeping your perks forever!"}
+                        description={"People will be able to see your requested badge through Vencord, and you're able to request to change it any time.\n\nDon't worry about your perks running out if you stop your subscription, you'll keep your perks forever!"}
                         cardImage={VENNIE_DONATOR_IMAGE}
                         backgroundImage={DONATOR_BACKGROUND_IMAGE}
                         backgroundColor="#ED87A9"
@@ -145,7 +145,7 @@ function VencordSettings() {
                 <SpecialCard
                     title="Contributions"
                     subtitle="Thank you for contributing!"
-                    description={"Since you've contributed to Vencord and added yourself to contributors list, you now have a cool new badge!\n\nTo avoid pesky help from people you don't know, theres gonna be a warning on your profile to not ask for support in your DMs."}
+                    description={"Since you've contributed to Vencord and added yourself to contributors list, you now have a cool new badge!\n\nTo avoid unwanted DMs from people you don't know, a warning has been placed on your profile not to message you for support."}
                     cardImage={COZY_CONTRIB_IMAGE}
                     backgroundImage={CONTRIB_BACKGROUND_IMAGE}
                     backgroundColor="#EDCC87"
