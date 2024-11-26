@@ -21,9 +21,10 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
+import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, GuildStore, useEffect, useState } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore, useEffect, useMemo, useState } from "@webpack/common";
 
 import { Color, Contrast } from "./color";
 
@@ -106,7 +107,7 @@ export function useGetContrastValue() {
 }
 export default definePlugin({
     name: "RoleColorEverywhere",
-    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi, Devs.jamesbt365],
+    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi, Devs.jamesbt365, Devs.sadan],
     description: "Adds the top role color anywhere possible",
     settings,
 
@@ -236,43 +237,46 @@ export default definePlugin({
     },
 
     useMessageColorsStyle(message: any, ref: any | null) {
-        try {
-            const { messageSaturation } = settings.use(["messageSaturation"]);
-            const author = useMessageAuthor(message);
-            const contrast = useGetContrastValue();
+        const { messageSaturation } = settings.use(["messageSaturation"]);
+        const author = useMessageAuthor(message);
+        const contrast = useGetContrastValue();
+        const [dep, update] = useForceUpdater(true);
+        return useMemo(() => {
+            try {
+                if (author.colorString != null && messageSaturation !== 0) {
+                    if (contrast === 1) {
+                        const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
 
-            if (author.colorString != null && messageSaturation !== 0) {
-                if (contrast === 1) {
-                    const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
-
+                        return {
+                            color: value.replace("{DEFAULT}", "--text-normal"),
+                            "--header-primary": value.replace("{DEFAULT}", "--header-primary"),
+                            "--text-muted": value.replace("{DEFAULT}", "--text-muted")
+                        };
+                    }
+                    // why
+                    if (!ref.current) setTimeout(update, 0);
+                    const computed = window.getComputedStyle(ref.current);
+                    const textNormal = computed.getPropertyValue("--text-normal"),
+                        headerPrimary = computed.getPropertyValue("--header-primary"),
+                        textMuted = computed.getPropertyValue("--text-muted");
+                    const bgOverlayChat = computed.getPropertyValue("--bg-overlay-chat"),
+                        backgroundPrimary = computed.getPropertyValue("--background-primary");
+                    if (!(bgOverlayChat || backgroundPrimary)) {
+                        throw new Error("No background color found");
+                    }
+                    const bg = new Contrast(Color.parse(bgOverlayChat || backgroundPrimary));
                     return {
-                        color: value.replace("{DEFAULT}", "--text-normal"),
-                        "--header-primary": value.replace("{DEFAULT}", "--header-primary"),
-                        "--text-muted": value.replace("{DEFAULT}", "--text-muted")
+                        color: bg.calculateMinContrastColor(Color.mixokl(author.colorString, textNormal, messageSaturation), contrast),
+                        "--header-primary": bg.calculateMinContrastColor(Color.mixokl(author.colorString, headerPrimary, messageSaturation), contrast),
+                        "--text-muted": bg.calculateMinContrastColor(Color.mixokl(author.colorString, textMuted, messageSaturation), contrast)
                     };
                 }
-                if (!ref.current) return;
-                const computed = window.getComputedStyle(ref.current);
-                const textNormal = computed.getPropertyValue("--text-normal"),
-                    headerPrimary = computed.getPropertyValue("--header-primary"),
-                    textMuted = computed.getPropertyValue("--text-muted");
-                const bgOverlayChat = computed.getPropertyValue("--bg-overlay-chat"),
-                    backgroundPrimary = computed.getPropertyValue("--background-primary");
-                if (!(bgOverlayChat || backgroundPrimary)) {
-                    throw new Error("No background color found");
-                }
-                const bg = new Contrast(Color.parse(bgOverlayChat || backgroundPrimary));
-                return {
-                    color: bg.calculateMinContrastColor(Color.mixokl(author.colorString, textNormal, messageSaturation), contrast),
-                    "--header-primary": bg.calculateMinContrastColor(Color.mixokl(author.colorString, headerPrimary, messageSaturation), contrast),
-                    "--text-muted": bg.calculateMinContrastColor(Color.mixokl(author.colorString, textMuted, messageSaturation), contrast)
-                };
+            } catch (e) {
+                new Logger("RoleColorEverywhere").error("Failed to get message color", e);
             }
-        } catch (e) {
-            new Logger("RoleColorEverywhere").error("Failed to get message color", e);
-        }
 
-        return null;
+            return null;
+        }, [author, contrast, ref, messageSaturation, dep]);
     },
 
     RoleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
