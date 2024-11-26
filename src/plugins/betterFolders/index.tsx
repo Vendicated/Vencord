@@ -357,10 +357,15 @@ export default definePlugin({
 
     makeGuildsBarTreeFilter(betterFoldersId: number) {
         return child => {
-            if (betterFoldersId) {
-                return child?.props?.onScroll != null;
+            if (!isBetterFolders) return true;
+
+            if (child?.props?.className?.includes("itemsContainer") && child.props.children != null) {
+                // Filter out everything but the scroller for the guild list
+                child.props.children = child.props.children.filter(child => child?.props?.onScroll != null);
+                return true;
             }
-            return true;
+
+            return false;
         };
     },
 
