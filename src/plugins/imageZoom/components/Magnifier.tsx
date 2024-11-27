@@ -53,6 +53,7 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
     const currentVideoElementRef = useRef<HTMLVideoElement | null>(null);
     const originalVideoElementRef = useRef<HTMLVideoElement | null>(null);
     const imageRef = useRef<HTMLImageElement | null>(null);
+
     useEffect(() => {
         return () => {
             if (settings.store.saveZoomValues) {
