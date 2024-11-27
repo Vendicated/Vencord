@@ -18,7 +18,7 @@
 
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { FluxDispatcher, React, useRef, useState } from "@webpack/common";
+import { FluxDispatcher, React, useEffect, useRef, useState } from "@webpack/common";
 
 import { ELEMENT_ID } from "../constants";
 import { settings } from "../index";
@@ -53,7 +53,14 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
     const currentVideoElementRef = useRef<HTMLVideoElement | null>(null);
     const originalVideoElementRef = useRef<HTMLVideoElement | null>(null);
     const imageRef = useRef<HTMLImageElement | null>(null);
-
+    useEffect(() => {
+        return () => {
+            if (settings.store.saveZoomValues) {
+                settings.store.zoom = zoom.current;
+                settings.store.size = size.current;
+            }
+        };
+    });
     // since we accessing document im gonna use useLayoutEffect
     React.useLayoutEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
@@ -149,10 +156,6 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
             document.removeEventListener("mouseup", onMouseUp);
             document.removeEventListener("wheel", onWheel);
 
-            if (settings.store.saveZoomValues) {
-                settings.store.zoom = zoom.current;
-                settings.store.size = size.current;
-            }
         };
     }, []);
 
