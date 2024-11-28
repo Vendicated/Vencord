@@ -15,6 +15,7 @@ export default definePlugin({
     patches: [
         {
             find: ')("attachments",',
+            group: true,
             replacement: [
                 {
                     match: /return\(0,\i.jsx\)\("ul",\{(?=.*?:(\i).map\()/,
