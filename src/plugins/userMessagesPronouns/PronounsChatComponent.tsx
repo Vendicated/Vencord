@@ -18,9 +18,10 @@
 
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
-import { i18n, Tooltip, UserStore } from "@webpack/common";
+import { Tooltip, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import { settings } from "./settings";
@@ -44,7 +45,7 @@ function PronounsChatComponent({ message }: { message: Message; }) {
     const pronouns = useFormattedPronouns(message.author.id);
 
     return pronouns && (
-        <Tooltip text={i18n.Messages.USER_PROFILE_PRONOUNS}>
+        <Tooltip text={getIntlMessage("USER_PROFILE_PRONOUNS")}>
             {tooltipProps => (
                 <span
                     {...tooltipProps}
