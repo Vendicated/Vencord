@@ -54,14 +54,6 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
     const originalVideoElementRef = useRef<HTMLVideoElement | null>(null);
     const imageRef = useRef<HTMLImageElement | null>(null);
 
-    useEffect(() => {
-        return () => {
-            if (settings.store.saveZoomValues) {
-                settings.store.zoom = zoom.current;
-                settings.store.size = size.current;
-            }
-        };
-    });
     // since we accessing document im gonna use useLayoutEffect
     React.useLayoutEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
@@ -157,8 +149,12 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
             document.removeEventListener("mouseup", onMouseUp);
             document.removeEventListener("wheel", onWheel);
 
+            if (settings.store.saveZoomValues) {
+                settings.store.zoom = zoom.current;
+                settings.store.size = size.current;
+            }
         };
-    }, []);
+    });
 
     if (!ready) return null;
 
