@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -13,7 +14,7 @@ import { useEffect, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
 const useNote = findByCodeLazy(".getNote(");
-const NoteEditor = findComponentByCodeLazy("hideNote:", ".userId);return");
+const NoteEditor = findComponentByCodeLazy("#{intl::NOTE_PLACEHOLDER}");
 const Section = findComponentByCodeLazy("section", '"header-secondary"', "requestAnimationFrame");
 
 const classes = findByPropsLazy("note", "appsConnections");
@@ -117,5 +118,5 @@ export default definePlugin({
         ]
     })),
     useNoteBox,
-    NotesSection
+    NotesSection: ErrorBoundary.wrap(NotesSection, {})
 });
