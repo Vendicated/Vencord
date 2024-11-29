@@ -1,0 +1,28 @@
+.vc-ads-wrapper {
+    padding: 0.1rem;
+    background-color: white;
+    width: fit-content;
+}
+
+.vc-ads-item {
+    padding: 0.1rem;
+    display: inline-block;
+    max-width: 220px;
+}
+
+.vc-ads-item p {
+    margin: 0;
+    font-weight: bolder;
+    color: black;
+}
+
+.vc-ads-item img {
+    width: 100%;
+    object-fit: cover;
+    max-height: 200px;
+}
+
+.vc-ads-item:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
