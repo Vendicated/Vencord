@@ -84,8 +84,10 @@ function handlePresenceUpdate() {
     forceUpdateFriendCount?.();
 }
 
+// Updated guild count handler to exclude deleted servers
 function handleGuildUpdate() {
-    guildCount = GuildStore.getGuildCount();
+    const allGuilds = GuildStore.getGuilds();
+    guildCount = Object.values(allGuilds).filter(guild => !guild.deleted).length;
     forceUpdateGuildCount?.();
 }
 
@@ -122,7 +124,6 @@ export default definePlugin({
         GUILD_CREATE: handleGuildUpdate,
         GUILD_DELETE: handleGuildUpdate,
     },
-
 
     start() {
         addServerListElement(ServerListRenderPosition.Above, this.renderIndicator);
