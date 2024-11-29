@@ -35,7 +35,7 @@ export interface Menu {
     }>;
     MenuItem: RC<{
         id: string;
-        label: ReactNode;
+        label: ReactNode | (({ isFocused }: { isFocused: boolean }) => ReactNode);
         action?(e: MouseEvent): void;
         icon?: ComponentType<any>;
 

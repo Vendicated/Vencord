@@ -4,17 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./styles.css";
-
+import { addPreSendListener, MessageObject, removePreSendListener, SendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
-import { ActiveIcon, UserCircleIcon } from "@components/Icons";
+import { ActiveIcon, RestartIcon, UserCircleIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Avatar, Menu, Text, useEffect, useState } from "@webpack/common";
-import PKAPI, { Member, Switch, System } from "pkapi.js";
+import { Avatar, Menu, Text } from "@webpack/common";
+import PKAPI, { Member, System } from "pkapi.js";
 
 const logger = new Logger("PluralKitIntegration");
 
@@ -23,20 +22,32 @@ const PopoutMenu = findComponentByCodeLazy("submenuPaddingContainer");
 
 const MenuDividerClasses = findByPropsLazy("menuDivider");
 const DefaultColorClass = findByPropsLazy("defaultColor");
-const UserMenuClasses = findByPropsLazy("userMenuItem", "userMenuUsername", "userMenuText", "activeIcon");
+const UserMenuClasses = findByPropsLazy("userMenuItem", "focused", "userMenuUsername", "userMenuText", "activeIcon");
 
 const settings = definePluginSettings({
-    pluralkitToken: {
-        description: "Your PluralKit token. Obtain it by running pk;token",
+    pluralKitSystemId: {
+        description: "The ID of the PluralKit system you want to integrate with",
+        restartNeeded: true,
+        type: OptionType.STRING
+    },
+    currentFronterId: {
+        description: "The ID of the current fronter.",
+        restartNeeded: false,
+        hidden: true,
         type: OptionType.STRING
     }
 });
+
+function isEmpty(input: string) {
+    return input.trim().length === 0;
+}
 
 export default definePlugin({
     name: "PluralKitIntegration",
     description: "Integrates PluralKit with Discord",
     authors: [Devs.JohnyTheCarrot],
     settings,
+    dependencies: ["MessageEventsAPI"],
     patches: [
         {
             find: /"PRESS_SWITCH_ACCOUNTS"/,
@@ -47,55 +58,72 @@ export default definePlugin({
             }
         }
     ],
-    initialized: false,
+
+    // State
     pkApi: null as PKAPI | null,
     system: null as System | null,
-    fronters: undefined as Switch | undefined,
+    members: null as Map<string, Member> | null,
+    preSend: null as SendListener | null,
     tags: ["accessibility", "a11y"],
     async start() {
         logger.debug("Starting PluralKit integration");
 
-        this.initialized = false;
-        if (!settings.store.pluralkitToken) {
-            logger.debug("No PluralKit token provided, skipping integration");
+        this.pkApi = new PKAPI();
+
+        if (!this.settings.store.pluralKitSystemId || isEmpty(this.settings.store.pluralKitSystemId)) {
             return;
         }
-        this.pkApi = new PKAPI({
-            token: settings.store.pluralkitToken
+        this.system = await this.pkApi.getSystem({
+            system: this.settings.store.pluralKitSystemId
         });
-        this.initialized = true;
-        this.system = await this.pkApi.getSystem();
         logger.debug("PluralKit integration started with system", this.system);
-        void this.getFronters();
+        this.preSend = addPreSendListener((_, msg) => this.onSend(msg));
+        void this.fetchMembers();
     },
     stop() {
-        this.initialized = false;
-        this.pkApi = null;
+        if (this.preSend) {
+            removePreSendListener(this.preSend);
+        }
     },
-    async getFronters() {
-        if (!this.system)
+    onSend(msg: MessageObject) {
+        if (!this.system
+            || !this.members
+            || !this.settings.store.currentFronterId
+            || isEmpty(this.settings.store.currentFronterId)
+            || msg.content.startsWith("pk;"))
             return;
 
-        this.system.getFronters().then(newFronters => {
-            this.fronters = newFronters;
+        const member = this.members.get(this.settings.store.currentFronterId);
+        if (!member)
+            return;
+
+        const { proxy_tags: proxyTags } = member;
+        if (!proxyTags || proxyTags.length === 0)
+            return;
+
+        const [someTag] = proxyTags;
+        if (someTag.prefix) {
+            msg.content = `${someTag.prefix} ${msg.content}`;
+        } else {
+            msg.content = `${msg.content} ${someTag.suffix}`;
+        }
+    },
+    async fetchMembers() {
+        this.system?.getMembers().then(members => {
+            this.members = members;
         });
     },
-    switchToMember(memberId: string) {
-        this.system?.createSwitch({
-            members: [memberId]
-        });
-        void this.getFronters();
+    switchToMember(memberId: string | undefined) {
+        this.settings.store.currentFronterId = memberId;
     },
     isMemberFronting(memberId: string) {
-        if (!this.fronters || !this.fronters.members)
-            return false;
-
-        // assert members is a map, the docs say "only contains member IDS if getting raw switches" which we're not doing
-        const map = this.fronters.members as Map<string, Member>;
-
-        return map.has(memberId);
+        return this.settings.store.currentFronterId === memberId;
     },
-    PluralKitMemberItem({ member, isCurrentlyFronting }: { member: Member, isCurrentlyFronting: boolean }) {
+    PluralKitMemberItem({ member, isCurrentlyFronting, isFocused }: {
+        member: Member,
+        isCurrentlyFronting: boolean,
+        isFocused: boolean
+    }) {
         return (
             <div className={UserMenuClasses.userMenuItem}>
                 {member.avatar_url &&
@@ -111,24 +139,15 @@ export default definePlugin({
                         className={UserMenuClasses.activeIcon}
                         width={18}
                         height={18}
+                        color={isFocused ? "var(--brand-500)" : "var(--white-500)"}
+                        secondaryColor={isFocused ? "var(--white-500)" : "var(--brand-500)"}
                     />
                 }
             </div>
         );
     },
     SwitchMember() {
-        const [members, setMembers] = useState<Map<string, Member>>(new Map());
-
-        useEffect(() => {
-            if (!this.pkApi || !this.system)
-                return;
-
-            this.system.getMembers().then(m => {
-                setMembers(m);
-            });
-        }, []);
-
-        if (!this.pkApi)
+        if (!this.system || !this.members)
             return null;
 
         return (
@@ -137,28 +156,49 @@ export default definePlugin({
                     icon={() => <UserCircleIcon width={16} height={16}/>}
                     label="Switch Proxy"
                     renderSubmenu={
-                        ({ closePopout }) => {
-                            return (
+                        ({ closePopout }) =>
+                            (
                                 <PopoutMenu navId="vc-pk-switch-member" variant="fixed" onClose={closePopout}>
-                                    {Array.from(members.values()).map(member => (
+                                    {Array.from(this.members.values()).map(member => (
                                         <Menu.MenuItem
                                             id={member.id}
-                                            label={
+                                            disabled={!member.proxy_tags || member.proxy_tags.length === 0}
+                                            label={({ isFocused }) => (
                                                 <this.PluralKitMemberItem
                                                     member={member}
                                                     isCurrentlyFronting={this.isMemberFronting(member.id)}
+                                                    isFocused={isFocused}
                                                 />
-                                            }
+                                            )}
                                             action={() => {
                                                 this.switchToMember(member.id);
                                                 closePopout();
                                             }}
-                                            className="vc-pk-user-menu-item"
+                                            focusedClassName={UserMenuClasses.focused}
                                         />
                                     ))}
+                                    <Menu.MenuSeparator/>
+                                    <Menu.MenuItem
+                                        id="vc-pk-disable-pk"
+                                        label="Disable"
+                                        color="danger"
+                                        action={() => {
+                                            this.switchToMember(undefined);
+                                            closePopout();
+                                        }}
+                                    />
+                                    <Menu.MenuItem
+                                        id="vc-pk-refresh"
+                                        label="Refresh Member List"
+                                        icon={RestartIcon}
+                                        color="danger"
+                                        action={() => {
+                                            void this.fetchMembers();
+                                            closePopout();
+                                        }}
+                                    />
                                 </PopoutMenu>
-                            );
-                        }
+                            )
                     }
                 />
                 <div className={MenuDividerClasses.menuDivider}/>

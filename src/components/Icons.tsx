@@ -448,12 +448,17 @@ export function UserCircleIcon(props: IconProps) {
     );
 }
 
-export function ActiveIcon(props: IconProps) {
+interface ActiveIconProps extends IconProps {
+    color?: string;
+    secondaryColor?: string;
+}
+
+export function ActiveIcon({ color, secondaryColor, ...props }: ActiveIconProps) {
     return (
         <Icon {...props} viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" fill="var(--vc-active-icon-primary, var(--white-500))"/>
+            <circle cx="12" cy="12" r="10" fill={color ?? "var(--white-500)"}/>
             <path
-                fill="var(--vc-active-icon-secondary, var(--brand-500))"
+                fill={secondaryColor ?? "var(--brand-500)"}
                 fill-rule="evenodd"
                 d="M12 23a11 11 0 1 0 0-22 11 11 0 0 0 0 22Zm5.7-13.3a1 1 0 0 0-1.4-1.4L10 14.58l-2.3-2.3a1 1 0 0 0-1.4 1.42l3 3a1 1 0 0 0 1.4 0l7-7Z"
                 clip-rule="evenodd"
