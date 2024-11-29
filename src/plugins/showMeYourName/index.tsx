@@ -228,7 +228,7 @@ export default definePlugin({
         const user: any = userOverride ?? message.author;
         const username = StreamerModeStore.enabled && settings.store.respectStreamerMode ? user.username[0] + "..." : user.username;
         const display = StreamerModeStore.enabled && settings.store.respectStreamerMode && user.globalName?.toLowerCase() === user.username.toLowerCase() ? user.globalName[0] + "..." : user.globalName || "";
-        const nick = StreamerModeStore.enabled && settings.store.respectStreamerMode && author?.nick?.toLowerCase() === user.username.toLowerCase() ? author.nick[0] + "..." : author?.nick === display ? "" : author?.nick || "";
+        const nick = StreamerModeStore.enabled && settings.store.respectStreamerMode && author?.nick?.toLowerCase() === user.username.toLowerCase() ? author.nick[0] + "..." : author?.nick || "";
 
         try {
             if (isRepliedMessage && !settings.store.replies) {
@@ -264,8 +264,14 @@ export default definePlugin({
             const first = order.shift() || "user";
             let second = order.shift() || null;
             let third = order.shift() || null;
+            // Override the display name if it is just an alternate capitalization of the username and they are in the second and third positions.
+            second === "display" && third === "user" && values[second].value.toLowerCase() === values[third].value.toLowerCase() ? second = null : null;
+            // If third is the same as second, remove it.
             second && third && values[third].value.toLowerCase() === values[second].value.toLowerCase() ? third = null : null;
+            // If second is the same as first, remove it.
             second && values[second].value.toLowerCase() === values[first].value.toLowerCase() ? second = null : null;
+            // If third is the same as first, remove it. Occurs if all three names are actually set and are the same.
+            third && values[third].value.toLowerCase() === values[first].value.toLowerCase() ? third = null : null;
 
             return (
                 <>
