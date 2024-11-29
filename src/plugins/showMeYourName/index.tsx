@@ -96,6 +96,11 @@ const settings = definePluginSettings({
         default: true,
         description: "Truncate usernames in Streamer Mode as Discord does everywhere else.",
     },
+    removeDuplicates: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "If any of the names are equivalent, only display the unique ones.",
+    },
     includedNames: {
         type: OptionType.SELECT,
         description: "The order to display usernames, nicknames, and display names. If any overlap or do not exist, they will be omitted. Regardless of your selection below, if nickname or display name are missing, the other will be used. If both are missing, username will be used.",
@@ -114,8 +119,8 @@ const settings = definePluginSettings({
 
             { label: "Nickname (Username) [Display Name]", value: "nick_user_display" },
             { label: "Nickname (Display Name) [Username]", value: "nick_display_user" },
-            { label: "Display (Name Username) [Nickname]", value: "display_user_nick" },
-            { label: "Display (Name Nickname) [Username]", value: "display_nick_user" },
+            { label: "Display Name (Username) [Nickname]", value: "display_user_nick" },
+            { label: "Display Name (Nickname) [Username]", value: "display_nick_user" },
             { label: "Username (Nickname) [Display Name]", value: "user_nick_display" },
             { label: "Username (Display Name) [Nickname]", value: "user_display_nick" },
         ],
@@ -123,13 +128,13 @@ const settings = definePluginSettings({
     nicknamePrefix: {
         type: OptionType.STRING,
         description: "The symbol to use as a prefix for the nickname. Can be up to 3 non-alphanumeric characters long.",
-        default: "",
+        default: "(",
         isValid: validSymbols,
     },
     nicknameSuffix: {
         type: OptionType.STRING,
         description: "The symbol to use as a suffix for the nickname. Can be up to 3 non-alphanumeric characters long.",
-        default: "",
+        default: ")",
         isValid: validSymbols,
     },
     nicknameColor: {
@@ -264,14 +269,15 @@ export default definePlugin({
             const first = order.shift() || "user";
             let second = order.shift() || null;
             let third = order.shift() || null;
-            // Override the display name if it is just an alternate capitalization of the username and they are in the second and third positions.
-            second === "display" && third === "user" && values[second].value.toLowerCase() === values[third].value.toLowerCase() ? second = null : null;
-            // If third is the same as second, remove it.
-            second && third && values[third].value.toLowerCase() === values[second].value.toLowerCase() ? third = null : null;
-            // If second is the same as first, remove it.
-            second && values[second].value.toLowerCase() === values[first].value.toLowerCase() ? second = null : null;
-            // If third is the same as first, remove it. Occurs if all three names are actually set and are the same.
-            third && values[third].value.toLowerCase() === values[first].value.toLowerCase() ? third = null : null;
+
+            if (settings.store.removeDuplicates) {
+                // If third is the same as second, remove it.
+                second && third && values[third].value.toLowerCase() === values[second].value.toLowerCase() ? third = null : null;
+                // If second is the same as first, remove it.
+                second && values[second].value.toLowerCase() === values[first].value.toLowerCase() ? second = null : null;
+                // If third is the same as first, remove it.
+                third && values[third].value.toLowerCase() === values[first].value.toLowerCase() ? third = null : null;
+            }
 
             return (
                 <>
