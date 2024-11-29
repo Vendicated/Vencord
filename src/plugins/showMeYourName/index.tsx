@@ -224,16 +224,15 @@ export default definePlugin({
     ],
     settings,
 
-    renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
-        try {
-            const user = userOverride ?? message.author;
-            const nick = author?.nick || "";
-            const username = StreamerModeStore.enabled && settings.store.respectStreamerMode ? user.username[0] + "..." : user.username;
-            const display = (user as any).globalName?.toLowerCase() === user.username.toLowerCase() ? "" : (user as any).globalName || "";
-            const prefix = withMentionPrefix ? "@" : "";
+    renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, userOverride }: UsernameProps) => {
+        const user = userOverride ?? message.author;
+        const nick = author?.nick || "";
+        const display = (user as any).globalName || "";
+        const username = StreamerModeStore.enabled && settings.store.respectStreamerMode ? user.username[0] + "..." : user.username;
 
+        try {
             if (isRepliedMessage && !settings.store.replies) {
-                return <>{prefix}{nick}</>;
+                return <>{nick || display || username}</>;
             }
 
             const { alwaysShowUsernameSymbols, alwaysShowNicknameSymbols, alwaysShowDisplaySymbols } = settings.store;
@@ -302,7 +301,7 @@ export default definePlugin({
                 </>
             );
         } catch {
-            return <>{StreamerModeStore.enabled && settings.store.respectStreamerMode ? ((author?.nick ? author.nick[0] : "") + "...") : author?.nick || ""}</>;
+            return <>{StreamerModeStore.enabled && settings.store.respectStreamerMode ? ((nick || display || username)[0] + "...") : (nick || display || username)}</>;
         }
     }, { noop: true }),
 });
