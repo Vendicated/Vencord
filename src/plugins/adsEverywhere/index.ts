@@ -49,7 +49,7 @@ function addAds() {
             { title: "How This Small Town Turned Into a Tourist Hotspot", image: "https://blog.sheswanderful.com/wp-content/uploads/2020/09/pexels-photo-4473398.jpeg" },
             { title: "The Secret Lives of Billionaires", image: "https://i.ytimg.com/vi/f_loexi83Mg/maxresdefault.jpg" },
             { title: "This Ancient Technique is Helping People Sleep Better", image: "https://physioentrust.com/wp-content/uploads/2021/09/maxresdefault-1024x688.jpg" },
-            { title: "DougDoug MugMug", image: "https://sxcu.net/6SJO1Ny03.png", href: "https://dougdoug.shop" }
+            { title: "DougDoug MugMug", image: "https://gist.github.com/user-attachments/assets/f51072fc-18df-48cb-8b00-ab76232a1b59", href: "https://dougdoug.shop" }
         ];
 
         function randomize(array) {
