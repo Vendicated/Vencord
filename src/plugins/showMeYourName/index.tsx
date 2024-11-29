@@ -226,9 +226,9 @@ export default definePlugin({
 
     renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, userOverride }: UsernameProps) => {
         const user = userOverride ?? message.author;
-        const nick = author?.nick || "";
-        const display = (user as any).globalName || "";
         const username = StreamerModeStore.enabled && settings.store.respectStreamerMode ? user.username[0] + "..." : user.username;
+        const nick = StreamerModeStore.enabled && settings.store.respectStreamerMode && author?.nick?.toLowerCase() === user.username.toLowerCase() ? author.nick[0] + "..." : author?.nick || "";
+        const display = StreamerModeStore.enabled && settings.store.respectStreamerMode && (user as any).globalName?.toLowerCase() === user.username.toLowerCase() ? (user as any).globalName[0] + "..." : (user as any).globalName || "";
 
         try {
             if (isRepliedMessage && !settings.store.replies) {
