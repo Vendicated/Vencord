@@ -123,7 +123,7 @@ export default definePlugin({
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the servers and folders from the GuildsBar Guild List children
                 {
-                    match: /lastTargetNode:\i\[\i\.length-1\].+?Fragment.+?\]}\)\]/,
+                    match: /lastTargetNode:\i\[\i\.length-1\].+?}\)\](?=}\))/,
                     replace: "$&.filter($self.makeGuildsBarGuildListFilter(!!arguments[0]?.isBetterFolders))"
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the scroller for the guild list from the GuildsBar Tree children
@@ -275,24 +275,30 @@ export default definePlugin({
     },
 
     makeGuildsBarGuildListFilter(isBetterFolders: boolean) {
-            return child => {
-                if (isBetterFolders) {
-                    try {
-                        return child?.props?.["aria-label"] === getIntlMessage("SERVERS");
-                    } catch (e) {
-                        console.error(e);
-                    }
-                }
-                return true;
-            };
+        return child => {
+            if (!isBetterFolders) return true;
+
+            try {
+                return child?.props?.["aria-label"] === getIntlMessage("SERVERS");
+            } catch (e) {
+                console.error(e);
+            }
+
+            return true;
+        };
     },
 
     makeGuildsBarTreeFilter(isBetterFolders: boolean) {
         return child => {
-            if (isBetterFolders) {
-                return child?.props?.onScroll != null;
+            if (!isBetterFolders) return true;
+
+            if (child?.props?.className?.includes("itemsContainer") && child.props.children != null) {
+                // Filter out everything but the scroller for the guild list
+                child.props.children = child.props.children.filter(child => child?.props?.onScroll != null);
+                return true;
             }
-            return true;
+
+            return false;
         };
     },
 
