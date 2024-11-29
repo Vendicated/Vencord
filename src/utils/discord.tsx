@@ -19,11 +19,38 @@
 import "./discord.css";
 
 import { MessageObject } from "@api/MessageEvents";
-import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
 import { Except } from "type-fest";
 
+import { runtimeHashMessageKey } from "./intlHash";
+import { Logger } from "./Logger";
 import { MediaModalItem, MediaModalProps, openMediaModal } from "./modal";
+
+const IntlManagerLogger = new Logger("IntlManager");
+
+/**
+ * Get an internationalized message from a non hashed key
+ * @param key The plain message key
+ * @param values The values to interpolate, if it's a rich message
+ */
+export function getIntlMessage(key: string, values?: Record<PropertyKey, any>): any {
+    return getIntlMessageFromHash(runtimeHashMessageKey(key), values, key);
+}
+
+/**
+ * Get an internationalized message from a hashed key
+ * @param hashedKey The hashed message key
+ * @param values The values to interpolate, if it's a rich message
+ */
+export function getIntlMessageFromHash(hashedKey: string, values?: Record<PropertyKey, any>, originalKey?: string): any {
+    try {
+        return values == null ? i18n.intl.string(i18n.t[hashedKey]) : i18n.intl.format(i18n.t[hashedKey], values);
+    } catch (e) {
+        IntlManagerLogger.error(`Failed to get intl message for key: ${originalKey ?? hashedKey}`, e);
+        return originalKey ?? "";
+    }
+}
 
 /**
  * Open the invite modal
@@ -184,4 +211,15 @@ export async function fetchUserProfile(id: string, options?: FetchUserProfileOpt
  */
 export function getUniqueUsername(user: User) {
     return user.discriminator === "0" ? user.username : user.tag;
+}
+
+/**
+ *  Get the URL for an emoji. This function always returns a gif URL for animated emojis, instead of webp
+ * @param id The emoji id
+ * @param animated Whether the emoji is animated
+ * @param size The size for the emoji
+ */
+export function getEmojiURL(id: string, animated: boolean, size: number) {
+    const url = IconUtils.getEmojiURL({ id, animated, size });
+    return animated ? url.replace(".webp", ".gif") : url;
 }
