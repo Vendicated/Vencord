@@ -1,0 +1,10 @@
+.vc-pk-user-menu-item {
+    --vc-active-icon-primary: var(--white-500);
+    --vc-active-icon-secondary: var(--brand-500);
+}
+
+.vc-pk-user-menu-item:hover,
+.vc-pk-user-menu-item:focus {
+    --vc-active-icon-primary: var(--brand-500);
+    --vc-active-icon-secondary: var(--white-500);
+}

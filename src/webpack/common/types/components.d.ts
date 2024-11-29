@@ -174,6 +174,8 @@ export type Button = ComponentType<PropsWithChildren<Omit<HTMLProps<HTMLButtonEl
 
     submittingStartedLabel?: string;
     submittingFinishedLabel?: string;
+
+    fullWidth?: boolean;
 }>> & {
     BorderColors: Record<"BLACK" | "BRAND" | "BRAND_NEW" | "GREEN" | "LINK" | "PRIMARY" | "RED" | "TRANSPARENT" | "WHITE" | "YELLOW", string>;
     Colors: Record<"BRAND" | "RED" | "GREEN" | "YELLOW" | "PRIMARY" | "LINK" | "WHITE" | "BLACK" | "TRANSPARENT" | "BRAND_NEW" | "CUSTOM", string>;
@@ -408,7 +410,7 @@ export type Popout = ComponentType<{
     onRequestClose?(): void;
 
     /** "center" and others */
-    align?: "left" | "right" | "center";
+    align?: "left" | "right" | "center" | "top" | "bottom";
     /** Popout.Animation */
     animation?: PopoutAnimation;
     autoInvert?: boolean;
