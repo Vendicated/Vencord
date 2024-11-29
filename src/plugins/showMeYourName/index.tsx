@@ -98,7 +98,7 @@ const settings = definePluginSettings({
     },
     includedNames: {
         type: OptionType.SELECT,
-        description: "The order to display usernames, nicknames, and display names. If any overlap or do not exist, they will be omitted.",
+        description: "The order to display usernames, nicknames, and display names. If any overlap or do not exist, they will be omitted. Regardless of your selection below, if nickname or display name are missing, the other will be used. If both are missing, username will be used.",
         default: "nick_user",
         options: [
             { label: "Nickname", value: "nick" },
@@ -225,77 +225,77 @@ export default definePlugin({
     settings,
 
     renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, userOverride }: UsernameProps) => {
-        const user = userOverride ?? message.author;
+        const user: any = userOverride ?? message.author;
         const username = StreamerModeStore.enabled && settings.store.respectStreamerMode ? user.username[0] + "..." : user.username;
-        const nick = StreamerModeStore.enabled && settings.store.respectStreamerMode && author?.nick?.toLowerCase() === user.username.toLowerCase() ? author.nick[0] + "..." : author?.nick || "";
-        const display = StreamerModeStore.enabled && settings.store.respectStreamerMode && (user as any).globalName?.toLowerCase() === user.username.toLowerCase() ? (user as any).globalName[0] + "..." : (user as any).globalName || "";
+        const display = StreamerModeStore.enabled && settings.store.respectStreamerMode && user.globalName?.toLowerCase() === user.username.toLowerCase() ? user.globalName[0] + "..." : user.globalName || "";
+        const nick = StreamerModeStore.enabled && settings.store.respectStreamerMode && author?.nick?.toLowerCase() === user.username.toLowerCase() ? author.nick[0] + "..." : author?.nick === display ? "" : author?.nick || "";
 
         try {
             if (isRepliedMessage && !settings.store.replies) {
                 return <>{nick || display || username}</>;
             }
 
+            const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
             const { alwaysShowUsernameSymbols, alwaysShowNicknameSymbols, alwaysShowDisplaySymbols } = settings.store;
             const usernamePrefix = settings.store.usernamePrefix === "none" ? "" : settings.store.usernamePrefix;
             const usernameSuffix = settings.store.usernameSuffix === "none" ? "" : settings.store.usernameSuffix;
-            const nicknamePrefix = settings.store.nicknamePrefix === "none" ? "" : settings.store.nicknamePrefix;
-            const nicknameSuffix = settings.store.nicknameSuffix === "none" ? "" : settings.store.nicknameSuffix;
-            const displayNamePrefix = settings.store.displayNamePrefix === "none" ? "" : settings.store.displayNamePrefix;
-            const displayNameSuffix = settings.store.displayNameSuffix === "none" ? "" : settings.store.displayNameSuffix;
-
-            const values = {
-                "nick": { "value": nick, "prefix": nicknamePrefix, "suffix": nicknameSuffix, "alwaysShow": alwaysShowNicknameSymbols },
-                "display": { "value": display, "prefix": displayNamePrefix, "suffix": displayNameSuffix, "alwaysShow": alwaysShowDisplaySymbols },
-                "user": { "value": username, "prefix": usernamePrefix, "suffix": usernameSuffix, "alwaysShow": alwaysShowUsernameSymbols }
-            };
-            const order = settings.store.includedNames.split("_");
-            const first = order[0] || order[1] || order[2];
-            const second = first === order[0] ? order[1] || order[2] || "" : first === order[1] ? order[2] : "";
-            const third = second === order[1] ? order[2] || "" : "";
-            second && values[second].value.toLowerCase() === values[first].value.toLowerCase() ? values[second].value = "" : null;
-            third && values[third].value.toLowerCase() === values[first].value.toLowerCase() ? values[third].value = "" : third && values[third].value.toLowerCase() === values[second].value.toLowerCase() ? values[third].value = "" : null;
-
-            const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
             const usernameColor = resolveColor(message.channel_id, user.id, settings.store.usernameColor.trim(), textMutedValue);
             const usernameSymbolColor = resolveColor(message.channel_id, user.id, settings.store.usernameSymbolColor.trim(), textMutedValue);
+            const nicknamePrefix = settings.store.nicknamePrefix === "none" ? "" : settings.store.nicknamePrefix;
+            const nicknameSuffix = settings.store.nicknameSuffix === "none" ? "" : settings.store.nicknameSuffix;
             const nicknameColor = resolveColor(message.channel_id, user.id, settings.store.nicknameColor.trim(), textMutedValue);
             const nicknameSymbolColor = resolveColor(message.channel_id, user.id, settings.store.nicknameSymbolColor.trim(), textMutedValue);
+            const displayNamePrefix = settings.store.displayNamePrefix === "none" ? "" : settings.store.displayNamePrefix;
+            const displayNameSuffix = settings.store.displayNameSuffix === "none" ? "" : settings.store.displayNameSuffix;
             const displayNameColor = resolveColor(message.channel_id, user.id, settings.store.displayNameColor.trim(), textMutedValue);
             const displayNameSymbolColor = resolveColor(message.channel_id, user.id, settings.store.displayNameSymbolColor.trim(), textMutedValue);
-            const secondColor = second && values[second].value === nick ? nicknameColor : second && values[second].value === username ? usernameColor : displayNameColor;
-            const secondSymbolColor = second && values[second].value === nick ? nicknameSymbolColor : second && values[second].value === username ? usernameSymbolColor : displayNameSymbolColor;
-            const thirdColor = third && values[third].value === nick ? nicknameColor : third && values[third].value === username ? usernameColor : displayNameColor;
-            const thirdSymbolColor = third && values[third].value === nick ? nicknameSymbolColor : third && values[third].value === username ? usernameSymbolColor : displayNameSymbolColor;
+
+            const values = {
+                "user": { "value": username, "prefix": usernamePrefix, "suffix": usernameSuffix, "alwaysShow": alwaysShowUsernameSymbols, "color": usernameColor, "symbolColor": usernameSymbolColor },
+                "display": { "value": display, "prefix": displayNamePrefix, "suffix": displayNameSuffix, "alwaysShow": alwaysShowDisplaySymbols, "color": displayNameColor, "symbolColor": displayNameSymbolColor },
+                "nick": { "value": nick, "prefix": nicknamePrefix, "suffix": nicknameSuffix, "alwaysShow": alwaysShowNicknameSymbols, "color": nicknameColor, "symbolColor": nicknameSymbolColor }
+            };
+
+            let order = settings.store.includedNames.split("_");
+            order.includes("nick") && !values.nick.value && !order.includes("display") && values.display.value ? order[order.indexOf("nick")] = "display" : null;
+            order.includes("display") && !values.display.value && !order.includes("user") && values.user.value ? order[order.indexOf("display")] = "user" : null;
+            order = order.filter((name: string) => values[name].value);
+
+            const first = order.shift() || "user";
+            let second = order.shift() || null;
+            let third = order.shift() || null;
+            second && third && values[third].value.toLowerCase() === values[second].value.toLowerCase() ? third = null : null;
+            second && values[second].value.toLowerCase() === values[first].value.toLowerCase() ? second = null : null;
 
             return (
                 <>
-                    {values[first].value && (
+                    {(
                         <span>
                             {values[first].alwaysShow ? values[first].prefix : ""}
                             {values[first].value}
                             {values[first].alwaysShow ? values[first].suffix : ""}
                         </span>
                     )}
-                    {second && values[second].value && (
+                    {second && (
                         <span>
-                            {(values[first].value) ? <span>&nbsp;</span> : ""}
-                            <span style={secondSymbolColor}>
-                                {values[second].alwaysShow || values[first].value ? values[second].prefix : ""}</span>
-                            <span style={secondColor}>
+                            <span>&nbsp;</span>
+                            <span style={values[second].symbolColor}>
+                                {values[second].prefix}</span>
+                            <span style={values[second].color}>
                                 {values[second].value}</span>
-                            <span style={secondSymbolColor}>
-                                {values[second].alwaysShow || values[first].value ? values[second].suffix : ""}</span>
+                            <span style={values[second].symbolColor}>
+                                {values[second].suffix}</span>
                         </span>
                     )}
-                    {third && values[third].value && (
+                    {third && (
                         <span>
-                            {values[first].value || values[second].value ? <span>&nbsp;</span> : ""}
-                            <span style={thirdSymbolColor}>
-                                {values[third].alwaysShow || (values[first].value || values[second].value) ? values[third].prefix : ""}</span>
-                            <span style={thirdColor}>
+                            <span>&nbsp;</span>
+                            <span style={values[third].symbolColor}>
+                                {values[third].prefix}</span>
+                            <span style={values[third].color}>
                                 {values[third].value}</span>
-                            <span style={thirdSymbolColor}>
-                                {values[third].alwaysShow || (values[first].value || values[second].value) ? values[third].suffix : ""}</span>
+                            <span style={values[third].symbolColor}>
+                                {values[third].suffix}</span>
                         </span>
                     )}
                 </>
