@@ -43,8 +43,7 @@
         "gifenc": "github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3",
         "monaco-editor": "^0.50.0",
         "nanoid": "^5.0.7",
-        "virtual-merge": "^1.0.1",
-        "pkapi.js": "^7.2.1"
+        "virtual-merge": "^1.0.1"
     },
     "devDependencies": {
         "@stylistic/eslint-plugin": "^2.6.1",
