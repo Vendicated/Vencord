@@ -283,9 +283,11 @@ export default definePlugin({
                 <>
                     {(
                         <span>
-                            {values[first].alwaysShow ? values[first].prefix : ""}
+                            {values[first].alwaysShow && <span style={values[first].symbolColor}>
+                                {values[first].prefix}</span>}
                             {values[first].value}
-                            {values[first].alwaysShow ? values[first].suffix : ""}
+                            {values[first].alwaysShow && <span style={values[first].symbolColor}>
+                                {values[first].suffix}</span>}
                         </span>
                     )}
                     {second && (
