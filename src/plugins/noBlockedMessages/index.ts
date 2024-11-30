@@ -18,17 +18,18 @@
 
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
+import { i18n } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 const RelationshipStore = findByPropsLazy("getRelationships", "isBlocked");
 
 interface MessageDeleteProps {
-    collapsedReason: {
-        message: string;
-    };
+    // Internal intl message for BLOCKED_MESSAGE_COUNT
+    collapsedReason: () => any;
 }
 
 export default definePlugin({
@@ -37,7 +38,7 @@ export default definePlugin({
     authors: [Devs.rushii, Devs.Samu],
     patches: [
         {
-            find: "Messages.BLOCKED_MESSAGES_HIDE",
+            find: "#{intl::BLOCKED_MESSAGES_HIDE}",
             replacement: [
                 {
                     match: /let\{[^}]*collapsedReason[^}]*\}/,
@@ -77,6 +78,11 @@ export default definePlugin({
     },
 
     shouldHide(props: MessageDeleteProps) {
-        return !props?.collapsedReason?.message.includes("deleted");
+        try {
+            return props.collapsedReason() === i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
+        } catch (e) {
+            console.error(e);
+        }
+        return false;
     }
 });

@@ -103,7 +103,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Do not show confirmation to join a voice channel when already connected to another if clicking on a hidden voice channel
-                    match: /(?<=getBlockedUsersForVoiceChannel\((\i)\.id\);return)/,
+                    match: /(?<=getIgnoredUsersForVoiceChannel\((\i)\.id\);return\()/,
                     replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
                 },
                 {
@@ -149,7 +149,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.CHANNEL_TOOLTIP_DIRECTORY",
+            find: "#{intl::CHANNEL_TOOLTIP_DIRECTORY}",
             predicate: () => settings.store.showMode === ShowMode.LockIcon,
             replacement: {
                 // Lock Icon
@@ -274,7 +274,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.ROLE_REQUIRED_SINGLE_USER_MESSAGE",
+            find: "#{intl::ROLE_REQUIRED_SINGLE_USER_MESSAGE}",
             replacement: [
                 {
                     // Change the role permission check to CONNECT if the channel is locked
@@ -336,7 +336,7 @@ export default definePlugin({
             ]
         },
         {
-            find: ".Messages.CHANNEL_CALL_CURRENT_SPEAKER.format",
+            find: "#{intl::CHANNEL_CALL_CURRENT_SPEAKER}",
             replacement: [
                 {
                     // Remove the divider and the open chat button for the HiddenChannelLockScreen
@@ -351,7 +351,7 @@ export default definePlugin({
             ]
         },
         {
-            find: ".Messages.EMBEDDED_ACTIVITIES_DEVELOPER_ACTIVITY_SHELF_FETCH_ERROR",
+            find: "#{intl::EMBEDDED_ACTIVITIES_DEVELOPER_ACTIVITY_SHELF_FETCH_ERROR}",
             replacement: [
                 {
                     // Render our HiddenChannelLockScreen component instead of the main voice channel component
@@ -401,7 +401,7 @@ export default definePlugin({
             ]
         },
         {
-            find: ".Messages.STAGE_FULL_MODERATOR_TITLE",
+            find: "#{intl::STAGE_FULL_MODERATOR_TITLE}",
             replacement: [
                 {
                     // Remove the divider and amount of users in stage channel components for the HiddenChannelLockScreen
@@ -463,7 +463,7 @@ export default definePlugin({
             ]
         },
         {
-            find: ".Messages.FORM_LABEL_MUTED",
+            find: "#{intl::FORM_LABEL_MUTED}",
             replacement: {
                 // Make GuildChannelStore.getChannels return hidden channels
                 match: /(?<=getChannels\(\i)(?=\))/,

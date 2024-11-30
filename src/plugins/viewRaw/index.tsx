@@ -23,11 +23,12 @@ import { CodeBlock } from "@components/CodeBlock";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Forms, i18n, Menu, Text } from "@webpack/common";
+import { Button, ChannelStore, Forms, Menu, Text } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 
@@ -122,7 +123,7 @@ function MakeContextCallback(name: "Guild" | "User" | "Channel"): NavContextMenu
     return (children, props) => {
         const value = props[name.toLowerCase()];
         if (!value) return;
-        if (props.label === i18n.Messages.CHANNEL_ACTIONS_MENU_LABEL) return; // random shit like notification settings
+        if (props.label === getIntlMessage("CHANNEL_ACTIONS_MENU_LABEL")) return; // random shit like notification settings
 
         const lastChild = children.at(-1);
         if (lastChild?.key === "developer-actions") {
@@ -154,6 +155,7 @@ export default definePlugin({
         "guild-context": MakeContextCallback("Guild"),
         "channel-context": MakeContextCallback("Channel"),
         "thread-context": MakeContextCallback("Channel"),
+        "gdm-context": MakeContextCallback("Channel"),
         "user-context": MakeContextCallback("User")
     },
 
