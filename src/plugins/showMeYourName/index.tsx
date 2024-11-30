@@ -99,11 +99,11 @@ const settings = definePluginSettings({
     removeDuplicates: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "If any of the names are equivalent, only display the unique ones.",
+        description: "If any of the names are equivalent, remove them, leaving only the unique names.",
     },
     includedNames: {
         type: OptionType.SELECT,
-        description: "The order to display usernames, nicknames, and display names. If any overlap or do not exist, they will be omitted. Regardless of your selection below, if nickname or display name are missing, the other will be used. If both are missing, username will be used.",
+        description: "The order to display usernames, nicknames, and display names. If any do not exist for the user, they will be omitted. Regardless of your selection below, if nickname or display name are missing, the other will replace it. If both are missing, username will be used.",
         default: "nick_user",
         options: [
             { label: "Nickname", value: "nick" },
@@ -271,8 +271,8 @@ export default definePlugin({
             let third = order.shift() || null;
 
             if (settings.store.removeDuplicates) {
-                // If third is the same as second, remove it.
-                second && third && values[third].value.toLowerCase() === values[second].value.toLowerCase() ? third = null : null;
+                // If third is the same as second, remove it, unless third is the username, then prioritize it.
+                second && third && values[third].value.toLowerCase() === values[second].value.toLowerCase() ? third === "user" ? second = null : third = null : null;
                 // If second is the same as first, remove it.
                 second && values[second].value.toLowerCase() === values[first].value.toLowerCase() ? second = null : null;
                 // If third is the same as first, remove it.
