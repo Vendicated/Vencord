@@ -1,3 +1,0 @@
-# moreCommands
-
-echo, lenny, mock

@@ -1,3 +1,0 @@
-# reactErrorDecoder
-
-Minifed React Error

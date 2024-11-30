@@ -1,8 +1,8 @@
 # ThemeAttributes
 
-This plugin adds data attributes and CSS variables to various elements inside Discord
+This plugin adds data attributes and CSS variables to various elements inside Discord.
 
-This allows themes to more easily theme those elements or even do things that otherwise wouldn't be possible
+This allows themes to more easily theme those elements or even do things that otherwise wouldn't be possible.
 
 ## Available Attributes
 

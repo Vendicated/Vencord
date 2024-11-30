@@ -1,5 +1,5 @@
 # voiceMessages
 
-Send voice messages (through microphone or imported sound file*), like with mobile clients.
+Allows you to send voice messages like on mobile.
 
-**Imported sound files will not play on iOS clients if the sound is not encoded as Opus.**
+**Imported sound files will not play on iOS clients if the file is not OggOpus.**

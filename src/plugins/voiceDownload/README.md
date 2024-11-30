@@ -1,3 +1,3 @@
 # voiceDownload
 
-Allows you to send voice messages like on mobile.
+Adds a download to voice messages.

@@ -31,7 +31,7 @@ function mock(input: string): string {
 
 export default definePlugin({
     name: "MoreCommands",
-    description: "echo, lenny, mock",
+    description: "Adds three new commands: /echo, /lenny, /mock.",
     authors: [Devs.Arjix, Devs.echo, Devs.Samu],
     commands: [
         {

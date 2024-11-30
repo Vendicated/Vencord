@@ -1,0 +1,3 @@
+# reactErrorDecoder
+
+Minifies React errors.
