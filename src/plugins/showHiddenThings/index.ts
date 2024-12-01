@@ -75,6 +75,15 @@ export default definePlugin({
                 replace: "$1$2arguments[0].member.highestRoleId]",
             }
         },
+        // allows you to open mod view on yourself
+        {
+            find: ".MEMBER_SAFETY,{modViewPanel:",
+            predicate: () => settings.store.showModView,
+            replacement: {
+                match: /\i(?=\?null)/,
+                replace: "false"
+            }
+        },
         {
             find: "prod_discoverable_guilds",
             predicate: () => settings.store.disableDiscoveryFilters,
@@ -107,7 +116,7 @@ export default definePlugin({
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
             all: true,
             replacement: {
-                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\)/g,
+                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0,rejectWithError:!1\}\)/g,
                 replace: "Promise.resolve({ body: { valid: true } })"
             }
         }
