@@ -110,6 +110,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - PolishWording (Grammar) by Samwich
 - PlatformSpoofer by Drag
 - PurgeMessages by bhop & nyx
+- QuestCompleter by HappyEnderman, SerStars, maintained by thororen
 - QuestionMarkReplacement by nyx
 - Quoter by Samwich
 - RemixMe by kvba
@@ -163,7 +164,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Discord Desktop Only
 - MediaDownloader by Colorman
-- QuestCompleter by HappyEnderman, SerStars, maintained by thororen
 - StatusWhilePlaying by thororen
 
 ### Equicord Devbuilds Only
