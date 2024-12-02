@@ -33,7 +33,7 @@ export default definePlugin({
     name: "Kernex",
     description: "Extra core functions for Nexulien",
     nexulien: true,
-    authors: [Devs.Zoid],
+    authors: [Devs.Zoid, Devs.TechTac],
     required: true,
 
     settings,

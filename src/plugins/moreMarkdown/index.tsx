@@ -319,7 +319,7 @@ export default definePlugin({
     name: "MoreMarkdown",
     description: "More markdown capabilities for Nexulien",
     nexulien: true,
-    authors: [Devs.Zoid],
+    authors: [Devs.Zoid, Devs.Jaegerwald, Devs.SwitchedCube],
     rulesByName: rulesByName,
 
     patches: [
