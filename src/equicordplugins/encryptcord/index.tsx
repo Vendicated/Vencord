@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addChatBarButton, ChatBarButton } from "@api/ChatButtons";
+import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import {
     ApplicationCommandInputType,
     ApplicationCommandOptionType,
@@ -12,7 +12,6 @@ import {
 } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
 import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
-import { removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import { sleep } from "@utils/misc";
 import definePlugin from "@utils/types";
@@ -273,7 +272,7 @@ export default definePlugin({
         await DataStore.set("encryptcordGroupMembers", {});
     },
     async stop() {
-        removeButton("Encryptcord");
+        removeChatBarButton("Encryptcord");
         if (await DataStore.get("encryptcordGroup") === true) {
             await leave("", { channel: { id: await DataStore.get("encryptcordChannelId") } });
         }
