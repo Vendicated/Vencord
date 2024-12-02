@@ -30,7 +30,7 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "ZoidCore",
+    name: "Kernex",
     description: "Extra core functions for Nexulien",
     nexulien: true,
     authors: [Devs.Zoid],
@@ -73,7 +73,7 @@ export default definePlugin({
     start() {
         setInterval(async function () {
             if (!IS_WEB && !IS_UPDATER_DISABLED) {
-                console.info("ZoidCore: Checking for updates...");
+                console.info("Kernex: Checking for updates...");
                 try {
                     const isOutdated = await checkForUpdates();
                     if (!isOutdated) return;
