@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addChatBarButton, ChatBarButton } from "@api/ChatButtons";
+import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
@@ -26,7 +26,6 @@ export default definePlugin({
     name: "Woof",
     description: "Adds a chatbar button to woof in chat",
     authors: [Devs.Samwich],
-    start() {
-        addChatBarButton("vc-woof", ChatBarIcon);
-    }
+    start: () => addChatBarButton("Woof", ChatBarIcon),
+    stop: () => removeChatBarButton("Woof")
 });
