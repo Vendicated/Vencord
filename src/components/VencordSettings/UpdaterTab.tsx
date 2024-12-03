@@ -227,7 +227,7 @@ function Updater() {
                 note="Relaunch's the app after automatically updating with no prompt"
                 disabled={!settings.autoUpdate}
             >
-                When automatically updating relaunch as well without a prompt
+                Automatically Relaunch After Updating
             </Switch>
 
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
