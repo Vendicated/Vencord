@@ -19,6 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
+import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Avatar, ChannelStore, Clickable, IconUtils, RelationshipStore, ScrollerThin, useMemo, UserStore } from "@webpack/common";
@@ -87,7 +88,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /\i\.useEffect.{0,100}(\i)\[0\]\.section/,
-                    replace: "$self.pushSection($1, arguments[0].user);$&"
+                    replace: "$self.pushSection($1,arguments[0].user);$&"
                 },
                 {
                     match: /\(0,\i\.jsx\)\(\i,\{items:\i,section:(\i)/,
@@ -97,26 +98,46 @@ export default definePlugin({
         },
         {
             find: 'section:"MUTUAL_FRIENDS"',
-            replacement: {
-                match: /\.openUserProfileModal.+?\)}\)}\)(?<=(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.divider}\)).+?)/,
-                replace: "$&,$self.renderDMPageList({user: arguments[0].user, Divider: $1, listStyle: $2.list})"
-            }
+            replacement: [
+                {
+                    match: /\i\|\|\i(?=\?\(0,\i\.jsxs?\)\(\i\.\i\.Overlay,)/,
+                    replace: "$&||$self.getMutualGroupDms(arguments[0].user.id).length>0"
+                },
+                {
+                    match: /\.openUserProfileModal.+?\)}\)}\)(?<=,(\i)&&(\i)&&(\(0,\i\.jsxs?\)\(\i\.\i,{className:(\i)\.divider}\)).+?)/,
+                    replace: (m, hasMutualGuilds, hasMutualFriends, Divider, classes) => "" +
+                        `${m},$self.renderDMPageList({user:arguments[0].user,hasDivider:${hasMutualGuilds}||${hasMutualFriends},Divider:${Divider},listStyle:${classes}.list})`
+                }
+            ]
         }
     ],
 
-    pushSection(sections: any[], user: User) {
-        if (isBotOrSelf(user) || sections[IS_PATCHED]) return;
+    getMutualGroupDms(userId: string) {
+        try {
+            return getMutualGroupDms(userId);
+        } catch (e) {
+            new Logger("MutualGroupDMs").error("Failed to get mutual group dms:", e);
+        }
 
-        sections[IS_PATCHED] = true;
-        sections.push({
-            section: "MUTUAL_GDMS",
-            text: getMutualGDMCountText(user)
-        });
+        return [];
+    },
+
+    pushSection(sections: any[], user: User) {
+        try {
+            if (isBotOrSelf(user) || sections[IS_PATCHED]) return;
+
+            sections[IS_PATCHED] = true;
+            sections.push({
+                section: "MUTUAL_GDMS",
+                text: getMutualGDMCountText(user)
+            });
+        } catch (e) {
+            new Logger("MutualGroupDMs").error("Failed to push mutual group dms section:", e);
+        }
     },
 
     renderMutualGDMs: ErrorBoundary.wrap(({ user, onClose }: { user: User, onClose: () => void; }) => {
         const mutualGDms = useMemo(() => getMutualGroupDms(user.id), [user.id]);
-
         const entries = renderClickableGDMs(mutualGDms, onClose);
 
         return (
@@ -138,14 +159,13 @@ export default definePlugin({
         );
     }),
 
-    renderDMPageList: ErrorBoundary.wrap(({ user, Divider, listStyle }: { user: User, Divider: JSX.Element, listStyle: string; }) => {
+    renderDMPageList: ErrorBoundary.wrap(({ user, hasDivider, Divider, listStyle }: { user: User, hasDivider: boolean, Divider: JSX.Element, listStyle: string; }) => {
         const mutualGDms = getMutualGroupDms(user.id);
         if (mutualGDms.length === 0) return null;
 
-
         return (
             <>
-                {Divider}
+                {hasDivider && Divider}
                 <ExpandableList
                     listClassName={listStyle}
                     header={"Mutual Groups"}
