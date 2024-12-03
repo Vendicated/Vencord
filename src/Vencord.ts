@@ -108,6 +108,7 @@ async function init() {
                         noPersist: true,
                         onClick: relaunch
                     }), 10_000);
+                if (Settings.autoUpdateRelaunch) return relaunch;
                 return;
             }
 

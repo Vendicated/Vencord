@@ -189,7 +189,7 @@ function Newer(props: CommonProps) {
 }
 
 function Updater() {
-    const settings = useSettings(["autoUpdate", "autoUpdateNotification"]);
+    const settings = useSettings(["autoUpdate", "autoUpdateRelaunch", "autoUpdateNotification"]);
 
     const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading..." });
 
@@ -220,6 +220,14 @@ function Updater() {
                 disabled={!settings.autoUpdate}
             >
                 Get notified when an automatic update completes
+            </Switch>
+            <Switch
+                value={settings.autoUpdateRelaunch}
+                onChange={(v: boolean) => settings.autoUpdateRelaunch = v}
+                note="Relaunch's the app after automatically updating with no prompt"
+                disabled={!settings.autoUpdate}
+            >
+                When automatically updating relaunch as well without a prompt
             </Switch>
 
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
