@@ -49,7 +49,12 @@ export default definePlugin({
         await this.buildCss();
 
         addButton("HideAttachments", msg => {
-            if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length) return null;
+            // @ts-ignore - discord-types lags behind discord.
+            const hasAttachmentsInShapshots = msg.messageSnapshots.some(
+                (snapshot: { message: { attachments: any[]; }; }) => snapshot?.message.attachments.length
+            );
+
+            if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length && !hasAttachmentsInShapshots) return null;
 
             const isHidden = hiddenMessages.has(msg.id);
 
