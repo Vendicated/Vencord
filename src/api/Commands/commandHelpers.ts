@@ -54,5 +54,5 @@ export function sendBotMessage(channelId: string, message: PartialDeep<Message>)
 export function findOption<T>(args: Argument[], name: string): T & {} | undefined;
 export function findOption<T>(args: Argument[], name: string, fallbackValue: T): T & {};
 export function findOption(args: Argument[], name: string, fallbackValue?: any) {
-    return (args.find(a => a.name === name)?.value || fallbackValue) as any;
+    return (args.find(a => a.name === name)?.value ?? fallbackValue) as any;
 }
