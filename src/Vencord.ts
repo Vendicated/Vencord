@@ -108,7 +108,7 @@ async function init() {
                         noPersist: true,
                         onClick: relaunch
                     }), 10_000);
-                return;
+                return relaunch;
             }
 
             setTimeout(() => showNotification({
