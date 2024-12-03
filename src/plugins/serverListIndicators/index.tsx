@@ -23,9 +23,9 @@ import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
-import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
-import { GuildStore, PresenceStore, RelationshipStore, Tooltip } from "@webpack/common";
+import { findStoreLazy } from "@webpack";
+import { GuildStore, PresenceStore, RelationshipStore, Tooltip, useStateFromStores } from "@webpack/common";
 
 const enum IndicatorType {
     SERVER = 1 << 0,
@@ -33,13 +33,28 @@ const enum IndicatorType {
     BOTH = SERVER | FRIEND,
 }
 
-let onlineFriends = 0;
+
+let onlineFriendsCount = 0;
 let guildCount = 0;
-let forceUpdateFriendCount: () => void;
-let forceUpdateGuildCount: () => void;
+
+const UserGuildJoinRequestStore = findStoreLazy("UserGuildJoinRequestStore");
 
 function FriendsIndicator() {
-    forceUpdateFriendCount = useForceUpdater();
+    onlineFriendsCount = useStateFromStores([RelationshipStore, PresenceStore], () => {
+        let count = 0;
+
+        const friendIds = RelationshipStore.getFriendIDs();
+        for (const id of friendIds) {
+            const status = PresenceStore.getStatus(id) ?? "offline";
+            if (status === "offline") {
+                continue;
+            }
+
+            count++;
+        }
+
+        return count;
+    });
 
     return (
         <div id="vc-friendcount">
@@ -59,7 +74,7 @@ function FriendsIndicator() {
                     </path>
                 </svg>
             }
-            <span id="vc-friendcount-text">{onlineFriends}</span>
+            <span id="vc-friendcount-text">{onlineFriendsCount}</span>
             {!!settings.store.useCompact &&
                 <span id="vc-friendcount-text-compact">Friends</span>
             }
@@ -68,7 +83,13 @@ function FriendsIndicator() {
 }
 
 function ServersIndicator() {
-    forceUpdateGuildCount = useForceUpdater();
+    guildCount = useStateFromStores([GuildStore, UserGuildJoinRequestStore], () => {
+        const guildJoinRequests: string[] = UserGuildJoinRequestStore.computeGuildIds();
+        const guilds = GuildStore.getGuilds();
+
+        // Filter only pending guild join requests
+        return GuildStore.getGuildCount() + guildJoinRequests.filter(id => guilds[id] == null).length;
+    });
 
     return (
         <div id="vc-guildcount">
@@ -94,24 +115,6 @@ function ServersIndicator() {
             }
         </div>
     );
-}
-
-function handlePresenceUpdate() {
-    onlineFriends = 0;
-    const relations = RelationshipStore.getRelationships();
-    for (const id of Object.keys(relations)) {
-        const type = relations[id];
-        // FRIEND relationship type
-        if (type === 1 && PresenceStore.getStatus(id) !== "offline") {
-            onlineFriends += 1;
-        }
-    }
-    forceUpdateFriendCount?.();
-}
-
-function handleGuildUpdate() {
-    guildCount = GuildStore.getGuildCount();
-    forceUpdateGuildCount?.();
 }
 
 export const settings = definePluginSettings({
@@ -146,13 +149,13 @@ export default definePlugin({
         // switch is simply better
         switch (mode) {
             case IndicatorType.BOTH:
-                text = `${onlineFriends} Friends, ${guildCount} Servers`;
+                text = `${onlineFriendsCount} Friends, ${guildCount} Servers`;
                 break;
             case IndicatorType.FRIEND:
-                text = `${onlineFriends} Friends`;
+                text = `${onlineFriendsCount} Friends`;
                 break;
             case IndicatorType.SERVER:
-                text = `${onlineFriends} Friends, ${guildCount} Servers`;
+                text = `${onlineFriendsCount} Friends, ${guildCount} Servers`;
                 break;
         }
 
@@ -177,16 +180,8 @@ export default definePlugin({
         </ErrorBoundary>;
     },
 
-    flux: {
-        PRESENCE_UPDATES: handlePresenceUpdate,
-        GUILD_CREATE: handleGuildUpdate,
-        GUILD_DELETE: handleGuildUpdate,
-    },
-
     start() {
         addServerListElement(ServerListRenderPosition.Above, this.renderIndicator);
-        handlePresenceUpdate();
-        handleGuildUpdate();
     },
 
     stop() {
