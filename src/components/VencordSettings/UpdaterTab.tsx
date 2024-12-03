@@ -224,7 +224,7 @@ function Updater() {
             <Switch
                 value={settings.autoUpdateRelaunch}
                 onChange={(v: boolean) => settings.autoUpdateRelaunch = v}
-                note="Relaunch's the app after automatically updating with no prompt"
+                note="Relaunches the app after automatically updating with no prompt"
                 disabled={!settings.autoUpdate}
             >
                 Automatically relaunch after updating
