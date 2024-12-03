@@ -108,7 +108,8 @@ async function init() {
                         noPersist: true,
                         onClick: relaunch
                     }), 10_000);
-                return relaunch;
+                if (Settings.autoUpdateRelaunch) return relaunch;
+                return;
             }
 
             setTimeout(() => showNotification({

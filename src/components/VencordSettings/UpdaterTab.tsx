@@ -189,7 +189,7 @@ function Newer(props: CommonProps) {
 }
 
 function Updater() {
-    const settings = useSettings(["autoUpdate", "autoUpdateNotification"]);
+    const settings = useSettings(["autoUpdate", "autoUpdateRelaunch", "autoUpdateNotification"]);
 
     const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading..." });
 
@@ -217,6 +217,14 @@ function Updater() {
                 value={settings.autoUpdateNotification}
                 onChange={(v: boolean) => settings.autoUpdateNotification = v}
                 note="Shows a notification when Equicord automatically updates"
+                disabled={!settings.autoUpdate}
+            >
+                Get notified when an automatic update completes
+            </Switch>
+            <Switch
+                value={settings.autoUpdateRelaunch}
+                onChange={(v: boolean) => settings.autoUpdateRelaunch = v}
+                note="When automatically updating relaunch as well"
                 disabled={!settings.autoUpdate}
             >
                 Get notified when an automatic update completes
