@@ -1,0 +1,12 @@
+.quests-warning{
+    font-size: 16px !important;
+    background-color: var(--info-warning-background) !important;
+    color: var(--info-warning-text) !important;
+    border: 1px solid var(--info-warning-foreground) !important;
+    border-radius: 5px !important;
+    font-weight: 500;
+    padding: 6px 10px;
+    text-align: center;
+    margin-top: 10px;
+    font-style: bold;
+}
