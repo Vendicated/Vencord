@@ -292,7 +292,7 @@ export default definePlugin({
         return child => {
             if (!isBetterFolders) return true;
 
-            if (child?.props?.className?.includes("itemsContainer")) {
+            if (child?.props?.className?.includes("itemsContainer") && child.props.children != null) {
                 // Filter out everything but the scroller for the guild list
                 child.props.children = child.props.children.filter(child => child?.props?.onScroll != null);
                 return true;

@@ -164,8 +164,8 @@ export default definePlugin({
             find: 'getElementById("slate-toolbar"',
             predicate: () => settings.store.addBack,
             replacement: {
-                match: /(?<=handleContextMenu\(\i\)\{.{0,200}isPlatformEmbedded)\?/,
-                replace: "||true?"
+                match: /(?<=handleContextMenu\(\i\)\{.{0,200}isPlatformEmbedded)\)/,
+                replace: "||true)"
             }
         },
         {
@@ -216,9 +216,12 @@ export default definePlugin({
                     replace: "true"
                 },
                 {
-                    match: /\i\.\i\.copy/,
+                    match: /\i\.\i\.copy(?=\(\i)/,
                     replace: "Vencord.Webpack.Common.Clipboard.copy"
-                }]
+                }
+            ],
+            all: true,
+            noWarn: true
         },
         // Automod add filter words
         {
