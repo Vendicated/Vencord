@@ -16,20 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Settings } from "@api/Settings";
+import { getUserSettingLazy } from "@api/UserSettings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+const DisableStreamPreviews = getUserSettingLazy<boolean>("voiceAndVideo", "disableStreamPreviews")!;
+
+// @TODO: Delete this plugin in the future
 export default definePlugin({
     name: "NoScreensharePreview",
     description: "Disables screenshare previews from being sent.",
     authors: [Devs.Nuckyz],
-    patches: [
-        {
-            find: '"ApplicationStreamPreviewUploadManager"',
-            replacement: {
-                match: /await \i\.\i\.(makeChunkedRequest\(|post\(\{url:)\i\.\i\.STREAM_PREVIEW.+?\}\)/g,
-                replace: "0"
-            }
+    start() {
+        if (!DisableStreamPreviews.getSetting()) {
+            DisableStreamPreviews.updateSetting(true);
         }
-    ]
+
+        Settings.plugins.NoScreensharePreview.enabled = false;
+    }
 });
