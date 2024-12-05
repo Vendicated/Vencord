@@ -37,6 +37,15 @@ export default definePlugin({
     name: "NoNitroUpsell",
     description: "Removes ALL of Discord's nitro upsells by tricking the client into thinking you have nitro.",
     authors: [EquicordDevs.thororen],
+    patches: [
+        {
+            find: "ProductCatalog",
+            replacement: {
+                match: /\i\.warn\("Cannot find the corresponding SKU to the user's premium type "\.concat\(\i\.premiumType\)\),/,
+                replace: ""
+            }
+        }
+    ],
     start() {
         user = UserStore.getCurrentUser();
         if (user) ready(user);
