@@ -17,7 +17,6 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, CommandContext, sendBotMessage } from "@api/Commands";
-import { migratePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -75,9 +74,8 @@ async function resolveImage(options: Argument[], ctx: CommandContext): Promise<{
     return { image, width, height };
 }
 
-migratePluginSettings("ImgToGif", "imgtogif");
 export default definePlugin({
-    name: "ImgToGif",
+    name: "imgtogif",
     description: "Adds a /imgtogif slash command to create a gif from any image",
     authors: [EquicordDevs.zyqunix],
     commands: [

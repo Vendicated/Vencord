@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>150 additional plugins</summary>
+<summary>147 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -77,7 +77,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Identity by Samwich
 - IgnoreTerms by D3SOX
 - ImagePreview by Creations
-- ImgToGif by zyqunix
 - InRole by nin0dev
 - IrcColors by Grzesiek11
 - IRememberYou by zoodogood
