@@ -219,7 +219,9 @@ function Updater() {
                 value={settings.autoUpdateNotification}
                 onChange={(v: boolean) => {
                     settings.autoUpdateNotification = v;
-                    settings.updateRelaunch = !v;
+                    if (settings.updateRelaunch) {
+                        settings.updateRelaunch = !v;
+                    }
                 }}
                 note="Shows a notification when Equicord automatically updates"
                 disabled={!settings.autoUpdate}
@@ -230,7 +232,9 @@ function Updater() {
                 value={settings.updateRelaunch}
                 onChange={(v: boolean) => {
                     settings.updateRelaunch = v;
-                    settings.autoUpdateNotification = !v;
+                    if (settings.autoUpdateNotification) {
+                        settings.autoUpdateNotification = !v;
+                    }
                 }}
                 note="Relaunches the app after updating with no prompt"
                 disabled={!settings.autoUpdate}
@@ -258,8 +262,8 @@ function Updater() {
 
             <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
 
-            {isNewer ? <Newer {...commonProps} /> : <Updatable {...commonProps} />}
-        </SettingsTab>
+            {isNewer ? <Newer {...commonProps} /> : <Updatable {...commonProps} />; }
+        </SettingsTab >
     );
 }
 
