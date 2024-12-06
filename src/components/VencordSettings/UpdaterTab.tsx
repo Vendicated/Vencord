@@ -262,7 +262,7 @@ function Updater() {
 
             <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
 
-            {isNewer ? <Newer {...commonProps} /> : <Updatable {...commonProps} />; }
+            {isNewer ? <Newer {...commonProps} /> : <Updatable {...commonProps} />}
         </SettingsTab >
     );
 }
