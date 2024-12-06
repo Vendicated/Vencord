@@ -75,6 +75,15 @@ export default definePlugin({
                 replace: "$1$2arguments[0].member.highestRoleId]",
             }
         },
+        // allows you to open mod view on yourself
+        {
+            find: ".MEMBER_SAFETY,{modViewPanel:",
+            predicate: () => settings.store.showModView,
+            replacement: {
+                match: /\i(?=\?null)/,
+                replace: "false"
+            }
+        },
         {
             find: "prod_discoverable_guilds",
             predicate: () => settings.store.disableDiscoveryFilters,
