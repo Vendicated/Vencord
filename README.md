@@ -143,6 +143,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - UserPFP by nexpid & thororen
 - UwUifier by echo
 - VCSupport by thororen
+- VCNarratorCustom by Loukios, ported by example-git
 - VencordRPC by AutumnVN
 - VideoSpeed by Samwich
 - ViewRawVariant (ViewRaw2) by Kyuuhachi
@@ -167,6 +168,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - StatusWhilePlaying by thororen
 
 ### Equicord Devbuilds Only
+- FurudoSpeak by example-git
 - Shakespearean by vmohammad
 - VoiceJoinMessages by Sqaaakoi & maintained by thororen
 
