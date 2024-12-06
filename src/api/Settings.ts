@@ -30,7 +30,6 @@ import plugins from "~plugins";
 const logger = new Logger("Settings");
 export interface Settings {
     autoUpdate: boolean;
-    autoUpdateRelaunch: boolean;
     autoUpdateNotification: boolean;
     useQuickCss: boolean;
     enableReactDevtools: boolean;
@@ -39,6 +38,7 @@ export interface Settings {
     enabledThemeLinks: string[];
     frameless: boolean;
     transparent: boolean;
+    updateRelaunch: boolean;
     winCtrlQ: boolean;
     macosVibrancyStyle:
     | "content"
@@ -88,7 +88,6 @@ export interface Settings {
 
 const DefaultSettings: Settings = {
     autoUpdate: true,
-    autoUpdateRelaunch: false,
     autoUpdateNotification: true,
     useQuickCss: true,
     themeLinks: [],
@@ -100,6 +99,7 @@ const DefaultSettings: Settings = {
     winCtrlQ: false,
     macosVibrancyStyle: undefined,
     disableMinSize: false,
+    updateRelaunch: false,
     winNativeTitleBar: false,
     plugins: {},
 
