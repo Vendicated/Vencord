@@ -1,20 +1,8 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
@@ -30,6 +18,7 @@ interface Tag {
     name: string;
     message: string;
     enabled: boolean;
+    variables: string[];
 }
 
 const getTags = () => DataStore.get(DATA_KEY).then<Tag[]>(t => t ?? []);
@@ -47,23 +36,51 @@ const removeTag = async (name: string) => {
     return tags;
 };
 
+function detectVariables(message: string): string[] {
+    const matches = message.match(/{(.*?)}/g) || [];
+    return Array.from(new Set(matches.map((variable: string) => variable.slice(1, -1))));
+}
+
+function replaceVariables(message: string, replacements: Record<string, string>) {
+    for (const [key, value] of Object.entries(replacements)) {
+        message = message.replaceAll(`{${key}}`, value);
+    }
+    return message;
+}
+
 function createTagCommand(tag: Tag) {
     registerCommand({
         name: tag.name,
         description: tag.name,
         inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
-        execute: async (_, ctx) => {
-            if (!await getTag(tag.name)) {
+        options: tag.variables ? tag.variables.map(variable => ({
+            name: variable,
+            description: `Value for ${variable}`,
+            type: ApplicationCommandOptionType.STRING,
+            required: true,
+        })) : [],
+        execute: async (args, ctx) => {
+            const existingTag = await getTag(tag.name);
+            if (!existingTag) {
                 sendBotMessage(ctx.channel.id, {
-                    content: `${EMOTE} The tag **${tag.name}** does not exist anymore! Please reload ur Discord to fix :)`
+                    content: `${EMOTE} The tag **${tag.name}** does not exist anymore! Please reload Discord to fix :)`
                 });
                 return { content: `/${tag.name}` };
             }
 
-            if (Settings.plugins.MessageTags.clyde) sendBotMessage(ctx.channel.id, {
-                content: `${EMOTE} The tag **${tag.name}** has been sent!`
-            });
-            return { content: tag.message.replaceAll("\\n", "\n") };
+            const replacements = Object.fromEntries(
+                tag.variables.map(variable => [variable, findOption(args, variable, "")])
+            );
+
+            const finalMessage = replaceVariables(existingTag.message, replacements).replaceAll("\\n", "\n");
+
+            if (Settings.plugins.MessageTags.clyde) {
+                sendBotMessage(ctx.channel.id, {
+                    content: `${EMOTE} The tag **${tag.name}** has been sent!`
+                });
+            }
+
+            return { content: finalMessage };
         },
         [MessageTagsMarker]: true,
     }, "CustomTags");
@@ -72,19 +89,22 @@ function createTagCommand(tag: Tag) {
 
 export default definePlugin({
     name: "MessageTags",
-    description: "Allows you to save messages and to use them with a simple command.",
-    authors: [Devs.Luna],
+    description: "Allows you to save messages and to use them with a simple command, now with variable support.",
+    authors: [Devs.Luna, Devs.SUDO],
     options: {
         clyde: {
             name: "Clyde message on send",
-            description: "If enabled, clyde will send you an ephemeral message when a tag was used.",
+            description: "If enabled, Clyde will send you an ephemeral message when a tag was used.",
             type: OptionType.BOOLEAN,
             default: true
         }
     },
 
     async start() {
-        for (const tag of await getTags()) createTagCommand(tag);
+        const tags = await getTags();
+        tags.forEach(tag => {
+            createTagCommand(tag);
+        });
     },
 
     commands: [
@@ -106,7 +126,7 @@ export default definePlugin({
                         },
                         {
                             name: "message",
-                            description: "The message that you will send when using this tag",
+                            description: "The message that you will send when using this tag, you can use placeholders like {user}",
                             type: ApplicationCommandOptionType.STRING,
                             required: true
                         }
@@ -120,7 +140,7 @@ export default definePlugin({
                 },
                 {
                     name: "delete",
-                    description: "Remove a tag from your yourself",
+                    description: "Remove a tag from yourself",
                     type: ApplicationCommandOptionType.SUB_COMMAND,
                     options: [
                         {
@@ -157,11 +177,12 @@ export default definePlugin({
                             return sendBotMessage(ctx.channel.id, {
                                 content: `${EMOTE} A Tag with the name **${name}** already exists!`
                             });
-
-                        const tag = {
+                        const variables = detectVariables(message);
+                        const tag: Tag = {
                             name: name,
                             enabled: true,
-                            message: message
+                            message: message,
+                            variables: variables
                         };
 
                         createTagCommand(tag);
@@ -192,9 +213,7 @@ export default definePlugin({
                         sendBotMessage(ctx.channel.id, {
                             embeds: [
                                 {
-                                    // @ts-ignore
                                     title: "All Tags:",
-                                    // @ts-ignore
                                     description: (await getTags())
                                         .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
                                         .join("\n") || `${EMOTE} Woops! There are no tags yet, use \`/tags create\` to create one!`,
