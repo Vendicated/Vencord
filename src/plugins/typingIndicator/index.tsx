@@ -163,7 +163,7 @@ export default definePlugin({
         {
             find: "UNREAD_IMPORTANT:",
             replacement: {
-                match: /\.name\),.{0,120}\.children.+?:null(?<=,channel:(\i).+?)/,
+                match: /\.name,{.{0,140}\.children.+?:null(?<=,channel:(\i).+?)/,
                 replace: "$&,$self.TypingIndicator($1.id,$1.getGuildId())"
             }
         },
