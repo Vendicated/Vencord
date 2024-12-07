@@ -1,0 +1,20 @@
+img.emoji:not([alt^=":"]):not([data-id]) {
+    text-indent: unset;
+    visibility: collapse;
+    display: inline-flex;
+    content: unset;
+}
+
+img.emoji:not([alt^=":"]):not([data-id])::before {
+    content: attr(alt);
+    visibility: visible;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+img.emoji.jumboable:not([alt^=":"]):not([data-id])::before {
+    font-size: 2cqw;
+}
