@@ -16,8 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { ProfileBadge } from "@api/Badges";
+import { ChatBarButtonFactory } from "@api/ChatButtons";
 import { Command } from "@api/Commands";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
+import { MessageAccessoryFactory } from "@api/MessageAccessories";
+import { MessageDecorationFactory } from "@api/MessageDecorations";
+import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
+import { MessagePopoverButtonFactory } from "@api/MessagePopover";
 import { FluxEvents } from "@webpack/types";
 import { Promisable } from "type-fest";
 
@@ -141,6 +148,20 @@ export interface PluginDef {
     toolboxActions?: Record<string, () => void>;
 
     tags?: string[];
+
+    userProfileBadge?: ProfileBadge;
+
+    onMessageClick?: MessageClickListener;
+    onBeforeMessageSend?: MessageSendListener;
+    onBeforeMessageEdit?: MessageEditListener;
+
+    renderMessagePopoverButton?: MessagePopoverButtonFactory;
+    renderMessageAccessory?: MessageAccessoryFactory;
+    renderMessageDecoration?: MessageDecorationFactory;
+
+    renderMemberListDecorator?: MemberListDecoratorFactory;
+
+    renderChatBarButton?: ChatBarButtonFactory;
 }
 
 export const enum StartAt {
