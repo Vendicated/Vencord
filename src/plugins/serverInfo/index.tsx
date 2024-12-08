@@ -5,7 +5,7 @@
  */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu } from "@webpack/common";
@@ -47,7 +47,6 @@ export const settings = definePluginSettings({
     }
 });
 
-migratePluginSettings("ServerInfo", "ServerProfile"); // what was I thinking with this name lmao
 export default definePlugin({
     name: "ServerInfo",
     description: "Allows you to view info about a server",
