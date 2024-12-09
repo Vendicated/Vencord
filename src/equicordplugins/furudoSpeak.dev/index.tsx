@@ -3,19 +3,21 @@
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-import { definePluginSettings, Settings } from "@api/Settings";
-import { EquicordDevs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+
+import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
-import { transferMessage } from "./native";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
+import { EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { MessageStore, Menu, React, Forms } from "@webpack/common";
+import definePlugin, { OptionType } from "@utils/types";
+import { Forms, Menu, MessageStore, React } from "@webpack/common";
+
+import { transferMessage } from "./native";
 
 const furudosettings = definePluginSettings(
     {
@@ -104,7 +106,7 @@ function messageSendListenerFuncs() {
 const FurudoSpeakChatToggle: ChatBarButton = ({ isMainChat }) => {
     const { isEnabled, showIcon } = furudosettings.use(["isEnabled", "showIcon"]);
     const toggle = async () => {
-        let done = await togglefunc();
+        const done = await togglefunc();
         return done;
     };
 
@@ -199,7 +201,7 @@ export default definePlugin({
         ],
         execute: async (args, ctx) => {
             furudosettings.store.isEnabled = !!findOption(args, "value", !furudosettings.store.isEnabled);
-            if (furudosettings.store.isEnabled) { messageSendListenerFuncs(); };
+            if (furudosettings.store.isEnabled) { messageSendListenerFuncs(); }
             sendBotMessage(ctx.channel.id, {
                 content: furudosettings.store.isEnabled ? "FurudoSpeak enabled!" : "FurudoSpeak disabled!",
             });

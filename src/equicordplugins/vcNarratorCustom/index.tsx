@@ -1,31 +1,16 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, Settings } from "@api/Settings";
-import { ErrorCard } from "@components/ErrorCard";
+import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
 import definePlugin, {
     OptionType,
     PluginOptionsItem,
-    ReporterTestable,
 } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import {
@@ -61,7 +46,6 @@ const VoiceStateStore = findByPropsLazy(
 
 async function speak(
     text: string,
-    settings: any = Settings.plugins.VcNarrator
 ) {
     if (text.trim().length === 0) return;
     const response = await fetch(
@@ -77,7 +61,7 @@ async function speak(
             referrerPolicy: "no-referrer",
             body: JSON.stringify({
                 text: text,
-                voice: Settings.plugins.VcNarratorCustom.customVoice,
+                voice: settings.store.customVoice,
             }),
         }
     );
@@ -94,15 +78,13 @@ async function speak(
     const url = URL.createObjectURL(blob);
 
     const audio = new Audio(url);
-    audio.volume = 0.3;
+    audio.volume = settings.store.volume;
+    audio.playbackRate = settings.store.rate;
     audio.play();
-
-    audio.volume = settings.volume;
-    audio.playbackRate = settings.rate;
 }
 
 function clean(str: string) {
-    const replacer = Settings.plugins.VcNarrator.latinOnly
+    const replacer = settings.store.latinOnly
         ? /[^\p{Script=Latin}\p{Number}\p{Punctuation}\s]/gu
         : /[^\p{Letter}\p{Number}\p{Punctuation}\s]/gu;
 
@@ -155,9 +137,9 @@ function getTypeAndChannelId(
 }
 
 function playSample(tempSettings: any, type: string) {
-    const settings = Object.assign(
+    const settingsobj = Object.assign(
         {},
-        Settings.plugins.VcNarrator,
+        settings.store,
         tempSettings
     );
     const currentUser = UserStore.getCurrentUser();
@@ -165,16 +147,88 @@ function playSample(tempSettings: any, type: string) {
 
     speak(
         formatText(
-            settings[type + "Message"],
+            settingsobj[type + "Message"],
             currentUser.username,
             "general",
             (currentUser as any).globalName ?? currentUser.username,
             GuildMemberStore.getNick(myGuildId, currentUser.id) ??
             currentUser.username
-        ),
-        settings
+        )
     );
 }
+
+const settings = definePluginSettings({
+    customVoice: {
+        type: OptionType.STRING,
+        description: "Custom voice id, currently just tiktok",
+        default: "en_us_001",
+    },
+    volume: {
+        type: OptionType.SLIDER,
+        description: "Narrator Volume",
+        default: 1,
+        markers: [0, 0.25, 0.5, 0.75, 1],
+        stickToMarkers: false,
+    },
+    rate: {
+        type: OptionType.SLIDER,
+        description: "Narrator Speed",
+        default: 1,
+        markers: [0.1, 0.5, 1, 2, 5, 10],
+        stickToMarkers: false,
+    },
+    sayOwnName: {
+        description: "Say own name",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
+    ignoreSelf: {
+        description: "Ignore yourself for all events.",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
+    latinOnly: {
+        description:
+            "Strip non latin characters from names before saying them",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
+    joinMessage: {
+        type: OptionType.STRING,
+        description: "Join Message",
+        default: "{{DISPLAY_NAME}} joined",
+    },
+    leaveMessage: {
+        type: OptionType.STRING,
+        description: "Leave Message",
+        default: "{{DISPLAY_NAME}} left",
+    },
+    moveMessage: {
+        type: OptionType.STRING,
+        description: "Move Message",
+        default: "{{DISPLAY_NAME}} moved to {{CHANNEL}}",
+    },
+    muteMessage: {
+        type: OptionType.STRING,
+        description: "Mute Message (only self for now)",
+        default: "{{DISPLAY_NAME}} Muted",
+    },
+    unmuteMessage: {
+        type: OptionType.STRING,
+        description: "Unmute Message (only self for now)",
+        default: "{{DISPLAY_NAME}} unmuted",
+    },
+    deafenMessage: {
+        type: OptionType.STRING,
+        description: "Deafen Message (only self for now)",
+        default: "{{DISPLAY_NAME}} deafened",
+    },
+    undeafenMessage: {
+        type: OptionType.STRING,
+        description: "Undeafen Message (only self for now)",
+        default: "{{DISPLAY_NAME}} undeafened",
+    },
+});
 
 export default definePlugin({
     name: "VcNarratorCustom",
@@ -206,9 +260,9 @@ export default definePlugin({
                 const [type, id] = getTypeAndChannelId(state, isMe);
                 if (!type) continue;
 
-                const template = Settings.plugins.VcNarrator[type + "Message"];
+                const template = settings.store[type + "Message"];
                 const user =
-                    isMe && !Settings.plugins.VcNarrator.sayOwnName
+                    isMe && !settings.store.sayOwnName
                         ? ""
                         : UserStore.getUser(userId).username;
                 const displayName =
@@ -244,86 +298,14 @@ export default definePlugin({
     },
 
     optionsCache: null as Record<string, PluginOptionsItem> | null,
-    settings: definePluginSettings(
-        {
-            customVoice: {
-                type: OptionType.STRING,
-                description: "Custom voice id, currently just tiktok",
-                default: "en_us_001",
-            },
-            volume: {
-                type: OptionType.SLIDER,
-                description: "Narrator Volume",
-                default: 1,
-                markers: [0, 0.25, 0.5, 0.75, 1],
-                stickToMarkers: false,
-            },
-            rate: {
-                type: OptionType.SLIDER,
-                description: "Narrator Speed",
-                default: 1,
-                markers: [0.1, 0.5, 1, 2, 5, 10],
-                stickToMarkers: false,
-            },
-            sayOwnName: {
-                description: "Say own name",
-                type: OptionType.BOOLEAN,
-                default: false,
-            },
-            ignoreSelf: {
-                description: "Ignore yourself for all events.",
-                type: OptionType.BOOLEAN,
-                default: false,
-            },
-            latinOnly: {
-                description:
-                    "Strip non latin characters from names before saying them",
-                type: OptionType.BOOLEAN,
-                default: false,
-            },
-            joinMessage: {
-                type: OptionType.STRING,
-                description: "Join Message",
-                default: "{{DISPLAY_NAME}} joined",
-            },
-            leaveMessage: {
-                type: OptionType.STRING,
-                description: "Leave Message",
-                default: "{{DISPLAY_NAME}} left",
-            },
-            moveMessage: {
-                type: OptionType.STRING,
-                description: "Move Message",
-                default: "{{DISPLAY_NAME}} moved to {{CHANNEL}}",
-            },
-            muteMessage: {
-                type: OptionType.STRING,
-                description: "Mute Message (only self for now)",
-                default: "{{DISPLAY_NAME}} Muted",
-            },
-            unmuteMessage: {
-                type: OptionType.STRING,
-                description: "Unmute Message (only self for now)",
-                default: "{{DISPLAY_NAME}} unmuted",
-            },
-            deafenMessage: {
-                type: OptionType.STRING,
-                description: "Deafen Message (only self for now)",
-                default: "{{DISPLAY_NAME}} deafened",
-            },
-            undeafenMessage: {
-                type: OptionType.STRING,
-                description: "Undeafen Message (only self for now)",
-                default: "{{DISPLAY_NAME}} undeafened",
-            },
-        },),
+    settings,
 
     settingsAboutComponent({ tempSettings: s }) {
         const types = useMemo(
             () =>
-                Object.keys(Vencord.Plugins.plugins.VcNarrator.options!)
-                    .filter((k) => k.endsWith("Message"))
-                    .map((k) => k.slice(0, -7)),
+                Object.keys(settings.store)
+                    .filter(k => k.endsWith("Message"))
+                    .map(k => k.slice(0, -7)),
             []
         );
 
@@ -365,7 +347,7 @@ export default definePlugin({
                     }}
                     className={"vc-narrator-buttons"}
                 >
-                    {types.map((t) => (
+                    {types.map(t => (
                         <Button key={t} onClick={() => playSample(s, t)}>
                             {wordsToTitle([t])}
                         </Button>
