@@ -12,34 +12,6 @@ env:
 permissions: write-all
 
 jobs:
-    Date:
-        name: Date
-        runs-on: ubuntu-latest
-        if: ${{ github.event.workflow_run.conclusion == 'success' }}
-        outputs:
-            DATE: ${{ steps.combined.outputs.DATE }}
-            TIME: ${{ steps.combined.outputs.TIME }}
-
-        steps:
-            - name: Get Month Day Year
-              id: date
-              uses: Kaven-Universe/github-action-current-date-time@v1
-              with:
-                  timezone-offset: 240
-
-            - name: Combine Time
-              id: combined
-              run: |
-                  echo "DATE=$YEAR/$MONTH/$DAY" >> $GITHUB_OUTPUT
-                  echo "TIME=$HOURS-$MINUTES-$SECONDS" >> $GITHUB_OUTPUT
-              env:
-                  YEAR: ${{ steps.date.outputs.year }}
-                  MONTH: ${{ steps.date.outputs.month }}
-                  DAY: ${{ steps.date.outputs.day }}
-                  HOURS: ${{ steps.date.outputs.hours }}
-                  MINUTES: ${{ steps.date.outputs.minutes }}
-                  SECONDS: ${{ steps.date.outputs.seconds }}
-
     Build:
         name: Build Equicord
         runs-on: ubuntu-latest
@@ -103,15 +75,17 @@ jobs:
 
             - name: Upload Equicord
               run: |
-                  gh release create v${{ steps.package-version.outputs.current-version}} --latest=false
                   gh release upload v${{ steps.package-version.outputs.current-version}} --clobber dist/release/*
+                  gh release upload latest --clobber dist/release/*
 
             - name: Upload Plugins JSON to Equibored repo
               run: |
+                  git config --global user.name "GitHub-Actions"
+                  git config --global user.email actions@github.com
                   git clone https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git plugins
                   cd plugins
 
-                  cp dist/release/*plugins.json .
+                  cp ../dist/release/*plugins.json .
                   git add -A
 
                   git commit -m "Plugins for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
