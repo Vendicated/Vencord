@@ -6,10 +6,40 @@ on:
 env:
     FORCE_COLOR: true
     GITHUB_TOKEN: ${{ secrets.ETOKEN }}
+    REPO: Equicord/Equibored
+    USERNAME: GitHub-Actions
 
 permissions: write-all
 
 jobs:
+    Date:
+        name: Date
+        runs-on: ubuntu-latest
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        outputs:
+            DATE: ${{ steps.combined.outputs.DATE }}
+            TIME: ${{ steps.combined.outputs.TIME }}
+
+        steps:
+            - name: Get Month Day Year
+              id: date
+              uses: Kaven-Universe/github-action-current-date-time@v1
+              with:
+                  timezone-offset: 240
+
+            - name: Combine Time
+              id: combined
+              run: |
+                  echo "DATE=$YEAR/$MONTH/$DAY" >> $GITHUB_OUTPUT
+                  echo "TIME=$HOURS-$MINUTES-$SECONDS" >> $GITHUB_OUTPUT
+              env:
+                  YEAR: ${{ steps.date.outputs.year }}
+                  MONTH: ${{ steps.date.outputs.month }}
+                  DAY: ${{ steps.date.outputs.day }}
+                  HOURS: ${{ steps.date.outputs.hours }}
+                  MINUTES: ${{ steps.date.outputs.minutes }}
+                  SECONDS: ${{ steps.date.outputs.seconds }}
+
     Build:
         name: Build Equicord
         runs-on: ubuntu-latest
@@ -68,23 +98,21 @@ jobs:
                   rm release/*.map
 
             - name: get-npm-version
-              if: ${{ github.ref_name == 'main' }}
               id: package-version
               uses: martinbeentjes/npm-get-version-action@v1.3.1
 
-            - name: Upload Equicord Stable
-              if: ${{ github.ref_name == 'main' }}
+            - name: Upload Equicord
               run: |
                   gh release create v${{ steps.package-version.outputs.current-version}} --latest=false
                   gh release upload v${{ steps.package-version.outputs.current-version}} --clobber dist/release/*
 
-            - name: Upload Equicord Dev
-              if: ${{ github.ref_name == 'dev' }}
+            - name: Upload Plugins JSON to Equibored repo
               run: |
-                  gh release upload devbuild --clobber dist/release/*
+                  git clone https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git plugins
+                  cd plugins
 
-            - name: Upload build artifact
-              uses: actions/upload-artifact@v4
-              with:
-                  name: "build"
-                  path: "dist/release/*"
+                  cp dist/release/*plugins.json .
+                  git add -A
+
+                  git commit -m "Plugins for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+                  git push --force https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git
