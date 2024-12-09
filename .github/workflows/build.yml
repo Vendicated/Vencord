@@ -1,8 +1,9 @@
 name: Release
 on:
     push:
+        tags:
+            - v*
         branches:
-            - main
             - dev
 env:
     FORCE_COLOR: true
@@ -68,10 +69,16 @@ jobs:
                   rm release/package.json
                   rm release/*.map
 
+            - name: get-npm-version
+              if: ${{ github.ref_name == 'main' }}
+              id: package-version
+              uses: martinbeentjes/npm-get-version-action@v1.3.1
+
             - name: Upload Equicord Stable
               if: ${{ github.ref_name == 'main' }}
               run: |
-                  gh release upload latest --clobber dist/release/*
+                  gh release create ${{ steps.package-version.outputs.current-version}} --latest=false
+                  gh release upload ${{ steps.package-version.outputs.current-version}} --clobber dist/release/*
 
             - name: Upload Equicord Dev
               if: ${{ github.ref_name == 'dev' }}
