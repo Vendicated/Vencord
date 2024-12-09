@@ -3,8 +3,6 @@ on:
     push:
         tags:
             - v*
-        branches:
-            - main
 env:
     FORCE_COLOR: true
     GITHUB_TOKEN: ${{ secrets.ETOKEN }}
