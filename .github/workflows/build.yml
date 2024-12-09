@@ -79,6 +79,8 @@ jobs:
 
             - name: Upload Plugins JSON to Equibored repo
               run: |
+                  git config --global user.name "GitHub-Actions"
+                  git config --global user.email actions@github.com
                   git clone https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git plugins
                   cd plugins
 
