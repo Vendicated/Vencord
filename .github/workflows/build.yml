@@ -78,8 +78,8 @@ jobs:
             - name: Upload Equicord Stable
               if: ${{ github.ref_name == 'main' }}
               run: |
-                  gh release create ${{ steps.package-version.outputs.current-version}} --latest=false
-                  gh release upload ${{ steps.package-version.outputs.current-version}} --clobber dist/release/*
+                  gh release create v${{ steps.package-version.outputs.current-version}} --latest=false
+                  gh release upload v${{ steps.package-version.outputs.current-version}} --clobber dist/release/*
 
             - name: Upload Equicord Dev
               if: ${{ github.ref_name == 'dev' }}
