@@ -49,7 +49,7 @@ export default definePlugin({
             find: "UNREAD_IMPORTANT:",
             replacement: [
                 {
-                    match: /\.name\),.{0,120}\.children.+?:null/,
+                    match: /\.name,{.{0,140}\.children.+?:null/,
                     replace: "$&,$self.CountBadge({channel: arguments[0].channel,})",
                     predicate: () => !settings.store.replaceWhiteDot
                 },

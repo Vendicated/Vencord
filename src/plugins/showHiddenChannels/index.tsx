@@ -178,13 +178,13 @@ export default definePlugin({
                 // Add the hidden eye icon if the channel is hidden
                 {
                     predicate: () => settings.store.showMode === ShowMode.EyeIconRight,
-                    match: /\.name\),.{0,120}\.children.+?:null(?<=,channel:(\i).+?)/,
+                    match: /\.name,{.{0,140}\.children.+?:null(?<=,channel:(\i).+?)/,
                     replace: (m, channel) => `${m},$self.isHiddenChannel(${channel})?$self.EyeRightIcon():null`
                 },
                 // Add the hidden lock icon if the channel is hidden
                 {
                     predicate: () => settings.store.showMode === ShowMode.LockIconRight,
-                    match: /\.name\),.{0,120}\.children.+?:null(?<=,channel:(\i).+?)/,
+                    match: /\.name,{.{0,140}\.children.+?:null(?<=,channel:(\i).+?)/,
                     replace: (m, channel) => `${m},$self.isHiddenChannel(${channel})?$self.LockRightIcon():null`
                 },
             ]
