@@ -4,6 +4,7 @@ on:
         tags:
             - v*
         branches:
+            - main
             - dev
 env:
     FORCE_COLOR: true
