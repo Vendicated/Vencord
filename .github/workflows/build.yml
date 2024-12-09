@@ -76,6 +76,7 @@ jobs:
             - name: Upload Equicord
               run: |
                   gh release upload v${{ steps.package-version.outputs.current-version}} --clobber dist/release/*
+                  gh release upload latest --clobber dist/release/*
 
             - name: Upload Plugins JSON to Equibored repo
               run: |
