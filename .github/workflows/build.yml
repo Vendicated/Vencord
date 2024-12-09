@@ -81,6 +81,7 @@ jobs:
                   gh release upload v${{ steps.package-version.outputs.current-version}} --clobber dist/release/*
 
             - name: Upload Equicord Stable
+              if: ${{ github.ref_name == 'main' }}
               run: |
                   gh release upload latest --clobber dist/release/*
 
