@@ -5,7 +5,6 @@ on:
             - v*
         branches:
             - main
-            - dev
 env:
     FORCE_COLOR: true
     GITHUB_TOKEN: ${{ secrets.ETOKEN }}
