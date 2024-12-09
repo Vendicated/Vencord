@@ -21,12 +21,13 @@ import esbuild from "esbuild";
 import { readdir } from "fs/promises";
 import { join } from "path";
 
-import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, commonRendererPlugins, watch } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, commonRendererPlugins, watch, IS_COMPANION_TEST } from "./common.mjs";
 
 const defines = {
     IS_STANDALONE,
     IS_DEV,
     IS_REPORTER,
+    IS_COMPANION_TEST,
     IS_UPDATER_DISABLED,
     IS_WEB: false,
     IS_EXTENSION: false,
