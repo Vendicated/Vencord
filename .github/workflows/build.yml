@@ -3,6 +3,8 @@ on:
     push:
         tags:
             - v*
+        branches:
+            - main
 env:
     FORCE_COLOR: true
     GITHUB_TOKEN: ${{ secrets.ETOKEN }}
@@ -73,9 +75,14 @@ jobs:
               id: package-version
               uses: martinbeentjes/npm-get-version-action@v1.3.1
 
-            - name: Upload Equicord
+            - name: Upload Equicord Tagged
+              if: startsWith(github.ref, 'refs/tags/')
               run: |
                   gh release upload v${{ steps.package-version.outputs.current-version}} --clobber dist/release/*
+
+            - name: Upload Equicord Stable
+              if: ${{ github.ref_name == 'main' }}
+              run: |
                   gh release upload latest --clobber dist/release/*
 
             - name: Upload Plugins JSON to Equibored repo
