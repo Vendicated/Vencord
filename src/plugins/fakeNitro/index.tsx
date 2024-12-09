@@ -17,7 +17,7 @@
 */
 
 import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild, getEmojiURL } from "@utils/discord";
@@ -29,6 +29,14 @@ import type { Emoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
+
+let premiumType;
+if (Settings.plugins.NoNitroUpsell.enabled) {
+    // @ts-ignore
+    premiumType = UserStore?.getCurrentUser()?._realPremiumType ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
+} else {
+    premiumType = UserStore?.getCurrentUser()?.premiumType ?? 0;
+}
 
 const StickerStore = findStoreLazy("StickersStore") as {
     getPremiumPacks(): StickerPack[];
@@ -412,21 +420,16 @@ export default definePlugin({
     },
 
     get canUseEmotes() {
-        // @ts-ignore
-        return (UserStore?.getCurrentUser()?._realPremiumType ?? UserStore?.getCurrentUser().premiumType ?? 0) > 0;
+        return (premiumType) > 0;
     },
 
     get canUseStickers() {
-        // @ts-ignore
-        return (UserStore?.getCurrentUser()?._realPremiumType ?? UserStore.getCurrentUser().premiumType ?? 0) > 1;
+        return (premiumType) > 1;
     },
 
     handleProtoChange(proto: any, user: any) {
         try {
             if (proto == null || typeof proto === "string") return;
-
-            // @ts-ignore
-            const premiumType: number = user?._realPremiumType ?? user?.premium_type ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
 
             if (premiumType !== 2) {
                 proto.appearance ??= AppearanceSettingsActionCreators.create();
@@ -456,8 +459,6 @@ export default definePlugin({
     },
 
     handleGradientThemeSelect(backgroundGradientPresetId: number | undefined, theme: number, original: () => void) {
-        // @ts-ignore
-        const premiumType = UserStore?.getCurrentUser()?._realPremiumType ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
         if (premiumType === 2 || backgroundGradientPresetId == null) return original();
 
         if (!PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators || !BINARY_READ_OPTIONS) return;
@@ -917,7 +918,6 @@ export default definePlugin({
             }
 
             if (s.enableEmojiBypass) {
-
                 for (const emoji of messageObj.validNonShortcutEmojis) {
                     if (this.canUseEmote(emoji, channelId)) continue;
 
