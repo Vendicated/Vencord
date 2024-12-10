@@ -30,16 +30,6 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
         if (save) saveTabs(userId);
     }, [userId]);
 
-    useEffect(() => {
-        // for some reason, the app directory is it's own page instead of a layer, so when it's opened
-        // everything behind it is destroyed, including our container. this workaround is required
-        // to properly add the container back without reinitializing everything
-        if ((Vencord.Plugins.plugins.ChannelTabs as any).appDirectoryClosed) {
-            setUserId(UserStore.getCurrentUser().id);
-            update(false);
-        }
-    }, []);
-
     const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {

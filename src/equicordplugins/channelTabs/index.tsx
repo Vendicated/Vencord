@@ -82,14 +82,6 @@ export default definePlugin({
                 match: /\i&&\((\i).maxHeight.{0,5}\)/,
                 replace: "$&;$1.maxHeight-=$self.containerHeight"
             }
-        },
-        // workaround for app directory killing our component, see comments in ChannelTabContainer.tsx
-        {
-            find: ".ApplicationDirectoryEntrypointNames.EXTERNAL",
-            replacement: {
-                match: /(\.guildSettingsSection\).{0,30})},\[/,
-                replace: "$1;$self.onAppDirectoryClose()},["
-            }
         }
     ],
 

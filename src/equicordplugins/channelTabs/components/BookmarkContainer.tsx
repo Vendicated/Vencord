@@ -268,7 +268,7 @@ export default function BookmarkContainer(props: BasicChannelTabsProps & { userI
                 {bookmarks && !bookmarks.length && <Text className={cl("bookmark-placeholder-text")} variant="text-xs/normal">
                     You have no bookmarks. You can add an open tab or hide this by right clicking it
                 </Text>}
-                {bookmarks?.length &&
+                {Array.isArray(bookmarks) && bookmarks.length > 0 &&
                     bookmarks.map((_, i) => (
                         <Bookmark key={i} index={i} bookmarks={bookmarks} methods={methods} />
                     ))
