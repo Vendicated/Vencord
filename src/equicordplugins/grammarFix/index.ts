@@ -81,12 +81,12 @@ const getPresend = dictionary => {
 export default definePlugin({
     name: "GrammarFix",
     description: "Automatic punctuation, capitalization, and word replacement.",
-    authors: [EquicordDevs.unstream],
+    authors: [EquicordDevs.seth],
     dependencies: ["MessageEventsAPI"],
     settings,
     async start() {
         let dictionary = await fetch(
-            "https://raw.githubusercontent.com/wont-stream/dictionary/3d52fecd9aca5dfee0fcde0df2c2af357f977df7/index.min.json",
+            "https://raw.githubusercontent.com/wont-stream/dictionary/6b9d2f06a1d89103fb7249f41de4db6811e3d374/index.min.json",
         );
         dictionary = await dictionary.json();
 

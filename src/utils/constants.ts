@@ -739,9 +739,9 @@ export const EquicordDevs = Object.freeze({
         name: "Prince527",
         id: 364105797162237952n
     },
-    unstream: {
-        name: "Unstream",
-        id: 1125315673829154837n
+    seth: {
+        name: "S€th",
+        id: 1273447359417942128n
     },
     ThePirateStoner: {
         name: "ThePirateStoner",
