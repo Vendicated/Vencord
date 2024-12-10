@@ -69,10 +69,9 @@ export default definePlugin({
         {
             find: "https://github.com/highlightjs/highlight.js/issues/2277",
             replacement: {
-                match: /\i(?=\("10.7.0")/g,
-                replace: "$self.NoopLogger"
-            },
-            all: true
+                match: /(?<=&&\()console.log\(`Deprecated.+?`\),/,
+                replace: ""
+            }
         },
         {
             find: 'react-spring: The "interpolate" function',
