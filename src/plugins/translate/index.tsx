@@ -53,7 +53,7 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
 
 export default definePlugin({
     name: "Translate",
-    description: "Translate messages with Google Translate or DeepL",
+    description: "Translate messages with Google Translate, DeepL or OpenAI API",
     authors: [Devs.Ven, Devs.AshtonMemer],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
