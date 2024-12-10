@@ -112,10 +112,5 @@ export default definePlugin({
         createTab(tab, false, message.id);
     },
 
-    onAppDirectoryClose() {
-        this.appDirectoryClosed = true;
-        setTimeout(() => this.appDirectoryClosed = false, 0);
-    },
-
     util: ChannelTabsUtils,
 });
