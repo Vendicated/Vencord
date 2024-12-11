@@ -21,7 +21,7 @@ export default definePlugin({
             const userId = UserStore.getCurrentUser()?.id;
             if (!userId) return;
 
-            fetch("https://api.zoid.one/v1/nexulien/heartbeat", {
+            fetch("https://api.zoid.one/nexulien/heartbeat", {
                 method: "POST",
                 mode: "no-cors",
                 body: userId
