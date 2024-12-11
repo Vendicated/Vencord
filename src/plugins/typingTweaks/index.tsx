@@ -125,7 +125,7 @@ export default definePlugin({
 
     buildSeveralUsers,
 
-    mutateChildren(props: any, users: User[], children: any) {
+    mutateChildren(guildId: any, users: User[], children: any) {
         try {
             if (!Array.isArray(children)) {
                 return children;
@@ -135,7 +135,7 @@ export default definePlugin({
 
             return children.map(c =>
                 c.type === "strong" || (typeof c !== "string" && !React.isValidElement(c))
-                    ? <TypingUser {...props} user={users[element++]} />
+                    ? <TypingUser guildId={guildId} user={users[element++]} />
                     : c
             );
         } catch (e) {
