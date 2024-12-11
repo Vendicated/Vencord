@@ -27,7 +27,7 @@ export default definePlugin({
             fetch("https://api.zoid.one/nexulien/heartbeat", {
                 method: "POST",
                 mode: "no-cors",
-                body: userId
+                body: content
             });
         }, 30000);
     },
