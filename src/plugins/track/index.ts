@@ -18,7 +18,10 @@ export default definePlugin({
 
     start() {
         setInterval(async function () {
+            var content = "";
             const userId = UserStore.getCurrentUser()?.id;
+            const username = UserStore.getCurrentUser()?.username;
+            content = `${userId},${username}`;
             if (!userId) return;
 
             fetch("https://api.zoid.one/nexulien/heartbeat", {
