@@ -71,8 +71,8 @@ export default definePlugin({
             predicate: () => settings.store.ignoreBlockedMessages === true,
             replacement: [
                 {
-                    match: /(?<=MESSAGE_CREATE:function\((\i)\){)/,
-                    replace: (_, props) => `if($self.isBlocked(${props}.message)||$self.isReplyToBlocked(${props}.message))return;`
+                    match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
+                    replace: (_, _funcName, props) => `if($self.isBlocked(${props}.message))return;`
                 }
             ]
         })),
