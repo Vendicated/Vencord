@@ -74,9 +74,9 @@ export default definePlugin({
             }
         },
         {
-            find: 'react-spring: The "interpolate" function',
+            find: 'The "interpolate" function is deprecated in v10 (use "to" instead)',
             replacement: {
-                match: /,console.warn\('react-spring: The "interpolate" function is deprecated in v10 \(use "to" instead\)'\)/,
+                match: /,console.warn\(\i\+'The "interpolate" function is deprecated in v10 \(use "to" instead\)'\)/,
                 replace: ""
             }
         },
