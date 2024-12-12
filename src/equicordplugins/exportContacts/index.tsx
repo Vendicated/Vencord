@@ -68,17 +68,20 @@ export default definePlugin({
         },
         {
             find: "[role=\"tab\"][aria-disabled=\"false\"]",
-            replacement: {
-                match: /this\.props;return\(/,
-                replace: "this.props;console.log(a.Children);return("
-            }
-        },
-        {
-            find: "[role=\"tab\"][aria-disabled=\"false\"]",
-            replacement: {
-                match: /(\w+)\.Children\.map\((\w+),\s*this\.renderChildren\)/,
-                replace: "[...$1.Children.map($2,this.renderChildren),$self.addExportButton()]"
-            }
+            replacement: [
+                {
+                    match: /this\.props;(return\(.*?"aria-label":(\i))/,
+                    replace: "this.props;console.log($2?.Children);$1"
+                },
+                {
+                    match: /("aria-label":(\i),children:)(\w+)\.Children\.map\((\w+),\s*this\.renderChildren\)/,
+                    replace:
+                        "$1($3 && $3.Children ?" +
+                        "($2 === 'Friends' ?" +
+                        "[...$3.Children.map($4, this.renderChildren), $self.addExportButton()]" +
+                        ": [...$3.Children.map($4, this.renderChildren)]) : $3.map($4, this.renderChildren))"
+                }
+            ]
         }
     ],
 
