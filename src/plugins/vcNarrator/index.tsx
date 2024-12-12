@@ -25,6 +25,10 @@ import { wordsToTitle } from "@utils/text";
 import definePlugin, { OptionType, PluginOptionsItem, ReporterTestable } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore } from "@webpack/common";
+import { EdgeTTS } from "./edge-tts";
+
+let edgeTTSAvaliable = true;
+let edgeTTSVoices: { name: string, shortName: string; }[] = [];
 
 interface VoiceState {
     userId: string;
@@ -45,18 +49,24 @@ const VoiceStateStore = findByPropsLazy("getVoiceStatesForChannel", "getCurrentC
 function speak(text: string, settings: any = Settings.plugins.VcNarrator) {
     if (!text) return;
 
-    const speech = new SpeechSynthesisUtterance(text);
-    let voice = speechSynthesis.getVoices().find(v => v.voiceURI === settings.voice);
-    if (!voice) {
-        new Logger("VcNarrator").error(`Voice "${settings.voice}" not found. Resetting to default.`);
-        voice = speechSynthesis.getVoices().find(v => v.default);
-        settings.voice = voice?.voiceURI;
-        if (!voice) return; // This should never happen
+    // Check for EdgeTTS voices
+    if (edgeTTSAvaliable && edgeTTSVoices.find(v => v.shortName === settings.voice)) {
+        const tts = new EdgeTTS(settings);
+        tts.speak(text);
+    } else if (speechSynthesis.getVoices().find(v => v.voiceURI === settings.voice) || speechSynthesis.getVoices().find(v => v.default)) { // Check for narrator voices
+        const speech = new SpeechSynthesisUtterance(text);
+        let voice = speechSynthesis.getVoices().find(v => v.voiceURI === settings.voice);
+        if (!voice) {
+            new Logger("VcNarrator").error(`Voice "${settings.voice}" not found. Resetting to default.`);
+            voice = speechSynthesis.getVoices().find(v => v.default);
+            settings.voice = voice?.voiceURI;
+            if (!voice) return; // This should never happen
+        }
+        speech.voice = voice!;
+        speech.volume = settings.volume;
+        speech.rate = settings.rate;
+        speechSynthesis.speak(speech);
     }
-    speech.voice = voice!;
-    speech.volume = settings.volume;
-    speech.rate = settings.rate;
-    speechSynthesis.speak(speech);
 }
 
 function clean(str: string) {
@@ -153,7 +163,7 @@ function playSample(tempSettings: any, type: string) {
 
 export default definePlugin({
     name: "VcNarrator",
-    description: "Announces when users join, leave, or move voice channels via narrator",
+    description: "Announces when users join, leave, or move voice channels via edge-tts or local narrator voices",
     authors: [Devs.Ven],
     reporterTestable: ReporterTestable.None,
 
@@ -207,14 +217,17 @@ export default definePlugin({
         }
     },
 
-    start() {
-        if (typeof speechSynthesis === "undefined" || speechSynthesis.getVoices().length === 0) {
+    async start() {
+        edgeTTSVoices = await new EdgeTTS().getVoices();
+
+        if (!edgeTTSAvaliable && (typeof speechSynthesis === "undefined" || speechSynthesis.getVoices().length === 0)) {
             new Logger("VcNarrator").warn(
-                "SpeechSynthesis not supported or no Narrator voices found. Thus, this plugin will not work. Check my Settings for more info"
+                "EdgeTTS not working, SpeechSynthesis not supported, and no Narrator voices found. Thus, this plugin will not work. Check my Settings for more info"
             );
+
+            edgeTTSAvaliable = false;
             return;
         }
-
     },
 
     optionsCache: null as Record<string, PluginOptionsItem> | null,
@@ -223,26 +236,25 @@ export default definePlugin({
         return this.optionsCache ??= {
             voice: {
                 type: OptionType.SELECT,
-                description: "Narrator Voice",
-                options: window.speechSynthesis?.getVoices().map(v => ({
-                    label: v.name,
-                    value: v.voiceURI,
-                    default: v.default
-                })) ?? []
+                description: "Voice",
+                options: [ // Set default voice to en-GB-RyanNeural if EdgeTTS is available otherwise allow narrator set the default
+                    ...speechSynthesis.getVoices().map(v => ({ label: v.name, value: v.voiceURI, default: edgeTTSAvaliable ? false : v.default })) ?? [],
+                    ...edgeTTSVoices.map(v => ({ label: v.name, value: v.shortName, default: v.shortName === "en-GB-RyanNeural" ? true : false }))
+                ],
             },
             volume: {
                 type: OptionType.SLIDER,
-                description: "Narrator Volume",
-                default: 1,
-                markers: [0, 0.25, 0.5, 0.75, 1],
+                description: "Volume",
+                default: 50,
+                markers: [0, 25, 50, 75, 100],
                 stickToMarkers: false
             },
             rate: {
                 type: OptionType.SLIDER,
-                description: "Narrator Speed",
+                description: "Speed",
                 default: 1,
-                markers: [0.1, 0.5, 1, 2, 5, 10],
-                stickToMarkers: false
+                markers: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+                stickToMarkers: true
             },
             sayOwnName: {
                 description: "Say own name",
@@ -304,13 +316,13 @@ export default definePlugin({
         );
 
         let errorComponent: React.ReactElement | null = null;
-        if (!hasVoices) {
-            let error = "No narrator voices found. ";
+        if (!hasVoices && !edgeTTSAvaliable) {
+            let error = "EdgeTTS unavaliable and no narrator voices found. ";
             error += navigator.platform?.toLowerCase().includes("linux")
                 ? "Install speech-dispatcher or espeak and run Discord with the --enable-speech-dispatcher flag"
                 : "Try installing some in the Narrator settings of your Operating System";
             errorComponent = <ErrorCard>{error}</ErrorCard>;
-        } else if (!hasEnglishVoices) {
+        } else if (!hasEnglishVoices && !edgeTTSAvaliable) {
             errorComponent = <ErrorCard>You don't have any English voices installed, so the narrator might sound weird</ErrorCard>;
         }
 
