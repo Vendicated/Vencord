@@ -108,7 +108,7 @@ export default definePlugin({
         }
     ],
     makeRule(order: number) {
-        const TONE_REGEXP = /^\b\/(\w+)\b/;
+        const TONE_REGEXP = /^\/(\w+)/;
         return {
             order,
             requiredFirstCharacters: ["/"],
