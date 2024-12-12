@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>151 additional plugins</summary>
+<summary>149 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -42,7 +42,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - CuteNekos by echo
 - CutePats by thororen
 - DecodeBase64 by ThePirateStoner
-- DeadMembers by Kyuuhachi
 - Demonstration by Samwich
 - DisableAnimations by S€th
 - DisableCameras by Joona
@@ -97,7 +96,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - MessageTranslate by Samwich
 - ModalFade by Kyuuhachi
 - MoreStickers by Leko & Arjix
-- MoreThemes by Kyuuhachi
 - NewPluginsManager by Sqaaakoi
 - NoAppsAllowed by kvba
 - NoBulletPoints by Samwich
@@ -191,7 +189,7 @@ Linux
 ```shell
 sh -c "$(curl -sS https://raw.githubusercontent.com/Equicord/Equicord/refs/heads/main/misc/install.sh)"
 ```
-  
+
 ## Installing Equicord Devbuild
 
 ### Dependencies
