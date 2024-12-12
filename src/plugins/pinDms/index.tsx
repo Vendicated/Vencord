@@ -71,7 +71,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Filter out pinned channels from the private channel list
-                    match: /(?<=\i,{channels:\i,)privateChannelIds:(\i)/,
+                    match: /(?<=channels:\i,)privateChannelIds:(\i)(?=,listRef:)/,
                     replace: "privateChannelIds:$1.filter(c=>!$self.isPinned(c))"
                 },
                 {
@@ -96,8 +96,8 @@ export default definePlugin({
 
                 // Fix Row Height
                 {
-                    match: /(?<="getRowHeight",.{1,100}return 1===)\i/,
-                    replace: "($&-$self.categoryLen())"
+                    match: /(\.startsWith\("section-divider"\).+?return 1===)(\i)/,
+                    replace: "$1($2-$self.categoryLen())"
                 },
                 {
                     match: /"getRowHeight",\((\i),(\i)\)=>{/,
