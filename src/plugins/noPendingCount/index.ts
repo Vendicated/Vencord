@@ -77,7 +77,7 @@ export default definePlugin({
             find: ".getSpamChannelsCount()",
             predicate: () => settings.store.hideMessageRequestsCount,
             replacement: {
-                match: /(?<=getSpamChannelsCount\(\),\i=)\i\.getMessageRequestsCount\(\)/,
+                match: /(?<=getSpamChannelsCount\(\);)return \i\.getMessageRequestsCount\(\)/,
                 replace: "$self.getRealMessageRequestCount()"
             }
         },
