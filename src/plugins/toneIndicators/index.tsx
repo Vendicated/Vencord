@@ -11,10 +11,6 @@ import definePlugin from "@utils/types";
 import { Tooltip } from "@webpack/common";
 import { React } from "webpack/common/react";
 
-const test = (data, output) => {
-    return <span>{output(data.content)} skiibid</span>;
-};
-
 function toneIndicator(short: string[], long: string) {
     return {
         short: short,
@@ -112,7 +108,7 @@ export default definePlugin({
         }
     ],
     makeRule(order: number) {
-        const TONE_REGEXP = /^\/(\w+)/;
+        const TONE_REGEXP = /\b\/(\w+)\b/;
         return {
             order,
             requiredFirstCharacters: ["/"],
