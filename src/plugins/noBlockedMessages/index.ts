@@ -72,7 +72,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
-                    replace: (_, _funcName, props) => `if($self.isBlocked(${props}.message))return;`
+                    replace: (_, _funcName, props) => `if($self.isBlocked(${props}.message))||$self.isReplyToBlocked(${props}.message))return;`
                 }
             ]
         })),
