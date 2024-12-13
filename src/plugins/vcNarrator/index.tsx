@@ -53,6 +53,7 @@ function speak(text: string, settings: any = Settings.plugins.VcNarrator) {
     if (edgeTTSAvaliable && edgeTTSVoices.find(v => v.shortName === settings.voice)) {
         const tts = new EdgeTTS(settings);
         tts.speak(text);
+        return;
     } else if (speechSynthesis.getVoices().find(v => v.voiceURI === settings.voice) || speechSynthesis.getVoices().find(v => v.default)) { // Check for narrator voices
         const speech = new SpeechSynthesisUtterance(text);
         let voice = speechSynthesis.getVoices().find(v => v.voiceURI === settings.voice);
