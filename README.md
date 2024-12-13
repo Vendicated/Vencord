@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>150 additional plugins</summary>
+<summary>151 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -97,6 +97,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - MessageTranslate by Samwich
 - ModalFade by Kyuuhachi
 - MoreStickers by Leko & Arjix
+- NeverPausePreviews by vappstar
 - NewPluginsManager by Sqaaakoi
 - NoAppsAllowed by kvba
 - NoBulletPoints by Samwich
