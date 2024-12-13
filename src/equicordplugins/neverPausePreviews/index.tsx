@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Forms } from "@webpack/common";
