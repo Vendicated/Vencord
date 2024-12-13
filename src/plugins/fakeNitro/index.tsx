@@ -219,8 +219,8 @@ function makeBypassPatches(): Omit<Patch, "plugin"> {
     return {
         find: "canUseCustomStickersEverywhere:",
         replacement: mapping.map(({ func, predicate }) => ({
-            match: new RegExp(String.raw`(?<=${func}:function\(\i(?:,\i)?\){)`),
-            replace: "return true;",
+            match: new RegExp(String.raw`(?<=${func}:)\i`),
+            replace: "() => true",
             predicate
         }))
     };
@@ -309,8 +309,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Overwrite incoming connection settings proto with our local settings
-                    match: /CONNECTION_OPEN:function\((\i)\){/,
-                    replace: (m, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
+                    match: /function (\i)\((\i)\){(?=.*CONNECTION_OPEN:\1)/,
+                    replace: (m, funcName, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
                 },
                 {
                     // Overwrite non local proto changes with our local settings
