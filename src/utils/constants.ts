@@ -942,11 +942,11 @@ export const EquicordDevs = Object.freeze({
     },
     Z1xus: {
         name: "Z1xus",
-        id: 377450600797044746n,
+        id: 377450600797044746n
     },
     Oggetto: {
         name: "Oggetto",
-        id: 619203349954166804n,
+        id: 619203349954166804n
     },
     zyqunix: {
         name: "zyqunix",
@@ -954,12 +954,16 @@ export const EquicordDevs = Object.freeze({
     },
     examplegit: {
         name: "example.user",
-        id: 175411535357673473n,
+        id: 175411535357673473n
     },
     Loukios: {
         name: "Loukios",
         id: 211461918127292416n
     },
+    vappstar: {
+        name: "vappstar",
+        id: 747192967311261748n
+    }
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
