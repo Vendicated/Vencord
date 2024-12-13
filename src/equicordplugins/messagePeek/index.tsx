@@ -41,10 +41,11 @@ export default definePlugin({
             replacement: {
                 match: /(?<=children:([^])[^]*)}\);/,
                 replace: `$&
+                    if ($1[0] && $1[0].props && $1[0].props.children) {
                     $1[0].props.children[1].props.children=[
                         $1[0].props.children[1].props.children,
                         $self.renderMessagePeek({ channel: $1[0].props.children[0].props.channel })
-                    ];`.replace(/\s+/g, "")
+                    ];};`.replace(/\s+/g, "")
             },
             predicate: () => settings.store.guildChannels === true
         }
