@@ -17,88 +17,148 @@
 */
 
 import { Settings, SettingsStore } from "@api/Settings";
-import { ThemeStore } from "@webpack/common";
+import { findStoreLazy } from "@webpack";
+import { FluxDispatcher, ThemeStore } from "@webpack/common";
 
+const PopoutWindowStore = findStoreLazy("PopoutWindowStore");
 
-let style: HTMLStyleElement;
-let themesStyle: HTMLStyleElement;
+class StyleManager {
+    style: HTMLStyleElement | null = null;
+    themesStyle: HTMLStyleElement | null = null;
+    systemValuesStyle: HTMLStyleElement | null = null;
+    doc: Document;
 
-function createStyle(id: string) {
-    const style = document.createElement("style");
-    style.id = id;
-    document.documentElement.append(style);
-    return style;
-}
-
-async function initSystemValues() {
-    const values = await VencordNative.themes.getSystemValues();
-    const variables = Object.entries(values)
-        .filter(([, v]) => v !== "#")
-        .map(([k, v]) => `--${k}: ${v};`)
-        .join("");
-
-    createStyle("vencord-os-theme-values").textContent = `:root{${variables}}`;
-}
-
-export async function toggle(isEnabled: boolean) {
-    if (!style) {
-        if (isEnabled) {
-            style = createStyle("vencord-custom-css");
-            VencordNative.quickCss.addChangeListener(css => {
-                style.textContent = css;
-                // At the time of writing this, changing textContent resets the disabled state
-                style.disabled = !Settings.useQuickCss;
-            });
-            style.textContent = await VencordNative.quickCss.get();
-        }
-    } else
-        style.disabled = !isEnabled;
-}
-
-async function initThemes() {
-    themesStyle ??= createStyle("vencord-themes");
-
-    const { themeLinks, enabledThemes } = Settings;
-
-    // "darker" and "midnight" both count as dark
-    const activeTheme = ThemeStore.theme === "light" ? "light" : "dark";
-
-    const links = themeLinks
-        .map(rawLink => {
-            const match = /^@(light|dark) (.*)/.exec(rawLink);
-            if (!match) return rawLink;
-
-            const [, mode, link] = match;
-            return mode === activeTheme ? link : null;
-        })
-        .filter(link => link !== null);
-
-    if (IS_WEB) {
-        for (const theme of enabledThemes) {
-            const themeData = await VencordNative.themes.getThemeData(theme);
-            if (!themeData) continue;
-            const blob = new Blob([themeData], { type: "text/css" });
-            links.push(URL.createObjectURL(blob));
-        }
-    } else {
-        const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}?v=${Date.now()}`);
-        links.push(...localThemes);
+    constructor(doc: Document) {
+        this.doc = doc;
     }
 
-    themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
+    createStyle(id: string) {
+        const style = this.doc.createElement("style");
+        style.id = id;
+        this.doc.documentElement.appendChild(style);
+        return style;
+    }
+
+    async initSystemValues() {
+        const values = await VencordNative.themes.getSystemValues();
+        const variables = Object.entries(values)
+            .filter(([, v]) => v !== "#")
+            .map(([k, v]) => `--${k}: ${v};`)
+            .join("");
+
+        this.createStyle("vencord-os-theme-values").textContent = `:root{${variables}}`;
+    }
+
+    async toggleCustomCSS(isEnabled: boolean) {
+        if (!this.style) {
+            if (isEnabled) {
+                this.style = this.createStyle("vencord-custom-css");
+                VencordNative.quickCss.addChangeListener(css => {
+                    this.style!.textContent = css;
+                    // At the time of writing this, changing textContent resets the disabled state
+                    this.style!.disabled = !Settings.useQuickCss;
+                });
+                this.style.textContent = await VencordNative.quickCss.get();
+            }
+        } else
+            this.style.disabled = !isEnabled;
+    }
+
+    async initThemes() {
+        this.themesStyle ??= this.createStyle("vencord-themes");
+        const { themeLinks, enabledThemes } = Settings;
+
+        // "darker" and "midnight" both count as dark
+        const activeTheme = ThemeStore.theme === "light" ? "light" : "dark";
+
+        const links = themeLinks
+            .map(rawLink => {
+                const match = /^@(light|dark) (.*)/.exec(rawLink);
+                if (!match) return rawLink;
+
+                const [, mode, link] = match;
+                return mode === activeTheme ? link : null;
+            })
+            .filter(link => link !== null);
+
+        if (IS_WEB) {
+            for (const theme of enabledThemes) {
+                const themeData = await VencordNative.themes.getThemeData(theme);
+                if (!themeData) continue;
+                const blob = new Blob([themeData], { type: "text/css" });
+                links.push(URL.createObjectURL(blob));
+            }
+        } else {
+            const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}?v=${Date.now()}`);
+            links.push(...localThemes);
+        }
+
+        this.themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
+    }
+
+    async init() {
+        await this.initSystemValues();
+        await this.initThemes();
+
+        await this.toggleCustomCSS(Settings.useQuickCss);
+        SettingsStore.addChangeListener("useQuickCss", this.toggleCustomCSS);
+
+        SettingsStore.addChangeListener("themeLinks", this.initThemes);
+        SettingsStore.addChangeListener("enabledThemes", this.initThemes);
+        ThemeStore.addChangeListener(this.initThemes);
+
+        if (!IS_WEB)
+            VencordNative.quickCss.addThemeChangeListener(this.initThemes);
+    }
+
+    destroy() {
+        this.style?.remove();
+        this.themesStyle?.remove();
+        this.systemValuesStyle?.remove();
+
+        SettingsStore.removeChangeListener("useQuickCss", this.toggleCustomCSS);
+        SettingsStore.removeChangeListener("themeLinks", this.initThemes);
+        SettingsStore.removeChangeListener("enabledThemes", this.initThemes);
+        ThemeStore.removeChangeListener(this.initThemes);
+    }
 }
 
+const mainWindowManager = new StyleManager(document);
+export const toggle = mainWindowManager.toggleCustomCSS.bind(mainWindowManager);
+
 document.addEventListener("DOMContentLoaded", () => {
-    initSystemValues();
-    initThemes();
+    mainWindowManager.init();
 
-    toggle(Settings.useQuickCss);
-    SettingsStore.addChangeListener("useQuickCss", toggle);
+    FluxDispatcher.subscribe("POPOUT_WINDOW_OPEN", () => {
+        const windowKeys = PopoutWindowStore.getWindowKeys();
+        const popoutWindow = PopoutWindowStore.getWindow(windowKeys[windowKeys.length - 1]);
+        const maxWait = 5000;
+        let elapsed = 0;
 
-    SettingsStore.addChangeListener("themeLinks", initThemes);
-    SettingsStore.addChangeListener("enabledThemes", initThemes);
-    ThemeStore.addChangeListener(initThemes);
+        const interval = setInterval(() => {
+            if (popoutWindow.document.readyState === "complete") {
+                clearInterval(interval);
 
-    if (!IS_WEB)
-        VencordNative.quickCss.addThemeChangeListener(initThemes);
+                const doc = popoutWindow.document;
+                const popoutWindowManager = new StyleManager(doc);
+
+                const style = doc.createElement("style");
+                style.id = "vencord-css-core";
+                style.textContent = document.getElementById("vencord-css-core")!.textContent;
+                doc.documentElement.appendChild(style);
+
+                popoutWindowManager.init();
+
+                popoutWindow.addEventListener("beforeunload", () => {
+                    popoutWindowManager.destroy();
+                });
+            }
+
+            if (elapsed >= maxWait) {
+                clearInterval(interval);
+            }
+
+            elapsed += 500;
+        }, 500);
+    });
 });
