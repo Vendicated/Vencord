@@ -160,7 +160,7 @@ export default definePlugin({
             name: "revolving-nyan-cat",
             description: "Makes Nyan Cat revolve around your message.",
             options: [RequiredMessageOption],
-            execute: () => ({
+            execute: opts => ({
                 content: htmlPlaceholder(presets.nyanRevolve, findOption(opts, "message", ""))
             })
         },
