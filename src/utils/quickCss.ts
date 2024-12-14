@@ -22,7 +22,6 @@ import { FluxDispatcher, ThemeStore } from "@webpack/common";
 
 import { sleep } from "./misc";
 
-
 const PopoutWindowStore = findStoreLazy("PopoutWindowStore");
 
 let style: HTMLStyleElement;
@@ -114,7 +113,7 @@ function applyToPopout(popoutWindow: Window) {
             doc.documentElement.appendChild(popoutStyle);
         }
         popoutStyle.textContent = content;
-        if (disabled !== undefined) {
+        if (disabled) {
             popoutStyle.disabled = disabled;
         }
     });
