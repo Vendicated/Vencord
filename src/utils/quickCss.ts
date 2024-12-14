@@ -123,10 +123,8 @@ class StyleManager {
     }
 }
 
-const mainWindowManager = new StyleManager(document);
-export const toggle = mainWindowManager.toggleCustomCSS.bind(mainWindowManager);
-
 document.addEventListener("DOMContentLoaded", () => {
+    const mainWindowManager = new StyleManager(document);
     mainWindowManager.init();
 
     FluxDispatcher.subscribe("POPOUT_WINDOW_OPEN", () => {
