@@ -298,7 +298,7 @@ const rules = [
     createRule("scaling", 24, ["+-", "-+"], "character", 2400),
     createRule("bouncing", 24, ["^^", "^^"], "block"),
     createRule("html", 24, ["[[", "]]"], "html"),
-    createRule("slam", 24, ["!!", "!!"], "delay", 250),
+    createRule("slam", 24, [">>", "<<"], "delay", 250),
     createRule("cursive", 24, ["&&", "&&"], "block"),
 ];
 
@@ -319,7 +319,7 @@ export default definePlugin({
     name: "MoreMarkdown",
     description: "More markdown capabilities for Nexulien",
     nexulien: true,
-    authors: [Devs.Zoid],
+    authors: [Devs.Zoid, Devs.Jaegerwald, Devs.SwitchedCube],
     rulesByName: rulesByName,
 
     patches: [

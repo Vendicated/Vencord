@@ -61,13 +61,13 @@ export default definePlugin({
             ]
         },
         {
-            find: ".installedLogHooks)",
+            find: ".BetterDiscord||null!=",
             replacement: {
-                // if getDebugLogging() returns false, the hooks don't get installed.
-                match: "getDebugLogging(){",
-                replace: "getDebugLogging(){return false;"
+                // Make hasClientMods return false
+                match: /(?=let \i=window;)/,
+                replace: "return false;"
             }
-        },
+        }
     ],
 
     startAt: StartAt.Init,

@@ -11,10 +11,6 @@ import definePlugin from "@utils/types";
 import { Tooltip } from "@webpack/common";
 import { React } from "webpack/common/react";
 
-const test = (data, output) => {
-    return <span>{output(data.content)} skiibid</span>;
-};
-
 function toneIndicator(short: string[], long: string) {
     return {
         short: short,

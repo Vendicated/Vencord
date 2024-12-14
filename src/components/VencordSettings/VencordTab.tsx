@@ -280,7 +280,7 @@ function HeaderCard({ image }: HeaderCardProps) {
             </div>
             <img
                 role="presentation"
-                src="https://raw.githubusercontent.com/Nexulien/assets/refs/heads/main/zoidcord-smallest.png"
+                src="https://raw.githubusercontent.com/Nexulien/assets/refs/heads/main/low_res_untitled_mascot_menu.png"
                 alt=""
                 height={192}
                 draggable="false"

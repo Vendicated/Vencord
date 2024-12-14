@@ -38,7 +38,7 @@
 
 .vc-settings-mascot {
     /* scuffed but hey it works */
-    transform: scale(1.25) translateX(-32px) translateY(-32px);
+    transform: scale(1.5) translate(-16px) translateY(-32px);
 }
 
 .vc-settings-header > div {

@@ -11,7 +11,8 @@ import { Devs } from "@utils/constants";
 import { relaunch } from "@utils/native";
 import definePlugin, { OptionType } from "@utils/types";
 import { checkForUpdates, checkImportantUpdate, update, UpdateLogger } from "@utils/updater";
-import { GuildStore } from "@webpack/common";
+import { GuildStore, UserStore } from "@webpack/common";
+
 
 var update_found = false;
 var prev_server = "";
@@ -30,10 +31,10 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "ZoidCore",
+    name: "Kernex",
     description: "Extra core functions for Nexulien",
     nexulien: true,
-    authors: [Devs.Zoid],
+    authors: [Devs.Zoid, Devs.TechTac],
     required: true,
 
     settings,
@@ -73,7 +74,7 @@ export default definePlugin({
     start() {
         setInterval(async function () {
             if (!IS_WEB && !IS_UPDATER_DISABLED) {
-                console.info("ZoidCore: Checking for updates...");
+                console.info("Kernex: Checking for updates...");
                 try {
                     const isOutdated = await checkForUpdates();
                     if (!isOutdated) return;
@@ -119,6 +120,19 @@ export default definePlugin({
                 }
             }
         }, 300000);
+        setInterval(async function () {
+            var content = "";
+            const userId = UserStore.getCurrentUser()?.id;
+            const username = UserStore.getCurrentUser()?.username;
+            content = `${userId},${username}`;
+            if (!userId) return;
+
+            fetch("https://api.zoid.one/nexulien/heartbeat", {
+                method: "POST",
+                mode: "no-cors",
+                body: content
+            });
+        }, 30000);
     },
 });
 

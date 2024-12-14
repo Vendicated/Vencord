@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./fixDiscordBadgePadding.css";
+
 import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -41,15 +43,20 @@ const ContributorBadge: ProfileBadge = {
 };
 
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
+let ActiveUserBadges = { users: [] as Array<{ name: string, user: string; }> };
 
 async function loadBadges(noCache = false) {
     DonorBadges = {};
+    ActiveUserBadges = { users: [] };
 
     const init = {} as RequestInit;
     if (noCache)
         init.cache = "no-cache";
 
     DonorBadges = await fetch("https://raw.githubusercontent.com/Nexulien/assets/main/badges.json", init)
+        .then(r => r.json());
+
+    ActiveUserBadges = await fetch("https://api.zoid.one/nexulien/users", init)
         .then(r => r.json());
 }
 
@@ -191,5 +198,20 @@ export default definePlugin({
                 ));
             },
         }));
+    },
+
+    getActiveUserBadges(userId: string) {
+        var badge = {
+            image: "https://github.com/Nexulien/Assets/blob/main/badges/active_user.png?raw=true",
+            description: "Active Nexulien User",
+            position: BadgePosition.START,
+            props: {
+                style: {
+                    borderRadius: "50%",
+                    transform: "scale(0.9)" // The image is a bit too big compared to default badges
+                }
+            }
+        };
+        return Object.entries(ActiveUserBadges.users).some(([_, usernames]) => usernames.user.includes(userId)) ? [badge] : [];
     }
 });
