@@ -69,7 +69,8 @@ width: 128px; height: 32px; margin-left: 96px; transform: translateY(-48px) tran
 }
 </style>
 <img class="boing" src="https://jaegerwalddev.github.io/assets/static/school/my_first_website-2/images/gnarpy_cat.png">
-<span class="boing-shadow"></span></body>`
+<span class="boing-shadow"></span></body>`,
+    nyanRevolve: `@@[[<img src="<https://www.nyan.cat/cats/original.gif>" style="display:block;position:fixed;height:64px;bottom:256px;"/>]]@@ %TEXT%`
 };
 
 function html(htmlText: string) {
@@ -153,6 +154,14 @@ export default definePlugin({
             description: "Generate a thought bubble over the previous message (adjust the values after sending as needed.)",
             execute: () => ({
                 content: htmlPlaceholder(presets.thoughts, (getLatestMessage()?.getBoundingClientRect().height + 96).toString())
+            })
+        },
+        {
+            name: "revolving-nyan-cat",
+            description: "Makes Nyan Cat revolve around your message.",
+            options: [RequiredMessageOption],
+            execute: opts => ({
+                content: htmlPlaceholder(presets.nyanRevolve, findOption(opts, "message", ""))
             })
         },
         {
