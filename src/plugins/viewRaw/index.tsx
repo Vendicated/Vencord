@@ -119,7 +119,7 @@ const settings = definePluginSettings({
     }
 });
 
-function MakeContextCallback(name: "Guild" | "User" | "Channel"): NavContextMenuPatchCallback {
+function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel"): NavContextMenuPatchCallback {
     return (children, props) => {
         const value = props[name.toLowerCase()];
         if (!value) return;
@@ -153,6 +153,7 @@ export default definePlugin({
     settings,
     contextMenus: {
         "guild-context": MakeContextCallback("Guild"),
+        "guild-settings-role-context": MakeContextCallback("Role"),
         "channel-context": MakeContextCallback("Channel"),
         "thread-context": MakeContextCallback("Channel"),
         "gdm-context": MakeContextCallback("Channel"),
