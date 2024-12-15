@@ -7,3 +7,10 @@
 // This file is for types of the connection items
 
 type ConnectionUrlLink = `${string & { __brand: "\\$\\{(?:id|name)\\}" }}`;
+
+
+
+// test
+
+const test: ConnectionUrlLink = "oogabooga${name}";
+const testFail: ConnectionUrlLink = "oogabooga";
