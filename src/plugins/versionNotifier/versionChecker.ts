@@ -6,7 +6,7 @@
 
 import { DataStore } from "@api/index";
 
-import { openVersionModal } from "./VersionModal";
+import openVersionModal from "./VersionModal";
 
 const DATA_KEY = "VencordVersion_LastKnown";
 

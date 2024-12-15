@@ -157,7 +157,7 @@ const VersionModal = ({ modalProps, lastKnownVersion }: { modalProps: ModalProps
     );
 };
 
-export function openVersionModal(lastKnownVersion: string) {
+export default function openVersionModal(lastKnownVersion: string) {
     // eslint-disable-next-line @stylistic/arrow-parens
     openModal((modalProps) => <VersionModal modalProps={modalProps} lastKnownVersion={lastKnownVersion} />);
 }
