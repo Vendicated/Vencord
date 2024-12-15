@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Link } from "@components/Link";
 import {
     ModalContent,
     ModalFooter,
@@ -29,7 +30,7 @@ const fetchCommits = async () => {
     }
 };
 
-const VersionModal = ({ modalProps }: { modalProps: ModalProps }) => {
+const VersionModal = ({ modalProps, lastKnownVersion }: { modalProps: ModalProps, lastKnownVersion: string; }): React.JSX.Element => {
     const [commits, setCommits] = React.useState<any[]>([]);
 
     React.useEffect(() => {
@@ -40,25 +41,58 @@ const VersionModal = ({ modalProps }: { modalProps: ModalProps }) => {
         fetchAndSetCommits();
     }, []);
 
-    const handleViewOnGitHub = (url: string) => {
-        window.open(url, "_blank");
-    };
+    // const handleViewOnGitHub = (url: string) => {
+    //     window.open(url, "_blank");
+    // };
 
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE}>
             <ModalHeader>
-                <Text variant="heading-lg/semibold">
-                    New Version Available {` v${VERSION}`}
+                <Text variant="heading-xl/bold">
+                    New Version Installed: {` v${VERSION} > v${lastKnownVersion}`} {IS_DEV ? "(DEV)" : ""}
                 </Text>
             </ModalHeader>
             <ModalContent>
-                <Text variant="text-md/bold">
-                    Below are the changes in the new version:
+                <Text
+                    variant="heading-xl/medium"
+                    className="p-3"
+                    lineClamp={2}
+                >
+                    Latest Change:
                 </Text>
-                <div className="space-y-4">
+                <div>
+                    {commits.length > 0 ? (
+                        <div className="space-y-3">
+                            {commits.at(0) && (
+                                <div key={commits.at(0).sha} className="border border-gray-300 rounded p-3 mt-3">
+                                    <Link
+                                        href={commits.at(0).html_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-semibold"
+                                    >
+                                        {commits.at(0).commit.message}
+                                    </Link>
+                                    <Text
+                                        variant="text-sm/normal"
+                                        className="text-gray-500"
+                                    >
+                                        Author: {commits.at(0).commit.author.name} | Date:{" "}
+                                        {new Date(commits.at(0).commit.author.date).toLocaleString()}
+                                    </Text>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <Text variant="text-md/bold">
+                            No commits found for the latest version.
+                        </Text>
+                    )}
+                </div>
+                <div className="space-y-7">
                     <div>
-                        <Text variant="heading-md/semibold">
-                            Latest Commits
+                        <Text variant="heading-xl/medium" className="p-3">
+                            Recent Commits
                         </Text>
                         {commits.length > 0 ? (
                             <div className="space-y-3">
@@ -76,16 +110,18 @@ const VersionModal = ({ modalProps }: { modalProps: ModalProps }) => {
                                     }) => (
                                         <div
                                             key={commit.sha}
-                                            className="border border-gray-300 rounded p-3"
+                                            className="border border-gray-300 rounded p-3 mb-2"
                                         >
-                                            <Text
-                                                variant="body-md"
-                                                className="font-semibold"
+                                            <Link
+                                                href={commit.html_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="font-lighter"
                                             >
                                                 {commit.commit.message}
-                                            </Text>
+                                            </Link>
                                             <Text
-                                                variant="body-sm"
+                                                variant="text-sm/normal"
                                                 className="text-gray-500"
                                             >
                                                 Author:{" "}
@@ -95,28 +131,12 @@ const VersionModal = ({ modalProps }: { modalProps: ModalProps }) => {
                                                     commit.commit.author.date
                                                 ).toLocaleString()}
                                             </Text>
-                                            <Flex
-                                                justify={Flex.Justify.END}
-                                                className="mt-2"
-                                            >
-                                                <Button
-                                                    color={Button.Colors.GREEN}
-                                                    size={Button.Sizes.SMALL}
-                                                    onClick={() =>
-                                                        handleViewOnGitHub(
-                                                            commit.html_url
-                                                        )
-                                                    }
-                                                >
-                                                    View on GitHub
-                                                </Button>
-                                            </Flex>
                                         </div>
                                     )
                                 )}
                             </div>
                         ) : (
-                            <Text variant="body-md">
+                            <Text variant="text-md/bold">
                                 No commits found for the latest version.
                             </Text>
                         )}
@@ -133,11 +153,11 @@ const VersionModal = ({ modalProps }: { modalProps: ModalProps }) => {
                     </Button>
                 </Flex>
             </ModalFooter>
-        </ModalRoot>
+        </ModalRoot >
     );
 };
 
-export function openVersionModal() {
+export function openVersionModal(lastKnownVersion: string) {
     // eslint-disable-next-line @stylistic/arrow-parens
-    openModal((modalProps) => <VersionModal modalProps={modalProps} />);
+    openModal((modalProps) => <VersionModal modalProps={modalProps} lastKnownVersion={lastKnownVersion} />);
 }
