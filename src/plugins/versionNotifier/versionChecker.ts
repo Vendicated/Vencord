@@ -13,10 +13,7 @@ const DATA_KEY = "VencordVersion_LastKnown";
 export async function checkForVencordUpdate(): Promise<void> {
     const lastKnownVersion = await getLastKnownVersion();
 
-    if (!lastKnownVersion) {
-        await DataStore.set(DATA_KEY, VERSION);
-        return;
-    }
+    if (!lastKnownVersion) { await DataStore.set(DATA_KEY, VERSION); return; }
     if (lastKnownVersion === VERSION) return;
 
     openVersionModal(VERSION);
