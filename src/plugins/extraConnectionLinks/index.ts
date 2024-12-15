@@ -11,7 +11,6 @@ import definePlugin from "@utils/types";
  * All the connection types implemented into this plugin
  */
 enum connectionTypes {
-    Roblox,
     Xbox,
     Epic,
 }
@@ -25,7 +24,6 @@ enum connectionTypes {
  * @example [connectionTypes.Roblox]: "https://www.roblox.com/users/${id}/profile",
  */
 const uris = { // name (what shows up on connection on ui), id (an identifier thing)
-    //[connectionTypes.Roblox]: "https://www.roblox.com/users/${id}/profile",
     [connectionTypes.Xbox]: "https://www.xbox.com/play/user/${name}",
     [connectionTypes.Epic]: "https://store.epicgames.com/u/${id}",
 };
@@ -35,7 +33,6 @@ const uris = { // name (what shows up on connection on ui), id (an identifier th
  * @example [connectionTypes.Epic]: "Epic Games",
  */
 const serviceNames = {
-    //[connectionTypes.Roblox]: "Roblox",
     [connectionTypes.Xbox]: "Xbox",
     [connectionTypes.Epic]: "Epic Games",
 };
@@ -51,7 +48,7 @@ export default definePlugin({
             return {
                 find: "getPlatformUserUrl:",
                 replacement: {
-                    match: new RegExp("(r"),
+                    match: new RegExp(`(?<=${serviceNames[connectionTypeSelected]}",.*},.+)(?=},)`),
                     replace: `, getPlatformUserUrl:e=>{let {name, id} = e; return \`${uris[connectionTypeSelected]}\`;}`
                 }
             };
