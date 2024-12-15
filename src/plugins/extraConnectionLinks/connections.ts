@@ -6,7 +6,7 @@
 
 // This file is for types of the connection items
 
-type ConnectionUrlLink = `${string & { __brand: "\\$\\{(?:id|name)\\}" }}`;
+type ConnectionUrlLink = /\$\{(?:id|name)\}/;
 
 
 
