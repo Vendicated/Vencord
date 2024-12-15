@@ -6,7 +6,7 @@
 
 import { DataStore } from "@api/index";
 
-import openVersionModal from "./VersionModal";
+import openChangelogModal from "./ChangelogModal";
 
 const DATA_KEY = "VencordVersion_LastKnown";
 
@@ -16,7 +16,7 @@ export async function checkForVencordUpdate(): Promise<void> {
     if (!lastKnownVersion) { await DataStore.set(DATA_KEY, VERSION); return; }
     if (lastKnownVersion === VERSION) return;
 
-    openVersionModal(VERSION);
+    openChangelogModal(VERSION);
     await DataStore.set(DATA_KEY, VERSION);
 }
 

@@ -11,7 +11,7 @@ import { checkForVencordUpdate } from "./versionChecker";
 
 export default definePlugin({
     name: "VersionNotifier",
-    description: "Show recent changes of the Vencord Repository on new commits",
+    description: "Show recent changes of the Vencord Repository when new commits get pushed",
     authors: [Devs.bluejutzu],
     flux: {
         async POST_CONNECTION_OPEN() {
