@@ -6,4 +6,4 @@
 
 // This file is for types of the connection items
 
-// coming soon when i make it lol
+type ConnectionUrlLink = string & { __regexPattern: /\$\{(?:id|name)\}/ };
