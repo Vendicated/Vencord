@@ -8,16 +8,15 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "NoDefaultHangStatus",
-    description: "Disable the default hang status when joining voice channels",
-    authors: [Devs.D3SOX],
-
+    name: "FixImagesQuality",
+    description: "Prevents images from being loaded as webp, which can cause quality loss",
+    authors: [Devs.Nuckyz],
     patches: [
         {
-            find: ".CHILLING)",
+            find: "getFormatQuality(){",
             replacement: {
-                match: /{enableHangStatus:(\i),/,
-                replace: "{_enableHangStatus:$1=false,"
+                match: /(?<=null;return )\i\.\i&&\(\i\|\|!\i\.isAnimated.+?:(?=\i&&\(\i="png"\))/,
+                replace: ""
             }
         }
     ]
