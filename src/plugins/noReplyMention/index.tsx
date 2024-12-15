@@ -99,7 +99,7 @@ export default definePlugin({
         {
             find: "SET_PENDING_REPLY_SHOULD_MENTION:",
             replacement: {
-                match: /(let{channelId:\i,shouldMention:\i}=(\i);t in (\i)&&)/,
+                match: /(let{channelId:\i,shouldMention:\i}=(\i);\i in (\i)&&)/,
                 replace: "$self.togglePing($2, $3);$1",
             },
         }
