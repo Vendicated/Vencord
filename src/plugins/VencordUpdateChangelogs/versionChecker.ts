@@ -8,12 +8,14 @@ import { DataStore } from "@api/index";
 
 import { openVersionModal } from "./VersionModal";
 
-const DATA_KEY = "PluginVersion_LastKnown";
+const DATA_KEY = "VencordVersion_LastKnown";
 
-export async function checkForPluginUpdate(): Promise<void> {
+export async function checkForVencordUpdate(): Promise<void> {
+    // Output: xx.xx.xx
     const lastKnownVersion = await DataStore.get(DATA_KEY) as string;
+    console.log(lastKnownVersion, VERSION, IS_DEV);
     if (lastKnownVersion !== VERSION || IS_DEV) {
-        openVersionModal();
+        openVersionModal(lastKnownVersion);
         await DataStore.set(DATA_KEY, VERSION);
     }
 }

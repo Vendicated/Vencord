@@ -4,18 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-import { checkForPluginUpdate } from "./versionChecker";
+import { checkForVencordUpdate } from "./versionChecker";
 
 export default definePlugin({
     name: "VersionNotifier",
-    description: "Notifies users when a new version of this plugin is available.",
-    authors: [{ id: 953708302058012702n, name: "bluejutzu" }],
+    description: "Notifies you of recent changelogs from the Vencord Repository when the version changes",
+    authors: [Devs.bluejutzu],
     enabledByDefault: true,
     flux: {
         async POST_CONNECTION_OPEN() {
-            await checkForPluginUpdate();
+            await checkForVencordUpdate();
         }
     }
 });
