@@ -11,11 +11,19 @@ import openVersionModal from "./VersionModal";
 const DATA_KEY = "VencordVersion_LastKnown";
 
 export async function checkForVencordUpdate(): Promise<void> {
-    // Output: xx.xx.xx
-    const lastKnownVersion = await DataStore.get(DATA_KEY) as string;
-    console.log(lastKnownVersion, VERSION, IS_DEV);
-    if (lastKnownVersion !== VERSION || IS_DEV) {
-        openVersionModal(lastKnownVersion);
+    const lastKnownVersion = await getLastKnownVersion();
+
+    if (!lastKnownVersion) {
         await DataStore.set(DATA_KEY, VERSION);
+        return;
     }
+    if (lastKnownVersion === VERSION) return;
+
+    openVersionModal(VERSION);
+    await DataStore.set(DATA_KEY, VERSION);
 }
+
+async function getLastKnownVersion(): Promise<string | undefined> {
+    return await DataStore.get(DATA_KEY) as string | undefined;
+}
+

@@ -13,7 +13,6 @@ export default definePlugin({
     name: "VersionNotifier",
     description: "Notifies you of recent changelogs from the Vencord Repository when the version changes",
     authors: [Devs.bluejutzu],
-    enabledByDefault: true,
     flux: {
         async POST_CONNECTION_OPEN() {
             await checkForVencordUpdate();
