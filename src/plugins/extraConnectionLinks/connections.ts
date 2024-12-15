@@ -6,4 +6,4 @@
 
 // This file is for types of the connection items
 
-type ConnectionUrlLink = `${string & { __regexPattern: /\$\{(?:id|name)\}/ }}`;
+type ConnectionUrlLink = `${string & { __brand: "\\$\\{(?:id|name)\\}" }}`;
