@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// This is a file that can be used and imported by other plugins
-// This file is for types of the built-in Discord connections
+// This file is for types of the connection items
 
 // coming soon when i make it lol
