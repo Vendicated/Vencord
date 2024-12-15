@@ -184,6 +184,11 @@ const settings = definePluginSettings({
         description: "show the Last.fm logo by the album cover",
         type: OptionType.BOOLEAN,
         default: true,
+    },
+    ignoreLastFmNowPlayingTag: {
+        description: "treat the last scrobbled song as Now Playing for 5mins or until it's changed, whichever comes first. Works around the behaviour of some scrobblers like Plex that only scrobble halfway through the song and don't set the Last.fm tag properly",
+        type: OptionType.BOOLEAN,
+        default: false,
     }
 });
 
@@ -243,8 +248,12 @@ export default definePlugin({
 
             const trackData = json.recenttracks?.track[0];
 
-            if (!trackData?.["@attr"]?.nowplaying)
-                return null;
+            if (!trackData?.["@attr"]?.nowplaying) {
+                if (!settings.store.ignoreLastFmNowPlayingTag)
+                    return null;
+                if (settings.store.ignoreLastFmNowPlayingTag && Math.floor(Date.now() / 1000) - trackData.date.uts > 5 * 60)
+                    return null;
+            }
 
             // why does the json api have xml structure
             return {
