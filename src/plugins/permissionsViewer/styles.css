@@ -1,12 +1,22 @@
 /* User Permissions Component */
 
-.vc-permviewer-user-sortorder-btn {
+.vc-permviewer-user-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.vc-permviewer-user-header-btns {
+    display: flex;
+    gap: 8px;
+}
+
+.vc-permviewer-user-header-btn {
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
 }
 
 /*  RolesAndUsersPermissions Component */
