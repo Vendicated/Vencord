@@ -20,12 +20,16 @@ import { Button } from "@webpack/common";
 
 import { Heart } from "./Heart";
 
-export default function DonateButton(props: any) {
+export default function DonateButton({
+    look = Button.Looks.LINK,
+    color = Button.Colors.TRANSPARENT,
+    ...props
+}) {
     return (
         <Button
             {...props}
-            look={Button.Looks.LINK}
-            color={Button.Colors.TRANSPARENT}
+            look={look}
+            color={color}
             onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
         >
             <Heart />
