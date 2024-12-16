@@ -5,22 +5,24 @@
  */
 
 import { DataStore } from "@api/index";
+import { Logger } from "@utils/Logger";
 
-import openVersionModal from "./VersionModal";
+import openChangelogModal from "./ChangelogModal";
 
 const DATA_KEY = "VencordVersion_LastKnown";
 
-export async function checkForVencordUpdate(): Promise<void> {
-    const lastKnownVersion = await getLastKnownVersion();
+const logger = new Logger("VersionNotifier", "green");
 
-    if (!lastKnownVersion) { await DataStore.set(DATA_KEY, VERSION); return; }
+export async function checkForVencordUpdate(): Promise<void> {
+    const lastKnownVersion = await DataStore.get(DATA_KEY) as string;
+
+    if (!lastKnownVersion) {
+        await DataStore.set(DATA_KEY, VERSION);
+        return;
+    }
     if (lastKnownVersion === VERSION) return;
 
-    openVersionModal(VERSION);
+    openChangelogModal(lastKnownVersion);
     await DataStore.set(DATA_KEY, VERSION);
+    logger.info(`Lastknown set from ${lastKnownVersion}, to ${VERSION}`);
 }
-
-async function getLastKnownVersion(): Promise<string | undefined> {
-    return await DataStore.get(DATA_KEY) as string | undefined;
-}
-

@@ -30,7 +30,7 @@ const fetchCommits = async () => {
     }
 };
 
-const VersionModal = ({ modalProps, lastKnownVersion }: { modalProps: ModalProps, lastKnownVersion: string; }): React.JSX.Element => {
+const ChangelogModal = ({ modalProps, lastKnownVersion }: { modalProps: ModalProps, lastKnownVersion: string; }): React.JSX.Element => {
     const [commits, setCommits] = React.useState<any[]>([]);
 
     React.useEffect(() => {
@@ -157,7 +157,7 @@ const VersionModal = ({ modalProps, lastKnownVersion }: { modalProps: ModalProps
     );
 };
 
-export function openVersionModal(lastKnownVersion: string) {
+export default function openChangelogModal(lastKnownVersion: string) {
     // eslint-disable-next-line @stylistic/arrow-parens
-    openModal((modalProps) => <VersionModal modalProps={modalProps} lastKnownVersion={lastKnownVersion} />);
+    openModal((modalProps) => <ChangelogModal modalProps={modalProps} lastKnownVersion={lastKnownVersion} />);
 }
