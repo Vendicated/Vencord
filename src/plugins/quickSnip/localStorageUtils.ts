@@ -66,12 +66,3 @@ export function getMyUsername(): string {
     const user = UserStore.getCurrentUser();
     return user.username;
 }
-
-/**
- *
- * @returns The ID of the current user, or undefined if not logged in.
- */
-export function getMyId(): string | undefined {
-    const data = JSON.parse(localStorage.getItem("MultiAccountStore") || "{}") as Record<string, any>;
-    return data._state?.users?.[0]?.id;
-}
