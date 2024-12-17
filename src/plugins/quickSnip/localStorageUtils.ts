@@ -5,6 +5,7 @@
  */
 
 import { localStorage } from "@utils/localStorage";
+import { UserStore } from "@webpack/common";
 
 export interface Snippet {
     name: string;
@@ -61,9 +62,9 @@ export function saveSnippets(snippets: Snippet[]): void {
  *
  * @returns The username of the current user, or undefined if not logged in.
  */
-export function getMyUsername(): string | undefined {
-    const data = JSON.parse(localStorage.getItem("MultiAccountStore") || "{}") as Record<string, any>;
-    return data._state?.users?.[0]?.username;
+export function getMyUsername(): string {
+    const user = UserStore.getCurrentUser();
+    return user.username;
 }
 
 /**

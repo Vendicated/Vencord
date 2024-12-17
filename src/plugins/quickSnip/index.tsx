@@ -5,7 +5,7 @@
  */
 
 import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
+import { removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, insertTextIntoChatInputBox, sendMessage } from "@utils/discord";
@@ -250,8 +250,8 @@ function SnippetModal({ rootProps, close }: SnippetModalProps) {
         }
         close();
     };
-
     const processSnippet = (snippet: string) => {
+        if (!getCurrentChannel()?.isDM()) return snippet.replace(/\${userName}/g, "").replace(/\${myName}/g, "");
         const userName = getCurrentChannel()?.rawRecipients[0].username || "";
         const myName = getMyUsername() || "";
         return snippet
@@ -397,9 +397,6 @@ export default definePlugin({
     settings,
     start() {
         addChatBarButton("QuickSnip", ChatBarIcon);
-        this.listener = addPreSendListener((context, msg) => {
-            console.log("Message content:", msg.content);
-        });
     },
     stop() {
         removeChatBarButton("QuickSnip");
