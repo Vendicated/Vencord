@@ -579,6 +579,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "jamesbt365",
         id: 158567567487795200n,
     },
+    ryfterwastaken: {
+        name: "Ryfter",
+        id: 898619112350183445n,
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
