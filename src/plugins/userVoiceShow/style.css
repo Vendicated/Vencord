@@ -17,10 +17,38 @@
     margin-left: 4px;
 }
 
-.vc-uvs-message-indicator {
+.vc-uvs-message-indicator:not(.vc-uvs-live) {
     display: inline-flex;
-    top: 2.5px;
     position: relative;
+    top: 2.5px;
+}
+
+.vc-uvs-message-indicator { 
+    display: inline-flex;
+    position: relative;
+    top: 0px !important;
+}
+
+.vc-uvs-live {
+    display: inline-flex;
+
+    background-color: var(--red-400);
+    border-radius: var(--custom-live-indicator-border-radius);
+
+    height: 16px;
+    min-height: 16px;
+    min-width: 16px;
+}
+
+.vc-uvs-live > span {
+    padding: 0 6px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--white);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    line-height: 1.333;
 }
 
 .vc-uvs-tooltip-container {
