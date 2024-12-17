@@ -5,7 +5,6 @@
  */
 
 import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
-import { removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, insertTextIntoChatInputBox, sendMessage } from "@utils/discord";
@@ -400,6 +399,5 @@ export default definePlugin({
     },
     stop() {
         removeChatBarButton("QuickSnip");
-        removePreSendListener(this.listener);
     }
 });
