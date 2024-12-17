@@ -17,6 +17,7 @@ export interface Category {
     color: number;
     channels: string[];
     collapsed?: boolean;
+    displayOnServerList?: boolean;
 }
 
 const CATEGORY_BASE_KEY = "PinDMsCategories-";
@@ -112,6 +113,17 @@ export function getAllUncollapsedChannels() {
     }
 
     return categories.filter(c => !c.collapsed).flatMap(c => c.channels);
+}
+
+export function getAllGuildsBarChannels() {
+    const privateChannelIds = PrivateChannelSortStore.getPrivateChannelIds();
+
+    if (settings.store.pinOrder === PinOrder.LastMessage && privateChannelIds.length !== 0) {
+        const sortedChannels = PrivateChannelSortStore.getPrivateChannelIds();
+        return categories.filter(c => c.displayOnServerList && !c.collapsed).flatMap(c => sortedChannels.filter(channel => c.channels.includes(channel)));
+    }
+
+    return categories.filter(c => c.displayOnServerList && !c.collapsed).flatMap(c => c.channels);
 }
 
 export function getSections() {
