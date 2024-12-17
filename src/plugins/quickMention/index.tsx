@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import { insertTextIntoChatInputBox } from "@utils/discord";
 import definePlugin from "@utils/types";
@@ -26,24 +25,18 @@ export default definePlugin({
     name: "QuickMention",
     authors: [Devs.kemo],
     description: "Adds a quick mention button to the message actions bar",
-    dependencies: ["MessagePopoverAPI"],
 
-    start() {
-        addButton("QuickMention", msg => {
-            const channel = ChannelStore.getChannel(msg.channel_id);
-            if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return null;
+    renderMessagePopoverButton(msg) {
+        const channel = ChannelStore.getChannel(msg.channel_id);
+        if (channel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, channel)) return null;
 
-            return {
-                label: "Quick Mention",
-                icon: this.Icon,
-                message: msg,
-                channel,
-                onClick: () => insertTextIntoChatInputBox(`<@${msg.author.id}> `)
-            };
-        });
-    },
-    stop() {
-        removeButton("QuickMention");
+        return {
+            label: "Quick Mention",
+            icon: this.Icon,
+            message: msg,
+            channel,
+            onClick: () => insertTextIntoChatInputBox(`<@${msg.author.id}> `)
+        };
     },
 
     Icon: () => (

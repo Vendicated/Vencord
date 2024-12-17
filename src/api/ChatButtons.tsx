@@ -74,9 +74,9 @@ export interface ChatBarProps {
     };
 }
 
-export type ChatBarButton = (props: ChatBarProps & { isMainChat: boolean; }) => JSX.Element | null;
+export type ChatBarButtonFactory = (props: ChatBarProps & { isMainChat: boolean; }) => JSX.Element | null;
 
-const buttonFactories = new Map<string, ChatBarButton>();
+const buttonFactories = new Map<string, ChatBarButtonFactory>();
 const logger = new Logger("ChatButtons");
 
 export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
@@ -91,7 +91,7 @@ export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
     }
 }
 
-export const addChatBarButton = (id: string, button: ChatBarButton) => buttonFactories.set(id, button);
+export const addChatBarButton = (id: string, button: ChatBarButtonFactory) => buttonFactories.set(id, button);
 export const removeChatBarButton = (id: string) => buttonFactories.delete(id);
 
 export interface ChatBarButtonProps {
