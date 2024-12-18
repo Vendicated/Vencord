@@ -342,7 +342,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
 
                 // Workaround for cases when it's not available
                 // (e.g when using MessageLinkEmkbeds)
-                if (sticker == undefined) {
+                if (sticker === undefined) {
                     return;
                 }
 
@@ -351,7 +351,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
 
                     // Workaround for incase the sticker or the server it's from is deleted.
                     // Allows the sticker to still be cloned, albeit less accurately.
-                    if (fetchedSticker == undefined) {
+                    if (fetchedSticker === undefined) {
                         return {
                             "id": sticker?.id,
                             "name": sticker?.name,
