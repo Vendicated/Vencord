@@ -63,16 +63,20 @@ async function fetchSticker(id: string) {
     const cached = StickersStore.getStickerById(id);
     if (cached) return cached;
 
-    const { body } = await RestAPI.get({
-        url: Constants.Endpoints.STICKER(id)
-    });
+    try {
+        const { body } = await RestAPI.get({
+            url: Constants.Endpoints.STICKER(id)
+        });
 
-    FluxDispatcher.dispatch({
-        type: "STICKER_FETCH_SUCCESS",
-        sticker: body
-    });
+        FluxDispatcher.dispatch({
+            type: "STICKER_FETCH_SUCCESS",
+            sticker: body
+        });
 
-    return body as Sticker;
+        return body as Sticker;
+    } catch (err) {
+        return undefined;
+    }
 }
 
 async function cloneSticker(guildId: string, sticker: Sticker) {
@@ -336,7 +340,31 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                 const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
                 if (sticker?.format_type === 3 /* LOTTIE */) return;
 
-                return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
+                // Workaround for cases when it's not available
+                // (e.g when using MessageLinkEmkbeds)
+                if (sticker == undefined) {
+                    return;
+                }
+
+                return buildMenuItem("Sticker", async () => {
+                    const fetchedSticker = await fetchSticker(favoriteableId);
+
+                    // Workaround for incase the sticker or the server it's from is deleted.
+                    // Allows the sticker to still be cloned, albeit less accurately.
+                    if (fetchedSticker == undefined) {
+                        return {
+                            "id": sticker?.id,
+                            "name": sticker?.name,
+                            "format_type": sticker?.format_type,
+                            "tags": sticker?.name,
+                            "type": "2",
+                            "available": true,
+                            "guild_id": 0
+                        };
+                    } else {
+                        return fetchedSticker;
+                    }
+                });
         }
     })();
 
