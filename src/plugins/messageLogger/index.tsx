@@ -54,13 +54,29 @@ function addDeleteStyle() {
     }
 }
 
+const buttonsToRemove = [
+    "edit",
+    "reply",
+    "forward",
+    "thread",
+    "pin",
+    "delete",
+];
+
 const REMOVE_HISTORY_ID = "ml-remove-history";
 const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
-const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
-    const { message } = props;
+const patchMessageContextMenu: NavContextMenuPatchCallback = (children, { message }) => {
     const { deleted, editHistory, id, channel_id } = message;
 
     if (!deleted && !editHistory?.length) return;
+
+    for (const id of buttonsToRemove) {
+        const group = findGroupChildrenByChildId(id, children);
+        if (group) {
+            const index = group.findIndex(c => c?.props?.id === id);
+            group.splice(index, 1);
+        }
+    }
 
     toggle: {
         if (!deleted) break toggle;
