@@ -25,10 +25,15 @@ import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/moda
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Channel } from "discord-types/general";
 import { Promisable } from "type-fest";
 
 const StickersStore = findStoreLazy("StickersStore");
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
+
+const ChannelStatusStore: {
+    getChannelStatus(c: Channel): string;
+} = findStoreLazy("ChannelStatusStore");
 
 interface Sticker {
     t: "Sticker";
@@ -47,6 +52,13 @@ interface Emoji {
     name: string;
     isAnimated: boolean;
 }
+
+interface ForumTagProps {
+    tag: {
+        emojiId?: string;
+        emojiName?: string;
+    };
+};
 
 type Data = Emoji | Sticker;
 
@@ -272,12 +284,12 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
     );
 }
 
-function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Omit<Sticker | Emoji, "t">>) {
+function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Omit<Sticker | Emoji, "t">>, label?: string) {
     return (
         <Menu.MenuItem
-            id="emote-cloner"
+            id={`emote-cloner${label ?? ""}`}
             key="emote-cloner"
-            label={`Clone ${type}`}
+            label={label ?? `Clone ${type}`}
             action={() =>
                 openModalLazy(async () => {
                     const res = await fetchData();
@@ -361,13 +373,74 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
     }
 };
 
+const emojiRegex = /https:\/\/cdn\.discordapp\.com\/emojis\/(\d+)\.([a-zA-Z]{3,4}).*/;
+const imageContextPatch: NavContextMenuPatchCallback = (children, props: {
+    src: string;
+}) => {
+    // this context menu is called on normal images, as well as stock emojis.
+    const matches = [...props.src.match(emojiRegex) ?? []];
+    if (matches.length === 0) return;
+    children.push(buildMenuItem("Emoji", () => ({
+        id: matches[1],
+        isAnimated: (matches[2] === "gif"),
+        name: "ProfileEmoji"
+    })));
+};
+
+const forumTagContextPatch: NavContextMenuPatchCallback = (
+    children,
+    { tag: { emojiId, emojiName } }: {
+        tag: {
+            emojiId?: string;
+            emojiName?: string;
+        };
+    },
+) => {
+    console.log(arguments[0]);
+    if (emojiName) return;
+    if (!emojiId) throw new Error("No emojiName or emojiId provided");
+
+    children.push(buildMenuItem("Emoji",));
+};
+
+const emojiMatchRegex = /<(a?):(\w+):(\d{19})>/g;
+const channelContextStatusPatch: NavContextMenuPatchCallback = (children, props: {
+    channel: Channel;
+}) => {
+    const status = ChannelStatusStore.getChannelStatus(props.channel);
+
+    if (!status) return;
+
+    const emojis = [...status.matchAll(emojiMatchRegex)];
+    if (emojis.length === 0) return;
+    console.log(emojis);
+    children.push((
+        <Menu.MenuItem id="vc-emoteCloner-item" label="Clone Emoji">
+            {
+                emojis.map(([_, animated, name, id]) => (
+                    buildMenuItem("Emoji", () => ({
+                        id,
+                        name,
+                        isAnimated: !!animated,
+                    }),
+                        `Clone ${name}`
+                    )
+                ))
+            }
+        </Menu.MenuItem>
+    ));
+};
+
 export default definePlugin({
     name: "EmoteCloner",
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
     tags: ["StickerCloner"],
-    authors: [Devs.Ven, Devs.Nuckyz],
+    authors: [Devs.Ven, Devs.Nuckyz, Devs.sadan],
     contextMenus: {
         "message": messageContextMenuPatch,
-        "expression-picker": expressionPickerPatch
-    }
+        "expression-picker": expressionPickerPatch,
+        "image-context": imageContextPatch,
+        "channel-context": channelContextStatusPatch,
+        "forum-tag": forumTagContextPatch
+    },
 });
