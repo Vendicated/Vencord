@@ -350,13 +350,17 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                     const fetchedSticker = await fetchSticker(favoriteableId);
 
                     // Workaround for incase the sticker or the server it's from is deleted.
-                    // Allows the sticker to still be cloned, albeit less accurately.
+                    // Allows the sticker to still be cloned.
                     if (fetchedSticker === undefined) {
                         return {
                             "id": sticker?.id,
                             "name": sticker?.name,
                             "format_type": sticker?.format_type,
-                            "tags": sticker?.name,
+                            // Discord has a character limit of at least 1 for tags (aka related emoji)
+                            // for some reason.
+                            // They don't check for spaces.
+                            "tags": " ",
+                            "description": "",
                             "type": "2",
                             "available": true,
                             "guild_id": 0
