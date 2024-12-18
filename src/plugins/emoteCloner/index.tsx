@@ -357,8 +357,6 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                             "name": sticker?.name,
                             "format_type": sticker?.format_type,
                             // Discord has a character limit of at least 1 for tags (aka related emoji)
-                            // for some reason.
-                            // They don't check for spaces.
                             "tags": " ",
                             "description": "",
                             "type": "2",
