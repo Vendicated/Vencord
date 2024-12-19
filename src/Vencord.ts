@@ -85,6 +85,7 @@ async function syncSettings() {
     }
 }
 
+
 async function init() {
     await onceReady;
     startAllPlugins(StartAt.WebpackReady);

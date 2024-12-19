@@ -17,7 +17,7 @@
 */
 
 import { showNotification } from "@api/Notifications";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { closeAllModals } from "@utils/modal";
@@ -55,12 +55,12 @@ const settings = definePluginSettings({
 
 let hasCrashedOnce = false;
 let isRecovering = false;
-let shouldAttemptRecover = true;
+let shouldAttemptRecover = false;// true;
 
 export default definePlugin({
     name: "CrashHandler",
     description: "Utility plugin for handling and possibly recovering from crashes without a restart",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.million1156],
     enabledByDefault: true,
 
     settings,
@@ -87,6 +87,21 @@ export default definePlugin({
             try {
                 // Prevent a crash loop with an error that could not be handled
                 if (!shouldAttemptRecover) {
+                    // Disable all non-core plugins (last-ditch effort to prevent a crash loop)
+                    try {
+                        CrashHandlerLogger.log("Disabling all non-core plugins...");
+                        const pluginSettings = Settings.plugins;
+
+                        for (const pluginName in pluginSettings) {
+                            if (pluginSettings[pluginName].enabled && !pluginSettings[pluginName].required) {
+                                pluginSettings[pluginName].enabled = false;
+                                CrashHandlerLogger.log(`Disabled plugin: ${pluginName}`);
+                            }
+                        }
+                    } catch (err) {
+                        CrashHandlerLogger.error("Failed to disable all non-core plugins", err);
+                    }
+
                     try {
                         showNotification({
                             color: "#eed202",
