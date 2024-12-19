@@ -287,7 +287,9 @@ export function findModuleFactory(...code: CodeFilter) {
     return wreq.m[id];
 }
 
-export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks" | "mapMangledModule", any[]]>;
+// FIXME: give this a better name
+export type TypeWebpackSearchHistory = "find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks" | "mapMangledModule";
+export const lazyWebpackSearchHistory = [] as Array<[TypeWebpackSearchHistory, any[]]>;
 
 /**
  * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
