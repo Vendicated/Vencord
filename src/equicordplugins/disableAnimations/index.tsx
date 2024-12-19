@@ -19,35 +19,45 @@
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findAll } from "@webpack";
+import { Forms } from "@webpack/common";
 
 export default definePlugin({
     name: "DisableAnimations",
     description: "Disables most of Discord's animations.",
     authors: [EquicordDevs.seth],
+    settingsAboutComponent: () => <>
+        <Forms.FormText className="platform-warning">
+            This plugin will only work on Equibop Vesktop and Discord Desktop
+        </Forms.FormText>
+    </>,
     start() {
-        this.springs = findAll((mod) => {
-            if (!mod.Globals) return false;
-            return true;
-        });
-
-        for (const spring of this.springs) {
-            spring.Globals.assign({
-                skipAnimation: true,
+        if (IS_EQUIBOP || IS_VESKTOP || IS_DISCORD_DESKTOP) {
+            this.springs = findAll(mod => {
+                if (!mod.Globals) return false;
+                return true;
             });
+
+            for (const spring of this.springs) {
+                spring.Globals.assign({
+                    skipAnimation: true,
+                });
+            }
+
+            this.css = document.createElement("style");
+            this.css.innerText = "* { transition: none !important; animation: none !important; }";
+
+            document.head.appendChild(this.css);
         }
-
-        this.css = document.createElement("style");
-        this.css.innerText = "* { transition: none !important; animation: none !important; }";
-
-        document.head.appendChild(this.css);
     },
     stop() {
-        for (const spring of this.springs) {
-            spring.Globals.assign({
-                skipAnimation: false,
-            });
-        }
+        if (IS_EQUIBOP || IS_VESKTOP || IS_DISCORD_DESKTOP) {
+            for (const spring of this.springs) {
+                spring.Globals.assign({
+                    skipAnimation: false,
+                });
+            }
 
-        if (this.css) this.css.remove();
+            if (this.css) this.css.remove();
+        }
     }
 });
