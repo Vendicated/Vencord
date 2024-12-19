@@ -133,11 +133,14 @@ export default definePlugin({
 
             let element = 0;
 
-            return children.map(c =>
-                c.type === "strong" || (typeof c !== "string" && !React.isValidElement(c))
-                    ? <TypingUser guildId={guildId} user={users[element++]} />
-                    : c
-            );
+            return children.map(c => {
+                const user = users[element++];
+
+                if (c.type === "strong" || (typeof c !== "string" && !React.isValidElement(c)))
+                    return <TypingUser key={user.id} guildId={guildId} user={user} />;
+
+                return c;
+            });
         } catch (e) {
             console.error(e);
         }
