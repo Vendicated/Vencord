@@ -31,8 +31,6 @@ const settings = definePluginSettings({
     showTimeouts: opt("Show member timeout icons in chat."),
     showInvitesPaused: opt("Show the invites paused tooltip in the server list."),
     showModView: opt("Show the member mod view context menu item in all servers."),
-    disableDiscoveryFilters: opt("Disable filters in Server Discovery search that hide servers that don't meet discovery criteria."),
-    disableDisallowedDiscoveryFilters: opt("Disable filters in Server Discovery search that hide NSFW & disallowed servers."),
 });
 
 export default definePlugin({
@@ -83,42 +81,6 @@ export default definePlugin({
                 replace: "false"
             }
         },
-        {
-            find: "prod_discoverable_guilds",
-            predicate: () => settings.store.disableDiscoveryFilters,
-            replacement: {
-                match: /\{"auto_removed:.*?\}/,
-                replace: "{}"
-            }
-        },
-        // remove the 200 server minimum
-        {
-            find: '">200"',
-            predicate: () => settings.store.disableDiscoveryFilters,
-            replacement: {
-                match: '">200"',
-                replace: '">0"'
-            }
-        },
-        // empty word filter
-        {
-            find: '"pepe","nude"',
-            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
-            replacement: {
-                match: /(?<=[?=])\["pepe",.+?\]/,
-                replace: "[]",
-            },
-        },
-        // patch request that queries if term is allowed
-        {
-            find: ".GUILD_DISCOVERY_VALID_TERM,query:",
-            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
-            all: true,
-            replacement: {
-                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0,rejectWithError:!1\}\)/g,
-                replace: "Promise.resolve({ body: { valid: true } })"
-            }
-        }
     ],
     settings,
 });
