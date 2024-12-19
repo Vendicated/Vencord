@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginSettingDef } from "@utils/types";
 
@@ -35,7 +35,6 @@ const settings = definePluginSettings({
     disableDisallowedDiscoveryFilters: opt("Disable filters in Server Discovery search that hide NSFW & disallowed servers."),
 });
 
-migratePluginSettings("ShowHiddenThings", "ShowTimeouts");
 export default definePlugin({
     name: "ShowHiddenThings",
     tags: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters"],
@@ -73,6 +72,15 @@ export default definePlugin({
             replacement: {
                 match: /(role:)\i(?=,guildId.{0,100}role:(\i\[))/,
                 replace: "$1$2arguments[0].member.highestRoleId]",
+            }
+        },
+        // allows you to open mod view on yourself
+        {
+            find: ".MEMBER_SAFETY,{modViewPanel:",
+            predicate: () => settings.store.showModView,
+            replacement: {
+                match: /\i(?=\?null)/,
+                replace: "false"
             }
         },
         {
