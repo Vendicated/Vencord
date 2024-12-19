@@ -89,11 +89,11 @@ export default definePlugin({
                 if (!shouldAttemptRecover) {
                     // Disable all non-core plugins (last-ditch effort to prevent a crash loop)
                     try {
-                        CrashHandlerLogger.log("Disabling all non-core plugins...");
+                        CrashHandlerLogger.debug("Disabling all non-core plugins...");
                         const pluginSettings = Settings.plugins;
-                        const disabledPlugins: string[] = [];
+                        const disabledPlugins: string[] = []; // horror
                         for (const pluginName in pluginSettings) {
-                            if (pluginSettings[pluginName].enabled && !pluginSettings[pluginName].required && !pluginSettings[pluginName].hidden) {
+                            if (pluginSettings[pluginName].enabled && !pluginSettings[pluginName].required && !pluginSettings[pluginName].hidden && !pluginName.endsWith("API")) {
                                 pluginSettings[pluginName].enabled = false;
                                 disabledPlugins.push(pluginName);
                                 CrashHandlerLogger.log(`Disabled plugin: ${pluginName}`);
