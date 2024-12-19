@@ -24,7 +24,7 @@ import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
-import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
+import { Clipboard, DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 
@@ -91,13 +91,21 @@ export default definePlugin({
                     try {
                         CrashHandlerLogger.log("Disabling all non-core plugins...");
                         const pluginSettings = Settings.plugins;
-
+                        const disabledPlugins: string[] = [];
                         for (const pluginName in pluginSettings) {
-                            if (pluginSettings[pluginName].enabled && !pluginSettings[pluginName].required) {
+                            if (pluginSettings[pluginName].enabled && !pluginSettings[pluginName].required && !pluginSettings[pluginName].hidden) {
                                 pluginSettings[pluginName].enabled = false;
+                                disabledPlugins.push(pluginName);
                                 CrashHandlerLogger.log(`Disabled plugin: ${pluginName}`);
                             }
                         }
+                        showNotification({
+                            color: "#eed202",
+                            title: "Plugins Disabled",
+                            body: "All plugins have been disabled to prevent an unrecoverable boot-loop! You can click this notification to copy the list of plugins disabled.",
+                            onClick: () => Clipboard.copy(disabledPlugins.join(", ")),
+                            noPersist: false
+                        });
                     } catch (err) {
                         CrashHandlerLogger.error("Failed to disable all non-core plugins", err);
                     }
