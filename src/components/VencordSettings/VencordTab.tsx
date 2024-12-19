@@ -109,8 +109,8 @@ function EquicordSettings() {
       title: "Enable window transparency.",
       note: "You need a theme that supports transparency or this will do nothing. Requires a full restart!",
       warning: {
-        enabled: true,
-        message: "This will stop the window from being resizable.",
+        enabled: isWindows,
+        message: "Enabling this will prevent you from snapping this window.",
       },
     },
     !IS_WEB &&
