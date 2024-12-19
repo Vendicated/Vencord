@@ -17,6 +17,7 @@
 */
 
 import { Clipboard } from "@webpack/common";
+import { JSX } from "react";
 
 import { cl } from "../utils/misc";
 import { CopyButton } from "./CopyButton";
