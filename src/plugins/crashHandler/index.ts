@@ -24,7 +24,7 @@ import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
-import { Clipboard, DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
+import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 
@@ -87,27 +87,23 @@ export default definePlugin({
             try {
                 // Prevent a crash loop with an error that could not be handled
                 if (!shouldAttemptRecover) {
-                    // Disable all non-core plugins (last-ditch effort to prevent a crash loop)
+                    // Enable "safe mode" (i.e. disable plugin functionality) (last-ditch effort to prevent a crash loop)
                     try {
                         CrashHandlerLogger.debug("Disabling all non-core plugins...");
                         const pluginSettings = Settings.plugins;
-                        const disabledPlugins: string[] = []; // horror
                         for (const pluginName in pluginSettings) {
                             if (pluginSettings[pluginName].enabled && !pluginSettings[pluginName].required && !pluginSettings[pluginName].hidden && !pluginName.endsWith("API")) {
-                                pluginSettings[pluginName].enabled = false;
-                                disabledPlugins.push(pluginName);
-                                CrashHandlerLogger.log(`Disabled plugin: ${pluginName}`);
+                                pluginSettings[pluginName].safeMode = true;
                             }
                         }
                         showNotification({
                             color: "#eed202",
-                            title: "Plugins Disabled",
-                            body: "All plugins have been disabled to prevent an unrecoverable boot-loop! You can click this notification to copy the list of plugins disabled.",
-                            onClick: () => Clipboard.copy(disabledPlugins.join(", ")),
+                            title: "Safe mode enabled!",
+                            body: "Plugin functionality has been disabled to prevent further crashes! Please restart your Discord!",
                             noPersist: false
                         });
                     } catch (err) {
-                        CrashHandlerLogger.error("Failed to disable all non-core plugins", err);
+                        CrashHandlerLogger.error("Failed to enable safe mode", err);
                     }
 
                     try {

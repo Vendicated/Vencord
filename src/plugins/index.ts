@@ -46,7 +46,7 @@ export function isPluginEnabled(p: string) {
     return (
         Plugins[p]?.required ||
         Plugins[p]?.isDependency ||
-        settings[p]?.enabled
+        (settings[p]?.enabled && !settings.safeMode)
     ) ?? false;
 }
 
@@ -216,7 +216,10 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const { name, commands, contextMenus } = p;
-
+    if (p.safeMode) {
+        logger.warn("Plugin is in safe mode, skipping start", name);
+        return false;
+    }
     if (p.start) {
         logger.info("Starting plugin", name);
         if (p.started) {
