@@ -55,7 +55,7 @@ const settings = definePluginSettings({
 
 let hasCrashedOnce = false;
 let isRecovering = false;
-let shouldAttemptRecover = true;
+let shouldAttemptRecover = false;
 
 export default definePlugin({
     name: "CrashHandler",
@@ -87,25 +87,27 @@ export default definePlugin({
             try {
                 // Prevent a crash loop with an error that could not be handled
                 if (!shouldAttemptRecover) {
-                    // Enable "safe mode" (i.e. disable plugin functionality) (last-ditch effort to prevent a crash loop)
-                    try {
-                        CrashHandlerLogger.debug("Disabling all non-core plugins...");
-                        const pluginSettings = Settings.plugins;
-                        for (const pluginName in pluginSettings) {
-                            if (pluginSettings[pluginName].enabled && !pluginSettings[pluginName].required && !pluginSettings[pluginName].hidden && !pluginName.endsWith("API")) {
-                                pluginSettings[pluginName].safeMode = true;
+                    const shouldEnableSafeMode = confirm("Discord has crashed two times rapidly, would you like to enable safe mode?");
+                    if (shouldEnableSafeMode) {
+                        // Enable "safe mode" (i.e. disable plugin functionality) (last-ditch effort to prevent a crash loop)
+                        try {
+                            CrashHandlerLogger.debug("Enabling safe mode..");
+                            const pluginSettings = Settings.plugins;
+                            for (const pluginName in pluginSettings) {
+                                if (pluginSettings[pluginName].enabled && !pluginSettings[pluginName].required && !pluginSettings[pluginName].hidden && !pluginName.endsWith("API")) {
+                                    pluginSettings[pluginName].safeMode = true;
+                                }
                             }
+                            showNotification({
+                                color: "#eed202",
+                                title: "Safe mode enabled!",
+                                body: "Plugin functionality has been disabled to prevent further crashes! Please restart your Discord!",
+                                noPersist: false
+                            });
+                        } catch (err) {
+                            CrashHandlerLogger.error("Failed to enable safe mode", err);
                         }
-                        showNotification({
-                            color: "#eed202",
-                            title: "Safe mode enabled!",
-                            body: "Plugin functionality has been disabled to prevent further crashes! Please restart your Discord!",
-                            noPersist: false
-                        });
-                    } catch (err) {
-                        CrashHandlerLogger.error("Failed to enable safe mode", err);
                     }
-
                     try {
                         showNotification({
                             color: "#eed202",

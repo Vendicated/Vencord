@@ -218,6 +218,8 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     const { name, commands, contextMenus } = p;
     if (p.safeMode) {
         logger.warn("Plugin is in safe mode, skipping start", name);
+        // Disable safe mode so the plugin can be started again
+        p.safeMode = false;
         return false;
     }
     if (p.start) {
