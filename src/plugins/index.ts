@@ -217,7 +217,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     const { name, commands, contextMenus } = p;
     console.log(name);
 
-    // console.log(settings[name]);
+    console.log(settings[name].safeMode);
     if (Plugins[name].safeMode === true) {
         console.warn(`Skipping Plugin ${name} has safe mode enabled omg!!!`);
     }
