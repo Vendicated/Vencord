@@ -16,12 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "Bigger Upload",
     description: "Reverts the free upload size limit back to 25MB",
-    authors: [{ name: "Kaydax", id: 142782417994907648n }],
+    authors: [Devs.Kaydax],
     patches: [
         {
             find: "GLOBAL_DISCOVERY:\"/discovery\"",

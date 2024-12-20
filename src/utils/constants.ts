@@ -20,7 +20,8 @@ export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 
-export interface Dev {
+export interface Dev
+{
     name: string;
     id: bigint;
     badge?: boolean;
@@ -578,6 +579,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     jamesbt365: {
         name: "jamesbt365",
         id: 158567567487795200n,
+    },
+    Kaydax: {
+        name: "Kaydax",
+        id: 142782417994907648n,
     },
 } satisfies Record<string, Dev>);
 
