@@ -6,31 +6,33 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByCodeLazy } from "@webpack";
+import { findComponentByCodeLazy } from "@webpack";
 
-const normalMessageComponent = findByCodeLazy(".USER_MENTION)");
+const NormalMessageComponent = findComponentByCodeLazy(".USER_MENTION)");
 
 export default definePlugin({
     name: "FullUserInChatbox",
-    description: "Adds the normal mention to the user chatbox, see the readme for more details and a full list of benefits.",
+    description: "Puts the full user mention object in the chatbox",
     authors: [Devs.sadan],
 
     patches: [
         {
-            find: "UNKNOWN_ROLE_PLACEHOLDER]",
+            find: ":\"text\":",
             replacement: {
-                match: /(hidePersonalInformation.{0,170}?)return/,
+                match: /(hidePersonalInformation.*?)return/,
                 replace: "$1return $self.patchChatboxMention(arguments[0]);"
             }
         }
     ],
 
     patchChatboxMention(props: any) {
-        return normalMessageComponent({
-            className: "mention",
-            userId: props.id,
-            channelId: props.channelId,
-            inlinePreview: undefined
-        });
-    }
+        return <NormalMessageComponent
+            // this seems to be constant
+            className="mention"
+            userId= {props.id}
+            channelId={props.channelId}
+            // This seems to always be false/undefined
+            inlinePreview={undefined}
+        />;
+    },
 });
