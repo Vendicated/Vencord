@@ -136,10 +136,9 @@ export const startAllPlugins = traceFunction("startAllPlugins", function startAl
     for (const name in Plugins) {
         if (isPluginEnabled(name) && (!IS_REPORTER || isReporterTestable(Plugins[name], ReporterTestable.Start))) {
             const p = Plugins[name];
-
             const startAt = p.startAt ?? StartAt.WebpackReady;
             if (startAt !== target) continue;
-
+            if (settings[name].safeMode === true) continue;
             startPlugin(Plugins[name]);
         }
     }
@@ -216,11 +215,11 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const { name, commands, contextMenus } = p;
-    if (p.safeMode) {
-        logger.warn("Plugin is in safe mode, skipping start", name);
-        // Disable safe mode so the plugin can be started again
-        p.safeMode = false;
-        return false;
+    console.log(name);
+
+    // console.log(settings[name]);
+    if (Plugins[name].safeMode === true) {
+        console.warn(`Skipping Plugin ${name} has safe mode enabled omg!!!`);
     }
     if (p.start) {
         logger.info("Starting plugin", name);
@@ -229,7 +228,8 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
             return false;
         }
         try {
-            p.start();
+            logger.info("Starting plugin", name);
+            if (!settings[name].safeMode === true) p.start();
         } catch (e) {
             logger.error(`Failed to start ${name}\n`, e);
             return false;
@@ -254,14 +254,17 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         subscribePluginFluxEvents(p, FluxDispatcher);
     }
 
-
     if (contextMenus) {
         logger.debug("Adding context menus patches of plugin", name);
         for (const navId in contextMenus) {
             addContextMenuPatch(navId, contextMenus[navId]);
         }
     }
-
+    // console.log(settings[name]);
+    if (p.safeMode === true) {
+        logger.debug("Skipping plugin", name, "due to safe mode");
+        p.safeMode = false;
+    }
     return true;
 }, p => `startPlugin ${p.name}`);
 

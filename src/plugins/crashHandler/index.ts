@@ -21,10 +21,13 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { closeAllModals } from "@utils/modal";
+import { relaunch } from "@utils/native";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
+
+import Plugins from "~plugins";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 
@@ -95,15 +98,18 @@ export default definePlugin({
                             const pluginSettings = Settings.plugins;
                             for (const pluginName in pluginSettings) {
                                 if (pluginSettings[pluginName].enabled && !pluginSettings[pluginName].required && !pluginSettings[pluginName].hidden && !pluginName.endsWith("API")) {
+                                    console.log(Plugins[pluginName]);
+                                    Plugins[pluginName].safeMode = true;
                                     pluginSettings[pluginName].safeMode = true;
                                 }
                             }
                             showNotification({
                                 color: "#eed202",
                                 title: "Safe mode enabled!",
-                                body: "Plugin functionality has been disabled to prevent further crashes! Please restart your Discord!",
+                                body: "Plugin functionality has been disabled to prevent further crashes! Relaunching..",
                                 noPersist: false
                             });
+                            relaunch();
                         } catch (err) {
                             CrashHandlerLogger.error("Failed to enable safe mode", err);
                         }
