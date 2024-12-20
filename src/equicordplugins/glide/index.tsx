@@ -243,18 +243,20 @@ function parseFontContent() {
     return fontName;
 }
 function injectCSS() {
+    if (Settings.plugins.Glide.enabled) {
 
-    const fontName = parseFontContent();
-    const theCSS = getCSS(fontName);
+        const fontName = parseFontContent();
+        const theCSS = getCSS(fontName);
 
-    var elementToRemove = document.getElementById("GlideStyleInjection");
-    if (elementToRemove) {
-        elementToRemove.remove();
+        let elementToRemove = document.getElementById("GlideStyleInjection");
+        if (elementToRemove) {
+            elementToRemove.remove();
+        }
+        const styleElement = document.createElement("style");
+        styleElement.id = "GlideStyleInjection";
+        styleElement.textContent = theCSS;
+        document.documentElement.appendChild(styleElement);
     }
-    const styleElement = document.createElement("style");
-    styleElement.id = "GlideStyleInjection";
-    styleElement.textContent = theCSS;
-    document.documentElement.appendChild(styleElement);
 }
 
 function getCSS(fontName) {
@@ -528,7 +530,7 @@ function getCSS(fontName) {
                     background-color: var(--primary);
                 }
                 ${settings.store.pastelStatuses ?
-            `
+                `
                     /*Pastel statuses*/
                     rect[fill='#23a55a'], svg[fill='#23a55a'] {
                         fill: #80c968 !important;
