@@ -248,7 +248,7 @@ function injectCSS() {
         const fontName = parseFontContent();
         const theCSS = getCSS(fontName);
 
-        let elementToRemove = document.getElementById("GlideStyleInjection");
+        const elementToRemove = document.getElementById("GlideStyleInjection");
         if (elementToRemove) {
             elementToRemove.remove();
         }
