@@ -27,8 +27,8 @@ export default definePlugin({
         {
             find: '"self-stream-hide"',
             replacement: {
-                match: /return \i?(.*?onConfirm:\(\)=>(\i\(!\i\)))/,
-                replace: "return $2$1"
+                match: /return (\i)?(.*?onConfirm:\(\)=>((\i)\(!\i\)))/,
+                replace: "let $4 = null; if ($4 !== null) return $3; return $1$2"
             }
         }
     ],
