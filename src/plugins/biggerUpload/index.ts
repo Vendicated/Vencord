@@ -35,7 +35,7 @@ export default definePlugin({
             find: "client_build_number",
             replacement: {
                 match: /client_build_number=[a-zA-Z]+/,
-                replace: "client_build_number=10000"
+                replace: "client_build_number=183109"
             }
         }
     ]
