@@ -34,14 +34,15 @@ export default new class Plugin implements PluginDef {
         this.name = PluginInfo.PLUGIN_NAME;
         this.description = PluginInfo.DESCRIPTION;
         this.authors = PluginInfo.AUTHORS as PluginAuthor[];
+
+        this.replacedUserPanelComponent = replacedUserPanelComponent.bind(this);
         this.patches = [{
-            find: "Messages.ACCOUNT_A11Y_LABEL",
+            find: "--custom-app-panels-height",
             replacement: {
-                match: /(?<=function)( .{0,3}(?={).)(.{0,1000}custom-app-panels-height.+?\)]}\))(})/,
-                replace: "$1return $self.replacedUserPanelComponent(function(){$2}, this, arguments)$3"
+                match: /(\w+\.\w+\(\w+,{\w+:function\(\){)return (\w)+}/,
+                replace: "$1 $self.storedComp = $2; return $self.replacedUserPanelComponent}"
             }
         }];
-        this.replacedUserPanelComponent = replacedUserPanelComponent;
     }
 };
 

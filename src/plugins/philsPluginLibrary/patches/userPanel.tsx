@@ -81,13 +81,12 @@ export const ButtonsSettingsPanel = () => {
         </>;
 };
 
-export function replacedUserPanelComponent(oldComponent: (...args: any[]) => any, thisContext: any, functionArguments: any) {
-    const componentResult: JSX.Element = Reflect.apply(oldComponent, thisContext, functionArguments);
-
+export function replacedUserPanelComponent() {
+    // @ts-ignore
+    const componentResult: JSX.Element = this.storedComp();
     if (!componentResult?.props) return componentResult;
 
     const { children } = componentResult.props;
-
 
     children.splice(children.length - 1, 0,
         <ButtonsSettingsPanel />
