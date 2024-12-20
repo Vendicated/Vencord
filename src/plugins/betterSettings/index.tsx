@@ -173,7 +173,7 @@ export default definePlugin({
                 }
                 return this;
             },
-            map(render: (item: SettingsEntry) => ReactElement) {
+            map(render: (item: SettingsEntry) => ReactElement<any>) {
                 return items
                     .filter(a => a.items.length > 0)
                     .map(({ label, items }) => {
@@ -181,11 +181,14 @@ export default definePlugin({
                         if (label) {
                             return (
                                 <Menu.MenuItem
+                                    key={label}
                                     id={label.replace(/\W/, "_")}
                                     label={label}
-                                    children={children}
                                     action={children[0].props.action}
-                                />);
+                                >
+                                    {children}
+                                </Menu.MenuItem>
+                            );
                         } else {
                             return children;
                         }

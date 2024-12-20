@@ -20,6 +20,7 @@ import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { LazyComponent } from "@utils/react";
 import { React } from "@webpack/common";
+import { ReactElement } from "react";
 
 import { ErrorCard } from "./ErrorCard";
 
@@ -80,10 +81,11 @@ const ErrorBoundary = LazyComponent(() => {
             if (this.props.noop) return null;
 
             if (this.props.fallback)
-                return <this.props.fallback
-                    children={this.props.children}
-                    {...this.state}
-                />;
+                return (
+                    <this.props.fallback {...this.state}>
+                        {this.props.children}
+                    </this.props.fallback>
+                );
 
             const msg = this.props.message || "An error occurred while rendering this Component. More info can be found below and in your console.";
 
@@ -105,7 +107,7 @@ const ErrorBoundary = LazyComponent(() => {
     };
 }) as
     React.ComponentType<React.PropsWithChildren<Props>> & {
-        wrap<T extends object = any>(Component: React.ComponentType<T>, errorBoundaryProps?: Omit<Props<T>, "wrappedProps">): React.FunctionComponent<T>;
+        wrap<T extends object = any>(Component: React.ComponentType<T>, errorBoundaryProps?: Omit<Props<T>, "wrappedProps">): (props: T) => ReactElement<any>;
     };
 
 ErrorBoundary.wrap = (Component, errorBoundaryProps) => props => (
