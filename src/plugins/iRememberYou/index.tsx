@@ -6,7 +6,6 @@
 
 import { DataStore } from "@api/index";
 import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
-import { ExpandableHeader } from "@components/ExpandableHeader";
 import { Heart } from "@components/Heart";
 import { openUserProfile } from "@utils/discord";
 import * as Modal from "@utils/modal";
@@ -231,12 +230,28 @@ class DataUI {
 
 
         return <aside key={key} >
-            <ExpandableHeader defaultState={true} headerText={key.toUpperCase()}>
-                <Flex style={{ gap: "calc(0.5em + 0.5vw) 0.2em", flexDirection: "column" }}>
-                    {usersElements}
-                </Flex>
-            </ExpandableHeader>
-
+            <div
+                className={"vc-i-remember-you-user-header-container"}
+                style={{
+                    display: "contents",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "8px",
+                }}
+            >
+                <Text>{key.toUpperCase()}</Text>
+                <div
+                    className={"vc-i-remember-you-user-header-btns"}
+                    style={{
+                        display: "none",
+                        gap: "8px",
+                    }}
+                >
+                    <Flex style={{ gap: "calc(0.5em + 0.5vw) 0.2em", flexDirection: "column" }}>
+                        {usersElements}
+                    </Flex>
+                </div>
+            </div>
         </aside>;
     }
 
