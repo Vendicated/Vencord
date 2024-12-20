@@ -1,4 +1,4 @@
-# TextProfileView
+# FullUserInChatbox
 
 Adds the Full user mention to the textbox
 
