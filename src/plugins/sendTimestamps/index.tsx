@@ -18,8 +18,7 @@
 
 import "./styles.css";
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
@@ -123,7 +122,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
     );
 }
 
-const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
+const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
     if (!isMainChat) return null;
 
     return (
@@ -160,22 +159,14 @@ export default definePlugin({
     name: "SendTimestamps",
     description: "Send timestamps easily via chat box button & text shortcuts. Read the extended description!",
     authors: [Devs.Ven, Devs.Tyler, Devs.Grzesiek11],
-    dependencies: ["MessageEventsAPI", "ChatInputButtonAPI"],
-
     settings,
 
-    start() {
-        addChatBarButton("SendTimestamps", ChatBarIcon);
-        this.listener = addPreSendListener((_, msg) => {
-            if (settings.store.replaceMessageContents) {
-                msg.content = msg.content.replace(/`\d{1,2}:\d{2} ?(?:AM|PM)?`/gi, parseTime);
-            }
-        });
-    },
+    renderChatBarButton: ChatBarIcon,
 
-    stop() {
-        removeChatBarButton("SendTimestamps");
-        removePreSendListener(this.listener);
+    onBeforeMessageSend(_, msg) {
+        if (settings.store.replaceMessageContents) {
+            msg.content = msg.content.replace(/`\d{1,2}:\d{2} ?(?:AM|PM)?`/gi, parseTime);
+        }
     },
 
     settingsAboutComponent() {
