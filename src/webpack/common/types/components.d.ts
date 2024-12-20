@@ -440,7 +440,7 @@ export type Paginator = ComponentType<{
     maxVisiblePages: number;
     pageSize: number;
     totalCount: number;
-
+    className?: string;
     onPageChange?(page: number): void;
     hideMaxPage?: boolean;
 }>;
