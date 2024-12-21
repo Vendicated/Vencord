@@ -129,8 +129,8 @@ for (const p of pluginsValues) {
             }
         }
     }
-    // Disable safe-mode after check is ran
-    if (p.safeMode) p.safeMode = false;
+    if (settings[p.name].safeMode) settings[p.name].safeMode = false;
+
 }
 
 export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins(target: StartAt) {
