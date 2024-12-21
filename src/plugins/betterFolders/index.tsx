@@ -159,7 +159,7 @@ export default definePlugin({
             ]
         },
         {
-            find: ".FOLDER_ITEM_GUILD_ICON_MARGIN);",
+            find: ".expandedFolderBackground,",
             predicate: () => settings.store.sidebar,
             replacement: [
                 // We use arguments[0] to access the isBetterFolders variable in this nested folder component (the parent exports all the props so we don't have to patch it)
@@ -185,7 +185,7 @@ export default definePlugin({
                 {
                     // Decide if we should render the expanded folder background if we are rendering the Better Folders sidebar
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
-                    match: /(?<=\.wrapper,children:\[)/,
+                    match: /(?<=\.isExpanded\),children:\[)/,
                     replace: "$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)&&"
                 },
                 {
