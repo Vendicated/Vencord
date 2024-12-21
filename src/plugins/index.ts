@@ -46,7 +46,7 @@ export function isPluginEnabled(p: string) {
     return (
         Plugins[p]?.required ||
         Plugins[p]?.isDependency ||
-        (settings[p]?.enabled && !settings[p]?.safeMode)
+        (settings[p]?.enabled && !Settings.safeMode)
     ) ?? false;
 }
 
@@ -129,8 +129,6 @@ for (const p of pluginsValues) {
             }
         }
     }
-    if (settings[p.name].safeMode) settings[p.name].safeMode = false;
-
 }
 
 export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins(target: StartAt) {
@@ -139,7 +137,9 @@ export const startAllPlugins = traceFunction("startAllPlugins", function startAl
         if (isPluginEnabled(name) && (!IS_REPORTER || isReporterTestable(Plugins[name], ReporterTestable.Start))) {
             const p = Plugins[name];
             const startAt = p.startAt ?? StartAt.WebpackReady;
+
             if (startAt !== target) continue;
+
             startPlugin(Plugins[name]);
         }
     }
@@ -249,12 +249,14 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         subscribePluginFluxEvents(p, FluxDispatcher);
     }
 
+
     if (contextMenus) {
         logger.debug("Adding context menus patches of plugin", name);
         for (const navId in contextMenus) {
             addContextMenuPatch(navId, contextMenus[navId]);
         }
     }
+
     return true;
 }, p => `startPlugin ${p.name}`);
 
