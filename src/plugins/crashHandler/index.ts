@@ -27,7 +27,6 @@ import { maybePromptToUpdate } from "@utils/updater";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 
-import Plugins from "~plugins";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 
@@ -98,8 +97,6 @@ export default definePlugin({
                             const pluginSettings = Settings.plugins;
                             for (const pluginName in pluginSettings) {
                                 if (pluginSettings[pluginName].enabled && !pluginSettings[pluginName].required && !pluginSettings[pluginName].hidden && !pluginName.endsWith("API")) {
-                                    console.log(Plugins[pluginName]);
-                                    Plugins[pluginName].safeMode = true;
                                     pluginSettings[pluginName].safeMode = true;
                                 }
                             }
