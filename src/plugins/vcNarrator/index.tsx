@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Notifications } from "@api/index";
+import { showNotification } from "@api/Notifications";
 import { Settings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
@@ -148,13 +150,20 @@ function playSample(tempSettings: any, type: string) {
     const currentUser = UserStore.getCurrentUser();
     const myGuildId = SelectedGuildStore.getGuildId();
 
+    if (settings.notification) {
+        showNotification({
+            title: "Voice Channel Sample",
+            body: formatText(settings[type + "Message"], currentUser.username, "general", (currentUser as any).globalName ?? currentUser.username, GuildMemberStore.getNick(myGuildId, currentUser.id) ?? currentUser.username)
+        });
+        return;
+    }
     speak(formatText(settings[type + "Message"], currentUser.username, "general", (currentUser as any).globalName ?? currentUser.username, GuildMemberStore.getNick(myGuildId, currentUser.id) ?? currentUser.username), settings);
 }
 
 export default definePlugin({
     name: "VcNarrator",
     description: "Announces when users join, leave, or move voice channels via narrator",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.ImLvna],
     reporterTestable: ReporterTestable.None,
 
     flux: {
@@ -182,6 +191,13 @@ export default definePlugin({
                 const nickname = user && (GuildMemberStore.getNick(myGuildId, userId) ?? user);
                 const channel = ChannelStore.getChannel(id).name;
 
+                if (Settings.plugins.VcNarrator.notification) {
+                    showNotification({
+                        title: "Voice Channel",
+                        body: formatText(template, user, channel, displayName, nickname)
+                    });
+                    return;
+                }
                 speak(formatText(template, user, channel, displayName, nickname));
 
                 // updateStatuses(type, state, isMe);
@@ -194,6 +210,13 @@ export default definePlugin({
             if (!s) return;
 
             const event = s.mute || s.selfMute ? "unmute" : "mute";
+            if (Settings.plugins.VcNarrator.notification) {
+                showNotification({
+                    title: "Voice Channel",
+                    body: formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", "")
+                });
+                return;
+            }
             speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
         },
 
@@ -203,147 +226,158 @@ export default definePlugin({
             if (!s) return;
 
             const event = s.deaf || s.selfDeaf ? "undeafen" : "deafen";
-            speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
-        }
-    },
-
-    start() {
-        if (typeof speechSynthesis === "undefined" || speechSynthesis.getVoices().length === 0) {
-            new Logger("VcNarrator").warn(
-                "SpeechSynthesis not supported or no Narrator voices found. Thus, this plugin will not work. Check my Settings for more info"
-            );
-            return;
-        }
-
-    },
-
-    optionsCache: null as Record<string, PluginOptionsItem> | null,
-
-    get options() {
-        return this.optionsCache ??= {
-            voice: {
-                type: OptionType.SELECT,
-                description: "Narrator Voice",
-                options: window.speechSynthesis?.getVoices().map(v => ({
-                    label: v.name,
-                    value: v.voiceURI,
-                    default: v.default
-                })) ?? []
-            },
-            volume: {
-                type: OptionType.SLIDER,
-                description: "Narrator Volume",
-                default: 1,
-                markers: [0, 0.25, 0.5, 0.75, 1],
-                stickToMarkers: false
-            },
-            rate: {
-                type: OptionType.SLIDER,
-                description: "Narrator Speed",
-                default: 1,
-                markers: [0.1, 0.5, 1, 2, 5, 10],
-                stickToMarkers: false
-            },
-            sayOwnName: {
-                description: "Say own name",
-                type: OptionType.BOOLEAN,
-                default: false
-            },
-            latinOnly: {
-                description: "Strip non latin characters from names before saying them",
-                type: OptionType.BOOLEAN,
-                default: false
-            },
-            joinMessage: {
-                type: OptionType.STRING,
-                description: "Join Message",
-                default: "{{USER}} joined"
-            },
-            leaveMessage: {
-                type: OptionType.STRING,
-                description: "Leave Message",
-                default: "{{USER}} left"
-            },
-            moveMessage: {
-                type: OptionType.STRING,
-                description: "Move Message",
-                default: "{{USER}} moved to {{CHANNEL}}"
-            },
-            muteMessage: {
-                type: OptionType.STRING,
-                description: "Mute Message (only self for now)",
-                default: "{{USER}} Muted"
-            },
-            unmuteMessage: {
-                type: OptionType.STRING,
-                description: "Unmute Message (only self for now)",
-                default: "{{USER}} unmuted"
-            },
-            deafenMessage: {
-                type: OptionType.STRING,
-                description: "Deafen Message (only self for now)",
-                default: "{{USER}} deafened"
-            },
-            undeafenMessage: {
-                type: OptionType.STRING,
-                description: "Undeafen Message (only self for now)",
-                default: "{{USER}} undeafened"
+            if (Settings.plugins.VcNarrator.notification) {
+                showNotification({
+                    title: "Voice Channel",
+                    body: formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", "")
+                });
+                return;
+                speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
             }
-        };
-    },
+        },
 
-    settingsAboutComponent({ tempSettings: s }) {
-        const [hasVoices, hasEnglishVoices] = useMemo(() => {
-            const voices = speechSynthesis.getVoices();
-            return [voices.length !== 0, voices.some(v => v.lang.startsWith("en"))];
-        }, []);
+        start() {
+            if (typeof speechSynthesis === "undefined" || speechSynthesis.getVoices().length === 0) {
+                new Logger("VcNarrator").warn(
+                    "SpeechSynthesis not supported or no Narrator voices found. Thus, this plugin will not work. Check my Settings for more info"
+                );
+                return;
+            }
 
-        const types = useMemo(
-            () => Object.keys(Vencord.Plugins.plugins.VcNarrator.options!).filter(k => k.endsWith("Message")).map(k => k.slice(0, -7)),
-            [],
-        );
+        },
 
-        let errorComponent: React.ReactElement | null = null;
-        if (!hasVoices) {
-            let error = "No narrator voices found. ";
-            error += navigator.platform?.toLowerCase().includes("linux")
-                ? "Install speech-dispatcher or espeak and run Discord with the --enable-speech-dispatcher flag"
-                : "Try installing some in the Narrator settings of your Operating System";
-            errorComponent = <ErrorCard>{error}</ErrorCard>;
-        } else if (!hasEnglishVoices) {
-            errorComponent = <ErrorCard>You don't have any English voices installed, so the narrator might sound weird</ErrorCard>;
+        optionsCache: null as Record<string, PluginOptionsItem> | null,
+
+        get options() {
+            return this.optionsCache ??= {
+                notification: {
+                    type: OptionType.BOOLEAN,
+                    description: "Send Notifications instead of speaking",
+                    default: false
+                },
+                voice: {
+                    type: OptionType.SELECT,
+                    description: "Narrator Voice",
+                    options: window.speechSynthesis?.getVoices().map(v => ({
+                        label: v.name,
+                        value: v.voiceURI,
+                        default: v.default
+                    })) ?? []
+                },
+                volume: {
+                    type: OptionType.SLIDER,
+                    description: "Narrator Volume",
+                    default: 1,
+                    markers: [0, 0.25, 0.5, 0.75, 1],
+                    stickToMarkers: false
+                },
+                rate: {
+                    type: OptionType.SLIDER,
+                    description: "Narrator Speed",
+                    default: 1,
+                    markers: [0.1, 0.5, 1, 2, 5, 10],
+                    stickToMarkers: false
+                },
+                sayOwnName: {
+                    description: "Say own name",
+                    type: OptionType.BOOLEAN,
+                    default: false
+                },
+                latinOnly: {
+                    description: "Strip non latin characters from names before saying them",
+                    type: OptionType.BOOLEAN,
+                    default: false
+                },
+                joinMessage: {
+                    type: OptionType.STRING,
+                    description: "Join Message",
+                    default: "{{USER}} joined"
+                },
+                leaveMessage: {
+                    type: OptionType.STRING,
+                    description: "Leave Message",
+                    default: "{{USER}} left"
+                },
+                moveMessage: {
+                    type: OptionType.STRING,
+                    description: "Move Message",
+                    default: "{{USER}} moved to {{CHANNEL}}"
+                },
+                muteMessage: {
+                    type: OptionType.STRING,
+                    description: "Mute Message (only self for now)",
+                    default: "{{USER}} Muted"
+                },
+                unmuteMessage: {
+                    type: OptionType.STRING,
+                    description: "Unmute Message (only self for now)",
+                    default: "{{USER}} unmuted"
+                },
+                deafenMessage: {
+                    type: OptionType.STRING,
+                    description: "Deafen Message (only self for now)",
+                    default: "{{USER}} deafened"
+                },
+                undeafenMessage: {
+                    type: OptionType.STRING,
+                    description: "Undeafen Message (only self for now)",
+                    default: "{{USER}} undeafened"
+                }
+            };
+        },
+
+        settingsAboutComponent({ tempSettings: s }) {
+            const [hasVoices, hasEnglishVoices] = useMemo(() => {
+                const voices = speechSynthesis.getVoices();
+                return [voices.length !== 0, voices.some(v => v.lang.startsWith("en"))];
+            }, []);
+
+            const types = useMemo(
+                () => Object.keys(Vencord.Plugins.plugins.VcNarrator.options!).filter(k => k.endsWith("Message")).map(k => k.slice(0, -7)),
+                [],
+            );
+
+            let errorComponent: React.ReactElement | null = null;
+            if (!hasVoices) {
+                let error = "No narrator voices found. ";
+                error += navigator.platform?.toLowerCase().includes("linux")
+                    ? "Install speech-dispatcher or espeak and run Discord with the --enable-speech-dispatcher flag"
+                    : "Try installing some in the Narrator settings of your Operating System";
+                errorComponent = <ErrorCard>{error}</ErrorCard>;
+            } else if (!hasEnglishVoices) {
+                errorComponent = <ErrorCard>You don't have any English voices installed, so the narrator might sound weird</ErrorCard>;
+            }
+
+            return (
+                <Forms.FormSection>
+                    <Forms.FormText>
+                        You can customise the spoken messages below. You can disable specific messages by setting them to nothing
+                    </Forms.FormText>
+                    <Forms.FormText>
+                        The special placeholders <code>{"{{USER}}"}</code>, <code>{"{{DISPLAY_NAME}}"}</code>, <code>{"{{NICKNAME}}"}</code> and <code>{"{{CHANNEL}}"}</code>{" "}
+                        will be replaced with the user's name (nothing if it's yourself), the user's display name, the user's nickname on current server and the channel's name respectively
+                    </Forms.FormText>
+                    {hasEnglishVoices && (
+                        <>
+                            <Forms.FormTitle className={Margins.top20} tag="h3">Play Example Sounds</Forms.FormTitle>
+                            <div
+                                style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(4, 1fr)",
+                                    gap: "1rem",
+                                }}
+                                className={"vc-narrator-buttons"}
+                            >
+                                {types.map(t => (
+                                    <Button key={t} onClick={() => playSample(s, t)}>
+                                        {wordsToTitle([t])}
+                                    </Button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                    {errorComponent}
+                </Forms.FormSection>
+            );
         }
-
-        return (
-            <Forms.FormSection>
-                <Forms.FormText>
-                    You can customise the spoken messages below. You can disable specific messages by setting them to nothing
-                </Forms.FormText>
-                <Forms.FormText>
-                    The special placeholders <code>{"{{USER}}"}</code>, <code>{"{{DISPLAY_NAME}}"}</code>, <code>{"{{NICKNAME}}"}</code> and <code>{"{{CHANNEL}}"}</code>{" "}
-                    will be replaced with the user's name (nothing if it's yourself), the user's display name, the user's nickname on current server and the channel's name respectively
-                </Forms.FormText>
-                {hasEnglishVoices && (
-                    <>
-                        <Forms.FormTitle className={Margins.top20} tag="h3">Play Example Sounds</Forms.FormTitle>
-                        <div
-                            style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(4, 1fr)",
-                                gap: "1rem",
-                            }}
-                            className={"vc-narrator-buttons"}
-                        >
-                            {types.map(t => (
-                                <Button key={t} onClick={() => playSample(s, t)}>
-                                    {wordsToTitle([t])}
-                                </Button>
-                            ))}
-                        </div>
-                    </>
-                )}
-                {errorComponent}
-            </Forms.FormSection>
-        );
-    }
-});
+    });
