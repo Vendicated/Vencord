@@ -62,7 +62,7 @@ let shouldAttemptRecover = true;
 export default definePlugin({
     name: "CrashHandler",
     description: "Utility plugin for handling and possibly recovering from crashes without a restart",
-    authors: [Devs.Nuckyz, Devs.million1156],
+    authors: [Devs.Nuckyz],
     enabledByDefault: true,
 
     settings,
@@ -98,7 +98,10 @@ export default definePlugin({
                         });
                     } catch { }
 
-                    const shouldEnableSafeMode = confirm("Discord has crashed two times rapidly, would you like to enable safe mode?");
+                    const shouldEnableSafeMode = confirm(
+                        "Discord has crashed two times rapidly. Would you like to enable Vencord Safe Mode? " +
+                        "This will start Discord in a safe mode, disabling all plugins and allowing you to disable any problematic ones."
+                    );
                     if (shouldEnableSafeMode) {
                         Settings.safeMode = true;
                         relaunch();

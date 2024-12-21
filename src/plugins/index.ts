@@ -136,8 +136,8 @@ export const startAllPlugins = traceFunction("startAllPlugins", function startAl
     for (const name in Plugins) {
         if (isPluginEnabled(name) && (!IS_REPORTER || isReporterTestable(Plugins[name], ReporterTestable.Start))) {
             const p = Plugins[name];
-            const startAt = p.startAt ?? StartAt.WebpackReady;
 
+            const startAt = p.startAt ?? StartAt.WebpackReady;
             if (startAt !== target) continue;
 
             startPlugin(Plugins[name]);
