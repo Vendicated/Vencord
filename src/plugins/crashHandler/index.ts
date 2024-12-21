@@ -58,7 +58,7 @@ const settings = definePluginSettings({
 
 let hasCrashedOnce = false;
 let isRecovering = false;
-let shouldAttemptRecover = false;
+let shouldAttemptRecover = true;
 
 export default definePlugin({
     name: "CrashHandler",
