@@ -27,7 +27,6 @@ import { maybePromptToUpdate } from "@utils/updater";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 
-
 const CrashHandlerLogger = new Logger("CrashHandler");
 
 const { ModalStack, DraftManager } = proxyLazyWebpack(() => {
