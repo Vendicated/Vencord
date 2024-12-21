@@ -54,6 +54,13 @@ export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
     const patch = newPatch as Patch;
     patch.plugin = pluginName;
 
+    // Skip patches in safe mode
+    if (settings[pluginName].safeMode === true) {
+        logger.debug(`Patch ${pluginName} has safe mode enabled, skipping..`);
+        settings[pluginName].safeMode = false; // Reset safe mode
+        return;
+    }
+
     if (IS_REPORTER) {
         delete patch.predicate;
         delete patch.group;
@@ -138,7 +145,6 @@ export const startAllPlugins = traceFunction("startAllPlugins", function startAl
             const p = Plugins[name];
             const startAt = p.startAt ?? StartAt.WebpackReady;
             if (startAt !== target) continue;
-            if (settings[name].safeMode === true) continue;
             startPlugin(Plugins[name]);
         }
     }
@@ -218,9 +224,6 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     console.log(name);
 
     console.log(settings[name].safeMode);
-    if (Plugins[name].safeMode === true) {
-        console.warn(`Skipping Plugin ${name} has safe mode enabled omg!!!`);
-    }
     if (p.start) {
         logger.info("Starting plugin", name);
         if (p.started) {
