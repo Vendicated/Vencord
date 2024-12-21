@@ -1,0 +1,29 @@
+.vc-role-color-wrapper {
+    --muted: var(--text-muted);
+    --normal: var(--text-normal);
+    --header: var(--header-primary);
+    --e-title: var(--embed-title);
+}
+
+.vc-role-color-wrapper div {
+    --text-muted: color-mix(
+        in oklab,
+        var(--role-color) var(--saturation),
+        var(--muted)
+    );
+    --text-normal: color-mix(
+        in oklab,
+        var(--role-color) var(--saturation),
+        var(--normal)
+    );
+    --header-primary: color-mix(
+        in oklab,
+        var(--role-color) var(--saturation),
+        var(--header)
+    );
+    --embed-title: color-mix(
+        in oklab,
+        var(--role-color) var(--saturation),
+        var(--e-title)
+    );
+}
