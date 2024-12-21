@@ -221,9 +221,7 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const { name, commands, contextMenus } = p;
-    console.log(name);
 
-    console.log(settings[name].safeMode);
     if (p.start) {
         logger.info("Starting plugin", name);
         if (p.started) {
@@ -231,7 +229,6 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
             return false;
         }
         try {
-            logger.info("Starting plugin", name);
             if (!settings[name].safeMode === true) p.start();
         } catch (e) {
             logger.error(`Failed to start ${name}\n`, e);
