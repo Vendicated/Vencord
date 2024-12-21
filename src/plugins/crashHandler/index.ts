@@ -98,8 +98,8 @@ export default definePlugin({
                     } catch { }
 
                     const shouldEnableSafeMode = confirm(
-                        "Discord has crashed two times rapidly. Would you like to enable Vencord Safe Mode? " +
-                        "This will start Discord in a safe mode, disabling all plugins and allowing you to disable any problematic ones."
+                        "Discord has crashed two times rapidly. Would you like to relaunch with Vencord safe mode? " +
+                        "This will temporarily disable all plugins and allow you to permanently disable any problematic ones."
                     );
                     if (shouldEnableSafeMode) {
                         Settings.safeMode = true;
