@@ -17,14 +17,16 @@
 */
 
 import { showNotification } from "@api/Notifications";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { closeAllModals } from "@utils/modal";
+import { relaunch } from "@utils/native";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
 import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
+
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 
@@ -60,7 +62,7 @@ let shouldAttemptRecover = true;
 export default definePlugin({
     name: "CrashHandler",
     description: "Utility plugin for handling and possibly recovering from crashes without a restart",
-    authors: [Devs.Nuckyz],
+    authors: [Devs.Nuckyz, Devs.million1156],
     enabledByDefault: true,
 
     settings,
@@ -87,6 +89,28 @@ export default definePlugin({
             try {
                 // Prevent a crash loop with an error that could not be handled
                 if (!shouldAttemptRecover) {
+                    const shouldEnableSafeMode = confirm("Discord has crashed two times rapidly, would you like to enable safe mode?");
+                    if (shouldEnableSafeMode) {
+                        // Enable "safe mode" (i.e. disable plugin functionality) (last-ditch effort to prevent a crash loop)
+                        try {
+                            CrashHandlerLogger.debug("Enabling safe mode..");
+                            const pluginSettings = Settings.plugins;
+                            for (const pluginName in pluginSettings) {
+                                if (pluginSettings[pluginName].enabled && !pluginSettings[pluginName].required && !pluginSettings[pluginName].hidden && !pluginName.endsWith("API")) {
+                                    pluginSettings[pluginName].safeMode = true;
+                                }
+                            }
+                            showNotification({
+                                color: "#eed202",
+                                title: "Safe mode enabled!",
+                                body: "Plugin functionality has been disabled to prevent further crashes! Relaunching..",
+                                noPersist: false
+                            });
+                            relaunch();
+                        } catch (err) {
+                            CrashHandlerLogger.error("Failed to enable safe mode", err);
+                        }
+                    }
                     try {
                         showNotification({
                             color: "#eed202",

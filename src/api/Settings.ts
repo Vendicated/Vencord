@@ -57,6 +57,7 @@ export interface Settings {
     plugins: {
         [plugin: string]: {
             enabled: boolean;
+            safeMode: boolean;
             [setting: string]: any;
         };
     };

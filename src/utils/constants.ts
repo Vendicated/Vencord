@@ -37,6 +37,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Vee",
         id: 343383572805058560n
     },
+    million1156: {
+        name: "million1156",
+        id: 96294210021376000n
+    },
     Arjix: {
         name: "ArjixWasTaken",
         id: 674710789138939916n,

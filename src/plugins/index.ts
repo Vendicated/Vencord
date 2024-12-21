@@ -46,13 +46,20 @@ export function isPluginEnabled(p: string) {
     return (
         Plugins[p]?.required ||
         Plugins[p]?.isDependency ||
-        settings[p]?.enabled
+        (settings[p]?.enabled && !settings.safeMode)
     ) ?? false;
 }
 
 export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
     const patch = newPatch as Patch;
     patch.plugin = pluginName;
+
+    // Skip patches in safe mode
+    if (settings[pluginName].safeMode === true) {
+        logger.debug(`Patch ${pluginName} has safe mode enabled, skipping..`);
+        settings[pluginName].safeMode = false; // Reset safe mode
+        return;
+    }
 
     if (IS_REPORTER) {
         delete patch.predicate;
@@ -136,10 +143,8 @@ export const startAllPlugins = traceFunction("startAllPlugins", function startAl
     for (const name in Plugins) {
         if (isPluginEnabled(name) && (!IS_REPORTER || isReporterTestable(Plugins[name], ReporterTestable.Start))) {
             const p = Plugins[name];
-
             const startAt = p.startAt ?? StartAt.WebpackReady;
             if (startAt !== target) continue;
-
             startPlugin(Plugins[name]);
         }
     }
@@ -224,7 +229,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
             return false;
         }
         try {
-            p.start();
+            if (!settings[name].safeMode === true) p.start();
         } catch (e) {
             logger.error(`Failed to start ${name}\n`, e);
             return false;
@@ -249,14 +254,17 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         subscribePluginFluxEvents(p, FluxDispatcher);
     }
 
-
     if (contextMenus) {
         logger.debug("Adding context menus patches of plugin", name);
         for (const navId in contextMenus) {
             addContextMenuPatch(navId, contextMenus[navId]);
         }
     }
-
+    // console.log(settings[name]);
+    if (p.safeMode === true) {
+        logger.debug("Skipping plugin", name, "due to safe mode");
+        p.safeMode = false;
+    }
     return true;
 }, p => `startPlugin ${p.name}`);
 

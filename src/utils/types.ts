@@ -99,6 +99,10 @@ export interface PluginDef {
      */
     startAt?: StartAt,
     /**
+     * Whether safe-mode is enabled for the plugin
+     */
+    safeMode?: boolean;
+    /**
      * Which parts of the plugin can be tested by the reporter. Defaults to all parts
      */
     reporterTestable?: number;

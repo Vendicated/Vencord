@@ -23,6 +23,7 @@ export interface ISettingElementProps<T extends PluginOptionBase> {
     onChange(newValue: any): void;
     pluginSettings: {
         [setting: string]: any;
+        safeMode: boolean;
         enabled: boolean;
     };
     id: string;
