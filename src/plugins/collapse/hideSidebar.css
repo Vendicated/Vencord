@@ -1,0 +1,9 @@
+div[class^="sidebar_"] {
+    display: var(--sidebar-display, flex) !important;
+}
+
+@media (width < 700px) {
+    div[class^="sidebar_"] {
+        display: var(--sidebar-auto-display, flex) !important;
+    }
+}
