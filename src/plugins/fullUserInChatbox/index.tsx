@@ -35,7 +35,7 @@ export default definePlugin({
 
     UserMentionComponent: ErrorBoundary.wrap((props: UserMentionComponentProps) => {
         return <UserMentionComponent
-            // this seems to be constant
+            // This seems to be constant
             className="mention"
             userId={props.id}
             channelId={props.channelId}
