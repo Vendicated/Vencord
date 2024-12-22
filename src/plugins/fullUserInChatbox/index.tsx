@@ -19,7 +19,7 @@ interface UserMentionComponentProps {
 }
 
 export default definePlugin({
-    name: "FullUserInChatbox",
+    name: "testa",
     description: "Makes the user mention in the chatbox have more functionalities, like right clicking",
     authors: [Devs.sadan],
 
@@ -33,30 +33,28 @@ export default definePlugin({
         }
     ],
 
-    UserMentionComponent(props: UserMentionComponentProps) {
-        return <ErrorBoundary
-            fallback={() => {
-                let username: string | null = null;
-                try {
-                    username = UserStore.getUser(props.id)?.username;
-                    if (username == null) {
-                        throw Error("Error getting fallback username");
-                    }
-                } catch (e) {
-                    console.error(e);
+    UserMentionComponent: ErrorBoundary.wrap((props: UserMentionComponentProps) => {
+        return <UserMentionComponent
+            // this seems to be constant
+            className="mention"
+            userId={props.id}
+            channelId={props.channelId}
+        />;
+    }, {
+        fallback: props => {
+            let username: string | null = null;
+            try {
+                username = UserStore.getUser((props as any)?.children?.props?.id)?.username;
+                if (username == null) {
+                    throw Error("Error getting fallback username");
                 }
-                username ||= "Unknown User";
-                return <span style={{
-                    color: "red",
-                }}>@{username}</span>;
-            }}
-        >
-            <UserMentionComponent
-                // this seems to be constant
-                className="mention"
-                userId={props.id}
-                channelId={props.channelId}
-            />
-        </ErrorBoundary>;
-    },
+            } catch (e) {
+                console.error(e);
+            }
+            username ||= "Unknown User";
+            return <span style={{
+                color: "red",
+            }}>@{username}</span>;
+        }
+    }),
 });
