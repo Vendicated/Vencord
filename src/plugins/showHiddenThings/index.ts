@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginSettingDef } from "@utils/types";
 
@@ -35,7 +35,6 @@ const settings = definePluginSettings({
     disableDisallowedDiscoveryFilters: opt("Disable filters in Server Discovery search that hide NSFW & disallowed servers."),
 });
 
-migratePluginSettings("ShowHiddenThings", "ShowTimeouts");
 export default definePlugin({
     name: "ShowHiddenThings",
     tags: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters"],
@@ -68,11 +67,20 @@ export default definePlugin({
         },
         // fixes a bug where Members page must be loaded to see highest role, why is Discord depending on MemberSafetyStore.getEnhancedMember for something that can be obtained here?
         {
-            find: "Messages.GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL,allowOverflow",
+            find: "#{intl::GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL}",
             predicate: () => settings.store.showModView,
             replacement: {
                 match: /(role:)\i(?=,guildId.{0,100}role:(\i\[))/,
                 replace: "$1$2arguments[0].member.highestRoleId]",
+            }
+        },
+        // allows you to open mod view on yourself
+        {
+            find: ".MEMBER_SAFETY,{modViewPanel:",
+            predicate: () => settings.store.showModView,
+            replacement: {
+                match: /\i(?=\?null)/,
+                replace: "false"
             }
         },
         {
@@ -107,7 +115,7 @@ export default definePlugin({
             predicate: () => settings.store.disableDisallowedDiscoveryFilters,
             all: true,
             replacement: {
-                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0\}\)/g,
+                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0,rejectWithError:!1\}\)/g,
                 replace: "Promise.resolve({ body: { valid: true } })"
             }
         }

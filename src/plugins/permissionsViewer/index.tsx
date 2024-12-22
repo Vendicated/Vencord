@@ -56,11 +56,6 @@ export const settings = definePluginSettings({
             { label: "Lowest Role", value: PermissionsSortOrder.LowestRole }
         ]
     },
-    defaultPermissionsDropdownState: {
-        description: "Whether the permissions dropdown on user popouts should be open by default",
-        type: OptionType.BOOLEAN,
-        default: false
-    }
 });
 
 function MenuItem(guildId: string, id?: string, type?: MenuItemParentType) {
@@ -170,7 +165,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".VIEW_ALL_ROLES,",
+            find: "#{intl::VIEW_ALL_ROLES}",
             replacement: {
                 match: /\.expandButton,.+?null,/,
                 replace: "$&$self.ViewPermissionsButton(arguments[0]),"
@@ -182,9 +177,9 @@ export default definePlugin({
         <Popout
             position="bottom"
             align="center"
-            renderPopout={() => (
+            renderPopout={({ closePopout }) => (
                 <Dialog className={PopoutClasses.container} style={{ width: "500px" }}>
-                    <UserPermissions guild={guild} guildMember={guildMember} forceOpen />
+                    <UserPermissions guild={guild} guildMember={guildMember} closePopout={closePopout} />
                 </Dialog>
             )}
         >
