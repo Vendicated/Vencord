@@ -203,7 +203,8 @@ export default definePlugin({
                 Application name: Discord Rich Presence <br />
                 Application description: (personal use) <br /> <br />
 
-                And copy the API key (not the shared secret!)
+                And copy the API key (not the shared secret!) <br />
+                Make sure "Hide recent listening information" is disabled in your last.fm privacy settings.
             </Forms.FormText>
         </>
     ),
