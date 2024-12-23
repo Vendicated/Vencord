@@ -9,10 +9,7 @@ import { IpcMainInvokeEvent } from "electron";
 
 export async function openLink(_: IpcMainInvokeEvent, url: string, browserPath: string): Promise<{ success: boolean; error?: string; }> {
     return new Promise(resolve => {
-        const command = `"${browserPath}" "${url}"`;
-
-        console.log("11");
-        exec(command, error => {
+        exec(`"${browserPath}" "${url}"`, error => {
             if (error) {
                 resolve({
                     error: `Code: ${error.code}. ${error.message}`,
