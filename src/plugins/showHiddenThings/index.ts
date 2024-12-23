@@ -95,7 +95,7 @@ export default definePlugin({
         },
         // disable redirect to sidebar
         {
-            find: /\i\.isCommunity\(\).{0,300}WindowLaunchIcon/,
+            find: "GuildSettingsMembersRow",
             predicate: () => settings.store.showMembersPageInSettings,
             replacement: {
                 match: /\i\.isCommunity\(\)/,
