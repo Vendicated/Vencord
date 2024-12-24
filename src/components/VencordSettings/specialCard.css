@@ -34,6 +34,7 @@
     color: black;
     font-size: 1em;
     margin-top: 1em;
+    white-space: pre-line;
 }
 
 .vc-special-seperator {
