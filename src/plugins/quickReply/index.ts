@@ -68,8 +68,12 @@ export default definePlugin({
     },
 
     flux: {
-        DELETE_PENDING_REPLY: () => { replyIdx = -1; },
-        MESSAGE_END_EDIT: () => { editIdx = -1; },
+        DELETE_PENDING_REPLY() {
+            replyIdx = -1;
+        },
+        MESSAGE_END_EDIT() {
+            editIdx = -1;
+        },
         MESSAGE_START_EDIT: onStartEdit,
         CREATE_PENDING_REPLY: onCreatePendingReply
     }
