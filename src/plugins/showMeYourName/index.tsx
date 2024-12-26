@@ -255,14 +255,15 @@ export default definePlugin({
 
     renderUsername: ErrorBoundary.wrap((props: any) => {
         const renderType = props.className === "mention" ? "mention" : "message";
-        let author, isRepliedMessage;
+        let author: any = null;
+        let isRepliedMessage = false;
         let mentionSymbol = "";
 
         if (renderType === "mention") {
             const channel = ChannelStore.getChannel(props.channelId) || {};
             const usr = UserStore.getUser(props.userId) || {};
             const mem = GuildMemberStore.getMember(channel.guild_id, props.userId) || {};
-            author = { ...usr, ...mem };
+            author = usr && mem ? { ...usr, ...mem } : usr || mem || null;
             isRepliedMessage = false;
             mentionSymbol = settings.store.hideDefaultAtSign ? "" : "@";
         } else if (renderType === "message") {
@@ -274,7 +275,7 @@ export default definePlugin({
             const channel = ChannelStore.getChannel(props.message.channel_id) || {};
             const usr = UserStore.getUser(props.message.author.id) || {};
             const mem = GuildMemberStore.getMember(channel.guild_id, props.message.author.id) || {};
-            author = { ...usr, ...mem };
+            author = usr && mem ? { ...usr, ...mem } : usr || mem || null;
             isRepliedMessage = props.isRepliedMessage;
             mentionSymbol = settings.store.hideDefaultAtSign ? "" : props.withMentionPrefix ? "@" : "";
         }
@@ -283,10 +284,10 @@ export default definePlugin({
             return <>{mentionSymbol}Unknown</>;
         }
 
-        const user: any = author;
+        const user = author;
         const username = StreamerModeStore.enabled && settings.store.respectStreamerMode ? user.username[0] + "..." : user.username;
         const display = StreamerModeStore.enabled && settings.store.respectStreamerMode && user.globalName?.toLowerCase() === user.username.toLowerCase() ? user.globalName[0] + "..." : user.globalName || "";
-        const nick = StreamerModeStore.enabled && settings.store.respectStreamerMode && author?.nick?.toLowerCase() === user.username.toLowerCase() ? author.nick[0] + "..." : author?.nick || "";
+        const nick = StreamerModeStore.enabled && settings.store.respectStreamerMode && user.nick?.toLowerCase() === user.username.toLowerCase() ? user.nick[0] + "..." : user.nick || "";
 
         try {
             if (isRepliedMessage && !settings.store.replies) {
