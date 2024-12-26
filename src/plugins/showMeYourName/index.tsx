@@ -79,13 +79,18 @@ const settings = definePluginSettings({
     replies: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Also display extra names in reply previews.",
+        description: "Also display extra names in replies.",
     },
     mentions: {
         type: OptionType.BOOLEAN,
-        default: true,
+        default: false,
         description: "Also display extra names in mentions.",
         restartNeeded: true
+    },
+    hideDefaultAtSign: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Hide the default '@' symbol before the name in mentions and replies. Only applied if either feature is enabled.",
     },
     respectStreamerMode: {
         type: OptionType.BOOLEAN,
@@ -251,6 +256,7 @@ export default definePlugin({
     renderUsername: ErrorBoundary.wrap((props: any) => {
         const renderType = props.className === "mention" ? "mention" : "message";
         let author, isRepliedMessage;
+        let mentionSymbol = "";
 
         if (renderType === "mention") {
             const channel = ChannelStore.getChannel(props.channelId) || {};
@@ -258,13 +264,23 @@ export default definePlugin({
             const mem = GuildMemberStore.getMember(channel.guild_id, props.userId) || {};
             author = { ...usr, ...mem };
             isRepliedMessage = false;
+            mentionSymbol = settings.store.hideDefaultAtSign ? "" : "@";
         } else if (renderType === "message") {
-            author = { ...props.message.author, ...props.author };
+            // props.message.author only has a globalName attribute.
+            // props.author only has a nick attribute, but it is overwritten by the globalName if no nickname is set.
+            // getUser only has a globalName attribute.
+            // getMember only has a nick attribute, and it is null if no nickname is set.
+            // Therefore just using the author props is not enough for an accurate result and we instead need to combine the results of getUser and getMember.
+            const channel = ChannelStore.getChannel(props.message.channel_id) || {};
+            const usr = UserStore.getUser(props.message.author.id) || {};
+            const mem = GuildMemberStore.getMember(channel.guild_id, props.message.author.id) || {};
+            author = { ...usr, ...mem };
             isRepliedMessage = props.isRepliedMessage;
+            mentionSymbol = settings.store.hideDefaultAtSign ? "" : props.withMentionPrefix ? "@" : "";
         }
 
         if (!author) {
-            return <>Unknown</>;
+            return <>{mentionSymbol}Unknown</>;
         }
 
         const user: any = author;
@@ -274,7 +290,7 @@ export default definePlugin({
 
         try {
             if (isRepliedMessage && !settings.store.replies) {
-                return <>{nick || display || username}</>;
+                return <>{mentionSymbol}{nick || display || username}</>;
             }
 
             const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
@@ -313,6 +329,7 @@ export default definePlugin({
 
             return (
                 <>
+                    {mentionSymbol && <span>{mentionSymbol}</span>}
                     {(
                         <span>
                             {values[first].alwaysShowSymbols && <span style={values[first].symbolColor}>
@@ -351,7 +368,7 @@ export default definePlugin({
             );
         } catch (e) {
             console.error(e);
-            return <>{StreamerModeStore.enabled && settings.store.respectStreamerMode ? ((nick || display || username)[0] + "...") : (nick || display || username)}</>;
+            return <>{mentionSymbol}{StreamerModeStore.enabled && settings.store.respectStreamerMode ? ((nick || display || username)[0] + "...") : (nick || display || username)}</>;
         }
     }, { noop: true }),
 });
