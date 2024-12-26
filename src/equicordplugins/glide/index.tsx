@@ -142,6 +142,11 @@ const settings = definePluginSettings({
         default: "0.2",
         onChange: injectCSS
     },
+    colorsEnabled: {
+        type: OptionType.BOOLEAN,
+        description: "Whether or not to enable theming",
+        onChange: () => injectCSS()
+    },
     ColorPreset: {
         type: OptionType.SELECT,
         description: "Some pre-made color presets (more soon hopefully)",
@@ -238,18 +243,20 @@ function parseFontContent() {
     return fontName;
 }
 function injectCSS() {
+    if (Settings.plugins.Glide.enabled) {
 
-    const fontName = parseFontContent();
-    const theCSS = getCSS(fontName);
+        const fontName = parseFontContent();
+        const theCSS = getCSS(fontName);
 
-    var elementToRemove = document.getElementById("GlideStyleInjection");
-    if (elementToRemove) {
-        elementToRemove.remove();
+        const elementToRemove = document.getElementById("GlideStyleInjection");
+        if (elementToRemove) {
+            elementToRemove.remove();
+        }
+        const styleElement = document.createElement("style");
+        styleElement.id = "GlideStyleInjection";
+        styleElement.textContent = theCSS;
+        document.documentElement.appendChild(styleElement);
     }
-    const styleElement = document.createElement("style");
-    styleElement.id = "GlideStyleInjection";
-    styleElement.textContent = theCSS;
-    document.documentElement.appendChild(styleElement);
 }
 
 function getCSS(fontName) {
@@ -318,13 +325,15 @@ function getCSS(fontName) {
         {
             --animspeed: ${Settings.plugins.Glide.animationSpeed + "s"};
             --font-primary: ${(fontName.length > 0 ? fontName : "Nunito")};
-            --accent: #${Settings.plugins.Glide.Accent};
-            --bgcol: #${Settings.plugins.Glide.Primary};
-            --text: #${Settings.plugins.Glide.Text};
-            --brand: #${Settings.plugins.Glide.Brand};
-            --mutedtext: ${mute(Settings.plugins.Glide.Text, 20)};
-            --mutedbrand: ${mute(Settings.plugins.Glide.Brand, 10)};
-            --mutedaccent: ${mute(Settings.plugins.Glide.Accent, 10)};
+            ${Settings.plugins.Glide.colorsEnabled ? `
+                --accent: #${Settings.plugins.Glide.Accent};
+                --bgcol: #${Settings.plugins.Glide.Primary};
+                --text: #${Settings.plugins.Glide.Text};
+                --brand: #${Settings.plugins.Glide.Brand};
+                --mutedtext: ${mute(Settings.plugins.Glide.Text, 20)};
+                --mutedbrand: ${mute(Settings.plugins.Glide.Brand, 10)};
+                --mutedaccent: ${mute(Settings.plugins.Glide.Accent, 10)};
+            ` : ""}
         }
 :root
 {
@@ -341,7 +350,7 @@ function getCSS(fontName) {
 
 
     /*COLOR ASSIGNING  (most of these probably effect more than whats commented)*/
-
+    ${Settings.plugins.Glide.colorsEnabled ? `
         /*accent based*/
 
             /*buttons*/
@@ -521,7 +530,7 @@ function getCSS(fontName) {
                     background-color: var(--primary);
                 }
                 ${settings.store.pastelStatuses ?
-            `
+                `
                     /*Pastel statuses*/
                     rect[fill='#23a55a'], svg[fill='#23a55a'] {
                         fill: #80c968 !important;
@@ -546,7 +555,7 @@ function getCSS(fontName) {
                 .unread_d8bfb3
                 {
                     background-color: var(--text) !important;
-                }
+                }` : ""}
 
         /*ROUNDING (rounding)*/
 
@@ -642,7 +651,7 @@ function getCSS(fontName) {
                 }
 
                 /*Hide icon on file uploading status*/
-                .icon_b52bef
+                .icon_f46c86
                 {
                     display: none;
                 }

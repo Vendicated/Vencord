@@ -28,7 +28,7 @@ export default definePlugin({
     authors: [EquicordDevs.vappstar],
     settingsAboutComponent: () => <>
         <Forms.FormText className="platform-warning">
-            This plugin will cause discord to use more resources than normal.
+            This plugin will cause discord to use more resources than normal
         </Forms.FormText>
     </>,
     patches: [

@@ -18,36 +18,18 @@
 
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findAll } from "@webpack";
 
 export default definePlugin({
-    name: "DisableAnimations",
-    description: "Disables most of Discord's animations.",
-    authors: [EquicordDevs.seth],
-    start() {
-        this.springs = findAll((mod) => {
-            if (!mod.Globals) return false;
-            return true;
-        });
-
-        for (const spring of this.springs) {
-            spring.Globals.assign({
-                skipAnimation: true,
-            });
+    name: "HideScreenShare",
+    description: "Hide your screen share by default",
+    authors: [EquicordDevs.thororen],
+    patches: [
+        {
+            find: '"self-stream-hide"',
+            replacement: {
+                match: /return (\i)?(.*?onConfirm:\(\)=>((\i)\(!\i\)))/,
+                replace: "let $4 = null; if ($4 !== null) return $3; return $1$2"
+            }
         }
-
-        this.css = document.createElement("style");
-        this.css.innerText = "* { transition: none !important; animation: none !important; }";
-
-        document.head.appendChild(this.css);
-    },
-    stop() {
-        for (const spring of this.springs) {
-            spring.Globals.assign({
-                skipAnimation: false,
-            });
-        }
-
-        if (this.css) this.css.remove();
-    }
+    ],
 });
