@@ -185,7 +185,7 @@ export default definePlugin({
                 {
                     // Decide if we should render the expanded folder background if we are rendering the Better Folders sidebar
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
-                    match: /(?<=\.wrapper,children:\[)/,
+                    match: /(?<=\.isExpanded\),children:\[)/,
                     replace: "$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)&&"
                 },
                 {
