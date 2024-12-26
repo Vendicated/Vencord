@@ -9,8 +9,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore } from "@webpack/common";
-import { Message, User } from "discord-types/general";
+import { ChannelStore, GuildMemberStore, UserStore } from "@webpack/common";
+import { GuildMember, User } from "discord-types/general";
 
 const StreamerModeStore = findStoreLazy("StreamerModeStore");
 const colorPattern = /^#(?:[\da-f]{3}){1,2}$|^#(?:[\da-f]{4}){1,2}$|(rgb|hsl)a?\((\s*-?\d+%?\s*,){2}(\s*-?\d+%?\s*)\)|(rgb|hsl)a?\((\s*-?\d+%?\s*,){3}\s*(0|(0?\.\d+)|1)\)$/iu;
@@ -51,7 +51,7 @@ function validSymbols(value: string) {
     return value === "" || (value.length <= 3 && /^[\p{S}\p{P}]{1,3}$/u.test(value));
 }
 
-function resolveColor(channelId: string, userId: string, savedColor: string, fallbackColor: string) {
+function resolveColor(user: User | GuildMember, savedColor: string, fallbackColor: string) {
     if (!savedColor.trim()) {
         return { color: fallbackColor };
     }
@@ -63,9 +63,7 @@ function resolveColor(channelId: string, userId: string, savedColor: string, fal
         }
 
         const percentage = percentageText ? 1 + (parseInt(percentageText) / 100) : 1;
-        const channel = ChannelStore.getChannel(channelId);
-        const member = channel ? GuildMemberStore.getMember(channel.guild_id, userId) : null;
-        const roleColor = member?.colorString;
+        const roleColor = (user as GuildMember)?.colorString || null;
 
         if (!roleColor) {
             return { color: fallbackColor };
@@ -77,19 +75,17 @@ function resolveColor(channelId: string, userId: string, savedColor: string, fal
     }
 }
 
-interface UsernameProps {
-    author: { nick: string; };
-    message: Message;
-    withMentionPrefix?: boolean;
-    isRepliedMessage: boolean;
-    userOverride?: User;
-}
-
 const settings = definePluginSettings({
     replies: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Also display extra names in reply previews.",
+    },
+    mentions: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Also display extra names in mentions.",
+        restartNeeded: true
     },
     respectStreamerMode: {
         type: OptionType.BOOLEAN,
@@ -232,7 +228,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display usernames, nicknames, display names, or any permutation thereof in chat. Nicknames are per-server and display names are global. You will need to hover over old messages to update them after changing any settings.",
-    authors: [Devs.Rini, Devs.TheKodeToad, Devs.Etorix],
+    authors: [Devs.Rini, Devs.TheKodeToad, Devs.Etorix, Devs.sadan],
     patches: [
         {
             find: '?"@":""',
@@ -241,11 +237,37 @@ export default definePlugin({
                 replace: "$self.renderUsername(arguments[0])}"
             }
         },
+        {
+            find: "missing user\"",
+            predicate: () => settings.store.mentions,
+            replacement: {
+                match: /"@"\.concat\(null!=(\i)\?\i:(\i)\)/,
+                replace: "$self.renderUsername(arguments[0])"
+            }
+        },
     ],
     settings,
 
-    renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, userOverride }: UsernameProps) => {
-        const user: any = userOverride ?? message.author;
+    renderUsername: ErrorBoundary.wrap((props: any) => {
+        const renderType = props.className === "mention" ? "mention" : "message";
+        let author, isRepliedMessage;
+
+        if (renderType === "mention") {
+            const channel = ChannelStore.getChannel(props.channelId) || {};
+            const usr = UserStore.getUser(props.userId) || {};
+            const mem = GuildMemberStore.getMember(channel.guild_id, props.userId) || {};
+            author = { ...usr, ...mem };
+            isRepliedMessage = false;
+        } else if (renderType === "message") {
+            author = props.userOverride || { ...props.message.author, ...props.author };
+            isRepliedMessage = props.isRepliedMessage;
+        }
+
+        if (!author) {
+            return <>Unknown</>;
+        }
+
+        const user: any = author;
         const username = StreamerModeStore.enabled && settings.store.respectStreamerMode ? user.username[0] + "..." : user.username;
         const display = StreamerModeStore.enabled && settings.store.respectStreamerMode && user.globalName?.toLowerCase() === user.username.toLowerCase() ? user.globalName[0] + "..." : user.globalName || "";
         const nick = StreamerModeStore.enabled && settings.store.respectStreamerMode && author?.nick?.toLowerCase() === user.username.toLowerCase() ? author.nick[0] + "..." : author?.nick || "";
@@ -257,18 +279,13 @@ export default definePlugin({
 
             const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
             const { alwaysShowUsernameSymbols, alwaysShowNicknameSymbols, alwaysShowDisplaySymbols, alwaysShowUsernameColor, alwaysShowNicknameColor, alwaysShowDisplayColor } = settings.store;
-            const usernamePrefix = settings.store.usernamePrefix === "none" ? "" : settings.store.usernamePrefix;
-            const usernameSuffix = settings.store.usernameSuffix === "none" ? "" : settings.store.usernameSuffix;
-            const usernameColor = resolveColor(message.channel_id, user.id, settings.store.usernameColor.trim(), textMutedValue);
-            const usernameSymbolColor = resolveColor(message.channel_id, user.id, settings.store.usernameSymbolColor.trim(), textMutedValue);
-            const nicknamePrefix = settings.store.nicknamePrefix === "none" ? "" : settings.store.nicknamePrefix;
-            const nicknameSuffix = settings.store.nicknameSuffix === "none" ? "" : settings.store.nicknameSuffix;
-            const nicknameColor = resolveColor(message.channel_id, user.id, settings.store.nicknameColor.trim(), textMutedValue);
-            const nicknameSymbolColor = resolveColor(message.channel_id, user.id, settings.store.nicknameSymbolColor.trim(), textMutedValue);
-            const displayNamePrefix = settings.store.displayNamePrefix === "none" ? "" : settings.store.displayNamePrefix;
-            const displayNameSuffix = settings.store.displayNameSuffix === "none" ? "" : settings.store.displayNameSuffix;
-            const displayNameColor = resolveColor(message.channel_id, user.id, settings.store.displayNameColor.trim(), textMutedValue);
-            const displayNameSymbolColor = resolveColor(message.channel_id, user.id, settings.store.displayNameSymbolColor.trim(), textMutedValue);
+            const { usernamePrefix, usernameSuffix, nicknamePrefix, nicknameSuffix, displayNamePrefix, displayNameSuffix } = settings.store;
+            const usernameColor = resolveColor(user, settings.store.usernameColor.trim(), textMutedValue);
+            const usernameSymbolColor = resolveColor(user, settings.store.usernameSymbolColor.trim(), textMutedValue);
+            const nicknameColor = resolveColor(user, settings.store.nicknameColor.trim(), textMutedValue);
+            const nicknameSymbolColor = resolveColor(user, settings.store.nicknameSymbolColor.trim(), textMutedValue);
+            const displayNameColor = resolveColor(user, settings.store.displayNameColor.trim(), textMutedValue);
+            const displayNameSymbolColor = resolveColor(user, settings.store.displayNameSymbolColor.trim(), textMutedValue);
 
             const values = {
                 "user": { "value": username, "prefix": usernamePrefix, "suffix": usernameSuffix, "alwaysShowSymbols": alwaysShowUsernameSymbols, "alwaysShowColor": alwaysShowUsernameColor, "color": usernameColor, "symbolColor": usernameSymbolColor },
@@ -332,7 +349,8 @@ export default definePlugin({
                     )}
                 </>
             );
-        } catch {
+        } catch (e) {
+            console.error(e);
             return <>{StreamerModeStore.enabled && settings.store.respectStreamerMode ? ((nick || display || username)[0] + "...") : (nick || display || username)}</>;
         }
     }, { noop: true }),
