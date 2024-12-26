@@ -227,7 +227,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ShowMeYourName",
-    description: "Display usernames, nicknames, display names, or any permutation thereof in chat. Nicknames are per-server and display names are global. You will need to hover over old messages to update them after changing any settings.",
+    description: "Display any permutation of nicknames, display names, and usernames in chat. Nicknames are per-server and display names are global. You will need to hover over old messages to update them after changing any settings.",
     authors: [Devs.Rini, Devs.TheKodeToad, Devs.Etorix, Devs.sadan],
     patches: [
         {
