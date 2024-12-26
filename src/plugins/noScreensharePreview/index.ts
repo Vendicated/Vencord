@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -28,11 +27,16 @@ export default definePlugin({
     name: "NoScreensharePreview",
     description: "Disables screenshare previews from being sent.",
     authors: [Devs.Nuckyz],
+
     start() {
         if (!DisableStreamPreviews.getSetting()) {
             DisableStreamPreviews.updateSetting(true);
         }
+    },
 
-        Settings.plugins.NoScreensharePreview.enabled = false;
+    stop() {
+        if (DisableStreamPreviews.getSetting()) {
+            DisableStreamPreviews.updateSetting(false);
+        }
     }
 });
