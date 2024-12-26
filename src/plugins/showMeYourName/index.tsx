@@ -259,7 +259,7 @@ export default definePlugin({
             author = { ...usr, ...mem };
             isRepliedMessage = false;
         } else if (renderType === "message") {
-            author = props.userOverride || { ...props.message.author, ...props.author };
+            author = { ...props.message.author, ...props.author };
             isRepliedMessage = props.isRepliedMessage;
         }
 
