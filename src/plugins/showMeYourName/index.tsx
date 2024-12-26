@@ -104,13 +104,13 @@ const settings = definePluginSettings({
     includedNames: {
         type: OptionType.SELECT,
         description: "The order to display usernames, nicknames, and display names. If any do not exist for the user, they will be omitted. Regardless of your selection below, if nickname or display name are missing, the other will replace it. If both are missing, username will be used.",
-        default: "nick_user",
+        default: "nick_display_user",
         options: [
             { label: "Nickname", value: "nick" },
             { label: "Display Name", value: "display" },
             { label: "Username", value: "user" },
 
-            { label: "Nickname (Username)", value: "nick_user", default: true },
+            { label: "Nickname (Username)", value: "nick_user" },
             { label: "Nickname (Display Name)", value: "nick_display" },
             { label: "Display Name (Username)", value: "display_user" },
             { label: "Display Name (Nickname)", value: "display_nick" },
@@ -118,7 +118,7 @@ const settings = definePluginSettings({
             { label: "Username (Display Name)", value: "user_display" },
 
             { label: "Nickname (Username) [Display Name]", value: "nick_user_display" },
-            { label: "Nickname (Display Name) [Username]", value: "nick_display_user" },
+            { label: "Nickname (Display Name) [Username]", value: "nick_display_user", default: true },
             { label: "Display Name (Username) [Nickname]", value: "display_user_nick" },
             { label: "Display Name (Nickname) [Username]", value: "display_nick_user" },
             { label: "Username (Nickname) [Display Name]", value: "user_nick_display" },
@@ -139,8 +139,8 @@ const settings = definePluginSettings({
     },
     nicknameColor: {
         type: OptionType.STRING,
-        description: "The color to use for the nickname. Accepts hex(a), rgb(a), or hsl(a) input. Will not affect the nickname if it is the only name displayed. Leave blank for default. \"Role\" to follow the user's top role color. \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
-        default: "",
+        description: "The color to use for the nickname. Accepts hex(a), rgb(a), or hsl(a) input. Leave blank for default. \"Role\" to follow the user's top role color. \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
+        default: "Role-25",
         isValid: validColor,
     },
     nicknameSymbolColor: {
@@ -152,6 +152,11 @@ const settings = definePluginSettings({
     alwaysShowNicknameSymbols: {
         type: OptionType.BOOLEAN,
         description: "Show nickname prefix and suffix even if the nickname is the only name displayed, or is the first displayed.",
+        default: false,
+    },
+    alwaysShowNicknameColor: {
+        type: OptionType.BOOLEAN,
+        description: "Show nickname color even if the nickname is the only name displayed, or is the first displayed.",
         default: false,
     },
     displayNamePrefix: {
@@ -168,8 +173,8 @@ const settings = definePluginSettings({
     },
     displayNameColor: {
         type: OptionType.STRING,
-        description: "The color to use for the display name. Accepts hex(a), rgb(a), or hsl(a) input. Will not affect the display name if it is the only name displayed. Leave blank for default. \"Role\" to follow the user's top role color. \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
-        default: "",
+        description: "The color to use for the display name. Accepts hex(a), rgb(a), or hsl(a) input. Leave blank for default. \"Role\" to follow the user's top role color. \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
+        default: "Role-25",
         isValid: validColor,
     },
     displayNameSymbolColor: {
@@ -181,6 +186,11 @@ const settings = definePluginSettings({
     alwaysShowDisplaySymbols: {
         type: OptionType.BOOLEAN,
         description: "Show display name prefix and suffix even if the display name is the only name displayed, or is the first displayed.",
+        default: false,
+    },
+    alwaysShowDisplayColor: {
+        type: OptionType.BOOLEAN,
+        description: "Show display name color even if the display name is the only name displayed, or is the first displayed.",
         default: false,
     },
     usernamePrefix: {
@@ -197,8 +207,8 @@ const settings = definePluginSettings({
     },
     usernameColor: {
         type: OptionType.STRING,
-        description: "The color to use for the username. Accepts hex(a), rgb(a), or hsl(a) input. Will not affect the username if it is the only name displayed. Leave blank for default. \"Role\" to follow the user's top role color. \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
-        default: "",
+        description: "The color to use for the username. Accepts hex(a), rgb(a), or hsl(a) input. Leave blank for default. \"Role\" to follow the user's top role color. \"Role+-#\" to adjust the brightness by that percentage (ex: \"Role+15\")",
+        default: "Role-25",
         isValid: validColor,
     },
     usernameSymbolColor: {
@@ -211,12 +221,17 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show username prefix and suffix even if the username is the only name displayed, or is the first displayed.",
         default: false,
+    },
+    alwaysShowUsernameColor: {
+        type: OptionType.BOOLEAN,
+        description: "Show username color even if the username is the only name displayed, or is the first displayed.",
+        default: false,
     }
 });
 
 export default definePlugin({
     name: "ShowMeYourName",
-    description: "Display usernames, nicknames, display names, or any combination thereof in chat. Nicknames are per-server and display names are global. You will need to hover over old messages to update them after changing any settings.",
+    description: "Display usernames, nicknames, display names, or any permutation thereof in chat. Nicknames are per-server and display names are global. You will need to hover over old messages to update them after changing any settings.",
     authors: [Devs.Rini, Devs.TheKodeToad, Devs.Etorix],
     patches: [
         {
@@ -241,7 +256,7 @@ export default definePlugin({
             }
 
             const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
-            const { alwaysShowUsernameSymbols, alwaysShowNicknameSymbols, alwaysShowDisplaySymbols } = settings.store;
+            const { alwaysShowUsernameSymbols, alwaysShowNicknameSymbols, alwaysShowDisplaySymbols, alwaysShowUsernameColor, alwaysShowNicknameColor, alwaysShowDisplayColor } = settings.store;
             const usernamePrefix = settings.store.usernamePrefix === "none" ? "" : settings.store.usernamePrefix;
             const usernameSuffix = settings.store.usernameSuffix === "none" ? "" : settings.store.usernameSuffix;
             const usernameColor = resolveColor(message.channel_id, user.id, settings.store.usernameColor.trim(), textMutedValue);
@@ -256,9 +271,9 @@ export default definePlugin({
             const displayNameSymbolColor = resolveColor(message.channel_id, user.id, settings.store.displayNameSymbolColor.trim(), textMutedValue);
 
             const values = {
-                "user": { "value": username, "prefix": usernamePrefix, "suffix": usernameSuffix, "alwaysShow": alwaysShowUsernameSymbols, "color": usernameColor, "symbolColor": usernameSymbolColor },
-                "display": { "value": display, "prefix": displayNamePrefix, "suffix": displayNameSuffix, "alwaysShow": alwaysShowDisplaySymbols, "color": displayNameColor, "symbolColor": displayNameSymbolColor },
-                "nick": { "value": nick, "prefix": nicknamePrefix, "suffix": nicknameSuffix, "alwaysShow": alwaysShowNicknameSymbols, "color": nicknameColor, "symbolColor": nicknameSymbolColor }
+                "user": { "value": username, "prefix": usernamePrefix, "suffix": usernameSuffix, "alwaysShowSymbols": alwaysShowUsernameSymbols, "alwaysShowColor": alwaysShowUsernameColor, "color": usernameColor, "symbolColor": usernameSymbolColor },
+                "display": { "value": display, "prefix": displayNamePrefix, "suffix": displayNameSuffix, "alwaysShowSymbols": alwaysShowDisplaySymbols, "alwaysShowColor": alwaysShowDisplayColor, "color": displayNameColor, "symbolColor": displayNameSymbolColor },
+                "nick": { "value": nick, "prefix": nicknamePrefix, "suffix": nicknameSuffix, "alwaysShowSymbols": alwaysShowNicknameSymbols, "alwaysShowColor": alwaysShowNicknameColor, "color": nicknameColor, "symbolColor": nicknameSymbolColor }
             };
 
             let order = settings.store.includedNames.split("_");
@@ -283,10 +298,13 @@ export default definePlugin({
                 <>
                     {(
                         <span>
-                            {values[first].alwaysShow && <span style={values[first].symbolColor}>
+                            {values[first].alwaysShowSymbols && <span style={values[first].symbolColor}>
                                 {values[first].prefix}</span>}
-                            {values[first].value}
-                            {values[first].alwaysShow && <span style={values[first].symbolColor}>
+                            {values[first].alwaysShowColor && <span style={values[first].color}>
+                                {values[first].value}</span>}
+                            {!values[first].alwaysShowColor && <span>
+                                {values[first].value}</span>}
+                            {values[first].alwaysShowSymbols && <span style={values[first].symbolColor}>
                                 {values[first].suffix}</span>}
                         </span>
                     )}
