@@ -27,8 +27,8 @@ function OutputVolumeComponent() {
 
     return (
         <>
-            {Settings.plugins.VCPanelSettings.showOutputVolumeHeader && <Forms.FormTitle>Output volume - {Math.floor(outputVolume)}%</Forms.FormTitle>}
-            <Slider maxValue={200} minValue={0} initialValue={outputVolume} hideBubble={Settings.plugins.VCPanelSettings.showOutputVolumeHeader} onValueChange={volume => {
+            {Settings.plugins.VCPanelSettings.showOutputVolumeHeader && <Forms.FormTitle>Output volume</Forms.FormTitle>}
+            <Slider maxValue={200} minValue={0} onValueRender={v => `${v.toFixed(0)}%`} initialValue={outputVolume} asValueChanges={volume => {
                 FluxDispatcher.dispatch({
                     type: "AUDIO_SET_OUTPUT_VOLUME",
                     volume
@@ -48,8 +48,8 @@ function InputVolumeComponent() {
 
     return (
         <>
-            {Settings.plugins.VCPanelSettings.showInputVolumeHeader && <Forms.FormTitle>Input volume - {Math.floor(inputVolume)}%</Forms.FormTitle>}
-            <Slider maxValue={100} minValue={0} initialValue={inputVolume} onValueChange={volume => {
+            {Settings.plugins.VCPanelSettings.showInputVolumeHeader && <Forms.FormTitle>Input volume</Forms.FormTitle>}
+            <Slider maxValue={100} minValue={0} initialValue={inputVolume} asValueChanges={volume => {
                 FluxDispatcher.dispatch({
                     type: "AUDIO_SET_INPUT_VOLUME",
                     volume
