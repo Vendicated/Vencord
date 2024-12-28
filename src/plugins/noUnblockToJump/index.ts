@@ -27,24 +27,42 @@ export default definePlugin({
     patches: [
         {
             find: '.id,"Search Results"',
-            replacement: {
-                match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,
-                replace: "if(false)$1"
-            }
+            replacement: [
+                {
+                    match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,
+                    replace: "if(false)$1"
+                },
+                {
+                    match: /\i\.ignored/,
+                    replace: "false"
+                }
+            ]
         },
         {
             find: "renderJumpButton()",
-            replacement: {
-                match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,
-                replace: "if(false)$1"
-            }
+            replacement: [
+                {
+                    match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,
+                    replace: "if(false)$1"
+                },
+                {
+                    match: /(?<=else if\()\i(?=\))/,
+                    replace: "false"
+                }
+            ]
         },
         {
             find: "flash:!0,returnMessageId",
-            replacement: {
-                match: /.\?(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,
-                replace: "false?$1"
-            }
+            replacement: [
+                {
+                    match: /.\?(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,
+                    replace: "false?$1"
+                },
+                {
+                    match: /.\?(.{1,10}\.show\({.{1,50}#{intl::UNIGNORE_TO_JUMP_TITLE})/,
+                    replace: "false?$1"
+                },
+            ]
         }
     ]
 });
