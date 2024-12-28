@@ -36,10 +36,6 @@ export default definePlugin({
                     match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}#{intl::UNIGNORE_TO_JUMP_TITLE})/,
                     replace: "if(false)$1"
                 },
-                // {
-                //     match: /\i\.ignored/,
-                //     replace: "false"
-                // }
             ]
         },
         {
@@ -53,10 +49,6 @@ export default definePlugin({
                     match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}#{intl::UNIGNORE_TO_JUMP_TITLE})/,
                     replace: "if(false)$1"
                 },
-                // {
-                //     match: /(?<=else if\()\i(?=\))/,
-                //     replace: "false"
-                // }
             ]
         },
         {
