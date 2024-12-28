@@ -27,8 +27,8 @@ export default definePlugin({
         {
             find: ".removeObscurity,",
             replacement: {
-                match: /super\(\.\.\.e\),/,
-                replace: 'super(...e),Vencord.Plugins.plugins.SpoilerReveal.createHoverWrapper(this),'
+                match: /super\(\.\.\.\i\),/,
+                replace: '$&,Vencord.Plugins.plugins.SpoilerReveal.createHoverWrapper(this),'
             }
         }
     ],
