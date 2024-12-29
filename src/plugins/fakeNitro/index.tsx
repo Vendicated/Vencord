@@ -31,7 +31,7 @@ import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
 let premiumType;
-if (Settings.plugins?.NoNitroUpsell?.enabled) {
+if (Settings.plugins.NoNitroUpsell.enabled) {
     // @ts-ignore
     premiumType = UserStore?.getCurrentUser()?._realPremiumType ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
 } else {

@@ -18,7 +18,7 @@
 
 import "./style.css";
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
@@ -123,16 +123,23 @@ const RenderStatusMenuItem = ({ status, update, disabled }: { status: DiscordSta
 
 
 const StatusSubMenuComponent = () => {
+    let premiumType;
+    if (Settings.plugins.NoNitroUpsell.enabled) {
+        // @ts-ignore
+        premiumType = UserStore?.getCurrentUser()?._realPremiumType ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
+    } else {
+        premiumType = UserStore?.getCurrentUser()?.premiumType ?? 0;
+    }
     const update = useForceUpdater();
     return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
         {Object.entries((settings.store.StatusPresets as { [k: string]: DiscordStatus | undefined; })).map(([index, status]) => status != null ? <Menu.MenuItem
             id={"status-presets-" + index}
             label={status.status}
-            action={() => (status.emojiInfo?.id != null && UserStore.getCurrentUser().hasPremiumPerks || status.emojiInfo?.id == null) && setStatus(status)}
+            action={() => (status.emojiInfo?.id != null && premiumType > 0 || status.emojiInfo?.id == null) && setStatus(status)}
             render={() => <RenderStatusMenuItem
                 status={status}
                 update={update}
-                disabled={status.emojiInfo?.id != null && !UserStore.getCurrentUser().hasPremiumPerks}
+                disabled={status.emojiInfo?.id != null && premiumType === 0}
             />}
         /> : null)}
     </Menu.Menu>;
