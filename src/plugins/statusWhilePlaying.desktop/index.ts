@@ -5,13 +5,13 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { getUserSettingLazy } from "@api/UserSettings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy } from "@webpack";
 import { PresenceStore, UserStore } from "@webpack/common";
 
-let savedStatus = "";
-const updateAsync = findByCodeLazy("updateAsync", "status");
+let oldStatus = "";
+const statusSettings = getUserSettingLazy("status", "status");
 const settings = definePluginSettings({
     statusToSet: {
         type: OptionType.SELECT,
@@ -47,11 +47,11 @@ export default definePlugin({
         RUNNING_GAMES_CHANGE(event) {
             const status = PresenceStore.getStatus(UserStore.getCurrentUser().id);
             if (event.games.length > 0 && status !== settings.store.statusToSet) {
-                savedStatus = status;
-                updateAsync(settings.store.statusToSet);
+                oldStatus = status;
+                statusSettings?.updateSetting(settings.store.statusToSet);
             } else {
-                if (savedStatus !== "" && savedStatus !== settings.store.statusToSet)
-                    updateAsync(savedStatus);
+                if (oldStatus !== "" && oldStatus !== settings.store.statusToSet)
+                    statusSettings?.updateSetting(oldStatus);
             }
         },
     }
