@@ -74,6 +74,8 @@ export interface Settings {
         settingsSync: boolean;
         settingsSyncVersion: number;
     };
+
+    safeMode: boolean;
 }
 
 const DefaultSettings: Settings = {
@@ -103,7 +105,9 @@ const DefaultSettings: Settings = {
         url: "https://api.vencord.dev/",
         settingsSync: false,
         settingsSyncVersion: 0
-    }
+    },
+
+    safeMode: false
 };
 
 const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;

@@ -133,6 +133,8 @@ async function init() {
                 "\n\n" + pendingPatches.map(p => `${p.plugin}: ${p.find}`).join("\n")
             );
     }
+
+    Settings.safeMode = false;
 }
 
 startAllPlugins(StartAt.Init);
