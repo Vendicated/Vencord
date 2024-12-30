@@ -17,8 +17,12 @@
 */
 
 import { Settings, SettingsStore } from "@api/Settings";
-import { ThemeStore } from "@webpack/common";
+import { findStoreLazy } from "@webpack";
+import { FluxDispatcher, ThemeStore } from "@webpack/common";
 
+import { sleep } from "./misc";
+
+const PopoutWindowStore = findStoreLazy("PopoutWindowStore");
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
@@ -40,7 +44,7 @@ async function initSystemValues() {
     createStyle("vencord-os-theme-values").textContent = `:root{${variables}}`;
 }
 
-export async function toggle(isEnabled: boolean) {
+async function toggle(isEnabled: boolean) {
     if (!style) {
         if (isEnabled) {
             style = createStyle("vencord-custom-css");
@@ -48,6 +52,7 @@ export async function toggle(isEnabled: boolean) {
                 style.textContent = css;
                 // At the time of writing this, changing textContent resets the disabled state
                 style.disabled = !Settings.useQuickCss;
+                updatePopoutWindows();
             });
             style.textContent = await VencordNative.quickCss.get();
         }
@@ -86,6 +91,40 @@ async function initThemes() {
     }
 
     themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
+    updatePopoutWindows();
+}
+
+function applyToPopout(popoutWindow: Window) {
+    if (!popoutWindow || !popoutWindow.document) return;
+
+    const doc = popoutWindow.document;
+
+    const styles = [
+        { id: "vencord-custom-css", content: style?.textContent ?? "", disabled: !Settings.useQuickCss },
+        { id: "vencord-themes", content: themesStyle?.textContent ?? "" },
+        { id: "vencord-os-theme-values", content: document.getElementById("vencord-os-theme-values")?.textContent ?? "" }
+    ];
+
+    styles.forEach(({ id, content, disabled }) => {
+        let popoutStyle = doc.getElementById(id) as HTMLStyleElement;
+        if (!popoutStyle) {
+            popoutStyle = doc.createElement("style");
+            popoutStyle.id = id;
+            doc.documentElement.appendChild(popoutStyle);
+        }
+        popoutStyle.textContent = content;
+        if (disabled) {
+            popoutStyle.disabled = disabled;
+        }
+    });
+}
+
+function updatePopoutWindows() {
+    const windowKeys = PopoutWindowStore.getWindowKeys();
+    for (const key of windowKeys) {
+        const popoutWindow = PopoutWindowStore.getWindow(key);
+        applyToPopout(popoutWindow);
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -101,4 +140,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!IS_WEB)
         VencordNative.quickCss.addThemeChangeListener(initThemes);
+
+    FluxDispatcher.subscribe("POPOUT_WINDOW_OPEN", () => {
+        const windowKeys = PopoutWindowStore.getWindowKeys();
+        const popoutWindow = PopoutWindowStore.getWindow(windowKeys[windowKeys.length - 1]);
+
+        sleep(300).then(() => {
+            applyToPopout(popoutWindow);
+            const style = popoutWindow.document.createElement("style");
+            style.id = "vencord-css-core";
+            style.textContent = document.getElementById("vencord-css-core")!.textContent;
+            popoutWindow.document.documentElement.appendChild(style);
+        });
+    });
 });
