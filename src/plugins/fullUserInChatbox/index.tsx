@@ -25,7 +25,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ":\"text\":",
+            find: ':"text":',
             replacement: {
                 match: /(hidePersonalInformation.*?)return/,
                 replace: "$1return $self.UserMentionComponent(arguments[0]);"
@@ -41,13 +41,10 @@ export default definePlugin({
             channelId={props.channelId}
         />;
     }, {
-        fallback: props => {
+        fallback: ({ wrappedProps }) => {
             let username: string | null = null;
             try {
-                username = UserStore.getUser((props as any)?.children?.props?.id)?.username;
-                if (username == null) {
-                    throw Error("Error getting fallback username");
-                }
+                username = UserStore.getUser(wrappedProps.id)?.username;
             } catch (e) {
                 console.error(e);
             }
