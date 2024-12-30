@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./index.css";
+
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
@@ -23,7 +25,7 @@ import { getIntlMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findLazy } from "@webpack";
-import { Card, ChannelStore, Forms, GuildStore, PermissionsBits, Switch, TextInput, Tooltip } from "@webpack/common";
+import { Card, ChannelStore, Forms, GuildMemberStore, GuildStore, PermissionsBits, Switch, TextInput, Tooltip } from "@webpack/common";
 import type { Permissions, RC } from "@webpack/types";
 import type { Channel, Guild, Message, User } from "discord-types/general";
 
@@ -108,6 +110,16 @@ const defaultSettings = Object.fromEntries(
     tags.map(({ name, displayName }) => [name, { text: displayName, showInChat: true, showInNotChat: true }])
 ) as TagSettings;
 
+// From https://gist.github.com/StevenBlack/960189
+export function getContrastYIQ(hexColor: string | undefined): "#000" | "#fff" | undefined {
+    if (!hexColor) return;
+    const r = parseInt(hexColor.substring(1, 3), 16);
+    const g = parseInt(hexColor.substring(3, 5), 16);
+    const b = parseInt(hexColor.substring(5, 7), 16);
+    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+    return yiq >= 128 ? "#000" : "#fff";
+}
+
 function SettingsComponent() {
     const tagSettings = settings.store.tagSettings ??= defaultSettings;
 
@@ -163,7 +175,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN
     },
     dontShowBotTag: {
-        description: "Only show extra tags for bots / Hide [BOT] text",
+        description: "Only show extra tags for bots / Hide [APP] text",
+        type: OptionType.BOOLEAN
+    },
+    useRoleColors: {
+        description: "Use the user's role color instead of the default color",
         type: OptionType.BOOLEAN
     },
     tagSettings: {
@@ -176,7 +192,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "MoreUserTags",
     description: "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
-    authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN],
+    authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN, Devs.OIRNOIR],
     settings,
     patches: [
         // add tags to the tag list
@@ -190,6 +206,11 @@ export default definePlugin({
         {
             find: "#{intl::DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP_OFFICIAL}",
             replacement: [
+                // Grab the colors from the params using the custom params
+                {
+                    match: /type:\i=\i\.\i\.BOT/,
+                    replace: "$&,moreTags_bgColor:moreTags_bgColor,moreTags_fgColor:moreTags_fgColor"
+                },
                 // make the tag show the right text
                 {
                     match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=(.{0,40}#{intl::APP_TAG}\))/,
@@ -202,27 +223,34 @@ export default definePlugin({
                     replace: "$1=$self.isOPTag($2)"
                 },
                 // add HTML data attributes (for easier theming)
+                // also set the colors
                 {
                     match: /.botText,children:(\i)}\)]/,
-                    replace: "$&,'data-tag':$1.toLowerCase()"
-                }
+                    replace: "$&,'data-tag':$1.toLowerCase(),style:{'background-color':moreTags_bgColor,'color':moreTags_fgColor},'data-moreTags-darkFg':moreTags_fgColor?.includes('0')"
+                },
             ],
         },
         // in messages
         {
             find: ".Types.ORIGINAL_POSTER",
-            replacement: {
-                match: /;return\((\(null==\i\?void 0:\i\.isSystemDM\(\).+?.Types.ORIGINAL_POSTER\)),null==(\i)\)/,
-                replace: ";$1;$2=$self.getTag({...arguments[0],origType:$2,location:'chat'});return $2 == null"
-            }
+            replacement: [
+                // Pass the tag's colors and type to the next function
+                {
+                    match: /;return\((\(null==\i\?void 0:\i\.isSystemDM\(\).+?.Types.ORIGINAL_POSTER\)),null==(\i)\)\?null:\(0,(\i)\.jsx\)\((\i).(\i),{/,
+                    replace: ";$1;$2=$self.getTag({...arguments[0],origType:$2,location:'chat'});return $2 == null?null:(0,$3.jsx)($4.$5,{...$self.getTagColors({...arguments[0],tagType:$2,location:'chat'}),"
+                }
+            ]
         },
         // in the member list
         {
             find: "#{intl::GUILD_OWNER}",
-            replacement: {
-                match: /(?<type>\i)=\(null==.{0,100}\.BOT;return null!=(?<user>\i)&&\i\.bot/,
-                replace: "$<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }); return typeof $<type> === 'number'"
-            }
+            replacement: [
+                // Pass the tag's colors and type to the next function
+                {
+                    match: /(?<type>\i)=\(null==.{0,100}\.BOT;return null!=(?<user>\i)&&\i\.bot\?\(0,(?<jsxf>\i)\.jsx\)\((?<module>\i)\.(?<subm>\i),{/,
+                    replace: "$<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }); return typeof $<type> === 'number'?(0,$<jsxf>.jsx)($<module>.$<subm>,{...$self.getTagColors({...arguments[0],tagType:$<type>,location:'not-chat'}),"
+                }
+            ]
         },
         // pass channel id down props to be used in profiles
         {
@@ -250,11 +278,39 @@ export default definePlugin({
                     match: /user:\i,nick:\i,/,
                     replace: "$&moreTags_channelId,"
                 }, {
+                    // Get the tag type and tag colors so that they can be distributed
+                    match: /(,\i=\i\.isPomelo\(\)\|\|\i;)(.+?botType:(\i),botVerified:(\i),(?!discriminatorClass:)(?<=user:(\i).+?))/,
+                    replace: "$1let moreTags_tagType=$self.getTag({user:$5,channelId:moreTags_channelId,origType:$3,location:'not-chat'});let moreTags_tagColors=$self.getTagColors({user:$5,channelId:moreTags_channelId,tagType:moreTags_tagType,location:'not-chat'});$2"
+                }, {
+                    // This isn't actually the function that passes into the tag renderer so we need more patches to help it along the way
                     match: /,botType:(\i),botVerified:(\i),(?!discriminatorClass:)(?<=user:(\i).+?)/g,
-                    replace: ",botType:$self.getTag({user:$3,channelId:moreTags_channelId,origType:$1,location:'not-chat'}),botVerified:$2,"
+                    replace: ",botType:moreTags_tagType,...moreTags_tagColors,"
+                }, {
+                    // Get the parameters from the function that were passed in previously
+                    // because Discord needs to make it hard on us
+                    match: /,botClass:\i,showStreamerModeTooltip:\i/,
+                    replace: "$&,moreTags_bgColor:moreTags_bgColor,moreTags_fgColor:moreTags_fgColor"
+                }, {
+                    // Finally pass the color information into the renderer
+                    match: /\.jsx\)\(\i\.\i,{type:\i,/,
+                    replace: "$&moreTags_bgColor,moreTags_fgColor,"
                 }
             ]
         },
+        // Colors need to be passed down through this random module.
+        // If there's a way to bypass this module without modifying discord's random variables (We don't want to break stuff) leave a PR (or comment if an existing one is open)
+        {
+            find: ",invertBotTagColor:",
+            replacement: [
+                {
+                    match: /,invertBotTagColor:\i/,
+                    replace: "$&,moreTags_bgColor:moreTags_bgColor,moreTags_fgColor:moreTags_fgColor"
+                }, {
+                    match: /verified:\i,useRemSizes:\i/,
+                    replace: "$&,moreTags_bgColor,moreTags_fgColor"
+                }
+            ]
+        }
     ],
 
     start() {
@@ -316,6 +372,30 @@ export default definePlugin({
         }
     },
 
+    getTagColors({
+        user, channelId, channel, location, tagType
+    }: {
+        user: User,
+        channel?: Channel,
+        channelId?: string;
+        location: "chat" | "not-chat";
+        tagType: number;
+    }): {
+        moreTags_bgColor: string,
+        moreTags_fgColor: string;
+    } {
+        const passedTagName = Object.keys(Tag.Types).find(k => Tag.Types[k] === tagType);
+        const [tagName, variant] = passedTagName?.split("-") ?? [null, null];
+        if (!settings.store.useRoleColors || !tagType || !tagName || (location === "chat" && !settings.store.tagSettings[tagName]?.showInChat) || (location === "not-chat" && !settings.store.tagSettings[tagName]?.showInNotChat) || (user.bot && settings.store.dontShowForBots)) {
+            return { moreTags_bgColor: "", moreTags_fgColor: "" };
+        }
+        if (!channel && channelId) channel = ChannelStore.getChannel(channelId);
+        const member = channel?.guild_id != null ? GuildMemberStore.getMember(channel?.guild_id, user.id) : null;
+        const colorString = member?.colorString;
+        const fgColorString = colorString != null ? getContrastYIQ(colorString) : null;
+        return { moreTags_bgColor: colorString ?? "", moreTags_fgColor: fgColorString ?? "" };
+    },
+
     getTag({
         message, user, channelId, origType, location, channel
     }: {
@@ -342,8 +422,8 @@ export default definePlugin({
         const perms = this.getPermissions(user, channel);
 
         for (const tag of tags) {
-            if (location === "chat" && !settings.tagSettings[tag.name].showInChat) continue;
-            if (location === "not-chat" && !settings.tagSettings[tag.name].showInNotChat) continue;
+            if (location === "chat" && !settings.tagSettings[tag.name]?.showInChat) continue;
+            if (location === "not-chat" && !settings.tagSettings[tag.name]?.showInNotChat) continue;
 
             // If the owner tag is disabled, and the user is the owner of the guild,
             // avoid adding other tags because the owner will always match the condition for them
