@@ -1,6 +1,6 @@
 # Full User In Chatbox
 
-Adds the Full user mention to the textbox
+Adds the full user mention to the textbox
 
 Adds the avatar if you have mentioned avatars enabled
 
