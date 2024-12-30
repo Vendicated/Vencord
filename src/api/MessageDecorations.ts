@@ -17,6 +17,7 @@
 */
 
 import { Channel, Message } from "discord-types/general/index.js";
+import { JSX } from "react";
 
 interface DecorationProps {
     author: {

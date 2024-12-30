@@ -114,7 +114,7 @@ function SettingsComponent() {
     return (
         <Flex flexDirection="column">
             {tags.map(t => (
-                <Card style={{ padding: "1em 1em 0" }}>
+                <Card key={t.name} style={{ padding: "1em 1em 0" }}>
                     <Forms.FormTitle style={{ width: "fit-content" }}>
                         <Tooltip text={t.description}>
                             {({ onMouseEnter, onMouseLeave }) => (

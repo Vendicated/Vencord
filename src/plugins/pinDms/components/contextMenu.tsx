@@ -33,7 +33,8 @@ function createPinMenuItem(channelId: string) {
                     {
                         categories.map(category => (
                             <Menu.MenuItem
-                                id={`pin-category-${category.name}`}
+                                key={category.id}
+                                id={`pin-category-${category.id}`}
                                 label={category.name}
                                 action={() => addChannelToCategory(channelId, category.id).then(forceUpdate)}
                             />
