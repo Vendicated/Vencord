@@ -1,22 +1,27 @@
 name: Sync to Codeberg
+
 concurrency:
-    group: ${{ github.ref }}
-    cancel-in-progress: true
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 on:
-    push:
-    workflow_dispatch:
-    schedule:
-        - cron: "0 */6 * * *"
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
 
 jobs:
-    codeberg:
-        if: github.repository == 'Vendicated/Vencord'
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-            - uses: pixta-dev/repository-mirroring-action@674e65a7d483ca28dafaacba0d07351bdcc8bd75 # v1.1.1
-              with:
-                  target_repo_url: "git@codeberg.org:Vee/cord.git"
-                  ssh_private_key: ${{ secrets.CODEBERG_SSH_PRIVATE_KEY }}
+  codeberg:
+    if: github.repository == 'Vendicated/Vencord'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Mirror to Codeberg
+        uses: pixta-dev/repository-mirroring-action@v1
+        with:
+          target_repo_url: "git@codeberg.org:Vee/cord.git"
+          ssh_private_key: ${{ secrets.CODEBERG_SSH_PRIVATE_KEY }}
