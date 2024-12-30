@@ -26,6 +26,7 @@ export default definePlugin({
     authors: [Devs.dzshn],
     patches: [
         {
+            // Clicking on search results to jump
             find: '.id,"Search Results"',
             replacement: [
                 {
@@ -39,6 +40,7 @@ export default definePlugin({
             ]
         },
         {
+            // Jump buttton in top right corner of messages
             find: "renderJumpButton()",
             replacement: [
                 {
@@ -52,6 +54,7 @@ export default definePlugin({
             ]
         },
         {
+            // clicking on replied messages to jump
             find: "flash:!0,returnMessageId",
             replacement: [
                 {
