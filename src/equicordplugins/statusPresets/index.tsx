@@ -124,7 +124,7 @@ const RenderStatusMenuItem = ({ status, update, disabled }: { status: DiscordSta
 
 const StatusSubMenuComponent = () => {
     let premiumType;
-    if (Settings.plugins.NoNitroUpsell.enabled) {
+    if (Settings.plugins.NoNitroUpsell?.enabled) {
         // @ts-ignore
         premiumType = UserStore?.getCurrentUser()?._realPremiumType ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
     } else {
