@@ -54,7 +54,7 @@ export default definePlugin({
             ]
         },
         {
-            // clicking on replied messages to jump
+            // Clicking on replied messages to jump
             find: "flash:!0,returnMessageId",
             replacement: [
                 {
