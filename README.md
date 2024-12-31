@@ -1,6 +1,6 @@
 # PawsomeVencord
 
-## Note, this is an unofficial fork of Vencord for an offcial port of the DiscordColorways plugin from BetterDiscord. This repo might be behind the main repo at times and its usage is meant for development purposes ONLY.
+## Note, this is an unofficial fork of Vencord. This repo might be behind the main repo at times.
 
 - Not to mention that this fork is pretty much only being maintained by 2 people LOL
 
