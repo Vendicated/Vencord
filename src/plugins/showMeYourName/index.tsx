@@ -191,8 +191,9 @@ export default definePlugin({
             // getMember only has a nick attribute, and it is null if no nickname is set.
             // Therefore just using the author props is not enough for an accurate result and we instead need to combine the results of getUser and getMember.
             const channel = ChannelStore.getChannel(props.message.channel_id) || {};
-            const usr = UserStore.getUser(props.message.author.id) || {};
-            const mem = GuildMemberStore.getMember(channel.guild_id, props.message.author.id) || {};
+            const athr = props.userOverride ? props.userOverride : props.message.author;
+            const usr = UserStore.getUser(athr.id) || {};
+            const mem = GuildMemberStore.getMember(channel.guild_id, athr.id) || {};
             author = usr && mem ? { ...usr, ...mem } : usr || mem || null;
             isRepliedMessage = props.isRepliedMessage;
             mentionSymbol = hideDefaultAtSign ? "" : props.withMentionPrefix ? "@" : "";
@@ -202,10 +203,9 @@ export default definePlugin({
             return <>{mentionSymbol}Unknown</>;
         }
 
-        const user = author;
-        const username = StreamerModeStore.enabled && respectStreamerMode ? user.username[0] + "..." : user.username;
-        const display = StreamerModeStore.enabled && respectStreamerMode && user.globalName?.toLowerCase() === user.username.toLowerCase() ? user.globalName[0] + "..." : user.globalName || "";
-        const nick = StreamerModeStore.enabled && respectStreamerMode && user.nick?.toLowerCase() === user.username.toLowerCase() ? user.nick[0] + "..." : user.nick || "";
+        const username = StreamerModeStore.enabled && respectStreamerMode ? author.username[0] + "..." : author.username;
+        const display = StreamerModeStore.enabled && respectStreamerMode && author.globalName?.toLowerCase() === author.username.toLowerCase() ? author.globalName[0] + "..." : author.globalName || "";
+        const nick = StreamerModeStore.enabled && respectStreamerMode && author.nick?.toLowerCase() === author.username.toLowerCase() ? author.nick[0] + "..." : author.nick || "";
 
         try {
             if (isRepliedMessage && !replies) {
@@ -214,9 +214,9 @@ export default definePlugin({
 
             const textMutedValue = getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d";
             const affixes = parseAffixes(includedNames);
-            const resolvedUsernameColor = resolveColor(user, usernameColor.trim(), textMutedValue);
-            const resolvedNicknameColor = resolveColor(user, nicknameColor.trim(), textMutedValue);
-            const resolvedDisplayNameColor = resolveColor(user, displayNameColor.trim(), textMutedValue);
+            const resolvedUsernameColor = resolveColor(author, usernameColor.trim(), textMutedValue);
+            const resolvedNicknameColor = resolveColor(author, nicknameColor.trim(), textMutedValue);
+            const resolvedDisplayNameColor = resolveColor(author, displayNameColor.trim(), textMutedValue);
             const affixColor = { color: getComputedStyle(document.documentElement)?.getPropertyValue("--text-muted")?.trim() || "#72767d" };
 
             const values = {
