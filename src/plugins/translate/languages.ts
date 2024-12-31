@@ -208,6 +208,12 @@ export const DeeplLanguages = {
     "uk": "Ukrainian"
 } as const;
 
+export const DeeplLanguagesWithoutPostfix = {
+    "zh": "Chinese",
+    "en": "English",
+    "pt": "Portuguese",
+} as const;
+
 export function deeplLanguageToGoogleLanguage(language: string) {
     switch (language) {
         case "": return "auto";
