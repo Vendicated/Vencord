@@ -57,7 +57,8 @@ export const settings = definePluginSettings({
         options: [
             { label: "Google Translate", value: "google", default: true },
             { label: "DeepL Free", value: "deepl" },
-            { label: "DeepL Pro", value: "deepl-pro" }
+            { label: "DeepL Pro", value: "deepl-pro" },
+            { label: "DeepLX", value: "deepl-x" }
         ] as const,
         onChange: resetLanguageDefaults
     },
@@ -66,6 +67,13 @@ export const settings = definePluginSettings({
         description: "DeepL API key",
         default: "",
         placeholder: "Get your API key from https://deepl.com/your-account",
+        disabled: () => IS_WEB
+    },
+    deeplxApiEndpoint: {
+        type: OptionType.STRING,
+        description: "DeepLX API Endpoint",
+        default: "",
+        placeholder: "Enter custom DeepLX API endpoint, e.g. https://deeplx.example.com/translate",
         disabled: () => IS_WEB
     },
     autoTranslate: {
