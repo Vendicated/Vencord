@@ -24,7 +24,7 @@
 }
 
 .vc-uvs-tooltip-container {
-    max-width: 300px;
+    max-width: 350px;
 }
 
 .vc-uvs-tooltip-content {
@@ -44,7 +44,25 @@
     align-self: center;
 }
 
-.vc-uvs-vc-members {
+.vc-uvs-vc-members-container {
     display: flex;
     gap: 6px;
+}
+
+.vc-uvs-vc-members-container>.vc-uvs-speaker {
+    display: flex;
+    padding-top: 6px;
+    align-items: flex-start
+}
+
+.vc-uvs-vc-members {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.vc-uvs-vc-member {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }

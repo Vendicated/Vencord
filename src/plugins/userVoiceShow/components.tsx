@@ -8,8 +8,9 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { classes } from "@utils/misc";
 import { filters, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
-import { ChannelRouter, ChannelStore, GuildStore, IconUtils, match, P, PermissionsBits, PermissionStore, React, showToast, Text, Toasts, Tooltip, useMemo, UserStore, useStateFromStores } from "@webpack/common";
+import { ChannelRouter, ChannelStore, GuildStore, IconUtils, match, P, PermissionsBits, PermissionStore, React, RelationshipStore, showToast, Text, Toasts, Tooltip, useMemo, UserStore, useStateFromStores, GuildMemberStore } from "@webpack/common";
 import { Channel } from "discord-types/general";
+import { settings } from "./index";
 
 const cl = classNameFactory("vc-uvs-");
 
@@ -115,15 +116,34 @@ function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
                 {channelIcon}
                 <Text variant="text-sm/semibold">{channelName}</Text>
             </div>
-            <div className={cl("vc-members")}>
+            <div className={cl("vc-members-container")}>
                 {isLocked ? <LockedSpeakerIcon size={18} /> : <SpeakerIcon size={18} />}
-                <UserSummaryItem
+                {!settings.store.showUserNames && <UserSummaryItem
                     users={users}
                     renderIcon={false}
                     max={13}
                     size={18}
-                />
-            </div>
+                />}
+                {settings.store.showUserNames && (
+                    <div className={cl("vc-members")}>
+                        {users.map(user => (
+                            <div key={user.id} className={cl("vc-member")}>
+                                <Avatar src={user.getAvatarURL()} size="SIZE_32" />
+                                <Text variant="text-sm/semibold">
+                                    {(() => {
+                                        const name = (guild && GuildMemberStore.getNick(guild.id, user.id))
+                                            || (!guild && RelationshipStore.getNickname(user.id))
+                                            || (user as any).globalName
+                                            || user.username;
+                                        const maxLength = settings.store.maxNameLength;
+                                        return name.length > maxLength ? name.slice(0, maxLength) + "..." : name;
+                                    })()}
+                                </Text>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div >
         </>
     );
 }
