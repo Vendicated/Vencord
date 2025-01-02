@@ -250,12 +250,12 @@ function SnippetModal({ rootProps, close }: SnippetModalProps) {
         close();
     };
     const processSnippet = (snippet: string) => {
-        if (!getCurrentChannel()?.isDM()) return snippet.replace(/\${userName}/g, "").replace(/\${myName}/g, "");
+        if (!getCurrentChannel()?.isDM()) return snippet.replace(/\${userName}/gi, "").replace(/\${myName}/gi, "");
         const userName = getCurrentChannel()?.rawRecipients[0].username || "";
         const myName = getMyUsername() || "";
         return snippet
-            .replace(/\${userName}/g, userName)
-            .replace(/\${myName}/g, myName);
+            .replace(/\${userName}/gi, userName)
+            .replace(/\${myName}/gi, myName);
     };
 
     return (
