@@ -144,6 +144,8 @@ function makeShortcuts() {
         me: { getter: () => Common.UserStore.getCurrentUser(), preload: false },
         meId: { getter: () => Common.UserStore.getCurrentUser().id, preload: false },
         messages: { getter: () => Common.MessageStore.getMessages(Common.SelectedChannelStore.getChannelId()), preload: false },
+        openModal: { getter: () => Webpack.findByProps("openModalLazy").openModal },
+        openModalLazy: { getter: () => Webpack.findByProps("openModalLazy").openModalLazy },
 
         Stores: {
             getter: () => Object.fromEntries(
