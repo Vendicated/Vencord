@@ -23,9 +23,9 @@ import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { OptionType, PluginOptionList } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { Button, ChannelStore, Forms, GuildStore, React, TextInput, useState } from "@webpack/common";
+import { Channel } from "discord-types/general";
 
 import { ISettingElementProps } from ".";
-import { Channel } from "discord-types/general";
 
 const UserMentionComponent = findComponentByCodeLazy(".USER_MENTION)");
 
