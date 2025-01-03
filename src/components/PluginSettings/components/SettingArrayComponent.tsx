@@ -91,7 +91,7 @@ export function SettingArrayComponent({
         if (!inputElement || inputElement.value === "") {
             return;
         }
-        // TODO add picker for users?
+        // TODO add picker for users etc?
         if (option.type !== OptionType.ARRAY && !(inputElement.value.length >= 18 && inputElement.value.length <= 19 && !isNaN(Number(inputElement.value)))) {
             setError("Value is not a valid snowflake ID");
             inputElement.value = "";
@@ -104,7 +104,6 @@ export function SettingArrayComponent({
 
 
     // FIXME make channels and guilds nicer!
-    // TODO make string type work
     return (
         <Forms.FormSection>
             <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
@@ -151,13 +150,11 @@ export function SettingArrayComponent({
                             marginTop: "10px",
                         }}
                     >
-                        {/* Add a single input field */}
                         <TextInput
                             type="text"
                             placeholder="Add Item (as ID)"
                             id={`vc-plugin-modal-input-${option.type === OptionType.CHANNELS ? "channel" : option.type === OptionType.GUILDS ? "guild" : option.type === OptionType.USERS ? "user" : "string"}`}
                         />
-                        {/* Add a submit button */}
                         <Button
                             size={Button.Sizes.MIN}
                             onClick={handleSubmit}
