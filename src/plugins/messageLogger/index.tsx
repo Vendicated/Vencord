@@ -86,12 +86,12 @@ const settings = definePluginSettings({
     },
     ignoreChannels: {
         type: OptionType.CHANNELS,
-        description: "List of channel IDs to ignore",
+        description: "List of channels to ignore",
         popoutText: "Ignore deleted messages in this channel"
     },
     ignoreGuilds: {
         type: OptionType.GUILDS,
-        description: "List of guild IDs to ignore",
+        description: "List of guilds to ignore",
         popoutText: "Ignore deleted messages in this guild",
     },
 });

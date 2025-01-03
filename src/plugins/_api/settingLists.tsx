@@ -8,7 +8,7 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { Menu, useState } from "@webpack/common";
+import { Menu, React } from "@webpack/common";
 
 function createContextMenu(name: "Guild" | "User" | "Channel", value: any) {
     return (
@@ -26,16 +26,24 @@ function renderRegisteredPlugins(name: "Guild" | "User" | "Channel", value: any)
     const type = name === "Guild" ? OptionType.GUILDS : name === "User" ? OptionType.USERS : OptionType.CHANNELS;
     const plugins = registeredPlugins[type];
 
-    const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
+
+    const [checkedItems, setCheckedItems] = React.useState<Record<string, boolean>>(
+        Object.fromEntries(
+            Object.keys(plugins).flatMap(plugin =>
+                plugins[plugin].map(setting => [`${plugin}-${setting}-${value.id}`, Vencord.Plugins.plugins[plugin].settings?.store[setting].includes(value.id)])
+            )
+        )
+    );
 
     const handleCheckboxClick = (plugin: string, setting: string) => {
-        const key = `${plugin}-${setting}`;
+        const key = `${plugin}-${setting}-${value.id}`;
         setCheckedItems(prevState => ({
             ...prevState,
             [key]: !prevState[key]
         }));
-        // @ts-ignore (can't be undefined because settings have to exist for this to be called in the first place)
+        // @ts-ignore settings must be defined otherwise we wouldn't be here
         const s = Vencord.Plugins.plugins[plugin].settings.store[setting];
+        // @ts-ignore
         Vencord.Plugins.plugins[plugin].settings.store[setting] = s.includes(value.id)
             ? s.filter(id => id !== value.id)
             : [...s, value.id];
@@ -49,10 +57,9 @@ function renderRegisteredPlugins(name: "Guild" | "User" | "Channel", value: any)
             {plugins[plugin].map(setting => (
                 <Menu.MenuCheckboxItem
                     id={`vc-plugin-settings-${plugin}-${setting}`}
-                    // @ts-ignore
-                    label={Vencord.Plugins.plugins[plugin].settings.def[setting].popoutText ?? setting}
+                    label={Vencord.Plugins.plugins[plugin].settings?.def[setting].popoutText ?? setting}
                     action={() => handleCheckboxClick(plugin, setting)}
-                    checked={checkedItems[`${plugin}-${setting}`]}
+                    checked={checkedItems[`${plugin}-${setting}-${value.id}`]}
                 />
             ))}
         </Menu.MenuItem>
@@ -93,7 +100,7 @@ const registeredPlugins: Record<OptionType.USERS | OptionType.GUILDS | OptionTyp
 
 export default definePlugin({
     name: "SettingListsAPI",
-    description: "API to automatically add context menus for settings",
+    description: "API that automatically adds context menus for User/Guild/Channel arrays of plugins",
     authors: [Devs.Elvyra],
     contextMenus: {
         "channel-context": MakeContextCallback("Channel"),
@@ -106,9 +113,9 @@ export default definePlugin({
         for (const plugin of Object.values(Vencord.Plugins.plugins)) {
             if (!Vencord.Plugins.isPluginEnabled(plugin.name) || !plugin.settings) continue;
             const settings = plugin.settings.def;
-            for (const settingKey of Object.keys(settings)) {
+             for (const settingKey of Object.keys(settings)) {
                 const setting = settings[settingKey];
-                if (setting.type === OptionType.USERS || setting.type === OptionType.GUILDS || setting.type === OptionType.CHANNELS) {
+                if ((setting.type === OptionType.USERS || setting.type === OptionType.GUILDS || setting.type === OptionType.CHANNELS) && !setting.hidePopout) {
                     if (!registeredPlugins[setting.type][plugin.name]) {
                         registeredPlugins[setting.type][plugin.name] = [];
                     }

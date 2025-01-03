@@ -16,14 +16,39 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
-import { PluginOptionSelect } from "@utils/types";
-import { Forms, useState, useEffect, ChannelStore, UserStore, GuildStore } from "@webpack/common";
+import { OptionType, PluginOptionList } from "@utils/types";
+import { findComponentByCodeLazy } from "@webpack";
+import { Button,ChannelStore, Forms, GuildStore, React, useState } from "@webpack/common";
 
 import { ISettingElementProps } from ".";
+import { Channel } from "discord-types/general";
 
-export function SettingListComponent({ option, pluginSettings, definedSettings, onChange, onError, id }: ISettingElementProps<PluginOptionSelect>) {
+const UserMentionComponent = findComponentByCodeLazy(".USER_MENTION)");
+
+const CloseIcon = () => {
+    return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" width="18" height="18">
+        <path d="M17.3 18.7a1 1 0 0 0 1.4-1.4L13.42 12l5.3-5.3a1 1 0 0 0-1.42-1.4L12 10.58l-5.3-5.3a1 1 0 0 0-1.4 1.42L10.58 12l-5.3 5.3a1 1 0 1 0 1.42 1.4L12 13.42l5.3 5.3Z" />
+    </svg>;
+};
+
+interface UserMentionComponentProps {
+    id: string;
+    channelId: string;
+    guildId: string;
+}
+
+export function SettingListComponent({
+    option,
+    pluginSettings,
+    definedSettings,
+    onChange,
+    onError,
+    id
+}: ISettingElementProps<PluginOptionList>) {
     const [error, setError] = useState<string | null>(null);
 
     const [items, setItems] = useState<string[]>([]);
@@ -34,31 +59,75 @@ export function SettingListComponent({ option, pluginSettings, definedSettings, 
             setItems([...items, newItem]);
             setNewItem("");
         }
+        pluginSettings[id] = items;
     };
+
+    if (items.length === 0 && pluginSettings[id].length !== 0) {
+        setItems(pluginSettings[id]);
+    }
 
     const removeItem = (index: number) => {
         setItems(items.filter((_, i) => i !== index));
+        pluginSettings[id] = items;
     };
 
 
-    useEffect(() => {
-        onError(error !== null);
-    }, [error]);
-
     function handleChange(newValue) {
-        const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
-        if (typeof isValid === "string") setError(isValid);
-        else if (!isValid) setError("Invalid input provided.");
-        else {
-            setError(null);
-            onChange(newValue);
-        }
+        onChange(newValue);
     }
 
+    function wrapChannel(id: string) {
+        const channel = ChannelStore.getChannel(id) as Channel;
+        if (!channel) {
+            return "Unknown Channel";
+        }
+        return (GuildStore.getGuild(channel.guild_id)?.name ?? "Unknown Guild") + " - " + channel.name;
+    }
+
+    // FIXME make channels and guilds nicer!
     return (
         <Forms.FormSection>
             <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom16} type="description">{option.description}</Forms.FormText>
+            <ErrorBoundary noop>
+                {items.map((item, index) => (
+                    <React.Fragment key={`${item}-${index}`}>
+                        <Flex
+                            flexDirection="row"
+                            style={{
+                                gap: "1px",
+                            }}
+                        >
+                            {option.type === OptionType.USERS ? (
+                                <UserMentionComponent
+                                    userId={item}
+                                    className="mention"
+                                />
+                            ) : option.type === OptionType.CHANNELS ? (
+                                <span style={{ color: "white" }}>{wrapChannel(item)}</span>
+                            ) : option.type === OptionType.GUILDS ? (
+                                <span style={{ color: "white" }}>
+                                    {GuildStore.getGuild(item)?.name || "Unknown Guild"}
+                                </span>
+                                // TODO add logo to guild and channel?
+                            ) : (
+                                <span>{item}</span>
+                            )}
+                            <Button
+                                size={Button.Sizes.MIN}
+                                onClick={() => removeItem(index)}
+                                style={
+                                    { background: "none", }
+                                }
+                            >
+                                <CloseIcon />
+                            </Button>
+                        </Flex>
+                    </React.Fragment>
+                ))}
+
+            </ErrorBoundary>
+
 
             {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
         </Forms.FormSection>

@@ -40,11 +40,11 @@ import {
     ISettingElementProps,
     SettingBooleanComponent,
     SettingCustomComponent,
+    SettingListComponent,
     SettingNumericComponent,
     SettingSelectComponent,
     SettingSliderComponent,
     SettingTextComponent,
-    SettingListComponent,
 } from "./components";
 import { openContributorModal } from "./ContributorModal";
 import { GithubButton, WebsiteButton } from "./LinkIconButton";
@@ -83,10 +83,10 @@ const Components: Record<OptionType, React.ComponentType<ISettingElementProps<an
     [OptionType.SELECT]: SettingSelectComponent,
     [OptionType.SLIDER]: SettingSliderComponent,
     [OptionType.COMPONENT]: SettingCustomComponent,
-/*     [OptionType.LIST]: SettingListComponent,
+    [OptionType.LIST]: SettingListComponent,
     [OptionType.USERS]: SettingListComponent,
     [OptionType.CHANNELS]: SettingListComponent,
-    [OptionType.GUILDS]: SettingListComponent */
+    [OptionType.GUILDS]: SettingListComponent
 };
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {

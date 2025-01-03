@@ -267,6 +267,7 @@ export interface PluginSettingSliderDef {
 export interface PluginSettingListDef{
     type: OptionType.LIST | OptionType.CHANNELS | OptionType.GUILDS | OptionType.USERS;
     popoutText?: string;
+    hidePopout?: boolean;
 }
 
 export interface IPluginOptionComponentProps {
@@ -302,6 +303,7 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingSelectDef ? O["options"][number]["value"] :
     O extends PluginSettingSliderDef ? number :
     O extends PluginSettingComponentDef ? any :
+    O extends PluginSettingListDef ? any[] :
     never;
 type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
     O["options"] extends { default?: boolean; }[] ? O["options"][number]["value"] : undefined
@@ -361,6 +363,7 @@ export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon 
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
 export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
+export type PluginOptionList = PluginSettingListDef & PluginSettingCommon;
 
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
     [key in keyof PluginExports]:

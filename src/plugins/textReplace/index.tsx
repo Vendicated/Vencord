@@ -74,15 +74,18 @@ const settings = definePluginSettings({
     stringRules: {
         type: OptionType.LIST,
         hidden: true,
+        description: ""
     },
     regexRules: {
         type: OptionType.LIST,
         hidden: true,
+        description: ""
     },
     migrated: {
         type: OptionType.BOOLEAN,
         hidden: true,
         default: false,
+        description: ""
     }
 });
 
@@ -232,8 +235,8 @@ function applyRules(content: string): string {
         }
     }
 
-    if (settings.store.stringRulesregexRules) {
-        for (const rule of settings.store.stringRulesregexRules) {
+    if (settings.store.regexRules) {
+        for (const rule of settings.store.regexRules) {
             if (!rule.find) continue;
             if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
 
