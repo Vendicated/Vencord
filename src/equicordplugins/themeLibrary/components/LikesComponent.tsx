@@ -5,8 +5,7 @@
  */
 
 import * as DataStore from "@api/DataStore";
-import { Button, useEffect, useRef, UserStore, useState } from "@webpack/common";
-import type { User } from "discord-types/general";
+import { Button, useEffect, useRef, useState } from "@webpack/common";
 
 import type { Theme, ThemeLikeProps } from "../types";
 import { isAuthorized } from "../utils/auth";
@@ -25,14 +24,13 @@ export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { t
 
     function getThemeLikes(themeId: Theme["id"]): number {
         const themeLike = likedThemes?.likes.find(like => like.themeId === themeId as unknown as Number);
-        return themeLike ? themeLike.userIds.length : 0;
+        return themeLike ? themeLike.likes : 0;
     }
 
     const handleLikeClick = async (themeId: Theme["id"]) => {
         if (!isAuthorized()) return;
         const theme = likedThemes?.likes.find(like => like.themeId === themeId as unknown as Number);
-        const currentUser: User = UserStore.getCurrentUser();
-        const hasLiked: boolean = (theme?.userIds.includes(currentUser.id) || themeId === "preview") ?? false;
+        const hasLiked: boolean = theme?.hasLiked ?? false;
         const endpoint = hasLiked ? "/likes/remove" : "/likes/add";
         const token = await DataStore.get("ThemeLibrary_uniqueToken");
 
@@ -46,9 +44,9 @@ export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { t
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    token,
                     themeId: themeId,
                 }),
             });
@@ -57,7 +55,12 @@ export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { t
 
             const fetchLikes = async () => {
                 try {
-                    const response = await themeRequest("/likes/get");
+                    const token = await DataStore.get("ThemeLibrary_uniqueToken");
+                    const response = await themeRequest("/likes/get", {
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                        },
+                    });
                     const data = await response.json();
                     setLikedThemes(data);
                 } catch (err) {
@@ -72,7 +75,7 @@ export const LikesComponent = ({ themeId, likedThemes: initialLikedThemes }: { t
         debounce.current = false;
     };
 
-    const hasLiked = likedThemes?.likes.some(like => like.themeId === themeId as unknown as Number && like.userIds.includes(UserStore.getCurrentUser().id)) ?? false;
+    const hasLiked = likedThemes?.likes.some(like => like.themeId === themeId as unknown as Number && like?.hasLiked === true) ?? false;
 
     return (
         <div>

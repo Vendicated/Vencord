@@ -21,5 +21,7 @@ export function getThemesDir(_: IpcMainInvokeEvent, dir: PathLike, theme: Theme)
 export async function downloadTheme(_: IpcMainInvokeEvent, dir: PathLike, theme: Theme) {
     if (!theme.content || !theme.name) return;
     const path = join(dir.toString(), `${theme.name}.theme.css`);
-    writeFileSync(path, Buffer.from(theme.content, "base64"));
+    const download = await fetch(`https://discord-themes.com/api/download/${theme.id}`);
+    const content = await download.text();
+    writeFileSync(path, content);
 }
