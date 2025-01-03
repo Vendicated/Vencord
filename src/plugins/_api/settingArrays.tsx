@@ -57,6 +57,7 @@ function renderRegisteredPlugins(name: "Guild" | "User" | "Channel", value: any)
             {plugins[plugin].map(setting => (
                 <Menu.MenuCheckboxItem
                     id={`vc-plugin-settings-${plugin}-${setting}`}
+                    // @ts-ignore popoutText exists due to this being a list option type FIXMe look at this again
                     label={Vencord.Plugins.plugins[plugin].settings?.def[setting].popoutText ?? setting}
                     action={() => handleCheckboxClick(plugin, setting)}
                     checked={checkedItems[`${plugin}-${setting}-${value.id}`]}

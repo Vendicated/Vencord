@@ -87,7 +87,7 @@ export function SettingListComponent({
         // Handle the submit action for the specific item
         // This could involve updating the state, making an API call, etc.
         // Clear the input field after submission
-        const inputElement = document.getElementById(`vc-plugin-modal-input-${option.type === OptionType.CHANNELS ? "channel" : option.type === OptionType.GUILDS ? "guild" : option.type === OptionType.USERS ? "user" : "string"}`);
+        const inputElement = document.getElementById(`vc-plugin-modal-input-${option.type === OptionType.CHANNELS ? "channel" : option.type === OptionType.GUILDS ? "guild" : option.type === OptionType.USERS ? "user" : "string"}`) as HTMLInputElement;
         if (!inputElement || inputElement.value === "") {
             return;
         }
