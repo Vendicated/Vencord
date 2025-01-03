@@ -77,7 +77,6 @@ export function SettingArrayComponent({
         // TODO add picker for users etc?
         if (option.type !== OptionType.ARRAY && !(inputElement.value.length >= 18 && inputElement.value.length <= 19 && !isNaN(Number(inputElement.value)))) {
             setError("Value is not a valid snowflake ID");
-            inputElement.value = "";
             return;
         }
         setItems([...items, inputElement.value]);
