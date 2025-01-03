@@ -48,7 +48,7 @@ interface UserMentionComponentProps {
     guildId: string;
 }
 
-export function SettingListComponent({
+export function SettingArrayComponent({
     option,
     pluginSettings,
     definedSettings,
@@ -107,60 +107,60 @@ export function SettingListComponent({
             <ErrorBoundary noop>
                 <React.Fragment>
                     {items.map((item, index) => (
-                            <Flex
-                                flexDirection="row"
-                                style={{
-                                    gap: "1px",
-                                }}
+                        <Flex
+                            flexDirection="row"
+                            style={{
+                                gap: "1px",
+                            }}
+                        >
+                            {option.type === OptionType.USERS ? (
+                                <UserMentionComponent
+                                    userId={item}
+                                    className="mention"
+                                />
+                            ) : option.type === OptionType.CHANNELS ? (
+                                <span style={{ color: "white" }}>{wrapChannel(item)}</span>
+                            ) : option.type === OptionType.GUILDS ? (
+                                <span style={{ color: "white" }}>
+                                    {GuildStore.getGuild(item)?.name || "Unknown Guild"}
+                                </span>
+                                // TODO add logo to guild and channel?
+                            ) : (
+                                <span style={{ color: "white" }}>{item}</span>
+                            )}
+                            <Button
+                                size={Button.Sizes.MIN}
+                                onClick={() => removeItem(index)}
+                                style={
+                                    { background: "none", }
+                                }
                             >
-                                {option.type === OptionType.USERS ? (
-                                    <UserMentionComponent
-                                        userId={item}
-                                        className="mention"
-                                    />
-                                ) : option.type === OptionType.CHANNELS ? (
-                                    <span style={{ color: "white" }}>{wrapChannel(item)}</span>
-                                ) : option.type === OptionType.GUILDS ? (
-                                    <span style={{ color: "white" }}>
-                                        {GuildStore.getGuild(item)?.name || "Unknown Guild"}
-                                    </span>
-                                    // TODO add logo to guild and channel?
-                                ) : (
-                                    <span style={{ color: "white" }}>{item}</span>
-                                )}
-                                <Button
-                                    size={Button.Sizes.MIN}
-                                    onClick={() => removeItem(index)}
-                                    style={
-                                        { background: "none", }
-                                    }
-                                >
-                                    <CloseIcon/>
-                                </Button>
+                                <CloseIcon />
+                            </Button>
                         </Flex>
                     ))}
-                            <Flex
-                                flexDirection="row"
-                                style={{
-                                    gap: "5px",
-                                    marginTop: "10px",
-                                }}
-                            >
-                                {/* Add a single input field */}
-                                <TextInput
-                                    type="text"
-                                    placeholder="Add Item"
-                                    id={`vc-plugin-modal-input-${option.type === OptionType.CHANNELS ? "channel" : option.type === OptionType.GUILDS ? "guild" : option.type === OptionType.USERS ? "user" : "string"}`}
-                                />
-                                {/* Add a submit button */}
-                                <Button
-                                    size={Button.Sizes.MIN}
-                                    onClick={handleSubmit}
-                                    style={{ background: "none" }}
-                                >
-                                    <CheckMarkIcon/>
-                                </Button>
-                            </Flex>
+                    <Flex
+                        flexDirection="row"
+                        style={{
+                            gap: "5px",
+                            marginTop: "10px",
+                        }}
+                    >
+                        {/* Add a single input field */}
+                        <TextInput
+                            type="text"
+                            placeholder="Add Item"
+                            id={`vc-plugin-modal-input-${option.type === OptionType.CHANNELS ? "channel" : option.type === OptionType.GUILDS ? "guild" : option.type === OptionType.USERS ? "user" : "string"}`}
+                        />
+                        {/* Add a submit button */}
+                        <Button
+                            size={Button.Sizes.MIN}
+                            onClick={handleSubmit}
+                            style={{ background: "none" }}
+                        >
+                            <CheckMarkIcon />
+                        </Button>
+                    </Flex>
                 </React.Fragment>
             </ErrorBoundary>
 

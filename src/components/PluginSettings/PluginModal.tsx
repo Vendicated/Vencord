@@ -38,9 +38,9 @@ import { PluginMeta } from "~plugins";
 
 import {
     ISettingElementProps,
+    SettingArrayComponent,
     SettingBooleanComponent,
     SettingCustomComponent,
-    SettingListComponent,
     SettingNumericComponent,
     SettingSelectComponent,
     SettingSliderComponent,
@@ -83,10 +83,10 @@ const Components: Record<OptionType, React.ComponentType<ISettingElementProps<an
     [OptionType.SELECT]: SettingSelectComponent,
     [OptionType.SLIDER]: SettingSliderComponent,
     [OptionType.COMPONENT]: SettingCustomComponent,
-    [OptionType.ARRAY]: SettingListComponent,
-    [OptionType.USERS]: SettingListComponent,
-    [OptionType.CHANNELS]: SettingListComponent,
-    [OptionType.GUILDS]: SettingListComponent
+    [OptionType.ARRAY]: SettingArrayComponent,
+    [OptionType.USERS]: SettingArrayComponent,
+    [OptionType.CHANNELS]: SettingArrayComponent,
+    [OptionType.GUILDS]: SettingArrayComponent
 };
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {

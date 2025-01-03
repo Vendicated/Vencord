@@ -10,7 +10,7 @@ import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, React } from "@webpack/common";
 
-function createContextMenu(name: "Guild" | "User" | "Channel", value: any) {
+function createContextMenu(name: string, value: any) {
     return (
         <Menu.MenuItem
             id="vc-plugin-settings"
@@ -22,7 +22,7 @@ function createContextMenu(name: "Guild" | "User" | "Channel", value: any) {
 }
 
 
-function renderRegisteredPlugins(name: "Guild" | "User" | "Channel", value: any) {
+function renderRegisteredPlugins(name: string, value: any) {
     const type = name === "Guild" ? OptionType.GUILDS : name === "User" ? OptionType.USERS : OptionType.CHANNELS;
     const plugins = registeredPlugins[type];
 
@@ -112,7 +112,7 @@ export default definePlugin({
         for (const plugin of Object.values(Vencord.Plugins.plugins)) {
             if (!Vencord.Plugins.isPluginEnabled(plugin.name) || !plugin.settings) continue;
             const settings = plugin.settings.def;
-             for (const settingKey of Object.keys(settings)) {
+            for (const settingKey of Object.keys(settings)) {
                 const setting = settings[settingKey];
                 if ((setting.type === OptionType.USERS || setting.type === OptionType.GUILDS || setting.type === OptionType.CHANNELS) && !setting.hidePopout) {
                     if (!registeredPlugins[setting.type][plugin.name]) {
