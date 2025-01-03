@@ -91,7 +91,6 @@ export function SettingArrayComponent({
     }
 
 
-    // FIXME make channels and guilds nicer!
     return (
         <Forms.FormSection>
             <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
