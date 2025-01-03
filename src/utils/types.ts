@@ -167,7 +167,7 @@ export const enum OptionType {
     SELECT,
     SLIDER,
     COMPONENT,
-    LIST,
+    ARRAY,
     USERS, // List of users
     CHANNELS, // List of channels
     GUILDS, // List of guilds
@@ -265,7 +265,7 @@ export interface PluginSettingSliderDef {
 }
 
 export interface PluginSettingListDef{
-    type: OptionType.LIST | OptionType.CHANNELS | OptionType.GUILDS | OptionType.USERS;
+    type: OptionType.ARRAY | OptionType.CHANNELS | OptionType.GUILDS | OptionType.USERS;
     popoutText?: string;
     hidePopout?: boolean;
 }
@@ -305,7 +305,7 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingComponentDef ? any :
     O extends PluginSettingListDef ? any[] :
     never;
-type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
+type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingListDef ? any[] : O extends PluginSettingSelectDef ? (
     O["options"] extends { default?: boolean; }[] ? O["options"][number]["value"] : undefined
 ) : O extends { default: infer T; } ? T : undefined;
 

@@ -83,7 +83,7 @@ const Components: Record<OptionType, React.ComponentType<ISettingElementProps<an
     [OptionType.SELECT]: SettingSelectComponent,
     [OptionType.SLIDER]: SettingSliderComponent,
     [OptionType.COMPONENT]: SettingCustomComponent,
-    [OptionType.LIST]: SettingListComponent,
+    [OptionType.ARRAY]: SettingListComponent,
     [OptionType.USERS]: SettingListComponent,
     [OptionType.CHANNELS]: SettingListComponent,
     [OptionType.GUILDS]: SettingListComponent

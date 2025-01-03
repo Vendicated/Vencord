@@ -72,12 +72,12 @@ const settings = definePluginSettings({
         }
     },
     stringRules: {
-        type: OptionType.LIST,
+        type: OptionType.ARRAY,
         hidden: true,
         description: ""
     },
     regexRules: {
-        type: OptionType.LIST,
+        type: OptionType.ARRAY,
         hidden: true,
         description: ""
     },
