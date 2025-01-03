@@ -96,10 +96,8 @@ const registeredPlugins: Record<OptionType.USERS | OptionType.GUILDS | OptionTyp
 };
 
 
-// TODO find a better name
-
 export default definePlugin({
-    name: "SettingListsAPI",
+    name: "SettingArraysAPI",
     description: "API that automatically adds context menus for User/Guild/Channel arrays of plugins",
     authors: [Devs.Elvyra],
     contextMenus: {
