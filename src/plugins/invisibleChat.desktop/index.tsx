@@ -19,7 +19,7 @@
 import { addChatBarButton, ChatBarButton } from "@api/ChatButtons";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { updateMessage } from "@api/MessageUpdater";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migrateSettingsToArrays } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
@@ -92,11 +92,14 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
     );
 };
 
+
+migrateSettingsToArrays("InvisibleChat", ["savedPasswords"]);
+
 const settings = definePluginSettings({
     savedPasswords: {
-        type: OptionType.STRING,
-        default: "password, Password",
-        description: "Saved Passwords (Seperated with a , )"
+        type: OptionType.ARRAY,
+        default: ["password", "Password"],
+        description: "Saved Passwords",
     }
 });
 
@@ -206,7 +209,7 @@ export function isCorrectPassword(result: string): boolean {
 }
 
 export async function iteratePasswords(message: Message): Promise<string | false> {
-    const passwords = settings.store.savedPasswords.split(",").map(s => s.trim());
+    const passwords = settings.store.savedPasswords.map(s => s.trim());
 
     if (!message?.content || !passwords?.length) return false;
 

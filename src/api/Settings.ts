@@ -220,6 +220,16 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
     }
 }
 
+export function migrateSettingsToArrays(pluginName: string, settings: string[], stringSeparator: string = ",") {
+    for (const setting of settings) {
+        if (SettingsStore.plain.plugins[pluginName] === undefined || typeof SettingsStore.plain.plugins[pluginName][setting] !== "string") continue;
+        logger.info(`Migrating setting ${setting} from ${pluginName} to list`);
+        // @ts-ignore
+        if (SettingsStore.plain.plugins[pluginName][setting] === "") SettingsStore.plain.plugins[pluginName][setting] = SettingsStore.plain.plugins[pluginName][setting].default ?? [];
+        else SettingsStore.plain.plugins[pluginName][setting] = SettingsStore.plain.plugins[pluginName][setting].split(stringSeparator);
+    }
+}
+
 export function definePluginSettings<
     Def extends SettingsDefinition,
     Checks extends SettingsChecks<Def>,
