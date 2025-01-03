@@ -91,7 +91,12 @@ export function SettingArrayComponent({
         if (!inputElement || inputElement.value === "") {
             return;
         }
-        // TODO add searching for users, channels, and guilds lol
+        // TODO add picker for users?
+        if (option.type !== OptionType.ARRAY && !(inputElement.value.length >= 18 && inputElement.value.length <= 19 && !isNaN(Number(inputElement.value)))) {
+            setError("Value is not a valid snowflake ID");
+            inputElement.value = "";
+            return;
+        }
         setItems([...items, inputElement.value]);
         pluginSettings[id] = items;
         inputElement.value = "";
@@ -149,7 +154,7 @@ export function SettingArrayComponent({
                         {/* Add a single input field */}
                         <TextInput
                             type="text"
-                            placeholder="Add Item"
+                            placeholder="Add Item (as ID)"
                             id={`vc-plugin-modal-input-${option.type === OptionType.CHANNELS ? "channel" : option.type === OptionType.GUILDS ? "guild" : option.type === OptionType.USERS ? "user" : "string"}`}
                         />
                         {/* Add a submit button */}
