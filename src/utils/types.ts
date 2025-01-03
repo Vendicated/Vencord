@@ -167,6 +167,10 @@ export const enum OptionType {
     SELECT,
     SLIDER,
     COMPONENT,
+    LIST,
+    USERS, // List of users
+    CHANNELS, // List of channels
+    GUILDS, // List of guilds
 }
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
@@ -183,6 +187,7 @@ export type PluginSettingDef = (
     | PluginSettingSliderDef
     | PluginSettingComponentDef
     | PluginSettingBigIntDef
+    | PluginSettingListDef
 ) & PluginSettingCommon;
 
 export interface PluginSettingCommon {
@@ -257,6 +262,11 @@ export interface PluginSettingSliderDef {
      * If false, allow users to select values in-between your markers.
      */
     stickToMarkers?: boolean;
+}
+
+export interface PluginSettingListDef{
+    type: OptionType.LIST | OptionType.CHANNELS | OptionType.GUILDS | OptionType.USERS;
+    popoutText?: string;
 }
 
 export interface IPluginOptionComponentProps {
