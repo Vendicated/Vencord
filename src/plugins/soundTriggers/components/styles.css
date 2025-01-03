@@ -1,0 +1,70 @@
+.vc-st-trigger-table {
+    gap: 6px;
+}
+
+.vc-st-trigger-entry {
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vc-st-hoverable-section:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-st-section {
+    border-radius: 3px;
+    padding: 5px;
+}
+
+.vc-st-emoji-picker {
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.vc-st-emoji-picker>div {
+    padding-right: 8px;
+    overflow: hidden;
+}
+
+.vc-st-modal-content {
+    padding: 10px;
+}
+
+.vc-st-modal-content input {
+    width: 100%;
+}
+
+.vc-st-modal-footer {
+    column-gap: 10px;
+}
+
+.vc-st-modal-body-text-card {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    row-gap: 10px;
+}
+
+.vc-st-modal-body-text-entry {
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vc-st-rounded-button {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    min-width: auto;
+    min-height: auto;
+    border-radius: 50%;
+}
+
+.vc-st-more-button {
+    background-color: var(--background-secondary);
+    color: var(--header-secondary);
+}
+
+.vc-st-more-button:hover {
+    background-color: var(--background-primary);
+    color: var(--interactive-active);
+}
