@@ -224,6 +224,7 @@ export function migrateSettingsToArrays(pluginName: string, settings: string[], 
     for (const setting of settings) {
         if (SettingsStore.plain.plugins[pluginName] === undefined || typeof SettingsStore.plain.plugins[pluginName][setting] !== "string") continue;
         logger.info(`Migrating setting ${setting} from ${pluginName} to list`);
+        // @ts-ignore
         if (SettingsStore.plain.plugins[pluginName][setting] === "") SettingsStore.plain.plugins[pluginName][setting] = SettingsStore.plain.plugins[pluginName][setting].default ?? [];
         else SettingsStore.plain.plugins[pluginName][setting] = SettingsStore.plain.plugins[pluginName][setting].split(stringSeparator);
     }

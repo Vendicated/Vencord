@@ -264,10 +264,11 @@ export interface PluginSettingSliderDef {
     stickToMarkers?: boolean;
 }
 
-export interface PluginSettingListDef{
+export interface PluginSettingListDef {
     type: OptionType.ARRAY | OptionType.CHANNELS | OptionType.GUILDS | OptionType.USERS;
     popoutText?: string;
     hidePopout?: boolean;
+    default?: any[];
 }
 
 export interface IPluginOptionComponentProps {
