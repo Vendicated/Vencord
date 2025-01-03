@@ -34,7 +34,7 @@ function renderRegisteredPlugins(name: "Guild" | "User" | "Channel", value: any)
             ...prevState,
             [key]: !prevState[key]
         }));
-        // @ts-ignore (cannot be undefined because settings have to exist for this to be called in the first place)
+        // @ts-ignore (can't be undefined because settings have to exist for this to be called in the first place)
         const s = Vencord.Plugins.plugins[plugin].settings.store[setting];
         Vencord.Plugins.plugins[plugin].settings.store[setting] = s.includes(value.id)
             ? s.filter(id => id !== value.id)
