@@ -9,7 +9,7 @@ import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { React, useMemo, useState } from "@webpack/common";
-import type { Fragment, MouseEventHandler, ReactNode } from "react";
+import type { MouseEventHandler, ReactNode } from "react";
 
 let hidechatbuttonsopen: boolean | undefined;
 
