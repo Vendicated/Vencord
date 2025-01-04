@@ -253,8 +253,6 @@ export function SettingArrayComponent({
             return;
         }
 
-        const newItems = [...items, inputElement.value];
-
         setItems([...items, inputElement.value]);
 
         pluginSettings[id] = items;
