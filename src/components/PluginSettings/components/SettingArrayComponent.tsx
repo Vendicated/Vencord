@@ -69,12 +69,7 @@ export function SettingArrayComponent({
         }
         return (GuildStore.getGuild(channel.guild_id)?.name ?? "Unknown Guild") + " - " + channel.name;
     }
-
-    /* Pseudocode for handling submit */
     function handleSubmit() {
-        // Handle the submit action for the specific item
-        // This could involve updating the state, making an API call, etc.
-        // Clear the input field after submission
         const inputElement = document.getElementById(`vc-plugin-modal-input-${option.type === OptionType.CHANNELS ? "channel" : option.type === OptionType.GUILDS ? "guild" : option.type === OptionType.USERS ? "user" : "string"}`) as HTMLInputElement;
         if (!inputElement || inputElement.value === "") {
             return;
@@ -82,7 +77,6 @@ export function SettingArrayComponent({
         // TODO add picker for users etc?
         if (option.type !== OptionType.ARRAY && !(inputElement.value.length >= 18 && inputElement.value.length <= 19 && !isNaN(Number(inputElement.value)))) {
             setError("Value is not a valid snowflake ID");
-            inputElement.value = "";
             return;
         }
         setItems([...items, inputElement.value]);
