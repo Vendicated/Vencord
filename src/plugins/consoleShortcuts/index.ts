@@ -20,6 +20,7 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel, getCurrentGuild } from "@utils/discord";
 import { runtimeHashMessageKey } from "@utils/intlHash";
 import { SYM_LAZY_CACHED, SYM_LAZY_GET } from "@utils/lazy";
+import { ModalAPI } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from "@utils/patches";
 import definePlugin, { PluginNative, StartAt } from "@utils/types";
@@ -144,6 +145,8 @@ function makeShortcuts() {
         me: { getter: () => Common.UserStore.getCurrentUser(), preload: false },
         meId: { getter: () => Common.UserStore.getCurrentUser().id, preload: false },
         messages: { getter: () => Common.MessageStore.getMessages(Common.SelectedChannelStore.getChannelId()), preload: false },
+        openModal: { getter: () => ModalAPI.openModal },
+        openModalLazy: { getter: () => ModalAPI.openModalLazy },
 
         Stores: {
             getter: () => Object.fromEntries(
