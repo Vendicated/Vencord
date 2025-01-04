@@ -65,10 +65,11 @@ export function SettingArrayComponent({
     const removeButton = (index: number) => {
         return (
             <Button
+                id={cl("remove-button")}
                 size={Button.Sizes.MIN}
                 onClick={() => removeItem(index)}
                 style={
-                    { background: "none", }
+                    { background: "none", color: "red" }
                 }
             >
                 <CloseIcon />
@@ -313,6 +314,7 @@ export function SettingArrayComponent({
                     />
                     <Button
                         size={Button.Sizes.MIN}
+                        id={cl("add-button")}
                         onClick={handleSubmit}
                         style={{ background: "none" }}
                     >
