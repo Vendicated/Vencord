@@ -69,6 +69,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - GrammarFix by S€th
 - HideChatButtons by iamme
 - HideMessage by Hanzy
+- HideScreenShare by thororen
 - HideServers by bepvte
 - HolyNotes by Wolfie
 - HomeTyping by Samwich
@@ -125,6 +126,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ShowBadgesInChat by Inbestigator & KrystalSkull
 - Signature by KrystalSkull
 - SidebarChat by Joona
+- StatsfmRPC by Crxaw & vmohammad
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo, maintained by thororen
 - StatusPresets by iamme
