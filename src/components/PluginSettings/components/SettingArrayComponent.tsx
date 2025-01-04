@@ -23,6 +23,8 @@ const UserMentionComponent = findComponentByCodeLazy(".USER_MENTION)");
 const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
 const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarURL");
 
+const SearchBar = findComponentByCodeLazy("focus(){let{current:");
+
 
 const CloseIcon = () => {
     return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" width="18" height="18">
@@ -36,12 +38,12 @@ const CheckMarkIcon = () => {
     </svg>;
 };
 
-
-interface UserMentionComponentProps {
-    id: string;
-    channelId: string;
-    guildId: string;
-}
+const SearchIcon = () => {
+    return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="16" y1="16" x2="22" y2="22"></line>
+    </svg>;
+};
 
 export function SettingArrayComponent({
     option,
@@ -53,6 +55,7 @@ export function SettingArrayComponent({
 }: ISettingElementProps<PluginOptionList>) {
     const [error, setError] = useState<string | null>(null);
     const [items, setItems] = useState<string[]>([]);
+    const [text, setText] = useState<string>("");
 
     useEffect(() => {
         pluginSettings[id] = items;
@@ -104,6 +107,7 @@ export function SettingArrayComponent({
                     key={index}
                     style={{
                         gap: "1px",
+                        marginBottom: "8px"
                     }}
                 >
                     {guild ? (
@@ -251,32 +255,33 @@ export function SettingArrayComponent({
     }
 
     function handleSubmit() {
-        const inputElement = document.getElementById(`vc-plugin-modal-input-${option.type === OptionType.CHANNELS ? "channel" : option.type === OptionType.GUILDS ? "guild" : option.type === OptionType.USERS ? "user" : "string"}`) as HTMLInputElement;
-        if (!inputElement || inputElement.value === "") {
+        if (text === "") {
             return;
         }
-        // TODO add picker for users etc?
-        if (option.type !== OptionType.ARRAY && !(inputElement.value.length >= 18 && inputElement.value.length <= 19 && !isNaN(Number(inputElement.value)))) {
-            setError("Value is not a valid snowflake ID");
+        if (option.type !== OptionType.ARRAY && !(text.length >= 18 && text.length <= 19 && !isNaN(Number(text)))) {
+            // openSearchModal();
+            setText("");
+            // FIXME
             return;
         }
 
-        if (items.includes(inputElement.value)) {
+        if (items.includes(text)) {
             setError("This item is already added");
-            inputElement.value = "";
+            setText("");
             return;
         }
 
-        setItems([...items, inputElement.value]);
+        setItems([...items, text]);
 
-        inputElement.value = "";
+        setText("");
+        setError(null);
     }
 
 
     return (
         <Forms.FormSection>
             <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom16} type="description">{option.description}</Forms.FormText>
+            <Forms.FormText className={Margins.bottom8} type="description">{option.description}</Forms.FormText>
             <ErrorBoundary noop>
                 {option.type === OptionType.ARRAY || option.type === OptionType.USERS ?
                     items.map((item, index) => (
@@ -285,6 +290,7 @@ export function SettingArrayComponent({
                             key={index}
                             style={{
                                 gap: "1px",
+                                marginBottom: "8px"
                             }}
                         >
                             {option.type === OptionType.USERS ? (
@@ -303,14 +309,15 @@ export function SettingArrayComponent({
                 <Flex
                     flexDirection="row"
                     style={{
-                        gap: "5px",
-                        marginTop: "10px",
+                        gap: "3px"
                     }}
                 >
                     <TextInput
                         type="text"
                         placeholder="Add Item (as ID)"
-                        id={`vc-plugin-modal-input-${option.type === OptionType.CHANNELS ? "channel" : option.type === OptionType.GUILDS ? "guild" : option.type === OptionType.USERS ? "user" : "string"}`}
+                        id={cl("input")}
+                        onChange={v => setText(v)}
+                        value={text}
                     />
                     <Button
                         size={Button.Sizes.MIN}
@@ -319,6 +326,18 @@ export function SettingArrayComponent({
                         style={{ background: "none" }}
                     >
                         <CheckMarkIcon />
+                    </Button>
+                    <Button
+                        id={cl("search-button")}
+                        size={Button.Sizes.MIN}
+                        onClick={() => {
+                            // openSearchModal();
+                        }}
+                        style={
+                            { background: "none" }
+                        }
+                    >
+                        <SearchIcon />
                     </Button>
                 </Flex>
             </ErrorBoundary>
