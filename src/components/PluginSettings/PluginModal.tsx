@@ -114,7 +114,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 setAuthors(a => [...a, author]);
             }
         })();
-    }, []);
+    }, [plugin.authors]);
 
     async function saveAndClose() {
         if (!plugin.options) {
