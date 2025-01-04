@@ -11,7 +11,7 @@ import { Margins } from "@utils/margins";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { OptionType, PluginOptionList } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { Avatar, Button, ChannelStore, Forms, GuildStore, IconUtils, React, Text, TextInput, useState } from "@webpack/common";
+import { Avatar, Button, ChannelStore, Forms, GuildStore, IconUtils, React, Text, TextInput, useEffect, useState } from "@webpack/common";
 import { Channel, Guild } from "discord-types/general";
 import { JSX } from "react";
 
@@ -52,8 +52,11 @@ export function SettingArrayComponent({
     id
 }: ISettingElementProps<PluginOptionList>) {
     const [error, setError] = useState<string | null>(null);
-
     const [items, setItems] = useState<string[]>([]);
+
+    useEffect(() => {
+        pluginSettings[id] = items;
+    }, [items, pluginSettings, id]);
 
     if (items.length === 0 && pluginSettings[id].length !== 0) {
         setItems(pluginSettings[id]);
@@ -89,9 +92,7 @@ export function SettingArrayComponent({
             pluginSettings[id] = [];
             return;
         }
-        const newItems = items.filter((_, i) => i !== index);
-        setItems(newItems);
-        pluginSettings[id] = newItems;
+        setItems(items.filter((_, i) => i !== index));
     };
 
     function renderGuildView() {
@@ -254,11 +255,8 @@ export function SettingArrayComponent({
             return;
         }
 
-        const newItems = [...items, inputElement.value];
+        setItems([...items, inputElement.value]);
 
-        setItems(newItems);
-
-        pluginSettings[id] = newItems;
         inputElement.value = "";
     }
 
