@@ -169,9 +169,18 @@ export const enum OptionType {
     SLIDER,
     COMPONENT,
     ARRAY,
-    USERS, // List of users
-    CHANNELS, // List of channels
-    GUILDS, // List of guilds
+    /**
+     * List of users
+     */
+    USERS,
+    /**
+     * List of channels
+     */
+    CHANNELS,
+    /**
+     * List of guilds
+     */
+    GUILDS,
 }
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
