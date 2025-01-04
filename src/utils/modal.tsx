@@ -17,7 +17,7 @@
 */
 
 import { findByPropsLazy, findModuleId, proxyLazyWebpack, wreq } from "@webpack";
-import type { ComponentType, PropsWithChildren, ReactElement, Ref } from "react";
+import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
 
@@ -47,7 +47,7 @@ export interface ModalOptions {
     onCloseCallback?: (() => void);
 }
 
-type RenderFunction = (props: ModalProps) => ReactElement<any>;
+type RenderFunction = (props: ModalProps) => ReactNode;
 
 export const Modals = findByPropsLazy("ModalRoot", "ModalCloseButton") as {
     ModalRoot: ComponentType<PropsWithChildren<{
