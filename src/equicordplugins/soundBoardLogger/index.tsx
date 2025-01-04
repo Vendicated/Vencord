@@ -43,7 +43,7 @@ export default definePlugin({
             );
 
         e.toolbar = [
-            <ErrorBoundary noop={true}>
+            <ErrorBoundary noop={true} key={"SoundBoardLogger"} >
                 <OpenSBLogsButton />
             </ErrorBoundary>,
             e.toolbar,

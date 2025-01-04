@@ -50,7 +50,7 @@ function VerifyModal({
     useEffect(() => () => void (state !== VerifyState.LoggedIn && onAbort()), []);
 
     const [inProgress, setInProgress] = useState(false);
-    const buttonRef = useRef<HTMLButtonElement>();
+    const buttonRef = useRef<HTMLButtonElement>(null);
     const controllerRef = useRef(new Controller({ progress: "0%" })).current;
 
     const holdDuration = 1000;
@@ -193,7 +193,6 @@ function VerifyModal({
                             }}
                             onPointerDown={startInput}
                             onPointerUp={endInput}
-                            // @ts-expect-error stop whining about refs
                             buttonRef={buttonRef}
                             disabled={inProgress}
                         >

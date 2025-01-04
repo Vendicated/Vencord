@@ -47,6 +47,9 @@
             ],
             "@plugins": [
                 "./plugins"
+            ],
+            "@equicordplugins": [
+                "./equicordplugins"
             ]
         },
         "plugins": [

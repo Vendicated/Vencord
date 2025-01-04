@@ -7,6 +7,7 @@
 import { DataStore } from "@api/index";
 import { classNameFactory } from "@api/Styles";
 import { NavigationRouter, SelectedChannelStore, SelectedGuildStore, showToast, Toasts, useState } from "@webpack/common";
+import { JSX } from "react";
 
 import { logger, settings } from "./constants";
 import { BasicChannelTabsProps, ChannelTabsProps, PersistedTabs } from "./types";

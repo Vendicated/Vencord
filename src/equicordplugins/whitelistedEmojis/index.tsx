@@ -13,6 +13,7 @@ import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Alerts, Button, EmojiStore, GuildStore, Menu, Toasts, useEffect, useState } from "@webpack/common";
 import { CustomEmoji, UnicodeEmoji } from "@webpack/types";
+import { JSX } from "react";
 
 interface ContextMenuEmoji {
     type: string;

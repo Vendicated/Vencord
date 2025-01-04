@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { CSSProperties, ImgHTMLAttributes } from "react";
+import { CSSProperties, ImgHTMLAttributes, JSX } from "react";
 
 export interface Timestamp {
     start?: number;

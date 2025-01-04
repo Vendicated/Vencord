@@ -160,7 +160,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                 <Forms.FormTitle tag="h5" style={{ marginTop: "10px" }}>Tags</Forms.FormTitle>
                                 <Forms.FormText>
                                     {tags.map(tag => (
-                                        <span className="vce-theme-info-tag">
+                                        <span className="vce-theme-info-tag" key={"vce-theme-info-tag"}>
                                             {tag}
                                         </span>
                                     ))}

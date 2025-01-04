@@ -7,6 +7,7 @@
 import { debounce } from "@shared/debounce";
 import { ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { React, Text, TextInput } from "@webpack/common";
+import { JSX } from "react";
 
 import { PickerContent, PickerContentHeader, PickerContentRow, PickerContentRowGrid, PickerHeaderProps, SidebarProps, Sticker, StickerCategoryType, StickerPack } from "../types";
 import { sendSticker } from "../upload";
@@ -141,7 +142,6 @@ function PickerContentRowGrid({
                                 alt={sticker.title}
                                 src={sticker.image}
                                 draggable="false"
-                                datatype="sticker"
                                 data-id={sticker.id}
                                 className={clPicker("content-row-grid-img")}
                                 loading="lazy"
@@ -177,7 +177,7 @@ function HeaderCollapseIcon({ isExpanded }: { isExpanded: boolean; }) {
                 transform: `rotate(${isExpanded ? "0" : "-90deg"})`
             }}
         >
-            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M16.59 8.59004L12 13.17L7.41 8.59004L6 10L12 16L18 10L16.59 8.59004Z"></path>
+            <path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d="M16.59 8.59004L12 13.17L7.41 8.59004L6 10L12 16L18 10L16.59 8.59004Z"></path>
         </svg>
     );
 }
@@ -297,6 +297,7 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
         }, [] as Sticker[][])
         .map((stickers, i) => (
             <PickerContentRow
+                key={i}
                 rowIndex={i}
                 channelId={channelId}
                 grid1={{
@@ -360,6 +361,7 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
                                     const rows = stickersToRows(queryFilter(sp.stickers));
                                     return (
                                         <PickerContentHeader
+                                            key={sp.id}
                                             image={sp.logo.image}
                                             title={sp.title}
                                             isSelected={sp.id === selectedStickerPackId}
@@ -400,7 +402,6 @@ export function PickerContent({ stickerPacks, selectedStickerPackId, setSelected
                                     alt={currentSticker?.title ?? ""}
                                     src={currentSticker?.image}
                                     draggable="false"
-                                    datatype="sticker"
                                     data-id={currentSticker?.id ?? ""}
                                     className={clPicker("content-inspector-img")}
                                 />

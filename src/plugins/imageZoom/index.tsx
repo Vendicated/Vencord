@@ -23,7 +23,8 @@ import { makeRange } from "@components/PluginSettings/components";
 import { debounce } from "@shared/debounce";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Menu, React, ReactDOM } from "@webpack/common";
+import { Menu, ReactDOM } from "@webpack/common";
+import { JSX } from "react";
 import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";

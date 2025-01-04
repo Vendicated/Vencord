@@ -35,6 +35,7 @@ export default ({ onClose, notebook, onChangeTab, ...props }: ModalProps & { onC
                     {notes && Object.keys(notes).length > 0 ? (
                         Object.values(notes).map(note => (
                             <RenderMessage
+                                key={notebook}
                                 note={note}
                                 notebook={notebook}
                                 fromDeleteModal={true} />

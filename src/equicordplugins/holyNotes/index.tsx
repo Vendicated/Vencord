@@ -42,6 +42,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = async (children, { 
         <Menu.MenuItem label="Add Message To" id="add-message-to-note">
             {Object.keys(noteHandler.getAllNotes()).map((notebook: string, index: number) => (
                 <Menu.MenuItem
+                    key={notebook}
                     label={notebook}
                     id={notebook}
                     action={() => noteHandler.addNote(message, notebook)}
@@ -103,7 +104,7 @@ export default definePlugin({
             );
 
         e.toolbar = [
-            <ErrorBoundary noop={true}>
+            <ErrorBoundary noop={true} key={"HolyNotes"}>
                 <ToolBarHeader />
             </ErrorBoundary>,
             e.toolbar,

@@ -159,7 +159,7 @@ export default LazyComponent(() => {
                         onClick={() => openBlockModal()}
                     />
                 )}
-                {review.sender.badges.map(badge => <ReviewBadge {...badge} />)}
+                {review.sender.badges.map((badge, idx) => <ReviewBadge key={idx} {...badge} />)}
 
                 {
                     !settings.store.hideTimestamps && review.type !== ReviewType.System && (
@@ -170,7 +170,13 @@ export default LazyComponent(() => {
 
                 <div className={cl("review-comment")}>
                     {(review.comment.length > 200 && !showAll)
-                        ? [Parser.parseGuildEventDescription(review.comment.substring(0, 200)), "...", <br />, (<a onClick={() => setShowAll(true)}>Read more</a>)]
+                        ? (
+                            <>
+                                {Parser.parseGuildEventDescription(review.comment.substring(0, 200))}...
+                                <br />
+                                <a onClick={() => setShowAll(true)}>Read more</a>]
+                            </>
+                        )
                         : Parser.parseGuildEventDescription(review.comment)}
                 </div>
 

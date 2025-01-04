@@ -5,6 +5,7 @@
  */
 
 import { React } from "@webpack/common";
+import { JSX } from "react";
 
 import { CategoryImageProps, StickerCategoryProps } from "../types";
 import { cl } from "../utils";
@@ -51,7 +52,7 @@ export function CategoryScroller(props: { children: React.ReactNode, categoryLen
         <div className={cl("category-scroller")}>
             <div>{
                 children.map(child => (
-                    <div role="listitem">
+                    <div role="listitem" key={cl("category-scroller")}>
                         {child}
                     </div>
                 ))

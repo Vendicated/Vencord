@@ -13,6 +13,7 @@ import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, Menu, MessageStore, NavigationRouter, PresenceStore, PrivateChannelsStore, UserStore, WindowStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
+import { JSX } from "react";
 
 interface IMessageCreate {
     channelId: string;

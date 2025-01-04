@@ -12,6 +12,7 @@ import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, Menu } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
+import { JSX } from "react";
 
 import ChannelsTabsContainer from "./components/ChannelTabsContainer";
 import { BasicChannelTabsProps, createTab, settings } from "./util";

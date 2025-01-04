@@ -13,12 +13,12 @@ import { VoiceChannelLogEntry } from "../logs";
 
 export default function Icon({ logEntry, channel, className }: { logEntry: VoiceChannelLogEntry; channel: Channel; className: string; }) {
     // Taken from /assets/7378a83d74ce97d83380.svg
-    const Join = <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18"><g fill="none" fill-rule="evenodd"><path d="m18 0h-18v18h18z" /><path d="m0 8h14.2l-3.6-3.6 1.4-1.4 6 6-6 6-1.4-1.4 3.6-3.6h-14.2" fill="#3ba55c" /></g></svg>;
+    const Join = <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18"><g fill="none" fillRule="evenodd"><path d="m18 0h-18v18h18z" /><path d="m0 8h14.2l-3.6-3.6 1.4-1.4 6 6-6 6-1.4-1.4 3.6-3.6h-14.2" fill="#3ba55c" /></g></svg>;
     // Taken from /assets/192510ade1abc3149b46.svg
-    const Leave = <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" ><g fill="none" fill-rule="evenodd"><path d="m18 0h-18v18h18z" /><path d="m3.8 8 3.6-3.6-1.4-1.4-6 6 6 6 1.4-1.4-3.6-3.6h14.2v-2" fill="#ed4245" /></g></svg>;
+    const Leave = <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" ><g fill="none" fillRule="evenodd"><path d="m18 0h-18v18h18z" /><path d="m3.8 8 3.6-3.6-1.4-1.4-6 6 6 6 1.4-1.4-3.6-3.6h14.2v-2" fill="#ed4245" /></g></svg>;
     // For other contributors, please DO make specific designs for these instead of how I just copied the join/leave icons and making them orange
-    const MovedTo = <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18"><g fill="none" fill-rule="evenodd"><path d="m18 0h-18v18h18z" /><path d="m3.8 8 3.6-3.6-1.4-1.4-6 6 6 6 1.4-1.4-3.6-3.6h14.2v-2" fill="#faa61a" /></g></svg>;
-    const MovedFrom = <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18"><g fill="none" fill-rule="evenodd"><path d="m18 0h-18v18h18z" /><path d="m0 8h14.2l-3.6-3.6 1.4-1.4 6 6-6 6-1.4-1.4 3.6-3.6h-14.2" fill="#faa61a" /></g></svg>;
+    const MovedTo = <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18"><g fill="none" fillRule="evenodd"><path d="m18 0h-18v18h18z" /><path d="m3.8 8 3.6-3.6-1.4-1.4-6 6 6 6 1.4-1.4-3.6-3.6h14.2v-2" fill="#faa61a" /></g></svg>;
+    const MovedFrom = <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18"><g fill="none" fillRule="evenodd"><path d="m18 0h-18v18h18z" /><path d="m0 8h14.2l-3.6-3.6 1.4-1.4 6 6-6 6-1.4-1.4 3.6-3.6h-14.2" fill="#faa61a" /></g></svg>;
 
     if (logEntry.newChannel && !logEntry.oldChannel) return React.cloneElement(Join, { className: classes(className, cl("join")) });
     if (!logEntry.newChannel && logEntry.oldChannel) return React.cloneElement(Leave, { className: classes(className, cl("leave")) });

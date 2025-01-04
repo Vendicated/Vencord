@@ -117,7 +117,7 @@ function TagConfigCard(props) {
                             const userData: any = UserStore.getUser(user);
                             if (!userData) return null;
                             return (
-                                <div style={{ display: "flex" }}>
+                                <div style={{ display: "flex" }} key={user.id}>
                                     <img src={userData.getAvatarURL()} style={{ height: "20px", borderRadius: "50%", marginRight: "5px" }}></img>
                                     <Text style={{ cursor: "pointer" }} variant={"text-md/normal"} onClick={() => setUserIDs(userIds.replace(`, ${user}`, "").replace(user, ""))}>{userData.globalName || userData.username}</Text>
                                 </div>
