@@ -77,6 +77,5 @@ export async function transferMessage(message: MessageObject, model: string, api
     });
     const res = await req.json();
     const msg = res.choices[0].message.content;
-    // console.log(msg);
     return msg;
 }
