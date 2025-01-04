@@ -89,8 +89,9 @@ export function SettingArrayComponent({
             pluginSettings[id] = [];
             return;
         }
-        setItems(items.filter((_, i) => i !== index));
-        pluginSettings[id] = items;
+        const newItems = items.filter((_, i) => i !== index);
+        setItems(newItems);
+        pluginSettings[id] = newItems;
     };
 
     function renderGuildView() {
@@ -253,9 +254,11 @@ export function SettingArrayComponent({
             return;
         }
 
-        setItems([...items, inputElement.value]);
+        const newItems = [...items, inputElement.value];
 
-        pluginSettings[id] = items;
+        setItems(newItems);
+
+        pluginSettings[id] = newItems;
         inputElement.value = "";
     }
 
