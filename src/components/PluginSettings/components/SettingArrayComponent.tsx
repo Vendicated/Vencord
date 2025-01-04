@@ -173,6 +173,24 @@ export function SettingArrayComponent({
             channels[channel.guild_id].push(channel);
         }
 
+        const userMention = channel => {
+            return <UserMentionComponent
+                userId={channel.recipients[0]}
+                className="mention"
+            />;
+        };
+
+        const gdmComponent = channel => {
+            return <span style={{ display: "inline-flex", alignItems: "center" }}>
+                {channel.recipients.length >= 2 && channel.icon == null ? (
+                    <GroupDMAvatars recipients={channel.recipients} size="SIZE_16" />
+                ) : (
+                    <Avatar src={getDMChannelIcon(channel)} size="SIZE_16" />
+                )}
+                <Text variant="text-sm/semibold" style={{ marginLeft: "4px" }}>{channel.name}</Text>
+            </span>;
+        };
+
         if (dmChannels.length > 0) {
             elements.push(
                 <details>
@@ -187,19 +205,12 @@ export function SettingArrayComponent({
                                     marginBottom: "8px",
                                 }}
                             >
-                                <span style={{ display: "inline-flex", alignItems: "center" }}>
-                                    {channel.recipients.length >= 2 && channel.icon == null ? (
-                                        <GroupDMAvatars recipients={channel.recipients} size="SIZE_16" />
-                                    ) : (
-                                        <Avatar src={getDMChannelIcon(channel)} size="SIZE_16" />
-                                    )}
-                                    <Text variant="text-sm/semibold" style={{ marginLeft: "4px" }}>{channel.name}</Text>
-                                    {removeButton(index)}
-                                </span>
+                                {channel.recipients.length === 1 ? userMention(channel) : gdmComponent(channel)}
+                                {removeButton(index)}
                             </Flex>
                         ))}
                     </div>
-                </details>
+                </details >
             );
         }
         Object.keys(channels).forEach(guildId => {
