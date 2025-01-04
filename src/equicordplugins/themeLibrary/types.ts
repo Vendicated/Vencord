@@ -65,7 +65,8 @@ export type ThemeLikeProps = {
     status: number;
     likes: [{
         themeId: number;
-        userIds: User["id"][];
+        likes: number;
+        hasLiked?: boolean;
     }];
 };
 
