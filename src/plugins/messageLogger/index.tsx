@@ -205,7 +205,7 @@ export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
     authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi],
-    dependencies: ["MessageUpdaterAPI", "SettingArraysAPI"],
+    dependencies: ["MessageUpdaterAPI"],
 
     contextMenus: {
         "message": patchMessageContextMenu,

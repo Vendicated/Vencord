@@ -53,10 +53,12 @@ function renderRegisteredPlugins(name: string, value: any) {
         <Menu.MenuItem
             id={`vc-plugin-settings-${plugin}`}
             label={plugin}
+            key={`vc-plugin-settings-${plugin}`}
         >
             {plugins[plugin].map(setting => (
                 <Menu.MenuCheckboxItem
                     id={`vc-plugin-settings-${plugin}-${setting}`}
+                    key={`vc-plugin-settings-${plugin}-${setting}`}
                     // @ts-ignore popoutText exists due to this being a list option type
                     label={Vencord.Plugins.plugins[plugin].settings?.def[setting].popoutText ?? setting}
                     action={() => handleCheckboxClick(plugin, setting)}
@@ -104,9 +106,11 @@ export default definePlugin({
     contextMenus: {
         "channel-context": MakeContextCallback("Channel"),
         "thread-context": MakeContextCallback("Channel"),
+        "gdm-context": MakeContextCallback("Channel"), // TODO make this work
         "guild-context": MakeContextCallback("Guild"),
         "user-context": MakeContextCallback("User")
     },
+    required: true,
 
     start() {
         for (const plugin of Object.values(Vencord.Plugins.plugins)) {
