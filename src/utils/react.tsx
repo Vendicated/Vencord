@@ -17,6 +17,7 @@
 */
 
 import { React, useEffect, useMemo, useReducer, useState } from "@webpack/common";
+import { ActionDispatch } from "react";
 
 import { checkIntersecting } from "./misc";
 
@@ -117,8 +118,8 @@ export function useAwaiter<T>(factory: () => Promise<T>, providedOpts?: AwaiterO
 /**
  * Returns a function that can be used to force rerender react components
  */
-export function useForceUpdater(): () => void;
-export function useForceUpdater(withDep: true): [unknown, () => void];
+export function useForceUpdater(): ActionDispatch<[]>;
+export function useForceUpdater(withDep: true): [any, ActionDispatch<[]>];
 export function useForceUpdater(withDep?: true) {
     const r = useReducer(x => x + 1, 0);
     return withDep ? r : r[1];

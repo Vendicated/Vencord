@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// @ts-check
-
 import stylistic from "@stylistic/eslint-plugin";
 import pathAlias from "eslint-plugin-path-alias";
+import react from "eslint-plugin-react";
 import header from "eslint-plugin-simple-header";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import unusedImports from "eslint-plugin-unused-imports";
@@ -17,13 +16,29 @@ export default tseslint.config(
     { ignores: ["dist", "browser", "packages/vencord-types"] },
     {
         files: ["src/**/*.{tsx,ts,mts,mjs,js,jsx}", "eslint.config.mjs"],
+        settings: {
+            react: {
+                version: "18"
+            }
+        },
+        ...react.configs.flat.recommended,
+        rules: {
+            ...react.configs.flat.recommended.rules,
+            "react/react-in-jsx-scope": "off",
+            "react/prop-types": "off",
+            "react/display-name": "off",
+            "react/no-unescaped-entities": "off",
+        }
+    },
+    {
+        files: ["src/**/*.{tsx,ts,mts,mjs,js,jsx}", "eslint.config.mjs"],
         plugins: {
             "simple-header": header,
             "@stylistic": stylistic,
             "@typescript-eslint": tseslint.plugin,
             "simple-import-sort": simpleImportSort,
             "unused-imports": unusedImports,
-            "path-alias": pathAlias,
+            "path-alias": pathAlias
         },
         settings: {
             "import/resolver": {

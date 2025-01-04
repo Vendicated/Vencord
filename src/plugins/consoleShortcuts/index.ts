@@ -133,7 +133,10 @@ function makeShortcuts() {
                 });
             }
 
-            Common.ReactDOM.render(Common.React.createElement(component, props), doc.body.appendChild(document.createElement("div")));
+            const root = Common.ReactDOM.createRoot(doc.body.appendChild(document.createElement("div")));
+            root.render(Common.React.createElement(component, props));
+
+            doc.addEventListener("close", () => root.unmount(), { once: true });
         },
 
         preEnable: (plugin: string) => (Vencord.Settings.plugins[plugin] ??= { enabled: true }).enabled = true,

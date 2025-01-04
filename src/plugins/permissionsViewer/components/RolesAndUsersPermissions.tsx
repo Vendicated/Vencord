@@ -113,6 +113,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
 
                                 return (
                                     <div
+                                        key={index}
                                         className={cl("modal-list-item-btn")}
                                         onClick={() => selectItem(index)}
                                         role="button"
@@ -178,7 +179,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                         <div className={cl("modal-divider")} />
                         <ScrollerThin className={cl("modal-perms")} orientation="auto">
                             {Object.values(PermissionsBits).map(bit => (
-                                <div className={cl("modal-perms-item")}>
+                                <div key={bit} className={cl("modal-perms-item")}>
                                     <div className={cl("modal-perms-item-icon")}>
                                         {(() => {
                                             const { permissions, overwriteAllow, overwriteDeny } = selectedItem;

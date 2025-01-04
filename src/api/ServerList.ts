@@ -17,6 +17,7 @@
 */
 
 import { Logger } from "@utils/Logger";
+import { JSX } from "react";
 
 const logger = new Logger("ServerListAPI");
 

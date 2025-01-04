@@ -23,7 +23,7 @@ import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
+import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip, useEffect, useLayoutEffect } from "@webpack/common";
 import { CustomEmoji } from "@webpack/types";
 import { Message, ReactionEmoji, User } from "discord-types/general";
 
@@ -134,18 +134,21 @@ export default definePlugin({
     renderUsers(props: RootObject) {
         return props.message.reactions.length > 10 ? null : (
             <ErrorBoundary noop>
-                <this._renderUsers {...props} />
+                <this.UsersComponent {...props} />
             </ErrorBoundary>
         );
     },
-    _renderUsers({ message, emoji, type }: RootObject) {
+
+    UsersComponent({ message, emoji, type }: RootObject) {
         const forceUpdate = useForceUpdater();
-        React.useLayoutEffect(() => { // bc need to prevent autoscrolling
+
+        useLayoutEffect(() => { // bc need to prevent autoscrolling
             if (Scroll?.scrollCounter > 0) {
                 Scroll.setAutomaticAnchor(null);
             }
         });
-        React.useEffect(() => {
+
+        useEffect(() => {
             const cb = (e: any) => {
                 if (e.messageId === message.id)
                     forceUpdate();
@@ -153,7 +156,7 @@ export default definePlugin({
             FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", cb);
 
             return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
-        }, [message.id]);
+        }, [message.id, forceUpdate]);
 
         const reactions = getReactionsWithQueue(message, emoji, type);
         const users = Object.values(reactions).filter(Boolean) as User[];

@@ -97,7 +97,7 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
             gap: getSpacingPx(settings.store.iconSpacing),
             flexWrap: "wrap"
         }}>
-            {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
+            {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} key={connection.id} />)}
         </Flex>
     );
 }
@@ -137,6 +137,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
                         className="vc-user-connection"
                         href={url}
                         target="_blank"
+                        rel="noreferrer"
                         onClick={e => {
                             if (Vencord.Plugins.isPluginEnabled("OpenInApp")) {
                                 const OpenInApp = Vencord.Plugins.plugins.OpenInApp as any as typeof import("../openInApp").default;

@@ -47,7 +47,7 @@ export interface ModalOptions {
     onCloseCallback?: (() => void);
 }
 
-type RenderFunction = (props: ModalProps) => ReactNode;
+type RenderFunction = (props: ModalProps) => ReactNode | Promise<ReactNode>;
 
 export const Modals = findByPropsLazy("ModalRoot", "ModalCloseButton") as {
     ModalRoot: ComponentType<PropsWithChildren<{

@@ -84,13 +84,12 @@ export default definePlugin({
     ],
 
     TooltipWrapper: ErrorBoundary.wrap(({ message, children, text }: { message: Message; children: FunctionComponent<any>; text: ReactNode; }) => {
-        if (settings.store.displayStyle === DisplayStyle.Tooltip) return <Tooltip
-            children={children}
-            text={renderTimeout(message, false)}
-        />;
+        if (settings.store.displayStyle === DisplayStyle.Tooltip)
+            return <Tooltip text={renderTimeout(message, false)}>{children}</Tooltip>;
+
         return (
             <div className="vc-std-wrapper">
-                <Tooltip text={text} children={children} />
+                <Tooltip text={text}>{children}</Tooltip>
                 <Text variant="text-md/normal" color="status-danger">
                     {renderTimeout(message, true)} timeout remaining
                 </Text>

@@ -169,8 +169,8 @@ export default definePlugin({
 
         return Settings.plugins.MessageLogger.inlineEdits && (
             <>
-                {message.editHistory?.map(edit => (
-                    <div className="messagelogger-edited">
+                {message.editHistory?.map((edit, idx) => (
+                    <div key={idx} className="messagelogger-edited">
                         {parseEditContent(edit.content, message)}
                         <Timestamp
                             timestamp={edit.timestamp}
@@ -304,7 +304,7 @@ export default definePlugin({
                 {...props}
                 className={classes("messagelogger-edit-marker", className)}
                 onClick={() => openHistoryModal(message)}
-                aria-role="button"
+                role="button"
             >
                 {children}
             </span>

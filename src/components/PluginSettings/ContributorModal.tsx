@@ -44,7 +44,7 @@ function ContributorModal({ user }: { user: User; }) {
     useEffect(() => {
         if (!profile && !user.bot && user.id)
             fetchUserProfile(user.id);
-    }, [user.id]);
+    }, [user.id, user.bot, profile]);
 
     const githubName = profile?.connectedAccounts?.find(a => a.type === "github")?.name;
     const website = profile?.connectedAccounts?.find(a => a.type === "domain")?.name;
