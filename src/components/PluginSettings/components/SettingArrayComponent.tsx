@@ -24,8 +24,6 @@ const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
 const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarURL");
 
 
-// FIXME saving is broken, so are indexes apparently?
-
 const CloseIcon = () => {
     return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" width="18" height="18">
         <path d="M17.3 18.7a1 1 0 0 0 1.4-1.4L13.42 12l5.3-5.3a1 1 0 0 0-1.42-1.4L12 10.58l-5.3-5.3a1 1 0 0 0-1.4 1.42L10.58 12l-5.3 5.3a1 1 0 1 0 1.42 1.4L12 13.42l5.3 5.3Z" />
@@ -255,10 +253,11 @@ export function SettingArrayComponent({
             return;
         }
 
+        const newItems = [...items, inputElement.value];
+
         setItems([...items, inputElement.value]);
-        console.log(pluginSettings[id]);
+
         pluginSettings[id] = items;
-        console.log(pluginSettings[id]);
         inputElement.value = "";
     }
 
