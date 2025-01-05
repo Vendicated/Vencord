@@ -164,8 +164,8 @@ export async function downloadAttachment(_event: IpcMainInvokeEvent, attachemnt:
         const res = await fetch(useOldUrl ? attachemnt.oldUrl : attachemnt.url);
 
         if (res.status !== 200) {
-            if (res.status === 404 || res.status === 403)
-                return { error: `Failed to get attachment ${attachemnt.id} for caching, error code ${res.status}`, path: null };
+            if (res.status === 404 || res.status === 403 || res.status === 415)
+                useOldUrl = true;
 
             attempts++;
             if (attempts > 3) {
@@ -176,7 +176,7 @@ export async function downloadAttachment(_event: IpcMainInvokeEvent, attachemnt:
             }
 
             await sleep(1000);
-            return downloadAttachment(_event, attachemnt, attempts, res.status === 415);
+            return downloadAttachment(_event, attachemnt, attempts, useOldUrl);
         }
 
         const ab = await res.arrayBuffer();

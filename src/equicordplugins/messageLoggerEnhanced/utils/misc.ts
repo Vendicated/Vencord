@@ -91,6 +91,7 @@ const getTimestamp = (timestamp: any): Date => {
 export const mapTimestamp = (m: any) => {
     if (m.timestamp) m.timestamp = getTimestamp(m.timestamp);
     if (m.editedTimestamp) m.editedTimestamp = getTimestamp(m.editedTimestamp);
+    if (m.embeds) m.embeds = m.embeds.map(e => sanitizeEmbed(m.channel_id, m.id, e));
     return m;
 };
 
