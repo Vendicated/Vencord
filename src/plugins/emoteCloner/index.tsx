@@ -30,6 +30,12 @@ import { Promisable } from "type-fest";
 const StickersStore = findStoreLazy("StickersStore");
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
 
+interface ForumTagContextMenuProps {
+    tag: {
+        emojiId: null | string;
+    };
+}
+
 interface OnboardingContextMenuProps {
     option: {
         emoji: { id: string; name: string; animated: boolean; } | { id: null; };
@@ -388,6 +394,20 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, { target, 
     return;
 };
 
+const forumTagContextMenuPatch: NavContextMenuPatchCallback = (children, { tag }: ForumTagContextMenuProps) => {
+    if (!tag?.emojiId) return;
+    // same function discord calls on the emoji id
+    const emoji = EmojiStore.getUsableCustomEmojiById(tag.emojiId);
+
+    if (!emoji) return;
+
+    children.push(buildMenuItem("Emoji", () => ({
+        id: emoji.id,
+        name: emoji.name,
+        isAnimated: emoji.animated,
+    })));
+};
+
 export default definePlugin({
     name: "EmoteCloner",
     description: "Allows you to clone Emotes & Stickers to your own server (right click them)",
@@ -398,8 +418,17 @@ export default definePlugin({
         {
             find: "emoji.animated||",
             replacement: {
-                match: /(?=onClick:)/,
-                replace: "onContextMenu:$self.OnboardingContextMenu.bind(null, arguments[0]),"
+                match: /(?=onClick:)(?=.*\(\)=>(\i)\(!1\))/,
+                replace: "onContextMenu:$self.OnboardingContextMenu.bind(null,arguments[0],$1),"
+            }
+        },
+        // needed because the context menu wont show up if dev mode is disabled (only used for copying ids)
+        {
+            find: '"forum-tag-"',
+            replacement: {
+                match: /(?<=&&)\i(?=&&)/,
+                // make sure there is a custom emoji as well
+                replace: "arguments[0]?.tag?.emojiId != null"
             }
         }
     ],
@@ -412,14 +441,14 @@ export default definePlugin({
     contextMenus: {
         "message": messageContextMenuPatch,
         "expression-picker": expressionPickerPatch,
-        "image-context": imageContextMenuPatch
+        "image-context": imageContextMenuPatch,
+        "forum-tag": forumTagContextMenuPatch,
     },
 
-    OnboardingContextMenu({ option: { emoji } }: OnboardingContextMenuProps, ev: React.MouseEvent) {
+    OnboardingContextMenu({ option: { emoji } }: OnboardingContextMenuProps, setMouseDown: (v: boolean) => void, ev: React.MouseEvent) {
         // covers no emoji and unicode emojis
         if (emoji?.id == null) return;
 
-        console.log(emoji);
         ContextMenuApi.openContextMenuLazy(ev, async () => {
             return () => (<Menu.Menu
                 navId="onboarding-question-context"
@@ -431,5 +460,7 @@ export default definePlugin({
                 }))}
             </Menu.Menu>);
         });
+        // fixes really annoying visual quirk due to discords code
+        setMouseDown(false);
     },
 });
