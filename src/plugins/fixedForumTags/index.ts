@@ -17,7 +17,7 @@ export default definePlugin({
         // shows overflow forum tags only when second arg is true (orig func only takes one arg)
         // we need to filter with a second arg because this func is also used for adding tags when posting
         {
-            find: "2023-01_forums_non_community",
+            find: ':"REQUEST_FORUM_UNREADS"',
             replacement: {
                 match: /(?=!\i.moderated)/,
                 replace: "arguments[1]||"
