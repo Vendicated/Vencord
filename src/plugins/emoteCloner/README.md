@@ -14,3 +14,6 @@ You can clone stickers from
 
 -   Sticker Picker
 -   In Chat
+
+![a video of Emote Cloner being used](https://github.com/user-attachments/assets/e15f85b9-4f5f-4f00-8340-333fc5f0561e
+)
