@@ -57,7 +57,7 @@ export function isAttachmentGoodToCache(attachment: MessageAttachment, fileExten
 export async function cacheMessageImages(message: LoggedMessage | LoggedMessageJSON) {
     try {
         for (const attachment of message.attachments) {
-            const fileExtension = getFileExtension(attachment.filename ?? attachment.url) ?? attachment.content_type?.split("/")?.[1] ?? ".png";
+            const fileExtension = getFileExtension(attachment.filename ?? attachment.url) ?? attachment?.content_type?.split("/")?.[1] ?? ".png";
 
             if (!isAttachmentGoodToCache(attachment, fileExtension)) {
                 Flogger.log("skipping", attachment.filename);
@@ -68,7 +68,7 @@ export async function cacheMessageImages(message: LoggedMessage | LoggedMessageJ
             attachment.oldProxyUrl = attachment.proxy_url;
 
             // only normal urls work if theres a charset in the content type /shrug
-            if (attachment.content_type?.includes(";")) {
+            if (attachment?.content_type?.includes(";")) {
                 attachment.proxy_url = attachment.url;
             } else {
                 // apparently proxy urls last longer

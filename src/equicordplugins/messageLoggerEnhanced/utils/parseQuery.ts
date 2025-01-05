@@ -113,10 +113,10 @@ export const doesMatch = (type: typeof validIdSearchTypes[number], value: string
                 case "attachment":
                     return message.attachments.length > 0;
                 case "image":
-                    return message.attachments.some(a => a.content_type?.startsWith("image")) ||
+                    return message.attachments.some(a => a?.content_type?.startsWith("image")) ||
                         message.embeds.some(e => e.image || e.thumbnail);
                 case "video":
-                    return message.attachments.some(a => a.content_type?.startsWith("video")) ||
+                    return message.attachments.some(a => a?.content_type?.startsWith("video")) ||
                         message.embeds.some(e => e.video);
                 case "embed":
                     return message.embeds.length > 0;
