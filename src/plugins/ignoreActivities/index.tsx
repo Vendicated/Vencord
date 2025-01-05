@@ -244,7 +244,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: '="LocalActivityStore",',
+            find: '"LocalActivityStore"',
             replacement: [
                 {
                     match: /HANG_STATUS.+?(?=!\i\(\)\(\i,\i\)&&)(?<=(\i)\.push.+?)/,
@@ -253,16 +253,16 @@ export default definePlugin({
             ]
         },
         {
-            find: '="ActivityTrackingStore",',
+            find: '"ActivityTrackingStore"',
             replacement: {
                 match: /getVisibleRunningGames\(\).+?;(?=for)(?<=(\i)=\i\.\i\.getVisibleRunningGames.+?)/,
                 replace: (m, runningGames) => `${m}${runningGames}=${runningGames}.filter(({id,name})=>$self.isActivityNotIgnored({type:0,application_id:id,name}));`
             }
         },
         {
-            find: ".Messages.SETTINGS_GAMES_TOGGLE_OVERLAY",
+            find: "#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}",
             replacement: {
-                match: /\.Messages\.SETTINGS_GAMES_TOGGLE_OVERLAY.+?}\(\),(?<={overlay:\i,.+?=(\i),.+?)(?=!(\i))/,
+                match: /#{intl::SETTINGS_GAMES_TOGGLE_OVERLAY}.+?}\(\),(?<={overlay:\i,.+?=(\i),.+?)(?=!(\i))/,
                 replace: (m, props, nowPlaying) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`
             }
         },

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
@@ -41,7 +41,6 @@ const settings = definePluginSettings({
     },
 });
 
-migratePluginSettings("PartyMode", "Party mode 🎉");
 export default definePlugin({
     name: "PartyMode",
     description: "Allows you to use party mode cause the party never ends ✨",
