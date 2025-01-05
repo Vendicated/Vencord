@@ -95,7 +95,7 @@ export default definePlugin({
     async start() {
         if (!settings.store.migrated) {
             const data = await DataStore.get(DATA_KEY);
-            if (!!data) settings.store.data = data;
+            if (data !== undefined) settings.store.data = data;
             settings.store.migrated = true;
         }
         for (const tag of settings.store.data) createTagCommand(tag);
