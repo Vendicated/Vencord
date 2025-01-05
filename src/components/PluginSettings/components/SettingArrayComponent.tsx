@@ -7,13 +7,14 @@
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { debounce } from "@shared/debounce";
 import { Margins } from "@utils/margins";
+import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { OptionType, PluginOptionList } from "@utils/types";
-import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { Avatar, Button, ChannelStore, Forms, GuildStore, IconUtils, React, Text, TextInput, useEffect, useState } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { Avatar, Button, ChannelStore, Forms, GuildStore, IconUtils, React, Text, TextInput, useCallback, useEffect, useRef, useState } from "@webpack/common";
 import { Channel, Guild } from "discord-types/general";
-import { JSX } from "react";
 
 import { ISettingElementProps } from ".";
 
@@ -22,9 +23,9 @@ const cl = classNameFactory("vc-plugin-modal-");
 const UserMentionComponent = findComponentByCodeLazy(".USER_MENTION)");
 const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
 const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarURL");
-
-const SearchBar = findComponentByCodeLazy("focus(){let{current:");
-
+const SearchBarModule = findByPropsLazy("SearchBar", "Checkbox");
+const SearchBarWrapper = findByPropsLazy("SearchBar", "Item");
+const SearchHandler = findByCodeLazy("createSearchContext", "setLimit");
 
 const CloseIcon = () => {
     return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" width="18" height="18">
@@ -63,6 +64,89 @@ export function SettingArrayComponent({
 
     if (items.length === 0 && pluginSettings[id].length !== 0) {
         setItems(pluginSettings[id]);
+    }
+
+    function SearchModal({ modalProps, close, val }: { modalProps: ModalProps; close(): void; val?: string; }) {
+
+        const [searchText, setSearchText] = useState<string>(val || "");
+        const [searchState, setSearchState] = useState({
+            results: [],
+            query: searchText
+        });
+        // channels:0, guilds:1, users:2
+        const [results, setResults] = useState<Record<string, any[]>>({
+            "channels": [],
+            "guilds": [],
+            "users": []
+        });
+
+        const searchHandlerRef = useRef<typeof SearchHandler | null>(null);
+
+        useEffect(() => {
+            const handler = new SearchHandler((results, query) => {
+                setSearchState({
+                    results,
+                    query
+                });
+            });
+            searchHandlerRef.current = handler;
+
+            return () => {
+                handler.destroy();
+            };
+        }, []);
+
+        const search = useCallback(debounce(() => {
+            if (searchHandlerRef.current) {
+                searchHandlerRef.current.search(searchText.trim());
+                setResults({
+                    "channels": [...searchHandlerRef.current._groupDMResults, ...searchHandlerRef.current._textChannelResults, ...searchHandlerRef.current._voiceChannelResults],
+                    "guilds": searchHandlerRef.current._guildResults,
+                    "users": searchHandlerRef.current._userResults
+                });
+            }
+        }, 300), [searchText]);
+
+        useEffect(() => {
+            search();
+        }, [searchText, search]);
+
+
+        return (
+            <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
+                <ModalHeader>
+                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Search for {
+                        option.type === OptionType.USERS ? "Users" : option.type === OptionType.CHANNELS ? "Channels" : "Guilds"
+                    }</Text>
+                    <ModalCloseButton onClick={close} />
+                </ModalHeader>
+                <ModalContent>
+                    <SearchBarWrapper.SearchBar
+                        size={SearchBarModule.SearchBar.Sizes.MEDIUM}
+                        placeholder={"Search for a" + (option.type === OptionType.USERS ? " user" : option.type === OptionType.CHANNELS ? " channel" : " guild")}
+                        query={searchText}
+                        onChange={setSearchText}
+                        autofocus={true}
+                    />
+                </ModalContent>
+
+                <ModalFooter>
+
+
+                </ModalFooter>
+
+            </ModalRoot>
+        );
+    }
+
+    function openSearchModal(val?: string) {
+        const key = openModal(modalProps => (
+            <SearchModal
+                modalProps={modalProps}
+                close={() => closeModal(key)}
+                val={val}
+            />
+        ));
     }
 
     const removeButton = (index: number) => {
@@ -162,7 +246,7 @@ export function SettingArrayComponent({
         // collapsible guild list with channels in it
         const channels: Record<string, Channel[]> = {};
         const dmChannels: Channel[] = [];
-        const elements: JSX.Element[] = [];
+        const elements: React.JSX.Element[] = [];
         for (const item of items) {
             const channel = ChannelStore.getChannel(item);
             if (!channel) {
@@ -259,7 +343,7 @@ export function SettingArrayComponent({
             return;
         }
         if (option.type !== OptionType.ARRAY && !(text.length >= 18 && text.length <= 19 && !isNaN(Number(text)))) {
-            // openSearchModal();
+            openSearchModal();
             setText("");
             // FIXME
             return;
@@ -330,9 +414,7 @@ export function SettingArrayComponent({
                     <Button
                         id={cl("search-button")}
                         size={Button.Sizes.MIN}
-                        onClick={() => {
-                            // openSearchModal();
-                        }}
+                        onClick={openSearchModal}
                         style={
                             { background: "none" }
                         }
