@@ -7,6 +7,7 @@
 import { classes } from "@utils/misc";
 import { findByPropsLazy } from "@webpack";
 import { React } from "@webpack/common";
+import { JSX } from "react";
 
 import { cl } from "../";
 import Grid, { GridProps } from "./Grid";
