@@ -17,7 +17,7 @@ interface ErroredPatch extends EvaledPatch {
     oldModule: string,
     newModule: string;
 }
-interface ReporterData {
+export interface ReporterData {
     failedPatches: {
         foundNoModule: Patch[];
         hadNoEffect: EvaledPatch[];
