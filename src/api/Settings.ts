@@ -144,6 +144,10 @@ export const SettingsStore = new SettingsStoreClass(settings, {
                     // normal setting with a default value
                     return (target[key] = setting.default);
 
+                else if (setting.type === OptionType.ARRAY)
+                    // if there is no default value we initialize it as an empty array
+                    return (target[key] = []);
+
                 if (setting.type === OptionType.SELECT) {
                     const def = setting.options.find(o => o.default);
                     if (def)

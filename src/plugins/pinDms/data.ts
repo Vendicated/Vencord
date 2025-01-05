@@ -39,7 +39,7 @@ export async function init() {
 }
 
 export async function initCategories() {
-    categories = settings.store.data;
+    categories = settings.store.data ?? [];
 }
 
 export function getCategory(id: string) {
