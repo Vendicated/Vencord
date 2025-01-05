@@ -6,19 +6,21 @@
 
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
 import { debounce } from "@shared/debounce";
 import { Margins } from "@utils/margins";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { OptionType, PluginOptionList } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Avatar, Button, ChannelStore, Forms, GuildStore, IconUtils, React, Text, TextInput, useCallback, useEffect, useRef, useState } from "@webpack/common";
+import { Avatar, Button, ChannelStore, Flex, Forms, GuildStore, Heading, IconUtils, React, Text, TextInput, useCallback, useEffect, useRef, useState } from "@webpack/common";
 import { Channel, Guild } from "discord-types/general";
 
 import { ISettingElementProps } from ".";
 
 const cl = classNameFactory("vc-plugin-modal-");
+
+
+// TODO add interfaces for the stuff from the modal instead of using any
 
 const UserMentionComponent = findComponentByCodeLazy(".USER_MENTION)");
 const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
@@ -60,7 +62,12 @@ export function SettingArrayComponent({
 
     useEffect(() => {
         pluginSettings[id] = items;
+        onChange(items);
     }, [items, pluginSettings, id]);
+
+    useEffect(() => {
+        onError(error !== null);
+    }, [error]);
 
     if (items.length === 0 && pluginSettings[id].length !== 0) {
         setItems(pluginSettings[id]);
@@ -79,6 +86,11 @@ export function SettingArrayComponent({
             "guilds": [],
             "users": []
         });
+        const [selected, setSelected] = useState<any[]>([]);
+
+        const onConfirm = () => {
+
+        };
 
         const searchHandlerRef = useRef<typeof SearchHandler | null>(null);
 
@@ -114,13 +126,21 @@ export function SettingArrayComponent({
 
         return (
             <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
-                <ModalHeader>
-                    <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Search for {
-                        option.type === OptionType.USERS ? "Users" : option.type === OptionType.CHANNELS ? "Channels" : "Guilds"
-                    }</Text>
-                    <ModalCloseButton onClick={close} />
-                </ModalHeader>
-                <ModalContent>
+                <ModalHeader
+                    className={cl("search-modal-header")}
+                    direction={Flex.Direction.VERTICAL}
+                    align={Flex.Align.START}
+                    justify={Flex.Justify.BETWEEN}
+                >
+                    <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", width: "100%", marginBottom: "8px" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                            <Heading variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Search for {
+                                option.type === OptionType.USERS ? "Users" : option.type === OptionType.CHANNELS ? "Channels" : "Guilds"
+                            }</Heading>
+                            <Heading variant="heading-sm/normal" style={{ color: "var(--header-muted)" }}>All selected items will be added to {wordsToTitle(wordsFromCamel(id))}</Heading>
+                        </div>
+                        <ModalCloseButton onClick={close} />
+                    </div>
                     <SearchBarWrapper.SearchBar
                         size={SearchBarModule.SearchBar.Sizes.MEDIUM}
                         placeholder={"Search for a" + (option.type === OptionType.USERS ? " user" : option.type === OptionType.CHANNELS ? " channel" : " guild")}
@@ -128,14 +148,28 @@ export function SettingArrayComponent({
                         onChange={setSearchText}
                         autofocus={true}
                     />
+                </ModalHeader>
+                <ModalContent>
+
                 </ModalContent>
 
                 <ModalFooter>
-
-
+                    <Button
+                        color={Button.Colors.BRAND}
+                        onClick={onConfirm}
+                    >
+                        Confirm
+                    </Button>
+                    <Button
+                        color={Button.Colors.TRANSPARENT}
+                        look={Button.Looks.LINK}
+                        onClick={close}
+                    >
+                        Cancel
+                    </Button>
                 </ModalFooter>
 
-            </ModalRoot>
+            </ModalRoot >
         );
     }
 
@@ -342,11 +376,16 @@ export function SettingArrayComponent({
         if (text === "") {
             return;
         }
-        if (option.type !== OptionType.ARRAY && !(text.length >= 18 && text.length <= 19 && !isNaN(Number(text)))) {
-            openSearchModal();
-            setText("");
-            // FIXME
-            return;
+        if (option.type !== OptionType.ARRAY) {
+            if (isNaN(Number(text))) {
+                openSearchModal(text);
+                setText("");
+                return;
+            }
+            if (!(text.length >= 18 && text.length <= 19)) {
+                setError("Invalid ID");
+                return;
+            }
         }
 
         if (items.includes(text)) {
@@ -398,7 +437,7 @@ export function SettingArrayComponent({
                 >
                     <TextInput
                         type="text"
-                        placeholder="Add Item (as ID)"
+                        placeholder="Add Item (ID or Name)"
                         id={cl("input")}
                         onChange={v => setText(v)}
                         value={text}
@@ -414,7 +453,7 @@ export function SettingArrayComponent({
                     <Button
                         id={cl("search-button")}
                         size={Button.Sizes.MIN}
-                        onClick={openSearchModal}
+                        onClick={() => openSearchModal(text)}
                         style={
                             { background: "none" }
                         }
