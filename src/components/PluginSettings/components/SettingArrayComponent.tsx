@@ -10,7 +10,7 @@ import { debounce } from "@shared/debounce";
 import { Margins } from "@utils/margins";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
-import { OptionType, PluginOptionList } from "@utils/types";
+import { OptionType, PluginOptionArray } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Avatar, Button, ChannelStore, Flex, Forms, GuildStore, Heading, IconUtils, React, Text, TextInput, useCallback, useEffect, useRef, useState } from "@webpack/common";
 import { Channel, Guild } from "discord-types/general";
@@ -55,7 +55,7 @@ export function SettingArrayComponent({
     onChange,
     onError,
     id
-}: ISettingElementProps<PluginOptionList>) {
+}: ISettingElementProps<PluginOptionArray>) {
     const [error, setError] = useState<string | null>(null);
     const [items, setItems] = useState<string[]>([]);
     const [text, setText] = useState<string>("");
