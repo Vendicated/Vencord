@@ -48,7 +48,7 @@ span {font-size: 64px; position: absolute;}
 75% {transform: rotate(45deg) translateY(-32px) translateX(-24px);}
 100% {transform: rotate(0deg);}
 }
-</style><img class="spin" src="https://jaegerwalddev.github.io/assets/static/school/my_first_website-2/images/maxwell_transparent.webp" draggable="false"></body>`,
+</style><img class="spin" src="<https://jaegerwalddev.github.io/assets/static/school/my_first_website-2/images/maxwell_transparent.webp>" draggable="false"></body>`,
     yaris: `<img src="<https://www.fortunacarmats.com/cache/goods/700x700x61ea817c40dc5.png>" class="yaris" draggable="false"/>
 <style>.yaris { animation: bounce 0.22222222222s infinite alternate cubic-bezier(.9,0,.1,1); }
 @keyframes bounce { 0% { transform: translateY(0) scale(1, 1); } 100% { transform: translateY(calc(20%)) scale(1.3, 0.7); } }</style>`,
@@ -81,6 +81,17 @@ function htmlPlaceholder(htmlText: string, replacement: string) {
 }
 function htmlPlaceholders(htmlText: string, replacements: string[]) {
     const result = `[[${htmlText}]]`;
+    for (let i = 0; i < replacements.length; i++) {
+        result.replace(`%TEXT${i + 1}%`, replacements[i]);
+    }
+    return result;
+}
+
+function placeholder(text: string, replacement: string) {
+    return `${text.replace("%TEXT%", replacement)}`;
+}
+function placeholders(text: string, replacements: string[]) {
+    const result = `${text}`;
     for (let i = 0; i < replacements.length; i++) {
         result.replace(`%TEXT${i + 1}%`, replacements[i]);
     }
@@ -161,7 +172,7 @@ export default definePlugin({
             description: "Makes Nyan Cat revolve around your message.",
             options: [RequiredMessageOption],
             execute: opts => ({
-                content: htmlPlaceholder(presets.nyanRevolve, findOption(opts, "message", ""))
+                content: placeholder(presets.nyanRevolve, findOption(opts, "message", ""))
             })
         },
         {
