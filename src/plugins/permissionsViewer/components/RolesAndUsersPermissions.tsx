@@ -19,15 +19,15 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
-import { getUniqueUsername } from "@utils/discord";
+import { getIntlMessage, getUniqueUsername } from "@utils/discord";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByCodeLazy } from "@webpack";
-import { Clipboard, ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, i18n, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, UserStore, useState, useStateFromStores } from "@webpack/common";
+import { Clipboard, ContextMenuApi, FluxDispatcher, GuildMemberStore, GuildStore, i18n, Menu, PermissionsBits, ScrollerThin, Text, Tooltip, useEffect, useMemo, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { UnicodeEmoji } from "@webpack/types";
 import type { Guild, Role, User } from "discord-types/general";
 
 import { settings } from "..";
-import { cl, getPermissionDescription, getPermissionString } from "../utils";
+import { cl, getGuildPermissionSpecMap } from "../utils";
 import { PermissionAllowedIcon, PermissionDefaultIcon, PermissionDeniedIcon } from "./icons";
 
 export const enum PermissionType {
@@ -56,7 +56,7 @@ function getRoleIconSrc(role: Role) {
 }
 
 function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, header }: { permissions: Array<RoleOrUserPermission>; guild: Guild; modalProps: ModalProps; header: string; }) {
-    permissions.sort((a, b) => a.type - b.type);
+    const guildPermissionSpecMap = useMemo(() => getGuildPermissionSpecMap(guild), [guild.id]);
 
     useStateFromStores(
         [GuildMemberStore],
@@ -64,6 +64,10 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
         null,
         (old, current) => old.length === current.length
     );
+
+    useEffect(() => {
+        permissions.sort((a, b) => a.type - b.type);
+    }, [permissions]);
 
     useEffect(() => {
         const usersToRequest = permissions
@@ -173,7 +177,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                         </ScrollerThin>
                         <div className={cl("modal-divider")} />
                         <ScrollerThin className={cl("modal-perms")} orientation="auto">
-                            {Object.entries(PermissionsBits).map(([permissionName, bit]) => (
+                            {Object.values(PermissionsBits).map(bit => (
                                 <div className={cl("modal-perms-item")}>
                                     <div className={cl("modal-perms-item-icon")}>
                                         {(() => {
@@ -192,9 +196,14 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                             return PermissionDefaultIcon();
                                         })()}
                                     </div>
-                                    <Text variant="text-md/normal">{getPermissionString(permissionName)}</Text>
+                                    <Text variant="text-md/normal">{guildPermissionSpecMap[String(bit)].title}</Text>
 
-                                    <Tooltip text={getPermissionDescription(permissionName) || "No Description"}>
+                                    <Tooltip text={
+                                        (() => {
+                                            const { description } = guildPermissionSpecMap[String(bit)];
+                                            return typeof description === "function" ? i18n.intl.format(description, {}) : description;
+                                        })()
+                                    }>
                                         {props => <InfoIcon {...props} />}
                                     </Tooltip>
                                 </div>
@@ -216,7 +225,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
         >
             <Menu.MenuItem
                 id={cl("copy-role-id")}
-                label={i18n.Messages.COPY_ID_ROLE}
+                label={getIntlMessage("COPY_ID_ROLE")}
                 action={() => {
                     Clipboard.copy(roleId);
                 }}
@@ -225,7 +234,7 @@ function RoleContextMenu({ guild, roleId, onClose }: { guild: Guild; roleId: str
             {(settings.store as any).unsafeViewAsRole && (
                 <Menu.MenuItem
                     id={cl("view-as-role")}
-                    label={i18n.Messages.VIEW_AS_ROLE}
+                    label={getIntlMessage("VIEW_AS_ROLE")}
                     action={() => {
                         const role = GuildStore.getRole(guild.id, roleId);
                         if (!role) return;
@@ -257,7 +266,7 @@ function UserContextMenu({ userId }: { userId: string; }) {
         >
             <Menu.MenuItem
                 id={cl("copy-user-id")}
-                label={i18n.Messages.COPY_ID_USER}
+                label={getIntlMessage("COPY_ID_USER")}
                 action={() => {
                     Clipboard.copy(userId);
                 }}
