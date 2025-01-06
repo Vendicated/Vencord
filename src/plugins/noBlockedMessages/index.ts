@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
@@ -32,10 +32,27 @@ interface MessageDeleteProps {
     collapsedReason: () => any;
 }
 
+const settings = definePluginSettings({
+    ignoreBlockedMessages: {
+        description: "Completely ignores (recent) incoming messages from blocked users (locally).",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true,
+    },
+    ignoreIgnoredMessages: {
+        description: "Additionally apply to 'ignored' users.",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: false,
+    },
+});
+
+
 export default definePlugin({
     name: "NoBlockedMessages",
     description: "Hides all blocked/ignored messages from chat completely.",
     authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365],
+    settings,
     patches: [
         {
             find: "#{intl::BLOCKED_MESSAGES_HIDE}",
@@ -60,21 +77,6 @@ export default definePlugin({
             ]
         }))
     ],
-    options: {
-        ignoreBlockedMessages: {
-            description: "Completely ignores (recent) incoming messages from blocked users (locally).",
-            type: OptionType.BOOLEAN,
-            default: false,
-            restartNeeded: true,
-        },
-        ignoreIgnoredMessages: {
-            description: "Additionally apply to 'ignored' users.",
-            type: OptionType.BOOLEAN,
-            default: true,
-            restartNeeded: false,
-        },
-
-    },
 
     shouldIgnoreMessage(message: Message) {
         try {
