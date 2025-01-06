@@ -152,12 +152,12 @@ const settings = definePluginSettings({
     hideWithSpotify: {
         description: "hide stats.fm presence if spotify is running",
         type: OptionType.BOOLEAN,
-        default: true,
+        default: false,
     },
     statusName: {
         description: "custom status text",
         type: OptionType.STRING,
-        default: "some music",
+        default: "Stats.fm",
     },
     nameFormat: {
         description: "Show name of song and artist in status name",
@@ -193,7 +193,7 @@ const settings = definePluginSettings({
     useListeningStatus: {
         description: 'show "Listening to" status instead of "Playing"',
         type: OptionType.BOOLEAN,
-        default: false,
+        default: true,
     },
     missingArt: {
         description: "When albums or albums art is missing",
