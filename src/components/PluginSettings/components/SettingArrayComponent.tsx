@@ -437,32 +437,31 @@ export function SettingArrayComponent({
                 >
                     <TextInput
                         type="text"
-                        placeholder="Enter text or ID"
+                        placeholder="Enter ID or search for text"
                         id={cl("input")}
                         onChange={v => setText(v)}
                         value={text}
                     />
-                    {text === "" ? null :
-                        !isNaN(Number(text)) ?
-                            <Button
-                                size={Button.Sizes.MIN}
-                                id={cl("add-button")}
-                                onClick={handleSubmit}
-                                style={{ background: "none" }}
-                                disabled={text.length < 18 || text.length > 19}
-                            >
-                                <CheckMarkIcon />
-                            </Button> :
-                            < Button
-                                id={cl("search-button")}
-                                size={Button.Sizes.MIN}
-                                onClick={() => openSearchModal(text)}
-                                style={
-                                    { background: "none" }
-                                }
-                            >
-                                <SearchIcon />
-                            </Button>
+                    {!isNaN(Number(text)) || text === "" ?
+                        <Button
+                            size={Button.Sizes.MIN}
+                            id={cl("add-button")}
+                            onClick={handleSubmit}
+                            style={{ background: "none" }}
+                            disabled={text.length < 18 || text.length > 19}
+                        >
+                            <CheckMarkIcon />
+                        </Button> :
+                        < Button
+                            id={cl("search-button")}
+                            size={Button.Sizes.MIN}
+                            onClick={() => openSearchModal(text)}
+                            style={
+                                { background: "none" }
+                            }
+                        >
+                            <SearchIcon />
+                        </Button>
                     }
                 </Flex>
             </ErrorBoundary>
