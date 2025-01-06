@@ -442,7 +442,7 @@ export function SettingArrayComponent({
                         onChange={v => setText(v)}
                         value={text}
                     />
-                    {!isNaN(Number(text)) || text === "" ?
+                    {!isNaN(Number(text)) && text !== "" ?
                         <Button
                             size={Button.Sizes.MIN}
                             id={cl("add-button")}
