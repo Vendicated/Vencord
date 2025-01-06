@@ -61,6 +61,21 @@ export function SettingArrayComponent({
     const [text, setText] = useState<string>("");
 
     useEffect(() => {
+        if (text === "") {
+            setError(null);
+        } else if (!isNaN(Number(text))) {
+            if (text.length >= 18 && text.length <= 19) {
+                setError(null);
+            } else {
+                setError("Invalid ID");
+            }
+        } else {
+            setError(null);
+        }
+    }, [text]);
+
+
+    useEffect(() => {
         pluginSettings[id] = items;
         onChange(items);
     }, [items, pluginSettings, id]);
@@ -373,21 +388,6 @@ export function SettingArrayComponent({
     }
 
     function handleSubmit() {
-        if (text === "") {
-            return;
-        }
-        if (option.type !== OptionType.ARRAY) {
-            if (isNaN(Number(text))) {
-                openSearchModal(text);
-                setText("");
-                return;
-            }
-            if (!(text.length >= 18 && text.length <= 19)) {
-                setError("Invalid ID");
-                return;
-            }
-        }
-
         if (items.includes(text)) {
             setError("This item is already added");
             setText("");
@@ -437,29 +437,33 @@ export function SettingArrayComponent({
                 >
                     <TextInput
                         type="text"
-                        placeholder="Add Item (ID or Name)"
+                        placeholder="Enter text or ID"
                         id={cl("input")}
                         onChange={v => setText(v)}
                         value={text}
                     />
-                    <Button
-                        size={Button.Sizes.MIN}
-                        id={cl("add-button")}
-                        onClick={handleSubmit}
-                        style={{ background: "none" }}
-                    >
-                        <CheckMarkIcon />
-                    </Button>
-                    <Button
-                        id={cl("search-button")}
-                        size={Button.Sizes.MIN}
-                        onClick={() => openSearchModal(text)}
-                        style={
-                            { background: "none" }
-                        }
-                    >
-                        <SearchIcon />
-                    </Button>
+                    {text === "" ? null :
+                        !isNaN(Number(text)) ?
+                            <Button
+                                size={Button.Sizes.MIN}
+                                id={cl("add-button")}
+                                onClick={handleSubmit}
+                                style={{ background: "none" }}
+                                disabled={text.length < 18 || text.length > 19}
+                            >
+                                <CheckMarkIcon />
+                            </Button> :
+                            < Button
+                                id={cl("search-button")}
+                                size={Button.Sizes.MIN}
+                                onClick={() => openSearchModal(text)}
+                                style={
+                                    { background: "none" }
+                                }
+                            >
+                                <SearchIcon />
+                            </Button>
+                    }
                 </Flex>
             </ErrorBoundary>
             {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
