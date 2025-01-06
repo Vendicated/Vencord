@@ -83,11 +83,7 @@ export default definePlugin({
             if (RelationshipStore.isBlocked(message.author.id)) {
                 return true;
             }
-            if (this.options.ignoreIgnoredMessages && RelationshipStore.isIgnored(message.author.id)) {
-                return true;
-            }
-
-            return false;
+	return settings.store.ignoreIgnoredMessages && RelationshipStore.isIgnored(message.author.id);
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if user is blocked or ignored:", e);
             return false;
