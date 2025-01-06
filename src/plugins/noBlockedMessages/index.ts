@@ -34,8 +34,8 @@ interface MessageDeleteProps {
 
 export default definePlugin({
     name: "NoBlockedMessages",
-    description: "Hides all blocked messages from chat completely.",
-    authors: [Devs.rushii, Devs.Samu],
+    description: "Hides all blocked/ignored messages from chat completely.",
+    authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365],
     patches: [
         {
             find: "#{intl::BLOCKED_MESSAGES_HIDE}",
@@ -55,7 +55,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
-                    replace: (_, _funcName, props) => `if($self.isBlocked(${props}.message))return;`
+                    replace: (_, _funcName, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
                 }
             ]
         }))
@@ -67,22 +67,44 @@ export default definePlugin({
             default: false,
             restartNeeded: true,
         },
+        ignoreIgnoredMessages: {
+            description: "Additionally apply to 'ignored' users.",
+            type: OptionType.BOOLEAN,
+            default: true,
+            restartNeeded: false,
+        },
+
     },
 
-    isBlocked(message: Message) {
+    shouldIgnoreMessage(message: Message) {
         try {
-            return RelationshipStore.isBlocked(message.author.id);
+            if (RelationshipStore.isBlocked(message.author.id)) {
+                return true;
+            }
+            if (this.options.ignoreIgnoredMessages && RelationshipStore.isIgnored(message.author.id)) {
+                return true;
+            }
+
+            return false;
         } catch (e) {
-            new Logger("NoBlockedMessages").error("Failed to check if user is blocked:", e);
+            new Logger("NoBlockedMessages").error("Failed to check if user is blocked or ignored:", e);
+            return false;
         }
     },
 
-    shouldHide(props: MessageDeleteProps) {
+    shouldHide(props: MessageDeleteProps): boolean {
         try {
-            return props.collapsedReason() === i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
+            const collapsedReason = props.collapsedReason();
+            const blockedReason = i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
+            const ignoredReason = Settings.plugins.NoBlockedMessages.ignoreIgnoredMessages
+                ? i18n.t[runtimeHashMessageKey("IGNORED_MESSAGE_COUNT")]()
+                : null;
+
+            return collapsedReason === blockedReason || collapsedReason === ignoredReason;
         } catch (e) {
             console.error(e);
+            return false;
         }
-        return false;
     }
+
 });
