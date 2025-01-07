@@ -134,7 +134,7 @@ export function initWs(isManual = false) {
                 nonce: d.nonce
             };
             // data.nonce = d.nonce;
-            ws.send(JSON.stringify(data));
+            ws.send(JSON.stringify(toSend));
         }
 
         logger.info("Received Message:", d.type, "\n", d.data);
@@ -412,17 +412,20 @@ export function initWs(isManual = false) {
                     .then(() => {
                         resolve();
                         replyData({
-                            type: "allModules",
-                            data: Object.keys(wreq.m),
+                            type: "moduleList",
+                            data: {
+                                modules: Object.keys(wreq.m)
+                            },
                             ok: true
                         });
                     })
                     .catch(e => {
                         console.error(e);
                         replyData({
-                            type: "allModules",
+                            type: "moduleList",
                             ok: false,
-                            data: e.toString()
+                            error: String(e),
+                            data: null
                         });
                         reject(e);
                     });

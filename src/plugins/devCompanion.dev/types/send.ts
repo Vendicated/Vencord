@@ -15,6 +15,7 @@ export type Base = {
     ok: true;
 } | {
     ok: false;
+    data?: any;
     error: string;
 };
 export type Nonce = {
