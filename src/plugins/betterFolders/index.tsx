@@ -123,8 +123,8 @@ export default definePlugin({
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the servers and folders from the GuildsBar Guild List children
                 {
-                    match: /(?<=discoveryIcon.{0,50}null])/,
-                    replace: ".filter($self.makeGuildsBarGuildListFilter(!!arguments[0]?.isBetterFolders))"
+                    match: /lastTargetNode:\i\[\i\.length-1\].+?}\):null\](?=}\))/,
+                    replace: "$&.filter($self.makeGuildsBarGuildListFilter(!!arguments[0]?.isBetterFolders))"
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the scroller for the guild list from the GuildsBar Tree children
                 {
