@@ -39,7 +39,7 @@ export default definePlugin({
                     replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"
                 },
                 {
-                    match: /fixedDiscoveryIcon\}\)\}\)\]/,
+                    match: /discoveryIcon\}\)\}\)\]/,
                     replace: "$&.concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below))"
                 }
             ]
