@@ -192,6 +192,7 @@ function UserPermissionsComponent({ guild, guildMember, closePopout }: { guild: 
             <div className={classes(RoleRootClasses.root)}>
                 {userPermissions.map(({ permission, roleColor, roleName }) => (
                     <Tooltip
+                        key={permission}
                         text={<GrantedByTooltip roleName={roleName} roleColor={roleColor} />}
                         tooltipClassName={cl("granted-by-container")}
                         tooltipContentClassName={cl("granted-by-content")}
