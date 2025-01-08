@@ -8,7 +8,7 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { filters, findByPropsLazy, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
+import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, filters, findByPropsLazy, findComponentByCodeLazy, findLazy, findStoreLazy, mapMangledModuleLazy } from "@webpack";
 import {
     ChannelRouter,
     ChannelStore,
@@ -18,7 +18,10 @@ import {
     MessageActions,
     PermissionsBits,
     PermissionStore,
+    PopoutActions,
+    React,
     SelectedChannelStore,
+    SelectedGuildStore,
     useEffect,
     UserStore,
     useStateFromStores
@@ -32,12 +35,22 @@ const { HeaderBar, HeaderBarIcon } = mapMangledModuleLazy(".themedMobile]:", {
     HeaderBarIcon: filters.byCode('size:"custom",'),
     HeaderBar: filters.byCode(".themedMobile]:"),
 });
+
 const Chat = findComponentByCodeLazy("filterAfterTimestamp:", "chatInputType");
 const Resize = findComponentByCodeLazy("sidebarType:", "homeSidebarWidth");
 const ChannelHeader = findComponentByCodeLazy(".forumPostTitle]:", '"channel-".concat');
+const PopoutWindow = findComponentByCodeLazy("Missing guestWindow reference");
+const FullChannelView = findComponentByCodeLazy("showFollowButton:(null");
+
+// love
+const ppStyle = findLazy(m => m?.popoutContent && Object.keys(m).length === 1);
+
 const ChatInputTypes = findByPropsLazy("FORM", "NORMAL");
 const Sidebars = findByPropsLazy("ThreadSidebar", "MessageRequestSidebar");
 
+const ChannelSectionStore = findStoreLazy("ChannelSectionStore");
+
+const requireChannelContextMenu = extractAndLoadChunksLazy(["&&this.handleActivitiesPopoutClose(),"], new RegExp(DefaultExtractAndLoadChunksRegex.source + ".{1,150}isFavorite"));
 
 interface ContextMenuProps {
     channel: Channel;
@@ -76,16 +89,14 @@ function MakeContextCallback(name: "user" | "channel"): NavContextMenuPatchCallb
 export default definePlugin({
     name: "SidebarChat",
     authors: [Devs.Joona],
-    description: "Open a another channel or a DM as a sidebar",
+    description: "Open a another channel or a DM as a sidebar or as a popout",
     patches: [
         {
-            find: "Missing channel in Channel.openChannelContextMenu",
-            replacement: [
-                {
-                    match: /this\.renderThreadSidebar\(\),/,
-                    replace: "$&$self.renderSidebar({width:this.props.width,stockSidebarOpen:this.props.channelSidebarState || this.props.guildSidebarState}),"
-                }
-            ]
+            find: 'case"pendingFriends":',
+            replacement: {
+                match: /return(\(0,\i\.jsxs?\)\(\i\.\i,{}\))/,
+                replace: "return [$1,$self.renderSidebar()]"
+            }
         }
     ],
 
@@ -96,10 +107,18 @@ export default definePlugin({
         "gdm-context": MakeContextCallback("channel"),
     },
 
-    renderSidebar: ErrorBoundary.wrap(({ width, stockSidebarOpen }: { width: number, stockSidebarOpen: any; }) => {
+    renderSidebar: ErrorBoundary.wrap(() => {
         const [guild, channel] = useStateFromStores(
             [SidebarStore],
             () => [SidebarStore.guild, SidebarStore.channel]
+        );
+
+        const [channelSidebar, guildSidebar] = useStateFromStores(
+            [ChannelSectionStore],
+            () => [
+                ChannelSectionStore.getSidebarState(SelectedChannelStore.getChannelId()),
+                ChannelSectionStore.getGuildSidebarState(SelectedGuildStore.getGuildId())
+            ]
         );
 
         useEffect(() => {
@@ -111,12 +130,12 @@ export default definePlugin({
             }
         }, [channel]);
 
-        if (!channel || stockSidebarOpen) return null;
+        if (!channel || channelSidebar || guildSidebar) return null;
 
         return (
             <Resize
                 sidebarType={Sidebars.MessageRequestSidebar}
-                maxWidth={width - 610}
+                maxWidth={1500}
             >
                 <HeaderBar
                     toolbar={
@@ -134,6 +153,19 @@ export default definePlugin({
                                         id: currentChannel.id,
                                     });
                                     ChannelRouter.transitionToChannel(channel.id);
+                                }}
+                            />
+                            <HeaderBarIcon
+                                icon={Icons.WindowLaunchIcon}
+                                tooltip="Popout Chat"
+                                onClick={async () => {
+                                    await requireChannelContextMenu();
+                                    PopoutActions.open(
+                                        `DISCORD_VC_SC-${channel.id}`,
+                                        () => renderPopout(channel), {
+                                        defaultWidth: 854,
+                                        defaultHeight: 480
+                                    });
                                 }}
                             />
                             <HeaderBarIcon
@@ -164,4 +196,23 @@ export default definePlugin({
             </Resize>
         );
     }),
+});
+
+const renderPopout = ErrorBoundary.wrap((channel: Channel) => {
+    // Copy from an unexported function of the one they use in the experiment
+    const { Provider } = React.createContext<string | undefined>(undefined);
+    const selectedChannel = ChannelStore.getChannel(channel.id);
+    return (
+        <PopoutWindow
+            withTitleBar={true}
+            windowKey={`DISCORD_VC_SC-${selectedChannel.id}`}
+            title={selectedChannel.name}
+            channelId={selectedChannel.id}
+            contentClassName={ppStyle.popoutContent}
+        >
+            <Provider value={selectedChannel.guild_id}>
+                <FullChannelView providedChannel={selectedChannel} />
+            </Provider>
+        </PopoutWindow>
+    );
 });
