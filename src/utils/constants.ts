@@ -594,7 +594,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     TechTac: {
         name: "Tech-Tac",
         id: 730090182715375666n
-    }
+    },
+    ryanamay: { name: "ryanamay", id: 1262793452236570667n }
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly

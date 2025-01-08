@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 
@@ -141,7 +142,7 @@ async function playSound(buffer: AudioBuffer, volume: number) {
 export default definePlugin({
     name: "Animalese",
     description: "Plays animalese (they yap a lot) on message sent",
-    authors: [{ name: "ryanamay", id: 1262793452236570667n }],
+    authors: [Devs.ryanamay],
     nexulien: true,
     settings,
 
