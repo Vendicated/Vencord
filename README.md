@@ -62,8 +62,6 @@ However, Discord is pretty indifferent about them and there are no known cases o
 
 Regardless, if your account is very important to you and it getting disabled would be a disaster for you, you should probably not use any client mods (not exclusive to Vencord), just to be safe
 
-Special thanks to mantikafasi for his great plugin ReviewDB
-
 Additionally, make sure not to post screenshots with Vencord in a server where you might get banned for it
 
 </details>
