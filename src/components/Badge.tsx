@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function Badge({ text, color }): JSX.Element {
+export function Badge({ text, color }) {
     return (
         <div className="vc-plugins-badge" style={{
             backgroundColor: color,
