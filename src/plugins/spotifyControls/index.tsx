@@ -48,10 +48,10 @@ export default definePlugin({
     },
     patches: [
         {
-            find: "showTaglessAccountPanel:",
+            find: "this.isCopiedStreakGodlike",
             replacement: {
                 // react.jsx)(AccountPanel, { ..., showTaglessAccountPanel: blah })
-                match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?showTaglessAccountPanel:)/,
+                match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?userTag:\i,hidePrivateData:)/,
                 // react.jsx(WrapperComponent, { VencordOriginal: AccountPanel, ...
                 replace: "$self.PanelWrapper,{VencordOriginal:$1,"
             }
@@ -61,7 +61,7 @@ export default definePlugin({
             replacement: [{
                 // Adds POST and a Marker to the SpotifyAPI (so we can easily find it)
                 match: /get:(\i)\.bind\(null,(\i\.\i)\.get\)/,
-                replace: "post:$1.bind(null,$2.post),$&"
+                replace: "post:$1.bind(null,$2.post),vcSpotifyMarker:1,$&"
             },
             {
                 // Spotify Connect API returns status 202 instead of 204 when skipping tracks.
@@ -70,14 +70,20 @@ export default definePlugin({
                 replace: "false",
             }]
         },
-        // Discord doesn't give you the repeat kind, only a boolean
         {
             find: 'repeat:"off"!==',
-            replacement: {
-                match: /repeat:"off"!==(.{1,3}),/,
-                replace: "actual_repeat:$1,$&"
-            }
-        }
+            replacement: [
+                {
+                    // Discord doesn't give you shuffle state and the repeat kind, only a boolean
+                    match: /repeat:"off"!==(\i),/,
+                    replace: "shuffle:arguments[2]?.shuffle_state??false,actual_repeat:$1,$&"
+                },
+                {
+                    match: /(?<=artists.filter\(\i=>).{0,10}\i\.id\)&&/,
+                    replace: ""
+                }
+            ]
+        },
     ],
 
     start: () => toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls),

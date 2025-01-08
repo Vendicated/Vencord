@@ -20,11 +20,11 @@ import { addPreEditListener, addPreSendListener, removePreEditListener, removePr
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
-import { getCurrentGuild } from "@utils/discord";
+import { getCurrentGuild, getEmojiURL } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import definePlugin, { OptionType, Patch } from "@utils/types";
+import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
+import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Emoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
@@ -37,8 +37,8 @@ const StickerStore = findStoreLazy("StickersStore") as {
 };
 
 const UserSettingsProtoStore = findStoreLazy("UserSettingsProtoStore");
-const ProtoUtils = findByPropsLazy("BINARY_READ_OPTIONS");
-const RoleSubscriptionEmojiUtils = findByPropsLazy("isUnusableRoleSubscriptionEmoji");
+
+const BINARY_READ_OPTIONS = findByPropsLazy("readerFactory");
 
 function searchProtoClassField(localName: string, protoClass: any) {
     const field = protoClass?.fields?.find((field: any) => field.localName === localName);
@@ -52,6 +52,7 @@ const PreloadedUserSettingsActionCreators = proxyLazyWebpack(() => UserSettingsA
 const AppearanceSettingsActionCreators = proxyLazyWebpack(() => searchProtoClassField("appearance", PreloadedUserSettingsActionCreators.ProtoClass));
 const ClientThemeSettingsActionsCreators = proxyLazyWebpack(() => searchProtoClassField("clientThemeSettings", AppearanceSettingsActionCreators));
 
+const isUnusableRoleSubscriptionEmoji = findByCodeLazy(".getUserIsAdmin(");
 
 const enum EmojiIntentions {
     REACTION,
@@ -193,6 +194,26 @@ const hasExternalStickerPerms = (channelId: string) => hasPermission(channelId, 
 const hasEmbedPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.EMBED_LINKS);
 const hasAttachmentPerms = (channelId: string) => hasPermission(channelId, PermissionsBits.ATTACH_FILES);
 
+function makeBypassPatches(): Omit<Patch, "plugin"> {
+    const mapping: Array<{ func: string, predicate?: () => boolean; }> = [
+        { func: "canUseCustomStickersEverywhere", predicate: () => settings.store.enableStickerBypass },
+        { func: "canUseHighVideoUploadQuality", predicate: () => settings.store.enableStreamQualityBypass },
+        { func: "canStreamQuality", predicate: () => settings.store.enableStreamQualityBypass },
+        { func: "canUseClientThemes" },
+        { func: "canUseCustomNotificationSounds" },
+        { func: "canUsePremiumAppIcons" }
+    ];
+
+    return {
+        find: "canUseCustomStickersEverywhere:",
+        replacement: mapping.map(({ func, predicate }) => ({
+            match: new RegExp(String.raw`(?<=${func}:)\i`),
+            replace: "() => true",
+            predicate
+        }))
+    };
+}
+
 export default definePlugin({
     name: "FakeNitro",
     authors: [Devs.Arjix, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN],
@@ -202,6 +223,17 @@ export default definePlugin({
     settings,
 
     patches: [
+        // General bypass patches
+        makeBypassPatches(),
+        // Patch the emoji picker in voice calls to not be bypassed by fake nitro
+        {
+            find: "emojiItemDisabled]",
+            predicate: () => settings.store.enableEmojiBypass,
+            replacement: {
+                match: /CHAT/,
+                replace: "STATUS"
+            }
+        },
         {
             find: ".PREMIUM_LOCKED;",
             group: true,
@@ -236,21 +268,11 @@ export default definePlugin({
         },
         // Allows the usage of subscription-locked emojis
         {
-            find: "isUnusableRoleSubscriptionEmoji:function",
+            find: ".getUserIsAdmin(",
             replacement: {
-                match: /isUnusableRoleSubscriptionEmoji:function/,
-                // Replace the original export with a func that always returns false and alias the original
-                replace: "isUnusableRoleSubscriptionEmoji:()=>()=>false,isUnusableRoleSubscriptionEmojiOriginal:function"
+                match: /(function \i\(\i,\i)\){(.{0,250}.getUserIsAdmin\(.+?return!1})/,
+                replace: (_, rest1, rest2) => `${rest1},fakeNitroOriginal){if(!fakeNitroOriginal)return false;${rest2}`
             }
-        },
-        // Allow stickers to be sent everywhere
-        {
-            find: "canUseCustomStickersEverywhere:function",
-            predicate: () => settings.store.enableStickerBypass,
-            replacement: {
-                match: /canUseCustomStickersEverywhere:function\(\i\){/,
-                replace: "$&return true;"
-            },
         },
         // Make stickers always available
         {
@@ -261,35 +283,13 @@ export default definePlugin({
                 replace: "true?"
             }
         },
-        // Allow streaming with high quality
-        {
-            find: "canUseHighVideoUploadQuality:function",
-            predicate: () => settings.store.enableStreamQualityBypass,
-            replacement: [
-                "canUseHighVideoUploadQuality",
-                "canStreamQuality",
-            ].map(func => {
-                return {
-                    match: new RegExp(`${func}:function\\(\\i(?:,\\i)?\\){`, "g"),
-                    replace: "$&return true;"
-                };
-            })
-        },
         // Remove boost requirements to stream with high quality
         {
-            find: "STREAM_FPS_OPTION.format",
+            find: "#{intl::STREAM_FPS_OPTION}",
             predicate: () => settings.store.enableStreamQualityBypass,
             replacement: {
                 match: /guildPremiumTier:\i\.\i\.TIER_\d,?/g,
                 replace: ""
-            }
-        },
-        // Allow client themes to be changeable
-        {
-            find: "canUseClientThemes:function",
-            replacement: {
-                match: /canUseClientThemes:function\(\i\){/,
-                replace: "$&return true;"
             }
         },
         {
@@ -297,8 +297,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Overwrite incoming connection settings proto with our local settings
-                    match: /CONNECTION_OPEN:function\((\i)\){/,
-                    replace: (m, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
+                    match: /function (\i)\((\i)\){(?=.*CONNECTION_OPEN:\1)/,
+                    replace: (m, funcName, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
                 },
                 {
                     // Overwrite non local proto changes with our local settings
@@ -333,35 +333,35 @@ export default definePlugin({
             ]
         },
         {
-            find: "renderEmbeds(",
+            find: "}renderEmbeds(",
             replacement: [
                 {
                     // Call our function to decide whether the embed should be ignored or not
                     predicate: () => settings.store.transformEmojis || settings.store.transformStickers,
-                    match: /(renderEmbeds\((\i)\){)(.+?embeds\.map\((\i)=>{)/,
+                    match: /(renderEmbeds\((\i)\){)(.+?embeds\.map\(\((\i),\i\)?=>{)/,
                     replace: (_, rest1, message, rest2, embed) => `${rest1}const fakeNitroMessage=${message};${rest2}if($self.shouldIgnoreEmbed(${embed},fakeNitroMessage))return null;`
                 },
                 {
                     // Patch the stickers array to add fake nitro stickers
                     predicate: () => settings.store.transformStickers,
-                    match: /(?<=renderStickersAccessories\((\i)\){let (\i)=\(0,\i\.\i\)\(\i\).+?;)/,
-                    replace: (_, message, stickers) => `${stickers}=$self.patchFakeNitroStickers(${stickers},${message});`
+                    match: /renderStickersAccessories\((\i)\){let (\i)=\(0,\i\.\i\)\(\i\).+?;/,
+                    replace: (m, message, stickers) => `${m}${stickers}=$self.patchFakeNitroStickers(${stickers},${message});`
                 },
                 {
                     // Filter attachments to remove fake nitro stickers or emojis
                     predicate: () => settings.store.transformStickers,
-                    match: /renderAttachments\(\i\){let{attachments:(\i).+?;/,
+                    match: /renderAttachments\(\i\){.+?{attachments:(\i).+?;/,
                     replace: (m, attachments) => `${m}${attachments}=$self.filterAttachments(${attachments});`
                 }
             ]
         },
         {
-            find: ".Messages.STICKER_POPOUT_UNJOINED_PRIVATE_GUILD_DESCRIPTION.format",
+            find: "#{intl::STICKER_POPOUT_UNJOINED_PRIVATE_GUILD_DESCRIPTION}",
             predicate: () => settings.store.transformStickers,
             replacement: [
                 {
                     // Export the renderable sticker to be used in the fake nitro sticker notice
-                    match: /let{renderableSticker:(\i).{0,250}isGuildSticker.+?channel:\i,/,
+                    match: /let{renderableSticker:(\i).{0,270}sticker:\i,channel:\i,/,
                     replace: (m, renderableSticker) => `${m}fakeNitroRenderableSticker:${renderableSticker},`
                 },
                 {
@@ -381,7 +381,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION",
+            find: "#{intl::EMOJI_POPOUT_UNJOINED_DISCOVERABLE_GUILD_DESCRIPTION}",
             predicate: () => settings.store.transformEmojis,
             replacement: {
                 // Add the fake nitro emoji notice
@@ -389,17 +389,9 @@ export default definePlugin({
                 replace: (_, reactNode, props) => `$self.addFakeNotice(${FakeNoticeType.Emoji},${reactNode},!!${props}?.fakeNitroNode?.fake)`
             }
         },
-        // Allow using custom app icons
-        {
-            find: "canUsePremiumAppIcons:function",
-            replacement: {
-                match: /canUsePremiumAppIcons:function\(\i\){/,
-                replace: "$&return true;"
-            }
-        },
         // Separate patch for allowing using custom app icons
         {
-            find: ".FreemiumAppIconIds.DEFAULT&&(",
+            find: /\.getCurrentDesktopIcon.{0,25}\.isPremium/,
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"
@@ -411,14 +403,6 @@ export default definePlugin({
             replacement: {
                 match: /(?<=type:"(?:SOUNDBOARD_SOUNDS_RECEIVED|GUILD_SOUNDBOARD_SOUND_CREATE|GUILD_SOUNDBOARD_SOUND_UPDATE|GUILD_SOUNDBOARD_SOUNDS_UPDATE)".+?available:)\i\.available/g,
                 replace: "true"
-            }
-        },
-        // Allow using custom notification sounds
-        {
-            find: "canUseCustomNotificationSounds:function",
-            replacement: {
-                match: /canUseCustomNotificationSounds:function\(\i\){/,
-                replace: "$&return true;"
             }
         }
     ],
@@ -472,12 +456,12 @@ export default definePlugin({
         const premiumType = UserStore?.getCurrentUser()?.premiumType ?? 0;
         if (premiumType === 2 || backgroundGradientPresetId == null) return original();
 
-        if (!PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators || !ProtoUtils) return;
+        if (!PreloadedUserSettingsActionCreators || !AppearanceSettingsActionCreators || !ClientThemeSettingsActionsCreators || !BINARY_READ_OPTIONS) return;
 
         const currentAppearanceSettings = PreloadedUserSettingsActionCreators.getCurrentValue().appearance;
 
         const newAppearanceProto = currentAppearanceSettings != null
-            ? AppearanceSettingsActionCreators.fromBinary(AppearanceSettingsActionCreators.toBinary(currentAppearanceSettings), ProtoUtils.BINARY_READ_OPTIONS)
+            ? AppearanceSettingsActionCreators.fromBinary(AppearanceSettingsActionCreators.toBinary(currentAppearanceSettings), BINARY_READ_OPTIONS)
             : AppearanceSettingsActionCreators.create();
 
         newAppearanceProto.theme = theme;
@@ -813,13 +797,19 @@ export default definePlugin({
     },
 
     canUseEmote(e: Emoji, channelId: string) {
-        if (e.type === "UNICODE") return true;
+        if (e.type === 0) return true;
         if (e.available === false) return false;
 
-        const isUnusableRoleSubEmoji = RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmojiOriginal ?? RoleSubscriptionEmojiUtils.isUnusableRoleSubscriptionEmoji;
-        if (isUnusableRoleSubEmoji(e, this.guildId)) return false;
+        if (isUnusableRoleSubscriptionEmoji(e, this.guildId, true)) return false;
 
-        if (this.canUseEmotes)
+        let isUsableTwitchSubEmote = false;
+        if (e.managed && e.guildId) {
+            // @ts-ignore outdated type
+            const myRoles = GuildMemberStore.getSelfMember(e.guildId)?.roles ?? [];
+            isUsableTwitchSubEmote = e.roles.some(r => myRoles.includes(r));
+        }
+
+        if (this.canUseEmotes || isUsableTwitchSubEmote)
             return e.guildId === this.guildId || hasExternalEmojiPerms(channelId);
         else
             return !e.animated && e.guildId === this.guildId;
@@ -930,7 +920,7 @@ export default definePlugin({
 
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
 
-                    const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
+                    const url = new URL(getEmojiURL(emoji.id, emoji.animated, s.emojiSize));
                     url.searchParams.set("size", s.emojiSize.toString());
                     url.searchParams.set("name", emoji.name);
 
@@ -963,7 +953,7 @@ export default definePlugin({
 
                 hasBypass = true;
 
-                const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
+                const url = new URL(getEmojiURL(emoji.id, emoji.animated, s.emojiSize));
                 url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
 

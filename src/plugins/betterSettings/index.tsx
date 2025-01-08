@@ -7,11 +7,14 @@
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
-import { ComponentDispatch, FocusLock, i18n, Menu, useEffect, useRef } from "@webpack/common";
+import { ComponentDispatch, FocusLock, Menu, useEffect, useRef } from "@webpack/common";
 import type { HTMLAttributes, ReactElement } from "react";
+
+import PluginsSubmenu from "./PluginsSubmenu";
 
 type SettingsEntry = { section: string, label: string; };
 
@@ -83,19 +86,19 @@ export default definePlugin({
             find: "this.renderArtisanalHack()",
             replacement: [
                 { // Fade in on layer
-                    match: /(?<=\((\i),"contextType",\i\.AccessibilityPreferencesContext\);)/,
+                    match: /(?<=\((\i),"contextType",\i\.\i\);)/,
                     replace: "$1=$self.Layer;",
                     predicate: () => settings.store.disableFade
                 },
                 { // Lazy-load contents
-                    match: /createPromise:\(\)=>([^:}]*?),webpackId:"\d+",name:(?!="CollectiblesShop")"[^"]+"/g,
+                    match: /createPromise:\(\)=>([^:}]*?),webpackId:"?\d+"?,name:(?!="CollectiblesShop")"[^"]+"/g,
                     replace: "$&,_:$1",
                     predicate: () => settings.store.eagerLoad
                 }
             ]
         },
         { // For some reason standardSidebarView also has a small fade-in
-            find: "DefaultCustomContentScroller:function()",
+            find: 'minimal:"contentColumnMinimal"',
             replacement: [
                 {
                     match: /\(0,\i\.useTransition\)\((\i)/,
@@ -109,21 +112,29 @@ export default definePlugin({
             predicate: () => settings.store.disableFade
         },
         { // Load menu TOC eagerly
-            find: "Messages.USER_SETTINGS_WITH_BUILD_OVERRIDE.format",
+            find: "#{intl::USER_SETTINGS_WITH_BUILD_OVERRIDE}",
             replacement: {
-                match: /(?<=(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?openContextMenuLazy.{0,100}?(await Promise\.all[^};]*?\)\)).*?,)(?=\1\(this)/,
-                replace: "(async ()=>$2)(),"
+                match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?null!=\i&&.{0,100}?(await Promise\.all[^};]*?\)\)).*?,(?=\1\(this)/,
+                replace: "$&(async ()=>$2)(),"
             },
             predicate: () => settings.store.eagerLoad
         },
         { // Settings cog context menu
-            find: "Messages.USER_SETTINGS_ACTIONS_MENU_LABEL",
-            replacement: {
-                match: /\(0,\i.useDefaultUserSettingsSections\)\(\)(?=\.filter\(\i=>\{let\{section:\i\}=)/,
-                replace: "$self.wrapMenu($&)"
-            }
-        }
+            find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
+            replacement: [
+                {
+                    match: /(EXPERIMENTS:.+?)(\(0,\i.\i\)\(\))(?=\.filter\(\i=>\{let\{section:\i\}=)/,
+                    replace: "$1$self.wrapMenu($2)"
+                },
+                {
+                    match: /case \i\.\i\.DEVELOPER_OPTIONS:return \i;/,
+                    replace: "$&case 'VencordPlugins':return $self.PluginsSubmenu();"
+                }
+            ]
+        },
     ],
+
+    PluginsSubmenu,
 
     // This is the very outer layer of the entire ui, so we can't wrap this in an ErrorBoundary
     // without possibly also catching unrelated errors of children.
@@ -149,7 +160,7 @@ export default definePlugin({
             if (item.section === "HEADER") {
                 items.push({ label: item.label, items: [] });
             } else if (item.section === "DIVIDER") {
-                items.push({ label: i18n.Messages.OTHER_OPTIONS, items: [] });
+                items.push({ label: getIntlMessage("OTHER_OPTIONS"), items: [] });
             } else {
                 items.at(-1)!.items.push(item);
             }

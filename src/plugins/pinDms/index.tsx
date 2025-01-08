@@ -71,7 +71,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Filter out pinned channels from the private channel list
-                    match: /(?<=\i,{channels:\i,)privateChannelIds:(\i)/,
+                    match: /(?<=channels:\i,)privateChannelIds:(\i)(?=,listRef:)/,
                     replace: "privateChannelIds:$1.filter(c=>!$self.isPinned(c))"
                 },
                 {
@@ -82,7 +82,7 @@ export default definePlugin({
 
                 // Rendering
                 {
-                    match: /"renderRow",(\i)=>{(?<="renderDM",.+?(\i\.default),\{channel:.+?)/,
+                    match: /"renderRow",(\i)=>{(?<="renderDM",.+?(\i\.\i),\{channel:.+?)/,
                     replace: "$&if($self.isChannelIndex($1.section, $1.row))return $self.renderChannel($1.section,$1.row,$2)();"
                 },
                 {
@@ -96,8 +96,8 @@ export default definePlugin({
 
                 // Fix Row Height
                 {
-                    match: /(?<="getRowHeight",.{1,100}return 1===)\i/,
-                    replace: "($&-$self.categoryLen())"
+                    match: /(\.startsWith\("section-divider"\).+?return 1===)(\i)/,
+                    replace: "$1($2-$self.categoryLen())"
                 },
                 {
                     match: /"getRowHeight",\((\i),(\i)\)=>{/,
@@ -111,8 +111,8 @@ export default definePlugin({
                     replace: "$self.getScrollOffset(arguments[0],$1,this.props.padding,this.state.preRenderedChildren,$&)"
                 },
                 {
-                    match: /(?<=scrollToChannel\(\i\){.{1,300})this\.props\.privateChannelIds/,
-                    replace: "[...$&,...$self.getAllUncollapsedChannels()]"
+                    match: /(scrollToChannel\(\i\){.{1,300})(this\.props\.privateChannelIds)/,
+                    replace: "$1[...$2,...$self.getAllUncollapsedChannels()]"
                 },
 
             ]
@@ -124,14 +124,14 @@ export default definePlugin({
         {
             find: ".FRIENDS},\"friends\"",
             replacement: {
-                match: /(?<=\i=\i=>{).{1,100}premiumTabSelected.{1,800}showDMHeader:.+?,/,
+                match: /(?<=\i=\i=>{).{1,100}premiumTabSelected.{0,950}showDMHeader:.+?,/,
                 replace: "let forceUpdate = Vencord.Util.useForceUpdater();$&_forceUpdate:forceUpdate,"
             }
         },
 
         // Fix Alt Up/Down navigation
         {
-            find: ".Routes.APPLICATION_STORE&&",
+            find: ".APPLICATION_STORE&&",
             replacement: {
                 // channelIds = __OVERLAY__ ? stuff : [...getStaticPaths(),...channelIds)]
                 match: /(?<=\i=__OVERLAY__\?\i:\[\.\.\.\i\(\),\.\.\.)\i/,

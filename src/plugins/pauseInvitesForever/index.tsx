@@ -18,17 +18,13 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Constants, GuildStore, i18n, RestAPI } from "@webpack/common";
-
-const { InvitesDisabledExperiment } = findByPropsLazy("InvitesDisabledExperiment");
+import { Constants, GuildStore, RestAPI } from "@webpack/common";
 
 function showDisableInvites(guildId: string) {
-    // Once the experiment is removed, this should keep working
-    const { enableInvitesDisabled } = InvitesDisabledExperiment?.getCurrentConfig?.({ guildId }) ?? { enableInvitesDisabled: true };
     // @ts-ignore
-    return enableInvitesDisabled && !GuildStore.getGuild(guildId).hasFeature("INVITES_DISABLED");
+    return !GuildStore.getGuild(guildId).hasFeature("INVITES_DISABLED");
 }
 
 function disableInvites(guildId: string) {
@@ -48,16 +44,16 @@ export default definePlugin({
 
     patches: [
         {
-            find: "Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION",
+            find: "#{intl::GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}",
             group: true,
             replacement: [
                 {
-                    match: /children:\i\.\i\.\i\.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION/,
+                    match: /children:\i\.\i\.string\(\i\.\i#{intl::GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}\)/,
                     replace: "children: $self.renderInvitesLabel({guildId:arguments[0].guildId,setChecked})",
                 },
                 {
-                    match: /(\i\.hasDMsDisabled\)\(\i\),\[\i,(\i)\]=\i\.useState\(\i\))/,
-                    replace: "$1,setChecked=$2"
+                    match: /\.INVITES_DISABLED\)(?=.+?#{intl::INVITES_PERMANENTLY_DISABLED_TIP}.+?checked:(\i)).+?\[\1,(\i)\]=\i.useState\(\i\)/,
+                    replace: "$&,setChecked=$2"
                 }
             ]
         }
@@ -66,7 +62,7 @@ export default definePlugin({
     renderInvitesLabel: ErrorBoundary.wrap(({ guildId, setChecked }) => {
         return (
             <div>
-                {i18n.Messages.GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION}
+                {getIntlMessage("GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION")}
                 {showDisableInvites(guildId) && <a role="button" onClick={() => {
                     setChecked(true);
                     disableInvites(guildId);

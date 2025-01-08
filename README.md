@@ -5,8 +5,8 @@
 The cutest Discord client mod
 
 | ![image](https://github.com/Vendicated/Vencord/assets/45497981/706722b1-32de-4d99-bee9-93993b504334) |
-|:--:|
-| A screenshot of vencord showcasing the [vencord-theme](https://github.com/synqat/vencord-theme) |
+| :--------------------------------------------------------------------------------------------------: |
+|   A screenshot of vencord showcasing the [vencord-theme](https://github.com/synqat/vencord-theme)    |
 
 ## Features
 
@@ -32,9 +32,9 @@ https://discord.gg/D9uwnFnqmd
 
 ## Sponsors
 
-| **Thanks a lot to all Vencord [sponsors](https://github.com/sponsors/Vendicated)!!** |
-|:--:| 
-| [![](https://meow.vendicated.dev/sponsors.png)](https://github.com/sponsors/Vendicated) |
+|     **Thanks a lot to all Vencord [sponsors](https://github.com/sponsors/Vendicated)!!**     |
+| :------------------------------------------------------------------------------------------: |
+|   [![](https://meow.vendicated.dev/sponsors.png)](https://github.com/sponsors/Vendicated)    |
 | *generated using [github-sponsor-graph](https://github.com/Vendicated/github-sponsor-graph)* |
 
 

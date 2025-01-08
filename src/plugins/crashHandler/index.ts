@@ -24,20 +24,19 @@ import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
-import { DraftType, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
+import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 
-const { ModalStack, DraftManager, closeExpressionPicker } = proxyLazyWebpack(() => {
-    const [ModalStack, DraftManager, ExpressionManager] = findBulk(
+const { ModalStack, DraftManager } = proxyLazyWebpack(() => {
+    const [ModalStack, DraftManager] = findBulk(
         filters.byProps("pushLazy", "popAll"),
         filters.byProps("clearDraft", "saveDraft"),
-        filters.byProps("closeExpressionPicker", "openExpressionPicker"),);
+    );
 
     return {
         ModalStack,
-        DraftManager,
-        closeExpressionPicker: ExpressionManager?.closeExpressionPicker,
+        DraftManager
     };
 });
 
@@ -68,7 +67,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".Messages.ERRORS_UNEXPECTED_CRASH",
+            find: "#{intl::ERRORS_UNEXPECTED_CRASH}",
             replacement: {
                 match: /this\.setState\((.+?)\)/,
                 replace: "$self.handleCrash(this,$1);"
@@ -144,7 +143,7 @@ export default definePlugin({
             CrashHandlerLogger.debug("Failed to clear drafts.", err);
         }
         try {
-            closeExpressionPicker();
+            ExpressionPickerStore.closeExpressionPicker();
         }
         catch (err) {
             CrashHandlerLogger.debug("Failed to close expression picker.", err);
@@ -176,7 +175,7 @@ export default definePlugin({
         }
         if (settings.store.attemptToNavigateToHome) {
             try {
-                NavigationRouter.transitionTo("/channels/@me");
+                NavigationRouter.transitionToGuild("@me");
             } catch (err) {
                 CrashHandlerLogger.debug("Failed to navigate to home", err);
             }
