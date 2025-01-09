@@ -48,6 +48,21 @@ type KeysOfType<Object, Type> = {
 
 
 function VencordSettings() {
+    /*
+    we need to detect win11 for background material,
+    which is not supported by win 10
+    https://learn.microsoft.com/en-us/microsoft-edge/web-platform/how-to-detect-win11#sample-code-for-detecting-windows-11
+    */
+    const [isWindows11, , isWindows11Pending] = useAwaiter(async () => {
+        if (
+            !navigator?.userAgentData ||
+            navigator?.userAgentData?.platform !== "Windows"
+        ) return false;
+
+        const ua = await navigator.userAgentData.getHighEntropyValues(["platformVersion"]);
+        const majorPlatformVersion = parseInt(ua?.platformVersion?.split(".")[0]!, 10);
+        return majorPlatformVersion >= 13;
+    }, { fallbackValue: false });
     const [settingsDir, , settingsDirPending] = useAwaiter(VencordNative.settings.getSettingsDir, {
         fallbackValue: "Loading..."
     });
@@ -58,24 +73,6 @@ function VencordSettings() {
     const isWindows = navigator.platform.toLowerCase().startsWith("win");
     const isMac = navigator.platform.toLowerCase().startsWith("mac");
     const needsVibrancySettings = IS_DISCORD_DESKTOP && isMac;
-
-    /*
-    we need to detect win11 for background material,
-    which is not supported by win 10
-    https://learn.microsoft.com/en-us/microsoft-edge/web-platform/how-to-detect-win11#sample-code-for-detecting-windows-11
-    */
-    let isWindows11 = false;
-    navigator?.userAgentData?.getHighEntropyValues(["platformVersion"])
-        .then(ua => {
-            if (isWindows) {
-                const majorPlatformVersion = parseInt(
-                    ua?.platformVersion?.split(".")[0]!
-                );
-                if (majorPlatformVersion >= 13) {
-                    isWindows11 = true;
-                }
-            }
-        });
     const needsBackgroundMaterial = IS_DISCORD_DESKTOP && isWindows11;
 
     const Switches: Array<false | {
@@ -284,6 +281,7 @@ function VencordSettings() {
                     isSelected={v => settings.winBackgroundMaterial === v}
                     serialize={identity} />
             </>}
+
 
             <Forms.FormSection className={Margins.top16} title="Vencord Notifications" tag="h5">
                 <Flex>
