@@ -1,5 +1,6 @@
 name: Build DevBuild
 on:
+    workflow_run:
     push:
         branches:
             - main
