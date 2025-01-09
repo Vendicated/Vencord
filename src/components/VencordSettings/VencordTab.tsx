@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+// Add data types to window.navigator for use in this file
+// needed for win11 detection
+/// <reference types="user-agent-data-types" />
+
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
@@ -54,6 +58,25 @@ function VencordSettings() {
     const isWindows = navigator.platform.toLowerCase().startsWith("win");
     const isMac = navigator.platform.toLowerCase().startsWith("mac");
     const needsVibrancySettings = IS_DISCORD_DESKTOP && isMac;
+
+    /*
+    we need to detect win11 for background material,
+    which is not supported by win 10
+    https://learn.microsoft.com/en-us/microsoft-edge/web-platform/how-to-detect-win11#sample-code-for-detecting-windows-11
+    */
+    let isWindows11 = false;
+    navigator?.userAgentData?.getHighEntropyValues(["platformVersion"])
+        .then(ua => {
+            if (isWindows) {
+                const majorPlatformVersion = parseInt(
+                    ua?.platformVersion?.split(".")[0]!
+                );
+                if (majorPlatformVersion >= 13) {
+                    isWindows11 = true;
+                }
+            }
+        });
+    const needsBackgroundMaterial = IS_DISCORD_DESKTOP && isWindows11;
 
     const Switches: Array<false | {
         key: KeysOfType<typeof settings, boolean>;
@@ -222,6 +245,43 @@ function VencordSettings() {
                     ]}
                     select={v => settings.macosVibrancyStyle = v}
                     isSelected={v => settings.macosVibrancyStyle === v}
+                    serialize={identity} />
+            </>}
+
+            {needsBackgroundMaterial && <>
+                <Forms.FormTitle tag="h5">Window Background Material (requires restart)</Forms.FormTitle>
+                <Select
+                    className={Margins.bottom20}
+                    placeholder="Window Background Material"
+                    options={[
+                        // Sorted from most opaque to most transparent
+                        {
+                            label: "Default",
+                            value: undefined
+                        },
+                        {
+                            label: "Auto",
+                            value: "auto"
+                        },
+                        {
+                            label: "None",
+                            value: "none"
+                        },
+                        {
+                            label: "Mica",
+                            value: "mica"
+                        },
+                        {
+                            label: "Tabbed",
+                            value: "tabbed"
+                        },
+                        {
+                            label: "Acrylic",
+                            value: "acrylic"
+                        },
+                    ]}
+                    select={v => settings.winBackgroundMaterial = v}
+                    isSelected={v => settings.winBackgroundMaterial === v}
                     serialize={identity} />
             </>}
 

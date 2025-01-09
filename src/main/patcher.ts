@@ -16,6 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+// need this for win11 detection
+import os from "node:os";
+
 import { onceDefined } from "@shared/onceDefined";
 import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
 import { dirname, join } from "path";
@@ -88,12 +91,19 @@ if (!IS_VANILLA) {
                 }
 
                 const needsVibrancy = process.platform === "darwin" && settings.macosVibrancyStyle;
+                const needsBackgroundMaterial = process.platform === "win32"
+                    && os.version().includes("Windows 11")
+                    && settings.winBackgroundMaterial;
 
                 if (needsVibrancy) {
                     options.backgroundColor = "#00000000";
                     if (settings.macosVibrancyStyle) {
                         options.vibrancy = settings.macosVibrancyStyle;
                     }
+                }
+
+                if(needsBackgroundMaterial) {
+                    options.backgroundMaterial = settings.winBackgroundMaterial;
                 }
 
                 process.env.DISCORD_PRELOAD = original;
