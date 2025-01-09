@@ -11,7 +11,7 @@ import { CodeFilter, stringMatches, wreq } from "@webpack";
 import { Toasts } from "@webpack/common";
 
 import { settings as companionSettings } from ".";
-import { FindNode } from "./types/recieve";
+import { Recieve } from "./types";
 
 /**
  * extracts the patched module, if there is no patched module, throws an error
@@ -37,7 +37,7 @@ export function extractModule(id: number, patched = companionSettings.store.useP
         throw new Error("No module found for module id:" + id);
     return patched ? module.$$vencordPatchedSource ?? module.original.toString() : module.original.toString();
 }
-export function parseNode(node: FindNode): any {
+export function parseNode(node: Recieve.FindNode): any {
     switch (node.type) {
         case "string":
             return node.value;

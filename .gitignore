@@ -26,3 +26,6 @@ ExtensionCache/
 settings/
 
 src/equicordplugins/usrpe
+
+# vencord companion module cache
+.modules

@@ -18,5 +18,6 @@
             "domain": "codeberg.org",
             "type": "Gitea"
         }
-    ]
+    ],
+    "equicord-companion.showSidebar": true,
 }

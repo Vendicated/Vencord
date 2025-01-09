@@ -10,11 +10,11 @@ import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { filters, findAll, search, wreq } from "@webpack";
 import { React, Toasts, useState } from "@webpack/common";
 import { loadLazyChunks } from "debug/loadLazyChunks";
+import { reporterData } from "debug/reporterData";
 import { Settings } from "Vencord";
 
 import { logger, PORT, settings } from ".";
-import { Recieve } from "./types";
-import { FullOutgoingMessage, OutgoingMessage } from "./types/send";
+import { Recieve, Send } from "./types";
 import { extractModule, extractOrThrow, findModuleId, mkRegexFind, parseNode, toggleEnabled, } from "./util";
 
 export function stopWs() {
@@ -29,7 +29,7 @@ export function initWs(isManual = false) {
     let hasErrored = false;
     const ws = socket = new WebSocket(`ws://localhost:${PORT}`);
 
-    function replyData(data: OutgoingMessage) {
+    function replyData(data: Send.OutgoingMessage) {
         ws.send(JSON.stringify(data));
     }
 
@@ -46,6 +46,21 @@ export function initWs(isManual = false) {
             },
             ok: true
         });
+
+        if (IS_COMPANION_TEST) {
+            const toSend = JSON.stringify(reporterData, (_k, v) => {
+                if (v instanceof RegExp)
+                    return String(v);
+                return v;
+            });
+
+            socket?.send(JSON.stringify({
+                type: "report",
+                data: JSON.parse(toSend),
+                ok: true
+            }));
+        }
+
 
         try {
             if (settings.store.notifyOnAutoConnect || isManual) {
@@ -112,8 +127,8 @@ export function initWs(isManual = false) {
 
             ws.send(JSON.stringify(data));
         }
-        function replyData(data: OutgoingMessage) {
-            const toSend: FullOutgoingMessage = {
+        function replyData(data: Send.OutgoingMessage) {
+            const toSend: Send.FullOutgoingMessage = {
                 ...data,
                 nonce: d.nonce
             };
@@ -290,7 +305,6 @@ export function initWs(isManual = false) {
             case "testPatch": {
                 const m = d.data;
                 let candidates;
-                console.log(m.find.toString());
                 if (d.data.findType === "string")
                     candidates = search(m.find.toString());
 
