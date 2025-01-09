@@ -43,8 +43,7 @@ export default definePlugin({
             replacement: {
                 match: /((let )(\i)=\i\.indexOf\(\i,(\i)\)),/,
                 replace: "$1;if ($3 === -1) {return $4;}$2"
-            },
-            all: true
+            }
         }
     ]
 });
