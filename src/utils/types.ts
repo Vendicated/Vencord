@@ -279,6 +279,8 @@ export interface PluginSettingArrayDef {
     popoutText?: string;
     hidePopout?: boolean;
     default?: any[];
+
+    onChange?(newValue: any[]): void;
 }
 
 export interface IPluginOptionComponentProps {

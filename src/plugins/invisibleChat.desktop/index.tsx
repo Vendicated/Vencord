@@ -93,7 +93,7 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
 };
 
 
-migrateSettingsToArrays("InvisibleChat", ["savedPasswords"]);
+migrateSettingsToArrays("InvisibleChat", ["savedPasswords"], s => s.split(",").map(s => s.trim()));
 
 const settings = definePluginSettings({
     savedPasswords: {
@@ -209,7 +209,7 @@ export function isCorrectPassword(result: string): boolean {
 }
 
 export async function iteratePasswords(message: Message): Promise<string | false> {
-    const passwords = settings.store.savedPasswords.map(s => s.trim());
+    const passwords = settings.store.savedPasswords;
 
     if (!message?.content || !passwords?.length) return false;
 

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migrateSettingsToArrays } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 
@@ -24,6 +24,8 @@ const NoopLogger = {
 
 const logAllow = new Set();
 
+migrateSettingsToArrays("consoleJanitor", ["whitelistedLoggers"], s => s.split(";").map(x => x.trim()));
+
 const settings = definePluginSettings({
     disableLoggers: {
         type: OptionType.BOOLEAN,
@@ -38,12 +40,12 @@ const settings = definePluginSettings({
         restartNeeded: true
     },
     whitelistedLoggers: {
-        type: OptionType.STRING,
-        description: "Semi colon separated list of loggers to allow even if others are hidden",
-        default: "GatewaySocket; Routing/Utils",
-        onChange(newVal: string) {
+        type: OptionType.ARRAY,
+        description: "List of loggers to allow even if others are hidden",
+        default: ["GatewaySocket", "Routing/Utils"],
+        onChange(newVal: string[]) {
             logAllow.clear();
-            newVal.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
+            newVal.forEach(logAllow.add.bind(logAllow));
         }
     }
 });
@@ -57,7 +59,7 @@ export default definePlugin({
     startAt: StartAt.Init,
     start() {
         logAllow.clear();
-        this.settings.store.whitelistedLoggers?.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
+        this.settings.store.whitelistedLoggers.forEach(logAllow.add.bind(logAllow));
     },
 
     NoopLogger: () => NoopLogger,

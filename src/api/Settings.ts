@@ -224,7 +224,7 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
     }
 }
 
-export function migrateSettingsToArrays(pluginName: string, settings: string[], stringSeparator: string = ",") {
+export function migrateSettingsToArrays(pluginName: string, settings: string[], stringSeparator: string | ((input: string) => string[]) = ",") {
     const { plugins } = SettingsStore.plain;
 
     for (const setting of settings) {
@@ -232,7 +232,8 @@ export function migrateSettingsToArrays(pluginName: string, settings: string[], 
         logger.info(`Migrating setting ${setting} from ${pluginName} to list`);
         // @ts-ignore
         if (plugins[pluginName][setting] === "") plugins[pluginName][setting] = plugins[pluginName][setting].default ?? [];
-        else plugins[pluginName][setting] = plugins[pluginName][setting].split(stringSeparator);
+        else if (typeof stringSeparator === "string") plugins[pluginName][setting] = plugins[pluginName][setting].split(stringSeparator);
+        else plugins[pluginName][setting] = stringSeparator(plugins[pluginName][setting]);
     }
 }
 
