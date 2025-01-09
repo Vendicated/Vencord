@@ -7,7 +7,7 @@
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
 import { patches } from "plugins";
-import { initWs } from "plugins/devCompanion/initWs";
+import { initWs } from "plugins/devCompanion.dev/initWs";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 import { reporterData } from "./reporterData";
