@@ -4,14 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { popNotice, showNotice } from "@api/Notices";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { filters, findAll, search, wreq } from "@webpack";
-import { Toasts } from "@webpack/common";
-import { reporterData } from "debug/reporterData";
+import { React, Toasts, useState } from "@webpack/common";
+import { loadLazyChunks } from "debug/loadLazyChunks";
 import { Settings } from "Vencord";
 
 import { logger, PORT, settings } from ".";
-import { extractModule, extractOrThrow, FindData, findModuleId, FindType, mkRegexFind, parseNode, PatchData, SendData, toggleEnabled, } from "./util";
+import { Recieve } from "./types";
+import { FullOutgoingMessage, OutgoingMessage } from "./types/send";
+import { extractModule, extractOrThrow, findModuleId, mkRegexFind, parseNode, toggleEnabled, } from "./util";
 
 export function stopWs() {
     socket?.close(1000, "Plugin Stopped");
@@ -25,7 +29,7 @@ export function initWs(isManual = false) {
     let hasErrored = false;
     const ws = socket = new WebSocket(`ws://localhost:${PORT}`);
 
-    function replyData<T extends SendData>(data: T) {
+    function replyData(data: OutgoingMessage) {
         ws.send(JSON.stringify(data));
     }
 
@@ -37,33 +41,27 @@ export function initWs(isManual = false) {
         // send module cache to vscode
         replyData({
             type: "moduleList",
-            data: Object.keys(wreq.m),
-            ok: true,
+            data: {
+                modules: Object.keys(wreq.m)
+            },
+            ok: true
         });
 
-        if (IS_COMPANION_TEST) {
-            const toSend = JSON.stringify(reporterData, (_k, v) => {
-                if (v instanceof RegExp)
-                    return String(v);
-                return v;
-            });
-
-            socket?.send(JSON.stringify({
-                type: "report",
-                data: JSON.parse(toSend),
-                ok: true
-            }));
-        }
-
-
-        (settings.store.notifyOnAutoConnect || isManual) && Toasts.show({
-            message: "Connected to WebSocket",
-            id: Toasts.genId(),
-            type: Toasts.Type.SUCCESS,
-            options: {
-                position: Toasts.Position.TOP
+        try {
+            if (settings.store.notifyOnAutoConnect || isManual) {
+                Toasts.show({
+                    message: "Connected to WebSocket",
+                    id: Toasts.genId(),
+                    type: Toasts.Type.SUCCESS,
+                    options: {
+                        position: Toasts.Position.TOP
+                    }
+                });
             }
-        });
+        }
+        catch (e) {
+            console.error(e);
+        }
     });
 
     ws.addEventListener("error", e => {
@@ -100,77 +98,83 @@ export function initWs(isManual = false) {
 
     ws.addEventListener("message", e => {
         try {
-            var { nonce, type, data } = JSON.parse(e.data);
+            var d = JSON.parse(e.data) as Recieve.FullIncomingMessage;
         } catch (err) {
             logger.error("Invalid JSON:", err, "\n" + e.data);
             return;
         }
+        /**
+         * @param error the error to reply with. if there is no error, the reply is a sucess
+         */
         function reply(error?: string) {
-            const data = { nonce, ok: !error } as Record<string, unknown>;
+            const data = { nonce: d.nonce, ok: !error } as Record<string, unknown>;
             if (error) data.error = error;
 
             ws.send(JSON.stringify(data));
         }
-        function replyData<T extends SendData>(data: T) {
-            data.nonce = nonce;
-            ws.send(JSON.stringify(data));
+        function replyData(data: OutgoingMessage) {
+            const toSend: FullOutgoingMessage = {
+                ...data,
+                nonce: d.nonce
+            };
+            // data.nonce = d.nonce;
+            ws.send(JSON.stringify(toSend));
         }
 
-        logger.info("Received Message:", type, "\n", data);
+        logger.info("Received Message:", d.type, "\n", d.data);
 
-        switch (type) {
+        switch (d.type) {
             case "disable": {
-                const { enabled, pluginName } = data;
-                const settings = Settings.plugins[pluginName];
-                if (enabled !== settings.enabled)
-                    toggleEnabled(pluginName, reply);
+                const m = d.data;
+                const settings = Settings.plugins[m.pluginName];
+                if (m.enabled !== settings.enabled)
+                    toggleEnabled(m.pluginName, reply);
                 break;
             }
             case "rawId": {
-                const { id } = data;
+                const m = d.data;
                 replyData({
+                    type: "rawId",
                     ok: true,
-                    data: extractModule(id),
-                    type: "ret"
+                    data: extractModule(m.id),
                 });
                 break;
             }
             case "diff": {
                 try {
-                    const { extractType, idOrSearch } = data;
-                    switch (extractType) {
+                    const m = d.data;
+                    switch (m.extractType) {
                         case "id": {
-                            if (typeof idOrSearch !== "number")
-                                throw new Error("Id is not a number, got :" + typeof idOrSearch);
+                            if (typeof m.idOrSearch !== "number")
+                                throw new Error("Id is not a number, got :" + typeof m.idOrSearch);
                             replyData({
                                 type: "diff",
                                 ok: true,
                                 data: {
-                                    patched: extractOrThrow(idOrSearch),
-                                    source: extractModule(idOrSearch, false)
+                                    patched: extractOrThrow(m.idOrSearch),
+                                    source: extractModule(m.idOrSearch, false),
+                                    moduleNumber: m.idOrSearch
                                 },
-                                moduleNumber: idOrSearch
                             });
                             break;
                         }
                         case "search": {
-                            let moduleId;
-                            if (data.findType === FindType.STRING)
-                                moduleId = +findModuleId([idOrSearch.toString()]);
-
+                            let moduleId: number;
+                            if (m.findType === "string")
+                                moduleId = +findModuleId([m.idOrSearch.toString()]);
                             else
-                                moduleId = +findModuleId(mkRegexFind(idOrSearch));
+                                moduleId = +findModuleId(mkRegexFind(m.idOrSearch));
                             const p = extractOrThrow(moduleId);
                             const p2 = extractModule(moduleId, false);
-                            console.log(p, p2, "done");
+
                             replyData({
                                 type: "diff",
                                 ok: true,
                                 data: {
                                     patched: p,
-                                    source: p2
+                                    source: p2,
+                                    moduleNumber: moduleId
                                 },
-                                moduleNumber: moduleId
                             });
                             break;
                         }
@@ -187,48 +191,51 @@ export function initWs(isManual = false) {
             }
             case "extract": {
                 try {
-                    const { extractType, idOrSearch } = data;
-                    switch (extractType) {
+                    const m = d.data;
+                    switch (m.extractType) {
                         case "id": {
-                            if (typeof idOrSearch !== "number")
-                                throw new Error("Id is not a number, got :" + typeof idOrSearch);
+                            if (typeof m.idOrSearch !== "number")
+                                throw new Error("Id is not a number, got :" + typeof m.idOrSearch);
 
                             else
                                 replyData({
                                     type: "extract",
                                     ok: true,
-                                    data: extractModule(idOrSearch),
-                                    moduleNumber: idOrSearch
+                                    data: {
+                                        module: extractModule(m.idOrSearch),
+                                        moduleNumber: m.idOrSearch,
+                                    },
                                 });
 
                             break;
                         }
                         case "search": {
                             let moduleId;
-                            if (data.findType === FindType.STRING)
-                                moduleId = +findModuleId([idOrSearch.toString()]);
+                            if (m.findType === "string")
+                                moduleId = +findModuleId([m.idOrSearch.toString()]);
 
                             else
-                                moduleId = +findModuleId(mkRegexFind(idOrSearch));
+                                moduleId = +findModuleId(mkRegexFind(m.idOrSearch));
                             replyData({
                                 type: "extract",
                                 ok: true,
-                                data: extractModule(moduleId),
-                                moduleNumber: moduleId
+                                data: {
+                                    module: extractModule(moduleId),
+                                    moduleNumber: moduleId
+                                },
                             });
                             break;
                         }
                         case "find": {
-                            const { findType, findArgs } = data;
                             try {
-                                var parsedArgs = findArgs.map(parseNode);
+                                var parsedArgs = m.findArgs.map(parseNode);
                             } catch (err) {
                                 return reply("Failed to parse args: " + err);
                             }
 
                             try {
                                 let results: any[];
-                                switch (findType.replace("find", "").replace("Lazy", "")) {
+                                switch (m.findType.replace("find", "").replace("Lazy", "")) {
                                     case "":
                                     case "Component":
                                         results = findAll(parsedArgs[0]);
@@ -249,7 +256,7 @@ export function initWs(isManual = false) {
                                         results = findAll(filters.componentByCode(...parsedArgs));
                                         break;
                                     default:
-                                        return reply("Unknown Find Type " + findType);
+                                        return reply("Unknown Find Type " + m.findType);
                                 }
 
                                 const uniqueResultsCount = new Set(results).size;
@@ -260,9 +267,11 @@ export function initWs(isManual = false) {
                                 replyData({
                                     type: "extract",
                                     ok: true,
-                                    find: true,
-                                    data: foundFind,
-                                    moduleNumber: +findModuleId([foundFind])
+                                    data: {
+                                        module: foundFind,
+                                        find: true,
+                                        moduleNumber: +findModuleId([foundFind])
+                                    },
                                 });
                             } catch (err) {
                                 return reply("Failed to find: " + err);
@@ -270,7 +279,7 @@ export function initWs(isManual = false) {
                             break;
                         }
                         default:
-                            reply(`Unknown Extract type. Got: ${extractType}`);
+                            reply(`Unknown Extract type. Got: ${d.data.extractType}`);
                             break;
                     }
                 } catch (error) {
@@ -279,14 +288,14 @@ export function initWs(isManual = false) {
                 break;
             }
             case "testPatch": {
-                const { find, replacement } = data as PatchData;
-
+                const m = d.data;
                 let candidates;
-                if (data.findType === FindType.REGEX)
-                    candidates = search(...mkRegexFind(find));
+                console.log(m.find.toString());
+                if (d.data.findType === "string")
+                    candidates = search(m.find.toString());
 
                 else
-                    candidates = search(find.toString());
+                    candidates = search(...mkRegexFind(m.find));
 
                 // const candidates = search(find);
                 const keys = Object.keys(candidates);
@@ -302,7 +311,7 @@ export function initWs(isManual = false) {
 
                 let i = 0;
 
-                for (const { match, replace } of replacement) {
+                for (const { match, replace } of m.replacement) {
                     i++;
 
                     try {
@@ -319,22 +328,20 @@ export function initWs(isManual = false) {
                         return reply(`Replacement ${i} failed: ${err}`);
                     }
                 }
-
                 reply();
                 break;
             }
             case "testFind": {
-                const { type, args } = data as FindData;
-                let parsedArgs;
+                const m = d.data;
                 try {
-                    parsedArgs = args.map(parseNode);
+                    var parsedArgs = m.args.map(parseNode);
                 } catch (err) {
                     return reply("Failed to parse args: " + err);
                 }
 
                 try {
                     let results: any[];
-                    switch (type.replace("find", "").replace("Lazy", "")) {
+                    switch (m.type.replace("find", "").replace("Lazy", "")) {
                         case "":
                         case "Component":
                             results = findAll(parsedArgs[0]);
@@ -355,7 +362,7 @@ export function initWs(isManual = false) {
                             results = findAll(filters.componentByCode(...parsedArgs));
                             break;
                         default:
-                            return reply("Unknown Find Type " + type);
+                            return reply("Unknown Find Type " + m.type);
                     }
 
                     const uniqueResultsCount = new Set(results).size;
@@ -368,9 +375,67 @@ export function initWs(isManual = false) {
                 reply();
                 break;
             }
+            case "allModules": {
+                const { promise, resolve, reject } = Promise.withResolvers<void>();
+                // wrap in try/catch to prevent crashing if notice api is not loaded
+                try {
+                    let closed = false;
+                    const close = () => {
+                        if (closed) return;
+                        closed = true;
+                        popNotice();
+                    };
+                    // @ts-expect-error it accepts react components
+                    showNotice(<AllModulesNoti done={promise} close={close} />, "OK", () => {
+                        closed = true;
+                        popNotice();
+                    });
+                } catch (e) {
+                    console.error(e);
+                }
+                loadLazyChunks()
+                    .then(() => {
+                        resolve();
+                        replyData({
+                            type: "moduleList",
+                            data: {
+                                modules: Object.keys(wreq.m)
+                            },
+                            ok: true
+                        });
+                    })
+                    .catch(e => {
+                        console.error(e);
+                        replyData({
+                            type: "moduleList",
+                            ok: false,
+                            error: String(e),
+                            data: null
+                        });
+                        reject(e);
+                    });
+                break;
+            }
             default:
-                reply("Unknown Type " + type);
+                reply("Unknown Type " + (d as any).type);
                 break;
         }
     });
 }
+
+interface AllModulesNotiProps {
+    done: Promise<unknown>;
+    close: () => void;
+}
+
+const AllModulesNoti = ErrorBoundary.wrap(function ({ done, close }: AllModulesNotiProps) {
+    const [state, setState] = useState<0 | 1 | -1>(0);
+    done.then(setState.bind(null, 1)).catch(setState.bind(null, -1));
+    console.log("test");
+    if (state === 1) setTimeout(close, 5000);
+    return (<>
+        {state === 0 && "Loading lazy modules, restarting could lead to errors"}
+        {state === 1 && "Loaded all lazy modules"}
+        {state === -1 && "Failed to load lazy modules, check console for errors"}
+    </>);
+}, { noop: true });

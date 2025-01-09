@@ -47,7 +47,7 @@ export const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "DevCompanion",
+    name: "UserDevCompanion",
     description: "Dev Companion Plugin",
     authors: [Devs.Ven, Devs.sadan, Devs.Samwich],
     reporterTestable: ReporterTestable.None,
@@ -62,8 +62,9 @@ export default definePlugin({
 
     start() {
         // if we're running the reporter, we need to initws in the reporter file to avoid a race condition
-        if (!IS_COMPANION_TEST)
-            initWs();
+        if (!IS_DEV) throw new Error("This plugin requires dev mode to run, please build with pnpm build --dev");
+        if (Vencord.Settings.plugins.DevCompanion?.enabled) throw new Error("Disable DevCompanion");
+        initWs();
     },
 
     stop: stopWs,

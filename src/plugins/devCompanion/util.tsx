@@ -11,50 +11,13 @@ import { CodeFilter, stringMatches, wreq } from "@webpack";
 import { Toasts } from "@webpack/common";
 
 import { settings as companionSettings } from ".";
+import { FindNode } from "./types/recieve";
 
-type Node = StringNode | RegexNode | FunctionNode;
-
-
-export interface StringNode {
-    type: "string";
-    value: string;
-}
-export interface RegexNode {
-    type: "regex";
-    value: {
-        pattern: string;
-        flags: string;
-    };
-}
-export enum FindType {
-    STRING,
-    REGEX
-}
-export interface FunctionNode {
-    type: "function";
-    value: string;
-}
-export interface PatchData {
-    find: string;
-    replacement: {
-        match: StringNode | RegexNode;
-        replace: StringNode | FunctionNode;
-    }[];
-}
-export interface FindData {
-    type: string;
-    args: Array<StringNode | FunctionNode>;
-}export interface SendData {
-    type: string;
-    data: any;
-    ok: boolean;
-    nonce?: number;
-}
 /**
  * extracts the patched module, if there is no patched module, throws an error
  * @param id module id
  */
-export function extractOrThrow(id) {
+export function extractOrThrow(id: number): string {
     const module = wreq.m[id];
     if (!module?.$$vencordPatchedSource)
         throw new Error("No patched module found for module id " + id);
@@ -74,7 +37,7 @@ export function extractModule(id: number, patched = companionSettings.store.useP
         throw new Error("No module found for module id:" + id);
     return patched ? module.$$vencordPatchedSource ?? module.original.toString() : module.original.toString();
 }
-export function parseNode(node: Node) {
+export function parseNode(node: FindNode): any {
     switch (node.type) {
         case "string":
             return node.value;
@@ -120,7 +83,7 @@ function showErrorToast(message: string) {
     });
 }
 
-export function toggleEnabled(name: string, beforeReload: () => void) {
+export function toggleEnabled(name: string, beforeReload: (error?: string) => void) {
     let restartNeeded = false;
     function onRestartNeeded() {
         restartNeeded = true;
