@@ -49,7 +49,7 @@ const settings = definePluginSettings({
         description: "User Blacklist (Comma Separated User-IDs)",
         placeholder: "261607958822125568,865521228859706162",
         isValid: (ids: string) => {
-            if (!!!ids || !ids.trim().length) return true;
+            if (!ids.trim().length) return true;
 
             if (/^(?:\d{18})(?:,\s?\d{18})*$/.test(ids)) return true;
             else return "Please ensure the User IDs are valid and separated correctly!";
