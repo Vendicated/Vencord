@@ -324,7 +324,7 @@ export default definePlugin({
             );
 
         e.toolbar = [
-            <ErrorBoundary noop={true}>
+            <ErrorBoundary noop={true} key={"MessageLoggerEnhanced"} >
                 <OpenLogsButton />
             </ErrorBoundary>,
             e.toolbar,
@@ -400,4 +400,3 @@ export default definePlugin({
         MessageStore.getMessage = this.oldGetMessage;
     }
 });
-

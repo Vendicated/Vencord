@@ -149,7 +149,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - VencordRPC by AutumnVN
 - VideoSpeed by Samwich
 - ViewRawVariant (ViewRaw2) by Kyuuhachi
-- VoiceChannelLog by Sqaaakoi & maintained by thororen
 - VoiceChatUtilities by D3SOX
 - WebpackTarball by Kyuuhachi
 - WhitelistedEmojis by Creations
@@ -172,6 +171,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Equicord Devbuilds Only
 - FurudoSpeak by example-git
 - Shakespearean by vmohammad
+- VoiceChannelLog by Sqaaakoi & maintained by thororen
 - VoiceJoinMessages by Sqaaakoi & maintained by thororen
 
 </details>

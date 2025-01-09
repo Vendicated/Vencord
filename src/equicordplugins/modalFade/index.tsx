@@ -93,9 +93,11 @@ export default definePlugin({
 });
 
 function usePrevious<T>(value: T | undefined): T | undefined {
-    const ref = useRef<T>();
+    const ref = useRef<T>(undefined);
     useEffect(() => {
-        ref.current = value;
+        if (ref !== undefined) {
+            ref.current = value;
+        }
     }, [value]);
     return ref.current;
 }

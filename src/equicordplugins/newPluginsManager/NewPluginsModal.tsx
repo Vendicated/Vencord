@@ -10,6 +10,7 @@ import { PluginCard } from "@components/PluginSettings";
 import { ChangeList } from "@utils/ChangeList";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Alerts, Button, Flex, Forms, Parser, React, Text, Tooltip, useMemo } from "@webpack/common";
+import { JSX } from "react";
 
 import Plugins from "~plugins";
 
@@ -133,7 +134,7 @@ function makeDependencyList(deps: string[]) {
     return (
         <React.Fragment>
             <Forms.FormText>This plugin is required by:</Forms.FormText>
-            {deps.map((dep: string) => <Forms.FormText className={cl("dep-text")}>{dep}</Forms.FormText>)}
+            {deps.map((dep: string) => <Forms.FormText key={cl("dep-text")} className={cl("dep-text")}>{dep}</Forms.FormText>)}
         </React.Fragment>
     );
 }

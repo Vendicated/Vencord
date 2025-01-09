@@ -124,6 +124,7 @@ export default function SoundBoardLog({ data, closeModal }) {
 
                     return (
                         <div
+                            key={cl("sound")}
                             className={cl("sound")}
                         >
                             <Flex flexDirection="row" className={cl("sound-info")}>

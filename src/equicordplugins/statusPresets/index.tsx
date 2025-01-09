@@ -133,6 +133,7 @@ const StatusSubMenuComponent = () => {
     const update = useForceUpdater();
     return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
         {Object.entries((settings.store.StatusPresets as { [k: string]: DiscordStatus | undefined; })).map(([index, status]) => status != null ? <Menu.MenuItem
+            key={"status-presets-" + index}
             id={"status-presets-" + index}
             label={status.status}
             action={() => (status.emojiInfo?.id != null && premiumType > 0 || status.emojiInfo?.id == null) && setStatus(status)}

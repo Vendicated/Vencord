@@ -268,7 +268,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                     <div className="shc-lock-screen-tags-container">
                         <Text variant="text-lg/bold">Available tags:</Text>
                         <div className="shc-lock-screen-tags">
-                            {availableTags.map(tag => <TagComponent tag={tag} />)}
+                            {availableTags.map(tag => <TagComponent tag={tag} key={tag.id} />)}
                         </div>
                     </div>
                 }

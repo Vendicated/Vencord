@@ -34,18 +34,17 @@ export default definePlugin({
     settings,
     async HandleGuildDeleteModal(server) {
         if (settings.store.confirmModal) {
-            Alerts.show({ title: "Delete server?", body: <p>It's permanent, if that wasn't obvious.</p>, confirmColor: Button.Colors.RED, confirmText: "Delete", onConfirm: () => GetPropsAndDeleteGuild(server.id), cancelText: "Cancel" });
-        }
-        else {
-            GetPropsAndDeleteGuild(server.id);
+            return Alerts.show({ title: "Delete server?", body: <p>It's permanent, if that wasn't obvious.</p>, confirmColor: Button.Colors.RED, confirmText: "Delete", onConfirm: () => GetPropsAndDeleteGuild(server.id), cancelText: "Cancel" });
+        } else {
+            return GetPropsAndDeleteGuild(server.id);
         }
     },
     patches: [
         {
             find: ".DELETE,onClick(){let",
             replacement: {
-                match: /let \i=(\i).toString\(\)/,
-                replace: "$self.HandleGuildDeleteModal($1);return;$&"
+                match: /let \i=(\i).guild.toString\(\)/,
+                replace: "$self.HandleGuildDeleteModal($1);$&"
             }
         }
     ]

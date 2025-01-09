@@ -29,7 +29,7 @@ export default class TarFile {
             [100, ""], // name of linked file (??)
             [255, ""], // padding
         ]));
-        this.buffers.push(data);
+        this.buffers.push(data.buffer as ArrayBuffer);
         this.buffers.push(new ArrayBuffer(-data.length & 0x1FF));
     }
 

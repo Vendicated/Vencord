@@ -275,6 +275,7 @@ function UserList(type: "friends" | "blocked", guild: Guild, ids: string[], setC
         <ScrollerThin fade className={cl("scroller")}>
             {sortedMembers.map(user => (
                 <FriendRow
+                    key={user.id}
                     user={user}
                     status={PresenceStore.getStatus(user.id) || "offline"}
                     onSelect={() => openUserProfile(user.id)}

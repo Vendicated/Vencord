@@ -145,10 +145,11 @@ function withTooltip(Component, props, messageId, channelId) {
                     messageId={messageId}
                 />
             </ErrorBoundary>
-        }
-        children={({ onMouseEnter, onMouseLeave }) =>
-            <Component {...props} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} />}
-    />;
+        }>
+        {({ onMouseEnter, onMouseLeave }) => (
+            <Component {...props} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} />
+        )}
+    </Tooltip>;
 }
 
 function MessagePreview({ channelId, messageId }) {

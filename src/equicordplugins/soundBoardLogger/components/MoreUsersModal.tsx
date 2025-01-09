@@ -39,7 +39,7 @@ export default function MoreUsersModal({ item, users, onClickUser, closeModal }:
                         <Clickable onClick={() => {
                             closeModal();
                             onClickUser(item, user);
-                        }}>
+                        }} key={user.id}>
                             <div className={cl("more-user")} style={{ cursor: "pointer" }}>
                                 <Flex flexDirection="row" className={cl("more-user-profile")}>
                                     <img

@@ -165,6 +165,7 @@ const NoteContextMenu = (
                         if (key !== notebook) {
                             return (
                                 <Menu.MenuItem
+                                    key={key}
                                     label={`Move to ${key}`}
                                     id={key}
                                     action={() => {

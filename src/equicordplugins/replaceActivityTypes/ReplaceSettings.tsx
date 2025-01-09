@@ -78,7 +78,7 @@ export function ReplaceSettings({ appIds, update, save }: SettingsProps) {
         <>
             {
                 appIds.map((setting, i) =>
-                    <Card style={{ padding: "1em 1em 0" }}>
+                    <Card style={{ padding: "1em 1em 0" }} key={i}>
                         <Switch
                             value={setting.enabled}
                             onChange={value => {

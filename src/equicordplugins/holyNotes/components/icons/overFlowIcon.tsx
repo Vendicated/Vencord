@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { JSX } from "react";
+
 const OverFlowIcon = ({ width = 24, height = 24, color = "var(--interactive-normal)", className, ...rest }) => (
     <svg
         {...rest}

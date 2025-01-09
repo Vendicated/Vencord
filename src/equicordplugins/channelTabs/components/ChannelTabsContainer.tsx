@@ -68,7 +68,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
         >
             <div className={cl("tab-container")}>
                 {openedTabs.map((tab, i) =>
-                    <ChannelTab {...tab} index={i} />
+                    <ChannelTab {...tab} index={i} key={i} />
                 )}
 
                 <button

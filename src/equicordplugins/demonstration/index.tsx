@@ -138,7 +138,7 @@ export default definePlugin({
     settingsAboutComponent: () => {
         return (
             <>
-                <Text>To change your keycode, check out <a href="https://www.toptal.com/developers/keycode" target="_blank">this tool</a>!</Text>
+                <Text>To change your keycode, check out <a href="https://www.toptal.com/developers/keycode" target="_blank" rel="noreferrer">this tool</a>!</Text>
             </>
         );
     },

@@ -17,14 +17,14 @@ import { openSoundBoardLog } from "./SoundBoardLog";
 // https://www.svgrepo.com/svg/438144/multimedia-play-icon-circle-button
 export function PlayIcon() {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20"><g fill="none" fill-rule="evenodd" transform="translate(-2 -2)"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" /><path fill="currentColor" d="m9.998 8.428 5.492 3.138a.5.5 0 0 1 0 .868l-5.492 3.139a.5.5 0 0 1-.748-.435V8.862a.5.5 0 0 1 .748-.435z" /></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20"><g fill="none" fillRule="evenodd" transform="translate(-2 -2)"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /><path fill="currentColor" d="m9.998 8.428 5.492 3.138a.5.5 0 0 1 0 .868l-5.492 3.139a.5.5 0 0 1-.748-.435V8.862a.5.5 0 0 1 .748-.435z" /></g></svg>
     );
 }
 
 // https://www.svgrepo.com/svg/528952/download
 export function DownloadIcon() {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M8 22h8c2.828 0 4.243 0 5.121-.879C22 20.243 22 18.828 22 16v-1c0-2.828 0-4.243-.879-5.121-.768-.769-1.946-.865-4.121-.877m-10 0c-2.175.012-3.353.108-4.121.877C2 10.757 2 12.172 2 15v1c0 2.828 0 4.243.879 5.121.3.3.662.498 1.121.628" /><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 2v13m0 0-3-3.5m3 3.5 3-3.5" /></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"><path stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" d="M8 22h8c2.828 0 4.243 0 5.121-.879C22 20.243 22 18.828 22 16v-1c0-2.828 0-4.243-.879-5.121-.768-.769-1.946-.865-4.121-.877m-10 0c-2.175.012-3.353.108-4.121.877C2 10.757 2 12.172 2 15v1c0 2.828 0 4.243.879 5.121.3.3.662.498 1.121.628" /><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 2v13m0 0-3-3.5m3 3.5 3-3.5" /></svg>
     );
 }
 
