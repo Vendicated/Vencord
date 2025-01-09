@@ -75,19 +75,6 @@ export default definePlugin({
                 match: /(?<=function\((\i),\i\)\{)(?=let \i=Object.values\(\i.\i\).*?(\i\.\i)\.open\()/,
                 replace: "$2.open($1);return;"
             }
-        },
-        {
-            find: "Unknown resolution:",
-            replacement: [
-                {
-                    match: /throw Error\("Unknown resolution: ".concat\((\i)\)\)/,
-                    replace: "return $1;"
-                },
-                {
-                    match: /throw Error\("Unknown frame rate: ".concat\((\i)\)\)/,
-                    replace: "return $1;"
-                }
-            ]
         }
     ],
 

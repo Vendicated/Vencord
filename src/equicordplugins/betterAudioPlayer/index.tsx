@@ -66,8 +66,7 @@ async function addListeners(audioElement: HTMLAudioElement, url: string, parentB
     const madeURL = new URL(url);
     madeURL.searchParams.set("t", Date.now().toString());
 
-    // thanks thororen :p
-    const corsProxyUrl = "https://cors.thororen.com/?url=" + encodeURIComponent(madeURL.href);
+    const corsProxyUrl = "https://corsproxy.io?" + encodeURIComponent(madeURL.href);
     const response = await fetch(corsProxyUrl);
     const blob = await response.blob();
     const blobUrl = URL.createObjectURL(blob);
