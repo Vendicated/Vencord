@@ -38,14 +38,6 @@ const cl = classNameFactory("vc-search-modal-");
 // TODO make guilds work
 // FIXME fix the no results display
 
-// TODO add all channel types
-
-// TODO filter for input type
-// TODO setting for max amount of selected items
-
-// FIXME remove scrolling up onclick
-// FIXME move selected items to the top of the list.
-
 const SearchBarModule = findByPropsLazy("SearchBar", "Checkbox", "AvatarSizes");
 const SearchBarWrapper = findByPropsLazy("SearchBar", "Item");
 const TextTypes = findByPropsLazy("APPLICATION", "GROUP_DM", "GUILD");
@@ -79,6 +71,7 @@ interface UnspecificRowProps {
     "aria-posinset": number,
     "aria-setsize": number
 }
+
 interface SpecificRowProps extends UnspecificRowProps {
     icon: React.JSX.Element,
     label: string,
@@ -90,7 +83,7 @@ interface UserIconProps {
     size?: number;
     animate?: boolean;
     "aria-hidden"?: boolean;
-    [key: string]: any; // To allow any additional props
+    [key: string]: any;
 }
 
 const searchTypesToResultTypes = (type: string | string[]) => {
@@ -203,7 +196,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         return (
             <SearchBarModule.Clickable
                 className={cl("destination-row")}
-                onClick={handlePress}
+                onClick={e => { handlePress(); e.preventDefault(); e.stopPropagation(); }}
                 aria-selected={isSelected}
                 {...interactionProps}
                 {...rest}
@@ -329,9 +322,10 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
         return (
             <Row {...otherProps}
-               icon={<GroupDMAvatars aria-hidden={true} size={SearchBarModule.AvatarSizes.SIZE_32} channel={channel}/>}
-               label={label}
-               subLabel={subLabelValue ?? ""}
+                 icon={<GroupDMAvatars aria-hidden={true} size={SearchBarModule.AvatarSizes.SIZE_32}
+                                       channel={channel}/>}
+                 label={label}
+                 subLabel={subLabelValue ?? ""}
             />
         );
     }
@@ -536,10 +530,10 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
             const destinations = removeDuplicates(
                 [...(pinnedDestinations.length > 0 ? pinnedDestinations.map(e => getItem(e)) : []),
-                ...recentDestinations
+                    ...recentDestinations
                 ]);
 
-            return processItems(destinations).slice(0, 15);
+            return processItems(destinations);
         }
 
         return {
@@ -639,11 +633,6 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             });
 
             if (index === -1) {
-                /* if (currentSelected.length >= 5) {  TODO add this later
-                    $(""); // Handle the case when max selection is reached
-                    return currentSelected;
-                } */
-
                 refCounter.current += 1;
                 return [e, ...currentSelected];
             }
@@ -682,7 +671,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                     size={SearchBarModule.SearchBar.Sizes.MEDIUM}
                     placeholder="Search"
                     query={searchText}
-                    onChange={v => {
+                    onChange={(v: string) => {
                         setSearchText(v);
                         updateSearchText(v);
                     }}
@@ -690,7 +679,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                         setSearchText("");
                         updateSearchText("");
                     }}
-                    setFocus={true}
+                    autoFocus={true}
                 />
             </ModalHeader>
             {
@@ -715,7 +704,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                         modalProps.onClose();
                     }}
                 >
-                    Confirm
+                    {"Add" + (selected.length > 1 ? " (" + selected.length + ")" : "")}
                 </Button>
                 <Button
                     color={Button.Colors.TRANSPARENT}
