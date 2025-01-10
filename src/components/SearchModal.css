@@ -1,0 +1,52 @@
+.vc-search-modal-destination-row {
+    display: flex;
+    min-height: 48px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    margin-left: 16px;
+    margin-right: 8px;
+    border-radius: 4px;
+    cursor: pointer
+}
+
+.vc-search-modal-identity {
+    display: flex;
+    flex-shrink: 1;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    overflow: hidden
+}
+
+.vc-search-modal-labels {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: 4px 0
+}
+
+.vc-search-modal-checkbox {
+    flex: 0;
+    margin-left: 16px
+}
+
+.vc-search-modal-label {
+    color: var(--header-primary)
+}
+
+.vc-search-modal-sub-label {
+    color: var(--header-muted)
+}
+
+.vc-search-modal-sub-label-icon {
+    width: 12px;
+    height: 12px;
+    margin-right: 2px
+}
+
+.vc-search-modal-thread-sub-label {
+    display: flex;
+    align-items: center
+}
