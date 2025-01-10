@@ -8,7 +8,7 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import SearchModal from "@components/SearchModal";
 import { Margins } from "@utils/margins";
-import { closeModal, openModal } from "@utils/modal";
+import { openModal } from "@utils/modal";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { OptionType, PluginOptionArray } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
@@ -104,14 +104,13 @@ export function SettingArrayComponent({
     }
 
     function openSearchModal(val?: string) {
-        const key = openModal(modalProps => (
+        return openModal(modalProps => (
             <SearchModal
                 modalProps={modalProps}
-                close={() => closeModal(key)}
                 input={val}
                 subText={"All selected items will be added to " + wordsToTitle(wordsFromCamel(id))}
                 searchType={option.type === OptionType.USERS ? "USERS" : option.type === OptionType.CHANNELS ? "CHANNELS" : "GUILDS"}
-                onSubmit={v => console.log(v)}
+                onSubmit={values => setItems([...items, ...values.map(v => v.id)])}
             />
         ));
     }

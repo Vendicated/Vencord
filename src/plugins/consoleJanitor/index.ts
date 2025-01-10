@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, migrateSettingsToArrays } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings, migrateSettingsToArrays } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 
@@ -24,7 +24,7 @@ const NoopLogger = {
 
 const logAllow = new Set();
 
-migrateSettingsToArrays("consoleJanitor", ["whitelistedLoggers"], s => s.split(";").map(x => x.trim()));
+migrateSettingsToArrays("ConsoleJanitor", ["whitelistedLoggers"], s => s.split(";").map(x => x.trim()));
 
 const settings = definePluginSettings({
     disableLoggers: {
@@ -59,7 +59,7 @@ export default definePlugin({
     startAt: StartAt.Init,
     start() {
         logAllow.clear();
-        this.settings.store.whitelistedLoggers.forEach(logAllow.add.bind(logAllow));
+        settings.store.whitelistedLoggers.forEach(logAllow.add.bind(logAllow));
     },
 
     NoopLogger: () => NoopLogger,
