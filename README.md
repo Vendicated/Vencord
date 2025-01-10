@@ -1,5 +1,5 @@
 > [!WARNING]
-> Nexulien is still pretty young in terms of differences from Vencord. We'll be adding more stuff and features over time, please be patient with us. Thinking is hard!
+> Nexulien is still pretty young in terms of differences from Vencord. We'll be adding more stuff and features over time, please be patient with us.
 
 <p>
 <img alt="Nexulien" src="./images/logo.svg" height="192px" align="left">
@@ -19,8 +19,8 @@
 - Everything from Vencord ([read more](https://github.com/Vendicated/Vencord/?tab=readme-ov-file#features))
 - More Plugins
     - Utility (ex.: ToneIndicators)
-    - Fun (ex.: DecTalk)
-    - In-built core functions [ex.: Server Themes (wip)]
+    - Fun (ex.: DecTalk, MoreMarkdown)
+    - In-built core functions [ex.: Server Themes]
 - Alien Cats
 
 ## Disclaimer
