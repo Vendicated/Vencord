@@ -72,6 +72,8 @@ function renderRegisteredPlugins(name: string, value: any) {
 
 function MakeContextCallback(name: "Guild" | "User" | "Channel"): NavContextMenuPatchCallback {
     return (children, props) => {
+        if (!registeredPlugins[OptionType.CHANNELS] && !registeredPlugins[OptionType.USERS] && !registeredPlugins[OptionType.GUILDS])
+            return;
         const value = props[name.toLowerCase()];
         if (!value) return;
         if (props.label === getIntlMessage("CHANNEL_ACTIONS_MENU_LABEL")) return; // random shit like notification settings
