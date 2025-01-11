@@ -18,8 +18,10 @@ import {
 } from "@utils/modal";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
-    Button, ChannelStore,
-    Flex, GuildStore,
+    Button,
+    ChannelStore,
+    Flex,
+    GuildStore,
     Heading,
     PresenceStore,
     React,
@@ -28,21 +30,21 @@ import {
     useCallback,
     useMemo,
     useRef,
-    UsernameUtils, UserStore,
+    UsernameUtils,
+    UserStore,
     useState
 } from "@webpack/common";
-import { Channel, User } from "discord-types/general";
+import { Channel, Guild, User } from "discord-types/general";
 
 const cl = classNameFactory("vc-search-modal-");
 
 // TODO make guilds work
-// FIXME fix the no results display
+// FIXME fix the no Result display
 
 const SearchBarModule = findByPropsLazy("SearchBar", "Checkbox", "AvatarSizes");
 const SearchBarWrapper = findByPropsLazy("SearchBar", "Item");
 const TextTypes = findByPropsLazy("APPLICATION", "GROUP_DM", "GUILD");
 const FrequencyModule = findByPropsLazy("getFrequentlyWithoutFetchingLatest");
-const ConnectionModule = findByPropsLazy("isConnected", "getSocket");
 const FrequentsModule = findByPropsLazy("getChannelHistory", "getFrequentGuilds");
 
 const wrapperFn = findByCodeLazy("prevDeps:void 0,");
@@ -56,18 +58,18 @@ const ChannelIcon = findByCodeLazy("channelGuildIcon,");
 
 const GroupDMAvatars = findComponentByCodeLazy("facepileSizeOverride", "recipients.length");
 
-interface DestinationItemProps {
-    type: string;
+interface DestinationItem {
+    type: "channel" | "user" | "guild";
     id: string;
 }
 
 interface UnspecificRowProps {
     key: string
-    destination: DestinationItemProps,
+    destination: DestinationItem,
     rowMode: string
     disabled: boolean,
     isSelected: boolean,
-    onPressDestination: (destination: DestinationItemProps) => void,
+    onPressDestination: (destination: DestinationItem) => void,
     "aria-posinset": number,
     "aria-setsize": number
 }
@@ -85,6 +87,32 @@ interface UserIconProps {
     "aria-hidden"?: boolean;
     [key: string]: any;
 }
+
+interface UserResult {
+    type: "USER";
+    record: User;
+    score: number;
+    comparator: string;
+    sortable?: string;
+}
+
+interface ChannelResult {
+    type: "TEXT_CHANNEL" | "VOICE_CHANNEL" | "GROUP_DM";
+    record: Channel;
+    score: number;
+    comparator: string;
+    sortable?: string;
+}
+
+interface GuildResult {
+    type: "GUILD";
+    record: Guild;
+    score: number;
+    comparator: string;
+    sortable?: string;
+}
+
+type Result = UserResult | ChannelResult | GuildResult;
 
 const searchTypesToResultTypes = (type: string | string[]) => {
     if (type === "ALL") return ["USER", "TEXT_CHANNEL", "VOICE_CHANNEL", "GROUP_DM", "GUILD"];
@@ -113,9 +141,20 @@ function searchTypeToText(type: string | string[]) {
     }
 }
 
+/**
+ * SearchModal component for displaying a modal with search functionality, built after Discord's forwarding Modal.
+ *
+ * @param {Object} props - The props for the SearchModal component.
+ * @param {ModalProps} props.modalProps - The modal props.
+ * @param {function} props.onSubmit - The function to call when the user submits their selection.
+ * @param {string} [props.input] - The initial input value for the search bar.
+ * @param {("USERS" | "CHANNELS" | "GUILDS")[] | "USERS" | "CHANNELS" | "GUILDS" | "ALL"} [props.searchType="ALL"] - The type of items to search for.
+ * @param {string} [props.subText] - Additional text to display below the heading.
+ * @returns The rendered SearchModal component.
+ */
 export default function SearchModal({ modalProps, onSubmit, input, searchType = "ALL", subText }: {
     modalProps: ModalProps;
-    onSubmit(selected: DestinationItemProps[]): void;
+    onSubmit(selected: DestinationItem[]): void;
     input?: string;
     searchType?: ("USERS" | "CHANNELS" | "GUILDS")[] | "USERS" | "CHANNELS" | "GUILDS" | "ALL";
     subText?: string
@@ -123,7 +162,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
     const callbacks = new Map();
 
-    function registerCallback(key, callback) {
+    function registerCallback(key: string, callback: (...args: any[]) => void): () => void {
         let currentCallbacks = callbacks.get(key);
         if (!currentCallbacks) {
             currentCallbacks = new Set();
@@ -164,14 +203,13 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
     const resultTypes = searchTypesToResultTypes(searchType);
 
-    const [selected, setSelected] = useState<DestinationItemProps[]>([]);
+    const [selected, setSelected] = useState<DestinationItem[]>([]);
 
     const refCounter = useRef(0);
 
     const rowContext = React.createContext({
         id: "NO_LIST",
-        setFocus(id: string) {
-        }
+        setFocus(id: string) {}
     });
 
     const Row = (props: SpecificRowProps) => {
@@ -196,7 +234,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         return (
             <SearchBarModule.Clickable
                 className={cl("destination-row")}
-                onClick={e => { handlePress(); e.preventDefault(); e.stopPropagation(); }}
+                onClick={e => { e.stopPropagation(); e.preventDefault(); handlePress(); }}
                 aria-selected={isSelected}
                 {...interactionProps}
                 {...rest}
@@ -248,7 +286,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         );
     }
 
-    function generateChannelLabel(channel: Channel) {
+    function generateChannelLabel(channel: Channel): string {
         return getChannelLabel(channel, UserStore, RelationshipStore, false);
     }
 
@@ -257,7 +295,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
         const channelLabel = generateChannelLabel(channel);
 
-        const parentChannelLabel = () => {
+        const parentChannelLabel = (): string => {
             const parentChannel = ChannelStore.getChannel(channel.parent_id);
             return parentChannel ? getChannelLabel(parentChannel, UserStore, RelationshipStore, false) : null;
         };
@@ -310,7 +348,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                 .map(user => UsernameUtils.getName(user));
 
             if (!userNames || userNames.length === 0 || channel.name === "")
-                return null;
+                return "";
             if (userNames.length <= 3)
                 return userNames.join(", ");
             const amount = userNames.length - 3;
@@ -325,7 +363,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                  icon={<GroupDMAvatars aria-hidden={true} size={SearchBarModule.AvatarSizes.SIZE_32}
                                        channel={channel}/>}
                  label={label}
-                 subLabel={subLabelValue ?? ""}
+                 subLabel={subLabelValue}
             />
         );
     }
@@ -350,7 +388,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         };
     }
 
-    function navigatorData(e) {
+    function navigatorData(e: { children: (data: ReturnType<typeof generateNavigatorData>) => React.ReactNode }): React.ReactNode {
         const { children } = e;
         return children(generateNavigatorData());
     }
@@ -364,7 +402,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         const handleFocus = useCallback(() => setFocus(rowId), [rowId, setFocus]);
 
         React.useLayoutEffect(() => {
-            return registerCallback(id, (tabIndex, id) => {
+            return registerCallback(id, (tabIndex: string, id: string) => {
                 setTabIndex(id && tabIndex === rowId ? 0 : -1);
             });
         }, [rowId, id]);
@@ -380,22 +418,21 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
     const [searchText, setSearchText] = useState<string>(input || "");
     const ref = {};
 
-    function getSearchHandler(e) {
-        const { searchOptions } = e;
-        const [results, setResults] = useState({
+    function getSearchHandler(searchOptions: Record<string, any>): { search: (e: { query: string, resultTypes: string[] }) => void, results: Result[], query: string } {
+        const [results, setResults] = useState<{ results: Result[], query: string }>({
             results: [],
             query: ""
         });
 
-        function getRef(e) { // FIXME probably should use a proper type for this
-            const ref_ = useRef(ref);
+        function getRef<T>(e: () => T): T {
+            const ref_ = useRef<T>(ref as T);
             if (ref_.current === ref)
                 ref_.current = e();
             return ref_.current;
         }
 
-        const searchHandler: typeof SearchHandler = getRef(() => {
-                const searchHandler = new SearchHandler((r, q) => {
+        const searchHandler: InstanceType<typeof SearchHandler> = getRef(() => {
+                const searchHandler = new SearchHandler((r: Result[], q: string) => {
                         setResults({
                             results: r,
                             query: q
@@ -426,7 +463,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         };
     }
 
-    function generateResults({ selectedDestinations }) {
+    function generateResults({ selectedDestinations }: { selectedDestinations: DestinationItem[] }) {
         const { search, query, results } = getSearchHandler({
             blacklist: null,
             frecencyBoosters: !0,
@@ -454,10 +491,9 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         loadFunction();
 
         const frequentChannels = wrapperFn([FrequencyModule], () => FrequencyModule.getFrequentlyWithoutFetchingLatest());
-        const isConnected = wrapperFn([ConnectionModule], () => ConnectionModule.isConnected());
         const hasQuery = query !== "";
 
-        function getItem(e) {
+        function getItem(e: DestinationItem): Result {
             if (e.type !== "user")
                 return convertItem(e.id);
             {
@@ -472,68 +508,45 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             }
         }
 
-        function processItems(items, existingItems?) {
-            let temp: null;
-            const set = new Set(existingItems || []);
-
-            const array: any[] = [];
-
-            items.forEach(item => {
-                if (item != null) {
-                    if (item.type === TextTypes.HEADER) temp = item;
-                    else {
-                        const { id } = item.record;
-                        if (!set.has(id)) {
-                            set.add(item);
-                            if (temp != null) {
-                                array.push(temp);
-                                temp = null;
-                            }
-                            array.push(item);
-                        }
-                    }
-                }
-            });
-            return array;
-        }
-
         const filterItems = (items: any[]) => {
             return items.filter(
-                item => item != null && (item.type === TextTypes.HEADER || resultTypes.includes(item.type))
+                item => item != null && resultTypes.includes(item.type)
             );
         };
 
-        function filterResults(e) {
-            const removeDuplicates = (arr: any[]) => {
+        function filterResults(props: {
+            results: Result[];
+            hasQuery: boolean;
+            frequentChannels: Channel[];
+            pinnedDestinations: DestinationItem[];
+        }): Result[] {
+            const removeDuplicates = (arr: Result[]): Result[] => {
                 const clean: any[] = [];
                 const seenIds = new Set();
                 arr.forEach(item => {
                     if (item == null || item.record == null) return;
-                    const id = item.type === "user" ? item.id : item.record.id;
-                    if (!seenIds.has(id)) {
-                        seenIds.add(id);
+                    if (!seenIds.has(item.record.id)) {
+                        seenIds.add(item.record.id);
                         clean.push(item);
                     }
                 });
                 return clean;
             };
 
-            const { results, hasQuery, frequentChannels, pinnedDestinations } = e;
-            if (hasQuery) return processItems(filterItems(results));
+            const { results, hasQuery, frequentChannels, pinnedDestinations } = props;
+            if (hasQuery) return filterItems(results);
 
-            const channelHistory = FrequentsModule.getChannelHistory();
+            const channelHistory: string[] = FrequentsModule.getChannelHistory();
 
             const recentDestinations = filterItems([
                 ...(channelHistory.length > 0 ? channelHistory.map(e => convertItem(e)) : []),
                 ...(frequentChannels.length > 0 ? frequentChannels.map(e => convertItem(e.id)) : [])
             ]);
 
-            const destinations = removeDuplicates(
+            return removeDuplicates(
                 [...(pinnedDestinations.length > 0 ? pinnedDestinations.map(e => getItem(e)) : []),
                     ...recentDestinations
                 ]);
-
-            return processItems(destinations);
         }
 
         return {
@@ -542,8 +555,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                 hasQuery: hasQuery,
                 frequentChannels: frequentChannels,
                 pinnedDestinations: pinned,
-                isConnected: isConnected
-            }), [results, hasQuery, frequentChannels, pinned, isConnected]),
+            }), [results, hasQuery, frequentChannels, pinned]),
             updateSearchText: updateSearch
         };
     }
@@ -558,12 +570,11 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
     const rowHeight = useCallback(() => 48, []);
 
-    function ModalScroller(e) {
+    function ModalScroller({ rowData, handleToggleDestination, paddingBottom, paddingTop }: { rowData: Result[], handleToggleDestination: (destination: DestinationItem) => void, paddingBottom?: number, paddingTop?: number }) {
 
-        const { rowData: t, handleToggleDestination, ...extraProps } = e;
-        const sectionCount = useMemo(() => [t.length], [t.length]);
+        const sectionCount: number[] = useMemo(() => [rowData.length], [rowData.length]);
 
-        const callback = useCallback(e => {
+        const callback = useCallback((e: { section: number, row: number }) => {
             const { section, row } = e;
             if (section > 0)
                 return;
@@ -571,8 +582,8 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             if (type === TextTypes.HEADER)
                 return;
 
-            const destination = {
-                type: type === TextTypes.USER ? "user" : "channel",
+            const destination: DestinationItem = {
+                type: type === TextTypes.USER ? "user" : type === TextTypes.GUILD ? "guild" : "channel",
                 id: record.id
             };
 
@@ -590,11 +601,11 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                 "aria-setsize": results.length
             };
 
-            if (type === TextTypes.USER)
+            if (type === "USER")
                 return generateUserItem(record, rowProps);
-            if (type === TextTypes.GROUP_DM)
+            if (type === "GROUP_DM")
                 return generateGdmItem(record, rowProps);
-            if (type === TextTypes.TEXT_CHANNEL || type === TextTypes.VOICE_CHANNEL) {
+            if (type === "TEXT_CHANNEL" || type === "VOICE_CHANNEL") {
                 return generateChannelItem(record, rowProps);
             } else throw new Error("Unknown type " + type);
         }, [results, selectedDestinationKeys, handleToggleDestination]);
@@ -614,7 +625,8 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                             }
                         }
                         {...data}
-                        {...extraProps}
+                        paddingBottom={paddingBottom}
+                        paddingTop={paddingTop}
                         sections={sectionCount}
                         sectionHeight={0}
                         renderRow={callback}
@@ -625,8 +637,8 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
     }
 
 
-    const setSelectedCallback = useCallback(e => {
-        setSelected(currentSelected => {
+    const setSelectedCallback = useCallback((e: DestinationItem) => {
+        setSelected((currentSelected: DestinationItem[]) => {
             const index = currentSelected.findIndex(item => {
                 const { type, id } = item;
                 return type === e.type && id === e.id;
