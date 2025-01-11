@@ -38,8 +38,6 @@ import { Channel, Guild, User } from "discord-types/general";
 
 const cl = classNameFactory("vc-search-modal-");
 
-// FIXME fix the no Result display
-
 const SearchBarModule = findByPropsLazy("SearchBar", "Checkbox", "AvatarSizes");
 const SearchBarWrapper = findByPropsLazy("SearchBar", "Item");
 const TextTypes = findByPropsLazy("APPLICATION", "GROUP_DM", "GUILD");
@@ -205,11 +203,6 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
     const [selected, setSelected] = useState<DestinationItem[]>([]);
 
     const refCounter = useRef(0);
-
-    const rowContext = React.createContext({
-        id: "NO_LIST",
-        setFocus(id: string) {}
-    });
 
     const Row = (props: SpecificRowProps) => {
         const {
@@ -412,11 +405,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
     function generateRowData(rowId: string) {
         const [tabIndex, setTabIndex] = useState(-1);
-
-        const { id, setFocus } = React.useContext(rowContext);
-
-        const handleFocus = useCallback(() => setFocus(rowId), [rowId, setFocus]);
-
+        const id = "NO_LIST";
         React.useLayoutEffect(() => {
             return registerCallback(id, (tabIndex: string, id: string) => {
                 setTabIndex(id && tabIndex === rowId ? 0 : -1);
@@ -427,7 +416,6 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             role: "listitem",
             "data-list-item-id": `${id}___${rowId}`,
             tabIndex,
-            onFocus: handleFocus,
         };
     }
 
@@ -740,13 +728,28 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                     rowData={results}
                     handleToggleDestination={setSelectedCallback}
                 /> : <ModalContent className={cl("no-results")}>
-                    <Text
-                        variant="text-md/normal"
-                        style={{ color: "var(--text-normal)" }}
-                    >No results found</Text>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
+                            <svg
+                                width="48"
+                                height="48"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                            >
+                                <path
+                                    d="M18 6L6 18M6 6L18 18"
+                                    stroke="var(--text-muted)"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            </svg>
+                            <Text
+                                variant="text-md/normal"
+                                style={{ color: "var(--text-muted)", marginLeft: "8px" }}
+                            >No results found</Text>
+                        </div>
                 </ModalContent>
             }
-
             <ModalFooter>
                 <Button
                     color={Button.Colors.BRAND}
@@ -754,6 +757,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                         onSubmit(selected);
                         modalProps.onClose();
                     }}
+                    disabled={selected.length === 0}
                 >
                     {"Add" + (selected.length > 1 ? " (" + selected.length + ")" : "")}
                 </Button>
@@ -762,7 +766,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                     look={Button.Looks.LINK}
                     onClick={modalProps.onClose}
                 >
-                    Cancel
+                Cancel
                 </Button>
             </ModalFooter>
 
