@@ -20,7 +20,7 @@
 import os from "node:os";
 
 import { onceDefined } from "@shared/onceDefined";
-import electron, { app, BrowserWindowConstructorOptions, Menu } from "electron";
+import electron, { app, BrowserWindowConstructorOptions, Menu, Rectangle, screen } from "electron";
 import { dirname, join } from "path";
 
 import { initIpc } from "./ipcMain";
@@ -71,6 +71,8 @@ if (!IS_VANILLA) {
     }
 
     class BrowserWindow extends electron.BrowserWindow {
+        // needed for initialization, set after fake maximize
+        #previousBounds: Rectangle = { x: 0, y: 0, width: 0, height: 0 };
         constructor(options: BrowserWindowConstructorOptions) {
             if (options?.webPreferences?.preload && options.title) {
                 const original = options.webPreferences.preload;
@@ -102,13 +104,46 @@ if (!IS_VANILLA) {
                     }
                 }
 
-                if(needsBackgroundMaterial) {
+                if (needsBackgroundMaterial) {
+                    // if we don't make it false, window would not be resizable
+                    if (options.transparent) options.transparent = false;
+                    options.backgroundColor = "#00000000";
                     options.backgroundMaterial = settings.winBackgroundMaterial;
                 }
 
                 process.env.DISCORD_PRELOAD = original;
 
                 super(options);
+                // Applying background material stops the window from being maximizable.
+                // On force maximize through the custom title bar, this.maximize() is called.
+                // This however breaks the background material and the background becomes completely black
+                // We therefore patch the maximize function to "fake" maximize the window as a workaround
+                // This however maximizes the window beyond the taskbar
+                // when scalingFactor > 1 (known bug in electron)
+                // https://github.com/electron/electron/issues/41824
+                if (needsBackgroundMaterial) {
+                    this.unmaximize = () => {
+                        this.setBounds({
+                            x: this.#previousBounds.x,
+                            y: this.#previousBounds.y,
+                            width: this.#previousBounds.width,
+                            height: this.#previousBounds.height
+                        });
+                        this.isMaximized = () => false;
+                    };
+                    this.maximize = () => {
+                        const primaryDisplay = screen.getPrimaryDisplay();
+                        const { workAreaSize } = primaryDisplay;
+                        if (
+                            this.getBounds().width < workAreaSize.width &&
+                            this.getBounds().height < workAreaSize.height
+                        ) {
+                            this.#previousBounds = this.getBounds();
+                            this.isMaximized = () => true;
+                            this.setBounds({ x: 0, y: 0, width: workAreaSize.width, height: workAreaSize.height });
+                        }
+                    };
+                }
                 initIpc(this);
             } else super(options);
         }
