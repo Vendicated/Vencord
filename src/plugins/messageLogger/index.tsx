@@ -28,7 +28,7 @@ import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, Menu, MessageStore, Parser, SelectedChannelStore, Timestamp, UserStore, useStateFromStores } from "@webpack/common";
 import { Message } from "discord-types/general";
 
@@ -43,7 +43,6 @@ interface MLMessage extends Message {
 }
 
 const styles = findByPropsLazy("edited", "communicationDisabled", "isSystemMessage");
-const getMessage = findByCodeLazy('replace(/^\\n+|\\n+$/g,"")');
 
 function addDeleteStyle() {
     if (Settings.plugins.MessageLogger.deleteStyle === "text") {
@@ -170,8 +169,8 @@ export default definePlugin({
 
         return Settings.plugins.MessageLogger.inlineEdits && (
             <>
-                {message.editHistory?.map(edit => (
-                    <div className="messagelogger-edited">
+                {message.editHistory?.map((edit, idx) => (
+                    <div key={idx} className="messagelogger-edited">
                         {parseEditContent(edit.content, message)}
                         <Timestamp
                             timestamp={edit.timestamp}
@@ -305,42 +304,40 @@ export default definePlugin({
                 {...props}
                 className={classes("messagelogger-edit-marker", className)}
                 onClick={() => openHistoryModal(message)}
-                aria-role="button"
+                role="button"
             >
                 {children}
             </span>
         );
     },
 
-    Messages: {
-        // DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
-        // TODO: find a better way to generate intl messages
-        DELETED_MESSAGE_COUNT: () => ({
-            ast: [[
-                6,
-                "count",
-                {
-                    "=0": ["No deleted messages"],
-                    one: [
-                        [
-                            1,
-                            "count"
-                        ],
-                        " deleted message"
+    // DELETED_MESSAGE_COUNT: getMessage("{count, plural, =0 {No deleted messages} one {{count} deleted message} other {{count} deleted messages}}")
+    // TODO: Find a better way to generate intl messages
+    DELETED_MESSAGE_COUNT: () => ({
+        ast: [[
+            6,
+            "count",
+            {
+                "=0": ["No deleted messages"],
+                one: [
+                    [
+                        1,
+                        "count"
                     ],
-                    other: [
-                        [
-                            1,
-                            "count"
-                        ],
-                        " deleted messages"
-                    ]
-                },
-                0,
-                "cardinal"
-            ]]
-        })
-    },
+                    " deleted message"
+                ],
+                other: [
+                    [
+                        1,
+                        "count"
+                    ],
+                    " deleted messages"
+                ]
+            },
+            0,
+            "cardinal"
+        ]]
+    }),
 
     patches: [
         {
@@ -349,35 +346,35 @@ export default definePlugin({
             replacement: [
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
-                    match: /MESSAGE_DELETE:function\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?},/,
+                    match: /function (?=.+?MESSAGE_DELETE:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
                     replace:
-                        "MESSAGE_DELETE:function($1){" +
-                        "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = $self.handleDelete(cache, $1, false);" +
-                        "   $2commit(cache);" +
-                        "},"
+                        "function $1($2){" +
+                        "   var cache = $3getOrCreate($2.channelId);" +
+                        "   cache = $self.handleDelete(cache, $2, false);" +
+                        "   $3commit(cache);" +
+                        "}"
                 },
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
-                    match: /MESSAGE_DELETE_BULK:function\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?},/,
+                    match: /function (?=.+?MESSAGE_DELETE_BULK:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
                     replace:
-                        "MESSAGE_DELETE_BULK:function($1){" +
-                        "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = $self.handleDelete(cache, $1, true);" +
-                        "   $2commit(cache);" +
-                        "},"
+                        "function $1($2){" +
+                        "   var cache = $3getOrCreate($2.channelId);" +
+                        "   cache = $self.handleDelete(cache, $2, true);" +
+                        "   $3commit(cache);" +
+                        "}"
                 },
                 {
                     // Add current cached content + new edit time to cached message's editHistory
-                    match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
+                    match: /(function (\i)\((\i)\).+?)\.update\((\i)(?=.*MESSAGE_UPDATE:\2)/,
                     replace: "$1" +
-                        ".update($3,m =>" +
-                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :" +
-                        "   $2.message.edited_timestamp && $2.message.content !== m.content ?" +
-                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
+                        ".update($4,m =>" +
+                        "   (($3.message.flags & 64) === 64 || $self.shouldIgnore($3.message, true)) ? m :" +
+                        "   $3.message.edited_timestamp && $3.message.content !== m.content ?" +
+                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($3.message, m)]) :" +
                         "       m" +
                         ")" +
-                        ".update($3"
+                        ".update($4"
                 },
                 {
                     // fix up key (edit last message) attempting to edit a deleted message
@@ -491,12 +488,12 @@ export default definePlugin({
             find: '"ReferencedMessageStore"',
             replacement: [
                 {
-                    match: /MESSAGE_DELETE:function\((\i)\).+?},/,
-                    replace: "MESSAGE_DELETE:function($1){},"
+                    match: /MESSAGE_DELETE:\i,/,
+                    replace: "MESSAGE_DELETE:()=>{},"
                 },
                 {
-                    match: /MESSAGE_DELETE_BULK:function\((\i)\).+?},/,
-                    replace: "MESSAGE_DELETE_BULK:function($1){},"
+                    match: /MESSAGE_DELETE_BULK:\i,/,
+                    replace: "MESSAGE_DELETE_BULK:()=>{},"
                 }
             ]
         },
@@ -531,7 +528,7 @@ export default definePlugin({
                 },
                 {
                     match: /(\i).type===\i\.\i\.MESSAGE_GROUP_BLOCKED\?.*?:/,
-                    replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$self.Messages.DELETED_MESSAGE_COUNT:',
+                    replace: '$&$1.type==="MESSAGE_GROUP_DELETED"?$self.DELETED_MESSAGE_COUNT:',
                 },
             ],
             predicate: () => Settings.plugins.MessageLogger.collapseDeleted
