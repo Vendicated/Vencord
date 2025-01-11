@@ -38,7 +38,6 @@ import { Channel, Guild, User } from "discord-types/general";
 
 const cl = classNameFactory("vc-search-modal-");
 
-// TODO make guilds work
 // FIXME fix the no Result display
 
 const SearchBarModule = findByPropsLazy("SearchBar", "Checkbox", "AvatarSizes");
@@ -340,6 +339,23 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         );
     }
 
+    function generateGuildItem(guild: Guild, otherProps: UnspecificRowProps) {
+        const guildName = guild.name;
+        const guildIcon = guild.getIconURL(SearchBarModule.AvatarSizes.SIZE_32, false);
+
+        return (
+            <Row {...otherProps}
+                 icon={<SearchBarModule.Avatar
+                     src={guildIcon}
+                     size={SearchBarModule.AvatarSizes.SIZE_32}
+                     aria-hidden={true}
+                 />}
+                 label={guildName}
+                 subLabel={""}
+            />
+        );
+    }
+
     function generateGdmItem(channel: Channel, otherProps: UnspecificRowProps) {
         function getParticipants(channel: Channel) {
             const userNames = channel.recipients
@@ -490,10 +506,19 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
         loadFunction();
 
-        const frequentChannels = wrapperFn([FrequencyModule], () => FrequencyModule.getFrequentlyWithoutFetchingLatest());
+        const frequentChannels: Channel[] = wrapperFn([FrequencyModule], () => FrequencyModule.getFrequentlyWithoutFetchingLatest());
         const hasQuery = query !== "";
 
         function getItem(e: DestinationItem): Result {
+            if (e.type === "guild") {
+                const guild = GuildStore.getGuild(e.id);
+                return {
+                    type: TextTypes.GUILD,
+                    record: guild,
+                    score: 0,
+                    comparator: guild.name,
+                };
+            }
             if (e.type !== "user")
                 return convertItem(e.id);
             {
@@ -537,10 +562,22 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             if (hasQuery) return filterItems(results);
 
             const channelHistory: string[] = FrequentsModule.getChannelHistory();
+            const guilds = Object.values(GuildStore.getGuilds()).map(
+                guild => {
+                    if (guild == null) return;
+                    return {
+                        type: TextTypes.GUILD,
+                        record: guild,
+                        score: 0,
+                        comparator: guild.name
+                    };
+                }
+            );
 
             const recentDestinations = filterItems([
                 ...(channelHistory.length > 0 ? channelHistory.map(e => convertItem(e)) : []),
-                ...(frequentChannels.length > 0 ? frequentChannels.map(e => convertItem(e.id)) : [])
+                ...(frequentChannels.length > 0 ? frequentChannels.map(e => convertItem(e.id)) : []),
+                ...guilds
             ]);
 
             return removeDuplicates(
@@ -605,9 +642,11 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                 return generateUserItem(record, rowProps);
             if (type === "GROUP_DM")
                 return generateGdmItem(record, rowProps);
-            if (type === "TEXT_CHANNEL" || type === "VOICE_CHANNEL") {
+            if (type === "TEXT_CHANNEL" || type === "VOICE_CHANNEL")
                 return generateChannelItem(record, rowProps);
-            } else throw new Error("Unknown type " + type);
+            if (type === "GUILD")
+                return generateGuildItem(record, rowProps);
+            else throw new Error("Unknown type " + type);
         }, [results, selectedDestinationKeys, handleToggleDestination]);
         const navRef = useRef(null);
         const nav = createNavigator(cl("search-modal"), navRef);
