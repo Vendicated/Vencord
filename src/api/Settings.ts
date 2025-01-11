@@ -23,7 +23,7 @@ import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/mergeDefaults";
 import { putCloudSettings } from "@utils/settingsSync";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
-import { React } from "@webpack/common";
+import { React, useEffect } from "@webpack/common";
 
 import plugins from "~plugins";
 
@@ -106,7 +106,7 @@ const DefaultSettings: Settings = {
     }
 };
 
-const settings = VencordNative.settings.get();
+const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;
 mergeDefaults(settings, DefaultSettings);
 
 const saveSettingsOnFrequentAction = debounce(async () => {
@@ -129,7 +129,7 @@ export const SettingsStore = new SettingsStoreClass(settings, {
 
         if (path === "plugins" && key in plugins)
             return target[key] = {
-                enabled: plugins[key].required ?? plugins[key].enabledByDefault ?? false
+                enabled: IS_REPORTER || plugins[key].required || plugins[key].enabledByDefault || false
             };
 
         // Since the property is not set, check if this is a plugin's setting and if so, try to resolve
@@ -156,12 +156,14 @@ export const SettingsStore = new SettingsStoreClass(settings, {
     }
 });
 
-SettingsStore.addGlobalChangeListener((_, path) => {
-    SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
-    localStorage.Vencord_settingsDirty = true;
-    saveSettingsOnFrequentAction();
-    VencordNative.settings.set(SettingsStore.plain, path);
-});
+if (!IS_REPORTER) {
+    SettingsStore.addGlobalChangeListener((_, path) => {
+        SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
+        localStorage.Vencord_settingsDirty = true;
+        saveSettingsOnFrequentAction();
+        VencordNative.settings.set(SettingsStore.plain, path);
+    });
+}
 
 /**
  * Same as {@link Settings} but unproxied. You should treat this as readonly,
@@ -190,7 +192,7 @@ export const Settings = SettingsStore.store;
 export function useSettings(paths?: UseSettings<Settings>[]) {
     const [, forceUpdate] = React.useReducer(() => ({}), {});
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (paths) {
             paths.forEach(p => SettingsStore.addChangeListener(p, forceUpdate));
             return () => paths.forEach(p => SettingsStore.removeChangeListener(p, forceUpdate));
@@ -198,7 +200,7 @@ export function useSettings(paths?: UseSettings<Settings>[]) {
             SettingsStore.addGlobalChangeListener(forceUpdate);
             return () => SettingsStore.removeGlobalChangeListener(forceUpdate);
         }
-    }, []);
+    }, [paths]);
 
     return SettingsStore.store;
 }
@@ -227,6 +229,10 @@ export function definePluginSettings<
         get store() {
             if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
             return Settings.plugins[definedSettings.pluginName] as any;
+        },
+        get plain() {
+            if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
+            return PlainSettings.plugins[definedSettings.pluginName] as any;
         },
         use: settings => useSettings(
             settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`) as UseSettings<Settings>[]

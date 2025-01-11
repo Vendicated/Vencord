@@ -19,17 +19,11 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
+import { findStoreLazy } from "@webpack";
+import { ChannelStore, Constants, FluxDispatcher, GuildStore, RelationshipStore, SnowflakeUtils, UserStore } from "@webpack/common";
 import { Settings } from "Vencord";
 
 const UserAffinitiesStore = findStoreLazy("UserAffinitiesStore");
-const { FriendsSections } = findByPropsLazy("FriendsSections");
-
-interface UserAffinity {
-    user_id: string;
-    affinity: number;
-}
 
 export default definePlugin({
     name: "ImplicitRelationships",
@@ -38,7 +32,7 @@ export default definePlugin({
     patches: [
         // Counts header
         {
-            find: ".FRIENDS_ALL_HEADER",
+            find: "#{intl::FRIENDS_ALL_HEADER}",
             replacement: {
                 match: /toString\(\)\}\);case (\i\.\i)\.BLOCKED/,
                 replace: 'toString()});case $1.IMPLICIT:return "Implicit — "+arguments[1];case $1.BLOCKED'
@@ -54,9 +48,9 @@ export default definePlugin({
         },
         // Sections header
         {
-            find: ".FRIENDS_SECTION_ONLINE",
+            find: "#{intl::FRIENDS_SECTION_ONLINE}",
             replacement: {
-                match: /(\(0,\i\.jsx\)\(\i\.TabBar\.Item,\{id:\i\.\i)\.BLOCKED,className:([^\s]+?)\.item,children:\i\.\i\.Messages\.BLOCKED\}\)/,
+                match: /(\(0,\i\.jsx\)\(\i\.TabBar\.Item,\{id:\i\.\i)\.BLOCKED,className:([^\s]+?)\.item,children:\i\.\i\.string\(\i\.\i#{intl::BLOCKED}\)\}\)/,
                 replace: "$1.IMPLICIT,className:$2.item,children:\"Implicit\"}),$&"
             },
         },
@@ -70,7 +64,7 @@ export default definePlugin({
         },
         // Piggyback relationship fetch
         {
-            find: ".fetchRelationships()",
+            find: '"FriendsStore',
             replacement: {
                 match: /(\i\.\i)\.fetchRelationships\(\)/,
                 // This relationship fetch is actually completely useless, but whatevs
@@ -123,7 +117,7 @@ export default definePlugin({
 
     wrapSort(comparator: Function, row: any) {
         return row.type === 5
-            ? -UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0
+            ? -(UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0)
             : comparator(row);
     },
 
@@ -182,6 +176,6 @@ export default definePlugin({
     },
 
     start() {
-        FriendsSections.IMPLICIT = "IMPLICIT";
+        Constants.FriendsSections.IMPLICIT = "IMPLICIT";
     }
 });

@@ -60,7 +60,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "Messages.AUTH_SESSIONS_SESSION_LOG_OUT",
+            find: "#{intl::AUTH_SESSIONS_SESSION_LOG_OUT}",
             replacement: [
                 // Replace children with a single label with state
                 {
@@ -77,15 +77,6 @@ export default definePlugin({
                     replace: "$& $self.renderIcon({ ...arguments[0], DeviceIcon: $1 }), false &&"
                 }
             ]
-        },
-        {
-            // Add the ability to change BlobMask's lower badge height
-            // (it allows changing width so we can mirror that logic)
-            find: "this.getBadgePositionInterpolation(",
-            replacement: {
-                match: /(\i\.animated\.rect,{id:\i,x:48-\(\i\+8\)\+4,y:)28(,width:\i\+8,height:)24,/,
-                replace: (_, leftPart, rightPart) => `${leftPart} 48 - ((this.props.lowerBadgeHeight ?? 16) + 8) + 4 ${rightPart} (this.props.lowerBadgeHeight ?? 16) + 8,`
-            }
         }
     ],
 
@@ -153,14 +144,16 @@ export default definePlugin({
                         <PlatformIcon width={14} height={14} />
                     </div>
                 }
-                lowerBadgeWidth={20}
-                lowerBadgeHeight={20}
+                lowerBadgeSize={{
+                    width: 20,
+                    height: 20
+                }}
             >
                 <div
                     className={SessionIconClasses.sessionIcon}
                     style={{ backgroundColor: GetOsColor(session.client_info.os) }}
                 >
-                    <DeviceIcon width={28} height={28} />
+                    <DeviceIcon width={28} height={28} color="currentColor" />
                 </div>
             </BlobMask>
         );
