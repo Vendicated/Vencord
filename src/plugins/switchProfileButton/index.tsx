@@ -1,10 +1,9 @@
-import { migratePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, Icons, TooltipContainer, Text, type MenuTypes } from "@webpack/common";
+import { Button, Icons, TooltipContainer, Text } from "@webpack/common";
 import { ReactNode } from "react";
 
 const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
