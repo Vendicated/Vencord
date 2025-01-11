@@ -32,10 +32,6 @@ import { ISettingElementProps } from ".";
 
 const cl = classNameFactory("vc-plugin-modal-");
 
-
-// TODO add interfaces for the stuff from the modal instead of using any
-// TODO also add types to all the vars :husk: :husk:
-
 const UserMentionComponent = findComponentByCodeLazy(".USER_MENTION)");
 const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
 const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarURL");
