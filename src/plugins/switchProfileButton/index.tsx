@@ -1,9 +1,15 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, Icons, TooltipContainer, Text } from "@webpack/common";
+import { Button, Icons, Text, TooltipContainer } from "@webpack/common";
 import { ReactNode } from "react";
 
 const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
