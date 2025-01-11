@@ -15,6 +15,7 @@ const RoleIconComponent = findComponentByCodeLazy(".Messages.ROLE_ICON_ALT_TEXT"
 import "./styles.css";
 
 import { User } from "discord-types/general";
+import { JSX } from "react";
 
 import settings from "./settings";
 
@@ -42,6 +43,7 @@ function CheckBadge({ badge, author }: { badge: string; author: User; }): JSX.El
                     {badges.getDonorBadges(author.id)?.map(badge => (
 
                         <RoleIconComponent
+                            key={author.id}
                             className={roleIconClassName}
                             name={badge.description}
                             size={20}
@@ -68,6 +70,7 @@ function CheckBadge({ badge, author }: { badge: string; author: User; }): JSX.El
                 .map(badge => (
 
                     <RoleIconComponent
+                        key={author.id}
                         className={roleIconClassName}
                         name={badge[1]}
                         size={20}
