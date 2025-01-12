@@ -11,7 +11,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "FixedForumTags",
     authors: [Devs.sadan],
-    description: "Allows you to search and filter by moderated forum tags",
+    description: "Allows you to search and filter by all forum tags, even those that only moderators can add",
 
     patches: [
         // shows overflow forum tags only when second arg is true (orig func only takes one arg)
