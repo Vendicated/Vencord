@@ -514,7 +514,7 @@ export default definePlugin({
         return array.filter(item => item != null);
     },
 
-    ensureChildrenIsArray(child: ReactElement) {
+    ensureChildrenIsArray(child: ReactElement<any>) {
         if (!Array.isArray(child.props.children)) child.props.children = [child.props.children];
     },
 
@@ -524,7 +524,7 @@ export default definePlugin({
 
         let nextIndex = content.length;
 
-        const transformLinkChild = (child: ReactElement) => {
+        const transformLinkChild = (child: ReactElement<any>) => {
             if (settings.store.transformEmojis) {
                 const fakeNitroMatch = child.props.href.match(fakeNitroEmojiRegex);
                 if (fakeNitroMatch) {
@@ -558,7 +558,7 @@ export default definePlugin({
             return child;
         };
 
-        const transformChild = (child: ReactElement) => {
+        const transformChild = (child: ReactElement<any>) => {
             if (child?.props?.trusted != null) return transformLinkChild(child);
             if (child?.props?.children != null) {
                 if (!Array.isArray(child.props.children)) {
@@ -574,7 +574,7 @@ export default definePlugin({
             return child;
         };
 
-        const modifyChild = (child: ReactElement) => {
+        const modifyChild = (child: ReactElement<any>) => {
             const newChild = transformChild(child);
 
             if (newChild?.type === "ul" || newChild?.type === "ol") {
@@ -601,7 +601,7 @@ export default definePlugin({
             return newChild;
         };
 
-        const modifyChildren = (children: Array<ReactElement>) => {
+        const modifyChildren = (children: Array<ReactElement<any>>) => {
             for (const [index, child] of children.entries()) children[index] = modifyChild(child);
 
             children = this.clearEmptyArrayItems(children);
