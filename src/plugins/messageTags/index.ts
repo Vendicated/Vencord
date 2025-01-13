@@ -64,17 +64,16 @@ function createTagCommand(tag: Tag) {
 
 
 const settings = definePluginSettings({
+    clyde: {
+        description: "If enabled, clyde will send you an ephemeral message when a tag was used.",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
     data: {
         type: OptionType.ARRAY,
         hidden: true,
         description: ""
     },
-    migrated: {
-        type: OptionType.BOOLEAN,
-        description: "",
-        default: false,
-        hidden: true
-    }
 });
 
 
@@ -82,22 +81,16 @@ export default definePlugin({
     name: "MessageTags",
     description: "Allows you to save messages and to use them with a simple command.",
     authors: [Devs.Luna],
-    options: {
-        clyde: {
-            name: "Clyde message on send",
-            description: "If enabled, clyde will send you an ephemeral message when a tag was used.",
-            type: OptionType.BOOLEAN,
-            default: true
-        }
-    },
     settings,
 
     async start() {
-        if (!settings.store.migrated) {
-            const data = await DataStore.get(DATA_KEY);
-            if (data !== undefined) settings.store.data = data;
-            settings.store.migrated = true;
+        const data = await DataStore.get(DATA_KEY);
+
+        if (data != null) {
+            settings.store.data = data;
+            await DataStore.del(DATA_KEY);
         }
+
         for (const tag of settings.store.data) createTagCommand(tag);
 
     },
