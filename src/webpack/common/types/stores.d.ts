@@ -39,6 +39,8 @@ export class FluxStore {
     syncWith: GenericFunction;
     waitFor: GenericFunction;
     __getLocalVars(): Record<string, any>;
+
+    static getAll(): FluxStore[];
 }
 
 export class FluxEmitter {
@@ -216,6 +218,14 @@ export class GuildStore extends FluxStore {
     getRole(guildId: string, roleId: string): Role;
     getRoles(guildId: string): Record<string, Role>;
     getAllGuildRoles(): Record<string, Record<string, Role>>;
+}
+
+export class ThemeStore extends FluxStore {
+    theme: "light" | "dark" | "darker" | "midnight";
+    darkSidebar: boolean;
+    isSystemThemeAvailable: boolean;
+    systemPrefersColorScheme: "light" | "dark";
+    systemTheme: null;
 }
 
 export type useStateFromStores = <T>(

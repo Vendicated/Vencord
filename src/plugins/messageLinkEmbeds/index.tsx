@@ -19,6 +19,7 @@
 import { addAccessory, removeAccessory } from "@api/MessageAccessories";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
+import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
@@ -37,10 +38,10 @@ import {
     PermissionStore,
     RestAPI,
     Text,
-    TextAndImagesSettingsStores,
     UserStore
 } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
+import { JSX } from "react";
 
 const messageCache = new Map<string, {
     message?: Message;
@@ -49,10 +50,12 @@ const messageCache = new Map<string, {
 
 const Embed = findComponentByCodeLazy(".inlineMediaEmbed");
 const AutoModEmbed = findComponentByCodeLazy(".withFooter]:", "childrenMessageContent:");
-const ChannelMessage = findComponentByCodeLazy("renderSimpleAccessories)");
+const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
 
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
 const EmbedClasses = findByPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
+
+const MessageDisplayCompact = getUserSettingLazy("textAndImages", "messageDisplayCompact")!;
 
 const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(?:\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
 const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;
@@ -145,6 +148,7 @@ async function fetchMessage(channelID: string, messageID: string) {
     if (!msg) return;
 
     const message: Message = MessageStore.getMessages(msg.channel_id).receiveMessage(msg).get(msg.id);
+    if (!message) return;
 
     messageCache.set(message.id, {
         message,
@@ -281,6 +285,8 @@ function getChannelLabelAndIconUrl(channel: Channel) {
 }
 
 function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): JSX.Element | null {
+    const compact = MessageDisplayCompact.useSetting();
+
     const dmReceiver = UserStore.getUser(ChannelStore.getChannel(channel.id).recipients?.[0]);
 
     const [channelLabel, iconUrl] = getChannelLabelAndIconUrl(channel);
@@ -305,6 +311,7 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): 
                         message={message}
                         channel={channel}
                         subscribeToComponentDispatch={false}
+                        compact={compact}
                     />
                 </div>
             )}
@@ -314,7 +321,7 @@ function ChannelMessageEmbedAccessory({ message, channel }: MessageEmbedProps): 
 
 function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
     const { message, channel } = props;
-    const compact = TextAndImagesSettingsStores.MessageDisplayCompact.useSetting();
+    const compact = MessageDisplayCompact.useSetting();
     const images = getImages(message);
     const { parse } = Parser;
 
@@ -341,10 +348,10 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                     ? parse(message.content)
                     : [noContent(message.attachments.length, message.embeds.length)]
                 }
-                {images.map(a => {
+                {images.map((a, idx) => {
                     const { width, height } = computeWidthAndHeight(a.width, a.height);
                     return (
-                        <div>
+                        <div key={idx}>
                             <img src={a.url} width={width} height={height} />
                         </div>
                     );
@@ -361,7 +368,7 @@ export default definePlugin({
     name: "MessageLinkEmbeds",
     description: "Adds a preview to messages that link another message",
     authors: [Devs.TheSun, Devs.Ven, Devs.RyanCaoDev],
-    dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI"],
+    dependencies: ["MessageAccessoriesAPI", "MessageUpdaterAPI", "UserSettingsAPI"],
 
     settings,
 

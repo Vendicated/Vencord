@@ -25,7 +25,7 @@ export default definePlugin({
     authors: [Devs.nekohaxx],
     patches: [
         {
-            find: "Messages.ONBOARDING_COVER_WELCOME_SUBTITLE",
+            find: "#{intl::ONBOARDING_COVER_WELCOME_SUBTITLE}",
             replacement: {
                 match: "3e3",
                 replace: "0"

@@ -25,7 +25,7 @@ export default definePlugin({
     authors: [Devs.Arjix, Devs.hunt, Devs.Ven],
     patches: [
         {
-            find: ".Messages.EDIT_TEXTAREA_HELP",
+            find: "#{intl::EDIT_TEXTAREA_HELP}",
             replacement: {
                 match: /(?<=,channel:\i\}\)\.then\().+?(?=return \i\.content!==this\.props\.message\.content&&\i\((.+?)\))/,
                 replace: (match, args) => "" +
@@ -35,7 +35,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".handleSendMessage",
+            find: ".handleSendMessage,onResize",
             replacement: {
                 // props.chatInputType...then((function(isMessageValid)... var parsedMessage = b.c.parse(channel,... var replyOptions = f.g.getSendMessageOptionsForReply(pendingReply);
                 // Lookbehind: validateMessage)({openWarningPopout:..., type: i.props.chatInputType, content: t, stickers: r, ...}).then((function(isMessageValid)

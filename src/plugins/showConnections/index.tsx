@@ -25,15 +25,13 @@ import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Text, Tooltip, UserProfileStore } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { Tooltip, UserProfileStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
 
-const Section = findComponentByCodeLazy(".lastSection", "children:");
-const ThemeStore = findStoreLazy("ThemeStore");
-const platformHooks: { useLegacyPlatformType(platform: string): string; } = findByPropsLazy("useLegacyPlatformType");
+const useLegacyPlatformType: (platform: string) => string = findByCodeLazy(".TWITTER_LEGACY:");
 const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
 const getProfileThemeProps = findByCodeLazy(".getPreviewThemeColors", "primaryColor:");
 
@@ -74,15 +72,18 @@ interface ConnectionPlatform {
     icon: { lightSVG: string, darkSVG: string; };
 }
 
-const profilePopoutComponent = ErrorBoundary.wrap((props: { user: User, displayProfile, compactSpacing; }) =>
-    <ConnectionsComponent id={props.user.id} theme={getProfileThemeProps(props).theme} compactSpacing={props.compactSpacing} />
+const profilePopoutComponent = ErrorBoundary.wrap(
+    (props: { user: User; displayProfile?: any; }) => (
+        <ConnectionsComponent
+            {...props}
+            id={props.user.id}
+            theme={getProfileThemeProps(props).theme}
+        />
+    ),
+    { noop: true }
 );
 
-const profilePanelComponent = ErrorBoundary.wrap(({ id }: { id: string; }) =>
-    <ConnectionsComponent id={id} theme={ThemeStore.theme} />
-);
-
-function ConnectionsComponent({ id, theme, compactSpacing }: { id: string, theme: string, compactSpacing?: boolean; }) {
+function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
@@ -91,30 +92,18 @@ function ConnectionsComponent({ id, theme, compactSpacing }: { id: string, theme
     if (!connections?.length)
         return null;
 
-    const Container = compactSpacing ? "div" : Section;
-
     return (
-        <Container>
-            <Text
-                tag="h2"
-                variant="eyebrow"
-                style={{ color: "var(--header-primary)" }}
-            >
-                Connections
-            </Text>
-            <Flex style={{
-                marginTop: "8px",
-                gap: getSpacingPx(settings.store.iconSpacing),
-                flexWrap: "wrap"
-            }}>
-                {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} />)}
-            </Flex>
-        </Container>
+        <Flex style={{
+            gap: getSpacingPx(settings.store.iconSpacing),
+            flexWrap: "wrap"
+        }}>
+            {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} key={connection.id} />)}
+        </Flex>
     );
 }
 
 function CompactConnectionComponent({ connection, theme }: { connection: Connection, theme: string; }) {
-    const platform = platforms.get(platformHooks.useLegacyPlatformType(connection.type));
+    const platform = platforms.get(useLegacyPlatformType(connection.type));
     const url = platform.getPlatformUserUrl?.(connection);
 
     const img = (
@@ -134,7 +123,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
         <Tooltip
             text={
                 <span className="vc-sc-tooltip">
-                    {connection.name}
+                    <span className="vc-sc-connection-name">{connection.name}</span>
                     {connection.verified && <VerifiedIcon />}
                     <TooltipIcon height={16} width={16} />
                 </span>
@@ -148,6 +137,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
                         className="vc-user-connection"
                         href={url}
                         target="_blank"
+                        rel="noreferrer"
                         onClick={e => {
                             if (Vencord.Plugins.isPluginEnabled("OpenInApp")) {
                                 const OpenInApp = Vencord.Plugins.plugins.OpenInApp as any as typeof import("../openInApp").default;
@@ -175,31 +165,17 @@ export default definePlugin({
     name: "ShowConnections",
     description: "Show connected accounts in user popouts",
     authors: [Devs.TheKodeToad],
+    settings,
+
     patches: [
         {
-            find: "{isUsingGuildBio:null!==(",
+            find: ".hasAvatarForGuild(null==",
             replacement: {
-                match: /,theme:\i\}\)(?=,.{0,150}setNote:)/,
-                replace: "$&,$self.profilePopoutComponent({ user: arguments[0].user, displayProfile: arguments[0].displayProfile, compactSpacing: false })"
-            }
-        },
-        {
-            find: ".UserPopoutUpsellSource.PROFILE_PANEL,",
-            replacement: {
-                // createElement(Divider, {}), createElement(NoteComponent)
-                match: /\(0,\i\.jsx\)\(\i\.\i,\{\}\).{0,100}setNote:(?=.+?channelId:(\i).id)/,
-                replace: "$self.profilePanelComponent({ id: $1.recipients[0] }),$&"
-            }
-        },
-        {
-            find: "autoFocusNote:!0})",
-            replacement: {
-                match: /{autoFocusNote:!1}\)}\)(?<=user:(\i),bio:null==(\i)\?.+?)/,
-                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2, compactSpacing: true })"
+                match: /currentUser:\i,guild:\i}\)(?<=user:(\i),bio:null==(\i)\?.+?)/,
+                replace: "$&,$self.profilePopoutComponent({ user: $1, displayProfile: $2 })"
             }
         }
     ],
-    settings,
+
     profilePopoutComponent,
-    profilePanelComponent
 });

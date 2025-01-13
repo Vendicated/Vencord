@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line path-alias/no-relative
 import { filters, findByPropsLazy, waitFor } from "@webpack";
 
 import { waitForComponent } from "./internal";
@@ -29,10 +28,13 @@ export let Forms = {} as {
     FormText: t.FormText,
 };
 
+export let Icons = {} as t.Icons;
+
 export let Card: t.Card;
 export let Button: t.Button;
 export let Switch: t.Switch;
 export let Tooltip: t.Tooltip;
+export let TooltipContainer: t.TooltipContainer;
 export let TextInput: t.TextInput;
 export let TextArea: t.TextArea;
 export let Text: t.Text;
@@ -54,7 +56,7 @@ export let FocusLock: t.FocusLock;
 export let useToken: t.useToken;
 
 export const MaskedLink = waitForComponent<t.MaskedLink>("MaskedLink", filters.componentByCode("MASKED_LINK)"));
-export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
+export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.byCode("#{intl::MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL}"));
 export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
 
 export const { OAuth2AuthorizeModal } = findByPropsLazy("OAuth2AuthorizeModal");
@@ -66,6 +68,7 @@ waitFor(["FormItem", "Button"], m => {
         Button,
         FormSwitch: Switch,
         Tooltip,
+        TooltipContainer,
         TextInput,
         TextArea,
         Text,
@@ -84,4 +87,5 @@ waitFor(["FormItem", "Button"], m => {
         Heading
     } = m);
     Forms = m;
+    Icons = m;
 });

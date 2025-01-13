@@ -16,18 +16,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import definePlugin, { OptionType } from "@utils/types";
+import { findByPropsLazy, findLazy } from "@webpack";
 import { Forms, React } from "@webpack/common";
 
 import hideBugReport from "./hideBugReport.css?managed";
 
-const KbdStyles = findByPropsLazy("key", "removeBuildOverride");
+const KbdStyles = findByPropsLazy("key", "combo");
+const BugReporterExperiment = findLazy(m => m?.definition?.id === "2024-09_bug_reporter");
+
+const settings = definePluginSettings({
+    toolbarDevMenu: {
+        type: OptionType.BOOLEAN,
+        description: "Change the Help (?) toolbar button (top right in chat) to Discord's developer menu",
+        default: false,
+        restartNeeded: true
+    }
+});
 
 export default definePlugin({
     name: "Experiments",
@@ -39,6 +50,8 @@ export default definePlugin({
         Devs.BanTheNons,
         Devs.Nuckyz
     ],
+
+    settings,
 
     patches: [
         {
@@ -66,13 +79,31 @@ export default definePlugin({
         {
             find: "toolbar:function",
             replacement: {
+                match: /hasBugReporterAccess:(\i)/,
+                replace: "_hasBugReporterAccess:$1=true"
+            },
+            predicate: () => settings.store.toolbarDevMenu
+        },
+
+        // makes the Favourites Server experiment allow favouriting DMs and threads
+        {
+            find: "useCanFavoriteChannel",
+            replacement: {
+                match: /\i\.isDM\(\)\|\|\i\.isThread\(\)/,
+                replace: "false",
+            }
+        },
+        // enable option to always record clips even if you are not streaming
+        {
+            find: "isDecoupledGameClippingEnabled(){",
+            replacement: {
                 match: /\i\.isStaff\(\)/,
                 replace: "true"
             }
         }
     ],
 
-    start: () => enableStyle(hideBugReport),
+    start: () => !BugReporterExperiment.getCurrentConfig().hasBugReporterAccess && enableStyle(hideBugReport),
     stop: () => disableStyle(hideBugReport),
 
     settingsAboutComponent: () => {
@@ -84,9 +115,11 @@ export default definePlugin({
                 <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
                 <Forms.FormText variant="text-md/normal">
                     You can open Discord's DevTools via {" "}
-                    <kbd className={KbdStyles.key}>{modKey}</kbd> +{" "}
-                    <kbd className={KbdStyles.key}>{altKey}</kbd> +{" "}
-                    <kbd className={KbdStyles.key}>O</kbd>{" "}
+                    <div className={KbdStyles.combo} style={{ display: "inline-flex" }}>
+                        <kbd className={KbdStyles.key}>{modKey}</kbd> +{" "}
+                        <kbd className={KbdStyles.key}>{altKey}</kbd> +{" "}
+                        <kbd className={KbdStyles.key}>O</kbd>{" "}
+                    </div>
                 </Forms.FormText>
             </React.Fragment>
         );
