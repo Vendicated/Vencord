@@ -114,7 +114,7 @@ function SettingsComponent() {
     return (
         <Flex flexDirection="column">
             {tags.map(t => (
-                <Card style={{ padding: "1em 1em 0" }}>
+                <Card key={t.name} style={{ padding: "1em 1em 0" }}>
                     <Forms.FormTitle style={{ width: "fit-content" }}>
                         <Tooltip text={t.description}>
                             {({ onMouseEnter, onMouseLeave }) => (
@@ -183,8 +183,8 @@ export default definePlugin({
         {
             find: ".ORIGINAL_POSTER=",
             replacement: {
-                match: /\((\i)=\{\}\)\)\[(\i)\.BOT/,
-                replace: "($1=$self.getTagTypes()))[$2.BOT"
+                match: /(?=(\i)\[\i\.BOT)/,
+                replace: "$self.genTagTypes($1);"
             }
         },
         {
@@ -280,8 +280,7 @@ export default definePlugin({
             .filter(Boolean);
     },
 
-    getTagTypes() {
-        const obj = {};
+    genTagTypes(obj) {
         let i = 100;
         tags.forEach(({ name }) => {
             obj[name] = ++i;
@@ -291,7 +290,6 @@ export default definePlugin({
             obj[`${name}-OP`] = ++i;
             obj[i] = `${name}-OP`;
         });
-        return obj;
     },
 
     isOPTag: (tag: number) => tag === Tag.Types.ORIGINAL_POSTER || tags.some(t => tag === Tag.Types[`${t.name}-OP`]),
