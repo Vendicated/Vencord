@@ -12,7 +12,7 @@ import { FluxDispatcher } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 const HideIcon = () => {
-    return <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-labelledby="eyeCrossedIconTitle" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" fill="none" color="currentColor">
+    return <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-labelledby="eyeCrossedIconTitle" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter" fill="none" color="currentColor">
         <g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier">
         <path d="M22 12C22 12 19 18 12 18C5 18 2 12 2 12C2 12 5 6 12 6C19 6 22 12 22 12Z"></path><circle cx="12" cy="12" r="3"></circle><path d="M3 21L20 4"></path></g>
     </svg>;
