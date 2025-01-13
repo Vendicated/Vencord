@@ -170,6 +170,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Luny",
         id: 821472922140803112n
     },
+    SUDO: {
+        name: "SUDO",
+        id: 480495309491798037n
+    },
     Vap: {
         name: "Vap0r1ze",
         id: 454072114492866560n
