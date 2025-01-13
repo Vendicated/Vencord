@@ -67,7 +67,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".Messages.ERRORS_UNEXPECTED_CRASH",
+            find: "#{intl::ERRORS_UNEXPECTED_CRASH}",
             replacement: {
                 match: /this\.setState\((.+?)\)/,
                 replace: "$self.handleCrash(this,$1);"
