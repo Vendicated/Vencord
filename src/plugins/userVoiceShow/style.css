@@ -26,7 +26,7 @@
 .vc-uvs-message-indicator { 
     display: inline-flex;
     position: relative;
-    top: 0px !important;
+    top: 2.5px !important;
 }
 
 .vc-uvs-live {
