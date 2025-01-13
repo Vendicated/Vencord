@@ -41,12 +41,14 @@ function renderRegisteredPlugins(name: string, value: any) {
             ...prevState,
             [key]: !prevState[key]
         }));
-        // @ts-ignore settings must be defined otherwise we wouldn't be here
-        const s = Vencord.Plugins.plugins[plugin].settings.store[setting];
-        // @ts-ignore
-        Vencord.Plugins.plugins[plugin].settings.store[setting] = s.includes(value.id)
-            ? s.filter(id => id !== value.id)
-            : [...s, value.id];
+
+        // settings must be defined otherwise the checkbox wouldn't exist in the first place
+        const s = Vencord.Plugins.plugins[plugin].settings!;
+        s.store[setting] = s.store[setting].includes(value.id)
+            ? s.store[setting].filter((id: string) => id !== value.id)
+            : [...s.store[setting], value.id];
+
+        s.def[setting].onChange?.(s.store[setting]);
 
     };
     return Object.keys(plugins).map(plugin => (
