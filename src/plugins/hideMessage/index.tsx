@@ -22,6 +22,7 @@ export default definePlugin({
     name: "HideMessage",
     description: "Adds an option to hide messages",
     authors: [Devs.Isaac],
+    dependencies: ["MessagePopoverAPI"],
 
     hideMessage(msg: Message) {
         FluxDispatcher.dispatch({type: "MESSAGE_DELETE", channelId: msg.channel_id, id: msg.id});
