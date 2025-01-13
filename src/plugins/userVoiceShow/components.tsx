@@ -15,7 +15,7 @@ import { settings } from "plugins/userVoiceShow";
 const cl = classNameFactory("vc-uvs-");
 
 const { selectVoiceChannel } = findByPropsLazy("selectVoiceChannel", "selectChannel");
-const { useChannelName } = mapMangledModuleLazy(".Messages.GROUP_DM_ALONE", {
+const { useChannelName } = mapMangledModuleLazy("#{intl::GROUP_DM_ALONE}", {
     useChannelName: filters.byCode("()=>null==")
 });
 const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");

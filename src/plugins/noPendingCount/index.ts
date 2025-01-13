@@ -74,10 +74,10 @@ export default definePlugin({
         // This prevents the Message Requests tab from always hiding due to the previous patch (and is compatible with spam requests)
         // In short, only the red badge is hidden. Button visibility behavior isn't changed.
         {
-            find: ".getSpamChannelsCount()",
+            find: ".getSpamChannelsCount();return",
             predicate: () => settings.store.hideMessageRequestsCount,
             replacement: {
-                match: /(?<=getSpamChannelsCount\(\),\i=)\i\.getMessageRequestsCount\(\)/,
+                match: /(?<=getSpamChannelsCount\(\);return )\i\.getMessageRequestsCount\(\)/,
                 replace: "$self.getRealMessageRequestCount()"
             }
         },

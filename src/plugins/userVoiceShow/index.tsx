@@ -64,7 +64,7 @@ export default definePlugin({
     patches: [
         // User Popout, Full Size Profile, Direct Messages Side Profile
         {
-            find: ".Messages.USER_PROFILE_LOAD_ERROR",
+            find: "#{intl::USER_PROFILE_LOAD_ERROR}",
             replacement: {
                 match: /(\.fetchError.+?\?)null/,
                 replace: (_, rest) => `${rest}$self.VoiceChannelIndicator({userId:arguments[0]?.userId,isProfile:true})`
@@ -85,7 +85,7 @@ export default definePlugin({
         {
             find: "PrivateChannel.renderAvatar",
             replacement: {
-                match: /\.Messages\.CLOSE_DM.+?}\)(?=])/,
+                match: /#{intl::CLOSE_DM}.+?}\)(?=])/,
                 replace: "$&,$self.VoiceChannelIndicator({userId:arguments[0]?.user?.id})"
             },
             predicate: () => settings.store.showVoiceChannelIndicator

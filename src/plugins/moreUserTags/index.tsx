@@ -19,6 +19,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findLazy } from "@webpack";
@@ -113,7 +114,7 @@ function SettingsComponent() {
     return (
         <Flex flexDirection="column">
             {tags.map(t => (
-                <Card style={{ padding: "1em 1em 0" }}>
+                <Card key={t.name} style={{ padding: "1em 1em 0" }}>
                     <Forms.FormTitle style={{ width: "fit-content" }}>
                         <Tooltip text={t.description}>
                             {({ onMouseEnter, onMouseLeave }) => (
@@ -182,18 +183,18 @@ export default definePlugin({
         {
             find: ".ORIGINAL_POSTER=",
             replacement: {
-                match: /\((\i)=\{\}\)\)\[(\i)\.BOT/,
-                replace: "($1=$self.getTagTypes()))[$2.BOT"
+                match: /(?=(\i)\[\i\.BOT)/,
+                replace: "$self.genTagTypes($1);"
             }
         },
         {
-            find: ".DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP_OFFICIAL,",
+            find: "#{intl::DISCORD_SYSTEM_MESSAGE_BOT_TAG_TOOLTIP_OFFICIAL}",
             replacement: [
                 // make the tag show the right text
                 {
-                    match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=.{0,40}(\i\.\i\.Messages)\.APP_TAG/,
-                    replace: (_, origSwitch, variant, tags, displayedText, strings) =>
-                        `${origSwitch}default:{${displayedText} = $self.getTagText(${tags}[${variant}], ${strings})}`
+                    match: /(switch\((\i)\){.+?)case (\i(?:\.\i)?)\.BOT:default:(\i)=(.{0,40}#{intl::APP_TAG}\))/,
+                    replace: (_, origSwitch, variant, tags, displayedText, originalText) =>
+                        `${origSwitch}default:{${displayedText} = $self.getTagText(${tags}[${variant}],${originalText})}`
                 },
                 // show OP tags correctly
                 {
@@ -217,7 +218,7 @@ export default definePlugin({
         },
         // in the member list
         {
-            find: ".Messages.GUILD_OWNER,",
+            find: "#{intl::GUILD_OWNER}",
             replacement: {
                 match: /(?<type>\i)=\(null==.{0,100}\.BOT;return null!=(?<user>\i)&&\i\.bot/,
                 replace: "$<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }); return typeof $<type> === 'number'"
@@ -232,7 +233,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.USER_PROFILE_PRONOUNS",
+            find: "#{intl::USER_PROFILE_PRONOUNS}",
             replacement: {
                 match: /(?=,hideBotTag:!0)/,
                 replace: ",moreTags_channelId:arguments[0].moreTags_channelId"
@@ -279,8 +280,7 @@ export default definePlugin({
             .filter(Boolean);
     },
 
-    getTagTypes() {
-        const obj = {};
+    genTagTypes(obj) {
         let i = 100;
         tags.forEach(({ name }) => {
             obj[name] = ++i;
@@ -290,26 +290,29 @@ export default definePlugin({
             obj[`${name}-OP`] = ++i;
             obj[i] = `${name}-OP`;
         });
-        return obj;
     },
 
     isOPTag: (tag: number) => tag === Tag.Types.ORIGINAL_POSTER || tags.some(t => tag === Tag.Types[`${t.name}-OP`]),
 
-    getTagText(passedTagName: string, strings: Record<string, string>) {
-        if (!passedTagName) return strings.APP_TAG;
-        const [tagName, variant] = passedTagName.split("-");
-        const tag = tags.find(({ name }) => tagName === name);
-        if (!tag) return strings.APP_TAG;
-        if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return strings.APP_TAG;
+    getTagText(passedTagName: string, originalText: string) {
+        try {
+            const [tagName, variant] = passedTagName.split("-");
+            if (!passedTagName) return getIntlMessage("APP_TAG");
+            const tag = tags.find(({ name }) => tagName === name);
+            if (!tag) return getIntlMessage("APP_TAG");
+            if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return getIntlMessage("APP_TAG");
 
-        const tagText = settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
-        switch (variant) {
-            case "OP":
-                return `${strings.BOT_TAG_FORUM_ORIGINAL_POSTER} • ${tagText}`;
-            case "BOT":
-                return `${strings.APP_TAG} • ${tagText}`;
-            default:
-                return tagText;
+            const tagText = settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
+            switch (variant) {
+                case "OP":
+                    return `${getIntlMessage("BOT_TAG_FORUM_ORIGINAL_POSTER")} • ${tagText}`;
+                case "BOT":
+                    return `${getIntlMessage("APP_TAG")} • ${tagText}`;
+                default:
+                    return tagText;
+            }
+        } catch {
+            return originalText;
         }
     },
 
