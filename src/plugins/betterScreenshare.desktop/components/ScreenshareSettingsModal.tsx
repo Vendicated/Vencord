@@ -190,7 +190,10 @@ export const ScreenshareSettingsModal = (props: ScreenshareSettingsModalProps) =
                 <Select
                     isDisabled={!resolutionEnabled || isSaving}
                     options={simpleResolutions}
-                    select={(value: types.Resolution) => void setWidth(value.width) ?? setHeight(value.height)}
+                    select={(value: types.Resolution) => {
+                        setWidth(value.width);
+                        setHeight(value.height);
+                    }}
                     isSelected={(value: types.Resolution) => width === value.width && height === value.height}
                     serialize={() => ""} />
             </SettingsModalCardItem>
@@ -356,7 +359,9 @@ export const ScreenshareSettingsModal = (props: ScreenshareSettingsModalProps) =
                                     {...props_} />;
                         });
                 }}
-                children={"Open"} />
+            >
+                Open
+            </Button>
         </SettingsModalCardItem>;
 
     const settingsCardAudio =

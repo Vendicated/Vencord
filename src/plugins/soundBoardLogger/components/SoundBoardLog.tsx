@@ -123,6 +123,7 @@ export default function SoundBoardLog({ data, closeModal }) {
 
                     return (
                         <div
+                            key={item.soundId}
                             className={cl("sound")}
                             onContextMenu={e =>
                                 ContextMenuApi.openContextMenu(e, () => <SoundContextMenu item={item} />)
@@ -147,6 +148,7 @@ export default function SoundBoardLog({ data, closeModal }) {
                                 className={cl("sound-users")}
                                 renderUser={(user: User) => (
                                     <Clickable
+                                        key={user.id} // Add a unique key for each user
                                         className={AvatarStyles.clickableAvatar}
                                         onClick={() => {
                                             onClickUser(item, user);

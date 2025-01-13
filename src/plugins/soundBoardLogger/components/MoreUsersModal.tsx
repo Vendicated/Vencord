@@ -9,7 +9,7 @@ import { Flex } from "@components/Flex";
 import { closeModal, ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { Clickable, Forms } from "@webpack/common";
 
-import { cl, getEmojiUrl,SoundLogEntry, User } from "../utils";
+import { cl, getEmojiUrl, SoundLogEntry, User } from "../utils";
 
 export function openMoreUsersModal(item: SoundLogEntry, users: User[], onClickUser: Function) {
     const key = openModal(props => (
@@ -37,10 +37,13 @@ export default function MoreUsersModal({ item, users, onClickUser, closeModal }:
                 {users.map(user => {
                     const currentUser = item.users.find(({ id }) => id === user.id) ?? { id: "", plays: [0] };
                     return (
-                        <Clickable onClick={() => {
-                            closeModal();
-                            onClickUser(item, user);
-                        }}>
+                        <Clickable
+                            key={user.id} // Added unique key here
+                            onClick={() => {
+                                closeModal();
+                                onClickUser(item, user);
+                            }}
+                        >
                             <div className={cl("more-user")} style={{ cursor: "pointer" }}>
                                 <Flex flexDirection="row" className={cl("more-user-profile")}>
                                     <img
@@ -51,7 +54,9 @@ export default function MoreUsersModal({ item, users, onClickUser, closeModal }:
                                     />
                                     <Forms.FormText variant="text-xs/medium" style={{ cursor: "pointer" }}>{user.username}</Forms.FormText>
                                 </Flex>
-                                <Forms.FormText variant="text-xs/medium" style={{ cursor: "pointer" }}>Played {currentUser.plays.length} {currentUser.plays.length === 1 ? "time" : "times"}</Forms.FormText>
+                                <Forms.FormText variant="text-xs/medium" style={{ cursor: "pointer" }}>
+                                    Played {currentUser.plays.length} {currentUser.plays.length === 1 ? "time" : "times"}
+                                </Forms.FormText>
                             </div>
                         </Clickable>
                     );

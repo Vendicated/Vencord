@@ -16,6 +16,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Clickable, Forms, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
+import { JSX } from "react";
 
 interface WatchingProps {
     userIds: string[];
@@ -48,9 +49,17 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
                 (<>
                     <Forms.FormTitle>{getIntlMessage("SPECTATORS", { numViewers: userIds.length })}</Forms.FormTitle>
                     <Flex flexDirection="column" style={{ gap: 6 }} >
-                        {users.map(user => (
-                            <Flex flexDirection="row" style={{ gap: 6, alignContent: "center" }} className={cl("user")} >
-                                <img src={user.getAvatarURL(guildId)} style={{ borderRadius: 8, width: 16, height: 16 }} />
+                        {users.map((user, index) => (
+                            <Flex
+                                key={userIds[index]} // Use userIds for key here
+                                flexDirection="row"
+                                style={{ gap: 6, alignContent: "center" }}
+                                className={cl("user")}
+                            >
+                                <img
+                                    src={user.getAvatarURL(guildId)}
+                                    style={{ borderRadius: 8, width: 16, height: 16 }}
+                                />
                                 {getUsername(user)}
                             </Flex>
                         ))}

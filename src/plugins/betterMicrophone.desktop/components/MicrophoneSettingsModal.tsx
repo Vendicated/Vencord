@@ -150,7 +150,10 @@ export const MicrophoneSettingsModal = (props: MicrophoneSettingsModalProps) => 
             switchProps={{
                 checked: (channelsEnabled && channels === 2) ?? false,
                 disabled: isSaving,
-                onChange: status => void setChannelsEnabled(status) ?? setChannels(2)
+                onChange: status => {
+                    setChannelsEnabled(status);
+                    setChannels(2);
+                }
             }}>
         </SettingsModalCard>;
 

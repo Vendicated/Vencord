@@ -18,7 +18,7 @@
 
 import { Flex } from "@components/Flex";
 import { Button, Tooltip } from "@webpack/common";
-import React from "react";
+import React, { JSX } from "react";
 
 
 export interface IconTooltipButtonProps {
@@ -26,7 +26,7 @@ export interface IconTooltipButtonProps {
     icon?: JSX.Element;
 }
 
-export const IconTooltipButton = (props: typeof Button["defaultProps"] & IconTooltipButtonProps) => {
+export const IconTooltipButton = (props: React.ComponentProps<typeof Button> & IconTooltipButtonProps) => {
     return (
         <Tooltip text={props.tooltipText}>
             {tooltipProps => <Button
