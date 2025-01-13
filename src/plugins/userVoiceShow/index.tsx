@@ -26,7 +26,7 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import { VoiceChannelIndicator } from "./components";
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     showInUserProfileModal: {
         type: OptionType.BOOLEAN,
         description: "Show a user's Voice Channel indicator in their profile next to the name",
@@ -42,6 +42,12 @@ const settings = definePluginSettings({
     showInMessages: {
         type: OptionType.BOOLEAN,
         description: "Show a user's Voice Channel indicator in messages",
+        default: true,
+        restartNeeded: true
+    },
+    showLiveIndicator: {
+        type: OptionType.BOOLEAN,
+        description: "Show a Live indicator next to a user's Voice Channel indicator",
         default: true,
         restartNeeded: true
     }
