@@ -23,10 +23,10 @@
     top: 2.5px;
 }
 
-.vc-uvs-message-indicator { 
+.vc-uvs-message-indicator {
     display: inline-flex;
     position: relative;
-    top: 0px !important;
+    top: 2.5px !important;
 }
 
 .vc-uvs-live {
