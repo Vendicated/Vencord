@@ -34,10 +34,10 @@ interface Tag {
 
 const getTag = (name: string) => settings.store.data.find((tt: Tag) => tt.name === name);
 const addTag = (tag: Tag) => {
-    settings.store.data.push(tag);
+    settings.store.data = [...settings.store.data, tag];
 };
 const removeTag = (name: string) => {
-    settings.store.data.filter((t: Tag) => t.name !== name);
+    settings.store.data = settings.store.data.filter((t: Tag) => t.name !== name);
 };
 
 function createTagCommand(tag: Tag) {
