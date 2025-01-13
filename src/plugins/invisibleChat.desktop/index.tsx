@@ -19,7 +19,7 @@
 import { addChatBarButton, ChatBarButton } from "@api/ChatButtons";
 import { addButton, removeButton } from "@api/MessagePopover";
 import { updateMessage } from "@api/MessageUpdater";
-import { definePluginSettings, migrateSettingsToArrays } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getStegCloak } from "@utils/dependencies";
@@ -93,13 +93,12 @@ const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
 };
 
 
-migrateSettingsToArrays("InvisibleChat", ["savedPasswords"], s => s.split(",").map(s => s.trim()));
-
 const settings = definePluginSettings({
     savedPasswords: {
         type: OptionType.ARRAY,
         default: ["password", "Password"],
         description: "Saved Passwords",
+        oldStringSeparator: s => s.split(",").map(s => s.trim()),
     }
 });
 

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings, migrateSettingsToArrays } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 
@@ -24,8 +24,6 @@ const NoopLogger = {
 
 const logAllow = new Set();
 
-migrateSettingsToArrays("ConsoleJanitor", ["whitelistedLoggers"], s => s.split(";").map(x => x.trim()));
-
 const settings = definePluginSettings({
     disableLoggers: {
         type: OptionType.BOOLEAN,
@@ -43,6 +41,7 @@ const settings = definePluginSettings({
         type: OptionType.ARRAY,
         description: "List of loggers to allow even if others are hidden",
         default: ["GatewaySocket", "Routing/Utils"],
+        oldStringSeparator: s => s.split(";").map(x => x.trim()),
         onChange(newVal: string[]) {
             logAllow.clear();
             newVal.forEach(logAllow.add.bind(logAllow));

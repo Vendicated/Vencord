@@ -224,19 +224,6 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
     }
 }
 
-export function migrateSettingsToArrays(pluginName: string, settings: string[], stringSeparator: string | ((input: string) => string[]) = ",") {
-    const { plugins } = SettingsStore.plain;
-    if (plugins[pluginName] === undefined)
-        return logger.error(`Plugin '${pluginName}' does not exist and cannot be migrated! Did you spell it correctly?`);
-    for (const setting of settings) {
-        if (typeof plugins[pluginName][setting] !== "string") continue;
-        logger.info(`Migrating setting ${setting} from ${pluginName} to list`);
-        if (plugins[pluginName][setting] === "") plugins[pluginName][setting] = [];
-        else if (typeof stringSeparator === "string") plugins[pluginName][setting] = plugins[pluginName][setting].split(stringSeparator);
-        else plugins[pluginName][setting] = stringSeparator(plugins[pluginName][setting]);
-    }
-}
-
 export function definePluginSettings<
     Def extends SettingsDefinition,
     Checks extends SettingsChecks<Def>,

@@ -20,7 +20,7 @@ import "./messageLogger.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { updateMessage } from "@api/MessageUpdater";
-import { definePluginSettings, migrateSettingsToArrays, Settings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
@@ -35,9 +35,6 @@ import { Message } from "discord-types/general";
 import overlayStyle from "./deleteStyleOverlay.css?managed";
 import textStyle from "./deleteStyleText.css?managed";
 import { openHistoryModal } from "./HistoryModal";
-
-migrateSettingsToArrays("MessageLogger", ["ignoreChannels", "ignoreGuilds", "ignoreUsers"]);
-
 
 const settings = definePluginSettings({
     deleteStyle: {

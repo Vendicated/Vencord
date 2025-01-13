@@ -279,6 +279,11 @@ export interface PluginSettingArrayDef {
     popoutText?: string;
     hidePopout?: boolean;
     default?: any[];
+    /**
+     * If the setting used to be a string with a custom delimiter, you can specify the delimiter or a function to split the string
+     * @default ","
+     */
+    oldStringSeparator?: string | ((value: string) => string[]);
 
     onChange?(newValue: any[]): void;
 }

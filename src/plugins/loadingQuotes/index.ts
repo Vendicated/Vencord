@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, migrateSettingsToArrays } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
@@ -25,7 +25,6 @@ import presetQuotesText from "file://quotes.txt";
 const presetQuotes = presetQuotesText.split("\n").map(quote => /^\s*[^#\s]/.test(quote) && quote.trim()).filter(Boolean) as string[];
 const noQuotesQuote = "Did you really disable all loading quotes? What a buffoon you are...";
 
-migrateSettingsToArrays("LoadingQuotes", ["additionalQuotes"], "|");
 
 const settings = definePluginSettings({
     replaceEvents: {
@@ -46,6 +45,7 @@ const settings = definePluginSettings({
     additionalQuotes: {
         description: "Additional custom quotes to possibly appear",
         type: OptionType.ARRAY,
+        oldStringSeparator: "|",
     },
 });
 
