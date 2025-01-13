@@ -20,6 +20,7 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, 
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+
 function mock(input: string): string {
     let output = "";
     for (let i = 0; i < input.length; i++) {
@@ -40,6 +41,7 @@ export default definePlugin({
             inputType: ApplicationCommandInputType.BOT,
             execute: (opts, ctx) => {
                 const content = findOption(opts, "message", "");
+
                 sendBotMessage(ctx.channel.id, { content });
             },
         },
@@ -97,17 +99,6 @@ export default definePlugin({
             },
         },
         {
-            name: "servertime",
-            description: "Displays the current server time",
-            options: [],
-            execute: () => {
-                const currentTime = new Date().toLocaleString();
-                return {
-                    content: `The current server time is: ${currentTime}`
-                };
-            },
-        },
-        {
             name: "ping",
             description: "Pings the bot to check if it's responding",
             options: [],
@@ -134,7 +125,7 @@ export default definePlugin({
             name: "flipcoin",
             description: "Flips a coin and returns heads or tails",
             options: [],
-            execute: () => {
+            execute: (opts, ctx) => {
                 const flip = Math.random() < 0.5 ? "Heads" : "Tails";
                 return {
                     content: `The coin landed on: ${flip}`
@@ -154,6 +145,48 @@ export default definePlugin({
                 return {
                     content: `${question} - ${response}`
                 };
+            },
+        },
+        {
+            name: "randomcat",
+            description: "Get a random cat picture",
+            options: [],
+            execute: (opts, ctx) => {
+                return (async () => {
+                    try {
+                        const response = await fetch("https://api.thecatapi.com/v1/images/search");
+                        if (!response.ok) throw new Error("Failed to fetch cat image");
+                        const data = await response.json();
+                        return {
+                            content: data[0].url
+                        };
+                    } catch (err) {
+                        sendBotMessage(ctx.channel.id, {
+                            content: "Sorry, couldn't fetch a cat picture right now 😿"
+                        });
+                    }
+                })();
+            },
+        },
+        {
+            name: "randomdog",
+            description: "Get a random ddog picture",
+            options: [],
+            execute: (opts, ctx) => {
+                return (async () => {
+                    try {
+                        const response = await fetch("https://api.thedogapi.com/v1/images/search");
+                        if (!response.ok) throw new Error("Failed to fetch dog image");
+                        const data = await response.json();
+                        return {
+                            content: data[0].url
+                        };
+                    } catch (err) {
+                        sendBotMessage(ctx.channel.id, {
+                            content: "Sorry, couldn't fetch a cat picture right now 🐶"
+                        });
+                    }
+                })();
             },
         },
         {
@@ -196,18 +229,15 @@ export default definePlugin({
             inputType: ApplicationCommandInputType.BOT,
             execute: async (opts, ctx) => {
                 const number = Math.min(parseInt(findOption(opts, "number", "5")), 10);
-                
                 if (isNaN(number) || number < 1) {
                     sendBotMessage(ctx.channel.id, {
                         content: "Please provide a valid number between 1 and 10!"
                     });
                     return;
                 }
-        
                 sendBotMessage(ctx.channel.id, {
                     content: `Starting countdown from ${number}...`
                 });
-        
                 for (let i = number; i >= 0; i--) {
                     await new Promise(resolve => setTimeout(resolve, 1000));
                     sendBotMessage(ctx.channel.id, {
@@ -234,6 +264,69 @@ export default definePlugin({
                     content: `I choose: ${choice}`
                 };
             }
+        },
+        {
+            name: "systeminfo",
+            description: "Shows system information",
+            options: [],
+            execute: async (opts, ctx) => {
+                try {
+                    const { userAgent, hardwareConcurrency, onLine, languages } = navigator;
+                    const { width, height, colorDepth } = window.screen;
+                    const { deviceMemory, connection }: { deviceMemory: any, connection: any; } = navigator as any;
+                    const platform = userAgent.includes("Windows") ? "Windows" :
+                        userAgent.includes("Mac") ? "MacOS" :
+                            userAgent.includes("Linux") ? "Linux" : "Unknown";
+                    const isMobile = /Mobile|Android|iPhone/i.test(userAgent);
+                    const deviceType = isMobile ? "Mobile" : "Desktop";
+                    const browserInfo = userAgent.match(/(?:chrome|firefox|safari|edge|opr)\/?\s*(\d+)/i)?.[0] || "Unknown";
+                    const networkInfo = connection ? `${connection.effectiveType || "Unknown"}` : "Unknown";
+                    const info = [
+                        `> **Platform**: ${platform}`,
+                        `> **Device Type**: ${deviceType}`,
+                        `> **Browser**: ${browserInfo}`,
+                        `> **CPU Cores**: ${hardwareConcurrency || "N/A"}`,
+                        `> **Memory**: ${deviceMemory ? `${deviceMemory}GB` : "N/A"}`,
+                        `> **Screen**: ${width}x${height} (${colorDepth}bit)`,
+                        `> **Languages**: ${languages?.join(", ")}`,
+                        `> **Network**: ${networkInfo} (${onLine ? "Online" : "Offline"})`
+                    ].join("\n");
+                    return { content: info };
+                } catch (err) {
+                    sendBotMessage(ctx.channel.id, { content: "Failed to fetch system information" });
+                }
+            },
+        },
+        {
+            name: "getUptime",
+            description: "Returns the system uptime",
+            execute: async (opts, ctx) => {
+                const uptime = performance.now() / 1000;
+                const uptimeInfo = `> **System Uptime**: ${Math.floor(uptime / 60)} minutes`;
+                return { content: uptimeInfo };
+            },
+        },
+        {
+            name: "getTime",
+            description: "Returns the current server time",
+            execute: async (opts, ctx) => {
+                const currentTime = new Date().toLocaleString();
+                return { content: `> **Current Time**: ${currentTime}` };
+            },
+        },
+        {
+            name: "getLocation",
+            description: "Returns the user's approximate location based on IP",
+            execute: async (opts, ctx) => {
+                try {
+                    const response = await fetch("https://ipapi.co/json/");
+                    const data = await response.json();
+                    const locationInfo = `> **Country**: ${data.country_name}\n> **Region**: ${data.region}\n> **City**: ${data.city}`;
+                    return { content: locationInfo };
+                } catch (err) {
+                    sendBotMessage(ctx.channel.id, { content: "Failed to fetch location information" });
+                }
+            },
         }
     ]
 });
