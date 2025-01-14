@@ -128,7 +128,7 @@ export default definePlugin({
             </Forms.FormText>
 
             <Forms.FormText className={Margins.top8}>
-                Only use experiments if you know what you're doing. Vencord is not responsible for any damage caused by enabling experiments.
+                Only use experiments if you know what you're doing. Equicord is not responsible for any damage caused by enabling experiments.
 
                 If you don't know what an experiment does, ignore it. Do not ask us what experiments do either, we probably don't know.
             </Forms.FormText>
