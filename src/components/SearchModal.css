@@ -50,3 +50,18 @@
     display: flex;
     align-items: center
 }
+
+.vc-search-modal-header-text {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.vc-search-modal-no-results-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}

@@ -637,7 +637,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             else throw new Error("Unknown type " + type);
         }, [results, selectedDestinationKeys, handleToggleDestination]);
         const navRef = useRef(null);
-        const nav = createNavigator(cl("search-modal"), navRef);
+        const nav = createNavigator(cl("nav"), navRef);
 
         return navigatorWrapper({
             navigator: nav,
@@ -684,20 +684,14 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
 
     return (
-        <ModalRoot {...modalProps} size={ModalSize.SMALL} className={cl("search-modal")}>
+        <ModalRoot {...modalProps} size={ModalSize.SMALL}>
             <ModalHeader
-                className={cl("search-modal-header")}
+                className={cl("header")}
                 direction={Flex.Direction.VERTICAL}
                 align={Flex.Align.START}
                 justify={Flex.Justify.BETWEEN}
             >
-                <div style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    width: "100%",
-                    marginBottom: "8px"
-                }}>
+                <div className={cl("header-text")}>
                     <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                         <Heading variant="heading-lg/semibold"
                                  style={{ flexGrow: 1 }}>{"Search for " + searchTypeToText(searchType)}</Heading>
@@ -728,7 +722,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                     rowData={results}
                     handleToggleDestination={setSelectedCallback}
                 /> : <ModalContent className={cl("no-results")}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
+                        <div className={cl("no-results-container")}>
                             <svg
                                 width="48"
                                 height="48"
