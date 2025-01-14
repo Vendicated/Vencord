@@ -81,12 +81,6 @@ const settings = definePluginSettings({
         hidden: true,
         description: ""
     },
-    migrated: {
-        type: OptionType.BOOLEAN,
-        hidden: true,
-        default: false,
-        description: ""
-    }
 });
 
 function stringToRegex(str: string) {
@@ -264,13 +258,20 @@ export default definePlugin({
     settings,
 
     async start() {
-        if (!settings.store.migrated) {
-            const stringRules = await DataStore.get(STRING_RULES_KEY) ?? makeEmptyRuleArray();
-            const regexRules = await DataStore.get(REGEX_RULES_KEY) ?? makeEmptyRuleArray();
 
-            settings.store.stringRules = stringRules;
-            settings.store.regexRules = regexRules;
-            settings.store.migrated = true;
+        if (settings.store.stringRules.length === 0 || settings.store.regexRules.length === 0) {
+            const stringRules = await DataStore.get(STRING_RULES_KEY);
+            const regexRules = await DataStore.get(REGEX_RULES_KEY);
+
+            if (stringRules != null) {
+                settings.store.stringRules = stringRules;
+                await DataStore.del(STRING_RULES_KEY);
+            } else if (settings.store.stringRules.length === 0) settings.store.stringRules = makeEmptyRuleArray();
+
+            if (regexRules != null) {
+                settings.store.regexRules = regexRules;
+                await DataStore.del(REGEX_RULES_KEY);
+            } else if (settings.store.regexRules.length === 0) settings.store.regexRules = makeEmptyRuleArray();
         }
 
         this.preSend = addPreSendListener((channelId, msg) => {
