@@ -246,7 +246,7 @@ function VencordSettings() {
             </>}
 
             {needsBackgroundMaterial && <>
-                <Forms.FormTitle tag="h5">Window Background Material (requires restart)</Forms.FormTitle>
+                <Forms.FormTitle tag="h5">Window Background Material</Forms.FormTitle>
                 <Select
                     className={Margins.bottom20}
                     placeholder="Window Background Material"
@@ -277,7 +277,13 @@ function VencordSettings() {
                             value: "acrylic"
                         },
                     ]}
-                    select={v => settings.winBackgroundMaterial = v}
+                    select={
+                        v => {
+                            settings.winBackgroundMaterial = v;
+                            // IPC call to set background material in real time
+                            VencordNative.settings.setBackgroundMaterial(v);
+                        }
+                    }
                     isSelected={v => settings.winBackgroundMaterial === v}
                     serialize={identity} />
             </>}
