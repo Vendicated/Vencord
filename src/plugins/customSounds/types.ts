@@ -51,7 +51,6 @@ export const soundTypes: readonly SoundType[] = [
 export function makeEmptyOverride(): SoundOverride {
     return {
         enabled: false,
-        useFile: false,
         url: "",
         volume: 100
     };
