@@ -17,9 +17,10 @@ import { SoundOverride, SoundPlayer, SoundType } from "../types";
 
 type FileInput = ComponentType<{
     ref: Ref<HTMLInputElement>;
-    onChange: (e: SyntheticEvent<HTMLInputElement>) => void;
+    onChange: (event: SyntheticEvent<HTMLInputElement>) => void;
     multiple?: boolean;
     filters?: { name?: string; extensions: string[]; }[];
+    disabled?: boolean;
 }>;
 
 const playSound: (id: string) => SoundPlayer = findByCodeLazy(".playWithListener().then");
@@ -66,6 +67,7 @@ export function SoundOverrideComponent({ type, override, onChange }: { type: Sou
                 Upload
                 <FileInput
                     ref={fileInputRef}
+                    disabled={!override.enabled}
                     onChange={event => {
                         event.stopPropagation();
                         event.preventDefault();
