@@ -10,7 +10,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
 import { findByCodeLazy, findLazy } from "@webpack";
-import { Button, Card, Forms, Slider, Switch, useRef } from "@webpack/common";
+import { Button, Card, Forms, Slider, Switch, Tooltip, useRef } from "@webpack/common";
 import { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { SoundOverride, SoundPlayer, SoundType } from "../types";
@@ -44,7 +44,9 @@ export function SoundOverrideComponent({ type, override, onChange }: { type: Sou
                 className={Margins.bottom16}
                 hideBorder={true}
             >
-                {type.name} <span className={cl("id")}>({type.id})</span>
+                <Tooltip text={type.id}>
+                    {tooltipProps => <span {...tooltipProps}>{type.name}</span>}
+                </Tooltip>
             </Switch>
             <Button
                 color={Button.Colors.PRIMARY}
