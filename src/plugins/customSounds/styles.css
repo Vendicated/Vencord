@@ -2,10 +2,17 @@
     padding: 1em 1em 0;
 }
 
-.vc-custom-sounds-id {
-    color: var(--text-muted);
+.vc-custom-sounds-file {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
 }
 
-.vc-custom-sounds-upload {
+.vc-custom-sounds-file-name {
+    flex-grow: 1;
+}
+
+.vc-custom-sounds-file-replace,
+.vc-custom-sounds-file-reset {
     display: inline;
 }
