@@ -111,7 +111,7 @@ export default definePlugin({
     patches: [
         {
             // Indicator
-            find: ".Messages.MESSAGE_EDITED,",
+            find: "#{intl::MESSAGE_EDITED}",
             replacement: {
                 match: /let\{className:\i,message:\i[^}]*\}=(\i)/,
                 replace: "try {$1 && $self.INV_REGEX.test($1.message.content) ? $1.content.push($self.indicator()) : null } catch {};$&"
@@ -133,10 +133,12 @@ export default definePlugin({
                     message: message,
                     channel: ChannelStore.getChannel(message.channel_id),
                     onClick: async () => {
-                        await iteratePasswords(message).then((res: string | false) => {
-                            if (res) return void this.buildEmbed(message, res);
-                            return void buildDecModal({ message });
-                        });
+                        const res = await iteratePasswords(message);
+
+                        if (res)
+                            this.buildEmbed(message, res);
+                        else
+                            buildDecModal({ message });
                     }
                 }
                 : null;
@@ -169,9 +171,9 @@ export default definePlugin({
 
         message.embeds.push({
             type: "rich",
-            title: "Decrypted Message",
+            rawTitle: "Decrypted Message",
             color: "0x45f5f5",
-            description: revealed,
+            rawDescription: revealed,
             footer: {
                 text: "Made with ❤️ by c0dine and Sammy!",
             },
