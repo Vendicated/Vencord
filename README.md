@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>151 additional plugins</summary>
+<summary>149 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -44,7 +44,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - DecodeBase64 by ThePirateStoner
 - DeadMembers by Kyuuhachi
 - Demonstration by Samwich
-- DisableAnimations by S€th
 - DisableCameras by Joona
 - DoNotLeak by Perny
 - DontFilterMe by Samwich
@@ -66,7 +65,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - GodMode by Tolgchu
 - GoodPerson by nin0dev & mantikafasi
 - GoogleThat by Samwich
-- GrammarFix by S€th
 - HideChatButtons by iamme
 - HideMessage by Hanzy
 - HideServers by bepvte
@@ -188,6 +186,7 @@ MacOS
 
 Linux
 - [CLI](https://github.com/Equicord/Equilotl/releases/latest/download/EquilotlCli-Linux)
+- [AUR](https://aur.archlinux.org/packages?O=0&K=equibop)
 ```shell
 sh -c "$(curl -sS https://raw.githubusercontent.com/Equicord/Equicord/refs/heads/main/misc/install.sh)"
 ```
