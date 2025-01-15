@@ -5,7 +5,6 @@
  */
 
 import { classNameFactory } from "@api/Styles";
-import { makeRange } from "@components/PluginSettings/components";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
@@ -48,18 +47,6 @@ export function SoundOverrideComponent({ type, override, onChange }: { type: Sou
                     {tooltipProps => <span {...tooltipProps}>{type.name}</span>}
                 </Tooltip>
             </Switch>
-            <Button
-                color={Button.Colors.PRIMARY}
-                className={Margins.bottom16}
-                onClick={() => {
-                    if (sound.current != null)
-                        sound.current.stop();
-                    sound.current = playSound(type.id);
-                }}
-                disabled={!override.enabled}
-            >
-                Preview
-            </Button>
             <Forms.FormTitle>Sound File</Forms.FormTitle>
             <div className={classes(cl("file"), Margins.bottom16)} >
                 <Forms.FormText className={cl("file-name")}>{override.url.length === 0 ? "Discord Default" : (override.fileName || "Custom Sound")}</Forms.FormText>
@@ -113,7 +100,6 @@ export function SoundOverrideComponent({ type, override, onChange }: { type: Sou
             </div>
             <Forms.FormTitle>Volume</Forms.FormTitle>
             <Slider
-                markers={makeRange(0, 100, 10)}
                 initialValue={override.volume}
                 onValueChange={value => {
                     override.volume = value;
@@ -123,6 +109,18 @@ export function SoundOverrideComponent({ type, override, onChange }: { type: Sou
                 className={Margins.bottom16}
                 disabled={!override.enabled}
             />
+            <Button
+                color={Button.Colors.PRIMARY}
+                className={Margins.bottom16}
+                onClick={() => {
+                    if (sound.current != null)
+                        sound.current.stop();
+                    sound.current = playSound(type.id);
+                }}
+                disabled={!override.enabled}
+            >
+                Preview
+            </Button>
         </Card>
     );
 }
