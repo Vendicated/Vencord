@@ -23,11 +23,14 @@ export default definePlugin({
     name: "MessagePopoverAPI",
     description: "API to add buttons to message popovers.",
     authors: [Devs.KingFish, Devs.Ven, Devs.Nuckyz],
-    patches: [{
-        find: "#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",
-        replacement: {
-            match: /\.jsx\)\((\i\.\i),\{label:\i\.\i\.string\(\i\.\i#{intl::MESSAGE_ACTION_REPLY}.{0,200}?"reply-self".{0,50}?\}\):null(?=,.+?message:(\i))/,
-            replace: "$&,Vencord.Api.MessagePopover._buildPopoverElements($1,$2)"
+    patches: [
+        {
+            find: "#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",
+            replacement: {
+                match: /(?<=:null),(.{0,40}togglePopout:.+?}\)),(.+?)\]}\):null,(?<=\((\i\.\i),{label:.+?:null,(\i&&!\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,
+                replace: (_, ReactButton, PotionButton, ButtonComponent, showReactButton, message) => "" +
+                    `]}):null,Vencord.Api.MessagePopover._buildPopoverElements(${ButtonComponent},${message}),${showReactButton}?${ReactButton}:null,${showReactButton}&&${PotionButton},`
+            }
         }
-    }],
+    ]
 });

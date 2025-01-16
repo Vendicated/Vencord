@@ -20,11 +20,11 @@ import { addPreEditListener, addPreSendListener, removePreEditListener, removePr
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
-import { getCurrentGuild } from "@utils/discord";
+import { getCurrentGuild, getEmojiURL } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType, Patch } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findStoreLazy, proxyLazyWebpack } from "@webpack";
-import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, IconUtils, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
+import { Alerts, ChannelStore, DraftType, EmojiStore, FluxDispatcher, Forms, GuildMemberStore, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Emoji } from "@webpack/types";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
@@ -207,8 +207,8 @@ function makeBypassPatches(): Omit<Patch, "plugin"> {
     return {
         find: "canUseCustomStickersEverywhere:",
         replacement: mapping.map(({ func, predicate }) => ({
-            match: new RegExp(String.raw`(?<=${func}:function\(\i(?:,\i)?\){)`),
-            replace: "return true;",
+            match: new RegExp(String.raw`(?<=${func}:)\i`),
+            replace: "() => true",
             predicate
         }))
     };
@@ -297,8 +297,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Overwrite incoming connection settings proto with our local settings
-                    match: /CONNECTION_OPEN:function\((\i)\){/,
-                    replace: (m, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
+                    match: /function (\i)\((\i)\){(?=.*CONNECTION_OPEN:\1)/,
+                    replace: (m, funcName, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
                 },
                 {
                     // Overwrite non local proto changes with our local settings
@@ -514,7 +514,7 @@ export default definePlugin({
         return array.filter(item => item != null);
     },
 
-    ensureChildrenIsArray(child: ReactElement) {
+    ensureChildrenIsArray(child: ReactElement<any>) {
         if (!Array.isArray(child.props.children)) child.props.children = [child.props.children];
     },
 
@@ -524,7 +524,7 @@ export default definePlugin({
 
         let nextIndex = content.length;
 
-        const transformLinkChild = (child: ReactElement) => {
+        const transformLinkChild = (child: ReactElement<any>) => {
             if (settings.store.transformEmojis) {
                 const fakeNitroMatch = child.props.href.match(fakeNitroEmojiRegex);
                 if (fakeNitroMatch) {
@@ -558,7 +558,7 @@ export default definePlugin({
             return child;
         };
 
-        const transformChild = (child: ReactElement) => {
+        const transformChild = (child: ReactElement<any>) => {
             if (child?.props?.trusted != null) return transformLinkChild(child);
             if (child?.props?.children != null) {
                 if (!Array.isArray(child.props.children)) {
@@ -574,7 +574,7 @@ export default definePlugin({
             return child;
         };
 
-        const modifyChild = (child: ReactElement) => {
+        const modifyChild = (child: ReactElement<any>) => {
             const newChild = transformChild(child);
 
             if (newChild?.type === "ul" || newChild?.type === "ol") {
@@ -601,7 +601,7 @@ export default definePlugin({
             return newChild;
         };
 
-        const modifyChildren = (children: Array<ReactElement>) => {
+        const modifyChildren = (children: Array<ReactElement<any>>) => {
             for (const [index, child] of children.entries()) children[index] = modifyChild(child);
 
             children = this.clearEmptyArrayItems(children);
@@ -920,7 +920,7 @@ export default definePlugin({
 
                     const emojiString = `<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`;
 
-                    const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
+                    const url = new URL(getEmojiURL(emoji.id, emoji.animated, s.emojiSize));
                     url.searchParams.set("size", s.emojiSize.toString());
                     url.searchParams.set("name", emoji.name);
 
@@ -953,7 +953,7 @@ export default definePlugin({
 
                 hasBypass = true;
 
-                const url = new URL(IconUtils.getEmojiURL({ id: emoji.id, animated: emoji.animated, size: s.emojiSize }));
+                const url = new URL(getEmojiURL(emoji.id, emoji.animated, s.emojiSize));
                 url.searchParams.set("size", s.emojiSize.toString());
                 url.searchParams.set("name", emoji.name);
 
