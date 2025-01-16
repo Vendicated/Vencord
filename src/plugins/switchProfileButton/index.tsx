@@ -14,12 +14,12 @@ import { ReactNode } from "react";
 
 const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
 
-type SwitchProfileMenuItemProps = {
+interface SwitchProfileMenuItemProps {
     id: string;
     label: string;
     subtext: ReactNode;
     action(): void;
-};
+}
 
 export default definePlugin({
     name: "SwitchProfileButton",
@@ -56,7 +56,7 @@ export default definePlugin({
         >
             <Button
                 aria-label={props.label}
-                onClick={(props.action)}
+                onClick={props.action}
                 look={Button.Looks.FILLED}
                 size={Button.Sizes.NONE}
                 color={RoleButtonClasses.bannerColor}
