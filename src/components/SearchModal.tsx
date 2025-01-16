@@ -32,7 +32,8 @@ import {
     useRef,
     UsernameUtils,
     UserStore,
-    useState
+    useState,
+    useStateFromStores
 } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
@@ -44,7 +45,6 @@ const TextTypes = findByPropsLazy("APPLICATION", "GROUP_DM", "GUILD");
 const FrequencyModule = findByPropsLazy("getFrequentlyWithoutFetchingLatest");
 const FrequentsModule = findByPropsLazy("getChannelHistory", "getFrequentGuilds");
 
-const wrapperFn = findByCodeLazy("prevDeps:void 0,");
 const convertItem = findByCodeLazy("GROUP_DM:return{", "GUILD_VOICE:case");
 const loadFunction = findByCodeLazy(".frecencyWithoutFetchingLatest)");
 const SearchHandler = findByCodeLazy("createSearchContext", "setLimit");
@@ -494,7 +494,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
         loadFunction();
 
-        const frequentChannels: Channel[] = wrapperFn([FrequencyModule], () => FrequencyModule.getFrequentlyWithoutFetchingLatest());
+        const frequentChannels: Channel[] = useStateFromStores([FrequencyModule], () => FrequencyModule.getFrequentlyWithoutFetchingLatest());
         const hasQuery = query !== "";
 
         function getItem(e: DestinationItem): Result {
