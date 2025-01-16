@@ -2,4 +2,4 @@
 
 Allows you to reorder attachments before sending them.
 
-![Preview](https://github.com/user-attachments/assets/83fb971f-630a-4f4f-a885-ffb4177bbb88)
+![Preview](https://github.com/user-attachments/assets/ef5eacb3-f0ba-4982-bdd7-ff87f74a6421)
