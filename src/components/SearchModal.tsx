@@ -16,7 +16,7 @@ import {
     ModalRoot,
     ModalSize
 } from "@utils/modal";
-import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import {
     Button,
     ChannelStore,
@@ -33,7 +33,7 @@ import {
     UsernameUtils,
     UserStore,
     useState,
-    useStateFromStores
+    useStateFromStores,
 } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
@@ -42,18 +42,20 @@ const cl = classNameFactory("vc-search-modal-");
 const SearchBarModule = findByPropsLazy("SearchBar", "Checkbox", "AvatarSizes");
 const SearchBarWrapper = findByPropsLazy("SearchBar", "Item");
 const TextTypes = findByPropsLazy("APPLICATION", "GROUP_DM", "GUILD");
-const FrequencyModule = findByPropsLazy("getFrequentlyWithoutFetchingLatest");
-const FrequentsModule = findByPropsLazy("getChannelHistory", "getFrequentGuilds");
+const SearchHandler = findByCodeLazy("createSearchContext", "setLimit");
 
 const convertItem = findByCodeLazy("GROUP_DM:return{", "GUILD_VOICE:case");
-const loadFunction = findByCodeLazy(".frecencyWithoutFetchingLatest)");
-const SearchHandler = findByCodeLazy("createSearchContext", "setLimit");
+const loadFrecency = findByCodeLazy(".frecencyWithoutFetchingLatest)");
 const navigatorWrapper = findByCodeLazy("useMemo(()=>({onKeyDown:");
 const createNavigator = findByCodeLazy(".keyboardModeEnabled)", "useCallback(()=>new Promise(", "Number.MAX_SAFE_INTEGER");
 const getChannelLabel = findByCodeLazy("recipients.map(", "getNickname(");
-const ChannelIcon = findByCodeLazy("channelGuildIcon,");
 
+const ChannelIcon = findComponentByCodeLazy("channelGuildIcon,");
 const GroupDMAvatars = findComponentByCodeLazy("facepileSizeOverride", "recipients.length");
+
+const FrecencyStore = findStoreLazy("FrecencyStore");
+const QuickSwitcherStore = findStoreLazy("QuickSwitcherStore");
+
 
 interface DestinationItem {
     type: "channel" | "user" | "guild";
@@ -278,14 +280,10 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         );
     }
 
-    function generateChannelLabel(channel: Channel): string {
-        return getChannelLabel(channel, UserStore, RelationshipStore, false);
-    }
-
     function generateChannelItem(channel: Channel, otherProps: UnspecificRowProps) {
         const guild = GuildStore.getGuild(channel?.guild_id);
 
-        const channelLabel = generateChannelLabel(channel);
+        const channelLabel = getChannelLabel(channel, UserStore, RelationshipStore, false);
 
         const parentChannelLabel = (): string => {
             const parentChannel = ChannelStore.getChannel(channel.parent_id);
@@ -492,9 +490,21 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             }
             , [search, queryData]);
 
-        loadFunction();
+        loadFrecency();
 
-        const frequentChannels: Channel[] = useStateFromStores([FrequencyModule], () => FrequencyModule.getFrequentlyWithoutFetchingLatest());
+        const frequentChannels: Channel[] = useStateFromStores([FrecencyStore], () => FrecencyStore.getFrequentlyWithoutFetchingLatest());
+        const channelHistory: string[] = useStateFromStores([QuickSwitcherStore], () => QuickSwitcherStore.getChannelHistory());
+        const guilds: GuildResult[] = useStateFromStores([GuildStore], () => Object.values(GuildStore.getGuilds()).map(
+            guild => {
+                return {
+                    type: TextTypes.GUILD,
+                    record: guild,
+                    score: 0,
+                    comparator: guild.name
+                };
+            }
+        ));
+
         const hasQuery = query !== "";
 
         function getItem(e: DestinationItem): Result {
@@ -532,6 +542,8 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             hasQuery: boolean;
             frequentChannels: Channel[];
             pinnedDestinations: DestinationItem[];
+            channelHistory: string[];
+            guilds: GuildResult[]
         }): Result[] {
             const removeDuplicates = (arr: Result[]): Result[] => {
                 const clean: any[] = [];
@@ -546,21 +558,8 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                 return clean;
             };
 
-            const { results, hasQuery, frequentChannels, pinnedDestinations } = props;
+            const { results, hasQuery, frequentChannels, pinnedDestinations, channelHistory, guilds } = props;
             if (hasQuery) return filterItems(results);
-
-            const channelHistory: string[] = FrequentsModule.getChannelHistory();
-            const guilds = Object.values(GuildStore.getGuilds()).map(
-                guild => {
-                    if (guild == null) return;
-                    return {
-                        type: TextTypes.GUILD,
-                        record: guild,
-                        score: 0,
-                        comparator: guild.name
-                    };
-                }
-            );
 
             const recentDestinations = filterItems([
                 ...(channelHistory.length > 0 ? channelHistory.map(e => convertItem(e)) : []),
@@ -580,7 +579,9 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                 hasQuery: hasQuery,
                 frequentChannels: frequentChannels,
                 pinnedDestinations: pinned,
-            }), [results, hasQuery, frequentChannels, pinned]),
+                channelHistory: channelHistory,
+                guilds: guilds
+            }), [results, hasQuery, frequentChannels, pinned, channelHistory, guilds]),
             updateSearchText: updateSearch
         };
     }
