@@ -10,8 +10,8 @@ import definePlugin from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { React, useRef } from "@webpack/common";
 
-const useDrag = findByCodeLazy("useDrag::spec.begin");
-const useDrop = findByCodeLazy(/\i=\(0,\i.\i\)\(\i.options\)/);
+const useDrag = findByCodeLazy("useDrag::spec.begin") as typeof import("react-dnd").useDrag;
+const useDrop = findByCodeLazy(/\i=\(0,\i.\i\)\(\i.options\)/) as typeof import("react-dnd").useDrop;
 const AttachmentItem = findComponentByCodeLazy(/channelId:\i,draftType:\i,upload:\i,/);
 const ItemType = "DND_ATTACHMENT";
 
