@@ -154,6 +154,7 @@ interface VoiceChannelIndicatorProps {
 const clickTimers = {} as Record<string, any>;
 
 export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isMessageIndicator, isProfile, isActionButton, shouldHighlight }: VoiceChannelIndicatorProps) => {
+    const { showLiveIndicator } = settings.use(["showLiveIndicator"]);
     const voiceState = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(userId));
     if (!voiceState) return null;
 
@@ -209,7 +210,7 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isMessageIndi
                     <LockedSpeakerIcon {...iconProps} />
                     : <SpeakerIcon {...iconProps} />;
 
-                return voiceState.selfStream && settings.store.showLiveIndicator ? <LiveIcon {...iconProps}>{icon}</LiveIcon> : icon;
+                return selfStream && showLiveIndicator ? <LiveIcon {...iconProps}>{icon}</LiveIcon> : icon;
             }}
         </Tooltip>
     );

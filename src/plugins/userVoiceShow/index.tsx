@@ -49,7 +49,6 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show a Live indicator next to a user's Voice Channel indicator",
         default: true,
-        restartNeeded: true
     }
 });
 
