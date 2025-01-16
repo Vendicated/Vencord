@@ -23,10 +23,10 @@
     top: 2.5px;
 }
 
-.vc-uvs-message-indicator { 
+.vc-uvs-message-indicator {
     display: inline-flex;
     position: relative;
-    top: 2.5px !important;
+    top: 0px !important;
 }
 
 .vc-uvs-live {
@@ -40,7 +40,7 @@
     min-width: 16px;
 }
 
-.vc-uvs-live > span {
+.vc-uvs-live>span {
     padding: 0 6px;
     font-family: var(--font-display);
     font-weight: 700;

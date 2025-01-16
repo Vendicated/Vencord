@@ -154,8 +154,10 @@ interface VoiceChannelIndicatorProps {
 const clickTimers = {} as Record<string, any>;
 
 export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isMessageIndicator, isProfile, isActionButton, shouldHighlight }: VoiceChannelIndicatorProps) => {
-    const channelId = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(userId)?.channelId as string | undefined);
     const voiceState = useStateFromStores([VoiceStateStore], () => VoiceStateStore.getVoiceStateForUser(userId));
+    if (!voiceState) return null;
+
+    const { channelId, selfStream } = voiceState;
 
     const channel = channelId == null ? undefined : ChannelStore.getChannel(channelId);
     if (channel == null) return null;
