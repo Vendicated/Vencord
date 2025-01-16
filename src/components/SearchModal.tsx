@@ -46,8 +46,6 @@ const SearchHandler = findByCodeLazy("createSearchContext", "setLimit");
 
 const convertItem = findByCodeLazy("GROUP_DM:return{", "GUILD_VOICE:case");
 const loadFrecency = findByCodeLazy(".frecencyWithoutFetchingLatest)");
-const navigatorWrapper = findByCodeLazy("useMemo(()=>({onKeyDown:");
-const createNavigator = findByCodeLazy(".keyboardModeEnabled)", "useCallback(()=>new Promise(", "Number.MAX_SAFE_INTEGER");
 const getChannelLabel = findByCodeLazy("recipients.map(", "getNickname(");
 
 const ChannelIcon = findComponentByCodeLazy("channelGuildIcon,");
@@ -158,27 +156,6 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
     searchType?: ("USERS" | "CHANNELS" | "GUILDS")[] | "USERS" | "CHANNELS" | "GUILDS" | "ALL";
     subText?: string
 }) {
-
-    const callbacks = new Map();
-
-    function registerCallback(key: string, callback: (...args: any[]) => void): () => void {
-        let currentCallbacks = callbacks.get(key);
-        if (!currentCallbacks) {
-            currentCallbacks = new Set();
-            callbacks.set(key, currentCallbacks);
-        }
-
-        currentCallbacks.add(callback);
-
-        return () => {
-            currentCallbacks.delete(callback);
-            if (currentCallbacks.size === 0) {
-                callbacks.delete(key);
-            }
-        };
-
-    }
-
     const UserIcon = React.memo(function ({
         user,
         size = SearchBarModule.AvatarSizes.SIZE_32,
@@ -204,8 +181,6 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
     const [selected, setSelected] = useState<DestinationItem[]>([]);
 
-    const refCounter = useRef(0);
-
     const Row = (props: SpecificRowProps) => {
         const {
             destination,
@@ -219,8 +194,11 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             ...rest
         } = props;
 
-        const interactionProps = generateRowData(destination.id);
-
+        const interactionProps = {
+            role: "listitem",
+            "data-list-item-id": `NO_LIST___${destination.id}`,
+            tabIndex: -1,
+        };
         const handlePress = useCallback(() => {
             onPressDestination?.(destination);
         }, [onPressDestination, destination]);
@@ -228,7 +206,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         return (
             <SearchBarModule.Clickable
                 className={cl("destination-row")}
-                onClick={e => { e.stopPropagation(); e.preventDefault(); handlePress(); }}
+                onClick={handlePress}
                 aria-selected={isSelected}
                 {...interactionProps}
                 {...rest}
@@ -250,6 +228,8 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                     </div>
                 </div>
                 <SearchBarModule.Checkbox
+                    onClick={e => console.log(e)}
+                    onChange={e => console.log(e)}
                     type={SearchBarModule.Checkbox.Types.INVERTED}
                     displayOnly={true}
                     size={24}
@@ -375,63 +355,86 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         );
     }
 
-    const navigatorContext = React.createContext({
-        id: "NO_LIST",
-        onKeyDown() {
-        },
-        orientation: "vertical",
-        ref: React.createRef(),
-        tabIndex: -1
-    });
-
-    function generateNavigatorData() {
-        const { id: id, onKeyDown, ref, tabIndex } = React.useContext(navigatorContext);
-        return {
-            role: "list",
-            tabIndex,
-            "data-list-id": id,
-            onKeyDown: onKeyDown,
-            ref: ref,
-        };
-    }
-
-    function navigatorData(e: { children: (data: ReturnType<typeof generateNavigatorData>) => React.ReactNode }): React.ReactNode {
-        const { children } = e;
-        return children(generateNavigatorData());
-    }
-
-
-    function generateRowData(rowId: string) {
-        const [tabIndex, setTabIndex] = useState(-1);
-        const id = "NO_LIST";
-        React.useLayoutEffect(() => {
-            return registerCallback(id, (tabIndex: string, id: string) => {
-                setTabIndex(id && tabIndex === rowId ? 0 : -1);
-            });
-        }, [rowId, id]);
-
-        return {
-            role: "listitem",
-            "data-list-item-id": `${id}___${rowId}`,
-            tabIndex,
-        };
-    }
-
     const [searchText, setSearchText] = useState<string>(input || "");
     const ref = {};
+
+    function getItem(e: DestinationItem): Result {
+        if (e.type === "guild") {
+            const guild = GuildStore.getGuild(e.id);
+            return {
+                type: TextTypes.GUILD,
+                record: guild,
+                score: 0,
+                comparator: guild.name,
+            };
+        }
+        if (e.type !== "user")
+            return convertItem(e.id);
+        {
+            const user = UserStore.getUser(e.id);
+            return {
+                type: TextTypes.USER,
+                record: user,
+                score: 0,
+                // @ts-ignore globalName is not in the types but exists
+                comparator: user.globalName,
+            };
+        }
+    }
+
+    const filterItems = (items: any[]) => {
+        return items.filter(
+            item => item != null && resultTypes.includes(item.type)
+        );
+    };
+
+    function filterResults(props: {
+        results: Result[];
+        hasQuery: boolean;
+        frequentChannels: Channel[];
+        channelHistory: string[];
+        guilds: GuildResult[]
+    }): Result[] {
+        const removeDuplicates = (arr: Result[]): Result[] => {
+            const clean: any[] = [];
+            const seenIds = new Set();
+            arr.forEach(item => {
+                if (item == null || item.record == null) return;
+                if (!seenIds.has(item.record.id)) {
+                    seenIds.add(item.record.id);
+                    clean.push(item);
+                }
+            });
+            return clean;
+        };
+
+        const { results, hasQuery, frequentChannels, channelHistory, guilds } = props;
+        if (hasQuery) return filterItems(results);
+
+        const recentDestinations = filterItems([
+            ...(channelHistory.length > 0 ? channelHistory.map(e => convertItem(e)) : []),
+            ...(frequentChannels.length > 0 ? frequentChannels.map(e => convertItem(e.id)) : []),
+            ...guilds
+        ]);
+
+        return removeDuplicates(
+            [...(selected.length > 0 ? selected.map(e => getItem(e)) : []),
+                ...recentDestinations
+            ]);
+    }
+
+    function getRef<T>(e: () => T): T {
+        const ref_ = useRef<T>(ref as T);
+        if (ref_.current === ref)
+            ref_.current = e();
+        return ref_.current;
+    }
 
     function getSearchHandler(searchOptions: Record<string, any>): { search: (e: { query: string, resultTypes: string[] }) => void, results: Result[], query: string } {
         const [results, setResults] = useState<{ results: Result[], query: string }>({
             results: [],
             query: ""
         });
-
-        function getRef<T>(e: () => T): T {
-            const ref_ = useRef<T>(ref as T);
-            if (ref_.current === ref)
-                ref_.current = e();
-            return ref_.current;
-        }
 
         const searchHandler: InstanceType<typeof SearchHandler> = getRef(() => {
                 const searchHandler = new SearchHandler((r: Result[], q: string) => {
@@ -465,7 +468,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         };
     }
 
-    function generateResults({ selectedDestinations }: { selectedDestinations: DestinationItem[] }) {
+    function generateResults() {
         const { search, query, results } = getSearchHandler({
             blacklist: null,
             frecencyBoosters: !0,
@@ -480,15 +483,12 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             updateSearch(searchText);
         }
 
-        const [pinned, setPinned] = useState(selectedDestinations != null ? selectedDestinations : []);
         React.useLayoutEffect(() => {
-                search({
-                    query: queryData,
-                    resultTypes: resultTypes,
-                });
-                setPinned(selectedDestinations != null ? selectedDestinations : []);
-            }
-            , [search, queryData]);
+            search({
+                query: queryData,
+                resultTypes: resultTypes,
+            });
+        }, [search, queryData]);
 
         loadFrecency();
 
@@ -507,88 +507,19 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
         const hasQuery = query !== "";
 
-        function getItem(e: DestinationItem): Result {
-            if (e.type === "guild") {
-                const guild = GuildStore.getGuild(e.id);
-                return {
-                    type: TextTypes.GUILD,
-                    record: guild,
-                    score: 0,
-                    comparator: guild.name,
-                };
-            }
-            if (e.type !== "user")
-                return convertItem(e.id);
-            {
-                const user = UserStore.getUser(e.id);
-                return {
-                    type: TextTypes.USER,
-                    record: user,
-                    score: 0,
-                    // @ts-ignore globalName is not in the types but exists
-                    comparator: user.globalName,
-                };
-            }
-        }
-
-        const filterItems = (items: any[]) => {
-            return items.filter(
-                item => item != null && resultTypes.includes(item.type)
-            );
-        };
-
-        function filterResults(props: {
-            results: Result[];
-            hasQuery: boolean;
-            frequentChannels: Channel[];
-            pinnedDestinations: DestinationItem[];
-            channelHistory: string[];
-            guilds: GuildResult[]
-        }): Result[] {
-            const removeDuplicates = (arr: Result[]): Result[] => {
-                const clean: any[] = [];
-                const seenIds = new Set();
-                arr.forEach(item => {
-                    if (item == null || item.record == null) return;
-                    if (!seenIds.has(item.record.id)) {
-                        seenIds.add(item.record.id);
-                        clean.push(item);
-                    }
-                });
-                return clean;
-            };
-
-            const { results, hasQuery, frequentChannels, pinnedDestinations, channelHistory, guilds } = props;
-            if (hasQuery) return filterItems(results);
-
-            const recentDestinations = filterItems([
-                ...(channelHistory.length > 0 ? channelHistory.map(e => convertItem(e)) : []),
-                ...(frequentChannels.length > 0 ? frequentChannels.map(e => convertItem(e.id)) : []),
-                ...guilds
-            ]);
-
-            return removeDuplicates(
-                [...(pinnedDestinations.length > 0 ? pinnedDestinations.map(e => getItem(e)) : []),
-                    ...recentDestinations
-                ]);
-        }
-
         return {
             results: useMemo(() => filterResults({
                 results: results,
                 hasQuery: hasQuery,
                 frequentChannels: frequentChannels,
-                pinnedDestinations: pinned,
                 channelHistory: channelHistory,
                 guilds: guilds
-            }), [results, hasQuery, frequentChannels, pinned, channelHistory, guilds]),
+            }), [results, hasQuery, frequentChannels, channelHistory, guilds]),
             updateSearchText: updateSearch
         };
     }
 
-    const { results, updateSearchText } = generateResults({
-        selectedDestinations: selected,
-    });
+    const { results, updateSearchText } = generateResults();
 
     const selectedDestinationKeys = useMemo(() => {
         return selected?.map(destination => `${destination.type}-${destination.id}`) || [];
@@ -615,7 +546,6 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
             const key = `${destination.type}-${destination.id}`;
 
-
             const rowProps: UnspecificRowProps = {
                 key,
                 destination,
@@ -636,32 +566,18 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             if (type === "GUILD")
                 return generateGuildItem(record, rowProps);
             else throw new Error("Unknown type " + type);
-        }, [results, selectedDestinationKeys, handleToggleDestination]);
-        const navRef = useRef(null);
-        const nav = createNavigator(cl("nav"), navRef);
+        }, [results]);
 
-        return navigatorWrapper({
-            navigator: nav,
-            children: navigatorData({
-                children: e => {
-                    const { ref, ...data } = e;
-                    return <SearchBarModule.ModalListContent
-                        scrollerRef={
-                            elem => {
-                                navRef.current = elem;
-                                ref.current = elem?.getScrollerNode() ?? null;
-                            }
-                        }
-                        {...data}
-                        paddingBottom={paddingBottom}
-                        paddingTop={paddingTop}
-                        sections={sectionCount}
-                        sectionHeight={0}
-                        renderRow={callback}
-                        rowHeight={rowHeight}/>;
-                }
-            })
-        });
+        return <SearchBarModule.ModalListContent
+            tabIndex={-1}
+            data-list-id="NO_LIST"
+            role="list"
+            paddingBottom={paddingBottom}
+            paddingTop={paddingTop}
+            sections={sectionCount}
+            sectionHeight={0}
+            renderRow={callback}
+            rowHeight={rowHeight}/>;
     }
 
 
@@ -673,11 +589,9 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             });
 
             if (index === -1) {
-                refCounter.current += 1;
                 return [e, ...currentSelected];
             }
 
-            refCounter.current += 1;
             currentSelected.splice(index, 1);
             return [...currentSelected];
         });
@@ -713,7 +627,6 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                         setSearchText("");
                         updateSearchText("");
                     }}
-                    autoFocus={true}
                 />
             </ModalHeader>
             {
