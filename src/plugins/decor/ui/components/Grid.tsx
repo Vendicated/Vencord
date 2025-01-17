@@ -5,6 +5,7 @@
  */
 
 import { React } from "@webpack/common";
+import { JSX } from "react";
 
 import { cl } from "../";
 
