@@ -1,0 +1,29 @@
+.vc-drag-att-item {
+    display: inline-flex;
+    cursor: grab;
+    pointer-events: auto;
+    transition: all 0.2s;
+}
+
+/* the item left behind after you begin dragging it */
+.vc-drag-att-item.vc-drag-att-dragging {
+    opacity: 0.25;
+}
+
+/* the item being dragged when you hover back over it */
+.vc-drag-att-item.vc-drag-att-dragging.vc-drag-att-drop-target {
+    outline: 2px solid var(--red-360);
+    border-radius: 5px;
+}
+
+/* the item you are dragging over when the dragged item is coming from the right */
+.vc-drag-att-item.vc-drag-att-drop-from-right {
+    border-left: 5px solid var(--green-360);
+    border-radius: 5px;
+}
+
+/* the item you are dragging over when the dragged item is coming from the left */
+.vc-drag-att-item.vc-drag-att-drop-from-left {
+    border-right: 5px solid var(--green-360);
+    border-radius: 5px;
+}

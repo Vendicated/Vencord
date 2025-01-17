@@ -4,16 +4,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./style.css";
+
+import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
+import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { React, useRef } from "@webpack/common";
+import { findComponentByCodeLazy } from "@webpack";
+import { React, useDrag, useDrop, useRef } from "@webpack/common";
 
-const useDrag = findByCodeLazy("useDrag::spec.begin") as typeof import("react-dnd").useDrag;
-const useDrop = findByCodeLazy(/\i=\(0,\i.\i\)\(\i.options\)/) as typeof import("react-dnd").useDrop;
 const AttachmentItem = findComponentByCodeLazy(/channelId:\i,draftType:\i,upload:\i,/);
 const ItemType = "DND_ATTACHMENT";
+const cl = classNameFactory("vc-drag-att-");
 
 const DraggableItem = ({ uploadItem, index, moveItem, children }) => {
     const [{ isDragging }, drag] = useDrag({
@@ -45,23 +48,15 @@ const DraggableItem = ({ uploadItem, index, moveItem, children }) => {
             ref={node => {
                 drag(drop(node));
             }}
-            style={{
-                display: "inline-flex",
-                cursor: "grab",
-                pointerEvents: "auto",
-                transition: "all 0.2s",
-                borderRadius: "5px",
-                ...(isDragging ? {
-                    opacity: 0.25
-                } : {}),
-                ...(isOver && isDragging ? {
-                    outline: "2px solid red"
-                } : {}),
-                ...(isOver && !isDragging ? {
-                    borderLeft: isComingFromRight.current ? "5px solid green" : "none",
-                    borderRight: isComingFromLeft.current ? "5px solid green" : "none"
-                } : {}),
-            }}
+            className={
+                classes(
+                    cl("item"),
+                    isDragging && cl("dragging"),
+                    isOver && cl("drop-target"),
+                    isOver && isComingFromRight.current && cl("drop-from-right"),
+                    isOver && isComingFromLeft.current && cl("drop-from-left")
+                )
+            }
         >
             {children}
         </div>
