@@ -48,7 +48,7 @@ export const Constants: t.Constants = mapMangledModuleLazy('ME:"/users/@me"', {
 export const RestAPI: t.RestAPI = findLazy(m => typeof m === "object" && m.del && m.put);
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
-export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", "registerLanguage");
+export const hljs: typeof import("highlight.js").default = findByPropsLazy("highlight", "registerLanguage");
 
 export const { match, P }: Pick<typeof import("ts-pattern"), "match" | "P"> = mapMangledModuleLazy("@ts-pattern/matcher", {
     match: filters.byCode("return new"),
@@ -163,9 +163,13 @@ waitFor(["open", "saveAccountChanges"], m => SettingsRouter = m);
 
 export const PermissionsBits: t.PermissionsBits = findLazy(m => typeof m.ADMINISTRATOR === "bigint");
 
-export const zustandCreate = findByCodeLazy("will be removed in v4");
+export const { zustandCreate } = mapMangledModuleLazy(["useSyncExternalStoreWithSelector:", "Object.assign"], {
+    zustandCreate: filters.byCode(/=>(\i)\?\i\(\1/)
+});
 
-export const zustandPersist = findByCodeLazy("[zustand persist middleware]");
+export const { zustandPersist } = mapMangledModuleLazy(".onRehydrateStorage)?", {
+    zustandPersist: filters.byCode(/(\(\i,\i\))=>.+?\i\1/)
+});
 
 export const MessageActions = findByPropsLazy("editMessage", "sendMessage");
 export const MessageCache = findByPropsLazy("clearCache", "_channelMessages");
@@ -181,7 +185,7 @@ export const ExpressionPickerStore: t.ExpressionPickerStore = mapMangledModuleLa
     toggleExpressionPicker: filters.byCode(/getState\(\)\.activeView===\i\?\i\(\):\i\(/),
     setExpressionPickerView: filters.byCode(/setState\({activeView:\i,lastActiveView:/),
     setSearchQuery: filters.byCode("searchQuery:"),
-    useExpressionPickerStore: filters.byCode("Object.is")
+    useExpressionPickerStore: filters.byCode(/\(\i,\i=\i\)=>/)
 });
 
 export const PopoutActions: t.PopoutActions = mapMangledModuleLazy('type:"POPOUT_WINDOW_OPEN"', {

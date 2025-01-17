@@ -11,7 +11,7 @@ import { Logger } from "@utils/Logger";
 import { waitFor } from "@webpack";
 import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
-import { HTMLProps, MouseEventHandler, ReactNode } from "react";
+import { HTMLProps, JSX, MouseEventHandler, ReactNode } from "react";
 
 let ChannelTextAreaClasses: Record<"button" | "buttonContainer", string>;
 waitFor(["buttonContainer", "channelTextArea"], m => ChannelTextAreaClasses = m);
@@ -99,7 +99,8 @@ export interface ChatBarButtonProps {
     tooltip: string;
     onClick: MouseEventHandler<HTMLButtonElement>;
     onContextMenu?: MouseEventHandler<HTMLButtonElement>;
-    buttonProps?: Omit<HTMLProps<HTMLButtonElement>, "size" | "onClick" | "onContextMenu">;
+    onAuxClick?: MouseEventHandler<HTMLButtonElement>;
+    buttonProps?: Omit<HTMLProps<HTMLButtonElement>, "size" | "onClick" | "onContextMenu" | "onAuxClick">;
 }
 export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
     return (
@@ -115,6 +116,7 @@ export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
                         innerClassName={`${ButtonWrapperClasses.button} ${ChannelTextAreaClasses?.button}`}
                         onClick={props.onClick}
                         onContextMenu={props.onContextMenu}
+                        onAuxClick={props.onAuxClick}
                         {...props.buttonProps}
                     >
                         <div className={ButtonWrapperClasses.buttonWrapper}>

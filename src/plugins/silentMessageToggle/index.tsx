@@ -78,7 +78,7 @@ const SilentMessageToggle: ChatBarButton = ({ isMainChat }) => {
                 {!enabled && <>
                     <mask id="vc-silent-msg-mask">
                         <path fill="#fff" d="M0 0h24v24H0Z" />
-                        <path stroke="#000" stroke-width="5.99068" d="M0 24 24 0" />
+                        <path stroke="#000" strokeWidth="5.99068" d="M0 24 24 0" />
                     </mask>
                     <path fill="var(--status-danger)" d="m21.178 1.70703 1.414 1.414L4.12103 21.593l-1.414-1.415L21.178 1.70703Z" />
                 </>}
