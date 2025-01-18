@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { findByPropsLazy, findModuleId, proxyLazyWebpack, wreq } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
@@ -47,7 +47,7 @@ export interface ModalOptions {
     onCloseCallback?: (() => void);
 }
 
-type RenderFunction = (props: ModalProps) => ReactNode;
+type RenderFunction = (props: ModalProps) => ReactNode | Promise<ReactNode>;
 
 export const Modals = findByPropsLazy("ModalRoot", "ModalCloseButton") as {
     ModalRoot: ComponentType<PropsWithChildren<{
@@ -101,24 +101,39 @@ export const Modals = findByPropsLazy("ModalRoot", "ModalCloseButton") as {
     }>;
 };
 
-export interface ImageModalItem {
-    type: "IMAGE" | "VIDEO";
+export type MediaModalItem = {
     url: string;
+    type: "IMAGE" | "VIDEO";
+    original?: string;
+    alt?: string;
     width?: number;
     height?: number;
-    original?: string;
-}
+    animated?: boolean;
+    maxWidth?: number;
+    maxHeight?: number;
+} & Record<PropertyKey, any>;
 
-export type ImageModal = ComponentType<{
+export type MediaModalProps = {
+    location?: string;
+    contextKey?: string;
+    onCloseCallback?: () => void;
     className?: string;
+    items: MediaModalItem[];
+    startingIndex?: number;
+    onIndexChange?: (...args: any[]) => void;
     fit?: string;
-    onClose?(): void;
+    shouldRedactExplicitContent?: boolean;
     shouldHideMediaOptions?: boolean;
-    shouldAnimate?: boolean;
-    items: ImageModalItem[];
-}>;
+    shouldAnimateCarousel?: boolean;
+};
 
-export const ImageModal = findComponentByCodeLazy(".MEDIA_MODAL_CLOSE") as ImageModal;
+export const openMediaModal: (props: MediaModalProps) => void = proxyLazyWebpack(() => {
+    const mediaModalKeyModuleId = findModuleId('"Zoomed Media Modal"');
+    if (mediaModalKeyModuleId == null) return;
+
+    const openMediaModalModule = wreq(findModuleId(mediaModalKeyModuleId, "modalKey:") as any);
+    return Object.values<any>(openMediaModalModule).find(v => String(v).includes("modalKey:"));
+});
 
 export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
 export const ModalHeader = LazyComponent(() => Modals.ModalHeader);
@@ -126,35 +141,32 @@ export const ModalContent = LazyComponent(() => Modals.ModalContent);
 export const ModalFooter = LazyComponent(() => Modals.ModalFooter);
 export const ModalCloseButton = LazyComponent(() => Modals.ModalCloseButton);
 
-const ModalAPI = findByPropsLazy("openModalLazy");
+export const ModalAPI = findByPropsLazy("openModalLazy");
 
 /**
  * Wait for the render promise to resolve, then open a modal with it.
  * This is equivalent to render().then(openModal)
  * You should use the Modal components exported by this file
  */
-export function openModalLazy(render: () => Promise<RenderFunction>, options?: ModalOptions & { contextKey?: string; }): Promise<string> {
-    return ModalAPI.openModalLazy(render, options);
-}
+export const openModalLazy: (render: () => Promise<RenderFunction>, options?: ModalOptions & { contextKey?: string; }) => Promise<string>
+    = proxyLazyWebpack(() => ModalAPI.openModalLazy);
 
 /**
  * Open a Modal with the given render function.
  * You should use the Modal components exported by this file
  */
-export function openModal(render: RenderFunction, options?: ModalOptions, contextKey?: string): string {
-    return ModalAPI.openModal(render, options, contextKey);
-}
+export const openModal: (render: RenderFunction, options?: ModalOptions, contextKey?: string) => string
+    = proxyLazyWebpack(() => ModalAPI.openModal);
 
 /**
  * Close a modal by its key
  */
-export function closeModal(modalKey: string, contextKey?: string): void {
-    return ModalAPI.closeModal(modalKey, contextKey);
-}
+export const closeModal: (modalKey: string, contextKey?: string) => void
+    = proxyLazyWebpack(() => ModalAPI.closeModal);
 
 /**
  * Close all open modals
  */
-export function closeAllModals(): void {
-    return ModalAPI.closeAllModals();
-}
+export const closeAllModals: () => void
+    = proxyLazyWebpack(() => ModalAPI.closeAllModals);
+

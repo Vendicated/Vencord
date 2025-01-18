@@ -16,7 +16,7 @@ import { User } from "discord-types/general";
 interface UserProfileProps {
     popoutProps: Record<string, any>;
     currentUser: User;
-    originalPopout: () => React.ReactNode;
+    OriginalPopout: () => React.ReactNode;
 }
 
 const UserProfile = findComponentByCodeLazy("UserProfilePopoutWrapper: user cannot be undefined");
@@ -69,23 +69,23 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".Messages.ACCOUNT_SPEAKING_WHILE_MUTED",
+            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
             group: true,
             replacement: [
                 {
-                    match: /(?<=\.SIZE_32\)}\);)/,
+                    match: /(?<=\.AVATAR_SIZE\);)/,
                     replace: "$self.useAccountPanelRef();"
                 },
                 {
                     match: /(\.AVATAR,children:.+?renderPopout:(\i)=>){(.+?)}(?=,position)(?<=currentUser:(\i).+?)/,
-                    replace: (_, rest, popoutProps, originalPopout, currentUser) => `${rest}$self.UserProfile({popoutProps:${popoutProps},currentUser:${currentUser},originalPopout:()=>{${originalPopout}}})`
+                    replace: (_, rest, popoutProps, originalPopout, currentUser) => `${rest}$self.UserProfile({popoutProps:${popoutProps},currentUser:${currentUser},OriginalPopout:()=>{${originalPopout}}})`
                 },
                 {
                     match: /\.AVATAR,children:.+?(?=renderPopout:)/,
                     replace: "$&onRequestClose:$self.onPopoutClose,"
                 },
                 {
-                    match: /(?<=.avatarWrapper,)/,
+                    match: /(?<=\.avatarWrapper,)/,
                     replace: "ref:$self.accountPanelRef,onContextMenu:$self.openAccountPanelContextMenu,"
                 }
             ]
@@ -112,17 +112,17 @@ export default definePlugin({
         openAlternatePopout = false;
     },
 
-    UserProfile: ErrorBoundary.wrap(({ popoutProps, currentUser, originalPopout }: UserProfileProps) => {
+    UserProfile: ErrorBoundary.wrap(({ popoutProps, currentUser, OriginalPopout }: UserProfileProps) => {
         if (
             (settings.store.prioritizeServerProfile && openAlternatePopout) ||
             (!settings.store.prioritizeServerProfile && !openAlternatePopout)
         ) {
-            return originalPopout();
+            return <OriginalPopout />;
         }
 
         const currentChannel = getCurrentChannel();
         if (currentChannel?.getGuildId() == null) {
-            return originalPopout();
+            return <OriginalPopout />;
         }
 
         return (

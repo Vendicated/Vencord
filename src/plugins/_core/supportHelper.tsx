@@ -34,6 +34,7 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { JSX } from "react";
 
 import gitHash from "~git-hash";
 import plugins, { PluginMeta } from "~plugins";
@@ -147,9 +148,9 @@ export default definePlugin({
     settings,
 
     patches: [{
-        find: ".BEGINNING_DM.format",
+        find: "#{intl::BEGINNING_DM}",
         replacement: {
-            match: /BEGINNING_DM\.format\(\{.+?\}\),(?=.{0,300}(\i)\.isMultiUserDM)/,
+            match: /#{intl::BEGINNING_DM},{.+?}\),(?=.{0,300}(\i)\.isMultiUserDM)/,
             replace: "$& $self.renderContributorDmWarningCard({ channel: $1 }),"
         }
     }],
