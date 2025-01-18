@@ -179,6 +179,16 @@ export default definePlugin({
     description: "Adds shorter Aliases for many things on the window. Run `shortcutList` for a list.",
     authors: [Devs.Ven],
 
+    patches: [
+        {
+            find: 'this,"_changeCallbacks",',
+            replacement: {
+                match: /\i\(this,"_changeCallbacks",/,
+                replace: "Reflect.defineProperty(this,Symbol.toStringTag,{value:this.getName(),configurable:!0,writable:!0,enumerable:!1}),$&"
+            }
+        }
+    ],
+
     startAt: StartAt.Init,
     start() {
         const shortcuts = makeShortcuts();
