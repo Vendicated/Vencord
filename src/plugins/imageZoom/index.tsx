@@ -81,7 +81,16 @@ export const settings = definePluginSettings({
 });
 
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = children => {
+const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    try {
+        // Discord re-uses the image context menu for links to for the copy and open buttons
+        if ("href" in props) return;
+        const classes: string[] = [...props.target.classList];
+        // emojis in user statuses
+        if (classes.some(x => x === "emoji")) return;
+    } catch (e) {
+        console.error(e);
+    }
     const { square, nearestNeighbour } = settings.use(["square", "nearestNeighbour"]);
 
     children.push(
