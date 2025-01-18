@@ -2,4 +2,4 @@
 
 Replaces the Google search with different Engines
 
-![Visualization](https://github.com/Vendicated/Vencord/assets/61953774/8b8158d2-0407-4d7b-9dff-a8b9bdc1a122)
+![Visualization](https://github.com/user-attachments/assets/e237dbee-46a1-4aed-b4df-7f11ee6a47be)
