@@ -168,6 +168,7 @@ export const enum OptionType {
     SELECT,
     SLIDER,
     COMPONENT,
+    ARRAY
 }
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
@@ -184,6 +185,7 @@ export type PluginSettingDef = (
     | PluginSettingSliderDef
     | PluginSettingComponentDef
     | PluginSettingBigIntDef
+    | PluginSettingArrayDef
 ) & PluginSettingCommon;
 
 export interface PluginSettingCommon {
@@ -238,10 +240,16 @@ export interface PluginSettingSelectDef {
     type: OptionType.SELECT;
     options: readonly PluginSettingSelectOption[];
 }
+
 export interface PluginSettingSelectOption {
     label: string;
     value: string | number | boolean;
     default?: boolean;
+}
+
+export interface PluginSettingArrayDef {
+    type: OptionType.ARRAY;
+    default?: any[];
 }
 
 export interface PluginSettingSliderDef {
@@ -293,7 +301,9 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingSelectDef ? O["options"][number]["value"] :
     O extends PluginSettingSliderDef ? number :
     O extends PluginSettingComponentDef ? any :
+    O extends PluginSettingArrayDef ? O["default"] extends any[] ? O["default"] : any[] :
     never;
+
 type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
     O["options"] extends { default?: boolean; }[] ? O["options"][number]["value"] : undefined
 ) : O extends { default: infer T; } ? T : undefined;
@@ -345,13 +355,15 @@ export type PluginOptionsItem =
     | PluginOptionBoolean
     | PluginOptionSelect
     | PluginOptionSlider
-    | PluginOptionComponent;
+    | PluginOptionComponent
+    | PluginOptionArray;
 export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
 export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | BigInt>;
 export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
 export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
+export type PluginOptionArray = PluginSettingArrayDef & PluginSettingCommon;
 
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
     [key in keyof PluginExports]:
