@@ -18,7 +18,7 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
-import { Settings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -32,20 +32,17 @@ interface Tag {
     enabled: boolean;
 }
 
-const getTags = () => DataStore.get(DATA_KEY).then<Tag[]>(t => t ?? []);
-const getTag = (name: string) => DataStore.get(DATA_KEY).then<Tag | null>((t: Tag[]) => (t ?? []).find((tt: Tag) => tt.name === name) ?? null);
-const addTag = async (tag: Tag) => {
-    const tags = await getTags();
-    tags.push(tag);
-    DataStore.set(DATA_KEY, tags);
-    return tags;
-};
-const removeTag = async (name: string) => {
-    let tags = await getTags();
-    tags = await tags.filter((t: Tag) => t.name !== name);
-    DataStore.set(DATA_KEY, tags);
-    return tags;
-};
+function getTag(name: string) {
+    return settings.store.tagsList.find(tag => tag.name === name) ?? null;
+}
+
+function addTag(tag: Tag) {
+    settings.store.tagsList.push(tag);
+}
+
+function removeTag(name: string) {
+    settings.store.tagsList = settings.store.tagsList.filter(tag => tag.name !== name);
+}
 
 function createTagCommand(tag: Tag) {
     registerCommand({
@@ -53,7 +50,7 @@ function createTagCommand(tag: Tag) {
         description: tag.name,
         inputType: ApplicationCommandInputType.BUILT_IN_TEXT,
         execute: async (_, ctx) => {
-            if (!await getTag(tag.name)) {
+            if (!getTag(tag.name)) {
                 sendBotMessage(ctx.channel.id, {
                     content: `${EMOTE} The tag **${tag.name}** does not exist anymore! Please reload ur Discord to fix :)`
                 });
@@ -68,6 +65,21 @@ function createTagCommand(tag: Tag) {
         [MessageTagsMarker]: true,
     }, "CustomTags");
 }
+
+const settings = definePluginSettings({
+    clyde: {
+        name: "Clyde message on send",
+        description: "If enabled, clyde will send you an ephemeral message when a tag was used.",
+        type: OptionType.BOOLEAN,
+        default: true
+    },
+    tagsList: {
+        type: OptionType.ARRAY,
+        description: "",
+        hidden: true,
+        default: [] as Tag[],
+    }
+});
 
 
 export default definePlugin({
@@ -84,7 +96,16 @@ export default definePlugin({
     },
 
     async start() {
-        for (const tag of await getTags()) createTagCommand(tag);
+        // TODO: Remove DataStore tags migrations once enough time has passed
+        const oldTags = await DataStore.get<Tag[]>(DATA_KEY);
+        if (oldTags != null) {
+            settings.store.tagsList = oldTags;
+            await DataStore.del(DATA_KEY);
+        }
+
+        for (const tag of settings.store.tagsList) {
+            createTagCommand(tag);
+        }
     },
 
     commands: [
@@ -153,7 +174,7 @@ export default definePlugin({
                         const name: string = findOption(args[0].options, "tag-name", "");
                         const message: string = findOption(args[0].options, "message", "");
 
-                        if (await getTag(name))
+                        if (getTag(name))
                             return sendBotMessage(ctx.channel.id, {
                                 content: `${EMOTE} A Tag with the name **${name}** already exists!`
                             });
@@ -165,7 +186,7 @@ export default definePlugin({
                         };
 
                         createTagCommand(tag);
-                        await addTag(tag);
+                        addTag(tag);
 
                         sendBotMessage(ctx.channel.id, {
                             content: `${EMOTE} Successfully created the tag **${name}**!`
@@ -175,13 +196,13 @@ export default definePlugin({
                     case "delete": {
                         const name: string = findOption(args[0].options, "tag-name", "");
 
-                        if (!await getTag(name))
+                        if (!getTag(name))
                             return sendBotMessage(ctx.channel.id, {
                                 content: `${EMOTE} A Tag with the name **${name}** does not exist!`
                             });
 
                         unregisterCommand(name);
-                        await removeTag(name);
+                        removeTag(name);
 
                         sendBotMessage(ctx.channel.id, {
                             content: `${EMOTE} Successfully deleted the tag **${name}**!`
@@ -195,7 +216,7 @@ export default definePlugin({
                                     // @ts-ignore
                                     title: "All Tags:",
                                     // @ts-ignore
-                                    description: (await getTags())
+                                    description: settings.store.tagsList
                                         .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
                                         .join("\n") || `${EMOTE} Woops! There are no tags yet, use \`/tags create\` to create one!`,
                                     // @ts-ignore
@@ -208,7 +229,7 @@ export default definePlugin({
                     }
                     case "preview": {
                         const name: string = findOption(args[0].options, "tag-name", "");
-                        const tag = await getTag(name);
+                        const tag = getTag(name);
 
                         if (!tag)
                             return sendBotMessage(ctx.channel.id, {
