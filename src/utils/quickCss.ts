@@ -18,9 +18,7 @@
 
 import { Settings, SettingsStore } from "@api/Settings";
 import { findStoreLazy } from "@webpack";
-import { FluxDispatcher, ThemeStore } from "@webpack/common";
-
-import { sleep } from "./misc";
+import { ThemeStore } from "@webpack/common";
 
 const PopoutWindowStore = findStoreLazy("PopoutWindowStore");
 
@@ -141,16 +139,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!IS_WEB)
         VencordNative.quickCss.addThemeChangeListener(initThemes);
 
-    FluxDispatcher.subscribe("POPOUT_WINDOW_OPEN", () => {
-        const windowKeys = PopoutWindowStore.getWindowKeys();
-        const popoutWindow = PopoutWindowStore.getWindow(windowKeys[windowKeys.length - 1]);
-
-        sleep(300).then(() => {
+    window.addEventListener("message", event => {
+        const { discordPopoutEvent } = event.data || {};
+        if (discordPopoutEvent?.type === "loaded") {
+            const popoutWindow = PopoutWindowStore.getWindow(discordPopoutEvent.key);
             applyToPopout(popoutWindow);
             const style = popoutWindow.document.createElement("style");
             style.id = "vencord-css-core";
             style.textContent = document.getElementById("vencord-css-core")!.textContent;
             popoutWindow.document.documentElement.appendChild(style);
-        });
+        }
     });
 });
