@@ -91,8 +91,7 @@ export function setStyle(style: Style) {
     if (!styleMap.has(style.name)) styleMap.set(style.name, style);
     const storedStyle = requireStyle(style.name);
     Object.assign(storedStyle, style);
-
-    (style.enabled ? enableStyle : disableStyle)(storedStyle);
+    compileStyle(style);
 }
 
 /**
@@ -170,12 +169,13 @@ export const setStyleClassNames = (style: Style | string, classNames: Record<str
  * @see {@link setStyleClassNames} for more info on style classnames
  */
 export function updateStyleInDocument(style: Style, doc: Document) {
-    let styleElement = [...doc.head.querySelectorAll<HTMLStyleElement>("style[data-vencord-name]")].find(e => e.dataset.vencordName === style.name);
+    const parent = doc.documentElement;
+    let styleElement = [...parent.querySelectorAll<HTMLStyleElement>("style[data-vencord-name]")].find(e => e.dataset.vencordName === style.name);
     if (style.enabled) {
         if (!styleElement) {
             styleElement = doc.createElement("style");
             styleElement.dataset.vencordName = style.name;
-            doc.documentElement.appendChild(styleElement);
+            parent.appendChild(styleElement);
         }
         styleElement.textContent = style.edit ? style.edit(style.source) : style.source;
     } else styleElement?.remove();
