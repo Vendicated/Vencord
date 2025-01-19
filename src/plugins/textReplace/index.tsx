@@ -46,6 +46,9 @@ const makeEmptyRule: () => Rule = () => ({
 });
 const makeEmptyRuleArray = () => [makeEmptyRule()];
 
+let stringRules = makeEmptyRuleArray();
+let regexRules = makeEmptyRuleArray();
+
 const settings = definePluginSettings({
     replace: {
         type: OptionType.COMPONENT,
@@ -56,13 +59,13 @@ const settings = definePluginSettings({
                 <>
                     <TextReplace
                         title="Using String"
-                        rulesArray={settings.store.stringRules}
+                        rulesArray={stringRules}
                         rulesKey={STRING_RULES_KEY}
                         update={update}
                     />
                     <TextReplace
                         title="Using Regex"
-                        rulesArray={settings.store.regexRules}
+                        rulesArray={regexRules}
                         rulesKey={REGEX_RULES_KEY}
                         update={update}
                     />
@@ -70,16 +73,6 @@ const settings = definePluginSettings({
                 </>
             );
         }
-    },
-    stringRules: {
-        type: OptionType.ARRAY,
-        hidden: true,
-        description: ""
-    },
-    regexRules: {
-        type: OptionType.ARRAY,
-        hidden: true,
-        description: ""
     },
 });
 
@@ -134,8 +127,7 @@ function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) 
         if (index === rulesArray.length - 1) return;
         rulesArray.splice(index, 1);
 
-        if (rulesKey === STRING_RULES_KEY) settings.store.stringRules = [...rulesArray];
-        else settings.store.regexRules = [...rulesArray];
+        await DataStore.set(rulesKey, rulesArray);
         update();
     }
 
@@ -148,8 +140,7 @@ function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) 
         if (rulesArray[index].find === "" && rulesArray[index].replace === "" && rulesArray[index].onlyIfIncludes === "" && index !== rulesArray.length - 1)
             rulesArray.splice(index, 1);
 
-        if (rulesKey === STRING_RULES_KEY) settings.store.stringRules = [...rulesArray];
-        else settings.store.regexRules = [...rulesArray];
+        await DataStore.set(rulesKey, rulesArray);
         update();
     }
 
@@ -220,8 +211,8 @@ function applyRules(content: string): string {
     if (content.length === 0)
         return content;
 
-    if (settings.store.stringRules) {
-        for (const rule of settings.store.stringRules) {
+    if (stringRules) {
+        for (const rule of stringRules) {
             if (!rule.find) continue;
             if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
 
@@ -229,8 +220,8 @@ function applyRules(content: string): string {
         }
     }
 
-    if (settings.store.regexRules) {
-        for (const rule of settings.store.regexRules) {
+    if (regexRules) {
+        for (const rule of regexRules) {
             if (!rule.find) continue;
             if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
 
@@ -258,21 +249,8 @@ export default definePlugin({
     settings,
 
     async start() {
-
-        if (settings.store.stringRules.length === 0 || settings.store.regexRules.length === 0) {
-            const stringRules = await DataStore.get(STRING_RULES_KEY);
-            const regexRules = await DataStore.get(REGEX_RULES_KEY);
-
-            if (stringRules != null) {
-                settings.store.stringRules = stringRules;
-                await DataStore.del(STRING_RULES_KEY);
-            } else if (settings.store.stringRules.length === 0) settings.store.stringRules = makeEmptyRuleArray();
-
-            if (regexRules != null) {
-                settings.store.regexRules = regexRules;
-                await DataStore.del(REGEX_RULES_KEY);
-            } else if (settings.store.regexRules.length === 0) settings.store.regexRules = makeEmptyRuleArray();
-        }
+        stringRules = await DataStore.get(STRING_RULES_KEY) ?? makeEmptyRuleArray();
+        regexRules = await DataStore.get(REGEX_RULES_KEY) ?? makeEmptyRuleArray();
 
         this.preSend = addPreSendListener((channelId, msg) => {
             // Channel used for sharing rules, applying rules here would be messy

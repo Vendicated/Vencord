@@ -54,12 +54,7 @@ export const settings = definePluginSettings({
         description: "Collapse DM sections",
         default: false,
         onChange: () => forceUpdate()
-    },
-    data: {
-        type: OptionType.ARRAY,
-        hidden: true,
-        description: "",
-    },
+    }
 });
 
 export default definePlugin({

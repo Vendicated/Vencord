@@ -34,10 +34,10 @@ interface Tag {
 
 const getTag = (name: string) => settings.store.data.find((tt: Tag) => tt.name === name);
 const addTag = (tag: Tag) => {
-    settings.store.data = [...settings.store.data, tag];
+    settings.store.data.push(tag);
 };
 const removeTag = (name: string) => {
-    settings.store.data = settings.store.data.filter((t: Tag) => t.name !== name);
+    settings.store.data.filter((t: Tag) => t.name !== name);
 };
 
 function createTagCommand(tag: Tag) {
@@ -64,16 +64,17 @@ function createTagCommand(tag: Tag) {
 
 
 const settings = definePluginSettings({
-    clyde: {
-        description: "If enabled, clyde will send you an ephemeral message when a tag was used.",
-        type: OptionType.BOOLEAN,
-        default: true
-    },
     data: {
         type: OptionType.ARRAY,
         hidden: true,
         description: ""
     },
+    migrated: {
+        type: OptionType.BOOLEAN,
+        description: "",
+        default: false,
+        hidden: true
+    }
 });
 
 
@@ -81,16 +82,22 @@ export default definePlugin({
     name: "MessageTags",
     description: "Allows you to save messages and to use them with a simple command.",
     authors: [Devs.Luna],
+    options: {
+        clyde: {
+            name: "Clyde message on send",
+            description: "If enabled, clyde will send you an ephemeral message when a tag was used.",
+            type: OptionType.BOOLEAN,
+            default: true
+        }
+    },
     settings,
 
     async start() {
-        const data = await DataStore.get(DATA_KEY);
-
-        if (data != null) {
-            settings.store.data = data;
-            await DataStore.del(DATA_KEY);
+        if (!settings.store.migrated) {
+            const data = await DataStore.get(DATA_KEY);
+            if (!!data) settings.store.data = data;
+            settings.store.migrated = true;
         }
-
         for (const tag of settings.store.data) createTagCommand(tag);
 
     },
