@@ -5,6 +5,7 @@
  */
 
 import * as DataStore from "@api/DataStore";
+import { Settings } from "@api/Settings";
 import { UserStore } from "@webpack/common";
 
 import { forceUpdate, PinOrder, PrivateChannelSortStore, settings } from "./index";
@@ -46,7 +47,7 @@ export function initCategories(userId: string) {
         currentUserCategories = settings.store.userBasedCategoryList[currentUserCategoriesIndex].categories;
     } else {
         currentUserCategoriesIndex = categoriesIndex;
-        currentUserCategories = settings.store.userBasedCategoryList[currentUserCategoriesIndex].categories;
+        currentUserCategories = settings.store.userBasedCategoryList[categoriesIndex].categories;
     }
 }
 
@@ -187,9 +188,9 @@ export function moveChannel(channelId: string, direction: -1 | 1) {
 
 // TODO: Remove DataStore PinnedDms migration once enough time has passed
 async function migrateData() {
-    if (Vencord.Settings.plugins.PinDMs.dmSectioncollapsed != null) {
-        settings.store.dmSectionCollapsed = Vencord.Settings.plugins.PinDMs.dmSectioncollapsed;
-        delete Vencord.Settings.plugins.PinDMs.dmSectioncollapsed;
+    if (Settings.plugins.PinDMs.dmSectioncollapsed != null) {
+        settings.store.dmSectionCollapsed = Settings.plugins.PinDMs.dmSectioncollapsed;
+        delete Settings.plugins.PinDMs.dmSectioncollapsed;
     }
 
     const dataStoreKeys = await DataStore.keys();
@@ -207,7 +208,5 @@ async function migrateData() {
         await DataStore.del(pinDmsKey);
     }
 
-    await DataStore.del(CATEGORY_MIGRATED_PINDMS_KEY);
-    await DataStore.del(CATEGORY_MIGRATED_KEY);
-    await DataStore.del(OLD_CATEGORY_KEY);
+    await Promise.all([DataStore.del(CATEGORY_MIGRATED_PINDMS_KEY), DataStore.del(CATEGORY_MIGRATED_KEY), DataStore.del(OLD_CATEGORY_KEY)]);
 }
