@@ -16,11 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { MapValue } from "type-fest/source/entry";
-
-export type Style = MapValue<typeof VencordStyles>;
-
 export const styleMap = window.VencordStyles ??= new Map();
+
+export interface Style {
+    name: string;
+    source: string;
+    enabled: boolean;
+    edit?(source: string): string;
+}
 
 export function requireStyle(name: string) {
     const style = styleMap.get(name);
@@ -35,7 +38,7 @@ function findDocuments() {
 
 /**
  * A style's name can be obtained from importing a stylesheet with `?managed` at the end of the import
- * @param name The name of the style
+ * @param style The style object
  * @returns `false` if the style was already enabled, `true` otherwise
  * @example
  * import pluginStyle from "./plugin.css?managed";
@@ -43,9 +46,7 @@ function findDocuments() {
  * // Inside some plugin method like "start()" or "[option].onChange()"
  * enableStyle(pluginStyle);
  */
-export function enableStyle(name: string) {
-    const style = requireStyle(name);
-
+export function enableStyle(style: Style) {
     style.enabled = true;
     compileStyle(style);
 
@@ -56,16 +57,12 @@ export function enableStyle(name: string) {
 }
 
 /**
- * @param name The name of the style
+ * @param style The style object
  * @returns `false` if the style was already disabled, `true` otherwise
  * @see {@link enableStyle} for info on getting the name of an imported style
  */
-export function disableStyle(name: string) {
-    const style = requireStyle(name);
-
-    findDocuments().forEach(doc => {
-        [...doc.head.querySelectorAll<HTMLStyleElement>("style[data-vencord-name]")].find(e => e.dataset.vencordName === style.name)?.remove();
-    });
+export function disableStyle(style: Style) {
+    compileStyle(style);
 
     if (!style.enabled)
         return false;
@@ -75,26 +72,15 @@ export function disableStyle(name: string) {
 }
 
 /**
- * @param name The name of the style
- * @returns `true` in most cases, may return `false` in some edge cases
- * @see {@link enableStyle} for info on getting the name of an imported style
- */
-export const toggleStyle = (name: string) => isStyleEnabled(name) ? disableStyle(name) : enableStyle(name);
-
-/**
- * @param name The name of the style
- * @returns Whether the style is enabled
- * @see {@link enableStyle} for info on getting the name of an imported style
- */
-export const isStyleEnabled = (name: string) => requireStyle(name).enabled ?? false;
-
-/**
  * @param style The new style object
  * @see {@link enableStyle} for info on getting the name of an imported style
  */
 export function setStyle(style: Style) {
-    styleMap.set(style.name, style);
-    (style.enabled ? enableStyle : disableStyle)(style.name);
+    if (!styleMap.has(style.name)) styleMap.set(style.name, style);
+    const storedStyle = requireStyle(style.name);
+    Object.assign(storedStyle, style);
+
+    (style.enabled ? enableStyle : disableStyle)(style);
 }
 
 /**
@@ -132,8 +118,7 @@ export const setStyleClassNames = (name: string, classNames: Record<string, stri
                 return className ? classNameToSelector(className) : match;
             });
     };
-    if (recompile && isStyleEnabled(style.name))
-        compileStyle(style);
+    if (recompile) compileStyle(style);
 };
 
 /**
@@ -145,12 +130,14 @@ export const setStyleClassNames = (name: string, classNames: Record<string, stri
 export const compileStyle = (style: Style) => {
     findDocuments().forEach(doc => {
         let styleElement = [...doc.head.querySelectorAll<HTMLStyleElement>("style[data-vencord-name]")].find(e => e.dataset.vencordName === style.name);
-        if (!styleElement) {
-            styleElement = doc.createElement("style");
-            styleElement.dataset.vencordName = style.name;
-            document.head.appendChild(styleElement);
-        }
-        styleElement.textContent = style.edit ? style.edit(style.source) : style.source;
+        if (style.enabled) {
+            if (!styleElement) {
+                styleElement = doc.createElement("style");
+                styleElement.dataset.vencordName = style.name;
+                document.head.appendChild(styleElement);
+            }
+            styleElement.textContent = style.edit ? style.edit(style.source) : style.source;
+        } else styleElement?.remove();
     });
 
 };

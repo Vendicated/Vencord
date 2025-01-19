@@ -22,4 +22,4 @@
     enabled: false
 });
 
-export default STYLE_NAME;
+export default window.VencordStyles.get(STYLE_NAME);

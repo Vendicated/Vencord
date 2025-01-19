@@ -45,12 +45,7 @@ declare global {
 
     export var VencordNative: typeof import("./VencordNative").default;
     export var Vencord: typeof import("./Vencord");
-    export var VencordStyles: Map<string, {
-        name: string;
-        source: string;
-        enabled: boolean;
-        edit?(source: string): string;
-    }>;
+    export var VencordStyles: Map<string, import("@api/Styles").Style>;
     export var appSettings: {
         set(setting: string, v: any): void;
     };
