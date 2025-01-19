@@ -200,7 +200,7 @@ const settings = definePluginSettings({
     ignoreWatching: {
         type: OptionType.BOOLEAN,
         description: "Ignore all watching activities",
-        default: undefined,
+        default: false,
         onChange: recalculateActivities
     },
     ignoreCompeting: {
