@@ -21,7 +21,7 @@ import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind } from "@utils/patches";
-import { Patch, Plugin, ReporterTestable, StartAt } from "@utils/types";
+import { OptionType, Patch, Plugin, ReporterTestable, StartAt } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
 
@@ -119,6 +119,11 @@ for (const p of pluginsValues) {
         for (const [name, def] of Object.entries(p.settings.def)) {
             const checks = p.settings.checks?.[name];
             p.options[name] = { ...def, ...checks };
+
+            // TODO: Remove this once Array settings have an UI implementation
+            if (p.options[name].type === OptionType.ARRAY) {
+                p.options[name].hidden = true;
+            }
         }
     }
 
