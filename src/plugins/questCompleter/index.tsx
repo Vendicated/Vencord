@@ -63,7 +63,7 @@ let ImagesConfig = {};
 export default definePlugin({
     name: "QuestCompleter",
     description: "A plugin to complete quests without having the game.",
-    authors: [Devs.Loukios],
+    authors: [Devs.Loukious],
     patches: [
         {
             find: "\"invite-button\"",

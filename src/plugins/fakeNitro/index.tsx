@@ -1000,7 +1000,7 @@ function makeBypassPatches(): Omit<Patch, "plugin"> {
 
 export default definePlugin({
     name: "FakeNitro",
-    authors: [Devs.Arjix, Devs.ScattrdBlade, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.Loukios],
+    authors: [Devs.Arjix, Devs.ScattrdBlade, Devs.D3SOX, Devs.Ven, Devs.fawn, Devs.captain, Devs.Nuckyz, Devs.AutumnVN, Devs.Loukious],
     description: "Allows you to stream in nitro quality, upload bigger files, send fake emojis/stickers, use client themes and custom Discord notifications.",
     contextMenus: {
         "channel-attach": ctxMenuPatch,

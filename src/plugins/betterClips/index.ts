@@ -39,7 +39,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "BetterClips",
     authors: [
-        Devs.Loukios
+        Devs.Loukious
     ],
     settings,
     patches: [

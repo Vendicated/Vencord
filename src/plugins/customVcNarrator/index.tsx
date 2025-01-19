@@ -171,7 +171,7 @@ function playSample(tempSettings: any, type: string) {
 export default definePlugin({
     name: "VcNarratorCustom",
     description: "Announces when users join, leave, or move voice channels via narrator. TikTok TTS version; speechSynthesis is pretty boring",
-    authors: [Devs.Ven, Devs.Nyako, Devs.Loukios],
+    authors: [Devs.Ven, Devs.Nyako, Devs.Loukious],
 
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
