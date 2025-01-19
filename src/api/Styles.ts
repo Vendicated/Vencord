@@ -46,11 +46,12 @@ function findDocuments() {
 export function enableStyle(name: string) {
     const style = requireStyle(name);
 
+    style.enabled = true;
+    compileStyle(style);
+
     if (style.enabled)
         return false;
 
-    style.enabled = true;
-    compileStyle(style);
     return true;
 }
 
@@ -61,12 +62,13 @@ export function enableStyle(name: string) {
  */
 export function disableStyle(name: string) {
     const style = requireStyle(name);
-    if (!style.enabled)
-        return false;
 
     findDocuments().forEach(doc => {
         [...doc.head.querySelectorAll<HTMLStyleElement>("style[data-vencord-name]")].find(e => e.dataset.vencordName === style.name)?.remove();
     });
+
+    if (!style.enabled)
+        return false;
 
     style.enabled = false;
     return true;
@@ -85,6 +87,15 @@ export const toggleStyle = (name: string) => isStyleEnabled(name) ? disableStyle
  * @see {@link enableStyle} for info on getting the name of an imported style
  */
 export const isStyleEnabled = (name: string) => requireStyle(name).enabled ?? false;
+
+/**
+ * @param style The new style object
+ * @see {@link enableStyle} for info on getting the name of an imported style
+ */
+export function setStyle(style: Style) {
+    styleMap.set(style.name, style);
+    (style.enabled ? enableStyle : disableStyle)(style.name);
+}
 
 /**
  * Sets the variables of a style
