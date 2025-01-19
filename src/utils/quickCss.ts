@@ -17,8 +17,8 @@
 */
 
 import { Settings, SettingsStore } from "@api/Settings";
-import { createStyle, setStyle } from "@api/Styles";
-import { ThemeStore } from "@webpack/common";
+import { addStylesToDocument, createStyle, setStyle } from "@api/Styles";
+import { PopoutWindowStore, ThemeStore } from "@webpack/common";
 
 async function initSystemValues() {
     const values = await VencordNative.themes.getSystemValues();
@@ -86,4 +86,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!IS_WEB)
         VencordNative.quickCss.addThemeChangeListener(initThemes);
+
+    window.addEventListener("message", event => {
+        const { discordPopoutEvent } = event.data || {};
+        if (discordPopoutEvent?.type !== "loaded") return;
+        const popoutWindow = PopoutWindowStore.getWindow(discordPopoutEvent.key);
+        if (!popoutWindow?.document) return;
+        addStylesToDocument(popoutWindow.document);
+    });
 });

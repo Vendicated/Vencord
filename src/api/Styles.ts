@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { PopoutWindowStore } from "@webpack/common";
+
 export const styleMap = window.VencordStyles ??= new Map();
 
 export interface Style {
@@ -31,9 +33,9 @@ export function requireStyle(name: string) {
     return style;
 }
 
-// TODO: Implement popouts
 function findDocuments() {
-    return [document];
+    const popouts = PopoutWindowStore?.getWindowKeys()?.map(k => PopoutWindowStore?.getWindow(k)?.document) ?? [];
+    return [document, ...popouts];
 }
 
 /**
@@ -163,25 +165,39 @@ export const setStyleClassNames = (style: Style | string, classNames: Record<str
 };
 
 /**
- * Updates the stylesheet after doing the following to the sourcecode:
- *   - Interpolate style classnames
- * @param style **_Must_ be a style with a DOM element**
+ * Updates the style in a document. This should only be called by {@link compileStyle} or when a new popout is created.
+ * @param style A style object
  * @see {@link setStyleClassNames} for more info on style classnames
  */
-export const compileStyle = (style: Style) => {
-    findDocuments().forEach(doc => {
-        let styleElement = [...doc.head.querySelectorAll<HTMLStyleElement>("style[data-vencord-name]")].find(e => e.dataset.vencordName === style.name);
-        if (style.enabled) {
-            if (!styleElement) {
-                styleElement = doc.createElement("style");
-                styleElement.dataset.vencordName = style.name;
-                document.head.appendChild(styleElement);
-            }
-            styleElement.textContent = style.edit ? style.edit(style.source) : style.source;
-        } else styleElement?.remove();
-    });
+export function updateStyleInDocument(style: Style, doc: Document) {
+    let styleElement = [...doc.head.querySelectorAll<HTMLStyleElement>("style[data-vencord-name]")].find(e => e.dataset.vencordName === style.name);
+    if (style.enabled) {
+        if (!styleElement) {
+            styleElement = doc.createElement("style");
+            styleElement.dataset.vencordName = style.name;
+            doc.documentElement.appendChild(styleElement);
+        }
+        styleElement.textContent = style.edit ? style.edit(style.source) : style.source;
+    } else styleElement?.remove();
+}
 
-};
+/**
+ * Updates styles in the DOM of all documents
+ * @param style A style object
+ * @see {@link setStyleClassNames} for more info on style classnames
+ */
+export function compileStyle(style: Style) {
+    findDocuments().forEach(doc => updateStyleInDocument(style, doc));
+}
+
+/**
+ * Updates styles in the DOM of all documents
+ * @param doc The document to add styles to
+ * @see {@link setStyleClassNames} for more info on style classnames
+ */
+export function addStylesToDocument(doc: Document) {
+    styleMap.forEach(style => updateStyleInDocument(style, doc));
+}
 
 /**
  * @param name The classname
