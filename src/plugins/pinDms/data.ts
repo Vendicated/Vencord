@@ -4,11 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import * as DataStore from "@api/DataStore";
-import { Settings } from "@api/Settings";
+import { DataStore } from "@api/index";
 import { UserStore } from "@webpack/common";
 
-import { DEFAULT_COLOR } from "./constants";
 import { forceUpdate, PinOrder, PrivateChannelSortStore, settings } from "./index";
 
 export interface Category {
@@ -19,109 +17,127 @@ export interface Category {
     collapsed?: boolean;
 }
 
+export interface UserBasedCategoryList {
+    userId: string;
+    categories: Category[];
+}
+
 const CATEGORY_BASE_KEY = "PinDMsCategories-";
 const CATEGORY_MIGRATED_PINDMS_KEY = "PinDMsMigratedPinDMs";
 const CATEGORY_MIGRATED_KEY = "PinDMsMigratedOldCategories";
 const OLD_CATEGORY_KEY = "BetterPinDMsCategories-";
 
-
-export let categories: Category[] = [];
-
-export async function saveCats(cats: Category[]) {
-    const { id } = UserStore.getCurrentUser();
-    await DataStore.set(CATEGORY_BASE_KEY + id, cats);
-}
-
 export async function init() {
-    const id = UserStore.getCurrentUser()?.id;
-    await initCategories(id);
-    await migrateData(id);
+    await migrateData();
+
+    initCategories(UserStore.getCurrentUser()?.id);
     forceUpdate();
 }
 
-export async function initCategories(userId: string) {
-    categories = await DataStore.get<Category[]>(CATEGORY_BASE_KEY + userId) ?? [];
+let currentUserCategoriesIndex = -1;
+export let currentUserCategories: Category[] = [];
+
+export function initCategories(userId: string) {
+    const categoriesIndex = settings.store.userBasedCategoryList.findIndex(categoryList => categoryList.userId === userId);
+
+    if (categoriesIndex === -1) {
+        settings.store.userBasedCategoryList.push({ userId, categories: [] });
+        currentUserCategoriesIndex = settings.store.userBasedCategoryList.length - 1;
+        currentUserCategories = settings.store.userBasedCategoryList[currentUserCategoriesIndex].categories;
+    } else {
+        currentUserCategoriesIndex = categoriesIndex;
+        currentUserCategories = settings.store.userBasedCategoryList[currentUserCategoriesIndex].categories;
+    }
+}
+
+function saveUserCategories() {
+    const userCategories = settings.store.userBasedCategoryList[currentUserCategoriesIndex];
+    settings.store.userBasedCategoryList[currentUserCategoriesIndex] = { ...userCategories };
+
+    forceUpdate();
 }
 
 export function getCategory(id: string) {
-    return categories.find(c => c.id === id);
+    return currentUserCategories.find(c => c.id === id);
 }
 
-export async function createCategory(category: Category) {
-    categories.push(category);
-    await saveCats(categories);
+export function getCategoryByIndex(index: number) {
+    return currentUserCategories[index];
 }
 
-export async function updateCategory(category: Category) {
-    const index = categories.findIndex(c => c.id === category.id);
+export function createCategory(category: Category) {
+    currentUserCategories.push(category);
+    saveUserCategories();
+}
+
+export function updateCategory(category: Category) {
+    const index = currentUserCategories.findIndex(c => c.id === category.id);
     if (index === -1) return;
 
-    categories[index] = category;
-    await saveCats(categories);
+    category[index] = category;
+    saveUserCategories();
 }
 
-export async function addChannelToCategory(channelId: string, categoryId: string) {
-    const category = categories.find(c => c.id === categoryId);
-    if (!category) return;
+export function addChannelToCategory(channelId: string, categoryId: string) {
+    const category = currentUserCategories.find(c => c.id === categoryId);
+    if (category == null) return;
 
     if (category.channels.includes(channelId)) return;
 
     category.channels.push(channelId);
-    await saveCats(categories);
-
+    saveUserCategories();
 }
 
-export async function removeChannelFromCategory(channelId: string) {
-    const category = categories.find(c => c.channels.includes(channelId));
-    if (!category) return;
+export function removeChannelFromCategory(channelId: string) {
+    const category = currentUserCategories.find(c => c.channels.includes(channelId));
+    if (category == null) return;
 
     category.channels = category.channels.filter(c => c !== channelId);
-    await saveCats(categories);
+    saveUserCategories();
 }
 
-export async function removeCategory(categoryId: string) {
-    const catagory = categories.find(c => c.id === categoryId);
-    if (!catagory) return;
+export function removeCategory(categoryId: string) {
+    const categoryIndex = currentUserCategories.findIndex(c => c.id === categoryId);
+    if (categoryIndex === -1) return;
 
-    // catagory?.channels.forEach(c => removeChannelFromCategory(c));
-    categories = categories.filter(c => c.id !== categoryId);
-    await saveCats(categories);
+    currentUserCategories.splice(categoryIndex, 1);
+    saveUserCategories();
 }
 
-export async function collapseCategory(id: string, value = true) {
-    const category = categories.find(c => c.id === id);
-    if (!category) return;
+export function collapseCategory(id: string, value = true) {
+    const category = currentUserCategories.find(c => c.id === id);
+    if (category == null) return;
 
     category.collapsed = value;
-    await saveCats(categories);
+    saveUserCategories();
 }
 
-// utils
+// Utils
 export function isPinned(id: string) {
-    return categories.some(c => c.channels.includes(id));
+    return currentUserCategories.some(c => c.channels.includes(id));
 }
 
 export function categoryLen() {
-    return categories.length;
+    return currentUserCategories.length;
 }
 
 export function getAllUncollapsedChannels() {
     if (settings.store.pinOrder === PinOrder.LastMessage) {
         const sortedChannels = PrivateChannelSortStore.getPrivateChannelIds();
-        return categories.filter(c => !c.collapsed).flatMap(c => sortedChannels.filter(channel => c.channels.includes(channel)));
+        return currentUserCategories.filter(c => !c.collapsed).flatMap(c => sortedChannels.filter(channel => c.channels.includes(channel)));
     }
 
-    return categories.filter(c => !c.collapsed).flatMap(c => c.channels);
+    return currentUserCategories.filter(c => !c.collapsed).flatMap(c => c.channels);
 }
 
 export function getSections() {
-    return categories.reduce((acc, category) => {
+    return currentUserCategories.reduce((acc, category) => {
         acc.push(category.channels.length === 0 ? 1 : category.channels.length);
         return acc;
     }, [] as number[]);
 }
 
-// move categories
+// Move categories
 export const canMoveArrayInDirection = (array: any[], index: number, direction: -1 | 1) => {
     const a = array[index];
     const b = array[index + direction];
@@ -130,18 +146,18 @@ export const canMoveArrayInDirection = (array: any[], index: number, direction: 
 };
 
 export const canMoveCategoryInDirection = (id: string, direction: -1 | 1) => {
-    const index = categories.findIndex(m => m.id === id);
-    return canMoveArrayInDirection(categories, index, direction);
+    const categoryIndex = currentUserCategories.findIndex(m => m.id === id);
+    return canMoveArrayInDirection(currentUserCategories, categoryIndex, direction);
 };
 
 export const canMoveCategory = (id: string) => canMoveCategoryInDirection(id, -1) || canMoveCategoryInDirection(id, 1);
 
 export const canMoveChannelInDirection = (channelId: string, direction: -1 | 1) => {
-    const category = categories.find(c => c.channels.includes(channelId));
-    if (!category) return false;
+    const category = currentUserCategories.find(c => c.channels.includes(channelId));
+    if (category == null) return false;
 
-    const index = category.channels.indexOf(channelId);
-    return canMoveArrayInDirection(category.channels, index, direction);
+    const channelIndex = category.channels.indexOf(channelId);
+    return canMoveArrayInDirection(category.channels, channelIndex, direction);
 };
 
 
@@ -150,70 +166,46 @@ function swapElementsInArray(array: any[], index1: number, index2: number) {
     [array[index1], array[index2]] = [array[index2], array[index1]];
 }
 
-// stolen from PinDMs
-export async function moveCategory(id: string, direction: -1 | 1) {
-    const a = categories.findIndex(m => m.id === id);
+export function moveCategory(id: string, direction: -1 | 1) {
+    const a = currentUserCategories.findIndex(m => m.id === id);
     const b = a + direction;
 
-    swapElementsInArray(categories, a, b);
-
-    await saveCats(categories);
+    swapElementsInArray(currentUserCategories, a, b);
+    saveUserCategories();
 }
 
-export async function moveChannel(channelId: string, direction: -1 | 1) {
-    const category = categories.find(c => c.channels.includes(channelId));
-    if (!category) return;
+export function moveChannel(channelId: string, direction: -1 | 1) {
+    const category = currentUserCategories.find(c => c.channels.includes(channelId));
+    if (category == null) return;
 
     const a = category.channels.indexOf(channelId);
     const b = a + direction;
 
     swapElementsInArray(category.channels, a, b);
-
-    await saveCats(categories);
+    saveUserCategories();
 }
 
-
-
-// migrate data
-const getPinDMsPins = () => (Settings.plugins.PinDMs.pinnedDMs || void 0)?.split(",") as string[] | undefined;
-
-async function migratePinDMs() {
-    if (categories.some(m => m.id === "oldPins")) {
-        return await DataStore.set(CATEGORY_MIGRATED_PINDMS_KEY, true);
+// TODO: Remove DataStore PinnedDms migration once enough time has passed
+async function migrateData() {
+    if (Vencord.Settings.plugins.PinDMs.dmSectioncollapsed != null) {
+        settings.store.dmSectionCollapsed = Vencord.Settings.plugins.PinDMs.dmSectioncollapsed;
+        delete Vencord.Settings.plugins.PinDMs.dmSectioncollapsed;
     }
 
-    const pindmspins = getPinDMsPins();
+    const dataStoreKeys = await DataStore.keys();
+    const pinDmsKeys = dataStoreKeys.map(key => String(key)).filter(key => key.startsWith(CATEGORY_BASE_KEY));
 
-    // we dont want duplicate pins
-    const difference = [...new Set(pindmspins)]?.filter(m => !categories.some(c => c.channels.includes(m)));
-    if (difference?.length) {
-        categories.push({
-            id: "oldPins",
-            name: "Pins",
-            color: DEFAULT_COLOR,
-            channels: difference
-        });
+    for (const pinDmsKey of pinDmsKeys) {
+        const categories = await DataStore.get<Category[]>(pinDmsKey);
+        if (categories == null) continue;
+
+        const userId = pinDmsKey.replace(CATEGORY_BASE_KEY, "");
+        settings.store.userBasedCategoryList.push({ userId, categories });
+
+        await DataStore.del(pinDmsKey);
     }
 
-    await DataStore.set(CATEGORY_MIGRATED_PINDMS_KEY, true);
-}
-
-async function migrateOldCategories(userId: string) {
-    const oldCats = await DataStore.get<Category[]>(OLD_CATEGORY_KEY + userId);
-    // dont want to migrate if the user has already has categories.
-    if (categories.length === 0 && oldCats?.length) {
-        categories.push(...(oldCats.filter(m => m.id !== "oldPins")));
-    }
-    await DataStore.set(CATEGORY_MIGRATED_KEY, true);
-}
-
-export async function migrateData(userId: string) {
-    const m1 = await DataStore.get(CATEGORY_MIGRATED_KEY), m2 = await DataStore.get(CATEGORY_MIGRATED_PINDMS_KEY);
-    if (m1 && m2) return;
-
-    // want to migrate the old categories first and then slove any conflicts with the PinDMs pins
-    if (!m1) await migrateOldCategories(userId);
-    if (!m2) await migratePinDMs();
-
-    await saveCats(categories);
+    await DataStore.del(CATEGORY_MIGRATED_PINDMS_KEY);
+    await DataStore.del(CATEGORY_MIGRATED_KEY);
+    await DataStore.del(OLD_CATEGORY_KEY);
 }

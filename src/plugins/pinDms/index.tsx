@@ -18,14 +18,13 @@ import { Channel } from "discord-types/general";
 import { contextMenus } from "./components/contextMenu";
 import { openCategoryModal, requireSettingsMenu } from "./components/CreateCategoryModal";
 import { DEFAULT_CHUNK_SIZE } from "./constants";
-import { canMoveCategory, canMoveCategoryInDirection, categories, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getSections, init, isPinned, moveCategory, removeCategory } from "./data";
+import { canMoveCategory, canMoveCategoryInDirection, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getCategoryByIndex, getSections, init, isPinned, moveCategory, removeCategory, UserBasedCategoryList } from "./data";
 
 interface ChannelComponentProps {
     children: React.ReactNode,
     channel: Channel,
     selected: boolean;
 }
-
 
 const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
 
@@ -49,12 +48,17 @@ export const settings = definePluginSettings({
         ],
         onChange: () => forceUpdate()
     },
-
-    dmSectioncollapsed: {
+    dmSectionCollapsed: {
         type: OptionType.BOOLEAN,
         description: "Collapse DM sections",
         default: false,
         onChange: () => forceUpdate()
+    },
+    userBasedCategoryList: {
+        type: OptionType.ARRAY,
+        description: "",
+        hidden: true,
+        default: [] as UserBasedCategoryList[]
     }
 });
 
@@ -157,9 +161,9 @@ export default definePlugin({
     },
 
     startAt: StartAt.WebpackReady,
-    start: init,
+    start: () => init(),
     flux: {
-        CONNECTION_OPEN: init,
+        CONNECTION_OPEN: () => init(),
     },
 
     isPinned,
@@ -210,30 +214,31 @@ export default definePlugin({
     },
 
     isChannelIndex(sectionIndex: number, channelIndex: number) {
-        if (settings.store.dmSectioncollapsed && sectionIndex !== 0)
+        if (settings.store.dmSectionCollapsed && sectionIndex !== 0) {
             return true;
-        const cat = categories[sectionIndex - 1];
-        return this.isCategoryIndex(sectionIndex) && (cat?.channels?.length === 0 || cat?.channels[channelIndex]);
+        }
+
+        const category = getCategoryByIndex(sectionIndex - 1);
+        return this.isCategoryIndex(sectionIndex) && (category?.channels?.length === 0 || category?.channels[channelIndex]);
     },
 
     isDMSectioncollapsed() {
-        return settings.store.dmSectioncollapsed;
+        return settings.store.dmSectionCollapsed;
     },
 
     collapseDMList() {
-        settings.store.dmSectioncollapsed = !settings.store.dmSectioncollapsed;
-        forceUpdate();
+        settings.store.dmSectionCollapsed = !settings.store.dmSectionCollapsed;
     },
 
     isChannelHidden(categoryIndex: number, channelIndex: number) {
         if (categoryIndex === 0) return false;
 
-        if (settings.store.dmSectioncollapsed && this.getSections().length + 1 === categoryIndex)
+        if (settings.store.dmSectionCollapsed && this.getSections().length + 1 === categoryIndex)
             return true;
 
         if (!this.instance || !this.isChannelIndex(categoryIndex, channelIndex)) return false;
 
-        const category = categories[categoryIndex - 1];
+        const category = getCategoryByIndex(categoryIndex - 1);
         if (!category) return false;
 
         return category.collapsed && this.instance.props.selectedChannelId !== this.getCategoryChannels(category)[channelIndex];
@@ -251,18 +256,14 @@ export default definePlugin({
     },
 
     renderCategory: ErrorBoundary.wrap(({ section }: { section: number; }) => {
-        const category = categories[section - 1];
-
+        const category = getCategoryByIndex(section - 1);
         if (!category) return null;
 
         return (
             <h2
                 className={classes(headerClasses.privateChannelsHeaderContainer, "vc-pindms-section-container", category.collapsed ? "vc-pindms-collapsed" : "")}
                 style={{ color: `#${category.color.toString(16).padStart(6, "0")}` }}
-                onClick={async () => {
-                    await collapseCategory(category.id, !category.collapsed);
-                    forceUpdate();
-                }}
+                onClick={() => collapseCategory(category.id, !category.collapsed)}
                 onContextMenu={e => {
                     ContextMenuApi.openContextMenu(e, () => (
                         <Menu.Menu
@@ -284,14 +285,14 @@ export default definePlugin({
                                             canMoveCategoryInDirection(category.id, -1) && <Menu.MenuItem
                                                 id="vc-pindms-move-category-up"
                                                 label="Move Up"
-                                                action={() => moveCategory(category.id, -1).then(() => forceUpdate())}
+                                                action={() => moveCategory(category.id, -1)}
                                             />
                                         }
                                         {
                                             canMoveCategoryInDirection(category.id, 1) && <Menu.MenuItem
                                                 id="vc-pindms-move-category-down"
                                                 label="Move Down"
-                                                action={() => moveCategory(category.id, 1).then(() => forceUpdate())}
+                                                action={() => moveCategory(category.id, 1)}
                                             />
                                         }
                                     </>
@@ -304,7 +305,7 @@ export default definePlugin({
                                 id="vc-pindms-delete-category"
                                 color="danger"
                                 label="Delete Category"
-                                action={() => removeCategory(category.id).then(() => forceUpdate())}
+                                action={() => removeCategory(category.id)}
                             />
 
 
@@ -341,7 +342,7 @@ export default definePlugin({
     },
 
     getChannel(sectionIndex: number, index: number, channels: Record<string, Channel>) {
-        const category = categories[sectionIndex - 1];
+        const category = getCategoryByIndex(sectionIndex - 1);
         if (!category) return { channel: null, category: null };
 
         const channelId = this.getCategoryChannels(category)[index];

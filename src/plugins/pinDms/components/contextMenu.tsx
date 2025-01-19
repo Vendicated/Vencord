@@ -7,8 +7,8 @@
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Menu } from "@webpack/common";
 
-import { addChannelToCategory, canMoveChannelInDirection, categories, isPinned, moveChannel, removeChannelFromCategory } from "../data";
-import { forceUpdate, PinOrder, settings } from "../index";
+import { addChannelToCategory, canMoveChannelInDirection, currentUserCategories, isPinned, moveChannel, removeChannelFromCategory } from "../data";
+import { PinOrder, settings } from "../index";
 import { openCategoryModal } from "./CreateCategoryModal";
 
 function createPinMenuItem(channelId: string) {
@@ -31,12 +31,12 @@ function createPinMenuItem(channelId: string) {
                     <Menu.MenuSeparator />
 
                     {
-                        categories.map(category => (
+                        currentUserCategories.map(category => (
                             <Menu.MenuItem
                                 key={category.id}
                                 id={`pin-category-${category.id}`}
                                 label={category.name}
-                                action={() => addChannelToCategory(channelId, category.id).then(forceUpdate)}
+                                action={() => addChannelToCategory(channelId, category.id)}
                             />
                         ))
                     }
@@ -49,7 +49,7 @@ function createPinMenuItem(channelId: string) {
                         id="unpin-dm"
                         label="Unpin DM"
                         color="danger"
-                        action={() => removeChannelFromCategory(channelId).then(forceUpdate)}
+                        action={() => removeChannelFromCategory(channelId)}
                     />
 
                     {
@@ -57,7 +57,7 @@ function createPinMenuItem(channelId: string) {
                             <Menu.MenuItem
                                 id="move-up"
                                 label="Move Up"
-                                action={() => moveChannel(channelId, -1).then(forceUpdate)}
+                                action={() => moveChannel(channelId, -1)}
                             />
                         )
                     }
@@ -67,7 +67,7 @@ function createPinMenuItem(channelId: string) {
                             <Menu.MenuItem
                                 id="move-down"
                                 label="Move Down"
-                                action={() => moveChannel(channelId, 1).then(forceUpdate)}
+                                action={() => moveChannel(channelId, 1)}
                             />
                         )
                     }

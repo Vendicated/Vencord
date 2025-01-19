@@ -10,8 +10,7 @@ import { extractAndLoadChunksLazy, findComponentByCodeLazy, findExportedComponen
 import { Button, Forms, Text, TextInput, Toasts, useEffect, useState } from "@webpack/common";
 
 import { DEFAULT_COLOR, SWATCHES } from "../constants";
-import { categories, Category, createCategory, getCategory, updateCategory } from "../data";
-import { forceUpdate } from "../index";
+import { Category, categoryLen, createCategory, getCategory, updateCategory } from "../data";
 
 interface ColorPickerProps {
     color: number | null;
@@ -52,7 +51,7 @@ function useCategory(categoryId: string | null, initalChannelId: string | null) 
         else if (initalChannelId)
             setCategory({
                 id: Toasts.genId(),
-                name: `Pin Category ${categories.length + 1}`,
+                name: `Pin Category ${categoryLen() + 1}`,
                 color: DEFAULT_COLOR,
                 collapsed: false,
                 channels: [initalChannelId]
@@ -70,14 +69,13 @@ export function NewCategoryModal({ categoryId, modalProps, initalChannelId }: Pr
 
     if (!category) return null;
 
-    const onSave = async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const onSave = (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         if (!categoryId)
-            await createCategory(category);
+            createCategory(category);
         else
-            await updateCategory(category);
+            updateCategory(category);
 
-        forceUpdate();
         modalProps.onClose();
     };
 
