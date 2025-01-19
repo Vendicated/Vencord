@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { createStyle } from "@api/Styles";
 import { debounce } from "@shared/debounce";
 import { contextBridge, webFrame } from "electron";
 import { readFileSync, watch } from "fs";
@@ -31,12 +30,12 @@ if (location.protocol !== "data:") {
     // #region cssInsert
     const rendererCss = join(__dirname, IS_VESKTOP ? "vencordDesktopRenderer.css" : "renderer.css");
 
-    const injectStyle = () => createStyle("vencord-css-core", readFileSync(rendererCss, "utf-8"));
+    const injectStyle = () => webFrame.executeJavaScript(`Vencord.Api.Styles.createStyle("vencord-css-core", atob("${btoa(readFileSync(rendererCss, "utf-8"))}"));`);
 
     if (document.readyState === "complete") {
         injectStyle();
     } else {
-        document.addEventListener("DOMContentLoaded", injectStyle, {
+        document.addEventListener("DOMContentLoaded", () => injectStyle(), {
             once: true
         });
     }
