@@ -32,6 +32,10 @@ interface Tag {
     enabled: boolean;
 }
 
+function getTags() {
+    return settings.store.tagsList;
+}
+
 function getTag(name: string) {
     return settings.store.tagsList.find(tag => tag.name === name) ?? null;
 }
@@ -81,7 +85,6 @@ const settings = definePluginSettings({
     }
 });
 
-
 export default definePlugin({
     name: "MessageTags",
     description: "Allows you to save messages and to use them with a simple command.",
@@ -103,7 +106,7 @@ export default definePlugin({
             await DataStore.del(DATA_KEY);
         }
 
-        for (const tag of settings.store.tagsList) {
+        for (const tag of getTags()) {
             createTagCommand(tag);
         }
     },
@@ -216,7 +219,7 @@ export default definePlugin({
                                     // @ts-ignore
                                     title: "All Tags:",
                                     // @ts-ignore
-                                    description: settings.store.tagsList
+                                    description: getTags()
                                         .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
                                         .join("\n") || `${EMOTE} Woops! There are no tags yet, use \`/tags create\` to create one!`,
                                     // @ts-ignore
