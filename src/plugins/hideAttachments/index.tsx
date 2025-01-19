@@ -83,7 +83,8 @@ export default definePlugin({
                     color: var(--text-muted);
                     font-size: 80%;
                 }
-            `
+            `,
+            enabled: hiddenMessages.size > 0
         });
     },
 
