@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { setStyle } from "@api/Styles";
+
 let styleStr = "";
 
 export const Margins: Record<`${"top" | "bottom" | "left" | "right"}${8 | 16 | 20}`, string> = {} as any;
@@ -29,7 +31,7 @@ for (const dir of ["top", "bottom", "left", "right"] as const) {
 }
 
 document.addEventListener("DOMContentLoaded", () =>
-    document.head.append(Object.assign(document.createElement("style"), {
-        textContent: styleStr,
-        id: "vencord-margins"
-    })), { once: true });
+    setStyle({
+        name: "vencord-margins",
+        source: styleStr,
+    }), { once: true });
