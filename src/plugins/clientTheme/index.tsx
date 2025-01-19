@@ -163,8 +163,7 @@ function generateColorOffsets(styles) {
         source: [
             `.theme-light {\n ${genThemeSpecificOffsets(variableLightness, lightVariableRegex, "--primary-345-hsl")} \n}`,
             `.theme-dark {\n ${genThemeSpecificOffsets(variableLightness, darkVariableRegex, "--primary-600-hsl")} \n}`,
-        ].join("\n\n"),
-        enabled: true
+        ].join("\n\n")
     });
 }
 
@@ -197,8 +196,7 @@ function generateLightModeFixes(styles) {
             reassignBackgrounds,
             reassignBackgroundColors,
             reassignVariables,
-        ].join("\n\n"),
-        enabled: true
+        ].join("\n\n")
     });
 }
 
@@ -220,8 +218,7 @@ function updateColorVars(color: string) {
             --theme-h: ${hue};
             --theme-s: ${saturation}%;
             --theme-l: ${lightness}%;
-        }`,
-        enabled: true
+        }`
     });
 }
 

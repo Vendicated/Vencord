@@ -29,8 +29,7 @@ async function initSystemValues() {
 
     setStyle({
         name: "vencord-os-theme-values",
-        source: `:root{${variables}}`,
-        enabled: true
+        source: `:root{${variables}}`
     });
 }
 
@@ -72,8 +71,7 @@ async function initThemes() {
 
     setStyle({
         name: "vencord-themes",
-        source: links.map(link => `@import url("${link.trim()}");`).join("\n"),
-        enabled: true
+        source: links.map(link => `@import url("${link.trim()}");`).join("\n")
     });
 }
 
