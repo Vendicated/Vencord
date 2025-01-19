@@ -89,6 +89,16 @@ export class SettingsStore<T extends object> {
                 self.pathListeners.get(setPath)?.forEach(cb => cb(value));
 
                 return true;
+            },
+            deleteProperty(target, key: string) {
+                Reflect.deleteProperty(target, key);
+
+                const setPath = `${path}${path && "."}${key}`;
+
+                self.globalListeners.forEach(cb => cb(undefined, setPath));
+                self.pathListeners.get(setPath)?.forEach(cb => cb(undefined));
+
+                return true;
             }
         });
     }

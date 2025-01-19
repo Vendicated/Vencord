@@ -250,6 +250,8 @@ export interface PluginSettingSelectOption {
 export interface PluginSettingArrayDef {
     type: OptionType.ARRAY;
     default?: any[];
+    // TODO: Remove this once Array settings have an UI implementation
+    hidden: true;
 }
 
 export interface PluginSettingSliderDef {
