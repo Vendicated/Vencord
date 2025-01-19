@@ -18,6 +18,7 @@
 
 import { get, set } from "@api/DataStore";
 import { addButton, removeButton } from "@api/MessagePopover";
+import { setStyle } from "@api/Styles";
 import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -41,10 +42,6 @@ export default definePlugin({
     dependencies: ["MessagePopoverAPI"],
 
     async start() {
-        style = document.createElement("style");
-        style.id = "VencordHideAttachments";
-        document.head.appendChild(style);
-
         await getHiddenMessages();
         await this.buildCss();
 
@@ -64,24 +61,30 @@ export default definePlugin({
     },
 
     stop() {
-        style.remove();
+        setStyle({
+            name: "HideAttachments",
+            enabled: false
+        });
         hiddenMessages.clear();
         removeButton("HideAttachments");
     },
 
     async buildCss() {
         const elements = [...hiddenMessages].map(id => `#message-accessories-${id}`).join(",");
-        style.textContent = `
-        :is(${elements}) :is([class*="embedWrapper"], [class*="clickableSticker"]) {
-            /* important is not necessary, but add it to make sure bad themes won't break it */
-            display: none !important;
-        }
-        :is(${elements})::after {
-            content: "Attachments hidden";
-            color: var(--text-muted);
-            font-size: 80%;
-        }
-        `;
+        setStyle({
+            name: "HideAttachments",
+            source: `
+                :is(${elements}) :is([class*="embedWrapper"], [class*="clickableSticker"]) {
+                    /* important is not necessary, but add it to make sure bad themes won't break it */
+                    display: none !important;
+                }
+                :is(${elements})::after {
+                    content: "Attachments hidden";
+                    color: var(--text-muted);
+                    font-size: 80%;
+                }
+            `
+        });
     },
 
     async toggleHide(id: string) {
