@@ -195,6 +195,8 @@ async function migrateData() {
     const dataStoreKeys = await DataStore.keys();
     const pinDmsKeys = dataStoreKeys.map(key => String(key)).filter(key => key.startsWith(CATEGORY_BASE_KEY));
 
+    if (pinDmsKeys.length === 0) return;
+
     for (const pinDmsKey of pinDmsKeys) {
         const categories = await DataStore.get<Category[]>(pinDmsKey);
         if (categories == null) continue;
