@@ -48,8 +48,8 @@ declare global {
     export var VencordStyles: Map<string, {
         name: string;
         source: string;
-        classNames: Record<string, string>;
-        dom: HTMLStyleElement | null;
+        enabled: boolean;
+        edit?(source: string): string;
     }>;
     export var appSettings: {
         set(setting: string, v: any): void;

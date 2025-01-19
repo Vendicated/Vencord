@@ -28,6 +28,11 @@ export function requireStyle(name: string) {
     return style;
 }
 
+// TODO: Implement popouts
+function findDocuments() {
+    return [document];
+}
+
 /**
  * A style's name can be obtained from importing a stylesheet with `?managed` at the end of the import
  * @param name The name of the style
@@ -41,16 +46,11 @@ export function requireStyle(name: string) {
 export function enableStyle(name: string) {
     const style = requireStyle(name);
 
-    if (style.dom?.isConnected)
+    if (style.enabled)
         return false;
 
-    if (!style.dom) {
-        style.dom = document.createElement("style");
-        style.dom.dataset.vencordName = style.name;
-    }
+    style.enabled = true;
     compileStyle(style);
-
-    document.head.appendChild(style.dom);
     return true;
 }
 
@@ -61,11 +61,14 @@ export function enableStyle(name: string) {
  */
 export function disableStyle(name: string) {
     const style = requireStyle(name);
-    if (!style.dom?.isConnected)
+    if (!style.enabled)
         return false;
 
-    style.dom.remove();
-    style.dom = null;
+    findDocuments().forEach(doc => {
+        [...doc.head.querySelectorAll<HTMLStyleElement>("style[data-vencord-name]")].find(e => e.dataset.vencordName === style.name)?.remove();
+    });
+
+    style.enabled = false;
     return true;
 }
 
@@ -81,7 +84,7 @@ export const toggleStyle = (name: string) => isStyleEnabled(name) ? disableStyle
  * @returns Whether the style is enabled
  * @see {@link enableStyle} for info on getting the name of an imported style
  */
-export const isStyleEnabled = (name: string) => requireStyle(name).dom?.isConnected ?? false;
+export const isStyleEnabled = (name: string) => requireStyle(name).enabled ?? false;
 
 /**
  * Sets the variables of a style
@@ -111,7 +114,13 @@ export const isStyleEnabled = (name: string) => requireStyle(name).dom?.isConnec
  */
 export const setStyleClassNames = (name: string, classNames: Record<string, string>, recompile = true) => {
     const style = requireStyle(name);
-    style.classNames = classNames;
+    style.edit = source => {
+        return source
+            .replace(/\[--(\w+)\]/g, (match, name) => {
+                const className = classNames[name];
+                return className ? classNameToSelector(className) : match;
+            });
+    };
     if (recompile && isStyleEnabled(style.name))
         compileStyle(style);
 };
@@ -123,13 +132,16 @@ export const setStyleClassNames = (name: string, classNames: Record<string, stri
  * @see {@link setStyleClassNames} for more info on style classnames
  */
 export const compileStyle = (style: Style) => {
-    if (!style.dom) throw new Error("Style has no DOM element");
+    findDocuments().forEach(doc => {
+        let styleElement = [...doc.head.querySelectorAll<HTMLStyleElement>("style[data-vencord-name]")].find(e => e.dataset.vencordName === style.name);
+        if (!styleElement) {
+            styleElement = doc.createElement("style");
+            styleElement.dataset.vencordName = style.name;
+            document.head.appendChild(styleElement);
+        }
+        styleElement.textContent = style.edit ? style.edit(style.source) : style.source;
+    });
 
-    style.dom.textContent = style.source
-        .replace(/\[--(\w+)\]/g, (match, name) => {
-            const className = style.classNames[name];
-            return className ? classNameToSelector(className) : match;
-        });
 };
 
 /**

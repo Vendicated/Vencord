@@ -276,7 +276,7 @@ export const stylePlugin = {
     name: "style-plugin",
     setup: ({ onResolve, onLoad }) => {
         onResolve({ filter: /\.css\?managed$/, namespace: "file" }, ({ path, resolveDir }) => ({
-            path: relative(process.cwd(), join(resolveDir, path.replace("?managed", ""))),
+            path: relative(process.cwd(), join(resolveDir, path.replace(/\?managed$/, ""))),
             namespace: "managed-style",
         }));
         onLoad({ filter: /\.css$/, namespace: "managed-style" }, async ({ path }) => {
@@ -287,7 +287,7 @@ export const stylePlugin = {
                 loader: "js",
                 contents: styleModule
                     .replaceAll("STYLE_SOURCE", JSON.stringify(css))
-                    .replaceAll("STYLE_NAME", JSON.stringify(name))
+                    .replaceAll("STYLE_NAME", JSON.stringify("managed-style:" + name))
             };
         });
     }
