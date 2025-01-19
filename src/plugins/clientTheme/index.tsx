@@ -7,7 +7,7 @@
 import "./clientTheme.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { setStyle } from "@api/Styles";
+import { createStyle, deleteStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
@@ -125,7 +125,7 @@ export default definePlugin({
     },
 
     stop() {
-        ["vars", "offsets", "lightModeFixes"].forEach(i => setStyle({ name: `ClientTheme-${i}`, enabled: false }));
+        ["vars", "offsets", "lightModeFixes"].forEach(i => deleteStyle(`ClientTheme-${i}`));
     }
 });
 
@@ -158,13 +158,10 @@ function generateColorOffsets(styles) {
         variableMatch = variableRegex.exec(styles);
     }
 
-    setStyle({
-        name: "ClientTheme-offsets",
-        source: [
-            `.theme-light {\n ${genThemeSpecificOffsets(variableLightness, lightVariableRegex, "--primary-345-hsl")} \n}`,
-            `.theme-dark {\n ${genThemeSpecificOffsets(variableLightness, darkVariableRegex, "--primary-600-hsl")} \n}`,
-        ].join("\n\n")
-    });
+    createStyle("ClientTheme-offsets", [
+        `.theme-light {\n ${genThemeSpecificOffsets(variableLightness, lightVariableRegex, "--primary-345-hsl")} \n}`,
+        `.theme-dark {\n ${genThemeSpecificOffsets(variableLightness, darkVariableRegex, "--primary-600-hsl")} \n}`,
+    ].join("\n\n"));
 }
 
 function generateLightModeFixes(styles) {
@@ -190,14 +187,11 @@ function generateLightModeFixes(styles) {
     // create css to reassign every var
     const reassignVariables = `.theme-light {\n ${lightBgVars.map(variable => `${variable}: var(--primary-100);`).join("\n")} \n}`;
 
-    setStyle({
-        name: "ClientTheme-lightModeFixes",
-        source: [
-            reassignBackgrounds,
-            reassignBackgroundColors,
-            reassignVariables,
-        ].join("\n\n")
-    });
+    createStyle("ClientTheme-lightModeFixes", [
+        reassignBackgrounds,
+        reassignBackgroundColors,
+        reassignVariables,
+    ].join("\n\n"));
 }
 
 function captureOne(str, regex) {
@@ -212,14 +206,11 @@ function mapReject(arr, mapFunc) {
 function updateColorVars(color: string) {
     const { hue, saturation, lightness } = hexToHSL(color);
 
-    setStyle({
-        name: "ClientTheme-vars",
-        source: `:root {
-            --theme-h: ${hue};
-            --theme-s: ${saturation}%;
-            --theme-l: ${lightness}%;
-        }`
-    });
+    createStyle("ClientTheme-vars", `:root {
+        --theme-h: ${hue};
+        --theme-s: ${saturation}%;
+        --theme-l: ${lightness}%;
+    }`);
 }
 
 // returns all of discord's native styles in a single string

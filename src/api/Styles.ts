@@ -25,8 +25,6 @@ export interface Style {
     edit?(source: string): string;
 }
 
-export type PartialStyle = Partial<Style> & Pick<Style, "name">;
-
 export function requireStyle(name: string) {
     const style = styleMap.get(name);
     if (!style) throw new Error(`Style "${name}" does not exist`);
@@ -40,7 +38,7 @@ function findDocuments() {
 
 /**
  * A style's name can be obtained from importing a stylesheet with `?managed` at the end of the import
- * @param style The style object
+ * @param style The style object or name
  * @returns `false` if the style was already enabled, `true` otherwise
  * @example
  * import pluginStyle from "./plugin.css?managed";
@@ -48,7 +46,9 @@ function findDocuments() {
  * // Inside some plugin method like "start()" or "[option].onChange()"
  * enableStyle(pluginStyle);
  */
-export function enableStyle(style: Style) {
+export function enableStyle(style: Style | string) {
+    if (typeof style === "string") style = requireStyle(style);
+
     style.enabled = true;
     compileStyle(style);
 
@@ -59,11 +59,19 @@ export function enableStyle(style: Style) {
 }
 
 /**
- * @param style The style object
+ * @param style The style object or name
  * @returns `false` if the style was already disabled, `true` otherwise
- * @see {@link enableStyle} for info on getting the name of an imported style
+ * @see {@link enableStyle} for info on importing managed styles
  */
-export function disableStyle(style: Style) {
+export function disableStyle(style: Style | string) {
+    if (typeof style === "string") {
+        try {
+            style = requireStyle(style);
+        } catch (e) {
+            return false;
+        }
+    }
+
     compileStyle(style);
 
     if (!style.enabled)
@@ -75,14 +83,45 @@ export function disableStyle(style: Style) {
 
 /**
  * @param style The new style object
- * @see {@link enableStyle} for info on getting the name of an imported style
+ * @see {@link enableStyle} for info on importing managed styles
  */
-export function setStyle(style: PartialStyle) {
-    if (!styleMap.has(style.name)) styleMap.set(style.name, { name: style.name, source: "", enabled: true });
+export function setStyle(style: Style) {
+    if (!styleMap.has(style.name)) styleMap.set(style.name, style);
     const storedStyle = requireStyle(style.name);
     Object.assign(storedStyle, style);
 
     (style.enabled ? enableStyle : disableStyle)(storedStyle);
+}
+
+/**
+ * Create a new style or update an existing style. Style will be enabled.
+ * @param name The name of the style
+ * @param source The CSS you want to inject
+ * @see {@link enableStyle} for info on importing managed styles
+ */
+export function createStyle(name: string, source: string) {
+    return setStyle({ name, source, enabled: true });
+}
+
+/**
+ * Deletes a style.
+ * This should only be used with programmatically injected styles.
+ * @param style The style to delete
+ * @see {@link enableStyle} for info on importing managed styles
+ */
+export function deleteStyle(style: Style | string) {
+    if (typeof style === "string") {
+        try {
+            style = requireStyle(style);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    style.enabled = false;
+    compileStyle(style);
+
+    return styleMap.delete(style.name);
 }
 
 /**
@@ -106,13 +145,13 @@ export function setStyle(style: PartialStyle) {
  * // -- final stylesheet --
  * .plugin-root .thin-31rlnD.scrollerBase-_bVAAt::-webkit-scrollbar { ... }
  * ```
- * @param name The name of the style
+ * @param style The style object or name
  * @param classNames An object where the keys are the variable names and the values are the variable values
  * @param recompile Whether to recompile the style after setting the variables, defaults to `true`
- * @see {@link enableStyle} for info on getting the name of an imported style
+ * @see {@link enableStyle} for info on importing managed styles
  */
-export const setStyleClassNames = (name: string, classNames: Record<string, string>, recompile = true) => {
-    const style = requireStyle(name);
+export const setStyleClassNames = (style: Style | string, classNames: Record<string, string>, recompile = true) => {
+    if (typeof style === "string") style = requireStyle(style);
     style.edit = source => {
         return source
             .replace(/\[--(\w+)\]/g, (match, name) => {

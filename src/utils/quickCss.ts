@@ -17,7 +17,7 @@
 */
 
 import { Settings, SettingsStore } from "@api/Settings";
-import { setStyle } from "@api/Styles";
+import { createStyle, setStyle } from "@api/Styles";
 import { ThemeStore } from "@webpack/common";
 
 async function initSystemValues() {
@@ -27,10 +27,7 @@ async function initSystemValues() {
         .map(([k, v]) => `--${k}: ${v};`)
         .join("");
 
-    setStyle({
-        name: "vencord-os-theme-values",
-        source: `:root{${variables}}`
-    });
+    createStyle("vencord-os-theme-values", `:root{${variables}}`);
 }
 
 export async function toggle(isEnabled: boolean, css?: string) {
@@ -69,10 +66,8 @@ async function initThemes() {
         links.push(...localThemes);
     }
 
-    setStyle({
-        name: "vencord-themes",
-        source: links.map(link => `@import url("${link.trim()}");`).join("\n")
-    });
+    createStyle("vencord-themes",
+        links.map(link => `@import url("${link.trim()}");`).join("\n"));
 }
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { setStyle } from "@api/Styles";
+import { createStyle } from "@api/Styles";
 
 let styleStr = "";
 
@@ -31,7 +31,4 @@ for (const dir of ["top", "bottom", "left", "right"] as const) {
 }
 
 document.addEventListener("DOMContentLoaded", () =>
-    setStyle({
-        name: "vencord-margins",
-        source: styleStr,
-    }), { once: true });
+    createStyle("vencord-margins", styleStr), { once: true });

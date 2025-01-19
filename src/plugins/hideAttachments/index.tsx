@@ -18,7 +18,7 @@
 
 import { get, set } from "@api/DataStore";
 import { addButton, removeButton } from "@api/MessagePopover";
-import { setStyle } from "@api/Styles";
+import { deleteStyle, setStyle } from "@api/Styles";
 import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -61,10 +61,7 @@ export default definePlugin({
     },
 
     stop() {
-        setStyle({
-            name: "HideAttachments",
-            enabled: false
-        });
+        deleteStyle("HideAttachments");
         hiddenMessages.clear();
         removeButton("HideAttachments");
     },
