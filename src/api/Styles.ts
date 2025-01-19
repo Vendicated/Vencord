@@ -39,7 +39,7 @@ function findDocuments() {
 }
 
 /**
- * A style's name can be obtained from importing a stylesheet with `?managed` at the end of the import
+ * A style object can be obtained by importing a stylesheet with `?managed` at the end of the import
  * @param style The style object or name
  * @returns `false` if the style was already enabled, `true` otherwise
  * @example
@@ -62,7 +62,7 @@ export function enableStyle(style: Style | string) {
 
 /**
  * @param style The style object or name
- * @returns `false` if the style was already disabled, `true` otherwise
+ * @returns `false` if the style was already disabled or cannot be found, `true` otherwise
  * @see {@link enableStyle} for info on importing managed styles
  */
 export function disableStyle(style: Style | string) {
@@ -84,6 +84,7 @@ export function disableStyle(style: Style | string) {
 }
 
 /**
+ * Set a style and update it.
  * @param style The new style object
  * @see {@link enableStyle} for info on importing managed styles
  */
@@ -182,7 +183,7 @@ export function updateStyleInDocument(style: Style, doc: Document) {
 }
 
 /**
- * Updates styles in the DOM of all documents
+ * Updates a style in the DOM of all documents
  * @param style A style object
  * @see {@link setStyleClassNames} for more info on style classnames
  */
@@ -191,7 +192,7 @@ export function compileStyle(style: Style) {
 }
 
 /**
- * Updates styles in the DOM of all documents
+ * Adds all enabled styles to the DOM of all documents
  * @param doc The document to add styles to
  * @see {@link setStyleClassNames} for more info on style classnames
  */
