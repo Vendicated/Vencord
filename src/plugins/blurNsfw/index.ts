@@ -17,24 +17,11 @@
 */
 
 import { Settings } from "@api/Settings";
+import { compileStyle, disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-let style: HTMLStyleElement;
-
-function setCss() {
-    style.textContent = `
-        .vc-nsfw-img [class^=imageWrapper] img,
-        .vc-nsfw-img [class^=wrapperPaused] video {
-            filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
-            transition: filter 0.2s;
-        }
-        .vc-nsfw-img [class^=imageWrapper]:hover img,
-        .vc-nsfw-img [class^=wrapperPaused]:hover video {
-            filter: unset;
-        }
-        `;
-}
+import style from "./style.css?managed";
 
 export default definePlugin({
     name: "BlurNSFW",
@@ -56,19 +43,16 @@ export default definePlugin({
             type: OptionType.NUMBER,
             description: "Blur Amount",
             default: 10,
-            onChange: setCss
+            onChange: () => compileStyle(style)
         }
     },
 
     start() {
-        style = document.createElement("style");
-        style.id = "VcBlurNsfw";
-        document.head.appendChild(style);
-
-        setCss();
+        style.edit = src => src.replace("blur-amount", Settings.plugins.BlurNSFW.blurAmount);
+        enableStyle(style);
     },
 
     stop() {
-        style?.remove();
+        disableStyle(style);
     }
 });
