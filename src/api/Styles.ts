@@ -25,6 +25,8 @@ export interface Style {
     edit?(source: string): string;
 }
 
+export type PartialStyle = Partial<Style> & Pick<Style, "name">;
+
 export function requireStyle(name: string) {
     const style = styleMap.get(name);
     if (!style) throw new Error(`Style "${name}" does not exist`);
@@ -75,12 +77,12 @@ export function disableStyle(style: Style) {
  * @param style The new style object
  * @see {@link enableStyle} for info on getting the name of an imported style
  */
-export function setStyle(style: Style) {
-    if (!styleMap.has(style.name)) styleMap.set(style.name, style);
+export function setStyle(style: PartialStyle) {
+    if (!styleMap.has(style.name)) styleMap.set(style.name, { name: style.name, source: "", enabled: true });
     const storedStyle = requireStyle(style.name);
     Object.assign(storedStyle, style);
 
-    (style.enabled ? enableStyle : disableStyle)(style);
+    (style.enabled ? enableStyle : disableStyle)(storedStyle);
 }
 
 /**
