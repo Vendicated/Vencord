@@ -35,7 +35,7 @@ if (location.protocol !== "data:") {
     if (document.readyState === "complete") {
         injectStyle();
     } else {
-        document.addEventListener("DOMContentLoaded", () => injectStyle(), {
+        document.addEventListener("DOMContentLoaded", injectStyle, {
             once: true
         });
     }
