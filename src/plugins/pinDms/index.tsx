@@ -49,6 +49,7 @@ export const settings = definePluginSettings({
         ],
         onChange: () => forceUpdate()
     },
+
     dmSectioncollapsed: {
         type: OptionType.BOOLEAN,
         description: "Collapse DM sections",
