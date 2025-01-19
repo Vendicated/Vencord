@@ -92,7 +92,7 @@ export function setStyle(style: Style) {
     if (!styleMap.has(style.name)) styleMap.set(style.name, style);
     const storedStyle = requireStyle(style.name);
     Object.assign(storedStyle, style);
-    compileStyle(style);
+    compileStyle(storedStyle);
 }
 
 /**
