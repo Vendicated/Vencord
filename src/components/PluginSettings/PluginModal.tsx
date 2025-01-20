@@ -143,7 +143,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
         } else {
             const options = Object.entries(plugin.options).map(([key, setting]) => {
-                if (setting.type !== OptionType.CUSTOM && setting.hidden) return null;
+                if (setting.type === OptionType.CUSTOM || setting.hidden) return null;
 
                 function onChange(newValue: any) {
                     setTempSettings(s => ({ ...s, [key]: newValue }));
