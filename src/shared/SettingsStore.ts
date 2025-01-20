@@ -6,6 +6,8 @@
 
 import { LiteralUnion } from "type-fest";
 
+const UNPROXIED_GETS = new Set(["concat", "copyWithin", "every", "filter", "flat", "join", "reverse", "shift", "slice", "some", "sort", "splice", "toReversed", "toSorted", "toSpliced", "unshift"]);
+
 // Resolves a possibly nested prop in the form of "some.nested.prop" to type of T.some.nested.prop
 type ResolvePropDeep<T, P> = P extends `${infer Pre}.${infer Suf}`
     ? Pre extends keyof T
@@ -58,7 +60,7 @@ export class SettingsStore<T extends object> {
             get(target, key: string) {
                 let v = target[key];
 
-                if (!(key in target) && self.getDefaultValue) {
+                if (!(key in target) && self.getDefaultValue != null) {
                     v = self.getDefaultValue({
                         target,
                         key,
@@ -67,11 +69,11 @@ export class SettingsStore<T extends object> {
                     });
                 }
 
-                if (Array.isArray(target)) {
-                    return v;
-                }
-
                 const settingsPath = `${path}${path && "."}${key}`;
+
+                if (Array.isArray(v)) {
+                    return self.makeArrayProxy(v, root, settingsPath);
+                }
 
                 if (typeof v === "object" && v != null) {
                     return self.makeProxy(v, root, settingsPath);
@@ -82,32 +84,97 @@ export class SettingsStore<T extends object> {
             set(target, key: string, value) {
                 if (target[key] === value) return true;
 
-                Reflect.set(target, key, value);
+                if (!Reflect.set(target, key, value)) {
+                    return false;
+                }
 
                 const setPath = `${path}${path && "."}${key}`;
+                self.globalListeners.forEach(cb => cb(root, setPath));
                 self.pathListeners.get(setPath)?.forEach(cb => cb(value));
-
-                if (Array.isArray(target)) {
-                    self.globalListeners.forEach(cb => cb(root, path));
-                    self.pathListeners.get(path)?.forEach(cb => cb(target));
-                } else {
-                    self.globalListeners.forEach(cb => cb(root, setPath));
-                }
 
                 return true;
             },
             deleteProperty(target, key: string) {
-                Reflect.deleteProperty(target, key);
+                if (!Reflect.deleteProperty(target, key)) {
+                    return false;
+                }
+
+                const setPath = `${path}${path && "."}${key}`;
+                self.globalListeners.forEach(cb => cb(root, setPath));
+                self.pathListeners.get(setPath)?.forEach(cb => cb(undefined));
+
+                return true;
+            }
+        });
+    }
+
+    private makeArrayProxy(array: any[], root: T, path: string = "") {
+        const self = this;
+        let shouldProxyGet = true;
+
+        return new Proxy(array, {
+            get(target, key: string) {
+                if (UNPROXIED_GETS.has(key)) {
+                    return function (...args: any[]) {
+                        shouldProxyGet = false;
+                        const result = array[key](...args);
+                        shouldProxyGet = true;
+
+                        if (Array.isArray(result)) {
+                            return self.makeArrayProxy(result, root, path);
+                        }
+
+                        return result;
+                    };
+                }
+
+                let v = target[key];
+
+                if (!(key in target) && self.getDefaultValue != null) {
+                    v = self.getDefaultValue({
+                        target,
+                        key,
+                        root,
+                        path
+                    });
+                }
+
+                const settingsPath = `${path}${path && "."}${key}`;
+
+                if (Array.isArray(v)) {
+                    return self.makeArrayProxy(v, root, settingsPath);
+                }
+
+                if (typeof v === "object" && v != null) {
+                    return self.makeProxy(v, root, settingsPath);
+                }
+
+                return v;
+            },
+            set(target, key: string, value) {
+                if (target[key] === value) return true;
+
+                if (!Reflect.set(target, key, value)) {
+                    return false;
+                }
+
+                const setPath = `${path}${path && "."}${key}`;
+                self.pathListeners.get(setPath)?.forEach(cb => cb(value));
+                self.globalListeners.forEach(cb => cb(root, path));
+                self.pathListeners.get(path)?.forEach(cb => cb(target));
+
+
+                return true;
+            },
+            deleteProperty(target, key: string) {
+                if (!Reflect.deleteProperty(target, key)) {
+                    return false;
+                }
 
                 const setPath = `${path}${path && "."}${key}`;
                 self.pathListeners.get(setPath)?.forEach(cb => cb(undefined));
-
-                if (Array.isArray(target)) {
-                    self.globalListeners.forEach(cb => cb(root, path));
-                    self.pathListeners.get(path)?.forEach(cb => cb(target));
-                } else {
-                    self.globalListeners.forEach(cb => cb(root, setPath));
-                }
+                self.globalListeners.forEach(cb => cb(root, path));
+                self.pathListeners.get(path)?.forEach(cb => cb(target));
 
                 return true;
             }
