@@ -17,7 +17,7 @@
 */
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
-import { addPreSendListener, MessageSendListener, removePreSendListener } from "@api/MessageEvents";
+import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -57,8 +57,8 @@ const SilentMessageToggle: ChatBarButtonFactory = ({ isMainChat }) => {
             }
         };
 
-        addPreSendListener(listener);
-        return () => void removePreSendListener(listener);
+        addMessagePreSendListener(listener);
+        return () => void removeMessagePreSendListener(listener);
     }, [enabled]);
 
     if (!isMainChat) return null;

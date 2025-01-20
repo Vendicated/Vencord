@@ -111,21 +111,21 @@ export async function _handlePreEdit(channelId: string, messageId: string, messa
 /**
  * Note: This event fires off before a message is sent, allowing you to edit the message.
  */
-export function addPreSendListener(listener: MessageSendListener) {
+export function addMessagePreSendListener(listener: MessageSendListener) {
     sendListeners.add(listener);
     return listener;
 }
 /**
  * Note: This event fires off before a message's edit is applied, allowing you to further edit the message.
  */
-export function addPreEditListener(listener: MessageEditListener) {
+export function addMessagePreEditListener(listener: MessageEditListener) {
     editListeners.add(listener);
     return listener;
 }
-export function removePreSendListener(listener: MessageSendListener) {
+export function removeMessagePreSendListener(listener: MessageSendListener) {
     return sendListeners.delete(listener);
 }
-export function removePreEditListener(listener: MessageEditListener) {
+export function removeMessagePreEditListener(listener: MessageEditListener) {
     return editListeners.delete(listener);
 }
 

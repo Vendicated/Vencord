@@ -22,7 +22,7 @@ import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
-import { addMessageClickListener, addPreEditListener, addPreSendListener, removeMessageClickListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
+import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendListener, removeMessageClickListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
@@ -286,8 +286,8 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         }
     }
 
-    if (onBeforeMessageEdit) addPreEditListener(onBeforeMessageEdit);
-    if (onBeforeMessageSend) addPreSendListener(onBeforeMessageSend);
+    if (onBeforeMessageEdit) addMessagePreEditListener(onBeforeMessageEdit);
+    if (onBeforeMessageSend) addMessagePreSendListener(onBeforeMessageSend);
     if (onMessageClick) addMessageClickListener(onMessageClick);
 
     if (renderChatBarButton) addChatBarButton(name, renderChatBarButton);
@@ -343,8 +343,8 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
         }
     }
 
-    if (onBeforeMessageEdit) removePreEditListener(onBeforeMessageEdit);
-    if (onBeforeMessageSend) removePreSendListener(onBeforeMessageSend);
+    if (onBeforeMessageEdit) removeMessagePreEditListener(onBeforeMessageEdit);
+    if (onBeforeMessageSend) removeMessagePreSendListener(onBeforeMessageSend);
     if (onMessageClick) removeMessageClickListener(onMessageClick);
 
     if (renderChatBarButton) removeChatBarButton(name);
