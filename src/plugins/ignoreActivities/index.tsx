@@ -212,6 +212,7 @@ const settings = definePluginSettings({
     ignoredActivities: {
         type: OptionType.CUSTOM,
         default: [] as IgnoredActivity[],
+        onChange: recalculateActivities
     }
 });
 
@@ -284,18 +285,12 @@ export default definePlugin({
         if (settings.store.ignoredActivities.length !== 0) {
             const gamesSeen = RunningGameStore.getGamesSeen() as { id?: string; exePath: string; }[];
 
-            let hasChanges = false;
             for (const [index, ignoredActivity] of settings.store.ignoredActivities.entries()) {
                 if (ignoredActivity.type !== ActivitiesTypes.Game) continue;
 
                 if (!gamesSeen.some(game => game.id === ignoredActivity.id || game.exePath === ignoredActivity.id)) {
                     settings.store.ignoredActivities.splice(index, 1);
-                    hasChanges = true;
                 }
-            }
-
-            if (hasChanges) {
-                recalculateActivities();
             }
         }
     },
