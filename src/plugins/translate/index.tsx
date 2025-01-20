@@ -95,26 +95,22 @@ export default definePlugin({
         
             if (matches && matches[0] === message.content.trim()) return;
         
-            const urlMap = new Map();
-        
             setShouldShowTranslateEnabledTooltip?.(true);
             clearTimeout(tooltipTimeout);
             tooltipTimeout = setTimeout(() => setShouldShowTranslateEnabledTooltip?.(false), 2000);
         
-            const tempContent = message.content.replace(urlRegex, (url) => {
-                const hash = h64(url).toString(16); 
-                urlMap.set(hashString, url);  
-                return hashString;  
-            });
-
+            const tempContent = message.content.replace(urlRegex, (url) => h64(url).toString(16));
+        
             const trans = await translate("sent", tempContent);
         
             let translatedContent = trans.text;
-
-            // hash to original
-            urlMap.forEach((url, hash) => {
-                translatedContent = translatedContent.replaceAll(hash, url);
-            });
+        
+            if (matches) {
+                matches.forEach((url) => {
+                    const hash = h64(url).toString(16);
+                    translatedContent = translatedContent.replaceAll(hash, url); 
+                });
+            }
         
             message.content = translatedContent;
         });
