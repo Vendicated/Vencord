@@ -66,15 +66,11 @@ const settings = definePluginSettings({
         }
     },
     stringRules: {
-        type: OptionType.ARRAY,
-        description: "",
-        hidden: true,
+        type: OptionType.CUSTOM,
         default: makeEmptyRuleArray(),
     },
     regexRules: {
-        type: OptionType.ARRAY,
-        description: "",
-        hidden: true,
+        type: OptionType.CUSTOM,
         default: makeEmptyRuleArray(),
     }
 });
