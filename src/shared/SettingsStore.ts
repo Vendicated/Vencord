@@ -94,6 +94,11 @@ export class SettingsStore<T extends object> {
                 const setPath = `${path}${path && "."}${key}`;
                 const paths = setPath.split(".");
 
+                // Because we support any type of settings with OptionType.CUSTOM, and those objects get proxied recursively,
+                // the path ends up including all the nested paths (plugins.pluginName.settingName.example.one).
+                // So, we need to extract the top-level setting path (plugins.pluginName.settingName),
+                // to be able to notify globalListeners and top-level setting name listeners (let { settingName } = settings.use(["settingName"]),
+                // with the new value
                 if (paths.length > 2 && paths[0] === "plugins") {
                     const settingPath = paths.slice(0, 3);
                     const settingPathStr = settingPath.join(".");
@@ -188,6 +193,11 @@ export class SettingsStore<T extends object> {
                 const setPath = `${path}${path && "."}${key}`;
                 const paths = setPath.split(".");
 
+                // Because we support any type of settings with OptionType.CUSTOM, and those objects get proxied recursively,
+                // the path ends up including all the nested paths (plugins.pluginName.settingName.example.one).
+                // So, we need to extract the top-level setting path (plugins.pluginName.settingName),
+                // to be able to notify globalListeners and top-level setting name listeners (let { settingName } = settings.use(["settingName"]),
+                // with the new value
                 if (paths.length > 2 && paths[0] === "plugins") {
                     const settingPath = paths.slice(0, 3);
                     const settingPathStr = settingPath.join(".");
