@@ -12,7 +12,7 @@ import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { ContextMenuApi, FluxDispatcher, Menu, React } from "@webpack/common";
+import { Clickable, ContextMenuApi, FluxDispatcher, Menu, React } from "@webpack/common";
 import { Channel } from "discord-types/general";
 
 import { contextMenus } from "./components/contextMenu";
@@ -48,7 +48,7 @@ export const settings = definePluginSettings({
     },
     canCollapseDmSection: {
         type: OptionType.BOOLEAN,
-        description: "Allow DMs section to be collapsable",
+        description: "Allow uncategorised DMs section to be collapsable",
         default: false
     },
     dmSectionCollapsed: {
@@ -163,9 +163,9 @@ export default definePlugin({
     },
 
     startAt: StartAt.WebpackReady,
-    start: () => init(),
+    start: init,
     flux: {
-        CONNECTION_OPEN: () => init(),
+        CONNECTION_OPEN: init,
     },
 
     usePinnedDms,
@@ -259,66 +259,69 @@ export default definePlugin({
         if (!category) return null;
 
         return (
-            <h2
-                className={classes(headerClasses.privateChannelsHeaderContainer, "vc-pindms-section-container", category.collapsed ? "vc-pindms-collapsed" : "")}
-                style={{ color: `#${category.color.toString(16).padStart(6, "0")}` }}
+            <Clickable
                 onClick={() => collapseCategory(category.id, !category.collapsed)}
-                onContextMenu={e => {
-                    ContextMenuApi.openContextMenu(e, () => (
-                        <Menu.Menu
-                            navId="vc-pindms-header-menu"
-                            onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
-                            color="danger"
-                            aria-label="Pin DMs Category Menu"
-                        >
-                            <Menu.MenuItem
-                                id="vc-pindms-edit-category"
-                                label="Edit Category"
-                                action={() => openCategoryModal(category.id, null)}
-                            />
-
-                            {
-                                canMoveCategory(category.id) && (
-                                    <>
-                                        {
-                                            canMoveCategoryInDirection(category.id, -1) && <Menu.MenuItem
-                                                id="vc-pindms-move-category-up"
-                                                label="Move Up"
-                                                action={() => moveCategory(category.id, -1)}
-                                            />
-                                        }
-                                        {
-                                            canMoveCategoryInDirection(category.id, 1) && <Menu.MenuItem
-                                                id="vc-pindms-move-category-down"
-                                                label="Move Down"
-                                                action={() => moveCategory(category.id, 1)}
-                                            />
-                                        }
-                                    </>
-
-                                )
-                            }
-
-                            <Menu.MenuSeparator />
-                            <Menu.MenuItem
-                                id="vc-pindms-delete-category"
-                                color="danger"
-                                label="Delete Category"
-                                action={() => removeCategory(category.id)}
-                            />
-
-
-                        </Menu.Menu>
-                    ));
-                }}
             >
-                <span className={headerClasses.headerText}>
-                    {category?.name ?? "uh oh"}
-                </span>
-                <svg className="vc-pindms-collapse-icon" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M9.3 5.3a1 1 0 0 0 0 1.4l5.29 5.3-5.3 5.3a1 1 0 1 0 1.42 1.4l6-6a1 1 0 0 0 0-1.4l-6-6a1 1 0 0 0-1.42 0Z"></path>
-                </svg>
-            </h2>
+                <h2
+                    className={classes(headerClasses.privateChannelsHeaderContainer, "vc-pindms-section-container", category.collapsed ? "vc-pindms-collapsed" : "")}
+                    style={{ color: `#${category.color.toString(16).padStart(6, "0")}` }}
+                    onContextMenu={e => {
+                        ContextMenuApi.openContextMenu(e, () => (
+                            <Menu.Menu
+                                navId="vc-pindms-header-menu"
+                                onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
+                                color="danger"
+                                aria-label="Pin DMs Category Menu"
+                            >
+                                <Menu.MenuItem
+                                    id="vc-pindms-edit-category"
+                                    label="Edit Category"
+                                    action={() => openCategoryModal(category.id, null)}
+                                />
+
+                                {
+                                    canMoveCategory(category.id) && (
+                                        <>
+                                            {
+                                                canMoveCategoryInDirection(category.id, -1) && <Menu.MenuItem
+                                                    id="vc-pindms-move-category-up"
+                                                    label="Move Up"
+                                                    action={() => moveCategory(category.id, -1)}
+                                                />
+                                            }
+                                            {
+                                                canMoveCategoryInDirection(category.id, 1) && <Menu.MenuItem
+                                                    id="vc-pindms-move-category-down"
+                                                    label="Move Down"
+                                                    action={() => moveCategory(category.id, 1)}
+                                                />
+                                            }
+                                        </>
+
+                                    )
+                                }
+
+                                <Menu.MenuSeparator />
+                                <Menu.MenuItem
+                                    id="vc-pindms-delete-category"
+                                    color="danger"
+                                    label="Delete Category"
+                                    action={() => removeCategory(category.id)}
+                                />
+
+
+                            </Menu.Menu>
+                        ));
+                    }}
+                >
+                    <span className={headerClasses.headerText}>
+                        {category?.name ?? "uh oh"}
+                    </span>
+                    <svg className="vc-pindms-collapse-icon" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M9.3 5.3a1 1 0 0 0 0 1.4l5.29 5.3-5.3 5.3a1 1 0 1 0 1.42 1.4l6-6a1 1 0 0 0 0-1.4l-6-6a1 1 0 0 0-1.42 0Z"></path>
+                    </svg>
+                </h2>
+            </Clickable>
         );
     }, { noop: true }),
 

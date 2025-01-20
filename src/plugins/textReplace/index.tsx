@@ -203,8 +203,9 @@ function TextReplaceTesting() {
 }
 
 function applyRules(content: string): string {
-    if (content.length === 0)
+    if (content.length === 0) {
         return content;
+    }
 
     for (const rule of settings.store.stringRules) {
         if (!rule.find) continue;

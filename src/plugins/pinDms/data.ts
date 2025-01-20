@@ -25,13 +25,15 @@ const CATEGORY_MIGRATED_KEY = "PinDMsMigratedOldCategories";
 const OLD_CATEGORY_KEY = "BetterPinDMsCategories-";
 
 let forceUpdateDms: (() => void) | undefined = undefined;
+export let currentUserCategories: Category[] = [];
 
 export async function init() {
     await migrateData();
 
     const userId = UserStore.getCurrentUser()?.id;
-    currentUserCategories = settings.store.userBasedCategoryList[userId] ??= [];
+    if (userId == null) return;
 
+    currentUserCategories = settings.store.userBasedCategoryList[userId] ??= [];
     forceUpdateDms?.();
 }
 
@@ -39,8 +41,6 @@ export function usePinnedDms() {
     forceUpdateDms = useForceUpdater();
     settings.use(["pinOrder", "canCollapseDmSection", "dmSectionCollapsed", "userBasedCategoryList"]);
 }
-
-export let currentUserCategories: Category[] = [];
 
 export function getCategory(id: string) {
     return currentUserCategories.find(c => c.id === id);

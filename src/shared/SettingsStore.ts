@@ -78,7 +78,7 @@ export class SettingsStore<T extends object> {
                     });
                 }
 
-                if (typeof v === "object" && v != null && !v[SYM_IS_PROXY]) {
+                if (typeof v === "object" && v !== null && !v[SYM_IS_PROXY]) {
                     const settingsPath = `${path}${path && "."}${key}`;
                     return self.makeProxy(v, root, settingsPath);
                 }
@@ -99,23 +99,7 @@ export class SettingsStore<T extends object> {
                 }
 
                 const setPath = `${path}${path && "."}${key}`;
-                const paths = setPath.split(".");
-
-                // Because we support any type of settings with OptionType.CUSTOM, and those objects get proxied recursively,
-                // the path ends up including all the nested paths (plugins.pluginName.settingName.example.one).
-                // So, we need to extract the top-level setting path (plugins.pluginName.settingName),
-                // to be able to notify globalListeners and top-level setting name listeners (let { settingName } = settings.use(["settingName"]),
-                // with the new value
-                if (paths.length > 2 && paths[0] === "plugins") {
-                    const settingPath = paths.slice(0, 3);
-                    const settingPathStr = settingPath.join(".");
-                    const settingValue = settingPath.reduce((acc, curr) => acc[curr], root);
-
-                    self.globalListeners.forEach(cb => cb(root, settingPathStr));
-                    self.pathListeners.get(settingPathStr)?.forEach(cb => cb(settingValue));
-                }
-
-                self.pathListeners.get(setPath)?.forEach(cb => cb(value));
+                self.notifyListeners(setPath, value, root);
 
                 return true;
             },
@@ -125,22 +109,31 @@ export class SettingsStore<T extends object> {
                 }
 
                 const setPath = `${path}${path && "."}${key}`;
-                const paths = setPath.split(".");
-
-                if (paths.length > 2 && paths[0] === "plugins") {
-                    const settingPath = paths.slice(0, 3);
-                    const settingPathStr = settingPath.join(".");
-                    const settingValue = settingPath.reduce((acc, curr) => acc[curr], root);
-
-                    self.globalListeners.forEach(cb => cb(root, settingPathStr));
-                    self.pathListeners.get(settingPathStr)?.forEach(cb => cb(settingValue));
-                }
-
-                self.pathListeners.get(setPath)?.forEach(cb => cb(undefined));
+                self.notifyListeners(setPath, undefined, root);
 
                 return true;
             }
         });
+    }
+
+    private notifyListeners(pathStr: string, value: any, root: T) {
+        const paths = pathStr.split(".");
+
+        // Because we support any type of settings with OptionType.CUSTOM, and those objects get proxied recursively,
+        // the path ends up including all the nested paths (plugins.pluginName.settingName.example.one).
+        // So, we need to extract the top-level setting path (plugins.pluginName.settingName),
+        // to be able to notify globalListeners and top-level setting name listeners (let { settingName } = settings.use(["settingName"]),
+        // with the new value
+        if (paths.length > 2 && paths[0] === "plugins") {
+            const settingPath = paths.slice(0, 3);
+            const settingPathStr = settingPath.join(".");
+            const settingValue = settingPath.reduce((acc, curr) => acc[curr], root);
+
+            this.globalListeners.forEach(cb => cb(root, settingPathStr));
+            this.pathListeners.get(settingPathStr)?.forEach(cb => cb(settingValue));
+        }
+
+        this.pathListeners.get(pathStr)?.forEach(cb => cb(value));
     }
 
     /**
