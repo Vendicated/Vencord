@@ -132,10 +132,7 @@ function TextReplace({ title, rulesArray }: TextReplaceProps) {
             rulesArray.push(makeEmptyRule());
         }
 
-        rulesArray[index] = {
-            ...rulesArray[index],
-            [key]: e
-        };
+        rulesArray[index][key] = e;
 
         if (rulesArray[index].find === "" && rulesArray[index].replace === "" && rulesArray[index].onlyIfIncludes === "" && index !== rulesArray.length - 1) {
             rulesArray.splice(index, 1);

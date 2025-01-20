@@ -67,6 +67,10 @@ export class SettingsStore<T extends object> {
                     });
                 }
 
+                if (Array.isArray(target)) {
+                    return v;
+                }
+
                 const settingsPath = `${path}${path && "."}${key}`;
 
                 if (typeof v === "object" && v != null) {
