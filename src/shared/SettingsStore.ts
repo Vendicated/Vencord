@@ -92,7 +92,17 @@ export class SettingsStore<T extends object> {
                 }
 
                 const setPath = `${path}${path && "."}${key}`;
-                self.globalListeners.forEach(cb => cb(root, setPath));
+                const paths = setPath.split(".");
+
+                if (paths.length > 2 && paths[0] === "plugins") {
+                    const settingPath = paths.slice(0, 3);
+                    const settingPathStr = settingPath.join(".");
+                    const settingValue = settingPath.reduce((acc, curr) => acc[curr], root);
+
+                    self.globalListeners.forEach(cb => cb(root, settingPathStr));
+                    self.pathListeners.get(settingPathStr)?.forEach(cb => cb(settingValue));
+                }
+
                 self.pathListeners.get(setPath)?.forEach(cb => cb(value));
 
                 return true;
@@ -103,7 +113,14 @@ export class SettingsStore<T extends object> {
                 }
 
                 const setPath = `${path}${path && "."}${key}`;
-                self.globalListeners.forEach(cb => cb(root, setPath));
+                const paths = setPath.split(".");
+
+                if (paths.length > 2 && paths[0] === "plugins") {
+                    const settingPathStr = paths.slice(0, 3).join(".");
+                    self.globalListeners.forEach(cb => cb(root, settingPathStr));
+                    self.pathListeners.get(settingPathStr)?.forEach(cb => cb(undefined));
+                }
+
                 self.pathListeners.get(setPath)?.forEach(cb => cb(undefined));
 
                 return true;
@@ -168,9 +185,19 @@ export class SettingsStore<T extends object> {
                     return false;
                 }
 
-                self.globalListeners.forEach(cb => cb(root, path));
-                self.pathListeners.get(path)?.forEach(cb => cb(target));
-                self.pathListeners.get(`${path}${path && "."}${key}`)?.forEach(cb => cb(value));
+                const setPath = `${path}${path && "."}${key}`;
+                const paths = setPath.split(".");
+
+                if (paths.length > 2 && paths[0] === "plugins") {
+                    const settingPath = paths.slice(0, 3);
+                    const settingPathStr = settingPath.join(".");
+                    const settingValue = settingPath.reduce((acc, curr) => acc[curr], root);
+
+                    self.globalListeners.forEach(cb => cb(root, settingPathStr));
+                    self.pathListeners.get(settingPathStr)?.forEach(cb => cb(settingValue));
+                }
+
+                self.pathListeners.get(setPath)?.forEach(cb => cb(value));
 
                 return true;
             },
@@ -179,10 +206,14 @@ export class SettingsStore<T extends object> {
                     return false;
                 }
 
-                self.globalListeners.forEach(cb => cb(root, path));
-                self.pathListeners.get(path)?.forEach(cb => cb(target));
-                self.pathListeners.get(`${path}${path && "."}${key}`)?.forEach(cb => cb(undefined));
+                const setPath = `${path}${path && "."}${key}`;
+                const paths = setPath.split(".");
 
+                if (paths.length > 2 && paths[0] === "plugins") {
+                    const settingPathStr = paths.slice(0, 3).join(".");
+                    self.globalListeners.forEach(cb => cb(root, settingPathStr));
+                    self.pathListeners.get(settingPathStr)?.forEach(cb => cb(undefined));
+                }
 
                 return true;
             }

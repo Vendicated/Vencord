@@ -177,7 +177,7 @@ export type SettingsChecks<D extends SettingsDefinition> = {
     (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
 };
 
-export type PluginSettingDef = PluginSettingCustomDef | ((
+export type PluginSettingDef = (PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">) | ((
     | PluginSettingStringDef
     | PluginSettingNumberDef
     | PluginSettingBooleanDef
@@ -362,7 +362,7 @@ export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon 
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
 export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
-export type PluginOptionCustom = PluginSettingCustomDef;
+export type PluginOptionCustom = PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">;
 
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
     [key in keyof PluginExports]:
