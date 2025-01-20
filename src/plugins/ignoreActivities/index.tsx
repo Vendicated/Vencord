@@ -210,10 +210,8 @@ const settings = definePluginSettings({
         onChange: recalculateActivities
     },
     ignoredActivities: {
-        type: OptionType.ARRAY,
-        description: "",
-        hidden: true,
-        default: [] as IgnoredActivity[]
+        type: OptionType.CUSTOM,
+        default: [] as IgnoredActivity[],
     }
 });
 

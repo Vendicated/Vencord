@@ -20,7 +20,7 @@ import { Command } from "@api/Commands";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { FluxEvents } from "@webpack/types";
 import { JSX } from "react";
-import { IsAny, Promisable } from "type-fest";
+import { Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
 export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {
@@ -300,7 +300,7 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingSelectDef ? O["options"][number]["value"] :
     O extends PluginSettingSliderDef ? number :
     O extends PluginSettingComponentDef ? any :
-    O extends PluginSettingCustomDef ? IsAny<O["default"]> extends true ? O["default"] : any :
+    O extends PluginSettingCustomDef ? O extends { default: infer Default; } ? Default : any :
     never;
 
 type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
