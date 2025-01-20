@@ -19,6 +19,7 @@
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
+import { disableStyle, enableStyle } from "@api/Styles";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind } from "@utils/patches";
 import { Patch, Plugin, ReporterTestable, StartAt } from "@utils/types";
@@ -215,7 +216,7 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 }
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
-    const { name, commands, contextMenus } = p;
+    const { name, commands, contextMenus, style } = p;
 
     if (p.start) {
         logger.info("Starting plugin", name);
@@ -257,11 +258,13 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         }
     }
 
+    if (style) enableStyle(style);
+
     return true;
 }, p => `startPlugin ${p.name}`);
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
-    const { name, commands, contextMenus } = p;
+    const { name, commands, contextMenus, style } = p;
 
     if (p.stop) {
         logger.info("Stopping plugin", name);
@@ -299,6 +302,8 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
             removeContextMenuPatch(navId, contextMenus[navId]);
         }
     }
+
+    if (style) disableStyle(style);
 
     return true;
 }, p => `stopPlugin ${p.name}`);

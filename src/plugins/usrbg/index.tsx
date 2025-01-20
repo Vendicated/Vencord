@@ -17,7 +17,6 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { enableStyle } from "@api/Styles";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -115,11 +114,10 @@ export default definePlugin({
     },
 
     async start() {
-        enableStyle(style);
-
         const res = await fetch(API_URL);
         if (res.ok) {
             this.data = await res.json();
         }
-    }
+    },
+    style
 });

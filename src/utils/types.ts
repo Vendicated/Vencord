@@ -18,6 +18,7 @@
 
 import { Command } from "@api/Commands";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { Style } from "@api/Styles";
 import { FluxEvents } from "@webpack/types";
 import { JSX } from "react";
 import { Promisable } from "type-fest";
@@ -140,6 +141,10 @@ export interface PluginDef {
      * The key will be used as text for the button
      */
     toolboxActions?: Record<string, () => void>;
+    /**
+     * An imported managed style to be enabled only when the plugin is enabled
+     */
+    style?: Style;
 
     tags?: string[];
 }
