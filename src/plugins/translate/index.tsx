@@ -26,6 +26,7 @@ import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, Menu } from "@webpack/common";
+import { hash as h64 } from '@intrnl/xxhash64';
 
 import { settings } from "./settings";
 import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
@@ -87,28 +88,36 @@ export default definePlugin({
         this.preSend = addPreSendListener(async (_, message) => {
             if (!settings.store.autoTranslate) return;
             if (!message.content) return;
-
+        
             const urlRegex = /(https?:\/\/\S+)/g;
-
+        
             const matches = message.content.match(urlRegex);
-
+        
             if (matches && matches[0] === message.content.trim()) return;
-
+        
+            const urlMap = new Map();
+        
             setShouldShowTranslateEnabledTooltip?.(true);
             clearTimeout(tooltipTimeout);
             tooltipTimeout = setTimeout(() => setShouldShowTranslateEnabledTooltip?.(false), 2000);
-
-            const tempContent = message.content.replace(urlRegex, url => "[[LINK]]");
+        
+            const tempContent = message.content.replace(urlRegex, (url) => {
+                const hash = h64(url);  // xxhash64 from @intrnl/xxhash64
+                // hash to string
+                const hashString = hash.toString(16); 
+                urlMap.set(hashString, url);  
+                return hashString;  
+            });
 
             const trans = await translate("sent", tempContent);
-
+        
             let translatedContent = trans.text;
-            if (matches) {
-                matches.forEach(url => {
-                    translatedContent = translatedContent.replace("[[LINK]]", url);
-                });
-            }
 
+            // hash to original
+            urlMap.forEach((url, hash) => {
+                translatedContent = translatedContent.replace(hash, url);
+            });
+        
             message.content = translatedContent;
         });
     },
