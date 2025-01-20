@@ -18,7 +18,7 @@ import { Channel } from "discord-types/general";
 import { contextMenus } from "./components/contextMenu";
 import { openCategoryModal, requireSettingsMenu } from "./components/CreateCategoryModal";
 import { DEFAULT_CHUNK_SIZE } from "./constants";
-import { canMoveCategory, canMoveCategoryInDirection, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getCategoryByIndex, getSections, init, isPinned, moveCategory, removeCategory } from "./data";
+import { canMoveCategory, canMoveCategoryInDirection, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getCategoryByIndex, getSections, init, isPinned, moveCategory, removeCategory, usePinnedDms } from "./data";
 
 interface ChannelComponentProps {
     children: React.ReactNode,
@@ -31,7 +31,6 @@ const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
 export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
 
 export let instance: any;
-export const forceUpdate = () => instance?.props?._forceUpdate?.();
 
 export const enum PinOrder {
     LastMessage,
@@ -45,14 +44,12 @@ export const settings = definePluginSettings({
         options: [
             { label: "Most recent message", value: PinOrder.LastMessage, default: true },
             { label: "Custom (right click channels to reorder)", value: PinOrder.Custom }
-        ],
-        onChange: () => forceUpdate()
+        ]
     },
     dmSectionCollapsed: {
         type: OptionType.BOOLEAN,
         description: "Collapse DM sections",
-        default: false,
-        onChange: () => forceUpdate()
+        default: false
     },
     userBasedCategoryList: {
         type: OptionType.CUSTOM,
@@ -126,8 +123,8 @@ export default definePlugin({
         {
             find: ".FRIENDS},\"friends\"",
             replacement: {
-                match: /let{showLibrary:\i,.+?showDMHeader:.+?,/,
-                replace: "let forceUpdate = Vencord.Util.useForceUpdater();$&_forceUpdate:forceUpdate,"
+                match: /let{showLibrary:\i,/,
+                replace: "$self.usePinnedDms();$&"
             }
         },
 
@@ -151,6 +148,7 @@ export default definePlugin({
             }
         },
     ],
+
     sections: null as number[] | null,
 
     set _instance(i: any) {
@@ -164,6 +162,7 @@ export default definePlugin({
         CONNECTION_OPEN: () => init(),
     },
 
+    usePinnedDms,
     isPinned,
     categoryLen,
     getSections,

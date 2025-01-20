@@ -6,8 +6,8 @@
 
 import { LiteralUnion } from "type-fest";
 
-const UNPROXIED_GETS = new Set(["concat", "copyWithin", "every", "filter", "flat", "join", "reverse", "shift", "slice", "some", "sort", "splice", "toReversed", "toSorted", "toSpliced", "unshift"]);
 const SYM_IS_PROXY = Symbol("SettingsStore.isProxy");
+const SYM_GET_RAW_TARGET = Symbol("SettingsStore.getRawTarget");
 
 // Resolves a possibly nested prop in the form of "some.nested.prop" to type of T.some.nested.prop
 type ResolvePropDeep<T, P> = P extends `${infer Pre}.${infer Suf}`
@@ -63,6 +63,10 @@ export class SettingsStore<T extends object> {
                     return true;
                 }
 
+                if (key === SYM_GET_RAW_TARGET) {
+                    return target;
+                }
+
                 let v = Reflect.get(target, key, receiver);
 
                 if (!(key in target) && self.getDefaultValue != null) {
@@ -74,18 +78,21 @@ export class SettingsStore<T extends object> {
                     });
                 }
 
-                const settingsPath = `${path}${path && "."}${key}`;
-
                 if (typeof v === "object" && v != null && !v[SYM_IS_PROXY]) {
-                    return Array.isArray(v)
-                        ? self.makeArrayProxy(v, root, settingsPath)
-                        : self.makeProxy(v, root, settingsPath);
+                    const settingsPath = `${path}${path && "."}${key}`;
+                    return self.makeProxy(v, root, settingsPath);
                 }
 
                 return v;
             },
             set(target, key: string, value) {
-                if (target[key] === value) return true;
+                if (value?.[SYM_IS_PROXY]) {
+                    value = value[SYM_GET_RAW_TARGET];
+                }
+
+                if (target[key] === value) {
+                    return true;
+                }
 
                 if (!Reflect.set(target, key, value)) {
                     return false;
@@ -121,9 +128,12 @@ export class SettingsStore<T extends object> {
                 const paths = setPath.split(".");
 
                 if (paths.length > 2 && paths[0] === "plugins") {
-                    const settingPathStr = paths.slice(0, 3).join(".");
+                    const settingPath = paths.slice(0, 3);
+                    const settingPathStr = settingPath.join(".");
+                    const settingValue = settingPath.reduce((acc, curr) => acc[curr], root);
+
                     self.globalListeners.forEach(cb => cb(root, settingPathStr));
-                    self.pathListeners.get(settingPathStr)?.forEach(cb => cb(undefined));
+                    self.pathListeners.get(settingPathStr)?.forEach(cb => cb(settingValue));
                 }
 
                 self.pathListeners.get(setPath)?.forEach(cb => cb(undefined));
@@ -131,103 +141,6 @@ export class SettingsStore<T extends object> {
                 return true;
             }
         });
-    }
-
-    private makeArrayProxy(array: any[], root: T, path: string = "") {
-        const self = this;
-        let shouldProxyGet = true;
-
-        let proxiedArray: typeof array;
-        return (proxiedArray = new Proxy(array, {
-            get(target, key: any, receiver) {
-                if (key === SYM_IS_PROXY) {
-                    return true;
-                }
-
-                if (!shouldProxyGet) {
-                    return Reflect.get(target, key, receiver);
-                }
-
-                if (UNPROXIED_GETS.has(key)) {
-                    return function (...args: any[]) {
-                        shouldProxyGet = false;
-                        const result = proxiedArray[key](...args);
-                        shouldProxyGet = true;
-
-                        if (!result[SYM_IS_PROXY] && Array.isArray(result)) {
-                            return self.makeArrayProxy(result, root, path);
-                        }
-
-                        return result;
-                    };
-                }
-
-                let v = Reflect.get(target, key, receiver);
-
-                if (!(key in target) && self.getDefaultValue != null) {
-                    v = self.getDefaultValue({
-                        target,
-                        key,
-                        root,
-                        path
-                    });
-                }
-
-                const settingsPath = `${path}${path && "."}${key}`;
-
-                if (typeof v === "object" && v != null && !v[SYM_IS_PROXY]) {
-                    return Array.isArray(v)
-                        ? self.makeArrayProxy(v, root, settingsPath)
-                        : self.makeProxy(v, root, settingsPath);
-                }
-
-                return v;
-            },
-            set(target, key: string, value) {
-                if (target[key] === value) return true;
-
-                if (!Reflect.set(target, key, value)) {
-                    return false;
-                }
-
-                const setPath = `${path}${path && "."}${key}`;
-                const paths = setPath.split(".");
-
-                // Because we support any type of settings with OptionType.CUSTOM, and those objects get proxied recursively,
-                // the path ends up including all the nested paths (plugins.pluginName.settingName.example.one).
-                // So, we need to extract the top-level setting path (plugins.pluginName.settingName),
-                // to be able to notify globalListeners and top-level setting name listeners (let { settingName } = settings.use(["settingName"]),
-                // with the new value
-                if (paths.length > 2 && paths[0] === "plugins") {
-                    const settingPath = paths.slice(0, 3);
-                    const settingPathStr = settingPath.join(".");
-                    const settingValue = settingPath.reduce((acc, curr) => acc[curr], root);
-
-                    self.globalListeners.forEach(cb => cb(root, settingPathStr));
-                    self.pathListeners.get(settingPathStr)?.forEach(cb => cb(settingValue));
-                }
-
-                self.pathListeners.get(setPath)?.forEach(cb => cb(value));
-
-                return true;
-            },
-            deleteProperty(target, key: string) {
-                if (!Reflect.deleteProperty(target, key)) {
-                    return false;
-                }
-
-                const setPath = `${path}${path && "."}${key}`;
-                const paths = setPath.split(".");
-
-                if (paths.length > 2 && paths[0] === "plugins") {
-                    const settingPathStr = paths.slice(0, 3).join(".");
-                    self.globalListeners.forEach(cb => cb(root, settingPathStr));
-                    self.pathListeners.get(settingPathStr)?.forEach(cb => cb(undefined));
-                }
-
-                return true;
-            }
-        }));
     }
 
     /**

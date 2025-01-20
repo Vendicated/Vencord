@@ -6,9 +6,10 @@
 
 import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
+import { useForceUpdater } from "@utils/react";
 import { UserStore } from "@webpack/common";
 
-import { forceUpdate, PinOrder, PrivateChannelSortStore, settings } from "./index";
+import { PinOrder, PrivateChannelSortStore, settings } from "./index";
 
 export interface Category {
     id: string;
@@ -23,21 +24,23 @@ const CATEGORY_MIGRATED_PINDMS_KEY = "PinDMsMigratedPinDMs";
 const CATEGORY_MIGRATED_KEY = "PinDMsMigratedOldCategories";
 const OLD_CATEGORY_KEY = "BetterPinDMsCategories-";
 
+let forceUpdateDms: (() => void) | undefined = undefined;
+
 export async function init() {
     await migrateData();
 
-    initCategories(UserStore.getCurrentUser()?.id);
-    forceUpdate();
+    const userId = UserStore.getCurrentUser()?.id;
+    currentUserCategories = settings.store.userBasedCategoryList[userId] ??= [];
+
+    forceUpdateDms?.();
+}
+
+export function usePinnedDms() {
+    forceUpdateDms = useForceUpdater();
+    settings.use(["pinOrder", "dmSectionCollapsed", "userBasedCategoryList"]);
 }
 
 export let currentUserCategories: Category[] = [];
-
-export function initCategories(userId: string) {
-    const categories = settings.store.userBasedCategoryList[userId];
-    if (categories == null) return;
-
-    currentUserCategories = categories;
-}
 
 export function getCategory(id: string) {
     return currentUserCategories.find(c => c.id === id);
@@ -49,15 +52,6 @@ export function getCategoryByIndex(index: number) {
 
 export function createCategory(category: Category) {
     currentUserCategories.push(category);
-    forceUpdate();
-}
-
-export function updateCategory(category: Category) {
-    const index = currentUserCategories.findIndex(c => c.id === category.id);
-    if (index === -1) return;
-
-    category[index] = category;
-    forceUpdate();
 }
 
 export function addChannelToCategory(channelId: string, categoryId: string) {
@@ -67,7 +61,6 @@ export function addChannelToCategory(channelId: string, categoryId: string) {
     if (category.channels.includes(channelId)) return;
 
     category.channels.push(channelId);
-    forceUpdate();
 }
 
 export function removeChannelFromCategory(channelId: string) {
@@ -75,7 +68,6 @@ export function removeChannelFromCategory(channelId: string) {
     if (category == null) return;
 
     category.channels = category.channels.filter(c => c !== channelId);
-    forceUpdate();
 }
 
 export function removeCategory(categoryId: string) {
@@ -83,7 +75,6 @@ export function removeCategory(categoryId: string) {
     if (categoryIndex === -1) return;
 
     currentUserCategories.splice(categoryIndex, 1);
-    forceUpdate();
 }
 
 export function collapseCategory(id: string, value = true) {
@@ -91,7 +82,6 @@ export function collapseCategory(id: string, value = true) {
     if (category == null) return;
 
     category.collapsed = value;
-    forceUpdate();
 }
 
 // Utils
@@ -153,7 +143,6 @@ export function moveCategory(id: string, direction: -1 | 1) {
     const b = a + direction;
 
     swapElementsInArray(currentUserCategories, a, b);
-    forceUpdate();
 }
 
 export function moveChannel(channelId: string, direction: -1 | 1) {
@@ -164,7 +153,6 @@ export function moveChannel(channelId: string, direction: -1 | 1) {
     const b = a + direction;
 
     swapElementsInArray(category.channels, a, b);
-    forceUpdate();
 }
 
 // TODO: Remove DataStore PinnedDms migration once enough time has passed
