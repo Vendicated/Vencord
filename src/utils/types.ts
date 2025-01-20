@@ -26,6 +26,7 @@ import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
 import { MessagePopoverButtonFactory } from "@api/MessagePopover";
 import { FluxEvents } from "@webpack/types";
+import { JSX } from "react";
 import { Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
