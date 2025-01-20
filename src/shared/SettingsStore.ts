@@ -58,12 +58,12 @@ export class SettingsStore<T extends object> {
         const self = this;
 
         return new Proxy(object, {
-            get(target, key: any) {
+            get(target, key: any, receiver) {
                 if (key === SYM_IS_PROXY) {
                     return true;
                 }
 
-                let v = target[key];
+                let v = Reflect.get(target, key, receiver);
 
                 if (!(key in target) && self.getDefaultValue != null) {
                     v = self.getDefaultValue({
@@ -76,12 +76,10 @@ export class SettingsStore<T extends object> {
 
                 const settingsPath = `${path}${path && "."}${key}`;
 
-                if (Array.isArray(v)) {
-                    return self.makeArrayProxy(v, root, settingsPath);
-                }
-
-                if (typeof v === "object" && v != null) {
-                    return self.makeProxy(v, root, settingsPath);
+                if (typeof v === "object" && v != null && !v[SYM_IS_PROXY]) {
+                    return Array.isArray(v)
+                        ? self.makeArrayProxy(v, root, settingsPath)
+                        : self.makeProxy(v, root, settingsPath);
                 }
 
                 return v;
@@ -117,16 +115,21 @@ export class SettingsStore<T extends object> {
         const self = this;
         let shouldProxyGet = true;
 
-        return new Proxy(array, {
-            get(target, key: any) {
+        let proxiedArray: typeof array;
+        return (proxiedArray = new Proxy(array, {
+            get(target, key: any, receiver) {
                 if (key === SYM_IS_PROXY) {
                     return true;
+                }
+
+                if (!shouldProxyGet) {
+                    return Reflect.get(target, key, receiver);
                 }
 
                 if (UNPROXIED_GETS.has(key)) {
                     return function (...args: any[]) {
                         shouldProxyGet = false;
-                        const result = array[key](...args);
+                        const result = proxiedArray[key](...args);
                         shouldProxyGet = true;
 
                         if (!result[SYM_IS_PROXY] && Array.isArray(result)) {
@@ -137,7 +140,7 @@ export class SettingsStore<T extends object> {
                     };
                 }
 
-                let v = target[key];
+                let v = Reflect.get(target, key, receiver);
 
                 if (!(key in target) && self.getDefaultValue != null) {
                     v = self.getDefaultValue({
@@ -150,12 +153,10 @@ export class SettingsStore<T extends object> {
 
                 const settingsPath = `${path}${path && "."}${key}`;
 
-                if (Array.isArray(v)) {
-                    return self.makeArrayProxy(v, root, settingsPath);
-                }
-
-                if (typeof v === "object" && v != null) {
-                    return self.makeProxy(v, root, settingsPath);
+                if (typeof v === "object" && v != null && !v[SYM_IS_PROXY]) {
+                    return Array.isArray(v)
+                        ? self.makeArrayProxy(v, root, settingsPath)
+                        : self.makeProxy(v, root, settingsPath);
                 }
 
                 return v;
@@ -167,11 +168,9 @@ export class SettingsStore<T extends object> {
                     return false;
                 }
 
-                const setPath = `${path}${path && "."}${key}`;
-                self.pathListeners.get(setPath)?.forEach(cb => cb(value));
                 self.globalListeners.forEach(cb => cb(root, path));
                 self.pathListeners.get(path)?.forEach(cb => cb(target));
-
+                self.pathListeners.get(`${path}${path && "."}${key}`)?.forEach(cb => cb(value));
 
                 return true;
             },
@@ -180,14 +179,14 @@ export class SettingsStore<T extends object> {
                     return false;
                 }
 
-                const setPath = `${path}${path && "."}${key}`;
-                self.pathListeners.get(setPath)?.forEach(cb => cb(undefined));
                 self.globalListeners.forEach(cb => cb(root, path));
                 self.pathListeners.get(path)?.forEach(cb => cb(target));
+                self.pathListeners.get(`${path}${path && "."}${key}`)?.forEach(cb => cb(undefined));
+
 
                 return true;
             }
-        });
+        }));
     }
 
     /**
