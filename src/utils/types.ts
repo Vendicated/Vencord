@@ -177,7 +177,7 @@ export type SettingsChecks<D extends SettingsDefinition> = {
     (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
 };
 
-export type PluginSettingDef = PluginSettingCustomDef | ((
+export type PluginSettingDef = ((
     | PluginSettingStringDef
     | PluginSettingNumberDef
     | PluginSettingBooleanDef
@@ -185,7 +185,7 @@ export type PluginSettingDef = PluginSettingCustomDef | ((
     | PluginSettingSliderDef
     | PluginSettingComponentDef
     | PluginSettingBigIntDef
-) & PluginSettingCommon);
+) & PluginSettingCommon) | (PluginSettingCustomDef & Partial<PluginSettingCommon>);
 
 export interface PluginSettingCommon {
     description: string;
