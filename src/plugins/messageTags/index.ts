@@ -29,7 +29,6 @@ const MessageTagsMarker = Symbol("MessageTags");
 interface Tag {
     name: string;
     message: string;
-    enabled: boolean;
 }
 
 function getTags() {
@@ -87,20 +86,14 @@ export default definePlugin({
     name: "MessageTags",
     description: "Allows you to save messages and to use them with a simple command.",
     authors: [Devs.Luna],
-    options: {
-        clyde: {
-            name: "Clyde message on send",
-            description: "If enabled, clyde will send you an ephemeral message when a tag was used.",
-            type: OptionType.BOOLEAN,
-            default: true
-        }
-    },
+    settings,
 
     async start() {
         // TODO: Remove DataStore tags migration once enough time has passed
         const oldTags = await DataStore.get<Tag[]>(DATA_KEY);
         if (oldTags != null) {
-            settings.store.tagsList = Object.fromEntries(oldTags.map(oldTag => [oldTag.name, oldTag]));
+            // @ts-ignore
+            settings.store.tagsList = Object.fromEntries(oldTags.map(oldTag => (delete oldTag.enabled, [oldTag.name, oldTag])));
             await DataStore.del(DATA_KEY);
         }
 
@@ -183,7 +176,6 @@ export default definePlugin({
 
                         const tag = {
                             name: name,
-                            enabled: true,
                             message: message
                         };
 
@@ -215,9 +207,7 @@ export default definePlugin({
                         sendBotMessage(ctx.channel.id, {
                             embeds: [
                                 {
-                                    // @ts-ignore
                                     title: "All Tags:",
-                                    // @ts-ignore
                                     description: Object.values(getTags())
                                         .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
                                         .join("\n") || `${EMOTE} Woops! There are no tags yet, use \`/tags create\` to create one!`,
