@@ -102,9 +102,7 @@ export default definePlugin({
             tooltipTimeout = setTimeout(() => setShouldShowTranslateEnabledTooltip?.(false), 2000);
         
             const tempContent = message.content.replace(urlRegex, (url) => {
-                const hash = h64(url);  // xxhash64 from @intrnl/xxhash64
-                // hash to string
-                const hashString = hash.toString(16); 
+                const hash = h64(url).toString(16); 
                 urlMap.set(hashString, url);  
                 return hashString;  
             });
