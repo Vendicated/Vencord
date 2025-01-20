@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addProfileBadge, removeProfileBadge } from "@api/Badges";
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
@@ -126,6 +127,7 @@ for (const p of pluginsValues) if (isPluginEnabled(p.name)) {
     if (p.renderMessageAccessory) neededApiPlugins.add("MessageAccessoriesAPI");
     if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
     if (p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
+    if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
 
     for (const key of pluginKeysToBind) {
         p[key] &&= p[key].bind(p) as any;
@@ -241,7 +243,7 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const {
-        name, commands, contextMenus,
+        name, commands, contextMenus, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
     } = p;
@@ -278,13 +280,14 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         subscribePluginFluxEvents(p, FluxDispatcher);
     }
 
-
     if (contextMenus) {
         logger.debug("Adding context menus patches of plugin", name);
         for (const navId in contextMenus) {
             addContextMenuPatch(navId, contextMenus[navId]);
         }
     }
+
+    if (userProfileBadge) addProfileBadge(userProfileBadge);
 
     if (onBeforeMessageEdit) addMessagePreEditListener(onBeforeMessageEdit);
     if (onBeforeMessageSend) addMessagePreSendListener(onBeforeMessageSend);
@@ -301,7 +304,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
     const {
-        name, commands, contextMenus,
+        name, commands, contextMenus, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
     } = p;
@@ -342,6 +345,8 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
             removeContextMenuPatch(navId, contextMenus[navId]);
         }
     }
+
+    if (userProfileBadge) removeProfileBadge(userProfileBadge);
 
     if (onBeforeMessageEdit) removeMessagePreEditListener(onBeforeMessageEdit);
     if (onBeforeMessageSend) removeMessagePreSendListener(onBeforeMessageSend);
