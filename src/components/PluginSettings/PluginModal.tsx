@@ -132,8 +132,6 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             pluginSettings[key] = value;
 
             if (option.type === OptionType.CUSTOM) continue;
-
-            option?.onChange?.(value);
             if (option?.restartNeeded) restartNeeded = true;
         }
         if (restartNeeded) onRestartNeeded();
