@@ -45,7 +45,10 @@ function addTag(tag: Tag) {
 }
 
 function removeTag(name: string) {
-    settings.store.tagsList = settings.store.tagsList.filter(tag => tag.name !== name);
+    const index = settings.store.tagsList.findIndex(tag => tag.name === name);
+    if (index === -1) return;
+
+    settings.store.tagsList.splice(index, 1);
 }
 
 function createTagCommand(tag: Tag) {

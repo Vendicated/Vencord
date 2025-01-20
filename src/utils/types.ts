@@ -20,7 +20,7 @@ import { Command } from "@api/Commands";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { FluxEvents } from "@webpack/types";
 import { JSX } from "react";
-import { Promisable } from "type-fest";
+import { IsAny, Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
 export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {
@@ -168,7 +168,7 @@ export const enum OptionType {
     SELECT,
     SLIDER,
     COMPONENT,
-    ARRAY
+    CUSTOM
 }
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
@@ -177,7 +177,7 @@ export type SettingsChecks<D extends SettingsDefinition> = {
     (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
 };
 
-export type PluginSettingDef = (
+export type PluginSettingDef = PluginSettingCustomDef | ((
     | PluginSettingStringDef
     | PluginSettingNumberDef
     | PluginSettingBooleanDef
@@ -185,8 +185,7 @@ export type PluginSettingDef = (
     | PluginSettingSliderDef
     | PluginSettingComponentDef
     | PluginSettingBigIntDef
-    | PluginSettingArrayDef
-) & PluginSettingCommon;
+) & PluginSettingCommon);
 
 export interface PluginSettingCommon {
     description: string;
@@ -247,11 +246,9 @@ export interface PluginSettingSelectOption {
     default?: boolean;
 }
 
-export interface PluginSettingArrayDef {
-    type: OptionType.ARRAY;
-    default?: any[];
-    // TODO: Remove this once Array settings have an UI implementation
-    hidden: true;
+export interface PluginSettingCustomDef {
+    type: OptionType.CUSTOM;
+    default?: any;
 }
 
 export interface PluginSettingSliderDef {
@@ -303,7 +300,7 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingSelectDef ? O["options"][number]["value"] :
     O extends PluginSettingSliderDef ? number :
     O extends PluginSettingComponentDef ? any :
-    O extends PluginSettingArrayDef ? O["default"] extends any[] ? O["default"] : any[] :
+    O extends PluginSettingCustomDef ? IsAny<O["default"]> extends true ? O["default"] : any :
     never;
 
 type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
@@ -358,14 +355,14 @@ export type PluginOptionsItem =
     | PluginOptionSelect
     | PluginOptionSlider
     | PluginOptionComponent
-    | PluginOptionArray;
+    | PluginOptionCustom;
 export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
 export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | BigInt>;
 export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
 export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
-export type PluginOptionArray = PluginSettingArrayDef & PluginSettingCommon;
+export type PluginOptionCustom = PluginSettingCustomDef;
 
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
     [key in keyof PluginExports]:

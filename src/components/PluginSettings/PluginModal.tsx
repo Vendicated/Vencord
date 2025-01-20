@@ -82,8 +82,7 @@ const Components: Record<OptionType, React.ComponentType<ISettingElementProps<an
     [OptionType.SELECT]: SettingSelectComponent,
     [OptionType.SLIDER]: SettingSliderComponent,
     [OptionType.COMPONENT]: SettingCustomComponent,
-    // TODO: Add UI for Array settings
-    [OptionType.ARRAY]: () => null,
+    [OptionType.CUSTOM]: () => null,
 };
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
@@ -131,6 +130,9 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         for (const [key, value] of Object.entries(tempSettings)) {
             const option = plugin.options[key];
             pluginSettings[key] = value;
+
+            if (option.type === OptionType.CUSTOM) continue;
+
             option?.onChange?.(value);
             if (option?.restartNeeded) restartNeeded = true;
         }
@@ -143,7 +145,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
         } else {
             const options = Object.entries(plugin.options).map(([key, setting]) => {
-                if (setting.hidden) return null;
+                if (setting.type !== OptionType.CUSTOM && setting.hidden) return null;
 
                 function onChange(newValue: any) {
                     setTempSettings(s => ({ ...s, [key]: newValue }));

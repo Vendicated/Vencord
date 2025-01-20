@@ -34,7 +34,7 @@ export interface SettingsStore<T extends object> extends SettingsStoreOptions { 
  */
 export class SettingsStore<T extends object> {
     private pathListeners = new Map<string, Set<(newData: any) => void>>();
-    private globalListeners = new Set<(newData: any, path: string) => void>();
+    private globalListeners = new Set<(newData: T, path: string) => void>();
 
     /**
      * The store object. Making changes to this object will trigger the applicable change listeners
@@ -69,10 +69,6 @@ export class SettingsStore<T extends object> {
 
                 const settingsPath = `${path}${path && "."}${key}`;
 
-                if (Array.isArray(v)) {
-                    return self.makeArrayProxy(v, settingsPath);
-                }
-
                 if (typeof v === "object" && v != null) {
                     return self.makeProxy(v, root, settingsPath);
                 }
@@ -85,7 +81,7 @@ export class SettingsStore<T extends object> {
                 Reflect.set(target, key, value);
                 const setPath = `${path}${path && "."}${key}`;
 
-                self.globalListeners.forEach(cb => cb(value, setPath));
+                self.globalListeners.forEach(cb => cb(root, setPath));
                 self.pathListeners.get(setPath)?.forEach(cb => cb(value));
 
                 return true;
@@ -95,33 +91,8 @@ export class SettingsStore<T extends object> {
 
                 const setPath = `${path}${path && "."}${key}`;
 
-                self.globalListeners.forEach(cb => cb(undefined, setPath));
+                self.globalListeners.forEach(cb => cb(root, setPath));
                 self.pathListeners.get(setPath)?.forEach(cb => cb(undefined));
-
-                return true;
-            }
-        });
-    }
-
-    private makeArrayProxy(array: any[], arrayPath: string) {
-        const self = this;
-
-        return new Proxy(array, {
-            set(target, key: string, value) {
-                if (target[key] === value) return true;
-
-                Reflect.set(target, key, value);
-
-                self.globalListeners.forEach(cb => cb(target, arrayPath));
-                self.pathListeners.get(arrayPath)?.forEach(cb => cb(target));
-
-                return true;
-            },
-            deleteProperty(target, key: string) {
-                Reflect.deleteProperty(target, key);
-
-                self.globalListeners.forEach(cb => cb(target, arrayPath));
-                self.pathListeners.get(arrayPath)?.forEach(cb => cb(target));
 
                 return true;
             }
