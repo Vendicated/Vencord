@@ -113,7 +113,7 @@ export default definePlugin({
 
             // hash to original
             urlMap.forEach((url, hash) => {
-                translatedContent = translatedContent.replace(hash, url);
+                translatedContent = translatedContent.replaceAll(hash, url);
             });
         
             message.content = translatedContent;
