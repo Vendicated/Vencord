@@ -18,7 +18,7 @@ import { Channel } from "discord-types/general";
 import { contextMenus } from "./components/contextMenu";
 import { openCategoryModal, requireSettingsMenu } from "./components/CreateCategoryModal";
 import { DEFAULT_CHUNK_SIZE } from "./constants";
-import { canMoveCategory, canMoveCategoryInDirection, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getCategoryByIndex, getSections, init, isPinned, moveCategory, removeCategory, UserBasedCategoryList } from "./data";
+import { canMoveCategory, canMoveCategoryInDirection, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getCategoryByIndex, getSections, init, isPinned, moveCategory, removeCategory } from "./data";
 
 interface ChannelComponentProps {
     children: React.ReactNode,
@@ -55,10 +55,8 @@ export const settings = definePluginSettings({
         onChange: () => forceUpdate()
     },
     userBasedCategoryList: {
-        type: OptionType.ARRAY,
-        description: "",
-        hidden: true,
-        default: [] as UserBasedCategoryList[]
+        type: OptionType.CUSTOM,
+        default: {} as Record<string, Category[]>
     }
 });
 

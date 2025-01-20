@@ -18,11 +18,6 @@ export interface Category {
     collapsed?: boolean;
 }
 
-export interface UserBasedCategoryList {
-    userId: string;
-    categories: Category[];
-}
-
 const CATEGORY_BASE_KEY = "PinDMsCategories-";
 const CATEGORY_MIGRATED_PINDMS_KEY = "PinDMsMigratedPinDMs";
 const CATEGORY_MIGRATED_KEY = "PinDMsMigratedOldCategories";
@@ -35,27 +30,13 @@ export async function init() {
     forceUpdate();
 }
 
-let currentUserCategoriesIndex = -1;
 export let currentUserCategories: Category[] = [];
 
 export function initCategories(userId: string) {
-    const categoriesIndex = settings.store.userBasedCategoryList.findIndex(categoryList => categoryList.userId === userId);
+    const categories = settings.store.userBasedCategoryList[userId];
+    if (categories == null) return;
 
-    if (categoriesIndex === -1) {
-        settings.store.userBasedCategoryList.push({ userId, categories: [] });
-        currentUserCategoriesIndex = settings.store.userBasedCategoryList.length - 1;
-        currentUserCategories = settings.store.userBasedCategoryList[currentUserCategoriesIndex].categories;
-    } else {
-        currentUserCategoriesIndex = categoriesIndex;
-        currentUserCategories = settings.store.userBasedCategoryList[categoriesIndex].categories;
-    }
-}
-
-function saveUserCategories() {
-    const userCategories = settings.store.userBasedCategoryList[currentUserCategoriesIndex];
-    settings.store.userBasedCategoryList[currentUserCategoriesIndex] = { ...userCategories };
-
-    forceUpdate();
+    currentUserCategories = categories;
 }
 
 export function getCategory(id: string) {
@@ -68,7 +49,7 @@ export function getCategoryByIndex(index: number) {
 
 export function createCategory(category: Category) {
     currentUserCategories.push(category);
-    saveUserCategories();
+    forceUpdate();
 }
 
 export function updateCategory(category: Category) {
@@ -76,7 +57,7 @@ export function updateCategory(category: Category) {
     if (index === -1) return;
 
     category[index] = category;
-    saveUserCategories();
+    forceUpdate();
 }
 
 export function addChannelToCategory(channelId: string, categoryId: string) {
@@ -86,7 +67,7 @@ export function addChannelToCategory(channelId: string, categoryId: string) {
     if (category.channels.includes(channelId)) return;
 
     category.channels.push(channelId);
-    saveUserCategories();
+    forceUpdate();
 }
 
 export function removeChannelFromCategory(channelId: string) {
@@ -94,7 +75,7 @@ export function removeChannelFromCategory(channelId: string) {
     if (category == null) return;
 
     category.channels = category.channels.filter(c => c !== channelId);
-    saveUserCategories();
+    forceUpdate();
 }
 
 export function removeCategory(categoryId: string) {
@@ -102,7 +83,7 @@ export function removeCategory(categoryId: string) {
     if (categoryIndex === -1) return;
 
     currentUserCategories.splice(categoryIndex, 1);
-    saveUserCategories();
+    forceUpdate();
 }
 
 export function collapseCategory(id: string, value = true) {
@@ -110,7 +91,7 @@ export function collapseCategory(id: string, value = true) {
     if (category == null) return;
 
     category.collapsed = value;
-    saveUserCategories();
+    forceUpdate();
 }
 
 // Utils
@@ -172,7 +153,7 @@ export function moveCategory(id: string, direction: -1 | 1) {
     const b = a + direction;
 
     swapElementsInArray(currentUserCategories, a, b);
-    saveUserCategories();
+    forceUpdate();
 }
 
 export function moveChannel(channelId: string, direction: -1 | 1) {
@@ -183,7 +164,7 @@ export function moveChannel(channelId: string, direction: -1 | 1) {
     const b = a + direction;
 
     swapElementsInArray(category.channels, a, b);
-    saveUserCategories();
+    forceUpdate();
 }
 
 // TODO: Remove DataStore PinnedDms migration once enough time has passed
@@ -203,7 +184,7 @@ async function migrateData() {
         if (categories == null) continue;
 
         const userId = pinDmsKey.replace(CATEGORY_BASE_KEY, "");
-        settings.store.userBasedCategoryList.push({ userId, categories });
+        settings.store.userBasedCategoryList[userId] = categories;
 
         await DataStore.del(pinDmsKey);
     }
