@@ -37,18 +37,15 @@ function getTags() {
 }
 
 function getTag(name: string) {
-    return settings.store.tagsList.find(tag => tag.name === name) ?? null;
+    return settings.store.tagsList[name] ?? null;
 }
 
 function addTag(tag: Tag) {
-    settings.store.tagsList.push(tag);
+    settings.store.tagsList[tag.name] = tag;
 }
 
 function removeTag(name: string) {
-    const index = settings.store.tagsList.findIndex(tag => tag.name === name);
-    if (index === -1) return;
-
-    settings.store.tagsList.splice(index, 1);
+    delete settings.store.tagsList[name];
 }
 
 function createTagCommand(tag: Tag) {
@@ -81,10 +78,8 @@ const settings = definePluginSettings({
         default: true
     },
     tagsList: {
-        type: OptionType.ARRAY,
-        description: "",
-        hidden: true,
-        default: [] as Tag[],
+        type: OptionType.CUSTOM,
+        default: {} as Record<string, Tag>,
     }
 });
 
@@ -105,7 +100,7 @@ export default definePlugin({
         // TODO: Remove DataStore tags migration once enough time has passed
         const oldTags = await DataStore.get<Tag[]>(DATA_KEY);
         if (oldTags != null) {
-            settings.store.tagsList = oldTags;
+            settings.store.tagsList = Object.fromEntries(oldTags.map(oldTag => [oldTag.name, oldTag]));
             await DataStore.del(DATA_KEY);
         }
 
