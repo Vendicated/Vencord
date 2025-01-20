@@ -471,7 +471,7 @@ export type ScrollerThin = ComponentType<PropsWithChildren<{
     onScroll?(): void;
 }>>;
 
-export type Clickable = <T extends keyof JSX.IntrinsicElements = "div">(props: PropsWithChildren<JSX.IntrinsicElements[T]> & {
+export type Clickable = <T extends "a" | "div" | "span" | "li" = "div">(props: PropsWithChildren<JSX.IntrinsicElements[T]> & {
     tag?: T;
 }) => ReactNode;
 
