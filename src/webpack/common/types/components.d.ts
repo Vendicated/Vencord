@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { ComponentPropsWithRef, ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, KeyboardEvent, MouseEvent, PropsWithChildren, PropsWithRef, ReactNode, Ref } from "react";
+import type { ComponentPropsWithRef, ComponentType, CSSProperties, ElementType, FunctionComponent, HtmlHTMLAttributes, HTMLProps, KeyboardEvent, MouseEvent, PropsWithChildren, PropsWithRef, ReactNode, Ref } from "react";
 
 import { IconNames } from "./iconNames";
 
@@ -471,7 +471,9 @@ export type ScrollerThin = ComponentType<PropsWithChildren<{
     onScroll?(): void;
 }>>;
 
-export type Clickable = ComponentType<PropsWithChildren<ComponentPropsWithRef<"div">>>;
+export type Clickable<T extends ElementType = "div"> = ComponentType<PropsWithChildren<ComponentPropsWithRef<T>> & {
+    tag?: T;
+}>;
 
 export type Avatar = ComponentType<PropsWithChildren<{
     className?: string;
