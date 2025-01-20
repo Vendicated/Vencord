@@ -7,6 +7,7 @@
 import { LiteralUnion } from "type-fest";
 
 const UNPROXIED_GETS = new Set(["concat", "copyWithin", "every", "filter", "flat", "join", "reverse", "shift", "slice", "some", "sort", "splice", "toReversed", "toSorted", "toSpliced", "unshift"]);
+const SYM_IS_PROXY = Symbol("SettingsStore.isProxy");
 
 // Resolves a possibly nested prop in the form of "some.nested.prop" to type of T.some.nested.prop
 type ResolvePropDeep<T, P> = P extends `${infer Pre}.${infer Suf}`
@@ -57,7 +58,11 @@ export class SettingsStore<T extends object> {
         const self = this;
 
         return new Proxy(object, {
-            get(target, key: string) {
+            get(target, key: any) {
+                if (key === SYM_IS_PROXY) {
+                    return true;
+                }
+
                 let v = target[key];
 
                 if (!(key in target) && self.getDefaultValue != null) {
@@ -113,14 +118,18 @@ export class SettingsStore<T extends object> {
         let shouldProxyGet = true;
 
         return new Proxy(array, {
-            get(target, key: string) {
+            get(target, key: any) {
+                if (key === SYM_IS_PROXY) {
+                    return true;
+                }
+
                 if (UNPROXIED_GETS.has(key)) {
                     return function (...args: any[]) {
                         shouldProxyGet = false;
                         const result = array[key](...args);
                         shouldProxyGet = true;
 
-                        if (Array.isArray(result)) {
+                        if (!result[SYM_IS_PROXY] && Array.isArray(result)) {
                             return self.makeArrayProxy(result, root, path);
                         }
 
