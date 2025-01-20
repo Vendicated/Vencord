@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Channel, User } from "discord-types/general/index.js";
 import { JSX } from "react";
 
@@ -42,10 +43,10 @@ interface DecoratorProps {
 export type MemberListDecoratorFactory = (props: DecoratorProps) => JSX.Element | null;
 type OnlyIn = "guilds" | "dms";
 
-export const decorators = new Map<string, { decorator: MemberListDecoratorFactory, onlyIn?: OnlyIn; }>();
+export const decorators = new Map<string, { render: MemberListDecoratorFactory, onlyIn?: OnlyIn; }>();
 
-export function addMemberListDecorator(identifier: string, decorator: MemberListDecoratorFactory, onlyIn?: OnlyIn) {
-    decorators.set(identifier, { decorator, onlyIn });
+export function addMemberListDecorator(identifier: string, render: MemberListDecoratorFactory, onlyIn?: OnlyIn) {
+    decorators.set(identifier, { render, onlyIn });
 }
 
 export function removeMemberListDecorator(identifier: string) {
@@ -54,12 +55,17 @@ export function removeMemberListDecorator(identifier: string) {
 
 export function __getDecorators(props: DecoratorProps): (JSX.Element | null)[] {
     const isInGuild = !!(props.guildId);
-    return Array.from(decorators.values(), decoratorObj => {
-        const { decorator, onlyIn } = decoratorObj;
-        // this can most likely be done cleaner
-        if (!onlyIn || (onlyIn === "guilds" && isInGuild) || (onlyIn === "dms" && !isInGuild)) {
-            return decorator(props);
+    return Array.from(
+        decorators.entries(),
+        ([key, { render: Decorator, onlyIn }]) => {
+            if ((onlyIn === "guilds" && !isInGuild) || (onlyIn === "dms" && isInGuild))
+                return null;
+
+            return (
+                <ErrorBoundary noop key={key} message={`Failed to render ${key} Member List Decorator`}>
+                    <Decorator {...props} />
+                </ErrorBoundary>
+            );
         }
-        return null;
-    });
+    );
 }

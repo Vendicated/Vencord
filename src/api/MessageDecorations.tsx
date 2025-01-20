@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Channel, Message } from "discord-types/general/index.js";
 import { JSX } from "react";
 
@@ -58,7 +59,12 @@ export function removeMessageDecoration(identifier: string) {
 }
 
 export function __addDecorationsToMessage(props: MessageDecorationProps): (JSX.Element | null)[] {
-    return [...decorations.values()].map(decoration => {
-        return decoration(props);
-    });
+    return Array.from(
+        decorations.entries(),
+        ([key, Decoration]) => (
+            <ErrorBoundary noop message={`Failed to render ${key} Message Decoration`} key={key}>
+                <Decoration {...props} />
+            </ErrorBoundary>
+        )
+    );
 }

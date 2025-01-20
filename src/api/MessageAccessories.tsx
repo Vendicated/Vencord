@@ -16,23 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { JSX } from "react";
 
 export type MessageAccessoryFactory = (props: Record<string, any>) => JSX.Element | null | Array<JSX.Element | null>;
 export type MessageAccessory = {
-    callback: MessageAccessoryFactory;
+    render: MessageAccessoryFactory;
     position?: number;
 };
 
-export const accessories = new Map<String, MessageAccessory>();
+export const accessories = new Map<string, MessageAccessory>();
 
 export function addMessageAccessory(
     identifier: string,
-    callback: MessageAccessoryFactory,
+    render: MessageAccessoryFactory,
     position?: number
 ) {
     accessories.set(identifier, {
-        callback,
+        render,
         position,
     });
 }
@@ -45,14 +46,15 @@ export function _modifyAccessories(
     elements: JSX.Element[],
     props: Record<string, any>
 ) {
-    for (const accessory of accessories.values()) {
-        let accessories = accessory.callback(props);
-        if (accessories == null)
-            continue;
+    for (const [key, accessory] of accessories.entries()) {
+        const res = (
+            <ErrorBoundary message={`Failed to render ${key} Message Accessory`} key={key}>
+                <accessory.render {...props} />
+            </ErrorBoundary>
+        );
 
-        if (!Array.isArray(accessories))
-            accessories = [accessories];
-        else if (accessories.length === 0)
+        const accessories = Array.isArray(res) ? res : [res];
+        if (!accessories.length)
             continue;
 
         elements.splice(
