@@ -18,7 +18,7 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, registerCommand, sendBotMessage, unregisterCommand } from "@api/Commands";
 import * as DataStore from "@api/DataStore";
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -61,7 +61,7 @@ function createTagCommand(tag: Tag) {
                 return { content: `/${tag.name}` };
             }
 
-            if (Settings.plugins.MessageTags.clyde) sendBotMessage(ctx.channel.id, {
+            if (settings.store.clyde) sendBotMessage(ctx.channel.id, {
                 content: `${EMOTE} The tag **${tag.name}** has been sent!`
             });
             return { content: tag.message.replaceAll("\\n", "\n") };
@@ -104,8 +104,9 @@ export default definePlugin({
             await DataStore.del(DATA_KEY);
         }
 
-        for (const tag of getTags()) {
-            createTagCommand(tag);
+        const tags = getTags();
+        for (const tagName in tags) {
+            createTagCommand(tags[tagName]);
         }
     },
 
@@ -217,7 +218,7 @@ export default definePlugin({
                                     // @ts-ignore
                                     title: "All Tags:",
                                     // @ts-ignore
-                                    description: getTags()
+                                    description: Object.values(getTags())
                                         .map(tag => `\`${tag.name}\`: ${tag.message.slice(0, 72).replaceAll("\\n", " ")}${tag.message.length > 72 ? "..." : ""}`)
                                         .join("\n") || `${EMOTE} Woops! There are no tags yet, use \`/tags create\` to create one!`,
                                     // @ts-ignore
