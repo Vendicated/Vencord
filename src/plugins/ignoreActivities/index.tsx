@@ -61,7 +61,7 @@ const ToggleIconOff = (activity: IgnoredActivity, fill: string) => ToggleIcon(ac
 
 function ToggleActivityComponent(activity: IgnoredActivity, isPlaying = false) {
     const s = settings.use(["ignoredActivities"]);
-    const { ignoredActivities = [] } = s;
+    const { ignoredActivities } = s;
 
     if (ignoredActivities.some(act => act.id === activity.id)) return ToggleIconOff(activity, "var(--status-danger)");
     return ToggleIconOn(activity, isPlaying ? "var(--green-300)" : "var(--primary-400)");

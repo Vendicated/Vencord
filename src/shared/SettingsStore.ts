@@ -79,10 +79,16 @@ export class SettingsStore<T extends object> {
                 if (target[key] === value) return true;
 
                 Reflect.set(target, key, value);
-                const setPath = `${path}${path && "."}${key}`;
 
-                self.globalListeners.forEach(cb => cb(root, setPath));
+                const setPath = `${path}${path && "."}${key}`;
                 self.pathListeners.get(setPath)?.forEach(cb => cb(value));
+
+                if (Array.isArray(target)) {
+                    self.globalListeners.forEach(cb => cb(root, path));
+                    self.pathListeners.get(path)?.forEach(cb => cb(target));
+                } else {
+                    self.globalListeners.forEach(cb => cb(root, setPath));
+                }
 
                 return true;
             },
@@ -90,9 +96,14 @@ export class SettingsStore<T extends object> {
                 Reflect.deleteProperty(target, key);
 
                 const setPath = `${path}${path && "."}${key}`;
-
-                self.globalListeners.forEach(cb => cb(root, setPath));
                 self.pathListeners.get(setPath)?.forEach(cb => cb(undefined));
+
+                if (Array.isArray(target)) {
+                    self.globalListeners.forEach(cb => cb(root, path));
+                    self.pathListeners.get(path)?.forEach(cb => cb(target));
+                } else {
+                    self.globalListeners.forEach(cb => cb(root, setPath));
+                }
 
                 return true;
             }
