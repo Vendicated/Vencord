@@ -46,10 +46,16 @@ export const settings = definePluginSettings({
             { label: "Custom (right click channels to reorder)", value: PinOrder.Custom }
         ]
     },
+    canCollapseDmSection: {
+        type: OptionType.BOOLEAN,
+        description: "Allow DMs section to be collapsable",
+        default: false
+    },
     dmSectionCollapsed: {
         type: OptionType.BOOLEAN,
-        description: "Collapse DM sections",
-        default: false
+        description: "Collapse DM section",
+        default: false,
+        hidden: true
     },
     userBasedCategoryList: {
         type: OptionType.CUSTOM,
@@ -187,11 +193,11 @@ export default definePlugin({
     },
 
     makeSpanProps() {
-        return {
+        return settings.store.canCollapseDmSection ? {
             onClick: () => this.collapseDMList(),
             role: "button",
             style: { cursor: "pointer" }
-        };
+        } : undefined;
     },
 
     getChunkSize() {
@@ -211,16 +217,12 @@ export default definePlugin({
     },
 
     isChannelIndex(sectionIndex: number, channelIndex: number) {
-        if (settings.store.dmSectionCollapsed && sectionIndex !== 0) {
+        if (settings.store.canCollapseDmSection && settings.store.dmSectionCollapsed && sectionIndex !== 0) {
             return true;
         }
 
         const category = getCategoryByIndex(sectionIndex - 1);
         return this.isCategoryIndex(sectionIndex) && (category?.channels?.length === 0 || category?.channels[channelIndex]);
-    },
-
-    isDMSectioncollapsed() {
-        return settings.store.dmSectionCollapsed;
     },
 
     collapseDMList() {
@@ -230,7 +232,7 @@ export default definePlugin({
     isChannelHidden(categoryIndex: number, channelIndex: number) {
         if (categoryIndex === 0) return false;
 
-        if (settings.store.dmSectionCollapsed && this.getSections().length + 1 === categoryIndex)
+        if (settings.store.canCollapseDmSection && settings.store.dmSectionCollapsed && this.getSections().length + 1 === categoryIndex)
             return true;
 
         if (!this.instance || !this.isChannelIndex(categoryIndex, channelIndex)) return false;

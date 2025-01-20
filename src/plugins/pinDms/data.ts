@@ -37,7 +37,7 @@ export async function init() {
 
 export function usePinnedDms() {
     forceUpdateDms = useForceUpdater();
-    settings.use(["pinOrder", "dmSectionCollapsed", "userBasedCategoryList"]);
+    settings.use(["pinOrder", "canCollapseDmSection", "dmSectionCollapsed", "userBasedCategoryList"]);
 }
 
 export let currentUserCategories: Category[] = [];
