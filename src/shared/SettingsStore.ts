@@ -68,8 +68,8 @@ const proxyHandler: ProxyHandler<any> = {
         }
 
         if (typeof v === "object" && v !== null && !v[SYM_IS_PROXY]) {
-            const settingsPath = `${path}${path && "."}${key}`;
-            return settingsStore["makeProxy"](v, root, settingsPath);
+            const getPath = `${path}${path && "."}${key}`;
+            return settingsStore["makeProxy"](v, root, getPath);
         }
 
         return v;
@@ -111,8 +111,8 @@ const proxyHandler: ProxyHandler<any> = {
 
         const { settingsStore, root, path } = proxyContext;
 
-        const setPath = `${path}${path && "."}${key}`;
-        settingsStore["notifyListeners"](setPath, undefined, root);
+        const deletPath = `${path}${path && "."}${key}`;
+        settingsStore["notifyListeners"](deletPath, undefined, root);
 
         return true;
     }
