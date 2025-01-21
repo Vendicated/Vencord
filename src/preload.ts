@@ -30,7 +30,7 @@ if (location.protocol !== "data:") {
     // #region cssInsert
     const rendererCss = join(__dirname, IS_VESKTOP ? "vencordDesktopRenderer.css" : "renderer.css");
 
-    const injectStyle = () => webFrame.executeJavaScript(`Vencord.Api.Styles.createStyle("vencord-css-core", atob("${btoa(readFileSync(rendererCss, "utf-8"))}"));`);
+    const injectStyle = () => webFrame.executeJavaScript(`try { Vencord.Api.Styles.createStyle("vencord-css-core", atob("${btoa(readFileSync(rendererCss, "utf-8"))}")); } catch (_) {}`);
 
     if (document.readyState === "complete") {
         injectStyle();
