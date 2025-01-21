@@ -16,6 +16,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Clickable, Forms, RelationshipStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
+import { JSX } from "react";
 
 interface WatchingProps {
     userIds: string[];
@@ -46,15 +47,23 @@ function Watching({ userIds, guildId }: WatchingProps): JSX.Element {
         <div className={cl("content")}>
             {userIds.length ?
                 (<>
-                    <Forms.FormTitle>{getIntlMessage("SPECTATORS.format({ numViewers: userIds.length })")}</Forms.FormTitle>
+                    <Forms.FormTitle>{getIntlMessage("SPECTATORS", { numViewers: userIds.length })}</Forms.FormTitle>
                     <Flex flexDirection="column" style={{ gap: 6 }} >
-                        {users.map(user => (
-                            <Flex flexDirection="row" style={{ gap: 6, alignContent: "center" }} className={cl("user")} >
-                                <img src={user.getAvatarURL(guildId)} style={{ borderRadius: 8, width: 16, height: 16 }} />
+                        {users.map((user, index) => (
+                            <Flex
+                                key={userIds[index]} // Use userIds for key here
+                                flexDirection="row"
+                                style={{ gap: 6, alignContent: "center" }}
+                                className={cl("user")}
+                            >
+                                <img
+                                    src={user.getAvatarURL(guildId)}
+                                    style={{ borderRadius: 8, width: 16, height: 16 }}
+                                />
                                 {getUsername(user)}
                             </Flex>
                         ))}
-                        {missingUsers > 0 && <span className={cl("more_users")}>{`+${getIntlMessage("NUM_USERS.format({ num: missingUsers })")}`}</span>}
+                        {missingUsers > 0 && <span className={cl("more_users")}>{`+${getIntlMessage("NUM_USERS", { num: missingUsers })}`}</span>}
                     </Flex>
                 </>)
                 : (<span className={cl("no_viewers")}>No spectators</span>)}
@@ -84,10 +93,10 @@ export default definePlugin({
         },
         {
             predicate: () => settings.store.showPanel,
-            find: "this.isJoinableActivity()||",
+            find: "this.renderEmbeddedActivity():",
             replacement: {
-                match: /(this\.isJoinableActivity\(\).{0,200}children:.{0,50})"div"/,
-                replace: "$1$self.WrapperComponent"
+                match: /(\|\|.{0,200}children:.{0,50})"div"(.*this\.renderEmbeddedActivity\(\))/,
+                replace: "$1$self.WrapperComponent$2"
             }
         }
     ],
@@ -123,7 +132,7 @@ export default definePlugin({
                     {users.length ?
                         <>
                             <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
-                                {getIntlMessage("SPECTATORS.format({ numViewers: userIds.length })")}
+                                {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
                             </Forms.FormTitle>
                             <UserSummaryItem
                                 users={users}

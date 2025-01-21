@@ -1,0 +1,125 @@
+.vc-soundlog-more-user,
+.vc-soundlog-sound {
+    box-sizing: border-box;
+    position: relative;
+    background: var(--background-secondary);
+    border-radius: var(--radius-sm);
+    height: 40px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+    border: 1px solid transparent;
+    overflow: hidden;
+    text-align: center;
+    margin-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px
+}
+
+.vc-soundlog-more-user-profile,
+.vc-soundlog-sound-info {
+    gap: 10px;
+    align-content: center;
+    align-items: center;
+    flex: 2;
+}
+
+.vc-soundlog-sound-buttons {
+    gap: 10px;
+    align-content: center;
+    flex: 1;
+}
+
+.vc-soundlog-sound-users {
+    flex: 2;
+}
+
+
+.vc-soundlog-sound-emoji {
+    width: 24px;
+    height: 24px;
+}
+
+.vc-soundlog-more,
+.vc-soundlog-user {
+    padding: 1em;
+}
+
+.vc-soundlog-more-header,
+.vc-soundlog-user-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1em;
+    width: fit-content;
+}
+
+.vc-soundlog-more-soundid,
+.vc-soundlog-user-name {
+    text-transform: none;
+    flex-grow: 0;
+    background: var(--background-tertiary);
+    border-radius: 0 9999px 9999px 0;
+    padding: 6px 0.8em 6px 0.5em;
+    font-size: 20px;
+    height: 20px;
+    position: relative;
+    text-wrap: nowrap;
+}
+
+.vc-soundlog-more-soundid {
+    background: unset;
+}
+
+.vc-soundlog-user-name::before {
+    content: "";
+    display: block;
+    position: absolute;
+    height: 100%;
+    width: 16px;
+    background: var(--background-tertiary);
+    z-index: -1;
+    left: -16px;
+    top: 0;
+}
+
+
+.vc-soundlog-more-emoji,
+.vc-soundlog-user-avatar {
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+}
+
+.vc-soundlog-more-emoji {
+    border-radius: 0%;
+}
+
+.vc-soundlog-user-buttons {
+    margin-left: auto;
+    display: flex;
+    gap: 0.2em;
+}
+
+.vc-soundlog-user-sound-emoji {
+    height: 48px;
+    margin-top: 20px;
+}
+
+/* input style from https://github.com/Vendicated/Vencord/blob/ea11f2244fde469ce308f8a4e7224430be62f8f1/src/plugins/sendTimestamps/styles.css#L1-L13 */
+.vc-soundlog-clone-input {
+    background-color: var(--input-background);
+    color: var(--text-normal);
+    width: 100%;
+    padding: 8px 8px 8px 12px;
+    outline: none;
+    border: 1px solid var(--input-background);
+    border-radius: 4px;
+    font-weight: 500;
+    font-style: inherit;
+    font-size: 100%;
+    box-sizing: border-box;
+    height: 40px;
+}

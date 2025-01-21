@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findStoreLazy } from "@webpack";
@@ -35,13 +35,13 @@ interface VoiceChannelContextProps {
     channel: Channel;
 }
 
-const VoiceChannelContext: NavContextMenuPatchCallback = (children, { channel }: VoiceChannelContextProps) => () => {
+const VoiceChannelContext: NavContextMenuPatchCallback = (children, { channel }: VoiceChannelContextProps) => {
     // only for voice and stage channels
     if (!channel || (channel.type !== 2 && channel.type !== 13)) return;
     const userCount = Object.keys(VoiceStateStore.getVoiceStatesForChannel(channel.id)).length;
     if (userCount === 0) return;
 
-    const guildChannels: { VOCAL: { channel: Channel, comparator: number }[] } = GuildChannelStore.getChannels(channel.guild_id);
+    const guildChannels: { VOCAL: { channel: Channel, comparator: number; }[]; } = GuildChannelStore.getChannels(channel.guild_id);
     const voiceChannels = guildChannels.VOCAL.map(({ channel }) => channel).filter(({ id }) => id !== channel.id);
 
     children.splice(
@@ -125,14 +125,11 @@ const VoiceChannelContext: NavContextMenuPatchCallback = (children, { channel }:
 export default definePlugin({
     name: "VoiceChatUtilities",
     description: "This plugin allows you to perform multiple actions on an entire channel (move, mute, disconnect, etc.) (originally by dutake)",
-    authors: [Devs.DamsDev1, Devs.D3SOX],
+    authors: [Devs.D3SOX],
 
-    start() {
-        addContextMenuPatch("channel-context", VoiceChannelContext);
-    },
-
-    stop() {
-        removeContextMenuPatch("channel-context", VoiceChannelContext);
+    contextMenus: {
+        "channel-context": VoiceChannelContext
     },
 });
+
 
