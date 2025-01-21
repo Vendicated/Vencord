@@ -31,9 +31,9 @@ interface SettingsStoreOptions {
 // merges the SettingsStoreOptions type into the class
 export interface SettingsStore<T extends object> extends SettingsStoreOptions { }
 
-interface ProxyContext {
-    settingsStore: SettingsStore<any>;
-    root: any;
+interface ProxyContext<T extends object = any> {
+    settingsStore: SettingsStore<T>;
+    root: T;
     path: string;
 }
 
