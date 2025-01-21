@@ -19,7 +19,7 @@ lerna-debug.log*
 *.tsbuildinfo
 .prettierrc
 
-src/userplugins 
+src/userplugins
 
 ExtensionCache/
 settings/

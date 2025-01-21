@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { React,UserStore } from "@webpack/common";
+import { UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 export const createDummyUser = (props: Partial<User>) => new (UserStore.getCurrentUser().constructor as any)(props);
@@ -25,39 +25,3 @@ export const validateNumberInput = (value: string) => parseInt(value) ? parseInt
 export const validateTextInputNumber = (value: string) => /^[0-9\b]+$/.test(value) || value === "";
 export const replaceObjectValuesIfExist =
     (target: Object, replace: Object) => Object.entries(target).forEach(([key, value]) => replace[key] && (target[key] = replace[key]));
-
-export type Callback = (child: React.ReactElement) => boolean;
-
-/**
- * Recursively searches for a child component that satisfies the provided callback.
- * @param element - The React element to search within.
- * @param callback - A function that checks if a child component matches the criteria.
- * @returns The matching child component, or undefined if no match is found.
- */
-export function findChildren(element: React.ReactNode, callback: Callback): { children?: any, parent?: any; } {
-    if (!React.isValidElement(element)) {
-        return {};
-    }
-
-    if (callback(element)) {
-        return { children: element };
-    }
-
-    const children = Array.isArray(element.props.children)
-        ? element.props.children
-        : [element.props.children];
-
-    for (const child of children) {
-        const { parent, children: _children } = findChildren(child, callback);
-
-        if (_children) {
-            let newParent = parent;
-            if (!newParent)
-                newParent = element;
-
-            return { children: _children, parent: newParent };
-        }
-    }
-
-    return {};
-}

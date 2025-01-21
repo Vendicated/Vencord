@@ -82,7 +82,7 @@ export function createPluginStore<Z extends PluginSettings = {}>(pluginName: str
     const use: PluginUse<Z> = () => { useSettings().plugins[pluginName].stores[storeName]; return get(); }; // useSettings is called to update renderer (after settings change)
 
     const initialSettings: Z = f(set, get);
-    const proxiedSettings = createObjectProxy(initialSettings as unknown, updateCallback); // Setup our proxy that allows us connections to the datastore
+    const proxiedSettings = createObjectProxy(initialSettings as any, updateCallback); // Setup our proxy that allows us connections to the datastore
 
     function updateCallback(updatedObject: any) {
         if (!startupStates[storeName]) return; // Wait for the startup information to overwrite the blank proxy

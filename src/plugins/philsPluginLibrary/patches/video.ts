@@ -144,7 +144,8 @@ export function getReplaceableVideoTransportationOptions(connection: types.Conne
         ...(framerateEnabled && framerate
             ? {
                 encodingVideoFrameRate: framerate,
-                remoteSinkWantsMaxFramerate: framerate
+                remoteSinkWantsMaxFramerate: framerate,
+                captureVideoFrameRate: framerate
             }
             : {}
         ),

@@ -104,6 +104,9 @@ importers:
       eslint-plugin-unused-imports:
         specifier: ^4.1.4
         version: 4.1.4(@typescript-eslint/eslint-plugin@8.19.0(@typescript-eslint/parser@8.19.0(eslint@9.17.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))(typescript@5.7.2))(eslint@9.17.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))(typescript@5.7.2))(eslint@9.17.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))
+      events:
+        specifier: ^3.3.0
+        version: 3.3.0
       highlight.js:
         specifier: 11.7.0
         version: 11.7.0
@@ -1489,6 +1492,10 @@ packages:
 
   eventemitter3@4.0.7:
     resolution: {integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==}
+
+  events@3.3.0:
+    resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
+    engines: {node: '>=0.8.x'}
 
   expand-tilde@2.0.2:
     resolution: {integrity: sha512-A5EmesHW6rfnZ9ysHQjPdJRni0SRar0tjtG5MNtm9n5TUvsYU8oozprtRD4AqHxcZWWlVuAmQo2nWKfN9oyjTw==}
@@ -4268,6 +4275,8 @@ snapshots:
   esutils@2.0.3: {}
 
   eventemitter3@4.0.7: {}
+
+  events@3.3.0: {}
 
   expand-tilde@2.0.2:
     dependencies:

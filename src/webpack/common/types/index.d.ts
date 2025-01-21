@@ -21,8 +21,6 @@ export * from "./components";
 export * from "./fluxEvents";
 export * from "./menu";
 export * from "./passiveupdatestate";
-export * from "./presenceupdate";
-export * from "./settingsStores";
 export * from "./stores";
 export * from "./utils";
 export * from "./voicestate";
