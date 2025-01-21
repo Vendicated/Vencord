@@ -111,8 +111,8 @@ const proxyHandler: ProxyHandler<any> = {
 
         const { settingsStore, root, path } = proxyContext;
 
-        const deletPath = `${path}${path && "."}${key}`;
-        settingsStore["notifyListeners"](deletPath, undefined, root);
+        const deletePath = `${path}${path && "."}${key}`;
+        settingsStore["notifyListeners"](deletePath, undefined, root);
 
         return true;
     }
