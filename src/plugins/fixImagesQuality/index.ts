@@ -13,7 +13,7 @@ export default definePlugin({
     authors: [Devs.Nuckyz],
     patches: [
         {
-            find: "getFormatQuality(){",
+            find: ".handleImageLoad)",
             replacement: {
                 match: /(?<=null;return )\i\.\i&&\(\i\|\|!\i\.isAnimated.+?:(?=\i&&\(\i="png"\))/,
                 replace: ""
