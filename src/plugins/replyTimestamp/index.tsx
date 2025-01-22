@@ -9,16 +9,11 @@ import "./style.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { filters, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
-import { Timestamp } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { DateUtils, Timestamp } from "@webpack/common";
 import type { Message } from "discord-types/general";
 import type { HTMLAttributes } from "react";
 
-const { calendarFormat, dateFormat, isSameDay } = mapMangledModuleLazy("millisecondsInUnit:", {
-    calendarFormat: filters.byCode("sameElse"),
-    dateFormat: filters.byCode('":'),
-    isSameDay: filters.byCode("Math.abs(+"),
-});
 const MessageClasses = findByPropsLazy("separator", "latin24CompactTimeStamp");
 
 function Sep(props: HTMLAttributes<HTMLElement>) {
@@ -46,14 +41,14 @@ function ReplyTimestamp({
     return (
         <Timestamp
             className="vc-reply-timestamp"
-            compact={isSameDay(refTimestamp, baseTimestamp)}
+            compact={DateUtils.isSameDay(refTimestamp, baseTimestamp)}
             timestamp={refTimestamp}
             isInline={false}
         >
             <Sep>[</Sep>
-            {isSameDay(refTimestamp, baseTimestamp)
-                ? dateFormat(refTimestamp, "LT")
-                : calendarFormat(refTimestamp)
+            {DateUtils.isSameDay(refTimestamp, baseTimestamp)
+                ? DateUtils.dateFormat(refTimestamp, "LT")
+                : DateUtils.calendarFormat(refTimestamp)
             }
             <Sep>]</Sep>
         </Timestamp>

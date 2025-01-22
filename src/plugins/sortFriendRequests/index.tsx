@@ -16,14 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { definePluginSettings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { RelationshipStore, Text } from "@webpack/common";
+import { DateUtils, RelationshipStore, Text, TooltipContainer } from "@webpack/common";
 import { User } from "discord-types/general";
 import { PropsWithChildren } from "react";
+
+const formatter = new Intl.DateTimeFormat(undefined, {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+});
+
+const cl = classNameFactory("vc-sortFriendRequests-");
 
 function getSince(user: User) {
     return new Date(RelationshipStore.getSince(user.id));
@@ -68,9 +78,13 @@ export default definePlugin({
     WrapperDateComponent: ErrorBoundary.wrap(({ user, children }: PropsWithChildren<{ user: User; }>) => {
         const since = getSince(user);
 
-        return <Flex flexDirection="row" style={{ alignItems: "center", justifyContent: "space-between", width: "100%", marginRight: "0.5em" }}>
+        return <div className={cl("wrapper")}>
             {children}
-            {!isNaN(since.getTime()) && <Text variant="text-xs/normal" color="text-muted">{since.toDateString()}</Text>}
-        </Flex>;
+            {!isNaN(since.getTime()) && (
+                <TooltipContainer text={DateUtils.dateFormat(since, "LLLL")} tooltipClassName={cl("tooltip")}>
+                    <Text variant="text-xs/normal" className={cl("date")}>{formatter.format(since)}</Text>
+                </TooltipContainer>
+            )}
+        </div>;
     })
 });
