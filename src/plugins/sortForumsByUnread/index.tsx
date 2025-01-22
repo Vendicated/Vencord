@@ -7,10 +7,15 @@
 import { findGroupChildrenByChildId } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher, Menu, ReadStateStore } from "@webpack/common";
 
-const settings = definePluginSettings({})
+const settings = definePluginSettings({
+    keepMenuOpenOnChange: {
+        type: OptionType.BOOLEAN,
+        description: "Keep the sort menu open after changing the unread setting"
+    }
+})
     .withPrivateSettings<{
         sortByUnread: boolean;
     }>();
@@ -24,6 +29,7 @@ export default definePlugin({
 
     contextMenus: {
         "sort-and-view": (children, props) => {
+            const { sortByUnread } = settings.use(["sortByUnread"]);
             const group = findGroupChildrenByChildId("sort-by-recent-activity", children);
             if (!group) return;
 
@@ -31,11 +37,11 @@ export default definePlugin({
                 <Menu.MenuCheckboxItem
                     id="unread-first"
                     label="Unread first"
-                    checked={settings.store?.sortByUnread}
+                    checked={sortByUnread}
                     action={() => {
-                        settings.store.sortByUnread = !settings.store?.sortByUnread;
+                        settings.store.sortByUnread = !sortByUnread;
                         FluxDispatcher.dispatch({ type: "RESORT_THREADS", channelId: props.channel.id });
-                        props.closePopout();
+                        if(!settings.store.keepMenuOpenOnChange) props.closePopout();
                     }}
                 />
             );
