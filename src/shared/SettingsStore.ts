@@ -32,91 +32,9 @@ interface SettingsStoreOptions {
 export interface SettingsStore<T extends object> extends SettingsStoreOptions { }
 
 interface ProxyContext<T extends object = any> {
-    settingsStore: SettingsStore<T>;
     root: T;
     path: string;
 }
-
-const proxyContexts = new WeakMap<any, ProxyContext>();
-
-const proxyHandler: ProxyHandler<any> = {
-    get(target, key: any, receiver) {
-        if (key === SYM_IS_PROXY) {
-            return true;
-        }
-
-        if (key === SYM_GET_RAW_TARGET) {
-            return target;
-        }
-
-        let v = Reflect.get(target, key, receiver);
-
-        const proxyContext = proxyContexts.get(target);
-        if (proxyContext == null) {
-            return v;
-        }
-
-        const { settingsStore, root, path } = proxyContext;
-
-        if (!(key in target) && settingsStore.getDefaultValue != null) {
-            v = settingsStore.getDefaultValue({
-                target,
-                key,
-                root,
-                path
-            });
-        }
-
-        if (typeof v === "object" && v !== null && !v[SYM_IS_PROXY]) {
-            const getPath = `${path}${path && "."}${key}`;
-            return settingsStore["makeProxy"](v, root, getPath);
-        }
-
-        return v;
-    },
-    set(target, key: string, value) {
-        if (value?.[SYM_IS_PROXY]) {
-            value = value[SYM_GET_RAW_TARGET];
-        }
-
-        if (target[key] === value) {
-            return true;
-        }
-
-        if (!Reflect.set(target, key, value)) {
-            return false;
-        }
-
-        const proxyContext = proxyContexts.get(target);
-        if (proxyContext == null) {
-            return true;
-        }
-
-        const { settingsStore, root, path } = proxyContext;
-
-        const setPath = `${path}${path && "."}${key}`;
-        settingsStore["notifyListeners"](setPath, value, root);
-
-        return true;
-    },
-    deleteProperty(target, key: string) {
-        if (!Reflect.deleteProperty(target, key)) {
-            return false;
-        }
-
-        const proxyContext = proxyContexts.get(target);
-        if (proxyContext == null) {
-            return true;
-        }
-
-        const { settingsStore, root, path } = proxyContext;
-
-        const deletePath = `${path}${path && "."}${key}`;
-        settingsStore["notifyListeners"](deletePath, undefined, root);
-
-        return true;
-    }
-};
 
 /**
  * The SettingsStore allows you to easily create a mutable store that
@@ -125,6 +43,90 @@ const proxyHandler: ProxyHandler<any> = {
 export class SettingsStore<T extends object> {
     private pathListeners = new Map<string, Set<(newData: any) => void>>();
     private globalListeners = new Set<(newData: T, path: string) => void>();
+    private readonly proxyContexts = new WeakMap<any, ProxyContext<T>>();
+
+    private readonly proxyHandler: ProxyHandler<any> = (() => {
+        const self = this;
+
+        return {
+            get(target, key: any, receiver) {
+                if (key === SYM_IS_PROXY) {
+                    return true;
+                }
+
+                if (key === SYM_GET_RAW_TARGET) {
+                    return target;
+                }
+
+                let v = Reflect.get(target, key, receiver);
+
+                const proxyContext = self.proxyContexts.get(target);
+                if (proxyContext == null) {
+                    return v;
+                }
+
+                const { root, path } = proxyContext;
+
+                if (!(key in target) && self.getDefaultValue != null) {
+                    v = self.getDefaultValue({
+                        target,
+                        key,
+                        root,
+                        path
+                    });
+                }
+
+                if (typeof v === "object" && v !== null && !v[SYM_IS_PROXY]) {
+                    const getPath = `${path}${path && "."}${key}`;
+                    return self.makeProxy(v, root, getPath);
+                }
+
+                return v;
+            },
+            set(target, key: string, value) {
+                if (value?.[SYM_IS_PROXY]) {
+                    value = value[SYM_GET_RAW_TARGET];
+                }
+
+                if (target[key] === value) {
+                    return true;
+                }
+
+                if (!Reflect.set(target, key, value)) {
+                    return false;
+                }
+
+                const proxyContext = self.proxyContexts.get(target);
+                if (proxyContext == null) {
+                    return true;
+                }
+
+                const { root, path } = proxyContext;
+
+                const setPath = `${path}${path && "."}${key}`;
+                self.notifyListeners(setPath, value, root);
+
+                return true;
+            },
+            deleteProperty(target, key: string) {
+                if (!Reflect.deleteProperty(target, key)) {
+                    return false;
+                }
+
+                const proxyContext = self.proxyContexts.get(target);
+                if (proxyContext == null) {
+                    return true;
+                }
+
+                const { root, path } = proxyContext;
+
+                const deletePath = `${path}${path && "."}${key}`;
+                self.notifyListeners(deletePath, undefined, root);
+
+                return true;
+            }
+        };
+    })();
 
     /**
      * The store object. Making changes to this object will trigger the applicable change listeners
@@ -142,13 +144,12 @@ export class SettingsStore<T extends object> {
     }
 
     private makeProxy(object: any, root: T = object, path = "") {
-        proxyContexts.set(object, {
-            settingsStore: this,
+        this.proxyContexts.set(object, {
             root,
             path
         });
 
-        return new Proxy(object, proxyHandler);
+        return new Proxy(object, this.proxyHandler);
     }
 
     private notifyListeners(pathStr: string, value: any, root: T) {
