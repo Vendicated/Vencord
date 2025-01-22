@@ -19,6 +19,7 @@
 import { definePluginSettings, Settings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import { ErrorCard } from "@components/ErrorCard";
+import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
@@ -282,9 +283,9 @@ function isTimestampDisabled() {
 }
 
 function isImageKeyValid(value: string) {
-    if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//.test(value)) return "Don't use Discord link. Use Imgur image link instead.";
-    if (/https?:\/\/(?!i\.)?imgur\.com\//.test(value)) return "Imgur link must be a direct link to the image. (e.g. https://i.imgur.com/...)";
-    if (/https?:\/\/(?!media\.)?tenor\.com\//.test(value)) return "Tenor link must be a direct link to the image. (e.g. https://media.tenor.com/...)";
+    if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//.test(value)) return "Don't use a Discord link. Use an Imgur image link instead.";
+    if (/https?:\/\/(?!i\.)?imgur\.com\//.test(value)) return "Imgur link must be a direct link to the image (e.g. https://i.imgur.com/...). Right click the image and click 'Copy image address'";
+    if (/https?:\/\/(?!media\.)?tenor\.com\//.test(value)) return "Tenor link must be a direct link to the image (e.g. https://media.tenor.com/...). Right click the GIF and click 'Copy image address'";
     return true;
 }
 
@@ -396,7 +397,7 @@ async function setRpc(disable?: boolean) {
 
 export default definePlugin({
     name: "CustomRPC",
-    description: "Allows you to set a custom rich presence.",
+    description: "Add a fully customisable Rich Presence (Game status) to your Discord profile",
     authors: [Devs.captain, Devs.AutumnVN, Devs.nin0dev],
     dependencies: ["UserSettingsAPI"],
     start: setRpc,
@@ -416,7 +417,7 @@ export default definePlugin({
                         style={{ padding: "1em" }}
                     >
                         <Forms.FormTitle>Notice</Forms.FormTitle>
-                        <Forms.FormText>Game activity isn't enabled, people won't be able to see your custom rich presence!</Forms.FormText>
+                        <Forms.FormText>Activity Sharing isn't enabled, people won't be able to see your custom rich presence!</Forms.FormText>
 
                         <Button
                             color={Button.Colors.TRANSPARENT}
@@ -428,22 +429,24 @@ export default definePlugin({
                     </ErrorCard>
                 )}
 
-                <Forms.FormText>
-                    Go to <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
-                    get the application ID.
-                </Forms.FormText>
-                <Forms.FormText>
-                    Upload images in the Rich Presence tab to get the image keys.
-                </Forms.FormText>
-                <Forms.FormText>
-                    If you want to use image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and select "Copy image address".
-                </Forms.FormText>
-                <Forms.FormText>
-                    You can't see your own button on your profile, but other people can see it.
-                </Forms.FormText>
-                <Forms.FormText>
-                    Some weird unicode text may cause the rich presence not work, try using normal text instead.
-                </Forms.FormText>
+                <Flex flexDirection="column" style={{ gap: ".5em" }} className={Margins.top16}>
+                    <Forms.FormText>
+                        Go to the <Link href="https://discord.com/developers/applications">Discord Developer Portal</Link> to create an application and
+                        get the application ID.
+                    </Forms.FormText>
+                    <Forms.FormText>
+                        Upload images in the Rich Presence tab to get the image keys.
+                    </Forms.FormText>
+                    <Forms.FormText>
+                        If you want to use an image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and selecting "Copy image address".
+                    </Forms.FormText>
+                    <Forms.FormText>
+                        You can't see your own buttons on your profile, but everyone else can see it fine.
+                    </Forms.FormText>
+                    <Forms.FormText>
+                        Some weird unicode text ("fonts" 𝖑𝖎𝖐𝖊 𝖙𝖍𝖎𝖘) may cause the rich presence to not show up, try using normal letters instead.
+                    </Forms.FormText>
+                </Flex>
 
                 <Forms.FormDivider className={Margins.top8} />
 
