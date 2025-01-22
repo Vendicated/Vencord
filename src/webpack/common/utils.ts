@@ -199,3 +199,10 @@ export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModuleLazy(/
     getDisplayProfile: filters.byCode(".getGuildMemberProfile("),
     useDisplayProfile: filters.byCode(/\[\i\.\i,\i\.\i],\(\)=>/)
 });
+
+export const DateUtils: t.DateUtils = mapMangledModuleLazy("millisecondsInUnit:", {
+    calendarFormat: filters.byCode("sameElse"),
+    dateFormat: filters.byCode('":'),
+    isSameDay: filters.byCode("Math.abs(+"),
+    diffAsUnits: filters.byCode("days:0", "millisecondsInUnit")
+});
