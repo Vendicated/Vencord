@@ -17,11 +17,17 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { RelationshipStore } from "@webpack/common";
+import { RelationshipStore, Text } from "@webpack/common";
 import { User } from "discord-types/general";
+import { PropsWithChildren } from "react";
+
+function getSince(user: User) {
+    return new Date(RelationshipStore.getSince(user.id));
+}
 
 const settings = definePluginSettings({
     showDates: {
@@ -48,28 +54,23 @@ export default definePlugin({
         find: "#{intl::FRIEND_REQUEST_CANCEL}",
         replacement: {
             predicate: () => settings.store.showDates,
-            match: /subText:(\i)(?<=user:(\i).+?)/,
-            replace: (_, subtext, user) => `subText:$self.makeSubtext(${subtext},${user})`
+            match: /(?<=\.listItemContents,children:\[)\(0,.+?(?=,\(0)(?<=user:(\i).+?)/,
+            replace: (children, user) => `$self.WrapperDateComponent({user:${user},children:${children}})`
         }
     }],
 
     wrapSort(comparator: Function, row: any) {
         return row.type === 3 || row.type === 4
-            ? -this.getSince(row.user)
+            ? -getSince(row.user)
             : comparator(row);
     },
 
-    getSince(user: User) {
-        return new Date(RelationshipStore.getSince(user.id));
-    },
+    WrapperDateComponent: ErrorBoundary.wrap(({ user, children }: PropsWithChildren<{ user: User; }>) => {
+        const since = getSince(user);
 
-    makeSubtext(text: string, user: User) {
-        const since = this.getSince(user);
-        return (
-            <Flex flexDirection="column" style={{ gap: 0, flexWrap: "wrap", lineHeight: "0.9rem" }}>
-                <span>{text}</span>
-                {!isNaN(since.getTime()) && <span>Received &mdash; {since.toDateString()}</span>}
-            </Flex>
-        );
-    }
+        return <Flex flexDirection="row" style={{ alignItems: "center", justifyContent: "space-between", width: "100%", marginRight: "0.5em" }}>
+            {children}
+            {!isNaN(since.getTime()) && <Text variant="text-xs/normal" color="text-muted">{since.toDateString()}</Text>}
+        </Flex>;
+    })
 });
