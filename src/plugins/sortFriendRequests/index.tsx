@@ -16,12 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { definePluginSettings } from "@api/Settings";
-import { Flex } from "@components/Flex";
+import { classNameFactory } from "@api/Styles";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { RelationshipStore } from "@webpack/common";
+import { DateUtils, RelationshipStore, Text, TooltipContainer } from "@webpack/common";
 import { User } from "discord-types/general";
+import { PropsWithChildren } from "react";
+
+const formatter = new Intl.DateTimeFormat(undefined, {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+});
+
+const cl = classNameFactory("vc-sortFriendRequests-");
+
+function getSince(user: User) {
+    return new Date(RelationshipStore.getSince(user.id));
+}
 
 const settings = definePluginSettings({
     showDates: {
@@ -48,28 +64,27 @@ export default definePlugin({
         find: "#{intl::FRIEND_REQUEST_CANCEL}",
         replacement: {
             predicate: () => settings.store.showDates,
-            match: /subText:(\i)(?<=user:(\i).+?)/,
-            replace: (_, subtext, user) => `subText:$self.makeSubtext(${subtext},${user})`
+            match: /(?<=\.listItemContents,children:\[)\(0,.+?(?=,\(0)(?<=user:(\i).+?)/,
+            replace: (children, user) => `$self.WrapperDateComponent({user:${user},children:${children}})`
         }
     }],
 
     wrapSort(comparator: Function, row: any) {
         return row.type === 3 || row.type === 4
-            ? -this.getSince(row.user)
+            ? -getSince(row.user)
             : comparator(row);
     },
 
-    getSince(user: User) {
-        return new Date(RelationshipStore.getSince(user.id));
-    },
+    WrapperDateComponent: ErrorBoundary.wrap(({ user, children }: PropsWithChildren<{ user: User; }>) => {
+        const since = getSince(user);
 
-    makeSubtext(text: string, user: User) {
-        const since = this.getSince(user);
-        return (
-            <Flex flexDirection="column" style={{ gap: 0, flexWrap: "wrap", lineHeight: "0.9rem" }}>
-                <span>{text}</span>
-                {!isNaN(since.getTime()) && <span>Received &mdash; {since.toDateString()}</span>}
-            </Flex>
-        );
-    }
+        return <div className={cl("wrapper")}>
+            {children}
+            {!isNaN(since.getTime()) && (
+                <TooltipContainer text={DateUtils.dateFormat(since, "LLLL")} tooltipClassName={cl("tooltip")}>
+                    <Text variant="text-xs/normal" className={cl("date")}>{formatter.format(since)}</Text>
+                </TooltipContainer>
+            )}
+        </div>;
+    })
 });
