@@ -451,7 +451,7 @@ export default definePlugin({
                     {activity[0] && <ActivityView
                         activity={activity[0]}
                         user={UserStore.getCurrentUser()}
-                        currentUser={UserStore.getUser('643945264868098049')}
+                        currentUser={UserStore.getUser("643945264868098049")}
                     />}
                 </div>
             </>
