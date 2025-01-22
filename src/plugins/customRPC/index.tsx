@@ -27,15 +27,19 @@ import { classes } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
+import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, React, UserStore } from "@webpack/common";
+import { User } from "discord-types/general";
 
 const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
-const ActivityComponent = findComponentByCodeLazy("onOpenGameProfile");
+const ActivityView = findComponentByCodeLazy<{
+    activity: Activity | null;
+    user: User;
+    currentUser: User;
+}>('location:"UserProfileActivityCard",');
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
 async function getApplicationAsset(key: string): Promise<string> {
-    if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(key)) return "mp:" + key.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
     return (await ApplicationAssetUtils.fetchAssetIds(settings.store.appID!, [key]))[0];
 }
 
@@ -169,7 +173,7 @@ const settings = definePluginSettings({
                 value: TimestampMode.NOW
             },
             {
-                label: "Same as your current time",
+                label: "Same as your current time (not reset after 24h)",
                 value: TimestampMode.TIME
             },
             {
@@ -269,6 +273,7 @@ function isStreamLinkDisabled() {
 
 function isStreamLinkValid(value: string) {
     if (!isStreamLinkDisabled() && !/https?:\/\/(www\.)?(twitch\.tv|youtube\.com)\/\w+/.test(value)) return "Streaming link must be a valid URL.";
+    if (value && value.length > 512) return "Streaming link must be not longer than 512 characters.";
     return true;
 }
 
@@ -277,6 +282,7 @@ function isTimestampDisabled() {
 }
 
 function isImageKeyValid(value: string) {
+    if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//.test(value)) return "Don't use Discord link. Use Imgur image link instead.";
     if (/https?:\/\/(?!i\.)?imgur\.com\//.test(value)) return "Imgur link must be a direct link to the image. (e.g. https://i.imgur.com/...)";
     if (/https?:\/\/(?!media\.)?tenor\.com\//.test(value)) return "Tenor link must be a direct link to the image. (e.g. https://media.tenor.com/...)";
     return true;
@@ -432,14 +438,21 @@ export default definePlugin({
                 <Forms.FormText>
                     If you want to use image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and select "Copy image address".
                 </Forms.FormText>
+                <Forms.FormText>
+                    You can't see your own button on your profile, but other people can see it.
+                </Forms.FormText>
+                <Forms.FormText>
+                    Some weird unicode text may cause the rich presence not work, try using normal text instead.
+                </Forms.FormText>
 
                 <Forms.FormDivider className={Margins.top8} />
 
-                <div style={{ width: "284px", ...profileThemeStyle, padding: 8, marginTop: 8, borderRadius: 8, background: "var(--bg-mod-faint)" }}>
-                    {activity[0] && <ActivityComponent activity={activity[0]} channelId={SelectedChannelStore.getChannelId()}
-                        guild={GuildStore.getGuild(SelectedGuildStore.getLastSelectedGuildId())}
-                        application={{ id: settings.store.appID }}
-                        user={UserStore.getCurrentUser()} />}
+                <div style={{ width: "284px", ...profileThemeStyle, marginTop: 8, borderRadius: 8, background: "var(--bg-mod-faint)" }}>
+                    {activity[0] && <ActivityView
+                        activity={activity[0]}
+                        user={UserStore.getCurrentUser()}
+                        currentUser={UserStore.getUser('643945264868098049')}
+                    />}
                 </div>
             </>
         );
