@@ -1,4 +1,4 @@
-# SortForumByUnread
+# SortForumsByUnread
 
 Allows sorting forum posts so that unread posts are at the top
 
