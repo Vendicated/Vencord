@@ -11,6 +11,7 @@ export interface SoundType {
 
 export interface SoundOverride {
     enabled: boolean;
+    fileName: string;
     url: string;
     volume: number;
 }
@@ -51,6 +52,7 @@ export const soundTypes: readonly SoundType[] = [
 export function makeEmptyOverride(): SoundOverride {
     return {
         enabled: false,
+        fileName: "",
         url: "",
         volume: 100
     };
