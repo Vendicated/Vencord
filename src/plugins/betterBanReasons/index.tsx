@@ -10,7 +10,6 @@ import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
-import { runtimeHashMessageKey } from "@utils/intlHash";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, TextInput } from "@webpack/common";
 
@@ -77,7 +76,7 @@ export default definePlugin({
     authors: [Devs.Inbestigator],
     patches: [
         {
-            find: "." + runtimeHashMessageKey("BAN_MULTIPLE_CONFIRM_TITLE"),
+            find: "#{intl::BAN_MULTIPLE_CONFIRM_TITLE}",
             replacement: [{
                 match: /\[(\{((?:name|value):\i\.intl\.string\(\i\.\i\.[A-Za-z0-9]+\),?){2}\},?){3}\]/,
                 replace: "$self.getReasons()"
