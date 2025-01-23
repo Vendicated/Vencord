@@ -41,7 +41,10 @@ export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
     }
 
     const canonSource = partialCanon.replaceAll("\\i", String.raw`(?:[A-Za-z_$][\w$]*)`);
-    return new RegExp(canonSource, match.flags) as T;
+    const canonRegex = new RegExp(canonSource, match.flags);
+    canonRegex.toString = match.toString.bind(match);
+
+    return canonRegex as T;
 }
 
 export function canonicalizeReplace<T extends string | ReplaceFn>(replace: T, pluginName: string): T {

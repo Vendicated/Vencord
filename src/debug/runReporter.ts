@@ -6,7 +6,7 @@
 
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { patches } from "plugins";
+import { addPatch, patches } from "plugins";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 
@@ -16,15 +16,36 @@ async function runReporter() {
     try {
         ReporterLogger.log("Starting test...");
 
-        let loadLazyChunksResolve: (value: void | PromiseLike<void>) => void;
+        let loadLazyChunksResolve: (value: void) => void;
         const loadLazyChunksDone = new Promise<void>(r => loadLazyChunksResolve = r);
 
-        Webpack.beforeInitListeners.add(() => loadLazyChunks().then((loadLazyChunksResolve)));
+        // The main patch for starting the reporter chunk loading
+        addPatch({
+            find: '"Could not find app-mount"',
+            replacement: {
+                match: /(?<="use strict";)/,
+                replace: "Vencord.Webpack._initReporter();"
+            }
+        }, "Vencord Reporter");
+
+        // @ts-ignore
+        Vencord.Webpack._initReporter = function () {
+            // initReporter is called in the patched entry point of Discord
+            // setImmediate to only start searching for lazy chunks after Discord initialized the app
+            setTimeout(() => loadLazyChunks().then(loadLazyChunksResolve), 0);
+        };
+
         await loadLazyChunksDone;
 
         for (const patch of patches) {
             if (!patch.all) {
                 new Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
+            }
+        }
+
+        for (const [plugin, moduleId, match, totalTime] of Vencord.WebpackPatcher.patchTimings) {
+            if (totalTime > 3) {
+                new Logger("WebpackInterceptor").warn(`Patch by ${plugin} took ${totalTime}ms (Module id is ${String(moduleId)}): ${match}`);
             }
         }
 
@@ -81,4 +102,5 @@ async function runReporter() {
     }
 }
 
-runReporter();
+// Run after the Vencord object has been created, because we need to add extra properties to it
+setTimeout(runReporter, 0);

@@ -26,7 +26,7 @@
 import { readFileSync } from "fs";
 import pup, { JSHandle } from "puppeteer-core";
 
-for (const variable of ["DISCORD_TOKEN", "CHROMIUM_BIN"]) {
+for (const variable of ["CHROMIUM_BIN"]) {
     if (!process.env[variable]) {
         console.error(`Missing environment variable ${variable}`);
         process.exit(1);
@@ -215,7 +215,7 @@ page.on("console", async e => {
 
         switch (tag) {
             case "WebpackInterceptor:":
-                const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
+                const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module|took [\d.]+?ms) \(Module id is (.+?)\): (.+)/)!;
                 if (!patchFailMatch) break;
 
                 console.error(await getText());
@@ -226,7 +226,7 @@ page.on("console", async e => {
                     plugin,
                     type,
                     id,
-                    match: regex.replace(/\(\?:\[A-Za-z_\$\]\[\\w\$\]\*\)/g, "\\i"),
+                    match: regex,
                     error: await maybeGetError(e.args()[3])
                 });
 
@@ -292,7 +292,7 @@ page.on("error", e => console.error("[Error]", e.message));
 page.on("pageerror", e => {
     if (e.message.includes("Sentry successfully disabled")) return;
 
-    if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module")) {
+    if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module") && !/^.{1,2}$/.test(e.message)) {
         console.error("[Page Error]", e.message);
         report.otherErrors.push(e.message);
     } else {
@@ -300,20 +300,9 @@ page.on("pageerror", e => {
     }
 });
 
-async function reporterRuntime(token: string) {
-    Vencord.Webpack.waitFor(
-        "loginToken",
-        m => {
-            console.log("[PUP_DEBUG]", "Logging in with token...");
-            m.loginToken(token);
-        }
-    );
-}
-
 await page.evaluateOnNewDocument(`
     if (location.host.endsWith("discord.com")) {
         ${readFileSync("./dist/browser.js", "utf-8")};
-        (${reporterRuntime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
     }
 `);
 

@@ -8,10 +8,11 @@ import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
 import * as Webpack from "@webpack";
 import { wreq } from "@webpack";
-
-const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
+import { AnyModuleFactory, ModuleFactory } from "webpack";
 
 export async function loadLazyChunks() {
+    const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
+
     try {
         LazyChunkLoaderLogger.log("Loading all chunks...");
 
@@ -25,7 +26,7 @@ export async function loadLazyChunks() {
         // True if resolved, false otherwise
         const chunksSearchPromises = [] as Array<() => boolean>;
 
-        const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?)\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/g);
+        const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?)\.then\(\i(?:\.\i)?\.bind\(\i,"?([^)]+?)"?(?:,[^)]+?)?\)\)/g);
 
         let foundCssDebuggingLoad = false;
 
@@ -82,7 +83,7 @@ export async function loadLazyChunks() {
             await Promise.all(
                 Array.from(validChunkGroups)
                     .map(([chunkIds]) =>
-                        Promise.all(chunkIds.map(id => wreq.e(id as any).catch(() => { })))
+                        Promise.all(chunkIds.map(id => wreq.e(id)))
                     )
             );
 
@@ -94,7 +95,7 @@ export async function loadLazyChunks() {
                         continue;
                     }
 
-                    if (wreq.m[entryPoint]) wreq(entryPoint as any);
+                    if (wreq.m[entryPoint]) wreq(entryPoint);
                 } catch (err) {
                     console.error(err);
                 }
@@ -122,32 +123,33 @@ export async function loadLazyChunks() {
             }, 0);
         }
 
-        Webpack.factoryListeners.add(factory => {
+        function factoryListener(factory: AnyModuleFactory | ModuleFactory) {
             let isResolved = false;
-            searchAndLoadLazyChunks(factory.toString()).then(() => isResolved = true);
-
-            chunksSearchPromises.push(() => isResolved);
-        });
-
-        for (const factoryId in wreq.m) {
-            let isResolved = false;
-            searchAndLoadLazyChunks(wreq.m[factoryId].toString()).then(() => isResolved = true);
+            searchAndLoadLazyChunks(String(factory))
+                .then(() => isResolved = true)
+                .catch(() => isResolved = true);
 
             chunksSearchPromises.push(() => isResolved);
         }
 
+        Webpack.factoryListeners.add(factoryListener);
+        for (const factoryId in wreq.m) {
+            factoryListener(wreq.m[factoryId]);
+        }
+
         await chunksSearchingDone;
+        Webpack.factoryListeners.delete(factoryListener);
 
         // Require deferred entry points
         for (const deferredRequire of deferredRequires) {
-            wreq!(deferredRequire as any);
+            wreq(deferredRequire);
         }
 
         // All chunks Discord has mapped to asset files, even if they are not used anymore
         const allChunks = [] as number[];
 
         // Matches "id" or id:
-        for (const currentMatch of wreq!.u.toString().matchAll(/(?:"([\deE]+?)"(?![,}]))|(?:([\deE]+?):)/g)) {
+        for (const currentMatch of String(wreq.u).matchAll(/(?:"([\deE]+?)"(?![,}]))|(?:([\deE]+?):)/g)) {
             const id = currentMatch[1] ?? currentMatch[2];
             if (id == null) continue;
 
@@ -156,7 +158,8 @@ export async function loadLazyChunks() {
 
         if (allChunks.length === 0) throw new Error("Failed to get all chunks");
 
-        // Chunks that are not loaded (not used) by Discord code anymore
+        // Chunks which our regex could not catch to load
+        // It will always contain WebWorker assets, and also currently contains some language packs which are loaded differently
         const chunksLeft = allChunks.filter(id => {
             return !(validChunks.has(id) || invalidChunks.has(id));
         });
@@ -166,12 +169,9 @@ export async function loadLazyChunks() {
                 .then(r => r.text())
                 .then(t => t.includes("importScripts("));
 
-            // Loads and requires a chunk
+            // Loads the chunk. Currently this only happens with the language packs which are loaded differently
             if (!isWorkerAsset) {
-                await wreq.e(id as any);
-                // Technically, the id of the chunk does not match the entry point
-                // But, still try it because we have no way to get the actual entry point
-                if (wreq.m[id]) wreq(id as any);
+                await wreq.e(id);
             }
         }));
 
