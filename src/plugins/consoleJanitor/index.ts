@@ -67,6 +67,20 @@ export default definePlugin({
 
     patches: [
         {
+            find: "https://github.com/highlightjs/highlight.js/issues/2277",
+            replacement: {
+                match: /(?<=&&\()console.log\(`Deprecated.+?`\),/,
+                replace: ""
+            }
+        },
+        {
+            find: 'The "interpolate" function is deprecated in v10 (use "to" instead)',
+            replacement: {
+                match: /,console.warn\(\i\+'The "interpolate" function is deprecated in v10 \(use "to" instead\)'\)/,
+                replace: ""
+            }
+        },
+        {
             find: 'console.warn("Window state not initialized"',
             replacement: {
                 match: /console\.warn\("Window state not initialized",\i\),/,
@@ -119,7 +133,7 @@ export default definePlugin({
         {
             find: "Slow dispatch on",
             replacement: {
-                match: /\i\.totalTime>100&&\i\.verbose\("Slow dispatch on ".+?\)\);/,
+                match: /\i\.totalTime>\i&&\i\.verbose\("Slow dispatch on ".+?\)\);/,
                 replace: ""
             }
         },
@@ -140,5 +154,5 @@ export default definePlugin({
                 replace: "$self.NoopLogger()"
             }
         }
-    ],
+    ]
 });
