@@ -118,8 +118,8 @@ export default definePlugin({
     },
 
     async start() {
-        Vencord.Api.Badges.addBadge(ContributorBadge);
-        Vencord.Api.Badges.addBadge(EquicordContributorBadge);
+        Vencord.Api.Badges.addProfileBadge(ContributorBadge);
+        Vencord.Api.Badges.addProfileBadge(EquicordContributorBadge);
         await loadAllBadges();
     },
 
