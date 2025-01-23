@@ -19,6 +19,7 @@
 import { Command } from "@api/Commands";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { FluxEvents } from "@webpack/types";
+import { JSX } from "react";
 import { Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
