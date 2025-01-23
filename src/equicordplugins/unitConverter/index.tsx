@@ -18,8 +18,8 @@
 
 import "./style.css";
 
-import { addAccessory } from "@api/MessageAccessories";
-import { addButton } from "@api/MessagePopover";
+import { addMessageAccessory } from "@api/MessageAccessories";
+import { addMessagePopoverButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -57,8 +57,8 @@ export default definePlugin({
     description: "Converts metric units to Imperal units and vice versa",
     authors: [Devs.sadan],
     start() {
-        addAccessory("vc-converter", props => <ConverterAccessory message={props.message} />);
-        addButton("vc-converter", message => {
+        addMessageAccessory("vc-converter", props => <ConverterAccessory message={props.message} />);
+        addMessagePopoverButton("vc-converter", message => {
             if (!message.content) return null;
             return {
                 label: "Convert Units",

@@ -7,7 +7,7 @@
 import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
+import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -104,12 +104,12 @@ export default definePlugin({
     start: () => {
         if (settings.store.isEnabled) true;
         addChatBarButton("Signature", SignatureToggle);
-        addPreSendListener(handleMessage);
+        addMessagePreSendListener(handleMessage);
     },
     stop: () => {
         if (settings.store.isEnabled) false;
         removeChatBarButton("Signature");
-        removePreSendListener(handleMessage);
+        removeMessagePreSendListener(handleMessage);
 
     },
 

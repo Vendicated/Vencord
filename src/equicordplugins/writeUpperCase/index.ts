@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
+import { addMessagePreSendListener, removeMessagePreSendListener, SendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -39,9 +39,9 @@ export default definePlugin({
     settings,
 
     start() {
-        addPreSendListener(presendObject);
+        addMessagePreSendListener(presendObject);
     },
     stop() {
-        removePreSendListener(presendObject);
+        removeMessagePreSendListener(presendObject);
     }
 });

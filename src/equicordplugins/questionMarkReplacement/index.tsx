@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
+import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -36,12 +36,12 @@ export default definePlugin({
     settings,
 
     start() {
-        this.preSend = addPreSendListener((_, msg) => {
+        this.preSend = addMessagePreSendListener((_, msg) => {
             msg.content = replaceQuestionMarks(msg.content);
         });
     },
 
     stop() {
-        removePreSendListener(this.preSend);
+        removeMessagePreSendListener(this.preSend);
     }
 });

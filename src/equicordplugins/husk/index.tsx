@@ -18,7 +18,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addButton, removeButton } from "@api/MessagePopover";
+import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
@@ -103,7 +103,7 @@ export default definePlugin({
         return id !== "" ? id : this.settings.store.emojiID;
     },
     async start() {
-        addButton("Husk", msg => {
+        addMessagePopoverButton("Husk", msg => {
             return {
                 label: "Husk",
                 icon: Husk,
@@ -121,7 +121,7 @@ export default definePlugin({
     },
 
     stop() {
-        removeButton("Husk");
+        removeMessagePopoverButton("Husk");
     },
 
 });

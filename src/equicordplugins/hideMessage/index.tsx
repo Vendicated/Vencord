@@ -8,7 +8,7 @@ import "./styles.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { get, set } from "@api/DataStore";
-import { addAccessory, removeAccessory } from "@api/MessageAccessories";
+import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { EquicordDevs } from "@utils/constants";
@@ -147,7 +147,7 @@ export default definePlugin({
             buildCss();
         }
 
-        addAccessory("vc-hide-message", ({ message }) => {
+        addMessageAccessory("vc-hide-message", ({ message }) => {
             if (hiddenMessages.has(message.id) && settings.store.showNotice) return <HideMessageAccessory id={message.id} />;
             return null;
         });
@@ -156,7 +156,7 @@ export default definePlugin({
     async stop() {
         for (const id of hiddenMessages.keys()) revealMessage(id);
 
-        removeAccessory("vc-hide-message");
+        removeMessageAccessory("vc-hide-message");
 
         style.remove();
         hiddenMessages.clear();

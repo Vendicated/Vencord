@@ -7,7 +7,7 @@
 import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
+import { addMessagePreSendListener, removeMessagePreSendListener, SendListener } from "@api/MessageEvents";
 import { definePluginSettings, Settings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
@@ -96,9 +96,9 @@ const furudosettings = definePluginSettings(
 
 function messageSendListenerFuncs() {
     if (furudosettings.store.isEnabled) {
-        addPreSendListener(presendObject);
+        addMessagePreSendListener(presendObject);
     } else {
-        removePreSendListener(presendObject);
+        removeMessagePreSendListener(presendObject);
     }
 }
 
@@ -243,6 +243,6 @@ export default definePlugin({
 
     stop: () => {
         removeChatBarButton("FurudoSpeak");
-        removePreSendListener(presendObject);
+        removeMessagePreSendListener(presendObject);
     }
 });

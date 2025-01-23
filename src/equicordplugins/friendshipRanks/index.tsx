@@ -148,10 +148,10 @@ export default definePlugin({
     description: "Adds badges showcasing how long you have been friends with a user for",
     authors: [Devs.Samwich],
     start() {
-        getBadgesToApply().forEach(thing => Vencord.Api.Badges.addBadge(thing));
+        getBadgesToApply().forEach(thing => Vencord.Api.Badges.addProfileBadge(thing));
 
     },
     stop() {
-        getBadgesToApply().forEach(thing => Vencord.Api.Badges.removeBadge(thing));
+        getBadgesToApply().forEach(thing => Vencord.Api.Badges.removeProfileBadge(thing));
     },
 });

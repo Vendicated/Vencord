@@ -5,8 +5,8 @@
  */
 
 import {
-    addPreSendListener,
-    removePreSendListener,
+    addMessagePreSendListener,
+    removeMessagePreSendListener,
     SendListener,
 } from "@api/MessageEvents";
 import {
@@ -38,10 +38,10 @@ export default definePlugin({
     authors: [Devs.Samwich],
     dependencies: ["MessageEventsAPI"],
     start() {
-        addPreSendListener(presendObject);
+        addMessagePreSendListener(presendObject);
     },
     stop() {
-        removePreSendListener(presendObject);
+        removeMessagePreSendListener(presendObject);
     },
     settings,
 });
