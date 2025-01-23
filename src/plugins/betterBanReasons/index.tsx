@@ -7,9 +7,14 @@
 import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
+import { runtimeHashMessageKey } from "@utils/intlHash";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, i18n, TextInput } from "@webpack/common";
+import { Button, Forms, TextInput } from "@webpack/common";
+
+const cl = classNameFactory("vc-bbr-");
 
 function ReasonsComponent() {
     const { reasons } = settings.use(["reasons"]);
@@ -18,11 +23,11 @@ function ReasonsComponent() {
         <Forms.FormSection title="Reasons">
             {reasons.map((reason: string, index: number) => (
                 <div
-                    className="vc-bbr-reason-wrapper"
+                    key={index}
+                    className={cl("reason-wrapper")}
                 >
                     <TextInput
                         type="text"
-                        key={index}
                         value={reason}
                         onChange={v => {
                             reasons[index] = v;
@@ -32,7 +37,7 @@ function ReasonsComponent() {
                     />
                     <Button
                         color={Button.Colors.RED}
-                        className="vc-bbr-remove-button"
+                        className={cl("remove-button")}
                         onClick={() => {
                             reasons.splice(index, 1);
                             settings.store.reasons = [...reasons];
@@ -60,7 +65,7 @@ const settings = definePluginSettings({
         default: [],
         component: ReasonsComponent,
     },
-    textInputDefault: {
+    isTextInputDefault: {
         type: OptionType.BOOLEAN,
         description: 'Shows a text input instead of a select menu by default. (Equivalent to clicking the "Other" option)'
     }
@@ -72,9 +77,9 @@ export default definePlugin({
     authors: [Devs.Inbestigator],
     patches: [
         {
-            find: "Messages.BAN_MULTIPLE_CONFIRM_TITLE",
+            find: "." + runtimeHashMessageKey("BAN_MULTIPLE_CONFIRM_TITLE"),
             replacement: [{
-                match: /\[\{name:\i\.\i\.Messages\.BAN_REASON_OPTION_SPAM_ACCOUNT.+?\}\]/,
+                match: /\[(\{((?:name|value):\i\.intl\.string\(\i\.\i\.[A-Za-z0-9]+\),?){2}\},?){3}\]/,
                 replace: "$self.getReasons()"
             },
             {
@@ -84,17 +89,16 @@ export default definePlugin({
         }
     ],
     getReasons() {
-        const reasons = settings.store.reasons.length
-            ? settings.store.reasons
+        const storedReasons = settings.store.reasons.filter((r: string) => r.trim());
+        const reasons: string[] = storedReasons.length
+            ? storedReasons
             : [
-                i18n.Messages.BAN_REASON_OPTION_SPAM_ACCOUNT,
-                i18n.Messages.BAN_REASON_OPTION_HACKED_ACCOUNT,
-                i18n.Messages.BAN_REASON_OPTION_BREAKING_RULES
+                getIntlMessage("BAN_REASON_OPTION_SPAM_ACCOUNT"),
+                getIntlMessage("BAN_REASON_OPTION_HACKED_ACCOUNT"),
+                getIntlMessage("BAN_REASON_OPTION_BREAKING_RULES"),
             ];
         return reasons.map(s => ({ name: s, value: s }));
     },
-    getDefaultState() {
-        return settings.store.textInputDefault ? 1 : 0;
-    },
+    getDefaultState: () => settings.store.isTextInputDefault ? 1 : 0,
     settings,
 });
