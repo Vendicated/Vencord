@@ -971,6 +971,10 @@ export const EquicordDevs = Object.freeze({
     voidbbg: {
         name: "voidbbg",
         id: 117126234588184582n
+    },
+    OIRNOIR: {
+        name: "OIRNOIR",
+        id: 720842469024989195n
     }
 } satisfies Record<string, Dev>);
 
