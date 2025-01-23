@@ -4,7 +4,7 @@
 }
 
 .vc-special-card-special {
-    padding: 1.9em;
+    padding: 1em 1.5em;
     margin-bottom: 1em;
     background-size: cover;
     background-position: center;
@@ -25,21 +25,21 @@
 
 .vc-special-subtitle {
     color: black;
-    font-size: 1.4em;
+    font-size: 1.2em;
     font-weight: bold;
-    margin-top: 0.9em;
+    margin-top: 0.5em;
 }
 
 .vc-special-text {
     color: black;
     font-size: 1em;
-    margin-top: 1em;
+    margin-top: .75em;
     white-space: pre-line;
 }
 
 .vc-special-seperator {
-    margin-top: 1em;
-    border-top: '1px solid white';
+    margin-top: .75em;
+    border-top: 1px solid white;
     opacity: 0.4;
 }
 
