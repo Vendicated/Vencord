@@ -19,7 +19,7 @@
 import "./specialCard.css";
 
 import { classNameFactory } from "@api/Styles";
-import { Card, Forms, React } from "@webpack/common";
+import { Card, Clickable, Forms, React } from "@webpack/common";
 import type { PropsWithChildren } from "react";
 
 const cl = classNameFactory("vc-special-");
@@ -68,9 +68,11 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
             {buttonTitle && (
                 <>
                     <Forms.FormDivider className={cl("seperator")} />
-                    <Forms.FormText className={cl("hyperlink")} onClick={onClick}>
-                        {buttonTitle}
-                    </Forms.FormText>
+                    <Clickable onClick={onClick} className={cl("hyperlink")}>
+                        <Forms.FormText className={cl("hyperlink-text")}>
+                            {buttonTitle}
+                        </Forms.FormText>
+                    </Clickable>
                 </>
             )}
         </Card>

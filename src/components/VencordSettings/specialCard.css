@@ -1,3 +1,17 @@
+.vc-donate-button {
+    overflow: visible !important;
+}
+
+.vc-donate-button .vc-heart-icon {
+    transition: transform 0.3s;
+}
+
+.vc-donate-button:hover .vc-heart-icon {
+    transform: scale(1.1);
+    z-index: 10;
+    position: relative;
+}
+
 .vc-settings-card {
     padding: 1em;
     margin-bottom: 1em;
@@ -44,12 +58,21 @@
 }
 
 .vc-special-hyperlink {
-    color: black;
-    font-size: 1em;
-    font-weight: bold;
     margin-top: 1em;
-    text-align: center;
     cursor: pointer;
+
+    .vc-special-hyperlink-text {
+        color: black;
+        font-size: 1em;
+        font-weight: bold;
+        text-align: center;
+        transition: text-decoration 0.5s;
+        cursor: pointer;
+    }
+
+    &:hover .vc-special-hyperlink-text {
+        text-decoration: underline;
+    }
 }
 
 .vc-special-image-container {
