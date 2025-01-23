@@ -203,7 +203,7 @@ export type SettingsChecks<D extends SettingsDefinition> = {
     (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
 };
 
-export type PluginSettingDef = (PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">) | ((
+export type PluginSettingDef = (PluginSettingCommon & PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">) | ((
     | PluginSettingStringDef
     | PluginSettingNumberDef
     | PluginSettingBooleanDef

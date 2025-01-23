@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
+import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
@@ -40,7 +40,7 @@ const settings = definePluginSettings(
         },
     });
 
-const SignatureToggle: ChatBarButton = ({ isMainChat }) => {
+const SignatureToggle: ChatBarButtonFactory = ({ isMainChat }) => {
     const { isEnabled, showIcon } = settings.use(["isEnabled", "showIcon"]);
     const toggle = () => settings.store.isEnabled = !settings.store.isEnabled;
 

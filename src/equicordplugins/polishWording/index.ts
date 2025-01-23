@@ -6,8 +6,8 @@
 
 import {
     addMessagePreSendListener,
+    MessageSendListener,
     removeMessagePreSendListener,
-    SendListener,
 } from "@api/MessageEvents";
 import {
     definePluginSettings,
@@ -17,7 +17,7 @@ import {
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-const presendObject: SendListener = (channelId, msg) => {
+const presendObject: MessageSendListener = (channelId, msg) => {
     msg.content = textProcessing(msg.content);
 };
 

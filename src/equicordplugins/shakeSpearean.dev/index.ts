@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addMessagePreSendListener, removeMessagePreSendListener, SendListener } from "@api/MessageEvents";
+import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings, Settings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -12,7 +12,7 @@ import { MessageStore } from "@webpack/common";
 
 import { transferMessage } from "./native";
 
-const presendObject: SendListener = async (channelId, msg, extra) => {
+const presendObject: MessageSendListener = async (channelId, msg, extra) => {
     const messageRef = extra.replyOptions.messageReference;
     const repliedMessage = ((messageRef?.message_id && messageRef.channel_id) && MessageStore.getMessage(messageRef?.channel_id, messageRef?.message_id)) || undefined;
     msg.content = await transferMessage(msg, Settings.plugins.Shakespearean.model, repliedMessage);
