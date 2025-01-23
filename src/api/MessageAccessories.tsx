@@ -16,28 +16,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { JSX } from "react";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { JSX, ReactNode } from "react";
 
-export type AccessoryCallback = (props: Record<string, any>) => JSX.Element | null | Array<JSX.Element | null>;
-export type Accessory = {
-    callback: AccessoryCallback;
+export type MessageAccessoryFactory = (props: Record<string, any>) => ReactNode;
+export type MessageAccessory = {
+    render: MessageAccessoryFactory;
     position?: number;
 };
 
-export const accessories = new Map<String, Accessory>();
+export const accessories = new Map<string, MessageAccessory>();
 
-export function addAccessory(
+export function addMessageAccessory(
     identifier: string,
-    callback: AccessoryCallback,
+    render: MessageAccessoryFactory,
     position?: number
 ) {
     accessories.set(identifier, {
-        callback,
+        render,
         position,
     });
 }
 
-export function removeAccessory(identifier: string) {
+export function removeMessageAccessory(identifier: string) {
     accessories.delete(identifier);
 }
 
@@ -45,15 +46,12 @@ export function _modifyAccessories(
     elements: JSX.Element[],
     props: Record<string, any>
 ) {
-    for (const accessory of accessories.values()) {
-        let accessories = accessory.callback(props);
-        if (accessories == null)
-            continue;
-
-        if (!Array.isArray(accessories))
-            accessories = [accessories];
-        else if (accessories.length === 0)
-            continue;
+    for (const [key, accessory] of accessories.entries()) {
+        const res = (
+            <ErrorBoundary message={`Failed to render ${key} Message Accessory`} key={key}>
+                <accessory.render {...props} />
+            </ErrorBoundary>
+        );
 
         elements.splice(
             accessory.position != null
@@ -62,7 +60,7 @@ export function _modifyAccessories(
                     : accessory.position
                 : elements.length,
             0,
-            ...accessories.filter(e => e != null) as JSX.Element[]
+            res
         );
     }
 
