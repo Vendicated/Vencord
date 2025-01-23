@@ -53,10 +53,6 @@ export function _modifyAccessories(
             </ErrorBoundary>
         );
 
-        const accessories = Array.isArray(res) ? res : [res];
-        if (!accessories.length)
-            continue;
-
         elements.splice(
             accessory.position != null
                 ? accessory.position < 0
@@ -64,7 +60,7 @@ export function _modifyAccessories(
                     : accessory.position
                 : elements.length,
             0,
-            ...accessories.filter(e => e != null) as JSX.Element[]
+            res
         );
     }
 
