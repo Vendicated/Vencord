@@ -218,7 +218,7 @@ export default definePlugin({
         },
         // in the member list
         {
-            find: "#{intl::GUILD_OWNER}",
+            find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
                 match: /(?<type>\i)=\(null==.{0,100}\.BOT;return null!=(?<user>\i)&&\i\.bot/,
                 replace: "$<type> = $self.getTag({user: $<user>, channel: arguments[0].channel, origType: $<user>.bot ? 0 : null, location: 'not-chat' }); return typeof $<type> === 'number'"

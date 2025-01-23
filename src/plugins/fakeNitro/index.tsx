@@ -391,7 +391,7 @@ export default definePlugin({
         },
         // Separate patch for allowing using custom app icons
         {
-            find: /\.getCurrentDesktopIcon.{0,25}\.isPremium/,
+            find: "?24:30,",
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"
