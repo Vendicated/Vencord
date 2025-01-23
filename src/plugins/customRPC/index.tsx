@@ -31,7 +31,7 @@ import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, React, UserStore } from "@webpack/common";
 
 const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
-const ActivityView = findComponentByCodeLazy('location:"UserProfileActivityCard",');
+const ActivityView = findComponentByCodeLazy(".party?(0", ".card");
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
@@ -399,6 +399,17 @@ export default definePlugin({
     stop: () => setRpc(true),
     settings,
 
+    patches: [
+        {
+            find: ".party?(0",
+            all: true,
+            replacement: {
+                match: /\i\.id===\i\.id\?null:/,
+                replace: ""
+            }
+        }
+    ],
+
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
         const gameActivityEnabled = ShowCurrentGame.useSetting();
@@ -449,7 +460,7 @@ export default definePlugin({
                     {activity[0] && <ActivityView
                         activity={activity[0]}
                         user={UserStore.getCurrentUser()}
-                        currentUser={{ id: "0" }}
+                        currentUser={UserStore.getCurrentUser()}
                     />}
                 </div>
             </>
