@@ -6,8 +6,8 @@
 
 import { LiteralUnion } from "type-fest";
 
-const SYM_IS_PROXY = Symbol("SettingsStore.isProxy");
-const SYM_GET_RAW_TARGET = Symbol("SettingsStore.getRawTarget");
+export const SYM_IS_PROXY = Symbol("SettingsStore.isProxy");
+export const SYM_GET_RAW_TARGET = Symbol("SettingsStore.getRawTarget");
 
 // Resolves a possibly nested prop in the form of "some.nested.prop" to type of T.some.nested.prop
 type ResolvePropDeep<T, P> = P extends `${infer Pre}.${infer Suf}`
