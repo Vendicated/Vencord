@@ -28,14 +28,9 @@ import { useAwaiter } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, Button, FluxDispatcher, Forms, React, UserStore } from "@webpack/common";
-import { User } from "discord-types/general";
 
 const useProfileThemeStyle = findByCodeLazy("profileThemeStyle:", "--profile-gradient-primary-color");
-const ActivityView = findComponentByCodeLazy<{
-    activity: Activity | null;
-    user: User;
-    currentUser: User;
-}>('location:"UserProfileActivityCard",');
+const ActivityView = findComponentByCodeLazy('location:"UserProfileActivityCard",');
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
@@ -451,7 +446,7 @@ export default definePlugin({
                     {activity[0] && <ActivityView
                         activity={activity[0]}
                         user={UserStore.getCurrentUser()}
-                        currentUser={UserStore.getUser("643945264868098049")}
+                        currentUser={{ id: "0" }}
                     />}
                 </div>
             </>
