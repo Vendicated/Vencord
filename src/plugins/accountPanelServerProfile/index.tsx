@@ -23,7 +23,7 @@ const UserProfile = findComponentByCodeLazy("UserProfilePopoutWrapper: user cann
 const styles = findByPropsLazy("accountProfilePopoutWrapper");
 
 let openAlternatePopout = false;
-let accountPanelRef: React.MutableRefObject<Record<PropertyKey, any> | null> = { current: null };
+let accountPanelRef: React.RefObject<Record<PropertyKey, any> | null> = { current: null };
 
 const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
     const { prioritizeServerProfile } = settings.use(["prioritizeServerProfile"]);

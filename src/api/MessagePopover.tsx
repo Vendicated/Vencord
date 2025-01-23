@@ -23,7 +23,7 @@ import type { ComponentType, MouseEventHandler } from "react";
 
 const logger = new Logger("MessagePopover");
 
-export interface ButtonItem {
+export interface MessagePopoverButtonItem {
     key?: string,
     label: string,
     icon: ComponentType<any>,
@@ -33,23 +33,23 @@ export interface ButtonItem {
     onContextMenu?: MouseEventHandler<HTMLButtonElement>;
 }
 
-export type getButtonItem = (message: Message) => ButtonItem | null;
+export type MessagePopoverButtonFactory = (message: Message) => MessagePopoverButtonItem | null;
 
-export const buttons = new Map<string, getButtonItem>();
+export const buttons = new Map<string, MessagePopoverButtonFactory>();
 
-export function addButton(
+export function addMessagePopoverButton(
     identifier: string,
-    item: getButtonItem,
+    item: MessagePopoverButtonFactory,
 ) {
     buttons.set(identifier, item);
 }
 
-export function removeButton(identifier: string) {
+export function removeMessagePopoverButton(identifier: string) {
     buttons.delete(identifier);
 }
 
 export function _buildPopoverElements(
-    Component: React.ComponentType<ButtonItem>,
+    Component: React.ComponentType<MessagePopoverButtonItem>,
     message: Message
 ) {
     const items: React.ReactNode[] = [];

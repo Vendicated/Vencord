@@ -17,7 +17,6 @@
 */
 
 import { DataStore } from "@api/index";
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
@@ -244,22 +243,17 @@ export default definePlugin({
     name: "TextReplace",
     description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in Vencord's Server",
     authors: [Devs.AutumnVN, Devs.TheKodeToad],
-    dependencies: ["MessageEventsAPI"],
 
     settings,
+
+    onBeforeMessageSend(channelId, msg) {
+        // Channel used for sharing rules, applying rules here would be messy
+        if (channelId === TEXT_REPLACE_RULES_CHANNEL_ID) return;
+        msg.content = applyRules(msg.content);
+    },
 
     async start() {
         stringRules = await DataStore.get(STRING_RULES_KEY) ?? makeEmptyRuleArray();
         regexRules = await DataStore.get(REGEX_RULES_KEY) ?? makeEmptyRuleArray();
-
-        this.preSend = addPreSendListener((channelId, msg) => {
-            // Channel used for sharing rules, applying rules here would be messy
-            if (channelId === TEXT_REPLACE_RULES_CHANNEL_ID) return;
-            msg.content = applyRules(msg.content);
-        });
-    },
-
-    stop() {
-        removePreSendListener(this.preSend);
     }
 });

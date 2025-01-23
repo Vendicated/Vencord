@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ChatBarButton } from "@api/ChatButtons";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
 import { Alerts, Forms, Tooltip, useEffect, useState } from "@webpack/common";
@@ -40,7 +40,7 @@ export function TranslateIcon({ height = 24, width = 24, className }: { height?:
 
 export let setShouldShowTranslateEnabledTooltip: undefined | ((show: boolean) => void);
 
-export const TranslateChatBarIcon: ChatBarButton = ({ isMainChat }) => {
+export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
     const { autoTranslate, showChatBarButton } = settings.use(["autoTranslate", "showChatBarButton"]);
 
     const [shouldShowTranslateEnabledTooltip, setter] = useState(false);
