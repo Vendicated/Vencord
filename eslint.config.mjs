@@ -105,7 +105,13 @@ export default tseslint.config(
             "no-invalid-regexp": "error",
             "no-constant-condition": ["error", { "checkLoops": false }],
             "no-duplicate-imports": "error",
-            "dot-notation": "error",
+            "@typescript-eslint/dot-notation": [
+                "error",
+                {
+                    "allowPrivateClassPropertyAccess": true,
+                    "allowProtectedClassPropertyAccess": true
+                }
+            ],
             "no-useless-escape": [
                 "error",
                 {

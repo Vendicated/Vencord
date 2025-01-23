@@ -17,7 +17,6 @@
 */
 
 import { get, set } from "@api/DataStore";
-import { addButton, removeButton } from "@api/MessagePopover";
 import { deleteStyle, setStyle } from "@api/Styles";
 import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
@@ -39,31 +38,29 @@ export default definePlugin({
     name: "HideAttachments",
     description: "Hide attachments and Embeds for individual messages via hover button",
     authors: [Devs.Ven],
-    dependencies: ["MessagePopoverAPI"],
+
+    renderMessagePopoverButton(msg) {
+        if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length) return null;
+
+        const isHidden = hiddenMessages.has(msg.id);
+
+        return {
+            label: isHidden ? "Show Attachments" : "Hide Attachments",
+            icon: isHidden ? ImageVisible : ImageInvisible,
+            message: msg,
+            channel: ChannelStore.getChannel(msg.channel_id),
+            onClick: () => this.toggleHide(msg.id)
+        };
+    },
 
     async start() {
         await getHiddenMessages();
         await this.buildCss();
-
-        addButton("HideAttachments", msg => {
-            if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length) return null;
-
-            const isHidden = hiddenMessages.has(msg.id);
-
-            return {
-                label: isHidden ? "Show Attachments" : "Hide Attachments",
-                icon: isHidden ? ImageVisible : ImageInvisible,
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: () => this.toggleHide(msg.id)
-            };
-        });
     },
 
     stop() {
         deleteStyle("HideAttachments");
         hiddenMessages.clear();
-        removeButton("HideAttachments");
     },
 
     async buildCss() {
