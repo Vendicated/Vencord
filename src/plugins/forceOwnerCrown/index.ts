@@ -27,7 +27,7 @@ export default definePlugin({
     authors: [Devs.D3SOX, Devs.Nickyux],
     patches: [
         {
-            find: "#{intl::GUILD_OWNER}",
+            find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
                 match: /,isOwner:(\i),/,
                 replace: ",_isOwner:$1=$self.isGuildOwner(e),"
