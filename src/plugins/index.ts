@@ -16,12 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addProfileBadge, removeProfileBadge } from "@api/Badges";
+import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
+import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
+import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
+import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendListener, removeMessageClickListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
+import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind } from "@utils/patches";
-import { Patch, Plugin, ReporterTestable, StartAt } from "@utils/types";
+import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
 
@@ -83,6 +90,13 @@ function isReporterTestable(p: Plugin, part: ReporterTestable) {
         : (p.reporterTestable & part) === part;
 }
 
+const pluginKeysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
+    "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
+    "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton"
+];
+
+const neededApiPlugins = new Set<string>();
+
 // First round-trip to mark and force enable dependencies
 //
 // FIXME: might need to revisit this if there's ever nested (dependencies of dependencies) dependencies since this only
@@ -106,10 +120,23 @@ for (const p of pluginsValues) if (isPluginEnabled(p.name)) {
         dep.isDependency = true;
     });
 
-    if (p.commands?.length) {
-        Plugins.CommandsAPI.isDependency = true;
-        settings.CommandsAPI.enabled = true;
+    if (p.commands?.length) neededApiPlugins.add("CommandsAPI");
+    if (p.onBeforeMessageEdit || p.onBeforeMessageSend || p.onMessageClick) neededApiPlugins.add("MessageEventsAPI");
+    if (p.renderChatBarButton) neededApiPlugins.add("ChatInputButtonAPI");
+    if (p.renderMemberListDecorator) neededApiPlugins.add("MemberListDecoratorsAPI");
+    if (p.renderMessageAccessory) neededApiPlugins.add("MessageAccessoriesAPI");
+    if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
+    if (p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
+    if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
+
+    for (const key of pluginKeysToBind) {
+        p[key] &&= p[key].bind(p) as any;
     }
+}
+
+for (const p of neededApiPlugins) {
+    Plugins[p].isDependency = true;
+    settings[p].enabled = true;
 }
 
 for (const p of pluginsValues) {
@@ -215,7 +242,11 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 }
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
-    const { name, commands, contextMenus } = p;
+    const {
+        name, commands, contextMenus, userProfileBadge,
+        onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
+        renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
+    } = p;
 
     if (p.start) {
         logger.info("Starting plugin", name);
@@ -249,7 +280,6 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         subscribePluginFluxEvents(p, FluxDispatcher);
     }
 
-
     if (contextMenus) {
         logger.debug("Adding context menus patches of plugin", name);
         for (const navId in contextMenus) {
@@ -257,11 +287,27 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         }
     }
 
+    if (userProfileBadge) addProfileBadge(userProfileBadge);
+
+    if (onBeforeMessageEdit) addMessagePreEditListener(onBeforeMessageEdit);
+    if (onBeforeMessageSend) addMessagePreSendListener(onBeforeMessageSend);
+    if (onMessageClick) addMessageClickListener(onMessageClick);
+
+    if (renderChatBarButton) addChatBarButton(name, renderChatBarButton);
+    if (renderMemberListDecorator) addMemberListDecorator(name, renderMemberListDecorator);
+    if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
+    if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
+    if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
+
     return true;
 }, p => `startPlugin ${p.name}`);
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
-    const { name, commands, contextMenus } = p;
+    const {
+        name, commands, contextMenus, userProfileBadge,
+        onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
+        renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
+    } = p;
 
     if (p.stop) {
         logger.info("Stopping plugin", name);
@@ -299,6 +345,18 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
             removeContextMenuPatch(navId, contextMenus[navId]);
         }
     }
+
+    if (userProfileBadge) removeProfileBadge(userProfileBadge);
+
+    if (onBeforeMessageEdit) removeMessagePreEditListener(onBeforeMessageEdit);
+    if (onBeforeMessageSend) removeMessagePreSendListener(onBeforeMessageSend);
+    if (onMessageClick) removeMessageClickListener(onMessageClick);
+
+    if (renderChatBarButton) removeChatBarButton(name);
+    if (renderMemberListDecorator) removeMemberListDecorator(name);
+    if (renderMessageDecoration) removeMessageDecoration(name);
+    if (renderMessageAccessory) removeMessageAccessory(name);
+    if (renderMessagePopoverButton) removeMessagePopoverButton(name);
 
     return true;
 }, p => `stopPlugin ${p.name}`);
