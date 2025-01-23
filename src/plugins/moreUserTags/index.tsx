@@ -243,7 +243,7 @@ export default definePlugin({
         },
         // in the member list
         {
-            find: "#{intl::GUILD_OWNER}",
+            find: "#{intl::GUILD_OWNER}),children:",
             replacement: [
                 // Pass the tag's colors and type to the next function
                 {
