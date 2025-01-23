@@ -54,29 +54,25 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
 
                     {children}
                 </div>
-                {
-                    cardImage && (
-                        <div className={cl("image-container")}>
-                            <img
-                                role="presentation"
-                                src={cardImage}
-                                alt=""
-                                className={cl("image")}
-                            />
-                        </div>
-                    )
-                }
+                {cardImage && (
+                    <div className={cl("image-container")}>
+                        <img
+                            role="presentation"
+                            src={cardImage}
+                            alt=""
+                            className={cl("image")}
+                        />
+                    </div>
+                )}
             </div>
-            {
-                buttonTitle && (
-                    <>
-                        <Forms.FormDivider className={cl("seperator")} />
-                        <Forms.FormText className={cl("hyperlink")} onClick={onClick} >
-                            {buttonTitle}
-                        </Forms.FormText>
-                    </>
-                )
-            }
+            {buttonTitle && (
+                <>
+                    <Forms.FormDivider className={cl("seperator")} />
+                    <Forms.FormText className={cl("hyperlink")} onClick={onClick}>
+                        {buttonTitle}
+                    </Forms.FormText>
+                </>
+            )}
         </Card>
     );
 }

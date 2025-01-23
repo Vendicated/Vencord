@@ -46,7 +46,7 @@ const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209
 const VENNIE_DONATOR_IMAGE = "https://cdn.discordapp.com/emojis/1238120638020063377.png";
 const COZY_CONTRIB_IMAGE = "https://cdn.discordapp.com/emojis/1026533070955872337.png";
 
-const DONATOR_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070116305436712.png?size=2048";
+const DONOR_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070116305436712.png?size=2048";
 const CONTRIB_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070166481895484.png?size=2048";
 
 type KeysOfType<Object, Type> = {
@@ -111,48 +111,43 @@ function VencordSettings() {
 
     return (
         <SettingsTab title="Vencord Settings">
-            {
-                isDonor(user?.id)
-                    ?
+            {isDonor(user?.id)
+                ? (
                     <SpecialCard
                         title="Donations"
                         subtitle="Thank you for donating!"
-                        description={"People will be able to see your requested badge through Vencord, and you're able to request to change it any time.\n\nDon't worry about your perks running out if you stop your subscription, you'll keep your perks forever!"}
+                        description="All Vencord users can see your badge! You can change it at any time by messaging @vending.machine."
                         cardImage={VENNIE_DONATOR_IMAGE}
-                        backgroundImage={DONATOR_BACKGROUND_IMAGE}
+                        backgroundImage={DONOR_BACKGROUND_IMAGE}
                         backgroundColor="#ED87A9"
                     >
-                        {
-                            DonateButtonComponent()
-                        }
+                        <DonateButtonComponent />
                     </SpecialCard>
-                    :
+                )
+                : (
                     <SpecialCard
                         title="Support the Project"
-                        description={"Please consider supporting the development of Vencord by donating!"}
+                        description="Please consider supporting the development of Vencord by donating!"
                         cardImage={donateImage}
-                        backgroundImage={DONATOR_BACKGROUND_IMAGE}
+                        backgroundImage={DONOR_BACKGROUND_IMAGE}
                         backgroundColor="#c3a3ce"
                     >
-                        {
-                            DonateButtonComponent()
-                        }
+                        <DonateButtonComponent />
                     </SpecialCard>
+                )
             }
-            {
-                isPluginDev(user?.id)
-                &&
+            {isPluginDev(user?.id) && (
                 <SpecialCard
                     title="Contributions"
                     subtitle="Thank you for contributing!"
-                    description={"Since you've contributed to Vencord and added yourself to contributors list, you now have a cool new badge!\n\nTo avoid unwanted DMs from people you don't know, a warning has been placed on your profile not to message you for support."}
+                    description="Since you've contributed to Vencord you now have a cool new badge!"
                     cardImage={COZY_CONTRIB_IMAGE}
                     backgroundImage={CONTRIB_BACKGROUND_IMAGE}
                     backgroundColor="#EDCC87"
-                    buttonTitle="See What You Contributed To"
+                    buttonTitle="See what you've contributed to"
                     buttonOnClick={() => openContributorModal(user)}
                 />
-            }
+            )}
 
             <Forms.FormSection title="Quick Actions">
                 <QuickActionCard>
