@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
-import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
+import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -41,7 +41,7 @@ const settings = definePluginSettings({
     }
 });
 
-const SilentMessageToggle: ChatBarButton = ({ isMainChat }) => {
+const SilentMessageToggle: ChatBarButtonFactory = ({ isMainChat }) => {
     const [enabled, setEnabled] = useState(lastState);
 
     function setEnabledValue(value: boolean) {
@@ -50,15 +50,15 @@ const SilentMessageToggle: ChatBarButton = ({ isMainChat }) => {
     }
 
     useEffect(() => {
-        const listener: SendListener = (_, message) => {
+        const listener: MessageSendListener = (_, message) => {
             if (enabled) {
                 if (settings.store.autoDisable) setEnabledValue(false);
                 if (!message.content.startsWith("@silent ")) message.content = "@silent " + message.content;
             }
         };
 
-        addPreSendListener(listener);
-        return () => void removePreSendListener(listener);
+        addMessagePreSendListener(listener);
+        return () => void removeMessagePreSendListener(listener);
     }, [enabled]);
 
     if (!isMainChat) return null;
@@ -91,9 +91,7 @@ export default definePlugin({
     name: "SilentMessageToggle",
     authors: [Devs.Nuckyz, Devs.CatNoir],
     description: "Adds a button to the chat bar to toggle sending a silent message.",
-    dependencies: ["MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
 
-    start: () => addChatBarButton("SilentMessageToggle", SilentMessageToggle),
-    stop: () => removeChatBarButton("SilentMessageToggle")
+    renderChatBarButton: SilentMessageToggle,
 });
