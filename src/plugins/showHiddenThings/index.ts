@@ -58,7 +58,7 @@ export default definePlugin({
             },
         },
         {
-            find: /context:\i,checkElevated:!1\}\),\i\.\i.{0,200}autoTrackExposure/,
+            find: /,checkElevated:!1}\),\i\.\i\)}(?<=getCurrentUser\(\);return.+?)/,
             predicate: () => settings.store.showModView,
             replacement: {
                 match: /return \i\.\i\(\i\.\i\(\{user:\i,context:\i,checkElevated:!1\}\),\i\.\i\)/,
