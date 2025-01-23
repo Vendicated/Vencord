@@ -37,7 +37,8 @@ const CANARY = process.env.USE_CANARY === "true";
 
 const browser = await pup.launch({
     headless: true,
-    executablePath: process.env.CHROMIUM_BIN
+    executablePath: process.env.CHROMIUM_BIN,
+    args: ["--no-sandbox"]
 });
 
 const page = await browser.newPage();

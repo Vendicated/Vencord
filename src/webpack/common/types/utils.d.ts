@@ -324,3 +324,10 @@ export interface DisplayProfileUtils {
     getDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
     useDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
 }
+
+export interface DateUtils {
+    isSameDay(date1: Date, date2: Date): boolean;
+    calendarFormat(date: Date): string;
+    dateFormat(date: Date, format: string): string;
+    diffAsUnits(start: Date, end: Date, stopAtOneSecond?: boolean): Record<"days" | "hours" | "minutes" | "seconds", number>;
+}
