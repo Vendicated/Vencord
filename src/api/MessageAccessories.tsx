@@ -17,9 +17,9 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { JSX } from "react";
+import { JSX, ReactNode } from "react";
 
-export type MessageAccessoryFactory = (props: Record<string, any>) => JSX.Element | null | Array<JSX.Element | null>;
+export type MessageAccessoryFactory = (props: Record<string, any>) => ReactNode;
 export type MessageAccessory = {
     render: MessageAccessoryFactory;
     position?: number;
