@@ -68,7 +68,7 @@ export function SettingArrayComponent({
     id
 }: ISettingElementProps<PluginOptionArray>) {
     const [error, setError] = useState<string | null>(null);
-    const [items, setItems] = useState<string[]>([]);
+    const [items, setItems] = useState<string[]>(pluginSettings[id] || []);
     const [text, setText] = useState<string>("");
 
     useEffect(() => {
@@ -87,15 +87,11 @@ export function SettingArrayComponent({
     useEffect(() => {
         pluginSettings[id] = items;
         onChange(items);
-    }, [items, pluginSettings, id]);
+    }, [items]);
 
     useEffect(() => {
         onError(error !== null);
     }, [error]);
-
-    if (items.length === 0 && pluginSettings[id].length !== 0) {
-        setItems(pluginSettings[id]);
-    }
 
     function openSearchModal(val?: string) {
         return openModal(modalProps => (
@@ -105,16 +101,17 @@ export function SettingArrayComponent({
                 subText={"All selected items will be added to " + wordsToTitle(wordsFromCamel(id))}
                 searchType={option.type === OptionType.USERS ? "USERS" : option.type === OptionType.CHANNELS ? "CHANNELS" : "GUILDS"}
                 onSubmit={values => setItems([...items, ...values.map(v => v.id)])}
+                excludeIds={items}
             />
         ));
     }
 
-    const removeButton = (index: number) => {
+    const removeButton = (id: string) => {
         return (
             <Button
                 id={cl("remove-button")}
                 size={Button.Sizes.MIN}
-                onClick={() => removeItem(index)}
+                onClick={() => removeItem(id)}
                 style={
                     { background: "none", color: "red" }
                 }
@@ -134,17 +131,16 @@ export function SettingArrayComponent({
 
     };
 
-    const removeItem = (index: number) => {
+    const removeItem = (itemId: string) => {
         if (items.length === 1) {
             setItems([]);
-            pluginSettings[id] = [];
             return;
         }
-        setItems(items.filter((_, i) => i !== index));
+        setItems(items.filter(item => item !== itemId));
     };
 
     function renderGuildView() {
-        return items.map(item => GuildStore.getGuild(item))
+        return items.map(item => GuildStore.getGuild(item) || item)
             .map((guild, index) => (
                 <Flex
                     flexDirection="row"
@@ -154,15 +150,15 @@ export function SettingArrayComponent({
                         marginBottom: "8px"
                     }}
                 >
-                    {guild ? (
+                    {typeof guild !== "string" ? (
                         <div className={cl("name")} style={{ color: "var(--text-normal)" }}>
                             <span style={{ display: "inline-flex", alignItems: "center" }}>
                                 {guildIcon(guild)}
                                 <Text variant="text-sm/semibold" style={{ marginLeft: "4px" }}>{guild.name}</Text>
                             </span>
                         </div>
-                    ) : <Text variant="text-sm/semibold">{"Unknown Guild"}</Text>}
-                    {removeButton(index)}
+                    ) : <Text variant="text-sm/semibold">{`Unknown Guild (${guild})`}</Text>}
+                    {removeButton(typeof guild !== "string" ? guild.id : guild)}
                 </Flex>
             ));
     }
@@ -206,9 +202,14 @@ export function SettingArrayComponent({
         const channels: Record<string, Channel[]> = {};
         const dmChannels: Channel[] = [];
         const elements: React.JSX.Element[] = [];
+
+        // to not remove items while iterating
+        const invalidChannels: string[] = [];
+
         for (const item of items) {
             const channel = ChannelStore.getChannel(item);
             if (!channel) {
+                invalidChannels.push(item);
                 continue;
             }
             if (channel.isDM() || channel.isGroupDM()) {
@@ -219,6 +220,10 @@ export function SettingArrayComponent({
                 channels[channel.guild_id] = [];
             }
             channels[channel.guild_id].push(channel);
+        }
+
+        for (const channel of invalidChannels) {
+            removeItem(channel);
         }
 
         const userMention = (channel: Channel) => {
@@ -239,33 +244,40 @@ export function SettingArrayComponent({
             </span>;
         };
 
+        let idx = -1;
+
         if (dmChannels.length > 0) {
             elements.push(
                 <details>
                     <summary style={{ color: "var(--text-normal)", marginBottom: "8px" }}>DMs</summary>
                     <div style={{ paddingLeft: "16px" }}>
-                        {dmChannels.map((channel, index) => (
-                            <Flex
+                        {dmChannels.map(channel => {
+                            idx += 1;
+                            return <Flex
                                 flexDirection="row"
-                                key={index}
+                                key={idx}
                                 style={{
                                     gap: "1px",
                                     marginBottom: "8px",
                                 }}
                             >
                                 {channel.recipients.length === 1 ? userMention(channel) : gdmComponent(channel)}
-                                {removeButton(index)}
-                            </Flex>
-                        ))}
+                                {removeButton(channel.id)}
+                            </Flex>;
+                        })}
                     </div>
                 </details >
             );
         }
+
+        const guilds: { name: string; guild: React.JSX.Element }[] = [];
+
         Object.keys(channels).forEach(guildId => {
             const guild = GuildStore.getGuild(guildId);
-            elements.push(
+            guilds.push(
+                { name: guild?.name ?? `Unknown Guild (${guildId})`, guild: (
                 <details>
-                    {!guild ? <summary style={{ color: "var(--text-normal)", marginBottom: "8px" }}>Unknown Guild</summary> : (
+                    {!guild ? <summary style={{ color: "var(--text-normal)", marginBottom: "8px" }}>{`Unknown Guild (${guildId})`}</summary> : (
                         <summary style={{ color: "var(--text-normal)", marginBottom: "8px" }}>
                             <span style={{ display: "inline-flex", alignItems: "center" }}>
                                 {guildIcon(guild)}
@@ -274,26 +286,33 @@ export function SettingArrayComponent({
                         </summary>
                     )}
                     <div style={{ paddingLeft: "16px", color: "var(--text-normal)" }}>
-                        {channels[guildId].map((channel, index) => (
-                            <Flex
+                        {channels[guildId].map(channel => {
+                            idx += 1;
+                            return <Flex
                                 flexDirection="row"
-                                key={index}
+                                key={idx}
                                 style={{
                                     gap: "1px",
                                     marginBottom: "8px"
-                                }}
-                            >
+                                }}>
                                 <span style={{ display: "inline-flex", alignItems: "center" }}>
                                     {getChannelSymbol(channel.type)}
                                     <Text variant="text-sm/semibold" style={{ marginLeft: "4px" }}>{channel.name}</Text>
-                                    {removeButton(index)}
+                                    {removeButton(channel.id)}
                                 </span>
-                            </Flex>
-                        ))}
+                            </Flex>;
+                        })}
                     </div>
-                </details>
+                </details>) }
             );
         });
+
+        guilds.sort((a, b) => a.name.localeCompare(b.name));
+
+        for (const guild of guilds) {
+            elements.push(guild.guild);
+        }
+
         return elements;
     }
 
@@ -334,7 +353,7 @@ export function SettingArrayComponent({
                             ) : (
                                 <span style={{ color: "var(--text-normal)" }}>{item}</span>
                             )}
-                            {removeButton(index)}
+                            {removeButton(item)}
                         </Flex>
                     )) : option.type === OptionType.CHANNELS ?
                         renderChannelView() : renderGuildView()

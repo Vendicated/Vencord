@@ -147,14 +147,16 @@ function searchTypeToText(type: string | string[]) {
  * @param {string} [props.input] - The initial input value for the search bar.
  * @param {("USERS" | "CHANNELS" | "GUILDS")[] | "USERS" | "CHANNELS" | "GUILDS" | "ALL"} [props.searchType="ALL"] - The type of items to search for.
  * @param {string} [props.subText] - Additional text to display below the heading.
+ * @param {string[]} [props.excludeIds] - An array of IDs to exclude from the search results.
  * @returns The rendered SearchModal component.
  */
-export default function SearchModal({ modalProps, onSubmit, input, searchType = "ALL", subText }: {
+export default function SearchModal({ modalProps, onSubmit, input, searchType = "ALL", subText, excludeIds }: {
     modalProps: ModalProps;
     onSubmit(selected: DestinationItem[]): void;
     input?: string;
     searchType?: ("USERS" | "CHANNELS" | "GUILDS")[] | "USERS" | "CHANNELS" | "GUILDS" | "ALL";
     subText?: string
+    excludeIds?: string[],
 }) {
     const UserIcon = React.memo(function ({
         user,
@@ -384,7 +386,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
     const filterItems = (items: any[]) => {
         return items.filter(
-            item => item != null && resultTypes.includes(item.type)
+            item => item != null && resultTypes.includes(item.type) && (excludeIds != null && !excludeIds.includes(item.record.id))
         );
     };
 
