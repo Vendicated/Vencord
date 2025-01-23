@@ -76,7 +76,6 @@ function createTagCommand(tag: Tag) {
 
 const settings = definePluginSettings({
     clyde: {
-        name: "Clyde message on send",
         description: "If enabled, clyde will send you an ephemeral message when a tag was used.",
         type: OptionType.BOOLEAN,
         default: true
@@ -84,6 +83,7 @@ const settings = definePluginSettings({
     tagsList: {
         type: OptionType.CUSTOM,
         default: {} as Record<string, Tag>,
+        description: "",
     }
 });
 

@@ -171,7 +171,6 @@ const settings = definePluginSettings({
     idsList: {
         type: OptionType.COMPONENT,
         description: "",
-        default: "",
         onChange(newValue: string) {
             const ids = new Set(newValue.split(",").map(id => id.trim()).filter(Boolean));
             settings.store.idsList = Array.from(ids).join(", ");
@@ -212,7 +211,8 @@ const settings = definePluginSettings({
     ignoredActivities: {
         type: OptionType.CUSTOM,
         default: [] as IgnoredActivity[],
-        onChange: recalculateActivities
+        onChange: recalculateActivities,
+        description: "",
     }
 });
 

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ChatBarButton } from "@api/ChatButtons";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { classes } from "@utils/misc";
 import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
 
@@ -58,7 +58,7 @@ export function IconWithTooltip({ text, icon, onClick }) {
     </Tooltip>;
 }
 
-export const ChatBarIcon: ChatBarButton = () => {
+export const ChatBarIcon: ChatBarButtonFactory = () => {
     return (
         <ChatBarButton tooltip="Open SoundBoard Log"
             onClick={openSoundBoardLog}>
