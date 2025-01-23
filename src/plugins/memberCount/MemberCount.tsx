@@ -6,10 +6,16 @@
 
 import { getCurrentChannel } from "@utils/discord";
 import { isObjectEmpty } from "@utils/misc";
-import { SelectedChannelStore, Tooltip, useEffect, useStateFromStores } from "@webpack/common";
+import {
+    ChannelStore, PermissionsBits,
+    PermissionStore,
+    SelectedChannelStore,
+    Tooltip,
+    useEffect,
+    useStateFromStores
+} from "@webpack/common";
 
-import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat, ThreadMemberListStore } from ".";
-import { MemberVoiceCountStore } from "./MemberVoiceCountStore";
+import { ChannelMemberStore, cl, GuildMemberCountStore, numberFormat, ThreadMemberListStore, VoiceStateStore } from ".";
 import { OnlineMemberCountStore } from "./OnlineMemberCountStore";
 
 export function MemberCount({ isTooltip, tooltipGuildId, voiceEnabled }: { isTooltip?: true; tooltipGuildId?: string; voiceEnabled?: boolean; }) {
@@ -17,8 +23,25 @@ export function MemberCount({ isTooltip, tooltipGuildId, voiceEnabled }: { isToo
     const guildId = isTooltip ? tooltipGuildId! : currentChannel?.guild_id;
 
     const voiceActivityCount = useStateFromStores(
-        [MemberVoiceCountStore],
-        () => MemberVoiceCountStore.getCount(guildId)
+        [VoiceStateStore],
+        () => {
+            if (!voiceEnabled) return 0;
+
+            const voiceStates = VoiceStateStore.getAllVoiceStates()[guildId ?? ""];
+            if (!voiceStates || Object.keys(voiceStates).length === 0) return 0;
+
+            return Object
+                .values(voiceStates)
+                .filter((voiceState: any) => {
+                    if (!voiceState.channelId) return false;
+
+                    const channel = ChannelStore.getChannel(voiceState.channelId);
+                    if (!channel) return false;
+
+                    return PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel);
+                })
+                .length;
+        }
     );
 
     const totalCount = useStateFromStores(
@@ -41,12 +64,18 @@ export function MemberCount({ isTooltip, tooltipGuildId, voiceEnabled }: { isToo
         () => ThreadMemberListStore.getMemberListSections(currentChannel?.id)
     );
 
-    if (!isTooltip && (groups.length >= 1 || groups[0].id !== "unknown")) {
-        onlineCount = groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count), 0);
+    if (!isTooltip && groups.length > 0 && groups[0].id !== "unknown") {
+        onlineCount = groups.reduce(
+            (total, curr) => total + (curr.id === "offline" ? 0 : curr.count),
+            0
+        );
     }
 
     if (!isTooltip && threadGroups && !isObjectEmpty(threadGroups)) {
-        onlineCount = Object.values(threadGroups).reduce((total, curr) => total + (curr.sectionId === "offline" ? 0 : curr.userIds.length), 0);
+        onlineCount = Object.values(threadGroups).reduce(
+            (total, curr) => total + (curr.sectionId === "offline" ? 0 : curr.userIds.length),
+            0
+        );
     }
 
     useEffect(() => {
@@ -55,7 +84,7 @@ export function MemberCount({ isTooltip, tooltipGuildId, voiceEnabled }: { isToo
 
     if (totalCount == null) return null;
 
-    const formattedVoiceCount = voiceActivityCount != null ? numberFormat(voiceActivityCount) : 0;
+    const formattedVoiceCount = numberFormat(voiceActivityCount ?? 0);
     const formattedOnlineCount = onlineCount != null ? numberFormat(onlineCount) : "?";
 
     return (

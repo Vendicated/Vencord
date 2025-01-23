@@ -28,7 +28,7 @@ import { FluxStore } from "@webpack/types";
 
 import { MemberCount } from "./MemberCount";
 
-export const voiceStateStore = findStoreLazy("VoiceStateStore") as FluxStore;
+export const VoiceStateStore = findStoreLazy("VoiceStateStore") as FluxStore & { getAllVoiceStates(): object; };
 export const GuildMemberCountStore = findStoreLazy("GuildMemberCountStore") as FluxStore & { getMemberCount(guildId?: string): number | null; };
 export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
     getProps(guildId?: string, channelId?: string): { groups: { count: number; id: string; }[]; };
