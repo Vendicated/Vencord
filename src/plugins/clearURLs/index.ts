@@ -33,6 +33,10 @@ export default definePlugin({
     description: "Removes tracking garbage from URLs",
     authors: [Devs.adryd],
 
+    start() {
+        this.createRules();
+    },
+
     onBeforeMessageSend(_, msg) {
         return this.onSend(msg);
     },
