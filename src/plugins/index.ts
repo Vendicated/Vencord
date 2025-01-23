@@ -25,7 +25,7 @@ import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccesso
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendListener, removeMessageClickListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
-import { Settings } from "@api/Settings";
+import { Settings, SettingsStore } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind } from "@utils/patches";
 import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
@@ -146,6 +146,10 @@ for (const p of pluginsValues) {
         for (const [name, def] of Object.entries(p.settings.def)) {
             const checks = p.settings.checks?.[name];
             p.options[name] = { ...def, ...checks };
+
+            if (def.onChange != null) {
+                SettingsStore.addChangeListener(`plugins.${p.name}.${name}`, def.onChange);
+            }
         }
     }
 
