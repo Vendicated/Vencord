@@ -27,9 +27,9 @@ export default definePlugin({
         {
             find: "#{intl::EDIT_TEXTAREA_HELP}",
             replacement: {
-                match: /(shouldRefocus:!1.+?value:\i,channel:\i}\)\.then\()(.+?)(?=return \i\.content!==this\.props\.message\.content&&\i\((.+?)\))/,
-                replace: (_, rest1, rest2, args) => "" +
-                    `${rest1}async ${rest2}` +
+                match: /(?<=,channel:\i\}\)\.then\().+?(?=return \i\.content!==this\.props\.message\.content&&\i\((.+?)\))/,
+                replace: (match, args) => "" +
+                    `async ${match}` +
                     `if(await Vencord.Api.MessageEvents._handlePreEdit(${args}))` +
                     "return Promise.resolve({shouldClear:false,shouldRefocus:true});"
             }
@@ -41,7 +41,7 @@ export default definePlugin({
                 // Lookbehind: validateMessage)({openWarningPopout:..., type: i.props.chatInputType, content: t, stickers: r, ...}).then((function(isMessageValid)
                 match: /(\{openWarningPopout:.{0,100}type:this.props.chatInputType.+?\.then\()(\i=>\{.+?let (\i)=\i\.\i\.parse\((\i),.+?let (\i)=\i\.\i\.getSendMessageOptions\(\{.+?\}\);)(?<=\)\(({.+?})\)\.then.+?)/,
                 // props.chatInputType...then((async function(isMessageValid)... var replyOptions = f.g.getSendMessageOptionsForReply(pendingReply); if(await Vencord.api...) return { shoudClear:true, shouldRefocus:true };
-                replace: (_, rest1, extra, rest2, parsedMessage, channel, replyOptions) => "" +
+                replace: (_, rest1, rest2, parsedMessage, channel, replyOptions, extra) => "" +
                     `${rest1}async ${rest2}` +
                     `if(await Vencord.Api.MessageEvents._handlePreSend(${channel}.id,${parsedMessage},${extra},${replyOptions}))` +
                     "return{shouldClear:false,shouldRefocus:true};"
