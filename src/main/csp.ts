@@ -32,12 +32,20 @@ const Policies: PolicyMap = {
     "cdn.discordapp.com": MediaAndCssSrc, // Discord CDN, used by Vencord and some themes to load media
     "media.discordapp.net": MediaSrc, // Discord media CDN, possible alternative to Discord CDN
 
-    "*.vencord.dev": MediaSrc, // used for VenCloud (api.vencord.dev) and badges (badges.vencord.dev)
-
     // CDNs used for some things by Vencord.
     // FIXME: we really should not be using CDNs anymore
     "cdnjs.cloudflare.com": MediaScriptsAndCssSrc,
     "unpkg.com": MediaScriptsAndCssSrc,
+
+    // Function Specific
+    "api.github.com": ["connect-src"], // used for updating Vencord itself
+    "ws.audioscrobbler.com": ["connect-src"], // last.fm API
+    "translate.googleapis.com": ["connect-src"], // Google Translate API
+    "*.vencord.dev": MediaSrc, // VenCloud (api.vencord.dev) and Badges (badges.vencord.dev)
+    "manti.vendicated.dev": MediaSrc, // ReviewDB API
+    "decor.fieryflames.dev": MediaSrc, // Decor API
+    "sponsor.ajay.app": MediaSrc, // Dearrow API
+    "usrbg.is-hardly.online": MediaSrc, // USRBG API
 };
 
 const findHeader = (headers: PolicyMap, headerName: Lowercase<string>) => {
