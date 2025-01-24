@@ -141,14 +141,21 @@ for (const p of neededApiPlugins) {
 
 for (const p of pluginsValues) {
     if (p.settings) {
-        p.settings.pluginName = p.name;
         p.options ??= {};
-        for (const [name, def] of Object.entries(p.settings.def)) {
+
+        p.settings.pluginName = p.name;
+        for (const name in p.settings.def) {
+            const def = p.settings.def[name];
             const checks = p.settings.checks?.[name];
             p.options[name] = { ...def, ...checks };
+        }
+    }
 
-            if (def.onChange != null) {
-                SettingsStore.addChangeListener(`plugins.${p.name}.${name}`, def.onChange);
+    if (p.options) {
+        for (const name in p.options) {
+            const opt = p.options[name];
+            if (opt.onChange != null) {
+                SettingsStore.addChangeListener(`plugins.${p.name}.${name}`, opt.onChange);
             }
         }
     }
