@@ -153,7 +153,7 @@ export function deleteStyle(style: Style | string) {
  * @see {@link classNamesToSelectors} for converting a class names object to variables
  * @see {@link enableStyle} for info on importing managed styles
  */
-export const setStyleVariables = (style: Style | string, variables: Record<string, string>, recompile = true) => {
+export const setStyleVariables = (style: Style | string, variables: Style["variables"], recompile = true) => {
     if (typeof style === "string") style = requireStyle(style);
     style.variables = variables;
     if (recompile) compileStyle(style);
