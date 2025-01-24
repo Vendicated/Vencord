@@ -21,19 +21,15 @@ import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Constants, Menu, PermissionsBits, PermissionStore, RestAPI, UserStore } from "@webpack/common";
+import { MessageSnapshot } from "@webpack/types";
+
 
 const EMBED_SUPPRESSED = 1 << 2;
-
-interface Snapshot {
-    message: {
-        embeds: any[];
-    };
-}
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, { channel, message: { author, messageSnapshots, embeds, flags, id: messageId } }) => {
     const isEmbedSuppressed = (flags & EMBED_SUPPRESSED) !== 0;
     const hasEmbedsInSnapshots = messageSnapshots.some(
-        (snapshot: Snapshot) => snapshot?.message.embeds.length
+        (snapshot: MessageSnapshot) => snapshot?.message.embeds.length
     );
 
     if (!isEmbedSuppressed && !embeds.length && !hasEmbedsInSnapshots) return;
