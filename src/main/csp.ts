@@ -6,41 +6,46 @@
 
 import { session } from "electron";
 
-const findHeader = (headers: Record<string, string[]>, headerName: Lowercase<string>) => {
-    return Object.keys(headers).find(h => h.toLowerCase() === headerName);
-};
+type PolicyMap = Record<string, string[]>;
 
 const MediaSrc = ["connect-src", "img-src", "media-src"];
 const CssSrc = ["style-src", "font-src"];
 const MediaAndCssSrc = [...MediaSrc, ...CssSrc];
 const MediaScriptsAndCssSrc = [...MediaAndCssSrc, "script-src", "worker-src"];
 
-const Policies: Record<string, string[]> = {
-    // Used by Themes
-    "*.github.io": MediaAndCssSrc,
-    "raw.githubusercontent.com": MediaAndCssSrc,
-    "*.githack.com": MediaAndCssSrc,
-    "jsdelivr.net": MediaAndCssSrc,
-    "fonts.googleapis.com": CssSrc,
+const Policies: PolicyMap = {
+    "*.github.io": MediaAndCssSrc, // github pages, used by most themes
+    "raw.githubusercontent.com": MediaAndCssSrc, // github raw, used by some themes
+    "*.gitlab.io": MediaAndCssSrc, // gitlab pages, used by some themes
+    "gitlab.com": MediaAndCssSrc, // gitlab raw, used by some themes
+    "*.codeberg.page": MediaAndCssSrc, // codeberg pages, used by some themes
+    "codeberg.org": MediaAndCssSrc, // codeberg raw, used by some themes
 
-    // Used by themes and some Vencord code
-    "cdn.discordapp.com": MediaAndCssSrc,
-    "media.discordapp.net": MediaSrc,
+    "*.githack.com": MediaAndCssSrc, // githack (namely raw.githack.com), used by some themes
+    "jsdelivr.net": MediaAndCssSrc, // jsdeliver, used by very few themes
+
+    "fonts.googleapis.com": CssSrc, // google fonts, used by many themes
+
+    "i.imgur.com": MediaSrc, // imgur, used by some themes
+    "i.ibb.co": MediaSrc, // imgbb, used by some themes
+
+    "cdn.discordapp.com": MediaAndCssSrc, // Discord CDN, used by Vencord and some themes to load media
+    "media.discordapp.net": MediaSrc, // Discord media CDN, possible alternative to Discord CDN
+
+    "*.vencord.dev": MediaSrc, // used for VenCloud (api.vencord.dev) and badges (badges.vencord.dev)
 
     // CDNs used for some things by Vencord.
     // FIXME: we really should not be using CDNs anymore
     "cdnjs.cloudflare.com": MediaScriptsAndCssSrc,
     "unpkg.com": MediaScriptsAndCssSrc,
-
-    // used for VenCloud (api.vencord.dev) and badges (badges.vencord.dev)
-    "*.vencord.dev": MediaSrc,
 };
 
-// Remove CSP
-type PolicyResult = Record<string, string[]>;
+const findHeader = (headers: PolicyMap, headerName: Lowercase<string>) => {
+    return Object.keys(headers).find(h => h.toLowerCase() === headerName);
+};
 
-const parsePolicy = (policy: string): PolicyResult => {
-    const result: PolicyResult = {};
+const parsePolicy = (policy: string): PolicyMap => {
+    const result: PolicyMap = {};
     policy.split(";").forEach(directive => {
         const [directiveKey, ...directiveValue] = directive.trim().split(/\s+/g);
         if (directiveKey && !Object.prototype.hasOwnProperty.call(result, directiveKey)) {
@@ -50,7 +55,8 @@ const parsePolicy = (policy: string): PolicyResult => {
 
     return result;
 };
-const stringifyPolicy = (policy: PolicyResult): string =>
+
+const stringifyPolicy = (policy: PolicyMap): string =>
     Object.entries(policy)
         .filter(([, values]) => values?.length)
         .map(directive => directive.flat().join(" "))
@@ -58,6 +64,10 @@ const stringifyPolicy = (policy: PolicyResult): string =>
 
 
 const patchCsp = (headers: Record<string, string[]>) => {
+    const reportOnlyHeader = findHeader(headers, "content-security-policy-report-only");
+    if (reportOnlyHeader)
+        delete headers[reportOnlyHeader];
+
     const header = findHeader(headers, "content-security-policy");
 
     if (header) {
