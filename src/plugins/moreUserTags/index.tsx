@@ -226,7 +226,7 @@ export default definePlugin({
                 // also set the colors
                 {
                     match: /.botText,children:(\i)}\)]/,
-                    replace: "$&,'data-tag':$1.toLowerCase(),style:{'background-color':moreTags_bgColor,'color':moreTags_fgColor},'data-moreTags-darkFg':moreTags_fgColor && moreTags_fgColor.includes('0') ? moreTags_fgColor : undefined"
+                    replace: "$&,'data-tag':$1.toLowerCase(),style:{'background-color':moreTags_bgColor,'color':moreTags_fgColor},'data-moreTags-darkFg':(moreTags_fgColor || '').includes('0')"
                 }
             ],
         },
