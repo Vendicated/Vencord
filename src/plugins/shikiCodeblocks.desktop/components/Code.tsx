@@ -18,6 +18,7 @@
 
 import type { IThemedToken } from "@vap/shiki";
 import { hljs } from "@webpack/common";
+import { JSX } from "react";
 
 import { cl } from "../utils/misc";
 import { ThemeBase } from "./Highlighter";
@@ -41,12 +42,12 @@ export const Code = ({
 
     if (useHljs) {
         try {
-            const { value: hljsHtml } = hljs.highlight(lang!, content, true);
+            const { value: hljsHtml } = hljs.highlight(content, { language: lang!, ignoreIllegals: true });
             lines = hljsHtml
                 .split("\n")
                 .map((line, i) => <span key={i} dangerouslySetInnerHTML={{ __html: line }} />);
         } catch {
-            lines = content.split("\n").map(line => <span>{line}</span>);
+            lines = content.split("\n").map((line, idx) => <span key={idx}>{line}</span>);
         }
     } else {
         const renderTokens =
@@ -55,11 +56,11 @@ export const Code = ({
                 .split("\n")
                 .map(line => [{ color: theme.plainColor, content: line } as IThemedToken]);
 
-        lines = renderTokens.map(line => {
+        lines = renderTokens.map((line, idx) => {
             // [Cynthia] this makes it so when you highlight the codeblock
             // empty lines are also selected and copied when you Ctrl+C.
             if (line.length === 0) {
-                return <span>{"\n"}</span>;
+                return <span key={idx}>{"\n"}</span>;
             }
 
             return (

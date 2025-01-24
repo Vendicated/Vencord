@@ -18,6 +18,7 @@
 
 import "./spotifyStyles.css";
 
+import { Settings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { debounce } from "@shared/debounce";
@@ -130,7 +131,9 @@ function Controls() {
             >
                 <Shuffle />
             </Button>
-            <Button onClick={() => SpotifyStore.prev()}>
+            <Button onClick={() => {
+                Settings.plugins.SpotifyControls.previousButtonRestartsTrack && SpotifyStore.position > 3000 ? SpotifyStore.seek(0) : SpotifyStore.prev();
+            }}>
                 <SkipPrev />
             </Button>
             <Button onClick={() => SpotifyStore.setPlaying(!isPlaying)}>
