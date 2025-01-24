@@ -13,7 +13,7 @@ const CssSrc = ["style-src", "font-src"];
 const MediaAndCssSrc = [...MediaSrc, ...CssSrc];
 const MediaScriptsAndCssSrc = [...MediaAndCssSrc, "script-src", "worker-src"];
 
-const Policies: PolicyMap = {
+export const CspPolicies: PolicyMap = {
     "*.github.io": MediaAndCssSrc, // github pages, used by most themes
     "raw.githubusercontent.com": MediaAndCssSrc, // github raw, used by some themes
     "*.gitlab.io": MediaAndCssSrc, // gitlab pages, used by some themes
@@ -92,7 +92,7 @@ const patchCsp = (headers: Record<string, string[]>) => {
 
         pushDirective("script-src", "'unsafe-inline'", "'unsafe-eval'");
 
-        for (const [host, directives] of Object.entries(Policies)) {
+        for (const [host, directives] of Object.entries(CspPolicies)) {
             for (const directive of directives) {
                 pushDirective(directive, host);
             }
