@@ -24,7 +24,7 @@ export interface Style {
     name: string;
     source: string;
     enabled: boolean;
-    edit?(source: string): string;
+    variables?: Record<string, string>;
 }
 
 export function requireStyle(name: string) {
@@ -148,26 +148,21 @@ export function deleteStyle(style: Style | string) {
  * .plugin-root .thin-31rlnD.scrollerBase-_bVAAt::-webkit-scrollbar { ... }
  * ```
  * @param style The style object or name
- * @param classNames An object where the keys are the variable names and the values are the variable values
+ * @param variables An object where the keys are the variable names and the values are the variable values
  * @param recompile Whether to recompile the style after setting the variables, defaults to `true`
+ * @see {@link classNamesToSelectors} for converting a class names object to variables
  * @see {@link enableStyle} for info on importing managed styles
  */
-export const setStyleClassNames = (style: Style | string, classNames: Record<string, string>, recompile = true) => {
+export const setStyleVariables = (style: Style | string, variables: Record<string, string>, recompile = true) => {
     if (typeof style === "string") style = requireStyle(style);
-    style.edit = source => {
-        return source
-            .replace(/\[--(\w+)\]/g, (match, name) => {
-                const className = classNames[name];
-                return className ? classNameToSelector(className) : match;
-            });
-    };
+    style.variables = variables;
     if (recompile) compileStyle(style);
 };
 
 /**
  * Updates the style in a document. This should only be called by {@link compileStyle} or when a new popout is created.
  * @param style A style object
- * @see {@link setStyleClassNames} for more info on style classnames
+ * @see {@link setStyleVariables} for more info on style classnames
  */
 export function updateStyleInDocument(style: Style, doc: Document) {
     const parent = doc.documentElement;
@@ -178,14 +173,21 @@ export function updateStyleInDocument(style: Style, doc: Document) {
             styleElement.dataset.vencordName = style.name;
             parent.appendChild(styleElement);
         }
-        styleElement.textContent = style.edit ? style.edit(style.source) : style.source;
+        let content = style.source;
+        if (style.variables) {
+            Object.entries(style.variables).forEach(([key, value]) => {
+                const kebabCaseKey = key.replaceAll(/(?<=[a-z])[A-Z0-9]/g, v => `-${v}`).toLowerCase();
+                content = content.replaceAll(`[--${kebabCaseKey}]`, value);
+            });
+        }
+        styleElement.textContent = content;
     } else styleElement?.remove();
 }
 
 /**
  * Updates a style in the DOM of all documents
  * @param style A style object
- * @see {@link setStyleClassNames} for more info on style classnames
+ * @see {@link setStyleVariables} for more info on style classnames
  */
 export function compileStyle(style: Style) {
     findDocuments().forEach(doc => updateStyleInDocument(style, doc));
@@ -194,7 +196,7 @@ export function compileStyle(style: Style) {
 /**
  * Adds all enabled styles to the DOM of all documents
  * @param doc The document to add styles to
- * @see {@link setStyleClassNames} for more info on style classnames
+ * @see {@link setStyleVariables} for more info on style classnames
  */
 export function addStylesToDocument(doc: Document) {
     styleMap.forEach(style => updateStyleInDocument(style, doc));
@@ -208,6 +210,15 @@ export function addStylesToDocument(doc: Document) {
  * classNameToSelector("foo bar") // => ".foo.bar"
  */
 export const classNameToSelector = (name: string, prefix = "") => name.split(" ").map(n => `.${prefix}${n}`).join("");
+
+/**
+ * @param classNames The classNames object
+ * @param prefix A prefix to add each class, defaults to `""`
+ * @return A css selector for the classname
+ * @example
+ * classNamesToSelectors({ a: "foo bar" }) // => { a: ".foo.bar" }
+ */
+export const classNamesToSelectors = (classNames: Record<string, string>, prefix = "") => Object.fromEntries(Object.entries(classNames).map(([k, v]) => [k, classNameToSelector(v, prefix)]));
 
 type ClassNameFactoryArg = string | string[] | Record<string, unknown> | false | null | undefined | 0 | "";
 /**

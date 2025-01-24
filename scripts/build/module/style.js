@@ -19,7 +19,8 @@
 (window.VencordStyles ??= new Map()).set(STYLE_NAME, {
     name: STYLE_NAME,
     source: STYLE_SOURCE,
-    enabled: false
+    enabled: false,
+    variables: {}
 });
 
 export default window.VencordStyles.get(STYLE_NAME);

@@ -17,7 +17,7 @@
 */
 
 import { Settings } from "@api/Settings";
-import { compileStyle } from "@api/Styles";
+import { setStyleVariables } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -43,12 +43,14 @@ export default definePlugin({
             type: OptionType.NUMBER,
             description: "Blur Amount",
             default: 10,
-            onChange: () => compileStyle(style)
+            onChange(v) {
+                setStyleVariables(style, { blurAmount: v });
+            }
         }
     },
 
     start() {
-        style.edit = src => src.replace("blur-amount", Settings.plugins.BlurNSFW.blurAmount);
+        setStyleVariables(style, { blurAmount: Settings.plugins.BlurNSFW.blurAmount });
     },
 
     style

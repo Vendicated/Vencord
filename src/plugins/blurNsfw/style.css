@@ -1,6 +1,6 @@
 .vc-nsfw-img [class^="imageWrapper"] img,
 .vc-nsfw-img [class^="wrapperPaused"] video {
-    filter: blur(blur-amount);
+    filter: blur([--blur-amount]px);
     transition: filter 0.2s;
 }
 
