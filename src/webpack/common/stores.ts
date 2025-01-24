@@ -50,6 +50,7 @@ export let GuildMemberStore: Stores.GuildMemberStore & t.FluxStore;
 export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
     /** Get the date (as a string) that the relationship was created */
     getSince(userId: string): string;
+    isIgnored(userId: string): boolean;
 };
 
 export let EmojiStore: t.EmojiStore;
