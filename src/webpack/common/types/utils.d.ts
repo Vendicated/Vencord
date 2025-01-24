@@ -21,7 +21,6 @@ import type { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
 import type { FluxEvents } from "./fluxEvents";
-import { i18nMessages } from "./i18nMessages";
 
 export { FluxEvents };
 
@@ -146,19 +145,6 @@ export interface LocaleInfo {
     name: string;
     englishName: string;
     postgresLang: string;
-}
-
-export interface i18n {
-    getAvailableLocales(): Locale[];
-    getLanguages(): LocaleInfo[];
-    getDefaultLocale(): string;
-    getLocale(): string;
-    getLocaleInfo(): LocaleInfo;
-    setLocale(locale: string): void;
-
-    loadPromise: Promise<void>;
-
-    Messages: Record<i18nMessages, any>;
 }
 
 export interface Clipboard {
@@ -337,4 +323,11 @@ export class DisplayProfile {
 export interface DisplayProfileUtils {
     getDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
     useDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
+}
+
+export interface DateUtils {
+    isSameDay(date1: Date, date2: Date): boolean;
+    calendarFormat(date: Date): string;
+    dateFormat(date: Date, format: string): string;
+    diffAsUnits(start: Date, end: Date, stopAtOneSecond?: boolean): Record<"days" | "hours" | "minutes" | "seconds", number>;
 }

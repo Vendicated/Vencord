@@ -20,7 +20,7 @@ import { AvatarDecorationModalPreview } from "../components";
 const FileUpload = findComponentByCodeLazy("fileUploadInput,");
 
 const { HelpMessage, HelpMessageTypes } = mapMangledModuleLazy('POSITIVE=3]="POSITIVE', {
-    HelpMessageTypes: filters.byProps("POSITIVE", "WARNING"),
+    HelpMessageTypes: filters.byProps("POSITIVE", "WARNING", "INFO"),
     HelpMessage: filters.byCode(".iconDiv")
 });
 
@@ -119,8 +119,8 @@ function CreateDecorationModal(props: ModalProps) {
                         />
                     </div>
                 </div>
-                <Forms.FormText type="description" className={Margins.bottom16}>
-                    <br />You can receive updates on your decoration's review by joining <Link
+                <HelpMessage messageType={HelpMessageTypes.INFO} className={Margins.bottom8}>
+                    To receive updates on your decoration's review, join <Link
                         href={`https://discord.gg/${INVITE_KEY}`}
                         onClick={async e => {
                             e.preventDefault();
@@ -138,8 +138,8 @@ function CreateDecorationModal(props: ModalProps) {
                         }}
                     >
                         Decor's Discord server
-                    </Link>.
-                </Forms.FormText>
+                    </Link> and allow direct messages.
+                </HelpMessage>
             </ErrorBoundary>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>
