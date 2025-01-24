@@ -74,7 +74,7 @@ const patchCsp = (headers: Record<string, string[]>) => {
         const csp = parsePolicy(headers[header][0]);
 
         const pushDirective = (directive: string, ...values: string[]) => {
-            csp[directive] ??= [];
+            csp[directive] ??= ["'self'"];
             csp[directive].push(...values);
         };
 
@@ -90,6 +90,7 @@ const patchCsp = (headers: Record<string, string[]>) => {
             }
         }
 
+        console.log(csp);
         headers[header] = [stringifyPolicy(csp)];
     }
 };
