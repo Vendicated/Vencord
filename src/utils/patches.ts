@@ -66,12 +66,12 @@ export function canonicalizeDescriptor<T>(descriptor: TypedPropertyDescriptor<T>
     return descriptor;
 }
 
-export function canonicalizeReplacement(replacement: Pick<PatchReplacement, "match" | "replace">, plugin: string) {
+export function canonicalizeReplacement(replacement: Pick<PatchReplacement, "match" | "replace">, pluginPath: string) {
     const descriptors = Object.getOwnPropertyDescriptors(replacement);
     descriptors.match = canonicalizeDescriptor(descriptors.match, canonicalizeMatch);
     descriptors.replace = canonicalizeDescriptor(
         descriptors.replace,
-        replace => canonicalizeReplace(replace, plugin),
+        replace => canonicalizeReplace(replace, pluginPath),
     );
     Object.defineProperties(replacement, descriptors);
 }
