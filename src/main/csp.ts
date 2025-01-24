@@ -88,11 +88,15 @@ const patchCsp = (headers: Record<string, string[]>) => {
             csp[directive].push(...values);
         };
 
-        for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
-            pushDirective(directive, "blob:", "data:", "vencord:", "'unsafe-inline'");
-        }
-
+        pushDirective("style-src", "'unsafe-inline'");
+        // we could make unsafe-inline safe by using strict-dynamic with a random nonce on our Vencord loader script https://content-security-policy.com/strict-dynamic/
+        // HOWEVER, at the time of writing (24 Jan 2025), Discord is INSANE and also uses unsafe-inline
+        // Once they stop using it, we also should
         pushDirective("script-src", "'unsafe-inline'", "'unsafe-eval'");
+
+        for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
+            pushDirective(directive, "blob:", "data:", "vencord:");
+        }
 
         for (const [host, directives] of Object.entries(CspPolicies)) {
             for (const directive of directives) {
