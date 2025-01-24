@@ -17,7 +17,6 @@
 */
 
 import { get, set } from "@api/DataStore";
-import { addButton, removeButton } from "@api/MessagePopover";
 import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -39,7 +38,25 @@ export default definePlugin({
     name: "HideAttachments",
     description: "Hide attachments and Embeds for individual messages via hover button",
     authors: [Devs.Ven],
-    dependencies: ["MessagePopoverAPI"],
+
+    renderMessagePopoverButton(msg) {
+        // @ts-ignore - discord-types lags behind discord.
+        const hasAttachmentsInShapshots = msg.messageSnapshots.some(
+            (snapshot: MessageSnapshot) => snapshot?.message.attachments.length
+        );
+
+        if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length && !hasAttachmentsInShapshots) return null;
+
+        const isHidden = hiddenMessages.has(msg.id);
+
+        return {
+            label: isHidden ? "Show Attachments" : "Hide Attachments",
+            icon: isHidden ? ImageVisible : ImageInvisible,
+            message: msg,
+            channel: ChannelStore.getChannel(msg.channel_id),
+            onClick: () => this.toggleHide(msg.id)
+        };
+    },
 
     async start() {
         style = document.createElement("style");
@@ -48,31 +65,11 @@ export default definePlugin({
 
         await getHiddenMessages();
         await this.buildCss();
-
-        addButton("HideAttachments", msg => {
-            // @ts-ignore - discord-types lags behind discord.
-            const hasAttachmentsInShapshots = msg.messageSnapshots.some(
-                (snapshot: MessageSnapshot) => snapshot?.message.attachments.length
-            );
-
-            if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length && !hasAttachmentsInShapshots) return null;
-
-            const isHidden = hiddenMessages.has(msg.id);
-
-            return {
-                label: isHidden ? "Show Attachments" : "Hide Attachments",
-                icon: isHidden ? ImageVisible : ImageInvisible,
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: () => this.toggleHide(msg.id)
-            };
-        });
     },
 
     stop() {
         style.remove();
         hiddenMessages.clear();
-        removeButton("HideAttachments");
     },
 
     async buildCss() {
