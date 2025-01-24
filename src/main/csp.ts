@@ -8,7 +8,8 @@ import { session } from "electron";
 
 type PolicyMap = Record<string, string[]>;
 
-const MediaSrc = ["connect-src", "img-src", "media-src"];
+const ConnectSrc = ["connect-src"];
+const MediaSrc = [...ConnectSrc, "img-src", "media-src"];
 const CssSrc = ["style-src", "font-src"];
 const MediaAndCssSrc = [...MediaSrc, ...CssSrc];
 const MediaScriptsAndCssSrc = [...MediaAndCssSrc, "script-src", "worker-src"];
@@ -38,12 +39,13 @@ export const CspPolicies: PolicyMap = {
     "unpkg.com": MediaScriptsAndCssSrc,
 
     // Function Specific
-    "api.github.com": ["connect-src"], // used for updating Vencord itself
-    "ws.audioscrobbler.com": ["connect-src"], // last.fm API
-    "translate.googleapis.com": ["connect-src"], // Google Translate API
+    "api.github.com": ConnectSrc, // used for updating Vencord itself
+    "ws.audioscrobbler.com": ConnectSrc, // last.fm API
+    "translate.googleapis.com": ConnectSrc, // Google Translate API
     "*.vencord.dev": MediaSrc, // VenCloud (api.vencord.dev) and Badges (badges.vencord.dev)
     "manti.vendicated.dev": MediaSrc, // ReviewDB API
-    "decor.fieryflames.dev": MediaSrc, // Decor API
+    "decor.fieryflames.dev": ConnectSrc, // Decor API
+    "ugc.decor.fieryflames.dev": MediaSrc, // Decor CDN
     "sponsor.ajay.app": MediaSrc, // Dearrow API
     "usrbg.is-hardly.online": MediaSrc, // USRBG API
 };
@@ -82,7 +84,7 @@ const patchCsp = (headers: Record<string, string[]>) => {
         const csp = parsePolicy(headers[header][0]);
 
         const pushDirective = (directive: string, ...values: string[]) => {
-            csp[directive] ??= ["'self'"];
+            csp[directive] ??= [...csp["default-src"] ?? []];
             csp[directive].push(...values);
         };
 
@@ -98,7 +100,6 @@ const patchCsp = (headers: Record<string, string[]>) => {
             }
         }
 
-        console.log(csp);
         headers[header] = [stringifyPolicy(csp)];
     }
 };
