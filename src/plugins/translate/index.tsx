@@ -26,6 +26,7 @@ import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, Menu } from "@webpack/common";
+import { hash as h64 } from '@intrnl/xxhash64';
 
 import { settings } from "./settings";
 import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
@@ -87,14 +88,31 @@ export default definePlugin({
         this.preSend = addPreSendListener(async (_, message) => {
             if (!settings.store.autoTranslate) return;
             if (!message.content) return;
-
+        
+            const urlRegex = /(https?:\/\/\S+)/g;
+        
+            const matches = message.content.match(urlRegex);
+        
+            if (matches && matches[0] === message.content.trim()) return;
+        
             setShouldShowTranslateEnabledTooltip?.(true);
             clearTimeout(tooltipTimeout);
             tooltipTimeout = setTimeout(() => setShouldShowTranslateEnabledTooltip?.(false), 2000);
-
-            const trans = await translate("sent", message.content);
-            message.content = trans.text;
-
+        
+            const tempContent = message.content.replace(urlRegex, (url) => h64(url).toString(16));
+        
+            const trans = await translate("sent", tempContent);
+        
+            let translatedContent = trans.text;
+        
+            if (matches) {
+                matches.forEach((url) => {
+                    const hash = h64(url).toString(16);
+                    translatedContent = translatedContent.replaceAll(hash, url); 
+                });
+            }
+        
+            message.content = translatedContent;
         });
     },
 
