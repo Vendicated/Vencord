@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Channel, Guild, GuildMember, MessageAttachment, User } from "discord-types/general";
+import { Channel, Guild, GuildMember, Message, User } from "discord-types/general";
 import type { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
 
@@ -134,10 +134,7 @@ export type Permissions = "CREATE_INSTANT_INVITE"
 export type PermissionsBits = Record<Permissions, bigint>;
 
 export interface MessageSnapshot {
-    message: {
-        embeds: Embed[];
-        attachments: MessageAttachment[];
-    };
+    message: Message;
 }
 
 export interface Locale {
