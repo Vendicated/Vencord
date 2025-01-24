@@ -47,13 +47,11 @@ export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
     return canonRegex as T;
 }
 
-export function canonicalizeReplace<T extends string | ReplaceFn>(replace: T, pluginName: string): T {
-    const self = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`;
-
+export function canonicalizeReplace<T extends string | ReplaceFn>(replace: T, pluginPath: string): T {
     if (typeof replace !== "function")
-        return replace.replaceAll("$self", self) as T;
+        return replace.replaceAll("$self", pluginPath) as T;
 
-    return ((...args) => replace(...args).replaceAll("$self", self)) as T;
+    return ((...args) => replace(...args).replaceAll("$self", pluginPath)) as T;
 }
 
 export function canonicalizeDescriptor<T>(descriptor: TypedPropertyDescriptor<T>, canonicalize: (value: T) => T) {

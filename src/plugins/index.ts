@@ -57,7 +57,7 @@ export function isPluginEnabled(p: string) {
     ) ?? false;
 }
 
-export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
+export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {
     const patch = newPatch as Patch;
     patch.plugin = pluginName;
 
@@ -74,7 +74,7 @@ export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
     }
 
     for (const replacement of patch.replacement) {
-        canonicalizeReplacement(replacement, pluginName);
+        canonicalizeReplacement(replacement, pluginPath);
 
         if (IS_REPORTER) {
             delete replacement.predicate;
