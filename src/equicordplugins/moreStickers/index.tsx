@@ -34,19 +34,19 @@ export default definePlugin({
         {
             find: "#{intl::STICKER_BUTTON_LABEL}",
             replacement: [{
-                match: /(children:\(0,\w\.jsx\)\()([\w.]+?)(,{innerClassName.{10,30}\.stickerButton)/,
+                match: /(children:\(0,\i\.jsx\)\()([\w.]+?)(,{innerClassName.{10,30}\.stickerButton)/,
                 replace: (_, head, button, tail) => {
                     const isMoreStickers = "arguments[0]?.stickersType";
                     return `${head}${isMoreStickers}?$self.stickerButton:${button}${tail}`;
                 }
             }, {
-                match: /(\w=)(\w\.useCallback\(\(\)=>\{\(0,\w+\.\w+\)\([\w.]*?\.STICKER,.*?);/,
+                match: /(\i=)(\i\.useCallback\(\(\)=>\{\(0,\w+\.\w+\)\([\w.]*?\.STICKER,.*?);/,
                 replace: (_, decl, cb) => {
                     const newCb = cb.replace(/(?<=\(\)=>\{\(.*?\)\().+?\.STICKER/, "\"stickers+\"");
                     return `${decl}arguments[0]?.stickersType?${newCb}:${cb};`;
                 }
             }, {
-                match: /(\w)=((\w)===\w+?\.\w+?\.STICKER)/,
+                match: /(\i)=((\i)===\w+?\.\w+?\.STICKER)/,
                 replace: (_, isActive, isStickerTab, currentTab) => {
                     const c = "arguments[0].stickersType";
                     return `${isActive}=${c}?(${currentTab}===${c}):(${isStickerTab})`;
@@ -56,7 +56,7 @@ export default definePlugin({
         {
             find: ".gifts)",
             replacement: {
-                match: /,\(null===\(\w=\w\.stickers\)\|\|void 0.*?(\w)\.push\((\(0,\w\.jsx\))\((.+?),{disabled:\w,type:(\w)},"sticker"\)\)/,
+                match: /\(null===\(\i=\i\.stickers\).*?(\i)\.push\((\(0,\i\.jsx\))\((.+?),{disabled:\w,type:(\i)},"sticker"\)\)/,
                 replace: (m, _, jsx, compo, type) => {
                     const c = "arguments[0].type";
                     return `${m},${c}?.submit?.button&&${_}.push(${jsx}(${compo},{disabled:!${c}?.submit?.button,type:${type},stickersType:"stickers+"},"stickers+"))`;
@@ -87,7 +87,7 @@ export default definePlugin({
         {
             find: '==="remove_text"',
             replacement: {
-                match: /,\w\.insertText=\w=>{[\w ;]*?1===\w\.length&&.+?==="remove_text"/,
+                match: /,\i\.insertText=\i=>{[\w ;]*?1===\i\.length&&.+?==="remove_text"/,
                 replace: ",$self.textEditor=arguments[0]$&"
             }
         }
