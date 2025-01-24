@@ -21,7 +21,7 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { PluginNative } from "@utils/types";
 import { showToast, Toasts } from "@webpack/common";
 
-import { DeeplLanguages, deeplLanguageToGoogleLanguage, GoogleLanguages } from "./languages";
+import { DeeplLanguages, DeeplLanguagesWithoutPostfix, deeplLanguageToGoogleLanguage, GoogleLanguages } from "./languages";
 import { resetLanguageDefaults, settings } from "./settings";
 
 export const cl = classNameFactory("vc-trans-");
@@ -41,6 +41,11 @@ interface DeeplData {
         detected_source_language: string;
         text: string;
     }[];
+}
+
+interface DeeplXData {
+    source_lang: string;
+    data: string;
 }
 
 export interface TranslationValue {
@@ -125,8 +130,13 @@ const showDeeplApiQuotaToast = onlyOnce(
 );
 
 async function deeplTranslate(text: string, sourceLang: string, targetLang: string): Promise<TranslationValue> {
-    if (!settings.store.deeplApiKey) {
-        showToast("DeepL API key is not set. Resetting to Google", Toasts.Type.FAILURE);
+    const isDeeplX = settings.store.service === "deepl-x";
+
+    const missingApiKey = !settings.store.deeplApiKey && !isDeeplX;
+    const missingApiEndpoint = !settings.store.deeplxApiEndpoint && isDeeplX;
+
+    if (missingApiKey || missingApiEndpoint) {
+        showToast((missingApiKey ? "DeepL API key" : "DeepLX API endpoint") + " is not set. Resetting to Google", Toasts.Type.FAILURE);
 
         settings.store.service = "google";
         resetLanguageDefaults();
@@ -136,10 +146,11 @@ async function deeplTranslate(text: string, sourceLang: string, targetLang: stri
 
     // CORS jumpscare
     const { status, data } = await Native.makeDeeplTranslateRequest(
-        settings.store.service === "deepl-pro",
+        settings.store.service ?? "deepl",
+        settings.store.deeplxApiEndpoint,
         settings.store.deeplApiKey,
         JSON.stringify({
-            text: [text],
+            text: isDeeplX ? text : [text],
             target_lang: targetLang,
             source_lang: sourceLang.split("-")[0]
         })
@@ -152,18 +163,26 @@ async function deeplTranslate(text: string, sourceLang: string, targetLang: stri
             throw "Failed to connect to DeepL API: " + data;
         case 403:
             throw "Invalid DeepL API key or version";
+        case 429:
+            throw "DeepL API rate limit exceeded";
         case 456:
             showDeeplApiQuotaToast();
             return fallbackToGoogle(text, sourceLang, targetLang);
         default:
             throw new Error(`Failed to translate "${text}" (${sourceLang} -> ${targetLang})\n${status} ${data}`);
     }
-
-    const { translations }: DeeplData = JSON.parse(data);
-    const src = translations[0].detected_source_language;
-
-    return {
-        sourceLanguage: DeeplLanguages[src] ?? src,
-        text: translations[0].text
-    };
+    if (isDeeplX) {
+        const { data: translation, source_lang: src }: DeeplXData = JSON.parse(data);
+        return {
+            sourceLanguage: DeeplLanguages[src] ?? DeeplLanguagesWithoutPostfix[src] ?? src,
+            text: translation
+        };
+    } else {
+        const { translations }: DeeplData = JSON.parse(data);
+        const src = translations[0].detected_source_language;
+        return {
+            sourceLanguage: DeeplLanguages[src] ?? src,
+            text: translations[0].text
+        };
+    }
 }
