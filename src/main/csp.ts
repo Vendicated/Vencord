@@ -46,7 +46,8 @@ export const CspPolicies: PolicyMap = {
     "manti.vendicated.dev": MediaSrc, // ReviewDB API
     "decor.fieryflames.dev": ConnectSrc, // Decor API
     "ugc.decor.fieryflames.dev": MediaSrc, // Decor CDN
-    "sponsor.ajay.app": MediaSrc, // Dearrow API
+    "sponsor.ajay.app": ConnectSrc, // Dearrow API
+    "dearrow-thumb.ajay.app": MediaSrc, // Dearrow Thumbnail CDN
     "usrbg.is-hardly.online": MediaSrc, // USRBG API
 };
 
