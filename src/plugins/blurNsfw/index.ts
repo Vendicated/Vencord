@@ -44,13 +44,13 @@ export default definePlugin({
             description: "Blur Amount",
             default: 10,
             onChange(v) {
-                setStyleVariables(style, { blurAmount: v.toString() });
+                setStyleVariables(style, { blurAmount: v });
             }
         }
     }),
 
     start() {
-        setStyleVariables(style, { blurAmount: this.settings.store.blurAmount.toString() });
+        setStyleVariables(style, { blurAmount: this.settings.store.blurAmount });
     },
 
     style

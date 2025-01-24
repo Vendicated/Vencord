@@ -24,7 +24,7 @@ export interface Style {
     name: string;
     source: string;
     enabled: boolean;
-    variables?: Record<string, string>;
+    variables?: Record<string, string | number>;
 }
 
 export function requireStyle(name: string) {
@@ -177,7 +177,7 @@ export function updateStyleInDocument(style: Style, doc: Document) {
         if (style.variables) {
             Object.entries(style.variables).forEach(([key, value]) => {
                 const kebabCaseKey = key.replaceAll(/(?<=[a-z])[A-Z0-9]/g, v => `-${v}`).toLowerCase();
-                content = content.replaceAll(`[--${kebabCaseKey}]`, value);
+                content = content.replaceAll(`[--${kebabCaseKey}]`, value.toString());
             });
         }
         styleElement.textContent = content;
