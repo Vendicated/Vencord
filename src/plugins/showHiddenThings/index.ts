@@ -30,9 +30,7 @@ const opt = (description: string) => ({
 const settings = definePluginSettings({
     showTimeouts: opt("Show member timeout icons in chat."),
     showInvitesPaused: opt("Show the invites paused tooltip in the server list."),
-    showModView: opt("Show the member mod view context menu item in all servers."),
-    disableDiscoveryFilters: opt("Disable filters in Server Discovery search that hide servers that don't meet discovery criteria."),
-    disableDisallowedDiscoveryFilters: opt("Disable filters in Server Discovery search that hide NSFW & disallowed servers."),
+    showModView: opt("Show the member mod view context menu item in all servers.")
 });
 
 export default definePlugin({
@@ -40,6 +38,8 @@ export default definePlugin({
     tags: ["ShowTimeouts", "ShowInvitesPaused", "ShowModView", "DisableDiscoveryFilters"],
     description: "Displays various hidden & moderator-only things regardless of permissions.",
     authors: [Devs.Dolfies],
+    settings,
+
     patches: [
         {
             find: "showCommunicationDisabledStyles",
@@ -58,7 +58,7 @@ export default definePlugin({
             },
         },
         {
-            find: /context:\i,checkElevated:!1\}\),\i\.\i.{0,200}autoTrackExposure/,
+            find: /,checkElevated:!1}\),\i\.\i\)}(?<=getCurrentUser\(\);return.+?)/,
             predicate: () => settings.store.showModView,
             replacement: {
                 match: /return \i\.\i\(\i\.\i\(\{user:\i,context:\i,checkElevated:!1\}\),\i\.\i\)/,
@@ -67,7 +67,7 @@ export default definePlugin({
         },
         // fixes a bug where Members page must be loaded to see highest role, why is Discord depending on MemberSafetyStore.getEnhancedMember for something that can be obtained here?
         {
-            find: "#{intl::GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL}",
+            find: "#{intl::GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL}),allowOverflow:",
             predicate: () => settings.store.showModView,
             replacement: {
                 match: /(role:)\i(?=,guildId.{0,100}role:(\i\[))/,
@@ -76,49 +76,12 @@ export default definePlugin({
         },
         // allows you to open mod view on yourself
         {
-            find: ".MEMBER_SAFETY,{modViewPanel:",
+            find: 'action:"PRESS_MOD_VIEW",icon:',
             predicate: () => settings.store.showModView,
             replacement: {
                 match: /\i(?=\?null)/,
                 replace: "false"
             }
-        },
-        {
-            find: "prod_discoverable_guilds",
-            predicate: () => settings.store.disableDiscoveryFilters,
-            replacement: {
-                match: /\{"auto_removed:.*?\}/,
-                replace: "{}"
-            }
-        },
-        // remove the 200 server minimum
-        {
-            find: '">200"',
-            predicate: () => settings.store.disableDiscoveryFilters,
-            replacement: {
-                match: '">200"',
-                replace: '">0"'
-            }
-        },
-        // empty word filter
-        {
-            find: '"pepe","nude"',
-            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
-            replacement: {
-                match: /(?<=[?=])\["pepe",.+?\]/,
-                replace: "[]",
-            },
-        },
-        // patch request that queries if term is allowed
-        {
-            find: ".GUILD_DISCOVERY_VALID_TERM,query:",
-            predicate: () => settings.store.disableDisallowedDiscoveryFilters,
-            all: true,
-            replacement: {
-                match: /\i\.\i\.get\(\{url:\i\.\i\.GUILD_DISCOVERY_VALID_TERM,query:\{term:\i\},oldFormErrors:!0,rejectWithError:!1\}\)/g,
-                replace: "Promise.resolve({ body: { valid: true } })"
-            }
         }
-    ],
-    settings,
+    ]
 });

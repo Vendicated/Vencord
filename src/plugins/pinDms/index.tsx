@@ -124,7 +124,7 @@ export default definePlugin({
         {
             find: ".FRIENDS},\"friends\"",
             replacement: {
-                match: /(?<=\i=\i=>{).{1,100}premiumTabSelected.{0,950}showDMHeader:.+?,/,
+                match: /let{showLibrary:\i,.+?showDMHeader:.+?,/,
                 replace: "let forceUpdate = Vencord.Util.useForceUpdater();$&_forceUpdate:forceUpdate,"
             }
         },
