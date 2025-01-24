@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { setStyleVariables } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -38,19 +38,19 @@ export default definePlugin({
         }
     ],
 
-    options: {
+    settings: definePluginSettings({
         blurAmount: {
             type: OptionType.NUMBER,
             description: "Blur Amount",
             default: 10,
             onChange(v) {
-                setStyleVariables(style, { blurAmount: v });
+                setStyleVariables(style, { blurAmount: v.toString() });
             }
         }
-    },
+    }),
 
     start() {
-        setStyleVariables(style, { blurAmount: Settings.plugins.BlurNSFW.blurAmount });
+        setStyleVariables(style, { blurAmount: this.settings.store.blurAmount.toString() });
     },
 
     style
