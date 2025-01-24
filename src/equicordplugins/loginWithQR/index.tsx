@@ -76,7 +76,7 @@ export default definePlugin({
         {
             find: "useGenerateUserSettingsSections",
             replacement: {
-                match: /(\.CLIPS)/,
+                match: /(\.FRIEND_REQUESTS)/,
                 replace: "$1,\"SCAN_QR_CODE\""
             }
         },
