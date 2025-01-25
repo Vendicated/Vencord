@@ -1,5 +1,3 @@
-
-
 .vc-vmwr-modal-content {
     padding: 16px 4px 16px 16px;
 }
@@ -20,7 +18,8 @@
     flex-direction: column;
     gap: 2px;
     padding-right: 8px;
-    width: 200px;
+    max-width: 300px;
+    min-width: 300px;
 }
 
 .vc-vmwr-modal-list-item-btn {
@@ -62,6 +61,11 @@
     object-fit: contain;
 }
 
+.vc-vmwr-modal-divider {
+    width: 2px;
+    background-color: var(--background-modifier-active);
+}
+
 .vc-vmwr-role-button {
     border-radius: var(--radius-xs);
     background: var(--bg-mod-faint);
@@ -85,9 +89,51 @@
     gap: 0.2em;
 }
 
+.vc-vmwr-modal-members {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+
 .vc-vmwr-user-avatar {
     border-radius: 50%;
     padding: 5px;
     width: 30px;
     height: 30px;
+}
+
+.vc-vmwr-member-list-header {
+    background-color: var(--background-secondary);
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.vc-vmwr-member-list-header-text {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.vc-vmwr-member-list-header-text .vc-info-icon {
+    color: var(--interactive-muted);
+    margin-left: auto;
+    cursor: pointer;
+    transition: color ease-in 0.1s;
+}
+
+.vc-vmwr-member-list-header-text .vc-info-icon:hover {
+    color: var(--interactive-active);
+}
+
+.vc-vmwr-member-list-footer {
+    padding: 5px;
+    text-align: center;
+    font-style: italic;
+}
+
+.vc-vmwr-divider {
+    height: 2px;
+    width: 100%;
+    background-color: var(--background-modifier-active);
 }
