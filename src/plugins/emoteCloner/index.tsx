@@ -75,6 +75,7 @@ async function fetchSticker(id: string) {
 
         return body as Sticker;
     } catch (err) {
+        return null;
     }
 }
 
