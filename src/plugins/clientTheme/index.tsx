@@ -5,6 +5,8 @@
  */
 
 import "./clientTheme.css";
+// fix for visual refresh :blobcatcozy~1:
+import "./visualRefreshVars.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
