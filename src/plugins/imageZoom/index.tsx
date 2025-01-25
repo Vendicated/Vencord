@@ -86,6 +86,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => 
     if ("href" in props) return;
     // emojis in user statuses
     if (props?.target?.classList != null && [...props.target.classList].some(x => x === "emoji")) return;
+
     const { square, nearestNeighbour } = settings.use(["square", "nearestNeighbour"]);
 
     children.push(
