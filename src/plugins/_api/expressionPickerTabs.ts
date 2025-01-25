@@ -14,14 +14,14 @@ export default definePlugin({
     authors: [Devs.iamme],
     patches: [
         {
-            find: ".EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL",
+            find: "#{intl::EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL}",
             replacement: [
                 {
-                    match: /\.jsx\)\((\i),\{id:\i\.E\i,.+?,"aria-selected":(\i)===\i\.\i\.EMOJI.+?,viewType:(\i).+?\}\)/,
+                    match: /\.jsx\)\((\i),\{id:\i\.E\i,.+?,"aria-selected":(\i)===\i\.\i\.EMOJI.+?,viewType:(\i).{0,50}\}\)/,
                     replace: "$&,...Vencord.Api.ExpressionPickerTabs.RenderTabButtons($1, $2)"
                 },
                 {
-                    match: /null,(\i)===\i\.\i\.EMOJI\?.{0,55}channel:(\i),.+?\):null/,
+                    match: /null,(\i)===\i\.\i\.SOUNDBOARD\?.{0,95}channel:(\i),.+?\):null/,
                     replace: "$&,...Vencord.Api.ExpressionPickerTabs.TabPanels($1, $2)"
                 }
             ]
