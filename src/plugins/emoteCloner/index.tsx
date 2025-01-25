@@ -317,6 +317,20 @@ function isGifUrl(url: string) {
     return u.pathname.endsWith(".gif") || u.searchParams.get("animated") === "true";
 }
 
+function buildFakeSticker(sticker: any) {
+    return {
+        id: sticker?.id,
+        name: sticker?.name,
+        format_type: sticker?.format_type,
+        // Discord has a character limit of at least 1 for tags (aka related emoji)
+        tags: " ",
+        description: "",
+        type: "2",
+        available: true,
+        guild_id: 0
+    };
+}
+
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
 
@@ -343,27 +357,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                 // (e.g when using MessageLinkEmkbeds)
                 if (sticker === undefined) return;
 
-                return buildMenuItem("Sticker", async () => {
-                    const fetchedSticker = await fetchSticker(favoriteableId);
-
-                    // Workaround for incase the sticker or the server it's from is deleted.
-                    // Allows the sticker to still be cloned.
-                    if (fetchedSticker === undefined) {
-                        return {
-                            id: sticker?.id,
-                            name: sticker?.name,
-                            format_type: sticker?.format_type,
-                            // Discord has a character limit of at least 1 for tags (aka related emoji)
-                            tags: " ",
-                            description: "",
-                            type: "2",
-                            available: true,
-                            guild_id: 0
-                        };
-                    }
-
-                    return fetchedSticker;
-                });
+                return buildMenuItem("Sticker", () => fetchSticker(favoriteableId).then(s => s ?? buildFakeSticker(sticker)));
         }
     })();
 
