@@ -149,7 +149,7 @@ function GuildInfoModal({ guild }: GuildProps) {
                 >
                     <div style={{ textAlign: "center" }}>
                         <div>
-                            Mutual Users
+                            Mutual Members
                         </div>{mutualMembersCount !== undefined ? ` (${mutualMembersCount})` : ""}
                     </div>
                 </TabBar.Item>
