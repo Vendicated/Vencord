@@ -311,9 +311,12 @@ export default definePlugin({
             }
         }
 
-        return buttons.length
-            ? <Flex>{buttons}</Flex>
-            : null;
+        return (
+            <>
+                <Flex>{buttons}</Flex>
+                <RenderPluginEmbed {...props} />;
+            </>
+        );
     },
 
     renderContributorDmWarningCard: ErrorBoundary.wrap(({ channel }) => {
