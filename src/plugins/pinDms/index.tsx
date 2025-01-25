@@ -18,7 +18,7 @@ import { Channel } from "discord-types/general";
 import { contextMenus } from "./components/contextMenu";
 import { openCategoryModal, requireSettingsMenu } from "./components/CreateCategoryModal";
 import { DEFAULT_CHUNK_SIZE } from "./constants";
-import { canMoveCategory, canMoveCategoryInDirection, categories, Category, categoryLen, collapseCategory, getAllUncollapsedChannels, getSections, init, isPinned, moveCategory, removeCategory } from "./data";
+import { canMoveCategory, canMoveCategoryInDirection, categories, Category, categoryLen, collapseCategory, getAllGuildsBarChannels, getAllUncollapsedChannels, getSections, init, isPinned, moveCategory, removeCategory } from "./data";
 
 interface ChannelComponentProps {
     children: React.ReactNode,
@@ -30,9 +30,14 @@ interface ChannelComponentProps {
 const headerClasses = findByPropsLazy("privateChannelsHeaderContainer");
 
 export const PrivateChannelSortStore = findStoreLazy("PrivateChannelSortStore") as { getPrivateChannelIds: () => string[]; };
+const PrivateChannelReadStateStore = findStoreLazy("PrivateChannelReadStateStore");
 
 export let instance: any;
-export const forceUpdate = () => instance?.props?._forceUpdate?.();
+
+export function forceUpdate() {
+    instance?.props?._forceUpdate?.();
+    PrivateChannelReadStateStore.emitChange();
+}
 
 export const enum PinOrder {
     LastMessage,
@@ -61,7 +66,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "PinDMs",
     description: "Allows you to pin private channels to the top of your DM list. To pin/unpin or reorder pins, right click DMs",
-    authors: [Devs.Ven, Devs.Aria],
+    authors: [Devs.Ven, Devs.Aria, Devs.niko],
     settings,
     contextMenus,
 
@@ -148,6 +153,15 @@ export default definePlugin({
                 replace: "$self.getAllUncollapsedChannels().concat($&.filter(c=>!$self.isPinned(c)))"
             }
         },
+
+        // Insert pinned dms to guilds bar
+        {
+            find: "{selectedVoiceGuildId:",
+            replacement: {
+                match: /\i\.\i\.getUnreadPrivateChannelIds\(\)/,
+                replace: "$self.getAllGuildsBarChannels().concat($&)"
+            }
+        }
     ],
     sections: null as number[] | null,
 
@@ -166,6 +180,7 @@ export default definePlugin({
     categoryLen,
     getSections,
     getAllUncollapsedChannels,
+    getAllGuildsBarChannels,
     requireSettingsMenu,
 
     makeProps(instance, { sections }: { sections: number[]; }) {
