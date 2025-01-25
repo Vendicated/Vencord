@@ -4,15 +4,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { InfoIcon } from "@components/Icons";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { findByCodeLazy } from "@webpack";
-import { Constants, GuildMemberStore, GuildStore, Parser, RestAPI, ScrollerThin, Text, useEffect, UserStore, useState } from "@webpack/common";
+import { findByCodeLazy, findExportedComponentLazy } from "@webpack";
+import { Constants, GuildMemberStore, GuildStore, Parser, RestAPI, ScrollerThin, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
 import { UnicodeEmoji } from "@webpack/types";
 import type { Role } from "discord-types/general";
 
 import { cl, GuildUtils } from "../utils";
 
 type GetRoleIconData = (role: Role, size: number) => { customIconSrc?: string; unicodeEmoji?: UnicodeEmoji; };
+const ThreeDots = findExportedComponentLazy("Dots", "AnimatedDots");
 const getRoleIconData: GetRoleIconData = findByCodeLazy("convertSurrogateToName", "customIconSrc", "unicodeEmoji");
 
 
@@ -24,7 +26,6 @@ function getRoleIconSrc(role: Role) {
     const { customIconSrc, unicodeEmoji } = icon;
     return customIconSrc ?? unicodeEmoji?.url;
 }
-
 
 function MembersContainer({ guildId, roleId, props }: { guildId: string; roleId: string; props: ModalProps; }) {
     // RMC: RoleMemberCounts
@@ -80,25 +81,56 @@ function MembersContainer({ guildId, roleId, props }: { guildId: string; roleId:
     const roleMembers = members.filter(x => x.roles.includes(roleId)).map(x => UserStore.getUser(x.userId));
 
     return (
-        <>
-            <Text>
-                {roleMembers.length} loaded / {RMC[roleId] || 0} members with this role<br/>{(roleMembers.length === RMC[roleId] || 0) ? "Loaded" : rolesFetched.includes(roleId) ? "Loaded" : "Loading..."}
-            </Text>
-            <hr/>
-            {roleMembers.map(x => {
+        <div className={cl("modal-members")}>
+            <div className={cl("member-list-header")}>
+                <div className={cl("member-list-header-text")}>
+                    <Text>
+                        {roleMembers.length} loaded / {RMC[roleId] || 0} members with this role<br />
+                    </Text>
+                    <Tooltip text="For roles with over 100 members, only the first 100 and the cached members will be shown.">
+                        {props => <InfoIcon {...props} />}
+                    </Tooltip>
+                </div>
 
-                return (
-                    <div key={x.id} className={cl("user-div")}>
-                        <img
-                            className={cl("user-avatar")}
-                            src={x.getAvatarURL()}
-                            alt=""
-                        />
-                        {Parser.parse(`<@${x.id}>`)}
-                    </div>
-                );
-            })}
-        </>
+            </div>
+            <ScrollerThin orientation="auto">
+                {roleMembers.map(x => {
+                    return (
+                        <div key={x.id} className={cl("user-div")}>
+                            <img
+                                className={cl("user-avatar")}
+                                src={x.getAvatarURL()}
+                                alt=""
+                            />
+                            {Parser.parse(`<@${x.id}>`)}
+                        </div>
+                    );
+                })}
+                {
+                    (Object.keys(RMC).length === 0) ? (
+                        <div className={cl("member-list-footer")}>
+                            <ThreeDots dotRadius={5} themed={true} />
+                        </div>
+                    ) : !RMC[roleId] ? (
+                        <Text className={cl("member-list-footer")} variant="text-md/normal">No member found with this role</Text>
+                    ) : RMC[roleId] === roleMembers.length ? (
+                        <>
+                            <div className={cl("divider")} />
+                            <Text className={cl("member-list-footer")} variant="text-md/normal">All members loaded</Text>
+                        </>
+                    ) : rolesFetched.includes(roleId) ? (
+                        <>
+                            <div className={cl("divider")} />
+                            <Text className={cl("member-list-footer")} variant="text-md/normal">All cached members loaded</Text>
+                        </>
+                    ) : (
+                        <div className={cl("member-list-footer")}>
+                            <ThreeDots dotRadius={5} themed={true} />
+                        </div>
+                    )
+                }
+            </ScrollerThin>
+        </div>
     );
 }
 
@@ -156,16 +188,14 @@ function VMWRModal({ guildId, props }: { guildId: string; props: ModalProps; }) 
                         })}
                     </ScrollerThin>
                     <div className={cl("modal-divider")} />
-                    <ScrollerThin className={cl("modal-members")} orientation="auto">
-                        <MembersContainer
-                            props={props}
-                            guildId={guildId}
-                            roleId={selectedRole.id}
-                        />
-                    </ScrollerThin>
+                    <MembersContainer
+                        props={props}
+                        guildId={guildId}
+                        roleId={selectedRole.id}
+                    />
                 </div>
             </ModalContent>
-        </ModalRoot>
+        </ModalRoot >
     );
 }
 
