@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
@@ -39,7 +39,7 @@ const settings = definePluginSettings({
         default: false,
         restartNeeded: true,
     },
-    ignoreIgnoredMessages: {
+    applyToIgnoredUsers: {
         description: "Additionally apply to 'ignored' users.",
         type: OptionType.BOOLEAN,
         default: true,
@@ -68,7 +68,7 @@ export default definePlugin({
             '"ReadStateStore"'
         ].map(find => ({
             find,
-            predicate: () => Settings.plugins.NoBlockedMessages.ignoreBlockedMessages === true,
+            predicate: () => settings.store.ignoreBlockedMessages === true,
             replacement: [
                 {
                     match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
@@ -83,7 +83,7 @@ export default definePlugin({
             if (RelationshipStore.isBlocked(message.author.id)) {
                 return true;
             }
-	return settings.store.ignoreIgnoredMessages && RelationshipStore.isIgnored(message.author.id);
+            return settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(message.author.id);
         } catch (e) {
             new Logger("NoBlockedMessages").error("Failed to check if user is blocked or ignored:", e);
             return false;
@@ -94,7 +94,7 @@ export default definePlugin({
         try {
             const collapsedReason = props.collapsedReason();
             const blockedReason = i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
-            const ignoredReason = Settings.plugins.NoBlockedMessages.ignoreIgnoredMessages
+            const ignoredReason = settings.store.applyToIgnoredUsers
                 ? i18n.t[runtimeHashMessageKey("IGNORED_MESSAGE_COUNT")]()
                 : null;
 
