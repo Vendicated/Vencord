@@ -36,6 +36,7 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { JSX } from "react";
 import { Embed } from "discord-types/general";
 
 import gitHash from "~git-hash";
@@ -149,22 +150,13 @@ export default definePlugin({
 
     settings,
 
-    patches: [
-        {
-            find: ".BEGINNING_DM.format",
-            replacement: {
-                match: /BEGINNING_DM\.format\(\{.+?\}\),(?=.{0,300}(\i)\.isMultiUserDM)/,
-                replace: "$& $self.renderContributorDmWarningCard({ channel: $1 }),"
-            },
-        },
-        {
-            find: "this.renderInlineMediaEmbed",
-            replacement: {
-                match: /render\(\).+?this\.props;/,
-                replace: "$&if($self.shouldRenderPluginCard(this.props)){return $self.renderPluginCard({embed:this.props.embed})};"
-            }
+    patches: [{
+        find: "#{intl::BEGINNING_DM}",
+        replacement: {
+            match: /#{intl::BEGINNING_DM},{.+?}\),(?=.{0,300}(\i)\.isMultiUserDM)/,
+            replace: "$& $self.renderContributorDmWarningCard({ channel: $1 }),"
         }
-    ],
+    }],
 
     commands: [
         {

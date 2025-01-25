@@ -63,9 +63,9 @@ export default definePlugin({
             }
         },
         {
-            find: "Messages.NOTE_PLACEHOLDER",
+            find: "#{intl::NOTE_PLACEHOLDER}",
             replacement: {
-                match: /\.NOTE_PLACEHOLDER,/,
+                match: /#{intl::NOTE_PLACEHOLDER}\),/,
                 replace: "$&spellCheck:!$self.noSpellCheck,"
             }
         }

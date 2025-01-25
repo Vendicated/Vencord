@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./fixDiscordBadgePadding.css";
+
 import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -77,7 +79,7 @@ export default definePlugin({
                     replace: "...$1.props,$& $1.image??"
                 },
                 {
-                    match: /(?<=text:(\i)\.description,.{0,200})children:/,
+                    match: /(?<="aria-label":(\i)\.description,.{0,200})children:/,
                     replace: "children:$1.component ? $self.renderBadgeComponent({ ...$1 }) :"
                 },
                 // conditionally override their onClick with badge.onClick if it exists

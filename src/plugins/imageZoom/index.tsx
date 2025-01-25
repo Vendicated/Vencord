@@ -24,6 +24,7 @@ import { debounce } from "@shared/debounce";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, ReactDOM } from "@webpack/common";
+import { JSX } from "react";
 import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
