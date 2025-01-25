@@ -75,7 +75,6 @@ async function fetchSticker(id: string) {
 
         return body as Sticker;
     } catch (err) {
-        return undefined;
     }
 }
 
@@ -342,9 +341,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
 
                 // Workaround for cases when it's not available
                 // (e.g when using MessageLinkEmkbeds)
-                if (sticker === undefined) {
-                    return;
-                }
+                if (sticker === undefined) return;
 
                 return buildMenuItem("Sticker", async () => {
                     const fetchedSticker = await fetchSticker(favoriteableId);
@@ -353,19 +350,19 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                     // Allows the sticker to still be cloned.
                     if (fetchedSticker === undefined) {
                         return {
-                            "id": sticker?.id,
-                            "name": sticker?.name,
-                            "format_type": sticker?.format_type,
+                            id: sticker?.id,
+                            name: sticker?.name,
+                            format_type: sticker?.format_type,
                             // Discord has a character limit of at least 1 for tags (aka related emoji)
-                            "tags": " ",
-                            "description": "",
-                            "type": "2",
-                            "available": true,
-                            "guild_id": 0
+                            tags: " ",
+                            description: "",
+                            type: "2",
+                            available: true,
+                            guild_id: 0
                         };
-                    } else {
-                        return fetchedSticker;
                     }
+
+                    return fetchedSticker;
                 });
         }
     })();
