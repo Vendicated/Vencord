@@ -97,7 +97,7 @@ export default definePlugin({
         {
             find: '"AppCrashedFatalReport: getLastCrash not supported."',
             replacement: {
-                match: /console\.log\("AppCrashedFatalReport: getLastCrash not supported\."\)/,
+                match: /console\.log\("AppCrashedFatalReport: getLastCrash not supported\."\);/,
                 replace: ""
             }
         },
