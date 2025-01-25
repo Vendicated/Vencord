@@ -7,7 +7,7 @@
 import "./styles.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { Dev } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Menu } from "@webpack/common";
 import type { Guild } from "discord-types/general";
@@ -34,7 +34,7 @@ export default definePlugin({
     name: "ViewMembersWithRole",
     description: "Shows all the members with the selected roles",
     authors: [
-        Dev.Ryfter
+        Devs.Ryfter
     ],
     contextMenus: {
         "guild-header-popout": makeContextMenuPatch()
