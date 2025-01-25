@@ -95,10 +95,9 @@ export default definePlugin({
             }
         },
         {
-            find: 'console.warn("[DEPRECATED] Please use `subscribeWithSelector` middleware");',
-            all: true,
+            find: '"AppCrashedFatalReport: getLastCrash not supported."',
             replacement: {
-                match: /console\.warn\("\[DEPRECATED\] Please use `subscribeWithSelector` middleware"\);/,
+                match: /console\.log\("AppCrashedFatalReport: getLastCrash not supported\."\);/,
                 replace: ""
             }
         },
