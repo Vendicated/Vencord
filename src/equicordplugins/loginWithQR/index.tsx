@@ -15,6 +15,7 @@ import { preload, unload } from "./images";
 import { cl } from "./ui";
 import openQrModal from "./ui/modals/QrModal";
 
+const qrModalOpen = false;
 export default definePlugin({
     name: "LoginWithQR",
     description: "Allows you to login to another device by scanning a login QR code, just like on mobile!",
@@ -46,11 +47,8 @@ export default definePlugin({
         {
             find: ".clipboardData&&(",
             replacement: {
-                // Find the handleGlobalPaste & handlePaste functions and prevent
-                // them from firing when the modal is open. Does this have any
-                // side effects? Maybe
-                match: /handle(Global)?Paste:(\i)(}|,)/g,
-                replace: "handle$1Paste:(...args)=>!$self.qrModalOpen&&$2(...args)$3",
+                match: /handleGlobalPaste:(\i)/,
+                replace: "handleGlobalPaste:(...args)=>!$self.qrModalOpen&&$1(...args)",
             },
         },
         // Insert a Scan QR Code button in the My Account tab
@@ -76,21 +74,21 @@ export default definePlugin({
         {
             find: "useGenerateUserSettingsSections",
             replacement: {
-                match: /(\.CLIPS)/,
-                replace: "$1,\"SCAN_QR_CODE\""
+                match: /\.CONNECTIONS/,
+                replace: "$&,\"SCAN_QR_CODE\""
             }
         },
         // Insert a Scan QR Code button in the Settings sheet (part 2)
         {
             find: ".PRIVACY_ENCRYPTION_VERIFIED_DEVICES_V2]",
             replacement: {
-                match: /(\.CLIPS]:{.*?},)/,
-                replace: "$1\"SCAN_QR_CODE\":$self.ScanQrSettingsSheet,"
+                match: /\.CLIPS]:{.*?},/,
+                replace: "$&\"SCAN_QR_CODE\":$self.ScanQrSettingsSheet,"
             }
         }
     ],
 
-    qrModalOpen: false,
+    qrModalOpen,
 
     insertScanQrButton: (button: ReactElement) => (
         <div className={cl("settings-btns")}>
@@ -114,11 +112,10 @@ export default definePlugin({
     },
 
     start() {
-        // Preload images
         preload();
     },
 
     stop() {
-        unload?.();
+        unload();
     },
 });
