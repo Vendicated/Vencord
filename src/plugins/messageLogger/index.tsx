@@ -53,6 +53,7 @@ const settings = definePluginSettings({
     },
     collapseDeleted: {
         type: OptionType.BOOLEAN,
+        restartNeeded: true,
         description: "Whether to collapse deleted messages, similar to blocked messages",
         default: false
     },
@@ -248,7 +249,6 @@ export default definePlugin({
             content: oldMessage.content
         };
     },
-
     settings: settings,
 
     handleDelete(cache: any, data: { ids: string[], id: string; mlDeleted?: boolean; }, isBulk: boolean) {
