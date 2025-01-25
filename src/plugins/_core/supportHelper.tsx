@@ -314,7 +314,7 @@ export default definePlugin({
         return (
             <>
                 <Flex>{buttons}</Flex>
-                <RenderPluginEmbed {...props} />;
+                <RenderPluginEmbed {...props} />
             </>
         );
     },
@@ -338,8 +338,8 @@ export default definePlugin({
 function RenderPluginEmbed(props) {
     return (
         <ErrorBoundary noop>
-            {props.message?.embeds.map(embed => {
-                if (!embed.url.startsWith("https://vencord.dev/plugins/")) return null;
+            {props.message?.embeds?.map(embed => {
+                if (!embed.url?.startsWith("https://vencord.dev/plugins/")) return null;
                 const pluginName = new URL(embed.url!).pathname.split("/").pop()!;
                 const plugin = plugins?.[pluginName];
                 const excludedPlugin = ExcludedPlugins[pluginName];
