@@ -17,6 +17,7 @@
 */
 
 import { Channel, User } from "discord-types/general/index.js";
+import { JSX } from "react";
 
 interface DecoratorProps {
     activities: any[];
