@@ -21,7 +21,7 @@ import "./styles.css";
 import * as DataStore from "@api/DataStore";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { CogWheel, InfoIcon, WarningIcon } from "@components/Icons";
+import { CogWheel, InfoIcon } from "@components/Icons";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { SettingsTab } from "@components/VencordSettings/shared";
@@ -31,7 +31,7 @@ import { classes, isObjectEmpty } from "@utils/misc";
 import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Tooltip, TooltipContainer, useMemo } from "@webpack/common";
+import { Alerts, Button, Card, Forms, Icons, lodash, Parser, React, Select, Text, TextInput, Tooltip, TooltipContainer, useMemo } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
@@ -124,11 +124,11 @@ export function UnavailablePluginCard({ name, description, isMissing }: { name: 
             setEnabled={() => { }}
             disabled={true}
             infoButton={
-                <TooltipContainer text={isMissing
+                <TooltipContainer text={!isMissing
                     ? "This plugin is not available Try updating!"
                     : `${name} is only available on ${ExcludedReasons[ExcludedPlugins[name]]}`
                 }>
-                    <WarningIcon />
+                    <Icons.WarningIcon />
                 </TooltipContainer>
             }
         />

@@ -37,7 +37,6 @@ import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { JSX } from "react";
-import { Embed } from "discord-types/general";
 
 import gitHash from "~git-hash";
 import plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
@@ -254,60 +253,6 @@ export default definePlugin({
         );
     }, { noop: true }),
 
-    shouldRenderPluginCard(props) {
-        return (props?.message?.author?.id === VENBOT_USER_ID || props?.embed?.type === "link") && props?.embed?.url?.startsWith("https://vencord.dev/plugins/");
-    },
-
-    renderPluginCard: ErrorBoundary.wrap(({ embed }: { embed: Embed; }) => {
-        const pluginName = new URL(embed.url!).pathname.split("/").pop()!;
-        const plugin = plugins?.[pluginName];
-        const excludedPlugin = ExcludedPlugins[pluginName];
-
-        const onRestartNeeded = () => showRestartAlert(<p>You need to restart Vencord to {Vencord.Plugins.isPluginEnabled(pluginName) ? "enable" : "disable"} {pluginName}!</p>);
-        const update = useForceUpdater();
-
-        if (excludedPlugin || !plugin) {
-            return (
-                <div style={{ width: "40%" }}>
-                    <UnavailablePluginCard
-                        name={pluginName}
-                        description={embed.rawDescription}
-                        key={pluginName}
-                        isMissing={!plugin}
-                    />
-                </div>
-            );
-        }
-
-        return (
-            <div style={{ width: "40%" }}>
-                {plugin.required ? (
-                    <Tooltip text={"This plugin is required for Vencord to function."} key={plugin.name}>
-                        {({ onMouseLeave, onMouseEnter }) => (
-                            <PluginCard
-                                onMouseLeave={onMouseLeave}
-                                onMouseEnter={onMouseEnter}
-                                onRestartNeeded={onRestartNeeded}
-                                update={update}
-                                disabled={true}
-                                plugin={plugin}
-                                key={pluginName}
-                            />
-                        )}
-                    </Tooltip>
-                ) : (
-                    <PluginCard
-                        onRestartNeeded={onRestartNeeded}
-                        disabled={plugin.required ?? false}
-                        update={update}
-                        plugin={plugin}
-                        key={pluginName}
-                    />
-                )}
-            </div>
-        );
-    }, { noop: true }),
-
     start() {
         addAccessory("vencord-debug", props => {
             const buttons = [] as JSX.Element[];
@@ -387,5 +332,63 @@ export default definePlugin({
                 ? <Flex>{buttons}</Flex>
                 : null;
         });
+
+        addAccessory("vc-plugin-embed", props => {
+            return <RenderPluginEmbed {...props} />;
+        });
     },
 });
+
+function RenderPluginEmbed(props) {
+    return (
+        <ErrorBoundary noop>
+            {props.message?.embeds.map(embed => {
+                if (!embed.url.startsWith("https://vencord.dev/plugins/")) return null;
+                const pluginName = new URL(embed.url!).pathname.split("/").pop()!;
+                const plugin = plugins?.[pluginName];
+                const excludedPlugin = ExcludedPlugins[pluginName];
+
+                const onRestartNeeded = () => showRestartAlert(<p>You need to restart Vencord to {Vencord.Plugins.isPluginEnabled(pluginName) ? "enable" : "disable"} {pluginName}!</p>);
+                const update = useForceUpdater();
+
+                if (excludedPlugin || !plugin) {
+                    return (
+                        <div style={{ maxWidth: "516px", width: "100%" }} key={pluginName}>
+                            <UnavailablePluginCard
+                                name={pluginName}
+                                description={embed.rawDescription}
+                                isMissing={!plugin}
+                            />
+                        </div>
+                    );
+                }
+
+                return (
+                    <div style={{ maxWidth: "516px", width: "100%" }} key={pluginName}>
+                        {plugin.required ? (
+                            <Tooltip text={"This plugin is required for Vencord to function."}>
+                                {({ onMouseLeave, onMouseEnter }) => (
+                                    <PluginCard
+                                        onMouseLeave={onMouseLeave}
+                                        onMouseEnter={onMouseEnter}
+                                        onRestartNeeded={onRestartNeeded}
+                                        update={update}
+                                        disabled={true}
+                                        plugin={plugin}
+                                    />
+                                )}
+                            </Tooltip>
+                        ) : (
+                            <PluginCard
+                                onRestartNeeded={onRestartNeeded}
+                                disabled={plugin.required ?? false}
+                                update={update}
+                                plugin={plugin}
+                            />
+                        )}
+                    </div>
+                );
+            })}
+        </ErrorBoundary>
+    );
+}
