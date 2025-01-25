@@ -7,7 +7,7 @@
 import { InfoIcon } from "@components/Icons";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByCodeLazy, findExportedComponentLazy } from "@webpack";
-import { Constants, GuildMemberStore, GuildStore, Parser, RestAPI, ScrollerThin, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
+import { Constants, GuildChannelStore, GuildMemberStore, GuildStore, Parser, RestAPI, ScrollerThin, Text, Tooltip, useEffect, UserStore, useState } from "@webpack/common";
 import { UnicodeEmoji } from "@webpack/types";
 import type { Role } from "discord-types/general";
 
@@ -27,7 +27,10 @@ function getRoleIconSrc(role: Role) {
     return customIconSrc ?? unicodeEmoji?.url;
 }
 
-function MembersContainer({ guildId, roleId, props }: { guildId: string; roleId: string; props: ModalProps; }) {
+function MembersContainer({ guildId, roleId }: { guildId: string; roleId: string; }) {
+
+    const channelId = GuildChannelStore.getChannels(guildId).SELECTABLE[0].channel.id;
+
     // RMC: RoleMemberCounts
     const [RMC, setRMC] = useState({});
     useEffect(() => {
@@ -102,7 +105,7 @@ function MembersContainer({ guildId, roleId, props }: { guildId: string; roleId:
                                 src={x.getAvatarURL()}
                                 alt=""
                             />
-                            {Parser.parse(`<@${x.id}>`)}
+                            {Parser.parse(`<@${x.id}>`, true, { channelId, viewingChannelId: channelId })}
                         </div>
                     );
                 })}
@@ -189,7 +192,6 @@ function VMWRModal({ guildId, props }: { guildId: string; props: ModalProps; }) 
                     </ScrollerThin>
                     <div className={cl("modal-divider")} />
                     <MembersContainer
-                        props={props}
                         guildId={guildId}
                         roleId={selectedRole.id}
                     />
