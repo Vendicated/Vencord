@@ -215,9 +215,9 @@ export default definePlugin({
         },
         collapseDeleted: {
             type: OptionType.BOOLEAN,
-            description:
-                "Whether to collapse deleted messages, similar to blocked messages",
+            description: "Whether to collapse deleted messages, similar to blocked messages",
             default: false,
+            restartNeeded: true,
         },
         logEdits: {
             type: OptionType.BOOLEAN,
