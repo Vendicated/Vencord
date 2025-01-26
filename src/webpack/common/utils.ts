@@ -48,7 +48,7 @@ export const Constants: t.Constants = mapMangledModuleLazy('ME:"/users/@me"', {
 export const RestAPI: t.RestAPI = findLazy(m => typeof m === "object" && m.del && m.put);
 export const moment: typeof import("moment") = findByPropsLazy("parseTwoDigitYear");
 
-export const hljs: typeof import("highlight.js") = findByPropsLazy("highlight", "registerLanguage");
+export const hljs: typeof import("highlight.js").default = findByPropsLazy("highlight", "registerLanguage");
 
 export const { match, P }: Pick<typeof import("ts-pattern"), "match" | "P"> = mapMangledModuleLazy("@ts-pattern/matcher", {
     match: filters.byCode("return new"),
@@ -198,4 +198,11 @@ export const UsernameUtils: t.UsernameUtils = findByPropsLazy("useName", "getGlo
 export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModuleLazy(/=\i\.getUserProfile\(\i\),\i=\i\.getGuildMemberProfile\(/, {
     getDisplayProfile: filters.byCode(".getGuildMemberProfile("),
     useDisplayProfile: filters.byCode(/\[\i\.\i,\i\.\i],\(\)=>/)
+});
+
+export const DateUtils: t.DateUtils = mapMangledModuleLazy("millisecondsInUnit:", {
+    calendarFormat: filters.byCode("sameElse"),
+    dateFormat: filters.byCode('":'),
+    isSameDay: filters.byCode("Math.abs(+"),
+    diffAsUnits: filters.byCode("days:0", "millisecondsInUnit")
 });
