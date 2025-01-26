@@ -167,9 +167,10 @@ export class SettingsStore<T extends object> {
 
             this.globalListeners.forEach(cb => cb(root, settingPathStr));
             this.pathListeners.get(settingPathStr)?.forEach(cb => cb(settingValue));
+        } else {
+            this.globalListeners.forEach(cb => cb(root, pathStr));
         }
 
-        this.globalListeners.forEach(cb => cb(root, pathStr));
         this.pathListeners.get(pathStr)?.forEach(cb => cb(value));
     }
 
