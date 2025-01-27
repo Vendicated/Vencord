@@ -5,7 +5,7 @@
  */
 
 import { DataStore } from "@api/index";
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
+import { addMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { Heart } from "@components/Heart";
 import { openUserProfile } from "@utils/discord";
 import * as Modal from "@utils/modal";
@@ -395,7 +395,7 @@ export default definePlugin({
         await data.initializeUsersCollection();
         data.writeGuildsOwnersToCollection();
         data.writeMembersFromUserGuildsToCollection();
-        data._onMessagePreSend_preSend = addPreSendListener(
+        data._onMessagePreSend_preSend = addMessagePreEditListener(
             data.onMessagePreSend.bind(data)
         );
         data.storageAutoSaveProtocol();
@@ -411,7 +411,7 @@ export default definePlugin({
     stop() {
         const dataManager = this.dataManager as Data;
 
-        removePreSendListener(dataManager._onMessagePreSend_preSend);
+        removeMessagePreSendListener(dataManager._onMessagePreSend_preSend);
         clearInterval(dataManager._storageAutoSaveProtocol_interval);
     },
 });

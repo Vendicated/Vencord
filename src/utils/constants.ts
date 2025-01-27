@@ -688,10 +688,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "ryan",
         id: 479403382994632704n
     },
-    Fres: {
-        name: "fres",
-        id: 843448897737064448n
-    },
     KrystalSkull: {
         name: "KrystalSkullOfficial",
         id: 929208515883569182n

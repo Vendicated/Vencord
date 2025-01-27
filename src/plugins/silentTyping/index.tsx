@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
@@ -54,7 +54,7 @@ const settings = definePluginSettings({
     },
 });
 
-const SilentTypingToggle: ChatBarButton = ({ isMainChat, channel }) => {
+const SilentTypingToggle: ChatBarButtonFactory = ({ isMainChat, channel }) => {
     const { isEnabled, showIcon, specificChats, disabledFor } = settings.use(["isEnabled", "showIcon", "specificChats", "disabledFor"]);
     const id = channel.guild_id ?? channel.id;
 
@@ -159,11 +159,12 @@ export default definePlugin({
     name: "SilentTyping",
     authors: [Devs.Ven, Devs.Rini, Devs.D3SOX],
     description: "Hide that you are typing",
-    dependencies: ["ChatInputButtonAPI"],
     settings,
+
     contextMenus: {
         "textarea-context": ChatBarContextCheckbox
     },
+
     patches: [
         {
             find: '.dispatch({type:"TYPING_START_LOCAL"',
@@ -199,6 +200,5 @@ export default definePlugin({
         FluxDispatcher.dispatch({ type: "TYPING_START_LOCAL", channelId });
     },
 
-    start: () => addChatBarButton("SilentTyping", SilentTypingToggle),
-    stop: () => removeChatBarButton("SilentTyping"),
+    renderChatBarButton: SilentTypingToggle,
 });
