@@ -17,11 +17,7 @@
 */
 
 import {
-    addPreEditListener,
-    addPreSendListener,
-    MessageObject,
-    removePreEditListener,
-    removePreSendListener
+    MessageObject
 } from "@api/MessageEvents";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -36,7 +32,18 @@ export default definePlugin({
     name: "ClearURLs",
     description: "Removes tracking garbage from URLs",
     authors: [Devs.adryd],
-    dependencies: ["MessageEventsAPI"],
+
+    start() {
+        this.createRules();
+    },
+
+    onBeforeMessageSend(_, msg) {
+        return this.onSend(msg);
+    },
+
+    onBeforeMessageEdit(_cid, _mid, msg) {
+        return this.onSend(msg);
+    },
 
     escapeRegExp(str: string) {
         return (str && reHasRegExpChar.test(str))
@@ -132,18 +139,5 @@ export default definePlugin({
                 match => this.replacer(match)
             );
         }
-    },
-
-    start() {
-        this.createRules();
-        this.preSend = addPreSendListener((_, msg) => this.onSend(msg));
-        this.preEdit = addPreEditListener((_cid, _mid, msg) =>
-            this.onSend(msg)
-        );
-    },
-
-    stop() {
-        removePreSendListener(this.preSend);
-        removePreEditListener(this.preEdit);
     },
 });
