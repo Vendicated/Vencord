@@ -191,6 +191,12 @@ export default definePlugin({
     ],
 
     getMember(userId: string, channelOrGuildId: string) {
+        if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
+            // @ts-ignore
+            const color = Vencord.Plugins.plugins['IrcColors'].calculateNameColorForUser(userId);
+            if (color) return { guildId: channelOrGuildId, member: { colorString: color, colorStrings: undefined } };
+        }
+
         try {
             const guildId = ChannelStore.getChannel(channelOrGuildId)?.guild_id ?? GuildStore.getGuild(channelOrGuildId)?.id;
             if (guildId == null) return null;
