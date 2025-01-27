@@ -6,7 +6,7 @@
 
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
-import definePlugin from "@utils/types";
+import definePlugin, { StartAt } from "@utils/types";
 import { ChannelStore, GuildStore, PermissionsBits } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
 
@@ -20,14 +20,6 @@ export default definePlugin({
     authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN, Devs.hen],
     settings,
     patches: [
-        // Add tags
-        {
-            find: ".ORIGINAL_POSTER=",
-            replacement: {
-                match: /function\(\i\){(?=.{1,30}.BOT)/,
-                replace: "$&$self.genTagTypes(arguments[0]);"
-            }
-        },
         // Render Tags in messages
         // Maybe there is a better way to catch this horror
         {
@@ -47,9 +39,14 @@ export default definePlugin({
         }
     ],
     tagObj: {},
+    startAt: StartAt.Init,
+    start() {
+        this.genTagTypes();
+    },
 
-    genTagTypes(obj) {
+    genTagTypes() {
         let i = 100;
+        const obj = {};
 
         for (const { name } of tags) {
             obj[name] = ++i;
@@ -125,15 +122,17 @@ export default definePlugin({
                 tag.permissions?.some(perm => perms.includes(perm)) ||
                 (tag.condition?.(message!, user, channel))
             ) {
+                console.log("TAGS HELP", tag, this.tagObj);
                 if ((channel.isForumPost() || channel.isMediaPost()) && channel.ownerId === user.id)
-                    type = Tag.Types[`${tag.name}-OP`];
+                    type = this.tagObj[`${tag.name}-OP`];
                 else if (user.bot && !isWebhook(message!, user) && !settings.dontShowBotTag)
-                    type = Tag.Types[`${tag.name}-BOT`];
+                    type = this.tagObj[`${tag.name}-BOT`];
                 else
-                    type = Tag.Types[tag.name];
+                    type = this.tagObj[tag.name];
                 break;
             }
         }
+        console.log("TAGS", type);
         return type;
     },
     getPermissions(user: User, channel: Channel): string[] {
