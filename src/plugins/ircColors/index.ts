@@ -76,7 +76,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: '="SYSTEM_TAG"',
+            find: '"Result cannot be null because the message is not null"',
             replacement: {
                 // Override colorString with our custom color and disable gradients if applying the custom color.
                 match: /(?<=colorString:\i,colorStrings:\i,colorRoleName:\i.*?}=)(\i),/,
@@ -115,6 +115,9 @@ export default definePlugin({
         }
     },
 
+    calculateNameColorForUser(...args: Parameters<typeof calculateNameColorForUser>) {
+        return calculateNameColorForUser(...args);
+    },
     calculateNameColorForMessageContext(context: any) {
         const userId: string | undefined = context?.message?.author?.id;
         const colorString = context?.author?.colorString;
