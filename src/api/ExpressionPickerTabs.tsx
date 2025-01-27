@@ -20,7 +20,7 @@ export interface ExpressionPickerButtonProps {
 }
 
 export interface ExpressionPickerPanelProps {
-    selectedTab: string;
+    containerWidth: number;
     channel: Channel;
 }
 
@@ -29,18 +29,20 @@ export type ExpressionPickerPanelComponent = (props: ExpressionPickerPanelProps)
 
 
 export interface ExpressionPickerTabItem {
-    tab: string,
+    title: string,
     Component: ExpressionPickerPanelComponent;
 }
+
+export type ExpressionPickerTabs = ExpressionPickerTabItem | ExpressionPickerPanelComponent;
 
 const ExpressionPickerComponents = new Map<string, ExpressionPickerTabItem>();
 
 
-export const addExpressionPickerTab = (id: string, tab: string, PanelComponent: ExpressionPickerPanelComponent) => ExpressionPickerComponents.set(id, { tab: tab, Component: PanelComponent });
+export const addExpressionPickerTab = (id: string, title: string, PanelComponent: ExpressionPickerPanelComponent) => ExpressionPickerComponents.set(id, { title: title, Component: PanelComponent });
 export const removeExpressionPickerTab = (id: string) => ExpressionPickerComponents.delete(id);
 
 export function RenderTabButtons(ExpressionPickerButtonComponent: ExpressionPickerButtonComponent, selectedTab: string) {
-    return Array.from(ExpressionPickerComponents, ([id, { tab }]) => (
+    return Array.from(ExpressionPickerComponents, ([id, { title }]) => (
         <ErrorBoundary key={`vc-expression-picker-button-${id}`}>
             <ExpressionPickerButtonComponent
                 id={`${id}-picker-tab`}
@@ -49,17 +51,17 @@ export function RenderTabButtons(ExpressionPickerButtonComponent: ExpressionPick
                 viewType={id}
                 isActive={id === selectedTab}
             >
-                {tab}
+                {title}
             </ExpressionPickerButtonComponent>
         </ErrorBoundary>
     ));
 }
 
-export function TabPanels(selectedTab: string, channel: Channel) {
+export function TabPanels(selectedTab: string, channel: Channel, containerWidth: number) {
     return Array.from(ExpressionPickerComponents, ([id, { Component }]) => (
         id === selectedTab &&
         <ErrorBoundary key={`vc-expression-picker-panel-${id}`}>
-            <Component selectedTab={selectedTab} channel={channel} />
+            <Component channel={channel} containerWidth={containerWidth} />
         </ErrorBoundary>
     ));
 }
