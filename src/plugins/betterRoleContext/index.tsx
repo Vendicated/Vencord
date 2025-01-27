@@ -108,7 +108,7 @@ export default definePlugin({
             }
 
             if (role.icon) {
-                children.unshift(
+                children.push(
                     <Menu.MenuItem
                         id="vc-view-role-icon"
                         label="View Role Icon"
