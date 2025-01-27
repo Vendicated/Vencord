@@ -90,20 +90,19 @@ export function removeGlobalContextMenuPatch(patch: GlobalContextMenuPatchCallba
  * A helper function for finding the children array of a group nested inside a context menu based on the id(s) of its children
  * @param id The id of the child. If an array is specified, all ids will be tried
  * @param children The context menu children
- * @param matchSubstring Whether to check if the id is a substring of the child id
  */
-export function findGroupChildrenByChildId(id: string | string[], children: Array<ReactElement | null>, matchSubstring = false): Array<ReactElement | null> | null {
+export function findGroupChildrenByChildId(id: string | string[], children: Array<ReactElement | null>): Array<ReactElement | null> | null {
     for (const child of children) {
         if (child == null) continue;
 
         if (Array.isArray(child)) {
-            const found = findGroupChildrenByChildId(id, child, matchSubstring);
+            const found = findGroupChildrenByChildId(id, child);
             if (found !== null) return found;
         }
 
         if (
-            (Array.isArray(id) && id.some(id => matchSubstring ? child.props?.id?.includes(id) : child.props?.id === id))
-                || matchSubstring ? child.props?.id?.includes(id) : child.props?.id === id
+            (Array.isArray(id) && id.some(id => child.props?.id === id))
+            || child.props?.id === id
         ) return children;
 
         let nextChildren = child.props?.children;
@@ -113,7 +112,7 @@ export function findGroupChildrenByChildId(id: string | string[], children: Arra
                 child.props.children = nextChildren;
             }
 
-            const found = findGroupChildrenByChildId(id, nextChildren, matchSubstring);
+            const found = findGroupChildrenByChildId(id, nextChildren);
             if (found !== null) return found;
         }
     }
