@@ -27,7 +27,7 @@ const { GuildContext } = mapMangledModuleLazy('navId:"guild-context"', {
 });
 
 const requireUserContextMenu = extractAndLoadChunksLazy([".userIds.length>0).reverse("]);
-const requireGuildContextMenu = extractAndLoadChunksLazy([".Messages.NO_MUTUAL_GUILDS})]"]);
+const requireGuildContextMenu = extractAndLoadChunksLazy(['action:"PRESS_MUTUAL_GUILD"']);
 
 let shiftPressed = false;
 const keydown = (e: KeyboardEvent) => e.key === "Shift" && (shiftPressed = true);
@@ -53,12 +53,12 @@ interface GuildProps {
 
 
 export default definePlugin({
-    name: "ShowMeTheMember",
+    name: "OpenMemberPopoutInstead",
     authors: [Devs.Joona],
-    description: "Open the member popout instead of navigating to the server",
+    description: "Clicking on a mutual server opens the member popout or context menu instead of navigating to the server or showing its context menu.",
     patches: [
         {
-            find: ".Messages.NO_MUTUAL_GUILDS})]",
+            find: 'action:"PRESS_MUTUAL_GUILD"',
             replacement: [
                 {
                     match: /return\(0,\i\.jsxs?\)\((\i),({.+?}),\i\.id\)/,
@@ -79,17 +79,20 @@ export default definePlugin({
         }
     ],
     settings,
-    async start() {
+
+    start() {
         document.addEventListener("keydown", keydown);
         document.addEventListener("keyup", keyup);
     },
+
     stop() {
         document.removeEventListener("keydown", keydown);
         document.removeEventListener("keyup", keyup);
     },
+
     renderGuild({ guild, nick, user, theme, onSelect, position, Original }: GuildProps) {
         return (
-            <ErrorBoundary>
+            <ErrorBoundary fallback={Original}>
                 <Popout
                     key={guild.id}
                     renderPopout={() => (
@@ -123,11 +126,12 @@ export default definePlugin({
                                     });
                                     return;
                                 }
+
                                 ContextMenuApi.openContextMenuLazy(e, async () => {
                                     await requireUserContextMenu();
 
                                     return props => (
-                                        <div className="vc-smtm-menu">
+                                        <div className="vc-ompi-menu">
                                             <UserContext
                                                 {...props}
                                                 user={user}
@@ -147,7 +151,7 @@ export default definePlugin({
                             />
                         </div>
                     )}
-                </ Popout>
+                </Popout>
             </ErrorBoundary >
         );
     }
