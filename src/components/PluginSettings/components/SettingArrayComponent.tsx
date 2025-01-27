@@ -334,7 +334,7 @@ export function SettingArrayComponent({
         <Forms.FormSection>
             <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom8} type="description">{option.description}</Forms.FormText>
-            <ErrorBoundary noop>
+            <ErrorBoundary>
                 {option.type === OptionType.ARRAY || option.type === OptionType.USERS ?
                     items.map((item, index) => (
                         <Flex
