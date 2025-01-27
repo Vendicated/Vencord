@@ -1,5 +1,7 @@
 # Emote Cloner
 
+![](https://github.com/user-attachments/assets/55e3b011-29bb-4f4d-bf1a-aad94d0f2107)
+
 Allows you to clone emojis and stickers by right-clicking them
 
 You can clone emojis from
@@ -14,5 +16,3 @@ You can clone stickers from
 
 -   Sticker Picker
 -   In Chat
-
-https://github.com/user-attachments/assets/e15f85b9-4f5f-4f00-8340-333fc5f0561e
