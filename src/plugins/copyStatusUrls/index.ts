@@ -5,14 +5,14 @@
  */
 
 import { Devs } from "@utils/constants";
+import { copyWithToast } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { Clipboard, Toasts } from "@webpack/common";
 import { User } from "discord-types/general";
 
 interface MakeContextMenuProps {
     user: User,
-    activity: any
+    activity: any;
 }
 
 // This is an API call if the result is not cached
@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: "?\"PRESS_WATCH_ON_CRUNCHYROLL_BUTTON\"",
             replacement: {
-                match: /(?=onClick)(?=.*index:(\i))/,
+                match: /(?=onClick)(?=.{0,200}index:(\i))/,
                 replace: "onContextMenu: $self.makeContextMenu(arguments[0], $1),"
             }
         }
@@ -35,31 +35,12 @@ export default definePlugin({
 
     makeContextMenu(props: MakeContextMenuProps, index: number) {
         return async () => {
-        try {
-                const { button_urls } = await getMetadataFromApi(props.activity, props.user.id);
-                if (!button_urls[index]) {
-                    throw new Error("button_urls does not contain index");
-                }
-                Clipboard.copy(button_urls[index]);
-                Toasts.show({
-                    id: Toasts.genId(),
-                    message: "Copied URL",
-                    type: Toasts.Type.SUCCESS,
-                    options: {
-                        position: Toasts.Position.TOP
-                    }
-                });
-            } catch (e) {
-                console.error(e);
-                Toasts.show({
-                    id: Toasts.genId(),
-                    message: "Error copying URL, check console for more info",
-                    type: Toasts.Type.FAILURE,
-                    options: {
-                        position: Toasts.Position.TOP
-                    }
-                });
+            const { button_urls } = await getMetadataFromApi(props.activity, props.user.id);
+            if (!button_urls[index]) {
+                console.error("button_urls does not contain index");
+                return;
             }
+            copyWithToast(button_urls[index]);
         };
     }
 });
