@@ -5,13 +5,12 @@ import { computePermissions, isWebhook, Tag, tags } from "./consts";
 import { getIntlMessage } from "@utils/discord";
 import { ChannelStore, GuildStore, PermissionsBits } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
-import { tag } from "type-fest/source/opaque";
 
 
 export default definePlugin({
     name: "MoreUserTags",
     description: "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
-    authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN],
+    authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN, Devs.hen],
     settings,
     patches: [
         // Add tags
@@ -23,6 +22,7 @@ export default definePlugin({
             }
         },
         // Render Tags in messages
+        // Maybe there is a better way to catch this horror
         {
             find: '.Types.ORIGINAL_POSTER',
             replacement: {
@@ -30,11 +30,12 @@ export default definePlugin({
                 replace: ',($1=$self.getTag({...arguments[0],location:"chat",origType:$1}))$&'
             }
         },
+        // Make discord actually use our tags
         {
             find: '.STAFF_ONLY_DM:',
             replacement: {
                 match: /(?<=type:(\i).{10,1000}.REMIX.{10,100})default:(\i)=/,
-                replace: "default:$2=$self.tagObj[$1];"
+                replace: "default:$2=$self.getTagText($self.tagObj[$1]);"
             }
         }
     ],
@@ -55,27 +56,23 @@ export default definePlugin({
         this.tagObj = obj;
     },
 
-    getTagText(passedTagName: string, originalText: string) {
-        try {
-            if (!passedTagName) return getIntlMessage("APP_TAG");
-            const [tagName, variant] = passedTagName.split("-");
+    getTagText(passedTagName: string) {
+        if (!passedTagName) return getIntlMessage("APP_TAG");
+        const [tagName, variant] = passedTagName.split("-");
 
-            const tag = tags.find(({ name }) => tagName === name);
-            if (!tag) return getIntlMessage("APP_TAG");
+        const tag = tags.find(({ name }) => tagName === name);
+        if (!tag) return getIntlMessage("APP_TAG");
 
-            if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return getIntlMessage("APP_TAG");
+        if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return getIntlMessage("APP_TAG");
 
-            const tagText = settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
-            switch (variant) {
-                case "OP":
-                    return `${getIntlMessage("BOT_TAG_FORUM_ORIGINAL_POSTER")} • ${tagText}`;
-                case "BOT":
-                    return `${getIntlMessage("APP_TAG")} • ${tagText}`;
-                default:
-                    return tagText;
-            }
-        } catch {
-            return originalText;
+        const tagText = settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
+        switch (variant) {
+            case "OP":
+                return `${getIntlMessage("BOT_TAG_FORUM_ORIGINAL_POSTER")} • ${tagText}`;
+            case "BOT":
+                return `${getIntlMessage("APP_TAG")} • ${tagText}`;
+            default:
+                return tagText;
         }
     },
 
