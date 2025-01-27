@@ -26,6 +26,14 @@ const furudosettings = definePluginSettings(
             description: "Toggle functionality",
             default: true,
         },
+        provider: {
+            description: "The AI provider to use",
+            type: OptionType.SELECT,
+            options: [
+                { label: "OpenAI", value: "openai", default: true },
+                { label: "Ollama", value: "ollama" },
+            ],
+        },
         apiKey: {
             type: OptionType.STRING,
             description: "OpenAI API key",
@@ -144,7 +152,6 @@ const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
     if (!contextMenu) return;
 
     const group = findGroupChildrenByChildId("submit-button", children);
-
     if (!group) return;
 
     const idx = group.findIndex(c => c?.props?.id === "submit-button");
@@ -159,26 +166,59 @@ const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
     );
 };
 
+const isConfigured = () => {
+    const { provider, apiKey, model } = Settings.plugins.FurudoSpeak;
+
+    for (const prop of [
+        "characterName",
+        "characterDescription",
+        "extraCharacterDescription",
+        "extraInstructions",
+        "exampleOne",
+        "exampleTwo",
+        "exampleThree",
+    ]) {
+        if (!Settings.plugins.FurudoSpeak[prop]) {
+            return false;
+        }
+    }
+
+    switch (provider) {
+        case "openai": {
+            return !!(apiKey.trim() && model.trim());
+        }
+
+        case "ollama": {
+            return !!model.trim();
+        }
+    }
+
+    return false;
+};
+
 
 const presendObject: MessageSendListener = async (channelId, msg, extra) => {
     const messageRef = extra.replyOptions.messageReference;
-    const repliedMessage = ((messageRef?.message_id && messageRef.channel_id) && MessageStore.getMessage(messageRef?.channel_id, messageRef?.message_id)) || undefined;
-    const apikey = Settings.plugins.FurudoSpeak.apiKey || "";
-    const model = Settings.plugins.FurudoSpeak.model || "";
-    const charactername = Settings.plugins.FurudoSpeak.characterName || "";
-    const characterdescription = Settings.plugins.FurudoSpeak.characterDescription || "";
-    const extracharacterdescription = Settings.plugins.FurudoSpeak.extraCharacterDescription || "";
-    const extrainstructions = Settings.plugins.FurudoSpeak.extraInstructions || "";
-    const exampleone = Settings.plugins.FurudoSpeak.exampleOne || "";
-    const exampletwo = Settings.plugins.FurudoSpeak.exampleTwo || "";
-    const examplethree = Settings.plugins.FurudoSpeak.exampleThree || "";
-    if (!apikey || !model || !charactername || !characterdescription || !extracharacterdescription || !extrainstructions || !exampleone || !exampletwo || !examplethree) {
+    const repliedMessage =
+        messageRef?.message_id && messageRef?.channel_id
+            ? MessageStore.getMessage(
+                messageRef.channel_id,
+                messageRef.message_id
+            )
+            : undefined;
+
+    if (!isConfigured()) {
         sendBotMessage(channelId, {
-            content: "FurudoSpeak is not configured properly. Please ensure that both a model and api key set in the plugin settings.. as well as all character traits being set to something as long as it's not empty.",
+            content:
+                "FurudoSpeak is not configured properly. Please ensure that both a model and api key set in the plugin settings.. as well as all character traits being set to something as long as it's not empty.",
         });
         return;
     }
-    msg.content = await transferMessage(msg, model, apikey, charactername, characterdescription, extracharacterdescription, extrainstructions, exampleone, exampletwo, examplethree, repliedMessage);
+    msg.content = await transferMessage(
+        msg,
+        Vencord.Settings.plugins.FurudoSpeak as any,
+        repliedMessage
+    );
 };
 
 export default definePlugin({
@@ -208,22 +248,34 @@ export default definePlugin({
         },
     }],
     settingsAboutComponent: () => {
-        const { apiKey, model } = furudosettings.use(["apiKey", "model"]);
+        const { provider, apiKey, model } = furudosettings.use([
+            "provider",
+            "apiKey",
+            "model",
+        ]);
+
+        const isConfigured =
+            provider === "openai"
+                ? apiKey.trim() && model.trim()
+                : provider === "ollama"
+                    ? !!model.trim()
+                    : false;
+
         return (
             <>
-                {(!apiKey || !model) && (
+                {(!isConfigured) && (
                     <ErrorCard
                         className={classes(Margins.top16, Margins.bottom16)}
                         style={{ padding: "1em" }}
                     >
                         <Forms.FormTitle>Notice</Forms.FormTitle>
-                        <Forms.FormText>FurudoSpeak is not configured. Please ensure that both a model and api key set in the plugin settings.</Forms.FormText>
+                        <Forms.FormText>FurudoSpeak is not configured. Please ensure that the relevant settings are set.</Forms.FormText>
 
                         <Forms.FormText>
                             An OpenAI api key can be generated at the: <Link href="https://platform.openai.com/settings/organization/api-keys">OpenAI Organization Settings Page.</Link>
                         </Forms.FormText>
                         <Forms.FormText>
-                            Also pick an OpenAI model to use for this plugin: refer to the <Link href="https://platform.openai.com/docs/models">OpenAI Models Page</Link> to find the model names.
+                            Also pick an OpenAI/Ollama model to use for this plugin: refer to the <Link href="https://platform.openai.com/docs/models">OpenAI Models Page</Link> and <Link href="https://ollama.com/search">Ollama Models Page</Link> to find the model names.
                         </Forms.FormText>
 
                         <Forms.FormDivider className={Margins.top8} />
