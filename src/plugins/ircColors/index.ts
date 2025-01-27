@@ -20,14 +20,18 @@ import { definePluginSettings } from "@api/Settings";
 import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { useMemo } from "@webpack/common";
 
-// Calculate a CSS color string based on the user ID
-function calculateNameColorForUser(id: string) {
-    const { lightness } = settings.use(["lightness"]);
-    const idHash = useMemo(() => h64(id), [id]);
-
-    return `hsl(${idHash % 360n}, 100%, ${lightness}%)`;
+function calculateHSLForId(id: string) {
+    // No useMemo/settings.use are here because this funcion is used in RoleColorEverywhere.getColorString
+    // to change @mention color.
+    //
+    // If we use useMemo/settings.use here we'll break probably some rules of hooks (condition for using hooks)
+    // ngl, xxhash seems fast enough to live without useMemo
+    return {
+        hue: Number(h64(id) % 360n),
+        saturation: 100,
+        lightness: settings.store.lightness
+    };
 }
 
 const settings = definePluginSettings({
@@ -55,7 +59,7 @@ export default definePlugin({
             find: '"Result cannot be null because the message is not null"',
             replacement: {
                 match: /let (\i)=\i\(\i\);(?=.{1,25}"Result cannot be null because the message is not null")/,
-                replace: "$&$1.colorString=$self.calculateNameColorForUser(BigInt(arguments[0].author.id));"
+                replace: "$&$1.colorString=$self.calculateNameColorForUser(arguments[0].author.id);"
             }
         },
         {
@@ -67,21 +71,25 @@ export default definePlugin({
             predicate: () => settings.store.memberListColors
         }
     ],
-    calculateNameColorForUser(...args: Parameters<typeof calculateNameColorForUser>) {
-        return calculateNameColorForUser(...args);
+    calculateHSLforId(...args: Parameters<typeof calculateHSLForId>) {
+        return calculateHSLForId(...args);
+    },
+    calculateNameColorForUser(id: string) {
+        const { hue, saturation, lightness } = calculateHSLForId(id);
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     },
     calculateNameColorForMessageContext(context: any) {
         const id = context?.message?.author?.id;
         if (id == null) {
             return null;
         }
-        return calculateNameColorForUser(id);
+        return calculateHSLForId(id);
     },
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
         if (id == null) {
             return null;
         }
-        return calculateNameColorForUser(id);
+        return calculateHSLForId(id);
     }
 });

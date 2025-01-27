@@ -72,6 +72,20 @@ const settings = definePluginSettings({
     }
 });
 
+// Needed to convert colors from IrcColors
+// https://stackoverflow.com/a/44134328
+function hslToHex(hue, saturation, lightness) {
+    lightness /= 100;
+    const a = saturation * Math.min(lightness, 1 - lightness) / 100;
+    const f = n => {
+        const k = (n + hue / 30) % 12;
+        const color = lightness - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, '0');   // convert to Hex and prefix "0" if needed
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+
 export default definePlugin({
     name: "RoleColorEverywhere",
     authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi, Devs.jamesbt365],
@@ -161,14 +175,14 @@ export default definePlugin({
             predicate: () => settings.store.colorChatMessages
         }
     ],
-
     getColorString(userId: string, channelOrGuildId: string) {
-        if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
-            // @ts-ignore
-            return Vencord.Plugins.plugins['IrcColors'].calculateNameColorForUser(BigInt(userId));
-        }
-
         try {
+            if (Vencord.Plugins.isPluginEnabled('IrcColors')) {
+                // @ts-ignore
+                const { hue, saturation, lightness } = Vencord.Plugins.plugins['IrcColors'].calculateHSLforId(userId);
+                return hslToHex(hue, saturation, lightness);
+            }
+
             const guildId = ChannelStore.getChannel(channelOrGuildId)?.guild_id ?? GuildStore.getGuild(channelOrGuildId)?.id;
             if (guildId == null) return null;
 
