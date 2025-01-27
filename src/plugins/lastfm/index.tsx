@@ -125,7 +125,7 @@ const settings = definePluginSettings({
         default: true,
     },
     hideWithActivity: {
-        description: "Hide Last.fm presence if any other activity is detected",
+        description: "Hide Last.fm presence if you have any other presence",
         type: OptionType.BOOLEAN,
         default: false,
     },
@@ -286,11 +286,9 @@ export default definePlugin({
         }
 
         if (settings.store.hideWithSpotify) {
-            for (const activity of PresenceStore.getActivities()) {
-                if (activity.type === ActivityType.LISTENING && activity.application_id !== applicationId) {
-                    // there is already music status because of Spotify or richerCider (probably more)
-                    return null;
-                }
+            if (PresenceStore.getActivities().some(a => a.type === ActivityType.LISTENING && a.application_id !== applicationId)) {
+                // there is already music status because of Spotify or richerCider (probably more)
+                return null;
             }
         }
 
