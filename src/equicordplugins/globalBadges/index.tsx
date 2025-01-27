@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addBadge, BadgePosition, ProfileBadge, removeBadge } from "@api/Badges";
+import { addProfileBadge, BadgePosition, ProfileBadge, removeProfileBadge } from "@api/Badges";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, EquicordDevs } from "@utils/constants";
@@ -137,8 +137,8 @@ export default definePlugin({
     description: "Adds global badges from other client mods",
     authors: [Devs.HypedDomi, EquicordDevs.Wolfie],
 
-    start: () => addBadge(Badge),
-    stop: () => removeBadge(Badge),
+    start: () => addProfileBadge(Badge),
+    stop: () => removeProfileBadge(Badge),
 
     options: {
         showPrefix: {

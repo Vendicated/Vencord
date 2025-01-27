@@ -8,7 +8,7 @@ import { classNameFactory } from "@api/Styles";
 import { getIntlMessage, getUniqueUsername } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Avatar, ChannelStore, ContextMenuApi, Dots, GuildStore, PresenceStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useRef, UserStore, useStateFromStores } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenuApi, Dots, GuildStore, Icons, PresenceStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, CircleQuestionIcon, closeTab, isTabSelected, moveDraggedTabs, moveToTab, openedTabs, settings } from "../util";
@@ -17,7 +17,7 @@ import { TabContextMenu } from "./ContextMenus";
 const { getBadgeWidthForValue } = findByPropsLazy("getBadgeWidthForValue");
 const dotStyles = findByPropsLazy("numberBadge", "textBadge");
 
-const { FriendsIcon } = findByPropsLazy("FriendsIcon");
+const { FriendsIcon } = Icons;
 const ChannelTypeIcon = findComponentByCodeLazy(".iconContainerWithGuildIcon,");
 
 const cl = classNameFactory("vc-channeltabs-");

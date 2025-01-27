@@ -16,15 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
-import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
+import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
+import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { React, useEffect, useState } from "@webpack/common";
 
 let lastState = false;
 
-const ReverseMessageToggle: ChatBarButton = ({ isMainChat }) => {
+const ReverseMessageToggle: ChatBarButtonFactory = ({ isMainChat }) => {
     const [enabled, setEnabled] = useState(lastState);
 
     function setEnabledValue(value: boolean) {
@@ -34,12 +34,12 @@ const ReverseMessageToggle: ChatBarButton = ({ isMainChat }) => {
     }
 
     useEffect(() => {
-        const listener: SendListener = async (_, message) => {
+        const listener: MessageSendListener = async (_, message) => {
             if (enabled && message.content) message.content = message.content.split("").reverse().join("");
         };
 
-        addPreSendListener(listener);
-        return () => void removePreSendListener(listener);
+        addMessagePreSendListener(listener);
+        return () => void removeMessagePreSendListener(listener);
     }, [enabled]);
 
     if (!isMainChat) return null;

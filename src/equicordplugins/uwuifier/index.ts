@@ -17,7 +17,7 @@
 */
 
 import { findOption, RequiredMessageOption } from "@api/Commands";
-import { addPreEditListener, addPreSendListener, MessageObject, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
+import { addMessagePreEditListener, addMessagePreSendListener, MessageObject, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -199,14 +199,14 @@ export default definePlugin({
     },
 
     start() {
-        this.preSend = addPreSendListener((_, msg) => this.onSend(msg));
-        this.preEdit = addPreEditListener((_cid, _mid, msg) =>
+        this.preSend = addMessagePreSendListener((_, msg) => this.onSend(msg));
+        this.preEdit = addMessagePreEditListener((_cid, _mid, msg) =>
             this.onSend(msg)
         );
     },
 
     stop() {
-        removePreSendListener(this.preSend);
-        removePreEditListener(this.preEdit);
+        removeMessagePreSendListener(this.preSend);
+        removeMessagePreEditListener(this.preEdit);
     },
 });

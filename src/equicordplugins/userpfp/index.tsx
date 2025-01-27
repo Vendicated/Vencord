@@ -23,18 +23,18 @@ const settings = definePluginSettings({
             { label: "Nitro", value: true, default: true },
         ],
     },
-    urlForDB: {
+    databaseToUse: {
         type: OptionType.SELECT,
         description: "Which Database url to use to load avatars, KNOW WHAT YOUR DOING",
         options: [
             {
-                label: "UserPFP Default DB",
+                label: "UserPFP Main DB",
                 value: "https://userpfp.github.io/UserPFP/source/data.json",
                 default: true
             },
             {
                 label: "UserPFP Backup DB",
-                value: "https://userpfp.thororen.com/data.json"
+                value: "https://userpfp.equicord.fyi/data.json"
             }
         ]
     }
@@ -74,7 +74,7 @@ export default definePlugin({
         return data.avatars[user.id] ?? original(user, animated, size);
     },
     async start() {
-        const res = await fetch(settings.store.urlForDB)
+        await fetch(settings.store.databaseToUse)
             .then(async res => {
                 if (res.ok) this.data = data = await res.json();
             })

@@ -32,7 +32,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::STICKER_BUTTON_LABEL}",
+            find: "ChannelStickerPickerButton",
             replacement: [{
                 match: /(children:\(0,\i\.jsx\)\()([\w.]+?)(,{innerClassName.{10,30}\.stickerButton)/,
                 replace: (_, head, button, tail) => {
@@ -56,7 +56,7 @@ export default definePlugin({
         {
             find: ".gifts)",
             replacement: {
-                match: /\(null===\(\i=\i\.stickers\).*?(\i)\.push\((\(0,\i\.jsx\))\((.+?),{disabled:\w,type:(\i)},"sticker"\)\)/,
+                match: /,.{0,5}\(null===\(\w=\w\.stickers\)\|\|void 0.*?(\w)\.push\((\(0,\w\.jsx\))\((.+?),{disabled:\w,type:(\w)},"sticker"\)\)\)/,
                 replace: (m, _, jsx, compo, type) => {
                     const c = "arguments[0].type";
                     return `${m},${c}?.submit?.button&&${_}.push(${jsx}(${compo},{disabled:!${c}?.submit?.button,type:${type},stickersType:"stickers+"},"stickers+"))`;
@@ -64,7 +64,7 @@ export default definePlugin({
             }
         },
         {
-            find: "role:\"tablist\",\"aria-label\":",
+            find: `role:"tablist","aria-label":`,
             replacement: {
                 match: /role:"tablist",.*?,?"aria-label":.+?\),children:(\[.*?\)\]}\)}\):null,)(.*?closePopout:\w.*?:null)/s,
                 replace: m => {

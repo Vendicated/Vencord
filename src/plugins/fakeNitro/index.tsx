@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
+import { addMessagePreEditListener, addMessagePreSendListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
@@ -858,7 +858,7 @@ export default definePlugin({
             });
         }
 
-        this.preSend = addPreSendListener(async (channelId, messageObj, extra) => {
+        this.preSend = addMessagePreSendListener(async (channelId, messageObj, extra) => {
             const { guildId } = this;
 
             let hasBypass = false;
@@ -949,7 +949,7 @@ export default definePlugin({
             return { cancel: false };
         });
 
-        this.preEdit = addPreEditListener(async (channelId, __, messageObj) => {
+        this.preEdit = addMessagePreEditListener(async (channelId, __, messageObj) => {
             if (!s.enableEmojiBypass) return;
 
             let hasBypass = false;
@@ -981,7 +981,7 @@ export default definePlugin({
     },
 
     stop() {
-        removePreSendListener(this.preSend);
-        removePreEditListener(this.preEdit);
+        removeMessagePreSendListener(this.preSend);
+        removeMessagePreEditListener(this.preEdit);
     }
 });

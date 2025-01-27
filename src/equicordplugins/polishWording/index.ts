@@ -5,9 +5,9 @@
  */
 
 import {
-    addPreSendListener,
-    removePreSendListener,
-    SendListener,
+    addMessagePreSendListener,
+    MessageSendListener,
+    removeMessagePreSendListener,
 } from "@api/MessageEvents";
 import {
     definePluginSettings,
@@ -17,7 +17,7 @@ import {
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-const presendObject: SendListener = (channelId, msg) => {
+const presendObject: MessageSendListener = (channelId, msg) => {
     msg.content = textProcessing(msg.content);
 };
 
@@ -38,10 +38,10 @@ export default definePlugin({
     authors: [Devs.Samwich],
     dependencies: ["MessageEventsAPI"],
     start() {
-        addPreSendListener(presendObject);
+        addMessagePreSendListener(presendObject);
     },
     stop() {
-        removePreSendListener(presendObject);
+        removeMessagePreSendListener(presendObject);
     },
     settings,
 });

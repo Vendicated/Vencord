@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
+import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
+import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings, Settings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Link } from "@components/Link";
@@ -96,14 +96,14 @@ const furudosettings = definePluginSettings(
 
 function messageSendListenerFuncs() {
     if (furudosettings.store.isEnabled) {
-        addPreSendListener(presendObject);
+        addMessagePreSendListener(presendObject);
     } else {
-        removePreSendListener(presendObject);
+        removeMessagePreSendListener(presendObject);
     }
 }
 
 
-const FurudoSpeakChatToggle: ChatBarButton = ({ isMainChat }) => {
+const FurudoSpeakChatToggle: ChatBarButtonFactory = ({ isMainChat }) => {
     const { isEnabled, showIcon } = furudosettings.use(["isEnabled", "showIcon"]);
     const toggle = async () => {
         const done = await togglefunc();
@@ -160,7 +160,7 @@ const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
 };
 
 
-const presendObject: SendListener = async (channelId, msg, extra) => {
+const presendObject: MessageSendListener = async (channelId, msg, extra) => {
     const messageRef = extra.replyOptions.messageReference;
     const repliedMessage = ((messageRef?.message_id && messageRef.channel_id) && MessageStore.getMessage(messageRef?.channel_id, messageRef?.message_id)) || undefined;
     const apikey = Settings.plugins.FurudoSpeak.apiKey || "";
@@ -243,6 +243,6 @@ export default definePlugin({
 
     stop: () => {
         removeChatBarButton("FurudoSpeak");
-        removePreSendListener(presendObject);
+        removeMessagePreSendListener(presendObject);
     }
 });

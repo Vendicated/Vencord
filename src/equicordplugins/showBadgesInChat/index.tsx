@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addDecoration, removeDecoration } from "@api/MessageDecorations";
+import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { isEquicordPluginDev, isPluginDev } from "@utils/misc";
 import definePlugin from "@utils/types";
@@ -145,9 +145,9 @@ export default definePlugin({
     dependencies: ["MessageDecorationsAPI"],
     settings,
     start: () => {
-        addDecoration("vc-show-badges-in-chat", props => props.message?.author ? <ChatBadges author={props.message.author} /> : null);
+        addMessageDecoration("vc-show-badges-in-chat", props => props.message?.author ? <ChatBadges author={props.message.author} /> : null);
     },
     stop: () => {
-        removeDecoration("vc-show-badges-in-chat");
+        removeMessageDecoration("vc-show-badges-in-chat");
     }
 });

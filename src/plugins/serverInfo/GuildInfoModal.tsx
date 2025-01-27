@@ -34,6 +34,7 @@ const enum Tabs {
     ServerInfo,
     Friends,
     BlockedUsers,
+    IgnoredUsers,
     MutualMembers
 }
 
@@ -47,7 +48,8 @@ interface RelationshipProps extends GuildProps {
 
 const fetched = {
     friends: false,
-    blocked: false
+    blocked: false,
+    ignored: false
 };
 
 function renderTimestamp(timestamp: number) {
@@ -59,11 +61,13 @@ function renderTimestamp(timestamp: number) {
 function GuildInfoModal({ guild }: GuildProps) {
     const [friendCount, setFriendCount] = useState<number>();
     const [blockedCount, setBlockedCount] = useState<number>();
+    const [ignoredCount, setIgnoredCount] = useState<number>();
     const [mutualMembersCount, setMutualMembersCount] = useState<number>();
 
     useEffect(() => {
         fetched.friends = false;
         fetched.blocked = false;
+        fetched.ignored = false;
     }, []);
 
     const [currentTab, setCurrentTab] = useState(Tabs.ServerInfo);
@@ -122,25 +126,55 @@ function GuildInfoModal({ guild }: GuildProps) {
                     className={cl("tab", { selected: currentTab === Tabs.ServerInfo })}
                     id={Tabs.ServerInfo}
                 >
-                    Server Info
+                    <div style={{ textAlign: "center" }}>
+                        <div>
+                            Server Info
+                        </div>
+                    </div>
                 </TabBar.Item>
                 <TabBar.Item
                     className={cl("tab", { selected: currentTab === Tabs.Friends })}
                     id={Tabs.Friends}
                 >
-                    Friends{friendCount !== undefined ? ` (${friendCount})` : ""}
+                    <div style={{ textAlign: "center" }}>
+                        <div>
+                            Friends
+                        </div>
+                        {friendCount !== undefined ? ` (${friendCount})` : ""}
+                    </div>
                 </TabBar.Item>
                 <TabBar.Item
                     className={cl("tab", { selected: currentTab === Tabs.MutualMembers })}
                     id={Tabs.MutualMembers}
                 >
-                    Mutual Server Members{mutualMembersCount !== undefined ? ` (${mutualMembersCount})` : ""}
+                    <div style={{ textAlign: "center" }}>
+                        <div>
+                            Mutual Members
+                        </div>{mutualMembersCount !== undefined ? ` (${mutualMembersCount})` : ""}
+                    </div>
                 </TabBar.Item>
                 <TabBar.Item
                     className={cl("tab", { selected: currentTab === Tabs.BlockedUsers })}
                     id={Tabs.BlockedUsers}
                 >
-                    Blocked Users{blockedCount !== undefined ? ` (${blockedCount})` : ""}
+                    <div style={{ textAlign: "center" }}>
+                        <div>
+                            Blocked Users
+                        </div>
+                        {blockedCount !== undefined ? ` (${blockedCount})` : ""}
+                    </div>
+                </TabBar.Item>
+                <TabBar.Item
+                    className={cl("tab", { selected: currentTab === Tabs.IgnoredUsers })}
+                    id={Tabs.IgnoredUsers}
+                >
+                    <div style={{ textAlign: "center" }}>
+                        <div>
+                            Ignored Users
+                        </div>
+                        {ignoredCount !== undefined ? `(${ignoredCount})` : ""}
+
+                    </div>
                 </TabBar.Item>
             </TabBar>
 
@@ -149,6 +183,7 @@ function GuildInfoModal({ guild }: GuildProps) {
                 {currentTab === Tabs.Friends && <FriendsTab guild={guild} setCount={setFriendCount} />}
                 {currentTab === Tabs.MutualMembers && <MutualMembersTab guild={guild} setCount={setMutualMembersCount} />}
                 {currentTab === Tabs.BlockedUsers && <BlockedUsersTab guild={guild} setCount={setBlockedCount} />}
+                {currentTab === Tabs.IgnoredUsers && <IgnoredUserTab guild={guild} setCount={setIgnoredCount} />}
             </div>
         </div>
     );
@@ -222,7 +257,13 @@ function BlockedUsersTab({ guild, setCount }: RelationshipProps) {
     return UserList("blocked", guild, blockedIds, setCount);
 }
 
-function UserList(type: "friends" | "blocked", guild: Guild, ids: string[], setCount: (count: number) => void) {
+function IgnoredUserTab({ guild, setCount }: RelationshipProps) {
+    const ignoredIds = Object.keys(RelationshipStore.getRelationships()).filter(id => RelationshipStore.isIgnored(id));
+    return UserList("ignored", guild, ignoredIds, setCount);
+}
+
+
+function UserList(type: "friends" | "blocked" | "ignored", guild: Guild, ids: string[], setCount: (count: number) => void) {
     const missing = [] as string[];
     const members = [] as string[];
 

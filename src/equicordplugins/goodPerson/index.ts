@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
+import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -77,13 +77,13 @@ export default definePlugin({
         }
     }),
     async start() {
-        this.preSend = addPreSendListener((_channelId, msg) => {
+        this.preSend = addMessagePreSendListener((_channelId, msg) => {
             const newContent = this.replaceBadVerbs(this.replaceBadNouns(msg.content));
             msg.content = newContent;
         });
     },
     stop() {
-        removePreSendListener(this.preSend);
+        removeMessagePreSendListener(this.preSend);
     },
     getEnabledBadNouns() {
         const thingToReturn: string[] = [];

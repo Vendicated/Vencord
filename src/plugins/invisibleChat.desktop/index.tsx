@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
-import { addButton, removeButton } from "@api/MessagePopover";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -54,7 +53,7 @@ function Indicator() {
                     aria-label="Hidden Message Indicator (InvisibleChat)"
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
-                    src="https://github.com/SammCheese/invisible-chat/blob/1c1a1111d5aed4ddd04bb76a8f10d138944e1d5a/src/assets/lock.png"
+                    src="https://github.com/SammCheese/invisible-chat/raw/NewReplugged/src/assets/lock.png"
                     width={20}
                     height={20}
                     style={{ transform: "translateY(4p)", paddingInline: 4 }}
@@ -66,17 +65,12 @@ function Indicator() {
 
 }
 
-const settings = definePluginSettings({
-    savedPasswords: {
-        type: OptionType.STRING,
-        default: "password, Password",
-        description: "Saved Passwords (Seperated with a , )"
-    }
-});
+const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
+    if (!isMainChat) return null;
 
-const generateChatButton: ChatBarButton = () => {
     return (
-        <ChatBarButton tooltip="Encrypt Message"
+        <ChatBarButton
+            tooltip="Encrypt Message"
             onClick={() => buildEncModal()}
 
             buttonProps={{
@@ -97,11 +91,19 @@ const generateChatButton: ChatBarButton = () => {
     );
 };
 
+const settings = definePluginSettings({
+    savedPasswords: {
+        type: OptionType.STRING,
+        default: "password, Password",
+        description: "Saved Passwords (Seperated with a , )"
+    }
+});
+
 export default definePlugin({
     name: "InvisibleChat",
     description: "Encrypt your Messages in a non-suspicious way!",
     authors: [Devs.SammCheese],
-    dependencies: ["MessagePopoverAPI", "ChatInputButtonAPI", "MessageUpdaterAPI"],
+    dependencies: ["MessageUpdaterAPI"],
     reporterTestable: ReporterTestable.Patches,
     settings,
 
@@ -124,32 +126,28 @@ export default definePlugin({
     async start() {
         const { default: StegCloak } = await getStegCloak();
         steggo = new StegCloak(true, false);
+    },
 
-        addButton("invDecrypt", message => {
-            return this.INV_REGEX.test(message?.content)
-                ? {
-                    label: "Decrypt Message",
-                    icon: this.popOverIcon,
-                    message: message,
-                    channel: ChannelStore.getChannel(message.channel_id),
-                    onClick: async () => {
-                        const res = await iteratePasswords(message);
+    renderMessagePopoverButton(message) {
+        return this.INV_REGEX.test(message?.content)
+            ? {
+                label: "Decrypt Message",
+                icon: this.popOverIcon,
+                message: message,
+                channel: ChannelStore.getChannel(message.channel_id),
+                onClick: async () => {
+                    const res = await iteratePasswords(message);
 
-                        if (res)
-                            this.buildEmbed(message, res);
-                        else
-                            buildDecModal({ message });
-                    }
+                    if (res)
+                        this.buildEmbed(message, res);
+                    else
+                        buildDecModal({ message });
                 }
-                : null;
-        });
-        addChatBarButton("invButton", generateChatButton);
+            }
+            : null;
     },
 
-    stop() {
-        removeButton("invDecrypt");
-        removeChatBarButton("invButton");
-    },
+    renderChatBarButton: ChatBarIcon,
 
     // Gets the Embed of a Link
     async getEmbed(url: URL): Promise<Object | {}> {
@@ -184,7 +182,6 @@ export default definePlugin({
         updateMessage(message.channel_id, message.id, { embeds: message.embeds });
     },
 
-    chatBarIcon: ErrorBoundary.wrap(generateChatButton, { noop: true }),
     popOverIcon: () => <PopOverIcon />,
     indicator: ErrorBoundary.wrap(Indicator, { noop: true })
 });

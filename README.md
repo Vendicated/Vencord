@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>149 additional plugins</summary>
+<summary>148 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -77,7 +77,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ImagePreview by Creations
 - ImgToGif by zyqunix
 - InRole by nin0dev
-- IrcColors by Grzesiek11
 - IRememberYou by zoodogood
 - Jumpscare by Surgedevs
 - JumpToStart by Samwich
@@ -186,11 +185,10 @@ MacOS
 
 Linux
 - [CLI](https://github.com/Equicord/Equilotl/releases/latest/download/EquilotlCli-Linux)
-- [AUR](https://aur.archlinux.org/packages?O=0&K=equibop)
+- [AUR](https://aur.archlinux.org/packages?O=0&K=equicord)
 ```shell
 sh -c "$(curl -sS https://raw.githubusercontent.com/Equicord/Equicord/refs/heads/main/misc/install.sh)"
 ```
-
 ## Installing Equicord Devbuild
 
 ### Dependencies
