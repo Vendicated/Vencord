@@ -328,17 +328,16 @@ export default definePlugin({
         },
         {
             find: ".guildFilter:null",
-            replacement: {
-                match: /function (\i)\(\i\){let{message:\i,gotoMessage/,
-                replace: "$self.renderMsg = $1; $&"
-            }
-        },
-        {
-            find: ".guildFilter:null",
-            replacement: {
-                match: /onClick:\(\)=>(\i\.\i\.deleteRecentMention\((\i)\.id\))/,
-                replace: "onClick: () => $2._keyword ? $self.deleteKeyword($2.id) : $1"
-            }
+            replacement: [
+                {
+                    match: /function (\i)\(\i\){let{message:\i,gotoMessage/,
+                    replace: "$self.renderMsg = $1; $&"
+                },
+                {
+                    match: /onClick:\(\)=>(\i\.\i\.deleteRecentMention\((\i)\.id\))/,
+                    replace: "onClick: () => $2._keyword ? $self.deleteKeyword($2.id) : $1"
+                }
+            ]
         }
     ],
 

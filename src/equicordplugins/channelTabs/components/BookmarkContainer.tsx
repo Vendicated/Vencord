@@ -8,8 +8,7 @@ import { classNameFactory } from "@api/Styles";
 import { getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { closeModal, openModal } from "@utils/modal";
-import { findByPropsLazy } from "@webpack";
-import { Avatar, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, Menu, ReadStateStore, ReadStateUtils, Text, Tooltip, useDrag, useDrop, useEffect, useRef, UserStore } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, Icons, Menu, ReadStateStore, ReadStateUtils, Text, Tooltip, useDrag, useDrop, useEffect, useRef, UserStore } from "@webpack/common";
 
 import { BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, CircleQuestionIcon, isBookmarkFolder, settings, switchChannel, useBookmarks } from "../util";
 import { NotificationDot } from "./ChannelTab";
@@ -17,7 +16,7 @@ import { BookmarkContextMenu, EditModal } from "./ContextMenus";
 
 const cl = classNameFactory("vc-channeltabs-");
 
-const { StarIcon } = findByPropsLazy("StarIcon");
+const { StarIcon } = Icons;
 
 function FolderIcon({ fill }: { fill: string; }) {
     return (

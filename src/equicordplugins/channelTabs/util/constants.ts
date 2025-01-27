@@ -7,7 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { Icons } from "@webpack/common";
 
 import { ChannelTabsPreview } from "../components/ChannelTabsContainer";
 
@@ -74,4 +74,4 @@ export const settings = definePluginSettings({
     }
 });
 
-export const { CircleQuestionIcon } = findByPropsLazy("CircleQuestionIcon");
+export const { CircleQuestionIcon } = Icons;
