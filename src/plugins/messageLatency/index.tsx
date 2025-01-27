@@ -162,7 +162,7 @@ export default definePlugin({
                     </>
                 }
             </Tooltip>;
-        });
+        }, { noop: true });
     },
 
     Icon({ delta, fill, props }: {
