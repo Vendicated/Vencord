@@ -60,6 +60,7 @@ const TrustedRolesIds = [
 const AsyncFunction = async function () { }.constructor;
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
+const ShowEmbeds = getUserSettingLazy<boolean>("textAndImages", "renderEmbeds")!;
 
 async function forceUpdate() {
     const outdated = await checkForUpdates();
@@ -97,14 +98,18 @@ async function generateDebugInfoMessage() {
     }
 
     const commonIssues = {
-        "NoRPC enabled": Vencord.Plugins.isPluginEnabled("NoRPC"),
         "Activity Sharing disabled": tryOrElse(() => !ShowCurrentGame.getSetting(), false),
+        "Link embeds disabled": tryOrElse(() => !ShowEmbeds.getSetting(), false),
         "Vencord DevBuild": !IS_STANDALONE,
         "Has UserPlugins": Object.values(PluginMeta).some(m => m.userPlugin),
         "More than two weeks out of date": BUILD_TIMESTAMP < Date.now() - 12096e5,
     };
 
+    const possiblyUnwantedPlugins = ["NoRPC", "NoProfileThemes", "NoMosaic", "Moyai"].filter(Vencord.Plugins.isPluginEnabled);
+
     let content = `>>> ${Object.entries(info).map(([k, v]) => `**${k}**: ${v}`).join("\n")}`;
+    if (possiblyUnwantedPlugins.length)
+        content += "\n" + `⚠️ ${possiblyUnwantedPlugins.join(", ")} enabled`;
     content += "\n" + Object.entries(commonIssues)
         .filter(([, v]) => v).map(([k]) => `⚠️ ${k}`)
         .join("\n");
