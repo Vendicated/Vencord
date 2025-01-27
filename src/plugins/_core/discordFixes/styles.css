@@ -1,0 +1,11 @@
+.vc-discord-fixes-username-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Remove top gap from chat tags, because the plugin makes it use a div to center instead */
+[class*="botTag"][class*="rem"] {
+    margin-top: unset;
+    top: unset;
+}
