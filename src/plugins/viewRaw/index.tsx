@@ -22,12 +22,12 @@ import { CodeBlock } from "@components/CodeBlock";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
-import { getIntlMessage } from "@utils/discord";
+import { getCurrentGuild, getIntlMessage } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Forms, Menu, Text } from "@webpack/common";
+import { Button, ChannelStore, Forms, GuildStore, Menu, Text } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 
@@ -144,6 +144,23 @@ function MakeContextCallback(name: "Guild" | "Role" | "User" | "Channel"): NavCo
     };
 }
 
+const devContextCallback: NavContextMenuPatchCallback = (children, { id }: { id: string; }) => {
+    const guild = getCurrentGuild();
+    if (!guild) return;
+
+    const role = GuildStore.getRole(guild.id, id);
+    if (!role) return;
+
+    children.push(
+        <Menu.MenuItem
+            id={"vc-view-role-raw"}
+            label="View Raw"
+            action={() => openViewRawModal(JSON.stringify(role, null, 4), "Role")}
+            icon={CopyIcon}
+        />
+    );
+};
+
 export default definePlugin({
     name: "ViewRaw",
     description: "Copy and view the raw content/data of any message, channel or guild",
@@ -156,7 +173,8 @@ export default definePlugin({
         "channel-context": MakeContextCallback("Channel"),
         "thread-context": MakeContextCallback("Channel"),
         "gdm-context": MakeContextCallback("Channel"),
-        "user-context": MakeContextCallback("User")
+        "user-context": MakeContextCallback("User"),
+        "dev-context": devContextCallback
     },
 
     renderMessagePopoverButton(msg) {

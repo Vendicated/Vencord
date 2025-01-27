@@ -83,7 +83,7 @@ export default definePlugin({
             if (!role) return;
 
             if (role.colorString) {
-                children.push(
+                children.unshift(
                     <Menu.MenuItem
                         id="vc-copy-role-color"
                         label="Copy Role Color"
@@ -93,8 +93,22 @@ export default definePlugin({
                 );
             }
 
+            if (PermissionStore.getGuildPermissionProps(guild).canManageRoles) {
+                children.unshift(
+                    <Menu.MenuItem
+                        id="vc-edit-role"
+                        label="Edit Role"
+                        action={async () => {
+                            await GuildSettingsActions.open(guild.id, "ROLES");
+                            GuildSettingsActions.selectRole(id);
+                        }}
+                        icon={PencilIcon}
+                    />
+                );
+            }
+
             if (role.icon) {
-                children.push(
+                children.unshift(
                     <Menu.MenuItem
                         id="vc-view-role-icon"
                         label="View Role Icon"
@@ -108,20 +122,6 @@ export default definePlugin({
                         icon={ImageIcon}
                     />
 
-                );
-            }
-
-            if (PermissionStore.getGuildPermissionProps(guild).canManageRoles) {
-                children.push(
-                    <Menu.MenuItem
-                        id="vc-edit-role"
-                        label="Edit Role"
-                        action={async () => {
-                            await GuildSettingsActions.open(guild.id, "ROLES");
-                            GuildSettingsActions.selectRole(id);
-                        }}
-                        icon={PencilIcon}
-                    />
                 );
             }
         }
