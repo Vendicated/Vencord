@@ -24,7 +24,7 @@ export interface ExpressionPickerPanelProps {
     channel: Channel;
 }
 
-export type ExpressionPickerButtonComponent = (props: ExpressionPickerButtonProps) => JSX.Element | null;
+export type ExpressionPickerButtonComponent = (props: ExpressionPickerButtonProps) => JSX.Element;
 export type ExpressionPickerPanelComponent = (props: ExpressionPickerPanelProps) => JSX.Element | null;
 
 
@@ -33,7 +33,7 @@ export interface ExpressionPickerTabItem {
     Component: ExpressionPickerPanelComponent;
 }
 
-export type ExpressionPickerTabs = ExpressionPickerTabItem | ExpressionPickerPanelComponent;
+export type ExpressionPickerTabs = ExpressionPickerTabItem | Array<ExpressionPickerTabItem> | ExpressionPickerPanelComponent;
 
 const ExpressionPickerComponents = new Map<string, ExpressionPickerTabItem>();
 
