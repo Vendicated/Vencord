@@ -211,7 +211,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                 alignItems: "center"
             }}>
                 {guilds.map(g => (
-                    <Tooltip text={g.name}>
+                    <Tooltip key={g.id} text={g.name}>
                         {({ onMouseLeave, onMouseEnter }) => (
                             <div
                                 onMouseLeave={onMouseLeave}
