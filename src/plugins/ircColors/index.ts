@@ -61,11 +61,11 @@ export default definePlugin({
     authors: [Devs.Grzesiek11],
     patches: [
         {
-            find: '="SYSTEM_TAG"',
+            find: '"Result cannot be null because the message is not null"',
             replacement: {
-                match: /(?<=className:\i\.username,style:.{0,50}:void 0,)/,
-                replace: "style:{color:$self.calculateNameColorForMessageContext(arguments[0])},",
-            },
+                match: /let (\i)=\i\(\i\);(?=.{1,25}"Result cannot be null because the message is not null")/,
+                replace: "$&$1.colorString=$self.calculateNameColorForUser(BigInt(arguments[0].author.id));"
+            }
         },
         {
             find: ".NameWithRole,{roleName:",
@@ -77,6 +77,9 @@ export default definePlugin({
         },
     ],
     settings,
+    calculateNameColorForUser(...args: Parameters<typeof calculateNameColorForUser>) {
+        return calculateNameColorForUser(...args);
+    },
     calculateNameColorForMessageContext(context: any) {
         const id = context?.message?.author?.id;
         if (id == null) {
