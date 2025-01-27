@@ -1,0 +1,24 @@
+.vc-position-inherit {
+    position: inherit;
+}
+
+/**
+ * copy pasted from discord css. not really webpack-findable since it's the only class in the module
+**/
+
+.vc-image-modal {
+    background: transparent !important;
+    box-shadow: none !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0;
+}
+
+@media(width <= 485px) {
+    .vc-image-modal {
+        display: relative;
+        overflow: visible;
+        overflow: initial;
+    }
+}
