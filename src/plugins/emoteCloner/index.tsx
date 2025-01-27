@@ -283,6 +283,9 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
     );
 }
 
+/**
+ * makes the return type of the arg fetchData of {@link buildMenuItem} based on the type arg
+ */
 type Discriminate<
     U extends { "t": string; },
     K extends U["t"]
@@ -449,8 +452,8 @@ export default definePlugin({
         // covers no emoji and unicode emojis
         if (emoji?.id == null) return;
 
-        ContextMenuApi.openContextMenuLazy(ev, async () => {
-            return () => (<Menu.Menu
+        ContextMenuApi.openContextMenu(ev, () => {
+            return <Menu.Menu
                 navId="onboarding-question-context"
                 onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
             >
@@ -458,7 +461,7 @@ export default definePlugin({
                     ...emoji,
                     isAnimated: emoji.animated
                 }))}
-            </Menu.Menu>);
+            </Menu.Menu>;
         });
         // fixes really annoying visual quirk due to discords code
         setMouseDown(false);
