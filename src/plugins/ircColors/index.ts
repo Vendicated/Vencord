@@ -67,7 +67,6 @@ export default definePlugin({
             predicate: () => settings.store.memberListColors
         }
     ],
-    settings,
     calculateNameColorForUser(...args: Parameters<typeof calculateNameColorForUser>) {
         return calculateNameColorForUser(...args);
     },

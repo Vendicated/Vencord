@@ -163,6 +163,11 @@ export default definePlugin({
     ],
 
     getColorString(userId: string, channelOrGuildId: string) {
+        if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
+            // @ts-ignore
+            return Vencord.Plugins.plugins['IrcColors'].calculateNameColorForUser(BigInt(userId));
+        }
+
         try {
             const guildId = ChannelStore.getChannel(channelOrGuildId)?.guild_id ?? GuildStore.getGuild(channelOrGuildId)?.id;
             if (guildId == null) return null;
