@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSetting } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
@@ -32,27 +32,29 @@ interface MessageDeleteProps {
     collapsedReason: () => any;
 }
 
+// Remove this migration once enough time has passed
+migratePluginSetting("NoBlockedMessages", "ignoreBlockedMessages", "ignoreMessages");
 const settings = definePluginSettings({
-    ignoreBlockedMessages: {
-        description: "Completely ignores (recent) incoming messages from blocked users (locally).",
+    ignoreMessages: {
+        description: "Completely ignores incoming messages from blocked and ignored (if enabled) users",
         type: OptionType.BOOLEAN,
         default: false,
-        restartNeeded: true,
+        restartNeeded: true
     },
     applyToIgnoredUsers: {
-        description: "Additionally apply to 'ignored' users.",
+        description: "Additionally apply to 'ignored' users",
         type: OptionType.BOOLEAN,
         default: true,
-        restartNeeded: false,
-    },
+        restartNeeded: false
+    }
 });
-
 
 export default definePlugin({
     name: "NoBlockedMessages",
-    description: "Hides all blocked/ignored messages from chat completely.",
+    description: "Hides all blocked/ignored messages from chat completely",
     authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365],
     settings,
+
     patches: [
         {
             find: "#{intl::BLOCKED_MESSAGES_HIDE}",
@@ -68,7 +70,7 @@ export default definePlugin({
             '"ReadStateStore"'
         ].map(find => ({
             find,
-            predicate: () => settings.store.ignoreBlockedMessages === true,
+            predicate: () => settings.store.ignoreMessages,
             replacement: [
                 {
                     match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
@@ -104,5 +106,4 @@ export default definePlugin({
             return false;
         }
     }
-
 });
