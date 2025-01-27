@@ -18,7 +18,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
-import { addButton, removeButton } from "@api/MessagePopover";
+import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { closeModal, Modals, ModalSize, openModal } from "@utils/modal";
@@ -124,7 +124,7 @@ export default definePlugin({
     },
 
     async start() {
-        addButton("QuickStar", message => {
+        addMessagePopoverButton("QuickStar", message => {
             // shouldn't be able to star our own messages
             if (message.author.id === UserStore.getCurrentUser().id)
                 return null;
@@ -153,6 +153,6 @@ export default definePlugin({
     },
 
     stop() {
-        removeButton("QuickStar");
+        removeMessagePopoverButton("QuickStar");
     }
 });

@@ -54,7 +54,7 @@ interface FakeRoleProps extends React.HTMLAttributes<HTMLDivElement> {
 function FakeRole({ text, color, ...props }: FakeRoleProps) {
     return (
         <div {...props} className={classes(RoleClasses.role)}>
-            <div className={RoleClasses.roleRemoveButton}>
+            <div className={RoleClasses.roleremoveMessagePopoverButton}>
                 <span
                     className={classes(RoleBorderClasses.roleCircle, RoleClasses.roleCircle)}
                     style={{ backgroundColor: color }}

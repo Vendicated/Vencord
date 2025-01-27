@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addButton, removeButton } from "@api/MessagePopover";
+import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
 import { ChannelStore } from "@webpack/common";
@@ -23,7 +23,7 @@ export default definePlugin({
     settings: settings,
 
     start() {
-        addButton("vc-imagedownload", message => {
+        addMessagePopoverButton("vc-imagedownload", message => {
             if (message.attachments.length === 0 && message.embeds.length === 0) return null;
             if (!settings.store.showInMessageHoverMenu) return null;
             return {
@@ -55,7 +55,7 @@ export default definePlugin({
         });
     },
     stop() {
-        removeButton("vc-imagedownload");
+        removeMessagePopoverButton("vc-imagedownload");
     },
     contextMenus: {
         "message": messageContextMenuPatch,
