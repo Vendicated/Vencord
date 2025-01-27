@@ -1,9 +1,16 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { definePluginSettings } from "@api/Settings";
 import { Margins } from "@utils/margins";
 import { OptionType } from "@utils/types";
 import { Card, Flex, Forms, Switch, TextInput, Tooltip } from "@webpack/common";
-import { TagSettings } from "./types";
+
 import { Tag, tags } from "./consts";
+import { TagSettings } from "./types";
 
 
 const defaultSettings = Object.fromEntries(

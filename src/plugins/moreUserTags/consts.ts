@@ -1,8 +1,15 @@
-import { RC } from "@webpack/types";
-import type { ITag } from "./types";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { findByCodeLazy, findLazy } from "@webpack";
 import { GuildStore } from "@webpack/common";
+import { RC } from "@webpack/types";
 import { Channel, Guild, Message, User } from "discord-types/general";
+
+import type { ITag } from "./types";
 
 export const isWebhook = (message: Message, user: User) => !!message?.webhookId && user.isNonUserBot();
 export const tags: ITag[] = [

@@ -1,10 +1,17 @@
-import definePlugin from "@utils/types";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { Devs } from "@utils/constants";
-import { settings } from './settings';
-import { computePermissions, isWebhook, Tag, tags } from "./consts";
 import { getIntlMessage } from "@utils/discord";
+import definePlugin from "@utils/types";
 import { ChannelStore, GuildStore, PermissionsBits } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
+
+import { computePermissions, isWebhook, Tag, tags } from "./consts";
+import { settings } from "./settings";
 
 
 export default definePlugin({
@@ -15,7 +22,7 @@ export default definePlugin({
     patches: [
         // Add tags
         {
-            find: '.ORIGINAL_POSTER=',
+            find: ".ORIGINAL_POSTER=",
             replacement: {
                 match: /function\(\i\){(?=.{1,30}.BOT)/,
                 replace: "$&$self.genTagTypes(arguments[0]);"
@@ -24,7 +31,7 @@ export default definePlugin({
         // Render Tags in messages
         // Maybe there is a better way to catch this horror
         {
-            find: '.Types.ORIGINAL_POSTER',
+            find: ".Types.ORIGINAL_POSTER",
             replacement: {
                 match: /(?<=let (\i).{1,200}children:\i}=\i;.{0,100}.isSystemDM.{0,350}),null==\i\)(?=.{1,30}?null:)/,
                 replace: ',($1=$self.getTag({...arguments[0],location:"chat",origType:$1}))$&'
@@ -32,7 +39,7 @@ export default definePlugin({
         },
         // Make discord actually use our tags
         {
-            find: '.STAFF_ONLY_DM:',
+            find: ".STAFF_ONLY_DM:",
             replacement: {
                 match: /(?<=type:(\i).{10,1000}.REMIX.{10,100})default:(\i)=/,
                 replace: "default:$2=$self.getTagText($self.tagObj[$1]);"

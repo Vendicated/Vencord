@@ -1,5 +1,11 @@
-import type { Channel, Message, User } from "discord-types/general";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import type { Permissions } from "@webpack/types";
+import type { Channel, Message, User } from "discord-types/general";
 
 export interface ITag {
     // name used for identifying, must be alphanumeric + underscores
