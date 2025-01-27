@@ -83,13 +83,13 @@ export default definePlugin({
         if (id == null) {
             return null;
         }
-        return calculateHSLForId(id);
+        return this.calculateNameColorForUser(id);
     },
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
         if (id == null) {
             return null;
         }
-        return calculateHSLForId(id);
+        return this.calculateNameColorForUser(id);
     }
 });
