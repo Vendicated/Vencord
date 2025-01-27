@@ -57,14 +57,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ".NITRO_BANNER,",
-            replacement: {
-                match: /\?\(0,\i\.jsx\)\(\i,{type:\i,shown/,
-                replace: "&&$self.shouldShowBadge(arguments[0])$&"
-            }
-        },
-        {
-            find: ".banner)==null",
+            find: '.banner)==null?"COMPLETE"',
             replacement: {
                 match: /(?<=void 0:)\i.getPreviewBanner\(\i,\i,\i\)/,
                 replace: "$self.patchBannerUrl(arguments[0])||$&"
@@ -107,10 +100,6 @@ export default definePlugin({
     patchBannerUrl({ displayProfile }: any) {
         if (displayProfile?.banner && settings.store.nitroFirst) return;
         if (this.userHasBackground(displayProfile?.userId)) return this.getImageUrl(displayProfile?.userId);
-    },
-
-    shouldShowBadge({ displayProfile, user }: any) {
-        return displayProfile?.banner && (!this.userHasBackground(user.id) || settings.store.nitroFirst);
     },
 
     userHasBackground(userId: string) {

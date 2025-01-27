@@ -35,6 +35,7 @@ import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
+import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
 
@@ -93,7 +94,7 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
 
-    const isEnabled = () => settings.enabled ?? false;
+    const isEnabled = () => Vencord.Plugins.isPluginEnabled(plugin.name);
 
     function toggleEnabled() {
         const wasEnabled = isEnabled();
@@ -292,10 +293,10 @@ export default function PluginSettings() {
 
         if (!pluginFilter(p)) continue;
 
-        const isRequired = p.required || depMap[p.name]?.some(d => settings.plugins[d].enabled);
+        const isRequired = p.required || p.isDependency || depMap[p.name]?.some(d => settings.plugins[d].enabled);
 
         if (isRequired) {
-            const tooltipText = p.required
+            const tooltipText = p.required || !depMap[p.name]
                 ? "This plugin is required for Vencord to function."
                 : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
 
@@ -387,7 +388,7 @@ function makeDependencyList(deps: string[]) {
     return (
         <React.Fragment>
             <Forms.FormText>This plugin is required by:</Forms.FormText>
-            {deps.map((dep: string) => <Forms.FormText className={cl("dep-text")}>{dep}</Forms.FormText>)}
+            {deps.map((dep: string) => <Forms.FormText key={dep} className={cl("dep-text")}>{dep}</Forms.FormText>)}
         </React.Fragment>
     );
 }
