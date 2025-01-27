@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: "?\"PRESS_WATCH_ON_CRUNCHYROLL_BUTTON\"",
             replacement: {
-                match: /(?=onClick)(?=.{0,200}index:(\i))/,
+                match: /(?<=fullWidth:!0,)(?=onClick)(?=.{0,200}index:(\i))/,
                 replace: "onContextMenu: $self.makeContextMenu(arguments[0], $1),"
             }
         }
