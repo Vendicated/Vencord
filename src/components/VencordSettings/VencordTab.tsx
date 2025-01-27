@@ -30,8 +30,7 @@ import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { Button, Forms, GuildMemberStore, React, Select, Switch, UserStore } from "@webpack/common";
 
-import Plugins from "~plugins";
-
+import BadgeAPI from "../../plugins/_api/badges";
 import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "..";
 import { openNotificationSettingsModal } from "./NotificationSettings";
 import { QuickAction, QuickActionCard } from "./quickActions";
@@ -299,7 +298,7 @@ function DonateButtonComponent() {
 }
 
 function isDonor(userId: string): boolean {
-    const donorBadges = (Plugins.BadgeAPI as unknown as typeof import("../../plugins/_api/badges").default).getDonorBadges(userId);
+    const donorBadges = BadgeAPI.getDonorBadges(userId);
     return GuildMemberStore.getMember(VENCORD_GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID) || !!donorBadges;
 }
 

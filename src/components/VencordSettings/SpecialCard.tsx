@@ -42,10 +42,7 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
     };
 
     return (
-        <Card
-            className={cl("card", "card-special")}
-            style={cardStyle}
-        >
+        <Card className={cl("card", "card-special")} style={cardStyle}>
             <div className={cl("card-flex")}>
                 <div className={cl("card-flex-main")}>
                     <Forms.FormTitle className={cl("title")} tag="h5">{title}</Forms.FormTitle>
