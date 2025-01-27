@@ -31,7 +31,8 @@ export function openGuildInfoModal(guild: Guild) {
 const enum Tabs {
     ServerInfo,
     Friends,
-    BlockedUsers
+    BlockedUsers,
+    IgnoredUsers
 }
 
 interface GuildProps {
@@ -44,7 +45,8 @@ interface RelationshipProps extends GuildProps {
 
 const fetched = {
     friends: false,
-    blocked: false
+    blocked: false,
+    ignored: false
 };
 
 function renderTimestamp(timestamp: number) {
@@ -56,10 +58,12 @@ function renderTimestamp(timestamp: number) {
 function GuildInfoModal({ guild }: GuildProps) {
     const [friendCount, setFriendCount] = useState<number>();
     const [blockedCount, setBlockedCount] = useState<number>();
+    const [ignoredCount, setIgnoredCount] = useState<number>();
 
     useEffect(() => {
         fetched.friends = false;
         fetched.blocked = false;
+        fetched.ignored = false;
     }, []);
 
     const [currentTab, setCurrentTab] = useState(Tabs.ServerInfo);
@@ -80,7 +84,10 @@ function GuildInfoModal({ guild }: GuildProps) {
                     className={cl("banner")}
                     src={bannerUrl}
                     alt=""
-                    onClick={() => openImageModal(bannerUrl)}
+                    onClick={() => openImageModal({
+                        url: bannerUrl,
+                        width: 1024
+                    })}
                 />
             )}
 
@@ -89,7 +96,11 @@ function GuildInfoModal({ guild }: GuildProps) {
                     ? <img
                         src={iconUrl}
                         alt=""
-                        onClick={() => openImageModal(iconUrl)}
+                        onClick={() => openImageModal({
+                            url: iconUrl,
+                            height: 512,
+                            width: 512,
+                        })}
                     />
                     : <div aria-hidden className={classes(IconClasses.childWrapper, IconClasses.acronym)}>{guild.acronym}</div>
                 }
@@ -125,12 +136,19 @@ function GuildInfoModal({ guild }: GuildProps) {
                 >
                     Blocked Users{blockedCount !== undefined ? ` (${blockedCount})` : ""}
                 </TabBar.Item>
+                <TabBar.Item
+                    className={cl("tab", { selected: currentTab === Tabs.IgnoredUsers })}
+                    id={Tabs.IgnoredUsers}
+                >
+                    Ignored Users{ignoredCount !== undefined ? ` (${ignoredCount})` : ""}
+                </TabBar.Item>
             </TabBar>
 
             <div className={cl("tab-content")}>
                 {currentTab === Tabs.ServerInfo && <ServerInfoTab guild={guild} />}
                 {currentTab === Tabs.Friends && <FriendsTab guild={guild} setCount={setFriendCount} />}
                 {currentTab === Tabs.BlockedUsers && <BlockedUsersTab guild={guild} setCount={setBlockedCount} />}
+                {currentTab === Tabs.IgnoredUsers && <IgnoredUserTab guild={guild} setCount={setIgnoredCount} />}
             </div>
         </div>
     );
@@ -151,7 +169,15 @@ function Owner(guildId: string, owner: User) {
 
     return (
         <div className={cl("owner")}>
-            <img src={ownerAvatarUrl} alt="" onClick={() => openImageModal(ownerAvatarUrl)} />
+            <img
+                src={ownerAvatarUrl}
+                alt=""
+                onClick={() => openImageModal({
+                    url: ownerAvatarUrl,
+                    height: 512,
+                    width: 512
+                })}
+            />
             {Parser.parse(`<@${owner.id}>`)}
         </div>
     );
@@ -196,7 +222,13 @@ function BlockedUsersTab({ guild, setCount }: RelationshipProps) {
     return UserList("blocked", guild, blockedIds, setCount);
 }
 
-function UserList(type: "friends" | "blocked", guild: Guild, ids: string[], setCount: (count: number) => void) {
+function IgnoredUserTab({ guild, setCount }: RelationshipProps) {
+    const ignoredIds = Object.keys(RelationshipStore.getRelationships()).filter(id => RelationshipStore.isIgnored(id));
+    return UserList("ignored", guild, ignoredIds, setCount);
+}
+
+
+function UserList(type: "friends" | "blocked" | "ignored", guild: Guild, ids: string[], setCount: (count: number) => void) {
     const missing = [] as string[];
     const members = [] as string[];
 
@@ -232,6 +264,7 @@ function UserList(type: "friends" | "blocked", guild: Guild, ids: string[], setC
         <ScrollerThin fade className={cl("scroller")}>
             {members.map(id =>
                 <FriendRow
+                    key={id}
                     user={UserStore.getUser(id)}
                     status={PresenceStore.getStatus(id) || "offline"}
                     onSelect={() => openUserProfile(id)}

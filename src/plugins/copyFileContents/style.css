@@ -1,6 +1,7 @@
 .vc-cfc-button {
     color: var(--interactive-normal);
     cursor: pointer;
+    padding-left: 4px;
 }
 
 .vc-cfc-button:hover {

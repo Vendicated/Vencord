@@ -23,12 +23,3 @@
 
     /* https://googlechrome.github.io/samples/image-rendering-pixelated/index.html */
 }
-
-/* make the carousel take up less space so we can click the backdrop and exit out of it */
-[class*="modalCarouselWrapper_"] {
-    top: 0 !important;
-}
-
-[class*="carouselModal_"] {
-    height: 0 !important;
-}

@@ -19,7 +19,10 @@
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
-import { PronounsFormat, PronounSource } from "./pronoundbUtils";
+export const enum PronounsFormat {
+    Lowercase = "LOWERCASE",
+    Capitalized = "CAPITALIZED"
+}
 
 export const settings = definePluginSettings({
     pronounsFormat: {
@@ -37,34 +40,9 @@ export const settings = definePluginSettings({
             }
         ]
     },
-    pronounSource: {
-        type: OptionType.SELECT,
-        description: "Where to source pronouns from",
-        options: [
-            {
-                label: "Prefer PronounDB, fall back to Discord",
-                value: PronounSource.PreferPDB,
-                default: true
-            },
-            {
-                label: "Prefer Discord, fall back to PronounDB (might lead to inconsistency between pronouns in chat and profile)",
-                value: PronounSource.PreferDiscord
-            }
-        ]
-    },
     showSelf: {
         type: OptionType.BOOLEAN,
-        description: "Enable or disable showing pronouns for the current user",
-        default: true
-    },
-    showInMessages: {
-        type: OptionType.BOOLEAN,
-        description: "Show in messages",
-        default: true
-    },
-    showInProfile: {
-        type: OptionType.BOOLEAN,
-        description: "Show in profile",
+        description: "Enable or disable showing pronouns for yourself",
         default: true
     }
 });

@@ -41,7 +41,7 @@ export default definePlugin({
         },
         {
             // Status emojis
-            find: ".Messages.GUILD_OWNER,",
+            find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
                 match: /(?<=\.activityEmoji,.+?animate:)\i/,
                 replace: "!0"

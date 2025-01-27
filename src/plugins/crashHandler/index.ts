@@ -67,7 +67,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".Messages.ERRORS_UNEXPECTED_CRASH",
+            find: "#{intl::ERRORS_UNEXPECTED_CRASH}",
             replacement: {
                 match: /this\.setState\((.+?)\)/,
                 replace: "$self.handleCrash(this,$1);"
@@ -175,7 +175,7 @@ export default definePlugin({
         }
         if (settings.store.attemptToNavigateToHome) {
             try {
-                NavigationRouter.transitionTo("/channels/@me");
+                NavigationRouter.transitionToGuild("@me");
             } catch (err) {
                 CrashHandlerLogger.debug("Failed to navigate to home", err);
             }

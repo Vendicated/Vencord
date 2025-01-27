@@ -57,7 +57,7 @@ export default definePlugin({
     patches: [
         // Change the max volume for sliders to allow for values above 200
         ...[
-            ".Messages.USER_VOLUME",
+            "#{intl::USER_VOLUME}",
             "currentVolume:"
         ].map(find => ({
             find,
@@ -77,6 +77,11 @@ export default definePlugin({
                     match: /Math\.max.{0,30}\)\)/,
                     replace: "arguments[0]"
                 },
+                // Fix streams not playing audio until you update them
+                {
+                    match: /\}return"video"/,
+                    replace: "this.updateAudioElement();$&"
+                },
                 // Patch the volume
                 {
                     match: /\.volume=this\._volume\/100;/,
@@ -89,7 +94,7 @@ export default definePlugin({
             find: "AudioContextSettingsMigrated",
             replacement: [
                 {
-                    match: /(?<=isLocalMute\(\i,\i\),volume:.+?volume:)\i(?=})/,
+                    match: /(?<=isLocalMute\(\i,\i\),volume:(\i).+?\i\(\i,\i,)\1(?=\))/,
                     replace: "$&>200?200:$&"
                 },
                 {
