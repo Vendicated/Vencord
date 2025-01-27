@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
+import { addMessagePreEditListener, addMessagePreSendListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
@@ -207,8 +207,8 @@ function makeBypassPatches(): Omit<Patch, "plugin"> {
     return {
         find: "canUseCustomStickersEverywhere:",
         replacement: mapping.map(({ func, predicate }) => ({
-            match: new RegExp(String.raw`(?<=${func}:function\(\i(?:,\i)?\){)`),
-            replace: "return true;",
+            match: new RegExp(String.raw`(?<=${func}:)\i`),
+            replace: "() => true",
             predicate
         }))
     };
@@ -297,8 +297,8 @@ export default definePlugin({
             replacement: [
                 {
                     // Overwrite incoming connection settings proto with our local settings
-                    match: /CONNECTION_OPEN:function\((\i)\){/,
-                    replace: (m, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
+                    match: /function (\i)\((\i)\){(?=.*CONNECTION_OPEN:\1)/,
+                    replace: (m, funcName, props) => `${m}$self.handleProtoChange(${props}.userSettingsProto,${props}.user);`
                 },
                 {
                     // Overwrite non local proto changes with our local settings
@@ -391,7 +391,7 @@ export default definePlugin({
         },
         // Separate patch for allowing using custom app icons
         {
-            find: /\.getCurrentDesktopIcon.{0,25}\.isPremium/,
+            find: "?24:30,",
             replacement: {
                 match: /\i\.\i\.isPremium\(\i\.\i\.getCurrentUser\(\)\)/,
                 replace: "true"
@@ -514,7 +514,7 @@ export default definePlugin({
         return array.filter(item => item != null);
     },
 
-    ensureChildrenIsArray(child: ReactElement) {
+    ensureChildrenIsArray(child: ReactElement<any>) {
         if (!Array.isArray(child.props.children)) child.props.children = [child.props.children];
     },
 
@@ -524,7 +524,7 @@ export default definePlugin({
 
         let nextIndex = content.length;
 
-        const transformLinkChild = (child: ReactElement) => {
+        const transformLinkChild = (child: ReactElement<any>) => {
             if (settings.store.transformEmojis) {
                 const fakeNitroMatch = child.props.href.match(fakeNitroEmojiRegex);
                 if (fakeNitroMatch) {
@@ -558,7 +558,7 @@ export default definePlugin({
             return child;
         };
 
-        const transformChild = (child: ReactElement) => {
+        const transformChild = (child: ReactElement<any>) => {
             if (child?.props?.trusted != null) return transformLinkChild(child);
             if (child?.props?.children != null) {
                 if (!Array.isArray(child.props.children)) {
@@ -574,7 +574,7 @@ export default definePlugin({
             return child;
         };
 
-        const modifyChild = (child: ReactElement) => {
+        const modifyChild = (child: ReactElement<any>) => {
             const newChild = transformChild(child);
 
             if (newChild?.type === "ul" || newChild?.type === "ol") {
@@ -601,7 +601,7 @@ export default definePlugin({
             return newChild;
         };
 
-        const modifyChildren = (children: Array<ReactElement>) => {
+        const modifyChildren = (children: Array<ReactElement<any>>) => {
             for (const [index, child] of children.entries()) children[index] = modifyChild(child);
 
             children = this.clearEmptyArrayItems(children);
@@ -853,7 +853,7 @@ export default definePlugin({
             });
         }
 
-        this.preSend = addPreSendListener(async (channelId, messageObj, extra) => {
+        this.preSend = addMessagePreSendListener(async (channelId, messageObj, extra) => {
             const { guildId } = this;
 
             let hasBypass = false;
@@ -941,7 +941,7 @@ export default definePlugin({
             return { cancel: false };
         });
 
-        this.preEdit = addPreEditListener(async (channelId, __, messageObj) => {
+        this.preEdit = addMessagePreEditListener(async (channelId, __, messageObj) => {
             if (!s.enableEmojiBypass) return;
 
             let hasBypass = false;
@@ -973,7 +973,7 @@ export default definePlugin({
     },
 
     stop() {
-        removePreSendListener(this.preSend);
-        removePreEditListener(this.preEdit);
+        removeMessagePreSendListener(this.preSend);
+        removeMessagePreEditListener(this.preEdit);
     }
 });

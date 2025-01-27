@@ -164,8 +164,8 @@ export default definePlugin({
             find: 'getElementById("slate-toolbar"',
             predicate: () => settings.store.addBack,
             replacement: {
-                match: /(?<=handleContextMenu\(\i\)\{.{0,200}isPlatformEmbedded)\?/,
-                replace: "||true?"
+                match: /(?<=handleContextMenu\(\i\)\{.{0,200}isPlatformEmbedded)\)/,
+                replace: "||true)"
             }
         },
         {
