@@ -60,7 +60,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "Messages.AUTH_SESSIONS_SESSION_LOG_OUT",
+            find: "#{intl::AUTH_SESSIONS_SESSION_LOG_OUT}",
             replacement: [
                 // Replace children with a single label with state
                 {

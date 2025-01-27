@@ -10,7 +10,6 @@ export * from "./CodeBlock";
 export * from "./DonateButton";
 export { default as ErrorBoundary } from "./ErrorBoundary";
 export * from "./ErrorCard";
-export * from "./ExpandableHeader";
 export * from "./Flex";
 export * from "./Heart";
 export * from "./Icons";

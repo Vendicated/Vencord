@@ -18,9 +18,9 @@
 
 import "./style.css";
 
-import { addBadge, BadgePosition, BadgeUserArgs, ProfileBadge, removeBadge } from "@api/Badges";
-import { addDecorator, removeDecorator } from "@api/MemberListDecorators";
-import { addDecoration, removeDecoration } from "@api/MessageDecorations";
+import { addProfileBadge, BadgePosition, BadgeUserArgs, ProfileBadge, removeProfileBadge } from "@api/Badges";
+import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
+import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
@@ -172,26 +172,26 @@ const badge: ProfileBadge = {
 const indicatorLocations = {
     list: {
         description: "In the member list",
-        onEnable: () => addDecorator("platform-indicator", props =>
+        onEnable: () => addMemberListDecorator("platform-indicator", props =>
             <ErrorBoundary noop>
                 <PlatformIndicator user={props.user} small={true} />
             </ErrorBoundary>
         ),
-        onDisable: () => removeDecorator("platform-indicator")
+        onDisable: () => removeMemberListDecorator("platform-indicator")
     },
     badges: {
         description: "In user profiles, as badges",
-        onEnable: () => addBadge(badge),
-        onDisable: () => removeBadge(badge)
+        onEnable: () => addProfileBadge(badge),
+        onDisable: () => removeProfileBadge(badge)
     },
     messages: {
         description: "Inside messages",
-        onEnable: () => addDecoration("platform-indicator", props =>
+        onEnable: () => addMessageDecoration("platform-indicator", props =>
             <ErrorBoundary noop>
                 <PlatformIndicator user={props.message?.author} wantTopMargin={true} />
             </ErrorBoundary>
         ),
-        onDisable: () => removeDecoration("platform-indicator")
+        onDisable: () => removeMessageDecoration("platform-indicator")
     }
 };
 
