@@ -239,6 +239,7 @@ await Promise.all([
         globalName: "Vencord",
         sourcemap,
         plugins: [
+            globPlugins("vencordDesktop"),
             globPlugins("equicordDesktop"),
             ...commonOpts.plugins
         ],
