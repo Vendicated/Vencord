@@ -16,7 +16,7 @@ interface UserMentionComponentProps {
     id: string;
     channelId: string;
     guildId: string;
-    OriginalComponent: ReactNode;
+    originalComponent: () => ReactNode;
 }
 
 export default definePlugin({
@@ -29,7 +29,7 @@ export default definePlugin({
             find: ':"text":',
             replacement: {
                 match: /(hidePersonalInformation\).+?)(if\(null!=\i\){.+?return \i)(?=})/,
-                replace: "$1return $self.UserMentionComponent({...arguments[0],OriginalComponent:(()=>{$2})()});"
+                replace: "$1return $self.UserMentionComponent({...arguments[0],originalComponent:()=>{$2}});"
             }
         }
     ],
@@ -42,6 +42,6 @@ export default definePlugin({
             channelId={props.channelId}
         />
     ), {
-        fallback: ({ wrappedProps }) => wrappedProps.OriginalComponent
+        fallback: ({ wrappedProps: { originalComponent } }) => originalComponent()
     })
 });

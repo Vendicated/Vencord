@@ -57,7 +57,7 @@ const Badges = new Set<ProfileBadge>();
  * Register a new badge with the Badges API
  * @param badge The badge to register
  */
-export function addBadge(badge: ProfileBadge) {
+export function addProfileBadge(badge: ProfileBadge) {
     badge.component &&= ErrorBoundary.wrap(badge.component, { noop: true });
     Badges.add(badge);
 }
@@ -66,7 +66,7 @@ export function addBadge(badge: ProfileBadge) {
  * Unregister a badge from the Badges API
  * @param badge The badge to remove
  */
-export function removeBadge(badge: ProfileBadge) {
+export function removeProfileBadge(badge: ProfileBadge) {
     return Badges.delete(badge);
 }
 
@@ -99,21 +99,4 @@ export function _getBadges(args: BadgeUserArgs) {
 export interface BadgeUserArgs {
     userId: string;
     guildId: string;
-}
-
-interface ConnectedAccount {
-    type: string;
-    id: string;
-    name: string;
-    verified: boolean;
-}
-
-interface Profile {
-    connectedAccounts: ConnectedAccount[];
-    premiumType: number;
-    premiumSince: string;
-    premiumGuildSince?: any;
-    lastFetched: number;
-    profileFetchFailed: boolean;
-    application?: any;
 }
