@@ -46,6 +46,15 @@ export default definePlugin({
                 match: /!\(null==(\i)\|\|0===\i\|\|null==(\i)\|\|0===\i\)/,
                 replace: (_, width, height) => `!((null==${width}||0===${width})&&(null==${height}||0===${height}))`
             }
+        },
+        // Make buttons show up for your own activities
+        {
+            find: ".party?(0",
+            all: true,
+            replacement: {
+                match: /\i\.id===\i\.id\?null:/,
+                replace: ""
+            }
         }
     ],
 
