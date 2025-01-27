@@ -20,7 +20,7 @@
     align-items: center;
     gap: 0.5em;
     padding: 8px 9px;
-    border-radius: 6px;
+    border-radius: 8px;
     transition: 0.1s ease-out;
     box-sizing: border-box;
 }
