@@ -20,14 +20,20 @@ import { definePluginSettings } from "@api/Settings";
 import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { useMemo } from "@webpack/common";
 
-// Calculate a CSS color string based on the user ID
+function calculateHSLForId(id: string) {
+    // No hooks: this also runs outside React components.
+    return {
+        hue: Number(h64(id + settings.store.seed) % 360n),
+        saturation: settings.store.saturation,
+        lightness: settings.store.lightness
+    };
+}
+
 function calculateNameColorForUser(id?: string) {
-    const { lightness, saturation, seed } = settings.use(["lightness", "saturation", "seed"]);
-    const idHash = useMemo(() => id ? h64(id + seed) : null, [id, seed]);
-
-    return idHash && `hsl(${idHash % 360n}, ${saturation}%, ${lightness}%)`;
+    if (!id) return null;
+    const { hue, saturation, lightness } = calculateHSLForId(id);
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
 
 const settings = definePluginSettings({
@@ -115,6 +121,9 @@ export default definePlugin({
         }
     },
 
+    calculateHSLforId(...args: Parameters<typeof calculateHSLForId>) {
+        return calculateHSLForId(...args);
+    },
     calculateNameColorForUser(...args: Parameters<typeof calculateNameColorForUser>) {
         return calculateNameColorForUser(...args);
     },
