@@ -55,6 +55,14 @@ export default definePlugin({
                 match: /\i\.id===\i\.id\?null:/,
                 replace: ""
             }
+        },
+        // Fixes mod view depending on Members page being loaded to acquire the member highest role
+        {
+            find: "#{intl::GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL}),allowOverflow:",
+            replacement: {
+                match: /(role:)\i(?=,guildId.{0,100}role:(\i\[))/,
+                replace: "$1$2arguments[0].member.highestRoleId]"
+            }
         }
     ],
 
