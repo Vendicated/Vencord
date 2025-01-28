@@ -12,7 +12,7 @@ const logger = new Logger("Markdown");
 export interface Rule extends ParserRule {
     requiredFirstCharacters: Array<string>;
     react: (node: any, recurseOutput: Output<any>, state: State) => JSX.Element;
-    Slate?: object;
+    Slate?: SlateRule;
     [k: string]: any;
 }
 
@@ -20,7 +20,6 @@ export interface SlateRule {
     type: string;
     after?: string;
     before?: string;
-    [k: string]: any;
 }
 
 export interface ParserRules {
@@ -42,7 +41,7 @@ export interface MarkdownRulesType {
 
 export type PluginMarkdownRulesType = Partial<MarkdownRulesType>;
 
-export const MarkdownRules: MarkdownRulesType = {} as MarkdownRulesType;
+export const MarkdownRules = {} as MarkdownRulesType;
 
 export type PluginRulesFunction = (r: MarkdownRulesType) => MarkdownRulesType | PluginMarkdownRulesType;
 
@@ -53,7 +52,7 @@ export const RemoveAPendingRule = (name: string) => PendingRulesMap.delete(name)
 
 export function patchMarkdownRules(originalMarkdownRules: MarkdownRulesType) {
     /**
-     * patchs the markdown rules
+     * patches the markdown rules
      * by overwriting and/or adding each rule to the original rules entries
      * @param originalRles the original discord markdown rules
      * @returns The patched rules
@@ -63,6 +62,7 @@ export function patchMarkdownRules(originalMarkdownRules: MarkdownRulesType) {
             target[k] = Object.assign(target[k] ?? {}, v);
         }
     }
+
     for (const [name, rule] of PendingRulesMap) {
         try {
             assignEntries(MarkdownRules, rule(originalMarkdownRules));
@@ -77,13 +77,15 @@ export function patchMarkdownRules(originalMarkdownRules: MarkdownRulesType) {
 
 export function patchSlateRules(slate: { [k: string]: SlateRule; }) {
     /**
-     * patchs the default slates
+     * patches the default slates
      * overwriting and/or adding each rule slate to the slate entries
      * @param slate The original slate
      * @returns The patched slate
      */
-    for (const [name, rule] of Object.entries(MarkdownRules)) {
-        slate[name] = rule.Slate ?? slate[name] ?? { type: "skip" };
+    for (const [_, rules] of Object.entries(MarkdownRules) as Array<[string, ParserRules]>) {
+        for (const [name, rule] of Object.entries(rules)) {
+            slate[name] = rule.Slate ?? slate[name] ?? { type: "skip" };
+        }
     }
     return slate;
 }
