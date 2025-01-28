@@ -89,7 +89,7 @@ export default definePlugin({
             if (!settings.store.autoTranslate) return;
             if (!message.content) return;
         
-            const urlRegex = /(https?:\/\/\S+)/g;
+            const urlRegex = /https?:\/\/\S+/g;
         
             const matches = message.content.match(urlRegex);
         
