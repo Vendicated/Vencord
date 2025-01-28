@@ -1,0 +1,33 @@
+.vc-settings-quickActions-card {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, max-content));
+    gap: 0.5em;
+    justify-content: center;
+    padding: 0.5em 0;
+    margin-bottom: 1em;
+}
+
+.vc-settings-quickActions-pill {
+    all: unset;
+    background: var(--background-secondary);
+    color: var(--header-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 8px 12px;
+    border-radius: 9999px;
+}
+
+.vc-settings-quickActions-pill:hover {
+    background: var(--background-secondary-alt);
+}
+
+.vc-settings-quickActions-pill:focus-visible {
+    outline: 2px solid var(--focus-primary);
+    outline-offset: 2px;
+}
+
+.vc-settings-quickActions-img {
+    width: 24px;
+    height: 24px;
+}

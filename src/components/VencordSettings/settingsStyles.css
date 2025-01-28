@@ -10,26 +10,6 @@
     margin-bottom: -2px;
 }
 
-.vc-settings-quick-actions-card {
-    color: var(--text-normal);
-    padding: 1em;
-    display: flex;
-    justify-content: space-evenly;
-    gap: 1em;
-    flex-wrap: wrap;
-    align-items: center;
-    margin-bottom: 1em;
-}
-
-.vc-settings-quick-actions-card button {
-    min-width: unset;
-}
-
-.vc-settings-quick-actions-img {
-    width: 30px;
-    height: 30px;
-}
-
 .vc-settings-donate {
     display: flex;
     flex-direction: row;
@@ -53,6 +33,20 @@
     padding: 0.5em;
     border: 1px solid var(--background-modifier-accent);
     max-height: unset;
+    background-color: transparent;
+    box-sizing: border-box;
+    font-size: 12px;
+    line-height: 14px;
+    resize: none;
+    width: 100%;
+}
+
+.vc-settings-theme-links::placeholder {
+    color: var(--header-secondary);
+}
+
+.vc-settings-theme-links:focus {
+    background-color: var(--background-tertiary);
 }
 
 .vc-cloud-settings-sync-grid {

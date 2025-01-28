@@ -14,8 +14,6 @@
     "typescript.preferences.quoteStyle": "double",
     "javascript.preferences.quoteStyle": "double",
 
-    "eslint.experimental.useFlatConfig": false,
-
     "gitlens.remotes": [
         {
             "domain": "codeberg.org",

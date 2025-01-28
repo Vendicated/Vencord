@@ -50,9 +50,11 @@ export let GuildMemberStore: Stores.GuildMemberStore & t.FluxStore;
 export let RelationshipStore: Stores.RelationshipStore & t.FluxStore & {
     /** Get the date (as a string) that the relationship was created */
     getSince(userId: string): string;
+    isIgnored(userId: string): boolean;
 };
 
 export let EmojiStore: t.EmojiStore;
+export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
 
@@ -66,7 +68,6 @@ export let DraftStore: t.DraftStore;
  *
  * @example const user = useStateFromStores([UserStore], () => UserStore.getCurrentUser(), null, (old, current) => old.id === current.id);
  */
-// eslint-disable-next-line prefer-destructuring
 export const useStateFromStores: t.useStateFromStores = findByCodeLazy("useStateFromStores");
 
 waitForStore("DraftStore", s => DraftStore = s);
@@ -85,3 +86,4 @@ waitForStore("GuildChannelStore", m => GuildChannelStore = m);
 waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
+waitForStore("ThemeStore", m => ThemeStore = m);

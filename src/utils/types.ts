@@ -16,10 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { ProfileBadge } from "@api/Badges";
+import { ChatBarButtonFactory } from "@api/ChatButtons";
 import { Command } from "@api/Commands";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { MarkdownRulesType, PluginMarkdownRulesType } from "@api/Markdown";
+import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
+import { MessageAccessoryFactory } from "@api/MessageAccessories";
+import { MessageDecorationFactory } from "@api/MessageDecorations";
+import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
+import { MessagePopoverButtonFactory } from "@api/MessagePopover";
 import { FluxEvents } from "@webpack/types";
+import { JSX } from "react";
 import { Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
@@ -73,13 +81,13 @@ export interface PluginDef {
     stop?(): void;
     patches?: Omit<Patch, "plugin">[];
     /**
-     * List of commands. If you specify these, you must add CommandsAPI to dependencies
+     * List of commands that your plugin wants to register
      */
     commands?: Command[];
     /**
      * A list of other plugins that your plugin depends on.
      * These will automatically be enabled and loaded before your plugin
-     * Common examples are CommandsAPI, MessageEventsAPI...
+     * Generally these will be API plugins
      */
     dependencies?: string[],
     /**
@@ -146,6 +154,20 @@ export interface PluginDef {
     rules?(r: MarkdownRulesType): PluginMarkdownRulesType;
 
     tags?: string[];
+
+    userProfileBadge?: ProfileBadge;
+
+    onMessageClick?: MessageClickListener;
+    onBeforeMessageSend?: MessageSendListener;
+    onBeforeMessageEdit?: MessageEditListener;
+
+    renderMessagePopoverButton?: MessagePopoverButtonFactory;
+    renderMessageAccessory?: MessageAccessoryFactory;
+    renderMessageDecoration?: MessageDecorationFactory;
+
+    renderMemberListDecorator?: MemberListDecoratorFactory;
+
+    renderChatBarButton?: ChatBarButtonFactory;
 }
 
 export const enum StartAt {
@@ -172,6 +194,7 @@ export const enum OptionType {
     SELECT,
     SLIDER,
     COMPONENT,
+    CUSTOM
 }
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
@@ -180,7 +203,7 @@ export type SettingsChecks<D extends SettingsDefinition> = {
     (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
 };
 
-export type PluginSettingDef = (
+export type PluginSettingDef = (PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">) | ((
     | PluginSettingStringDef
     | PluginSettingNumberDef
     | PluginSettingBooleanDef
@@ -188,7 +211,7 @@ export type PluginSettingDef = (
     | PluginSettingSliderDef
     | PluginSettingComponentDef
     | PluginSettingBigIntDef
-) & PluginSettingCommon;
+) & PluginSettingCommon);
 
 export interface PluginSettingCommon {
     description: string;
@@ -242,10 +265,16 @@ export interface PluginSettingSelectDef {
     type: OptionType.SELECT;
     options: readonly PluginSettingSelectOption[];
 }
+
 export interface PluginSettingSelectOption {
     label: string;
     value: string | number | boolean;
     default?: boolean;
+}
+
+export interface PluginSettingCustomDef {
+    type: OptionType.CUSTOM;
+    default?: any;
 }
 
 export interface PluginSettingSliderDef {
@@ -297,7 +326,9 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingSelectDef ? O["options"][number]["value"] :
     O extends PluginSettingSliderDef ? number :
     O extends PluginSettingComponentDef ? any :
+    O extends PluginSettingCustomDef ? O extends { default: infer Default; } ? Default : any :
     never;
+
 type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
     O["options"] extends { default?: boolean; }[] ? O["options"][number]["value"] : undefined
 ) : O extends { default: infer T; } ? T : undefined;
@@ -314,6 +345,8 @@ export interface DefinedSettings<
 > {
     /** Shorthand for `Vencord.Settings.plugins.PluginName`, but with typings */
     store: SettingsStore<Def> & PrivateSettings;
+    /** Shorthand for `Vencord.PlainSettings.plugins.PluginName`, but with typings */
+    plain: SettingsStore<Def> & PrivateSettings;
     /**
      * React hook for getting the settings for this plugin
      * @param filter optional filter to avoid rerenders for irrelevent settings
@@ -347,13 +380,15 @@ export type PluginOptionsItem =
     | PluginOptionBoolean
     | PluginOptionSelect
     | PluginOptionSlider
-    | PluginOptionComponent;
+    | PluginOptionComponent
+    | PluginOptionCustom;
 export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
 export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | BigInt>;
 export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
 export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
+export type PluginOptionCustom = PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">;
 
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
     [key in keyof PluginExports]:

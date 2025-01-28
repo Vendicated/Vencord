@@ -46,7 +46,7 @@ const embedUrlRe = /https:\/\/www\.youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/;
 async function embedDidMount(this: Component<Props>) {
     try {
         const { embed } = this.props;
-        const { replaceElements } = settings.store;
+        const { replaceElements, dearrowByDefault } = settings.store;
 
         if (!embed || embed.dearrow || embed.provider?.name !== "YouTube" || !embed.video?.url) return;
 
@@ -63,18 +63,22 @@ async function embedDidMount(this: Component<Props>) {
 
         if (!hasTitle && !hasThumb) return;
 
+
         embed.dearrow = {
-            enabled: true
+            enabled: dearrowByDefault
         };
 
         if (hasTitle && replaceElements !== ReplaceElements.ReplaceThumbnailsOnly) {
-            embed.dearrow.oldTitle = embed.rawTitle;
-            embed.rawTitle = titles[0].title.replace(/(^|\s)>(\S)/g, "$1$2");
-        }
+            const replacementTitle = titles[0].title.replace(/(^|\s)>(\S)/g, "$1$2");
 
+            embed.dearrow.oldTitle = dearrowByDefault ? embed.rawTitle : replacementTitle;
+            if (dearrowByDefault) embed.rawTitle = replacementTitle;
+        }
         if (hasThumb && replaceElements !== ReplaceElements.ReplaceTitlesOnly) {
-            embed.dearrow.oldThumb = embed.thumbnail.proxyURL;
-            embed.thumbnail.proxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}&time=${thumbnails[0].timestamp}`;
+            const replacementProxyURL = `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoId}&time=${thumbnails[0].timestamp}`;
+
+            embed.dearrow.oldThumb = dearrowByDefault ? embed.thumbnail.proxyURL : replacementProxyURL;
+            if (dearrowByDefault) embed.thumbnail.proxyURL = replacementProxyURL;
         }
 
         this.forceUpdate();
@@ -96,6 +100,7 @@ function DearrowButton({ component }: { component: Component<Props>; }) {
                     className={"vc-dearrow-toggle-" + (embed.dearrow.enabled ? "on" : "off")}
                     onClick={() => {
                         const { enabled, oldThumb, oldTitle } = embed.dearrow;
+                        settings.store.dearrowByDefault = !enabled;
                         embed.dearrow.enabled = !enabled;
                         if (oldTitle) {
                             embed.dearrow.oldTitle = embed.rawTitle;
@@ -153,6 +158,12 @@ const settings = definePluginSettings({
             { label: "Titles", value: ReplaceElements.ReplaceTitlesOnly },
             { label: "Thumbnails", value: ReplaceElements.ReplaceThumbnailsOnly },
         ],
+    },
+    dearrowByDefault: {
+        description: "Dearrow videos automatically",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: false
     }
 });
 

@@ -26,8 +26,7 @@
 }
 
 .vc-st-modal-header {
-    justify-content: space-between;
-    align-content: center;
+    place-content: center space-between;
 }
 
 .vc-st-modal-header h1 {

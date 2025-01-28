@@ -72,6 +72,11 @@ export interface Menu {
         onChange(value: number): void,
         renderValue?(value: number): string,
     }>;
+    MenuSearchControl: RC<{
+        query: string
+        onChange(query: string): void;
+        placeholder?: string;
+    }>;
 }
 
 export interface ContextMenuApi {

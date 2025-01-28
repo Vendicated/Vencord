@@ -24,7 +24,6 @@ export default definePlugin({
     name: "MoreKaomoji",
     description: "Adds more Kaomoji to discord. ヽ(´▽`)/",
     authors: [Devs.JacobTm],
-    dependencies: ["CommandsAPI"],
     commands: [
         { name: "dissatisfaction", description: " ＞﹏＜" },
         { name: "smug", description: "ಠ_ಠ" },

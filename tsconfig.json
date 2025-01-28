@@ -4,6 +4,7 @@
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
+        "allowJs": true,
         "lib": [
             "DOM",
             "DOM.Iterable",
@@ -37,7 +38,8 @@
                 "transform": "typescript-transform-paths",
                 "afterDeclarations": true
             }
-        ]
+        ],
+        "outDir": "who-fucking-cares-dude"
     },
-    "include": ["src/**/*", "browser/**/*", "scripts/**/*"]
+    "include": ["src/**/*", "browser/**/*", "scripts/**/*", "eslint.config.mjs"],
 }

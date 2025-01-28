@@ -24,6 +24,7 @@ import { debounce } from "@shared/debounce";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, ReactDOM } from "@webpack/common";
+import { JSX } from "react";
 import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
@@ -80,7 +81,12 @@ export const settings = definePluginSettings({
 });
 
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = children => {
+const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    // Discord re-uses the image context menu for links to for the copy and open buttons
+    if ("href" in props) return;
+    // emojis in user statuses
+    if (props.target?.classList?.contains("emoji")) return;
+
     const { square, nearestNeighbour } = settings.use(["square", "nearestNeighbour"]);
 
     children.push(
@@ -156,14 +162,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: "Messages.OPEN_IN_BROWSER",
+            find: ".contain,SCALE_DOWN:",
             replacement: {
-                // there are 2 image thingies. one for carosuel and one for the single image.
-                // so thats why i added global flag.
-                // also idk if this patch is good, should it be more specific?
-                // https://regex101.com/r/xfvNvV/1
-                match: /return.{1,200}\.wrapper.{1,200}src:\i,/g,
-                replace: `$&id: '${ELEMENT_ID}',`
+                match: /\.slide,\i\),/g,
+                replace: `$&id:"${ELEMENT_ID}",`
             }
         },
 
@@ -171,7 +173,7 @@ export default definePlugin({
             find: ".handleImageLoad)",
             replacement: [
                 {
-                    match: /placeholderVersion:\i,/,
+                    match: /placeholderVersion:\i,(?=.{0,50}children:)/,
                     replace: "...$self.makeProps(this),$&"
                 },
 
@@ -183,15 +185,13 @@ export default definePlugin({
                 {
                     match: /componentWillUnmount\(\){/,
                     replace: "$&$self.unMountMagnifier();"
+                },
+
+                {
+                    match: /componentDidUpdate\(\i\){/,
+                    replace: "$&$self.updateMagnifier(this);"
                 }
             ]
-        },
-        {
-            find: ".carouselModal",
-            replacement: {
-                match: /(?<=\.carouselModal.{0,100}onClick:)\i,/,
-                replace: "()=>{},"
-            }
         }
     ],
 
@@ -224,6 +224,11 @@ export default definePlugin({
                 this.root.render(this.currentMagnifierElement);
             }
         }
+    },
+
+    updateMagnifier(instance) {
+        this.unMountMagnifier();
+        this.renderMagnifier(instance);
     },
 
     unMountMagnifier() {
