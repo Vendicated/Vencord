@@ -5,6 +5,7 @@
  */
 
 import { Logger } from "@utils/Logger";
+import { JSX } from "react";
 import { Output, ParserRule, State } from "simple-markdown";
 
 const logger = new Logger("Markdown");
