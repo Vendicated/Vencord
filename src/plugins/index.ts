@@ -168,8 +168,9 @@ for (const p of pluginsValues) {
             }
         }
     }
-    if (p.rules && isPluginEnabled(p.name)) {
-        AddAPendingRule(p.name, p.rules);
+
+    if (p.markdownRules && isPluginEnabled(p.name)) {
+        AddAPendingRule(p.name, p.markdownRules);
     }
 }
 
