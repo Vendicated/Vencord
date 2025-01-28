@@ -36,7 +36,7 @@ export const Forms = {
 
 export const Card = waitForComponent<t.Card>("Card", filters.componentByCode(".editable),"));
 export const Button = waitForComponent<t.Button>("Button", filters.componentByCode("#{intl::A11Y_LOADING_STARTED}))),!1"));
-export const Switch = waitForComponent<t.Switch>("Switch", filters.componentByCode('viewBox:"0 0 28 20",preserveAspectRatio:"xMinYMid meet"'));
+export const Switch = waitForComponent<t.Switch>("Switch", filters.componentByCode(".labelRow,ref:", ".disabledText"));
 
 const Tooltips = mapMangledModuleLazy(".tooltipTop,bottom:", {
     Tooltip: filters.componentByCode("this.renderTooltip()]"),
