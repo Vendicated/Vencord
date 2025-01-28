@@ -11,17 +11,36 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
+import { findByCodeLazy } from "@webpack";
+import { useEffect } from "@webpack/common";
 import { PropsWithChildren } from "react";
+
+const cl = classNameFactory("vc-discord-fixes-");
+
+const fetchMemberSupplemental = findByCodeLazy('type:"FETCH_GUILD_MEMBER_SUPPLEMENTAL_SUCCESS"');
 
 type UsernameWrapperProps = PropsWithChildren<Record<string, any> & {
     className?: string;
 }>;
 
-const cl = classNameFactory("vc-discord-fixes-");
-
 const UsernameWrapper = ErrorBoundary.wrap((props: UsernameWrapperProps) => {
     return <div {...props} className={classes(cl("username-wrapper"), props.className)} />;
 }, { noop: true });
+
+type MemberSupplementalCache = Record<string, number>;
+let memberSupplementalCache = {};
+
+function setMemberSupplementalCache(cache: MemberSupplementalCache) {
+    memberSupplementalCache = cache;
+}
+
+function useFetchMemberSupplemental(guildId: string, userId: string) {
+    useEffect(() => {
+        // Set this member as unfetched in the member supplemental cache
+        memberSupplementalCache[`${guildId}-${userId}`] ??= 1;
+        fetchMemberSupplemental(guildId, [userId]);
+    }, [guildId, userId]);
+}
 
 export default definePlugin({
     name: "DiscordFixes",
@@ -63,8 +82,29 @@ export default definePlugin({
                 match: /(role:)\i(?=,guildId.{0,100}role:(\i\[))/,
                 replace: "$1$2arguments[0].member.highestRoleId]"
             }
+        },
+        // Fix mod view join method depending on loading the member in the Members page
+        {
+            find: ".MANUAL_MEMBER_VERIFICATION]:",
+            replacement: {
+                match: /useEffect\(.{0,50}\.requestMembersById\(.+?\[\i,\i\]\);(?<=userId:(\i),guildId:(\i).+?)/,
+                replace: (m, userId, guildId) => `${m}$self.useFetchMemberSupplemental(${guildId},${userId});`
+            }
+        },
+        // Fix member supplemental caching code and export cache object to use within the plugin code,
+        // there is no other way around it besides patching again
+        {
+            find: ".MEMBER_SAFETY_SUPPLEMENTAL(",
+            replacement: [
+                {
+                    match: /(let (\i)={};)(function \i\(\i,\i\){return \i\+)(\i})/,
+                    replace: (_, rest1, cache, rest2, rest3) => `${rest1}$self.setMemberSupplementalCache(${cache});${rest2}"-"+${rest3}`
+                }
+            ]
         }
     ],
 
-    UsernameWrapper
+    UsernameWrapper,
+    setMemberSupplementalCache,
+    useFetchMemberSupplemental
 });
