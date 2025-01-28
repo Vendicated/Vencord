@@ -56,11 +56,14 @@ export const filters = {
             : m => props.every(p => m[p] !== void 0),
 
     byCode: (...code: CodeFilter): FilterFn => {
-        code = code.map(canonicalizeMatch);
-        return m => {
+        const parsedCode = code.map(canonicalizeMatch);
+        const filter = m => {
             if (typeof m !== "function") return false;
-            return stringMatches(Function.prototype.toString.call(m), code);
+            return stringMatches(Function.prototype.toString.call(m), parsedCode);
         };
+
+        filter.$$vencordProps = [...code];
+        return filter;
     },
     byStoreName: (name: StoreNameFilter): FilterFn => m =>
         m.constructor?.displayName === name,
