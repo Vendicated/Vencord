@@ -14,10 +14,12 @@ export default definePlugin({
 
     patches: [
         {
-            find: "\"sticker\")",
+            find: '"sticker")',
             replacement: {
-                match: /return\(\i\.\i\|\|(?=\(\i\.isDM.+?(\i)\.push)/,
-                replace: "$&(Vencord.Api.ChatButtons._injectButtons($1,arguments[0]),false)||"
+                match: /return\((!)?\i\.\i(?:\|\||&&)(?=\(\i\.isDM.+?(\i)\.push)/,
+                replace: (m, not, children) => not
+                    ? `${m}(Vencord.Api.ChatButtons._injectButtons(${children},arguments[0]),true)&&`
+                    : `${m}(Vencord.Api.ChatButtons._injectButtons(${children},arguments[0]),false)||`
             }
         }
     ]
