@@ -80,7 +80,7 @@ function hslToHex(hue, saturation, lightness) {
     const f = n => {
         const k = (n + hue / 30) % 12;
         const color = lightness - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-        return Math.round(255 * color).toString(16).padStart(2, '0');   // convert to Hex and prefix "0" if needed
+        return Math.round(255 * color).toString(16).padStart(2, "0"); // convert to Hex and prefix "0" if needed
     };
     return `#${f(0)}${f(8)}${f(4)}`;
 }
@@ -177,9 +177,9 @@ export default definePlugin({
     ],
     getColorString(userId: string, channelOrGuildId: string) {
         try {
-            if (Vencord.Plugins.isPluginEnabled('IrcColors')) {
+            if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
                 // @ts-ignore
-                const { hue, saturation, lightness } = Vencord.Plugins.plugins['IrcColors'].calculateHSLforId(userId);
+                const { hue, saturation, lightness } = Vencord.Plugins.plugins.IrcColors.calculateHSLforId(userId);
                 return hslToHex(hue, saturation, lightness);
             }
 
