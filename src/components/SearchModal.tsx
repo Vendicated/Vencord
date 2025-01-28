@@ -66,7 +66,7 @@ interface DestinationItem {
 interface UnspecificRowProps {
     key: string;
     destination: DestinationItem,
-    rowMode: string;
+    rowMode: string,
     disabled: boolean,
     isSelected: boolean,
     onPressDestination: (destination: DestinationItem) => void,
