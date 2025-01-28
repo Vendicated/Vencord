@@ -156,7 +156,7 @@ function searchTypeToText(type: SearchType) {
  *
  * @param {SearchModalProps} props - The props for the SearchModal component.
  * @param {ModalProps} props.modalProps - The modal props. You get these from the `openModal` function.
- * @param {function} props.onSubmit - The function to call when the user submits their selection.
+ * @param {function} props.onSubmit - Callback function invoked when the user submits their selection.
  * @param {string} [props.input] - The initial input value for the search bar.
  * @param {SearchType} [props.searchType="ALL"] - The type of items to search for.
  * @param {string} [props.subText] - Additional text to display below the heading.
