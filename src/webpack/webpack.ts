@@ -131,8 +131,7 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
             return isWaitFor ? [found, key] : found;
         }
 
-        // the length check makes search about 20% faster
-        for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
+        for (const nestedMod in mod.exports) {
             const nested = mod.exports[nestedMod];
             if (nested && filter(nested)) {
                 return isWaitFor ? [nested, key] : nested;
@@ -163,7 +162,7 @@ export function findAll(filter: FilterFn) {
 
         if (mod.exports.default && filter(mod.exports.default))
             ret.push(mod.exports.default);
-        else for (const nestedMod in mod.exports) if (nestedMod.length <= 3) {
+        else for (const nestedMod in mod.exports) {
             const nested = mod.exports[nestedMod];
             if (nested && filter(nested)) ret.push(nested);
         }
@@ -226,16 +225,15 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
                 break;
             }
 
-            for (const nestedMod in mod.exports)
-                if (nestedMod.length <= 3) {
-                    const nested = mod.exports[nestedMod];
-                    if (nested && filter(nested)) {
-                        results[j] = nested;
-                        filters[j] = undefined;
-                        if (++found === length) break outer;
-                        continue outer;
-                    }
+            for (const nestedMod in mod.exports) {
+                const nested = mod.exports[nestedMod];
+                if (nested && filter(nested)) {
+                    results[j] = nested;
+                    filters[j] = undefined;
+                    if (++found === length) break outer;
+                    continue outer;
                 }
+            }
         }
     }
 
