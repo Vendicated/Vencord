@@ -46,8 +46,9 @@ export default definePlugin({
             find: "#{intl::ONBOARDING_CHANNEL_THRESHOLD_WARNING}",
             replacement: [
                 {
-                    match: /{(\i:function\(\){return \i},?){2}}/,
-                    replace: m => m.replaceAll(canonicalizeMatch(/return \i/g), "return ()=>Promise.resolve(true)")
+                    // why in the world are these arrow funcitons
+                    match: /{(\i:\(\)=>\i,?){2}}/,
+                    replace: m => m.replaceAll(canonicalizeMatch(/\(\)=>\i/g), "()=>()=>Promise.resolve(true)")
                 }
             ],
             predicate: () => settings.store.onboarding
