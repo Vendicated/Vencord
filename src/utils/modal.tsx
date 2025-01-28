@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, findByPropsLazy, findModuleId, mapMangledModuleLazy, proxyLazyWebpack, wreq } from "@webpack";
+import { filters, findModuleId, mapMangledModuleLazy, proxyLazyWebpack, wreq } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
@@ -49,7 +49,7 @@ export interface ModalOptions {
 
 type RenderFunction = (props: ModalProps) => ReactNode | Promise<ReactNode>;
 
-export const Modals = findByPropsLazy("ModalRoot", "ModalCloseButton") as {
+interface Modals {
     ModalRoot: ComponentType<PropsWithChildren<{
         transitionState: ModalTransitionState;
         size?: ModalSize;
@@ -99,7 +99,21 @@ export const Modals = findByPropsLazy("ModalRoot", "ModalCloseButton") as {
         hideOnFullscreen?: boolean;
         className?: string;
     }>;
-};
+}
+
+const Modals: Modals = mapMangledModuleLazy(':"thin")', {
+    ModalRoot: filters.byCode('.MODAL,"aria-labelledby":'),
+    ModalHeader: filters.byCode(",id:"),
+    ModalContent: filters.byCode(".content,"),
+    ModalFooter: filters.byCode(".footer,"),
+    ModalCloseButton: filters.byCode(".close]:")
+});
+
+export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
+export const ModalHeader = LazyComponent(() => Modals.ModalHeader);
+export const ModalContent = LazyComponent(() => Modals.ModalContent);
+export const ModalFooter = LazyComponent(() => Modals.ModalFooter);
+export const ModalCloseButton = LazyComponent(() => Modals.ModalCloseButton);
 
 export type MediaModalItem = {
     url: string;
@@ -134,12 +148,6 @@ export const openMediaModal: (props: MediaModalProps) => void = proxyLazyWebpack
     const openMediaModalModule = wreq(findModuleId(mediaModalKeyModuleId, "modalKey:") as any);
     return Object.values<any>(openMediaModalModule).find(v => String(v).includes("modalKey:"));
 });
-
-export const ModalRoot = LazyComponent(() => Modals.ModalRoot);
-export const ModalHeader = LazyComponent(() => Modals.ModalHeader);
-export const ModalContent = LazyComponent(() => Modals.ModalContent);
-export const ModalFooter = LazyComponent(() => Modals.ModalFooter);
-export const ModalCloseButton = LazyComponent(() => Modals.ModalCloseButton);
 
 interface ModalAPI {
     /**
