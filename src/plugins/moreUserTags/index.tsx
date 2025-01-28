@@ -42,7 +42,7 @@ export default definePlugin({
             replacement: {
                 match: /(?<=let (\i).{1,500}.isSystemDM.{0,350}),null==(\i\))(?=.{1,30}?null:)/,
                 replace:
-                    ',($1=$self.getTag({...arguments[0],location:"chat",origType:$1}))$&',
+                    ",($1=$self.getTag({...arguments[0],isChat:true,origType:$1}))$&",
             },
         },
         // Make discord actually use our tags
@@ -60,7 +60,25 @@ export default definePlugin({
             find: ".lostPermission)",
             replacement: {
                 match: /(?<=return .{0,20})\.bot?(?=.{0,100}type:(\i))/,
-                replace: "&& ($1=$self.getTag({...arguments[0],location:'non-chat',origType:$1}))"
+                replace: "&& ($1=$self.getTag({...arguments[0],isChat:false,origType:$1}))"
+            }
+        },
+
+        // Next both 2 patches are goint together
+        // First one passes down the react dom channelId which is required to get tag
+        // Second one actually gets/displays it
+        {
+            find: ".hasAvatarForGuild(null==",
+            replacement: {
+                match: /user:\i,(?=.{0,50}.BITE_SIZE)/,
+                replace: "$&channelId:arguments[0].channelId,"
+            },
+        },
+        {
+            find: ".clickableUsername",
+            replacement: {
+                match: /null!=(\i)(?=.{0,100}type:\i)/,
+                replace: "($1=$self.getTag({...arguments[0],isChat:false,origType:$1}),$1!==null)"
             }
         }
     ],
@@ -87,18 +105,18 @@ export default definePlugin({
     },
 
     getTag({
-        message, user, channelId, origType, location, channel
+        message, user, channelId, origType, isChat, channel, ...rest
     }: {
         message?: Message,
         user: User & { isClyde(): boolean; },
         channel?: Channel & { isForumPost(): boolean; isMediaPost(): boolean; },
         channelId?: string;
         origType?: number;
-        location: "chat" | "not-chat";
+        isChat?: boolean;
     }): number | null {
         if (!user)
             return null;
-        if (location === "chat" && user.id === "1")
+        if (isChat && user.id === "1")
             return Tag.Types.OFFICIAL;
         if (user.isClyde())
             return Tag.Types.AI;
@@ -112,9 +130,9 @@ export default definePlugin({
         const perms = this.getPermissions(user, channel);
 
         for (const tag of tags) {
-            if (location === "chat" && !settings.tagSettings[tag.name].showInChat)
+            if (isChat && !settings.tagSettings[tag.name].showInChat)
                 continue;
-            if (location === "not-chat" && !settings.tagSettings[tag.name].showInNotChat)
+            if (!isChat && !settings.tagSettings[tag.name].showInNotChat)
                 continue;
 
             // If the owner tag is disabled, and the user is the owner of the guild,
@@ -123,9 +141,9 @@ export default definePlugin({
                 (tag.name !== "OWNER" &&
                     GuildStore.getGuild(channel?.guild_id)?.ownerId ===
                     user.id &&
-                    location === "chat" &&
+                    isChat &&
                     !settings.tagSettings.OWNER.showInChat) ||
-                (location === "not-chat" &&
+                (!isChat &&
                     !settings.tagSettings.OWNER.showInNotChat)
             )
                 continue;
