@@ -70,7 +70,7 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const { useStatusFillColor } = mapMangledModuleLazy(".DIAGONAL_FACEPILE_16,typing:", {
+const { useStatusFillColor } = mapMangledModuleLazy(".concat(.5625*", {
     useStatusFillColor: filters.byCode(".hex")
 });
 
