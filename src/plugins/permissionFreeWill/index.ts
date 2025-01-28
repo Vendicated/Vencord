@@ -48,7 +48,7 @@ export default definePlugin({
                 {
                     // why in the world are these arrow funcitons
                     match: /{(?:\i:(?:function\(\){return |\(\)=>)\i){2}}/,
-                    replace: m => m.replaceAll(canonicalizeMatch(/\(\)=>\i/g), "()=>()=>Promise.resolve(true)")
+                    replace: m => m.replaceAll(canonicalizeMatch(/(?:function\(\){return |\(\)=>)\i/g), "()=>()=>Promise.resolve(true)")
                 }
             ],
             predicate: () => settings.store.onboarding
