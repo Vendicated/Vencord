@@ -46,7 +46,7 @@ export default definePlugin({
             find: "#{intl::ONBOARDING_CHANNEL_THRESHOLD_WARNING}",
             replacement: [
                 {
-                    match: /{(?:\i:(?:function\(\){return |\(\)=>)\i[,}]){2}}/,
+                    match: /{(?:\i:(?:function\(\){return |\(\)=>)\i[,}]?){2}}/,
                     replace: m => m.replaceAll(canonicalizeMatch(/(?:function\(\){return |\(\)=>)\i/g), "()=>()=>Promise.resolve(true)")
                 }
             ],
