@@ -108,8 +108,10 @@ export default definePlugin({
                 },
                 {
                     // Prevent Discord from trying to connect to hidden voice channels
-                    match: /(?=\|\|\i\.\i\.selectVoiceChannel\((\i)\.id\))/,
-                    replace: (_, channel) => `||$self.isHiddenChannel(${channel})`
+                    match: /(?=(\|\||&&)\i\.\i\.selectVoiceChannel\((\i)\.id\))/,
+                    replace: (_, condition, channel) => condition === "||"
+                        ? `||$self.isHiddenChannel(${channel})`
+                        : `&&!$self.isHiddenChannel(${channel})`
                 },
                 {
                     // Make Discord show inside the channel if clicking on a hidden or locked channel
@@ -122,8 +124,10 @@ export default definePlugin({
         {
             find: ".AUDIENCE),{isSubscriptionGated",
             replacement: {
-                match: /(\i)\.isRoleSubscriptionTemplatePreviewChannel\(\)/,
-                replace: (m, channel) => `${m}||$self.isHiddenChannel(${channel})`
+                match: /(!)?(\i)\.isRoleSubscriptionTemplatePreviewChannel\(\)/,
+                replace: (m, not, channel) => not
+                    ? `${m}&&!$self.isHiddenChannel(${channel})`
+                    : `${m}||$self.isHiddenChannel(${channel})`
             }
         },
         {
