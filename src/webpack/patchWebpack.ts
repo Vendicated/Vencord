@@ -179,7 +179,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                     // There are (at the time of writing) 11 modules exporting the window,
                     // and also modules exporting DOMTokenList, which breaks webpack finding
                     // Make these non enumerable to improve search performance and avoid erros
-                    if (exports === window) {
+                    if (exports === window || exports[Symbol.toStringTag] === "DOMTokenList") {
                         shouldMakeNonEnumerable = true;
                         break nonEnumerableChecking;
                     }
@@ -188,19 +188,15 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                         break nonEnumerableChecking;
                     }
 
-                    if (exports instanceof DOMTokenList) {
-                        shouldMakeNonEnumerable = true;
-                        break nonEnumerableChecking;
-                    }
-
-                    if (exports.default === window || exports.default instanceof DOMTokenList) {
+                    if (exports.default === window || exports.default?.[Symbol.toStringTag] === "DOMTokenList") {
                         shouldMakeNonEnumerable = true;
                         break nonEnumerableChecking;
                     }
 
                     for (const nested in exports) {
-                        if (exports[nested] === window || exports[nested] instanceof DOMTokenList) {
+                        if (exports[nested] === window || exports[nested]?.[Symbol.toStringTag] === "DOMTokenList") {
                             shouldMakeNonEnumerable = true;
+                            break nonEnumerableChecking;
                         }
                     }
                 }
