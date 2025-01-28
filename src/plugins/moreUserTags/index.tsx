@@ -31,24 +31,16 @@ const genTagTypes = () => {
 
 export default definePlugin({
     name: "MoreUserTags",
-    description:
-        "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
-    authors: [
-        Devs.Cyn,
-        Devs.TheSun,
-        Devs.RyanCaoDev,
-        Devs.LordElias,
-        Devs.AutumnVN,
-        Devs.hen,
-    ],
+    description: "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
+    authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN, Devs.hen],
     settings,
     patches: [
         // Render Tags in messages
         // Maybe there is a better way to catch this horror
         {
-            find: ".Types.ORIGINAL_POSTER",
+            find: ".isVerifiedBot(),hideIcon:",
             replacement: {
-                match: /(?<=let (\i).{1,200}children:\i}=\i;.{0,100}.isSystemDM.{0,350}),null==\i\)(?=.{1,30}?null:)/,
+                match: /(?<=let (\i).{1,500}.isSystemDM.{0,350}),null==(\i\))(?=.{1,30}?null:)/,
                 replace:
                     ',($1=$self.getTag({...arguments[0],location:"chat",origType:$1}))$&',
             },
@@ -61,6 +53,16 @@ export default definePlugin({
                 replace: "default:$2=$self.getTagText($self.localTags[$1]);",
             },
         },
+        // Member list
+        // In the current state it makes smth like
+        // null != U && U && ($1=blahblahblah)
+        {
+            find: ".lostPermission)",
+            replacement: {
+                match: /(?<=return .{0,20})\.bot?(?=.{0,100}type:(\i))/,
+                replace: "&& ($1=$self.getTag({...arguments[0],location:'non-chat',origType:$1}))"
+            }
+        }
     ],
     localTags: genTagTypes(),
 
@@ -110,15 +112,9 @@ export default definePlugin({
         const perms = this.getPermissions(user, channel);
 
         for (const tag of tags) {
-            if (
-                location === "chat" &&
-                !settings.tagSettings[tag.name].showInChat
-            )
+            if (location === "chat" && !settings.tagSettings[tag.name].showInChat)
                 continue;
-            if (
-                location === "not-chat" &&
-                !settings.tagSettings[tag.name].showInNotChat
-            )
+            if (location === "not-chat" && !settings.tagSettings[tag.name].showInNotChat)
                 continue;
 
             // If the owner tag is disabled, and the user is the owner of the guild,
@@ -126,7 +122,7 @@ export default definePlugin({
             if (
                 (tag.name !== "OWNER" &&
                     GuildStore.getGuild(channel?.guild_id)?.ownerId ===
-                        user.id &&
+                    user.id &&
                     location === "chat" &&
                     !settings.tagSettings.OWNER.showInChat) ||
                 (location === "not-chat" &&
@@ -135,26 +131,24 @@ export default definePlugin({
                 continue;
 
             if (
-                tag.permissions?.some((perm) => perms.includes(perm)) ||
+                tag.permissions?.some(perm => perms.includes(perm)) ||
                 tag.condition?.(message!, user, channel)
             ) {
-                console.log("TAGS HELP", tag, this.localTags);
-                if (
-                    (channel.isForumPost() || channel.isMediaPost()) &&
-                    channel.ownerId === user.id
-                )
+                if ((channel.isForumPost() || channel.isMediaPost()) && channel.ownerId === user.id)
                     type = this.localTags[`${tag.name}-OP`];
+
                 else if (
                     user.bot &&
                     !isWebhook(message!, user) &&
                     !settings.dontShowBotTag
                 )
                     type = this.localTags[`${tag.name}-BOT`];
+
                 else type = this.localTags[tag.name];
                 break;
             }
         }
-        console.log("TAGS", type);
+
         return type;
     },
     getPermissions(user: User, channel: Channel): string[] {
