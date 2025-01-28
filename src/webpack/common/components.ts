@@ -36,7 +36,7 @@ export const Forms = {
 
 export const Card = waitForComponent<t.Card>("Card", filters.componentByCode(".editable),"));
 export const Button = waitForComponent<t.Button>("Button", filters.componentByCode("#{intl::A11Y_LOADING_STARTED}))),!1"));
-export const Switch = waitForComponent<t.Switch>("Switch", filters.componentByCode('("Switch")'));
+export const Switch = waitForComponent<t.Switch>("Switch", filters.componentByCode('viewBox:"0 0 28 20",preserveAspectRatio:"xMinYMid meet"'));
 
 const Tooltips = mapMangledModuleLazy(".tooltipTop,bottom:", {
     Tooltip: filters.componentByCode("this.renderTooltip()]"),
@@ -74,8 +74,16 @@ export const FocusLock = LazyComponent(() => FocusLock_);
 
 export let ButtonLooks: t.ButtonLooks;
 waitFor(["BLANK", "FILLED", "LINK"], m => ButtonLooks = m);
+
 export let useToken: t.useToken;
-waitFor(filters.byCode('("useToken")'), m => useToken = m);
+waitFor(m => {
+    if (typeof m !== "function") {
+        return false;
+    }
+
+    const str = String(m);
+    return str.includes(".resolve({theme:null") && !str.includes("useMemo");
+}, m => useToken = m);
 
 export const MaskedLink = waitForComponent<t.MaskedLink>("MaskedLink", filters.componentByCode("MASKED_LINK)"));
 export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.componentByCode("#{intl::MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL}"));
