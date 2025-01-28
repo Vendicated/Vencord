@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByPropsLazy, findModuleId, proxyLazyWebpack, wreq } from "@webpack";
+import { filters, findByPropsLazy, findModuleId, mapMangledModuleLazy, proxyLazyWebpack, wreq } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
@@ -141,32 +141,33 @@ export const ModalContent = LazyComponent(() => Modals.ModalContent);
 export const ModalFooter = LazyComponent(() => Modals.ModalFooter);
 export const ModalCloseButton = LazyComponent(() => Modals.ModalCloseButton);
 
-export const ModalAPI = findByPropsLazy("openModalLazy");
+interface ModalAPI {
+    /**
+     * Wait for the render promise to resolve, then open a modal with it.
+     * This is equivalent to render().then(openModal)
+     * You should use the Modal components exported by this file
+     */
+    openModalLazy: (render: () => Promise<RenderFunction>, options?: ModalOptions & { contextKey?: string; }) => Promise<string>;
+    /**
+     * Open a Modal with the given render function.
+     * You should use the Modal components exported by this file
+     */
+    openModal: (render: RenderFunction, options?: ModalOptions, contextKey?: string) => string;
+    /**
+     * Close a modal by its key
+     */
+    closeModal: (modalKey: string, contextKey?: string) => void;
+    /**
+     * Close all open modals
+     */
+    closeAllModals: () => void;
+}
 
-/**
- * Wait for the render promise to resolve, then open a modal with it.
- * This is equivalent to render().then(openModal)
- * You should use the Modal components exported by this file
- */
-export const openModalLazy: (render: () => Promise<RenderFunction>, options?: ModalOptions & { contextKey?: string; }) => Promise<string>
-    = proxyLazyWebpack(() => ModalAPI.openModalLazy);
+export const ModalAPI: ModalAPI = mapMangledModuleLazy(".modalKey?", {
+    openModalLazy: filters.byCode(".modalKey?"),
+    openModal: filters.byCode(",instant:"),
+    closeModal: filters.byCode(".onCloseCallback()"),
+    closeAllModals: filters.byCode(".getState();for")
+});
 
-/**
- * Open a Modal with the given render function.
- * You should use the Modal components exported by this file
- */
-export const openModal: (render: RenderFunction, options?: ModalOptions, contextKey?: string) => string
-    = proxyLazyWebpack(() => ModalAPI.openModal);
-
-/**
- * Close a modal by its key
- */
-export const closeModal: (modalKey: string, contextKey?: string) => void
-    = proxyLazyWebpack(() => ModalAPI.closeModal);
-
-/**
- * Close all open modals
- */
-export const closeAllModals: () => void
-    = proxyLazyWebpack(() => ModalAPI.closeAllModals);
-
+export const { openModalLazy, openModal, closeModal, closeAllModals } = ModalAPI;
