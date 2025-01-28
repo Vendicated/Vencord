@@ -223,6 +223,11 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
 export function migratePluginSetting(pluginName: string, oldSetting: string, newSetting: string) {
     const { plugins } = SettingsStore.plain;
 
+    if (
+        plugins[pluginName][newSetting] != null ||
+        plugins[pluginName][oldSetting] == null
+    ) return;
+
     plugins[pluginName][newSetting] = plugins[pluginName][oldSetting];
     delete plugins[pluginName][oldSetting];
     SettingsStore.markAsChanged();
