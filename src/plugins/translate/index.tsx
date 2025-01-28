@@ -105,12 +105,10 @@ export default definePlugin({
         
             let translatedContent = trans.text;
         
-            if (matches) {
-                matches.forEach((url) => {
-                    const hash = h64(url).toString(16);
-                    translatedContent = translatedContent.replaceAll(hash, url); 
-                });
-            }
+            matches?.forEach(url => {
+                const hash = h64(url).toString(16);
+                translatedContent = translatedContent.replaceAll(hash, url); 
+            });
         
             message.content = translatedContent;
         });
