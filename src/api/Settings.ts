@@ -224,8 +224,8 @@ export function migratePluginSetting(pluginName: string, oldSetting: string, new
     const { plugins } = SettingsStore.plain;
 
     if (
-        plugins[pluginName][newSetting] != null ||
-        plugins[pluginName][oldSetting] == null
+        plugins?.[pluginName]?.[oldSetting] == null ||
+        plugins[pluginName][newSetting] != null
     ) return;
 
     plugins[pluginName][newSetting] = plugins[pluginName][oldSetting];
