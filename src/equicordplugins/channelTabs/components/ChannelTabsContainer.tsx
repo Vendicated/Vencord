@@ -6,7 +6,8 @@
 
 import { classNameFactory } from "@api/Styles";
 import { useForceUpdater } from "@utils/react";
-import { Button, ContextMenuApi, Flex, FluxDispatcher, Forms, Icons, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
+import { findByPropsLazy } from "@webpack";
+import { Button, ContextMenuApi, Flex, FluxDispatcher, Forms, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
 import { BasicChannelTabsProps, ChannelTabsProps, createTab, handleChannelSwitch, openedTabs, openStartupTabs, saveTabs, settings, setUpdaterFunction, useGhostTabs } from "../util";
 import BookmarkContainer from "./BookmarkContainer";
@@ -15,7 +16,7 @@ import { BasicContextMenu } from "./ContextMenus";
 
 type TabSet = Record<string, ChannelTabsProps[]>;
 
-const { PlusSmallIcon } = Icons;
+const { PlusSmallIcon } = findByPropsLazy("PlusSmallIcon");
 const cl = classNameFactory("vc-channeltabs-");
 
 export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
