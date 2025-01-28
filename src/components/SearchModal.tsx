@@ -64,14 +64,14 @@ interface DestinationItem {
 }
 
 interface UnspecificRowProps {
-    key: string
+    key: string;
     destination: DestinationItem,
-    rowMode: string
+    rowMode: string;
     disabled: boolean,
     isSelected: boolean,
     onPressDestination: (destination: DestinationItem) => void,
     "aria-posinset": number,
-    "aria-setsize": number
+    "aria-setsize": number;
 }
 
 interface SpecificRowProps extends UnspecificRowProps {
@@ -113,8 +113,18 @@ interface GuildResult {
 }
 
 type Result = UserResult | ChannelResult | GuildResult;
+type SearchType = ("USERS" | "CHANNELS" | "GUILDS")[] | "USERS" | "CHANNELS" | "GUILDS" | "ALL";
 
-const searchTypesToResultTypes = (type: string | string[]) => {
+export interface SearchModalProps {
+    modalProps: ModalProps;
+    onSubmit(selected: DestinationItem[]): void;
+    input?: string;
+    searchType?: SearchType;
+    subText?: string;
+    excludeIds?: string[],
+}
+
+const searchTypesToResultTypes = (type: SearchType) => {
     if (type === "ALL") return ["USER", "TEXT_CHANNEL", "VOICE_CHANNEL", "GROUP_DM", "GUILD"];
     if (typeof type === "string") {
         if (type === "USERS") return ["USER"];
@@ -125,10 +135,10 @@ const searchTypesToResultTypes = (type: string | string[]) => {
     }
 };
 
-function searchTypeToText(type: string | string[]) {
+function searchTypeToText(type: SearchType) {
     if (type === undefined || type === "ALL") return "Users, Channels, and Servers";
     if (typeof type === "string") {
-        if (type === "GUILD") return "Servers";
+        if (type === "GUILDS") return "Servers";
         else return type.charAt(0) + type.slice(1).toLowerCase();
     } else {
         if (type.length === 1) {
@@ -144,23 +154,17 @@ function searchTypeToText(type: string | string[]) {
 /**
  * SearchModal component for displaying a modal with search functionality, built after Discord's forwarding Modal.
  *
- * @param {Object} props - The props for the SearchModal component.
- * @param {ModalProps} props.modalProps - The modal props.
+ * @param {SearchModalProps} props - The props for the SearchModal component.
+ * @param {ModalProps} props.modalProps - The modal props. You get these from the `openModal` function.
  * @param {function} props.onSubmit - The function to call when the user submits their selection.
  * @param {string} [props.input] - The initial input value for the search bar.
- * @param {("USERS" | "CHANNELS" | "GUILDS")[] | "USERS" | "CHANNELS" | "GUILDS" | "ALL"} [props.searchType="ALL"] - The type of items to search for.
+ * @param {SearchType} [props.searchType="ALL"] - The type of items to search for.
  * @param {string} [props.subText] - Additional text to display below the heading.
  * @param {string[]} [props.excludeIds] - An array of IDs to exclude from the search results.
  * @returns The rendered SearchModal component.
  */
-export default function SearchModal({ modalProps, onSubmit, input, searchType = "ALL", subText, excludeIds }: {
-    modalProps: ModalProps;
-    onSubmit(selected: DestinationItem[]): void;
-    input?: string;
-    searchType?: ("USERS" | "CHANNELS" | "GUILDS")[] | "USERS" | "CHANNELS" | "GUILDS" | "ALL";
-    subText?: string
-    excludeIds?: string[],
-}) {
+export default function SearchModal({ modalProps, onSubmit, input, searchType = "ALL", subText, excludeIds }: SearchModalProps) {
+
     const UserIcon = React.memo(function ({
         user,
         size = SearchBarModule.AvatarSizes.SIZE_32,
@@ -253,14 +257,14 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
         return (
             <Row {...otherProps}
-                 icon={<UserIcon
-                     aria-hidden={true}
-                     size={SearchBarModule.AvatarSizes.SIZE_32}
-                     user={user}
-                     status={userStatus}
-                 />}
-                 label={nickname ?? username}
-                 subLabel={userTag}
+                icon={<UserIcon
+                    aria-hidden={true}
+                    size={SearchBarModule.AvatarSizes.SIZE_32}
+                    user={user}
+                    status={userStatus}
+                />}
+                label={nickname ?? username}
+                subLabel={userTag}
             />
         );
     }
@@ -321,13 +325,13 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
         return (
             <Row {...otherProps}
-                 icon={<SearchBarModule.Avatar
-                     src={guildIcon}
-                     size={SearchBarModule.AvatarSizes.SIZE_32}
-                     aria-hidden={true}
-                 />}
-                 label={guildName}
-                 subLabel={""}
+                icon={<SearchBarModule.Avatar
+                    src={guildIcon}
+                    size={SearchBarModule.AvatarSizes.SIZE_32}
+                    aria-hidden={true}
+                />}
+                label={guildName}
+                subLabel={""}
             />
         );
     }
@@ -352,10 +356,10 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
         return (
             <Row {...otherProps}
-                 icon={<GroupDMAvatars aria-hidden={true} size={SearchBarModule.AvatarSizes.SIZE_32}
-                                       channel={channel}/>}
-                 label={label}
-                 subLabel={subLabelValue}
+                icon={<GroupDMAvatars aria-hidden={true} size={SearchBarModule.AvatarSizes.SIZE_32}
+                    channel={channel} />}
+                label={label}
+                subLabel={subLabelValue}
             />
         );
     }
@@ -396,7 +400,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         hasQuery: boolean;
         frequentChannels: Channel[];
         channelHistory: string[];
-        guilds: GuildResult[]
+        guilds: GuildResult[];
     }): Result[] {
         const removeDuplicates = (arr: Result[]): Result[] => {
             const clean: any[] = [];
@@ -422,7 +426,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
         return removeDuplicates(
             [...(selected.length > 0 ? selected.map(e => getItem(e)) : []),
-                ...recentDestinations
+            ...recentDestinations
             ]);
     }
 
@@ -433,39 +437,39 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         return ref_.current;
     }
 
-    function getSearchHandler(searchOptions: Record<string, any>): { search: (e: { query: string, resultTypes: string[] }) => void, results: Result[], query: string } {
-        const [results, setResults] = useState<{ results: Result[], query: string }>({
+    function getSearchHandler(searchOptions: Record<string, any>): { search: (e: { query: string, resultTypes: string[]; }) => void, results: Result[], query: string; } {
+        const [results, setResults] = useState<{ results: Result[], query: string; }>({
             results: [],
             query: ""
         });
 
         const searchHandler: InstanceType<typeof SearchHandler> = getRef(() => {
-                const searchHandler = new SearchHandler((r: Result[], q: string) => {
-                        setResults({
-                            results: r,
-                            query: q
-                        });
-                    }
-                );
-                searchHandler.setLimit(20);
-                searchHandler.search("");
-                return searchHandler;
+            const searchHandler = new SearchHandler((r: Result[], q: string) => {
+                setResults({
+                    results: r,
+                    query: q
+                });
             }
+            );
+            searchHandler.setLimit(20);
+            searchHandler.search("");
+            return searchHandler;
+        }
         );
         useEffect(() => () => searchHandler.destroy(), [searchHandler]);
         useEffect(() => {
-                searchOptions != null && searchOptions !== searchHandler.options && searchHandler.setOptions(searchOptions);
-            }, [searchHandler, searchOptions]
+            searchOptions != null && searchOptions !== searchHandler.options && searchHandler.setOptions(searchOptions);
+        }, [searchHandler, searchOptions]
         );
         return {
             search: useCallback(e => {
-                    const { query, resultTypes } = e;
-                    if (searchHandler.resultTypes == null || !(resultTypes.length === searchHandler.resultTypes.size && resultTypes.every(e => searchHandler.resultTypes.has(e)))) {
-                        searchHandler.setResultTypes(resultTypes);
-                        searchHandler.setLimit(resultTypes.length === 1 ? 50 : 20);
-                    }
-                    searchHandler.search(query.trim() === "" ? "" : query);
+                const { query, resultTypes } = e;
+                if (searchHandler.resultTypes == null || !(resultTypes.length === searchHandler.resultTypes.size && resultTypes.every(e => searchHandler.resultTypes.has(e)))) {
+                    searchHandler.setResultTypes(resultTypes);
+                    searchHandler.setLimit(resultTypes.length === 1 ? 50 : 20);
                 }
+                searchHandler.search(query.trim() === "" ? "" : query);
+            }
                 , [searchHandler]),
             ...results
         };
@@ -530,11 +534,11 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
     const rowHeight = useCallback(() => 48, []);
 
-    function ModalScroller({ rowData, handleToggleDestination, paddingBottom, paddingTop }: { rowData: Result[], handleToggleDestination: (destination: DestinationItem) => void, paddingBottom?: number, paddingTop?: number }) {
+    function ModalScroller({ rowData, handleToggleDestination, paddingBottom, paddingTop }: { rowData: Result[], handleToggleDestination: (destination: DestinationItem) => void, paddingBottom?: number, paddingTop?: number; }) {
 
         const sectionCount: number[] = useMemo(() => [rowData.length], [rowData.length]);
 
-        const callback = useCallback((e: { section: number, row: number }) => {
+        const callback = useCallback((e: { section: number, row: number; }) => {
             const { section, row } = e;
             if (section > 0)
                 return;
@@ -580,7 +584,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             sections={sectionCount}
             sectionHeight={0}
             renderRow={callback}
-            rowHeight={rowHeight}/>;
+            rowHeight={rowHeight} />;
     }
 
 
@@ -612,11 +616,11 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                 <div className={cl("header-text")}>
                     <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                         <Heading variant="heading-lg/semibold"
-                                 style={{ flexGrow: 1 }}>{"Search for " + searchTypeToText(searchType)}</Heading>
+                            style={{ flexGrow: 1 }}>{"Search for " + searchTypeToText(searchType)}</Heading>
                         {subText !== undefined && <Heading variant="heading-sm/normal"
-                                                           style={{ color: "var(--header-muted)" }}>{subText}</Heading>}
+                            style={{ color: "var(--header-muted)" }}>{subText}</Heading>}
                     </div>
-                    <ModalCloseButton onClick={modalProps.onClose}/>
+                    <ModalCloseButton onClick={modalProps.onClose} />
                 </div>
                 <SearchBarWrapper.SearchBar
                     size={SearchBarModule.SearchBar.Sizes.MEDIUM}
@@ -639,26 +643,26 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                     rowData={results}
                     handleToggleDestination={setSelectedCallback}
                 /> : <ModalContent className={cl("no-results")}>
-                        <div className={cl("no-results-container")}>
-                            <svg
-                                width="48"
-                                height="48"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                            >
-                                <path
-                                    d="M18 6L6 18M6 6L18 18"
-                                    stroke="var(--text-muted)"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                            </svg>
-                            <Text
-                                variant="text-md/normal"
-                                style={{ color: "var(--text-muted)", marginLeft: "8px" }}
-                            >No results found</Text>
-                        </div>
+                    <div className={cl("no-results-container")}>
+                        <svg
+                            width="48"
+                            height="48"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                        >
+                            <path
+                                d="M18 6L6 18M6 6L18 18"
+                                stroke="var(--text-muted)"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        </svg>
+                        <Text
+                            variant="text-md/normal"
+                            style={{ color: "var(--text-muted)", marginLeft: "8px" }}
+                        >No results found</Text>
+                    </div>
                 </ModalContent>
             }
             <ModalFooter>
@@ -677,7 +681,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                     look={Button.Looks.LINK}
                     onClick={modalProps.onClose}
                 >
-                Cancel
+                    Cancel
                 </Button>
             </ModalFooter>
 
