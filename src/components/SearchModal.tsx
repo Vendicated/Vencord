@@ -386,7 +386,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
     const filterItems = (items: any[]) => {
         return items.filter(
-            item => item != null && resultTypes.includes(item.type) && !exclude IDs?.includes(item.record.id)
+            item => item != null && resultTypes.includes(item.type) && !excludeIds?.includes(item.record.id)
         );
     };
 
