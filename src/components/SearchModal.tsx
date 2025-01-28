@@ -28,6 +28,8 @@ import {
     RelationshipStore,
     Text,
     useCallback,
+    useEffect,
+    useLayoutEffect,
     useMemo,
     useRef,
     UsernameUtils,
@@ -36,6 +38,7 @@ import {
     useStateFromStores,
 } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
+import { JSX } from "react";
 
 const cl = classNameFactory("vc-search-modal-");
 
@@ -72,9 +75,9 @@ interface UnspecificRowProps {
 }
 
 interface SpecificRowProps extends UnspecificRowProps {
-    icon: React.JSX.Element,
+    icon: JSX.Element,
     label: string,
-    subLabel: string | React.JSX.Element
+    subLabel: string | JSX.Element,
 }
 
 interface UserIconProps {
@@ -272,7 +275,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             return parentChannel ? getChannelLabel(parentChannel, UserStore, RelationshipStore, false) : null;
         };
 
-        let subLabel: string | React.JSX.Element = guild?.name;
+        let subLabel: string | JSX.Element = guild?.name;
 
         // @ts-ignore isForumPost is not in the types but exists
         if (channel.isThread() || channel.isForumPost()) {
@@ -451,8 +454,8 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                 return searchHandler;
             }
         );
-        React.useEffect(() => () => searchHandler.destroy(), [searchHandler]);
-        React.useEffect(() => {
+        useEffect(() => () => searchHandler.destroy(), [searchHandler]);
+        useEffect(() => {
                 searchOptions != null && searchOptions !== searchHandler.options && searchHandler.setOptions(searchOptions);
             }, [searchHandler, searchOptions]
         );
@@ -485,7 +488,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             updateSearch(searchText);
         }
 
-        React.useLayoutEffect(() => {
+        useLayoutEffect(() => {
             search({
                 query: queryData,
                 resultTypes: resultTypes,
@@ -524,7 +527,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
     const { results, updateSearchText } = generateResults();
 
     const selectedDestinationKeys = useMemo(() => {
-        return selected?.map(destination => `${destination.type}-${destination.id}`) || [];
+        return selected.map(destination => `${destination.type}-${destination.id}`) || [];
     }, [selected]);
 
     const rowHeight = useCallback(() => 48, []);
