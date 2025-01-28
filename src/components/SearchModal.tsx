@@ -375,16 +375,14 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         }
         if (e.type !== "user")
             return convertItem(e.id);
-        {
-            const user = UserStore.getUser(e.id);
-            return {
-                type: TextTypes.USER,
-                record: user,
-                score: 0,
-                // @ts-ignore globalName is not in the types but exists
-                comparator: user.globalName,
-            };
-        }
+        const user = UserStore.getUser(e.id);
+        return {
+            type: TextTypes.USER,
+            record: user,
+            score: 0,
+            // @ts-ignore globalName is not in the types but exists
+            comparator: user.globalName,
+        };
     }
 
     const filterItems = (items: any[]) => {
