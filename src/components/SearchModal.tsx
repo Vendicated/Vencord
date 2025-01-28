@@ -71,7 +71,7 @@ interface UnspecificRowProps {
     isSelected: boolean,
     onPressDestination: (destination: DestinationItem) => void,
     "aria-posinset": number,
-    "aria-setsize": number;
+    "aria-setsize": number,
 }
 
 interface SpecificRowProps extends UnspecificRowProps {
