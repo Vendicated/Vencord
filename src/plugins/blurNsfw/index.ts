@@ -16,55 +16,86 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+
+const settings = definePluginSettings({
+    blurAmount: {
+        type: OptionType.NUMBER,
+        description: "Blur Amount",
+        default: 10,
+        onChange: () => setCss()
+    },
+    blurDirectMessage: {
+        type: OptionType.BOOLEAN,
+        description: "Blur Images in Direct Messages",
+        default: false,
+    }
+});
 
 let style: HTMLStyleElement;
 
 function setCss() {
+    if (!style) return;
+    const blurValue = settings.store.blurAmount ?? 10;
+    
     style.textContent = `
+        /* Blur for NSFW channels */
         .vc-nsfw-img [class^=imageWrapper] img,
         .vc-nsfw-img [class^=wrapperPaused] video {
-            filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
+            filter: blur(${blurValue}px);
             transition: filter 0.2s;
         }
+        
+        /* Blur for DMs when enabled */
+        .vc-dm-blur [class^=imageWrapper] img,
+        .vc-dm-blur [class^=wrapperPaused] video {
+            filter: blur(${blurValue}px);
+            transition: filter 0.2s;
+        }
+        
+        /* Remove blur on hover for both NSFW and DMs */
         .vc-nsfw-img [class^=imageWrapper]:hover img,
-        .vc-nsfw-img [class^=wrapperPaused]:hover video {
+        .vc-nsfw-img [class^=wrapperPaused]:hover video,
+        .vc-dm-blur [class^=imageWrapper]:hover img,
+        .vc-dm-blur [class^=wrapperPaused]:hover video {
             filter: unset;
         }
-        `;
+    `;
+}
+
+function getDmClass(channel: any) {
+    if (!channel) return '';
+    // Check for both DM (1) and Group DM (3)
+    if (channel.type !== 1 && channel.type !== 3) return '';
+    return settings.store.blurDirectMessage ? ' vc-dm-blur' : '';
 }
 
 export default definePlugin({
     name: "BlurNSFW",
-    description: "Blur attachments in NSFW channels until hovered",
+    description: "Blur attachments in NSFW channels and DMs until hovered",
     authors: [Devs.Ven],
 
     patches: [
         {
             find: ".embedWrapper,embed",
-            replacement: [{
+            replacement: {
                 match: /\.container/,
-                replace: "$&+(this.props.channel.nsfw? ' vc-nsfw-img': '')"
-            }]
+                replace: (_match: string) => {
+                    return `.container+(this.props.channel.nsfw?' vc-nsfw-img':'')+$self.getDmClass(this.props.channel)`;
+                }
+            }
         }
     ],
 
-    options: {
-        blurAmount: {
-            type: OptionType.NUMBER,
-            description: "Blur Amount",
-            default: 10,
-            onChange: setCss
-        }
-    },
+    getDmClass,
+    settings,
 
     start() {
         style = document.createElement("style");
-        style.id = "VcBlurNsfw";
+        style.id = "VcBlurNSFW";
         document.head.appendChild(style);
-
         setCss();
     },
 
