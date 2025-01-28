@@ -47,7 +47,7 @@ export default definePlugin({
             replacement: [
                 {
                     // why in the world are these arrow funcitons
-                    match: /{(\i:\(\)=>\i,?){2}}/,
+                    match: /{(?:\i:(?:function\(\){return |\(\)=>)\i){2}}/,
                     replace: m => m.replaceAll(canonicalizeMatch(/\(\)=>\i/g), "()=>()=>Promise.resolve(true)")
                 }
             ],
