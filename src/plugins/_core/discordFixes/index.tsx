@@ -12,7 +12,7 @@ import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { useEffect } from "@webpack/common";
+import { GuildStore, PermissionsBits, PermissionStore, useEffect } from "@webpack/common";
 import { PropsWithChildren } from "react";
 
 const cl = classNameFactory("vc-discord-fixes-");
@@ -36,6 +36,10 @@ function setMemberSupplementalCache(cache: MemberSupplementalCache) {
 
 function useFetchMemberSupplemental(guildId: string, userId: string) {
     useEffect(() => {
+        if (!PermissionStore.can(PermissionsBits.MANAGE_GUILD, GuildStore.getGuild(guildId))) {
+            return;
+        }
+
         // Set this member as unfetched in the member supplemental cache
         memberSupplementalCache[`${guildId}-${userId}`] ??= 1;
         fetchMemberSupplemental(guildId, [userId]);
