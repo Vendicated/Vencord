@@ -25,7 +25,7 @@ import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { filters, findStoreLazy, mapMangledModuleLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -70,7 +70,9 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const useStatusFillColor = findByCodeLazy('"useStatusFillColor"');
+const { useStatusFillColor } = mapMangledModuleLazy(".DIAGONAL_FACEPILE_16,typing:", {
+    useStatusFillColor: filters.byCode(".hex")
+});
 
 const PlatformIcon = ({ platform, status, small }: { platform: Platform, status: string; small: boolean; }) => {
     const tooltip = platform === "embedded"
