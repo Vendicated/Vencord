@@ -22,16 +22,17 @@ import { filters, mapMangledModuleLazy, waitFor } from "@webpack";
 import { waitForComponent } from "./internal";
 import * as t from "./types/components";
 
-const FormTitle = waitForComponent<t.FormTitle>("FormTitle", filters.componentByCode("tag", "h5"));
+
+const FormTitle = waitForComponent<t.FormTitle>("FormTitle", filters.componentByCode('["defaultMargin".concat'));
+const FormText = waitForComponent<t.FormText>("FormText", filters.componentByCode(".SELECTABLE),", ".DISABLED:"));
 const FormSection = waitForComponent<t.FormSection>("FormSection", filters.componentByCode(".titleId)&&"));
 const FormDivider = waitForComponent<t.FormDivider>("FormDivider", filters.componentByCode(".divider,", ",style:", '"div"', /\.divider,\i\),style:/));
-const FormText = waitForComponent<t.FormText>("FormText", filters.componentByCode(".SELECTABLE)", ".DISABLED"));
 
 export const Forms = {
     FormTitle,
+    FormText,
     FormSection,
-    FormDivider,
-    FormText
+    FormDivider
 };
 
 export const Card = waitForComponent<t.Card>("Card", filters.componentByCode(".editable),", ".outline:"));
