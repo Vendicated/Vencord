@@ -17,16 +17,29 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, mapMangledModuleLazy, waitFor } from "../webpack";
+import { filters, mapMangledModuleLazy, waitFor, wreq } from "../webpack";
 import type * as t from "./types/menu";
 
-export let Menu = {} as t.Menu;
+export const Menu = {} as t.Menu;
 
-waitFor(["MenuItem", "MenuSliderControl"], m => Menu = m);
+// Relies on .name properties added by the MenuItemDemanglerAPI
+waitFor(m => m.name === "MenuCheckboxItem", (_, id) => {
+    // we have to do this manual require by ID because m is in this case the MenuCheckBoxItem instead of the entire module
+    const module = wreq(id as any);
+
+    for (const e of Object.values(module)) {
+        if (typeof e === "function" && e.name.startsWith("Menu")) {
+            Menu[e.name] = e;
+        }
+    }
+});
+
+waitFor(filters.componentByCode('path:["empty"]'), m => Menu.Menu = m);
+waitFor(filters.componentByCode("sliderContainer", "slider", "handleSize:16", "=100"), m => Menu.MenuSliderControl = m);
+waitFor(filters.componentByCode('role:"searchbox', "top:2", "query:"), m => Menu.MenuSearchControl = m);
 
 export const ContextMenuApi: t.ContextMenuApi = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN', {
     closeContextMenu: filters.byCode("CONTEXT_MENU_CLOSE"),
     openContextMenu: filters.byCode("renderLazy:"),
     openContextMenuLazy: e => typeof e === "function" && e.toString().length < 100
 });
-

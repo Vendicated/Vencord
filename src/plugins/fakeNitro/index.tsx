@@ -235,7 +235,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".PREMIUM_LOCKED;",
+            find: ".GUILD_SUBSCRIPTION_UNAVAILABLE;",
             group: true,
             predicate: () => settings.store.enableEmojiBypass,
             replacement: [
@@ -256,8 +256,10 @@ export default definePlugin({
                 },
                 {
                     // Disallow the emoji for premium locked if the intention doesn't allow it
-                    match: /!\i\.\i\.canUseEmojisEverywhere\(\i\)/,
-                    replace: m => `(${m}&&!${IS_BYPASSEABLE_INTENTION})`
+                    match: /(!)?(\i\.\i\.canUseEmojisEverywhere\(\i\))/,
+                    replace: (m, not) => not
+                        ? `(${m}&&!${IS_BYPASSEABLE_INTENTION})`
+                        : `(${m}||${IS_BYPASSEABLE_INTENTION})`
                 },
                 {
                     // Allow animated emojis to be used if the intention allows it
