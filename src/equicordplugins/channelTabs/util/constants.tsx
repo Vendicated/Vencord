@@ -7,6 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
+import { findComponentByCodeLazy } from "@webpack";
 
 import { ChannelTabsPreview } from "../components/ChannelTabsContainer";
 
@@ -73,21 +74,4 @@ export const settings = definePluginSettings({
     }
 });
 
-export function CircleQuestionIcon({ height = 24, width = 24 }) {
-    return <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={width}
-        height={height}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <circle cx="12" cy="12" r="10" />
-        <path d="M12 17h.01" />
-        <path d="M12 13c1.38 0 2.5-1.12 2.5-2.5S13.38 8 12 8s-2.5 1.12-2.5 2.5" />
-    </svg>;
-
-}
+export const CircleQuestionIcon = findComponentByCodeLazy("10.58l-3.3-3.3a1");

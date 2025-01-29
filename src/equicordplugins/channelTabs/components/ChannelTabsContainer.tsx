@@ -6,6 +6,7 @@
 
 import { classNameFactory } from "@api/Styles";
 import { useForceUpdater } from "@utils/react";
+import { findComponentByCodeLazy } from "@webpack";
 import { Button, ContextMenuApi, Flex, FluxDispatcher, Forms, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
 import { BasicChannelTabsProps, ChannelTabsProps, createTab, handleChannelSwitch, openedTabs, openStartupTabs, saveTabs, settings, setUpdaterFunction, useGhostTabs } from "../util";
@@ -15,22 +16,7 @@ import { BasicContextMenu } from "./ContextMenus";
 
 type TabSet = Record<string, ChannelTabsProps[]>;
 
-function PlusSmallIcon() {
-    return <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <line x1="12" y1="5" x2="12" y2="19" />
-        <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>;
-}
+const PlusSmallIcon = findComponentByCodeLazy("0v-5h5a1");
 
 const cl = classNameFactory("vc-channeltabs-");
 
