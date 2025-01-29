@@ -123,7 +123,7 @@ export default definePlugin({
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the servers and folders from the GuildsBar Guild List children
                 {
-                    match: /lastTargetNode:\i\[\i\.length-1\].+?Fragment.+?\]}\)\]/,
+                    match: /lastTargetNode:\i\[\i\.length-1\].+?}\)(?::null)?\](?=}\))/,
                     replace: "$&.filter($self.makeGuildsBarGuildListFilter(!!arguments[0]?.isBetterFolders))"
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the scroller for the guild list from the GuildsBar Tree children
@@ -159,7 +159,7 @@ export default definePlugin({
             ]
         },
         {
-            find: ".FOLDER_ITEM_GUILD_ICON_MARGIN);",
+            find: ".expandedFolderBackground,",
             predicate: () => settings.store.sidebar,
             replacement: [
                 // We use arguments[0] to access the isBetterFolders variable in this nested folder component (the parent exports all the props so we don't have to patch it)
@@ -173,8 +173,8 @@ export default definePlugin({
                 // Disable expanding and collapsing folders transition in the normal GuildsBar sidebar
                 {
                     predicate: () => !settings.store.keepIcons,
-                    match: /(?<=#{intl::SERVER_FOLDER_PLACEHOLDER}.+?useTransition\)\()/,
-                    replace: "$self.shouldShowTransition(arguments[0])&&"
+                    match: /(?=,\{from:\{height)/,
+                    replace: "&&$self.shouldShowTransition(arguments[0])"
                 },
                 // If we are rendering the normal GuildsBar sidebar, we avoid rendering guilds from folders that are expanded
                 {
@@ -185,7 +185,7 @@ export default definePlugin({
                 {
                     // Decide if we should render the expanded folder background if we are rendering the Better Folders sidebar
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
-                    match: /(?<=\.wrapper,children:\[)/,
+                    match: /(?<=\.isExpanded\),children:\[)/,
                     replace: "$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)&&"
                 },
                 {
@@ -275,24 +275,30 @@ export default definePlugin({
     },
 
     makeGuildsBarGuildListFilter(isBetterFolders: boolean) {
-        try {
-            return child => {
-                if (isBetterFolders) {
-                    return child?.props?.["aria-label"] === getIntlMessage("SERVERS");
-                }
-                return true;
-            };
-        } catch {
+        return child => {
+            if (!isBetterFolders) return true;
+
+            try {
+                return child?.props?.["aria-label"] === getIntlMessage("SERVERS");
+            } catch (e) {
+                console.error(e);
+            }
+
             return true;
-        }
+        };
     },
 
     makeGuildsBarTreeFilter(isBetterFolders: boolean) {
         return child => {
-            if (isBetterFolders) {
-                return child?.props?.onScroll != null;
+            if (!isBetterFolders) return true;
+
+            if (child?.props?.className?.includes("itemsContainer") && child.props.children != null) {
+                // Filter out everything but the scroller for the guild list
+                child.props.children = child.props.children.filter(child => child?.props?.onScroll != null);
+                return true;
             }
-            return true;
+
+            return false;
         };
     },
 
