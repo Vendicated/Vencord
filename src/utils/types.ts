@@ -189,7 +189,20 @@ export const enum OptionType {
     SELECT,
     SLIDER,
     COMPONENT,
-    CUSTOM
+    CUSTOM,
+    ARRAY,
+    /**
+     * Array of users
+     */
+    USERS,
+    /**
+     * Array of channels
+     */
+    CHANNELS,
+    /**
+     * Array of guilds
+     */
+    GUILDS
 }
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
@@ -206,6 +219,7 @@ export type PluginSettingDef = (PluginSettingCustomDef & Pick<PluginSettingCommo
     | PluginSettingSliderDef
     | PluginSettingComponentDef
     | PluginSettingBigIntDef
+    | PluginSettingArrayDef
 ) & PluginSettingCommon);
 
 export interface PluginSettingCommon {
@@ -288,6 +302,27 @@ export interface PluginSettingSliderDef {
     stickToMarkers?: boolean;
 }
 
+export interface PluginSettingArrayDef {
+    type: OptionType.ARRAY | OptionType.CHANNELS | OptionType.GUILDS | OptionType.USERS;
+    /**
+     * The text to show in the context-menu.
+     * If not specified, the setting name will be used.
+     */
+    popoutText?: string;
+    /**
+     * If the context-menu entry should be hidden.
+     */
+    hidePopout?: boolean;
+    default?: any[];
+    /**
+     * If the setting used to be a string with a custom delimiter, you can specify the delimiter or a function to split the string
+     * @default ","
+     */
+    oldStringSeparator?: string | ((value: string) => string[]);
+
+    onChange?(newValue: any[]): void;
+}
+
 export interface IPluginOptionComponentProps {
     /**
      * Run this when the value changes.
@@ -322,9 +357,10 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingSliderDef ? number :
     O extends PluginSettingComponentDef ? any :
     O extends PluginSettingCustomDef ? O extends { default: infer Default; } ? Default : any :
+    O extends PluginSettingArrayDef ? any[] :
     never;
 
-type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
+type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingArrayDef ? any[] : O extends PluginSettingSelectDef ? (
     O["options"] extends { default?: boolean; }[] ? O["options"][number]["value"] : undefined
 ) : O extends { default: infer T; } ? T : undefined;
 
@@ -376,7 +412,8 @@ export type PluginOptionsItem =
     | PluginOptionSelect
     | PluginOptionSlider
     | PluginOptionComponent
-    | PluginOptionCustom;
+    | PluginOptionCustom
+    | PluginOptionArray;
 export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
 export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | BigInt>;
 export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
@@ -384,6 +421,7 @@ export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & 
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
 export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
 export type PluginOptionCustom = PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">;
+export type PluginOptionArray = PluginSettingArrayDef & PluginSettingCommon;
 
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
     [key in keyof PluginExports]:

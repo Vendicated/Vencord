@@ -28,7 +28,7 @@ import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/Messag
 import { Settings, SettingsStore } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind } from "@utils/patches";
-import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
+import { OptionType, Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
 
@@ -254,10 +254,24 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const {
-        name, commands, contextMenus, userProfileBadge,
+        name, commands, contextMenus, settings, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
     } = p;
+
+    if (settings != null)
+        for (const setting of Object.keys(settings.def)) {
+            const { type } = settings.def[setting];
+            if (type === OptionType.ARRAY || type === OptionType.USERS || type === OptionType.GUILDS || type === OptionType.CHANNELS) {
+                if (typeof settings.store[setting] === "string") {
+                    logger.info(`Converting string values of setting ${setting} of plugin ${name} to array`);
+
+                    const sep = settings.def[setting].oldStringSeparator ?? ",";
+                    if (typeof sep === "string") settings.store[setting] = settings.store[setting].split(sep);
+                    else settings.store[setting] = sep(settings.store[setting]);
+                }
+            }
+        }
 
     if (p.start) {
         logger.info("Starting plugin", name);
