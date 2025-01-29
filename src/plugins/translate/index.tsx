@@ -93,7 +93,7 @@ export default definePlugin({
         
             const matches = message.content.match(urlRegex);
         
-            if (matches && matches[0] === message.content.trim()) return;
+            if (matches?.[0] === message.content.trim()) return;
         
             setShouldShowTranslateEnabledTooltip?.(true);
             clearTimeout(tooltipTimeout);
