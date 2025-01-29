@@ -41,6 +41,7 @@ export default definePlugin({
                 {
                     match: /navId:(?=.+?([,}].*?\)))/g,
                     replace: (m, rest) => {
+                        // Check if this navId: match is a destructuring statement, ignore it if it is
                         const destructuringMatch = rest.match(/}=.+/);
                         if (destructuringMatch == null) {
                             return `contextMenuAPIArguments:typeof arguments!=='undefined'?arguments:[],${m}`;
