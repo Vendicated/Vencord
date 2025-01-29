@@ -1,13 +1,13 @@
 /* stylelint-disable function-url-quotes */
 .vc-more-stickers-icon {
-    fill: #b9bbbe;
+    fill: var(--interactive-normal);
     margin-top: 20%;
 }
 
 .vc-more-stickers-icon:hover,
 .vc-more-stickers-icon:focus-visible,
 .vc-more-stickers-icon-active {
-    fill: #fff;
+    fill: var(--interactive-active);
 }
 
 .vc-more-stickers-picker-container {
