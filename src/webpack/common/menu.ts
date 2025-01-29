@@ -17,7 +17,7 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, mapMangledModuleLazy, waitFor, wreq } from "../webpack";
+import { filters, findComponentByCodeLazy, mapMangledModuleLazy, waitFor, wreq } from "../webpack";
 import type * as t from "./types/menu";
 
 export const Menu = {} as t.Menu;
@@ -33,6 +33,8 @@ waitFor(m => m.name === "MenuCheckboxItem", (_, id) => {
         }
     }
 });
+
+Menu.MenuSliderControl = findComponentByCodeLazy('.toFixed(0),"%")', "slider");
 
 export const ContextMenuApi: t.ContextMenuApi = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN', {
     closeContextMenu: filters.byCode("CONTEXT_MENU_CLOSE"),
