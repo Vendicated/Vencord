@@ -127,7 +127,7 @@ define(Function.prototype, "m", {
         // The proxy responsible for patching the module factories when they are set, or definining getters for the patched versions
         const proxiedModuleFactories = new Proxy(originalModules, moduleFactoriesHandler);
         /*
-        If Discord ever decides to set module factories using the variable of the modules object directly, instead of wreq.m, switch the proxy to the prototype
+        If Webpack ever decides to set module factories using the variable of the modules object directly, instead of wreq.m, switch the proxy to the prototype
         Reflect.setPrototypeOf(originalModules, new Proxy(originalModules, moduleFactoriesHandler));
         */
 
@@ -137,7 +137,7 @@ define(Function.prototype, "m", {
 
 const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
     /*
-    If Discord ever decides to set module factories using the variable of the modules object directly instead of wreq.m, we need to switch the proxy to the prototype
+    If Webpack ever decides to set module factories using the variable of the modules object directly instead of wreq.m, we need to switch the proxy to the prototype
     and that requires defining additional traps for keeping the object working
 
     // Proxies on the prototype dont intercept "get" when the property is in the object itself. But in case it isn't we need to return undefined,
