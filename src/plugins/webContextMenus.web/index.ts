@@ -37,8 +37,7 @@ async function fetchImage(url: string) {
 
 let result;
 switch (true) {
-    case IS_VESKTOP:
-    case IS_EQUIBOP:
+    case IS_VESKTOP || IS_EQUIBOP:
     case "legcord" in window:
     case "goofcord" in window:
         result = true;
