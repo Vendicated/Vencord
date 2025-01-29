@@ -21,6 +21,7 @@ import { filters, findComponentByCodeLazy, mapMangledModuleLazy, waitFor, wreq }
 import type * as t from "./types/menu";
 
 export const Menu = {
+    Menu: findComponentByCodeLazy('path:["empty"]'),
     // forward ref
     MenuSliderControl: findComponentByCodeLazy("sliderContainer", "slider", "handleSize:16", "=100")
 } as t.Menu;
