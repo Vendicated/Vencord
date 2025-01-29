@@ -101,7 +101,7 @@ interface Modals {
     }>;
 }
 
-const Modals: Modals = mapMangledModuleLazy(':"thin")', {
+export const Modals: Modals = mapMangledModuleLazy(':"thin")', {
     ModalRoot: filters.componentByCode('.MODAL,"aria-labelledby":'),
     ModalHeader: filters.componentByCode(",id:"),
     ModalContent: filters.componentByCode(".content,"),
