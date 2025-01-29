@@ -42,4 +42,3 @@ export const ContextMenuApi: t.ContextMenuApi = mapMangledModuleLazy('type:"CONT
     openContextMenu: filters.byCode("renderLazy:"),
     openContextMenuLazy: e => typeof e === "function" && e.toString().length < 100
 });
-
