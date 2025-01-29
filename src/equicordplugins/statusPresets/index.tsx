@@ -80,7 +80,7 @@ const StatsModule: { default: FunctionComponent<ModalProps>; } = proxyLazy(() =>
     return wreq(Number(id));
 });
 
-const requireCustomStatusModal = extractAndLoadChunksLazy(["action:\"PRESS_ADD_CUSTOM_STATUS\"", ".openModalLazy"]);
+const requireCustomStatusModal = extractAndLoadChunksLazy(["action:\"PRESS_ADD_CUSTOM_STATUS\"", /\i\.\i\i\)/]);
 
 const openCustomStatusModalLazy = () => openModalLazy(async () => {
     await requireCustomStatusModal();
