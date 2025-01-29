@@ -53,8 +53,8 @@ export default definePlugin({
             find: "{refreshThreadIds:!0}",
             replacement: [
                 {
-                    match: /if\(\i===(?<=function\((\i),(\i)\).{0,75})/,
-                    replace: "const unreadCompare=$self.comparePosts($1,$2);if(unreadCompare!==0)return unreadCompare;$&"
+                    match: /(return function\((\i),(\i)\)\{)(.{0,75}\i===\i\.\i\.LATEST_ACTIVITY)/,
+                    replace: "$1const unreadCompare=$self.comparePosts($2,$3);if(unreadCompare!==0)return unreadCompare;$4"
                 }
             ]
         }
