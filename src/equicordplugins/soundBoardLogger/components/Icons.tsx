@@ -6,7 +6,7 @@
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { classes } from "@utils/misc";
-import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
+import { Button, ButtonWrapperClasses, Tooltip } from "@webpack/common";
 
 import { cl } from "../utils";
 import { openSoundBoardLog } from "./SoundBoardLog";
@@ -42,7 +42,7 @@ export function IconWithTooltip({ text, icon, onClick }) {
                     aria-haspopup="dialog"
                     aria-label={text}
                     size=""
-                    look={ButtonLooks.BLANK}
+                    look={Button.Looks.BLANK}
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                     innerClassName={ButtonWrapperClasses.button}

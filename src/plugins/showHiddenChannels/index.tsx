@@ -208,6 +208,12 @@ export default definePlugin({
                     replace: (_, otherClasses, isIf, isMuted, mutedClassExpression) => isIf
                         ? `${isMuted}?${mutedClassExpression}:"",${otherClasses}if(${isMuted})return ""`
                         : `${isMuted}?${mutedClassExpression}:"",${otherClasses}${isMuted}?""`
+                },
+                {
+                    // Make muted channels also appear as unread if hide unreads is false and the channel is hidden
+                    predicate: () => settings.store.channelStyle === ChannelStyle.MutedUnread || settings.store.channelStyle === ChannelStyle.Unread,
+                    match: /\.LOCKED;if\((?<={channel:(\i).+?)/,
+                    replace: (m, channel) => `${m}!$self.isHiddenChannel(${channel})&&`
                 }
             ]
         },
@@ -216,8 +222,6 @@ export default definePlugin({
             predicate: () => settings.store.channelStyle !== ChannelStyle.Unread && settings.store.channelStyle !== ChannelStyle.MutedUnread,
             replacement: [
                 {
-                    // Make muted channels also appear as unread if hide unreads is false, using the HiddenIconWithMutedStyle and the channel is hidden
-                    predicate: () => settings.store.hideUnreads === false && settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
                     match: /(?<=\.LOCKED(?:;if\(|:))(?<={channel:(\i).+?)/,
                     replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
                 },

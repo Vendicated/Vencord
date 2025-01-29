@@ -8,7 +8,7 @@ import { BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import { Modals, ModalSize, openModal } from "@utils/modal";
+import { ModalContent, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Button, Flex, Forms, RelationshipStore } from "@webpack/common";
 
@@ -81,8 +81,8 @@ const ranks: rankInfo[] =
 function openRankModal(rank: rankInfo) {
     openModal(props => (
         <ErrorBoundary>
-            <Modals.ModalRoot {...props} size={ModalSize.DYNAMIC}>
-                <Modals.ModalHeader>
+            <ModalRoot {...props} size={ModalSize.DYNAMIC}>
+                <ModalHeader>
                     <Flex style={{ width: "100%", justifyContent: "center" }}>
                         <Forms.FormTitle
                             tag="h2"
@@ -95,16 +95,16 @@ function openRankModal(rank: rankInfo) {
                             {rank.title}
                         </Forms.FormTitle>
                     </Flex>
-                </Modals.ModalHeader>
-                <Modals.ModalContent>
+                </ModalHeader>
+                <ModalContent>
                     <div style={{ padding: "1em", textAlign: "center" }}>
                         <rank.assetSVG height="150px"></rank.assetSVG>
                         <Forms.FormText className={Margins.top16}>
                             {rank.description}
                         </Forms.FormText>
                     </div>
-                </Modals.ModalContent>
-            </Modals.ModalRoot>
+                </ModalContent>
+            </ModalRoot>
         </ErrorBoundary >
     ));
 }

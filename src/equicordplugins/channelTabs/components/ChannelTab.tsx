@@ -8,12 +8,13 @@ import { classNameFactory } from "@api/Styles";
 import { getIntlMessage, getUniqueUsername } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Avatar, ChannelStore, ContextMenuApi, Dots, GuildStore, PresenceStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useRef, UserStore, useStateFromStores } from "@webpack/common";
+import { Avatar, ChannelStore, ContextMenuApi, GuildStore, PresenceStore, ReadStateStore, Text, TypingStore, useDrag, useDrop, useRef, UserStore, useStateFromStores } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
 import { ChannelTabsProps, CircleQuestionIcon, closeTab, isTabSelected, moveDraggedTabs, moveToTab, openedTabs, settings } from "../util";
 import { TabContextMenu } from "./ContextMenus";
 
+const ThreeDots = findComponentByCodeLazy(".dots,", "dotRadius:");
 const { getBadgeWidthForValue } = findByPropsLazy("getBadgeWidthForValue");
 const dotStyles = findByPropsLazy("numberBadge", "textBadge");
 
@@ -52,7 +53,7 @@ const ChannelIcon = ({ channel }: { channel: Channel; }) =>
 
 function TypingIndicator({ isTyping }: { isTyping: boolean; }) {
     return isTyping
-        ? <Dots dotRadius={3} themed={true} className={cl("typing-indicator")} />
+        ? <ThreeDots dotRadius={3} themed={true} className={cl("typing-indicator")} />
         : null;
 }
 
