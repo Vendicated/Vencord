@@ -44,37 +44,41 @@ interface ContextMenuProps {
     user: User;
 }
 
-const ArrowsLeftRightIcon = <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
->
-    <polyline points="17 11 21 7 17 3" />
-    <line x1="21" y1="7" x2="9" y2="7" />
-    <polyline points="7 21 3 17 7 13" />
-    <line x1="15" y1="17" x2="3" y2="17" />
-</svg>;
+function ArrowsLeftRightIcon() {
+    return <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <polyline points="17 11 21 7 17 3" />
+        <line x1="21" y1="7" x2="9" y2="7" />
+        <polyline points="7 21 3 17 7 13" />
+        <line x1="15" y1="17" x2="3" y2="17" />
+    </svg>;
+}
 
-const XSmallIcon = <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
->
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-</svg>;
+function XSmallIcon() {
+    return <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>;
+}
 
 function MakeContextCallback(name: "user" | "channel"): NavContextMenuPatchCallback {
     return (children, { user, channel, guildId }: ContextMenuProps) => {
