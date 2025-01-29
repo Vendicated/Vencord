@@ -131,7 +131,7 @@ function unfurlEmbed(url: string, message: Message) {
     RestAPI.post({
         url: Constants.Endpoints.UNFURL_EMBED_URLS,
         body: {
-            urls: [url] // The endpoint accepts up to 5 urls at a time but if we send 5 and one fails, it will just return 4 embeds with no indication of which embed corresponds to which url
+            urls: [url]
         }
     }).catch(e => {
         showFailureToast("Failed to get embed");
