@@ -1,11 +1,31 @@
 /* Download Desktop button in guilds list */
-[class^="listItem_"]:has([data-list-item-id="guildsnav___app-download-button"]),
-[class^="listItem_"]:has(+ [class^="listItem_"] [data-list-item-id="guildsnav___app-download-button"]) {
+[class^=listItem_]:has([data-list-item-id=guildsnav___app-download-button]),
+[class^=listItem_]:has(+ [class^=listItem_] [data-list-item-id=guildsnav___app-download-button]) {
   display: none;
 }
 
+/* FIXME: remove this once Discord fixes their css to not explode scrollbars on chromium >=121 */
+* {
+  scrollbar-width: unset !important;
+  scrollbar-color: unset !important;
+}
+
 /* Workaround for making things in the draggable area clickable again on macOS */
-.platform-osx [class*="topic_"],
-.platform-osx [class*="notice_"] button {
+.platform-osx [class*=topic_],
+.platform-osx [class*=notice_] button {
   -webkit-app-region: no-drag;
+}
+
+[class*="titleBar"] [class*="winButton"] {
+  display: none;
+}
+
+[class*="titleBar"] {
+  height: var(--vencord-titlebar-size);
+  margin-top: 0;
+}
+
+[class*="notAppAsidePanel_"]>[class*="app_"]>[class*="app_"] [class*="bg_"] {
+  top: calc(var(--vencord-titlebar-size)*-1);
+
 }
