@@ -27,7 +27,6 @@ import { cl } from "./utils";
 export const settings = definePluginSettings({
     authorize: {
         type: OptionType.COMPONENT,
-        description: "Authorize with ReviewDB",
         component: () => (
             <Button onClick={() => authorize()}>
                 Authorize with ReviewDB
@@ -56,7 +55,6 @@ export const settings = definePluginSettings({
     },
     buttons: {
         type: OptionType.COMPONENT,
-        description: "ReviewDB buttons",
         component: () => (
             <div className={cl("button-grid")} >
                 <Button onClick={openBlockModal}>Manage Blocked Users</Button>

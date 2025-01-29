@@ -45,7 +45,6 @@ const makeEmptyRuleArray = () => [makeEmptyRule()];
 const settings = definePluginSettings({
     replace: {
         type: OptionType.COMPONENT,
-        description: "",
         component: () => {
             const { stringRules, regexRules } = settings.use(["stringRules", "regexRules"]);
 

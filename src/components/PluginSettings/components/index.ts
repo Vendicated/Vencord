@@ -18,7 +18,7 @@
 
 import { DefinedSettings, PluginOptionBase } from "@utils/types";
 
-export interface ISettingElementProps<T extends PluginOptionBase> {
+interface ISettingElementPropsBase<T> {
     option: T;
     onChange(newValue: any): void;
     pluginSettings: {
@@ -29,6 +29,9 @@ export interface ISettingElementProps<T extends PluginOptionBase> {
     onError(hasError: boolean): void;
     definedSettings?: DefinedSettings;
 }
+
+export type ISettingElementProps<T extends PluginOptionBase> = ISettingElementPropsBase<T>;
+export type ISettingCustomElementProps<T extends Omit<PluginOptionBase, "description" | "placeholder">> = ISettingElementPropsBase<T>;
 
 export * from "../../Badge";
 export * from "./SettingBooleanComponent";

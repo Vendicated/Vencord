@@ -147,8 +147,7 @@ function IdsListComponent(props: { setValue: (value: string) => void; }) {
 const settings = definePluginSettings({
     importCustomRPC: {
         type: OptionType.COMPONENT,
-        description: "",
-        component: () => <ImportCustomRPCComponent />
+        component: ImportCustomRPCComponent
     },
     listMode: {
         type: OptionType.SELECT,
@@ -168,7 +167,6 @@ const settings = definePluginSettings({
     },
     idsList: {
         type: OptionType.COMPONENT,
-        description: "",
         default: "",
         onChange(newValue: string) {
             const ids = new Set(newValue.split(",").map(id => id.trim()).filter(Boolean));

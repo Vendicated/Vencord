@@ -198,15 +198,16 @@ export type SettingsChecks<D extends SettingsDefinition> = {
     (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
 };
 
-export type PluginSettingDef = (PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">) | ((
-    | PluginSettingStringDef
-    | PluginSettingNumberDef
-    | PluginSettingBooleanDef
-    | PluginSettingSelectDef
-    | PluginSettingSliderDef
-    | PluginSettingComponentDef
-    | PluginSettingBigIntDef
-) & PluginSettingCommon);
+export type PluginSettingDef =
+    (PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">) |
+    (PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">) | ((
+        | PluginSettingStringDef
+        | PluginSettingNumberDef
+        | PluginSettingBooleanDef
+        | PluginSettingSelectDef
+        | PluginSettingSliderDef
+        | PluginSettingBigIntDef
+    ) & PluginSettingCommon);
 
 export interface PluginSettingCommon {
     description: string;
@@ -226,12 +227,14 @@ export interface PluginSettingCommon {
      */
     target?: "WEB" | "DESKTOP" | "BOTH";
 }
+
 interface IsDisabled<D = unknown> {
     /**
      * Checks if this setting should be disabled
      */
     disabled?(this: D): boolean;
 }
+
 interface IsValid<T, D = unknown> {
     /**
      * Prevents the user from saving settings if this is false or a string
@@ -320,7 +323,7 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingBooleanDef ? boolean :
     O extends PluginSettingSelectDef ? O["options"][number]["value"] :
     O extends PluginSettingSliderDef ? number :
-    O extends PluginSettingComponentDef ? any :
+    O extends PluginSettingComponentDef ? O extends { default: infer Default; } ? Default : any :
     O extends PluginSettingCustomDef ? O extends { default: infer Default; } ? Default : any :
     never;
 
@@ -382,7 +385,7 @@ export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDe
 export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
-export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
+export type PluginOptionComponent = PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">;
 export type PluginOptionCustom = PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">;
 
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {

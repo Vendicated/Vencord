@@ -17,7 +17,6 @@ import DecorSection from "./ui/components/DecorSection";
 export const settings = definePluginSettings({
     changeDecoration: {
         type: OptionType.COMPONENT,
-        description: "Change your avatar decoration",
         component() {
             if (!Vencord.Plugins.plugins.Decor.started) return <Forms.FormText>
                 Enable Decor and restart your client to change your avatar decoration.
