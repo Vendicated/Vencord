@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
+import { Button, ButtonWrapperClasses, Tooltip } from "@webpack/common";
 
 
 // Thanks svgrepo.com for the play and download icons.
@@ -38,7 +38,7 @@ export function IconWithTooltip({ text, icon, onClick }) {
                     aria-haspopup="dialog"
                     aria-label={text}
                     size=""
-                    look={ButtonLooks.BLANK}
+                    look={Button.Looks.BLANK}
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                     innerClassName={ButtonWrapperClasses.button}
