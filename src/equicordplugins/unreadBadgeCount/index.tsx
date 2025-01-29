@@ -10,14 +10,37 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { findStoreLazy } from "@webpack";
 import { ReadStateStore, useStateFromStores } from "@webpack/common";
 import { Channel } from "discord-types/general";
 import { JSX } from "react";
 
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
 const JoinedThreadsStore = findStoreLazy("JoinedThreadsStore");
-const { NumberBadge } = findByPropsLazy("NumberBadge");
+
+function NumberBadge({ color, className, count }) {
+    return <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        className={className}
+    >
+        <circle cx="12" cy="12" r="10" fill={color} />
+        <text
+            x="50%"
+            y="50%"
+            textAnchor="middle"
+            fontSize="10"
+            fill="white"
+            fontWeight="bold"
+            dy=".3em"
+        >
+            {count}
+        </text>
+    </svg>;
+}
 
 const settings = definePluginSettings({
     showOnMutedChannels: {

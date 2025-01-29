@@ -6,9 +6,10 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findExportedComponentLazy, findStoreLazy } from "@webpack";
+import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { useStateFromStores } from "@webpack/common";
-const ThreeDots = findExportedComponentLazy("Dots", "AnimatedDots");
+
+const ThreeDots = findComponentByCodeLazy(".dots,", "dotRadius:");
 
 const TypingStore = findStoreLazy("TypingStore");
 

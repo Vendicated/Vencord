@@ -59,20 +59,20 @@ export default definePlugin({
         // Discord adds it's paste listeners to #app-mount. We can intercept them
         // by attaching listeners a child element.
         containerEl = document.querySelector("[class^=appAsidePanelWrapper]")!;
-        containerEl.addEventListener("paste", blockPastePropogation);
+        containerEl?.addEventListener("paste", blockPastePropogation);
 
         // Also add them to body to intercept the event listeners on document
-        document.body.addEventListener("paste", blockPastePropogation);
+        document?.body?.addEventListener("paste", blockPastePropogation);
 
-        document.body.addEventListener("mousedown", disablePasteOnMousedown);
+        document?.body?.addEventListener("mousedown", disablePasteOnMousedown);
     },
 
     stop() {
-        containerEl.removeEventListener("paste", blockPastePropogation);
+        containerEl?.removeEventListener("paste", blockPastePropogation);
 
-        document.body.removeEventListener("paste", blockPastePropogation);
+        document?.body?.removeEventListener("paste", blockPastePropogation);
 
-        document.body.removeEventListener("mousedown", disablePasteOnMousedown);
+        document?.body?.removeEventListener("mousedown", disablePasteOnMousedown);
         pasteDisabled = false;
     },
 });
