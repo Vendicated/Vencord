@@ -15,7 +15,7 @@
         "https://raw.githubusercontent.com/*"
     ],
 
-    "permissions": ["declarativeNetRequest"],
+    "permissions": ["declarativeNetRequest", "tabs"],
 
     "content_scripts": [
         {
@@ -49,5 +49,37 @@
                 "path": "modifyResponseHeaders.json"
             }
         ]
+    },
+    "background": {
+        "service_worker": "service-worker.js"
+    },
+    "commands": {
+        "UNASSIGNED": {
+            "description": "This action doesn't do anything! Please choose one from the drop down."
+        },
+        "TOGGLE_MUTE": {
+            "description": "Toggle your microphone's transmission on and off."
+        },
+        "TOGGLE_DEAFEN": {
+            "description": "Toggle your speaker’s playback on and off. Also disables your microphone while deafened."
+        },
+        "TOGGLE_VOICE_MODE": {
+            "description": "Toggle to switch between Push-to-talk and Voice Activity mode."
+        },
+        "TOGGLE_STREAMER_MODE": {
+            "description": "Toggle to enable/disable Streamer Mode."
+        },
+        "TOGGLE_GO_LIVE_STREAMING": {
+            "description": "Toggle to start/stop streaming in your current voice channel. Streams can only be started with this keybind if Discord recognises the game you are currently playing."
+        },
+        "NAVIGATE_BACK": {
+            "description": "Navigate backward in page history"
+        },
+        "NAVIGATE_FORWARD": {
+            "description": "Navigate forward in page history"
+        },
+        "SAVE_CLIP": {
+            "description": "Clips the last 30 seconds to 2 minutes of your stream, depending on your settings."
+        }
     }
 }

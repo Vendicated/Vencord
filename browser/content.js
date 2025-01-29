@@ -18,6 +18,9 @@ document.addEventListener(
                 EXTENSION_BASE_URL: browser.runtime.getURL(""),
             }
         });
+        chrome.runtime.onMessage.addListener(request => {
+            window.postMessage({ type: "vencord:keybinds", meta: request.command });  
+        })
     },
     { once: true }
 );

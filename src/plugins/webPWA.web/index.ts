@@ -18,18 +18,27 @@ const isMac = navigator.platform.startsWith("Mac");
 const GuildReadStateStore: FluxStore & { getTotalMentionCount: () => number; hasAnyUnread: () => boolean; } = findStoreLazy("GuildReadStateStore");
 const NotificationSettingsStore: FluxStore & { getDisableUnreadBadge: () => boolean; } = findStoreLazy("NotificationSettingsStore");
 
+let _keybinds: Record<string, { onTrigger: () => any; }>;
+
 export default definePlugin({
   name: "WebPWA",
   description: "Allows Discord to be installable and usable as a PWA.",
   authors: [Devs.ThaUnknown],
+  flux: {
+    KEYBINDS_REGISTER_GLOBAL_KEYBIND_ACTIONS: ({ keybinds }: { keybinds: Record<string, { onTrigger: () => any; }>; }) => {
+      _keybinds = keybinds;
+    }
+  },
   start() {
+    if (!IS_EXTENSION) return;
+
     // css
     enableStyle(style);
     // installability
     const manifest = {
       name: "Discord",
       short_name: "Discord",
-      start_url: 'https:' + window.GLOBAL_ENV.WEBAPP_ENDPOINT + "/app", // URL when PWA launches
+      start_url: "https:" + window.GLOBAL_ENV.WEBAPP_ENDPOINT + "/app", // URL when PWA launches
       display: "fullscreen",
       display_override: ["window-controls-overlay"],
       lang: "en-US",
@@ -60,14 +69,19 @@ export default definePlugin({
     // title bar
     if ("windowControlsOverlay" in navigator) { // firefox!
       const { height } = navigator.windowControlsOverlay!.getTitlebarAreaRect();
-      document.body.style.setProperty('--vencord-titlebar-size', height + 'px');
+      document.body.style.setProperty("--vencord-titlebar-size", height + "px");
       navigator.windowControlsOverlay!.addEventListener(
         "geometrychange",
         this.handleGeometryChange
       );
     }
+
+    // keybinds
+    window.addEventListener("message", this.keybindListener);
   },
   stop() {
+    if (!IS_EXTENSION) return;
+
     if ("windowControlsOverlay" in navigator) {
       navigator.windowControlsOverlay!.removeEventListener(
         "geometrychange",
@@ -75,6 +89,7 @@ export default definePlugin({
       );
       navigator.setAppBadge(0);
     }
+    window.removeEventListenerEventListener("message", this.keybindListener);
     disableStyle(style);
     this.linkEl?.remove();
     NotificationSettingsStore.removeChangeListener(this.setBadge);
@@ -85,7 +100,6 @@ export default definePlugin({
     {
       find: "platform-web", // patches title bar color and button position [unused]
       replacement: {
-        // eslint-disable-next-line no-useless-escape
         match: /(?<=" platform-overlay"\):)\i/,
         replace: "$self.getPlatformClass()"
       }
@@ -93,7 +107,6 @@ export default definePlugin({
     {
       find: "\"NotificationSettingsStore",
       replacement: {
-        // eslint-disable-next-line no-useless-escape
         match: /\.isPlatformEmbedded(?=\?\i\.\i\.ALL)/g,
         replace: "$&||true"
       }
@@ -102,7 +115,6 @@ export default definePlugin({
       find: ".wordmarkWindows",
       replacement: [
         {
-          // eslint-disable-next-line no-useless-escape
           match: /case \i\.\i\.WINDOWS:/,
           replace: 'case "WEB":'
         },
@@ -110,11 +122,17 @@ export default definePlugin({
         // these methods don't work outside of PWA's so is there a point?
         ...["close", "minimize", "maximize"].map(op => ({
           match: new RegExp(String.raw`\i\.\i\.${op}\b`),
-          replace: ``
+          replace: ""
         }))
       ]
     }
   ],
+  keybindListener: (e: MessageEvent) => {
+    if (e.data?.type === "vencord:keybinds") {
+      const { meta } = e.data;
+      if (meta in _keybinds!) _keybinds![meta].onTrigger();
+    }
+  },
   setBadge: () => {
     try {
       const mentionCount = GuildReadStateStore.getTotalMentionCount();
@@ -133,9 +151,9 @@ export default definePlugin({
   handleGeometryChange(event: WindowControlsOverlayGeometryChangeEvent) {
     // we want the title bar to be of consistent size, no matter the zoom level, device pixel ratio or OS
     if (event.visible) {
-      document.body.style.setProperty('--vencord-titlebar-size', event.titlebarAreaRect.height + 'px');
+      document.body.style.setProperty("--vencord-titlebar-size", event.titlebarAreaRect.height + "px");
     } else {
-      document.body.style.setProperty('--vencord-titlebar-size', '0px');
+      document.body.style.setProperty("--vencord-titlebar-size", "0px");
     }
   },
   getPlatformClass() {
