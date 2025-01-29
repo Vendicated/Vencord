@@ -10,7 +10,7 @@ import definePlugin from "@utils/types";
 import { ChannelStore, GuildStore, PermissionsBits } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
 
-import { classNames, computePermissions, isWebhook, Tag, tags } from "./consts";
+import { computePermissions, isWebhook, Tag, tags } from "./consts";
 import { settings } from "./settings";
 
 const genTagTypes = () => {
@@ -35,16 +35,16 @@ export default definePlugin({
     authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN, Devs.hen],
     settings,
     patches: [
-        // // Render Tags in messages
-        // // Maybe there is a better way to catch this horror
-        // {
-        //     find: ".isVerifiedBot(),hideIcon:",
-        //     replacement: {
-        //         match: /(?<=let (\i).{1,500}.isSystemDM.{0,350}),null==(\i\))(?=.{1,30}?null:)/,
-        //         replace:
-        //             ",($1=$self.getTag({...arguments[0],isChat:true,origType:$1}))$&",
-        //     },
-        // },
+        // Render Tags in messages
+        // Maybe there is a better way to catch this horror
+        {
+            find: ".isVerifiedBot(),hideIcon:",
+            replacement: {
+                match: /(?<=let (\i).{1,500}.isSystemDM.{0,350}),null==(\i\))(?=.{1,30}?null:)/,
+                replace:
+                    ",($1=$self.getTag({...arguments[0],isChat:true,origType:$1}))$&",
+            },
+        },
         // Make discord actually use our tags
         {
             find: ".STAFF_ONLY_DM:",
@@ -82,19 +82,6 @@ export default definePlugin({
             }
         }
     ],
-    renderMessageDecoration(props) {
-        const tag = this.getTag({
-            message: props.message,
-            isChat: true
-        });
-
-        return tag && <Tag
-            type={tag}
-            useRemSizes={true}
-            className={props.compact ? classNames.botTagCompact : classNames.botTagCozy}
-            verified={props.message.author.verified}
-        />;
-    },
     localTags: genTagTypes(),
 
     getTagText(passedTagName: string) {
