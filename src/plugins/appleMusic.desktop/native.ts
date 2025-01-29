@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { canonicalizeMatch } from "@utils/patches";
 import { execFile } from "child_process";
 import { promisify } from "util";
 
@@ -26,7 +27,7 @@ interface RemoteData {
 let cachedRemoteData: { id: string, data: RemoteData; } | { id: string, failures: number; } | null = null;
 
 const APPLE_MUSIC_BUNDLE_REGEX = /<script type="module" crossorigin src="([a-zA-Z0-9.\-/]+)"><\/script>/;
-const APPLE_MUSIC_TOKEN_REGEX = /\w+="([A-Za-z0-9-_]*\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*)",\w+="x-apple-jingle-correlation-key"/;
+const APPLE_MUSIC_TOKEN_REGEX = canonicalizeMatch(/Promise.allSettled\(\i\)\}const \i="([A-Za-z0-9-_]*\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*)"/);
 
 let cachedToken: string | undefined = undefined;
 
