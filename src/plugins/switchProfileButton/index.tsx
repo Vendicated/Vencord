@@ -7,6 +7,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
+import { canonicalizeMatch } from "@utils/patches";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Button, Text, TooltipContainer } from "@webpack/common";
@@ -29,15 +30,10 @@ export default definePlugin({
     patches: [
         {
             find: ".FULL_SIZE,user:",
-            group: true,
             replacement: [
                 {
-                    match: /\(\i\.MenuItem(,{id:"view-)/g,
-                    replace: "($self.SwitchProfileButton$1"
-                },
-                {
-                    match: /(\(0,\i\.jsx\)\(.{0,30}viewProfileItem:)(\i\(\))}\)/,
-                    replace: "$2,$1null})"
+                    match: /(\(0,\i\.jsx\)\(.{0,30}viewProfileItem:)(.{0,850}?\}\))\}\)\]/,
+                    replace: (_, overflowMenu, viewProfileItem) => `${viewProfileItem.replaceAll(canonicalizeMatch(/\(\i\.\i(,{id:"view-)/g), "($self.SwitchProfileButton$1")},${overflowMenu}null})]`
                 }
             ]
         },
