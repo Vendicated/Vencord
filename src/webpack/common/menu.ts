@@ -17,14 +17,10 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, findComponentByCodeLazy, mapMangledModuleLazy, waitFor, wreq } from "../webpack";
+import { filters, mapMangledModuleLazy, waitFor, wreq } from "../webpack";
 import type * as t from "./types/menu";
 
-export const Menu = {
-    Menu: findComponentByCodeLazy('path:["empty"]'),
-    // forward ref
-    MenuSliderControl: findComponentByCodeLazy("sliderContainer", "slider", "handleSize:16", "=100")
-} as t.Menu;
+export const Menu = {} as t.Menu;
 
 // Relies on .name properties added by the MenuItemDemanglerAPI
 waitFor(m => m.name === "MenuCheckboxItem", (_, id) => {
@@ -37,6 +33,9 @@ waitFor(m => m.name === "MenuCheckboxItem", (_, id) => {
         }
     }
 });
+
+waitFor(filters.componentByCode('path:["empty"]'), m => Menu.Menu = m);
+waitFor(filters.componentByCode("sliderContainer", "slider", "handleSize:16", "=100"), m => Menu.MenuSliderControl = m);
 
 export const ContextMenuApi: t.ContextMenuApi = mapMangledModuleLazy('type:"CONTEXT_MENU_OPEN', {
     closeContextMenu: filters.byCode("CONTEXT_MENU_CLOSE"),
