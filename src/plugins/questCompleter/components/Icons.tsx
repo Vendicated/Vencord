@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip, useEffect, useState } from "@webpack/common";
+import { Button, ButtonWrapperClasses, Tooltip, useEffect, useState } from "@webpack/common";
 
 
 export function QuestIcon({ height = 24, width = 24 }: { height?: number; width?: number; }) {
@@ -26,7 +26,7 @@ export function IconWithTooltip({ text, icon, onClick, isDisabled }) {
             <div style={{ display: "flex" }}>
                 <Button
                     aria-label={text}
-                    look={ButtonLooks.BLANK}
+                    look={Button.Looks.BLANK}
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                     onClick={onClick}
