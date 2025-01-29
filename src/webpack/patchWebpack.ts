@@ -330,23 +330,35 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
         // There are (at the time of writing) 11 modules exporting the window
         // Make these non enumerable to improve webpack search performance
         if (typeof require === "function") {
-            let foundWindow = false;
+            let shouldMakeNonEnumerable = false;
 
-            if (exports === window) {
-                foundWindow = true;
-            } else if (typeof exports === "object") {
-                if (exports.default === window) {
-                    foundWindow = true;
-                } else {
-                    for (const exportKey in exports) if (exportKey.length <= 3) {
-                        if (exports[exportKey] === window) {
-                            foundWindow = true;
-                        }
+            nonEnumerableChecking: {
+                // There are (at the time of writing) 11 modules exporting the window,
+                // and also modules exporting DOMTokenList, which breaks webpack finding
+                // Make these non enumerable to improve search performance and avoid erros
+                if (exports === window || exports[Symbol.toStringTag] === "DOMTokenList") {
+                    shouldMakeNonEnumerable = true;
+                    break nonEnumerableChecking;
+                }
+
+                if (typeof exports !== "object") {
+                    break nonEnumerableChecking;
+                }
+
+                if (exports.default === window || exports.default?.[Symbol.toStringTag] === "DOMTokenList") {
+                    shouldMakeNonEnumerable = true;
+                    break nonEnumerableChecking;
+                }
+
+                for (const exportKey in exports) {
+                    if (exports[exportKey] === window || exports[exportKey]?.[Symbol.toStringTag] === "DOMTokenList") {
+                        shouldMakeNonEnumerable = true;
+                        break nonEnumerableChecking;
                     }
                 }
             }
 
-            if (foundWindow) {
+            if (shouldMakeNonEnumerable) {
                 if (require.c != null) {
                     Object.defineProperty(require.c, id, {
                         value: require.c[id],
@@ -387,7 +399,7 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
                     continue;
                 }
 
-                for (const exportKey in exports) if (exportKey.length <= 3) {
+                for (const exportKey in exports) {
                     const exportValue = exports[exportKey];
 
                     if (exportValue != null && filter(exportValue)) {
