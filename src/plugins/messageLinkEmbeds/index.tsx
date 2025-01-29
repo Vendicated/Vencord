@@ -27,22 +27,7 @@ import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import {
-    Button,
-    ChannelStore,
-    Constants,
-    GuildStore,
-    Icons,
-    IconUtils,
-    MessageStore,
-    Parser,
-    PermissionsBits,
-    PermissionStore,
-    RestAPI,
-    Text,
-    UserStore,
-    useState
-} from "@webpack/common";
+import { Button, ChannelStore, Clickable, Constants, GuildStore, IconUtils, MessageStore, Parser, PermissionsBits, PermissionStore, RestAPI, Text, UserStore, useState } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 import { JSX } from "react";
 
@@ -54,6 +39,10 @@ const messageCache = new Map<string, {
 const Embed = findComponentByCodeLazy(".inlineMediaEmbed");
 const AutoModEmbed = findComponentByCodeLazy(".withFooter]:", "childrenMessageContent:");
 const ChannelMessage = findComponentByCodeLazy("childrenExecutedCommand:", ".hideAccessories");
+
+const ImageWarningIcon = findComponentByCodeLazy("M19.91 14.63a1.06 1.06 0 0 0-1.82");
+const EyeIcon = findComponentByCodeLazy("M22.89 11.7c.07.2.07.4 0 .6C22.27");
+const EyeSlashIcon = findComponentByCodeLazy("M8.18 10.81c-.13.43.36.65");
 
 const SearchResultClasses = findByPropsLazy("message", "searchResult");
 const EmbedClasses = findByPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
@@ -318,7 +307,7 @@ function Spoiler(props: { children: JSX.Element }) : JSX.Element {
         >
             {!visible &&
                 <div className={explicitContentWarning}>
-                    <Icons.ImageWarningIcon size="lg" color="white"/>
+                    <ImageWarningIcon size="lg" color="white"/>
                     <Text variant="text-sm/normal" color="always-white"
                           className={classes(explicitContentWarningText)}>
                         {getIntlMessage("EXPLICIT_CONTENT_WARNING")}
@@ -332,12 +321,12 @@ function Spoiler(props: { children: JSX.Element }) : JSX.Element {
                 {props.children}
             </div>
             <div className={obscureButtonContainer}>
-                <Icons.Clickable onClick={() => setVisible(!visible)}
+                <Clickable onClick={() => setVisible(!visible)}
                                  aria-label={getIntlMessage("EXPLICIT_CONTENT_BUTTON_TOOLTIP")}
                                  className={obscureHoverButton}>
-                    {visible ? <Icons.EyeIcon size="md" color="currentColor"/> :
-                        <Icons.EyeSlashIcon size="md" color="currentColor"/>}
-                </Icons.Clickable>
+                    {visible ? <EyeIcon size="md" color="currentColor"/> :
+                        <EyeSlashIcon size="md" color="currentColor"/>}
+                </Clickable>
             </div>
         </div>
     );
