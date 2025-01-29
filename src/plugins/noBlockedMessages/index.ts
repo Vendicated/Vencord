@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings, migratePluginSetting } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { runtimeHashMessageKey } from "@utils/intlHash";
 import { Logger } from "@utils/Logger";
@@ -32,10 +32,29 @@ interface MessageDeleteProps {
     collapsedReason: () => any;
 }
 
+// Remove this migration once enough time has passed
+migratePluginSetting("NoBlockedMessages", "ignoreBlockedMessages", "ignoreMessages");
+const settings = definePluginSettings({
+    ignoreMessages: {
+        description: "Completely ignores incoming messages from blocked and ignored (if enabled) users",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true
+    },
+    applyToIgnoredUsers: {
+        description: "Additionally apply to 'ignored' users",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: false
+    }
+});
+
 export default definePlugin({
     name: "NoBlockedMessages",
-    description: "Hides all blocked messages from chat completely.",
-    authors: [Devs.rushii, Devs.Samu],
+    description: "Hides all blocked/ignored messages from chat completely",
+    authors: [Devs.rushii, Devs.Samu, Devs.jamesbt365],
+    settings,
+
     patches: [
         {
             find: "#{intl::BLOCKED_MESSAGES_HIDE}",
@@ -51,38 +70,40 @@ export default definePlugin({
             '"ReadStateStore"'
         ].map(find => ({
             find,
-            predicate: () => Settings.plugins.NoBlockedMessages.ignoreBlockedMessages === true,
+            predicate: () => settings.store.ignoreMessages,
             replacement: [
                 {
                     match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
-                    replace: (_, _funcName, props) => `if($self.isBlocked(${props}.message))return;`
+                    replace: (_, _funcName, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
                 }
             ]
         }))
     ],
-    options: {
-        ignoreBlockedMessages: {
-            description: "Completely ignores (recent) incoming messages from blocked users (locally).",
-            type: OptionType.BOOLEAN,
-            default: false,
-            restartNeeded: true,
-        },
-    },
 
-    isBlocked(message: Message) {
+    shouldIgnoreMessage(message: Message) {
         try {
-            return RelationshipStore.isBlocked(message.author.id);
+            if (RelationshipStore.isBlocked(message.author.id)) {
+                return true;
+            }
+            return settings.store.applyToIgnoredUsers && RelationshipStore.isIgnored(message.author.id);
         } catch (e) {
-            new Logger("NoBlockedMessages").error("Failed to check if user is blocked:", e);
+            new Logger("NoBlockedMessages").error("Failed to check if user is blocked or ignored:", e);
+            return false;
         }
     },
 
-    shouldHide(props: MessageDeleteProps) {
+    shouldHide(props: MessageDeleteProps): boolean {
         try {
-            return props.collapsedReason() === i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
+            const collapsedReason = props.collapsedReason();
+            const blockedReason = i18n.t[runtimeHashMessageKey("BLOCKED_MESSAGE_COUNT")]();
+            const ignoredReason = settings.store.applyToIgnoredUsers
+                ? i18n.t[runtimeHashMessageKey("IGNORED_MESSAGE_COUNT")]()
+                : null;
+
+            return collapsedReason === blockedReason || collapsedReason === ignoredReason;
         } catch (e) {
             console.error(e);
+            return false;
         }
-        return false;
     }
 });

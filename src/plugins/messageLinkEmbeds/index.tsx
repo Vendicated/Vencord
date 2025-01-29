@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addAccessory, removeAccessory } from "@api/MessageAccessories";
+import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { updateMessage } from "@api/MessageUpdater";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
@@ -44,6 +44,7 @@ import {
     useState
 } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
+import { JSX } from "react";
 
 const messageCache = new Map<string, {
     message?: Message;
@@ -407,10 +408,10 @@ function AutomodEmbedAccessory(props: MessageEmbedProps): JSX.Element | null {
                     ? parse(message.content)
                     : [noContent(message.attachments.length, message.embeds.length)]
                 }
-                {images.map(a => {
+                {images.map((a, idx) => {
                     const { width, height } = computeWidthAndHeight(a.width, a.height);
                     return (
-                        <div>
+                        <div key={idx}>
                             <img src={a.url} width={width} height={height} />
                         </div>
                     );
@@ -438,7 +439,7 @@ export default definePlugin({
     settings,
 
     start() {
-        addAccessory("messageLinkEmbed", props => {
+        addMessageAccessory("messageLinkEmbed", props => {
             if (!messageLinkRegex.test(props.message.content))
                 return null;
 
@@ -456,6 +457,6 @@ export default definePlugin({
     },
 
     stop() {
-        removeAccessory("messageLinkEmbed");
+        removeMessageAccessory("messageLinkEmbed");
     }
 });
