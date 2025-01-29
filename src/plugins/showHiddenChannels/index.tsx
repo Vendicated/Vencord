@@ -122,8 +122,10 @@ export default definePlugin({
                 },
                 {
                     // Prevent Discord from trying to connect to hidden voice channels
-                    match: /(?=&&\i\.\i\.selectVoiceChannel\((\i)\.id\))/,
-                    replace: (_, channel) => `&&!$self.isHiddenChannel(${channel})`
+                    match: /(?=(\|\||&&)\i\.\i\.selectVoiceChannel\((\i)\.id\))/,
+                    replace: (_, condition, channel) => condition === "||"
+                        ? `||$self.isHiddenChannel(${channel})`
+                        : `&&!$self.isHiddenChannel(${channel})`
                 },
                 {
                     // Make Discord show inside the channel if clicking on a hidden or locked channel
@@ -136,8 +138,10 @@ export default definePlugin({
         {
             find: ".AUDIENCE),{isSubscriptionGated",
             replacement: {
-                match: /!(\i)\.isRoleSubscriptionTemplatePreviewChannel\(\)/,
-                replace: (m, channel) => `${m}&&!$self.isHiddenChannel(${channel})`
+                match: /(!)?(\i)\.isRoleSubscriptionTemplatePreviewChannel\(\)/,
+                replace: (m, not, channel) => not
+                    ? `${m}&&!$self.isHiddenChannel(${channel})`
+                    : `${m}||$self.isHiddenChannel(${channel})`
             }
         },
         {
@@ -200,14 +204,10 @@ export default definePlugin({
                 },
                 // Make voice channels also appear as muted if they are muted
                 {
-                    match: /(?<=\.wrapper:\i\.notInteractive,)(.+?)if\((\i)\)return (\i\.MUTED);/,
-                    replace: (_, otherClasses, isMuted, mutedClassExpression) => `${isMuted}?${mutedClassExpression}:"",${otherClasses}if(${isMuted})return "";`
-                },
-                {
-                    // Make muted channels also appear as unread if hide unreads is false and the channel is hidden
-                    predicate: () => settings.store.channelStyle === ChannelStyle.MutedUnread || settings.store.channelStyle === ChannelStyle.Unread,
-                    match: /\.LOCKED;if\((?<={channel:(\i).+?)/,
-                    replace: (m, channel) => `${m}!$self.isHiddenChannel(${channel})&&`
+                    match: /(?<=\.wrapper:\i\.notInteractive,)(.+?)(if\()?(\i)(?:\)return |\?)(\i\.MUTED)/,
+                    replace: (_, otherClasses, isIf, isMuted, mutedClassExpression) => isIf
+                        ? `${isMuted}?${mutedClassExpression}:"",${otherClasses}if(${isMuted})return ""`
+                        : `${isMuted}?${mutedClassExpression}:"",${otherClasses}${isMuted}?""`
                 }
             ]
         },
@@ -215,6 +215,12 @@ export default definePlugin({
             find: "UNREAD_IMPORTANT:",
             predicate: () => settings.store.channelStyle !== ChannelStyle.Unread && settings.store.channelStyle !== ChannelStyle.MutedUnread,
             replacement: [
+                {
+                    // Make muted channels also appear as unread if hide unreads is false, using the HiddenIconWithMutedStyle and the channel is hidden
+                    predicate: () => settings.store.hideUnreads === false && settings.store.showMode === ShowMode.HiddenIconWithMutedStyle,
+                    match: /(?<=\.LOCKED(?:;if\(|:))(?<={channel:(\i).+?)/,
+                    replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
+                },
                 {
                     // Hide unreads
                     match: /{channel:(\i),name:\i,.+?unread:(\i).+?;/,
