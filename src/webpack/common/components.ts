@@ -60,9 +60,15 @@ export const Popout = waitForComponent<t.Popout>("Popout", filters.componentByCo
 export const Dialog = waitForComponent<t.Dialog>("Dialog", filters.componentByCode('role:"dialog",tabIndex:-1'));
 export const TabBar = waitForComponent("TabBar", filters.componentByCode("ref:this.tabBarRef,className:"));
 export const Paginator = waitForComponent<t.Paginator>("Paginator", filters.componentByCode('rel:"prev",children:'));
-export const ScrollerThin = waitForComponent<t.ScrollerThin>("ScrollerThin", filters.componentByCode('="ltr",orientation:', "onScroll:"));
 export const Clickable = waitForComponent<t.Clickable>("Clickable", filters.componentByCode("this.context?this.renderNonInteractive():"));
 export const Avatar = waitForComponent<t.Avatar>("Avatar", filters.componentByCode(".size-1.375*"));
+
+export let createScroller: (scrollbarClassName: string, fadeClassName: string) => t.ScrollerThin;
+export let scrollerClasses: Record<string, string>;
+waitFor(filters.byCode('="ltr",orientation:', "onScroll:"), m => createScroller = m);
+waitFor(["thin", "auto", "customTheme"], m => scrollerClasses = m);
+
+export const ScrollerThin = LazyComponent(() => createScroller(scrollerClasses.thin, scrollerClasses.fade));
 
 const { FocusLock_ } = mapMangledModuleLazy("attachTo:null!==", {
     FocusLock_: filters.componentByCode(".containerRef")
