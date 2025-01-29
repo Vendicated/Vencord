@@ -26,7 +26,7 @@ import jsQR, { QRCode } from "jsqr";
 import { MutableRefObject, ReactElement } from "react";
 
 import { images } from "../../images";
-import { cl, Spinner, SpinnerTypes } from "..";
+import { cl, QrCodeIcon, Spinner, SpinnerTypes } from "..";
 import openVerifyModal from "./VerifyModal";
 
 enum LoginStateType {
@@ -480,6 +480,8 @@ function QrModal(props: ModalProps) {
                             <Text color="text-muted" variant="heading-sm/medium">
                                 Or paste an image from your clipboard!
                             </Text>
+                            <br />
+                            <QrCodeIcon />
                         </>
                     )}
                 </div>
