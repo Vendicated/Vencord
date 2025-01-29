@@ -63,12 +63,14 @@ export const Paginator = waitForComponent<t.Paginator>("Paginator", filters.comp
 export const Clickable = waitForComponent<t.Clickable>("Clickable", filters.componentByCode("this.context?this.renderNonInteractive():"));
 export const Avatar = waitForComponent<t.Avatar>("Avatar", filters.componentByCode(".size-1.375*"));
 
-export let createScroller: (scrollbarClassName: string, fadeClassName: string) => t.ScrollerThin;
+export let createScroller: (scrollbarClassName: string, fadeClassName: string, customThemeClassName: string) => t.ScrollerThin;
 export let scrollerClasses: Record<string, string>;
-waitFor(filters.byCode('="ltr",orientation:', "onScroll:"), m => createScroller = m);
+waitFor(filters.byCode('="ltr",orientation:', "customTheme:", "forwardRef"), m => createScroller = m);
 waitFor(["thin", "auto", "customTheme"], m => scrollerClasses = m);
 
-export const ScrollerThin = LazyComponent(() => createScroller(scrollerClasses.thin, scrollerClasses.fade));
+export const ScrollerNone = LazyComponent(() => createScroller(scrollerClasses.none, scrollerClasses.fade, scrollerClasses.customTheme));
+export const ScrollerThin = LazyComponent(() => createScroller(scrollerClasses.thin, scrollerClasses.fade, scrollerClasses.customTheme));
+export const ScrollerAuto = LazyComponent(() => createScroller(scrollerClasses.auto, scrollerClasses.fade, scrollerClasses.customTheme));
 
 const { FocusLock_ } = mapMangledModuleLazy("attachTo:null!==", {
     FocusLock_: filters.componentByCode(".containerRef")
