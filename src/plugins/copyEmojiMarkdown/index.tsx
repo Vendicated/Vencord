@@ -36,7 +36,7 @@ function getEmojiMarkdown(target: Target, copyUnicode: boolean): string {
     const imgSrc = target?.firstChild.src;
     const url = new URL(imgSrc);
     const isAnimated = url.searchParams.get("animated") === "true";
-    const extension = target?.firstChild.src.match(
+    const extension = imgSrc.match(
         /https:\/\/cdn\.discordapp\.com\/emojis\/\d+\.(\w+)/
     )?.[1];
 
