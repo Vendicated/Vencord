@@ -33,11 +33,14 @@ function getEmojiMarkdown(target: Target, copyUnicode: boolean): string {
             : `:${emojiName}:`;
     }
 
+    const imgSrc = target?.firstChild.src;
+    const url = new URL(imgSrc);
+    const isAnimated = url.searchParams.get("animated") === "true";
     const extension = target?.firstChild.src.match(
         /https:\/\/cdn\.discordapp\.com\/emojis\/\d+\.(\w+)/
     )?.[1];
 
-    return `<${extension === "gif" ? "a" : ""}:${emojiName.replace(/~\d+$/, "")}:${emojiId}>`;
+    return `<${(isAnimated || extension === "gif") ? "a" : ""}:${emojiName.replace(/~\d+$/, "")}:${emojiId}>`;
 }
 
 const settings = definePluginSettings({
@@ -55,7 +58,7 @@ export default definePlugin({
     settings,
 
     contextMenus: {
-        "expression-picker"(children, { target }: { target: Target }) {
+        "expression-picker"(children, { target }: { target: Target; }) {
             if (target.dataset.type !== "emoji") return;
 
             children.push(
