@@ -1,7 +1,14 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { MessageObject } from "@api/MessageEvents";
-import { FurudoSettings } from "../types";
 import { Message } from "discord-types/general";
+
 import { instructions } from "../instructions";
+import { FurudoSettings } from "../types";
 
 export default async (
     message: MessageObject,
@@ -81,7 +88,7 @@ export default async (
             ],
             stream: false,
         }),
-    }).then((r) => r.json());
+    }).then(r => r.json());
 
     return completion.message.content;
 };

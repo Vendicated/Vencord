@@ -7,10 +7,9 @@
 import { MessageObject } from "@api/MessageEvents";
 import { Message } from "discord-types/general";
 
-import { FurudoSettings } from "./types";
-
-import OpenAI from "./providers/OpenAI";
 import Ollama from "./providers/Ollama";
+import OpenAI from "./providers/OpenAI";
+import { FurudoSettings } from "./types";
 
 export async function transferMessage(
     message: MessageObject,

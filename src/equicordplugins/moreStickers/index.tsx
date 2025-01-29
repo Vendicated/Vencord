@@ -64,7 +64,7 @@ export default definePlugin({
             }
         },
         {
-            find: `role:"tablist","aria-label":`,
+            find: "role:\"tablist\",\"aria-label\":",
             replacement: {
                 match: /role:"tablist",.*?,?"aria-label":.+?\),children:(\[.*?\)\]}\)}\):null,)(.*?closePopout:\w.*?:null)/s,
                 replace: m => {
