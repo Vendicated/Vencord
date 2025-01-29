@@ -148,10 +148,9 @@ export default definePlugin({
             )
                 continue;
 
-            if (
-                tag.permissions?.some(perm => perms.includes(perm)) ||
-                tag.condition?.(message!, user, channel)
-            ) {
+            if ("permissions" in tag ?
+                tag.permissions.some(perm => perms.includes(perm)) :
+                tag.condition(message!, user, channel)) {
                 if ((channel.isForumPost() || channel.isMediaPost()) && channel.ownerId === user.id)
                     type = this.localTags[`${tag.name}-OP`];
 

@@ -12,7 +12,7 @@ import { Channel, Guild, Message, User } from "discord-types/general";
 import type { ITag } from "./types";
 
 export const isWebhook = (message: Message, user: User) => !!message?.webhookId && user.isNonUserBot();
-export const tags: ITag[] = [
+export const tags = [
     {
         name: "WEBHOOK",
         displayName: "Webhook",
@@ -49,7 +49,7 @@ export const tags: ITag[] = [
         description: "Can timeout people",
         permissions: ["MODERATE_MEMBERS"]
     }
-];
+] as const satisfies ITag[];
 
 export const Tag = findLazy(m => m.Types?.[0] === "BOT") as RC<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
 
