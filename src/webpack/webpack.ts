@@ -86,7 +86,7 @@ export const filters = {
 export type CallbackFn = (module: ModuleExports, id: PropertyKey) => void;
 export type FactoryListernFn = (factory: AnyModuleFactory) => void;
 
-export const subscriptions = new Map<FilterFn, CallbackFn>();
+export const waitForSubscriptions = new Map<FilterFn, CallbackFn>();
 export const moduleListeners = new Set<CallbackFn>();
 export const factoryListeners = new Set<FactoryListernFn>();
 
@@ -130,18 +130,13 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
 
     for (const key in cache) {
         const mod = cache[key];
-        if (!mod.loaded || !mod?.exports) continue;
+        if (!mod?.loaded || mod.exports == null) continue;
 
         if (filter(mod.exports)) {
             return isWaitFor ? [mod.exports, key] : mod.exports;
         }
 
         if (typeof mod.exports !== "object") continue;
-
-        if (mod.exports.default && filter(mod.exports.default)) {
-            const found = mod.exports.default;
-            return isWaitFor ? [found, key] : found;
-        }
 
         for (const nestedMod in mod.exports) {
             const nested = mod.exports[nestedMod];
@@ -165,16 +160,14 @@ export function findAll(filter: FilterFn) {
     const ret = [] as any[];
     for (const key in cache) {
         const mod = cache[key];
-        if (!mod.loaded || !mod?.exports) continue;
+        if (!mod?.loaded || mod.exports == null) continue;
 
         if (filter(mod.exports))
             ret.push(mod.exports);
         else if (typeof mod.exports !== "object")
             continue;
 
-        if (mod.exports.default && filter(mod.exports.default))
-            ret.push(mod.exports.default);
-        else for (const nestedMod in mod.exports) {
+        for (const nestedMod in mod.exports) {
             const nested = mod.exports[nestedMod];
             if (nested && filter(nested)) ret.push(nested);
         }
@@ -213,7 +206,7 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
     outer:
     for (const key in cache) {
         const mod = cache[key];
-        if (!mod.loaded || !mod?.exports) continue;
+        if (!mod?.loaded || mod.exports == null) continue;
 
         for (let j = 0; j < length; j++) {
             const filter = filters[j];
@@ -229,13 +222,6 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
 
             if (typeof mod.exports !== "object")
                 continue;
-
-            if (mod.exports.default && filter(mod.exports.default)) {
-                results[j] = mod.exports.default;
-                filters[j] = undefined;
-                if (++found === length) break outer;
-                break;
-            }
 
             for (const nestedMod in mod.exports) {
                 const nested = mod.exports[nestedMod];
@@ -605,7 +591,7 @@ export function waitFor(filter: string | PropsFilter | FilterFn, callback: Callb
         if (existing) return void callback(existing, id);
     }
 
-    subscriptions.set(filter, callback);
+    waitForSubscriptions.set(filter, callback);
 }
 
 /**

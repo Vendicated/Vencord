@@ -12,7 +12,7 @@ import { PatchReplacement } from "@utils/types";
 
 import { traceFunctionWithResults } from "../debug/Tracer";
 import { patches } from "../plugins";
-import { _initWebpack, AnyModuleFactory, AnyWebpackRequire, factoryListeners, findModuleId, ModuleExports, moduleListeners, subscriptions, WebpackRequire, WrappedModuleFactory, wreq } from ".";
+import { _initWebpack, AnyModuleFactory, AnyWebpackRequire, factoryListeners, findModuleId, ModuleExports, moduleListeners, waitForSubscriptions, WebpackRequire, WrappedModuleFactory, wreq } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 
@@ -345,11 +345,6 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
                     break nonEnumerableChecking;
                 }
 
-                if (exports.default === window || exports.default?.[Symbol.toStringTag] === "DOMTokenList") {
-                    shouldMakeNonEnumerable = true;
-                    break nonEnumerableChecking;
-                }
-
                 for (const exportKey in exports) {
                     if (exports[exportKey] === window || exports[exportKey]?.[Symbol.toStringTag] === "DOMTokenList") {
                         shouldMakeNonEnumerable = true;
@@ -380,11 +375,11 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
             }
         }
 
-        for (const [filter, callback] of subscriptions) {
+        for (const [filter, callback] of waitForSubscriptions) {
             try {
 
                 if (filter(exports)) {
-                    subscriptions.delete(filter);
+                    waitForSubscriptions.delete(filter);
                     callback(exports, id);
                     continue;
                 }
@@ -393,17 +388,11 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
                     continue;
                 }
 
-                if (exports.default != null && filter(exports.default)) {
-                    subscriptions.delete(filter);
-                    callback(exports.default, id);
-                    continue;
-                }
-
                 for (const exportKey in exports) {
                     const exportValue = exports[exportKey];
 
                     if (exportValue != null && filter(exportValue)) {
-                        subscriptions.delete(filter);
+                        waitForSubscriptions.delete(filter);
                         callback(exportValue, id);
                         break;
                     }
