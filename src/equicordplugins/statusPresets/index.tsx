@@ -104,7 +104,7 @@ function setStatus(status: DiscordStatus) {
     });
 }
 
-const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomStatusHint} onClick={e => { e.stopPropagation(); CustomStatusSettings?.updateSetting(null); }}>{CircleXIcon}</Clickable>;
+const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomStatusHint} onClick={e => { e.stopPropagation(); CustomStatusSettings?.updateSetting(null); }}><CircleXIcon /></Clickable>;
 
 function StatusIcon({ isHovering, status }: { isHovering: boolean; status: DiscordStatus; }) {
     return <div className={StatusStyles.status}>{isHovering ?
