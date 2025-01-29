@@ -73,10 +73,10 @@ export default definePlugin({
         "geometrychange",
         this.handleGeometryChange
       );
+      navigator.setAppBadge(0);
     }
     disableStyle(style);
     this.linkEl?.remove();
-    navigator.setAppBadge(0);
     NotificationSettingsStore.removeChangeListener(this.setBadge);
     GuildReadStateStore.removeChangeListener(this.setBadge);
     RelationshipStore.removeChangeListener(this.setBadge);
