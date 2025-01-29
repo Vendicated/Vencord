@@ -313,9 +313,9 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: "#{intl::UNREADS_TAB_LABEL}",
+            find: "#{intl::UNREADS_TAB_LABEL})}",
             replacement: {
-                match: /\i\?\(0,\i\.jsxs\)\(\i\.TabBar\.Item/,
+                match: /\(0,\i\.jsxs\)\(\i\.\i\i\.Item/,
                 replace: "$self.keywordTabBar(),$&"
             }
         },

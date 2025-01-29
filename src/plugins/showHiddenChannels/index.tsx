@@ -212,8 +212,8 @@ export default definePlugin({
                 {
                     // Make muted channels also appear as unread if hide unreads is false and the channel is hidden
                     predicate: () => settings.store.channelStyle === ChannelStyle.MutedUnread || settings.store.channelStyle === ChannelStyle.Unread,
-                    match: /\.LOCKED;if\((?<={channel:(\i).+?)/,
-                    replace: (m, channel) => `${m}!$self.isHiddenChannel(${channel})&&`
+                    match: /(?<=\.LOCKED(?:;if\(|:))(?<={channel:(\i).+?)/,
+                    replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
                 }
             ]
         },
