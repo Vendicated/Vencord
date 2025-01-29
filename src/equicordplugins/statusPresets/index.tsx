@@ -108,7 +108,7 @@ const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomSt
 
 function StatusIcon({ isHovering, status }: { isHovering: boolean; status: DiscordStatus; }) {
     return <div className={StatusStyles.status}>{isHovering ?
-        CircleXIcon
+        <CircleXIcon />
         : (status.emojiInfo != null ? <EmojiComponent emoji={status.emojiInfo} animate={false} hideTooltip={false} /> : <div className={StatusStyles.customEmojiPlaceholder} />)}</div>;
 }
 
