@@ -22,7 +22,7 @@ import { filters, findByPropsLazy, mapMangledModuleLazy, waitFor } from "@webpac
 import { waitForComponent } from "./internal";
 import * as t from "./types/components";
 
-const FormTitle = waitForComponent<t.FormTitle>("FormTitle", filters.componentByCode(".SELECTABLE),"));
+const FormTitle = waitForComponent<t.FormTitle>("FormTitle", filters.componentByCode(".SELECTABLE),", ".DISABLED:"));
 const FormSection = waitForComponent<t.FormSection>("FormSection", filters.componentByCode(".titleId)&&"));
 const FormDivider = waitForComponent<t.FormDivider>("FormDivider", filters.componentByCode(".divider,", ",style:", '"div"', /\.divider,\i\),style:/));
 const FormText = waitForComponent<t.FormText>("FormText", filters.componentByCode('["defaultMargin".concat'));
@@ -34,7 +34,7 @@ export const Forms = {
     FormText
 };
 
-export const Card = waitForComponent<t.Card>("Card", filters.componentByCode(".editable),"));
+export const Card = waitForComponent<t.Card>("Card", filters.componentByCode(".editable),", ".outline:"));
 export const Button = waitForComponent<t.Button>("Button", filters.componentByCode("#{intl::A11Y_LOADING_STARTED}))),!1"));
 export const Switch = waitForComponent<t.Switch>("Switch", filters.componentByCode(".labelRow,ref:", ".disabledText"));
 

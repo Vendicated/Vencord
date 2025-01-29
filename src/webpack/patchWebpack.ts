@@ -250,7 +250,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
         for (const factoryListener of factoryListeners) {
             try {
-                factoryListener(originalMod, id);
+                factoryListener(originalMod);
             } catch (err) {
                 logger.error("Error in Webpack factory listener:\n", err, factoryListener);
             }
