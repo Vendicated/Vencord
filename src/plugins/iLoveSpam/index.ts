@@ -27,7 +27,7 @@ export default definePlugin({
         {
             find: "hasFlag:{writable",
             replacement: {
-                match: /if\((\i)<=(?:1<<30|1073741824)\)return/,
+                match: /if\((\i)<=(?:0x40000000|(?:1<<30|1073741824))\)return/,
                 replace: "if($1===(1<<20))return false;$&",
             },
         },

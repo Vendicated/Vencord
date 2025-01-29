@@ -69,8 +69,8 @@ export default definePlugin({
         {
             find: "https://github.com/highlightjs/highlight.js/issues/2277",
             replacement: {
-                match: /(?<=&&\()console.log\(`Deprecated.+?`\),/,
-                replace: ""
+                match: /\(console.log\(`Deprecated.+?`\),/,
+                replace: "("
             }
         },
         {

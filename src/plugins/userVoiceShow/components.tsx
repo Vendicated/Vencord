@@ -22,7 +22,7 @@ const VoiceStateStore = findStoreLazy("VoiceStateStore");
 
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 const Avatar = findComponentByCodeLazy(".status)/2):0");
-const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarURL");
+const GroupDMAvatars = findComponentByCodeLazy("frontSrc:", "getAvatarURL");
 
 const ActionButtonClasses = findByPropsLazy("actionButton", "highlight");
 

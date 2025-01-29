@@ -220,16 +220,16 @@ export default definePlugin({
         {
             find: ".cursorPointer:null,children",
             replacement: {
-                match: /.Avatar,.+?src:(.+?\))(?=[,}])/,
-                replace: (m, avatarUrl) => `${m},onClick:()=>$self.openAvatar(${avatarUrl})`
+                match: /(?=,src:(\i.getAvatarURL\(.+?[)]))/,
+                replace: (_, avatarUrl) => `,onClick:()=>$self.openAvatar(${avatarUrl})`
             }
         },
         // User Dms top large icon
         {
             find: 'experimentLocation:"empty_messages"',
             replacement: {
-                match: /.Avatar,.+?src:(.+?\))(?=[,}])/,
-                replace: (m, avatarUrl) => `${m},onClick:()=>$self.openAvatar(${avatarUrl})`
+                match: /(?<=SIZE_80,)(?=src:(.+?\))[,}])/,
+                replace: (_, avatarUrl) => `onClick:()=>$self.openAvatar(${avatarUrl}),`
             }
         }
     ]

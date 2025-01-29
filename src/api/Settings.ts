@@ -221,15 +221,13 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
 }
 
 export function migratePluginSetting(pluginName: string, oldSetting: string, newSetting: string) {
-    const { plugins } = SettingsStore.plain;
+    const settings = SettingsStore.plain.plugins[pluginName];
+    if (!settings) return;
 
-    if (
-        plugins?.[pluginName]?.[oldSetting] == null ||
-        plugins[pluginName][newSetting] != null
-    ) return;
+    if (!Object.hasOwn(settings, oldSetting) || Object.hasOwn(settings, newSetting)) return;
 
-    plugins[pluginName][newSetting] = plugins[pluginName][oldSetting];
-    delete plugins[pluginName][oldSetting];
+    settings[newSetting] = settings[oldSetting];
+    delete settings[oldSetting];
     SettingsStore.markAsChanged();
 }
 

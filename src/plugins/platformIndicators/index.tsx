@@ -25,7 +25,7 @@ import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { filters, findStoreLazy, mapMangledModuleLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -70,7 +70,9 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const StatusUtils = findByPropsLazy("useStatusFillColor", "StatusTypes");
+const { useStatusFillColor } = mapMangledModuleLazy(".concat(.5625*", {
+    useStatusFillColor: filters.byCode(".hex")
+});
 
 const PlatformIcon = ({ platform, status, small }: { platform: Platform, status: string; small: boolean; }) => {
     const tooltip = platform === "embedded"
@@ -79,7 +81,7 @@ const PlatformIcon = ({ platform, status, small }: { platform: Platform, status:
 
     const Icon = Icons[platform] ?? Icons.desktop;
 
-    return <Icon color={StatusUtils.useStatusFillColor(status)} tooltip={tooltip} small={small} />;
+    return <Icon color={useStatusFillColor(status)} tooltip={tooltip} small={small} />;
 };
 
 function ensureOwnStatus(user: User) {

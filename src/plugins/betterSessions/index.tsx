@@ -21,7 +21,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Constants, React, RestAPI, Tooltip } from "@webpack/common";
 
 import { RenameButton } from "./components/RenameButton";
@@ -34,7 +34,7 @@ const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
 const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
 
-const BlobMask = findExportedComponentLazy("BlobMask");
+const BlobMask = findComponentByCodeLazy("!1,lowerBadgeSize:");
 
 const settings = definePluginSettings({
     backgroundCheck: {

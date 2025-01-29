@@ -172,26 +172,36 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
             if (!exports) return;
 
-            // There are (at the time of writing) 11 modules exporting the window
-            // Make these non enumerable to improve webpack search performance
             if (require.c) {
-                let foundWindow = false;
+                let shouldMakeNonEnumerable = false;
 
-                if (exports === window) {
-                    foundWindow = true;
-                } else if (typeof exports === "object") {
-                    if (exports?.default === window) {
-                        foundWindow = true;
-                    } else {
-                        for (const nested in exports) if (nested.length <= 3) {
-                            if (exports[nested] === window) {
-                                foundWindow = true;
-                            }
+                nonEnumerableChecking: {
+                    // There are (at the time of writing) 11 modules exporting the window,
+                    // and also modules exporting DOMTokenList, which breaks webpack finding
+                    // Make these non enumerable to improve search performance and avoid erros
+                    if (exports === window || exports[Symbol.toStringTag] === "DOMTokenList") {
+                        shouldMakeNonEnumerable = true;
+                        break nonEnumerableChecking;
+                    }
+
+                    if (typeof exports !== "object") {
+                        break nonEnumerableChecking;
+                    }
+
+                    if (exports.default === window || exports.default?.[Symbol.toStringTag] === "DOMTokenList") {
+                        shouldMakeNonEnumerable = true;
+                        break nonEnumerableChecking;
+                    }
+
+                    for (const nested in exports) {
+                        if (exports[nested] === window || exports[nested]?.[Symbol.toStringTag] === "DOMTokenList") {
+                            shouldMakeNonEnumerable = true;
+                            break nonEnumerableChecking;
                         }
                     }
                 }
 
-                if (foundWindow) {
+                if (shouldMakeNonEnumerable) {
                     Object.defineProperty(require.c, id, {
                         value: require.c[id],
                         enumerable: false,
@@ -221,7 +231,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                             subscriptions.delete(filter);
                             callback(exports.default, id);
                         } else {
-                            for (const nested in exports) if (nested.length <= 3) {
+                            for (const nested in exports) {
                                 if (exports[nested] && filter(exports[nested])) {
                                     subscriptions.delete(filter);
                                     callback(exports[nested], id);

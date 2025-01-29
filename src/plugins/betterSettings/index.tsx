@@ -101,8 +101,8 @@ export default definePlugin({
             find: 'minimal:"contentColumnMinimal"',
             replacement: [
                 {
-                    match: /\(0,\i\.useTransition\)\((\i)/,
-                    replace: "(_cb=>_cb(void 0,$1))||$&"
+                    match: /(?=\(0,\i\.\i\)\((\i),\{from:\{position:"absolute")/,
+                    replace: "(_cb=>_cb(void 0,$1))||"
                 },
                 {
                     match: /\i\.animated\.div/,
