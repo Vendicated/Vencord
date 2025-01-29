@@ -177,8 +177,10 @@ export default definePlugin({
                 },
                 // Make voice channels also appear as muted if they are muted
                 {
-                    match: /(?<=\.wrapper:\i\.notInteractive,)(.+?)(\i)\?(\i\.MUTED)/,
-                    replace: (_, otherClasses, isMuted, mutedClassExpression) => `${isMuted}?${mutedClassExpression}:"",${otherClasses}${isMuted}?""`
+                    match: /(?<=\.wrapper:\i\.notInteractive,)(.+?)(if\()?(\i)(?:\)return |\?)(\i\.MUTED)/,
+                    replace: (_, otherClasses, isIf, isMuted, mutedClassExpression) => isIf
+                        ? `${isMuted}?${mutedClassExpression}:"",${otherClasses}if(${isMuted})return ""`
+                        : `${isMuted}?${mutedClassExpression}:"",${otherClasses}${isMuted}?""`
                 }
             ]
         },
