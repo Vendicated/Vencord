@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { generateId, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
@@ -73,7 +73,7 @@ const getAttachments = async (channelId: string) =>
     );
 
 
-const PreviewButton: ChatBarButton = ({ isMainChat, isEmpty, type: { attachments } }) => {
+const PreviewButton: ChatBarButtonFactory = ({ isMainChat, isEmpty, type: { attachments } }) => {
     const channelId = SelectedChannelStore.getChannelId();
     const draft = useStateFromStores([DraftStore], () => getDraft(channelId));
 
@@ -121,11 +121,9 @@ export default definePlugin({
     name: "PreviewMessage",
     description: "Lets you preview your message before sending it.",
     authors: [Devs.Aria],
-    dependencies: ["ChatInputButtonAPI"],
     // start early to ensure we're the first plugin to add our button
     // This makes the popping in less awkward
     startAt: StartAt.Init,
 
-    start: () => addChatBarButton("previewMessage", PreviewButton),
-    stop: () => removeChatBarButton("previewMessage"),
+    renderChatBarButton: PreviewButton,
 });
