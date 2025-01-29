@@ -27,5 +27,9 @@
 
 [class*="notAppAsidePanel_"]>[class*="app_"]>[class*="app_"] [class*="bg_"] {
   top: calc(var(--vencord-titlebar-size)*-1);
+}
 
+:root {
+  /* opt out of auto-dark-mode plugins, which break discord css, such as force-dark, dark-reader etc */
+  color-scheme: only light;
 }
