@@ -70,8 +70,7 @@ const ErrorBoundary = LazyComponent(() => {
 
         componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
             this.props.onError?.({ error, errorInfo, props: this.props.wrappedProps });
-            logger.error("A component threw an Error\n", error);
-            logger.error("Component Stack", errorInfo.componentStack);
+            logger.error(`${this.props.message || "A component threw an Error"}\n`, error, errorInfo.componentStack);
         }
 
         render() {

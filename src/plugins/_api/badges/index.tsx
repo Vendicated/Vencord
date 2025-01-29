@@ -106,8 +106,9 @@ export default definePlugin({
         }
     },
 
+    userProfileBadge: ContributorBadge,
+
     async start() {
-        Vencord.Api.Badges.addBadge(ContributorBadge);
         await loadBadges();
     },
 
