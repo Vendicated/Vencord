@@ -17,47 +17,7 @@
 */
 
 import { Devs } from "@utils/constants";
-import { canonicalizeMatch } from "@utils/patches";
 import definePlugin from "@utils/types";
-import { factoryListeners } from "@webpack";
-
-/**
- * The last var name which the ContextMenu module was WebpackRequire'd and assigned to
- */
-let lastVarName = "";
-
-/**
- * The key exporting the ContextMenu module "Menu"
- */
-let exportKey: string = "";
-
-/**
- * The id of the module exporting the ContextMenu module "Menu"
- */
-let modId: string = "";
-
-function factoryListener(factory: any, id: string) {
-    if (!Vencord.Plugins.isPluginEnabled("ContextMenuAPI")) {
-        return factoryListeners.delete(factoryListener);
-    }
-
-    const str = String(factory);
-    if (!str.includes("♫ (つ｡◕‿‿◕｡)つ ♪")) {
-        return;
-    }
-
-    factoryListeners.delete(factoryListener);
-
-    const match = str.match(canonicalizeMatch(/{(?=.+?function (\i){.{0,50}let{navId:).+?(\i):(?:function \(\){return |\(\)=>)\1/));
-    if (match == null) {
-        return;
-    }
-
-    exportKey = match[2];
-    modId = id;
-}
-
-factoryListeners.add(factoryListener);
 
 export default definePlugin({
     name: "ContextMenuAPI",
@@ -79,19 +39,14 @@ export default definePlugin({
             noWarn: true,
             replacement: [
                 {
-                    get match() {
-                        return RegExp(`${String(modId)}(?<=(\\i)=.+?)`);
-                    },
-                    replace: (m, varName) => {
-                        lastVarName = varName;
+                    match: /navId:(?=.+?([,}].*?\)))/g,
+                    replace: (m, rest) => {
+                        const destructuringMatch = rest.match(/}=.+/);
+                        if (destructuringMatch == null) {
+                            return `contextMenuAPIArguments:typeof arguments!=='undefined'?arguments:[],${m}`;
+                        }
                         return m;
                     }
-                },
-                {
-                    get match() {
-                        return RegExp(`${String(exportKey)},{(?<=${lastVarName}\\.${String(exportKey)},{)`, "g");
-                    },
-                    replace: "$&contextMenuAPIArguments:typeof arguments!=='undefined'?arguments:[],"
                 }
             ]
         }
