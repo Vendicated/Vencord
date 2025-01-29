@@ -17,7 +17,7 @@
 */
 
 import { LazyComponent } from "@utils/lazyReact";
-import { filters, findByPropsLazy, mapMangledModuleLazy, waitFor } from "@webpack";
+import { filters, mapMangledModuleLazy, waitFor } from "@webpack";
 
 import { waitForComponent } from "./internal";
 import * as t from "./types/components";
@@ -80,9 +80,6 @@ const { FocusLock_ } = mapMangledModuleLazy("attachTo:null!==", {
 
 export const FocusLock = LazyComponent(() => FocusLock_);
 
-export let ButtonLooks: t.ButtonLooks;
-waitFor(["BLANK", "FILLED", "LINK"], m => ButtonLooks = m);
-
 export let useToken: t.useToken;
 waitFor(m => {
     if (typeof m !== "function") {
@@ -96,5 +93,4 @@ waitFor(m => {
 export const MaskedLink = waitForComponent<t.MaskedLink>("MaskedLink", filters.componentByCode("MASKED_LINK)"));
 export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.componentByCode("#{intl::MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL}"));
 export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
-
-export const { OAuth2AuthorizeModal } = findByPropsLazy("OAuth2AuthorizeModal");
+export const OAuth2AuthorizeModal = waitForComponent("OAuth2AuthorizeModal", filters.componentByCode(".authorize),children:", ".contentBackground"));

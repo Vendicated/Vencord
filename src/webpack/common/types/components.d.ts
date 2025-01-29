@@ -24,7 +24,6 @@ export type FormTextTypes = Record<"DEFAULT" | "INPUT_PLACEHOLDER" | "DESCRIPTIO
 export type HeadingTag = `h${1 | 2 | 3 | 4 | 5 | 6}`;
 
 export type Margins = Record<"marginTop16" | "marginTop8" | "marginBottom8" | "marginTop20" | "marginBottom20", string>;
-export type ButtonLooks = Record<"FILLED" | "INVERTED" | "OUTLINED" | "LINK" | "BLANK", string>;
 
 export type TextProps = PropsWithChildren<HtmlHTMLAttributes<HTMLDivElement> & {
     variant?: TextVariant;
