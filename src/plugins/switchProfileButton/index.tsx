@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Button, Icons, Text, TooltipContainer } from "@webpack/common";
+import { Button, Text, TooltipContainer } from "@webpack/common";
 import { ReactNode } from "react";
 
 const RoleButtonClasses = findByPropsLazy("button", "buttonInner", "icon", "banner");
@@ -63,7 +63,9 @@ export default definePlugin({
                 className={classes(RoleButtonClasses.button, RoleButtonClasses.icon, RoleButtonClasses.banner)}
                 innerClassName={classes(RoleButtonClasses.buttonInner, RoleButtonClasses.icon, RoleButtonClasses.banner)}
             >
-                <Icons.ArrowsLeftRightIcon size="xs" />
+                <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M2.3 7.7a1 1 0 0 1 0-1.4l4-4a1 1 0 0 1 1.4 1.4L5.42 6H21a1 1 0 1 1 0 2H5.41l2.3 2.3a1 1 0 1 1-1.42 1.4l-4-4ZM17.7 21.7l4-4a1 1 0 0 0 0-1.4l-4-4a1 1 0 0 0-1.4 1.4l2.29 2.3H3a1 1 0 1 0 0 2h15.59l-2.3 2.3a1 1 0 0 0 1.42 1.4Z" />
+                </svg>
             </Button>
         </TooltipContainer>;
     }, { noop: true })
