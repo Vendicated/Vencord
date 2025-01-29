@@ -26,7 +26,10 @@ export async function loadLazyChunks() {
         // True if resolved, false otherwise
         const chunksSearchPromises = [] as Array<() => boolean>;
 
+        /* This regex loads all language packs which makes webpack finds testing extremely slow, so for now, lets use one which doesnt include those
         const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?)\.then\(\i(?:\.\i)?\.bind\(\i,"?([^)]+?)"?(?:,[^)]+?)?\)\)/g);
+        */
+        const LazyChunkRegex = canonicalizeMatch(/(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?)\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/g);
 
         let foundCssDebuggingLoad = false;
 
