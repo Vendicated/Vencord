@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addAccessory } from "@api/MessageAccessories";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -143,7 +142,7 @@ export default definePlugin({
     required: true,
     description: "Helps us provide support to you",
     authors: [Devs.Ven],
-    dependencies: ["UserSettingsAPI", "MessageAccessoriesAPI"],
+    dependencies: ["UserSettingsAPI"],
 
     settings,
 
@@ -236,6 +235,85 @@ export default definePlugin({
         }
     },
 
+    renderMessageAccessory(props) {
+        const buttons = [] as JSX.Element[];
+
+        const shouldAddUpdateButton =
+            !IS_UPDATER_DISABLED
+            && (
+                (props.channel.id === KNOWN_ISSUES_CHANNEL_ID) ||
+                (props.channel.id === SUPPORT_CHANNEL_ID && props.message.author.id === VENBOT_USER_ID)
+            )
+            && props.message.content?.includes("update");
+
+        if (shouldAddUpdateButton) {
+            buttons.push(
+                <Button
+                    key="vc-update"
+                    color={Button.Colors.GREEN}
+                    onClick={async () => {
+                        try {
+                            if (await forceUpdate())
+                                showToast("Success! Restarting...", Toasts.Type.SUCCESS);
+                            else
+                                showToast("Already up to date!", Toasts.Type.MESSAGE);
+                        } catch (e) {
+                            new Logger(this.name).error("Error while updating:", e);
+                            showToast("Failed to update :(", Toasts.Type.FAILURE);
+                        }
+                    }}
+                >
+                    Update Now
+                </Button>
+            );
+        }
+
+        if (props.channel.id === SUPPORT_CHANNEL_ID) {
+            if (props.message.content.includes("/vencord-debug") || props.message.content.includes("/vencord-plugins")) {
+                buttons.push(
+                    <Button
+                        key="vc-dbg"
+                        onClick={async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() })}
+                    >
+                        Run /vencord-debug
+                    </Button>,
+                    <Button
+                        key="vc-plg-list"
+                        onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
+                    >
+                        Run /vencord-plugins
+                    </Button>
+                );
+            }
+
+            if (props.message.author.id === VENBOT_USER_ID) {
+                const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
+                if (match) {
+                    buttons.push(
+                        <Button
+                            key="vc-run-snippet"
+                            onClick={async () => {
+                                try {
+                                    await AsyncFunction(match[1])();
+                                    showToast("Success!", Toasts.Type.SUCCESS);
+                                } catch (e) {
+                                    new Logger(this.name).error("Error while running snippet:", e);
+                                    showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
+                                }
+                            }}
+                        >
+                            Run Snippet
+                        </Button>
+                    );
+                }
+            }
+        }
+
+        return buttons.length
+            ? <Flex>{buttons}</Flex>
+            : null;
+    },
+
     renderContributorDmWarningCard: ErrorBoundary.wrap(({ channel }) => {
         const userId = channel.getRecipientId();
         if (!isPluginDev(userId)) return null;
@@ -250,85 +328,4 @@ export default definePlugin({
             </Card>
         );
     }, { noop: true }),
-
-    start() {
-        addAccessory("vencord-debug", props => {
-            const buttons = [] as JSX.Element[];
-
-            const shouldAddUpdateButton =
-                !IS_UPDATER_DISABLED
-                && (
-                    (props.channel.id === KNOWN_ISSUES_CHANNEL_ID) ||
-                    (props.channel.id === SUPPORT_CHANNEL_ID && props.message.author.id === VENBOT_USER_ID)
-                )
-                && props.message.content?.includes("update");
-
-            if (shouldAddUpdateButton) {
-                buttons.push(
-                    <Button
-                        key="vc-update"
-                        color={Button.Colors.GREEN}
-                        onClick={async () => {
-                            try {
-                                if (await forceUpdate())
-                                    showToast("Success! Restarting...", Toasts.Type.SUCCESS);
-                                else
-                                    showToast("Already up to date!", Toasts.Type.MESSAGE);
-                            } catch (e) {
-                                new Logger(this.name).error("Error while updating:", e);
-                                showToast("Failed to update :(", Toasts.Type.FAILURE);
-                            }
-                        }}
-                    >
-                        Update Now
-                    </Button>
-                );
-            }
-
-            if (props.channel.id === SUPPORT_CHANNEL_ID) {
-                if (props.message.content.includes("/vencord-debug") || props.message.content.includes("/vencord-plugins")) {
-                    buttons.push(
-                        <Button
-                            key="vc-dbg"
-                            onClick={async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() })}
-                        >
-                            Run /vencord-debug
-                        </Button>,
-                        <Button
-                            key="vc-plg-list"
-                            onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
-                        >
-                            Run /vencord-plugins
-                        </Button>
-                    );
-                }
-
-                if (props.message.author.id === VENBOT_USER_ID) {
-                    const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
-                    if (match) {
-                        buttons.push(
-                            <Button
-                                key="vc-run-snippet"
-                                onClick={async () => {
-                                    try {
-                                        await AsyncFunction(match[1])();
-                                        showToast("Success!", Toasts.Type.SUCCESS);
-                                    } catch (e) {
-                                        new Logger(this.name).error("Error while running snippet:", e);
-                                        showToast("Failed to run snippet :(", Toasts.Type.FAILURE);
-                                    }
-                                }}
-                            >
-                                Run Snippet
-                            </Button>
-                        );
-                    }
-                }
-            }
-
-            return buttons.length
-                ? <Flex>{buttons}</Flex>
-                : null;
-        });
-    },
 });

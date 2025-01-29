@@ -9,7 +9,7 @@ import "./ChatButton.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { waitFor } from "@webpack";
-import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
+import { Button, ButtonWrapperClasses, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 import { HTMLProps, JSX, MouseEventHandler, ReactNode } from "react";
 
@@ -74,9 +74,9 @@ export interface ChatBarProps {
     };
 }
 
-export type ChatBarButton = (props: ChatBarProps & { isMainChat: boolean; }) => JSX.Element | null;
+export type ChatBarButtonFactory = (props: ChatBarProps & { isMainChat: boolean; }) => JSX.Element | null;
 
-const buttonFactories = new Map<string, ChatBarButton>();
+const buttonFactories = new Map<string, ChatBarButtonFactory>();
 const logger = new Logger("ChatButtons");
 
 export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
@@ -91,7 +91,7 @@ export function _injectButtons(buttons: ReactNode[], props: ChatBarProps) {
     }
 }
 
-export const addChatBarButton = (id: string, button: ChatBarButton) => buttonFactories.set(id, button);
+export const addChatBarButton = (id: string, button: ChatBarButtonFactory) => buttonFactories.set(id, button);
 export const removeChatBarButton = (id: string) => buttonFactories.delete(id);
 
 export interface ChatBarButtonProps {
@@ -110,7 +110,7 @@ export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
                     <Button
                         aria-label={props.tooltip}
                         size=""
-                        look={ButtonLooks.BLANK}
+                        look={Button.Looks.BLANK}
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
                         innerClassName={`${ButtonWrapperClasses.button} ${ChannelTextAreaClasses?.button}`}
