@@ -37,6 +37,7 @@ import { Constructor } from "type-fest";
 import { PluginMeta } from "~plugins";
 
 import {
+    ISettingCustomElementProps,
     ISettingElementProps,
     SettingBooleanComponent,
     SettingCustomComponent,
@@ -74,7 +75,7 @@ function makeDummyUser(user: { username: string; id?: string; avatar?: string; }
     return newUser;
 }
 
-const Components: Record<OptionType, React.ComponentType<ISettingElementProps<any>>> = {
+const Components: Record<OptionType, React.ComponentType<ISettingElementProps<any> | ISettingCustomElementProps<any>>> = {
     [OptionType.STRING]: SettingTextComponent,
     [OptionType.NUMBER]: SettingNumericComponent,
     [OptionType.BIGINT]: SettingNumericComponent,
