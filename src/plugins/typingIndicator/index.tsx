@@ -23,12 +23,12 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findComponentByCodeLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
+import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "../typingTweaks";
 
-const ThreeDots = findExportedComponentLazy("Dots", "AnimatedDots");
+const ThreeDots = findComponentByCodeLazy(".dots,", "dotRadius:");
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 
 const TypingStore = findStoreLazy("TypingStore");
