@@ -169,8 +169,8 @@ export default definePlugin({
 
         return Settings.plugins.MessageLogger.inlineEdits && (
             <>
-                {message.editHistory?.map(edit => (
-                    <div className="messagelogger-edited">
+                {message.editHistory?.map((edit, idx) => (
+                    <div key={idx} className="messagelogger-edited">
                         {parseEditContent(edit.content, message)}
                         <Timestamp
                             timestamp={edit.timestamp}
@@ -211,7 +211,8 @@ export default definePlugin({
         collapseDeleted: {
             type: OptionType.BOOLEAN,
             description: "Whether to collapse deleted messages, similar to blocked messages",
-            default: false
+            default: false,
+            restartNeeded: true,
         },
         logEdits: {
             type: OptionType.BOOLEAN,
@@ -304,7 +305,7 @@ export default definePlugin({
                 {...props}
                 className={classes("messagelogger-edit-marker", className)}
                 onClick={() => openHistoryModal(message)}
-                aria-role="button"
+                role="button"
             >
                 {children}
             </span>
@@ -500,7 +501,7 @@ export default definePlugin({
 
         {
             // Message context base menu
-            find: "useMessageMenu:",
+            find: ".MESSAGE,commandTargetId:",
             replacement: [
                 {
                     // Remove the first section if message is deleted

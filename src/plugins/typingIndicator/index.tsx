@@ -23,12 +23,12 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findComponentByCodeLazy, findExportedComponentLazy, findStoreLazy } from "@webpack";
+import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { GuildMemberStore, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "../typingTweaks";
 
-const ThreeDots = findExportedComponentLazy("Dots", "AnimatedDots");
+const ThreeDots = findComponentByCodeLazy(".dots,", "dotRadius:");
 const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
 
 const TypingStore = findStoreLazy("TypingStore");
@@ -100,16 +100,24 @@ function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: s
                 {props => (
                     <div className="vc-typing-indicator" {...props}>
                         {((settings.store.indicatorMode & IndicatorMode.Avatars) === IndicatorMode.Avatars) && (
-                            <UserSummaryItem
-                                users={typingUsersArray.map(id => UserStore.getUser(id))}
-                                guildId={guildId}
-                                renderIcon={false}
-                                max={3}
-                                showDefaultAvatarsForNullUsers
-                                showUserPopout
-                                size={16}
-                                className="vc-typing-indicator-avatars"
-                            />
+                            <div
+                                onClick={e => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                }}
+                                onKeyPress={e => e.stopPropagation()}
+                            >
+                                <UserSummaryItem
+                                    users={typingUsersArray.map(id => UserStore.getUser(id))}
+                                    guildId={guildId}
+                                    renderIcon={false}
+                                    max={3}
+                                    showDefaultAvatarsForNullUsers
+                                    showUserPopout
+                                    size={16}
+                                    className="vc-typing-indicator-avatars"
+                                />
+                            </div>
                         )}
                         {((settings.store.indicatorMode & IndicatorMode.Dots) === IndicatorMode.Dots) && (
                             <div className="vc-typing-indicator-dots">

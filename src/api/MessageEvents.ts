@@ -73,11 +73,11 @@ export interface MessageExtra {
     openWarningPopout: (props: any) => any;
 }
 
-export type SendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => Promisable<void | { cancel: boolean; }>;
-export type EditListener = (channelId: string, messageId: string, messageObj: MessageObject) => Promisable<void | { cancel: boolean; }>;
+export type MessageSendListener = (channelId: string, messageObj: MessageObject, extra: MessageExtra) => Promisable<void | { cancel: boolean; }>;
+export type MessageEditListener = (channelId: string, messageId: string, messageObj: MessageObject) => Promisable<void | { cancel: boolean; }>;
 
-const sendListeners = new Set<SendListener>();
-const editListeners = new Set<EditListener>();
+const sendListeners = new Set<MessageSendListener>();
+const editListeners = new Set<MessageEditListener>();
 
 export async function _handlePreSend(channelId: string, messageObj: MessageObject, extra: MessageExtra, replyOptions: MessageReplyOptions) {
     extra.replyOptions = replyOptions;
@@ -111,29 +111,29 @@ export async function _handlePreEdit(channelId: string, messageId: string, messa
 /**
  * Note: This event fires off before a message is sent, allowing you to edit the message.
  */
-export function addPreSendListener(listener: SendListener) {
+export function addMessagePreSendListener(listener: MessageSendListener) {
     sendListeners.add(listener);
     return listener;
 }
 /**
  * Note: This event fires off before a message's edit is applied, allowing you to further edit the message.
  */
-export function addPreEditListener(listener: EditListener) {
+export function addMessagePreEditListener(listener: MessageEditListener) {
     editListeners.add(listener);
     return listener;
 }
-export function removePreSendListener(listener: SendListener) {
+export function removeMessagePreSendListener(listener: MessageSendListener) {
     return sendListeners.delete(listener);
 }
-export function removePreEditListener(listener: EditListener) {
+export function removeMessagePreEditListener(listener: MessageEditListener) {
     return editListeners.delete(listener);
 }
 
 
 // Message clicks
-type ClickListener = (message: Message, channel: Channel, event: MouseEvent) => void;
+export type MessageClickListener = (message: Message, channel: Channel, event: MouseEvent) => void;
 
-const listeners = new Set<ClickListener>();
+const listeners = new Set<MessageClickListener>();
 
 export function _handleClick(message: Message, channel: Channel, event: MouseEvent) {
     // message object may be outdated, so (try to) fetch latest one
@@ -147,11 +147,11 @@ export function _handleClick(message: Message, channel: Channel, event: MouseEve
     }
 }
 
-export function addClickListener(listener: ClickListener) {
+export function addMessageClickListener(listener: MessageClickListener) {
     listeners.add(listener);
     return listener;
 }
 
-export function removeClickListener(listener: ClickListener) {
+export function removeMessageClickListener(listener: MessageClickListener) {
     return listeners.delete(listener);
 }
