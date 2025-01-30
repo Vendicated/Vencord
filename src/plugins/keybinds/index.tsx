@@ -11,6 +11,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 import { keybinds } from "./components/keybinds";
@@ -40,10 +41,7 @@ export default definePlugin({
     name: "Keybinds",
     description: "Bind keys to commands.",
     authors: [
-        {
-            name: "Ryfter",
-            id: 0n,
-        }
+        Devs.Ryfter
     ],
     settings,
     start() {
@@ -73,5 +71,3 @@ export default definePlugin({
         }
     },
 });
-
-
