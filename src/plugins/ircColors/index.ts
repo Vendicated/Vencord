@@ -21,7 +21,7 @@ import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-function calculateHSLForId(id: string) {
+function calculateHSLforId(id: string) {
     // No useMemo/settings.use are here because this funcion is used in RoleColorEverywhere.getColorString
     // to change @mention color.
     //
@@ -71,11 +71,9 @@ export default definePlugin({
             predicate: () => settings.store.memberListColors
         }
     ],
-    calculateHSLforId(...args: Parameters<typeof calculateHSLForId>) {
-        return calculateHSLForId(...args);
-    },
+    calculateHSLforId,
     calculateNameColorForUser(id: string) {
-        const { hue, saturation, lightness } = calculateHSLForId(id);
+        const { hue, saturation, lightness } = calculateHSLforId(id);
         return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     },
     calculateNameColorForMessageContext(context: any) {
