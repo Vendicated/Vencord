@@ -100,16 +100,24 @@ function TypingIndicator({ channelId, guildId }: { channelId: string; guildId: s
                 {props => (
                     <div className="vc-typing-indicator" {...props}>
                         {((settings.store.indicatorMode & IndicatorMode.Avatars) === IndicatorMode.Avatars) && (
-                            <UserSummaryItem
-                                users={typingUsersArray.map(id => UserStore.getUser(id))}
-                                guildId={guildId}
-                                renderIcon={false}
-                                max={3}
-                                showDefaultAvatarsForNullUsers
-                                showUserPopout
-                                size={16}
-                                className="vc-typing-indicator-avatars"
-                            />
+                            <div
+                                onClick={e => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                }}
+                                onKeyPress={e => e.stopPropagation()}
+                            >
+                                <UserSummaryItem
+                                    users={typingUsersArray.map(id => UserStore.getUser(id))}
+                                    guildId={guildId}
+                                    renderIcon={false}
+                                    max={3}
+                                    showDefaultAvatarsForNullUsers
+                                    showUserPopout
+                                    size={16}
+                                    className="vc-typing-indicator-avatars"
+                                />
+                            </div>
                         )}
                         {((settings.store.indicatorMode & IndicatorMode.Dots) === IndicatorMode.Dots) && (
                             <div className="vc-typing-indicator-dots">
