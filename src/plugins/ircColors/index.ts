@@ -42,8 +42,14 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true
     },
-    onlyApplyToColorlessUsers: {
-        description: "Only apply to colorless users",
+    applyColorOnlyToUsersWithoutColor: {
+        description: "Apply colors only to users who don't have a predefined color",
+        restartNeeded: false,
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    applyColorOnlyInDms: {
+        description: "Apply colors only in direct messages; do not apply colors in servers.",
         restartNeeded: false,
         type: OptionType.BOOLEAN,
         default: false
@@ -76,20 +82,30 @@ export default definePlugin({
 
     calculateNameColorForMessageContext(context: any) {
         const id = context?.message?.author?.id;
+        const colorString = context?.author?.colorString;
         const color = calculateNameColorForUser(id);
 
-        return (settings.store.onlyApplyToColorlessUsers && !context.author.colorString)
+        if (settings.store.applyColorOnlyInDms && context.channel?.guild_id) {
+            return colorString;
+        }
+
+        return (settings.store.applyColorOnlyToUsersWithoutColor && !colorString)
             ? color
-            : context.author.colorString;
+            : colorString;
 
     },
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
+        const colorString = context?.colorString;
         const color = calculateNameColorForUser(id);
 
-        return (settings.store.onlyApplyToColorlessUsers && !context.colorString)
+        if (settings.store.applyColorOnlyInDms && context.channel?.guild_id) {
+            return colorString;
+        }
+
+        return (settings.store.applyColorOnlyToUsersWithoutColor && !colorString)
             ? color
-            : context.colorString;
+            : colorString;
     }
 
 });
