@@ -41,6 +41,12 @@ const settings = definePluginSettings({
         restartNeeded: true,
         type: OptionType.BOOLEAN,
         default: true
+    },
+    onlyApplyToColorlessUsers: {
+        description: "Only apply to colorless users",
+        restartNeeded: false,
+        type: OptionType.BOOLEAN,
+        default: false
     }
 });
 
@@ -70,10 +76,30 @@ export default definePlugin({
 
     calculateNameColorForMessageContext(context: any) {
         const id = context?.message?.author?.id;
-        return calculateNameColorForUser(id);
+        const color = calculateNameColorForUser(id);
+
+        if (settings.store.onlyApplyToColorlessUsers) {
+            if (!context.author.colorString) {
+                return color;
+            }
+
+            return context.author.colorString;
+        }
+
+        return color;
     },
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
-        return calculateNameColorForUser(id);
+        const color = calculateNameColorForUser(id);
+
+        if (settings.store.onlyApplyToColorlessUsers) {
+            if (!context.colorString) {
+                return color;
+            }
+
+            return context.colorString;
+        }
+
+        return color;
     }
 });
