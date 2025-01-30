@@ -20,14 +20,18 @@ import { definePluginSettings } from "@api/Settings";
 import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { useMemo } from "@webpack/common";
 
-// Calculate a CSS color string based on the user ID
-function calculateNameColorForUser(id: string) {
-    const { lightness } = settings.use(["lightness"]);
-    const idHash = useMemo(() => h64(id), [id]);
-
-    return `hsl(${idHash % 360n}, 100%, ${lightness}%)`;
+function calculateHSLforId(id: string) {
+    // No useMemo/settings.use are here because this funcion is used in RoleColorEverywhere.getColorString
+    // to change @mention color.
+    //
+    // If we use useMemo/settings.use here we'll break probably some rules of hooks (condition for using hooks)
+    // ngl, xxhash seems fast enough to live without useMemo
+    return {
+        hue: Number(h64(id) % 360n),
+        saturation: 100,
+        lightness: settings.store.lightness
+    };
 }
 
 const settings = definePluginSettings({
@@ -52,10 +56,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: '="SYSTEM_TAG"',
+            find: '"Result cannot be null because the message is not null"',
             replacement: {
-                match: /(?<=className:\i\.username,style:.{0,50}:void 0,)/,
-                replace: "style:{color:$self.calculateNameColorForMessageContext(arguments[0])},"
+                match: /let (\i)=\i\(\i\);(?=.{1,25}"Result cannot be null because the message is not null")/,
+                replace: "$&$1.colorString=$self.calculateNameColorForUser(arguments[0].author.id);"
             }
         },
         {
@@ -67,19 +71,23 @@ export default definePlugin({
             predicate: () => settings.store.memberListColors
         }
     ],
-
+    calculateHSLforId,
+    calculateNameColorForUser(id: string) {
+        const { hue, saturation, lightness } = calculateHSLforId(id);
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    },
     calculateNameColorForMessageContext(context: any) {
         const id = context?.message?.author?.id;
         if (id == null) {
             return null;
         }
-        return calculateNameColorForUser(id);
+        return this.calculateNameColorForUser(id);
     },
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
         if (id == null) {
             return null;
         }
-        return calculateNameColorForUser(id);
+        return this.calculateNameColorForUser(id);
     }
 });
