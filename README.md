@@ -1,6 +1,3 @@
-> [!WARNING]
-> Nexulien is still pretty young in terms of differences from Vencord. We'll be adding more stuff and features over time, please be patient with us.
-
 <p>
 <img alt="Nexulien" src="./images/logo.svg" height="192px" align="left">
 <br>
