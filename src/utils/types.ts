@@ -204,7 +204,7 @@ export type SettingsChecks<D extends SettingsDefinition> = {
 };
 
 export type PluginSettingDef =
-    (PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">) |
+    (PluginSettingCommon & PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">) |
     (PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">) | ((
         | PluginSettingStringDef
         | PluginSettingNumberDef
