@@ -68,5 +68,8 @@ export default definePlugin({
 
         removeSettingsPanelButton(PluginInfo.PLUGIN_NAME);
     },
+    toolboxActions: {
+        "Open Screenshare Settings": openScreenshareModal
+    },
     replacedScreenshareModalComponent
 });
