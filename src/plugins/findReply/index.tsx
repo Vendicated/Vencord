@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addButton, removeButton } from "@api/MessagePopover";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -71,10 +70,8 @@ export default definePlugin({
     name: "FindReply",
     description: "Jumps to the earliest reply to a message in a channel (lets you follow past conversations more easily).",
     authors: [Devs.newwares],
-    start() {
-        enableStyle(styles);
-        addButton("vc-findreply", message => {
-            if (!message.id) return null;
+    renderMessagePopoverButton(message: Message) {
+        if (!message.id) return null;
             const replies = findReplies(message);
             if (Vencord.Settings.plugins.FindReply.hideButtonIfNoReply && !replies.length) return null;
             return {
@@ -115,10 +112,11 @@ export default definePlugin({
                     }
                 }
             };
-        });
+    },
+    start() {
+        enableStyle(styles);
     },
     stop() {
-        removeButton("vc-findreply");
         root && root.unmount();
         element?.remove();
         disableStyle(styles);
