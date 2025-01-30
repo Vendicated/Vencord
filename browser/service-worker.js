@@ -3,3 +3,9 @@ chrome.commands.onCommand.addListener(async (command) => {
   
   chrome.tabs.sendMessage(tab.id, { command });
 });
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "openShortcuts") {
+    chrome.tabs.create({ url: "about://extensions/shortcuts" });
+  }
+});

@@ -1,9 +1,3 @@
-/* Download Desktop button in guilds list */
-[class^=listItem_]:has([data-list-item-id=guildsnav___app-download-button]),
-[class^=listItem_]:has(+ [class^=listItem_] [data-list-item-id=guildsnav___app-download-button]) {
-  display: none;
-}
-
 /* FIXME: remove this once Discord fixes their css to not explode scrollbars on chromium >=121 */
 * {
   scrollbar-width: unset !important;
@@ -16,20 +10,37 @@
   -webkit-app-region: no-drag;
 }
 
-[class*="titleBar"] [class*="winButton"] {
-  display: none;
-}
-
-[class*="titleBar"] {
-  height: var(--vencord-titlebar-size);
-  margin-top: 0;
-}
-
-[class*="notAppAsidePanel_"]>[class*="app_"]>[class*="app_"] [class*="bg_"] {
-  top: calc(var(--vencord-titlebar-size)*-1);
-}
-
 :root {
   /* opt out of auto-dark-mode plugins, which break discord css, such as force-dark, dark-reader etc */
   color-scheme: only light;
+}
+
+/* only enable this css when in PWA mode */
+@media all and (display-mode: window-controls-overlay) {
+
+  /* Download Desktop button in guilds list */
+  [class^=listItem_]:has([data-list-item-id=guildsnav___app-download-button]),
+  [class^=listItem_]:has(+ [class^=listItem_] [data-list-item-id=guildsnav___app-download-button]) {
+    display: none;
+  }
+
+  [class*="titleBar"] {
+    height: var(--vencord-titlebar-size);
+    margin-top: 0;
+  }
+
+  [class*="titleBar"] [class*="winButton"] {
+    display: none;
+  }
+
+  [class*="notAppAsidePanel_"]>[class*="app_"]>[class*="app_"] [class*="bg_"] {
+    top: calc(var(--vencord-titlebar-size)*-1);
+  }
+}
+
+/* hide title bar when not using wco */
+@media all and not (display-mode: window-controls-overlay) {
+  [class*="titleBar"] {
+    display: none;
+  }
 }

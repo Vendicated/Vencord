@@ -42,8 +42,8 @@ export default definePlugin({
       display: "fullscreen",
       display_override: ["window-controls-overlay"],
       lang: "en-US",
-      background_color: "#2b2d31",
-      theme_color: "#1e1f22",
+      background_color: "#2b2d31", // var(--background-secondary)
+      theme_color: "#1e1f22", // var(--background-tertiary)
       scope: "/", // scope of all possible URL"s
       description: "Imagine a place...",
       orientation: "landscape",
@@ -125,8 +125,22 @@ export default definePlugin({
           replace: ""
         }))
       ]
+    },
+    {
+      find: ".browserNotice",
+      replacement: {
+        match: /className:(\i)\.browserNotice,children:[^}]+}\)/,
+        replace: "className:$1.browserNotice,children:$self.customNotice()"
+      }
     }
   ],
+  customNotice() {
+    return (
+      <div>
+        Custom global keybinds are supported. Navigate to <a onClick={() => { window.postMessage({ type: "OPEN_SHORTCUTS" }, "*"); }}>about://extensions/shortcuts</a> to change them.
+      </div>
+    );
+  },
   keybindListener: (e: MessageEvent) => {
     if (e.data?.type === "vencord:keybinds") {
       const { meta } = e.data;
