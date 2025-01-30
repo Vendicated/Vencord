@@ -78,28 +78,18 @@ export default definePlugin({
         const id = context?.message?.author?.id;
         const color = calculateNameColorForUser(id);
 
-        if (settings.store.onlyApplyToColorlessUsers) {
-            if (!context.author.colorString) {
-                return color;
-            }
+        return (settings.store.onlyApplyToColorlessUsers && !context.author.colorString)
+            ? color
+            : context.author.colorString;
 
-            return context.author.colorString;
-        }
-
-        return color;
     },
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
         const color = calculateNameColorForUser(id);
 
-        if (settings.store.onlyApplyToColorlessUsers) {
-            if (!context.colorString) {
-                return color;
-            }
-
-            return context.colorString;
-        }
-
-        return color;
+        return (settings.store.onlyApplyToColorlessUsers && !context.colorString)
+            ? color
+            : context.colorString;
     }
+
 });
