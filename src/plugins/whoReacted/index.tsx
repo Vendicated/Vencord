@@ -94,7 +94,7 @@ function makeRenderMoreUsers(users: User[]) {
     };
 }
 
-function handleClickAvatar(event: React.MouseEvent<HTMLElement, MouseEvent>) {
+function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
     event.stopPropagation();
 }
 
@@ -176,7 +176,7 @@ export default definePlugin({
                 style={{ marginLeft: "0.5em", transform: "scale(0.9)" }}
             >
                 {settings.store.avatarClick ? (
-                    <div onClick={handleClickAvatar}>
+                    <div onClick={handleClickAvatar} onKeyPress={handleClickAvatar}>
                         <UserSummaryItem
                             users={users}
                             guildId={ChannelStore.getChannel(message.channel_id)?.guild_id}
@@ -195,7 +195,7 @@ export default definePlugin({
                             renderIcon={false}
                             max={5}
                             showDefaultAvatarsForNullUsers
-                            showUserPopout={false}
+                            showUserPopout
                             renderMoreUsers={makeRenderMoreUsers(users)}
                         />
                     </div>
