@@ -196,7 +196,7 @@ function nextReply(isUp: boolean) {
         channel,
         message,
         shouldMention: shouldMention(message),
-        showMentionToggle: channel.isPrivate() && message.author.id !== meId,
+        showMentionToggle: !channel.isPrivate() && message.author.id !== meId,
         _isQuickReply: true
     });
     ComponentDispatch.dispatchToLastSubscribed("TEXTAREA_FOCUS");
