@@ -24,7 +24,7 @@ import { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
 import { patches } from "../plugins";
-import { _initWebpack, beforeInitListeners, factoryListeners, moduleListeners, subscriptions, wreq } from ".";
+import { _initWebpack, _shouldIgnoreModule, beforeInitListeners, factoryListeners, moduleListeners, subscriptions, wreq } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 
@@ -173,35 +173,9 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
             if (!exports) return;
 
             if (require.c) {
-                let shouldMakeNonEnumerable = false;
+                const shouldIgnoreModule = _shouldIgnoreModule(exports);
 
-                nonEnumerableChecking: {
-                    // There are (at the time of writing) 11 modules exporting the window,
-                    // and also modules exporting DOMTokenList, which breaks webpack finding
-                    // Make these non enumerable to improve search performance and avoid erros
-                    if (exports === window || exports[Symbol.toStringTag] === "DOMTokenList") {
-                        shouldMakeNonEnumerable = true;
-                        break nonEnumerableChecking;
-                    }
-
-                    if (typeof exports !== "object") {
-                        break nonEnumerableChecking;
-                    }
-
-                    if (exports.default === window || exports.default?.[Symbol.toStringTag] === "DOMTokenList") {
-                        shouldMakeNonEnumerable = true;
-                        break nonEnumerableChecking;
-                    }
-
-                    for (const nested in exports) {
-                        if (exports[nested] === window || exports[nested]?.[Symbol.toStringTag] === "DOMTokenList") {
-                            shouldMakeNonEnumerable = true;
-                            break nonEnumerableChecking;
-                        }
-                    }
-                }
-
-                if (shouldMakeNonEnumerable) {
+                if (shouldIgnoreModule) {
                     Object.defineProperty(require.c, id, {
                         value: require.c[id],
                         enumerable: false,
@@ -226,17 +200,16 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                     if (exports && filter(exports)) {
                         subscriptions.delete(filter);
                         callback(exports, id);
-                    } else if (typeof exports === "object") {
-                        if (exports.default && filter(exports.default)) {
+                    }
+
+                    if (typeof exports !== "object") {
+                        continue;
+                    }
+
+                    for (const exportKey in exports) {
+                        if (exports[exportKey] && filter(exports[exportKey])) {
                             subscriptions.delete(filter);
-                            callback(exports.default, id);
-                        } else {
-                            for (const nested in exports) {
-                                if (exports[nested] && filter(exports[nested])) {
-                                    subscriptions.delete(filter);
-                                    callback(exports[nested], id);
-                                }
-                            }
+                            callback(exports[exportKey], id);
                         }
                     }
                 } catch (err) {
