@@ -70,7 +70,7 @@ export const NotificationDot = ({ channelIds }: { channelIds: string[]; }) => {
             data-has-mention={!!mentionCount}
             className={classes(dotStyles.numberBadge, dotStyles.baseShapeRound)}
             style={{
-                width: 16
+                width: "16px"
             }}
             ref={node => node?.style.setProperty("background-color",
                 mentionCount ? "var(--red-400)" : "var(--brand-500)", "important"
