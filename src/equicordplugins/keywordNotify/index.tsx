@@ -315,8 +315,8 @@ export default definePlugin({
         {
             find: "#{intl::UNREADS_TAB_LABEL})}",
             replacement: {
-                match: /\(0,\i\.jsxs\)\(\i\.\i\i\.Item/,
-                replace: "$self.keywordTabBar(),$&"
+                match: /,(\i\?\(0,\i\.jsxs\)\(\i\.\i\i\.Item)/,
+                replace: ",$self.keywordTabBar()$&"
             }
         },
         {
@@ -328,18 +328,17 @@ export default definePlugin({
         },
         {
             find: ".guildFilter:null",
-            replacement: {
-                match: /function (\i)\(\i\){let{message:\i,gotoMessage/,
-                replace: "$self.renderMsg = $1; $&"
-            }
+            replacement: [
+                {
+                    match: /function (\i)\(\i\){let{message:\i,gotoMessage/,
+                    replace: "$self.renderMsg = $1; $&"
+                },
+                {
+                    match: /onClick:\(\)=>(\i\.\i\.deleteRecentMention\((\i)\.id\))/,
+                    replace: "onClick: () => $2._keyword ? $self.deleteKeyword($2.id) : $1"
+                }
+            ]
         },
-        {
-            find: ".guildFilter:null",
-            replacement: {
-                match: /onClick:\(\)=>(\i\.\i\.deleteRecentMention\((\i)\.id\))/,
-                replace: "onClick: () => $2._keyword ? $self.deleteKeyword($2.id) : $1"
-            }
-        }
     ],
 
     async start() {
