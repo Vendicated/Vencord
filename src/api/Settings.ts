@@ -220,6 +220,17 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
     }
 }
 
+export function migratePluginSetting(pluginName: string, oldSetting: string, newSetting: string) {
+    const settings = SettingsStore.plain.plugins[pluginName];
+    if (!settings) return;
+
+    if (!Object.hasOwn(settings, oldSetting) || Object.hasOwn(settings, newSetting)) return;
+
+    settings[newSetting] = settings[oldSetting];
+    delete settings[oldSetting];
+    SettingsStore.markAsChanged();
+}
+
 export function definePluginSettings<
     Def extends SettingsDefinition,
     Checks extends SettingsChecks<Def>,

@@ -211,7 +211,8 @@ export default definePlugin({
         collapseDeleted: {
             type: OptionType.BOOLEAN,
             description: "Whether to collapse deleted messages, similar to blocked messages",
-            default: false
+            default: false,
+            restartNeeded: true,
         },
         logEdits: {
             type: OptionType.BOOLEAN,
@@ -500,7 +501,7 @@ export default definePlugin({
 
         {
             // Message context base menu
-            find: "useMessageMenu:",
+            find: ".MESSAGE,commandTargetId:",
             replacement: [
                 {
                     // Remove the first section if message is deleted
