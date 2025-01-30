@@ -120,7 +120,7 @@ const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
 
 const logger = new Logger("StatsfmPresence");
 
-const presenceStore = findByPropsLazy("getLocalPresence");
+const PresenceStore = findByPropsLazy("getLocalPresence");
 
 async function getApplicationAsset(key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];
@@ -136,26 +136,31 @@ function setActivity(activity: Activity | null) {
 
 const settings = definePluginSettings({
     username: {
-        description: "stats.fm username",
+        description: "Stats.fm username",
         type: OptionType.STRING,
     },
     shareUsername: {
-        description: "show link to stats.fm profile",
+        description: "Show link to stats.fm profile",
         type: OptionType.BOOLEAN,
         default: false,
     },
     shareSong: {
-        description: "show link to song on stats.fm",
+        description: "Show link to song on stats.fm",
         type: OptionType.BOOLEAN,
         default: true,
     },
     hideWithSpotify: {
-        description: "hide stats.fm presence if spotify is running",
+        description: "Hide stats.fm presence if spotify is running",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
+    hideWithExternalRPC: {
+        description: "Hides stats.fm presence if an external RPC is running",
         type: OptionType.BOOLEAN,
         default: false,
     },
     statusName: {
-        description: "custom status text",
+        description: "Custom status text",
         type: OptionType.STRING,
         default: "Stats.fm",
     },
@@ -191,7 +196,7 @@ const settings = definePluginSettings({
         ],
     },
     useListeningStatus: {
-        description: 'show "Listening to" status instead of "Playing"',
+        description: 'Show "Listening to" status instead of "Playing"',
         type: OptionType.BOOLEAN,
         default: true,
     },
@@ -211,7 +216,7 @@ const settings = definePluginSettings({
         ],
     },
     showStatsFmLogo: {
-        description: "show the Stats.fm next to the albums cover",
+        description: "Show the Stats.fm next to the albums cover",
         type: OptionType.BOOLEAN,
         default: true,
     }
@@ -287,11 +292,16 @@ export default definePlugin({
     },
 
     async getActivity(): Promise<Activity | null> {
+        if (settings.store.hideWithExternalRPC) {
+            if (PresenceStore.getActivities().some(a => a.application_id !== applicationId)) {
+                return null;
+            }
+        }
+
         if (settings.store.hideWithSpotify) {
-            for (const activity of presenceStore.getActivities()) {
-                if (activity.type === ActivityType.LISTENING && activity.application_id !== applicationId) {
-                    return null;
-                }
+            if (PresenceStore.getActivities().some(a => a.type === ActivityType.LISTENING && a.application_id !== applicationId)) {
+                // there is already music status because of Spotify or richerCider (probably more)
+                return null;
             }
         }
 
