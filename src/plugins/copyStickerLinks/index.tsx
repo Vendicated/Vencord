@@ -17,17 +17,13 @@
 */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
-import { Margins } from "@utils/margins";
 import definePlugin from "@utils/types";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { findStoreLazy } from "@webpack";
+import { Constants, Clipboard, FluxDispatcher, Menu, React, RestAPI, Toasts } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const StickersStore = findStoreLazy("StickersStore");
-const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
 
 interface Sticker {
     t: "Sticker";
@@ -52,10 +48,10 @@ type Data = Emoji | Sticker;
 const StickerExt = [, "png", "png", "json", "gif"] as const;
 
 function getUrl(data: Data) {
-    if (data.t === "Emoji")
-        return `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/emojis/${data.id}.${data.isAnimated ? "gif" : "png"}?size=4096&lossless=true`;
+    if (data.t === "Sticker")
+        return `https:${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
 
-    return `${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
+    return "oops Couldnt get it sorry boss";
 }
 
 async function fetchSticker(id: string) {
@@ -74,211 +70,14 @@ async function fetchSticker(id: string) {
     return body as Sticker;
 }
 
-async function cloneSticker(guildId: string, sticker: Sticker) {
-    const data = new FormData();
-    data.append("name", sticker.name);
-    data.append("tags", sticker.tags);
-    data.append("description", sticker.description);
-    data.append("file", await fetchBlob(getUrl(sticker)));
-
-    const { body } = await RestAPI.post({
-        url: Constants.Endpoints.GUILD_STICKER_PACKS(guildId),
-        body: data,
-    });
-
-    FluxDispatcher.dispatch({
-        type: "GUILD_STICKERS_CREATE_SUCCESS",
-        guildId,
-        sticker: {
-            ...body,
-            user: UserStore.getCurrentUser()
-        }
-    });
-}
-
-async function cloneEmoji(guildId: string, emoji: Emoji) {
-    const data = await fetchBlob(getUrl(emoji));
-
-    const dataUrl = await new Promise<string>(resolve => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(data);
-    });
-
-    return uploadEmoji({
-        guildId,
-        name: emoji.name.split("~")[0],
-        image: dataUrl
-    });
-}
-
-function getGuildCandidates(data: Data) {
-    const meId = UserStore.getCurrentUser().id;
-
-    return Object.values(GuildStore.getGuilds()).filter(g => {
-        const canCreate = g.ownerId === meId ||
-            (PermissionStore.getGuildPermissions({ id: g.id }) & PermissionsBits.CREATE_GUILD_EXPRESSIONS) === PermissionsBits.CREATE_GUILD_EXPRESSIONS;
-        if (!canCreate) return false;
-
-        if (data.t === "Sticker") return true;
-
-        const { isAnimated } = data as Emoji;
-
-        const emojiSlots = g.getMaxEmojiSlots();
-        const { emojis } = EmojiStore.getGuilds()[g.id];
-
-        let count = 0;
-        for (const emoji of emojis)
-            if (emoji.animated === isAnimated && !emoji.managed)
-                count++;
-        return count < emojiSlots;
-    }).sort((a, b) => a.name.localeCompare(b.name));
-}
-
-async function fetchBlob(url: string) {
-    const res = await fetch(url);
-    if (!res.ok)
-        throw new Error(`Failed to fetch ${url} - ${res.status}`);
-
-    return res.blob();
-}
-
-async function doClone(guildId: string, data: Sticker | Emoji) {
-    try {
-        if (data.t === "Sticker")
-            await cloneSticker(guildId, data);
-        else
-            await cloneEmoji(guildId, data);
-
-        Toasts.show({
-            message: `Successfully cloned ${data.name} to ${GuildStore.getGuild(guildId)?.name ?? "your server"}!`,
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId()
-        });
-    } catch (e: any) {
-        let message = "Something went wrong (check console!)";
-        try {
-            message = JSON.parse(e.text).message;
-        } catch { }
-
-        new Logger("EmoteCloner").error("Failed to clone", data.name, "to", guildId, e);
-        Toasts.show({
-            message: "Failed to clone: " + message,
-            type: Toasts.Type.FAILURE,
-            id: Toasts.genId()
-        });
-    }
-}
-
-const getFontSize = (s: string) => {
-    // [18, 18, 16, 16, 14, 12, 10]
-    const sizes = [20, 20, 18, 18, 16, 14, 12];
-    return sizes[s.length] ?? 4;
-};
-
-const nameValidator = /^\w+$/i;
-
-function CloneModal({ data }: { data: Sticker | Emoji; }) {
-    const [isCloning, setIsCloning] = React.useState(false);
-    const [name, setName] = React.useState(data.name);
-
-    const [x, invalidateMemo] = React.useReducer(x => x + 1, 0);
-
-    const guilds = React.useMemo(() => getGuildCandidates(data), [data.id, x]);
-
-    return (
-        <>
-            <Forms.FormTitle className={Margins.top20}>Custom Name</Forms.FormTitle>
-            <CheckedTextInput
-                value={name}
-                onChange={v => {
-                    data.name = v;
-                    setName(v);
-                }}
-                validate={v =>
-                    (data.t === "Emoji" && v.length > 2 && v.length < 32 && nameValidator.test(v))
-                    || (data.t === "Sticker" && v.length > 2 && v.length < 30)
-                    || "Name must be between 2 and 32 characters and only contain alphanumeric characters"
-                }
-            />
-            <div style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "1em",
-                padding: "1em 0.5em",
-                justifyContent: "center",
-                alignItems: "center"
-            }}>
-                {guilds.map(g => (
-                    <Tooltip text={g.name}>
-                        {({ onMouseLeave, onMouseEnter }) => (
-                            <div
-                                onMouseLeave={onMouseLeave}
-                                onMouseEnter={onMouseEnter}
-                                role="button"
-                                aria-label={"Clone to " + g.name}
-                                aria-disabled={isCloning}
-                                style={{
-                                    borderRadius: "50%",
-                                    backgroundColor: "var(--background-secondary)",
-                                    display: "inline-flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    width: "4em",
-                                    height: "4em",
-                                    cursor: isCloning ? "not-allowed" : "pointer",
-                                    filter: isCloning ? "brightness(50%)" : "none"
-                                }}
-                                onClick={isCloning ? void 0 : async () => {
-                                    setIsCloning(true);
-                                    doClone(g.id, data).finally(() => {
-                                        invalidateMemo();
-                                        setIsCloning(false);
-                                    });
-                                }}
-                            >
-                                {g.icon ? (
-                                    <img
-                                        aria-hidden
-                                        style={{
-                                            borderRadius: "50%",
-                                            width: "100%",
-                                            height: "100%",
-                                        }}
-                                        src={g.getIconURL(512, true)}
-                                        alt={g.name}
-                                    />
-                                ) : (
-                                    <Forms.FormText
-                                        style={{
-                                            fontSize: getFontSize(g.acronym),
-                                            width: "100%",
-                                            overflow: "hidden",
-                                            whiteSpace: "nowrap",
-                                            textAlign: "center",
-                                            cursor: isCloning ? "not-allowed" : "pointer",
-                                        }}
-                                    >
-                                        {g.acronym}
-                                    </Forms.FormText>
-                                )}
-                            </div>
-                        )}
-                    </Tooltip>
-                ))}
-            </div>
-        </>
-    );
-}
-
 function buildMenuItem(type: "Sticker", fetchData: () => Promisable<Omit<Sticker, "t">>) {
     return (
         <Menu.MenuItem
             id="copystickerurl"
             key="copystickerurl"
-            label={"Copy Sticker URL"}
-            action={() => {
-                const res = fetchData();
+            label={"Copy Sticker Link"}
+            action={async () => {
+                const res = await fetchData();
                 const data = { t: type, ...res } as Sticker;
                 const url = getUrl(data);
                 console.log("URL: " + url + "\n" + "Data: " + data);
@@ -287,16 +86,27 @@ function buildMenuItem(type: "Sticker", fetchData: () => Promisable<Omit<Sticker
                     type: Toasts.Type.SUCCESS,
                     id: Toasts.genId()
                 });
+                Clipboard.copy(url);
             }
             }
         />
     );
 }
 
-function isGifUrl(url: string) {
-    const u = new URL(url);
-    return u.pathname.endsWith(".gif") || u.searchParams.get("animated") === "true";
-}
+/*
+        <Menu.MenuItem
+            id="openstickerlink"
+            key="openstickerlink"
+            label={"Open Sticker Link"}
+            action={async () => {
+                const res = await fetchData();
+                const data = { t: type, ...res } as Sticker;
+                const url = getUrl(data);
+                VencordNative.native.openExternal(url);
+            }
+            }
+        />
+*/
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
@@ -312,7 +122,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     })();
 
     if (menuItem)
-        findGroupChildrenByChildId("copy-link", children)?.push(menuItem);
+        findGroupChildrenByChildId(`devmode-copy-id`, children, true)?.push(menuItem);
 };
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
@@ -326,7 +136,7 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
 
 export default definePlugin({
     name: "CopyStickerLinks",
-    description: "Adds the ability to copy sticker links and open them to your browser.",
+    description: "Adds the ability to copy and open sticker links to your browser.",
     authors: [Devs.Byeoon],
     contextMenus: {
         "message": messageContextMenuPatch,
