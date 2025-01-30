@@ -21,7 +21,7 @@ import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-function calculateHSLForId(id: string) {
+function calculateHSLforId(id: string) {
     // No hooks: this also runs outside React components.
     return {
         hue: Number(h64(id + settings.store.seed) % 360n),
@@ -32,7 +32,7 @@ function calculateHSLForId(id: string) {
 
 function calculateNameColorForUser(id?: string) {
     if (!id) return null;
-    const { hue, saturation, lightness } = calculateHSLForId(id);
+    const { hue, saturation, lightness } = calculateHSLforId(id);
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
 
@@ -121,9 +121,7 @@ export default definePlugin({
         }
     },
 
-    calculateHSLforId(...args: Parameters<typeof calculateHSLForId>) {
-        return calculateHSLForId(...args);
-    },
+    calculateHSLforId,
     calculateNameColorForUser(...args: Parameters<typeof calculateNameColorForUser>) {
         return calculateNameColorForUser(...args);
     },
