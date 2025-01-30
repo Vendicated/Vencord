@@ -244,7 +244,7 @@ export default definePlugin({
     },
 
     async start() {
-        // TODO: Remove DataStore rules migrations once enough time has passed
+        // TODO(OptionType.CUSTOM Related): Remove DataStore rules migrations once enough time has passed
         const oldStringRules = await DataStore.get<Rule[]>(STRING_RULES_KEY);
         if (oldStringRules != null) {
             settings.store.stringRules = oldStringRules;

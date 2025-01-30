@@ -89,7 +89,7 @@ export default definePlugin({
     settings,
 
     async start() {
-        // TODO: Remove DataStore tags migration once enough time has passed
+        // TODO(OptionType.CUSTOM Related): Remove DataStore tags migration once enough time has passed
         const oldTags = await DataStore.get<Tag[]>(DATA_KEY);
         if (oldTags != null) {
             // @ts-ignore
