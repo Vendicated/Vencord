@@ -23,11 +23,11 @@ import definePlugin, { OptionType } from "@utils/types";
 import { useMemo } from "@webpack/common";
 
 // Calculate a CSS color string based on the user ID
-function calculateNameColorForUser(id: string) {
+function calculateNameColorForUser(id?: string) {
     const { lightness } = settings.use(["lightness"]);
-    const idHash = useMemo(() => h64(id), [id]);
+    const idHash = useMemo(() => id ? h64(id) : null, [id]);
 
-    return `hsl(${idHash % 360n}, 100%, ${lightness}%)`;
+    return idHash && `hsl(${idHash % 360n}, 100%, ${lightness}%)`;
 }
 
 const settings = definePluginSettings({
@@ -70,16 +70,10 @@ export default definePlugin({
 
     calculateNameColorForMessageContext(context: any) {
         const id = context?.message?.author?.id;
-        if (id == null) {
-            return null;
-        }
         return calculateNameColorForUser(id);
     },
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
-        if (id == null) {
-            return null;
-        }
         return calculateNameColorForUser(id);
     }
 });
