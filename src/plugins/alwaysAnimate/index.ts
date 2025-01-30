@@ -43,8 +43,8 @@ export default definePlugin({
             // Status emojis
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(?<=:"MemberListItem",.{0,200}animate:)\i/,
-                replace: "!0"
+                match: /(\.CUSTOM_STATUS.+?animate:)\i/,
+                replace: (_, rest) => `${rest}!0`
             }
         },
         {
