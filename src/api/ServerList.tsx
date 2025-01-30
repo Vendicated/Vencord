@@ -16,41 +16,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Logger } from "@utils/Logger";
-import { JSX } from "react";
-
-const logger = new Logger("ServerListAPI");
+import ErrorBoundary from "@components/ErrorBoundary";
+import { ComponentType } from "react";
 
 export const enum ServerListRenderPosition {
     Above,
     In,
 }
 
-const renderFunctionsAbove = new Set<Function>();
-const renderFunctionsIn = new Set<Function>();
+const componentsAbove = new Set<ComponentType>();
+const componentsBelow = new Set<ComponentType>();
 
 function getRenderFunctions(position: ServerListRenderPosition) {
-    return position === ServerListRenderPosition.Above ? renderFunctionsAbove : renderFunctionsIn;
+    return position === ServerListRenderPosition.Above ? componentsAbove : componentsBelow;
 }
 
-export function addServerListElement(position: ServerListRenderPosition, renderFunction: Function) {
+export function addServerListElement(position: ServerListRenderPosition, renderFunction: ComponentType) {
     getRenderFunctions(position).add(renderFunction);
 }
 
-export function removeServerListElement(position: ServerListRenderPosition, renderFunction: Function) {
+export function removeServerListElement(position: ServerListRenderPosition, renderFunction: ComponentType) {
     getRenderFunctions(position).delete(renderFunction);
 }
 
 export const renderAll = (position: ServerListRenderPosition) => {
-    const ret: Array<JSX.Element> = [];
-
-    for (const renderFunction of getRenderFunctions(position)) {
-        try {
-            ret.unshift(renderFunction());
-        } catch (e) {
-            logger.error("Failed to render server list element:", e);
-        }
-    }
-
-    return ret;
+    return Array.from(
+        getRenderFunctions(position),
+        (Component, i) => (
+            <ErrorBoundary noop key={i}>
+                <Component />
+            </ErrorBoundary>
+        )
+    );
 };
