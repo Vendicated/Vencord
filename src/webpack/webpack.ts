@@ -71,13 +71,16 @@ export const filters = {
     componentByCode: (...code: CodeFilter): FilterFn => {
         const filter = filters.byCode(...code);
         return m => {
-            if (filter(m)) return true;
-            if (!m.$$typeof) return false;
-            if (m.type)
-                return m.type.render
-                    ? filter(m.type.render) // memo + forwardRef
-                    : filter(m.type); // memo
-            if (m.render) return filter(m.render); // forwardRef
+            let inner = m;
+
+            while (inner != null) {
+                if (filter(inner)) return true;
+                else if (!inner.$$typeof) return false;
+                else if (inner.type) inner = inner.type; // memos
+                else if (inner.render) inner = inner.render; // forwardRefs
+                else return false;
+            }
+
             return false;
         };
     }
@@ -102,6 +105,38 @@ export function _initWebpack(webpackRequire: WebpackRequire) {
         writable: true,
         enumerable: false
     });
+}
+
+// Credits to Zerebos for implementing this in BD, thus giving the idea for us to implement it too
+const TypedArray = Object.getPrototypeOf(Int8Array);
+
+function _shouldIgnoreValue(value: any) {
+    if (value == null) return true;
+    if (value === window) return true;
+    if (value === document || value === document.documentElement) return true;
+    if (value[Symbol.toStringTag] === "DOMTokenList") return true;
+    if (value instanceof TypedArray) return true;
+
+    return false;
+}
+
+export function _shouldIgnoreModule(exports: any) {
+    if (_shouldIgnoreValue(exports)) {
+        return true;
+    }
+
+    if (typeof exports !== "object") {
+        return false;
+    }
+
+    let allNonEnumerable = true;
+    for (const exportKey in exports) {
+        if (!_shouldIgnoreValue(exports[exportKey])) {
+            allNonEnumerable = false;
+        }
+    }
+
+    return allNonEnumerable;
 }
 
 let devToolsOpen = false;
@@ -164,7 +199,8 @@ export function findAll(filter: FilterFn) {
 
         if (filter(mod.exports))
             ret.push(mod.exports);
-        else if (typeof mod.exports !== "object")
+
+        if (typeof mod.exports !== "object")
             continue;
 
         for (const nestedMod in mod.exports) {

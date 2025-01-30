@@ -12,7 +12,7 @@ import { PatchReplacement } from "@utils/types";
 
 import { traceFunctionWithResults } from "../debug/Tracer";
 import { patches } from "../plugins";
-import { _initWebpack, AnyModuleFactory, AnyWebpackRequire, factoryListeners, findModuleId, ModuleExports, moduleListeners, waitForSubscriptions, WebpackRequire, WrappedModuleFactory, wreq } from ".";
+import { _initWebpack, _shouldIgnoreModule, AnyModuleFactory, AnyWebpackRequire, factoryListeners, findModuleId, ModuleExports, moduleListeners, waitForSubscriptions, WebpackRequire, WrappedModuleFactory, wreq } from ".";
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 
@@ -327,33 +327,10 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
         exports = module.exports;
         if (exports == null) return factoryReturn;
 
-        // There are (at the time of writing) 11 modules exporting the window
-        // Make these non enumerable to improve webpack search performance
         if (typeof require === "function") {
-            let shouldMakeNonEnumerable = false;
+            const shouldIgnoreModule = _shouldIgnoreModule(exports);
 
-            nonEnumerableChecking: {
-                // There are (at the time of writing) 11 modules exporting the window,
-                // and also modules exporting DOMTokenList, which breaks webpack finding
-                // Make these non enumerable to improve search performance and avoid erros
-                if (exports === window || exports[Symbol.toStringTag] === "DOMTokenList") {
-                    shouldMakeNonEnumerable = true;
-                    break nonEnumerableChecking;
-                }
-
-                if (typeof exports !== "object") {
-                    break nonEnumerableChecking;
-                }
-
-                for (const exportKey in exports) {
-                    if (exports[exportKey] === window || exports[exportKey]?.[Symbol.toStringTag] === "DOMTokenList") {
-                        shouldMakeNonEnumerable = true;
-                        break nonEnumerableChecking;
-                    }
-                }
-            }
-
-            if (shouldMakeNonEnumerable) {
+            if (shouldIgnoreModule) {
                 if (require.c != null) {
                     Object.defineProperty(require.c, id, {
                         value: require.c[id],
