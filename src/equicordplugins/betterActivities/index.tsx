@@ -459,17 +459,17 @@ export default definePlugin({
     patches: [
         {
             // Patch activity icons
-            find: ".getHangStatusActivity():null!",
+            find: '"activity-status-web"',
             replacement: {
-                match: /null!=(\i)&&\i.some\(\i=>\(0,\i.\i\)\(\i,\i\)\)\?/,
-                replace: "$self.patchActivityList(e),false?"
+                match: /\(null==\i?\?void 0:\i.some\(\i\.\i\)\)/,
+                replace: "$self.patchActivityList(e),false"
             },
             predicate: () => settings.store.memberList,
         },
         {
             // Show all activities in the user popout/sidebar
             // still broken btw
-            find: '"UserActivityContainer"',
+            find: "#{intl::ACTIVITY_REACTION_REPLY_TITLE}",
             replacement: {
                 match: /(?<=\(0,\i\.jsx\)\()(\i\.\i)(?=,{...(\i),activity:\i,user:\i,application:\i)/,
                 replace: "$2.type==='BiteSizePopout'?$self.showAllActivitiesComponent:$1"
