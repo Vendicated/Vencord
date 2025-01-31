@@ -41,13 +41,25 @@ const settings = definePluginSettings({
         restartNeeded: true,
         type: OptionType.BOOLEAN,
         default: true
+    },
+    applyColorOnlyToUsersWithoutColor: {
+        description: "Apply colors only to users who don't have a predefined color",
+        restartNeeded: false,
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    applyColorOnlyInDms: {
+        description: "Apply colors only in direct messages; do not apply colors in servers.",
+        restartNeeded: false,
+        type: OptionType.BOOLEAN,
+        default: false
     }
 });
 
 export default definePlugin({
     name: "IrcColors",
     description: "Makes username colors in chat unique, like in IRC clients",
-    authors: [Devs.Grzesiek11],
+    authors: [Devs.Grzesiek11, Devs.jamesbt365],
     settings,
 
     patches: [
@@ -70,10 +82,28 @@ export default definePlugin({
 
     calculateNameColorForMessageContext(context: any) {
         const id = context?.message?.author?.id;
-        return calculateNameColorForUser(id);
+        const colorString = context?.author?.colorString;
+        const color = calculateNameColorForUser(id);
+
+        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+            return colorString;
+        }
+
+        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
+            ? color
+            : colorString;
     },
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
-        return calculateNameColorForUser(id);
+        const colorString = context?.colorString;
+        const color = calculateNameColorForUser(id);
+
+        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+            return colorString;
+        }
+
+        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
+            ? color
+            : colorString;
     }
 });
