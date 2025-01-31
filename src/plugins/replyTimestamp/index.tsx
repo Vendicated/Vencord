@@ -44,14 +44,7 @@ function ReplyTimestamp({
             compact={DateUtils.isSameDay(refTimestamp, baseTimestamp)}
             timestamp={refTimestamp}
             isInline={false}
-        >
-            <Sep>[</Sep>
-            {DateUtils.isSameDay(refTimestamp, baseTimestamp)
-                ? DateUtils.dateFormat(refTimestamp, "LT")
-                : DateUtils.calendarFormat(refTimestamp)
-            }
-            <Sep>]</Sep>
-        </Timestamp>
+        />
     );
 }
 
