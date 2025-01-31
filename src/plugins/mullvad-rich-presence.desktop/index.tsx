@@ -75,8 +75,6 @@ async function updateMullvadStatus() {
 
         const isConnected = statusObject.state === "connected";
 
-        console.log(statusObject);
-
         let city = "Not Connected";
         let country = "";
         let tunnelType = "N/A";
@@ -138,8 +136,6 @@ async function setActivity(isConnected: boolean, city: string, country: string, 
         },
         buttons: [],
     };
-
-    console.log("Setting Discord activity:", activity);
 
     FluxDispatcher.dispatch({
         type: "LOCAL_ACTIVITY_UPDATE",
