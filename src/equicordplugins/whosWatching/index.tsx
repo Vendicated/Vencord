@@ -146,7 +146,7 @@ export default definePlugin({
                                 )}
                             />
                         </>
-                        : <Forms.FormText>No spectators</Forms.FormText>
+                        : <Forms.FormText style={{ marginLeft: 8 }}>No spectators</Forms.FormText>
                     }
                 </div>
             </>
