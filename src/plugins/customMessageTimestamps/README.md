@@ -8,7 +8,7 @@ This plugin allows you to customize the timestamps in chat messages and tooltips
 ![cozy](https://github.com/user-attachments/assets/a883b21b-346b-4e36-9660-771eff6898c9)
 
 
-- Compact: The timestamp to the left of messages when chat is in compact mode when you send multiple messages in cozy mode.
+- Compact: The timestamp to the left of messages when chat is in compact mode and when you send multiple messages in cozy mode.
 ![compact](https://github.com/user-attachments/assets/9944495f-ff21-4da5-b6f2-0ee0e0a7bf99)
 
 
