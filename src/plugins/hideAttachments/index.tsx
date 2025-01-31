@@ -22,6 +22,7 @@ import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore } from "@webpack/common";
+import { MessageSnapshot } from "@webpack/types";
 
 import { ILoadMessagesSuccessPayload, IMessage, IMessageCreatePayload, IMessageUpdatePayload } from "./types";
 import { isStringEmpty } from "./utils";
@@ -182,8 +183,11 @@ export default definePlugin({
 
     settings,
 
-    renderMessagePopoverButton(msg: IMessage) {
-        const hasAttachmentsInSnapshots = !Array.isArray(msg.message_snapshots);
+    renderMessagePopoverButton(msg) {
+        // @ts-ignore - discord-types lags behind discord.
+        const hasAttachmentsInSnapshots = msg.messageSnapshots.some(
+            (snapshot: MessageSnapshot) => snapshot?.message.attachments.length || snapshot?.message.embeds.length > 0
+        );
         if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length && !hasAttachmentsInSnapshots) {
             return null;
         }
