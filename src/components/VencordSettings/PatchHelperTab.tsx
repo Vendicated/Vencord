@@ -58,12 +58,12 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
     const [patchedCode, matchResult, diff] = React.useMemo(() => {
         const src: string = fact.toString().replaceAll("\n", "");
 
+        let canonicalMatch;
         try {
-            new RegExp(match);
+            canonicalMatch = canonicalizeMatch(new RegExp(match));
         } catch (e) {
             return ["", [], []];
         }
-        const canonicalMatch = canonicalizeMatch(new RegExp(match));
         try {
             const canonicalReplace = canonicalizeReplace(replacement, "YourPlugin");
             var patched = src.replace(canonicalMatch, canonicalReplace as string);
@@ -327,7 +327,7 @@ function PatchHelper() {
         setMatch(v);
 
         try {
-            new RegExp(v);
+            canonicalizeMatch(new RegExp(v));
             setMatchError(void 0);
         } catch (e: any) {
             setMatchError((e as Error).message);
