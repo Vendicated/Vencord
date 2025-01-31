@@ -98,7 +98,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
      *             asyncResult(error);
      *         }
      *     }, false); // false because our module does not have an await after dealing with the async requires
-     * }z2
+     * }
      */
     a: (this: WebpackRequire, module: Module, body: AsyncModuleBody, hasAwaitAfterDependencies?: boolean) => void;
     /** getDefaultExport function for compatibility with non-harmony modules */
