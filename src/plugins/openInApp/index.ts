@@ -57,7 +57,7 @@ const UrlReplacementRules: Record<string, URLReplacementRule> = {
         description: "Open Tidal links in the Tidal app",
     },
     itunes: {
-        match: /^https:\/\/music\.apple\.com\/([a-z]{2}\/)?(album|artist|playlist|song|curator)\/([^/?#]+)\/?([^/?#]+)?(?:\?.*)?(?:#.*)?$/,
+        match: /^https:\/\/(?:geo\.)?music\.apple\.com\/([a-z]{2}\/)?(album|artist|playlist|song|curator)\/([^/?#]+)\/?([^/?#]+)?(?:\?.*)?(?:#.*)?$/,
         replace: (_, lang, type, name, id) => id ? `itunes://music.apple.com/us/${type}/${name}/${id}` : `itunes://music.apple.com/us/${type}/${name}`,
         description: "Open Apple Music links in the iTunes app"
     },
@@ -100,8 +100,9 @@ export default definePlugin({
                     replace: "true"
                 },
                 {
-                    match: /!\(0,\i\.isDesktop\)\(\)/,
-                    replace: "false"
+                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
+                    match: /(!)?\(0,\i\.isDesktop\)\(\)/,
+                    replace: (_, not) => not ? "false" : "true"
                 }
             ]
         },
