@@ -26,7 +26,7 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import { VoiceChannelIndicator } from "./components";
 
-const settings = definePluginSettings({
+export const settings = definePluginSettings({
     showInUserProfileModal: {
         type: OptionType.BOOLEAN,
         description: "Show a user's Voice Channel indicator in their profile next to the name",
@@ -44,13 +44,23 @@ const settings = definePluginSettings({
         description: "Show a user's Voice Channel indicator in messages",
         default: true,
         restartNeeded: true
-    }
+    },
+    showUserNames: {
+        type: OptionType.BOOLEAN,
+        description: "Show user's name in the Voice Channel indicator",
+        default: false,
+    },
+    maxNameLength: {
+        type: OptionType.NUMBER,
+        description: "Set the maximum length for the user's name in the Voice Channel indicator",
+        default: 10,
+    },
 });
 
 export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows an indicator when a user is in a Voice Channel",
-    authors: [Devs.Nuckyz, Devs.LordElias],
+    authors: [Devs.Nuckyz, Devs.LordElias, Devs.ScarZ],
     dependencies: ["MemberListDecoratorsAPI", "MessageDecorationsAPI"],
     settings,
 
