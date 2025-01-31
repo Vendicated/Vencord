@@ -121,7 +121,7 @@ export default definePlugin({
                 <div className={classes(cl("spectators_panel"), Margins.top8)}>
                     {users.length ?
                         <>
-                            <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
+                            <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0, marginLeft: 8, textTransform: "uppercase" }}>
                                 {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
                             </Forms.FormTitle>
                             <UserSummaryItem
