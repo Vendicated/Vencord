@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Constants, Clipboard, FluxDispatcher, Menu, React, RestAPI, Toasts } from "@webpack/common";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findStoreLazy } from "@webpack";
+import { Clipboard, Constants, FluxDispatcher, Menu, React, RestAPI, Toasts } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const StickersStore = findStoreLazy("StickersStore");
