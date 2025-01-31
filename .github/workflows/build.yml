@@ -56,12 +56,7 @@ jobs:
                   cp *.{json,zip,asar} release
 
                   # legacy un-asared files
-                  # FIXME: remove at some point
                   cp desktop/* release
-                  for file in vesktop/*; do
-                    filename=$(basename "$file")
-                    cp "$file" "release/vencordDesktop${filename^}"
-                  done
                   for file in equibop/*; do
                     filename=$(basename "$file")
                     cp "$file" "release/equicordDesktop${filename^}"

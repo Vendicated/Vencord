@@ -158,59 +158,6 @@ await Promise.all([
         }
     }),
 
-    // Vencord Desktop main & renderer & preload
-    esbuild.build({
-        ...nodeCommonOpts,
-        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/main/index.ts")],
-        outfile: "dist/vesktop/main.js",
-        footer: { js: "//# sourceURL=VencordMain\n" + sourceMapFooter("main") },
-        sourcemap,
-        define: {
-            ...defines,
-            IS_DISCORD_DESKTOP: "false",
-            IS_VESKTOP: "true",
-            IS_EQUIBOP: "false"
-        },
-        plugins: [
-            ...nodeCommonOpts.plugins,
-            globNativesPlugin
-        ]
-    }),
-    esbuild.build({
-        ...commonOpts,
-        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/Vencord.ts")],
-        outfile: "dist/vencordDesktopRenderer.js",
-        format: "iife",
-        target: ["esnext"],
-        footer: { js: "//# sourceURL=VencordRenderer\n" + sourceMapFooter("renderer") },
-        globalName: "Vencord",
-        sourcemap,
-        plugins: [
-            globPlugins("vencordDesktop"),
-            globPlugins("equicordDesktop"),
-            ...commonOpts.plugins
-        ],
-        define: {
-            ...defines,
-            IS_DISCORD_DESKTOP: "false",
-            IS_VESKTOP: "true",
-            IS_EQUIBOP: "false"
-        }
-    }),
-    esbuild.build({
-        ...nodeCommonOpts,
-        entryPoints: [join(dirname(fileURLToPath(import.meta.url)), "../../src/preload.ts")],
-        outfile: "dist/vesktop/preload.js",
-        footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
-        sourcemap,
-        define: {
-            ...defines,
-            IS_DISCORD_DESKTOP: "false",
-            IS_VESKTOP: "true",
-            IS_EQUIBOP: "false"
-        }
-    }),
-
     // Equicord Desktop main & renderer & preload
     esbuild.build({
         ...nodeCommonOpts,
@@ -239,7 +186,6 @@ await Promise.all([
         globalName: "Vencord",
         sourcemap,
         plugins: [
-            globPlugins("vencordDesktop"),
             globPlugins("equicordDesktop"),
             ...commonOpts.plugins
         ],
@@ -276,10 +222,6 @@ await Promise.all([
         name: "equicord",
         main: "patcher.js"
     })),
-    writeFile("dist/vesktop/package.json", JSON.stringify({
-        name: "equicord",
-        main: "main.js"
-    })),
     writeFile("dist/equibop/package.json", JSON.stringify({
         name: "equicord",
         main: "main.js"
@@ -289,5 +231,4 @@ await Promise.all([
 await Promise.all([
     createPackage("dist/desktop", "dist/desktop.asar"),
     createPackage("dist/equibop", "dist/equibop.asar"),
-    createPackage("dist/vesktop", "dist/vesktop.asar")
 ]);
