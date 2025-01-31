@@ -72,44 +72,49 @@ async function fetchSticker(id: string) {
 
 function buildMenuItem(type: "Sticker", fetchData: () => Promisable<Omit<Sticker, "t">>) {
     return (
-        <Menu.MenuItem
-            id="copystickerurl"
-            key="copystickerurl"
-            label={"Copy Sticker Link"}
-            action={async () => {
-                const res = await fetchData();
-                const data = { t: type, ...res } as Sticker;
-                const url = getUrl(data);
-                console.log("URL: " + url + "\n" + "Data: " + data);
-                Toasts.show({
-                    message: "Link to sticker copied!",
-                    type: Toasts.Type.SUCCESS,
-                    id: Toasts.genId()
-                });
-                Clipboard.copy(url);
-            }
-            }
-        />
+        <>
+            <Menu.MenuSeparator></Menu.MenuSeparator>
+
+            <Menu.MenuItem
+                id="copystickerurl"
+                key="copystickerurl"
+                label={"Copy Sticker Link"}
+                action={async () => {
+                    const res = await fetchData();
+                    const data = { t: type, ...res } as Sticker;
+                    const url = getUrl(data);
+                    console.log("URL: " + url + "\n" + "Data: " + data);
+                    Toasts.show({
+                        message: "Link to sticker copied!",
+                        type: Toasts.Type.SUCCESS,
+                        id: Toasts.genId()
+                    });
+                    Clipboard.copy(url);
+                }
+                }
+            />
+
+            <Menu.MenuItem
+                id="openstickerlink"
+                key="openstickerlink"
+                label={"Open Sticker Link"}
+                action={async () => {
+                    const res = await fetchData();
+                    const data = { t: type, ...res } as Sticker;
+                    const url = getUrl(data);
+                    VencordNative.native.openExternal(url);
+                }
+                }
+            />
+        </>
     );
 }
 
-/*
-        <Menu.MenuItem
-            id="openstickerlink"
-            key="openstickerlink"
-            label={"Open Sticker Link"}
-            action={async () => {
-                const res = await fetchData();
-                const data = { t: type, ...res } as Sticker;
-                const url = getUrl(data);
-                VencordNative.native.openExternal(url);
-            }
-            }
-        />
-*/
+
+
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    const { favoriteableId, itemHref, itemSrc, favoriteableType } = props ?? {};
+    const { favoriteableId, favoriteableType } = props ?? {};
     if (!favoriteableId) return;
     const menuItem = (() => {
         switch (favoriteableType) {
