@@ -247,6 +247,19 @@ export function migratePluginSetting(pluginName: string, oldSetting: string, new
     SettingsStore.markAsChanged();
 }
 
+export function migrateSettingFromPlugin(newPlugin: string, newSetting: string, oldPlugin: string, oldSetting: string) {
+    const newSettings = SettingsStore.plain.plugins[newPlugin];
+    const oldSettings = SettingsStore.plain.plugins[oldPlugin];
+    if (!oldSettings || !Object.hasOwn(oldSettings, oldSetting)) return;
+    if (!newSettings || (Object.hasOwn(SettingsStore.plain.plugins[newPlugin], newSetting))) return;
+
+    if (Object.hasOwn(SettingsStore.plain.plugins[newPlugin], newSetting)) return;
+
+    SettingsStore.plain.plugins[newPlugin][newSetting] = oldSettings[oldSetting];
+    delete oldSettings[oldSetting];
+    SettingsStore.markAsChanged();
+}
+
 export function definePluginSettings<
     Def extends SettingsDefinition,
     Checks extends SettingsChecks<Def>,
