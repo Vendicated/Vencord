@@ -36,14 +36,7 @@ interface Sticker {
     type: number;
 }
 
-interface Emoji {
-    t: "Emoji";
-    id: string;
-    name: string;
-    isAnimated: boolean;
-}
-
-type Data = Emoji | Sticker;
+type Data = Sticker;
 
 const StickerExt = [, "png", "png", "json", "gif"] as const;
 
@@ -51,7 +44,7 @@ function getUrl(data: Data) {
     if (data.t === "Sticker")
         return `https:${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=2048&lossless=true`;
 
-    return "oops Couldnt get it sorry boss";
+    return "";
 }
 
 async function fetchSticker(id: string) {
@@ -83,7 +76,6 @@ function buildMenuItem(type: "Sticker", fetchData: () => Promisable<Omit<Sticker
                     const res = await fetchData();
                     const data = { t: type, ...res } as Sticker;
                     const url = getUrl(data);
-                    console.log("URL: " + url + "\n" + "Data: " + data);
                     Toasts.show({
                         message: "Link to sticker copied!",
                         type: Toasts.Type.SUCCESS,
