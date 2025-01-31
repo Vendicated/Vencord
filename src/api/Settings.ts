@@ -251,11 +251,11 @@ export function migrateSettingFromPlugin(newPlugin: string, newSetting: string, 
     const newSettings = SettingsStore.plain.plugins[newPlugin];
     const oldSettings = SettingsStore.plain.plugins[oldPlugin];
     if (!oldSettings || !Object.hasOwn(oldSettings, oldSetting)) return;
-    if (!newSettings || (Object.hasOwn(SettingsStore.plain.plugins[newPlugin], newSetting))) return;
+    if (!newSettings || (Object.hasOwn(newSettings, newSetting))) return;
 
-    if (Object.hasOwn(SettingsStore.plain.plugins[newPlugin], newSetting)) return;
+    if (Object.hasOwn(newSettings, newSetting)) return;
 
-    SettingsStore.plain.plugins[newPlugin][newSetting] = oldSettings[oldSetting];
+    newSettings[newSetting] = oldSettings[oldSetting];
     delete oldSettings[oldSetting];
     SettingsStore.markAsChanged();
 }
