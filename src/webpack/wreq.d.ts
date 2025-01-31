@@ -15,9 +15,9 @@ export type Module = {
 /** exports can be anything, however initially it is always an empty object */
 export type ModuleFactory = (this: ModuleExports, module: Module, exports: ModuleExports, require: WebpackRequire) => void;
 
-export type WebpackQueues = unique symbol;
-export type WebpackExports = unique symbol;
-export type WebpackError = unique symbol;
+export type WebpackQueues = unique symbol | "__webpack_queues__";
+export type WebpackExports = unique symbol | "__webpack_exports__";
+export type WebpackError = unique symbol | "__webpack_error__";
 
 export type AsyncModulePromise = Promise<ModuleExports> & {
     [WebpackQueues]: (fnQueue: ((queue: any[]) => any)) => any;
@@ -74,7 +74,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
     //  */
     // es: (this: WebpackRequire, fromObject: AnyRecord, toObject: AnyRecord) => AnyRecord;
     /**
-     * Creates an async module. A module that exports something that is a Promise, or requires an export from an async module.
+     * Creates an async module. A module that which has top level await, or requires an export from an async module.
      *
      * The body function must be an async function. "module.exports" will become an {@link AsyncModulePromise}.
      *
@@ -98,7 +98,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
      *             asyncResult(error);
      *         }
      *     }, false); // false because our module does not have an await after dealing with the async requires
-     * }
+     * }z2
      */
     a: (this: WebpackRequire, module: Module, body: AsyncModuleBody, hasAwaitAfterDependencies?: boolean) => void;
     /** getDefaultExport function for compatibility with non-harmony modules */

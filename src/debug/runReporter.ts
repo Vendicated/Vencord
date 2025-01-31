@@ -45,7 +45,7 @@ async function runReporter() {
 
         for (const [plugin, moduleId, match, totalTime] of Vencord.WebpackPatcher.patchTimings) {
             if (totalTime > 3) {
-                new Logger("WebpackInterceptor").warn(`Patch by ${plugin} took ${totalTime}ms (Module id is ${String(moduleId)}): ${match}`);
+                new Logger("WebpackInterceptor").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
             }
         }
 
@@ -109,5 +109,6 @@ async function runReporter() {
     }
 }
 
-// Run after the Vencord object has been created, because we need to add extra properties to it
+// Run after the Vencord object has been created.
+// We need to add extra properties to it, and it is only created after all of Vencord code has ran
 setTimeout(runReporter, 0);
