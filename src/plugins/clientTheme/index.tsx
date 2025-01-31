@@ -91,15 +91,12 @@ function ThemeSettings() {
 
 const settings = definePluginSettings({
     color: {
-        description: "Color your Discord client theme will be based around. Light mode isn't supported",
         type: OptionType.COMPONENT,
         default: "313338",
-        component: () => <ThemeSettings />
+        component: ThemeSettings
     },
     resetColor: {
-        description: "Reset Theme Color",
         type: OptionType.COMPONENT,
-        default: "313338",
         component: () => (
             <Button onClick={() => onPickColor(0x313338)}>
                 Reset Theme Color
@@ -110,7 +107,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ClientTheme",
-    authors: [Devs.F53, Devs.Nuckyz],
+    authors: [Devs.Nuckyz],
     description: "Recreation of the old client theme experiment. Add a color to your Discord client theme",
     settings,
 

@@ -156,7 +156,7 @@ export default definePlugin({
             find: "#{intl::MESSAGE_EDITED}",
             replacement: {
                 match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
-                replace: "style:$self.useMessageColorStyle($1),"
+                replace: "style:$self.useMessageColorsStyle($1),"
             },
             predicate: () => settings.store.colorChatMessages
         }
@@ -188,27 +188,25 @@ export default definePlugin({
         };
     },
 
-    useMessageColor(message: any) {
+    useMessageColorsStyle(message: any) {
         try {
             const { messageSaturation } = settings.use(["messageSaturation"]);
             const author = useMessageAuthor(message);
 
             if (author.colorString != null && messageSaturation !== 0) {
-                return `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var(--text-normal))`;
+                const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
+
+                return {
+                    color: value.replace("{DEFAULT}", "--text-normal"),
+                    "--header-primary": value.replace("{DEFAULT}", "--header-primary"),
+                    "--text-muted": value.replace("{DEFAULT}", "--text-muted")
+                };
             }
         } catch (e) {
             new Logger("RoleColorEverywhere").error("Failed to get message color", e);
         }
 
         return null;
-    },
-
-    useMessageColorStyle(message: any) {
-        const color = this.useMessageColor(message);
-
-        return color && {
-            color
-        };
     },
 
     RoleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {

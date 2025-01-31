@@ -17,7 +17,6 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { ExpandableHeader } from "@components/ExpandableHeader";
 import { getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
@@ -25,7 +24,7 @@ import { PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/com
 import type { Guild, GuildMember } from "discord-types/general";
 
 import { PermissionsSortOrder, settings } from "..";
-import { cl, getPermissionString, getSortedRoles, sortUserRoles } from "../utils";
+import { cl, getGuildPermissionSpecMap, getSortedRoles, sortUserRoles } from "../utils";
 import openRolesAndUsersPermissionsModal, { PermissionType, type RoleOrUserPermission } from "./RolesAndUsersPermissions";
 
 interface UserPermission {
@@ -87,8 +86,10 @@ function GrantedByTooltip({ roleName, roleColor }: GrantedByTooltipProps) {
     );
 }
 
-function UserPermissionsComponent({ guild, guildMember, forceOpen = false }: { guild: Guild; guildMember: GuildMember; forceOpen?: boolean; }) {
+function UserPermissionsComponent({ guild, guildMember, closePopout }: { guild: Guild; guildMember: GuildMember; closePopout: () => void; }) {
     const { permissionsSortOrder } = settings.use(["permissionsSortOrder"]);
+
+    const guildPermissionSpecMap = useMemo(() => getGuildPermissionSpecMap(guild), [guild.id]);
 
     const [rolePermissions, userPermissions] = useMemo(() => {
         const userPermissions: UserPermissions = [];
@@ -106,7 +107,7 @@ function UserPermissionsComponent({ guild, guildMember, forceOpen = false }: { g
                 permissions: Object.values(PermissionsBits).reduce((prev, curr) => prev | curr, 0n)
             });
 
-            const OWNER = getIntlMessage("GUILD_OWNER") || "Server Owner";
+            const OWNER = getIntlMessage("GUILD_OWNER") ?? "Server Owner";
             userPermissions.push({
                 permission: OWNER,
                 roleName: "Owner",
@@ -117,11 +118,11 @@ function UserPermissionsComponent({ guild, guildMember, forceOpen = false }: { g
 
         sortUserRoles(userRoles);
 
-        for (const [permission, bit] of Object.entries(PermissionsBits)) {
+        for (const bit of Object.values(PermissionsBits)) {
             for (const { permissions, colorString, position, name } of userRoles) {
                 if ((permissions & bit) === bit) {
                     userPermissions.push({
-                        permission: getPermissionString(permission),
+                        permission: guildPermissionSpecMap[String(bit)].title,
                         roleName: name,
                         roleColor: colorString || "var(--primary-300)",
                         rolePosition: position
@@ -137,26 +138,15 @@ function UserPermissionsComponent({ guild, guildMember, forceOpen = false }: { g
         return [rolePermissions, userPermissions];
     }, [permissionsSortOrder]);
 
-    return (
-        <ExpandableHeader
-            forceOpen={forceOpen}
-            headerText="Permissions"
-            moreTooltipText="Role Details"
-            onMoreClick={() =>
-                openRolesAndUsersPermissionsModal(
-                    rolePermissions,
-                    guild,
-                    guildMember.nick || UserStore.getUser(guildMember.userId).username
-                )
-            }
-            onDropDownClick={state => settings.store.defaultPermissionsDropdownState = !state}
-            defaultState={settings.store.defaultPermissionsDropdownState}
-            buttons={[
+    return <div>
+        <div className={cl("user-header-container")}>
+            <Text variant="eyebrow">Permissions</Text>
+            <div className={cl("user-header-btns")}>
                 <Tooltip text={`Sorting by ${permissionsSortOrder === PermissionsSortOrder.HighestRole ? "Highest Role" : "Lowest Role"}`}>
                     {tooltipProps => (
                         <div
                             {...tooltipProps}
-                            className={cl("user-sortorder-btn")}
+                            className={cl("user-header-btn")}
                             role="button"
                             tabIndex={0}
                             onClick={() => {
@@ -164,8 +154,8 @@ function UserPermissionsComponent({ guild, guildMember, forceOpen = false }: { g
                             }}
                         >
                             <svg
-                                width="20"
-                                height="20"
+                                width="24"
+                                height="24"
                                 viewBox="0 96 960 960"
                                 transform={permissionsSortOrder === PermissionsSortOrder.HighestRole ? "scale(1 1)" : "scale(1 -1)"}
                             >
@@ -174,24 +164,47 @@ function UserPermissionsComponent({ guild, guildMember, forceOpen = false }: { g
                         </div>
                     )}
                 </Tooltip>
-            ]}>
-            {userPermissions.length > 0 && (
-                <div className={classes(RoleRootClasses.root)}>
-                    {userPermissions.map(({ permission, roleColor, roleName }) => (
-                        <Tooltip
-                            text={<GrantedByTooltip roleName={roleName} roleColor={roleColor} />}
-                            tooltipClassName={cl("granted-by-container")}
-                            tooltipContentClassName={cl("granted-by-content")}
+                <Tooltip text="Role Details">
+                    {tooltipProps => (
+                        <div
+                            {...tooltipProps}
+                            className={cl("user-header-btn")}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => {
+                                closePopout();
+                                openRolesAndUsersPermissionsModal(rolePermissions, guild, guildMember.nick || UserStore.getUser(guildMember.userId).username);
+                            }}
                         >
-                            {tooltipProps => (
-                                <FakeRole {...tooltipProps} text={permission} color={roleColor} />
-                            )}
-                        </Tooltip>
-                    ))}
-                </div>
-            )}
-        </ExpandableHeader>
-    );
+                            <svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                            >
+                                <path fill="var(--text-normal)" d="M7 12.001C7 10.8964 6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 12.001C17 10.8964 17.8954 10.001 19 10.001Z" />
+                            </svg>
+                        </div>
+                    )}
+                </Tooltip>
+            </div>
+        </div>
+        {userPermissions.length > 0 && (
+            <div className={classes(RoleRootClasses.root)}>
+                {userPermissions.map(({ permission, roleColor, roleName }) => (
+                    <Tooltip
+                        key={permission}
+                        text={<GrantedByTooltip roleName={roleName} roleColor={roleColor} />}
+                        tooltipClassName={cl("granted-by-container")}
+                        tooltipContentClassName={cl("granted-by-content")}
+                    >
+                        {tooltipProps => (
+                            <FakeRole {...tooltipProps} text={permission} color={roleColor} />
+                        )}
+                    </Tooltip>
+                ))}
+            </div>
+        )}
+    </div>;
 }
 
 export default ErrorBoundary.wrap(UserPermissionsComponent, { noop: true });
