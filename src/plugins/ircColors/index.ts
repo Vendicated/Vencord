@@ -89,10 +89,9 @@ export default definePlugin({
             return colorString;
         }
 
-        return (settings.store.applyColorOnlyToUsersWithoutColor && !colorString)
+        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
             ? color
             : colorString;
-
     },
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
@@ -103,7 +102,7 @@ export default definePlugin({
             return colorString;
         }
 
-        return (settings.store.applyColorOnlyToUsersWithoutColor && !colorString)
+        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
             ? color
             : colorString;
     }
