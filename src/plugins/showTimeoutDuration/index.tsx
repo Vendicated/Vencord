@@ -9,13 +9,16 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/discord";
+import { canonicalizeMatch } from "@utils/patches";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, i18n, Text, Tooltip } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, Text, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
 import { FunctionComponent, ReactNode } from "react";
 
-const CountDown = findComponentLazy(m => m.prototype?.render?.toString().includes(".MAX_AGE_NEVER"));
+const countDownFilter = canonicalizeMatch("#{intl::MAX_AGE_NEVER}");
+const CountDown = findComponentLazy(m => m.prototype?.render?.toString().includes(countDownFilter));
 
 const enum DisplayStyle {
     Tooltip = "tooltip",
@@ -48,9 +51,14 @@ function renderTimeout(message: Message, inline: boolean) {
         />
     );
 
+    getIntlMessage("GUILD_ENABLE_COMMUNICATION_TIME_REMAINING", {
+        username: message.author.username,
+        countdown
+    });
+
     return inline
         ? countdown()
-        : i18n.Messages.GUILD_ENABLE_COMMUNICATION_TIME_REMAINING.format({
+        : getIntlMessage("GUILD_ENABLE_COMMUNICATION_TIME_REMAINING", {
             username: message.author.username,
             countdown
         });
@@ -65,24 +73,23 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY",
+            find: "#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",
             replacement: [
                 {
-                    match: /(\i)\.Tooltip,{(text:.{0,30}\.Messages\.GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY)/,
-                    replace: "$self.TooltipWrapper,{message:arguments[0].message,$2"
+                    match: /\i\.\i,{(text:.{0,30}#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}\))/,
+                    replace: "$self.TooltipWrapper,{message:arguments[0].message,$1"
                 }
             ]
         }
     ],
 
     TooltipWrapper: ErrorBoundary.wrap(({ message, children, text }: { message: Message; children: FunctionComponent<any>; text: ReactNode; }) => {
-        if (settings.store.displayStyle === DisplayStyle.Tooltip) return <Tooltip
-            children={children}
-            text={renderTimeout(message, false)}
-        />;
+        if (settings.store.displayStyle === DisplayStyle.Tooltip)
+            return <Tooltip text={renderTimeout(message, false)}>{children}</Tooltip>;
+
         return (
             <div className="vc-std-wrapper">
-                <Tooltip text={text} children={children} />
+                <Tooltip text={text}>{children}</Tooltip>
                 <Text variant="text-md/normal" color="status-danger">
                     {renderTimeout(message, true)} timeout remaining
                 </Text>

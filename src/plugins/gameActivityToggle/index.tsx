@@ -26,7 +26,7 @@ import { findComponentByCodeLazy } from "@webpack";
 
 import style from "./style.css?managed";
 
-const Button = findComponentByCodeLazy("Button.Sizes.NONE,disabled:");
+const Button = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
 
 const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
@@ -92,7 +92,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".Messages.ACCOUNT_SPEAKING_WHILE_MUTED",
+            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
             replacement: {
                 match: /this\.renderNameZone\(\).+?children:\[/,
                 replace: "$&$self.GameActivityToggleButton(),"

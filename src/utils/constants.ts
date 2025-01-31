@@ -267,10 +267,6 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "arHSM",
         id: 841509053422632990n
     },
-    F53: {
-        name: "Cassie (Code)",
-        id: 280411966126948353n
-    },
     AutumnVN: {
         name: "AutumnVN",
         id: 393694671383166998n
@@ -520,8 +516,8 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         id: 721717126523781240n,
     },
     nyx: {
-        name: "verticalsync",
-        id: 328165170536775680n
+        name: "verticalsync.",
+        id: 1207087393929171095n
     },
     nekohaxx: {
         name: "nekohaxx",
@@ -574,6 +570,14 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     RamziAH: {
         name: "RamziAH",
         id: 1279957227612147747n,
+    },
+    SomeAspy: {
+        name: "SomeAspy",
+        id: 516750892372852754n,
+    },
+    jamesbt365: {
+        name: "jamesbt365",
+        id: 158567567487795200n,
     },
 } satisfies Record<string, Dev>);
 

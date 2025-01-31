@@ -20,10 +20,13 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
-import { findByPropsLazy } from "@webpack";
+import { filters, mapMangledModuleLazy } from "@webpack";
 import { Clipboard, ComponentDispatch } from "@webpack/common";
 
-const ctxMenuCallbacks = findByPropsLazy("contextMenuCallbackNative");
+const ctxMenuCallbacks = mapMangledModuleLazy('.tagName)==="TEXTAREA"||', {
+    contextMenuCallbackWeb: filters.byCode('.tagName)==="INPUT"||'),
+    contextMenuCallbackNative: filters.byCode('.tagName)==="TEXTAREA"||')
+});
 
 async function fetchImage(url: string) {
     const res = await fetch(url);
@@ -127,11 +130,11 @@ export default definePlugin({
                     replace: "return [true"
                 },
                 {
-                    match: /(?<=COPY_IMAGE_MENU_ITEM,)action:/,
+                    match: /(?<=#{intl::COPY_IMAGE_MENU_ITEM}\),)action:/,
                     replace: "action:()=>$self.copyImage(arguments[0]),oldAction:"
                 },
                 {
-                    match: /(?<=SAVE_IMAGE_MENU_ITEM,)action:/,
+                    match: /(?<=#{intl::SAVE_IMAGE_MENU_ITEM}\),)action:/,
                     replace: "action:()=>$self.saveImage(arguments[0]),oldAction:"
                 },
             ]
@@ -164,8 +167,8 @@ export default definePlugin({
             find: 'getElementById("slate-toolbar"',
             predicate: () => settings.store.addBack,
             replacement: {
-                match: /(?<=handleContextMenu\(\i\)\{.{0,200}isPlatformEmbedded)\?/,
-                replace: "||true?"
+                match: /(?<=handleContextMenu\(\i\)\{.{0,200}isPlatformEmbedded)\)/,
+                replace: "||true)"
             }
         },
         {
@@ -202,32 +205,35 @@ export default definePlugin({
             }
         },
         {
-            find: ".Messages.SEARCH_WITH_GOOGLE",
+            find: "#{intl::SEARCH_WITH_GOOGLE}",
             replacement: {
                 match: /\i\.isPlatformEmbedded/,
                 replace: "true"
             }
         },
         {
-            find: ".Messages.COPY,hint:",
+            find: "#{intl::COPY}),hint:",
             replacement: [
                 {
                     match: /\i\.isPlatformEmbedded/,
                     replace: "true"
                 },
                 {
-                    match: /\i\.\i\.copy/,
+                    match: /\i\.\i\.copy(?=\(\i)/,
                     replace: "Vencord.Webpack.Common.Clipboard.copy"
-                }]
+                }
+            ],
+            all: true,
+            noWarn: true
         },
         // Automod add filter words
         {
             find: '("interactionUsernameProfile',
             replacement:
-                {
-                    match: /\i\.isPlatformEmbedded(?=.{0,50}\.tagName)/,
-                    replace: "true"
-                },
+            {
+                match: /\i\.isPlatformEmbedded(?=.{0,50}\.tagName)/,
+                replace: "true"
+            },
         }
     ],
 
