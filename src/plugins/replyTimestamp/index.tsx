@@ -9,16 +9,8 @@ import "./style.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
 import { DateUtils, Timestamp } from "@webpack/common";
 import type { Message } from "discord-types/general";
-import type { HTMLAttributes } from "react";
-
-const MessageClasses = findByPropsLazy("separator", "latin24CompactTimeStamp");
-
-function Sep(props: HTMLAttributes<HTMLElement>) {
-    return <i className={MessageClasses.separator} aria-hidden={true} {...props} />;
-}
 
 const enum ReferencedMessageState {
     LOADED = 0,
