@@ -35,12 +35,10 @@ function getEmojiMarkdown(target: Target, copyUnicode: boolean): string {
 
     const imgSrc = target?.firstChild.src;
     const url = new URL(imgSrc);
-    const isAnimated = url.searchParams.get("animated") === "true";
-    const extension = imgSrc.match(
-        /https:\/\/cdn\.discordapp\.com\/emojis\/\d+\.(\w+)/
-    )?.[1];
+    const hasParam = url.searchParams.get("animated") === "true";
+    const isGif = url.pathname.endsWith(".gif");
 
-    return `<${(isAnimated || extension === "gif") ? "a" : ""}:${emojiName.replace(/~\d+$/, "")}:${emojiId}>`;
+    return `<${(hasParam || isGif) ? "a" : ""}:${emojiName.replace(/~\d+$/, "")}:${emojiId}>`;
 }
 
 const settings = definePluginSettings({
