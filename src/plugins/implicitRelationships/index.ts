@@ -50,9 +50,9 @@ export default definePlugin({
         {
             find: "#{intl::FRIENDS_SECTION_ONLINE}",
             replacement: {
-                match: /(\(0,\i\.jsx\)\(\i\.\i\.Item,\{id:\i\.\i)\.BLOCKED,className:([^\s]+?)\.item,children:\i\.\i\.string\(\i\.\i#{intl::BLOCKED}\)\}\)/,
-                replace: "$1.IMPLICIT,className:$2.item,children:\"Implicit\"}),$&"
-            },
+                match: /,{id:(\i\.\i)\.BLOCKED,show:.+?className:(\i\.item)/,
+                replace: (rest, relationShipTypes, className) => `,{id:${relationShipTypes}.IMPLICIT,show:true,className:${className},content:"Implicit"}${rest}`
+            }
         },
         // Sections content
         {
