@@ -49,7 +49,7 @@ const StickerExt = [, "png", "png", "json", "gif"] as const;
 
 function getUrl(data: Data) {
     if (data.t === "Sticker")
-        return `https:${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
+        return `https:${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=2048&lossless=true`;
 
     return "oops Couldnt get it sorry boss";
 }
@@ -110,9 +110,6 @@ function buildMenuItem(type: "Sticker", fetchData: () => Promisable<Omit<Sticker
     );
 }
 
-
-
-
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     const { favoriteableId, favoriteableType } = props ?? {};
     if (!favoriteableId) return;
@@ -120,7 +117,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         switch (favoriteableType) {
             case "sticker":
                 const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
-                if (sticker?.format_type === 3 /* LOTTIE */) return;
+                if (sticker?.format_type === 3) return;
 
                 return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
         }
@@ -131,7 +128,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
 };
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
-    const { id, name, type } = props?.target?.dataset ?? {};
+    const { id, type } = props?.target?.dataset ?? {};
     if (!id) return;
 
     if (type === "sticker" && !props.target.className?.includes("lottieCanvas")) {
@@ -146,16 +143,7 @@ export default definePlugin({
     contextMenus: {
         "message": messageContextMenuPatch,
         "expression-picker": expressionPickerPatch
-    },
-
-    start() {
-        // TODO
-    },
-
-    stop() {
-    },
-
-
+    }
 });
 
 
