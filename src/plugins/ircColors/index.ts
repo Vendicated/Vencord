@@ -106,5 +106,4 @@ export default definePlugin({
             ? color
             : colorString;
     }
-
 });
