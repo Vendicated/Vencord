@@ -27,4 +27,6 @@ This plugin allows you to customize the timestamps in chat messages and tooltips
 - **Last week**: Format for dates within the last week (e.g., "Monday, 2:30 PM").
 - **Same else**: Format for older dates (e.g., "01/01/2024, 2:30 PM").
 
+![settings](https://github.com/user-attachments/assets/daf4bd95-5a52-4376-9226-2a3afd043368)
+
 For more information on formatting options, refer to the [Moment.js formatting documentation](https://momentjs.com/docs/#/displaying/format/).
