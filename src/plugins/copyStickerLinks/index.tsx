@@ -71,7 +71,7 @@ function buildMenuItem(type: "Sticker", fetchData: () => Promisable<Omit<Sticker
             <Menu.MenuItem
                 id="copystickerurl"
                 key="copystickerurl"
-                label={"Copy Sticker Link"}
+                label={"Copy URL"}
                 action={async () => {
                     const res = await fetchData();
                     const data = { t: type, ...res } as Sticker;
@@ -89,7 +89,7 @@ function buildMenuItem(type: "Sticker", fetchData: () => Promisable<Omit<Sticker
             <Menu.MenuItem
                 id="openstickerlink"
                 key="openstickerlink"
-                label={"Open Sticker Link"}
+                label={"Open URL"}
                 action={async () => {
                     const res = await fetchData();
                     const data = { t: type, ...res } as Sticker;
