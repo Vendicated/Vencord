@@ -124,8 +124,6 @@ function Updatable(props: CommonProps) {
                 </Forms.FormText>
             )}
 
-            {isOutdated && <Changes updates={updates} {...props} />}
-
             <Flex className={classes(Margins.bottom8, Margins.top8)}>
                 {isOutdated && <Button
                     size={Button.Sizes.SMALL}
@@ -174,6 +172,8 @@ function Updatable(props: CommonProps) {
                     Check for Updates
                 </Button>
             </Flex>
+
+            {isOutdated && <Changes updates={updates} {...props} />}
         </>
     );
 }
@@ -223,6 +223,12 @@ function Updater() {
                 Get notified when an automatic update completes
             </Switch>
 
+            <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
+
+            {isNewer ? <Newer {...commonProps} /> : <Updatable {...commonProps} />}
+
+            <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
+
             <Forms.FormTitle tag="h5">Repo</Forms.FormTitle>
 
             <Forms.FormText className="vc-text-selectable">
@@ -238,12 +244,6 @@ function Updater() {
                 }
                 {" "}(<HashLink hash={gitHash} repo={repo} disabled={repoPending} />)
             </Forms.FormText>
-
-            <Forms.FormDivider className={Margins.top8 + " " + Margins.bottom8} />
-
-            <Forms.FormTitle tag="h5">Updates</Forms.FormTitle>
-
-            {isNewer ? <Newer {...commonProps} /> : <Updatable {...commonProps} />}
         </SettingsTab>
     );
 }
