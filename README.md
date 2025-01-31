@@ -111,8 +111,8 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Quoter by Samwich
 - RemixMe by kvba
 - RepeatMessage by Tolgchu
-- ReplaceActivityTypes by Nyako
 - ReplyPingControl by ant0n & MrDiamond
+- RPCEditor by Nyako & nin0dev
 - RPCStats by Samwich
 - SearchFix by Jaxx
 - SekaiStickers by MaiKokain
