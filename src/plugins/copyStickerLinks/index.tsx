@@ -116,7 +116,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     })();
 
     if (menuItem)
-        findGroupChildrenByChildId(`devmode-copy-id`, children, true)?.push(menuItem);
+        findGroupChildrenByChildId("devmode-copy-id", children, true)?.push(menuItem);
 };
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
@@ -137,6 +137,3 @@ export default definePlugin({
         "expression-picker": expressionPickerPatch
     }
 });
-
-
-
