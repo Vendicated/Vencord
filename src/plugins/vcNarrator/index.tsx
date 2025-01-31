@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Notifications } from "@api/index";
+import { showNotification } from "@api/Notifications";
 import { Settings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
@@ -149,13 +151,20 @@ function playSample(tempSettings: any, type: string) {
     const currentUser = UserStore.getCurrentUser();
     const myGuildId = SelectedGuildStore.getGuildId();
 
+    if (settings.notification) {
+        showNotification({
+            title: "Voice Channel Sample",
+            body: formatText(settings[type + "Message"], currentUser.username, "general", (currentUser as any).globalName ?? currentUser.username, GuildMemberStore.getNick(myGuildId, currentUser.id) ?? currentUser.username)
+        });
+        return;
+    }
     speak(formatText(settings[type + "Message"], currentUser.username, "general", (currentUser as any).globalName ?? currentUser.username, GuildMemberStore.getNick(myGuildId, currentUser.id) ?? currentUser.username), settings);
 }
 
 export default definePlugin({
     name: "VcNarrator",
     description: "Announces when users join, leave, or move voice channels via narrator",
-    authors: [Devs.Ven],
+    authors: [Devs.Ven, Devs.ImLvna],
     reporterTestable: ReporterTestable.None,
 
     flux: {
@@ -183,6 +192,13 @@ export default definePlugin({
                 const nickname = user && (GuildMemberStore.getNick(myGuildId, userId) ?? user);
                 const channel = ChannelStore.getChannel(id).name;
 
+                if (Settings.plugins.VcNarrator.notification) {
+                    showNotification({
+                        title: "Voice Channel",
+                        body: formatText(template, user, channel, displayName, nickname)
+                    });
+                    return;
+                }
                 speak(formatText(template, user, channel, displayName, nickname));
 
                 // updateStatuses(type, state, isMe);
@@ -195,6 +211,13 @@ export default definePlugin({
             if (!s) return;
 
             const event = s.mute || s.selfMute ? "unmute" : "mute";
+            if (Settings.plugins.VcNarrator.notification) {
+                showNotification({
+                    title: "Voice Channel",
+                    body: formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", "")
+                });
+                return;
+            }
             speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
         },
 
@@ -204,6 +227,13 @@ export default definePlugin({
             if (!s) return;
 
             const event = s.deaf || s.selfDeaf ? "undeafen" : "deafen";
+            if (Settings.plugins.VcNarrator.notification) {
+                showNotification({
+                    title: "Voice Channel",
+                    body: formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", "")
+                });
+                return;
+            }
             speak(formatText(Settings.plugins.VcNarrator[event + "Message"], "", ChannelStore.getChannel(chanId).name, "", ""));
         }
     },
@@ -222,6 +252,11 @@ export default definePlugin({
 
     get options() {
         return this.optionsCache ??= {
+            notification: {
+                type: OptionType.BOOLEAN,
+                description: "Send Notifications instead of speaking",
+                default: false
+            },
             voice: {
                 type: OptionType.SELECT,
                 description: "Narrator Voice",
