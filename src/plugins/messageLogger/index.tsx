@@ -446,11 +446,11 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(className:\i,item:\i),/,
-                    replace: "$1,item: deleted,"
+                    replace: "$1,item:messageLoggerItem,"
                 },
                 {
                     match: /\[\i\.obscured\]:.+?,/,
-                    replace: "$& 'messagelogger-deleted-attachment': deleted,"
+                    replace: "$& 'messagelogger-deleted-attachment': messageLoggerItem?.originalItem?.deleted??false,"
                 }
             ]
         },
