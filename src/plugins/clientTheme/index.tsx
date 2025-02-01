@@ -126,6 +126,7 @@ export default definePlugin({
     stop() {
         document.getElementById("clientThemeVars")?.remove();
         document.getElementById("clientThemeOffsets")?.remove();
+        document.getElementById("clientThemeLightModeFixes")?.remove();
     }
 });
 
