@@ -169,7 +169,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
     }, [channelId]);
 
     return (
-        <div className={classes(ChatScrollClasses.auto, ChatScrollClasses.customTheme, ChatClasses.chatContent, cl("outer-container"))}>
+        <div className={classes(ChatScrollClasses.auto, ChatScrollClasses.customTheme, ChatScrollClasses.managedReactiveScroller)}>
             <div className={cl("container")}>
                 <img className={cl("logo")} src={HiddenChannelLogo} />
 
