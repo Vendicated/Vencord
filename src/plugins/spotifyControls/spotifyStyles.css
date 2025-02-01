@@ -35,8 +35,8 @@
     width: 24px;
 }
 
-[class*="vc-spotify-shuffle"] .vc-spotify-button-icon,
-[class*="vc-spotify-repeat"] .vc-spotify-button-icon {
+.vc-spotify-shuffle .vc-spotify-button-icon,
+.vc-spotify-repeat .vc-spotify-button-icon {
     width: 22px;
     height: 22px;
 }

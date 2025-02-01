@@ -127,7 +127,7 @@ function Controls() {
     return (
         <Flex className={cl("button-row")} style={{ gap: 0 }}>
             <Button
-                className={classes(cl("button"), cl(shuffle ? "shuffle-on" : "shuffle-off"))}
+                className={classes(cl("button"), cl("shuffle"), cl(shuffle ? "shuffle-on" : "shuffle-off"))}
                 onClick={() => SpotifyStore.setShuffle(!shuffle)}
             >
                 <Shuffle />
@@ -144,7 +144,7 @@ function Controls() {
                 <SkipNext />
             </Button>
             <Button
-                className={classes(cl("button"), cl(repeatClassName))}
+                className={classes(cl("button"), cl("repeat"), cl(repeatClassName))}
                 onClick={() => SpotifyStore.setRepeat(nextRepeat)}
                 style={{ position: "relative" }}
             >
