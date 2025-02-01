@@ -68,15 +68,16 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
     return (
         <ModalRoot {...rootProps}>
             <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle tag="h2">
+                <Forms.FormTitle tag="h2" className={cl("modal-title")}>
                     Timestamp Picker
                 </Forms.FormTitle>
 
-                <ModalCloseButton onClick={close} />
+                <ModalCloseButton onClick={close} className={cl("modal-close-button")} />
             </ModalHeader>
 
             <ModalContent className={cl("modal-content")}>
                 <input
+                    className={cl("date-picker")}
                     type="datetime-local"
                     value={value}
                     onChange={e => setValue(e.currentTarget.value)}
