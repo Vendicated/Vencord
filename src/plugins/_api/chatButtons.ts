@@ -16,6 +16,7 @@ export default definePlugin({
         {
             find: '"sticker")',
             replacement: {
+                // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
                 match: /return\((!)?\i\.\i(?:\|\||&&)(?=\(\i\.isDM.+?(\i)\.push)/,
                 replace: (m, not, children) => not
                     ? `${m}(Vencord.Api.ChatButtons._injectButtons(${children},arguments[0]),true)&&`
