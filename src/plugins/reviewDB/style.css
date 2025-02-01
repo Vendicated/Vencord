@@ -21,11 +21,6 @@
     margin: 6px 16px;
 }
 
-/* When input becomes disabled(while sending review), input adds unneccesary padding to left, this prevents it */
-.vc-rdb-input > div > div {
-    padding-left: 0 !important;
-}
-
 .vc-rdb-placeholder {
     margin-bottom: 4px;
     font-weight: bold;
@@ -69,7 +64,7 @@
     border-radius: 8px;
 }
 
-.vc-rdb-review-comment img {
+.vc-rdb-review-comment [class*="avatar"] {
     vertical-align: text-top;
 }
 
