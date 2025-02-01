@@ -141,6 +141,7 @@ export default definePlugin({
                                             src={user.getAvatarURL(void 0, 80, true)}
                                             alt={user.username}
                                             title={user.username}
+                                            style={{ marginLeft: 8 }}
                                         />
                                     </Clickable>
                                 )}
