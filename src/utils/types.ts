@@ -25,9 +25,11 @@ import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
 import { MessagePopoverButtonFactory } from "@api/MessagePopover";
+import { NicknameIconFactory } from "@api/NicknameIcons";
 import { FluxEvents } from "@webpack/types";
 import { JSX } from "react";
 import { Promisable } from "type-fest";
+import { LiteralStringUnion } from "type-fest/source/literal-union";
 
 // exists to export default definePlugin({...})
 export default function definePlugin<P extends PluginDef>(p: P & Record<string, any>) {
@@ -88,7 +90,7 @@ export interface PluginDef {
      * These will automatically be enabled and loaded before your plugin
      * Generally these will be API plugins
      */
-    dependencies?: string[],
+    dependencies?: Array<LiteralStringUnion<"BadgeAPI" | "ChatInputButtonAPI" | "CommandsAPI" | "ContextMenuAPI" | "DynamicImageModalAPI" | "NicknameIconsAPI" | "MemberListDecoratorsAPI" | "MenuItemDemanglerAPI" | "MessageAccessoriesAPI" | "MessageDecorationsAPI" | "MessageEventsAPI" | "MessagePopoverAPI" | "MessageUpdaterAPI" | "NoticesAPI" | "ServerListAPI" | "UserSettingsAPI">>,
     /**
      * Whether this plugin is required and forcefully enabled
      */
@@ -161,8 +163,10 @@ export interface PluginDef {
     renderMessageDecoration?: MessageDecorationFactory;
 
     renderMemberListDecorator?: MemberListDecoratorFactory;
+    renderNicknameIcon?: NicknameIconFactory;
 
     renderChatBarButton?: ChatBarButtonFactory;
+
 }
 
 export const enum StartAt {
