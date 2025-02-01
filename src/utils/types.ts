@@ -166,7 +166,6 @@ export interface PluginDef {
     renderNicknameIcon?: NicknameIconFactory;
 
     renderChatBarButton?: ChatBarButtonFactory;
-
 }
 
 export const enum StartAt {
