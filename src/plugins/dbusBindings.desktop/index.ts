@@ -60,7 +60,7 @@ export default definePlugin({
         //
         // const bus = dbus.sessionBus();
         const Session = await Native.GScreateSession();
-        console.log("rat", Session);
+        // console.log("rat", Session);
         // this.startDbus();
 
     },
