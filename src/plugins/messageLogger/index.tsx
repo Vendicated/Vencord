@@ -442,15 +442,10 @@ export default definePlugin({
         {
             // Attachment renderer
             find: ".removeMosaicItemHoverButton",
-            group: true,
             replacement: [
                 {
-                    match: /(className:\i,item:\i),/,
-                    replace: "$1,item:messageLoggerItem,"
-                },
-                {
-                    match: /\[\i\.obscured\]:.+?,/,
-                    replace: "$& 'messagelogger-deleted-attachment': messageLoggerItem?.originalItem?.deleted??false,"
+                    match: /\[\i\.obscured\]:.+?,(?<=item:(\i).+?)/,
+                    replace: '$&"messagelogger-deleted-attachment":$1.originalItem?.deleted,'
                 }
             ]
         },
