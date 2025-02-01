@@ -12,17 +12,14 @@
     font-size: 100%;
 }
 
-.vc-st-format-label,
-.vc-st-format-label span {
-    background-color: transparent;
-}
-
-.vc-st-modal-content [class|="select"] {
+.vc-st-format-select {
     margin-bottom: 1em;
+
+    --background-modifier-accent: transparent;
 }
 
-.vc-st-modal-content [class|="select"] span {
-    background-color: var(--input-background);
+.vc-st-format-label {
+    --background-modifier-accent: transparent;
 }
 
 .vc-st-modal-header {
