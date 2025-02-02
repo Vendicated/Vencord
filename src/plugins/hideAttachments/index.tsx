@@ -64,15 +64,22 @@ const toggleHide = async (channelId: string, messageId: string): Promise<void> =
  * @returns {boolean}
  */
 const shouldHideByUserIdFilter = (payload: IMessage, userFilters: Set<string>): boolean => {
-    if (!payload.attachments.length && !payload.embeds.length) {
-        return false;
+    if (userFilters.has(payload.author.id)) {
+        // Check if it's a forwarded messages with embeds/attachments
+        if (Array.isArray(payload.message_snapshots)) {
+            const hasMedia = payload.message_snapshots.some(snapshot => {
+                return snapshot.message.attachments.length > 0 || snapshot.message.embeds.length > 0;
+            });
+            if (hasMedia) {
+                return true;
+            }
+        }
+
+        // Otherwise, just check if the message contain embeds/attachments
+        return payload.attachments.length > 0 || payload.embeds.length > 0;
     }
 
-    if (!Array.isArray(payload.message_snapshots)) {
-        return false;
-    }
-
-    return userFilters.has(payload.author.id);
+    return false;
 };
 
 /**
