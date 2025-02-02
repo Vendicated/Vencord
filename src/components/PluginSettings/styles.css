@@ -66,10 +66,7 @@
     background-color: var(--background-secondary-alt) !important;
     transition: 0.1s ease-out;
     transition-property: box-shadow, transform, background, opacity;
-}
-
-.vc-plugins-info-card div {
-    line-height: 32px;
+    gap: 0.25em;
 }
 
 .vc-plugins-restart-card {
@@ -79,11 +76,11 @@
     color: var(--info-warning-text);
 }
 
-.vc-plugins-restart-card button {
+.vc-plugins-restart-button {
     margin-top: 0.5em;
 }
 
-.vc-plugins-info-button svg:not(:hover, :focus) {
+.vc-plugins-info-icon:not(:hover, :focus) {
     color: var(--text-muted);
 }
 

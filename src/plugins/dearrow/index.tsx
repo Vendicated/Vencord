@@ -121,6 +121,7 @@ function DearrowButton({ component }: { component: Component<Props>; }) {
                         height="24px"
                         viewBox="0 0 36 36"
                         aria-label="Toggle Dearrow"
+                        className="vc-dearrow-icon"
                     >
                         <path
                             fill="#1213BD"
