@@ -69,7 +69,7 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
                     <Forms.FormText className={cl("dep-text")}>
                         Restart now to apply new plugins and their settings
                     </Forms.FormText>
-                    <Button onClick={() => location.reload()}>
+                    <Button onClick={() => location.reload()} className={cl("restart-button")}>
                         Restart
                     </Button>
                 </>
@@ -158,8 +158,8 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
                     className={classes(ButtonClasses.button, cl("info-button"))}
                 >
                     {plugin.options && !isObjectEmpty(plugin.options)
-                        ? <CogWheel />
-                        : <InfoIcon />}
+                        ? <CogWheel className={cl("info-icon")} />
+                        : <InfoIcon className={cl("info-icon")} />}
                 </button>
             }
         />
