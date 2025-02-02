@@ -571,6 +571,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "RamziAH",
         id: 1279957227612147747n,
     },
+    garlicOS: {
+        name: "garlicOS",
+        id: 206235904644349953n,
+    },
     SomeAspy: {
         name: "SomeAspy",
         id: 516750892372852754n,
