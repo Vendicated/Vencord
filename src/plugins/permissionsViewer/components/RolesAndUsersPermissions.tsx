@@ -157,7 +157,7 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                     src={user.getAvatarURL(void 0, void 0, false)}
                                                 />
                                             )}
-                                            <Text variant="text-md/normal">
+                                            <Text variant="text-md/normal" className={cl("modal-list-item-text")}>
                                                 {
                                                     permission.type === PermissionType.Role
                                                         ? role?.name ?? "Unknown Role"
