@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+// Add data types to window.navigator for use in this file
+// needed for win11 detection
+/// <reference types="user-agent-data-types" />
+
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
@@ -44,6 +48,21 @@ type KeysOfType<Object, Type> = {
 
 
 function VencordSettings() {
+    /*
+    we need to detect win11 for background material,
+    which is not supported by win 10
+    https://learn.microsoft.com/en-us/microsoft-edge/web-platform/how-to-detect-win11#sample-code-for-detecting-windows-11
+    */
+    const [isWindows11, , isWindows11Pending] = useAwaiter(async () => {
+        if (
+            !navigator?.userAgentData ||
+            navigator?.userAgentData?.platform !== "Windows"
+        ) return false;
+
+        const ua = await navigator.userAgentData.getHighEntropyValues(["platformVersion"]);
+        const majorPlatformVersion = parseInt(ua?.platformVersion?.split(".")[0]!, 10);
+        return majorPlatformVersion >= 13;
+    }, { fallbackValue: false });
     const [settingsDir, , settingsDirPending] = useAwaiter(VencordNative.settings.getSettingsDir, {
         fallbackValue: "Loading..."
     });
@@ -54,6 +73,7 @@ function VencordSettings() {
     const isWindows = navigator.platform.toLowerCase().startsWith("win");
     const isMac = navigator.platform.toLowerCase().startsWith("mac");
     const needsVibrancySettings = IS_DISCORD_DESKTOP && isMac;
+    const needsBackgroundMaterial = IS_DISCORD_DESKTOP && isWindows11;
 
     const Switches: Array<false | {
         key: KeysOfType<typeof settings, boolean>;
@@ -224,6 +244,50 @@ function VencordSettings() {
                     isSelected={v => settings.macosVibrancyStyle === v}
                     serialize={identity} />
             </>}
+
+            {needsBackgroundMaterial && <>
+                <Forms.FormTitle tag="h5">Window Background Material</Forms.FormTitle>
+                <Select
+                    className={Margins.bottom20}
+                    placeholder="Window Background Material"
+                    options={[
+                        // Sorted from most opaque to most transparent
+                        {
+                            label: "Default",
+                            value: undefined
+                        },
+                        {
+                            label: "Auto",
+                            value: "auto"
+                        },
+                        {
+                            label: "None",
+                            value: "none"
+                        },
+                        {
+                            label: "Mica",
+                            value: "mica"
+                        },
+                        {
+                            label: "Tabbed",
+                            value: "tabbed"
+                        },
+                        {
+                            label: "Acrylic",
+                            value: "acrylic"
+                        },
+                    ]}
+                    select={
+                        v => {
+                            settings.winBackgroundMaterial = v;
+                            // IPC call to set background material in real time
+                            VencordNative.settings.setBackgroundMaterial(v);
+                        }
+                    }
+                    isSelected={v => settings.winBackgroundMaterial === v}
+                    serialize={identity} />
+            </>}
+
 
             <Forms.FormSection className={Margins.top16} title="Vencord Notifications" tag="h5">
                 <Flex>
