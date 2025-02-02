@@ -6,3 +6,8 @@
     background-color: var(--menu-item-default-hover-bg) !important;
     color: var(--white) !important;
 }
+
+.vc-sp-icon {
+    transform: rotate(45deg);
+    margin-top: 4px;
+}

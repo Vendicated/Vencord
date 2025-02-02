@@ -47,7 +47,7 @@ interface Emoji {
     name: string;
 }
 
-const CircleXIcon = findComponentByCodeLazy("22Zm4.7-15.7a1");
+const PlusSmallIcon = findComponentByCodeLazy("0-2h-5V6Z");
 
 interface DiscordStatus {
     emojiInfo: Emoji | null;
@@ -91,11 +91,11 @@ function setStatus(status: DiscordStatus) {
     });
 }
 
-const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomStatusHint} onClick={e => { e.stopPropagation(); CustomStatusSettings?.updateSetting(null); }}><CircleXIcon /></Clickable>;
+const ClearStatusButton = () => <Clickable className={StatusStyles.clearCustomStatusHint} onClick={e => { e.stopPropagation(); CustomStatusSettings?.updateSetting(null); }}><PlusSmallIcon className={"vc-sp-icon"} /></Clickable>;
 
 function StatusIcon({ isHovering, status }: { isHovering: boolean; status: DiscordStatus; }) {
     return <div className={StatusStyles.status}>{isHovering ?
-        <CircleXIcon />
+        <PlusSmallIcon className={"vc-sp-icon"} />
         : (status.emojiInfo != null ? <EmojiComponent emoji={status.emojiInfo} animate={false} hideTooltip={false} /> : <div className={StatusStyles.customEmojiPlaceholder} />)}</div>;
 }
 
@@ -173,26 +173,42 @@ export default definePlugin({
     ],
     render() {
         const status = CustomStatusSettings.getSetting();
-        return <ErrorBoundary>
-            <div className={StatusStyles.menuDivider} />
-            {status == null ?
-                <PMenu
-                    id="sp-custom/presets-status"
-                    action="PRESS_SET_STATUS"
-                    onClick={openCustomStatusModalLazy}
-                    icon={() => <div className={StatusStyles.customEmojiPlaceholder} />}
-                    label="Set Custom Status" renderSubmenu={StatusSubMenuComponent}
-                />
-                :
-                <PMenu
-                    id="sp-edit/presets-status"
-                    action="PRESS_EDIT_CUSTOM_STATUS"
-                    onClick={openCustomStatusModalLazy}
-                    hint={<ClearStatusButton />}
-                    icon={() => status.emoji != null ? <EmojiComponent emoji={status.emoji} animate={false} hideTooltip={false} /> : null}
-                    label="Edit Custom Status" renderSubmenu={StatusSubMenuComponent}
-                />}
-        </ErrorBoundary>;
+        return (
+            <ErrorBoundary>
+                <div className={StatusStyles.menuDivider} />
+                {status == null ?
+                    <PMenu
+                        id="sp-custom/presets-status"
+                        action="PRESS_SET_STATUS"
+                        onClick={openCustomStatusModalLazy}
+                        icon={
+                            () => <div
+                                className={StatusStyles.customEmojiPlaceholder}
+                            />
+                        }
+                        label="Set Custom Status"
+                        renderSubmenu={StatusSubMenuComponent}
+                    />
+                    :
+                    <PMenu
+                        id="sp-edit/presets-status"
+                        action="PRESS_EDIT_CUSTOM_STATUS"
+                        onClick={openCustomStatusModalLazy}
+                        hint={<ClearStatusButton />}
+                        icon={
+                            () => status.emoji != null ? (
+                                <EmojiComponent
+                                    emoji={status.emoji}
+                                    animate={false}
+                                    hideTooltip={false}
+                                />
+                            ) : null
+                        }
+                        label="Edit Custom Status"
+                        renderSubmenu={StatusSubMenuComponent}
+                    />}
+            </ErrorBoundary>
+        );
     },
     renderRememberButton(statue: DiscordStatus) {
         return <Button
