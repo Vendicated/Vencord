@@ -64,6 +64,10 @@ const toggleHide = async (channelId: string, messageId: string): Promise<void> =
  * @returns {boolean}
  */
 const shouldHideByUserIdFilter = (payload: IMessage, userFilters: string[]): boolean => {
+    if (!payload.attachments.length && !payload.embeds.length) {
+        return false;
+    }
+
     for (const id of userFilters) {
         if (payload.author.id === id) {
             return true;
@@ -73,6 +77,11 @@ const shouldHideByUserIdFilter = (payload: IMessage, userFilters: string[]): boo
     return false;
 };
 
+/**
+ * Checks if the embed should be hidden
+ * @param {Embed[]} embeds List of embeds
+ * @param {string[]} domainList List of domains
+ */
 const shouldHideEmbed = (embeds: Embed[], domainList: string[]): boolean => {
     for (const embed of embeds) {
         if (!embed.url) {
