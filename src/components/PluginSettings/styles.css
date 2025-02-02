@@ -76,7 +76,7 @@
     color: var(--info-warning-text);
 }
 
-.vc-plugins-info-button svg:not(:hover, :focus) {
+.vc-plugins-info-icon:not(:hover, :focus) {
     color: var(--text-muted);
 }
 
