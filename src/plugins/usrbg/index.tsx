@@ -21,8 +21,6 @@ import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-import style from "./index.css?managed";
-
 const API_URL = "https://usrbg.is-hardly.online/users";
 
 interface UsrbgApiReturn {

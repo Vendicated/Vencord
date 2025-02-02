@@ -1,10 +1,9 @@
-.vc-nsfw-img [class^="imageWrapper"] img,
-.vc-nsfw-img [class^="wrapperPaused"] video {
+.vc-nsfw-img [class^="imageContainer"],
+.vc-nsfw-img [class^="wrapperPaused"] {
     filter: blur([--blur-amount]px);
     transition: filter 0.2s;
-}
 
-.vc-nsfw-img [class^="imageWrapper"]:hover img,
-.vc-nsfw-img [class^="wrapperPaused"]:hover video {
-    filter: unset;
+    &:hover {
+        filter: blur(0);
+    }
 }

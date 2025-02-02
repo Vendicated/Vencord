@@ -41,7 +41,7 @@ export default definePlugin({
     settings: definePluginSettings({
         blurAmount: {
             type: OptionType.NUMBER,
-            description: "Blur Amount",
+            description: "Blur Amount (in pixels)",
             default: 10,
             onChange(v) {
                 setStyleVariables(style, { blurAmount: v });
