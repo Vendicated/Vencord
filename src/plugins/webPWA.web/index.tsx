@@ -67,14 +67,12 @@ export default definePlugin({
     RelationshipStore.addChangeListener(this.setBadge);
 
     // title bar
-    if ("windowControlsOverlay" in navigator) { // firefox!
-      const { height } = navigator.windowControlsOverlay!.getTitlebarAreaRect();
-      document.body.style.setProperty("--vencord-titlebar-size", height + "px");
-      navigator.windowControlsOverlay!.addEventListener(
-        "geometrychange",
-        this.handleGeometryChange
-      );
-    }
+    const { height } = navigator.windowControlsOverlay!.getTitlebarAreaRect();
+    document.body.style.setProperty("--vencord-titlebar-size", height + "px");
+    navigator.windowControlsOverlay!.addEventListener(
+      "geometrychange",
+      this.handleGeometryChange
+    );
 
     // keybinds
     window.addEventListener("message", this.keybindListener);
@@ -82,13 +80,11 @@ export default definePlugin({
   stop() {
     if (!IS_EXTENSION) return;
 
-    if ("windowControlsOverlay" in navigator) {
-      navigator.windowControlsOverlay!.removeEventListener(
-        "geometrychange",
-        this.handleGeometryChange
-      );
-      navigator.setAppBadge(0);
-    }
+    navigator.windowControlsOverlay!.removeEventListener(
+      "geometrychange",
+      this.handleGeometryChange
+    );
+    navigator.setAppBadge(0);
     window.removeEventListenerEventListener("message", this.keybindListener);
     disableStyle(style);
     this.linkEl?.remove();
@@ -137,7 +133,7 @@ export default definePlugin({
   customNotice() {
     return (
       <div>
-        Custom global keybinds are supported. Navigate to <a onClick={() => { window.postMessage({ type: "OPEN_SHORTCUTS" }, "*"); }}>about://extensions/shortcuts</a> to change them.
+        Custom global Push To X keybinds are supported. Navigate to <a onClick={() => { window.postMessage({ type: "OPEN_SHORTCUTS" }, "*"); }}>about://extensions/shortcuts</a> to change them. Hold To X keybinds are not supported.
       </div>
     );
   },
