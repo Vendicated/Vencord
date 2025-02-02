@@ -22,7 +22,7 @@ let _keybinds: Record<string, { onTrigger: () => any; }>;
 
 export default definePlugin({
   name: "WebPWA",
-  description: "Allows Discord to be installable and usable as a PWA.",
+  description: "Makes Discord installable as a PWA. Enables notification badges, global keybinds and the custom title bar.",
   authors: [Devs.ThaUnknown],
   flux: {
     KEYBINDS_REGISTER_GLOBAL_KEYBIND_ACTIONS: ({ keybinds }: { keybinds: Record<string, { onTrigger: () => any; }>; }) => {
@@ -113,24 +113,19 @@ export default definePlugin({
         {
           match: /case \i\.\i\.WINDOWS:/,
           replace: 'case "WEB":'
-        },
-        // these 3 buttons should never actually be clickable, since we expect the user to install the PWA
-        // these methods don't work outside of PWA's so is there a point?
-        ...["close", "minimize", "maximize"].map(op => ({
-          match: new RegExp(String.raw`\i\.\i\.${op}\b`),
-          replace: ""
-        }))
+        }
       ]
     },
     {
       find: ".browserNotice",
       replacement: {
-        match: /className:(\i)\.browserNotice,children:[^}]+}\)/,
-        replace: "className:$1.browserNotice,children:$self.customNotice()"
+        match: /className:(\i)\.browserNotice,children:([^}]+}\))/,
+        replace: "className:$1.browserNotice,children:$self.customNotice($2)"
       }
     }
   ],
-  customNotice() {
+  customNotice(oldChildren: string) {
+    if (!IS_EXTENSION) return oldChildren;
     return (
       <div>
         Custom global Push To X keybinds are supported. Navigate to <a onClick={() => { window.postMessage({ type: "OPEN_SHORTCUTS" }, "*"); }}>about://extensions/shortcuts</a> to change them. Hold To X keybinds are not supported.
