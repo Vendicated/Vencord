@@ -133,7 +133,7 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
     }));
 }
 
-const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, small = false }: { user: User; wantMargin?: boolean; wantTopMargin?: boolean; small?: boolean; }) => {
+const PlatformIndicator = ({ user, wantMargin = true, small = false }: { user: User; wantMargin?: boolean; small?: boolean; }) => {
     if (!user || user.bot) return null;
 
     ensureOwnStatus(user);
@@ -157,7 +157,6 @@ const PlatformIndicator = ({ user, wantMargin = true, wantTopMargin = false, sma
             className="vc-platform-indicator"
             style={{
                 marginLeft: wantMargin ? 4 : 0,
-                top: wantTopMargin ? 2 : 0,
                 gap: 2
             }}
         >
@@ -190,7 +189,7 @@ const indicatorLocations = {
         description: "Inside messages",
         onEnable: () => addMessageDecoration("platform-indicator", props =>
             <ErrorBoundary noop>
-                <PlatformIndicator user={props.message?.author} wantTopMargin={true} />
+                <PlatformIndicator user={props.message?.author} />
             </ErrorBoundary>
         ),
         onDisable: () => removeMessageDecoration("platform-indicator")

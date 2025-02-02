@@ -399,17 +399,6 @@ export default definePlugin({
     stop: () => setRpc(true),
     settings,
 
-    patches: [
-        {
-            find: ".party?(0",
-            all: true,
-            replacement: {
-                match: /\i\.id===\i\.id\?null:/,
-                replace: ""
-            }
-        }
-    ],
-
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
         const gameActivityEnabled = ShowCurrentGame.useSetting();

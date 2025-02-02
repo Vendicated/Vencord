@@ -65,16 +65,7 @@ export default definePlugin({
                 replace: "return true",
             }
         },
-        // fixes a bug where Members page must be loaded to see highest role, why is Discord depending on MemberSafetyStore.getEnhancedMember for something that can be obtained here?
-        {
-            find: "#{intl::GUILD_MEMBER_MOD_VIEW_PERMISSION_GRANTED_BY_ARIA_LABEL}),allowOverflow:",
-            predicate: () => settings.store.showModView,
-            replacement: {
-                match: /(role:)\i(?=,guildId.{0,100}role:(\i\[))/,
-                replace: "$1$2arguments[0].member.highestRoleId]",
-            }
-        },
-        // allows you to open mod view on yourself
+        // Allows you to open mod view on yourself
         {
             find: 'action:"PRESS_MOD_VIEW",icon:',
             predicate: () => settings.store.showModView,
