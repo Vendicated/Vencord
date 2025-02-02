@@ -181,8 +181,8 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "HideAttachments",
-    description: "Hide attachments and Embeds for individual messages via hover button",
+    name: "HideMedia",
+    description: "Hide attachments and embeds for individual messages via hover button",
     authors: [Devs.Ven, Devs.aiko],
     dependencies: ["MessageUpdaterAPI"],
 
