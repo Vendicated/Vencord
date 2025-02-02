@@ -20,6 +20,7 @@ import "./style.css";
 
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
+import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -51,19 +52,10 @@ export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows an indicator when a user is in a Voice Channel",
     authors: [Devs.Nuckyz, Devs.LordElias],
-    dependencies: ["MemberListDecoratorsAPI", "MessageDecorationsAPI"],
+    dependencies: ["NicknameIconsAPI", "MemberListDecoratorsAPI", "MessageDecorationsAPI"],
     settings,
 
     patches: [
-        // User Popout, Full Size Profile, Direct Messages Side Profile
-        {
-            find: "#{intl::USER_PROFILE_LOAD_ERROR}",
-            replacement: {
-                match: /(\.fetchError.+?\?)null/,
-                replace: (_, rest) => `${rest}$self.VoiceChannelIndicator({userId:arguments[0]?.userId,isProfile:true})`
-            },
-            predicate: () => settings.store.showInUserProfileModal
-        },
         // To use without the MemberList decorator API
         /* // Guild Members List
         {
@@ -95,6 +87,9 @@ export default definePlugin({
     ],
 
     start() {
+        if (settings.store.showInUserProfileModal) {
+            addNicknameIcon("UserVoiceShow", ({ userId }) => <VoiceChannelIndicator userId={userId} isProfile />);
+        }
         if (settings.store.showInMemberList) {
             addMemberListDecorator("UserVoiceShow", ({ user }) => user == null ? null : <VoiceChannelIndicator userId={user.id} />);
         }
@@ -104,6 +99,7 @@ export default definePlugin({
     },
 
     stop() {
+        removeNicknameIcon("UserVoiceShow");
         removeMemberListDecorator("UserVoiceShow");
         removeMessageDecoration("UserVoiceShow");
     },
