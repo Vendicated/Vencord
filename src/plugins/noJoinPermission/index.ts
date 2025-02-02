@@ -15,8 +15,8 @@ export default definePlugin({
         {
             find: "No integration type was selected.",
             replacement: {
-                match: /(.includes\(\i\)\);)(return{requestedScopes:\i,accountScopes:\i})/,
-                replace: "$1$self.handleScopes(t, n);$2"
+                match: /(.includes\(\i\)\);)(return{requestedScopes:(\i),accountScopes:(\i)})/,
+                replace: "$1$self.handleScopes($3, $4);$2"
             }
         }
     ],
