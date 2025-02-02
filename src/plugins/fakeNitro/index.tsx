@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addPreEditListener, addPreSendListener, removePreEditListener, removePreSendListener } from "@api/MessageEvents";
+import { addMessagePreEditListener, addMessagePreSendListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
@@ -235,7 +235,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".PREMIUM_LOCKED;",
+            find: ".GUILD_SUBSCRIPTION_UNAVAILABLE;",
             group: true,
             predicate: () => settings.store.enableEmojiBypass,
             replacement: [
@@ -256,8 +256,11 @@ export default definePlugin({
                 },
                 {
                     // Disallow the emoji for premium locked if the intention doesn't allow it
-                    match: /!\i\.\i\.canUseEmojisEverywhere\(\i\)/,
-                    replace: m => `(${m}&&!${IS_BYPASSEABLE_INTENTION})`
+                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
+                    match: /(!)?(\i\.\i\.canUseEmojisEverywhere\(\i\))/,
+                    replace: (m, not) => not
+                        ? `(${m}&&!${IS_BYPASSEABLE_INTENTION})`
+                        : `(${m}||${IS_BYPASSEABLE_INTENTION})`
                 },
                 {
                     // Allow animated emojis to be used if the intention allows it
@@ -853,7 +856,7 @@ export default definePlugin({
             });
         }
 
-        this.preSend = addPreSendListener(async (channelId, messageObj, extra) => {
+        this.preSend = addMessagePreSendListener(async (channelId, messageObj, extra) => {
             const { guildId } = this;
 
             let hasBypass = false;
@@ -941,7 +944,7 @@ export default definePlugin({
             return { cancel: false };
         });
 
-        this.preEdit = addPreEditListener(async (channelId, __, messageObj) => {
+        this.preEdit = addMessagePreEditListener(async (channelId, __, messageObj) => {
             if (!s.enableEmojiBypass) return;
 
             let hasBypass = false;
@@ -973,7 +976,7 @@ export default definePlugin({
     },
 
     stop() {
-        removePreSendListener(this.preSend);
-        removePreEditListener(this.preEdit);
+        removeMessagePreSendListener(this.preSend);
+        removeMessagePreEditListener(this.preEdit);
     }
 });
