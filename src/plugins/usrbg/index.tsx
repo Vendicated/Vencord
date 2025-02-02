@@ -116,6 +116,5 @@ export default definePlugin({
         if (res.ok) {
             this.data = await res.json();
         }
-    },
-    style
+    }
 });
