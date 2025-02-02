@@ -63,18 +63,16 @@ const toggleHide = async (channelId: string, messageId: string): Promise<void> =
  * @param {string[]} userFilters List of user IDs to be checked
  * @returns {boolean}
  */
-const shouldHideByUserIdFilter = (payload: IMessage, userFilters: string[]): boolean => {
+const shouldHideByUserIdFilter = (payload: IMessage, userFilters: Set<string>): boolean => {
     if (!payload.attachments.length && !payload.embeds.length) {
         return false;
     }
 
-    for (const id of userFilters) {
-        if (payload.author.id === id) {
-            return true;
-        }
+    if (!Array.isArray(payload.message_snapshots)) {
+        return false;
     }
 
-    return false;
+    return userFilters.has(payload.author.id);
 };
 
 /**
@@ -146,7 +144,7 @@ const checkAndHide = async (message: IMessage, store: typeof settings.store): Pr
     const userFilters = isStringEmpty(store.filterUserList)
         ? []
         : store.filterUserList.split(",");
-    if (shouldHideByUserIdFilter(message, userFilters)) {
+    if (shouldHideByUserIdFilter(message, new Set(userFilters))) {
         await toggleHide(message.channel_id, message.id);
         return;
     }
