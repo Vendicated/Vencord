@@ -17,7 +17,6 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
@@ -102,11 +101,5 @@ export default definePlugin({
 
     GameActivityToggleButton: ErrorBoundary.wrap(GameActivityToggleButton, { noop: true }),
 
-    start() {
-        enableStyle(style);
-    },
-
-    stop() {
-        disableStyle(style);
-    }
+    style
 });
