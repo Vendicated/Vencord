@@ -28,7 +28,7 @@ const timers = {} as Record<string, {
 export default definePlugin({
     name: "VoiceChatDoubleClick",
     description: "Join voice chats via double click instead of single click",
-    authors: [Devs.Ven, Devs.D3SOX],
+    authors: [Devs.Ven, Devs.D3SOX, Devs.Moritzoni],
     patches: [
         ...[
             ".handleVoiceStatusClick", // voice channels
@@ -54,6 +54,17 @@ export default definePlugin({
                 replace: (_, onClick, props) => ""
                     + `onClick:(vcDoubleClickEvt)=>$self.shouldRunOnClick(vcDoubleClickEvt,${props})&&${onClick}()`,
             }
+        },
+        {
+            // active now voice and stream
+            find: "VoiceSection",
+            all: true,
+            replacement: [
+                {
+                    match: "selectVoiceChannel",
+                    replace: "selectChannel",
+                }
+            ]
         }
     ],
 
