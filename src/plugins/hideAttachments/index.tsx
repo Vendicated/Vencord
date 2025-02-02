@@ -16,80 +16,92 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { get, set } from "@api/DataStore";
-import { addButton, removeButton } from "@api/MessagePopover";
+import { updateMessage } from "@api/MessageUpdater";
+import { migratePluginSettings } from "@api/Settings";
 import { ImageInvisible, ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { ChannelStore } from "@webpack/common";
-
-let style: HTMLStyleElement;
+import { MessageSnapshot } from "@webpack/types";
 
 const KEY = "HideAttachments_HiddenIds";
 
-let hiddenMessages: Set<string> = new Set();
-const getHiddenMessages = () => get(KEY).then(set => {
-    hiddenMessages = set ?? new Set<string>();
+let hiddenMessages = new Set<string>();
+
+async function getHiddenMessages() {
+    hiddenMessages = await get(KEY) ?? new Set();
     return hiddenMessages;
-});
+}
+
 const saveHiddenMessages = (ids: Set<string>) => set(KEY, ids);
 
+migratePluginSettings("HideMedia", "HideAttachments");
+
 export default definePlugin({
-    name: "HideAttachments",
-    description: "Hide attachments and Embeds for individual messages via hover button",
+    name: "HideMedia",
+    description: "Hide attachments and embeds for individual messages via hover button",
     authors: [Devs.Ven],
-    dependencies: ["MessagePopoverAPI"],
+    dependencies: ["MessageUpdaterAPI"],
+
+    patches: [{
+        find: "this.renderAttachments(",
+        replacement: {
+            match: /(?<=\i=)this\.render(?:Attachments|Embeds|StickersAccessories)\((\i)\)/g,
+            replace: "$self.shouldHide($1?.id)?null:$&"
+        }
+    }],
+
+    renderMessagePopoverButton(msg) {
+        // @ts-ignore - discord-types lags behind discord.
+        const hasAttachmentsInShapshots = msg.messageSnapshots.some(
+            (snapshot: MessageSnapshot) => snapshot?.message.attachments.length
+        );
+
+        if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length && !hasAttachmentsInShapshots) return null;
+
+        const isHidden = hiddenMessages.has(msg.id);
+
+        return {
+            label: isHidden ? "Show Media" : "Hide Media",
+            icon: isHidden ? ImageVisible : ImageInvisible,
+            message: msg,
+            channel: ChannelStore.getChannel(msg.channel_id),
+            onClick: () => this.toggleHide(msg.channel_id, msg.id)
+        };
+    },
+
+    renderMessageAccessory({ message }) {
+        if (!this.shouldHide(message.id)) return null;
+
+        return (
+            <span className={classes("vc-hideAttachments-accessory", !message.content && "vc-hideAttachments-no-content")}>
+                Media Hidden
+            </span>
+        );
+    },
 
     async start() {
-        style = document.createElement("style");
-        style.id = "VencordHideAttachments";
-        document.head.appendChild(style);
-
         await getHiddenMessages();
-        await this.buildCss();
-
-        addButton("HideAttachments", msg => {
-            if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length) return null;
-
-            const isHidden = hiddenMessages.has(msg.id);
-
-            return {
-                label: isHidden ? "Show Attachments" : "Hide Attachments",
-                icon: isHidden ? ImageVisible : ImageInvisible,
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: () => this.toggleHide(msg.id)
-            };
-        });
     },
 
     stop() {
-        style.remove();
         hiddenMessages.clear();
-        removeButton("HideAttachments");
     },
 
-    async buildCss() {
-        const elements = [...hiddenMessages].map(id => `#message-accessories-${id}`).join(",");
-        style.textContent = `
-        :is(${elements}) :is([class*="embedWrapper"], [class*="clickableSticker"]) {
-            /* important is not necessary, but add it to make sure bad themes won't break it */
-            display: none !important;
-        }
-        :is(${elements})::after {
-            content: "Attachments hidden";
-            color: var(--text-muted);
-            font-size: 80%;
-        }
-        `;
+    shouldHide(messageId: string) {
+        return hiddenMessages.has(messageId);
     },
 
-    async toggleHide(id: string) {
+    async toggleHide(channelId: string, messageId: string) {
         const ids = await getHiddenMessages();
-        if (!ids.delete(id))
-            ids.add(id);
+        if (!ids.delete(messageId))
+            ids.add(messageId);
 
         await saveHiddenMessages(ids);
-        await this.buildCss();
+        updateMessage(channelId, messageId);
     }
 });
