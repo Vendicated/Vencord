@@ -39,7 +39,7 @@ async function getHiddenMessages() {
 
 const saveHiddenMessages = (ids: Set<string>) => set(KEY, ids);
 
-migratePluginSettings("HideMedia", "HideAttachments_HiddenIds");
+migratePluginSettings("HideMedia", "HideAttachments");
 
 export default definePlugin({
     name: "HideMedia",
