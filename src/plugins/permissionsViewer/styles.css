@@ -73,7 +73,7 @@
     background-color: var(--background-modifier-selected);
 }
 
-.vc-permviewer-modal-list-item > div {
+.vc-permviewer-modal-list-item-text {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;

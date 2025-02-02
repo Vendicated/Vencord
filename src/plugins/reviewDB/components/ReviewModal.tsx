@@ -65,7 +65,7 @@ function Modal({ modalProps, modalKey, discordId, name, type }: { modalProps: an
                 </ModalContent>
 
                 <ModalFooter className={cl("modal-footer")}>
-                    <div>
+                    <div className={cl("modal-footer-wrapper")}>
                         {ownReview && (
                             <ReviewComponent
                                 refetch={refetch}

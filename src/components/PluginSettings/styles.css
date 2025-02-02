@@ -63,10 +63,7 @@
     height: 8em;
     display: flex;
     flex-direction: column;
-}
-
-.vc-plugins-info-card div {
-    line-height: 32px;
+    gap: 0.25em;
 }
 
 .vc-plugins-restart-card {
@@ -76,11 +73,11 @@
     color: var(--info-warning-text);
 }
 
-.vc-plugins-restart-card button {
+.vc-plugins-restart-button {
     margin-top: 0.5em;
     background: var(--info-warning-foreground) !important;
 }
 
-.vc-plugins-info-button svg:not(:hover, :focus) {
+.vc-plugins-info-icon:not(:hover, :focus) {
     color: var(--text-muted);
 }

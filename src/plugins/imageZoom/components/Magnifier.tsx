@@ -195,6 +195,7 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
                     />
                 ) : (
                     <img
+                        className={cl("image")}
                         ref={imageRef}
                         style={{
                             position: "absolute",

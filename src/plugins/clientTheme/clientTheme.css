@@ -1,29 +1,29 @@
-.client-theme-settings {
+.vc-clientTheme-settings {
     display: flex;
     flex-direction: column;
 }
 
-.client-theme-container {
+.vc-clientTheme-container {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
 }
 
-.client-theme-settings-labels {
+.vc-clientTheme-labels {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
 }
 
-.client-theme-container > [class^="colorSwatch"] > [class^="swatch"] {
+.vc-clientTheme-container [class^="swatch"] {
     border: thin solid var(--background-modifier-accent) !important;
 }
 
-.client-theme-warning * {
+.vc-clientTheme-warning-text {
     color: var(--text-danger);
 }
 
-.client-theme-contrast-warning {
+.vc-clientTheme-contrast-warning {
     background-color: var(--background-primary);
     padding: 0.5rem;
     border-radius: .5rem;

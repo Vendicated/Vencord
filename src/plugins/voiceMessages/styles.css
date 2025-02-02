@@ -9,10 +9,6 @@
     margin-bottom: 1em;
 }
 
-.vc-vmsg-modal audio {
-    width: 100%;
-}
-
 .vc-vmsg-preview {
     color: var(--text-normal);
     border-radius: 24px;

@@ -16,14 +16,9 @@
     border: 1px solid var(--profile-message-input-border-color);
 }
 
-.vc-rdb-modal-footer > div {
+.vc-rdb-modal-footer-wrapper {
     width: 100%;
     margin: 6px 16px;
-}
-
-/* When input becomes disabled(while sending review), input adds unneccesary padding to left, this prevents it */
-.vc-rdb-input > div > div {
-    padding-left: 0 !important;
 }
 
 .vc-rdb-placeholder {
@@ -69,7 +64,7 @@
     border-radius: 8px;
 }
 
-.vc-rdb-review-comment img {
+.vc-rdb-review-comment [class*="avatar"] {
     vertical-align: text-top;
 }
 
@@ -117,13 +112,13 @@
     align-items: center;
 }
 
-.vc-rdb-block-modal-row img {
+.vc-rdb-block-modal-avatar {
     border-radius: 50%;
     height: 2em;
     width: 2em;
 }
 
-.vc-rdb-block-modal img::before {
+.vc-rdb-block-modal-avatar::before {
     content: "";
     display: block;
     width: 100%;

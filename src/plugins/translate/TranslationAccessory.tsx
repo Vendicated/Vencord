@@ -55,7 +55,7 @@ export function TranslationAccessory({ message }: { message: Message; }) {
 
     return (
         <span className={cl("accessory")}>
-            <TranslateIcon width={16} height={16} />
+            <TranslateIcon width={16} height={16} className={cl("accessory-icon")} />
             {Parser.parse(translation.text)}
             {" "}
             (translated from {translation.sourceLanguage} - <Dismiss onDismiss={() => setTranslation(undefined)} />)

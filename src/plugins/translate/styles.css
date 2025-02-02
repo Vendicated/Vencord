@@ -6,7 +6,7 @@
     place-content: center space-between;
 }
 
-.vc-trans-modal-header h1 {
+.vc-trans-modal-title {
     margin: 0;
 }
 
@@ -17,7 +17,7 @@
     font-weight: 400;
 }
 
-.vc-trans-accessory svg {
+.vc-trans-accessory-icon {
     margin-right: 0.25em;
 }
 

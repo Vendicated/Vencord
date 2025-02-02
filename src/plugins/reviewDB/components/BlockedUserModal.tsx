@@ -39,7 +39,7 @@ function BlockedUser({ user, isBusy, setIsBusy }: { user: ReviewDBUser; isBusy: 
 
     return (
         <div className={cl("block-modal-row")}>
-            <img src={user.profilePhoto} alt="" />
+            <img className={cl("block-modal-avatar")} src={user.profilePhoto} alt="" />
             <Forms.FormText className={cl("block-modal-username")}>{user.username}</Forms.FormText>
             <UnblockButton
                 onClick={isBusy ? undefined : async () => {

@@ -23,7 +23,7 @@ import { resolveLang } from "../api/languages";
 import { HighlighterProps } from "../components/Highlighter";
 import { HljsSetting } from "../types";
 
-export const cl = classNameFactory("shiki-");
+export const cl = classNameFactory("vc-shiki-");
 
 export const shouldUseHljs = ({
     lang,

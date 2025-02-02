@@ -1,4 +1,4 @@
-.vc-st-modal-content input {
+.vc-st-date-picker {
     background-color: var(--input-background);
     color: var(--text-normal);
     width: 95%;
@@ -12,35 +12,28 @@
     font-size: 100%;
 }
 
-.vc-st-format-label,
-.vc-st-format-label span {
-    background-color: transparent;
-}
-
-.vc-st-modal-content [class|="select"] {
+.vc-st-format-select {
     margin-bottom: 1em;
+
+    --background-modifier-accent: transparent;
 }
 
-.vc-st-modal-content [class|="select"] span {
-    background-color: var(--input-background);
+.vc-st-format-label {
+    --background-modifier-accent: transparent;
 }
 
 .vc-st-modal-header {
     place-content: center space-between;
 }
 
-.vc-st-modal-header h1 {
+.vc-st-modal-title {
     margin: 0;
 }
 
-.vc-st-modal-header button {
+.vc-st-modal-close-button {
     padding: 0;
 }
 
 .vc-st-preview-text {
     margin-bottom: 1em;
-}
-
-.vc-st-button svg {
-    transform: scale(1.1) translateY(1px);
 }
