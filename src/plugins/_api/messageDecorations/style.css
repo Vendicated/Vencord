@@ -1,0 +1,15 @@
+.vc-message-decorations-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25em;
+}
+
+.vc-message-decorations-wrapper:not(:empty) {
+    /* Margin to match default Discord decorators */
+    margin-left: 0.25em;
+
+    /* Align vertically */
+    position: relative;
+    top: 0.2rem;
+}

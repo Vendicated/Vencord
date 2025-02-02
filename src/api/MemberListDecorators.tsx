@@ -43,20 +43,21 @@ interface DecoratorProps {
 export type MemberListDecoratorFactory = (props: DecoratorProps) => JSX.Element | null;
 type OnlyIn = "guilds" | "dms";
 
-export const decorators = new Map<string, { render: MemberListDecoratorFactory, onlyIn?: OnlyIn; }>();
+export const decoratorsFactories = new Map<string, { render: MemberListDecoratorFactory, onlyIn?: OnlyIn; }>();
 
 export function addMemberListDecorator(identifier: string, render: MemberListDecoratorFactory, onlyIn?: OnlyIn) {
-    decorators.set(identifier, { render, onlyIn });
+    decoratorsFactories.set(identifier, { render, onlyIn });
 }
 
 export function removeMemberListDecorator(identifier: string) {
-    decorators.delete(identifier);
+    decoratorsFactories.delete(identifier);
 }
 
-export function __getDecorators(props: DecoratorProps): (JSX.Element | null)[] {
+export function __getDecorators(props: DecoratorProps): JSX.Element {
     const isInGuild = !!(props.guildId);
-    return Array.from(
-        decorators.entries(),
+
+    const decorators = Array.from(
+        decoratorsFactories.entries(),
         ([key, { render: Decorator, onlyIn }]) => {
             if ((onlyIn === "guilds" && !isInGuild) || (onlyIn === "dms" && isInGuild))
                 return null;
@@ -67,5 +68,11 @@ export function __getDecorators(props: DecoratorProps): (JSX.Element | null)[] {
                 </ErrorBoundary>
             );
         }
+    );
+
+    return (
+        <div className="vc-member-list-decorators-wrapper">
+            {decorators}
+        </div>
     );
 }
