@@ -76,20 +76,17 @@
     color: var(--info-warning-text);
 }
 
-.vc-plugins-restart-button {
-    margin-top: 0.5em;
-}
-
-.vc-plugins-info-icon:not(:hover, :focus) {
+.vc-plugins-info-button svg:not(:hover, :focus) {
     color: var(--text-muted);
 }
 
-.vc-restart-button {
+.vc-plugins-restart-button {
     background-color: var(--background-color) !important;
     border: 1px solid var(--info-warning-foreground) !important;
+    margin-top: 0.5em;
 }
 
-.vc-restart-button:hover {
+.vc-plugins-restart-button:hover {
     background-color: var(--info-warning-foreground) !important;
 }
 

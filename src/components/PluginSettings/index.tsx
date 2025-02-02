@@ -71,7 +71,7 @@ function ReloadRequiredCard({ required, enabledPlugins, openDisablePluginsModal,
                     <Forms.FormText className={cl("dep-text")}>
                         Restart now to apply new plugins and their settings
                     </Forms.FormText>
-                    <Button onClick={() => location.reload()} className={cl("restart-button")}>
+                    <Button className={cl("restart-button")} onClick={() => location.reload()}>
                         Restart
                     </Button>
                 </>
