@@ -103,7 +103,4 @@ export default definePlugin({
             setScrollHook(Math.max(0, Math.min(newValue, emojisLength - this.getMaxQuickReactions())));
         };
     },
-    AddReactionsButton() {
-
-    }
 });

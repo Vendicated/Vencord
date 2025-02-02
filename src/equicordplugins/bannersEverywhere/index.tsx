@@ -12,7 +12,7 @@ import definePlugin, { OptionType, Plugin } from "@utils/types";
 import { findStoreLazy } from "@webpack";
 import { User } from "discord-types/general";
 
-import style from "./index.css?managed";
+import style from "./style.css?managed";
 
 interface iUSRBG extends Plugin {
     userHasBackground(userId: string);

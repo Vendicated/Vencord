@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./index.css";
+import "./style.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { migratePluginSettings, Settings, useSettings } from "@api/Settings";
