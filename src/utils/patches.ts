@@ -19,6 +19,10 @@
 import { runtimeHashMessageKey } from "./intlHash";
 import { Patch, PatchReplacement, ReplaceFn } from "./types";
 
+/**
+ * NOTE: This function can throw an error, even if `new RegExp()` would not.
+ * Eg: `canonicalizeMatch(/\\i/)` throws, but `new RegExp(/\\i/)` does not.
+ */
 export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
     let partialCanon = typeof match === "string" ? match : match.source;
     partialCanon = partialCanon.replaceAll(/#{intl::([\w$+/]*)(?:::(\w+))?}/g, (_, key, modifier) => {
