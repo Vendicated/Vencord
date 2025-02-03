@@ -176,13 +176,15 @@ export default definePlugin({
         }
     ],
     getColorString(userId: string, channelOrGuildId: string) {
-        try {
-            if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
-                // @ts-ignore
-                const { hue, saturation, lightness } = Vencord.Plugins.plugins.IrcColors.calculateHSLforId(userId);
-                return hslToHex(hue, saturation, lightness);
+        if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
+            // @ts-ignore
+            const colors = Vencord.Plugins.plugins.IrcColors?.calculateHSLforId?.(userId);
+            if (colors) {
+                return hslToHex(colors.hue, colors.saturation, colors.lightness);
             }
+        }
 
+        try {
             const guildId = ChannelStore.getChannel(channelOrGuildId)?.guild_id ?? GuildStore.getGuild(channelOrGuildId)?.id;
             if (guildId == null) return null;
 

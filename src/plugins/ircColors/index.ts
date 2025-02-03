@@ -20,13 +20,26 @@ import { definePluginSettings } from "@api/Settings";
 import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { ChannelStore } from "@webpack/common";
+
+function calculateHSLforId(id: string) {
+    // No hooks here because it breaks RoleColorsEverywhere
+    // There is a condition to use this function, so react will refure to render the component
+    // If we remove the condition, then the hash will be calculated even if this plugin is disabled
+    // And everything would seem fine except mentions, those are still under some condition inside of discord code
+    return {
+        hue: Number(h64(id) % 360n),
+        saturation: 100,
+        lightness: settings.store.lightness
+    };
+}
 
 // Calculate a CSS color string based on the user ID
 function calculateNameColorForUser(id?: string) {
-    const { lightness } = settings.use(["lightness"]);
-    const idHash = useMemo(() => id ? h64(id) : null, [id]);
+    if (!id) return null;
+    const { hue, saturation, lightness } = calculateHSLforId(id);
 
-    return idHash && `hsl(${idHash % 360n}, 100%, ${lightness}%)`;
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
 
 const settings = definePluginSettings({
@@ -58,7 +71,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "IrcColors",
     description: "Makes username colors in chat unique, like in IRC clients",
-    authors: [Devs.Grzesiek11, Devs.jamesbt365],
+    authors: [Devs.Grzesiek11, Devs.jamesbt365, Devs.hen],
     settings,
 
     patches: [
@@ -66,7 +79,7 @@ export default definePlugin({
             find: '"Result cannot be null because the message is not null"',
             replacement: {
                 match: /let (\i)=\i\(\i\);(?=.{1,25}"Result cannot be null because the message is not null")/,
-                replace: "$&$1.colorString=$self.calculateNameColorForUser(arguments[0].author.id);"
+                replace: "$&$1.colorString=$self.calculateNameColorForMessageContext(arguments[0],$1.colorString);"
             }
         },
         {
@@ -79,18 +92,15 @@ export default definePlugin({
         }
     ],
     calculateHSLforId,
-    calculateNameColorForUser(id: string) {
-        const { hue, saturation, lightness } = calculateHSLforId(id);
-        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-    },
-    calculateNameColorForMessageContext(context: any) {
-        const id = context?.message?.author?.id;
-        const colorString = context?.author?.colorString;
+    calculateNameColorForMessageContext(message: any, colorString: string) {
+        const id = message?.author?.id;
         const color = calculateNameColorForUser(id);
+        const channel = ChannelStore.getChannel(message.channel_id);
 
-        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+        if (settings.store.applyColorOnlyInDms && !channel?.isPrivate()) {
             return colorString;
         }
+
         return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
             ? color
             : colorString;
