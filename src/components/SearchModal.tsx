@@ -9,23 +9,25 @@ import "./SearchModal.css";
 import { classNameFactory } from "@api/Styles";
 import {
     ModalCloseButton,
-    ModalContent,
-    ModalFooter,
+    ModalContent, ModalFooter,
     ModalHeader,
+ModalListContent,
     ModalProps,
     ModalRoot,
     ModalSize
 } from "@utils/modal";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import {
+    Avatar,
     Button,
-    ChannelStore,
+    ChannelStore, Checkbox, Clickable,
     Flex,
     GuildStore,
     Heading,
     PresenceStore,
     React,
     RelationshipStore,
+    SearchBar,
     Text,
     useCallback,
     useEffect,
@@ -42,8 +44,8 @@ import { JSX } from "react";
 
 const cl = classNameFactory("vc-search-modal-");
 
-const SearchBarModule = findByPropsLazy("SearchBar", "Checkbox", "AvatarSizes");
-const SearchBarWrapper = findByPropsLazy("SearchBar", "Item");
+const ColorModule = findByPropsLazy("colors", "modules", "themes");
+const SearchBarWrapper = findByPropsLazy("SearchBar");
 const TextTypes = findByPropsLazy("APPLICATION", "GROUP_DM", "GUILD");
 const SearchHandler = findByCodeLazy("createSearchContext", "setLimit");
 
@@ -64,7 +66,7 @@ interface DestinationItem {
 }
 
 interface UnspecificRowProps {
-    key: string;
+    key: string,
     destination: DestinationItem,
     rowMode: string,
     disabled: boolean,
@@ -82,7 +84,6 @@ interface SpecificRowProps extends UnspecificRowProps {
 
 interface UserIconProps {
     user: User;
-    size?: number;
     animate?: boolean;
     "aria-hidden"?: boolean;
     [key: string]: any;
@@ -167,18 +168,18 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
     const UserIcon = React.memo(function ({
         user,
-        size = SearchBarModule.AvatarSizes.SIZE_32,
         animate = false,
         "aria-hidden": ariaHidden = false,
         ...rest
     }: UserIconProps) {
 
-        const avatarSrc = user.getAvatarURL(void 0, SearchBarModule.getAvatarSize(size), animate);
+        // FIXME
+        const avatarSrc = user.getAvatarURL(void 0, 32, animate);
 
         return (
-            <SearchBarModule.Avatar
+            <Avatar
                 src={avatarSrc}
-                size={size}
+                size={"SIZE_32"}
                 aria-label={ariaHidden ? undefined : user.username}
                 aria-hidden={ariaHidden}
                 {...rest}
@@ -208,14 +209,10 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             "data-list-item-id": `NO_LIST___${destination.id}`,
             tabIndex: -1,
         };
-        const handlePress = useCallback(() => {
-            onPressDestination?.(destination);
-        }, [onPressDestination, destination]);
-
         return (
-            <SearchBarModule.Clickable
+            <Clickable
                 className={cl("destination-row")}
-                onClick={handlePress}
+                onClick={e => { onPressDestination?.(destination); }}
                 aria-selected={isSelected}
                 {...interactionProps}
                 {...rest}
@@ -236,16 +233,14 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                         >{subLabel}</Text>
                     </div>
                 </div>
-                <SearchBarModule.Checkbox
-                    onClick={e => console.log(e)}
-                    onChange={e => console.log(e)}
-                    type={SearchBarModule.Checkbox.Types.INVERTED}
-                    displayOnly={true}
+                <Checkbox
+                    type={Checkbox.Types.INVERTED}
+                    displayOnly={true} // todo try using false
                     size={24}
                     value={isSelected}
                     className={cl("checkbox")}
                 />
-            </SearchBarModule.Clickable>
+            </Clickable>
         );
     };
 
@@ -259,7 +254,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             <Row {...otherProps}
                 icon={<UserIcon
                     aria-hidden={true}
-                    size={SearchBarModule.AvatarSizes.SIZE_32}
+                    size={"SIZE_32"}
                     user={user}
                     status={userStatus}
                 />}
@@ -272,6 +267,36 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
     function generateChannelItem(channel: Channel, otherProps: UnspecificRowProps) {
         const guild = GuildStore.getGuild(channel?.guild_id);
 
+        const svgProps = {
+            "aria-hidden": true,
+            className: cl("sub-label-icon"),
+            role: "img",
+            xmlns: "http://www.w3.org/2000/svg",
+            width: 24,
+            height: 24,
+            fill: "none",
+            viewBox: "0 0 24 24"
+        };
+        const ForumChannelSvg = () => <svg {...svgProps}>
+            <path
+                fill={ColorModule.colors.TEXT_SECONDARY.css}
+                d="M18.91 12.98a5.45 5.45 0 0 1 2.18 6.2c-.1.33-.09.68.1.96l.83 1.32a1 1 0 0 1-.84 1.54h-5.5A5.6 5.6 0 0 1 10 17.5a5.6 5.6 0 0 1 5.68-5.5c1.2 0 2.32.36 3.23.98Z"
+            />
+            <path
+                fill={ColorModule.colors.TEXT_SECONDARY.css}
+                d="M19.24 10.86c.32.16.72-.02.74-.38L20 10c0-4.42-4.03-8-9-8s-9 3.58-9 8c0 1.5.47 2.91 1.28 4.11.14.21.12.49-.06.67l-1.51 1.51A1 1 0 0 0 2.4 18h5.1a.5.5 0 0 0 .49-.5c0-4.2 3.5-7.5 7.68-7.5 1.28 0 2.5.3 3.56.86Z"
+            />
+        </svg>;
+
+        const TextIcon = () => <svg {...svgProps}>
+                <path
+                    fill={ColorModule.colors.TEXT_SECONDARY.css}
+                    fillRule="evenodd"
+                    d="M10.99 3.16A1 1 0 1 0 9 2.84L8.15 8H4a1 1 0 0 0 0 2h3.82l-.67 4H3a1 1 0 1 0 0 2h3.82l-.8 4.84a1 1 0 0 0 1.97.32L8.85 16h4.97l-.8 4.84a1 1 0 0 0 1.97.32l.86-5.16H20a1 1 0 1 0 0-2h-3.82l.67-4H21a1 1 0 1 0 0-2h-3.82l.8-4.84a1 1 0 1 0-1.97-.32L15.15 8h-4.97l.8-4.84ZM14.15 14l.67-4H9.85l-.67 4h4.97Z"
+                    clipRule="evenodd"
+                />
+            </svg>;
+
         const channelLabel = getChannelLabel(channel, UserStore, RelationshipStore, false);
 
         const parentChannelLabel = (): string => {
@@ -283,15 +308,12 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
         // @ts-ignore isForumPost is not in the types but exists
         if (channel.isThread() || channel.isForumPost()) {
-            // @ts-ignore
-            const IconComponent = channel.isForumPost() ? SearchBarModule.ForumIcon : SearchBarModule.TextIcon;
-
             subLabel = (
                 <div className={cl("thread-sub-label")}>
-                    <IconComponent
-                        color={SearchBarModule.tokens.colors.TEXT_SECONDARY}
-                        className={cl("sub-label-icon")}
-                    />
+                    {
+                        // @ts-ignore isForumPost is not in the types but exists
+                        channel.isForumPost() ? <ForumChannelSvg/> : <TextIcon/>
+                    }
                     <Text
                         variant="text-xs/medium"
                         color="text-secondary"
@@ -321,13 +343,13 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
     function generateGuildItem(guild: Guild, otherProps: UnspecificRowProps) {
         const guildName = guild.name;
-        const guildIcon = guild.getIconURL(SearchBarModule.AvatarSizes.SIZE_32, false);
+        const guildIcon = guild.getIconURL("SIZE_32", false);
 
         return (
             <Row {...otherProps}
-                icon={<SearchBarModule.Avatar
+                icon={<Avatar
                     src={guildIcon}
-                    size={SearchBarModule.AvatarSizes.SIZE_32}
+                    size={"SIZE_32"}
                     aria-hidden={true}
                 />}
                 label={guildName}
@@ -356,7 +378,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
         return (
             <Row {...otherProps}
-                icon={<GroupDMAvatars aria-hidden={true} size={SearchBarModule.AvatarSizes.SIZE_32}
+                icon={<GroupDMAvatars aria-hidden={true} size={"SIZE_32"}
                     channel={channel} />}
                 label={label}
                 subLabel={subLabelValue}
@@ -400,7 +422,6 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
         hasQuery: boolean;
         frequentChannels: Channel[];
         channelHistory: string[];
-        guilds: GuildResult[];
     }): Result[] {
         const removeDuplicates = (arr: Result[]): Result[] => {
             const clean: any[] = [];
@@ -415,7 +436,18 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             return clean;
         };
 
-        const { results, hasQuery, frequentChannels, channelHistory, guilds } = props;
+        const guilds: GuildResult[] = useStateFromStores([GuildStore], () => Object.values(GuildStore.getGuilds()).map(
+            guild => {
+                return {
+                    type: TextTypes.GUILD,
+                    record: guild,
+                    score: 0,
+                    comparator: guild.name
+                };
+            }
+        ));
+
+        const { results, hasQuery, frequentChannels, channelHistory } = props;
         if (hasQuery) return filterItems(results);
 
         const recentDestinations = filterItems([
@@ -424,8 +456,9 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             ...guilds
         ]);
 
+
         return removeDuplicates(
-            [...(selected.length > 0 ? selected.map(e => getItem(e)) : []),
+            [...selected.map(e => getItem(e)),
             ...recentDestinations
             ]);
     }
@@ -451,16 +484,13 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                 });
             }
             );
+            searchHandler.setOptions(searchOptions);
             searchHandler.setLimit(20);
             searchHandler.search("");
             return searchHandler;
         }
         );
         useEffect(() => () => searchHandler.destroy(), [searchHandler]);
-        useEffect(() => {
-            searchOptions != null && searchOptions !== searchHandler.options && searchHandler.setOptions(searchOptions);
-        }, [searchHandler, searchOptions]
-        );
         return {
             search: useCallback(e => {
                 const { query, resultTypes } = e;
@@ -501,16 +531,6 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
         const frequentChannels: Channel[] = useStateFromStores([FrecencyStore], () => FrecencyStore.getFrequentlyWithoutFetchingLatest());
         const channelHistory: string[] = useStateFromStores([QuickSwitcherStore], () => QuickSwitcherStore.getChannelHistory());
-        const guilds: GuildResult[] = useStateFromStores([GuildStore], () => Object.values(GuildStore.getGuilds()).map(
-            guild => {
-                return {
-                    type: TextTypes.GUILD,
-                    record: guild,
-                    score: 0,
-                    comparator: guild.name
-                };
-            }
-        ));
 
         const hasQuery = query !== "";
 
@@ -520,19 +540,12 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                 hasQuery: hasQuery,
                 frequentChannels: frequentChannels,
                 channelHistory: channelHistory,
-                guilds: guilds
-            }), [results, hasQuery, frequentChannels, channelHistory, guilds]),
+            }), [results, hasQuery, frequentChannels, channelHistory]),
             updateSearchText: updateSearch
         };
     }
 
     const { results, updateSearchText } = generateResults();
-
-    const selectedDestinationKeys = useMemo(() => {
-        return selected.map(destination => `${destination.type}-${destination.id}`) || [];
-    }, [selected]);
-
-    const rowHeight = useCallback(() => 48, []);
 
     function ModalScroller({ rowData, handleToggleDestination, paddingBottom, paddingTop }: { rowData: Result[], handleToggleDestination: (destination: DestinationItem) => void, paddingBottom?: number, paddingTop?: number; }) {
 
@@ -558,7 +571,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                 destination,
                 rowMode: "toggle",
                 disabled: false,
-                isSelected: selectedDestinationKeys.includes(key),
+                isSelected: selected.some(e => e.type === destination.type && e.id === destination.id),
                 onPressDestination: handleToggleDestination,
                 "aria-posinset": row + 1,
                 "aria-setsize": results.length
@@ -573,9 +586,9 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             if (type === "GUILD")
                 return generateGuildItem(record, rowProps);
             else throw new Error("Unknown type " + type);
-        }, [results]);
+        }, []);
 
-        return <SearchBarModule.ModalListContent
+        return <ModalListContent
             tabIndex={-1}
             data-list-id="NO_LIST"
             role="list"
@@ -584,7 +597,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             sections={sectionCount}
             sectionHeight={0}
             renderRow={callback}
-            rowHeight={rowHeight} />;
+            rowHeight={48} />;
     }
 
 
@@ -602,8 +615,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
             currentSelected.splice(index, 1);
             return [...currentSelected];
         });
-    }, [selected]);
-
+    }, []);
 
     return (
         <ModalRoot {...modalProps} size={ModalSize.SMALL}>
@@ -623,7 +635,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
                     <ModalCloseButton onClick={modalProps.onClose} />
                 </div>
                 <SearchBarWrapper.SearchBar
-                    size={SearchBarModule.SearchBar.Sizes.MEDIUM}
+                    size={SearchBar.Sizes.MEDIUM}
                     placeholder="Search"
                     query={searchText}
                     onChange={(v: string) => {

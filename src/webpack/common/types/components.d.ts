@@ -17,6 +17,7 @@
 */
 
 import type { ComponentPropsWithRef, ComponentType, CSSProperties, FunctionComponent, HtmlHTMLAttributes, HTMLProps, JSX, KeyboardEvent, MouseEvent, PropsWithChildren, PropsWithRef, ReactNode, Ref } from "react";
+import Input = Electron.Input;
 
 
 export type TextVariant = "heading-sm/normal" | "heading-sm/medium" | "heading-sm/semibold" | "heading-sm/bold" | "heading-md/normal" | "heading-md/medium" | "heading-md/semibold" | "heading-md/bold" | "heading-lg/normal" | "heading-lg/medium" | "heading-lg/semibold" | "heading-lg/bold" | "heading-xl/normal" | "heading-xl/medium" | "heading-xl/bold" | "heading-xxl/normal" | "heading-xxl/medium" | "heading-xxl/bold" | "eyebrow" | "heading-deprecated-14/normal" | "heading-deprecated-14/medium" | "heading-deprecated-14/bold" | "text-xxs/normal" | "text-xxs/medium" | "text-xxs/semibold" | "text-xxs/bold" | "text-xs/normal" | "text-xs/medium" | "text-xs/semibold" | "text-xs/bold" | "text-sm/normal" | "text-sm/medium" | "text-sm/semibold" | "text-sm/bold" | "text-md/normal" | "text-md/medium" | "text-md/semibold" | "text-md/bold" | "text-lg/normal" | "text-lg/medium" | "text-lg/semibold" | "text-lg/bold" | "display-sm" | "display-md" | "display-lg" | "code";
@@ -501,4 +502,41 @@ export type Icon = ComponentType<JSX.IntrinsicElements["svg"] & {
     size?: string;
     colorClass?: string;
 } & Record<string, any>>;
+
+type Checkbox = ComponentType<PropsWithChildren<{
+    disabled?: boolean;
+    readOnly?: boolean;
+    value?: boolean;
+    align?: string;
+    className?: string;
+    innerClassName?: string;
+    size?: number;
+    reverse?: boolean;
+    displayOnly?: boolean;
+    type?: string;
+    onClick?(): void;
+}>> & Record<string, any>;
+
+
+type SearchBar = ComponentType<PropsWithChildren<{
+    query: string;
+    autoFocus?: boolean;
+    onClear?: () => void;
+    className?: string;
+    placeholder?: string;
+    iconClassName?: string;
+    onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
+    onKeyUp?: (event: KeyboardEvent<HTMLInputElement>) => void;
+    onKeyPress?: (event: KeyboardEvent<HTMLInputElement>) => void;
+    isLoading?: boolean;
+    size?: string;
+    disabled?: boolean;
+    onChange?: (value: string) => void;
+    onBlur?: () => void;
+    onFocus?: () => void;
+    autoComplete?: string;
+    inputProps?: HTMLProps<HTMLInputElement>;
+    hideSearchIcon?: boolean;
+    "aria-label"?: string;
+}>> & Record<string, any>;
 
