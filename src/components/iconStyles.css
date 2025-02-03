@@ -5,3 +5,8 @@
 .vc-owner-crown-icon {
     color: var(--text-warning);
 }
+
+.vc-heart-icon {
+    margin-right: 0.5em;
+    translate: 0 2px;
+}

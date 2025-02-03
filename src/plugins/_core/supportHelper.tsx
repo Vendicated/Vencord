@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
-import { Devs, SUPPORT_CHANNEL_ID } from "@utils/constants";
+import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
@@ -40,9 +40,6 @@ import plugins, { PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
 
-const VENCORD_GUILD_ID = "1015060230222131221";
-const VENBOT_USER_ID = "1017176847865352332";
-const KNOWN_ISSUES_CHANNEL_ID = "1222936386626129920";
 const CodeBlockRe = /```js\n(.+?)```/s;
 
 const AllowedChannelIds = [
@@ -52,9 +49,9 @@ const AllowedChannelIds = [
 ];
 
 const TrustedRolesIds = [
-    "1026534353167208489", // contributor
-    "1026504932959977532", // regular
-    "1042507929485586532", // donor
+    CONTRIB_ROLE_ID, // contributor
+    REGULAR_ROLE_ID, // regular
+    DONOR_ROLE_ID, // donor
 ];
 
 const AsyncFunction = async function () { }.constructor;
