@@ -1,24 +1,8 @@
-/* Message content highlighting */
-.messagelogger-deleted [class*="contents"] > :is(div, h1, h2, h3, p) {
-    color: var(--status-danger, #f04747) !important;
-}
-
-/* Markdown title highlighting */
-.messagelogger-deleted [class*="contents"] :is(h1, h2, h3) {
-    color: var(--status-danger, #f04747) !important;
-}
-
-/* Bot "thinking" text highlighting */
-.messagelogger-deleted [class*="colorStandard"] {
-    color: var(--status-danger, #f04747) !important;
-}
-
-/* Embed highlighting */
-.messagelogger-deleted article :is(div, span, h1, h2, h3, p) {
-    color: var(--status-danger, #f04747) !important;
-}
-
-.messagelogger-deleted a {
-    color: var(--red-460, #be3535) !important;
-    text-decoration: underline;
+.messagelogger-deleted {
+    --text-normal: var(--status-danger, #f04747);
+    --interactive-normal: var(--status-danger, #f04747);
+    --text-muted: var(--status-danger, #f04747);
+    --embed-title: var(--red-460, #be3535);
+    --text-link: var(--red-460, #be3535);
+    --header-primary: var(--red-460, #be3535);
 }

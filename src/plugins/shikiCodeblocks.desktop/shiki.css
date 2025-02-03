@@ -1,13 +1,13 @@
-.shiki-container {
+.vc-shiki-container {
     border: 4px;
     background-color: var(--background-secondary);
 }
 
-.shiki-root {
+.vc-shiki-root {
     border-radius: 4px;
 }
 
-.shiki-root code {
+.vc-shiki-root .vc-shiki-code {
     display: block;
     overflow-x: auto;
     padding: 0.5em;
@@ -20,16 +20,16 @@
     border: none;
 }
 
-.shiki-devicon {
+.vc-shiki-devicon {
     margin-right: 8px;
     user-select: none;
 }
 
-.shiki-plain code {
+.vc-shiki-plain .vc-shiki-code {
     padding-top: 8px;
 }
 
-.shiki-btns {
+.vc-shiki-btns {
     font-size: 1em;
     position: absolute;
     right: 0;
@@ -37,25 +37,25 @@
     opacity: 0;
 }
 
-.shiki-root:hover .shiki-btns {
+.vc-shiki-root:hover .vc-shiki-btns {
     opacity: 1;
 }
 
-.shiki-btn {
+.vc-shiki-btn {
     border-radius: 4px 4px 0 0;
     padding: 4px 8px;
     user-select: none;
 }
 
-.shiki-btn ~ .shiki-btn {
+.vc-shiki-btn ~ .vc-shiki-btn {
     margin-left: 4px;
 }
 
-.shiki-btn:last-child {
+.vc-shiki-btn:last-child {
     border-radius: 4px 0;
 }
 
-.shiki-spinner-container {
+.vc-shiki-spinner-container {
     align-items: center;
     background-color: rgb(0 0 0 / 60%);
     display: flex;
@@ -64,11 +64,11 @@
     inset: 0;
 }
 
-.shiki-preview {
+.vc-shiki-preview {
     margin-bottom: 2em;
 }
 
-.shiki-lang {
+.vc-shiki-lang {
     padding: 0 5px;
     margin-bottom: 6px;
     font-weight: bold;
@@ -77,24 +77,24 @@
     align-items: center;
 }
 
-.shiki-table {
+.vc-shiki-table {
     border-collapse: collapse;
     width: 100%;
 }
 
-.shiki-table tr {
+.vc-shiki-table-row {
     height: 19px;
     width: 100%;
 }
 
-.shiki-root td:first-child {
+.vc-shiki-root .vc-shiki-table-cell:first-child {
     border-right: 1px solid transparent;
     padding-left: 5px;
     padding-right: 8px;
     user-select: none;
 }
 
-.shiki-root td:last-child {
+.vc-shiki-root .vc-shiki-table-cell:last-child {
     padding-left: 8px;
     word-break: break-word;
     width: 100%;
