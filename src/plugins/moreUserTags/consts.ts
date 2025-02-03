@@ -52,7 +52,8 @@ export const tags = [
 ] as const satisfies ITag[];
 
 export const Tag = findLazy(m => m.Types?.[0] === "BOT") as RC<{ type?: number | null, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
-export const classNames = findByPropsLazy("botTagCompact");
+export const messageClassNames = findByPropsLazy("botTagCompact");
+export const memberListClassNames = findByPropsLazy("memberInner");
 
 // PermissionStore.computePermissions will not work here since it only gets permissions for the current user
 export const computePermissions: (options: {

@@ -7,10 +7,10 @@
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { ChannelStore, GuildStore, PermissionsBits } from "@webpack/common";
+import { ChannelStore, GuildStore, PermissionsBits, UserStore } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
 
-import { computePermissions, isWebhook, Tag, tags } from "./consts";
+import { computePermissions, memberListClassNames, messageClassNames, Tag, tags } from "./consts";
 import { settings } from "./settings";
 
 const genTagTypes = () => {
@@ -35,16 +35,6 @@ export default definePlugin({
     authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN, Devs.hen],
     settings,
     patches: [
-        // Render Tags in messages
-        // Maybe there is a better way to catch this horror
-        {
-            find: ".isVerifiedBot(),hideIcon:",
-            replacement: {
-                match: /(?<=let (\i).{1,500}.isSystemDM.{0,350}),null==(\i\))(?=.{1,30}?null:)/,
-                replace:
-                    ",($1=$self.getTag({...arguments[0],isChat:true,origType:$1}))$&",
-            },
-        },
         // Make discord actually use our tags
         {
             find: ".STAFF_ONLY_DM:",
@@ -52,16 +42,6 @@ export default definePlugin({
                 match: /(?<=type:(\i).{10,1000}.REMIX.{10,100})default:(\i)=/,
                 replace: "default:$2=$self.getTagText($self.localTags[$1]);",
             },
-        },
-        // Member list
-        // In the current state it makes smth like
-        // null != U && U && ($1=blahblahblah)
-        {
-            find: ".lostPermission)",
-            replacement: {
-                match: /(?<=return .{0,20})\.bot?(?=.{0,100}type:(\i))/,
-                replace: "&& ($1=$self.getTag({...arguments[0],isChat:false,origType:$1}))"
-            }
         },
 
         // Next both 2 patches are goint together
@@ -83,6 +63,35 @@ export default definePlugin({
         }
     ],
     localTags: genTagTypes(),
+    renderMessageDecoration(props) {
+        const tagId = this.getTag({
+            message: props.message,
+            user: UserStore.getUser(props.message.author.id),
+            channelId: props.message.channel_id,
+            isChat: false
+        });
+
+        return tagId && <Tag
+            className={props.compact ? messageClassNames.botTagCompact : messageClassNames.botTagCozy}
+            type={tagId}
+            useRemSizes={true}
+            verified={false}>
+        </Tag>;
+    },
+    renderMemberListDecorator(props) {
+        const tagId = this.getTag({
+            user: props.user,
+            channel: props.channel,
+            isChat: false
+        });
+
+        return tagId && <Tag
+            className={memberListClassNames.botTag}
+            type={tagId}
+            useRemSizes={false}
+            verified={false}>
+        </Tag>;
+    },
 
     getTagText(passedTagName: string) {
         if (!passedTagName) return getIntlMessage("APP_TAG");
@@ -116,14 +125,11 @@ export default definePlugin({
     }): number | null {
         user ??= message?.author as any;
 
-        if (!user)
-            return null;
-        if (isChat && user.id === "1")
-            return Tag.Types.OFFICIAL;
-        if (user.isClyde())
-            return Tag.Types.AI;
+        if (!user) return null;
+        if (isChat && user.id === "1") return null;
+        if (user.isClyde()) return null;
 
-        let type = typeof origType === "number" ? origType : null;
+        const type = typeof origType === "number" ? origType : null;
 
         channelId ??= message?.channel_id as any;
         channel ??= ChannelStore.getChannel(channelId!) as any;
@@ -154,18 +160,8 @@ export default definePlugin({
             if ("permissions" in tag ?
                 tag.permissions.some(perm => perms.includes(perm)) :
                 tag.condition(message!, user, channel)) {
-                if ((channel.isForumPost() || channel.isMediaPost()) && channel.ownerId === user.id)
-                    type = this.localTags[`${tag.name}-OP`];
 
-                else if (
-                    user.bot &&
-                    !isWebhook(message!, user) &&
-                    !settings.dontShowBotTag
-                )
-                    type = this.localTags[`${tag.name}-BOT`];
-
-                else type = this.localTags[tag.name];
-                break;
+                return this.localTags[tag.name];
             }
         }
 
