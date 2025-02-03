@@ -108,7 +108,7 @@ export default definePlugin({
         },
         {
             // Emoji category list
-            find: "#{intl::EMOJI_CATEGORY_TOP_GUILD_EMOJI}",
+            find: "#{intl::EMOJI_CATEGORY_TOP_GUILD_EMOJI},{guildName:",
             replacement: {
                 match: /(?<=(\i)\.unshift\((\i)\):)(?=\1\.push\(\2\))/,
                 replace: "$2.isNitroLocked||"

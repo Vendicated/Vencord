@@ -84,59 +84,71 @@ function BookmarkFolderOpenMenu(props: BookmarkProps) {
             onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
             aria-label="Bookmark Folder Menu"
         >
-            {bookmark.bookmarks.map((b, i) => <><Menu.MenuItem
-                key={`bookmark-folder-entry-${b.channelId}`}
-                id={`bookmark-folder-entry-${b.channelId}`}
-                label={<div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.25rem"
-                }}>
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
-                        {b.name}
-                    </span>
-                    {bookmarkNotificationDot && <NotificationDot channelIds={[b.channelId]} />}
-                </div>}
-                icon={() => <BookmarkIcon bookmark={b} />}
-                showIconFirst={true}
-                action={() => switchChannel(b)} /><span>
-                    (
-                    bookmarkNotificationDot && <Menu.MenuGroup>
-                        <Menu.MenuItem
-                            key="mark-as-read"
-                            id="mark-as-read"
-                            label={getIntlMessage("MARK_AS_READ")}
-                            disabled={!ReadStateStore.hasUnread(b.channelId)}
-                            action={() => ReadStateUtils.ackChannel(ChannelStore.getChannel(b.channelId))} />
-                    </Menu.MenuGroup>
-                    )
-                </span><span>
+            {bookmark.bookmarks.map((b, i) => (
+                <Menu.MenuItem
+                    key={`bookmark-folder-entry-${b.channelId}`}
+                    id={`bookmark-folder-entry-${b.channelId}`}
+                    label={
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.25rem"
+                            }}>
+                            <span
+                                style={{
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis"
+                                }}>
+                                {b.name}
+                            </span>
+                            {bookmarkNotificationDot && <NotificationDot channelIds={[b.channelId]} />}
+                        </div>
+                    }
+                    icon={() => <BookmarkIcon bookmark={b} />}
+                    showIconFirst={true}
+                    action={() => switchChannel(b)}
+                >
+                    {bookmarkNotificationDot && (
+                        <Menu.MenuGroup>
+                            <Menu.MenuItem
+                                key="mark-as-read"
+                                id="mark-as-read"
+                                label={getIntlMessage("MARK_AS_READ")}
+                                disabled={!ReadStateStore.hasUnread(b.channelId)}
+                                action={() => ReadStateUtils.ackChannel(ChannelStore.getChannel(b.channelId))}
+                            />
+                        </Menu.MenuGroup>
+                    )}
                     <Menu.MenuGroup key="bookmarks">
-
                         <Menu.MenuItem
                             key="edit-bookmark"
                             id="edit-bookmark"
                             label="Edit Bookmark"
                             action={() => {
-                                const key = openModal(modalProps => <EditModal
-                                    modalProps={modalProps}
-                                    modalKey={key}
-                                    bookmark={b}
-                                    onSave={name => {
-                                        const newBookmarks = [...bookmark.bookmarks];
-                                        newBookmarks[i].name = name;
-                                        methods.editBookmark(index, { bookmarks: newBookmarks });
-                                        closeModal(key);
-                                    }} />
+                                const key = openModal(modalProps =>
+                                    <EditModal
+                                        modalProps={modalProps}
+                                        modalKey={key}
+                                        bookmark={b}
+                                        onSave={name => {
+                                            const newBookmarks = [...bookmark.bookmarks];
+                                            newBookmarks[i].name = name;
+                                            methods.editBookmark(index, { bookmarks: newBookmarks });
+                                            closeModal(key);
+                                        }}
+                                    />
                                 );
-                            }} />
+                            }}
+                        />
                         <Menu.MenuItem
                             key="delete-bookmark"
                             id="delete-bookmark"
                             label="Delete Bookmark"
                             action={() => {
                                 methods.deleteBookmark(i, index);
-                            }} />
+                            }}
+                        />
                         <Menu.MenuItem
                             key="remove-bookmark-from-folder"
                             id="remove-bookmark-from-folder"
@@ -144,14 +156,14 @@ function BookmarkFolderOpenMenu(props: BookmarkProps) {
                             action={() => {
                                 const newBookmarks = [...bookmark.bookmarks];
                                 newBookmarks.splice(i, 1);
-
                                 methods.addBookmark(b);
                                 methods.editBookmark(index, { bookmarks: newBookmarks });
-                            }} />
+                            }}
+                        />
                     </Menu.MenuGroup>
-                </span>
-            </>)}
-        </Menu.Menu >
+                </Menu.MenuItem>
+            ))}
+        </Menu.Menu>
     );
 }
 
