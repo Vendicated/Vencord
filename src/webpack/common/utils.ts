@@ -92,7 +92,7 @@ export interface ToastData {
     /**
      * Toasts.Type
      */
-    type: number,
+    type: string,
     options?: ToastOptions;
 }
 
