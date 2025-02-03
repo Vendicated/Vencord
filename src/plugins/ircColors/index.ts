@@ -77,7 +77,7 @@ export default definePlugin({
     name: "IrcColors",
     description: "Makes username colors in chat unique, like in IRC clients",
     tags: ["Appearance", "Customisation"],
-    authors: [Devs.Grzesiek11, Devs.jamesbt365],
+    authors: [Devs.Grzesiek11, Devs.jamesbt365, Devs.hen],
     settings,
 
     patches: [
@@ -122,9 +122,6 @@ export default definePlugin({
     },
 
     calculateHSLforId,
-    calculateNameColorForUser(...args: Parameters<typeof calculateNameColorForUser>) {
-        return calculateNameColorForUser(...args);
-    },
     calculateNameColorForMessageContext(context: any) {
         const userId: string | undefined = context?.message?.author?.id;
         const colorString = context?.author?.colorString;
