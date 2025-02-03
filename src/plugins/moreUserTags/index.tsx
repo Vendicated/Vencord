@@ -7,7 +7,7 @@
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { ChannelStore, GuildStore, PermissionsBits, UserStore } from "@webpack/common";
+import { ChannelStore, GuildStore, PermissionsBits, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
 
 import { computePermissions, memberListClassNames, messageClassNames, Tag, tags } from "./consts";
@@ -20,10 +20,6 @@ const genTagTypes = () => {
     for (const { name } of tags) {
         obj[name] = ++i;
         obj[i] = name;
-        obj[`${name}-BOT`] = ++i;
-        obj[i] = `${name}-BOT`;
-        obj[`${name}-OP`] = ++i;
-        obj[i] = `${name}-OP`;
     }
 
     return obj;
@@ -44,25 +40,20 @@ export default definePlugin({
             },
         },
 
-        // Next both 2 patches are goint together
-        // First one passes down the react dom channelId which is required to get tag
-        // Second one actually gets/displays it
-        {
-            find: ".hasAvatarForGuild(null==",
-            replacement: {
-                match: /user:\i,(?=.{0,50}.BITE_SIZE)/,
-                replace: "$&channelId:arguments[0].channelId,"
-            },
-        },
+        // User profile
+        // TODO: replace with API
         {
             find: ".clickableUsername",
             replacement: {
                 match: /null!=(\i)(?=.{0,100}type:\i)/,
-                replace: "($1=$self.getTag({...arguments[0],isChat:false,origType:$1}),$1!==null)"
+                replace: "($1=$self.getTag({...arguments[0],channelId:$self.getChannelId(),isChat:false,origType:$1}),$1!==null)"
             }
         }
     ],
     localTags: genTagTypes(),
+    getChannelId() {
+        return SelectedChannelStore.getChannelId();
+    },
     renderMessageDecoration(props) {
         const tagId = this.getTag({
             message: props.message,
@@ -93,47 +84,31 @@ export default definePlugin({
         </Tag>;
     },
 
-    getTagText(passedTagName: string) {
-        if (!passedTagName) return getIntlMessage("APP_TAG");
-        const [tagName, variant] = passedTagName.split("-");
-
+    getTagText(tagName: string) {
+        if (!tagName) return getIntlMessage("APP_TAG");
         const tag = tags.find(({ name }) => tagName === name);
-        if (!tag) return getIntlMessage("APP_TAG");
+        if (!tag) return tagName || getIntlMessage("APP_TAG");
 
-        if (variant === "BOT" && tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return getIntlMessage("APP_TAG");
+        if (tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return;
 
-        const tagText = settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
-        switch (variant) {
-            case "OP":
-                return `${getIntlMessage("BOT_TAG_FORUM_ORIGINAL_POSTER")} • ${tagText}`;
-            case "BOT":
-                return `${getIntlMessage("APP_TAG")} • ${tagText}`;
-            default:
-                return tagText;
-        }
+        return settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
     },
 
     getTag({
-        message, user, channelId, origType, isChat, channel
+        message, user, channelId, isChat, channel
     }: {
         message?: Message,
         user?: User & { isClyde(): boolean; },
         channel?: Channel & { isForumPost(): boolean; isMediaPost(): boolean; },
         channelId?: string;
-        origType?: number;
         isChat?: boolean;
     }): number | null {
-        user ??= message?.author as any;
-
         if (!user) return null;
         if (isChat && user.id === "1") return null;
         if (user.isClyde()) return null;
 
-        const type = typeof origType === "number" ? origType : null;
-
-        channelId ??= message?.channel_id as any;
         channel ??= ChannelStore.getChannel(channelId!) as any;
-        if (!channel) return type;
+        if (!channel) return null;
 
         const settings = this.settings.store;
         const perms = this.getPermissions(user, channel);
@@ -165,7 +140,7 @@ export default definePlugin({
             }
         }
 
-        return type;
+        return null;
     },
     getPermissions(user: User, channel: Channel): string[] {
         const guild = GuildStore.getGuild(channel?.guild_id);
