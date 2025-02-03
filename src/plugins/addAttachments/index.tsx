@@ -16,15 +16,12 @@ export default definePlugin({
     authors: [Devs.Lumap],
 
     renderMessagePopoverButton(msg) {
-        // edit msg needs send msg perms
+        if (UserStore.getCurrentUser().id !== msg.author.id || msg.attachments.length === 10) return null;
+
         const currChannel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
         if (currChannel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, currChannel)) return null;
 
-        // make sure message can be edited (type is 0, has no voice message)
-        if (msg.type !== 0 || msg.hasFlag(8192)) return null;
-
-        // max attachment limit
-        if (UserStore.getCurrentUser().id !== msg.author.id || msg.attachments.length === 10) return null;
+        if (![0,19].includes(msg.type) || msg.hasFlag(8192)) return null;
 
         return {
             label: "Add attachments",
@@ -60,7 +57,7 @@ export default definePlugin({
                             {
                                 filename: file.name,
                                 file_size: file.size,
-                                id: Math.round(Math.random() * 99999999), // apparently this doesn't matter that much ??
+                                id: Math.round(Math.random() * 99999999),
                                 is_clip: false
                             }
                         ]
