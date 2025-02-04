@@ -1,4 +1,3 @@
 .vc-more-user-tags-tag {
-    position: relative;
-    bottom: 0.1rem;
+    margin-top: unset !important;
 }
