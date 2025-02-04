@@ -1,3 +1,8 @@
-.vc-more-user-tags-tag {
+.vc-more-user-tags-message-tag {
+    /* Remove default margin from tags in messages */
     margin-top: unset !important;
+
+    /* Align with Discord default tags in messages */
+    position: relative;
+    bottom: 0.01em;
 }

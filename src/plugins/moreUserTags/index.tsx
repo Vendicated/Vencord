@@ -66,7 +66,7 @@ export default definePlugin({
 
         return tagId && <Tag
             useRemSizes={true}
-            className="vc-more-user-tags-tag"
+            className="vc-more-user-tags-message-tag"
             type={tagId}
             verified={false}>
         </Tag>;
