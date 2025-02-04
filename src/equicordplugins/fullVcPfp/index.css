@@ -1,0 +1,8 @@
+div[data-selenium-video-tile] div[role="img"] {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: unset !important;
+  background: center / contain no-repeat;
+  background-image: var(--full-res-avatar);
+  > * { display: none; }
+}
