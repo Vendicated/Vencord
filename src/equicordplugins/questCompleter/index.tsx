@@ -244,7 +244,7 @@ export default definePlugin({
         {
             find: "toolbar:function",
             replacement: {
-                match: /(function \i\(\i\){)(.{1,200}toolbar.{1,200}mobileToolbar)/,
+                match: /(function \i\(\i\){)(.{1,200}toolbar.{1,300}mobileToolbar)/,
                 replace: "$1$self.toolbarAction(arguments[0]);$2"
             }
         }
