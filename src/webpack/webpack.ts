@@ -69,12 +69,12 @@ export const filters = {
         m.constructor?.displayName === name,
 
     componentByCode: (...code: CodeFilter): FilterFn => {
-        const filter = filters.byCode(...code);
-        return m => {
+        const byCodeFilter = filters.byCode(...code);
+        const filter = m => {
             let inner = m;
 
             while (inner != null) {
-                if (filter(inner)) return true;
+                if (byCodeFilter(inner)) return true;
                 else if (!inner.$$typeof) return false;
                 else if (inner.type) inner = inner.type; // memos
                 else if (inner.render) inner = inner.render; // forwardRefs
@@ -83,6 +83,9 @@ export const filters = {
 
             return false;
         };
+
+        filter.$$vencordProps = [...code];
+        return filter;
     }
 };
 
