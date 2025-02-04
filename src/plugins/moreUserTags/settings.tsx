@@ -12,11 +12,6 @@ import { Card, Flex, Forms, Switch, TextInput, Tooltip } from "@webpack/common";
 import { Tag, tags } from "./consts";
 import { TagSettings } from "./types";
 
-
-const defaultSettings = Object.fromEntries(
-    tags.map(({ name, displayName }) => [name, { text: displayName, showInChat: true, showInNotChat: true }])
-) as TagSettings;
-
 function SettingsComponent() {
     const tagSettings = settings.store.tagSettings as TagSettings;
 
