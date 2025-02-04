@@ -155,6 +155,11 @@ export interface PluginDef {
 
     tags?: string[];
 
+    /**
+     * Managed style to automatically enable and disable when the plugin is enabled or disabled
+     */
+    managedStyle?: string;
+
     userProfileBadge?: ProfileBadge;
 
     onMessageClick?: MessageClickListener;
