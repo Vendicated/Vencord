@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore } from "@webpack/common";
@@ -22,27 +21,18 @@ export default definePlugin({
     name: "HideMessage",
     description: "Adds an option to hide messages",
     authors: [Devs.Isaac],
-    dependencies: ["MessagePopoverAPI"],
+    
+    renderMessagePopoverButton(msg) {
+        return {
+            label: "Hide Message",
+            icon: HideIcon,
+            message: msg,
+            channel: ChannelStore.getChannel(msg.channel_id),
+            onClick: () => this.hideMessage(msg)
+        };
+    },
 
     hideMessage(msg: Message) {
         FluxDispatcher.dispatch({type: "MESSAGE_DELETE", channelId: msg.channel_id, id: msg.id});
-    },
-
-    start() {
-        addButton("HideMessage", msg => {
-            const label = "Hide Message";
-
-            return {
-                label,
-                icon: HideIcon,
-                message: msg,
-                channel: ChannelStore.getChannel(msg.channel_id),
-                onClick: () => this.hideMessage(msg)
-            };
-        });
-    },
-
-    stop() {
-        removeButton("HideMessage");
     },
 });
