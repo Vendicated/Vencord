@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { findByCodeLazy, findByPropsLazy, findLazy } from "@webpack";
+import { findByCodeLazy, findLazy } from "@webpack";
 import { GuildStore } from "@webpack/common";
 import { RC } from "@webpack/types";
 import { Channel, Guild, Message, User } from "discord-types/general";
@@ -52,8 +52,6 @@ export const tags = [
 ] as const satisfies ITag[];
 
 export const Tag = findLazy(m => m.Types?.[0] === "BOT") as RC<{ type?: number | null, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
-export const messageClassNames = findByPropsLazy("botTagCompact");
-export const memberListClassNames = findByPropsLazy("memberInner");
 
 // PermissionStore.computePermissions will not work here since it only gets permissions for the current user
 export const computePermissions: (options: {

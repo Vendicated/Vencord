@@ -4,13 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { ChannelStore, GuildStore, PermissionsBits, SelectedChannelStore, UserStore } from "@webpack/common";
 import { Channel, Message, User } from "discord-types/general";
 
-import { computePermissions, memberListClassNames, messageClassNames, Tag, tags } from "./consts";
+import { computePermissions, Tag, tags } from "./consts";
 import { settings } from "./settings";
 
 const genTagTypes = () => {
@@ -63,9 +65,9 @@ export default definePlugin({
         });
 
         return tagId && <Tag
-            className={props.compact ? messageClassNames.botTagCompact : messageClassNames.botTagCozy}
-            type={tagId}
             useRemSizes={true}
+            className="vc-more-user-tags-tag"
+            type={tagId}
             verified={false}>
         </Tag>;
     },
@@ -77,9 +79,7 @@ export default definePlugin({
         });
 
         return tagId && <Tag
-            className={memberListClassNames.botTag}
             type={tagId}
-            useRemSizes={false}
             verified={false}>
         </Tag>;
     },
