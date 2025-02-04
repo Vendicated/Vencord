@@ -33,8 +33,7 @@ function getEmojiMarkdown(target: Target, copyUnicode: boolean): string {
             : `:${emojiName}:`;
     }
 
-    const imgSrc = target?.firstChild.src;
-    const url = new URL(imgSrc);
+    const url = new URL(target.firstChild.src);
     const hasParam = url.searchParams.get("animated") === "true";
     const isGif = url.pathname.endsWith(".gif");
 
