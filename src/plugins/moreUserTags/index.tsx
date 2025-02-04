@@ -14,6 +14,7 @@ import { Channel, Message, User } from "discord-types/general";
 
 import { computePermissions, Tag, tags } from "./consts";
 import { settings } from "./settings";
+import { TagSettings } from "./types";
 
 const genTagTypes = () => {
     let i = 100;
@@ -52,6 +53,18 @@ export default definePlugin({
             }
         }
     ],
+    start() {
+        const tagSettings = settings.store.tagSettings || {} as TagSettings;
+        for (const tag of Object.values(tags)) {
+            tagSettings[tag.name] ??= {
+                showInChat: true,
+                showInNotChat: true,
+                text: tag.displayName
+            };
+        }
+
+        settings.store.tagSettings = tagSettings;
+    },
     localTags: genTagTypes(),
     getChannelId() {
         return SelectedChannelStore.getChannelId();

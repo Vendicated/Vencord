@@ -18,7 +18,7 @@ const defaultSettings = Object.fromEntries(
 ) as TagSettings;
 
 function SettingsComponent() {
-    const tagSettings = settings.store.tagSettings ??= defaultSettings;
+    const tagSettings = settings.store.tagSettings as TagSettings;
 
     return (
         <Flex flexDirection="column">
@@ -69,11 +69,13 @@ function SettingsComponent() {
 export const settings = definePluginSettings({
     dontShowForBots: {
         description: "Don't show extra tags for bots (excluding webhooks)",
-        type: OptionType.BOOLEAN
+        type: OptionType.BOOLEAN,
+        default: false
     },
     dontShowBotTag: {
         description: "Only show extra tags for bots / Hide [BOT] text",
-        type: OptionType.BOOLEAN
+        type: OptionType.BOOLEAN,
+        default: false
     },
     tagSettings: {
         type: OptionType.COMPONENT,
