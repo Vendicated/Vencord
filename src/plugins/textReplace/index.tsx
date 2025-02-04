@@ -17,13 +17,11 @@
 */
 
 import { DataStore } from "@api/index";
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { DeleteIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, React, TextInput, useState } from "@webpack/common";
 
@@ -35,8 +33,6 @@ type Rule = Record<"find" | "replace" | "onlyIfIncludes", string>;
 interface TextReplaceProps {
     title: string;
     rulesArray: Rule[];
-    rulesKey: string;
-    update: () => void;
 }
 
 const makeEmptyRule: () => Rule = () => ({
@@ -46,34 +42,35 @@ const makeEmptyRule: () => Rule = () => ({
 });
 const makeEmptyRuleArray = () => [makeEmptyRule()];
 
-let stringRules = makeEmptyRuleArray();
-let regexRules = makeEmptyRuleArray();
-
 const settings = definePluginSettings({
     replace: {
         type: OptionType.COMPONENT,
-        description: "",
         component: () => {
-            const update = useForceUpdater();
+            const { stringRules, regexRules } = settings.use(["stringRules", "regexRules"]);
+
             return (
                 <>
                     <TextReplace
                         title="Using String"
                         rulesArray={stringRules}
-                        rulesKey={STRING_RULES_KEY}
-                        update={update}
                     />
                     <TextReplace
                         title="Using Regex"
                         rulesArray={regexRules}
-                        rulesKey={REGEX_RULES_KEY}
-                        update={update}
                     />
                     <TextReplaceTesting />
                 </>
             );
         }
     },
+    stringRules: {
+        type: OptionType.CUSTOM,
+        default: makeEmptyRuleArray(),
+    },
+    regexRules: {
+        type: OptionType.CUSTOM,
+        default: makeEmptyRuleArray(),
+    }
 });
 
 function stringToRegex(str: string) {
@@ -120,28 +117,24 @@ function Input({ initialValue, onChange, placeholder }: {
     );
 }
 
-function TextReplace({ title, rulesArray, rulesKey, update }: TextReplaceProps) {
+function TextReplace({ title, rulesArray }: TextReplaceProps) {
     const isRegexRules = title === "Using Regex";
 
     async function onClickRemove(index: number) {
         if (index === rulesArray.length - 1) return;
         rulesArray.splice(index, 1);
-
-        await DataStore.set(rulesKey, rulesArray);
-        update();
     }
 
     async function onChange(e: string, index: number, key: string) {
-        if (index === rulesArray.length - 1)
+        if (index === rulesArray.length - 1) {
             rulesArray.push(makeEmptyRule());
+        }
 
         rulesArray[index][key] = e;
 
-        if (rulesArray[index].find === "" && rulesArray[index].replace === "" && rulesArray[index].onlyIfIncludes === "" && index !== rulesArray.length - 1)
+        if (rulesArray[index].find === "" && rulesArray[index].replace === "" && rulesArray[index].onlyIfIncludes === "" && index !== rulesArray.length - 1) {
             rulesArray.splice(index, 1);
-
-        await DataStore.set(rulesKey, rulesArray);
-        update();
+        }
     }
 
     return (
@@ -208,29 +201,26 @@ function TextReplaceTesting() {
 }
 
 function applyRules(content: string): string {
-    if (content.length === 0)
+    if (content.length === 0) {
         return content;
-
-    if (stringRules) {
-        for (const rule of stringRules) {
-            if (!rule.find) continue;
-            if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
-
-            content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replace(/^\s|\s$/g, "");
-        }
     }
 
-    if (regexRules) {
-        for (const rule of regexRules) {
-            if (!rule.find) continue;
-            if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
+    for (const rule of settings.store.stringRules) {
+        if (!rule.find) continue;
+        if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
 
-            try {
-                const regex = stringToRegex(rule.find);
-                content = content.replace(regex, rule.replace.replaceAll("\\n", "\n"));
-            } catch (e) {
-                new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
-            }
+        content = ` ${content} `.replaceAll(rule.find, rule.replace.replaceAll("\\n", "\n")).replace(/^\s|\s$/g, "");
+    }
+
+    for (const rule of settings.store.regexRules) {
+        if (!rule.find) continue;
+        if (rule.onlyIfIncludes && !content.includes(rule.onlyIfIncludes)) continue;
+
+        try {
+            const regex = stringToRegex(rule.find);
+            content = content.replace(regex, rule.replace.replaceAll("\\n", "\n"));
+        } catch (e) {
+            new Logger("TextReplace").error(`Invalid regex: ${rule.find}`);
         }
     }
 
@@ -244,22 +234,27 @@ export default definePlugin({
     name: "TextReplace",
     description: "Replace text in your messages. You can find pre-made rules in the #textreplace-rules channel in Vencord's Server",
     authors: [Devs.AutumnVN, Devs.TheKodeToad],
-    dependencies: ["MessageEventsAPI"],
 
     settings,
 
-    async start() {
-        stringRules = await DataStore.get(STRING_RULES_KEY) ?? makeEmptyRuleArray();
-        regexRules = await DataStore.get(REGEX_RULES_KEY) ?? makeEmptyRuleArray();
-
-        this.preSend = addPreSendListener((channelId, msg) => {
-            // Channel used for sharing rules, applying rules here would be messy
-            if (channelId === TEXT_REPLACE_RULES_CHANNEL_ID) return;
-            msg.content = applyRules(msg.content);
-        });
+    onBeforeMessageSend(channelId, msg) {
+        // Channel used for sharing rules, applying rules here would be messy
+        if (channelId === TEXT_REPLACE_RULES_CHANNEL_ID) return;
+        msg.content = applyRules(msg.content);
     },
 
-    stop() {
-        removePreSendListener(this.preSend);
+    async start() {
+        // TODO(OptionType.CUSTOM Related): Remove DataStore rules migrations once enough time has passed
+        const oldStringRules = await DataStore.get<Rule[]>(STRING_RULES_KEY);
+        if (oldStringRules != null) {
+            settings.store.stringRules = oldStringRules;
+            await DataStore.del(STRING_RULES_KEY);
+        }
+
+        const oldRegexRules = await DataStore.get<Rule[]>(REGEX_RULES_KEY);
+        if (oldRegexRules != null) {
+            settings.store.regexRules = oldRegexRules;
+            await DataStore.del(REGEX_RULES_KEY);
+        }
     }
 });

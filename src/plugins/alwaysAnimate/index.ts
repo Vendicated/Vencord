@@ -41,10 +41,10 @@ export default definePlugin({
         },
         {
             // Status emojis
-            find: "#{intl::GUILD_OWNER}",
+            find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(?<=\.activityEmoji,.+?animate:)\i/,
-                replace: "!0"
+                match: /(\.CUSTOM_STATUS.+?animate:)\i/,
+                replace: (_, rest) => `${rest}!0`
             }
         },
         {
