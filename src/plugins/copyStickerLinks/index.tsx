@@ -103,18 +103,13 @@ function buildMenuItem(stickerId: string) {
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     const { favoriteableId, favoriteableType } = props ?? {};
     if (!favoriteableId) return;
-    const menuItem = (() => {
-        switch (favoriteableType) {
-            case "sticker":
-                const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
-                if (sticker?.format_type === 3) return;
+    if (favoriteableType != "sticker") return;
 
-                return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
-        }
-    })();
+    const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
+    if (sticker?.format_type === 3) return;
 
-    if (menuItem)
-        findGroupChildrenByChildId("devmode-copy-id", children, true)?.push(menuItem);
+    const menuItem = buildMenuItem("Sticker", () => fetchSticker(favoriteableId);
+    findGroupChildrenByChildId("devmode-copy-id", children, true)?.push(menuItem);
 };
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
