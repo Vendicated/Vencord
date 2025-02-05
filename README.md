@@ -13,14 +13,14 @@ The cutest Discord client mod
 ## Features
 
 -   Super easy to install (Download Installer, open, click install button, done)
--   100+ plugins built in: [See a list](https://vencord.dev/plugins)
+-   100+ plugins built in: [See a list](https://vencord.dev/plugins) (This list does not represent the current plugin list, it will only show the native vencord plugins)
     -   Some highlights: SpotifyControls, MessageLogger, Experiments, GameActivityToggle, Translate, NoTrack, QuickReply, Free Emotes/Stickers, PermissionsViewer, CustomCommands, ShowHiddenChannels, PronounDB
 -   Fairly lightweight despite the many inbuilt plugins
--   Excellent Browser Support: Run Vencord in your Browser via extension or UserScript
+~~-   Excellent Browser Support: Run Vencord in your Browser via extension or UserScript~~
 -   Works on any Discord branch: Stable, Canary or PTB all work (though for the best experience I recommend stable!)
 -   Custom CSS and Themes: Inbuilt css editor with support to import any css files (including BetterDiscord themes)
 -   Privacy friendly, blocks Discord analytics & crash reporting out of the box and has no telemetry
--   Maintained very actively, broken plugins are usually fixed within 12 hours
+-   Maintained very actively, broken plugins are usually fixed within 12 hours (sometimes longer due to being a fork, and discord actively changing their app)
 -   Settings sync: Keep your plugins and their settings synchronised between devices / apps (optional)
 
 
