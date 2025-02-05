@@ -9,9 +9,10 @@ import "./SearchModal.css";
 import { classNameFactory } from "@api/Styles";
 import {
     ModalCloseButton,
-    ModalContent, ModalFooter,
+    ModalContent,
+    ModalFooter,
     ModalHeader,
-ModalListContent,
+    ModalListContent,
     ModalProps,
     ModalRoot,
     ModalSize
@@ -20,7 +21,9 @@ import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy
 import {
     Avatar,
     Button,
-    ChannelStore, Checkbox, Clickable,
+    ChannelStore,
+    Checkbox,
+    Clickable,
     Flex,
     GuildStore,
     Heading,
