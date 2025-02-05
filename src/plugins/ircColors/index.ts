@@ -20,6 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { ChannelStore, GuildMemberStore, SelectedChannelStore } from "@webpack/common";
 
 function calculateHSLforId(id: string) {
     // No hooks: this also runs outside React components.
@@ -28,6 +29,18 @@ function calculateHSLforId(id: string) {
         saturation: settings.store.saturation,
         lightness: settings.store.lightness
     };
+}
+
+// https://stackoverflow.com/a/44134328
+function hslToHex(hue, saturation, lightness) {
+    lightness /= 100;
+    const a = saturation * Math.min(lightness, 1 - lightness) / 100;
+    const f = n => {
+        const k = (n + hue / 30) % 12;
+        const color = lightness - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, "0"); // convert to Hex and prefix "0" if needed
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
 }
 
 function calculateNameColorForUser(id?: string) {
@@ -122,11 +135,24 @@ export default definePlugin({
     },
 
     calculateHSLforId,
-    calculateNameColorForUser,
+    resolveUsedColor(userId: string) {
+        const channelId = SelectedChannelStore.getChannelId();
+        const channel = ChannelStore.getChannel(channelId);
+        const colorString = channel?.guild_id
+            ? GuildMemberStore.getMember(channel.guild_id, userId)?.colorString
+            : undefined;
+
+        if (settings.store.applyColorOnlyInDms && !channel?.isPrivate()) return colorString;
+        if (settings.store.applyColorOnlyToUsersWithoutColor && colorString) return colorString;
+
+        const { hue, lightness, saturation } = calculateHSLforId(userId);
+
+        return hslToHex(hue, saturation, lightness);
+    },
     calculateNameColorForMessageContext(context: any) {
         const userId: string | undefined = context?.message?.author?.id;
         const colorString = context?.author?.colorString;
-        const color = calculateNameColorForUser(userId);
+        const color = userId ? this.resolveUsedColor(userId) : null;
 
         // Color preview in role settings
         if (context?.message?.channel_id === "1337" && userId === "313337")
@@ -145,7 +171,7 @@ export default definePlugin({
         try {
             const id = context?.user?.id;
             const colorString = context?.colorString;
-            const color = calculateNameColorForUser(id);
+            const color = id ? this.resolveUsedColor(id) : null;
 
             if (settings.store.applyColorOnlyInDms && context?.guildId !== undefined) {
                 return colorString;
