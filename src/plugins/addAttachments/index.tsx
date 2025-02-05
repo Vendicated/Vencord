@@ -21,7 +21,7 @@ export default definePlugin({
         const currChannel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
         if (currChannel.guild_id && !PermissionStore.can(PermissionsBits.SEND_MESSAGES, currChannel)) return null;
 
-        if (![0,19].includes(msg.type) || msg.hasFlag(8192)) return null;
+        if (![0, 19].includes(msg.type) || msg.hasFlag(8192)) return null;
 
         return {
             label: "Add attachments",
@@ -47,9 +47,9 @@ export default definePlugin({
                 return input.remove();
             }
 
-            showToast("Uploading...");
+            showToast("Uploading, this can take a while...");
 
-            async function uploadLoop(file: File) {
+            const uploadPromises = Array.from(input.files).map(async file => {
                 const attachmentsReq = (await Common.RestAPI.post({
                     url: `/channels/${channelId}/attachments`,
                     body: {
@@ -69,26 +69,26 @@ export default definePlugin({
                     body: file
                 });
 
-                const msg = MessageStore.getMessage(channelId, messageId);
+                return {
+                    id: attachmentsReq.id,
+                    uploaded_filename: attachmentsReq.upload_filename,
+                    filename: file.name
+                };
+            });
 
-                await Common.RestAPI.patch({
-                    url: `/channels/${channelId}/messages/${messageId}`,
-                    body: {
-                        attachments: [
-                            ...msg.attachments,
-                            {
-                                id: attachmentsReq.id,
-                                uploaded_filename: attachmentsReq.upload_filename,
-                                filename: file.name
-                            }
-                        ]
-                    }
-                });
-            }
+            const newAttachments = await Promise.all(uploadPromises);
 
-            for (let i = 0; i < input.files.length; i++) {
-                await uploadLoop(input.files[i]);
-            }
+            const msg = MessageStore.getMessage(channelId, messageId);
+
+            await Common.RestAPI.patch({
+                url: `/channels/${channelId}/messages/${messageId}`,
+                body: {
+                    attachments: [
+                        ...msg.attachments,
+                        ...newAttachments
+                    ]
+                }
+            });
 
             input.remove();
         });
