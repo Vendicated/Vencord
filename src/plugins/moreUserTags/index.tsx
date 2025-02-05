@@ -107,8 +107,6 @@ export default definePlugin({
         const tag = tags.find(({ name }) => tagName === name);
         if (!tag) return tagName || getIntlMessage("APP_TAG");
 
-        if (tagName !== "WEBHOOK" && this.settings.store.dontShowForBots) return;
-
         return settings.store.tagSettings?.[tag.name]?.text || tag.displayName;
     },
 
