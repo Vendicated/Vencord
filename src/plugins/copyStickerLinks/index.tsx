@@ -44,7 +44,7 @@ function getUrl(data: Data) {
     if (data.format_type === 1 || data.format_type === 3)
         return `https:${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
 
-    return "https://cdn.discordapp.com";
+    return `https://cdn.discordapp.com/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
 }
 
 async function fetchSticker(id: string) {
