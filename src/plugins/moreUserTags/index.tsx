@@ -37,10 +37,15 @@ export default definePlugin({
         // Make discord actually use our tags
         {
             find: ".STAFF_ONLY_DM:",
-            replacement: {
+            replacement: [{
                 match: /(?<=type:(\i).{10,1000}.REMIX.{10,100})default:(\i)=/,
                 replace: "default:$2=$self.getTagText($self.localTags[$1]);",
+            }, {
+                match: /(?<=type:(\i).{10,1000}.REMIX.{10,100})\.BOT:(?=default:)/,
+                replace: "$&return null;",
+                predicate: () => settings.store.dontShowBotTag
             },
+            ],
         },
 
         // User profile
@@ -116,14 +121,16 @@ export default definePlugin({
         channelId?: string;
         isChat?: boolean;
     }): number | null {
+        const settings = this.settings.store;
+
         if (!user) return null;
         if (isChat && user.id === "1") return null;
         if (user.isClyde()) return null;
+        if (user.bot && settings.dontShowForBots) return null;
 
         channel ??= ChannelStore.getChannel(channelId!) as any;
         if (!channel) return null;
 
-        const settings = this.settings.store;
         const perms = this.getPermissions(user, channel);
 
         for (const tag of tags) {

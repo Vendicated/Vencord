@@ -68,9 +68,10 @@ export const settings = definePluginSettings({
         default: false
     },
     dontShowBotTag: {
-        description: "Only show extra tags for bots / Hide [BOT] text",
+        description: "Only show extra tags for bots / Hide [APP] text",
         type: OptionType.BOOLEAN,
-        default: false
+        default: false,
+        restartNeeded: true
     },
     tagSettings: {
         type: OptionType.COMPONENT,
