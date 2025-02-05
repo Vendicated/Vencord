@@ -17,7 +17,7 @@ export default definePlugin({
     patches: [{
         find: "\"data-selenium-video-tile\":",
         replacement: {
-            match: /(?<=function\((\i),\i\)\{)(?=let.{0,40},style:)/,
+            match: /(?<=function\((\i),\i\)\{)/,
             replace: "$1.style=$self.getVoiceBackgroundStyles($1);",
         }
     }],
