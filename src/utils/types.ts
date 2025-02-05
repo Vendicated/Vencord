@@ -197,15 +197,18 @@ export const enum OptionType {
     CUSTOM,
     ARRAY,
     /**
-     * Array of users
+     * Array of users.
+     * A user context menu will be automatically added for this setting.
      */
     USERS,
     /**
-     * Array of channels
+     * Array of channels.
+     * A channel context menu will be automatically added for this setting.
      */
     CHANNELS,
     /**
-     * Array of guilds
+     * Array of guilds.
+     * A guild context menu will be automatically added for this setting.
      */
     GUILDS
 }
