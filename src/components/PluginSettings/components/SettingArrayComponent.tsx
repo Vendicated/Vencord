@@ -68,8 +68,25 @@ export function SettingArrayComponent({
     id
 }: ISettingElementProps<PluginOptionArray>) {
     const [error, setError] = useState<string | null>(null);
-    const [items, setItems] = useState<string[]>(pluginSettings[id] || []);
+    const [items, setItems] = useState<string[]>(ensureSettingsMigrated() || []);
     const [text, setText] = useState<string>("");
+
+    function ensureSettingsMigrated(): string[] | undefined {
+        // in case the settings get manually overridden without a restart of Vencord itself this will prevent crashing
+        if (pluginSettings[id] == null || Array.isArray(pluginSettings[id])) {
+            return pluginSettings[id];
+        }
+        let migrated: string[];
+        if (typeof option.oldStringSeparator === "string" || option.oldStringSeparator instanceof RegExp) {
+            migrated = pluginSettings[id]?.split(option.oldStringSeparator);
+        } else if (typeof option.oldStringSeparator === "function") {
+            migrated = option.oldStringSeparator(pluginSettings[id]);
+        } else {
+            throw new Error(`Invalid oldStringSeparator for in setting ${id} for plugin ${definedSettings?.pluginName || "Unknown plugin"}`);
+        }
+        onChange(migrated);
+        return migrated;
+    }
 
     useEffect(() => {
         if (text === "") {
