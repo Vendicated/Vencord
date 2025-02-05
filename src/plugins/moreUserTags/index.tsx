@@ -6,6 +6,7 @@
 
 import "./styles.css";
 
+import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
@@ -15,6 +16,8 @@ import { Channel, Message, User } from "discord-types/general";
 import { computePermissions, Tag, tags } from "./consts";
 import { settings } from "./settings";
 import { TagSettings } from "./types";
+
+const cl = classNameFactory("vc-mut-");
 
 const genTagTypes = () => {
     let i = 100;
@@ -84,7 +87,7 @@ export default definePlugin({
 
         return tagId && <Tag
             useRemSizes={true}
-            className={"vc-mut-message-tag" + (props.message.author.isVerifiedBot() ? " vc-mut-message-verified" : "")}
+            className={cl("message-tag", props.message.author.isVerifiedBot() && "message-verified")}
             type={tagId}
             verified={false}>
         </Tag>;
