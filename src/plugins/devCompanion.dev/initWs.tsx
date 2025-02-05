@@ -137,8 +137,6 @@ export function initWs(isManual = false) {
             ws.send(JSON.stringify(toSend));
         }
 
-        logger.info("Received Message:", d.type, "\n", d.data);
-
         switch (d.type) {
             case "disable": {
                 const m = d.data;
@@ -177,7 +175,7 @@ export function initWs(isManual = false) {
                         case "search": {
                             let moduleId: number;
                             if (m.findType === "string")
-                                moduleId = +findModuleId([m.idOrSearch.toString()]);
+                                moduleId = +findModuleId([canonicalizeMatch(m.idOrSearch.toString())]);
                             else
                                 moduleId = +findModuleId(mkRegexFind(m.idOrSearch));
                             const p = extractOrThrow(moduleId);
@@ -218,7 +216,7 @@ export function initWs(isManual = false) {
                                     type: "extract",
                                     ok: true,
                                     data: {
-                                        module: extractModule(m.idOrSearch),
+                                        module: extractModule(m.idOrSearch, m.usePatched ?? undefined),
                                         moduleNumber: m.idOrSearch,
                                     },
                                 });
@@ -228,7 +226,7 @@ export function initWs(isManual = false) {
                         case "search": {
                             let moduleId;
                             if (m.findType === "string")
-                                moduleId = +findModuleId([m.idOrSearch.toString()]);
+                                moduleId = +findModuleId([canonicalizeMatch(m.idOrSearch.toString())]);
 
                             else
                                 moduleId = +findModuleId(mkRegexFind(m.idOrSearch));
@@ -236,7 +234,7 @@ export function initWs(isManual = false) {
                                 type: "extract",
                                 ok: true,
                                 data: {
-                                    module: extractModule(moduleId),
+                                    module: extractModule(moduleId, m.usePatched ?? undefined),
                                     moduleNumber: moduleId
                                 },
                             });
@@ -446,7 +444,6 @@ interface AllModulesNotiProps {
 const AllModulesNoti = ErrorBoundary.wrap(function ({ done, close }: AllModulesNotiProps) {
     const [state, setState] = useState<0 | 1 | -1>(0);
     done.then(setState.bind(null, 1)).catch(setState.bind(null, -1));
-    console.log("test");
     if (state === 1) setTimeout(close, 5000);
     return (<>
         {state === 0 && "Loading lazy modules, restarting could lead to errors"}
