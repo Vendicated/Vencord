@@ -302,7 +302,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
         const channelLabel = getChannelLabel(channel, UserStore, RelationshipStore, false);
 
-        const parentChannelLabel = (): string => {
+        const parentChannelLabel = (): string | null => {
             const parentChannel = ChannelStore.getChannel(channel.parent_id);
             return parentChannel ? getChannelLabel(parentChannel, UserStore, RelationshipStore, false) : null;
         };
