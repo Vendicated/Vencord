@@ -69,17 +69,23 @@ export const filters = {
         m.constructor?.displayName === name,
 
     componentByCode: (...code: CodeFilter): FilterFn => {
-        const filter = filters.byCode(...code);
-        return m => {
-            if (filter(m)) return true;
-            if (!m.$$typeof) return false;
-            if (m.type)
-                return m.type.render
-                    ? filter(m.type.render) // memo + forwardRef
-                    : filter(m.type); // memo
-            if (m.render) return filter(m.render); // forwardRef
+        const byCodeFilter = filters.byCode(...code);
+        const filter = m => {
+            let inner = m;
+
+            while (inner != null) {
+                if (byCodeFilter(inner)) return true;
+                else if (!inner.$$typeof) return false;
+                else if (inner.type) inner = inner.type; // memos
+                else if (inner.render) inner = inner.render; // forwardRefs
+                else return false;
+            }
+
             return false;
         };
+
+        filter.$$vencordProps = [...code];
+        return filter;
     }
 };
 
@@ -93,6 +99,38 @@ export const beforeInitListeners = new Set<(wreq: WebpackInstance) => void>();
 export function _initWebpack(webpackRequire: WebpackInstance) {
     wreq = webpackRequire;
     cache = webpackRequire.c;
+}
+
+// Credits to Zerebos for implementing this in BD, thus giving the idea for us to implement it too
+const TypedArray = Object.getPrototypeOf(Int8Array);
+
+function _shouldIgnoreValue(value: any) {
+    if (value == null) return true;
+    if (value === window) return true;
+    if (value === document || value === document.documentElement) return true;
+    if (value[Symbol.toStringTag] === "DOMTokenList") return true;
+    if (value instanceof TypedArray) return true;
+
+    return false;
+}
+
+export function _shouldIgnoreModule(exports: any) {
+    if (_shouldIgnoreValue(exports)) {
+        return true;
+    }
+
+    if (typeof exports !== "object") {
+        return false;
+    }
+
+    let allNonEnumerable = true;
+    for (const exportKey in exports) {
+        if (!_shouldIgnoreValue(exports[exportKey])) {
+            allNonEnumerable = false;
+        }
+    }
+
+    return allNonEnumerable;
 }
 
 let devToolsOpen = false;
@@ -121,18 +159,13 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
 
     for (const key in cache) {
         const mod = cache[key];
-        if (!mod.loaded || !mod?.exports) continue;
+        if (!mod?.loaded || mod.exports == null) continue;
 
         if (filter(mod.exports)) {
             return isWaitFor ? [mod.exports, key] : mod.exports;
         }
 
         if (typeof mod.exports !== "object") continue;
-
-        if (mod.exports.default && filter(mod.exports.default)) {
-            const found = mod.exports.default;
-            return isWaitFor ? [found, key] : found;
-        }
 
         for (const nestedMod in mod.exports) {
             const nested = mod.exports[nestedMod];
@@ -156,16 +189,15 @@ export function findAll(filter: FilterFn) {
     const ret = [] as any[];
     for (const key in cache) {
         const mod = cache[key];
-        if (!mod.loaded || !mod?.exports) continue;
+        if (!mod?.loaded || mod.exports == null) continue;
 
         if (filter(mod.exports))
             ret.push(mod.exports);
-        else if (typeof mod.exports !== "object")
+
+        if (typeof mod.exports !== "object")
             continue;
 
-        if (mod.exports.default && filter(mod.exports.default))
-            ret.push(mod.exports.default);
-        else for (const nestedMod in mod.exports) {
+        for (const nestedMod in mod.exports) {
             const nested = mod.exports[nestedMod];
             if (nested && filter(nested)) ret.push(nested);
         }
@@ -204,7 +236,7 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
     outer:
     for (const key in cache) {
         const mod = cache[key];
-        if (!mod.loaded || !mod?.exports) continue;
+        if (!mod?.loaded || mod.exports == null) continue;
 
         for (let j = 0; j < length; j++) {
             const filter = filters[j];
@@ -220,13 +252,6 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
 
             if (typeof mod.exports !== "object")
                 continue;
-
-            if (mod.exports.default && filter(mod.exports.default)) {
-                results[j] = mod.exports.default;
-                filters[j] = undefined;
-                if (++found === length) break outer;
-                break;
-            }
 
             for (const nestedMod in mod.exports) {
                 const nested = mod.exports[nestedMod];
