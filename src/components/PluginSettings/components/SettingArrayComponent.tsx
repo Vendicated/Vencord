@@ -72,6 +72,18 @@ export function SettingArrayComponent({
     const [text, setText] = useState<string>("");
 
     useEffect(() => {
+        if (text === "") {
+            setError(null);
+            return;
+        }
+
+        if (option.type === OptionType.ARRAY) {
+            const isValid = option.isValid?.call(definedSettings, text) ?? true;
+            if (typeof isValid === "string") setError(isValid);
+            else if (!isValid) setError("Invalid input provided.");
+            else setError(null);
+            return;
+        }
         if (!isNaN(Number(text)) && text !== "") {
             if (text.length >= 18 && text.length <= 19) {
                 setError(null);
@@ -79,7 +91,10 @@ export function SettingArrayComponent({
                 setError("Invalid ID");
             }
         } else if (text !== "") {
-            setError(null);
+            const isValid = option.isValid?.call(definedSettings, text) ?? true;
+            if (typeof isValid === "string") setError(isValid);
+            else if (!isValid) setError("Invalid input provided.");
+            else setError(null);
         }
     }, [text]);
 
@@ -377,7 +392,7 @@ export function SettingArrayComponent({
                             id={cl("add-button")}
                             onClick={handleSubmit}
                             style={{ background: "none" }}
-                            disabled={((text.length < 18 || text.length > 19) && option.type !== OptionType.ARRAY) || text === ""}
+                            disabled={((text.length < 18 || text.length > 19) && option.type !== OptionType.ARRAY) || text === "" || error != null}
                         >
                             <CheckMarkIcon />
                         </Button> :

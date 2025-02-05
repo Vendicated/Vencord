@@ -326,14 +326,14 @@ export interface PluginSettingArrayDef {
      * Only applies to User, Channel, and Guild arrays.
      */
     hidePopout?: boolean;
-    default?: any[];
+    default?: string[];
     /**
      * If the setting used to be a string with a custom delimiter, you can specify the delimiter or a function to split the string
      * @default ","
      */
     oldStringSeparator?: string | ((value: string) => string[]) | RegExp;
 
-    onChange?(newValue: any[]): void;
+    onChange?(newValue: string[]): void;
 }
 
 export interface IPluginOptionComponentProps {
@@ -434,7 +434,7 @@ export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & 
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
 export type PluginOptionComponent = PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">;
 export type PluginOptionCustom = PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">;
-export type PluginOptionArray = PluginSettingArrayDef & PluginSettingCommon;
+export type PluginOptionArray = PluginSettingArrayDef & PluginSettingCommon & IsDisabled & IsValid<string>;
 
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
     [key in keyof PluginExports]:
