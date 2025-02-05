@@ -20,14 +20,39 @@ import { definePluginSettings } from "@api/Settings";
 import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { useMemo } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, SelectedChannelStore } from "@webpack/common";
+
+function calculateHSLforId(id: string) {
+    // No hooks here because it breaks RoleColorsEverywhere
+    // There is a condition to use this function, so react will refure to render the component
+    // If we remove the condition, then the hash will be calculated even if this plugin is disabled
+    // And everything would seem fine except mentions, those are still under some condition inside of discord code
+    return {
+        hue: Number(h64(id) % 360n),
+        saturation: 100,
+        lightness: settings.store.lightness
+    };
+}
+
+// https://stackoverflow.com/a/44134328
+// Role Color Everywhere expects colorString to be hex, so...
+function hslToHex(hue, saturation, lightness) {
+    lightness /= 100;
+    const a = saturation * Math.min(lightness, 1 - lightness) / 100;
+    const f = n => {
+        const k = (n + hue / 30) % 12;
+        const color = lightness - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, "0"); // convert to Hex and prefix "0" if needed
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
+}
 
 // Calculate a CSS color string based on the user ID
 function calculateNameColorForUser(id?: string) {
-    const { lightness } = settings.use(["lightness"]);
-    const idHash = useMemo(() => id ? h64(id) : null, [id]);
+    if (!id) return null;
+    const { hue, saturation, lightness } = calculateHSLforId(id);
 
-    return idHash && `hsl(${idHash % 360n}, 100%, ${lightness}%)`;
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
 
 const settings = definePluginSettings({
@@ -59,15 +84,15 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "IrcColors",
     description: "Makes username colors in chat unique, like in IRC clients",
-    authors: [Devs.Grzesiek11, Devs.jamesbt365],
+    authors: [Devs.Grzesiek11, Devs.jamesbt365, Devs.hen],
     settings,
 
     patches: [
         {
-            find: '="SYSTEM_TAG"',
+            find: '"Result cannot be null because the message is not null"',
             replacement: {
-                match: /(?<=className:\i\.username,style:.{0,50}:void 0,)/,
-                replace: "style:{color:$self.calculateNameColorForMessageContext(arguments[0])},"
+                match: /let (\i)=\i\(\i\);(?=.{1,25}"Result cannot be null because the message is not null")/,
+                replace: "$&$1.colorString=$self.calculateNameColorForMessageContext(arguments[0],$1.colorString);"
             }
         },
         {
@@ -79,31 +104,28 @@ export default definePlugin({
             predicate: () => settings.store.memberListColors
         }
     ],
+    // Propped to be used in TypingTweaks/RoleColorsEverywhere
+    calculateHSLforId,
+    resolveUsedColor(userId: string) {
+        const channelId = SelectedChannelStore.getChannelId();
+        const channel = ChannelStore.getChannel(channelId);
+        const colorString = GuildMemberStore.getMember(channel.guild_id, userId)?.colorString;
 
-    calculateNameColorForMessageContext(context: any) {
-        const id = context?.message?.author?.id;
-        const colorString = context?.author?.colorString;
-        const color = calculateNameColorForUser(id);
+        if (settings.store.applyColorOnlyInDms && !channel?.isPrivate()) return colorString;
+        if (settings.store.applyColorOnlyToUsersWithoutColor && colorString) return colorString;
 
-        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
-            return colorString;
-        }
+        const { hue, lightness, saturation } = calculateHSLforId(userId);
 
-        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
-            ? color
-            : colorString;
+        return hslToHex(hue, saturation, lightness);
+    },
+    calculateNameColorForMessageContext(message: any, colorString: string) {
+        const id = message?.author?.id;
+
+        return id ? this.resolveUsedColor(id) : undefined;
+
     },
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
-        const colorString = context?.colorString;
-        const color = calculateNameColorForUser(id);
-
-        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
-            return colorString;
-        }
-
-        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
-            ? color
-            : colorString;
+        return id ? this.resolveUsedColor(id) : undefined;
     }
 });

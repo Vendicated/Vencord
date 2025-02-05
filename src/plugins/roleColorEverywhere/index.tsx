@@ -161,8 +161,13 @@ export default definePlugin({
             predicate: () => settings.store.colorChatMessages
         }
     ],
-
     getColorString(userId: string, channelOrGuildId: string) {
+        if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
+            // @ts-ignore
+            const color = Vencord.Plugins.plugins.IrcColors?.resolveUsedColor?.(userId);
+            if (color) return color;
+        }
+
         try {
             const guildId = ChannelStore.getChannel(channelOrGuildId)?.guild_id ?? GuildStore.getGuild(channelOrGuildId)?.id;
             if (guildId == null) return null;
