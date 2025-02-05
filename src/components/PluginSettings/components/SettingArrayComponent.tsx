@@ -77,20 +77,18 @@ export function SettingArrayComponent({
             return;
         }
 
-        if (option.type === OptionType.ARRAY) {
-            const isValid = option.isValid?.call(definedSettings, text) ?? true;
-            if (typeof isValid === "string") setError(isValid);
-            else if (!isValid) setError("Invalid input provided.");
-            else setError(null);
+        if (items.includes(text)) {
+            setError("This item is already added");
             return;
         }
-        if (!isNaN(Number(text)) && text !== "") {
+
+        if (option.type !== OptionType.ARRAY && !isNaN(Number(text)) && text !== "") {
             if (text.length >= 18 && text.length <= 19) {
                 setError(null);
             } else {
                 setError("Invalid ID");
             }
-        } else if (text !== "") {
+        } else {
             const isValid = option.isValid?.call(definedSettings, text) ?? true;
             if (typeof isValid === "string") setError(isValid);
             else if (!isValid) setError("Invalid input provided.");
@@ -331,19 +329,6 @@ export function SettingArrayComponent({
         return elements;
     }
 
-    function handleSubmit() {
-        if (items.includes(text)) {
-            setError("This item is already added");
-            setText("");
-            return;
-        }
-
-        setItems([...items, text]);
-
-        setText("");
-        setError(null);
-    }
-
 
     return (
         <Forms.FormSection>
@@ -390,9 +375,9 @@ export function SettingArrayComponent({
                         <Button
                             size={Button.Sizes.MIN}
                             id={cl("add-button")}
-                            onClick={handleSubmit}
+                            onClick={() => { setItems([...items, text]); setText(""); }}
                             style={{ background: "none" }}
-                            disabled={((text.length < 18 || text.length > 19) && option.type !== OptionType.ARRAY) || text === "" || error != null}
+                            disabled={text === "" || error != null}
                         >
                             <CheckMarkIcon />
                         </Button> :
