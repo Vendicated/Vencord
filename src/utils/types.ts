@@ -148,12 +148,13 @@ export interface PluginDef {
      * The key will be used as text for the button
      */
     toolboxActions?: Record<string, () => void>;
-    /**
-     * An imported managed style to be enabled only when the plugin is enabled
-     */
-    style?: Style;
 
     tags?: string[];
+
+    /**
+     * Managed style to automatically enable and disable when the plugin is enabled or disabled
+     */
+    managedStyle?: Style;
 
     userProfileBadge?: ProfileBadge;
 

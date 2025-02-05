@@ -21,12 +21,13 @@ import { setStyleVariables } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-import style from "./style.css?managed";
+import managedStyle from "./style.css?managed";
 
 export default definePlugin({
     name: "BlurNSFW",
     description: "Blur attachments in NSFW channels until hovered",
     authors: [Devs.Ven],
+    managedStyle,
 
     patches: [
         {
@@ -44,14 +45,12 @@ export default definePlugin({
             description: "Blur Amount (in pixels)",
             default: 10,
             onChange(v) {
-                setStyleVariables(style, { blurAmount: v });
+                setStyleVariables(managedStyle, { blurAmount: v });
             }
         }
     }),
 
     start() {
-        setStyleVariables(style, { blurAmount: this.settings.store.blurAmount });
-    },
-
-    style
+        setStyleVariables(managedStyle, { blurAmount: this.settings.store.blurAmount });
+    }
 });

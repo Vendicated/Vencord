@@ -28,7 +28,7 @@ import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
 import { ELEMENT_ID } from "./constants";
-import style from "./styles.css?managed";
+import managedStyle from "./styles.css?managed";
 
 export const settings = definePluginSettings({
     saveZoomValues: {
@@ -159,6 +159,8 @@ export default definePlugin({
     authors: [Devs.Aria],
     tags: ["ImageUtilities"],
 
+    managedStyle,
+
     patches: [
         {
             find: ".contain,SCALE_DOWN:",
@@ -260,7 +262,5 @@ export default definePlugin({
         // so componenetWillUnMount gets called if Magnifier component is still alive
         this.root && this.root.unmount();
         this.element?.remove();
-    },
-
-    style
+    }
 });
