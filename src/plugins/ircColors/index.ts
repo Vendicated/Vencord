@@ -122,6 +122,7 @@ export default definePlugin({
     },
 
     calculateHSLforId,
+    calculateNameColorForUser,
     calculateNameColorForMessageContext(context: any) {
         const userId: string | undefined = context?.message?.author?.id;
         const colorString = context?.author?.colorString;

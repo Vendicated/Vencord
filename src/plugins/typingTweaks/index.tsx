@@ -68,6 +68,15 @@ interface TypingUserProps {
     guildId: string;
 }
 
+const getUserColor = (userId: string, guildId: string) => {
+    if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
+        // @ts-ignore
+        const color = Vencord.Plugins.plugins?.IrcColors?.calculateNameColorForUser?.(userId);
+        if (color) return color;
+    }
+
+    return GuildMemberStore.getMember(guildId, userId)?.colorString;
+};
 const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: TypingUserProps) {
     return (
         <strong
@@ -77,7 +86,7 @@ const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: Typ
                 openUserProfile(user.id);
             }}
             style={{
-                color: settings.store.showRoleColors ? GuildMemberStore.getMember(guildId, user.id)?.colorString : undefined,
+                color: settings.store.showRoleColors ? getUserColor(user.id, guildId) : undefined,
             }}
         >
             {settings.store.showAvatars && (
