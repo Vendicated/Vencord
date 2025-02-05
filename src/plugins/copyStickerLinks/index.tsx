@@ -36,11 +36,9 @@ interface Sticker {
     type: number;
 }
 
-type Data = Sticker;
-
 const StickerExt = [, "png", "png", "json", "gif"] as const;
 
-function getUrl(data: Data) {
+function getUrl(data: Sticker) {
     if (data.format_type === 4)
         return `https:${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.gif?size=4096&lossless=true`;
 
