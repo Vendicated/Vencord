@@ -57,6 +57,15 @@ interface Props {
     guildId: string;
 }
 
+const getUserColor = (userId: string, guildId: string) => {
+    if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
+        // @ts-ignore
+        const color = Vencord.Plugins.plugins?.IrcColors?.calculateNameColorForUser?.(userId);
+        if (color) return color;
+    }
+
+    return GuildMemberStore.getMember(guildId, userId)?.colorString;
+};
 const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
     return (
         <strong
@@ -68,7 +77,7 @@ const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
                 display: "grid",
                 gridAutoFlow: "column",
                 gap: "4px",
-                color: settings.store.showRoleColors ? GuildMemberStore.getMember(guildId, user.id)?.colorString : undefined,
+                color: settings.store.showRoleColors ? getUserColor(user?.id, guildId) : undefined,
                 cursor: "pointer"
             }}
         >

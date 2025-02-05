@@ -91,7 +91,9 @@ export default definePlugin({
             predicate: () => settings.store.memberListColors
         }
     ],
+    // Propped to be used in TypingTweaks/RoleColorsEverywhere
     calculateHSLforId,
+    calculateNameColorForUser,
     calculateNameColorForMessageContext(message: any, colorString: string) {
         const id = message?.author?.id;
         const color = calculateNameColorForUser(id);
