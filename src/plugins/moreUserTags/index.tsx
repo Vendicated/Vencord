@@ -84,7 +84,7 @@ export default definePlugin({
 
         return tagId && <Tag
             useRemSizes={true}
-            className="vc-more-user-tags-message-tag"
+            className={"vc-mut-message-tag" + (props.message.author.isVerifiedBot() ? " vc-mut-message-verified" : "")}
             type={tagId}
             verified={false}>
         </Tag>;
