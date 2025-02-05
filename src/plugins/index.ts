@@ -157,6 +157,7 @@ for (const p of pluginsValues) {
             const checks = p.settings.checks?.[name];
             p.options[name] = { ...def, ...checks };
 
+            // TODO remove this in a few months when everyone has updated.
             if (
                 (def.type === OptionType.ARRAY || def.type === OptionType.USERS || def.type === OptionType.GUILDS || def.type === OptionType.CHANNELS)
                 && typeof p.settings.store[name] === "string"
