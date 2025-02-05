@@ -61,7 +61,7 @@ async function fetchSticker(id: string) {
     return body as Sticker;
 }
 
-function buildMenuItem(type: "Sticker", fetchData: () => Promisable<Omit<Sticker, "t">>) {
+function buildMenuItem(stickerId: string) {
     return (
         <>
             <Menu.MenuSeparator></Menu.MenuSeparator>
