@@ -797,5 +797,5 @@ export default definePlugin({
     },
     startAt: StartAt.DOMContentLoaded,
     // preview thing, kinda low effort but eh
-    settingsAboutComponent: () => <img src="https://files.catbox.moe/j8y2gt.webp" style={{ width: "568px", borderRadius: "30px" }} ></img>
+    settingsAboutComponent: () => <img src="https://cdn.nest.rip/uploads/97fdf6c1-764c-4445-9422-d3d52af7434c.webp" style={{ width: "568px", borderRadius: "30px" }} ></img>
 });
