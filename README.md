@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>150 additional plugins</summary>
+<summary>151 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -136,6 +136,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ThemeLibrary by Fafa
 - Timezones by Aria
 - Title by Kyuuhachi
+- toggleVideoBind by mochie
 - TosuRPC by AutumnVN
 - Translate+ by Prince527 & Ven
 - UnitConverter by sadan
