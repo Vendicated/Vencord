@@ -41,10 +41,10 @@ type Data = Sticker;
 const StickerExt = [, "png", "png", "json", "gif"] as const;
 
 function getUrl(data: Data) {
-    if (data.t === "Sticker")
-        return `https:${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=2048&lossless=true`;
+    if (data.format_type === 1 || data.format_type === 3)
+        return `https:${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
 
-    return "";
+    return "https://cdn.discordapp.com";
 }
 
 async function fetchSticker(id: string) {
