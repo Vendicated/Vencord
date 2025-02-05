@@ -23,7 +23,14 @@ import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
-import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendListener, removeMessageClickListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
+import {
+    addMessageClickListener,
+    addMessagePreEditListener,
+    addMessagePreSendListener,
+    removeMessageClickListener,
+    removeMessagePreEditListener,
+    removeMessagePreSendListener
+} from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
@@ -149,6 +156,27 @@ for (const p of pluginsValues) {
             const def = p.settings.def[name];
             const checks = p.settings.checks?.[name];
             p.options[name] = { ...def, ...checks };
+
+            if (
+                (def.type === OptionType.ARRAY || def.type === OptionType.USERS || def.type === OptionType.GUILDS || def.type === OptionType.CHANNELS)
+                && typeof p.settings.store[name] === "string"
+            ) {
+                if (p.settings.store[name] === "")
+                    p.settings.store[name] = def.default ?? [];
+                else {
+                    logger.info(`Converting string values of setting ${name} of plugin ${p.name} to array`);
+
+                    const sep = def.oldStringSeparator ?? ",";
+                    let newVal: string[];
+                    if (typeof sep === "string" || sep instanceof RegExp) newVal = p.settings.store[name].split(sep);
+                    else newVal = sep(p.settings.store[name]);
+
+                    // additional safeguard to prevent the new array to be an empty string, looks weird in the UI.
+                    if (newVal.length > 1 || newVal[0] !== "") p.settings.store[name] = newVal;
+                    else p.settings.store[name] = [];
+
+                }
+            }
         }
     }
 
@@ -255,24 +283,10 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const {
-        name, commands, contextMenus, settings, managedStyle, userProfileBadge,
+        name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
     } = p;
-
-    if (settings != null)
-        for (const setting of Object.keys(settings.def)) {
-            const { type } = settings.def[setting];
-            if (type === OptionType.ARRAY || type === OptionType.USERS || type === OptionType.GUILDS || type === OptionType.CHANNELS) {
-                if (typeof settings.store[setting] === "string") {
-                    logger.info(`Converting string values of setting ${setting} of plugin ${name} to array`);
-
-                    const sep = settings.def[setting].oldStringSeparator ?? ",";
-                    if (typeof sep === "string") settings.store[setting] = settings.store[setting].split(sep);
-                    else settings.store[setting] = sep(settings.store[setting]);
-                }
-            }
-        }
 
     if (p.start) {
         logger.info("Starting plugin", name);

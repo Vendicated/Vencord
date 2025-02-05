@@ -45,7 +45,14 @@ const settings = definePluginSettings({
     additionalQuotes: {
         description: "Additional custom quotes to possibly appear",
         type: OptionType.ARRAY,
-        oldStringSeparator: "|",
+        oldStringSeparator: s => {
+            if ("additionalQuotesDelimiter" in settings.store) {
+                const deli = settings.store.additionalQuotesDelimiter ?? "|";
+                delete settings.store.additionalQuotesDelimiter;
+                return s.split(deli);
+            }
+            return s.split("|");
+        },
     },
 });
 

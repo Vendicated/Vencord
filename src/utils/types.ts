@@ -315,10 +315,12 @@ export interface PluginSettingArrayDef {
     /**
      * The text to show in the context-menu.
      * If not specified, the setting name will be used.
+     * Only applies to User, Channel, and Guild arrays.
      */
     popoutText?: string;
     /**
      * If the context-menu entry should be hidden.
+     * Only applies to User, Channel, and Guild arrays.
      */
     hidePopout?: boolean;
     default?: any[];
@@ -326,7 +328,7 @@ export interface PluginSettingArrayDef {
      * If the setting used to be a string with a custom delimiter, you can specify the delimiter or a function to split the string
      * @default ","
      */
-    oldStringSeparator?: string | ((value: string) => string[]);
+    oldStringSeparator?: string | ((value: string) => string[]) | RegExp;
 
     onChange?(newValue: any[]): void;
 }
