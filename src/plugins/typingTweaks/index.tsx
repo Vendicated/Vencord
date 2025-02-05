@@ -69,13 +69,13 @@ interface TypingUserProps {
 }
 
 const getUserColor = (userId: string, guildId: string) => {
-    const roleColor = GuildMemberStore.getMember(guildId, userId)?.colorString;
-
     if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
         // @ts-ignore
         const color = Vencord.Plugins.plugins.IrcColors?.resolveUsedColor?.(userId);
         if (color) return color;
     }
+
+    return GuildMemberStore.getMember(guildId, userId)?.colorString;
 };
 const TypingUser = ErrorBoundary.wrap(function TypingUser({ user, guildId }: TypingUserProps) {
     return (
