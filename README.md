@@ -30,7 +30,8 @@ Download at https://github.com/enzomtpYT/PawsomeVencordInstaller/releases
 
 ## Join our Support/Community Server
 
-https://discord.gg/D9uwnFnqmd
+[Vencord Support/Community Server](https://discord.gg/D9uwnFnqmd)
+PawsomeVencord server soon
 
 ## Sponsors
 
