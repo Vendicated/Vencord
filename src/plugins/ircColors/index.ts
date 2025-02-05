@@ -35,6 +35,7 @@ function calculateHSLforId(id: string) {
 }
 
 // https://stackoverflow.com/a/44134328
+// Role Color Everywhere expects colorString to be hex, so...
 function hslToHex(hue, saturation, lightness) {
     lightness /= 100;
     const a = saturation * Math.min(lightness, 1 - lightness) / 100;
