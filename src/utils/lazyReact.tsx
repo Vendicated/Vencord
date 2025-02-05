@@ -24,6 +24,21 @@ export function LazyComponent<T extends object = any>(factory: () => React.Compo
     };
 
     LazyComponent.$$vencordInternal = get;
-
+    Object.defineProperty(LazyComponent, "name", {
+        enumerable: false,
+        get() {
+            const got = get();
+            let name;
+            if (Function.prototype.toString.call(got).startsWith("class")) {
+                name = got.displayName;
+            } else {
+                name = got.name;
+            }
+            return `${name ? `${name}-` : ""}LazyComponent`;
+        }
+    });
+    // Object.defineProperty(LazyComponent, "displayName", {
+    //     value: "TEST123DisplayName",
+    // });
     return LazyComponent as ComponentType<T>;
 }

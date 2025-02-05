@@ -27,11 +27,20 @@ export function waitForComponent<T extends React.ComponentType<any> = React.Comp
     let myValue: T = function () {
         throw new Error(`Vencord could not find the ${name} Component`);
     } as any;
-
     const lazyComponent = LazyComponent(() => myValue) as T;
     waitFor(filter, (v: any) => {
         myValue = v;
         Object.assign(lazyComponent, v);
+        if ("toString" in v && typeof v.toString === "function" && Function.prototype.toString.call(v.toString).includes("{ [native code] }")) {
+            const str: string = v.toString();
+            if (typeof str !== "string")
+                void 0;
+            else if (str.startsWith("class")) {
+                Object.defineProperty(v, "displayName", { value: name });
+            } else if (str.startsWith("function")) {
+                Object.defineProperty(v, "name", { value: name });
+            }
+        }
     }, { isIndirect: true });
 
     return lazyComponent;
