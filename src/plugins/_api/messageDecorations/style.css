@@ -12,7 +12,7 @@
     /* Align vertically */
     position: relative;
     vertical-align: top;
-    top: 0.05rem;
-    height: 100%;
+    top: 0.1rem;
+    height: calc(1rem + 4px);
     max-height: calc(1rem + 4px)
 }
