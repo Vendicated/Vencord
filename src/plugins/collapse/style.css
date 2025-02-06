@@ -1,0 +1,26 @@
+.vc-toggle-sidebar-button {
+    display: block;
+    margin: 0.7em auto 0.5em;
+    padding: 0;
+    transition: transform 0.1s;
+}
+
+.vc-toggle-sidebar-button svg {
+    height: min-content;
+    width: var(--sidebar-button-size, 2.5em);
+    margin: 0;
+    padding: 0;
+
+}
+
+.vc-toggle-sidebar-button svg * {
+    --sidebar-icon-stroke: var(--interactive-normal);
+}
+
+.vc-toggle-sidebar-button:hover {
+    transform: scale(1.1);
+}
+
+.vc-toggle-sidebar-button:hover svg * {
+    --sidebar-icon-stroke: var(--interactive-active);
+}
