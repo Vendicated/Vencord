@@ -8,7 +8,7 @@ import { UploadIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, showToast, UserStore } from "@webpack/common";
-import { Common } from "webpack";
+import { Common, findByProps } from "webpack";
 
 export default definePlugin({
     name: "AddAttachments",
@@ -57,7 +57,7 @@ export default definePlugin({
                             {
                                 filename: file.name,
                                 file_size: file.size,
-                                id: Math.round(Math.random() * 99999999),
+                                id: findByProps("uniqueId").uniqueId(),
                                 is_clip: false
                             }
                         ]
