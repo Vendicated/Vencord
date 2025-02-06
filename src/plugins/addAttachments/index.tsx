@@ -7,7 +7,7 @@
 import { UploadIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, showToast, UserStore } from "@webpack/common";
+import { ChannelStore, MessageStore, PermissionsBits, PermissionStore, SelectedChannelStore, showToast, Toasts, UserStore } from "@webpack/common";
 import { Common, findByPropsLazy } from "webpack";
 
 const uniqueIdProp = findByPropsLazy("uniqueId");
@@ -45,11 +45,11 @@ export default definePlugin({
             if (!input.files) return input.remove();
 
             if ((10 - messageAttachments) < input.files.length) {
-                showToast(`You can only add ${10 - messageAttachments} more attachments to this message.`, 2);
+                showToast(`You can only add ${10 - messageAttachments} more attachments to this message.`, Toasts.Type.FAILURE);
                 return input.remove();
             }
 
-            showToast("Uploading, this can take a while...");
+            showToast("Uploading, this can take a while...", Toasts.Type.CLOCK);
 
             const files = Array.from(input.files).map(file => ({
                 filename: file.name,
@@ -87,6 +87,8 @@ export default definePlugin({
                     ]
                 }
             });
+
+            showToast("Attachments added successfully!", Toasts.Type.SUCCESS);
 
             input.remove();
         });
