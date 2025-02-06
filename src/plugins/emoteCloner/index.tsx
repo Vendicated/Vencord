@@ -211,7 +211,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                 alignItems: "center"
             }}>
                 {guilds.map(g => (
-                    <Tooltip text={g.name}>
+                    <Tooltip key={g.id} text={g.name}>
                         {({ onMouseLeave, onMouseEnter }) => (
                             <div
                                 onMouseLeave={onMouseLeave}
@@ -310,7 +310,8 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
 }
 
 function isGifUrl(url: string) {
-    return new URL(url).pathname.endsWith(".gif");
+    const u = new URL(url);
+    return u.pathname.endsWith(".gif") || u.searchParams.get("animated") === "true";
 }
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {

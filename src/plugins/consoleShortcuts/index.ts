@@ -18,7 +18,9 @@
 
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, getCurrentGuild } from "@utils/discord";
+import { runtimeHashMessageKey } from "@utils/intlHash";
 import { SYM_LAZY_CACHED, SYM_LAZY_GET } from "@utils/lazy";
+import { ModalAPI } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from "@utils/patches";
 import definePlugin, { PluginNative, StartAt } from "@utils/types";
@@ -61,7 +63,7 @@ function makeShortcuts() {
                     default:
                         const uniqueMatches = [...new Set(matches)];
                         if (uniqueMatches.length > 1)
-                            console.warn(`Warning: This filter matches ${matches.length} modules. Make it more specific!\n`, uniqueMatches);
+                            console.warn(`Warning: This filter matches ${uniqueMatches.length} exports. Make it more specific!\n`, uniqueMatches);
 
                         return matches[0];
                 }
@@ -104,6 +106,7 @@ function makeShortcuts() {
         canonicalizeMatch,
         canonicalizeReplace,
         canonicalizeReplacement,
+        runtimeHashMessageKey,
         fakeRender: (component: ComponentType, props: any) => {
             const prevWin = fakeRenderWin?.deref();
             const win = prevWin?.closed === false
@@ -130,7 +133,10 @@ function makeShortcuts() {
                 });
             }
 
-            Common.ReactDOM.render(Common.React.createElement(component, props), doc.body.appendChild(document.createElement("div")));
+            const root = Common.ReactDOM.createRoot(doc.body.appendChild(document.createElement("div")));
+            root.render(Common.React.createElement(component, props));
+
+            doc.addEventListener("close", () => root.unmount(), { once: true });
         },
 
         preEnable: (plugin: string) => (Vencord.Settings.plugins[plugin] ??= { enabled: true }).enabled = true,
@@ -142,6 +148,8 @@ function makeShortcuts() {
         me: { getter: () => Common.UserStore.getCurrentUser(), preload: false },
         meId: { getter: () => Common.UserStore.getCurrentUser().id, preload: false },
         messages: { getter: () => Common.MessageStore.getMessages(Common.SelectedChannelStore.getChannelId()), preload: false },
+        openModal: { getter: () => ModalAPI.openModal },
+        openModalLazy: { getter: () => ModalAPI.openModalLazy },
 
         Stores: {
             getter: () => Object.fromEntries(
@@ -157,11 +165,38 @@ function loadAndCacheShortcut(key: string, val: any, forceLoad: boolean) {
     const currentVal = val.getter();
     if (!currentVal || val.preload === false) return currentVal;
 
-    const value = currentVal[SYM_LAZY_GET]
-        ? forceLoad ? currentVal[SYM_LAZY_GET]() : currentVal[SYM_LAZY_CACHED]
-        : currentVal;
+    function unwrapProxy(value: any) {
+        if (value[SYM_LAZY_GET]) {
+            forceLoad ? currentVal[SYM_LAZY_GET]() : currentVal[SYM_LAZY_CACHED];
+        } else if (value.$$vencordInternal) {
+            return forceLoad ? value.$$vencordInternal() : value;
+        }
 
-    if (value) define(window.shortcutList, key, { value });
+        return value;
+    }
+
+    const value = unwrapProxy(currentVal);
+    if (typeof value === "object" && value !== null) {
+        const descriptors = Object.getOwnPropertyDescriptors(value);
+
+        for (const propKey in descriptors) {
+            if (value[propKey] == null) continue;
+
+            const descriptor = descriptors[propKey];
+            if (descriptor.writable === true || descriptor.set != null) {
+                const currentValue = value[propKey];
+                const newValue = unwrapProxy(currentValue);
+                if (newValue != null && currentValue !== newValue) {
+                    value[propKey] = newValue;
+                }
+            }
+        }
+    }
+
+    if (value != null) {
+        define(window.shortcutList, key, { value });
+        define(window, key, { value });
+    }
 
     return value;
 }
@@ -170,6 +205,16 @@ export default definePlugin({
     name: "ConsoleShortcuts",
     description: "Adds shorter Aliases for many things on the window. Run `shortcutList` for a list.",
     authors: [Devs.Ven],
+
+    patches: [
+        {
+            find: 'this,"_changeCallbacks",',
+            replacement: {
+                match: /\i\(this,"_changeCallbacks",/,
+                replace: "Reflect.defineProperty(this,Symbol.toStringTag,{value:this.getName(),configurable:!0,writable:!0,enumerable:!1}),$&"
+            }
+        }
+    ],
 
     startAt: StartAt.Init,
     start() {

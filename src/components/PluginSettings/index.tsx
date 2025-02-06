@@ -35,6 +35,7 @@ import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip, useMemo } from "@webpack/common";
+import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins } from "~plugins";
 
@@ -68,7 +69,7 @@ function ReloadRequiredCard({ required }: { required: boolean; }) {
                     <Forms.FormText className={cl("dep-text")}>
                         Restart now to apply new plugins and their settings
                     </Forms.FormText>
-                    <Button onClick={() => location.reload()}>
+                    <Button onClick={() => location.reload()} className={cl("restart-button")}>
                         Restart
                     </Button>
                 </>
@@ -157,8 +158,8 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
                     className={classes(ButtonClasses.button, cl("info-button"))}
                 >
                     {plugin.options && !isObjectEmpty(plugin.options)
-                        ? <CogWheel />
-                        : <InfoIcon />}
+                        ? <CogWheel className={cl("info-icon")} />
+                        : <InfoIcon className={cl("info-icon")} />}
                 </button>
             }
         />
@@ -387,7 +388,7 @@ function makeDependencyList(deps: string[]) {
     return (
         <React.Fragment>
             <Forms.FormText>This plugin is required by:</Forms.FormText>
-            {deps.map((dep: string) => <Forms.FormText className={cl("dep-text")}>{dep}</Forms.FormText>)}
+            {deps.map((dep: string) => <Forms.FormText key={dep} className={cl("dep-text")}>{dep}</Forms.FormText>)}
         </React.Fragment>
     );
 }

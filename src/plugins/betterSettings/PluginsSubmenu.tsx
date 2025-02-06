@@ -5,8 +5,9 @@
  */
 
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
+import { getIntlMessage } from "@utils/discord";
 import { isObjectEmpty } from "@utils/misc";
-import { Alerts, i18n, Menu, useMemo, useState } from "@webpack/common";
+import { Alerts, Menu, useMemo, useState } from "@webpack/common";
 
 import Plugins from "~plugins";
 
@@ -48,7 +49,7 @@ export default function PluginsSubmenu() {
                         query={query}
                         onChange={setQuery}
                         ref={ref}
-                        placeholder={i18n.Messages.SEARCH}
+                        placeholder={getIntlMessage("SEARCH")}
                     />
                 )}
             />

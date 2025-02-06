@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./fixDiscordBadgePadding.css";
+
 import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -26,7 +28,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { isPluginDev } from "@utils/misc";
-import { closeModal, Modals, openModal } from "@utils/modal";
+import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Forms, Toasts, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
@@ -77,7 +79,7 @@ export default definePlugin({
                     replace: "...$1.props,$& $1.image??"
                 },
                 {
-                    match: /(?<=text:(\i)\.description,.{0,200})children:/,
+                    match: /(?<="aria-label":(\i)\.description,.{0,200})children:/,
                     replace: "children:$1.component ? $self.renderBadgeComponent({ ...$1 }) :"
                 },
                 // conditionally override their onClick with badge.onClick if it exists
@@ -100,8 +102,9 @@ export default definePlugin({
         }
     },
 
+    userProfileBadge: ContributorBadge,
+
     async start() {
-        Vencord.Api.Badges.addBadge(ContributorBadge);
         await loadBadges();
     },
 
@@ -141,8 +144,8 @@ export default definePlugin({
                         closeModal(modalKey);
                         VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
                     }}>
-                        <Modals.ModalRoot {...props}>
-                            <Modals.ModalHeader>
+                        <ModalRoot {...props}>
+                            <ModalHeader>
                                 <Flex style={{ width: "100%", justifyContent: "center" }}>
                                     <Forms.FormTitle
                                         tag="h2"
@@ -156,8 +159,8 @@ export default definePlugin({
                                         Vencord Donor
                                     </Forms.FormTitle>
                                 </Flex>
-                            </Modals.ModalHeader>
-                            <Modals.ModalContent>
+                            </ModalHeader>
+                            <ModalContent>
                                 <Flex>
                                     <img
                                         role="presentation"
@@ -180,13 +183,13 @@ export default definePlugin({
                                         Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
                                     </Forms.FormText>
                                 </div>
-                            </Modals.ModalContent>
-                            <Modals.ModalFooter>
+                            </ModalContent>
+                            <ModalFooter>
                                 <Flex style={{ width: "100%", justifyContent: "center" }}>
                                     <DonateButton />
                                 </Flex>
-                            </Modals.ModalFooter>
-                        </Modals.ModalRoot>
+                            </ModalFooter>
+                        </ModalRoot>
                     </ErrorBoundary>
                 ));
             },
