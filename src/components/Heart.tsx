@@ -16,14 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export function Heart() {
+import { classes } from "@utils/misc";
+import { SVGProps } from "react";
+
+export function Heart(props: SVGProps<SVGSVGElement>) {
     return (
         <svg
             aria-hidden="true"
-            height="16"
             viewBox="0 0 16 16"
+            height="16"
             width="16"
-            style={{ marginRight: "0.5em", transform: "translateY(2px)" }}
+            {...props}
+            className={classes("vc-heart-icon", props.className)}
         >
             <path
                 fill="#db61a2"
