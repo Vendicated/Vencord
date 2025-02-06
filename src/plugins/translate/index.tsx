@@ -87,7 +87,32 @@ export default definePlugin({
         clearTimeout(tooltipTimeout);
         tooltipTimeout = setTimeout(() => setShouldShowTranslateEnabledTooltip?.(false), 2000);
 
-        const trans = await translate("sent", message.content);
-        message.content = trans.text;
+        const emojiRegex = /<:[a-zA-Z0-9_]+:[0-9]+>/g;
+
+        const emojis = message.content.match(emojiRegex) || [];
+        const parts = message.content.split(emojiRegex);
+
+        const translatedParts = await Promise.all(
+            parts.map(async (part) => {
+                const trimmedPart = part.trim();
+                if (!trimmedPart) return part;
+                const trans = await translate("sent", trimmedPart);
+                return trans.text;
+            })
+        );
+
+        const reconstructedMessage = translatedParts.reduce((acc, part, index) => {
+            acc += part;
+            if (emojis[index]) {
+                acc += ` ${emojis[index]} `;
+            }
+            return acc;
+        }, '');
+
+        if (settings.store.includeOriginalText) {
+            message.content = `${reconstructedMessage.trim()}\n-# ${message.content}`;
+        } else {
+            message.content = reconstructedMessage.trim();
+        }
     }
 });
