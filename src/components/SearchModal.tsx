@@ -7,6 +7,7 @@
 import "./SearchModal.css";
 
 import { classNameFactory } from "@api/Styles";
+import { ErrorBoundary } from "@components/index";
 import {
     ModalCloseButton,
     ModalContent,
@@ -167,7 +168,7 @@ function searchTypeToText(type: SearchType) {
  * @param {string[]} [props.excludeIds] - An array of IDs to exclude from the search results.
  * @returns The rendered SearchModal component.
  */
-export default function SearchModal({ modalProps, onSubmit, input, searchType = "ALL", subText, excludeIds }: SearchModalProps) {
+export default ErrorBoundary.wrap(function SearchModal({ modalProps, onSubmit, input, searchType = "ALL", subText, excludeIds }: SearchModalProps) {
 
     const UserIcon = React.memo(function ({
         user,
@@ -702,4 +703,7 @@ export default function SearchModal({ modalProps, onSubmit, input, searchType = 
 
         </ModalRoot>
     );
-}
+}, {
+    noop: true,
+    onError: ({ props }) => props.modalProps.onClose()
+});

@@ -59,7 +59,7 @@ const SearchIcon = () => {
     </svg>;
 };
 
-export function SettingArrayComponent({
+export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayComponent({
     option,
     pluginSettings,
     definedSettings,
@@ -351,7 +351,6 @@ export function SettingArrayComponent({
         <Forms.FormSection>
             <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom8} type="description">{option.description}</Forms.FormText>
-            <ErrorBoundary>
                 {option.type === OptionType.ARRAY || option.type === OptionType.USERS ?
                     items.map((item, index) => (
                         <Flex
@@ -410,8 +409,7 @@ export function SettingArrayComponent({
                         </Button>
                     }
                 </Flex>
-            </ErrorBoundary>
             {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
         </Forms.FormSection>
     );
-}
+},);
