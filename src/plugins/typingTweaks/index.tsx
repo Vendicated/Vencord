@@ -25,6 +25,8 @@ import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/com
 import { User } from "discord-types/general";
 import { PropsWithChildren } from "react";
 
+import IrcColors from "../ircColors";
+
 const settings = definePluginSettings({
     showAvatars: {
         type: OptionType.BOOLEAN,
@@ -59,8 +61,7 @@ interface Props {
 
 const getUserColor = (userId: string, guildId: string) => {
     if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
-        // @ts-ignore
-        const color = Vencord.Plugins.plugins.IrcColors?.resolveUsedColor?.(userId);
+        const color = IrcColors.resolveUserColor(userId);
         if (color) return color;
     }
 

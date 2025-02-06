@@ -25,6 +25,8 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
 
+import IrcColors from "../ircColors";
+
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
 
 const settings = definePluginSettings({
@@ -163,8 +165,7 @@ export default definePlugin({
     ],
     getColorString(userId: string, channelOrGuildId: string) {
         if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
-            // @ts-ignore
-            const color = Vencord.Plugins.plugins.IrcColors?.resolveUsedColor?.(userId);
+            const color = IrcColors.resolveUserColor(userId);
             if (color) return color;
         }
 

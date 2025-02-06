@@ -47,14 +47,6 @@ function hslToHex(hue, saturation, lightness) {
     return `#${f(0)}${f(8)}${f(4)}`;
 }
 
-// Calculate a CSS color string based on the user ID
-function calculateNameColorForUser(id?: string) {
-    if (!id) return null;
-    const { hue, saturation, lightness } = calculateHSLforId(id);
-
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-}
-
 const settings = definePluginSettings({
     lightness: {
         description: "Lightness, in %. Change if the colors are too light or too dark",
@@ -106,7 +98,7 @@ export default definePlugin({
     ],
     // Propped to be used in TypingTweaks/RoleColorsEverywhere
     calculateHSLforId,
-    resolveUsedColor(userId: string) {
+    resolveUserColor(userId: string) {
         const channelId = SelectedChannelStore.getChannelId();
         const channel = ChannelStore.getChannel(channelId);
         const colorString = GuildMemberStore.getMember(channel.guild_id, userId)?.colorString;
@@ -120,12 +112,11 @@ export default definePlugin({
     },
     calculateNameColorForMessageContext(message: any, colorString: string) {
         const id = message?.author?.id;
-
-        return id ? this.resolveUsedColor(id) : undefined;
+        return id && this.resolveUserColor(id);
 
     },
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
-        return id ? this.resolveUsedColor(id) : undefined;
+        return id && this.resolveUserColor(id);
     }
 });
