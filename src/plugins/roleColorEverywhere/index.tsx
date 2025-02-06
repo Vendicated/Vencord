@@ -17,6 +17,7 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import IrcColors from "@plugins/ircColors";
 import { Devs } from "@utils/constants";
 import { hasGuildFeature } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -24,6 +25,7 @@ import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { GuildMember, Role } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildRoleStore, GuildStore } from "@webpack/common";
+
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
 
@@ -196,10 +198,9 @@ export default definePlugin({
             const member = guildId == null ? null : GuildMemberStore.getMember(guildId, userId);
 
             if (Vencord.Plugins.isPluginEnabled("IrcColors")) {
-                // @ts-ignore
-                const color = Vencord.Plugins.plugins.IrcColors?.resolveUsedColor?.(userId);
+                const color = IrcColors.resolveUserColor(userId);
                 if (color && color !== member?.colorString)
-                    return { guildId: guildId ?? channelOrGuildId, member: { colorString: color, colorStrings: undefined } };
+                    return { guildId: guildId ?? channelOrGuildId, member: { colorString: color, colorStrings: null } };
             }
 
             return guildId != null && member ? { guildId, member } : null;

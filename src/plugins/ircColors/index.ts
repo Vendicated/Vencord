@@ -44,12 +44,6 @@ function hslToHex(hue, saturation, lightness) {
     return `#${f(0)}${f(8)}${f(4)}`;
 }
 
-function calculateNameColorForUser(id?: string) {
-    if (!id) return null;
-    const { hue, saturation, lightness } = calculateHSLforId(id);
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-}
-
 const settings = definePluginSettings({
     lightness: {
         description: "Lightness, in %. Change if the colors are too light or too dark",
@@ -96,7 +90,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: '"Result cannot be null because the message is not null"',
+            find: '="SYSTEM_TAG"',
             replacement: {
                 // Override colorString with our custom color and disable gradients if applying the custom color.
                 match: /(?<=colorString:\i,colorStrings:\i,colorRoleName:\i.*?}=)(\i),/,
@@ -136,7 +130,7 @@ export default definePlugin({
     },
 
     calculateHSLforId,
-    resolveUsedColor(userId: string) {
+    resolveUserColor(userId: string) {
         const channelId = SelectedChannelStore.getChannelId();
         const channel = ChannelStore.getChannel(channelId);
         const colorString = channel?.guild_id
@@ -153,7 +147,7 @@ export default definePlugin({
     calculateNameColorForMessageContext(context: any) {
         const userId: string | undefined = context?.message?.author?.id;
         const colorString = context?.author?.colorString;
-        const color = userId ? this.resolveUsedColor(userId) : null;
+        const color = userId ? this.resolveUserColor(userId) : null;
 
         // Color preview in role settings
         if (context?.message?.channel_id === "1337" && userId === "313337")
@@ -172,7 +166,7 @@ export default definePlugin({
         try {
             const id = context?.user?.id;
             const colorString = context?.colorString;
-            const color = id ? this.resolveUsedColor(id) : null;
+            const color = id ? this.resolveUserColor(id) : null;
 
             if (settings.store.applyColorOnlyInDms && context?.guildId !== undefined) {
                 return colorString;
