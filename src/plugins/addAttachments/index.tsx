@@ -51,32 +51,28 @@ export default definePlugin({
 
             showToast("Uploading, this can take a while...");
 
-            const uploadPromises = Array.from(input.files).map(async file => {
-                const attachmentsReq = (await Common.RestAPI.post({
-                    url: `/channels/${channelId}/attachments`,
-                    body: {
-                        files: [
-                            {
-                                filename: file.name,
-                                file_size: file.size,
-                                id: uniqueIdProp.uniqueId(),
-                                is_clip: false
-                            }
-                        ]
-                    }
-                })).body.attachments[0];
+            const files = Array.from(input.files).map(file => ({
+                filename: file.name,
+                file_size: file.size,
+                id: uniqueIdProp.uniqueId(),
+                is_clip: false
+            }));
 
-                await fetch(attachmentsReq.upload_url, {
+            const attachmentsReq = (await Common.RestAPI.post({
+                url: `/channels/${channelId}/attachments`,
+                body: { files }
+            })).body.attachments as { id: string, upload_url: string, upload_filename: string }[];
+
+            const uploadPromises = attachmentsReq.map((uploadedFile, index) =>
+                fetch(uploadedFile.upload_url, {
                     method: "PUT",
-                    body: file
-                });
-
-                return {
-                    id: attachmentsReq.id,
-                    uploaded_filename: attachmentsReq.upload_filename,
-                    filename: file.name
-                };
-            });
+                    body: input.files![index]
+                }).then(() => ({
+                    id: uploadedFile.id,
+                    uploaded_filename: uploadedFile.upload_filename,
+                    filename: input.files![index].name
+                }))
+            );
 
             const newAttachments = await Promise.all(uploadPromises);
 
