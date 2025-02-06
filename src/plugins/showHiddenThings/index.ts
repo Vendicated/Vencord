@@ -103,7 +103,7 @@ export default definePlugin({
             }
         },
         {
-            find: /ENABLED_MODERATION_EXPERIENCE_FOR_NON_COMMUNITY.{0,500}GUILD_MOD_DASH_MEMBER_SAFETY/,
+            find: /ENABLED_MODERATION_EXPERIENCE_FOR_NON_COMMUNITY.{0,700}GUILD_MOD_DASH_MEMBER_SAFETY/,
             predicate: () => settings.store.showMembersPageInSidebar,
             replacement: {
                 match: /\i\.hasFeature\(\i\.\i\.ENABLED_MODERATION_EXPERIENCE_FOR_NON_COMMUNITY\)/,
