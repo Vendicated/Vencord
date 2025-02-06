@@ -4,15 +4,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { migratePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { IconUtils, UserStore } from "@webpack/common";
 
 import style from "./style.css?managed";
+
+migratePluginSettings("FullVCPFP", "fullVcPfp");
 export default definePlugin({
-    name: "fullVcPfp",
-    description: "Makes avatars take up the entire vc tile for a more dynamic and immersive experience 🚀",
+    name: "FullVCPFP",
+    description: "Makes avatars take up the entire vc tile for a more dynamic and immersive experience",
     authors: [EquicordDevs.mochienya],
     patches: [{
         find: "\"data-selenium-video-tile\":",
