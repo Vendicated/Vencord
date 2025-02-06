@@ -5,7 +5,7 @@
     --e-title: var(--embed-title);
 }
 
-.vc-role-color-wrapper div {
+.vc-role-color-wrapper div[class^="message"] {
     --text-muted: color-mix(
         in oklab,
         var(--role-color) var(--saturation),
