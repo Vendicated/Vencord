@@ -440,16 +440,19 @@ export default ErrorBoundary.wrap(function SearchModal({ modalProps, onSubmit, i
             return clean;
         };
 
-        const guilds: GuildResult[] = useStateFromStores([GuildStore], () => Object.values(GuildStore.getGuilds()).map(
-            guild => {
-                return {
-                    type: TextTypes.GUILD,
-                    record: guild,
-                    score: 0,
-                    comparator: guild.name
-                };
-            }
-        ));
+        let guilds: GuildResult[] = [];
+
+        if (resultTypes.includes("GUILD"))
+            guilds = Object.values(GuildStore.getGuilds()).map(
+                guild => {
+                    return {
+                        type: TextTypes.GUILD,
+                        record: guild,
+                        score: 0,
+                        comparator: guild.name
+                    };
+                }
+            );
 
         const { results, hasQuery, frequentChannels, channelHistory } = props;
         if (hasQuery) return filterItems(results);
