@@ -20,28 +20,37 @@ import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
+import { openContributorModal } from "@components/PluginSettings/ContributorModal";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { gitRemote } from "@shared/vencordUserAgent";
+import { DONOR_ROLE_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import { identity } from "@utils/misc";
+import { identity, isPluginDev } from "@utils/misc";
 import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { Button, Card, Forms, React, Select, Switch } from "@webpack/common";
+import { Button, Forms, GuildMemberStore, React, Select, Switch, UserStore } from "@webpack/common";
 
+import BadgeAPI from "../../plugins/_api/badges";
 import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "..";
 import { openNotificationSettingsModal } from "./NotificationSettings";
 import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
+import { SpecialCard } from "./SpecialCard";
 
 const cl = classNameFactory("vc-settings-");
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
 
+const VENNIE_DONATOR_IMAGE = "https://cdn.discordapp.com/emojis/1238120638020063377.png";
+const COZY_CONTRIB_IMAGE = "https://cdn.discordapp.com/emojis/1026533070955872337.png";
+
+const DONOR_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070116305436712.png?size=2048";
+const CONTRIB_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070166481895484.png?size=2048";
+
 type KeysOfType<Object, Type> = {
     [K in keyof Object]: Object[K] extends Type ? K : never;
 }[keyof Object];
-
 
 function VencordSettings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(VencordNative.settings.getSettingsDir, {
@@ -54,6 +63,8 @@ function VencordSettings() {
     const isWindows = navigator.platform.toLowerCase().startsWith("win");
     const isMac = navigator.platform.toLowerCase().startsWith("mac");
     const needsVibrancySettings = IS_DISCORD_DESKTOP && isMac;
+
+    const user = UserStore.getCurrentUser();
 
     const Switches: Array<false | {
         key: KeysOfType<typeof settings, boolean>;
@@ -99,7 +110,44 @@ function VencordSettings() {
 
     return (
         <SettingsTab title="Vencord Settings">
-            <DonateCard image={donateImage} />
+            {isDonor(user?.id)
+                ? (
+                    <SpecialCard
+                        title="Donations"
+                        subtitle="Thank you for donating!"
+                        description="All Vencord users can see your badge! You can change it at any time by messaging @vending.machine."
+                        cardImage={VENNIE_DONATOR_IMAGE}
+                        backgroundImage={DONOR_BACKGROUND_IMAGE}
+                        backgroundColor="#ED87A9"
+                    >
+                        <DonateButtonComponent />
+                    </SpecialCard>
+                )
+                : (
+                    <SpecialCard
+                        title="Support the Project"
+                        description="Please consider supporting the development of Vencord by donating!"
+                        cardImage={donateImage}
+                        backgroundImage={DONOR_BACKGROUND_IMAGE}
+                        backgroundColor="#c3a3ce"
+                    >
+                        <DonateButtonComponent />
+                    </SpecialCard>
+                )
+            }
+            {isPluginDev(user?.id) && (
+                <SpecialCard
+                    title="Contributions"
+                    subtitle="Thank you for contributing!"
+                    description="Since you've contributed to Vencord you now have a cool new badge!"
+                    cardImage={COZY_CONTRIB_IMAGE}
+                    backgroundImage={CONTRIB_BACKGROUND_IMAGE}
+                    backgroundColor="#EDCC87"
+                    buttonTitle="See what you've contributed to"
+                    buttonOnClick={() => openContributorModal(user)}
+                />
+            )}
+
             <Forms.FormSection title="Quick Actions">
                 <QuickActionCard>
                     <QuickAction
@@ -239,31 +287,19 @@ function VencordSettings() {
     );
 }
 
-interface DonateCardProps {
-    image: string;
+function DonateButtonComponent() {
+    return (
+        <DonateButton
+            look={Button.Looks.FILLED}
+            color={Button.Colors.WHITE}
+            style={{ marginTop: "1em" }}
+        />
+    );
 }
 
-function DonateCard({ image }: DonateCardProps) {
-    return (
-        <Card className={cl("card", "donate")}>
-            <div>
-                <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
-                <Forms.FormText>Please consider supporting the development of Vencord by donating!</Forms.FormText>
-                <DonateButton style={{ transform: "translateX(-1em)" }} />
-            </div>
-            <img
-                role="presentation"
-                src={image}
-                alt=""
-                height={128}
-                style={{
-                    imageRendering: image === SHIGGY_DONATE_IMAGE ? "pixelated" : void 0,
-                    marginLeft: "auto",
-                    transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : void 0
-                }}
-            />
-        </Card>
-    );
+function isDonor(userId: string): boolean {
+    const donorBadges = BadgeAPI.getDonorBadges(userId);
+    return GuildMemberStore.getMember(VENCORD_GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID) || !!donorBadges;
 }
 
 export default wrapTab(VencordSettings, "Vencord Settings");
