@@ -18,15 +18,10 @@
 
 import "./styles.css";
 
-import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { addAccessory, removeAccessory } from "@api/MessageAccessories";
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
-import { addButton, removeButton } from "@api/MessagePopover";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, Menu } from "@webpack/common";
-import { hash as h64 } from '@intrnl/xxhash64';
 
 import { settings } from "./settings";
 import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
@@ -52,11 +47,12 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
     ));
 };
 
+let tooltipTimeout: any;
+
 export default definePlugin({
     name: "Translate",
     description: "Translate messages with Google Translate or DeepL",
     authors: [Devs.Ven, Devs.AshtonMemer],
-    dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
     contextMenus: {
         "message": messageCtxPatch
@@ -64,60 +60,46 @@ export default definePlugin({
     // not used, just here in case some other plugin wants it or w/e
     translate,
 
-    start() {
-        addAccessory("vc-translation", props => <TranslationAccessory message={props.message} />);
+    renderMessageAccessory: props => <TranslationAccessory message={props.message} />,
 
-        addChatBarButton("vc-translate", TranslateChatBarIcon);
+    renderChatBarButton: TranslateChatBarIcon,
 
-        addButton("vc-translate", message => {
-            if (!message.content) return null;
+    renderMessagePopoverButton(message) {
+        if (!message.content) return null;
 
-            return {
-                label: "Translate",
-                icon: TranslateIcon,
-                message,
-                channel: ChannelStore.getChannel(message.channel_id),
-                onClick: async () => {
-                    const trans = await translate("received", message.content);
-                    handleTranslate(message.id, trans);
-                }
-            };
-        });
-
-        let tooltipTimeout: any;
-        this.preSend = addPreSendListener(async (_, message) => {
-            if (!settings.store.autoTranslate) return;
-            if (!message.content) return;
-        
-            const urlRegex = /https?:\/\/\S+/g;
-        
-            const matches = message.content.match(urlRegex);
-        
-            if (matches?.[0] === message.content.trim()) return;
-        
-            setShouldShowTranslateEnabledTooltip?.(true);
-            clearTimeout(tooltipTimeout);
-            tooltipTimeout = setTimeout(() => setShouldShowTranslateEnabledTooltip?.(false), 2000);
-        
-            const tempContent = message.content.replace(urlRegex, (url) => h64(url).toString(16));
-        
-            const trans = await translate("sent", tempContent);
-        
-            let translatedContent = trans.text;
-        
-            matches?.forEach(url => {
-                const hash = h64(url).toString(16);
-                translatedContent = translatedContent.replaceAll(hash, url); 
-            });
-        
-            message.content = translatedContent;
-        });
+        return {
+            label: "Translate",
+            icon: TranslateIcon,
+            message,
+            channel: ChannelStore.getChannel(message.channel_id),
+            onClick: async () => {
+                const trans = await translate("received", message.content);
+                handleTranslate(message.id, trans);
+            }
+        };
     },
 
-    stop() {
-        removePreSendListener(this.preSend);
-        removeChatBarButton("vc-translate");
-        removeButton("vc-translate");
-        removeAccessory("vc-translation");
-    },
+    async onBeforeMessageSend(_, message) {
+        if (!settings.store.autoTranslate || !message.content) return;
+
+        setShouldShowTranslateEnabledTooltip?.(true);
+        clearTimeout(tooltipTimeout);
+        tooltipTimeout = setTimeout(() => setShouldShowTranslateEnabledTooltip?.(false), 2000);
+
+        let tempContent = message.content;
+        let index = 1;
+        const placeholders: string[] = [];
+
+        if (settings.store.preserveEmojisAndURLs) {
+            tempContent = tempContent
+                .replace(/(https?:\/\/\S+)/g, url => (placeholders[index] = url, `<${index++}>`))
+                .replace(/(<a?:[a-zA-Z0-9_]+:[0-9]+>)/g, emoji => (placeholders[index] = emoji, `<${index++}>`));
+        }
+
+        const translatedContent = (await translate("sent", tempContent)).text;
+
+        message.content = settings.store.preserveEmojisAndURLs
+            ? translatedContent.replace(/<(\d+)>/g, (_, i) => placeholders[+i] || i)
+            : translatedContent;
+    }
 });
