@@ -30,7 +30,7 @@ let wreqFallbackApplied = false;
  * */
 let shouldPatchFactories = true;
 
-const getBuildNumber = makeLazy(() => {
+export const getBuildNumber = makeLazy(() => {
     try {
         shouldPatchFactories = false;
 
