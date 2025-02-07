@@ -40,7 +40,7 @@ export function canonicalizeMatch<T extends RegExp | string>(match: T): T {
         return partialCanon as T;
     }
 
-    const canonSource = partialCanon.replaceAll("\\i", String.raw`(?:[A-Za-z_$][\w$]*)`);
+    const canonSource = partialCanon.replaceAll(/(\\*)\\i/g, (_, leadingEscapes) => leadingEscapes.length % 2 === 0 ? `${leadingEscapes}${String.raw`(?:[A-Za-z_$][\w$]*)`}` : _);
     return new RegExp(canonSource, match.flags) as T;
 }
 
