@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Button } from "@webpack/common";
+import { openInviteModal } from "@utils/discord";
+import { Button, showToast } from "@webpack/common";
 import { ButtonProps } from "@webpack/types";
 
 import { Heart } from "./Heart";
@@ -36,6 +37,26 @@ export default function DonateButton({
         >
             <Heart />
             Donate
+        </Button>
+    );
+}
+
+export function InviteButton({
+    look = Button.Looks.LINK,
+    color = Button.Colors.TRANSPARENT,
+    ...props
+}: Partial<ButtonProps>) {
+    return (
+        <Button
+            {...props}
+            look={look}
+            color={color}
+            onClick={() => openInviteModal("bFp57wxCkv").catch(() =>
+                showToast("Invalid or expired invite"),
+            )}
+            innerClassName="vc-donate-button"
+        >
+            Invite
         </Button>
     );
 }

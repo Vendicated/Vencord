@@ -60,19 +60,19 @@
 .vc-special-hyperlink {
     margin-top: 1em;
     cursor: pointer;
+}
 
-    .vc-special-hyperlink-text {
-        color: black;
-        font-size: 1em;
-        font-weight: bold;
-        text-align: center;
-        transition: text-decoration 0.5s;
-        cursor: pointer;
-    }
+.vc-special-hyperlink-text {
+    color: black;
+    font-size: 1em;
+    font-weight: bold;
+    text-align: center;
+    transition: text-decoration 0.5s;
+    cursor: pointer;
+}
 
-    &:hover .vc-special-hyperlink-text {
-        text-decoration: underline;
-    }
+.vc-special-hyperlink:hover .vc-special-hyperlink-text {
+    text-decoration: underline;
 }
 
 .vc-special-image-container {

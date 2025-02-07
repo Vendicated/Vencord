@@ -9,7 +9,7 @@ import "./VencordTab.css";
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import DonateButton from "@components/DonateButton";
+import DonateButton, { InviteButton } from "@components/DonateButton";
 import { openContributorModal } from "@components/PluginSettings/ContributorModal";
 import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { gitRemote } from "@shared/vencordUserAgent";
@@ -334,11 +334,16 @@ function EquicordSettings() {
 
 function DonateButtonComponent() {
     return (
-        <DonateButton
-            look={Button.Looks.FILLED}
-            color={Button.Colors.TRANSPARENT}
-            style={{ marginTop: "1em" }}
-        />
+        <Flex>
+            <DonateButton
+                look={Button.Looks.FILLED}
+                color={Button.Colors.TRANSPARENT}
+                style={{ marginTop: "1em" }} />
+            <InviteButton
+                look={Button.Looks.FILLED}
+                color={Button.Colors.TRANSPARENT}
+                style={{ marginTop: "1em" }} />
+        </Flex>
     );
 }
 
