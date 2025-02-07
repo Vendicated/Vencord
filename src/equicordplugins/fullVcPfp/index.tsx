@@ -15,7 +15,7 @@ import style from "./style.css?managed";
 migratePluginSettings("FullVCPFP", "fullVcPfp");
 export default definePlugin({
     name: "FullVCPFP",
-    description: "Makes avatars take up the entire vc tile for a more dynamic and immersive experience",
+    description: "Makes avatars take up the entire vc tile. Breaks if USRBG Voice Background is enabled.",
     authors: [EquicordDevs.mochienya],
     patches: [{
         find: "\"data-selenium-video-tile\":",
