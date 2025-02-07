@@ -135,7 +135,7 @@ async function printReport() {
             username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
             embeds: [
                 {
-                    title: `${CANARY ? "Canary" : "Stable"} Report (${buildHash})`,
+                    title: `Discord ${CANARY ? "Canary" : "Stable"} (${buildHash}) ~ ${Date.now()}`,
                     color: CANARY ? 0xfbb642 : 0x5865f2
                 },
                 {
@@ -316,7 +316,7 @@ page.on("pageerror", e => {
     }
 });
 page.on("load", async () => {
-    const url = `https://discord.com/assets/version.${CANARY ? "canary" : "stable"}.json`;
+    const url = CANARY ? "https://canary.discord.com/assets/version.canary.json" : "https://discord.com/assets/version.stable.json";
     const res = await fetch(url);
     if (!res.ok) return;
 
