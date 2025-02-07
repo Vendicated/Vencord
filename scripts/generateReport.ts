@@ -135,7 +135,7 @@ async function printReport() {
             username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
             embeds: [
                 {
-                    title: `Discord ${CANARY ? "Canary" : "Stable"} (${buildHash}) ~ ${Date.now()}`,
+                    title: `Discord ${CANARY ? "Canary" : "Stable"} (${buildHash})`,
                     color: CANARY ? 0xfbb642 : 0x5865f2
                 },
                 {
