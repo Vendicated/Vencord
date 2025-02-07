@@ -8,12 +8,12 @@ import { Settings } from "@api/Settings";
 import { makeLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { interpolateIfDefined } from "@utils/misc";
+import { canonicalizeReplacement } from "@utils/patches";
 import { PatchReplacement } from "@utils/types";
 
 import { traceFunctionWithResults } from "../debug/Tracer";
 import { patches } from "../plugins";
 import { _initWebpack, _shouldIgnoreModule, AnyModuleFactory, AnyWebpackRequire, factoryListeners, findModuleId, MaybeWrappedModuleFactory, ModuleExports, moduleListeners, waitForSubscriptions, WebpackRequire, WrappedModuleFactory, wreq } from ".";
-import { canonicalizeReplacement } from "@utils/patches";
 
 export const SYM_ORIGINAL_FACTORY = Symbol("WebpackPatcher.originalFactory");
 export const SYM_PATCHED_SOURCE = Symbol("WebpackPatcher.patchedSource");
@@ -475,7 +475,7 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory): [patchedFacto
                 continue;
             }
 
-			// TODO: remove once Vesktop has been updated to use addPatch
+            // TODO: remove once Vesktop has been updated to use addPatch
             if (patch.plugin === "Vesktop") {
                 canonicalizeReplacement(replacement, "VCDP");
             }
