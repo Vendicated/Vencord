@@ -94,9 +94,11 @@ export const moduleListeners = new Set<CallbackFn>();
 export const factoryListeners = new Set<FactoryListernFn>();
 
 export function _initWebpack(webpackRequire: WebpackRequire) {
-    wreq = webpackRequire;
+    if (webpackRequire.c == null) {
+        return;
+    }
 
-    if (webpackRequire.c == null) return;
+    wreq = webpackRequire;
     cache = webpackRequire.c;
 
     Reflect.defineProperty(webpackRequire.c, Symbol.toStringTag, {
@@ -563,8 +565,9 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher: RegExp = D
     }
 
     const [, rawChunkIds, entryPointId] = match;
-    if (Number.isNaN(Number(entryPointId))) {
-        const err = new Error("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array, or the entry point id returned as the second group wasn't a number");
+
+    if (rawChunkIds == null || entryPointId == null) {
+        const err = new Error("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array or the entry point id");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
 
         // Strict behaviour in DevBuilds to fail early and make sure the issue is found
@@ -574,12 +577,19 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher: RegExp = D
         return false;
     }
 
+    const numEntryPoint = Number(entryPointId);
+    const entryPoint = Number.isNaN(numEntryPoint) ? entryPointId : numEntryPoint;
+
     if (rawChunkIds) {
-        const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map((m: any) => Number(m[1]));
+        const chunkIds = Array.from(rawChunkIds.matchAll(ChunkIdsRegex)).map(m => {
+            const numChunkId = Number(m[1]);
+            return Number.isNaN(numChunkId) ? m[1] : numChunkId;
+        });
+
         await Promise.all(chunkIds.map(id => wreq.e(id)));
     }
 
-    if (wreq.m[entryPointId] == null) {
+    if (wreq.m[entryPoint] == null) {
         const err = new Error("extractAndLoadChunks: Entry point is not loaded in the module factories, perhaps one of the chunks failed to load");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
 
@@ -590,7 +600,7 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher: RegExp = D
         return false;
     }
 
-    wreq(Number(entryPointId));
+    wreq(entryPoint);
     return true;
 }
 

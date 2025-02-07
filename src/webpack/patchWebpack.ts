@@ -32,10 +32,15 @@ const getBuildNumber = makeLazy(() => {
     try {
         shouldPatchFactories = false;
 
-        const hardcodedModuleAttempt = wreq(128014)?.b;
-        if (typeof hardcodedModuleAttempt === "function" && typeof hardcodedModuleAttempt() === "number") {
-            return hardcodedModuleAttempt() as number;
-        }
+        try {
+            if (wreq.m[128014]?.toString().includes("Trying to open a changelog for an invalid build number")) {
+                const harcodedGetBuildNumber = wreq(128014).b as () => number;
+
+                if (typeof harcodedGetBuildNumber === "function" && typeof harcodedGetBuildNumber() === "number") {
+                    return harcodedGetBuildNumber();
+                }
+            }
+        } catch { }
 
         const moduleId = findModuleId("Trying to open a changelog for an invalid build number");
         if (moduleId == null) {
@@ -142,22 +147,17 @@ const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
 
     // Proxies on the prototype dont intercept "get" when the property is in the object itself. But in case it isn't we need to return undefined,
     // to avoid Reflect.get having no effect and causing a stack overflow
-    get: (target, p, receiver) => {
+    get(target, p, receiver) {
         return undefined;
     },
     // Same thing as get
-    has: (target, p) => {
+    has(target, p) {
         return false;
     },
     */
 
     // The set trap for patching or defining getters for the module factories when new module factories are loaded
-    set: (target, p, newValue, receiver) => {
-        // If the property is not a number, we are not dealing with a module factory
-        if (Number.isNaN(Number(p))) {
-            return define(target, p, { value: newValue });
-        }
-
+    set(target, p, newValue, receiver) {
         if (updateExistingFactory(target, p, newValue)) {
             return true;
         }
@@ -184,7 +184,7 @@ function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], id
     for (const wreq of allWebpackInstances) {
         if (ignoreExistingInTarget && wreq.m === moduleFactoriesTarget) continue;
 
-        if (Reflect.getOwnPropertyDescriptor(wreq.m, id) != null) {
+        if (Object.hasOwn(wreq.m, id)) {
             existingFactory = Reflect.getOwnPropertyDescriptor(wreq.m, id);
             moduleFactoriesWithFactory = wreq.m;
             break;
@@ -325,7 +325,9 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
         }
 
         exports = module.exports;
-        if (exports == null) return factoryReturn;
+        if (exports == null) {
+            return factoryReturn;
+        }
 
         if (typeof require === "function") {
             const shouldIgnoreModule = _shouldIgnoreModule(exports);
@@ -354,7 +356,6 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
 
         for (const [filter, callback] of waitForSubscriptions) {
             try {
-
                 if (filter(exports)) {
                     waitForSubscriptions.delete(filter);
                     callback(exports, id);
@@ -416,34 +417,39 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
             ? code.includes(patch.find)
             : (patch.find.global && (patch.find.lastIndex = 0), patch.find.test(code));
 
-        if (!moduleMatches) continue;
+        if (!moduleMatches) {
+            continue;
+        }
 
+        const buildNumber = getBuildNumber();
         if (
             !Settings.eagerPatches &&
-            (patch.fromBuild != null && getBuildNumber() !== -1 && getBuildNumber() < patch.fromBuild) ||
-            (patch.toBuild != null && getBuildNumber() !== -1 && getBuildNumber() > patch.toBuild)
+            buildNumber !== -1 &&
+            (patch.fromBuild != null && buildNumber < patch.fromBuild) ||
+            (patch.toBuild != null && buildNumber > patch.toBuild)
         ) {
             continue;
         }
 
-        patchedBy.add(patch.plugin);
-
         const executePatch = traceFunctionWithResults(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => {
-            if (match instanceof RegExp && match.global) {
+            if (typeof match !== "string" && match.global) {
                 match.lastIndex = 0;
             }
 
             return code.replace(match, replace);
         });
+
         const previousCode = code;
         const previousFactory = factory;
+        let markedAsPatched = false;
 
         // We change all patch.replacement to array in plugins/index
         for (const replacement of patch.replacement as PatchReplacement[]) {
             if (
                 !Settings.eagerPatches &&
-                (replacement.fromBuild != null && getBuildNumber() !== -1 && getBuildNumber() < replacement.fromBuild) ||
-                (replacement.toBuild != null && getBuildNumber() !== -1 && getBuildNumber() > replacement.toBuild)
+                buildNumber !== -1 &&
+                (replacement.fromBuild != null && buildNumber < replacement.fromBuild) ||
+                (replacement.toBuild != null && buildNumber > replacement.toBuild)
             ) {
                 continue;
             }
@@ -470,7 +476,11 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
                         logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
                         code = previousCode;
                         patchedFactory = previousFactory;
-                        patchedBy.delete(patch.plugin);
+
+                        if (markedAsPatched) {
+                            patchedBy.delete(patch.plugin);
+                        }
+
                         break;
                     }
 
@@ -478,44 +488,22 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
                 }
 
                 code = newCode;
-                patchedFactory = (0, eval)(`// Webpack Module ${String(id)} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${String(id)}`);
+                patchedFactory = (0, eval)(`// Webpack Module ${String(id)} - Patched by ${[...patchedBy, patch.plugin].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${String(id)}`);
+
+                if (!patchedBy.has(patch.plugin)) {
+                    patchedBy.add(patch.plugin);
+                    markedAsPatched = true;
+                }
             } catch (err) {
                 logger.error(`Patch by ${patch.plugin} errored (Module id is ${String(id)}): ${replacement.match}\n`, err);
 
                 if (IS_DEV) {
-                    const changeSize = code.length - lastCode.length;
-                    const match = lastCode.match(replacement.match)!;
-
-                    // Use 200 surrounding characters of context
-                    const start = Math.max(0, match.index! - 200);
-                    const end = Math.min(lastCode.length, match.index! + match[0].length + 200);
-                    // (changeSize may be negative)
-                    const endPatched = end + changeSize;
-
-                    const context = lastCode.slice(start, end);
-                    const patchedContext = code.slice(start, endPatched);
-
-                    // inline require to avoid including it in !IS_DEV builds
-                    const diff = (require("diff") as typeof import("diff")).diffWordsWithSpace(context, patchedContext);
-                    let fmt = "%c %s ";
-                    const elements: string[] = [];
-                    for (const d of diff) {
-                        const color = d.removed
-                            ? "red"
-                            : d.added
-                                ? "lime"
-                                : "grey";
-                        fmt += "%c%s";
-                        elements.push("color:" + color, d.value);
-                    }
-
-                    logger.errorCustomFmt(...Logger.makeTitle("white", "Before"), context);
-                    logger.errorCustomFmt(...Logger.makeTitle("white", "After"), patchedContext);
-                    const [titleFmt, ...titleElements] = Logger.makeTitle("white", "Diff");
-                    logger.errorCustomFmt(titleFmt + fmt, ...titleElements, ...elements);
+                    diffErroredPatch(code, lastCode, lastCode.match(replacement.match)!);
                 }
 
-                patchedBy.delete(patch.plugin);
+                if (markedAsPatched) {
+                    patchedBy.delete(patch.plugin);
+                }
 
                 if (patch.group) {
                     logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
@@ -529,8 +517,42 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
             }
         }
 
-        if (!patch.all) patches.splice(i--, 1);
+        if (!patch.all) {
+            patches.splice(i--, 1);
+        }
     }
 
     return patchedFactory;
+}
+
+function diffErroredPatch(code: string, lastCode: string, match: RegExpMatchArray) {
+    const changeSize = code.length - lastCode.length;
+
+    // Use 200 surrounding characters of context
+    const start = Math.max(0, match.index! - 200);
+    const end = Math.min(lastCode.length, match.index! + match[0].length + 200);
+    // (changeSize may be negative)
+    const endPatched = end + changeSize;
+
+    const context = lastCode.slice(start, end);
+    const patchedContext = code.slice(start, endPatched);
+
+    // inline require to avoid including it in !IS_DEV builds
+    const diff = (require("diff") as typeof import("diff")).diffWordsWithSpace(context, patchedContext);
+    let fmt = "%c %s ";
+    const elements: string[] = [];
+    for (const d of diff) {
+        const color = d.removed
+            ? "red"
+            : d.added
+                ? "lime"
+                : "grey";
+        fmt += "%c%s";
+        elements.push("color:" + color, d.value);
+    }
+
+    logger.errorCustomFmt(...Logger.makeTitle("white", "Before"), context);
+    logger.errorCustomFmt(...Logger.makeTitle("white", "After"), patchedContext);
+    const [titleFmt, ...titleElements] = Logger.makeTitle("white", "Diff");
+    logger.errorCustomFmt(titleFmt + fmt, ...titleElements, ...elements);
 }

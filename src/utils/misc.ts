@@ -102,7 +102,7 @@ export function pluralise(amount: number, singular: string, plural = singular + 
 
 export function interpolateIfDefined(strings: TemplateStringsArray, ...args: any[]) {
     if (args.some(arg => arg == null)) return "";
-    return strings.reduce((acc, str, i) => `${acc}${str}${args[i] ?? ""}`, "");
+    return String.raw({ raw: strings }, ...args);
 }
 
 export function tryOrElse<T>(func: () => T, fallback: T): T {

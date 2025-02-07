@@ -16,11 +16,11 @@ export async function loadLazyChunks() {
     try {
         LazyChunkLoaderLogger.log("Loading all chunks...");
 
-        const validChunks = new Set<number>();
-        const invalidChunks = new Set<number>();
-        const deferredRequires = new Set<number>();
+        const validChunks = new Set<PropertyKey>();
+        const invalidChunks = new Set<PropertyKey>();
+        const deferredRequires = new Set<PropertyKey>();
 
-        let chunksSearchingResolve: (value: void | PromiseLike<void>) => void;
+        let chunksSearchingResolve: (value: void) => void;
         const chunksSearchingDone = new Promise<void>(r => chunksSearchingResolve = r);
 
         // True if resolved, false otherwise
@@ -38,12 +38,15 @@ export async function loadLazyChunks() {
             const hasCssDebuggingLoad = foundCssDebuggingLoad ? false : (foundCssDebuggingLoad = factoryCode.includes(".cssDebuggingEnabled&&"));
 
             const lazyChunks = factoryCode.matchAll(LazyChunkRegex);
-            const validChunkGroups = new Set<[chunkIds: number[], entryPoint: number]>();
+            const validChunkGroups = new Set<[chunkIds: PropertyKey[], entryPoint: PropertyKey]>();
 
             const shouldForceDefer = false;
 
             await Promise.all(Array.from(lazyChunks).map(async ([, rawChunkIds, entryPoint]) => {
-                const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Webpack.ChunkIdsRegex)).map(m => Number(m[1])) : [];
+                const chunkIds = rawChunkIds ? Array.from(rawChunkIds.matchAll(Webpack.ChunkIdsRegex)).map(m => {
+                    const numChunkId = Number(m[1]);
+                    return Number.isNaN(numChunkId) ? m[1] : numChunkId;
+                }) : [];
 
                 if (chunkIds.length === 0) {
                     return;
@@ -78,7 +81,8 @@ export async function loadLazyChunks() {
                 }
 
                 if (!invalidChunkGroup) {
-                    validChunkGroups.add([chunkIds, Number(entryPoint)]);
+                    const numEntryPoint = Number(entryPoint);
+                    validChunkGroups.add([chunkIds, Number.isNaN(numEntryPoint) ? entryPoint : numEntryPoint]);
                 }
             }));
 
@@ -149,14 +153,15 @@ export async function loadLazyChunks() {
         }
 
         // All chunks Discord has mapped to asset files, even if they are not used anymore
-        const allChunks = [] as number[];
+        const allChunks = [] as PropertyKey[];
 
         // Matches "id" or id:
         for (const currentMatch of String(wreq.u).matchAll(/(?:"([\deE]+?)"(?![,}]))|(?:([\deE]+?):)/g)) {
             const id = currentMatch[1] ?? currentMatch[2];
             if (id == null) continue;
 
-            allChunks.push(Number(id));
+            const numId = Number(id);
+            allChunks.push(Number.isNaN(numId) ? id : numId);
         }
 
         if (allChunks.length === 0) throw new Error("Failed to get all chunks");
