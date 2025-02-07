@@ -18,9 +18,10 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
+import { copyWithToast } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Clipboard, Constants, FluxDispatcher, Menu, React, RestAPI, Toasts } from "@webpack/common";
+import { Constants, FluxDispatcher, Menu, React, RestAPI } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const StickersStore = findStoreLazy("StickersStore");
@@ -74,12 +75,7 @@ function buildMenuItem(Sticker, fetchData: () => Promisable<Omit<Sticker, "t">>)
                     const res = await fetchData();
                     const data = { t: Sticker, ...res } as Sticker;
                     const url = getUrl(data);
-                    Toasts.show({
-                        message: "Link to sticker copied!",
-                        type: Toasts.Type.SUCCESS,
-                        id: Toasts.genId()
-                    });
-                    Clipboard.copy(url);
+                    copyWithToast(url, "Link copied!");
                 }
                 }
             />
