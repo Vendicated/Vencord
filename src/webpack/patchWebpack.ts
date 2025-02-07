@@ -37,10 +37,10 @@ export const getBuildNumber = makeLazy(() => {
 
         try {
             if (wreq.m[128014]?.toString().includes("Trying to open a changelog for an invalid build number")) {
-                const harcodedGetBuildNumber = wreq(128014).b as () => number;
+                const hardcodedGetBuildNumber = wreq(128014).b as () => number;
 
-                if (typeof harcodedGetBuildNumber === "function" && typeof harcodedGetBuildNumber() === "number") {
-                    return harcodedGetBuildNumber();
+                if (typeof hardcodedGetBuildNumber === "function" && typeof hardcodedGetBuildNumber() === "number") {
+                    return hardcodedGetBuildNumber();
                 }
             }
         } catch { }
@@ -92,7 +92,7 @@ export function getFactoryPatchedBy(id: PropertyKey, webpackRequire = wreq as An
 
 // wreq.m is the Webpack object containing module factories. It is pre-populated with module factories, and is also populated via webpackGlobal.push
 // We use this setter to intercept when wreq.m is defined and apply the patching in its module factories.
-// We wrap wreq.m with our proxy, which is responsible for patching the module factories when they are set, or definining getters for the patched versions.
+// We wrap wreq.m with our proxy, which is responsible for patching the module factories when they are set, or defining getters for the patched versions.
 
 // If this is the main Webpack, we also set up the internal references to WebpackRequire.
 define(Function.prototype, "m", {
@@ -145,7 +145,7 @@ define(Function.prototype, "m", {
             enumerable: false
         });
 
-        // The proxy responsible for patching the module factories when they are set, or definining getters for the patched versions
+        // The proxy responsible for patching the module factories when they are set, or defining getters for the patched versions
         const proxiedModuleFactories = new Proxy(originalModules, moduleFactoriesHandler);
         /*
         If Webpack ever decides to set module factories using the variable of the modules object directly, instead of wreq.m, switch the proxy to the prototype
@@ -161,7 +161,7 @@ const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
     If Webpack ever decides to set module factories using the variable of the modules object directly instead of wreq.m, we need to switch the proxy to the prototype
     and that requires defining additional traps for keeping the object working
 
-    // Proxies on the prototype dont intercept "get" when the property is in the object itself. But in case it isn't we need to return undefined,
+    // Proxies on the prototype don't intercept "get" when the property is in the object itself. But in case it isn't we need to return undefined,
     // to avoid Reflect.get having no effect and causing a stack overflow
     get(target, p, receiver) {
         return undefined;
