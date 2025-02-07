@@ -7,6 +7,7 @@
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
 import { addPatch, patches } from "plugins";
+import { getBuildNumber } from "webpack/patchWebpack";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 
@@ -36,6 +37,10 @@ async function runReporter() {
         };
 
         await loadLazyChunksDone;
+
+        if (IS_REPORTER && IS_WEB && !IS_VESKTOP) {
+            console.log("[REPORTER-META]", { buildNumber: getBuildNumber() });
+        }
 
         for (const patch of patches) {
             if (!patch.all) {

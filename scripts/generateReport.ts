@@ -35,7 +35,7 @@ for (const variable of ["CHROMIUM_BIN"]) {
 }
 
 const CANARY = process.env.USE_CANARY === "true";
-let buildHash = "Unknown Hash";
+let buildNumber = "Unknown Build number";
 
 const browser = await pup.launch({
     headless: true,
@@ -135,7 +135,7 @@ async function printReport() {
             username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
             embeds: [
                 {
-                    title: `Discord ${CANARY ? "Canary" : "Stable"} (${buildHash})`,
+                    title: `Discord ${CANARY ? "Canary" : "Stable"} (${buildNumber})`,
                     color: CANARY ? 0xfbb642 : 0x5865f2
                 },
                 {
@@ -218,6 +218,15 @@ page.on("console", async e => {
 
     const isVencord = firstArg === "[Vencord]";
     const isDebug = firstArg === "[PUP_DEBUG]";
+    const isReporterMeta = firstArg === "[REPORTER-META]";
+
+    if (isReporterMeta) {
+        const metaData = await rawArgs[1].jsonValue() as any;
+        if (metaData?.buildNumber && metaData.buildNumber !== -1) {
+            buildNumber = metaData.buildNumber;
+        }
+        return;
+    }
 
     outer:
     if (isVencord) {
@@ -314,13 +323,6 @@ page.on("pageerror", e => {
     } else {
         report.ignoredErrors.push(e.message);
     }
-});
-page.on("load", async () => {
-    const url = CANARY ? "https://canary.discord.com/assets/version.canary.json" : "https://discord.com/assets/version.stable.json";
-    const res = await fetch(url);
-    if (!res.ok) return;
-
-    buildHash = await res.json().then(d => d.hash);
 });
 
 await page.evaluateOnNewDocument(`
