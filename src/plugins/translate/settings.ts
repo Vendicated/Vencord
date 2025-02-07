@@ -73,6 +73,11 @@ export const settings = definePluginSettings({
         description: "Automatically translate your messages before sending. You can also shift/right click the translate button to toggle this",
         default: false
     },
+        preserveEmojisAndURLs: {
+        type: OptionType.BOOLEAN,
+        description: "Prevent emojis and URLs from being modified when translating messages.",
+        default: false
+    },
     showAutoTranslateTooltip: {
         type: OptionType.BOOLEAN,
         description: "Show a tooltip on the ChatBar button whenever a message is automatically translated",
