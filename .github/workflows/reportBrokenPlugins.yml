@@ -55,7 +55,7 @@ jobs:
 
             - name: Run Reporter
               if: ${{ github.event_name == 'schedule' || inputs.discord_branch == 'both' || inputs.discord_branch == 'stable' }}
-              timeout-minutes: 15
+              timeout-minutes: 10
               run: |
                   export PATH="$PWD/node_modules/.bin:$PATH"
                   export CHROMIUM_BIN=${{ steps.setup-chrome.outputs.chrome-path }}
@@ -84,7 +84,7 @@ jobs:
                       fi
                   done
 
-                  cat "$stable_output_file" "$canary_output_file" >> $$GITHUB_STEP_SUMMARY
+                  cat "$stable_output_file" "$canary_output_file" >> $GITHUB_STEP_SUMMARY
                   exit $exit_code
               env:
                   WEBHOOK_URL: ${{ inputs.webhook_url || secrets.DISCORD_WEBHOOK }}
