@@ -64,7 +64,6 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
             </div>
             {buttonTitle && (
                 <>
-                    <Forms.FormDivider className={cl("seperator")} />
                     <Clickable onClick={onClick} className={cl("hyperlink")}>
                         <Forms.FormText className={cl("hyperlink-text")}>
                             {buttonTitle}
