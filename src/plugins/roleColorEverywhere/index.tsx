@@ -31,6 +31,7 @@ import { ChannelStore, GuildMemberStore, GuildStore, Menu, React } from "@webpac
 
 import { RoleModal } from "./components/RolesModal";
 import { toggleRole } from "./storeHelper";
+import { ContextMenu } from "./components/ContextMenu";
 import { brewUserColor } from "./witchCauldron";
 
 const cl = classNameFactory("rolecolor");
