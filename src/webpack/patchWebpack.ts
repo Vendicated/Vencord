@@ -13,6 +13,7 @@ import { PatchReplacement } from "@utils/types";
 import { traceFunctionWithResults } from "../debug/Tracer";
 import { patches } from "../plugins";
 import { _initWebpack, _shouldIgnoreModule, AnyModuleFactory, AnyWebpackRequire, factoryListeners, findModuleId, MaybeWrappedModuleFactory, ModuleExports, moduleListeners, waitForSubscriptions, WebpackRequire, WrappedModuleFactory, wreq } from ".";
+import { canonicalizeReplacement } from "@utils/patches";
 
 export const SYM_ORIGINAL_FACTORY = Symbol("WebpackPatcher.originalFactory");
 export const SYM_PATCHED_SOURCE = Symbol("WebpackPatcher.patchedSource");
@@ -472,6 +473,10 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory): [patchedFacto
                 (replacement.toBuild != null && buildNumber > replacement.toBuild)
             ) {
                 continue;
+            }
+
+            if (patch.plugin === "Vesktop") {
+                canonicalizeReplacement(replacement, "VCDP");
             }
 
             const lastCode = code;
