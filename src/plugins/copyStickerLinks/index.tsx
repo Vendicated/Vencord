@@ -61,7 +61,7 @@ async function fetchSticker(id: string) {
     return body as Sticker;
 }
 
-function buildMenuItem(type: "Sticker", fetchData: () => Promisable<Omit<Sticker, "t">>) {
+function buildMenuItem(Sticker, fetchData: () => Promisable<Omit<Sticker, "t">>) {
     return (
         <>
             <Menu.MenuSeparator></Menu.MenuSeparator>
@@ -72,7 +72,7 @@ function buildMenuItem(type: "Sticker", fetchData: () => Promisable<Omit<Sticker
                 label={"Copy URL"}
                 action={async () => {
                     const res = await fetchData();
-                    const data = { t: type, ...res } as Sticker;
+                    const data = { t: Sticker, ...res } as Sticker;
                     const url = getUrl(data);
                     Toasts.show({
                         message: "Link to sticker copied!",
@@ -90,7 +90,7 @@ function buildMenuItem(type: "Sticker", fetchData: () => Promisable<Omit<Sticker
                 label={"Open URL"}
                 action={async () => {
                     const res = await fetchData();
-                    const data = { t: type, ...res } as Sticker;
+                    const data = { t: Sticker, ...res } as Sticker;
                     const url = getUrl(data);
                     VencordNative.native.openExternal(url);
                 }
@@ -101,16 +101,12 @@ function buildMenuItem(type: "Sticker", fetchData: () => Promisable<Omit<Sticker
 }
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    const { favoriteableId, favoriteableType } = props ?? {};
+    const { favoriteableId } = props ?? {};
     if (!favoriteableId) return;
     const menuItem = (() => {
-        switch (favoriteableType) {
-            case "sticker":
-                const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
-                if (sticker?.format_type === 3) return;
-
-                return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
-        }
+        const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
+        if (sticker?.format_type === 3) return;
+        return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
     })();
 
     if (menuItem)
@@ -118,10 +114,10 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
 };
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
-    const { id, type } = props?.target?.dataset ?? {};
+    const { id } = props?.target?.dataset ?? {};
     if (!id) return;
 
-    if (type === "sticker" && !props.target.className?.includes("lottieCanvas")) {
+    if (!props.target.className?.includes("lottieCanvas")) {
         children.push(buildMenuItem("Sticker", () => fetchSticker(id)));
     }
 };
