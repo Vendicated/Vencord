@@ -30,6 +30,7 @@ import { ChannelStore, GuildMemberStore, GuildRoleStore, GuildStore, Menu, React
 
 import { RoleModal } from "./components/RolesModal";
 import { toggleRole } from "./storeHelper";
+import { ContextMenu } from "./components/ContextMenu";
 import { brewUserColor } from "./witchCauldron";
 
 const cl = classNameFactory("rolecolor");
