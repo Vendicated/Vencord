@@ -54,7 +54,6 @@ jobs:
               run: pnpm buildReporter
 
             - name: Run Reporter
-              if: ${{ github.event_name == 'schedule' || inputs.discord_branch == 'both' || inputs.discord_branch == 'stable' }}
               timeout-minutes: 10
               run: |
                   export PATH="$PWD/node_modules/.bin:$PATH"
