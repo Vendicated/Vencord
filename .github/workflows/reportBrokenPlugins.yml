@@ -68,12 +68,12 @@ jobs:
                   pids=""
 
                   if [[ "${{ inputs.discord_branch }}" = "both" || "${{ inputs.discord_branch }}" = "stable" ]]; then
-                    node dist/report.mjs >> "$stable_output_file" &
+                    node dist/report.mjs > "$stable_output_file" &
                     pids="$pids $!"
                   fi
 
                   if [[ "${{ inputs.discord_branch }}" = "both" || "${{ inputs.discord_branch }}" = "canary" ]]; then
-                    USE_CANARY=true node dist/report.mjs >> "$canary_output_file" &
+                    USE_CANARY=true node dist/report.mjs > "$canary_output_file" &
                     pids="$pids $!"
                   fi
 
@@ -84,7 +84,7 @@ jobs:
                       fi
                   done
 
-                  cat "$stable_output_file" "$canary_output_file" > $$GITHUB_STEP_SUMMARY
+                  cat "$stable_output_file" "$canary_output_file" >> $$GITHUB_STEP_SUMMARY
                   exit $exit_code
               env:
                   WEBHOOK_URL: ${{ inputs.webhook_url || secrets.DISCORD_WEBHOOK }}
