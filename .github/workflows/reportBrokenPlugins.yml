@@ -67,7 +67,7 @@ jobs:
                   WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
 
             - name: Test Canary
-              if: ${{ github.event_name == 'schedule' || inputs.discord_branch == 'both' || inputs.discord_branch == 'canary' }}
+              if: ${{ (success() || failure()) && (github.event_name == 'schedule' || inputs.discord_branch == 'both' || inputs.discord_branch == 'canary') }}
               timeout-minutes: 10
               run: |
                   export PATH="$PWD/node_modules/.bin:$PATH"
