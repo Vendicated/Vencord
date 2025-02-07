@@ -75,7 +75,6 @@ export default definePlugin({
             if (optimistic || type !== "MESSAGE_CREATE") return;
             if (SelectedChannelStore.getChannelId() === channelId) return;
             const channel = ChannelStore.getChannel(channelId);
-            if (ChannelStore.getChannel(SelectedChannelStore.getChannelId())?.guild_id !== channel.guild_id) return;
             if (document.hasFocus()) return;
 
             const { whitelistedServers, servers, whitelistedChannels, channels } = settings.store;
