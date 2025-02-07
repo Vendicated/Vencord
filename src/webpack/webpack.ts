@@ -555,7 +555,7 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher: RegExp = D
         return false;
     }
 
-    const match = module.toString().match(canonicalizeMatch(matcher));
+    const match = String(module).match(canonicalizeMatch(matcher));
     if (!match) {
         const err = new Error("extractAndLoadChunks: Couldn't find chunk loading in module factory code");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
@@ -569,7 +569,7 @@ export async function extractAndLoadChunks(code: CodeFilter, matcher: RegExp = D
 
     const [, rawChunkIds, entryPointId] = match;
 
-    if (rawChunkIds == null || entryPointId == null) {
+    if (entryPointId == null) {
         const err = new Error("extractAndLoadChunks: Matcher didn't return a capturing group with the chunk ids array or the entry point id");
         logger.warn(err, "Code:", code, "Matcher:", matcher);
 
