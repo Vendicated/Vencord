@@ -542,7 +542,7 @@ export const ChunkIdsRegex = /\("([^"]+?)"\)/g;
  * @param matcher A RegExp that returns the chunk ids array as the first capture group and the entry point id as the second. Defaults to a matcher that captures the first lazy chunk loading found in the module factory
  * @returns A promise that resolves with a boolean whether the chunks were loaded
  */
-export async function extractAndLoadChunks(code: CodeFilter, matcher: RegExp = DefaultExtractAndLoadChunksRegex) {
+export async function extractAndLoadChunks(code: CodeFilter, matcher = DefaultExtractAndLoadChunksRegex) {
     const module = findModuleFactory(...code);
     if (!module) {
         const err = new Error("extractAndLoadChunks: Couldn't find module factory");

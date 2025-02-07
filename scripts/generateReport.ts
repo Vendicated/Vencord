@@ -26,7 +26,7 @@
 import { readFileSync } from "fs";
 import pup, { JSHandle } from "puppeteer-core";
 
-for (const variable of ["CHROMIUM_BIN"]) {
+for (const variable of ["DISCORD_TOKEN", "CHROMIUM_BIN"]) {
     if (!process.env[variable]) {
         console.error(`Missing environment variable ${variable}`);
         process.exit(1);
@@ -300,9 +300,20 @@ page.on("pageerror", e => {
     }
 });
 
+async function reporterRuntime(token: string) {
+    Vencord.Webpack.waitFor(
+        "loginToken",
+        m => {
+            console.log("[PUP_DEBUG]", "Logging in with token...");
+            m.loginToken(token);
+        }
+    );
+}
+
 await page.evaluateOnNewDocument(`
     if (location.host.endsWith("discord.com")) {
         ${readFileSync("./dist/browser.js", "utf-8")};
+        (${reporterRuntime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
     }
 `);
 
