@@ -24,16 +24,13 @@ import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, GuildStore, Menu, React } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore, React } from "@webpack/common";
 
-import { RoleModal } from "./components/RolesModal";
-import { toggleRole } from "./storeHelper";
+import { ContextMenu } from "./components/ContextMenu";
 import { brewUserColor } from "./witchCauldron";
 
-const cl = classNameFactory("rolecolor");
 const DeveloperMode = getUserSettingLazy("appearance", "developerMode")!;
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
@@ -259,37 +256,14 @@ export default definePlugin({
             settings.store.userColorFromRoles[guild.id] ??= [];
 
             const role = GuildStore.getRole(guild.id, id);
-            if (!role) return;
+            if (!role || !role.colorString) return;
 
-            const togglelabel = (settings.store.userColorFromRoles[guild.id]?.includes(role.id) ?
-                "Remove role from" :
-                "Add role to") + " coloring list";
-
-            if (role.colorString) {
-                children.push(
-                    <Menu.MenuItem
-                        id={cl("context-menu")}
-                        label="Coloring"
-                    >
-                        <Menu.MenuItem
-                            id={cl("toggle-role-for-guild")}
-                            label={togglelabel}
-                            action={() => toggleRole(settings.store.userColorFromRoles, guild.id, role.id)}
-                        />
-                        <Menu.MenuItem
-                            id={cl("show-color-roles")}
-                            label="Show roles"
-                            action={() => openModal(modalProps => (
-                                <RoleModal
-                                    modalProps={modalProps}
-                                    guild={guild}
-                                    colorsStore={settings.store.userColorFromRoles}
-                                />
-                            ))}
-                        />
-                    </Menu.MenuItem>
-                );
-            }
+            children.push(ContextMenu({
+                classFactory: classNameFactory("rolecolor"),
+                colorsStore: settings.store.userColorFromRoles,
+                roleId: role.id,
+                guild
+            }));
         }
     }
 });
