@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { SYM_ORIGINAL_FACTORY, SYM_PATCHED_BY, SYM_PATCHED_SOURCE } from "./patchWebpack";
+
 export type ModuleExports = any;
 
 export type Module = {
@@ -194,12 +196,16 @@ export type AnyWebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & Par
 
 /** exports can be anything, however initially it is always an empty object */
 export type AnyModuleFactory = ((this: ModuleExports, module: Module, exports: ModuleExports, require: AnyWebpackRequire) => void) & {
-    $$vencordPatchedSource?: string;
+    [SYM_PATCHED_SOURCE]?: string;
+    [SYM_PATCHED_BY]?: Set<string>;
 };
 
 export type WrappedModuleFactory = AnyModuleFactory & {
-    $$vencordOriginal?: AnyModuleFactory;
-    $$vencordPatchedSource?: string;
+    [SYM_ORIGINAL_FACTORY]: AnyModuleFactory;
+    [SYM_PATCHED_SOURCE]?: string;
+    [SYM_PATCHED_BY]?: Set<string>;
 };
+
+export type MaybeWrappedModuleFactory = AnyModuleFactory | WrappedModuleFactory;
 
 export type WrappedModuleFactories = Record<PropertyKey, WrappedModuleFactory>;

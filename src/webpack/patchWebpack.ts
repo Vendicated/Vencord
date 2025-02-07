@@ -12,14 +12,16 @@ import { PatchReplacement } from "@utils/types";
 
 import { traceFunctionWithResults } from "../debug/Tracer";
 import { patches } from "../plugins";
-import { _initWebpack, _shouldIgnoreModule, AnyModuleFactory, AnyWebpackRequire, factoryListeners, findModuleId, ModuleExports, moduleListeners, waitForSubscriptions, WebpackRequire, WrappedModuleFactory, wreq } from ".";
+import { _initWebpack, _shouldIgnoreModule, AnyModuleFactory, AnyWebpackRequire, factoryListeners, findModuleId, MaybeWrappedModuleFactory, ModuleExports, moduleListeners, waitForSubscriptions, WebpackRequire, WrappedModuleFactory, wreq } from ".";
 
-const logger = new Logger("WebpackInterceptor", "#8caaee");
-
+export const SYM_ORIGINAL_FACTORY = Symbol("WebpackPatcher.originalFactory");
+export const SYM_PATCHED_SOURCE = Symbol("WebpackPatcher.patchedSource");
+export const SYM_PATCHED_BY = Symbol("WebpackPatcher.patchedBy");
 /** A set with all the Webpack instances */
 export const allWebpackInstances = new Set<AnyWebpackRequire>();
 export const patchTimings = [] as Array<[plugin: string, moduleId: PropertyKey, match: string | RegExp, totalTime: number]>;
 
+const logger = new Logger("WebpackInterceptor", "#8caaee");
 /** Whether we tried to fallback to factory WebpackRequire, or disabled patches */
 let wreqFallbackApplied = false;
 /** Whether we should be patching factories.
@@ -73,6 +75,19 @@ const define: Define = (target, p, attributes) => {
         ...attributes
     });
 };
+
+export function getOriginalFactory(id: PropertyKey, webpackRequire = wreq as AnyWebpackRequire) {
+    const moduleFactory = webpackRequire.m[id];
+    return (moduleFactory?.[SYM_ORIGINAL_FACTORY] ?? moduleFactory) as AnyModuleFactory | undefined;
+}
+
+export function getFactoryPatchedSource(id: PropertyKey, webpackRequire = wreq as AnyWebpackRequire) {
+    return webpackRequire.m[id]?.[SYM_PATCHED_SOURCE];
+}
+
+export function getFactoryPatchedBy(id: PropertyKey, webpackRequire = wreq as AnyWebpackRequire) {
+    return webpackRequire.m[id]?.[SYM_PATCHED_BY];
+}
 
 // wreq.m is the Webpack object containing module factories. It is pre-populated with module factories, and is also populated via webpackGlobal.push
 // We use this setter to intercept when wreq.m is defined and apply the patching in its module factories.
@@ -200,9 +215,10 @@ function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], id
             Reflect.defineProperty(moduleFactoriesTarget, id, existingFactory);
         }
 
-        // Persist $$vencordPatchedSource in the new original factory, if the patched one has already been required
+        // Persist patched source and patched by in the new original factory, if the patched one has already been required
         if (IS_DEV && existingFactory.value != null) {
-            newFactory.$$vencordPatchedSource = existingFactory.value.$$vencordPatchedSource;
+            newFactory[SYM_PATCHED_SOURCE] = existingFactory.value[SYM_PATCHED_SOURCE];
+            newFactory[SYM_PATCHED_BY] = existingFactory.value[SYM_PATCHED_BY];
         }
 
         return Reflect.set(moduleFactoriesTarget, id, newFactory, moduleFactoriesTarget);
@@ -235,24 +251,25 @@ function notifyFactoryListeners(factory: AnyModuleFactory) {
  * @param id The id of the module
  * @param factory The original or patched module factory
  */
-function defineModulesFactoryGetter(id: PropertyKey, factory: WrappedModuleFactory) {
+function defineModulesFactoryGetter(id: PropertyKey, factory: MaybeWrappedModuleFactory) {
     const descriptor: PropertyDescriptor = {
         get() {
-            // $$vencordOriginal means the factory is already patched
-            if (!shouldPatchFactories || factory.$$vencordOriginal != null) {
+            // SYM_ORIGINAL_FACTORY means the factory is already patched
+            if (!shouldPatchFactories || factory[SYM_ORIGINAL_FACTORY] != null) {
                 return factory;
             }
 
             return (factory = wrapAndPatchFactory(id, factory));
         },
-        set(newFactory: AnyModuleFactory) {
-            if (IS_DEV && factory.$$vencordPatchedSource != null) {
-                newFactory.$$vencordPatchedSource = factory.$$vencordPatchedSource;
+        set(newFactory: MaybeWrappedModuleFactory) {
+            if (IS_DEV) {
+                newFactory[SYM_PATCHED_SOURCE] = factory[SYM_PATCHED_SOURCE];
+                newFactory[SYM_PATCHED_BY] = factory[SYM_PATCHED_BY];
             }
 
-            if (factory.$$vencordOriginal != null) {
+            if (factory[SYM_ORIGINAL_FACTORY] != null) {
                 factory.toString = newFactory.toString.bind(newFactory);
-                factory.$$vencordOriginal = newFactory;
+                factory[SYM_ORIGINAL_FACTORY] = newFactory;
             } else {
                 factory = newFactory;
             }
@@ -274,12 +291,12 @@ function defineModulesFactoryGetter(id: PropertyKey, factory: WrappedModuleFacto
  * @returns The wrapper for the patched module factory
  */
 function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory) {
-    const patchedFactory = patchFactory(id, originalFactory);
+    const [patchedFactory, patchedSource, patchedBy] = patchFactory(id, originalFactory);
 
     const wrappedFactory: WrappedModuleFactory = function (...args) {
         // Restore the original factory in all the module factories objects. We want to make sure the original factory is restored properly, no matter what is the Webpack instance
         for (const wreq of allWebpackInstances) {
-            define(wreq.m, id, { value: wrappedFactory.$$vencordOriginal });
+            define(wreq.m, id, { value: wrappedFactory[SYM_ORIGINAL_FACTORY] });
         }
 
         // eslint-disable-next-line prefer-const
@@ -303,10 +320,10 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
                     _initWebpack(require as WebpackRequire);
                 } else if (IS_DEV) {
                     logger.error("WebpackRequire was not initialized, running modules without patches instead.");
-                    return wrappedFactory.$$vencordOriginal!.apply(this, args);
+                    return wrappedFactory[SYM_ORIGINAL_FACTORY].apply(this, args);
                 }
             } else if (IS_DEV) {
-                return wrappedFactory.$$vencordOriginal!.apply(this, args);
+                return wrappedFactory[SYM_ORIGINAL_FACTORY].apply(this, args);
             }
         }
 
@@ -316,12 +333,12 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
             factoryReturn = patchedFactory.apply(this, args);
         } catch (err) {
             // Just re-throw Discord errors
-            if (patchedFactory === originalFactory) {
+            if (patchedFactory === wrappedFactory[SYM_ORIGINAL_FACTORY]) {
                 throw err;
             }
 
             logger.error("Error in patched module factory:\n", err);
-            return wrappedFactory.$$vencordOriginal!.apply(this, args);
+            return wrappedFactory[SYM_ORIGINAL_FACTORY].apply(this, args);
         }
 
         exports = module.exports;
@@ -384,15 +401,17 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
     };
 
     wrappedFactory.toString = originalFactory.toString.bind(originalFactory);
-    wrappedFactory.$$vencordOriginal = originalFactory;
+    wrappedFactory[SYM_ORIGINAL_FACTORY] = originalFactory;
 
     if (IS_DEV && patchedFactory !== originalFactory) {
-        const patchedSource = String(patchedFactory);
-
-        wrappedFactory.$$vencordPatchedSource = patchedSource;
-        originalFactory.$$vencordPatchedSource = patchedSource;
+        wrappedFactory[SYM_PATCHED_SOURCE] = patchedSource;
+        wrappedFactory[SYM_PATCHED_BY] = patchedBy;
+        originalFactory[SYM_PATCHED_SOURCE] = patchedSource;
+        originalFactory[SYM_PATCHED_BY] = patchedBy;
     }
 
+    // @ts-expect-error Allow GC to get into action, if possible
+    originalFactory = undefined;
     return wrappedFactory;
 }
 
@@ -401,9 +420,9 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
  *
  * @param id The id of the module
  * @param factory The original module factory
- * @returns The patched module factory
+ * @returns The patched module factory, the patched source of it, and the plugins that patched it
  */
-function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
+function patchFactory(id: PropertyKey, factory: AnyModuleFactory): [patchedFactory: AnyModuleFactory, patchedSource: string, patchedBy: Set<string>] {
     // 0, prefix to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
     let code: string = "0," + String(factory);
     let patchedFactory = factory;
@@ -522,7 +541,7 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory) {
         }
     }
 
-    return patchedFactory;
+    return [patchedFactory, code, patchedBy];
 }
 
 function diffErroredPatch(code: string, lastCode: string, match: RegExpMatchArray) {
@@ -537,7 +556,7 @@ function diffErroredPatch(code: string, lastCode: string, match: RegExpMatchArra
     const context = lastCode.slice(start, end);
     const patchedContext = code.slice(start, endPatched);
 
-    // inline require to avoid including it in !IS_DEV builds
+    // Inline require to avoid including it in !IS_DEV builds
     const diff = (require("diff") as typeof import("diff")).diffWordsWithSpace(context, patchedContext);
     let fmt = "%c %s ";
     const elements: string[] = [];
