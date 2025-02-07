@@ -53,29 +53,39 @@ jobs:
             - name: Build Vencord Reporter Version
               run: pnpm buildReporter
 
-            - name: Test Stable
+            - name: Run Reporter
               if: ${{ github.event_name == 'schedule' || inputs.discord_branch == 'both' || inputs.discord_branch == 'stable' }}
-              timeout-minutes: 10
+              timeout-minutes: 15
               run: |
                   export PATH="$PWD/node_modules/.bin:$PATH"
                   export CHROMIUM_BIN=${{ steps.setup-chrome.outputs.chrome-path }}
 
                   esbuild scripts/generateReport.ts > dist/report.mjs
-                  node dist/report.mjs >> $GITHUB_STEP_SUMMARY
-              env:
-                  WEBHOOK_URL: ${{ inputs.webhook_url || secrets.DISCORD_WEBHOOK }}
-                  WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
 
-            - name: Test Canary
-              if: ${{ (success() || failure()) && (github.event_name == 'schedule' || inputs.discord_branch == 'both' || inputs.discord_branch == 'canary') }}
-              timeout-minutes: 10
-              run: |
-                  export PATH="$PWD/node_modules/.bin:$PATH"
-                  export CHROMIUM_BIN=${{ steps.setup-chrome.outputs.chrome-path }}
-                  export USE_CANARY=true
+                  stable_output_file=$(mktemp)
+                  canary_output_file=$(mktemp)
 
-                  esbuild scripts/generateReport.ts > dist/report.mjs
-                  node dist/report.mjs >> $GITHUB_STEP_SUMMARY
+                  pids=""
+
+                  if [[ "${{ inputs.discord_branch }}" = "both" || "${{ inputs.discord_branch }}" = "stable" ]]; then
+                    node dist/report.mjs >> "$stable_output_file" &
+                    pids="$pids $!"
+                  fi
+
+                  if [[ "${{ inputs.discord_branch }}" = "both" || "${{ inputs.discord_branch }}" = "canary" ]]; then
+                    USE_CANARY=true node dist/report.mjs >> "$canary_output_file" &
+                    pids="$pids $!"
+                  fi
+
+                  exit_code=0
+                  for pid in $pids; do
+                      if ! wait "$pid"; then
+                        exit_code=1
+                      fi
+                  done
+
+                  cat "$stable_output_file" "$canary_output_file" > $$GITHUB_STEP_SUMMARY
+                  exit $exit_code
               env:
                   WEBHOOK_URL: ${{ inputs.webhook_url || secrets.DISCORD_WEBHOOK }}
                   WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
