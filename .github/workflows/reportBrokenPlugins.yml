@@ -73,12 +73,12 @@ jobs:
 
                   if [[ "$branch" = "both" || "$branch" = "stable" ]]; then
                     node dist/report.mjs > "$stable_output_file" &
-                    pids="$pids $!"
+                    pids+=" $!"
                   fi
 
                   if [[ "$branch" = "both" || "$branch" = "canary" ]]; then
                     USE_CANARY=true node dist/report.mjs > "$canary_output_file" &
-                    pids="$pids $!"
+                    pids+=" $!"
                   fi
 
                   exit_code=0
