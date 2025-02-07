@@ -18,12 +18,29 @@
 
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
+
+// Equicord
 export const SUPPORT_CHANNEL_ID = "1297590739911573585";
-export const VC_SUPPORT_CHANNEL_ID = "1026515880080842772";
-export const SUPPORT_CHANNEL_IDS = [SUPPORT_CHANNEL_ID, VC_SUPPORT_CHANNEL_ID];
 export const GUILD_ID = "1173279886065029291";
+export const DONOR_ROLE_ID = "1173316879083896912";
+export const CONTRIB_ROLE_ID = "1222677964760682556";
+export const EQUICORD_TEAM = "1173520023239786538";
+export const EQUIBOP_CONTRIB_ROLE_ID = "1287079931645263968";
+export const VENCORD_CONTRIB_ROLE_ID = "1173343399470964856";
+
+// Vencord
+export const VC_SUPPORT_CHANNEL_ID = "1026515880080842772";
 export const VC_GUILD_ID = "1015060230222131221";
+export const VENBOT_USER_ID = "1017176847865352332";
+export const VC_DONOR_ROLE_ID = "1042507929485586532";
+export const VC_CONTRIB_ROLE_ID = "1026534353167208489";
+export const VC_REGULAR_ROLE_ID = "1026504932959977532";
+export const VC_KNOWN_ISSUES_CHANNEL_ID = "1222936386626129920";
+
 export const GUILD_IDS = [GUILD_ID, VC_GUILD_ID];
+export const SUPPORT_CHANNEL_IDS = [SUPPORT_CHANNEL_ID, VC_SUPPORT_CHANNEL_ID];
+export const DONOR_ROLE_IDS = [DONOR_ROLE_ID, VC_DONOR_ROLE_ID];
+export const CONTRIB_ROLE_IDS = [CONTRIB_ROLE_ID, EQUIBOP_CONTRIB_ROLE_ID, VENCORD_CONTRIB_ROLE_ID, VC_CONTRIB_ROLE_ID];
 
 export interface Dev {
     name: string;
@@ -583,6 +600,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     jamesbt365: {
         name: "jamesbt365",
         id: 158567567487795200n,
+    },
+    samsam: {
+        name: "samsam",
+        id: 836452332387565589n,
     },
 } satisfies Record<string, Dev>);
 
