@@ -2,6 +2,14 @@ name: Test Patches
 on:
     workflow_dispatch:
         inputs:
+            discord_branch:
+                type: choice
+                description: "Discord Branch to test patches on"
+                options:
+                    - both
+                    - stable
+                    - canary
+                default: both
             webhook_url:
                 type: string
                 description: "Webhook URL that the report will be posted to. This will be visible for everyone, so DO NOT pass sensitive webhooks like discord webhook. This is meant to be used by Venbot."
@@ -45,7 +53,8 @@ jobs:
             - name: Build Vencord Reporter Version
               run: pnpm buildReporter
 
-            - name: Create Report
+            - name: Test Stable
+              if: ${{ inputs.discord_branch == 'both' || inputs.discord_branch == 'stable' }}
               timeout-minutes: 10
               run: |
                   export PATH="$PWD/node_modules/.bin:$PATH"
@@ -57,9 +66,9 @@ jobs:
                   WEBHOOK_URL: ${{ inputs.webhook_url || secrets.DISCORD_WEBHOOK }}
                   WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
 
-            - name: Create Report (Canary)
+            - name: Test Canary
+              if: ${{ inputs.discord_branch == 'both' || inputs.discord_branch == 'canary' }}
               timeout-minutes: 10
-              if: success() || failure() # even run if previous one failed
               run: |
                   export PATH="$PWD/node_modules/.bin:$PATH"
                   export CHROMIUM_BIN=${{ steps.setup-chrome.outputs.chrome-path }}
