@@ -1,7 +1,6 @@
 {
     "manifest_version": 3,
     "minimum_chrome_version": "111",
-
     "name": "Vencord Web",
     "description": "The cutest Discord mod now in your browser",
     "author": "Vendicated",
@@ -9,38 +8,49 @@
     "icons": {
         "128": "icon.png"
     },
-
     "host_permissions": [
         "*://*.discord.com/*",
         "https://raw.githubusercontent.com/*"
     ],
-
-    "permissions": ["declarativeNetRequest"],
-
+    "permissions": [
+        "declarativeNetRequest",
+        "tabs"
+    ],
     "content_scripts": [
         {
             "run_at": "document_start",
-            "matches": ["*://*.discord.com/*"],
-            "js": ["content.js"],
+            "matches": [
+                "*://*.discord.com/*"
+            ],
+            "js": [
+                "content.js"
+            ],
             "all_frames": true,
             "world": "ISOLATED"
         },
         {
             "run_at": "document_start",
-            "matches": ["*://*.discord.com/*"],
-            "js": ["dist/Vencord.js"],
+            "matches": [
+                "*://*.discord.com/*"
+            ],
+            "js": [
+                "dist/Vencord.js"
+            ],
             "all_frames": true,
             "world": "MAIN"
         }
     ],
-
     "web_accessible_resources": [
         {
-            "resources": ["dist/*", "third-party/*"],
-            "matches": ["*://*.discord.com/*"]
+            "resources": [
+                "dist/*",
+                "third-party/*"
+            ],
+            "matches": [
+                "*://*.discord.com/*"
+            ]
         }
     ],
-
     "declarative_net_request": {
         "rule_resources": [
             {
@@ -49,5 +59,34 @@
                 "path": "modifyResponseHeaders.json"
             }
         ]
+    },
+    "background": {
+        "service_worker": "service-worker.js"
+    },
+    "commands": {
+        "TOGGLE_MUTE": {
+            "description": "Toggle your microphone's transmission on and off."
+        },
+        "TOGGLE_DEAFEN": {
+            "description": "Toggle your speaker’s playback on and off. Also disables your microphone while deafened."
+        },
+        "TOGGLE_VOICE_MODE": {
+            "description": "Toggle to switch between Push-to-talk and Voice Activity mode."
+        },
+        "TOGGLE_STREAMER_MODE": {
+            "description": "Toggle to enable/disable Streamer Mode."
+        },
+        "TOGGLE_GO_LIVE_STREAMING": {
+            "description": "Toggle to start/stop streaming in your current voice channel. Streams can only be started with this keybind if Discord recognises the game you are currently playing."
+        },
+        "NAVIGATE_BACK": {
+            "description": "Navigate backward in page history"
+        },
+        "NAVIGATE_FORWARD": {
+            "description": "Navigate forward in page history"
+        },
+        "SAVE_CLIP": {
+            "description": "Clips the last 30 seconds to 2 minutes of your stream, depending on your settings."
+        }
     }
 }
