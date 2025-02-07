@@ -66,12 +66,17 @@ jobs:
 
                   pids=""
 
-                  if [[ "${{ inputs.discord_branch }}" = "both" || "${{ inputs.discord_branch }}" = "stable" ]]; then
+                  branch="${{ inputs.discord_branch }}"
+                  if [[ "${{ github.event_name }}" = "schedule" ]]; then
+                    branch="both"
+                  fi
+
+                  if [[ "$branch" = "both" || "$branch" = "stable" ]]; then
                     node dist/report.mjs > "$stable_output_file" &
                     pids="$pids $!"
                   fi
 
-                  if [[ "${{ inputs.discord_branch }}" = "both" || "${{ inputs.discord_branch }}" = "canary" ]]; then
+                  if [[ "$branch" = "both" || "$branch" = "canary" ]]; then
                     USE_CANARY=true node dist/report.mjs > "$canary_output_file" &
                     pids="$pids $!"
                   fi
