@@ -61,7 +61,7 @@ async function fetchSticker(id: string) {
     return body as Sticker;
 }
 
-function buildMenuItem(stickerId: string) {
+function buildMenuItem(type: "Sticker", fetchData: () => Promisable<Omit<Sticker, "t">>) {
     return (
         <>
             <Menu.MenuSeparator></Menu.MenuSeparator>
@@ -103,13 +103,18 @@ function buildMenuItem(stickerId: string) {
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     const { favoriteableId, favoriteableType } = props ?? {};
     if (!favoriteableId) return;
-    if (favoriteableType != "sticker") return;
+    const menuItem = (() => {
+        switch (favoriteableType) {
+            case "sticker":
+                const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
+                if (sticker?.format_type === 3) return;
 
-    const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
-    if (sticker?.format_type === 3) return;
+                return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
+        }
+    })();
 
-    const menuItem = buildMenuItem("Sticker", () => fetchSticker(favoriteableId);
-    findGroupChildrenByChildId("devmode-copy-id", children, true)?.push(menuItem);
+    if (menuItem)
+        findGroupChildrenByChildId("devmode-copy-id", children, true)?.push(menuItem);
 };
 
 const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { target: HTMLElement; }) => {
