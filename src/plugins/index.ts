@@ -28,7 +28,7 @@ import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/Messag
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Logger } from "@utils/Logger";
-import { canonicalizeFind } from "@utils/patches";
+import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
 import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
@@ -58,7 +58,7 @@ export function isPluginEnabled(p: string) {
     ) ?? false;
 }
 
-export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
+export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {
     const patch = newPatch as Patch;
     patch.plugin = pluginName;
 
@@ -74,10 +74,12 @@ export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string) {
         patch.replacement = [patch.replacement];
     }
 
-    if (IS_REPORTER) {
-        patch.replacement.forEach(r => {
-            delete r.predicate;
-        });
+    for (const replacement of patch.replacement) {
+        canonicalizeReplacement(replacement, pluginPath);
+
+        if (IS_REPORTER) {
+            delete replacement.predicate;
+        }
     }
 
     patch.replacement = patch.replacement.filter(({ predicate }) => !predicate || predicate());
