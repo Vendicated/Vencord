@@ -425,6 +425,7 @@ function wrapAndPatchFactory(id: PropertyKey, originalFactory: AnyModuleFactory)
 function patchFactory(id: PropertyKey, factory: AnyModuleFactory): [patchedFactory: AnyModuleFactory, patchedSource: string, patchedBy: Set<string>] {
     // 0, prefix to turn it into an expression: 0,function(){} would be invalid syntax without the 0,
     let code: string = "0," + String(factory);
+    let patchedSource = code;
     let patchedFactory = factory;
 
     const patchedBy = new Set<string>();
@@ -507,7 +508,8 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory): [patchedFacto
                 }
 
                 code = newCode;
-                patchedFactory = (0, eval)(`// Webpack Module ${String(id)} - Patched by ${[...patchedBy, patch.plugin].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${String(id)}`);
+                patchedSource = `// Webpack Module ${String(id)} - Patched by ${[...patchedBy, patch.plugin].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${String(id)}`;
+                patchedFactory = (0, eval)(patchedSource);
 
                 if (!patchedBy.has(patch.plugin)) {
                     patchedBy.add(patch.plugin);
@@ -541,7 +543,7 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory): [patchedFacto
         }
     }
 
-    return [patchedFactory, code, patchedBy];
+    return [patchedFactory, patchedSource, patchedBy];
 }
 
 function diffErroredPatch(code: string, lastCode: string, match: RegExpMatchArray) {
