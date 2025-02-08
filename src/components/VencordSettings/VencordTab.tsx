@@ -1,19 +1,19 @@
- /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+/*
+* Vencord, a modification for Discord's desktop app
+* Copyright (c) 2022 Vendicated and contributors
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import "./headerCard.css";
@@ -25,11 +25,11 @@ import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
-import { identity } from "@utils/misc";
+import { identity, isPluginDev } from "@utils/misc";
 import { closeAllModals } from "@utils/modal";
 import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { Button, Card, FluxDispatcher, Forms, GuildStore, NavigationRouter, React, Select, Switch } from "@webpack/common";
+import { Button, Card, FluxDispatcher, Forms, GuildStore, NavigationRouter, React, Select, Switch, UserStore } from "@webpack/common";
 
 import { boykisserIcon, Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "..";
 import { openNotificationSettingsModal } from "./NotificationSettings";
@@ -42,11 +42,9 @@ const cl = classNameFactory("vc-settings-");
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1258290490961559633.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1258484151670018220.gif";
 
-const VENNIE_DONATOR_IMAGE = "https://cdn.discordapp.com/emojis/1238120638020063377.png";
-const COZY_CONTRIB_IMAGE = "https://cdn.discordapp.com/emojis/1026533070955872337.png";
+const CONTRIB_IMAGE = "https://cdn.discordapp.com/emojis/1337858798664024156.png";
 
-const DONOR_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070116305436712.png?size=2048";
-const CONTRIB_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070166481895484.png?size=2048";
+const CONTRIB_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1337878381517078649.png?size=2048";
 
 type KeysOfType<Object, Type> = {
     [K in keyof Object]: Object[K] extends Type ? K : never;
@@ -59,6 +57,8 @@ function VencordSettings() {
     const settings = useSettings();
 
     const donateImage = React.useMemo(() => Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE, []);
+
+    const user = UserStore.getCurrentUser();
 
     const isWindows = navigator.platform.toLowerCase().startsWith("win");
     const isMac = navigator.platform.toLowerCase().startsWith("mac");
@@ -109,6 +109,15 @@ function VencordSettings() {
     return (
         <SettingsTab title="Nexulien Settings">
             <HeaderCard image={donateImage} />
+            {isPluginDev(user?.id) && (
+                <SpecialCard
+                    title="Thank you for contributing!"
+                    description="Since you've contributed to Nexulien, you now have a cool new badge!"
+                    cardImage={CONTRIB_IMAGE}
+                    backgroundImage={CONTRIB_BACKGROUND_IMAGE}
+                    backgroundGradient="linear-gradient(to left, #00ff99, #7700ee)"
+                />
+            )}
             <QuickActionContainer title="Quick Actions">
                 <QuickAction
                     Icon={LogIcon}

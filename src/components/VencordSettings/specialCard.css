@@ -18,10 +18,11 @@
 }
 
 .vc-special-card-special {
-    padding: 1em 1.5em;
+    padding: 1em;
     margin-bottom: 1em;
-    background-size: cover;
-    background-position: center;
+    background-size: cover !important;
+    background-position: center !important;
+    border-radius: 12px !important;
 }
 
 .vc-special-card-flex {
@@ -31,44 +32,44 @@
 
 .vc-special-card-flex-main {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.1em;
+    padding: 0.5em;
+    text-shadow: 2px 2px 2px #70e4;
 }
 
 .vc-special-title {
-    color: black;
-}
-
-.vc-special-subtitle {
-    color: black;
+    color: white;
     font-size: 1.2em;
     font-weight: bold;
-    margin-top: 0.5em;
 }
 
 .vc-special-text {
-    color: black;
+    color: white;
     font-size: 1em;
-    margin-top: .75em;
     white-space: pre-line;
 }
 
 .vc-special-seperator {
-    margin-top: .75em;
+    margin-top: 0.75em;
     border-top: 1px solid white;
     opacity: 0.4;
+}
+
+.vc-special-hyperlink > .vc-special-hyperlink-text {
+    color: white;
+    font-size: 1em;
+    font-weight: bold;
+    text-align: center;
+    transition: text-decoration 0.5s;
+    cursor: pointer;
 }
 
 .vc-special-hyperlink {
     margin-top: 1em;
     cursor: pointer;
-
-    .vc-special-hyperlink-text {
-        color: black;
-        font-size: 1em;
-        font-weight: bold;
-        text-align: center;
-        transition: text-decoration 0.5s;
-        cursor: pointer;
-    }
 
     &:hover .vc-special-hyperlink-text {
         text-decoration: underline;
@@ -79,14 +80,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-left: 1em;
     flex-shrink: 0;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background-color: white;
+    width: 70px;
+    height: 70px;
 }
 
 .vc-special-image {
-    width: 65%;
+    width: 80%;
 }

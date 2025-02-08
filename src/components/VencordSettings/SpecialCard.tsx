@@ -30,27 +30,17 @@ interface StyledCardProps {
     description: string;
     cardImage?: string;
     backgroundImage?: string;
-    backgroundColor?: string;
-    buttonTitle?: string;
-    buttonOnClick?: () => void;
+    backgroundGradient?: string;
 }
 
-export function SpecialCard({ title, subtitle, description, cardImage, backgroundImage, backgroundColor, buttonTitle, buttonOnClick: onClick, children }: PropsWithChildren<StyledCardProps>) {
+export function SpecialCard({ title, description, cardImage, backgroundImage, backgroundGradient, children }: PropsWithChildren<StyledCardProps>) {
     const cardStyle: React.CSSProperties = {
-        backgroundColor: backgroundColor || "#9c85ef",
-        backgroundImage: `url(${backgroundImage || ""})`,
+        background: `url(${backgroundImage || ""})${backgroundGradient ? `, ${backgroundGradient}` : ""}`,
     };
 
     return (
         <Card className={cl("card", "card-special")} style={cardStyle}>
             <div className={cl("card-flex")}>
-                <div className={cl("card-flex-main")}>
-                    <Forms.FormTitle className={cl("title")} tag="h5">{title}</Forms.FormTitle>
-                    <Forms.FormText className={cl("subtitle")}>{subtitle}</Forms.FormText>
-                    <Forms.FormText className={cl("text")}>{description}</Forms.FormText>
-
-                    {children}
-                </div>
                 {cardImage && (
                     <div className={cl("image-container")}>
                         <img
@@ -61,17 +51,13 @@ export function SpecialCard({ title, subtitle, description, cardImage, backgroun
                         />
                     </div>
                 )}
+                <div className={cl("card-flex-main")}>
+                    <Forms.FormTitle className={cl("title")} tag="h5">{title}</Forms.FormTitle>
+                    <Forms.FormText className={cl("text")}>{description}</Forms.FormText>
+
+                    {children}
+                </div>
             </div>
-            {buttonTitle && (
-                <>
-                    <Forms.FormDivider className={cl("seperator")} />
-                    <Clickable onClick={onClick} className={cl("hyperlink")}>
-                        <Forms.FormText className={cl("hyperlink-text")}>
-                            {buttonTitle}
-                        </Forms.FormText>
-                    </Clickable>
-                </>
-            )}
         </Card>
     );
 }
