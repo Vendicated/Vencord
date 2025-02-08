@@ -51,6 +51,7 @@
         "idb": "8.0.0",
         "monaco-editor": "^0.52.2",
         "nanoid": "^5.0.9",
+        "socket.io": "^4.8.1",
         "usercss-meta": "^0.12.0",
         "openai": "^4.30.0",
         "virtual-merge": "^1.0.1"
