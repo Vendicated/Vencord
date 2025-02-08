@@ -9,7 +9,6 @@ import { Notifications } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
-import { localStorage } from "@utils/localStorage";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, Menu, MessageStore, NavigationRouter, PresenceStore, PrivateChannelsStore, UserStore, WindowStore } from "@webpack/common";
@@ -33,7 +32,7 @@ function Icon(enabled: boolean) {
 }
 
 const getBypassed = (source: Sources) =>
-    (JSON.parse(localStorage.getItem("vc-bypass-dnd") ?? '{"guild": [], "user": [], "channel": []}') as Record<Sources, string[]>)[source];
+    (JSON.parse(settings.store.bypasseds) as Record<Sources, string[]>)[source];
 
 const getAllBypassed = () => ({
     guild: getBypassed("guild"),
@@ -42,7 +41,7 @@ const getAllBypassed = () => ({
 });
 
 function setLists(source: Sources, value: string[]) {
-    localStorage.setItem("vc-bypass-dnd", JSON.stringify({ ...getAllBypassed(), [source]: value }));
+    settings.store.bypasseds = JSON.stringify({ ...getAllBypassed(), [source]: value });
 }
 
 async function showNotification(message: Message, guildId: string | undefined) {
@@ -85,7 +84,7 @@ const ContextCallback = (name: Sources): NavContextMenuPatchCallback => (childre
         return;
     }
 
-    children.splice(-1, 0, (
+    children.splice(-1, 0,
         <Menu.MenuGroup>
             <Menu.MenuItem
                 id={`dnd-${name}-bypass`}
@@ -97,7 +96,7 @@ const ContextCallback = (name: Sources): NavContextMenuPatchCallback => (childre
                 }}
             />
         </Menu.MenuGroup>
-    ));
+    );
 };
 
 const settings = definePluginSettings({
@@ -108,6 +107,12 @@ const settings = definePluginSettings({
     notificationSound: {
         type: OptionType.BOOLEAN,
         description: "Whether the notification sound should be played",
+    },
+    bypasseds: {
+        type: OptionType.STRING,
+        description: "Bypassed users, channels and guilds",
+        default: '{"guild": [], "user": [], "channel": []}',
+        hidden: true
     }
 });
 
