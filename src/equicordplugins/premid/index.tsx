@@ -127,7 +127,7 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         onChange: (value: boolean) => {
-            if (!value) preMid.clearActivity();
+            if (!value) clearActivity();
         },
     },
     showButtons: {
@@ -147,9 +147,17 @@ const settings = definePluginSettings({
     }
 });
 
+function clearActivity() {
+    FluxDispatcher.dispatch({
+        type: "LOCAL_ACTIVITY_UPDATE",
+        activity: null,
+        socketId: "PreMiD",
+    });
+}
+
 const Native = VencordNative.pluginHelpers.PreMiD as PluginNative<typeof import("./native")>;
 
-const preMid = definePlugin({
+export default definePlugin({
     name: "PreMiD",
     tags: ["presence", "premid", "rpc", "watching"],
     description: "A PreMiD app replacement. Supports watching/listening status. Requires extra setup (see settings)",
@@ -158,7 +166,7 @@ const preMid = definePlugin({
         "Toggle presence sharing": () => {
             settings.store.enableSet = !settings.store.enableSet;
             showToast(`Presence sharing is now ${settings.store.enableSet ? "enabled" : "disabled"}`);
-            preMid.clearActivity();
+            clearActivity();
         },
     },
 
@@ -177,6 +185,8 @@ const preMid = definePlugin({
         </>
     ),
 
+    clearActivity,
+
     settings,
     logger,
 
@@ -187,14 +197,6 @@ const preMid = definePlugin({
     stop() {
         this.clearActivity();
         Native.disconnect();
-    },
-
-    clearActivity() {
-        FluxDispatcher.dispatch({
-            type: "LOCAL_ACTIVITY_UPDATE",
-            activity: null,
-            socketId: "PreMiD",
-        });
     },
 
     showToast,
@@ -323,5 +325,3 @@ function showToast(msg: string) {
         }
     });
 }
-
-export default preMid;
