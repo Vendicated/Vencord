@@ -27,9 +27,11 @@ import { createHmac } from "crypto";
 import { readFileSync } from "fs";
 import pup, { JSHandle } from "puppeteer-core";
 
+const logStderr = (...data: any[]) => console.error(`${CANARY ? "CANARY" : "STABLE"} ---`, ...data);
+
 for (const variable of ["CHROMIUM_BIN"]) {
     if (!process.env[variable]) {
-        console.error(`Missing environment variable ${variable}`);
+        logStderr(`Missing environment variable ${variable}`);
         process.exit(1);
     }
 }
@@ -192,8 +194,8 @@ async function printReport() {
             headers,
             body
         }).then(res => {
-            if (!res.ok) console.error(`Webhook failed with status ${res.status}`);
-            else console.error("Posted to Webhook successfully");
+            if (!res.ok) logStderr(`Webhook failed with status ${res.status}`);
+            else logStderr("Posted to Webhook successfully");
         });
     }
 }
@@ -202,10 +204,13 @@ page.on("console", async e => {
     const level = e.type();
     const rawArgs = e.args();
 
-    async function getText() {
+    async function getText(skipFirst = true) {
+        let args = e.args();
+        if (skipFirst) args = args.slice(1);
+
         try {
             return await Promise.all(
-                e.args().map(async a => {
+                args.map(async a => {
                     return await maybeGetError(a) || await a.jsonValue();
                 })
             ).then(a => a.join(" ").trim());
@@ -243,7 +248,7 @@ page.on("console", async e => {
                 const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module|took [\d.]+?ms) \(Module id is (.+?)\): (.+)/)!;
                 if (!patchFailMatch) break;
 
-                console.error(await getText());
+                logStderr(await getText());
                 process.exitCode = 1;
 
                 const [, plugin, type, id, regex] = patchFailMatch;
@@ -260,7 +265,7 @@ page.on("console", async e => {
                 const failedToStartMatch = message.match(/Failed to start (.+)/);
                 if (!failedToStartMatch) break;
 
-                console.error(await getText());
+                logStderr(await getText());
                 process.exitCode = 1;
 
                 const [, name] = failedToStartMatch;
@@ -271,7 +276,7 @@ page.on("console", async e => {
 
                 break;
             case "LazyChunkLoader:":
-                console.error(await getText());
+                logStderr(await getText());
 
                 switch (message) {
                     case "A fatal error occurred:":
@@ -280,7 +285,7 @@ page.on("console", async e => {
 
                 break;
             case "Reporter:":
-                console.error(await getText());
+                logStderr(await getText());
 
                 switch (message) {
                     case "A fatal error occurred:":
@@ -298,27 +303,27 @@ page.on("console", async e => {
     }
 
     if (isDebug) {
-        console.error(await getText());
+        logStderr(await getText());
     } else if (level === "error") {
-        const text = await getText();
+        const text = await getText(false);
 
         if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("Webpack")) {
             if (IGNORED_DISCORD_ERRORS.some(regex => text.match(regex))) {
                 report.ignoredErrors.push(text);
             } else {
-                console.error("[Unexpected Error]", text);
+                logStderr("[Unexpected Error]", text);
                 report.otherErrors.push(text);
             }
         }
     }
 });
 
-page.on("error", e => console.error("[Error]", e.message));
+page.on("error", e => logStderr("[Error]", e.message));
 page.on("pageerror", e => {
     if (e.message.includes("Sentry successfully disabled")) return;
 
     if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module") && !/^.{1,2}$/.test(e.message)) {
-        console.error("[Page Error]", e.message);
+        logStderr("[Page Error]", e.message);
         report.otherErrors.push(e.message);
     } else {
         report.ignoredErrors.push(e.message);
