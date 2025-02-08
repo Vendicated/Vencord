@@ -59,6 +59,14 @@ export default definePlugin({
                     replace: "$&return;"
                 }
             ]
+        },
+        {
+            find: ".BetterDiscord||null!=",
+            replacement: {
+                // Make hasClientMods return false
+                match: /(?=let \i=window;)/,
+                replace: "return false;"
+            }
         }
     ],
 
