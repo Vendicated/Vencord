@@ -290,16 +290,16 @@ span.HTMLMessageContent {
 };
 
 const rules = [
-    createRule("wiggly", 24, [")~", "~("], "character", 1200),
+    // createRule("wiggly", 24, [")~", "~("], "character", 1200),
     createRule("highlighted", 24, ["==", "=="], "block"),
     createRule("spinning", 24, ["@@", "@@"], "block"),
     createRule("glowing", 24, ["++", "++"], "block"),
-    createRule("rainbow", 24, ["%%", "%%"], "character", 2400),
-    createRule("scaling", 24, ["+-", "-+"], "character", 2400),
+    // createRule("rainbow", 24, ["%%", "%%"], "character", 2400),
+    // createRule("scaling", 24, ["+-", "-+"], "character", 2400),
     createRule("bouncing", 24, ["^^", "^^"], "block"),
-    createRule("html", 24, ["[[", "]]"], "html"),
-    createRule("slam", 24, [">>", "<<"], "delay", 250),
-    createRule("cursive", 24, ["&&", "&&"], "block"),
+    // createRule("html", 24, ["[[", "]]"], "html"),
+    // createRule("slam", 24, [">>", "<<"], "delay", 250),
+    // createRule("cursive", 24, ["&&", "&&"], "block"),
 ];
 
 const rulesByName = {};
