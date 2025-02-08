@@ -27,13 +27,15 @@
     padding-bottom: 0;
 }
 
-.vc-settings-svgTitle {
-    background-image: url("https://raw.githubusercontent.com/Nexulien/Assets/refs/heads/main/nexulien.svg");
-    background-size: contain;
-    background-repeat: no-repeat;
+.vc-settings-logo-container {
     width: 100%;
     height: 20%;
-    filter: grayscale(1) brightness(999);
+}
+
+.vc-settings-logo {
+    width: auto;
+    height: 100%;
+    object-fit: contain;
 }
 
 .vc-settings-mascot {
