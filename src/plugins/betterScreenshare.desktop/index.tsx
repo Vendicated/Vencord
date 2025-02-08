@@ -24,7 +24,7 @@ import { addSettingsPanelButton, Emitter, removeSettingsPanelButton, Screenshare
 import { PluginInfo } from "./constants";
 import { openScreenshareModal } from "./modals";
 import { ScreenshareAudioPatcher, ScreensharePatcher } from "./patchers";
-import { replacedScreenshareModalComponent } from "./patches";
+import { GoLivePanelWrapper, replacedSubmitFunction } from "./patches";
 import { initScreenshareAudioStore, initScreenshareStore } from "./stores";
 
 export default definePlugin({
@@ -34,10 +34,17 @@ export default definePlugin({
     dependencies: ["PhilsPluginLibrary"],
     patches: [
         {
-            find: "Messages.SCREENSHARE_RELAUNCH",
+            find: "GoLiveModal: user cannot be undefined", // Module: 60594; canaryRelease: 364525; L431
             replacement: {
-                match: /(function .{1,2}\(.{1,2}\){)(.{1,40}(?=selectGuild).+?(?:]}\)}\)))(})/,
-                replace: "$1return $self.replacedScreenshareModalComponent(function(){$2}, this, arguments)$3"
+                match: /onSubmit:(\w+)/,
+                replace: "onSubmit:$self.replacedSubmitFunction($1)"
+            }
+        },
+        {
+            find: "StreamSettings: user cannot be undefined", // Module: 641115; canaryRelease: 364525; L254
+            replacement: {
+                match: /\(.{0,10}(,{.{0,100}modalContent)/,
+                replace: "($self.GoLivePanelWrapper$1"
             }
         }
     ],
@@ -71,5 +78,6 @@ export default definePlugin({
     toolboxActions: {
         "Open Screenshare Settings": openScreenshareModal
     },
-    replacedScreenshareModalComponent
+    replacedSubmitFunction,
+    GoLivePanelWrapper
 });

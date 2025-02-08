@@ -30,8 +30,8 @@ const plugin = definePlugin({
         {
             find: "--custom-app-panels-height",
             replacement: {
-                match: /(\w+\.\w+\(\w+,{\w+:function\(\){)return (\w)+}/,
-                replace: "$1 $self.storedComp = $2; return $self.replacedUserPanelComponent}"
+                match: /{}\)}\),/,
+                replace: "{})}),$self.replacedUserPanelComponent(),"
             }
         },
         {

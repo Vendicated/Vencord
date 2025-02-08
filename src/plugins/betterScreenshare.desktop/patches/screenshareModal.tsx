@@ -58,30 +58,8 @@ const ReplacedStreamSettings = () => {
     );
 };
 
-export function replacedScreenshareModalSettingsContentType(oldType: (...args: any[]) => any, thisContext: any, functionArguments: any) {
-    const { hideDefaultSettings } = Settings.plugins[PluginInfo.PLUGIN_NAME];
-    const oldTypeResult = Reflect.apply(oldType, thisContext, functionArguments);
-
-    if (hideDefaultSettings)
-        oldTypeResult.props.children = oldTypeResult.props.children.filter(c => !c?.props?.selectedFPS);
-    oldTypeResult.props.children.push(<ReplacedStreamSettings />);
-
-    return oldTypeResult;
-}
-
-export function replacedScreenshareModalComponent(oldComponent: (...args: any[]) => any, thisContext: any, functionArguments: any) {
-    const oldComponentResult = Reflect.apply(oldComponent, thisContext, functionArguments);
-
-    const content = oldComponentResult.props.children.props.children[2].props.children[1].props.children[3].props.children.props.children;
-    const oldContentType = content.type;
-
-    content.type = function () {
-        return replacedScreenshareModalSettingsContentType(oldContentType, this, arguments);
-    };
-
-    const [submitBtn, cancelBtn] = oldComponentResult.props.children.props.children[2].props.children[2].props.children;
-
-    submitBtn.props.onClick = () => {
+export function replacedSubmitFunction(fn) { // This is used to hook over the new OnSubmit function instead of implementing an OnClick function
+    return (...args) => {
         const { screensharePatcher, screenshareAudioPatcher } = Plugin;
 
         if (screensharePatcher) {
@@ -92,6 +70,20 @@ export function replacedScreenshareModalComponent(oldComponent: (...args: any[])
 
         if (screenshareAudioPatcher)
             screenshareAudioPatcher.forceUpdateTransportationOptions();
+        return fn(...args);
     };
-    return oldComponentResult;
+}
+
+export function GoLivePanelWrapper({ children }: { children: React.JSX.Element; }) {
+    if (!children)
+        return;
+
+    const { hideDefaultSettings } = Settings.plugins[PluginInfo.PLUGIN_NAME];
+    if (hideDefaultSettings)
+        return <ReplacedStreamSettings />;
+
+    children.props.children.push(<ReplacedStreamSettings />);
+
+    return children;
+
 }
