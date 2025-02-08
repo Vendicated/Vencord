@@ -1,4 +1,4 @@
-/*
+ /*
  * Vencord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
@@ -35,16 +35,22 @@ import { boykisserIcon, Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, R
 import { openNotificationSettingsModal } from "./NotificationSettings";
 import { QuickAction, QuickActionContainer } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
+import { SpecialCard } from "./SpecialCard";
 
 const cl = classNameFactory("vc-settings-");
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1258290490961559633.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1258484151670018220.gif";
 
+const VENNIE_DONATOR_IMAGE = "https://cdn.discordapp.com/emojis/1238120638020063377.png";
+const COZY_CONTRIB_IMAGE = "https://cdn.discordapp.com/emojis/1026533070955872337.png";
+
+const DONOR_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070116305436712.png?size=2048";
+const CONTRIB_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070166481895484.png?size=2048";
+
 type KeysOfType<Object, Type> = {
     [K in keyof Object]: Object[K] extends Type ? K : never;
 }[keyof Object];
-
 
 function VencordSettings() {
     const [settingsDir, , settingsDirPending] = useAwaiter(VencordNative.settings.getSettingsDir, {
