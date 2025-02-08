@@ -14,9 +14,9 @@ on:
                 type: string
                 description: "Webhook URL that the report will be posted to. This will be visible for everyone, so DO NOT pass sensitive webhooks like discord webhook. This is meant to be used by Venbot."
                 required: false
-    schedule:
-        # Every day at midnight
-        - cron: 0 0 * * *
+    # schedule:
+    #   # Every day at midnight
+    #   - cron: 0 0 * * *
 
 jobs:
     TestPlugins:
