@@ -17,7 +17,7 @@ export const settings = definePluginSettings({
     showWithoutHover: {
         type: OptionType.BOOLEAN,
         description: "Always show the timer without needing to hover",
-        restartNeeded: false,
+        restartNeeded: true,
         default: true
     },
     showRoleColor: {
@@ -106,6 +106,17 @@ export default definePlugin({
     patches: [
         {
             find: ".usernameSpeaking]",
+            predicate: () => !settings.store.showWithoutHover,
+            replacement: [
+                {
+                    match: /(?<=user:(\i).*?)iconGroup,children:\[/,
+                    replace: "$&$self.renderTimer($1.id),"
+                },
+            ]
+        },
+        {
+            find: ".usernameSpeaking]",
+            predicate: () => settings.store.showWithoutHover,
             replacement: [
                 {
                     match: /function\(\)\{.+:""(?=.*?userId:(\i))/,
@@ -217,9 +228,6 @@ export default definePlugin({
     },
 
     renderTimer(userId: string) {
-        if (!settings.store.showWithoutHover) {
-            return "";
-        }
         // get the user join time from the users object
         const joinTime = userJoinTimes.get(userId);
         if (!joinTime?.time) {
