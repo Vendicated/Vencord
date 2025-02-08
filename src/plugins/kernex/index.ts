@@ -125,28 +125,28 @@ export default definePlugin({
             if (channelId) {
                 document.body.classList.add(`guild-${guildId}`, `channel-${channelId}`);
             }
-            if (guildId !== prev_server) {
-                document.querySelector(".nexulien-server-style")?.remove();
-                const description = GuildStore.getGuild(guildId)?.description;
-                const urls = description?.match(/\bhttps?:\/\/\S+\b/g);
-                if (urls) {
-                    for (const url of urls) {
-                        fetch(url, { method: "HEAD" })
-                            .then(response => response.url)
-                            .then(resolvedUrl => {
-                                if (resolvedUrl.endsWith(".css")) {
-                                    const link = document.createElement("link");
-                                    link.rel = "stylesheet";
-                                    link.className = "nexulien-server-style";
-                                    link.href = resolvedUrl;
-                                    document.head.appendChild(link);
-                                }
-                            })
-                            .catch(console.error);
-                    }
-                }
-                prev_server = guildId;
-            }
+            // if (guildId !== prev_server) {
+            //     document.querySelector(".nexulien-server-style")?.remove();
+            //     const description = GuildStore.getGuild(guildId)?.description;
+            //     const urls = description?.match(/\bhttps?:\/\/\S+\b/g);
+            //     if (urls) {
+            //         for (const url of urls) {
+            //             fetch(url, { method: "HEAD" })
+            //                 .then(response => response.url)
+            //                 .then(resolvedUrl => {
+            //                     if (resolvedUrl.endsWith(".css")) {
+            //                         const link = document.createElement("link");
+            //                         link.rel = "stylesheet";
+            //                         link.className = "nexulien-server-style";
+            //                         link.href = resolvedUrl;
+            //                         document.head.appendChild(link);
+            //                     }
+            //                 })
+            //                 .catch(console.error);
+            //         }
+            //     }
+            //     prev_server = guildId;
+            // }
         }
     },
     start() {
