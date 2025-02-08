@@ -45,6 +45,9 @@
             "@webpack": [
                 "./webpack/webpack"
             ],
+            "@webpack/patch": [
+                "./webpack/patchWebpack"
+            ],
             "@plugins": [
                 "./plugins"
             ],
