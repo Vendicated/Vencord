@@ -477,7 +477,7 @@ function patchFactory(id: PropertyKey, factory: AnyModuleFactory): [patchedFacto
             }
 
             // TODO: remove once Vesktop has been updated to use addPatch
-            if (patch.plugin === "Equibop") {
+            if (patch.plugin === "Vesktop") {
                 canonicalizeReplacement(replacement, "VCDP");
             }
 
