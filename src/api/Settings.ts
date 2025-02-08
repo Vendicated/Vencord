@@ -32,10 +32,11 @@ export interface Settings {
     autoUpdate: boolean;
     autoUpdateNotification: boolean;
     useQuickCss: boolean;
-    enableReactDevtools: boolean;
-    themeLinks: string[];
+    eagerPatches: boolean;
     enabledThemes: string[];
     enabledThemeLinks: string[];
+    enableReactDevtools: boolean;
+    themeLinks: string[];
     frameless: boolean;
     transparent: boolean;
     updateRelaunch: boolean;
@@ -91,6 +92,7 @@ const DefaultSettings: Settings = {
     autoUpdateNotification: true,
     useQuickCss: true,
     themeLinks: [],
+    eagerPatches: IS_REPORTER,
     enabledThemes: [],
     enabledThemeLinks: [],
     enableReactDevtools: false,

@@ -215,7 +215,7 @@ page.on("console", async e => {
 
         switch (tag) {
             case "WebpackInterceptor:":
-                const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/)!;
+                const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module|took [\d.]+?ms) \(Module id is (.+?)\): (.+)/)!;
                 if (!patchFailMatch) break;
 
                 console.error(await getText());
@@ -226,7 +226,7 @@ page.on("console", async e => {
                     plugin,
                     type,
                     id,
-                    match: regex.replace(/\(\?:\[A-Za-z_\$\]\[\\w\$\]\*\)/g, "\\i"),
+                    match: regex,
                     error: await maybeGetError(e.args()[3])
                 });
 
@@ -298,7 +298,7 @@ page.on("pageerror", e => {
     if (e.message.includes("the network is offline")) return;
     if (e.message.includes("Cannot read properties of undefined (reading 'includes')")) return;
 
-    if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module")) {
+    if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module") && !/^.{1,2}$/.test(e.message)) {
         console.error("[Page Error]", e.message);
         report.otherErrors.push(e.message);
     } else {

@@ -6,21 +6,37 @@
 
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { patches } from "plugins";
+import { addPatch, patches } from "plugins";
 import { initWs } from "plugins/devCompanion.dev/initWs";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 import { reporterData } from "./reporterData";
 
-const ReporterLogger = new Logger("Reporter");
 async function runReporter() {
+    const ReporterLogger = new Logger("Reporter");
+
     try {
         ReporterLogger.log("Starting test...");
 
-        let loadLazyChunksResolve: (value: void | PromiseLike<void>) => void;
+        let loadLazyChunksResolve: (value: void) => void;
         const loadLazyChunksDone = new Promise<void>(r => loadLazyChunksResolve = r);
 
-        Webpack.beforeInitListeners.add(() => loadLazyChunks().then((loadLazyChunksResolve)));
+        // The main patch for starting the reporter chunk loading
+        addPatch({
+            find: '"Could not find app-mount"',
+            replacement: {
+                match: /(?<="use strict";)/,
+                replace: "Vencord.Webpack._initReporter();"
+            }
+        }, "Equicord Reporter");
+
+        // @ts-ignore
+        Vencord.Webpack._initReporter = function () {
+            // initReporter is called in the patched entry point of Discord
+            // setImmediate to only start searching for lazy chunks after Discord initialized the app
+            setTimeout(() => loadLazyChunks().then(loadLazyChunksResolve), 0);
+        };
+
         await loadLazyChunksDone;
 
         for (const patch of patches) {
@@ -28,6 +44,12 @@ async function runReporter() {
                 new Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
                 if (IS_COMPANION_TEST)
                     reporterData.failedPatches.foundNoModule.push(patch);
+            }
+        }
+
+        for (const [plugin, moduleId, match, totalTime] of Vencord.WebpackPatcher.patchTimings) {
+            if (totalTime > 3) {
+                new Logger("WebpackInterceptor").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
             }
         }
 
@@ -96,6 +118,8 @@ async function runReporter() {
     }
 }
 
-// imported in webpack for reporterData, wrap to avoid running reporter
+// Imported in webpack for reporterData, wrap to avoid running reporter
+// Run after the Vencord object has been created.
+// We need to add extra properties to it, and it is only created after all of Vencord code has ran
 if (IS_REPORTER)
-    runReporter();
+    setTimeout(runReporter, 0);

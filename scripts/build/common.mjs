@@ -304,7 +304,7 @@ export const commonOpts = {
     logLevel: "info",
     bundle: true,
     watch,
-    minify: !watch,
+    minify: !watch && !IS_REPORTER,
     sourcemap: watch ? "inline" : "",
     legalComments: "linked",
     banner,
