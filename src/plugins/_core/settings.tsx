@@ -229,6 +229,7 @@ export default definePlugin({
         if (IS_DEV) return " (Dev)";
         if (IS_WEB) return " (Web)";
         if (IS_VESKTOP) return ` (Vesktop v${VesktopNative.app.getVersion()})`;
+        if (IS_EQUIBOP) return `Equibop v${VesktopNative.app.getVersion()}`;
         if (IS_STANDALONE) return " (Standalone)";
         return "";
     },
