@@ -86,7 +86,11 @@ async function generateDebugInfoMessage() {
             `v${VERSION} • [${gitHash}](<https://github.com/Equicord/Equicord/commit/${gitHash}>)` +
             `${SettingsPlugin.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${client}`,
-        Platform: window.navigator.platform
+        Platform: `${DiscordNative.process.platform === "darwin" ?
+            (DiscordNative.process.arch === "arm64" ? "MacSilicon" : "MacIntel") :
+            DiscordNative.process.platform === "win32" && DiscordNative.process.arch === "x64" ?
+                "Windows" :
+                `${DiscordNative.process.platform} ${DiscordNative.process.arch}`}`
     };
 
     if (IS_DISCORD_DESKTOP) {
@@ -96,8 +100,8 @@ async function generateDebugInfoMessage() {
     const commonIssues = {
         "NoRPC enabled": Vencord.Plugins.isPluginEnabled("NoRPC"),
         "Activity Sharing disabled": tryOrElse(() => !ShowCurrentGame.getSetting(), false),
-        "Equicord DevBuild": !IS_STANDALONE,
-        "Has UserPlugins": Object.values(PluginMeta).some(m => m.userPlugin),
+        "Equicord Dev Build": !IS_STANDALONE,
+        "Has Userplugins": Object.values(PluginMeta).some(m => m.userPlugin),
         "More than two weeks out of date": BUILD_TIMESTAMP < Date.now() - 12096e5,
     };
 
