@@ -17,5 +17,6 @@
 */
 
 export * as Common from "./common";
+export * from "./utils/getFactories";
 export * from "./webpack";
 export * from "./wreq.d";

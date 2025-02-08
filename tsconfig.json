@@ -42,11 +42,11 @@
             "@webpack/common": [
                 "./webpack/common"
             ],
+            "@webpack/utils": [
+                "./webpack/utils"
+            ],
             "@webpack": [
                 "./webpack/webpack"
-            ],
-            "@webpack/patch": [
-                "./webpack/patchWebpack"
             ],
             "@plugins": [
                 "./plugins"
