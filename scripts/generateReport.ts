@@ -37,7 +37,10 @@ for (const variable of ["CHROMIUM_BIN"]) {
 }
 
 const CANARY = process.env.USE_CANARY === "true";
-let buildNumber = "Unknown Build number";
+let metaData = {
+    buildNumber: "Unknown Build Number",
+    buildHash: "Unknown Build Hash"
+};
 
 const browser = await pup.launch({
     headless: true,
@@ -137,7 +140,11 @@ async function printReport() {
             username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
             embeds: [
                 {
-                    title: `Discord ${CANARY ? "Canary" : "Stable"} (${buildNumber})`,
+                    author: {
+                        name: `Discord ${CANARY ? "Canary" : "Stable"} (${metaData.buildNumber})`,
+                        url: `https://nelly.tools/builds/app/${metaData.buildHash}`,
+                        icon_url: CANARY ? "https://cdn.discordapp.com/emojis/1252721945699549327.png?size=128" : "https://cdn.discordapp.com/emojis/1252721943463985272.png?size=128"
+                    },
                     color: CANARY ? 0xfbb642 : 0x5865f2
                 },
                 {
@@ -226,10 +233,7 @@ page.on("console", async e => {
     const isReporterMeta = firstArg === "[REPORTER_META]";
 
     if (isReporterMeta) {
-        const metaData = await rawArgs[1].jsonValue() as any;
-        if (metaData?.buildNumber && metaData.buildNumber !== -1) {
-            buildNumber = metaData.buildNumber;
-        }
+        metaData = await rawArgs[1].jsonValue() as any;
         return;
     }
 

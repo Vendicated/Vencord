@@ -39,7 +39,10 @@ async function runReporter() {
         await loadLazyChunksDone;
 
         if (IS_REPORTER && IS_WEB && !IS_VESKTOP) {
-            console.log("[REPORTER_META]", { buildNumber: getBuildNumber() });
+            console.log("[REPORTER_META]", {
+                buildNumber: getBuildNumber(),
+                buildHash: window.GLOBAL_ENV.SENTRY_TAGS.buildId
+            });
         }
 
         for (const patch of patches) {
