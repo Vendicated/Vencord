@@ -299,7 +299,7 @@ const rules = [
     createRule("bouncing", 24, ["^^", "^^"], "block"),
     // createRule("html", 24, ["[[", "]]"], "html"),
     // createRule("slam", 24, [">>", "<<"], "delay", 250),
-    // createRule("cursive", 24, ["&&", "&&"], "block"),
+    createRule("cursive", 24, ["&&", "&&"], "block"),
 ];
 
 const rulesByName = {};
