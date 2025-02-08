@@ -49,7 +49,7 @@ async function runReporter() {
         }
 
         for (const [plugin, moduleId, match, totalTime] of Vencord.WebpackPatcher.patchTimings) {
-            if (totalTime > 3) {
+            if (totalTime > 5) {
                 new Logger("WebpackInterceptor").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
             }
         }
