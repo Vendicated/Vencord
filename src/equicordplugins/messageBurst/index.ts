@@ -10,7 +10,7 @@ import definePlugin, { OptionType } from "@utils/types";
 import { ChannelStore, MessageActions, MessageStore, UserStore } from "@webpack/common";
 import { Channel, Message } from "discord-types/general";
 
-function shouldEdit(channel: Channel, message: Message, timePeriod: number) {
+function shouldEdit(channel: Channel, message: Message, timePeriod: number, shouldMergeWithAttachment: boolean) {
     let should = true;
 
     if (channel.isGroupDM()) {
@@ -20,6 +20,14 @@ function shouldEdit(channel: Channel, message: Message, timePeriod: number) {
     }
 
     if (message.author.id !== UserStore.getCurrentUser().id) {
+        should = false;
+    }
+
+    if (document.querySelector('[class^="replyBar__"]')) {
+        should = false;
+    }
+
+    if (message.attachments.length > 0 && !shouldMergeWithAttachment) {
         should = false;
     }
 
@@ -46,6 +54,11 @@ export default definePlugin({
             type: OptionType.NUMBER,
             description: "The duration of bursts (in seconds).",
             default: 3
+        },
+        shouldMergeWithAttachment: {
+            type: OptionType.BOOLEAN,
+            description: "Should the message be merged if the last message has an attachment?",
+            default: false
         }
     }),
     onBeforeMessageSend(channelId, message) {
@@ -60,9 +73,7 @@ export default definePlugin({
 
         const channel = ChannelStore.getChannel(channelId);
 
-        const { should, content } = shouldEdit(channel, lastMessage as Message, this.settings.store.timePeriod);
-
-        console.log(should, content, this.settings.store.timePeriod);
+        const { should, content } = shouldEdit(channel, lastMessage as Message, this.settings.store.timePeriod, this.settings.store.shouldMergeWithAttachment);
 
         if (should) {
             MessageActions.editMessage(channelId, lastMessageId, {
