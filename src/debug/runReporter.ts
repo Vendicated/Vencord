@@ -7,6 +7,7 @@
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
 import { addPatch, patches } from "plugins";
+import { getBuildNumber } from "webpack/patchWebpack";
 
 import { loadLazyChunks } from "./loadLazyChunks";
 
@@ -37,6 +38,13 @@ async function runReporter() {
 
         await loadLazyChunksDone;
 
+        if (IS_REPORTER && IS_WEB && !IS_VESKTOP) {
+            console.log("[REPORTER_META]", {
+                buildNumber: getBuildNumber(),
+                buildHash: window.GLOBAL_ENV.SENTRY_TAGS.buildId
+            });
+        }
+
         for (const patch of patches) {
             if (!patch.all) {
                 new Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
@@ -44,7 +52,7 @@ async function runReporter() {
         }
 
         for (const [plugin, moduleId, match, totalTime] of Vencord.WebpackPatcher.patchTimings) {
-            if (totalTime > 3) {
+            if (totalTime > 5) {
                 new Logger("WebpackInterceptor").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
             }
         }
