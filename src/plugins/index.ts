@@ -35,10 +35,8 @@ import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/Messag
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Logger } from "@utils/Logger";
-
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
 import { OptionType, Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
-
 import { FluxDispatcher } from "@webpack/common";
 import { FluxEvents } from "@webpack/types";
 
