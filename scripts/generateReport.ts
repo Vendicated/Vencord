@@ -340,7 +340,7 @@ page.on("pageerror", e => {
 
 await page.evaluateOnNewDocument(`
     if (location.host.endsWith("discord.com")) {
-        ${readFileSync("./dist/browser.js", "utf-8")};
+        ${readFileSync("./dist/browser/browser.js", "utf-8")};
     }
 `);
 
