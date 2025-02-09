@@ -68,6 +68,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - GoogleThat by Samwich
 - HideChatButtons by iamme
 - HideMessage by Hanzy
+- HideServers by bepvte
 - HolyNotes by Wolfie
 - HomeTyping by Samwich
 - HopOn by ImLvna
@@ -165,9 +166,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ScreenRecorder by AutumnVN
 
 ### Discord Desktop Only
-- HideServers by bepvte
 - MediaDownloader by Colorman
-- PreMiD by Nyako
 - StatusWhilePlaying by thororen
 
 ### Equicord Devbuilds Only
