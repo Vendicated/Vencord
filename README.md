@@ -87,6 +87,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - LoginWithQR by nexpid
 - MediaPlaybackSpeed by D3SOX
 - Meow by Samwich
+- MessageBurst by port
 - MessageColors by Hen
 - MessageLinkTooltip by Kyuuhachi
 - MessageLoggerEnhanced by Aria

@@ -1004,6 +1004,10 @@ export const EquicordDevs = Object.freeze({
         name: "okiso",
         id: 274178934143451137n,
     },
+    port22exposed: {
+        name: "port",
+        id: 1318383159645311009n,
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
