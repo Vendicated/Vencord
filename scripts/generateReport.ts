@@ -23,17 +23,24 @@
 // eslint-disable-next-line spaced-comment
 /// <reference types="../src/modules" />
 
+import { createHmac } from "crypto";
 import { readFileSync } from "fs";
 import pup, { JSHandle } from "puppeteer-core";
 
-for (const variable of ["DISCORD_TOKEN", "CHROMIUM_BIN"]) {
+const logStderr = (...data: any[]) => console.error(`${CANARY ? "CANARY" : "STABLE"} ---`, ...data);
+
+for (const variable of ["CHROMIUM_BIN"]) {
     if (!process.env[variable]) {
-        console.error(`Missing environment variable ${variable}`);
+        logStderr(`Missing environment variable ${variable}`);
         process.exit(1);
     }
 }
 
 const CANARY = process.env.USE_CANARY === "true";
+let metaData = {
+    buildNumber: "Unknown Build Number",
+    buildHash: "Unknown Build Hash"
+};
 
 const browser = await pup.launch({
     headless: true,
@@ -128,56 +135,74 @@ async function printReport() {
 
     console.log();
 
-    if (process.env.DISCORD_WEBHOOK) {
-        await fetch(process.env.DISCORD_WEBHOOK, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                description: "Here's the latest Vencord Report!",
-                username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
-                embeds: [
-                    {
-                        title: "Bad Patches",
-                        description: report.badPatches.map(p => {
-                            const lines = [
-                                `**__${p.plugin} (${p.type}):__**`,
-                                `ID: \`${p.id}\``,
-                                `Match: ${toCodeBlock(p.match, "Match: ".length, true)}`
-                            ];
-                            if (p.error) lines.push(`Error: ${toCodeBlock(p.error, "Error: ".length, true)}`);
-                            return lines.join("\n");
-                        }).join("\n\n") || "None",
-                        color: report.badPatches.length ? 0xff0000 : 0x00ff00
+    if (process.env.WEBHOOK_URL) {
+        const body = JSON.stringify({
+            username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
+            embeds: [
+                {
+                    author: {
+                        name: `Discord ${CANARY ? "Canary" : "Stable"} (${metaData.buildNumber})`,
+                        url: `https://nelly.tools/builds/app/${metaData.buildHash}`,
+                        icon_url: CANARY ? "https://cdn.discordapp.com/emojis/1252721945699549327.png?size=128" : "https://cdn.discordapp.com/emojis/1252721943463985272.png?size=128"
                     },
-                    {
-                        title: "Bad Webpack Finds",
-                        description: report.badWebpackFinds.map(f => toCodeBlock(f, 0, true)).join("\n") || "None",
-                        color: report.badWebpackFinds.length ? 0xff0000 : 0x00ff00
-                    },
-                    {
-                        title: "Bad Starts",
-                        description: report.badStarts.map(p => {
-                            const lines = [
-                                `**__${p.plugin}:__**`,
-                                toCodeBlock(p.error, 0, true)
-                            ];
-                            return lines.join("\n");
-                        }
-                        ).join("\n\n") || "None",
-                        color: report.badStarts.length ? 0xff0000 : 0x00ff00
-                    },
-                    {
-                        title: "Discord Errors",
-                        description: report.otherErrors.length ? toCodeBlock(report.otherErrors.join("\n"), 0, true) : "None",
-                        color: report.otherErrors.length ? 0xff0000 : 0x00ff00
+                    color: CANARY ? 0xfbb642 : 0x5865f2
+                },
+                {
+                    title: "Bad Patches",
+                    description: report.badPatches.map(p => {
+                        const lines = [
+                            `**__${p.plugin} (${p.type}):__**`,
+                            `ID: \`${p.id}\``,
+                            `Match: ${toCodeBlock(p.match, "Match: ".length, true)}`
+                        ];
+                        if (p.error) lines.push(`Error: ${toCodeBlock(p.error, "Error: ".length, true)}`);
+                        return lines.join("\n");
+                    }).join("\n\n") || "None",
+                    color: report.badPatches.length ? 0xff0000 : 0x00ff00
+                },
+                {
+                    title: "Bad Webpack Finds",
+                    description: report.badWebpackFinds.map(f => toCodeBlock(f, 0, true)).join("\n") || "None",
+                    color: report.badWebpackFinds.length ? 0xff0000 : 0x00ff00
+                },
+                {
+                    title: "Bad Starts",
+                    description: report.badStarts.map(p => {
+                        const lines = [
+                            `**__${p.plugin}:__**`,
+                            toCodeBlock(p.error, 0, true)
+                        ];
+                        return lines.join("\n");
                     }
-                ]
-            })
+                    ).join("\n\n") || "None",
+                    color: report.badStarts.length ? 0xff0000 : 0x00ff00
+                },
+                {
+                    title: "Discord Errors",
+                    description: report.otherErrors.length ? toCodeBlock(report.otherErrors.join("\n"), 0, true) : "None",
+                    color: report.otherErrors.length ? 0xff0000 : 0x00ff00
+                }
+            ]
+        });
+
+        const headers = {
+            "Content-Type": "application/json"
+        };
+
+        // functions similar to https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries
+        // used by venbot to ensure webhook invocations are genuine (since we will pass the webhook url as a workflow input which is publicly visible)
+        // generate a secret with something like `openssl rand -hex 128`
+        if (process.env.WEBHOOK_SECRET) {
+            headers["X-Signature"] = "sha256=" + createHmac("sha256", process.env.WEBHOOK_SECRET).update(body).digest("hex");
+        }
+
+        await fetch(process.env.WEBHOOK_URL, {
+            method: "POST",
+            headers,
+            body
         }).then(res => {
-            if (!res.ok) console.error(`Webhook failed with status ${res.status}`);
-            else console.error("Posted to Discord Webhook successfully");
+            if (!res.ok) logStderr(`Webhook failed with status ${res.status}`);
+            else logStderr("Posted to Webhook successfully");
         });
     }
 }
@@ -186,10 +211,13 @@ page.on("console", async e => {
     const level = e.type();
     const rawArgs = e.args();
 
-    async function getText() {
+    async function getText(skipFirst = true) {
+        let args = e.args();
+        if (skipFirst) args = args.slice(1);
+
         try {
             return await Promise.all(
-                e.args().map(async a => {
+                args.map(async a => {
                     return await maybeGetError(a) || await a.jsonValue();
                 })
             ).then(a => a.join(" ").trim());
@@ -202,6 +230,12 @@ page.on("console", async e => {
 
     const isVencord = firstArg === "[Vencord]";
     const isDebug = firstArg === "[PUP_DEBUG]";
+    const isReporterMeta = firstArg === "[REPORTER_META]";
+
+    if (isReporterMeta) {
+        metaData = await rawArgs[1].jsonValue() as any;
+        return;
+    }
 
     outer:
     if (isVencord) {
@@ -218,7 +252,7 @@ page.on("console", async e => {
                 const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module|took [\d.]+?ms) \(Module id is (.+?)\): (.+)/)!;
                 if (!patchFailMatch) break;
 
-                console.error(await getText());
+                logStderr(await getText());
                 process.exitCode = 1;
 
                 const [, plugin, type, id, regex] = patchFailMatch;
@@ -235,7 +269,7 @@ page.on("console", async e => {
                 const failedToStartMatch = message.match(/Failed to start (.+)/);
                 if (!failedToStartMatch) break;
 
-                console.error(await getText());
+                logStderr(await getText());
                 process.exitCode = 1;
 
                 const [, name] = failedToStartMatch;
@@ -246,7 +280,7 @@ page.on("console", async e => {
 
                 break;
             case "LazyChunkLoader:":
-                console.error(await getText());
+                logStderr(await getText());
 
                 switch (message) {
                     case "A fatal error occurred:":
@@ -255,7 +289,7 @@ page.on("console", async e => {
 
                 break;
             case "Reporter:":
-                console.error(await getText());
+                logStderr(await getText());
 
                 switch (message) {
                     case "A fatal error occurred:":
@@ -273,47 +307,36 @@ page.on("console", async e => {
     }
 
     if (isDebug) {
-        console.error(await getText());
+        logStderr(await getText());
     } else if (level === "error") {
-        const text = await getText();
+        const text = await getText(false);
 
         if (text.length && !text.startsWith("Failed to load resource: the server responded with a status of") && !text.includes("Webpack")) {
             if (IGNORED_DISCORD_ERRORS.some(regex => text.match(regex))) {
                 report.ignoredErrors.push(text);
             } else {
-                console.error("[Unexpected Error]", text);
+                logStderr("[Unexpected Error]", text);
                 report.otherErrors.push(text);
             }
         }
     }
 });
 
-page.on("error", e => console.error("[Error]", e.message));
+page.on("error", e => logStderr("[Error]", e.message));
 page.on("pageerror", e => {
     if (e.message.includes("Sentry successfully disabled")) return;
 
     if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module") && !/^.{1,2}$/.test(e.message)) {
-        console.error("[Page Error]", e.message);
+        logStderr("[Page Error]", e.message);
         report.otherErrors.push(e.message);
     } else {
         report.ignoredErrors.push(e.message);
     }
 });
 
-async function reporterRuntime(token: string) {
-    Vencord.Webpack.waitFor(
-        "loginToken",
-        m => {
-            console.log("[PUP_DEBUG]", "Logging in with token...");
-            m.loginToken(token);
-        }
-    );
-}
-
 await page.evaluateOnNewDocument(`
     if (location.host.endsWith("discord.com")) {
         ${readFileSync("./dist/browser.js", "utf-8")};
-        (${reporterRuntime.toString()})(${JSON.stringify(process.env.DISCORD_TOKEN)});
     }
 `);
 
