@@ -1,23 +1,10 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2024 nin0dev
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
@@ -34,7 +21,7 @@ const badRegexesSlurs = ["\\bn{1,}(i|!|1){1,}(b|g){2,}(a|@|e|3){1,}?"];
 const badVerbsGeneral = ["kill", "destroy"];
 const badNounsGeneral = ["shit", "bullshit", "bitch", "bastard", "die", "brainless"];
 /** * FUN ***/
-const badNounsFun = ["kotlin", "avast", "fres"];
+const badNounsFun = ["kotlin", "avast"];
 /** * REPLACEMENTS ***/
 const badVerbsReplacements = ["love", "eat", "deconstruct", "marry", "fart", "teach", "display", "plug", "explode", "undress", "finish", "freeze", "beat", "free", "brush", "allocate", "date", "melt", "breed", "educate", "injure", "change"];
 const badNounsReplacements = ["pasta", "kebab", "cake", "potato", "woman", "computer", "java", "hamburger", "monster truck", "osu!", "Ukrainian ball in search of gas game", "Anime", "Anime girl", "good", "keyboard", "NVIDIA RTX 3090 Graphics Card", "storm", "queen", "single", "umbrella", "mosque", "physics", "bath", "virus", "bathroom", "mom", "owner", "airport", "Avast Antivirus Free"];
@@ -76,14 +63,10 @@ export default definePlugin({
             default: true
         }
     }),
-    async start() {
-        this.preSend = addMessagePreSendListener((_channelId, msg) => {
-            const newContent = this.replaceBadVerbs(this.replaceBadNouns(msg.content));
-            msg.content = newContent;
-        });
-    },
-    stop() {
-        removeMessagePreSendListener(this.preSend);
+    onBeforeMessageSend: (c, msg) => {
+        // @ts-ignore
+        const newContent = Vencord.Plugins.plugins.GoodPerson.replaceBadVerbs(Vencord.Plugins.plugins.GoodPerson.replaceBadNouns(msg.content));
+        msg.content = newContent;
     },
     getEnabledBadNouns() {
         const thingToReturn: string[] = [];
@@ -117,34 +100,37 @@ export default definePlugin({
         });
     },
     flux: {
-        async MESSAGE_CREATE
-            ({ guildId, message }) {
-            const msg = message;
-            // @ts-ignore
-            let newMessageContent = Vencord.Plugins.plugins.GoodPerson.replaceBadVerbs(Vencord.Plugins.plugins.GoodPerson.replaceBadNouns(msg.content));
-            if (message.content !== newMessageContent) {
-                newMessageContent += "\n-# <:husk:1280158956341297225> **GoodPerson made this message good. Reload your client to clear changes**";
-                msg.content = newMessageContent;
-                FluxDispatcher.dispatch({
-                    type: "MESSAGE_UPDATE",
-                    message: msg,
-                    guildId
-                });
+        async MESSAGE_CREATE({ guildId, message }) {
+            if (Settings.plugins.GoodPerson.incoming) {
+                const msg = message;
+                // @ts-ignore
+                let newMessageContent = Vencord.Plugins.plugins.GoodPerson.replaceBadVerbs(Vencord.Plugins.plugins.GoodPerson.replaceBadNouns(msg.content));
+                if (message.content !== newMessageContent) {
+                    newMessageContent += "\n-# <:husk:1280158956341297225> **GoodPerson made this message good. Reload your client to clear changes**";
+                    msg.content = newMessageContent;
+                    FluxDispatcher.dispatch({
+                        type: "MESSAGE_UPDATE",
+                        message: msg,
+                        guildId
+                    });
+                }
             }
         },
-        async MESSAGE_UPDATE
-            ({ guildId, message }) {
-            const msg = message;
-            // @ts-ignore
-            let newMessageContent = Vencord.Plugins.plugins.GoodPerson.replaceBadVerbs(Vencord.Plugins.plugins.GoodPerson.replaceBadNouns(msg.content));
-            if (message.content !== newMessageContent) {
-                newMessageContent += "\n-# <:husk:1280158956341297225> **GoodPerson made this message good. Reload your client to clear changes**";
-                msg.content = newMessageContent;
-                FluxDispatcher.dispatch({
-                    type: "MESSAGE_UPDATE",
-                    message: msg,
-                    guildId
-                });
+        async MESSAGE_UPDATE({ guildId, message }) {
+            if (Settings.plugins.GoodPerson.incoming) {
+                const msg = message;
+                if (msg.content.includes("-# <:husk:1280158956341297225> **GoodPerson made this message good. Reload your client to clear changes**")) return;
+                // @ts-ignore
+                let newMessageContent = Vencord.Plugins.plugins.GoodPerson.replaceBadVerbs(Vencord.Plugins.plugins.GoodPerson.replaceBadNouns(msg.content));
+                if (message.content !== newMessageContent) {
+                    newMessageContent += "\n-# <:husk:1280158956341297225> **GoodPerson made this message good. Reload your client to clear changes**";
+                    msg.content = newMessageContent;
+                    FluxDispatcher.dispatch({
+                        type: "MESSAGE_UPDATE",
+                        message: msg,
+                        guildId
+                    });
+                }
             }
         }
     }
