@@ -61,7 +61,7 @@ export function getFactoryPatchedBy(moduleId: PropertyKey, webpackRequire = wreq
 
 const logger = new Logger("WebpackInterceptor", "#8caaee");
 
-/** Whether we tried to fallback to WebpackRequire of the factory, or disabled patches */
+/** Whether we tried to fallback to the WebpackRequire of the factory, or disabled patches */
 let wreqFallbackApplied = false;
 
 const define: typeof Reflect.defineProperty = (target, p, attributes) => {
@@ -81,9 +81,9 @@ const define: typeof Reflect.defineProperty = (target, p, attributes) => {
 
 // Factories can be patched in two ways. Eagerly or lazily.
 // If we are patching eagerly, pre-populated factories are patched immediately and new factories are patched when set.
-// Else, we only patch when they called.
+// Else, we only patch them when called.
 
-// Factories are always wrapped in a proxy, which allows us to intercept the call to them, patch if it wasnt eagerly patched,
+// Factories are always wrapped in a proxy, which allows us to intercept the call to them, patch if they werent eagerly patched,
 // and call them with our wrapper which notifies our listeners.
 
 // wreq.m is also wrapped in a proxy to intercept when new factories are set, patch them eargely, if enabled, and wrap them in the factory proxy.
@@ -153,7 +153,7 @@ define(Function.prototype, "m", {
     }
 });
 
-// The proxy for patching eagerly and/or wrapping factories in their proxy
+// The proxy for patching eagerly and/or wrapping factories in their proxy.
 const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
     /*
     If Webpack ever decides to set module factories using the variable of the modules object directly instead of wreq.m, we need to switch the proxy to the prototype
@@ -182,7 +182,7 @@ const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
     }
 };
 
-// The proxy for patching lazily and/or running factories with our wrapper
+// The proxy for patching lazily and/or running factories with our wrapper.
 const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
     apply(target, thisArg: unknown, argArray: Parameters<AnyModuleFactory>) {
         // SAFETY: Factories have `name` as their key in the module factories object, and that is always their module id
@@ -200,7 +200,7 @@ const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
     get(target, p, receiver) {
         const v = Reflect.get(target, p, receiver);
 
-        // Make proxied factories toString return their original factory toString
+        // Make proxied factories `toString` return their original factory `toString`
         if (p === "toString") {
             return (...args: unknown[]) => v.apply(target[SYM_ORIGINAL_FACTORY] ?? target, args);
         }
@@ -293,7 +293,7 @@ function runFactoryWithWrap(moduleId: PropertyKey, patchedFactory: PatchedModule
         delete patchedFactory[SYM_ORIGINAL_FACTORY];
     }
 
-    // Restore the original factory in all the module factories objects.
+    // Restore the original factory in all the module factories objects, discarding our proxy and allowing it to be garbage collected
     for (const wreq of Object.values(allWebpackInstances)) {
         define(wreq.m, moduleId, { value: originalFactory });
     }
