@@ -20,7 +20,7 @@ interface iUSRBG extends Plugin {
 migratePluginSettings("FullVCPFP", "fullVcPfp");
 export default definePlugin({
     name: "FullVCPFP",
-    description: "Makes avatars take up the entire vc tile. Breaks if USRBG Voice Background is enabled.",
+    description: "Makes avatars take up the entire vc tile",
     authors: [EquicordDevs.mochienya],
     patches: [
         {
