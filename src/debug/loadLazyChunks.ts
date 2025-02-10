@@ -140,8 +140,8 @@ export async function loadLazyChunks() {
         }
 
         Webpack.factoryListeners.add(factoryListener);
-        for (const factoryId in wreq.m) {
-            factoryListener(factoryId, wreq.m[factoryId]);
+        for (const moduleId in wreq.m) {
+            factoryListener(moduleId, wreq.m[moduleId]);
         }
 
         await chunksSearchingDone;
