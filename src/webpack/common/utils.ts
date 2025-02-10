@@ -71,10 +71,15 @@ export let Alerts: t.Alerts;
 waitFor(["show", "close"], m => Alerts = m);
 
 const ToastType = {
-    MESSAGE: 0,
-    SUCCESS: 1,
-    FAILURE: 2,
-    CUSTOM: 3
+    MESSAGE: "message",
+    SUCCESS: "success",
+    FAILURE: "failure",
+    CUSTOM: "custom",
+    CLIP: "clip",
+    LINK: "link",
+    FORWARD: "forward",
+    BOOKMARK: "bookmark",
+    CLOCK: "clock"
 };
 const ToastPosition = {
     TOP: 0,
@@ -87,7 +92,7 @@ export interface ToastData {
     /**
      * Toasts.Type
      */
-    type: number,
+    type: string,
     options?: ToastOptions;
 }
 
@@ -110,7 +115,7 @@ export const Toasts = {
     ...{} as {
         show(data: ToastData): void;
         pop(): void;
-        create(message: string, type: number, options?: ToastOptions): ToastData;
+        create(message: string, type: string, options?: ToastOptions): ToastData;
     }
 };
 
@@ -198,4 +203,11 @@ export const UsernameUtils: t.UsernameUtils = findByPropsLazy("useName", "getGlo
 export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModuleLazy(/=\i\.getUserProfile\(\i\),\i=\i\.getGuildMemberProfile\(/, {
     getDisplayProfile: filters.byCode(".getGuildMemberProfile("),
     useDisplayProfile: filters.byCode(/\[\i\.\i,\i\.\i],\(\)=>/)
+});
+
+export const DateUtils: t.DateUtils = mapMangledModuleLazy("millisecondsInUnit:", {
+    calendarFormat: filters.byCode("sameElse"),
+    dateFormat: filters.byCode('":'),
+    isSameDay: filters.byCode("Math.abs(+"),
+    diffAsUnits: filters.byCode("days:0", "millisecondsInUnit")
 });
