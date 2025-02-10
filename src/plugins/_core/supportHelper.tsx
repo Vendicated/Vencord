@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
-import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
+import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, KNOWN_ISSUES_CHANNEL_ID, REGULAR_ROLE_ID, SUPPORT_CHANNEL_ID, SUPPORT_HELPER_ROLE_ID, VENBOT_USER_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
@@ -33,13 +33,13 @@ import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
 import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Message } from "discord-types/general";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
 import plugins, { PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
-import { Message } from "discord-types/general";
 
 const CodeBlockRe = /```js\n(.+?)```/s;
 
@@ -50,10 +50,10 @@ const AllowedChannelIds = [
 ];
 
 const TrustedRolesIds = [
-    CONTRIB_ROLE_ID, // contributor
-    REGULAR_ROLE_ID, // regular
-    DONOR_ROLE_ID, // donor
-    "1244313853357981787", // support helper
+    CONTRIB_ROLE_ID,
+    REGULAR_ROLE_ID,
+    DONOR_ROLE_ID,
+    SUPPORT_HELPER_ROLE_ID,
 ];
 
 const AsyncFunction = async function () { }.constructor;
