@@ -18,7 +18,7 @@ import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, ModuleE
 export const SYM_ORIGINAL_FACTORY = Symbol("WebpackPatcher.originalFactory");
 export const SYM_PATCHED_SOURCE = Symbol("WebpackPatcher.patchedSource");
 export const SYM_PATCHED_BY = Symbol("WebpackPatcher.patchedBy");
-export const allWebpackInstances = new Set<AnyWebpackRequire>();
+export const allWebpackInstances = new WeakSet<AnyWebpackRequire>();
 
 export const patchTimings = [] as Array<[plugin: string, moduleId: PropertyKey, match: PatchReplacement["match"], totalTime: number]>;
 
@@ -208,7 +208,7 @@ const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
 function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], id: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget: boolean = false) {
     let existingFactory: TypedPropertyDescriptor<AnyModuleFactory> | undefined;
     let moduleFactoriesWithFactory: AnyWebpackRequire["m"] | undefined;
-    for (const wreq of allWebpackInstances) {
+    for (const wreq of Object.values(allWebpackInstances)) {
         if (ignoreExistingInTarget && wreq.m === moduleFactoriesTarget) continue;
 
         if (Object.hasOwn(wreq.m, id)) {
@@ -264,10 +264,11 @@ function runFactoryWithWrap(moduleId: PropertyKey, patchedFactory: PatchedModule
     }
 
     // Restore the original factory in all the module factories objects.
-    for (const wreq of allWebpackInstances) {
+    for (const wreq of Object.values(allWebpackInstances)) {
         define(wreq.m, moduleId, { value: originalFactory });
     }
 
+    // eslint-disable-next-line prefer-const
     let [module, exports, require] = argArray;
 
     if (wreq == null) {
@@ -366,7 +367,7 @@ function runFactoryWithWrap(moduleId: PropertyKey, patchedFactory: PatchedModule
     }
 
     return factoryReturn;
-};
+}
 
 /**
  * Patches a module factory.
