@@ -9,10 +9,10 @@ import { Settings } from "@api/Settings";
 import { canonicalizeMatch } from "@utils/patches";
 import { CodeFilter, stringMatches, wreq } from "@webpack";
 import { Toasts } from "@webpack/common";
-
-import { settings as companionSettings, logger } from ".";
-import { FindNode } from "./types/recieve";
 import { getFactoryPatchedBy, getFactoryPatchedSource } from "webpack/patchWebpack";
+
+import { logger, settings as companionSettings } from ".";
+import { FindNode } from "./types/recieve";
 
 /**
  * extracts the patched module, if there is no patched module, throws an error

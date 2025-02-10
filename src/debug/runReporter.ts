@@ -6,8 +6,8 @@
 
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { initWs } from "plugins/devCompanion.dev/initWs";
 import { addPatch, patches } from "plugins";
+import { initWs } from "plugins/devCompanion.dev/initWs";
 import { getBuildNumber } from "webpack/patchWebpack";
 
 import { loadLazyChunks } from "./loadLazyChunks";
