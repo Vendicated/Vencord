@@ -327,7 +327,6 @@ page.on("console", async e => {
 page.on("error", e => logStderr("[Error]", e.message));
 page.on("pageerror", e => {
     if (e.message.includes("Sentry successfully disabled")) return;
-    if (e.message.includes("the network is offline")) return;
 
     if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module") && !/^.{1,2}$/.test(e.message)) {
         logStderr("[Page Error]", e.message);
