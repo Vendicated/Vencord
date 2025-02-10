@@ -18,7 +18,7 @@ import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, ModuleE
 export const SYM_ORIGINAL_FACTORY = Symbol("WebpackPatcher.originalFactory");
 export const SYM_PATCHED_SOURCE = Symbol("WebpackPatcher.patchedSource");
 export const SYM_PATCHED_BY = Symbol("WebpackPatcher.patchedBy");
-export const allWebpackInstances = new WeakSet<AnyWebpackRequire>();
+export const allWebpackInstances = new Set<AnyWebpackRequire>();
 
 export const patchTimings = [] as Array<[plugin: string, moduleId: PropertyKey, match: PatchReplacement["match"], totalTime: number]>;
 
@@ -222,7 +222,7 @@ const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
 function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], moduleId: PropertyKey, newFactory: AnyModuleFactory, receiver: any, ignoreExistingInTarget: boolean = false) {
     let existingFactory: TypedPropertyDescriptor<AnyModuleFactory> | undefined;
     let moduleFactoriesWithFactory: AnyWebpackRequire["m"] | undefined;
-    for (const wreq of Object.values(allWebpackInstances)) {
+    for (const wreq of allWebpackInstances) {
         if (ignoreExistingInTarget && wreq.m === moduleFactoriesTarget) {
             continue;
         }
@@ -294,7 +294,7 @@ function runFactoryWithWrap(moduleId: PropertyKey, patchedFactory: PatchedModule
     }
 
     // Restore the original factory in all the module factories objects, discarding our proxy and allowing it to be garbage collected
-    for (const wreq of Object.values(allWebpackInstances)) {
+    for (const wreq of allWebpackInstances) {
         define(wreq.m, moduleId, { value: originalFactory });
     }
 
