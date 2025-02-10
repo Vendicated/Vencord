@@ -130,7 +130,7 @@ export async function loadLazyChunks() {
             }, 0);
         }
 
-        function factoryListener(factory: AnyModuleFactory | ModuleFactory) {
+        function factoryListener(_moduleId: PropertyKey, factory: AnyModuleFactory | ModuleFactory) {
             let isResolved = false;
             searchAndLoadLazyChunks(String(factory))
                 .then(() => isResolved = true)
@@ -141,7 +141,7 @@ export async function loadLazyChunks() {
 
         Webpack.factoryListeners.add(factoryListener);
         for (const factoryId in wreq.m) {
-            factoryListener(wreq.m[factoryId]);
+            factoryListener(factoryId, wreq.m[factoryId]);
         }
 
         await chunksSearchingDone;

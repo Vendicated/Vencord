@@ -200,12 +200,10 @@ export type AnyModuleFactory = ((this: ModuleExports, module: Module, exports: M
     [SYM_PATCHED_BY]?: Set<string>;
 };
 
-export type WrappedModuleFactory = AnyModuleFactory & {
+export type PatchedModuleFactory = AnyModuleFactory & {
     [SYM_ORIGINAL_FACTORY]: AnyModuleFactory;
     [SYM_PATCHED_SOURCE]?: string;
     [SYM_PATCHED_BY]?: Set<string>;
 };
 
-export type MaybeWrappedModuleFactory = AnyModuleFactory | WrappedModuleFactory;
-
-export type WrappedModuleFactories = Record<PropertyKey, WrappedModuleFactory>;
+export type MaybePatchedModuleFactory = PatchedModuleFactory | AnyModuleFactory;
