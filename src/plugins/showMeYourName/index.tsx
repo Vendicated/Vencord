@@ -10,6 +10,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { RelationshipStore } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 
 interface UsernameProps {
@@ -40,6 +41,11 @@ const settings = definePluginSettings({
         default: false,
         description: "Also apply functionality to reply previews",
     },
+    preferFriend: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Use friend names in place of usernames (overrides Display Names option if applicable)"
+    }
 });
 
 export default definePlugin({
@@ -60,9 +66,12 @@ export default definePlugin({
     renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
         try {
             const user = userOverride ?? message.author;
+            const friendName = RelationshipStore.getNickname(user.id);
             let { username } = user;
             if (settings.store.displayNames)
                 username = (user as any).globalName || username;
+            if (settings.store.preferFriend)
+                username = friendName ?? username;
 
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";
