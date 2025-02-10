@@ -54,7 +54,7 @@ export function SettingBooleanComponent({ option, pluginSettings, definedSetting
                 hideBorder
                 style={{ marginBottom: "0.5em" }}
             >
-                {wordsToTitle(wordsFromCamel(id))}
+                {option.displayName ?? wordsToTitle(wordsFromCamel(id))}
             </Switch>
             {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
         </Forms.FormSection>
