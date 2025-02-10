@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>153 additional plugins</summary>
+<summary>152 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -64,7 +64,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Glide by Samwich
 - GlobalBadges by HypedDomi & Hosted by Wolfie
 - GodMode by Tolgchu
-- GoodPerson by nin0dev & mantikafasi
 - GoogleThat by Samwich
 - HideChatButtons by iamme
 - HideMessage by Hanzy
