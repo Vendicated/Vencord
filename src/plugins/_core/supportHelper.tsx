@@ -39,6 +39,7 @@ import gitHash from "~git-hash";
 import plugins, { PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
+import { Message } from "discord-types/general";
 
 const VENCORD_GUILD_ID = "1015060230222131221";
 const VENBOT_USER_ID = "1017176847865352332";
@@ -55,6 +56,7 @@ const TrustedRolesIds = [
     "1026534353167208489", // contributor
     "1026504932959977532", // regular
     "1042507929485586532", // donor
+    "1244313853357981787", // support helper
 ];
 
 const AsyncFunction = async function () { }.constructor;
@@ -146,13 +148,28 @@ export default definePlugin({
 
     settings,
 
-    patches: [{
-        find: "#{intl::BEGINNING_DM}",
-        replacement: {
-            match: /#{intl::BEGINNING_DM},{.+?}\),(?=.{0,300}(\i)\.isMultiUserDM)/,
-            replace: "$& $self.renderContributorDmWarningCard({ channel: $1 }),"
-        }
-    }],
+    patches: [
+        {
+            find: "#{intl::BEGINNING_DM}",
+            replacement: {
+                match: /#{intl::BEGINNING_DM},{.+?}\),(?=.{0,300}(\i)\.isMultiUserDM)/,
+                replace: "$& $self.renderContributorDmWarningCard({ channel: $1 }),"
+            }
+        },
+        // kindly stolen from NoBlockedMessages
+        ...[
+            '"MessageStore"',
+            '"ReadStateStore"'
+        ].map(find => ({
+            find,
+            replacement: [
+                {
+                    match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
+                    replace: (_, _funcName, props) => `if($self.shouldIgnoreMessage(${props}.message))return;`
+                }
+            ]
+        }))
+    ],
 
     commands: [
         {
@@ -312,6 +329,13 @@ export default definePlugin({
         return buttons.length
             ? <Flex>{buttons}</Flex>
             : null;
+    },
+
+    shouldIgnoreMessage(message: Message) {
+        // @ts-ignore outdated type
+        const roles = GuildMemberStore.getSelfMember(VENCORD_GUILD_ID)?.roles;
+        if (!roles || !TrustedRolesIds.some(id => roles.includes(id))) return false;
+        return message.author.id === VENBOT_USER_ID && message.channel_id === SUPPORT_CHANNEL_ID && message.content.includes("sticky");
     },
 
     renderContributorDmWarningCard: ErrorBoundary.wrap(({ channel }) => {
