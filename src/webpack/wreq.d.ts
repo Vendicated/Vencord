@@ -202,8 +202,6 @@ export type AnyModuleFactory = ((this: ModuleExports, module: Module, exports: M
 
 export type PatchedModuleFactory = AnyModuleFactory & {
     [SYM_ORIGINAL_FACTORY]: AnyModuleFactory;
-    [SYM_PATCHED_SOURCE]?: string;
-    [SYM_PATCHED_BY]?: Set<string>;
 };
 
 export type MaybePatchedModuleFactory = PatchedModuleFactory | AnyModuleFactory;
