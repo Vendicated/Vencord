@@ -76,6 +76,19 @@ const define: typeof Reflect.defineProperty = (target, p, attributes) => {
     });
 };
 
+// wreq.m is the Webpack object containing module factories. It is pre-populated with factories, and is also populated via webpackGlobal.push
+// We use this setter to intercept when wreq.m is defined and apply patching to its factories.
+
+// Factories can be patched in two ways. Eagerly or lazily.
+// If we are patching eagerly, pre-populated factories are patched immediately and new factories are patched when set.
+// Else, we only patch when they called.
+
+// Factories are always wrapped in a proxy, which allows us to intercept the call to them, patch if it wasnt eagerly patched,
+// and call them with our wrapper which notifies our listeners.
+
+// wreq.m is also wrapped in a proxy to intercept when new factories are set, patch them eargely, if enabled, and wrap them in the factory proxy.
+
+// If this is the main Webpack, we also set up the internal references to WebpackRequire.
 define(Function.prototype, "m", {
     enumerable: false,
 
@@ -122,7 +135,7 @@ define(Function.prototype, "m", {
             notifyFactoryListeners(moduleId, originalFactory);
 
             const proxiedFactory = new Proxy(Settings.eagerPatches ? patchFactory(moduleId, originalFactory) : originalFactory, moduleFactoryHandler);
-            Reflect.set(originalModules, moduleId, proxiedFactory, originalModules);
+            define(originalModules, moduleId, { value: proxiedFactory });
         }
 
         define(originalModules, Symbol.toStringTag, {
@@ -140,6 +153,7 @@ define(Function.prototype, "m", {
     }
 });
 
+// The proxy for patching eagerly and/or wrapping factories in their proxy
 const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
     /*
     If Webpack ever decides to set module factories using the variable of the modules object directly instead of wreq.m, we need to switch the proxy to the prototype
@@ -156,7 +170,6 @@ const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
     },
     */
 
-    // The set trap for patching or defining getters for the module factories when new module factories are loaded
     set(target, p, newValue, receiver) {
         if (updateExistingFactory(target, p, newValue, receiver)) {
             return true;
@@ -169,6 +182,7 @@ const moduleFactoriesHandler: ProxyHandler<AnyWebpackRequire["m"]> = {
     }
 };
 
+// The proxy for patching lazily and/or running factories with our wrapper
 const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
     apply(target, thisArg: unknown, argArray: Parameters<AnyModuleFactory>) {
         // SAFETY: Factories have `name` as their key in the module factories object, and that is always their module id
@@ -198,10 +212,10 @@ const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
 /**
  * Update a factory that exists in any Webpack instance with a new original factory.
  *
- * @target The module factories where this new original factory is being set
+ * @param moduleFactoriesTarget The module factories where this new original factory is being set
  * @param moduleId The id of the module
  * @param newFactory The new original factory
- * @receiver The receiver of the factory
+ * @param receiver The receiver of the new factory
  * @param ignoreExistingInTarget Whether to ignore checking if the factory already exists in the moduleFactoriesTarget
  * @returns Whether the original factory was updated, or false if it doesn't exist in any Webpack instance
  */
@@ -209,7 +223,9 @@ function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], mo
     let existingFactory: TypedPropertyDescriptor<AnyModuleFactory> | undefined;
     let moduleFactoriesWithFactory: AnyWebpackRequire["m"] | undefined;
     for (const wreq of Object.values(allWebpackInstances)) {
-        if (ignoreExistingInTarget && wreq.m === moduleFactoriesTarget) continue;
+        if (ignoreExistingInTarget && wreq.m === moduleFactoriesTarget) {
+            continue;
+        }
 
         if (Object.hasOwn(wreq.m, moduleId)) {
             existingFactory = Reflect.getOwnPropertyDescriptor(wreq.m, moduleId);
@@ -219,21 +235,27 @@ function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], mo
     }
 
     if (existingFactory != null) {
-        // If existingFactory exists in any Webpack instance, it's either wrapped in defineModuleFactoryGetter, or it has already been required.
-        // So define the descriptor of it on this current Webpack instance (if it doesn't exist already), call Reflect.set with the new original,
-        // and let the correct logic apply (normal set, or defineModuleFactoryGetter setter)
-
+        // If existingFactory exists in any Webpack instance, it's either wrapped in our proxy, or it has already been required.
+        // In the case it is wrapped in our proxy, we need the Webpack instance with this new original factory to also have our proxy.
+        // So, define the descriptor of the existing factory on it.
         if (moduleFactoriesWithFactory !== moduleFactoriesTarget) {
             Reflect.defineProperty(receiver, moduleId, existingFactory);
         }
 
-        // Persist patched source and patched by in the new original factory, if the patched one has already been required
-        if (IS_DEV && existingFactory.value != null) {
-            newFactory[SYM_PATCHED_SOURCE] = existingFactory.value[SYM_PATCHED_SOURCE];
-            newFactory[SYM_PATCHED_BY] = existingFactory.value[SYM_PATCHED_BY];
+        const existingFactoryValue = moduleFactoriesWithFactory![moduleId];
+
+        // Update with the new original factory, if it does have a current original factory
+        if (existingFactoryValue[SYM_ORIGINAL_FACTORY] != null) {
+            existingFactoryValue[SYM_ORIGINAL_FACTORY] = newFactory;
         }
 
-        return Reflect.set(moduleFactoriesTarget, moduleId, newFactory, receiver);
+        // Persist patched source and patched by in the new original factory
+        if (IS_DEV) {
+            newFactory[SYM_PATCHED_SOURCE] = existingFactoryValue[SYM_PATCHED_SOURCE];
+            newFactory[SYM_PATCHED_BY] = existingFactoryValue[SYM_PATCHED_BY];
+        }
+
+        return true;
     }
 
     return false;
@@ -255,6 +277,14 @@ function notifyFactoryListeners(moduleId: PropertyKey, factory: AnyModuleFactory
     }
 }
 
+/**
+ * Run a (possibly) patched module factory with a wrapper which notifies our listeners.
+ *
+ * @param moduleId The id of the module
+ * @param patchedFactory The (possibly) patched module factory
+ * @param thisArg The `value` of the call to the factory
+ * @param argArray The arguments of the call to the factory
+ */
 function runFactoryWithWrap(moduleId: PropertyKey, patchedFactory: PatchedModuleFactory, thisArg: unknown, argArray: Parameters<MaybePatchedModuleFactory>) {
     const originalFactory = patchedFactory[SYM_ORIGINAL_FACTORY];
 
@@ -505,13 +535,9 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
 
     patchedFactory[SYM_ORIGINAL_FACTORY] = originalFactory;
 
-    if (patchedFactory !== originalFactory) {
-        patchedFactory.toString = originalFactory.toString.bind(originalFactory);
-
-        if (IS_DEV) {
-            originalFactory[SYM_PATCHED_SOURCE] = patchedSource;
-            originalFactory[SYM_PATCHED_BY] = patchedBy;
-        }
+    if (IS_DEV && patchedFactory !== originalFactory) {
+        originalFactory[SYM_PATCHED_SOURCE] = patchedSource;
+        originalFactory[SYM_PATCHED_BY] = patchedBy;
     }
 
     return patchedFactory as PatchedModuleFactory;
