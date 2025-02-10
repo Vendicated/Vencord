@@ -73,7 +73,13 @@ export type DisablePlugin = {
     };
 };
 
+/**
+ * @deprecated use {@link ExtractModule} instead
+ */
 export type RawId = {
+    /**
+     * @deprecated use {@link ExtractModule} instead
+     */
     type: "rawId";
     data: {
         id: number;
