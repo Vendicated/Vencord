@@ -33,11 +33,6 @@ export function requireStyle(name: string) {
     return style;
 }
 
-function findDocuments() {
-    const popouts = PopoutWindowStore?.getWindowKeys()?.map(k => PopoutWindowStore?.getWindow(k)?.document) ?? [];
-    return [document, ...popouts];
-}
-
 /**
  * A style object can be obtained by importing a stylesheet with `?managed` at the end of the import
  * @param style The style object or name
@@ -188,7 +183,8 @@ export function updateStyleInDocument(style: Style, doc: Document) {
  * @see {@link setStyleVariables} for more info on style classnames
  */
 export function compileStyle(style: Style) {
-    findDocuments().forEach(doc => updateStyleInDocument(style, doc));
+    const popouts = PopoutWindowStore?.getWindowKeys()?.map(k => PopoutWindowStore?.getWindow(k)?.document) ?? [];
+    return [document, ...popouts].forEach(doc => updateStyleInDocument(style, doc));
 }
 
 /**
