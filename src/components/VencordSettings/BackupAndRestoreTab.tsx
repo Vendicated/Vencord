@@ -44,6 +44,7 @@ function BackupRestoreTab() {
                     <li>&mdash; Custom QuickCSS</li>
                     <li>&mdash; Theme Links</li>
                     <li>&mdash; Plugin Settings</li>
+                    <li>&mdash; Plugin DataStores (e.g. Timezones or IRememberYou)</li>
                 </ul>
             </Text>
             <Flex>
