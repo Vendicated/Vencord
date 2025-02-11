@@ -54,12 +54,6 @@ export const banner = {
 `.trim()
 };
 
-/** @type {Array<import("esbuild").BuildContext>} */
-const contexts = [];
-export async function createContext(options) {
-    contexts.push(await context(options));
-}
-
 /**
  * @param {import("esbuild").BuildOptions[]} buildConfigs
  */
@@ -341,10 +335,9 @@ export const commonOpts = {
     plugins: [fileUrlPlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
     external: ["~plugins", "~git-hash", "~git-remote", "/assets/*"],
     inject: ["./scripts/build/inject/react.mjs"],
+    jsx: "transform",
     jsxFactory: "VencordCreateElement",
-    jsxFragment: "VencordFragment",
-    // Work around https://github.com/evanw/esbuild/issues/2460
-    tsconfig: "./scripts/build/tsconfig.esbuild.json"
+    jsxFragment: "VencordFragment"
 };
 
 const escapedBuiltinModules = builtinModules
