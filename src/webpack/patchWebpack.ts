@@ -538,6 +538,8 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
     if (IS_DEV && patchedFactory !== originalFactory) {
         originalFactory[SYM_PATCHED_SOURCE] = patchedSource;
         originalFactory[SYM_PATCHED_BY] = patchedBy;
+        patchedFactory[SYM_PATCHED_SOURCE] = patchedSource;
+        patchedFactory[SYM_PATCHED_BY] = patchedBy;
     }
 
     return patchedFactory as PatchedModuleFactory;
