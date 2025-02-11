@@ -65,14 +65,14 @@ const buildConfigs = [
         minify: true,
         format: "iife",
         outbase: "node_modules/monaco-editor/esm/",
-        outdir: "dist/monaco"
+        outdir: "dist/vendor/monaco"
     },
     {
         entryPoints: ["browser/monaco.ts"],
         bundle: true,
         minify: true,
         format: "iife",
-        outfile: "dist/monaco/index.js",
+        outfile: "dist/vendor/monaco/index.js",
         loader: {
             ".ttf": "file"
         }
@@ -143,7 +143,7 @@ async function buildExtension(target, files) {
     const entries = {
         "dist/Vencord.js": await readFile("dist/extension.js"),
         "dist/Vencord.css": await readFile("dist/extension.css"),
-        ...await loadDir("dist/monaco"),
+        ...await loadDir("dist/vendor/monaco", "dist/"),
         ...Object.fromEntries(await Promise.all(files.map(async f => {
             let content = await readFile(join("browser", f));
             if (f.startsWith("manifest")) {

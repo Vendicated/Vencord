@@ -19,9 +19,6 @@ importers:
       '@intrnl/xxhash64':
         specifier: ^0.1.2
         version: 0.1.2
-      '@sapphi-red/web-noise-suppressor':
-        specifier: 0.3.5
-        version: 0.3.5
       '@vap/core':
         specifier: 0.0.12
         version: 0.0.12
@@ -746,9 +743,6 @@ packages:
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
-
-  '@sapphi-red/web-noise-suppressor@0.3.5':
-    resolution: {integrity: sha512-jh3+V9yM+zxLriQexoGm0GatoPaJWjs6ypFIbFYwQp+AoUb55eUXrjKtKQyuC5zShzzeAQUl0M5JzqB7SSrsRA==}
 
   '@stylistic/eslint-plugin@2.12.1':
     resolution: {integrity: sha512-fubZKIHSPuo07FgRTn6S4Nl0uXPRPYVNpyZzIDGfp7Fny6JjNus6kReLD7NI380JXi4HtUTSOZ34LBuNPO1XLQ==}
@@ -3221,8 +3215,6 @@ snapshots:
       - supports-color
 
   '@rtsao/scc@1.1.0': {}
-
-  '@sapphi-red/web-noise-suppressor@0.3.5': {}
 
   '@stylistic/eslint-plugin@2.12.1(eslint@9.17.0(patch_hash=xm46kqcmdgzlmm4aifkfpxaho4))(typescript@5.7.2)':
     dependencies:
