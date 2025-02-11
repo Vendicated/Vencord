@@ -19,10 +19,15 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+import managedStyle from "./style.css?managed";
+
 export default definePlugin({
     name: "MessageDecorationsAPI",
     description: "API to add decorations to messages",
     authors: [Devs.TheSun],
+
+    managedStyle,
+
     patches: [
         {
             find: '"Message Username"',
@@ -31,5 +36,5 @@ export default definePlugin({
                 replace: "$&,...Vencord.Api.MessageDecorations.__addMessageDecorationsToMessage(arguments[0])"
             }
         }
-    ],
+    ]
 });
