@@ -17,7 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import esbuild from "esbuild";
 import { readFileSync } from "fs";
 import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
 import { join } from "path";
@@ -56,13 +55,6 @@ const commonOptions = {
 const MonacoWorkerEntryPoints = [
     "vs/language/css/css.worker.js",
     "vs/editor/editor.worker.js"
-];
-
-const RnNoiseFiles = [
-    "dist/rnnoise.wasm",
-    "dist/rnnoise_simd.wasm",
-    "dist/rnnoise/workletProcessor.js",
-    "LICENSE"
 ];
 
 /** @type {import("esbuild").BuildOptions[]} */
@@ -152,9 +144,6 @@ async function buildExtension(target, files) {
         "dist/Vencord.js": await readFile("dist/extension.js"),
         "dist/Vencord.css": await readFile("dist/extension.css"),
         ...await loadDir("dist/monaco"),
-        ...Object.fromEntries(await Promise.all(RnNoiseFiles.map(async file =>
-            [`third-party/rnnoise/${file.replace(/^dist\//, "")}`, await readFile(`node_modules/@sapphi-red/web-noise-suppressor/${file}`)]
-        ))),
         ...Object.fromEntries(await Promise.all(files.map(async f => {
             let content = await readFile(join("browser", f));
             if (f.startsWith("manifest")) {
