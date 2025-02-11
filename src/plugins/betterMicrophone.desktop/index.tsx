@@ -43,5 +43,8 @@ export default definePlugin({
         Emitter.removeAllListeners(PluginInfo.PLUGIN_NAME);
 
         removeSettingsPanelButton(PluginInfo.PLUGIN_NAME);
-    }
+    },
+    toolboxActions: {
+        "Open Microphone Settings": openMicrophoneSettingsModal
+    },
 });

@@ -64,6 +64,7 @@ export function getStreamParameters(connection: types.Connection, get: Profilabl
 
     return {
         ...connection.videoStreamParameters[0],
+        quality: 100,
         ...(videoBitrateEnabled && videoBitrate
             ? {
                 maxBitrate: videoBitrate * 1000,
@@ -124,12 +125,12 @@ export function getReplaceableVideoTransportationOptions(connection: types.Conne
     return {
         ...(videoBitrateEnabled && videoBitrate
             ? {
-                encodingVideoBitRate: videoBitrate * 1000,
-                encodingVideoMinBitRate: videoBitrate * 1000,
-                encodingVideoMaxBitRate: videoBitrate * 1000,
-                callBitRate: videoBitrate * 1000,
-                callMinBitRate: videoBitrate * 1000,
-                callMaxBitRate: videoBitrate * 1000
+                encodingVideoBitRate: Math.round(videoBitrate * 1000),
+                encodingVideoMinBitRate: Math.round(videoBitrate * 1000),
+                encodingVideoMaxBitRate: Math.round(videoBitrate * 1000),
+                callBitRate: Math.round(videoBitrate * 1000),
+                callMinBitRate: Math.round(videoBitrate * 1000),
+                callMaxBitRate: Math.round(videoBitrate * 1000)
             }
             : {}
         ),
@@ -225,6 +226,33 @@ export function patchConnectionVideoTransportOptions(
     logger?: Logger
 ) {
     const oldSetTransportOptions = connection.conn.setTransportOptions;
+    const oldGetQuality = connection.videoQualityManager.getQuality;
+
+    connection.videoQualityManager.getQuality = function (src) {
+        const { currentProfile } = get();
+        const { videoBitrateEnabled, videoBitrate, framerateEnabled, framerate, resolutionEnabled, width, height } = currentProfile;
+
+        const quality = oldGetQuality.call(this, src);
+
+        if (videoBitrateEnabled) {
+            quality.bitrateMax = Math.round(videoBitrate! * 1000);
+            quality.bitrateMin = Math.round(videoBitrate! * 1000);
+            quality.bitrateTarget = Math.round(videoBitrate! * 1000);
+        }
+
+        quality.localWant = 100;
+        quality.capture.framerate = framerateEnabled ? framerate : quality.capture.framerate;
+
+        quality.capture.width = resolutionEnabled ? width : quality.capture.width;
+        quality.capture.height = resolutionEnabled ? height : quality.capture.height;
+        quality.capture.pixelCount = quality.capture.width * quality.capture.height;
+
+        quality.encode = quality.capture;
+
+        logger?.info("Overridden getQuality", quality);
+
+        return quality;
+    };
 
     connection.conn.setTransportOptions = function (this: any, options: Record<string, any>) {
         const replaceableTransportOptions = getReplaceableVideoTransportationOptions(connection, get);
