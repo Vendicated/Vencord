@@ -64,7 +64,8 @@ export async function buildOrWatchAll(buildConfigs) {
         ));
     } else {
         await Promise.all(buildConfigs.map(cfg => build(cfg)))
-            .catch(() => {
+            .catch(error => {
+                console.error(error.message);
                 // esbuild will already print the error, so just exit and swallow the error (to avoid ugly stacktrace)
                 process.exit(1);
             });
