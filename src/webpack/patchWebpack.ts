@@ -15,8 +15,10 @@ import { reporterData } from "debug/reporterData";
 import { traceFunctionWithResults } from "../debug/Tracer";
 import { patches } from "../plugins";
 import { _initWebpack, _shouldIgnoreModule, AnyModuleFactory, AnyWebpackRequire, factoryListeners, findModuleId, MaybeWrappedModuleFactory, ModuleExports, moduleListeners, waitForSubscriptions, WebpackRequire, WrappedModuleFactory, wreq } from ".";
-import { SYM_ORIGINAL_FACTORY, SYM_PATCHED_BY, SYM_PATCHED_SOURCE } from "./utils/symbols";
 
+export const SYM_ORIGINAL_FACTORY = Symbol("WebpackPatcher.originalFactory");
+export const SYM_PATCHED_SOURCE = Symbol("WebpackPatcher.patchedSource");
+export const SYM_PATCHED_BY = Symbol("WebpackPatcher.patchedBy");
 /** A set with all the Webpack instances */
 export const allWebpackInstances = new Set<AnyWebpackRequire>();
 export const patchTimings = [] as Array<[plugin: string, moduleId: PropertyKey, match: string | RegExp, totalTime: number]>;
@@ -75,6 +77,19 @@ const define: Define = (target, p, attributes) => {
         ...attributes
     });
 };
+
+export function getOriginalFactory(id: PropertyKey, webpackRequire = wreq as AnyWebpackRequire) {
+    const moduleFactory = webpackRequire.m[id];
+    return (moduleFactory?.[SYM_ORIGINAL_FACTORY] ?? moduleFactory) as AnyModuleFactory | undefined;
+}
+
+export function getFactoryPatchedSource(id: PropertyKey, webpackRequire = wreq as AnyWebpackRequire) {
+    return webpackRequire.m[id]?.[SYM_PATCHED_SOURCE];
+}
+
+export function getFactoryPatchedBy(id: PropertyKey, webpackRequire = wreq as AnyWebpackRequire) {
+    return webpackRequire.m[id]?.[SYM_PATCHED_BY];
+}
 
 // wreq.m is the Webpack object containing module factories. It is pre-populated with module factories, and is also populated via webpackGlobal.push
 // We use this setter to intercept when wreq.m is defined and apply the patching in its module factories.

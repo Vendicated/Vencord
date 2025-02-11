@@ -9,20 +9,27 @@ import { Settings } from "@api/Settings";
 import { canonicalizeMatch } from "@utils/patches";
 import { CodeFilter, stringMatches, wreq } from "@webpack";
 import { Toasts } from "@webpack/common";
-import { getFactoryPatchedSource, getOriginalFactory } from "@webpack/utils";
+import { AnyWebpackRequire } from "webpack";
 
 import { settings as companionSettings } from ".";
 import { Recieve } from "./types";
+
+const SYM_PATCHED_SOURCE = Symbol("WebpackPatcher.patchedSource");
+
+function getFactoryPatchedSource(id: PropertyKey, webpackRequire = wreq as AnyWebpackRequire) {
+    return webpackRequire.m[id]?.[SYM_PATCHED_SOURCE];
+}
 
 /**
  * extracts the patched module, if there is no patched module, throws an error
  * @param id module id
  */
 export function extractOrThrow(id: number): string {
-    const module = getFactoryPatchedSource(id);
-    if (!module)
+    const module = wreq.m[id];
+    const patchedSource = getFactoryPatchedSource(id);
+    if (!patchedSource)
         throw new Error("No patched module found for module id " + id);
-    return module;
+    return patchedSource;
 }
 
 /**
@@ -34,11 +41,12 @@ export function extractOrThrow(id: number): string {
  * @param patched return the patched module
  */
 export function extractModule(id: number, patched = companionSettings.store.usePatchedModule): string {
+    const module = wreq.m[id];
+    if (!module)
+        throw new Error("No module found for module id:" + id);
+    const original = module.toString();
     const patchedSource = getFactoryPatchedSource(id);
-    const original = getOriginalFactory(id);
-    if (patched && !patchedSource || !original)
-        throw new Error("No module found for module id: " + id);
-    return patched ? patchedSource ?? original.toString() : original.toString();
+    return patched ? patchedSource ?? original : original;
 }
 
 export function parseNode(node: Recieve.FindNode): any {
