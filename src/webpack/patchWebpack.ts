@@ -198,6 +198,10 @@ const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
     },
 
     get(target, p, receiver) {
+        if (target[SYM_ORIGINAL_FACTORY] != null && (p === SYM_PATCHED_SOURCE || p === SYM_PATCHED_BY)) {
+            return Reflect.get(target[SYM_ORIGINAL_FACTORY], p, target[SYM_ORIGINAL_FACTORY]);
+        }
+
         const v = Reflect.get(target, p, receiver);
 
         // Make proxied factories `toString` return their original factory `toString`
@@ -538,8 +542,6 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
     if (IS_DEV && patchedFactory !== originalFactory) {
         originalFactory[SYM_PATCHED_SOURCE] = patchedSource;
         originalFactory[SYM_PATCHED_BY] = patchedBy;
-        patchedFactory[SYM_PATCHED_SOURCE] = patchedSource;
-        patchedFactory[SYM_PATCHED_BY] = patchedBy;
     }
 
     return patchedFactory as PatchedModuleFactory;
