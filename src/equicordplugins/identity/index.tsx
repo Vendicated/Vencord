@@ -6,7 +6,7 @@
 
 import { DataStore } from "@api/index";
 import { Flex } from "@components/Flex";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { Alerts, Button, FluxDispatcher, Forms, Toasts, UserProfileStore, UserStore } from "@webpack/common";
@@ -23,7 +23,7 @@ async function SetNewData() {
     // holy moly
     FluxDispatcher.dispatch({ type: "USER_SETTINGS_ACCOUNT_SET_PENDING_AVATAR", avatar: pfpBase64 });
     FluxDispatcher.dispatch({ type: "USER_SETTINGS_ACCOUNT_SET_PENDING_GLOBAL_NAME", globalName: `${PersonData.name.first} ${PersonData.name.last}` });
-    FluxDispatcher.dispatch({ type: "USER_SETTINGS_ACCOUNT_SET_PENDING_PRONOUNS", pronouns: "" });
+    FluxDispatcher.dispatch({ type: "USER_SETTINGS_ACCOUNT_SET_PENDING_PRONOUNS", pronouns: `${PersonData.gender === "male" ? "he/him" : PersonData.gender === "female" ? "she/her" : ""}` });
     FluxDispatcher.dispatch({ type: "USER_SETTINGS_ACCOUNT_SET_PENDING_BANNER", banner: null });
     FluxDispatcher.dispatch({ type: "USER_SETTINGS_ACCOUNT_SET_PENDING_ACCENT_COLOR", color: null });
     FluxDispatcher.dispatch({ type: "USER_SETTINGS_ACCOUNT_SET_PENDING_THEME_COLORS", themeColors: [null, null] });
@@ -134,7 +134,7 @@ function ResetCard() {
 export default definePlugin({
     name: "Identity",
     description: "Allows you to edit your profile to a random fake person with the click of a button",
-    authors: [Devs.Samwich],
+    authors: [Devs.Samwich, EquicordDevs.port22exposed],
     ResetCard: ResetCard,
     patches: [
         {
