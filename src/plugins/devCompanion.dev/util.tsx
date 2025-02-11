@@ -9,29 +9,22 @@ import { Settings } from "@api/Settings";
 import { canonicalizeMatch } from "@utils/patches";
 import { CodeFilter, stringMatches, wreq } from "@webpack";
 import { Toasts } from "@webpack/common";
-import { AnyWebpackRequire } from "webpack";
 
-import { settings as companionSettings } from ".";
-import { Recieve } from "./types";
+import { logger, settings as companionSettings } from ".";
+import { FindNode } from "./types/recieve";
 
-const SYM_PATCHED_SOURCE = Symbol("WebpackPatcher.patchedSource");
-
-function getFactoryPatchedSource(id: PropertyKey, webpackRequire = wreq as AnyWebpackRequire) {
-    return webpackRequire.m[id]?.[SYM_PATCHED_SOURCE];
-}
+const { WebpackPatcher: { getFactoryPatchedBy, getFactoryPatchedSource } } = require("Vencord") as typeof import("Vencord");
 
 /**
  * extracts the patched module, if there is no patched module, throws an error
  * @param id module id
  */
-export function extractOrThrow(id: number): string {
-    const module = wreq.m[id];
+export function extractOrThrow(id: PropertyKey): string {
     const patchedSource = getFactoryPatchedSource(id);
     if (!patchedSource)
-        throw new Error("No patched module found for module id " + id);
+        throw new Error(`No patched module found for module id ${String(id)}`);
     return patchedSource;
 }
-
 /**
  *  attempts to extract the module, throws if not found
  *
@@ -40,16 +33,31 @@ export function extractOrThrow(id: number): string {
  * @param id module id
  * @param patched return the patched module
  */
-export function extractModule(id: number, patched = companionSettings.store.usePatchedModule): string {
-    const module = wreq.m[id];
-    if (!module)
-        throw new Error("No module found for module id:" + id);
-    const original = module.toString();
-    const patchedSource = getFactoryPatchedSource(id);
-    return patched ? patchedSource ?? original : original;
+export function extractModule(id: PropertyKey, patched = companionSettings.store.usePatchedModule): string {
+    if (patched) {
+        try {
+            return extractOrThrow(id);
+        } catch (e) {
+            logger.debug(e);
+        }
+    }
+    return extractUnpatchedModule(id);
+}
+function extractUnpatchedModule(id: PropertyKey): string {
+    if (!wreq.m[id]) {
+        throw new Error(`Module not found for id: ${String(id)}`);
+    }
+    return `// Webpack Module ${String(id)} - Patched by\n0,${wreq.m[id]}\n//# sourceURL=WebpackModule${String(id)}`;
 }
 
-export function parseNode(node: Recieve.FindNode): any {
+/**
+ *
+ * @param usePatched if false, always returns `[]`, otherwise uses the same setting as {@link extractModule}
+ */
+export function getModulePatchedBy(id: PropertyKey, usePatched = companionSettings.store.usePatchedModule): string[] {
+    return [...usePatched && getFactoryPatchedBy(id) || []];
+}
+export function parseNode(node: FindNode): any {
     switch (node.type) {
         case "string":
             return node.value;

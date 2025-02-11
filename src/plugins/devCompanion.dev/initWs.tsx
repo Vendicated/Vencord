@@ -14,8 +14,9 @@ import { reporterData } from "debug/reporterData";
 import { Settings } from "Vencord";
 
 import { logger, PORT, settings } from ".";
-import { Recieve, Send } from "./types";
-import { extractModule, extractOrThrow, findModuleId, mkRegexFind, parseNode, toggleEnabled, } from "./util";
+import { Recieve } from "./types";
+import { FullOutgoingMessage, OutgoingMessage } from "./types/send";
+import { extractModule, extractOrThrow, findModuleId, getModulePatchedBy, mkRegexFind, parseNode, toggleEnabled, } from "./util";
 
 export function stopWs() {
     socket?.close(1000, "Plugin Stopped");
@@ -29,7 +30,7 @@ export function initWs(isManual = false) {
     let hasErrored = false;
     const ws = socket = new WebSocket(`ws://localhost:${PORT}`);
 
-    function replyData(data: Send.OutgoingMessage) {
+    function replyData(data: OutgoingMessage) {
         ws.send(JSON.stringify(data));
     }
 
@@ -122,19 +123,21 @@ export function initWs(isManual = false) {
          * @param error the error to reply with. if there is no error, the reply is a sucess
          */
         function reply(error?: string) {
-            const data = { nonce: d.nonce, ok: !error } as Record<string, unknown>;
-            if (error) data.error = error;
-
-            ws.send(JSON.stringify(data));
+            const toSend = { nonce: d.nonce, ok: !error } as Record<string, unknown>;
+            if (error) toSend.error = error;
+            logger.debug("Replying with:", toSend);
+            ws.send(JSON.stringify(toSend));
         }
-        function replyData(data: Send.OutgoingMessage) {
-            const toSend: Send.FullOutgoingMessage = {
+        function replyData(data: OutgoingMessage) {
+            const toSend: FullOutgoingMessage = {
                 ...data,
                 nonce: d.nonce
             };
-            // data.nonce = d.nonce;
+            logger.debug(`Replying with data: ${toSend}`);
             ws.send(JSON.stringify(toSend));
         }
+
+        logger.debug(`Received Message: ${d.type}`, "\n", d.data);
 
         switch (d.type) {
             case "disable": {
@@ -146,6 +149,7 @@ export function initWs(isManual = false) {
             }
             case "rawId": {
                 const m = d.data;
+                logger.warn("Deprecated rawId message received, use extract instead");
                 replyData({
                     type: "rawId",
                     ok: true,
@@ -166,7 +170,8 @@ export function initWs(isManual = false) {
                                 data: {
                                     patched: extractOrThrow(m.idOrSearch),
                                     source: extractModule(m.idOrSearch, false),
-                                    moduleNumber: m.idOrSearch
+                                    moduleNumber: m.idOrSearch,
+                                    patchedBy: getModulePatchedBy(m.idOrSearch, true)
                                 },
                             });
                             break;
@@ -186,7 +191,8 @@ export function initWs(isManual = false) {
                                 data: {
                                     patched: p,
                                     source: p2,
-                                    moduleNumber: moduleId
+                                    moduleNumber: moduleId,
+                                    patchedBy: getModulePatchedBy(moduleId, true)
                                 },
                             });
                             break;
@@ -217,6 +223,7 @@ export function initWs(isManual = false) {
                                     data: {
                                         module: extractModule(m.idOrSearch, m.usePatched ?? undefined),
                                         moduleNumber: m.idOrSearch,
+                                        patchedBy: getModulePatchedBy(m.idOrSearch, m.usePatched ?? undefined)
                                     },
                                 });
 
@@ -234,7 +241,8 @@ export function initWs(isManual = false) {
                                 ok: true,
                                 data: {
                                     module: extractModule(moduleId, m.usePatched ?? undefined),
-                                    moduleNumber: moduleId
+                                    moduleNumber: moduleId,
+                                    patchedBy: getModulePatchedBy(moduleId, m.usePatched ?? undefined)
                                 },
                             });
                             break;
@@ -283,7 +291,8 @@ export function initWs(isManual = false) {
                                     data: {
                                         module: foundFind,
                                         find: true,
-                                        moduleNumber: +findModuleId([foundFind])
+                                        moduleNumber: +findModuleId([foundFind]),
+                                        patchedBy: getModulePatchedBy(foundFind)
                                     },
                                 });
                             } catch (err) {
