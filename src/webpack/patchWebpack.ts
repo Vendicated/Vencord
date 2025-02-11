@@ -206,7 +206,7 @@ const moduleFactoryHandler: ProxyHandler<MaybePatchedModuleFactory> = {
 
         // Make proxied factories `toString` return their original factory `toString`
         if (p === "toString") {
-            return (...args: unknown[]) => v.apply(target[SYM_ORIGINAL_FACTORY] ?? target, args);
+            return v.bind(target[SYM_ORIGINAL_FACTORY] ?? target);
         }
 
         return v;
