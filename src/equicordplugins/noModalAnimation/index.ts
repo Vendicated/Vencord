@@ -13,18 +13,32 @@ export default definePlugin({
     authors: [Devs.AutumnVN],
     patches: [
         {
-            find: ".rootWithShadow",
+            find: "DURATION_IN:",
             replacement: {
-                match: /\?300:100/,
-                replace: "?0:0",
+                match: /300,/,
+                replace: "0,",
             }
         },
         {
             find: 'backdropFilter:"blur(0px)"',
             replacement: {
-                match: /\?0:300/,
+                match: /\?0:200/,
                 replace: "?0:0",
             }
+        },
+        {
+            find: '="ABOVE"',
+            replacement: {
+                match: /:300/,
+                replace: ":0",
+            }
+        },
+        {
+            find: "renderLurkerModeUpsellPopout,position:",
+            replacement: {
+                match: /200:300/g,
+                replace: "0:0",
+            },
         }
     ]
 });
