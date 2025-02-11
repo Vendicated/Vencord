@@ -304,7 +304,6 @@ function runFactoryWithWrap(moduleId: PropertyKey, patchedFactory: PatchedModule
         define(wreq.m, moduleId, { value: originalFactory });
     }
 
-    // eslint-disable-next-line prefer-const
     let [module, exports, require] = argArray;
 
     if (wreq == null) {
