@@ -51,13 +51,12 @@ function findDocuments() {
 export function enableStyle(style: Style | string) {
     if (typeof style === "string") style = requireStyle(style);
 
+    const previousState = style.enabled;
+
     style.enabled = true;
     compileStyle(style);
 
-    if (style.enabled)
-        return false;
-
-    return true;
+    return !previousState;
 }
 
 /**
@@ -74,13 +73,12 @@ export function disableStyle(style: Style | string) {
         }
     }
 
-    compileStyle(style);
-
-    if (!style.enabled)
-        return false;
+    const previousState = style.enabled;
 
     style.enabled = false;
-    return true;
+    compileStyle(style);
+
+    return previousState;
 }
 
 /**
