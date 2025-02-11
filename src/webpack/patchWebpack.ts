@@ -276,7 +276,7 @@ function updateExistingFactory(moduleFactoriesTarget: AnyWebpackRequire["m"], mo
 function notifyFactoryListeners(moduleId: PropertyKey, factory: AnyModuleFactory) {
     for (const factoryListener of factoryListeners) {
         try {
-            factoryListener(moduleId, factory);
+            factoryListener(factory, moduleId);
         } catch (err) {
             logger.error("Error in Webpack factory listener:\n", err, factoryListener);
         }
