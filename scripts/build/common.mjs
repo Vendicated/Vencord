@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+// @ts-check
+
 import "../suppressExperimentalWarnings.js";
 import "../checkNodeVersion.js";
 
