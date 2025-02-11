@@ -158,7 +158,7 @@ export default definePlugin({
         {
             find: "#{intl::CUSTOM_STATUS_SET_CUSTOM_STATUS}",
             replacement: {
-                match: /\.\i\i,children:.{0,70}\i\.\i\.string\(\i\.\i#{intl::SAVE}\)\}\)/,
+                match: /\.\i\i,children:\i\.\i\.string\(\i\.\i#{intl::SAVE}\)\}\)/,
                 replace: "$&,$self.renderRememberButton(this.state)"
             }
         },
