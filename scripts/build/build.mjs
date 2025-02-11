@@ -39,13 +39,14 @@ if (defines.IS_STANDALONE === "false")
     defines["process.platform"] = JSON.stringify(process.platform);
 
 /**
- * @type {ptions}
+ * @type {import("esbuild").BuildOptions}
  */
 const nodeCommonOpts = {
     ...commonOpts,
     format: "cjs",
     platform: "node",
     target: ["esnext"],
+    // @ts-expect-error this is never undefined
     external: ["electron", "original-fs", "~pluginNatives", ...commonOpts.external],
     define: defines
 };
@@ -116,6 +117,7 @@ const buildConfigs = ([
             IS_VESKTOP: "false"
         },
         plugins: [
+            // @ts-ignore this is never undefined
             ...nodeCommonOpts.plugins,
             globNativesPlugin
         ]

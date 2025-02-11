@@ -31,7 +31,7 @@ import { getPluginTarget } from "../utils.mjs";
 import { builtinModules } from "module";
 
 /** @type {import("../../package.json")} */
-const PackageJSON = JSON.parse(readFileSync("package.json"));
+const PackageJSON = JSON.parse(readFileSync("package.json", "utf-8"));
 
 export const VERSION = PackageJSON.version;
 // https://reproducible-builds.org/docs/source-date-epoch/
@@ -331,7 +331,7 @@ export const commonOpts = {
     logLevel: "info",
     bundle: true,
     minify: !watch,
-    sourcemap: watch ? "inline" : "",
+    sourcemap: watch ? "inline" : "external",
     legalComments: "linked",
     banner,
     plugins: [fileUrlPlugin, gitHashPlugin, gitRemotePlugin, stylePlugin],
@@ -353,5 +353,6 @@ export const commonRendererPlugins = [
     banImportPlugin(/^react$/, "Cannot import from react. React and hooks should be imported from @webpack/common"),
     banImportPlugin(/^electron(\/.*)?$/, "Cannot import electron in browser code. You need to use a native.ts file"),
     banImportPlugin(/^ts-pattern$/, "Cannot import from ts-pattern. match and P should be imported from @webpack/common"),
+    // @ts-ignore this is never undefined
     ...commonOpts.plugins
 ];

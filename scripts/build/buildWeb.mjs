@@ -26,7 +26,7 @@ import Zip from "zip-local";
 import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION, commonRendererPlugins, createContext, buildOrWatchAll } from "./common.mjs";
 
 /**
- * @type {createContextOptions}
+ * @type {import("esbuild").BuildOptions}
  */
 const commonOptions = {
     ...commonOpts,
@@ -160,6 +160,7 @@ async function buildExtension(target, files) {
             if (f.startsWith("manifest")) {
                 const json = JSON.parse(content.toString("utf-8"));
                 json.version = VERSION;
+                // @ts-ignore assigning U8Array to Buffer
                 content = new TextEncoder().encode(JSON.stringify(json));
             }
 
