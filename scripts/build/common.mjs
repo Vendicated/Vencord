@@ -20,7 +20,7 @@ import "../suppressExperimentalWarnings.js";
 import "../checkNodeVersion.js";
 
 import { exec, execSync } from "child_process";
-import esbuild from "esbuild";
+import esbuild, { build, context } from "esbuild";
 import { constants as FsConstants, readFileSync } from "fs";
 import { access, readdir, readFile } from "fs/promises";
 import { minify as minifyHtml } from "html-minifier-terser";
@@ -53,6 +53,25 @@ export const banner = {
 // Updater Disabled: ${IS_UPDATER_DISABLED}
 `.trim()
 };
+
+/** @type {Array<import("esbuild").BuildContext>} */
+const contexts = [];
+export async function createContext(options) {
+    contexts.push(await context(options));
+}
+
+/**
+ * @param {import("esbuild").BuildOptions[]} buildConfigs
+ */
+export async function buildOrWatchAll(buildConfigs) {
+    if (watch) {
+        await Promise.all(buildConfigs.map(cfg =>
+            context(cfg).then(ctx => ctx.watch())
+        ));
+    } else {
+        await Promise.all(buildConfigs.map(cfg => build(cfg)));
+    }
+}
 
 const PluginDefinitionNameMatcher = /definePlugin\(\{\s*(["'])?name\1:\s*(["'`])(.+?)\2/;
 /**
@@ -311,7 +330,6 @@ export const banImportPlugin = (filter, message) => ({
 export const commonOpts = {
     logLevel: "info",
     bundle: true,
-    watch,
     minify: !watch,
     sourcemap: watch ? "inline" : "",
     legalComments: "linked",
