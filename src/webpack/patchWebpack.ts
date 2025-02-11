@@ -9,11 +9,13 @@ import { makeLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { interpolateIfDefined } from "@utils/misc";
 import { canonicalizeReplacement } from "@utils/patches";
-import { PatchReplacement } from "@utils/types";
+import { Patch, PatchReplacement } from "@utils/types";
 
 import { traceFunctionWithResults } from "../debug/Tracer";
 import { _initWebpack, _shouldIgnoreModule, factoryListeners, findModuleId, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
 import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, ModuleExports, PatchedModuleFactory, WebpackRequire } from "./wreq.d";
+
+export const patches = [] as Patch[];
 
 export const SYM_ORIGINAL_FACTORY = Symbol("WebpackPatcher.originalFactory");
 export const SYM_PATCHED_SOURCE = Symbol("WebpackPatcher.patchedSource");
@@ -418,8 +420,8 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
 
     const patchedBy = new Set<string>();
 
-    for (let i = 0; i < Vencord.Plugins.patches.length; i++) {
-        const patch = Vencord.Plugins.patches[i];
+    for (let i = 0; i < patches.length; i++) {
+        const patch = patches[i];
 
         const moduleMatches = typeof patch.find === "string"
             ? code.includes(patch.find)
@@ -533,7 +535,7 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
         }
 
         if (!patch.all) {
-            Vencord.Plugins.patches.splice(i--, 1);
+            patches.splice(i--, 1);
         }
     }
 
