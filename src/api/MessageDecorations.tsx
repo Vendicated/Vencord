@@ -48,14 +48,14 @@ export interface MessageDecorationProps {
 }
 export type MessageDecorationFactory = (props: MessageDecorationProps) => JSX.Element | null;
 
-export const decorationsFactories = new Map<string, MessageDecorationFactory>();
+export const decorations = new Map<string, MessageDecorationFactory>();
 
 export function addMessageDecoration(identifier: string, decoration: MessageDecorationFactory) {
-    decorationsFactories.set(identifier, decoration);
+    decorations.set(identifier, decoration);
 }
 
 export function removeMessageDecoration(identifier: string) {
-    decorationsFactories.delete(identifier);
+    decorations.delete(identifier);
 }
 
 export function __addMessageDecorationsToMessage(props: MessageDecorationProps): (JSX.Element | null)[] {
