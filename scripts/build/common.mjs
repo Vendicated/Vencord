@@ -341,7 +341,7 @@ export const banImportPlugin = (filter, message) => ({
 export const commonOpts = {
     logLevel: "info",
     bundle: true,
-    minify: !watch,
+    minify: !watch && !IS_REPORTER,
     sourcemap: watch ? "inline" : "external",
     legalComments: "linked",
     banner,
