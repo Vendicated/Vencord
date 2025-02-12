@@ -173,7 +173,7 @@ function initWs(isManual = false) {
 
                     try {
                         const matcher = canonicalizeMatch(parseNode(match));
-                        const replacement = canonicalizeReplace(parseNode(replace), "PlaceHolderPluginName");
+                        const replacement = canonicalizeReplace(parseNode(replace), 'Vencord.Plugins.plugins["PlaceHolderPluginName"]"');
 
                         const newSource = src.replace(matcher, replacement as string);
 
