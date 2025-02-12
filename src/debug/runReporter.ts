@@ -6,10 +6,10 @@
 
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { addPatch, patches } from "plugins";
 import { initWs } from "plugins/devCompanion.dev/initWs";
-import { getBuildNumber } from "webpack/patchWebpack";
+import { getBuildNumber, patchTimings } from "webpack/patchWebpack";
 
+import { addPatch, patches } from "../plugins";
 import { loadLazyChunks } from "./loadLazyChunks";
 import { reporterData } from "./reporterData";
 
@@ -55,7 +55,7 @@ async function runReporter() {
             }
         }
 
-        for (const [plugin, moduleId, match, totalTime] of Vencord.WebpackPatcher.patchTimings) {
+        for (const [plugin, moduleId, match, totalTime] of patchTimings) {
             if (totalTime > 5) {
                 new Logger("WebpackInterceptor").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
             }
