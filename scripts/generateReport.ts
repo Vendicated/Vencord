@@ -54,14 +54,17 @@ async function maybeGetError(handle: JSHandle): Promise<string | undefined> {
         .catch(() => undefined);
 }
 
+interface PatchInfo {
+    plugin: string;
+    type: string;
+    id: string;
+    match: string;
+    error?: string;
+};
+
 const report = {
-    badPatches: [] as {
-        plugin: string;
-        type: string;
-        id: string;
-        match: string;
-        error?: string;
-    }[],
+    badPatches: [] as PatchInfo[],
+    slowPatches: [] as PatchInfo[],
     badStarts: [] as {
         plugin: string;
         error: string;
@@ -132,53 +135,67 @@ async function printReport() {
     console.log();
 
     if (process.env.WEBHOOK_URL) {
+        const patchesToEmbed = (title: string, patches: PatchInfo[], color: number) => ({
+            title,
+            color,
+            description: patches.map(p => {
+                const lines = [
+                    `**__${p.plugin} (${p.type}):__**`,
+                    `ID: \`${p.id}\``,
+                    `Match: ${toCodeBlock(p.match, "Match: ".length, true)}`
+                ];
+                if (p.error) lines.push(`Error: ${toCodeBlock(p.error, "Error: ".length, true)}`);
+
+                return lines.join("\n");
+            }).join("\n\n"),
+        });
+
+        const embeds = [
+            {
+                author: {
+                    name: `Discord ${CANARY ? "Canary" : "Stable"} (${metaData.buildNumber})`,
+                    url: `https://nelly.tools/builds/app/${metaData.buildHash}`,
+                    icon_url: CANARY ? "https://cdn.discordapp.com/emojis/1252721945699549327.png?size=128" : "https://cdn.discordapp.com/emojis/1252721943463985272.png?size=128"
+                },
+                color: CANARY ? 0xfbb642 : 0x5865f2
+            },
+            report.badPatches.length > 0 && patchesToEmbed("Bad Patches", report.badPatches, 0xff0000),
+            report.slowPatches.length > 0 && patchesToEmbed("Slow Patches", report.slowPatches, 0xf0b232),
+            report.badWebpackFinds.length > 0 && {
+                title: "Bad Webpack Finds",
+                description: report.badWebpackFinds.map(f => toCodeBlock(f, 0, true)).join("\n") || "None",
+                color: 0xff0000
+            },
+            report.badStarts.length > 0 && {
+                title: "Bad Starts",
+                description: report.badStarts.map(p => {
+                    const lines = [
+                        `**__${p.plugin}:__**`,
+                        toCodeBlock(p.error, 0, true)
+                    ];
+                    return lines.join("\n");
+                }
+                ).join("\n\n") || "None",
+                color: 0xff0000
+            },
+            report.otherErrors.length > 0 && {
+                title: "Discord Errors",
+                description: report.otherErrors.length ? toCodeBlock(report.otherErrors.join("\n"), 0, true) : "None",
+                color: 0xff0000
+            }
+        ].filter(Boolean);
+
+        if (embeds.length === 1) {
+            embeds.push({
+                title: "No issues found",
+                description: "Seems like everything is working fine (for now) <:shipit:1330992641466433556>",
+                color: 0x00ff00
+            });
+        }
+
         const body = JSON.stringify({
             username: "Vencord Reporter" + (CANARY ? " (Canary)" : ""),
-            embeds: [
-                {
-                    author: {
-                        name: `Discord ${CANARY ? "Canary" : "Stable"} (${metaData.buildNumber})`,
-                        url: `https://nelly.tools/builds/app/${metaData.buildHash}`,
-                        icon_url: CANARY ? "https://cdn.discordapp.com/emojis/1252721945699549327.png?size=128" : "https://cdn.discordapp.com/emojis/1252721943463985272.png?size=128"
-                    },
-                    color: CANARY ? 0xfbb642 : 0x5865f2
-                },
-                {
-                    title: "Bad Patches",
-                    description: report.badPatches.map(p => {
-                        const lines = [
-                            `**__${p.plugin} (${p.type}):__**`,
-                            `ID: \`${p.id}\``,
-                            `Match: ${toCodeBlock(p.match, "Match: ".length, true)}`
-                        ];
-                        if (p.error) lines.push(`Error: ${toCodeBlock(p.error, "Error: ".length, true)}`);
-                        return lines.join("\n");
-                    }).join("\n\n") || "None",
-                    color: report.badPatches.length ? 0xff0000 : 0x00ff00
-                },
-                {
-                    title: "Bad Webpack Finds",
-                    description: report.badWebpackFinds.map(f => toCodeBlock(f, 0, true)).join("\n") || "None",
-                    color: report.badWebpackFinds.length ? 0xff0000 : 0x00ff00
-                },
-                {
-                    title: "Bad Starts",
-                    description: report.badStarts.map(p => {
-                        const lines = [
-                            `**__${p.plugin}:__**`,
-                            toCodeBlock(p.error, 0, true)
-                        ];
-                        return lines.join("\n");
-                    }
-                    ).join("\n\n") || "None",
-                    color: report.badStarts.length ? 0xff0000 : 0x00ff00
-                },
-                {
-                    title: "Discord Errors",
-                    description: report.otherErrors.length ? toCodeBlock(report.otherErrors.join("\n"), 0, true) : "None",
-                    color: report.otherErrors.length ? 0xff0000 : 0x00ff00
-                }
-            ]
+            embeds
         });
 
         const headers = {
@@ -245,14 +262,17 @@ page.on("console", async e => {
 
         switch (tag) {
             case "WebpackInterceptor:":
-                const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module|took [\d.]+?ms) \(Module id is (.+?)\): (.+)/)!;
-                if (!patchFailMatch) break;
+                const patchFailMatch = message.match(/Patch by (.+?) (had no effect|errored|found no module) \(Module id is (.+?)\): (.+)/);
+                const patchSlowMatch = message.match(/Patch by (.+?) (took [\d.]+?ms) \(Module id is (.+?)\): (.+)/);
+                const match = patchFailMatch ?? patchSlowMatch;
+                if (!match) break;
 
                 logStderr(await getText());
                 process.exitCode = 1;
 
-                const [, plugin, type, id, regex] = patchFailMatch;
-                report.badPatches.push({
+                const [, plugin, type, id, regex] = match;
+                const list = patchFailMatch ? report.badPatches : report.slowPatches;
+                list.push({
                     plugin,
                     type,
                     id,
