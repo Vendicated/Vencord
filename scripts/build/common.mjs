@@ -361,7 +361,6 @@ export const commonOpts = {
 const escapedBuiltinModules = builtinModules
     .map(m => m.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"))
     .join("|");
-const builtinModuleRegex = new RegExp(`^(node:)?(${escapedBuiltinModules})$`);
 
 export const commonRendererPlugins = [
     banImportPlugin(/^react$/, "Cannot import from react. React and hooks should be imported from @webpack/common"),
