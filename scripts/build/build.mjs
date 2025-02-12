@@ -31,7 +31,7 @@ const defines = stringifyValues({
     IS_UPDATER_DISABLED,
     IS_WEB: false,
     IS_EXTENSION: false,
-    VERSION,
+    VERSION: JSON.stringify(VERSION),
     BUILD_TIMESTAMP
 });
 
