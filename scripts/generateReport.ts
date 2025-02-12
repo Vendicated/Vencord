@@ -16,11 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/* eslint-disable no-fallthrough */
-
-// eslint-disable-next-line spaced-comment
 /// <reference types="../src/globals" />
-// eslint-disable-next-line spaced-comment
 /// <reference types="../src/modules" />
 
 import { createHmac } from "crypto";
