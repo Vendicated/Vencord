@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Channel, Message } from "discord-types/general/index.js";
 import { JSX } from "react";
 
-interface DecorationProps {
+export interface MessageDecorationProps {
     author: {
         /**
          * Will be username if the user has no nickname
@@ -45,20 +46,31 @@ interface DecorationProps {
     message: Message;
     [key: string]: any;
 }
-export type Decoration = (props: DecorationProps) => JSX.Element | null;
+export type MessageDecorationFactory = (props: MessageDecorationProps) => JSX.Element | null;
 
-export const decorations = new Map<string, Decoration>();
+export const decorationsFactories = new Map<string, MessageDecorationFactory>();
 
-export function addDecoration(identifier: string, decoration: Decoration) {
-    decorations.set(identifier, decoration);
+export function addMessageDecoration(identifier: string, decoration: MessageDecorationFactory) {
+    decorationsFactories.set(identifier, decoration);
 }
 
-export function removeDecoration(identifier: string) {
-    decorations.delete(identifier);
+export function removeMessageDecoration(identifier: string) {
+    decorationsFactories.delete(identifier);
 }
 
-export function __addDecorationsToMessage(props: DecorationProps): (JSX.Element | null)[] {
-    return [...decorations.values()].map(decoration => {
-        return decoration(props);
-    });
+export function __addDecorationsToMessage(props: MessageDecorationProps): JSX.Element {
+    const decorations = Array.from(
+        decorationsFactories.entries(),
+        ([key, Decoration]) => (
+            <ErrorBoundary noop message={`Failed to render ${key} Message Decoration`} key={key}>
+                <Decoration {...props} />
+            </ErrorBoundary>
+        )
+    );
+
+    return (
+        <div className="vc-message-decorations-wrapper">
+            {decorations}
+        </div>
+    );
 }
