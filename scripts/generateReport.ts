@@ -188,7 +188,7 @@ async function printReport() {
         if (embeds.length === 1) {
             embeds.push({
                 title: "No issues found",
-                description: "Seems like everything is working fine (for now)! :)",
+                description: "Seems like everything is working fine (for now) <:shipit:1330992641466433556>",
                 color: 0x00ff00
             });
         }
