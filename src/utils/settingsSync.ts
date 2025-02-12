@@ -35,11 +35,11 @@ export async function importSettings(data: string) {
         throw new Error("Failed to parse JSON: " + String(err));
     }
 
-    if ("settings" in parsed && "quickCss" in parsed && "dataStore" in parsed) {
+    if ("settings" in parsed && "quickCss" in parsed) {
         Object.assign(PlainSettings, parsed.settings);
         await VencordNative.settings.set(parsed.settings);
         await VencordNative.quickCss.set(parsed.quickCss);
-        await DataStore.setMany(parsed.dataStore);
+        if (parsed.dataStore) await DataStore.setMany(parsed.dataStore);
     } else
         throw new Error("Invalid Settings. Is this even an Equicord Settings file?");
 }
