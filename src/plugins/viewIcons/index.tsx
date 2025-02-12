@@ -174,7 +174,7 @@ const GroupDMContext: NavContextMenuPatchCallback = (children, { channel }: Grou
 export default definePlugin({
     name: "ViewIcons",
     authors: [Devs.Ven, Devs.TheKodeToad, Devs.Nuckyz, Devs.nyx],
-    description: "Makes avatars and banners in user profiles clickable, adds View Icon/Banner entries in the user, server and group channel context menu.",
+    description: "Makes avatars and banners in user profiles clickable; adds View Icon/Banner entries in the user, server and group channel context menu.",
     tags: ["ImageUtilities"],
     dependencies: ["DynamicImageModalAPI"],
 
