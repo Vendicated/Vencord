@@ -87,19 +87,19 @@ const buildConfigs = [
     {
         ...commonOptions,
         outfile: "dist/extension.js",
-        define: stringifyValues({
+        define: {
             ...commonOptions.define,
-            IS_EXTENSION: true
-        }),
+            IS_EXTENSION: "true"
+        },
         footer: { js: "//# sourceURL=VencordWeb" }
     },
     {
         ...commonOptions,
         inject: ["browser/GMPolyfill.js", ...(commonOptions?.inject || [])],
-        define: stringifyValues({
+        define: {
             ...commonOptions.define,
             window: "unsafeWindow",
-        }),
+        },
         outfile: "dist/Vencord.user.js",
         banner: {
             js: readFileSync("browser/userscript.meta.js", "utf-8").replace("%version%", `${VERSION}.${new Date().getTime()}`)
