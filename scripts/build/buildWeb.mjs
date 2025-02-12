@@ -24,7 +24,7 @@ import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises
 import { join } from "path";
 import Zip from "zip-local";
 
-import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION, commonRendererPlugins, buildOrWatchAll } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION, commonRendererPlugins, buildOrWatchAll, stringifyValues } from "./common.mjs";
 
 /**
  * @type {import("esbuild").BuildOptions}
@@ -32,26 +32,26 @@ import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, VERSION,
 const commonOptions = {
     ...commonOpts,
     entryPoints: ["browser/Vencord.ts"],
-    globalName: "Vencord",
     format: "iife",
+    globalName: "Vencord",
     external: ["~plugins", "~git-hash", "/assets/*"],
+    target: ["esnext"],
     plugins: [
         globPlugins("web"),
         ...commonRendererPlugins
     ],
-    target: ["esnext"],
-    define: {
-        IS_WEB: "true",
-        IS_EXTENSION: "false",
-        IS_STANDALONE: "true",
-        IS_DEV: String(IS_DEV),
-        IS_REPORTER: String(IS_REPORTER),
-        IS_DISCORD_DESKTOP: "false",
-        IS_VESKTOP: "false",
-        IS_UPDATER_DISABLED: "true",
-        VERSION: JSON.stringify(VERSION),
-        BUILD_TIMESTAMP: String(BUILD_TIMESTAMP),
-    }
+    define: stringifyValues({
+        IS_WEB: true,
+        IS_EXTENSION: false,
+        IS_STANDALONE: true,
+        IS_DEV,
+        IS_REPORTER,
+        IS_DISCORD_DESKTOP: false,
+        IS_VESKTOP: false,
+        IS_UPDATER_DISABLED: true,
+        VERSION,
+        BUILD_TIMESTAMP
+    })
 };
 
 const MonacoWorkerEntryPoints = [
@@ -87,19 +87,19 @@ const buildConfigs = [
     {
         ...commonOptions,
         outfile: "dist/extension.js",
-        define: {
-            ...commonOptions?.define,
-            IS_EXTENSION: "true",
-        },
+        define: stringifyValues({
+            ...commonOptions.define,
+            IS_EXTENSION: true
+        }),
         footer: { js: "//# sourceURL=VencordWeb" }
     },
     {
         ...commonOptions,
         inject: ["browser/GMPolyfill.js", ...(commonOptions?.inject || [])],
-        define: {
-            ...(commonOptions?.define),
+        define: stringifyValues({
+            ...commonOptions.define,
             window: "unsafeWindow",
-        },
+        }),
         outfile: "dist/Vencord.user.js",
         banner: {
             js: readFileSync("browser/userscript.meta.js", "utf-8").replace("%version%", `${VERSION}.${new Date().getTime()}`)

@@ -57,6 +57,23 @@ export const banner = {
 };
 
 /**
+ * JSON.stringify all values in an object
+ * @type {(obj: Record<string, any>) => Record<string, string>}
+ */
+export function stringifyValues(obj) {
+    for (const key in obj) {
+        const value = obj[key];
+        if (typeof value === "string") {
+            continue;
+        }
+
+        obj[key] = JSON.stringify(value);
+    }
+
+    return obj;
+}
+
+/**
  * @param {import("esbuild").BuildOptions[]} buildConfigs
  */
 export async function buildOrWatchAll(buildConfigs) {
@@ -352,6 +369,6 @@ export const commonRendererPlugins = [
     banImportPlugin(/^react$/, "Cannot import from react. React and hooks should be imported from @webpack/common"),
     banImportPlugin(/^electron(\/.*)?$/, "Cannot import electron in browser code. You need to use a native.ts file"),
     banImportPlugin(/^ts-pattern$/, "Cannot import from ts-pattern. match and P should be imported from @webpack/common"),
-    // @ts-ignore this is never undefined
+    // @ts-expect-error this is never undefined
     ...commonOpts.plugins
 ];

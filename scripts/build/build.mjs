@@ -22,35 +22,47 @@
 import { readdir } from "fs/promises";
 import { join } from "path";
 
-import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, commonRendererPlugins, watch, buildOrWatchAll } from "./common.mjs";
+import { BUILD_TIMESTAMP, commonOpts, exists, globPlugins, IS_DEV, IS_REPORTER, IS_STANDALONE, IS_UPDATER_DISABLED, resolvePluginName, VERSION, commonRendererPlugins, watch, buildOrWatchAll, stringifyValues } from "./common.mjs";
 
-const defines = {
-    IS_STANDALONE: String(IS_STANDALONE),
-    IS_DEV: String(IS_DEV),
-    IS_REPORTER: String(IS_REPORTER),
-    IS_UPDATER_DISABLED: String(IS_UPDATER_DISABLED),
-    IS_WEB: "false",
-    IS_EXTENSION: "false",
-    VERSION: JSON.stringify(VERSION),
-    BUILD_TIMESTAMP: String(BUILD_TIMESTAMP)
-};
+const defines = stringifyValues({
+    IS_STANDALONE,
+    IS_DEV,
+    IS_REPORTER,
+    IS_UPDATER_DISABLED,
+    IS_WEB: false,
+    IS_EXTENSION: false,
+    VERSION,
+    BUILD_TIMESTAMP
+});
 
-if (defines.IS_STANDALONE === "false")
+if (defines.IS_STANDALONE === "false") {
     // If this is a local build (not standalone), optimize
     // for the specific platform we're on
     defines["process.platform"] = JSON.stringify(process.platform);
+}
+
+/**
+ * @type {(defines: { IS_DISCORD_DESKTOP: boolean; IS_VESKTOP: boolean; }) => Record<string, string>}
+ */
+function extendDefines({ IS_DISCORD_DESKTOP, IS_VESKTOP }) {
+    return stringifyValues({
+        ...defines,
+        IS_DISCORD_DESKTOP,
+        IS_VESKTOP
+    });
+}
 
 /**
  * @type {import("esbuild").BuildOptions}
  */
 const nodeCommonOpts = {
     ...commonOpts,
+    define: defines,
     format: "cjs",
     platform: "node",
     target: ["esnext"],
     // @ts-expect-error this is never undefined
-    external: ["electron", "original-fs", "~pluginNatives", ...commonOpts.external],
-    define: defines
+    external: ["electron", "original-fs", "~pluginNatives", ...commonOpts.external]
 };
 
 const sourceMapFooter = s => watch ? "" : `//# sourceMappingURL=vencord://${s}.js.map`;
@@ -113,16 +125,15 @@ const buildConfigs = ([
         outfile: "dist/patcher.js",
         footer: { js: "//# sourceURL=VencordPatcher\n" + sourceMapFooter("patcher") },
         sourcemap,
-        define: {
-            ...defines,
-            IS_DISCORD_DESKTOP: "true",
-            IS_VESKTOP: "false"
-        },
         plugins: [
             // @ts-ignore this is never undefined
             ...nodeCommonOpts.plugins,
             globNativesPlugin
-        ]
+        ],
+        define: extendDefines({
+            IS_DISCORD_DESKTOP: false,
+            IS_VESKTOP: false
+        })
     },
     {
         ...commonOpts,
@@ -137,11 +148,10 @@ const buildConfigs = ([
             globPlugins("discordDesktop"),
             ...commonRendererPlugins
         ],
-        define: {
-            ...defines,
-            IS_DISCORD_DESKTOP: "true",
-            IS_VESKTOP: "false"
-        }
+        define: extendDefines({
+            IS_DISCORD_DESKTOP: true,
+            IS_VESKTOP: false
+        })
     },
     {
         ...nodeCommonOpts,
@@ -149,11 +159,10 @@ const buildConfigs = ([
         outfile: "dist/preload.js",
         footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
         sourcemap,
-        define: {
-            ...defines,
-            IS_DISCORD_DESKTOP: "true",
-            IS_VESKTOP: "false"
-        }
+        define: extendDefines({
+            IS_DISCORD_DESKTOP: true,
+            IS_VESKTOP: false
+        })
     },
 
     // Vencord Desktop main & renderer & preload
@@ -163,15 +172,14 @@ const buildConfigs = ([
         outfile: "dist/vencordDesktopMain.js",
         footer: { js: "//# sourceURL=VencordDesktopMain\n" + sourceMapFooter("vencordDesktopMain") },
         sourcemap,
-        define: {
-            ...defines,
-            IS_DISCORD_DESKTOP: "false",
-            IS_VESKTOP: "true"
-        },
         plugins: [
             ...nodeCommonOpts.plugins,
             globNativesPlugin
-        ]
+        ],
+        define: extendDefines({
+            IS_DISCORD_DESKTOP: false,
+            IS_VESKTOP: true
+        })
     },
     {
         ...commonOpts,
@@ -186,11 +194,10 @@ const buildConfigs = ([
             globPlugins("vencordDesktop"),
             ...commonRendererPlugins
         ],
-        define: {
-            ...defines,
-            IS_DISCORD_DESKTOP: "false",
-            IS_VESKTOP: "true"
-        }
+        define: extendDefines({
+            IS_DISCORD_DESKTOP: false,
+            IS_VESKTOP: true
+        })
     },
     {
         ...nodeCommonOpts,
@@ -198,12 +205,11 @@ const buildConfigs = ([
         outfile: "dist/vencordDesktopPreload.js",
         footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("vencordDesktopPreload") },
         sourcemap,
-        define: {
-            ...defines,
-            IS_DISCORD_DESKTOP: "false",
-            IS_VESKTOP: "true"
-        }
-    },
+        define: extendDefines({
+            IS_DISCORD_DESKTOP: false,
+            IS_VESKTOP: true
+        })
+    }
 ]);
 
 await buildOrWatchAll(buildConfigs);
