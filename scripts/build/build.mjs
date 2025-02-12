@@ -126,7 +126,7 @@ const buildConfigs = ([
         footer: { js: "//# sourceURL=VencordPatcher\n" + sourceMapFooter("patcher") },
         sourcemap,
         plugins: [
-            // @ts-ignore this is never undefined
+            // @ts-expect-error this is never undefined
             ...nodeCommonOpts.plugins,
             globNativesPlugin
         ],

@@ -151,8 +151,7 @@ async function buildExtension(target, files) {
             if (f.startsWith("manifest")) {
                 const json = JSON.parse(content.toString("utf-8"));
                 json.version = VERSION;
-                // @ts-ignore assigning U8Array to Buffer
-                content = new TextEncoder().encode(JSON.stringify(json));
+                content = Buffer.from(new TextEncoder().encode(JSON.stringify(json)));
             }
 
             return [
