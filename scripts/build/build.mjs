@@ -31,7 +31,7 @@ const defines = stringifyValues({
     IS_UPDATER_DISABLED,
     IS_WEB: false,
     IS_EXTENSION: false,
-    VERSION: VERSION,
+    VERSION,
     BUILD_TIMESTAMP
 });
 
@@ -50,7 +50,7 @@ const nodeCommonOpts = {
     format: "cjs",
     platform: "node",
     target: ["esnext"],
-    // @ts-expect-error this is never undefined
+    // @ts-ignore this is never undefined
     external: ["electron", "original-fs", "~pluginNatives", ...commonOpts.external]
 };
 
