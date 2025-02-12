@@ -62,14 +62,8 @@ export const banner = {
  */
 export function stringifyValues(obj) {
     for (const key in obj) {
-        const value = obj[key];
-        if (typeof value === "string") {
-            continue;
-        }
-
-        obj[key] = JSON.stringify(value);
+        obj[key] = JSON.stringify(obj[key]);
     }
-
     return obj;
 }
 

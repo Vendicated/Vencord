@@ -31,7 +31,7 @@ const defines = stringifyValues({
     IS_UPDATER_DISABLED,
     IS_WEB: false,
     IS_EXTENSION: false,
-    VERSION: JSON.stringify(VERSION),
+    VERSION: VERSION,
     BUILD_TIMESTAMP
 });
 
@@ -39,17 +39,6 @@ if (defines.IS_STANDALONE === "false") {
     // If this is a local build (not standalone), optimize
     // for the specific platform we're on
     defines["process.platform"] = JSON.stringify(process.platform);
-}
-
-/**
- * @type {(defines: { IS_DISCORD_DESKTOP: boolean; IS_VESKTOP: boolean; }) => Record<string, string>}
- */
-function extendDefines({ IS_DISCORD_DESKTOP, IS_VESKTOP }) {
-    return stringifyValues({
-        ...defines,
-        IS_DISCORD_DESKTOP,
-        IS_VESKTOP
-    });
 }
 
 /**
@@ -130,10 +119,11 @@ const buildConfigs = ([
             ...nodeCommonOpts.plugins,
             globNativesPlugin
         ],
-        define: extendDefines({
-            IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: false
-        })
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: "false",
+            IS_VESKTOP: "false"
+        }
     },
     {
         ...commonOpts,
@@ -148,10 +138,11 @@ const buildConfigs = ([
             globPlugins("discordDesktop"),
             ...commonRendererPlugins
         ],
-        define: extendDefines({
-            IS_DISCORD_DESKTOP: true,
-            IS_VESKTOP: false
-        })
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: "true",
+            IS_VESKTOP: "false"
+        }
     },
     {
         ...nodeCommonOpts,
@@ -159,10 +150,11 @@ const buildConfigs = ([
         outfile: "dist/preload.js",
         footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("preload") },
         sourcemap,
-        define: extendDefines({
-            IS_DISCORD_DESKTOP: true,
-            IS_VESKTOP: false
-        })
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: "true",
+            IS_VESKTOP: "false"
+        }
     },
 
     // Vencord Desktop main & renderer & preload
@@ -176,10 +168,11 @@ const buildConfigs = ([
             ...nodeCommonOpts.plugins,
             globNativesPlugin
         ],
-        define: extendDefines({
-            IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true
-        })
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: "false",
+            IS_VESKTOP: "true"
+        }
     },
     {
         ...commonOpts,
@@ -194,10 +187,11 @@ const buildConfigs = ([
             globPlugins("vencordDesktop"),
             ...commonRendererPlugins
         ],
-        define: extendDefines({
-            IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true
-        })
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: "false",
+            IS_VESKTOP: "true"
+        }
     },
     {
         ...nodeCommonOpts,
@@ -205,10 +199,11 @@ const buildConfigs = ([
         outfile: "dist/vencordDesktopPreload.js",
         footer: { js: "//# sourceURL=VencordPreload\n" + sourceMapFooter("vencordDesktopPreload") },
         sourcemap,
-        define: extendDefines({
-            IS_DISCORD_DESKTOP: false,
-            IS_VESKTOP: true
-        })
+        define: {
+            ...defines,
+            IS_DISCORD_DESKTOP: "false",
+            IS_VESKTOP: "true"
+        }
     }
 ]);
 
