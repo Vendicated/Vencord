@@ -23,6 +23,7 @@ import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin from "@utils/types";
 import { Constants, FluxDispatcher, RestAPI, UserProfileStore, UserStore, useState } from "@webpack/common";
+import { ProfileBadge, UserProfile } from "@webpack/types";
 import { type ComponentType, type ReactNode } from "react";
 
 // LYING to the type checker here
@@ -46,13 +47,6 @@ const badges: Record<string, ProfileBadge> = {
 
 const fetching = new Set<string>();
 const queue = new Queue(5);
-
-interface ProfileBadge {
-    id: string;
-    description: string;
-    icon: string;
-    link?: string;
-}
 
 interface MentionProps {
     data: {
@@ -101,7 +95,7 @@ async function getUser(id: string) {
         fakeBadges.push(badges.premium);
 
     // Fill in what we can deduce
-    const profile = UserProfileStore.getUserProfile(id);
+    const profile: Partial<UserProfile> = UserProfileStore.getUserProfile(id) ?? {};
     profile.accentColor = user.accent_color;
     profile.badges = fakeBadges;
     profile.banner = user.banner;
