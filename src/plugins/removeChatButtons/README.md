@@ -1,4 +1,4 @@
-# RemoveChatButtons
+# RemovableChatButtons
 
 ![Removable Chat Buttons](https://i.imgur.com/Tg2ELah.png)
 

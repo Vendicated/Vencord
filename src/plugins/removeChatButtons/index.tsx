@@ -54,7 +54,7 @@ export const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "RemoveChatButtons",
+    name: "RemovableChatButtons",
     description: "Remove default and plugin buttons from the chat bar based on settings.",
     authors: [Devs.Mahiro],
     settings,
