@@ -9,7 +9,7 @@ import "./ChatButton.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { waitFor } from "@webpack";
-import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
+import { Button, ButtonWrapperClasses, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 import { HTMLProps, JSX, MouseEventHandler, ReactNode } from "react";
 
@@ -110,7 +110,7 @@ export const ChatBarButton = ErrorBoundary.wrap((props: ChatBarButtonProps) => {
                     <Button
                         aria-label={props.tooltip}
                         size=""
-                        look={ButtonLooks.BLANK}
+                        look={Button.Looks.BLANK}
                         onMouseEnter={onMouseEnter}
                         onMouseLeave={onMouseLeave}
                         innerClassName={`${ButtonWrapperClasses.button} ${ChannelTextAreaClasses?.button}`}
