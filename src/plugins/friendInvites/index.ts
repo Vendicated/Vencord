@@ -26,7 +26,7 @@ const FriendInvites = findByPropsLazy("createFriendInvite");
 export default definePlugin({
     name: "FriendInvites",
     description: "Create and manage friend invite links via slash commands (/create friend invite, /view friend invites, /revoke friend invites).",
-    authors: [Devs.afn, Devs.Dziurwa, Devs.xou09],
+    authors: [Devs.afn, Devs.Dziurwa],
     commands: [
         {
             name: "create friend invite",
