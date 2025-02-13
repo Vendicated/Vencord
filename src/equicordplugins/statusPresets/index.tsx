@@ -24,12 +24,11 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
 import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
-import { ModalProps, openModalLazy } from "@utils/modal";
+import { openModalLazy } from "@utils/modal";
 import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { extractAndLoadChunksLazy, findByPropsLazy, findComponentByCodeLazy, findModuleId, wreq } from "@webpack";
 import { Button, Clickable, Menu, Toasts, UserStore, useState } from "@webpack/common";
-import { FunctionComponent } from "react";
 
 
 const settings = definePluginSettings({
@@ -62,7 +61,7 @@ const PMenu = findComponentByCodeLazy(".menuItemLabel", ".menuItemInner");
 const EmojiComponent = findComponentByCodeLazy(/\.translateSurrogatesToInlineEmoji\(\i.\i\),/);
 
 const CustomStatusSettings = getUserSettingLazy("status", "customStatus")!;
-const StatsModule: { default: FunctionComponent<ModalProps>; } = proxyLazy(() => {
+const StatusModule = proxyLazy(() => {
     const id = findModuleId("this.renderCustomStatusInput()");
     return wreq(Number(id));
 });
@@ -71,7 +70,9 @@ const requireCustomStatusModal = extractAndLoadChunksLazy(["action:\"PRESS_ADD_C
 
 const openCustomStatusModalLazy = () => openModalLazy(async () => {
     await requireCustomStatusModal();
-    return props => <StatsModule.default {...props} />;
+    const key = Object.keys(StatusModule)[0];
+    const Component = StatusModule[key];
+    return props => <Component {...props} />;
 });
 
 function getExpirationMs(expiration: "TODAY" | number) {
