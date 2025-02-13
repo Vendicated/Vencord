@@ -224,6 +224,7 @@ export type PluginSettingDef =
 
 export interface PluginSettingCommon {
     description: string;
+    displayName?: string;
     placeholder?: string;
     onChange?(newValue: any): void;
     /**
