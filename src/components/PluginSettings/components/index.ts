@@ -34,6 +34,7 @@ export type ISettingElementProps<T extends PluginOptionBase> = ISettingElementPr
 export type ISettingCustomElementProps<T extends Omit<PluginOptionBase, "description" | "placeholder">> = ISettingElementPropsBase<T>;
 
 export * from "../../Badge";
+export * from "./SettingArrayComponent";
 export * from "./SettingBooleanComponent";
 export * from "./SettingCustomComponent";
 export * from "./SettingNumericComponent";
