@@ -28,12 +28,8 @@ const StickersStore = findStoreLazy("StickersStore");
 
 interface Sticker {
     t: "Sticker";
-    description: string;
     format_type: number;
-    guild_id: string;
     id: string;
-    name: string;
-    tags: string;
     type: number;
 }
 
@@ -97,12 +93,15 @@ function buildMenuItem(Sticker, fetchData: () => Promisable<Omit<Sticker, "t">>)
 }
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    const { favoriteableId } = props ?? {};
+    const { favoriteableId, favoriteableType } = props ?? {};
     if (!favoriteableId) return;
     const menuItem = (() => {
         const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
         if (sticker?.format_type === 3) return;
-        return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
+        switch (favoriteableType) {
+            case "sticker":
+                return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
+        }
     })();
 
     if (menuItem)
