@@ -25,6 +25,7 @@ import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
 import { MessagePopoverButtonFactory } from "@api/MessagePopover";
+import { Style } from "@api/Styles";
 import { FluxEvents } from "@webpack/types";
 import { JSX } from "react";
 import { Promisable } from "type-fest";
@@ -161,7 +162,7 @@ export interface PluginDef {
     /**
      * Managed style to automatically enable and disable when the plugin is enabled or disabled
      */
-    managedStyle?: string;
+    managedStyle?: Style;
 
     userProfileBadge?: ProfileBadge;
 
