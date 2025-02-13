@@ -19,29 +19,22 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+import managedStyle from "./style.css?managed";
+
 export default definePlugin({
-    name: "MemberListDecoratorsAPI",
-    description: "API to add decorators to member list (both in servers and DMs)",
-    authors: [Devs.TheSun, Devs.Ven],
+    name: "MessageDecorationsAPI",
+    description: "API to add decorations to messages",
+    authors: [Devs.TheSun],
+
+    managedStyle,
+
     patches: [
         {
-            find: ".lostPermission)",
-            replacement: [
-                {
-                    match: /let\{[^}]*lostPermissionTooltipText:\i[^}]*\}=(\i),/,
-                    replace: "$&vencordProps=$1,"
-                }, {
-                    match: /#{intl::GUILD_OWNER}(?=.+?decorators:(\i)\(\)).+?\1=?\(\)=>.+?children:\[/,
-                    replace: "$&...(typeof vencordProps=='undefined'?[]:Vencord.Api.MemberListDecorators.__getDecorators(vencordProps)),"
-                }
-            ]
-        },
-        {
-            find: "PrivateChannel.renderAvatar",
+            find: '"Message Username"',
             replacement: {
-                match: /decorators:(\i\.isSystemDM\(\))\?(.+?):null/,
-                replace: "decorators:[...Vencord.Api.MemberListDecorators.__getDecorators(arguments[0]), $1?$2:null]"
+                match: /#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?}\),\i(?=\])/,
+                replace: "$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"
             }
         }
-    ],
+    ]
 });
