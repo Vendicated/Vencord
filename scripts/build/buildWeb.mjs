@@ -90,7 +90,7 @@ const buildConfigs = [
     },
     {
         ...commonOptions,
-        outfile: "dist/browser.js",
+        outfile: "dist/browser/browser.js",
         footer: { js: "//# sourceURL=VencordWeb" }
     },
     {
