@@ -134,7 +134,8 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
             preload: join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js"),
             contextIsolation: true,
             nodeIntegration: false,
-            sandbox: false
+            sandbox: false,
+            devTools: IS_DEV
         }
     });
 
