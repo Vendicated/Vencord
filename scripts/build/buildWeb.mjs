@@ -49,6 +49,7 @@ const commonOptions = {
         IS_COMPANION_TEST,
         IS_DISCORD_DESKTOP: false,
         IS_VESKTOP: false,
+        IS_EQUIBOP: false,
         IS_UPDATER_DISABLED: true,
         VERSION,
         BUILD_TIMESTAMP
