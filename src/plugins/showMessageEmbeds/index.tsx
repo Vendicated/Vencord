@@ -6,7 +6,7 @@
 
 import { findGroupChildrenByChildId } from "@api/ContextMenu";
 import { updateMessage } from "@api/MessageUpdater";
-import { ImageVisible } from "@components/Icons";
+import { ImageInvisible,ImageVisible } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { parseUrl } from "@utils/misc";
@@ -64,11 +64,19 @@ function addButton(menu, message, url) {
     if (!isEmbedInMessage(message, url)) {
         menu.splice(0, 0,
             <Menu.MenuItem
-                id="unfurl-url"
+                id="vc-sme-show"
                 label="Show Embed"
                 action={_ => unfurlEmbed(url, message)}
                 icon={ImageVisible}
-                key="unfurl-url"/>);
+                key="vc-sme-show"/>);
+    } else if (isUrlInMessage(message, url)) { // check the url is actually in the message text so we know it's one people can actually add back
+        menu.splice(0, 0,
+            <Menu.MenuItem
+                id="vc-sme-remove"
+                label="Remove Embed"
+                action={_ => removeEmbed(url, message)}
+                icon={ImageInvisible}
+                key="vc-sme-remove"/>);
     }
 }
 
@@ -78,6 +86,16 @@ function isEmbedInMessage(message: Message, url: string): boolean {
     }) || message?.attachments?.some((attachment: any) => {
         return attachment?.url === url;
     });
+}
+
+function isUrlInMessage(message: Message, url: string): boolean {
+    const urls = message?.content?.match(/https?:\/\/[^\s]+/g) || [];
+    for (const u of urls) {
+        if (u === url || normaliseUrl(u) === url) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // special cases where the unfurl api endpoint returns an embed with a different url than the one we requested
@@ -112,7 +130,15 @@ function normaliseUrl(url: string): string {
     const xDotComRegex = /(https?:\/\/(?:www\.)?)x\.com(\/.*)?/;
 
     if (xDotComRegex.test(url)) {
-        url = url.replace(xDotComRegex, "$1twitter.com$2");
+        url = url.replace(xDotComRegex, (match, p1, p2) => p1 + "twitter.com" + (p2 || ""));
+    }
+
+    // tiktok adds ?enable_tiktok_webview=true
+    const tiktokRegex = /(https?:\/\/(?:www\.)?)tiktok\.com(\/.*)?/;
+    const searchParams = new URLSearchParams(url.split("?")[1] || "");
+    if (tiktokRegex.test(url) && !searchParams.has("enable_tiktok_webview")) {
+        searchParams.append("enable_tiktok_webview", "true");
+        url = url.split("?")[0] + "?" + searchParams.toString();
     }
 
     return url;
@@ -168,6 +194,11 @@ function unfurlEmbed(url: string, message: Message) {
 
         updateMessage(message.channel_id, message.id, { embeds: newEmbeds });
     });
+}
+
+function removeEmbed(url: string, message: Message) {
+    const newEmbeds = message.embeds.filter((embed: any) => embed.url !== url);
+    updateMessage(message.channel_id, message.id, { embeds: newEmbeds });
 }
 
 function showFailureToast(message: string) {
