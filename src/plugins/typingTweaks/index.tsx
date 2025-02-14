@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/common";
 import { User } from "discord-types/general";
+import { getCustomColorString } from "@equicordplugins/customUserColors";
 import { PropsWithChildren } from "react";
 
 const settings = definePluginSettings({
@@ -57,6 +58,12 @@ interface Props {
     guildId: string;
 }
 
+function TypingUserColor(guildId: string, userId: string) {
+    if (!settings.store.showRoleColors) return;
+    if (Settings.plugins.customUserColors.enabled) return getCustomColorString(userId, true);
+    return GuildMemberStore.getMember(guildId, userId)?.colorString;
+}
+
 const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
     return (
         <strong
@@ -68,7 +75,7 @@ const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
                 display: "grid",
                 gridAutoFlow: "column",
                 gap: "4px",
-                color: settings.store.showRoleColors ? GuildMemberStore.getMember(guildId, user.id)?.colorString : undefined,
+                color: typingUserColor(guildId, user.id),
                 cursor: "pointer"
             }}
         >
