@@ -50,6 +50,7 @@ export default {
         get: () => sendSync<Settings>(IpcEvents.GET_SETTINGS),
         set: (settings: Settings, pathToNotify?: string) => invoke<void>(IpcEvents.SET_SETTINGS, settings, pathToNotify),
         getSettingsDir: () => invoke<string>(IpcEvents.GET_SETTINGS_DIR),
+        setBackgroundMaterial: (backgroundMaterial: Settings["winBackgroundMaterial"]) => invoke<void>(IpcEvents.SET_BACKGROUND_MATERIAL, backgroundMaterial)
     },
 
     quickCss: {
