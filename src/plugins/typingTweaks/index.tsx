@@ -18,12 +18,12 @@
 
 import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { getCustomColorString } from "@equicordplugins/customUserColors";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/common";
 import { User } from "discord-types/general";
-import { getCustomColorString } from "@equicordplugins/customUserColors";
 import { PropsWithChildren } from "react";
 
 const settings = definePluginSettings({
@@ -58,7 +58,7 @@ interface Props {
     guildId: string;
 }
 
-function TypingUserColor(guildId: string, userId: string) {
+function typingUserColor(guildId: string, userId: string) {
     if (!settings.store.showRoleColors) return;
     if (Settings.plugins.customUserColors.enabled) return getCustomColorString(userId, true);
     return GuildMemberStore.getMember(guildId, userId)?.colorString;

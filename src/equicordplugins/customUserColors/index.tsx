@@ -13,19 +13,21 @@ import { EquicordDevs } from "@utils/constants";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { extractAndLoadChunksLazy } from "@webpack";
-import { Menu, UserStore } from "@webpack/common";
+import { Menu } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { SetColorModal } from "./SetColorModal";
 
 export const DATASTORE_KEY = "equicord-customcolors";
 export let colors: Record<string, string> = {};
+
 (async () => {
     colors = await get<Record<string, string>>(DATASTORE_KEY) || {};
 })();
 
-const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}(\i\.\i\("?.+?"?\).*?).then\(\i\.bind\(\i,"?(.+?)"?\)\).{0,50}"UserSettings"/);
 // needed for color picker to be available without opening settings (ty pindms!!)
+const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}(\i\.\i\("?.+?"?\).*?).then\(\i\.bind\(\i,"?(.+?)"?\)\).{0,50}"UserSettings"/);
+
 const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: { user: User; }) => {
     if (user?.id == null) return;
 
@@ -96,15 +98,11 @@ export default definePlugin({
     ],
 
     colorDMList(a: any): string | undefined {
-        try {
-            // @ts-ignore
-            const { id } = UserStore.findByTag(a.avatar.props["aria-label"]);
-            // get user id by props on avatars having username as aria label
-            const colorString = getCustomColorString(id, true);
-            if (colorString)
-                return colorString;
-            return "inherit";
-        } catch { return; } // if you have a group in your dms then discord will crash on load without this
+        const userId = a?.subText?.props?.user?.id;
+        if (!userId) return;
+        const colorString = getCustomColorString(userId, true);
+        if (colorString) return colorString;
+        return "inherit";
     },
 
     colorIfServer(a: any): string | undefined {
