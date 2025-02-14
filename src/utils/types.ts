@@ -20,6 +20,7 @@ import { ProfileBadge } from "@api/Badges";
 import { ChatBarButtonFactory } from "@api/ChatButtons";
 import { Command } from "@api/Commands";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { MarkdownRulesType, PluginMarkdownRulesType } from "@api/Markdown";
 import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
 import { MessageAccessoryFactory } from "@api/MessageAccessories";
 import { MessageDecorationFactory } from "@api/MessageDecorations";
@@ -155,6 +156,10 @@ export interface PluginDef {
      * The key will be used as text for the button
      */
     toolboxActions?: Record<string, () => void>;
+    /**
+     * Allows you to add custom Rules to markdown
+     */
+    markdownRules?(r: MarkdownRulesType): PluginMarkdownRulesType;
 
     tags?: string[];
 
