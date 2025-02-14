@@ -31,8 +31,8 @@
             "@webpack": ["./webpack/webpack"],
             "@webpack/patcher": ["./webpack/patchWebpack"],
             "@webpack/wreq.d": ["./webpack/wreq.d"],
-            "@plugins": ["./plugins"],
-            "@equicordplugins": ["./equicordplugins"]
+            "@plugins/*": ["./plugins/*"],
+            "@equicordplugins/*": ["./equicordplugins/*"]
         },
         "plugins": [
             // Transform paths in output .d.ts files (Include this line if you output declarations files)
