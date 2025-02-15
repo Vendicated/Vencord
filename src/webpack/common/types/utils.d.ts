@@ -329,6 +329,23 @@ export interface DisplayProfileUtils {
     useDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
 }
 
+export type OpenUserProfileModalProps = {
+    userId: string;
+    guildId: string;
+    showGuildProfile?: boolean;
+    channelId: string;
+    analyticsLocation: {
+        page: string;
+        section: string;
+    };
+    section?: "USER_INFO" | "BOT_INFO" | "ACTIVITY" | "MUTUAL_GUILDS" | "MUTUAL_FRIENDS" | "BOT_DATA_ACCESS";
+    subsection?: "ROLES" | "CONNECTIONS" | "NOTE" | "RECENT_ACTIVITY";
+};
+
+export interface UserProfileActions {
+    openUserProfileModal(props: OpenUserProfileModalProps): Promise<void>;
+}
+
 export interface DateUtils {
     isSameDay(date1: Date, date2: Date): boolean;
     calendarFormat(date: Date): string;
