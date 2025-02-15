@@ -21,9 +21,14 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
+import { useForceUpdater } from "@utils/react";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore, useEffect, useMemo, useRef, useState } from "@webpack/common";
+import Message from "discord-types/general/Message";
+
+import { Color, Contrast, getBackgroundColor } from "./color";
+
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
 
@@ -69,12 +74,41 @@ const settings = definePluginSettings({
         description: "Intensity of message coloring.",
         markers: makeRange(0, 100, 10),
         default: 30
+    },
+    minColorContrast: {
+        type: OptionType.STRING,
+        description: "the min contrast that colors will be rendered at, `1` to disable",
+        default: "1",
+    }
+}, {
+    minColorContrast: {
+        isValid(value) {
+            if (value === "") return true;
+            return !Number.isNaN(parseFloat(value)) || "Input is not a number";
+        },
     }
 });
 
+export function clamp(min, max, val) {
+    return Math.max(min, Math.min(max, val));
+}
+
+export function getContrastValue() {
+    const num = parseFloat(settings.store.minColorContrast);
+    if (Number.isNaN(num)) return 1;
+    return clamp(1, 21, num);
+}
+export function useGetContrastValue() {
+    const { minColorContrast } = settings.use(["minColorContrast"]);
+    const [contrast, setContrast] = useState(getContrastValue());
+    useEffect(() => {
+        setContrast(getContrastValue());
+    }, [minColorContrast]);
+    return contrast;
+}
 export default definePlugin({
     name: "RoleColorEverywhere",
-    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi, Devs.jamesbt365],
+    authors: [Devs.KingFish, Devs.lewisakura, Devs.AutumnVN, Devs.Kyuuhachi, Devs.jamesbt365, Devs.sadan],
     description: "Adds the top role color anywhere possible",
     settings,
 
@@ -156,11 +190,62 @@ export default definePlugin({
             find: "#{intl::MESSAGE_EDITED}",
             replacement: {
                 match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
-                replace: "style:$self.useMessageColorsStyle($1),"
+                replace: "style:$self.useMessageColorsStyle($1, vc_ref),"
             },
             predicate: () => settings.store.colorChatMessages
+        },
+        // HORROR: ref for message content to get background colors
+        {
+            find: "#{intl::MESSAGE_EDITED}",
+            replacement: {
+                match: /(contentRef:(\i).+?(\i)\.useRef.+?)(?=return)/,
+                replace: "$1let vc_ref = $2 ?? $3.useRef(null);"
+            }
+        },
+        {
+            find: "#{intl::MESSAGE_EDITED}",
+            replacement: {
+                match: /(?<=ref:)\i/,
+                replace: "vc_ref"
+            }
+        },
+        // cap contrast of usernames
+        {
+            find: "style:\"username\"",
+            replacement: {
+                match: /(?<=message:(\i).*)(?<=color:(\i).*)(?<=void 0,)/,
+                replace: "...$self.capContrast($2, $1),"
+            }
         }
     ],
+
+    capContrast(color: string, { mentioned }: Message) {
+        const ref = useRef<{ ref: Element; }>(null);
+        const contrast = useGetContrastValue();
+        const [dep, update] = useForceUpdater(true);
+        return useMemo(() => {
+            try {
+                if (color == null || contrast === 1) return {};
+                if (!ref.current?.ref) {
+                    console.log("updating");
+                    setTimeout(update, 0);
+                    return { ref };
+                }
+                const computed = getComputedStyle(ref.current.ref);
+                const standardBG = getBackgroundColor(computed);
+                const bgColor = mentioned ? computed.getPropertyValue("--background-mentioned") : standardBG;
+                if (!bgColor) throw new Error("Background color not found");
+                return {
+                    ref,
+                    style: {
+                        color: new Contrast(Color.parse(bgColor, standardBG)).calculateMinContrastColor(Color.parse(color), contrast)
+                    }
+                };
+            } catch (error) {
+                console.error(error);
+            }
+        }, [ref?.current?.ref, contrast, color, dep, mentioned]);
+    },
 
     getColorString(userId: string, channelOrGuildId: string) {
         try {
@@ -188,25 +273,48 @@ export default definePlugin({
         };
     },
 
-    useMessageColorsStyle(message: any) {
-        try {
-            const { messageSaturation } = settings.use(["messageSaturation"]);
-            const author = useMessageAuthor(message);
+    useMessageColorsStyle(message: any, ref: any | null) {
+        const { messageSaturation } = settings.use(["messageSaturation"]);
+        const author = useMessageAuthor(message);
+        const contrast = useGetContrastValue();
+        const [dep, update] = useForceUpdater(true);
+        return useMemo(() => {
+            try {
+                if (author.colorString != null && messageSaturation !== 0) {
+                    if (contrast === 1) {
+                        const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
 
-            if (author.colorString != null && messageSaturation !== 0) {
-                const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
+                        return {
+                            color: value.replace("{DEFAULT}", "--text-normal"),
+                            "--header-primary": value.replace("{DEFAULT}", "--header-primary"),
+                            "--text-muted": value.replace("{DEFAULT}", "--text-muted")
+                        };
+                    }
+                    // why
+                    if (!ref.current) {
+                        setTimeout(update, 0);
+                        return {};
+                    }
+                    const computed = window.getComputedStyle(ref.current);
+                    const textNormal = computed.getPropertyValue("--text-normal"),
+                        headerPrimary = computed.getPropertyValue("--header-primary"),
+                        textMuted = computed.getPropertyValue("--text-muted");
 
-                return {
-                    color: value.replace("{DEFAULT}", "--text-normal"),
-                    "--header-primary": value.replace("{DEFAULT}", "--header-primary"),
-                    "--text-muted": value.replace("{DEFAULT}", "--text-muted")
-                };
+                    const bg = new Contrast(Color.parse(getBackgroundColor(computed)));
+                    const rc = Color.parse(author.colorString);
+                    const mkColor = c => bg.calculateMinContrastColor(rc.mix("oklab", messageSaturation / 100, Color.parse(c)), contrast);
+                    return {
+                        color: mkColor(textNormal),
+                        "--header-primary": mkColor(headerPrimary),
+                        "--text-muted": mkColor(textMuted)
+                    };
+                }
+            } catch (e) {
+                new Logger("RoleColorEverywhere").error("Failed to get message color", e);
             }
-        } catch (e) {
-            new Logger("RoleColorEverywhere").error("Failed to get message color", e);
-        }
 
-        return null;
+            return null;
+        }, [author, contrast, ref, messageSaturation, dep]);
     },
 
     RoleGroupColor: ErrorBoundary.wrap(({ id, count, title, guildId, label }: { id: string; count: number; title: string; guildId: string; label: string; }) => {
