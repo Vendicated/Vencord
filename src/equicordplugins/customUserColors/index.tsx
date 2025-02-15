@@ -83,15 +83,15 @@ export default definePlugin({
     patches: [
         {
             // this also affects name headers in chats outside of servers
-            find: /type:\i\.\i\.Types\.REMIX/,
+            find: ".USERNAME),{",
             replacement: {
-                match: /"username".{0,25}void 0/,
-                replace: "{color:$self.colorIfServer(arguments[0])}"
+                match: /(\i=\{.{0,50})\?\{color:\i\}:void 0/,
+                replace: "color=$self.colorIfServer(arguments[0]),$1?{color:color}:{color:color}"
             }
         },
         {
             predicate: () => settings.store.dmList,
-            find: /muted:\i=!1,highlighted:\i=!1/,
+            find: "!1,wrapContent",
             replacement: {
                 match: /(nameAndDecorators,)/,
                 replace: "$1style:{color:$self.colorDMList(arguments[0])},"
