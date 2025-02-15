@@ -7,7 +7,7 @@
 import "./clientTheme.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
+import { classNameFactory, createStyle, deleteStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
@@ -124,9 +124,7 @@ export default definePlugin({
     },
 
     stop() {
-        document.getElementById("clientThemeVars")?.remove();
-        document.getElementById("clientThemeOffsets")?.remove();
-        document.getElementById("clientThemeLightModeFixes")?.remove();
+        ["vars", "offsets", "lightModeFixes"].forEach(i => deleteStyle(`ClientTheme-${i}`));
     }
 });
 
@@ -159,7 +157,7 @@ function generateColorOffsets(styles) {
         variableMatch = variableRegex.exec(styles);
     }
 
-    createStyleSheet("clientThemeOffsets", [
+    createStyle("ClientTheme-offsets", [
         `.theme-light {\n ${genThemeSpecificOffsets(variableLightness, lightVariableRegex, "--primary-345-hsl")} \n}`,
         `.theme-dark {\n ${genThemeSpecificOffsets(variableLightness, darkVariableRegex, "--primary-600-hsl")} \n}`,
     ].join("\n\n"));
@@ -188,7 +186,7 @@ function generateLightModeFixes(styles) {
     // create css to reassign every var
     const reassignVariables = `.theme-light {\n ${lightBgVars.map(variable => `${variable}: var(--primary-100);`).join("\n")} \n}`;
 
-    createStyleSheet("clientThemeLightModeFixes", [
+    createStyle("ClientTheme-lightModeFixes", [
         reassignBackgrounds,
         reassignBackgroundColors,
         reassignVariables,
@@ -207,23 +205,11 @@ function mapReject(arr, mapFunc) {
 function updateColorVars(color: string) {
     const { hue, saturation, lightness } = hexToHSL(color);
 
-    let style = document.getElementById("clientThemeVars");
-    if (!style)
-        style = createStyleSheet("clientThemeVars");
-
-    style.textContent = `:root {
+    createStyle("ClientTheme-vars", `:root {
         --theme-h: ${hue};
         --theme-s: ${saturation}%;
         --theme-l: ${lightness}%;
-    }`;
-}
-
-function createStyleSheet(id, content = "") {
-    const style = document.createElement("style");
-    style.setAttribute("id", id);
-    style.textContent = content.split("\n").map(line => line.trim()).join("\n");
-    document.body.appendChild(style);
-    return style;
+    }`);
 }
 
 // returns all of discord's native styles in a single string
