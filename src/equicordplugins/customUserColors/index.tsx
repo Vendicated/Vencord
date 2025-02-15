@@ -85,8 +85,8 @@ export default definePlugin({
             // this also affects name headers in chats outside of servers
             find: /type:\i\.\i\.Types\.REMIX/,
             replacement: {
-                match: /(username,style):"username".{0,25}void 0/,
-                replace: "$1:{color:$self.colorIfServer(arguments[0])}"
+                match: /"username".{0,25}void 0/,
+                replace: "{color:$self.colorIfServer(arguments[0])}"
             }
         },
         {
