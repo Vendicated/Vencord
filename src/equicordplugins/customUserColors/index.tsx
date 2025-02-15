@@ -85,8 +85,8 @@ export default definePlugin({
             // this also affects name headers in chats outside of servers
             find: /type:\i\.\i\.Types\.REMIX/,
             replacement: {
-                match: /style:"username".{0,50}void 0/,
-                replace: "style:{color:$self.colorIfServer(arguments[0])}"
+                match: /(username,style):"username".{0,25}void 0/,
+                replace: "$1:{color:$self.colorIfServer(arguments[0])}"
             }
         },
         {
@@ -108,7 +108,8 @@ export default definePlugin({
     },
 
     colorIfServer(a: any): string | undefined {
-        const roleColor = a.author.colorString;
+        const roleColor = a.author?.colorString;
+        if (!roleColor) return;
 
         if (a.channel.guild_id && !settings.store.colorInServers) return roleColor;
 
