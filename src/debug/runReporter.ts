@@ -17,8 +17,7 @@ async function runReporter() {
     try {
         ReporterLogger.log("Starting test...");
 
-        let loadLazyChunksResolve: (value: void) => void;
-        const loadLazyChunksDone = new Promise<void>(r => loadLazyChunksResolve = r);
+        const { promise: loadLazyChunksDone, resolve: loadLazyChunksResolve } = Promise.withResolvers<void>();
 
         // The main patch for starting the reporter chunk loading
         addPatch({

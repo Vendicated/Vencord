@@ -97,10 +97,6 @@ export const moduleListeners = new Set<CallbackFn>();
 export const factoryListeners = new Set<FactoryListernFn>();
 
 export function _initWebpack(webpackRequire: WebpackRequire) {
-    if (webpackRequire.c == null) {
-        return;
-    }
-
     wreq = webpackRequire;
     cache = webpackRequire.c;
 
