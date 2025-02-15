@@ -61,7 +61,7 @@
     margin-top: 1em;
     cursor: pointer;
 
-    .vc-special-hyperlink-text {
+    & .vc-special-hyperlink-text {
         color: black;
         font-size: 1em;
         font-weight: bold;
