@@ -47,7 +47,7 @@ const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: {
 };
 
 export function getCustomColorString(userId: string, withHash?: boolean): string | undefined {
-    if (!colors[userId] || !Settings.plugins.customUserColors.enabled)
+    if (!colors[userId] || !Settings.plugins.CustomUserColors.enabled)
         return;
 
     if (withHash)
@@ -110,8 +110,7 @@ export default definePlugin({
     colorIfServer(a: any): string | undefined {
         const roleColor = a.author.colorString;
 
-        if (a.channel.guild_id && !settings.store.colorInServers)
-            return roleColor;
+        if (a.channel.guild_id && !settings.store.colorInServers) return roleColor;
 
         const color = getCustomColorString(a.message.author.id, true);
         return color ?? roleColor;
