@@ -8,7 +8,7 @@ import "./styles.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { get } from "@api/DataStore";
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings, Settings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
@@ -57,7 +57,7 @@ export function getCustomColorString(userId: string, withHash?: boolean): string
 }
 
 const settings = definePluginSettings({
-    DmList: {
+    dmList: {
         type: OptionType.BOOLEAN,
         description: "Users with custom colors defined will have their name in the dm list colored",
         default: true,
@@ -69,8 +69,10 @@ const settings = definePluginSettings({
     }
 });
 
+
+migratePluginSettings("CustomUserColors", "customUserColors");
 export default definePlugin({
-    name: "customUserColors",
+    name: "CustomUserColors",
     description: "Lets you add a custom color to any user, anywhere! Highly recommend to use with typingTweaks and roleColorEverywhere",
     authors: [EquicordDevs.mochienya],
     contextMenus: { "user-context": userContextMenuPatch },
@@ -83,12 +85,12 @@ export default definePlugin({
             // this also affects name headers in chats outside of servers
             find: /type:\i\.\i\.Types\.REMIX/,
             replacement: {
-                match: /style:"username".*?void 0/,
+                match: /style:"username".{0,50}void 0/,
                 replace: "style:{color:$self.colorIfServer(arguments[0])}"
             }
         },
         {
-            predicate: () => settings.store.DmList,
+            predicate: () => settings.store.dmList,
             find: /muted:\i=!1,highlighted:\i=!1/,
             replacement: {
                 match: /(nameAndDecorators,)/,
