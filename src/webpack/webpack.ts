@@ -112,6 +112,10 @@ export function _initWebpack(webpackRequire: WebpackRequire) {
 // Credits to Zerebos for implementing this in BD, thus giving the idea for us to implement it too
 const TypedArray = Object.getPrototypeOf(Int8Array);
 
+// Discord might export a Proxy that returns non-null values for any property key (e.g. their i18n Proxy)
+// We can use a unique symbol to detect this and ignore it
+const uniqueSymbol = Symbol("matchesLiterallyAnything");
+
 function _shouldIgnoreValue(value: any) {
     if (value == null) return true;
     if (value === window) return true;
@@ -127,13 +131,22 @@ export function _shouldIgnoreModule(exports: any) {
         return true;
     }
 
-    if (typeof exports !== "object") {
+    if (typeof exports !== "object" || exports == null) {
         return false;
+    }
+
+    if (exports?.[uniqueSymbol]) {
+        return true;
     }
 
     let allNonEnumerable = true;
     for (const exportKey in exports) {
-        if (!_shouldIgnoreValue(exports[exportKey])) {
+        const exp = exports[exportKey];
+        if (exp?.[uniqueSymbol]) {
+            return true;
+        }
+
+        if (!_shouldIgnoreValue(exp)) {
             allNonEnumerable = false;
         }
     }
