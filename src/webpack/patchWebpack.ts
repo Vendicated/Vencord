@@ -191,7 +191,8 @@ define(Function.prototype, "m", {
 
             define(this, "m", { value: proxiedModuleFactories });
 
-            // Overwrite webpack's defineExports function to make exports configurable so we can overwrite them for blacklisting
+            // Overwrite webpack's defineExports function to define the export descriptors configurable.
+            // This is needed so we can later blacklist specific exports from webpack search by making them non-enumerable
             this.d = function (exports: object, getters: object) {
                 for (const key in getters) {
                     if (Object.hasOwn(getters, key) && !Object.hasOwn(exports, key)) {
