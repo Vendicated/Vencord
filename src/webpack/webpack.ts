@@ -135,7 +135,7 @@ export function _shouldIgnoreModule(exports: any) {
         return false;
     }
 
-    if (exports?.[uniqueSymbol]) {
+    if (exports[uniqueSymbol]) {
         return true;
     }
 
