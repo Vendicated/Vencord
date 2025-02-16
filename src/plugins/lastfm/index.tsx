@@ -106,6 +106,7 @@ const settings = definePluginSettings({
         type: OptionType.STRING,
     },
     apiKey: {
+        displayName: "API Key",
         description: "last.fm api key",
         type: OptionType.STRING,
     },
@@ -186,7 +187,8 @@ const settings = definePluginSettings({
         ],
     },
     showLastFmLogo: {
-        description: "show the Last.fm logo by the album cover",
+        displayName: "Show Last.fm Logo",
+        description: "Show the Last.fm logo by the album cover",
         type: OptionType.BOOLEAN,
         default: true,
     }

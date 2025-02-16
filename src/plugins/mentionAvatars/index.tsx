@@ -16,6 +16,7 @@ import { User } from "discord-types/general";
 const settings = definePluginSettings({
     showAtSymbol: {
         type: OptionType.BOOLEAN,
+        displayName: "Show @ Symbol",
         description: "Whether the the @ symbol should be displayed on user mentions",
         default: true
     }
