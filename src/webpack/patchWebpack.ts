@@ -12,7 +12,7 @@ import { canonicalizeReplacement } from "@utils/patches";
 import { Patch, PatchReplacement } from "@utils/types";
 
 import { traceFunctionWithResults } from "../debug/Tracer";
-import { _initWebpack, _shouldIgnoreModule, factoryListeners, findModuleId, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
+import { _blacklistBadModules, _initWebpack, factoryListeners, findModuleId, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
 import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, ModuleExports, PatchedModuleFactory, WebpackRequire } from "./wreq.d";
 
 export const patches = [] as Patch[];
@@ -190,6 +190,19 @@ define(Function.prototype, "m", {
             */
 
             define(this, "m", { value: proxiedModuleFactories });
+
+            // Overwrite webpack's defineExports function to make exports configurable so we can overwrite them for blacklisting
+            this.d = function (exports: object, getters: object) {
+                for (const key in getters) {
+                    if (Object.hasOwn(getters, key) && !Object.hasOwn(exports, key)) {
+                        Object.defineProperty(exports, key, {
+                            enumerable: true,
+                            configurable: true,
+                            get: getters[key],
+                        });
+                    }
+                }
+            };
         };
     }
 });
@@ -407,19 +420,8 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
         return factoryReturn;
     }
 
-    if (typeof require === "function") {
-        const shouldIgnoreModule = _shouldIgnoreModule(exports);
-
-        if (shouldIgnoreModule) {
-            if (require.c != null) {
-                Object.defineProperty(require.c, module.id, {
-                    value: require.c[module.id],
-                    enumerable: false,
-                    configurable: true,
-                    writable: true
-                });
-            }
-
+    if (typeof require === "function" && require.c) {
+        if (_blacklistBadModules(require.c, exports, module.id)) {
             return factoryReturn;
         }
     }

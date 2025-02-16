@@ -23,7 +23,7 @@ import { canonicalizeMatch } from "@utils/patches";
 
 import { traceFunction } from "../debug/Tracer";
 import { Flux } from "./common";
-import { AnyModuleFactory, ModuleExports, WebpackRequire } from "./wreq";
+import { AnyModuleFactory, AnyWebpackRequire, ModuleExports, WebpackRequire } from "./wreq";
 
 const logger = new Logger("Webpack");
 
@@ -112,22 +112,32 @@ export function _initWebpack(webpackRequire: WebpackRequire) {
 // Credits to Zerebos for implementing this in BD, thus giving the idea for us to implement it too
 const TypedArray = Object.getPrototypeOf(Int8Array);
 
-// Discord might export a Proxy that returns non-null values for any property key (e.g. their i18n Proxy)
-// We can use a unique symbol to detect this and ignore it
-const uniqueName = "is this a proxy that returns values for any key?";
-
 function _shouldIgnoreValue(value: any) {
     if (value == null) return true;
     if (value === window) return true;
     if (value === document || value === document.documentElement) return true;
-    if (value[Symbol.toStringTag] === "DOMTokenList") return true;
+    if (value[Symbol.toStringTag] === "DOMTokenList" || value[Symbol.toStringTag] === "IntlMessagesProxy") return true;
+    // Discord might export a Proxy that returns non-null values for any property key (e.g. their i18n Proxy (caught by above check))
+    // We can use a unique string to detect this and ignore it
+    if (value["is this a proxy that returns values for any key?"]) return true;
     if (value instanceof TypedArray) return true;
 
     return false;
 }
 
-export function _shouldIgnoreModule(exports: any) {
+function makePropertyNonEnumerable(target: Object, key: PropertyKey) {
+    const descriptor = Object.getOwnPropertyDescriptor(target, key);
+    if (descriptor == null) return;
+
+    Reflect.defineProperty(target, key, {
+        ...descriptor,
+        enumerable: false
+    });
+}
+
+export function _blacklistBadModules(requireCache: NonNullable<AnyWebpackRequire["c"]>, exports: any, moduleId: PropertyKey) {
     if (_shouldIgnoreValue(exports)) {
+        makePropertyNonEnumerable(requireCache, moduleId);
         return true;
     }
 
@@ -135,23 +145,13 @@ export function _shouldIgnoreModule(exports: any) {
         return false;
     }
 
-    if (exports[uniqueName]) {
-        return true;
-    }
-
-    let allNonEnumerable = true;
     for (const exportKey in exports) {
-        const exp = exports[exportKey];
-        if (exp?.[uniqueName]) {
-            return true;
-        }
-
-        if (!_shouldIgnoreValue(exp)) {
-            allNonEnumerable = false;
+        if (_shouldIgnoreValue(exports[exportKey])) {
+            makePropertyNonEnumerable(exports, exportKey);
         }
     }
 
-    return allNonEnumerable;
+    return false;
 }
 
 let devToolsOpen = false;
@@ -487,12 +487,27 @@ export function findExportedComponentLazy<T extends object = any>(...props: Prop
     });
 }
 
+function getAllPropertyNames(object: Object, includeNonEnumerable: boolean) {
+    const names = new Set<PropertyKey>();
+
+    const getKeys = includeNonEnumerable ? Object.getOwnPropertyNames : Object.keys;
+    do {
+        getKeys(object).forEach(name => names.add(name));
+        object = Object.getPrototypeOf(object);
+    } while (object != null);
+
+    return names;
+}
+
 /**
  * Finds a mangled module by the provided code "code" (must be unique and can be anywhere in the module)
  * then maps it into an easily usable module via the specified mappers.
  *
  * @param code The code to look for
  * @param mappers Mappers to create the non mangled exports
+ * @param includeBlacklistedExports Whether to include blacklisted exports in the search.
+ *                                  These exports are dangerous. Accessing properties on them may throw errors
+ *                                  or always return values (so a byProps filter will always return true)
  * @returns Unmangled exports as specified in mappers
  *
  * @example mapMangledModule("headerIdIsManaged:", {
@@ -500,7 +515,7 @@ export function findExportedComponentLazy<T extends object = any>(...props: Prop
  *             closeModal: filters.byCode("key==")
  *          })
  */
-export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>): Record<S, any> {
+export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>, includeBlacklisted = false): Record<S, any> {
     const exports = {} as Record<S, any>;
 
     const id = findModuleId(...Array.isArray(code) ? code : [code]);
@@ -508,8 +523,9 @@ export const mapMangledModule = traceFunction("mapMangledModule", function mapMa
         return exports;
 
     const mod = wreq(id as any);
+    const keys = getAllPropertyNames(mod, includeBlacklisted);
     outer:
-    for (const key in mod) {
+    for (const key of keys) {
         const member = mod[key];
         for (const newName in mappers) {
             // if the current mapper matches this module
@@ -523,24 +539,13 @@ export const mapMangledModule = traceFunction("mapMangledModule", function mapMa
 });
 
 /**
- * {@link mapMangledModule}, lazy.
-
- * Finds a mangled module by the provided code "code" (must be unique and can be anywhere in the module)
- * then maps it into an easily usable module via the specified mappers.
- *
- * @param code The code to look for
- * @param mappers Mappers to create the non mangled exports
- * @returns Unmangled exports as specified in mappers
- *
- * @example mapMangledModule("headerIdIsManaged:", {
- *             openModal: filters.byCode("headerIdIsManaged:"),
- *             closeModal: filters.byCode("key==")
- *          })
+ * lazy mapMangledModule
+  * @see {@link mapMangledModule}
  */
-export function mapMangledModuleLazy<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>): Record<S, any> {
+export function mapMangledModuleLazy<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>, includeBlacklistedExports = false): Record<S, any> {
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["mapMangledModule", [code, mappers]]);
 
-    return proxyLazy(() => mapMangledModule(code, mappers));
+    return proxyLazy(() => mapMangledModule(code, mappers, includeBlacklistedExports));
 }
 
 export const DefaultExtractAndLoadChunksRegex = /(?:(?:Promise\.all\(\[)?(\i\.e\("?[^)]+?"?\)[^\]]*?)(?:\]\))?|Promise\.resolve\(\))\.then\(\i\.bind\(\i,"?([^)]+?)"?\)\)/;
