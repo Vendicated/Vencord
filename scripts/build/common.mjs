@@ -194,7 +194,13 @@ export const gitRemotePlugin = {
         build.onLoad({ filter, namespace: "git-remote" }, async () => {
             let remote = process.env.VENCORD_REMOTE;
             if (!remote) {
-                const res = await promisify(exec)("git remote get-url origin", { encoding: "utf-8" });
+                const headRefRes = await promisify(exec)("git symbolic-ref -q HEAD", { encoding: "utf-8" }).catch(() => ({ stdout: "" }));
+                const headRef = headRefRes.stdout.trim();
+                const upstreamRes = await promisify(exec)(`git for-each-ref --format=%(upstream:short) "${headRef}"`, { encoding: "utf-8" })
+                    .catch(() => ({ stdout: "" }));
+                const remoteName = upstreamRes.stdout.trim().split("/")[0] || "origin";
+                const res = await promisify(exec)(`git remote get-url ${remoteName}`, { encoding: "utf-8" });
+
                 remote = res.stdout.trim()
                     .replace("https://github.com/", "")
                     .replace("git@github.com:", "")
