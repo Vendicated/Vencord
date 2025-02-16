@@ -114,7 +114,7 @@ const TypedArray = Object.getPrototypeOf(Int8Array);
 
 // Discord might export a Proxy that returns non-null values for any property key (e.g. their i18n Proxy)
 // We can use a unique symbol to detect this and ignore it
-const uniqueSymbol = Symbol("matchesLiterallyAnything");
+const uniqueName = "is this a proxy that returns values for any key?";
 
 function _shouldIgnoreValue(value: any) {
     if (value == null) return true;
@@ -135,14 +135,14 @@ export function _shouldIgnoreModule(exports: any) {
         return false;
     }
 
-    if (exports[uniqueSymbol]) {
+    if (exports[uniqueName]) {
         return true;
     }
 
     let allNonEnumerable = true;
     for (const exportKey in exports) {
         const exp = exports[exportKey];
-        if (exp?.[uniqueSymbol]) {
+        if (exp?.[uniqueName]) {
             return true;
         }
 
