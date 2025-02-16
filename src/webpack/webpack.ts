@@ -515,7 +515,7 @@ function getAllPropertyNames(object: Object, includeNonEnumerable: boolean) {
  *             closeModal: filters.byCode("key==")
  *          })
  */
-export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>, includeBlacklisted = false): Record<S, any> {
+export const mapMangledModule = traceFunction("mapMangledModule", function mapMangledModule<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>, includeBlacklistedExports = false): Record<S, any> {
     const exports = {} as Record<S, any>;
 
     const id = findModuleId(...Array.isArray(code) ? code : [code]);
@@ -523,7 +523,7 @@ export const mapMangledModule = traceFunction("mapMangledModule", function mapMa
         return exports;
 
     const mod = wreq(id as any);
-    const keys = getAllPropertyNames(mod, includeBlacklisted);
+    const keys = getAllPropertyNames(mod, includeBlacklistedExports);
     outer:
     for (const key of keys) {
         const member = mod[key];
