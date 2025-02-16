@@ -40,7 +40,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Toggle functionality",
         default: true,
-    }
+    },
+    excludeChannels: {
+        type: OptionType.STRING,
+        description: "Comma-separated list of channel IDs to show typing in",
+        default: ""
+    },
 });
 
 const SilentTypingToggle: ChatBarButtonFactory = ({ isMainChat }) => {
@@ -133,7 +138,9 @@ export default definePlugin({
     }],
 
     async startTyping(channelId: string) {
-        if (settings.store.isEnabled) return;
+        if (settings.store.isEnabled && !settings.store.excludeChannels.includes(channelId)) {
+            return;
+        }
         FluxDispatcher.dispatch({ type: "TYPING_START_LOCAL", channelId });
     },
 
