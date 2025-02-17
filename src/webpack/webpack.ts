@@ -112,6 +112,7 @@ export function _initWebpack(webpackRequire: WebpackRequire) {
 // Credits to Zerebos for implementing this in BD, thus giving the idea for us to implement it too
 const TypedArray = Object.getPrototypeOf(Int8Array);
 
+const PROXY_CHECK = "is this a proxy that returns values for any key?";
 function shouldIgnoreValue(value: any) {
     if (value == null) return true;
     if (value === window) return true;
@@ -120,7 +121,11 @@ function shouldIgnoreValue(value: any) {
     // Discord might export a Proxy that returns non-null values for any property key which would pass all findByProps filters.
     // One example of this is their i18n Proxy. However, that is already covered by the IntlMessagesProxy check above.
     // As a fallback if they ever change the name or add a new Proxy, use a unique string to detect such proxies and ignore them
-    if (value["is this a proxy that returns values for any key?"]) return true;
+    if (value[PROXY_CHECK]) {
+        // their i18n Proxy "caches" by setting each accessed property to the return, so try to delete
+        Reflect.deleteProperty(value, PROXY_CHECK);
+        return true;
+    }
     if (value instanceof TypedArray) return true;
 
     return false;
