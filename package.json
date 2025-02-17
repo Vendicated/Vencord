@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.11.4",
+    "version": "1.11.5",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/Vendicated/Vencord#readme",
     "bugs": {
@@ -30,13 +30,12 @@
         "lint": "eslint",
         "lint-styles": "stylelint \"src/**/*.css\" --ignore-pattern src/userplugins",
         "lint:fix": "pnpm lint --fix",
-        "test": "pnpm buildStandalone && pnpm lint && pnpm lint-styles && pnpm testTsc && pnpm generatePluginJson",
+        "test": "pnpm buildStandalone && pnpm testTsc && pnpm lint && pnpm lint-styles && pnpm generatePluginJson",
         "testWeb": "pnpm lint && pnpm buildWeb && pnpm testTsc",
         "testTsc": "tsc --noEmit"
     },
     "dependencies": {
         "@intrnl/xxhash64": "^0.1.2",
-        "@sapphi-red/web-noise-suppressor": "0.3.5",
         "@vap/core": "0.0.12",
         "@vap/shiki": "0.10.5",
         "fflate": "^0.8.2",
@@ -56,7 +55,7 @@
         "@types/yazl": "^2.4.5",
         "diff": "^7.0.0",
         "discord-types": "^1.3.26",
-        "esbuild": "^0.15.18",
+        "esbuild": "^0.25.0",
         "eslint": "^9.17.0",
         "eslint-import-resolver-alias": "^1.1.2",
         "eslint-plugin-path-alias": "2.1.0",
