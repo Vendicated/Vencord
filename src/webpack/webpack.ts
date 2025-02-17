@@ -135,13 +135,13 @@ function makePropertyNonEnumerable(target: Object, key: PropertyKey) {
     });
 }
 
-export function _blacklistBadModules(requireCache: NonNullable<AnyWebpackRequire["c"]>, exports: any, moduleId: PropertyKey) {
+export function _blacklistBadModules(requireCache: NonNullable<AnyWebpackRequire["c"]>, exports: ModuleExports, moduleId: PropertyKey) {
     if (_shouldIgnoreValue(exports)) {
         makePropertyNonEnumerable(requireCache, moduleId);
         return true;
     }
 
-    if (typeof exports !== "object" || exports == null) {
+    if (typeof exports !== "object") {
         return false;
     }
 
