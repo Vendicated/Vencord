@@ -193,13 +193,13 @@ define(Function.prototype, "m", {
 
             // Overwrite Webpack's defineExports function to define the export descriptors configurable.
             // This is needed so we can later blacklist specific exports from Webpack search by making them non-enumerable
-            this.d = function (exports: object, getters: object) {
-                for (const key in getters) {
-                    if (Object.hasOwn(getters, key) && !Object.hasOwn(exports, key)) {
+            this.d = function (exports, definition) {
+                for (const key in definition) {
+                    if (Object.hasOwn(definition, key) && !Object.hasOwn(exports, key)) {
                         Object.defineProperty(exports, key, {
                             enumerable: true,
                             configurable: true,
-                            get: getters[key],
+                            get: definition[key],
                         });
                     }
                 }

@@ -131,7 +131,7 @@ function shouldIgnoreValue(value: any) {
     return false;
 }
 
-function makePropertyNonEnumerable(target: Object, key: PropertyKey) {
+function makePropertyNonEnumerable(target: Record<PropertyKey, any>, key: PropertyKey) {
     const descriptor = Object.getOwnPropertyDescriptor(target, key);
     if (descriptor == null) return;
 
@@ -499,7 +499,7 @@ export function findExportedComponentLazy<T extends object = any>(...props: Prop
     });
 }
 
-function getAllPropertyNames(object: Object, includeNonEnumerable: boolean) {
+function getAllPropertyNames(object: Record<PropertyKey, any>, includeNonEnumerable: boolean) {
     const names = new Set<PropertyKey>();
 
     const getKeys = includeNonEnumerable ? Object.getOwnPropertyNames : Object.keys;
