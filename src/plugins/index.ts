@@ -20,6 +20,7 @@ import { addProfileBadge, removeProfileBadge } from "@api/Badges";
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import { AddAPendingRule } from "@api/Markdown";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
@@ -170,6 +171,10 @@ for (const p of pluginsValues) {
                 addPatch(patch, p.name);
             }
         }
+    }
+
+    if (p.markdownRules && isPluginEnabled(p.name)) {
+        AddAPendingRule(p.name, p.markdownRules);
     }
 }
 
