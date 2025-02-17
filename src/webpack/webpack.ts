@@ -547,7 +547,7 @@ export const mapMangledModule = traceFunction("mapMangledModule", function mapMa
   * @see {@link mapMangledModule}
  */
 export function mapMangledModuleLazy<S extends string>(code: string | RegExp | CodeFilter, mappers: Record<S, FilterFn>, includeBlacklistedExports = false): Record<S, any> {
-    if (IS_REPORTER) lazyWebpackSearchHistory.push(["mapMangledModule", [code, mappers]]);
+    if (IS_REPORTER) lazyWebpackSearchHistory.push(["mapMangledModule", [code, mappers, includeBlacklistedExports]]);
 
     return proxyLazy(() => mapMangledModule(code, mappers, includeBlacklistedExports));
 }
