@@ -78,9 +78,9 @@ async function runReporter() {
                     result = await Webpack.extractAndLoadChunks(code, matcher);
                     if (result === false) result = null;
                 } else if (method === "mapMangledModule") {
-                    const [code, mapper] = args;
+                    const [code, mapper, includeBlacklistedExports] = args;
 
-                    result = Webpack.mapMangledModule(code, mapper);
+                    result = Webpack.mapMangledModule(code, mapper, includeBlacklistedExports);
                     if (Object.keys(result).length !== Object.keys(mapper).length) throw new Error("Webpack Find Fail");
                 } else {
                     // @ts-ignore
