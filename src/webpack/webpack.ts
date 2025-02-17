@@ -121,7 +121,7 @@ function shouldIgnoreValue(value: any) {
     // Discord might export a Proxy that returns non-null values for any property key which would pass all findByProps filters.
     // One example of this is their i18n Proxy. However, that is already covered by the IntlMessagesProxy check above.
     // As a fallback if they ever change the name or add a new Proxy, use a unique string to detect such proxies and ignore them
-    if (value[PROXY_CHECK]) {
+    if (value[PROXY_CHECK] !== void 0) {
         // their i18n Proxy "caches" by setting each accessed property to the return, so try to delete
         Reflect.deleteProperty(value, PROXY_CHECK);
         return true;
