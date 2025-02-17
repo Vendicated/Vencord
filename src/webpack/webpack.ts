@@ -112,13 +112,14 @@ export function _initWebpack(webpackRequire: WebpackRequire) {
 // Credits to Zerebos for implementing this in BD, thus giving the idea for us to implement it too
 const TypedArray = Object.getPrototypeOf(Int8Array);
 
-function _shouldIgnoreValue(value: any) {
+function shouldIgnoreValue(value: any) {
     if (value == null) return true;
     if (value === window) return true;
     if (value === document || value === document.documentElement) return true;
     if (value[Symbol.toStringTag] === "DOMTokenList" || value[Symbol.toStringTag] === "IntlMessagesProxy") return true;
-    // Discord might export a Proxy that returns non-null values for any property key (e.g. their i18n Proxy (caught by above check))
-    // We can use a unique string to detect this and ignore it
+    // Discord might export a Proxy that returns non-null values for any property key which would pass all findByProps filters.
+    // One example of this is their i18n Proxy. However, that is already covered by the IntlMessagesProxy check above.
+    // As a fallback if they ever change the name or add a new Proxy, use a unique string to detect such proxies and ignore them
     if (value["is this a proxy that returns values for any key?"]) return true;
     if (value instanceof TypedArray) return true;
 
@@ -136,7 +137,7 @@ function makePropertyNonEnumerable(target: Object, key: PropertyKey) {
 }
 
 export function _blacklistBadModules(requireCache: NonNullable<AnyWebpackRequire["c"]>, exports: ModuleExports, moduleId: PropertyKey) {
-    if (_shouldIgnoreValue(exports)) {
+    if (shouldIgnoreValue(exports)) {
         makePropertyNonEnumerable(requireCache, moduleId);
         return true;
     }
@@ -145,13 +146,16 @@ export function _blacklistBadModules(requireCache: NonNullable<AnyWebpackRequire
         return false;
     }
 
+    let hasOnlyBadProperties = true;
     for (const exportKey in exports) {
-        if (_shouldIgnoreValue(exports[exportKey])) {
+        if (shouldIgnoreValue(exports[exportKey])) {
             makePropertyNonEnumerable(exports, exportKey);
+        } else {
+            hasOnlyBadProperties = false;
         }
     }
 
-    return false;
+    return hasOnlyBadProperties;
 }
 
 let devToolsOpen = false;
