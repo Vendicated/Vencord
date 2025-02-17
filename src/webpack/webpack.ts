@@ -423,7 +423,10 @@ export function findByCodeLazy(...code: CodeFilter) {
  * Find a store by its displayName
  */
 export function findStore(name: StoreNameFilter) {
-    const res: any = Flux.Store.getAll().find(filters.byStoreName(name));
+    const res = Flux.Store.getAll
+        ? Flux.Store.getAll().find(filters.byStoreName(name))
+        : find(filters.byStoreName(name), { isIndirect: true });
+
     if (!res)
         handleModuleNotFound("findStore", name);
     return res;
