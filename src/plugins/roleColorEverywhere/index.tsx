@@ -165,7 +165,7 @@ export default definePlugin({
 
     getColorString(userId: string, channelOrGuildId: string) {
         try {
-            if (Settings.plugins.customUserColors.enabled)
+            if (Settings.plugins.CustomUserColors.enabled)
                 return getCustomColorString(userId, true);
 
             const guildId = ChannelStore.getChannel(channelOrGuildId)?.guild_id ?? GuildStore.getGuild(channelOrGuildId)?.id;
