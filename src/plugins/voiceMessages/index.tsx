@@ -137,6 +137,12 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
     const [blob, setBlob] = useState<Blob>();
     const [blobUrl, setBlobUrl] = useObjectUrl();
 
+    const setAudioBlob = blob => {
+        if (!blob.type.startsWith("audio/")) return;
+        setBlob(blob);
+        setBlobUrl(blob);
+    };
+
     useEffect(() => () => {
         if (blobUrl)
             URL.revokeObjectURL(blobUrl);
@@ -182,6 +188,16 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         || blob.type.includes("codecs") && !blob.type.includes("opus")
     );
 
+    const handleDrop = async event => {
+        event.preventDefault();
+        const file = event.dataTransfer.files[0];
+        if (file) setAudioBlob(file);
+    };
+
+    const handleDragOver = event => {
+        event.preventDefault();
+    };
+
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader>
@@ -189,22 +205,21 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
             </ModalHeader>
 
             <ModalContent className={cl("modal")}>
-                <div className={cl("buttons")}>
+                <div
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    className={cl("buttons")}
+                >
+
                     <VoiceRecorder
-                        setAudioBlob={blob => {
-                            setBlob(blob);
-                            setBlobUrl(blob);
-                        }}
+                        setAudioBlob={blob => setAudioBlob(blob)}
                         onRecordingChange={setRecording}
                     />
 
                     <Button
                         onClick={async () => {
                             const file = await chooseFile("audio/*");
-                            if (file) {
-                                setBlob(file);
-                                setBlobUrl(file);
-                            }
+                            if (file) setAudioBlob(file);
                         }}
                     >
                         Upload File
