@@ -137,6 +137,9 @@ importers:
       typescript-transform-paths:
         specifier: ^3.5.3
         version: 3.5.3(typescript@5.7.2)
+      user-agent-data-types:
+        specifier: ^0.4.2
+        version: 0.4.2
       zip-local:
         specifier: ^0.3.5
         version: 0.3.5
@@ -2761,6 +2764,9 @@ packages:
   use@3.1.1:
     resolution: {integrity: sha512-cwESVXlO3url9YWlFW/TA9cshCEhtu7IKJ/p5soJ/gGpj7vbvFrAY/eIioQ6Dw23KjZhYgiIo8HOs1nQ2vr/oQ==}
     engines: {node: '>=0.10.0'}
+
+  user-agent-data-types@0.4.2:
+    resolution: {integrity: sha512-jXep3kO/dGNmDOkbDa8ccp4QArgxR4I76m3QVcJ1aOF0B9toc+YtSXtX5gLdDTZXyWlpQYQrABr6L1L2GZOghw==}
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -5726,6 +5732,8 @@ snapshots:
   urix@0.1.0: {}
 
   use@3.1.1: {}
+
+  user-agent-data-types@0.4.2: {}
 
   util-deprecate@1.0.2: {}
 
