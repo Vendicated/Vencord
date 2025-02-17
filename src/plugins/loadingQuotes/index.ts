@@ -25,6 +25,7 @@ import presetQuotesText from "file://quotes.txt";
 const presetQuotes = presetQuotesText.split("\n").map(quote => /^\s*[^#\s]/.test(quote) && quote.trim()).filter(Boolean) as string[];
 const noQuotesQuote = "Did you really disable all loading quotes? What a buffoon you are...";
 
+
 const settings = definePluginSettings({
     replaceEvents: {
         description: "Should this plugin also apply during events with special event themed quotes? (e.g. Halloween)",
@@ -42,14 +43,16 @@ const settings = definePluginSettings({
         default: false
     },
     additionalQuotes: {
-        description: "Additional custom quotes to possibly appear, separated by the below delimiter",
-        type: OptionType.STRING,
-        default: "",
-    },
-    additionalQuotesDelimiter: {
-        description: "Delimiter for additional quotes",
-        type: OptionType.STRING,
-        default: "|",
+        description: "Additional custom quotes to possibly appear",
+        type: OptionType.ARRAY,
+        oldStringSeparator: s => {
+            if ("additionalQuotesDelimiter" in settings.store) {
+                const deli = settings.store.additionalQuotesDelimiter ?? "|";
+                delete settings.store.additionalQuotesDelimiter;
+                return s.split(deli);
+            }
+            return s.split("|");
+        },
     },
 });
 
@@ -79,16 +82,15 @@ export default definePlugin({
 
     mutateQuotes(quotes: string[]) {
         try {
-            const { enableDiscordPresetQuotes, additionalQuotes, additionalQuotesDelimiter, enablePluginPresetQuotes } = settings.store;
+            const { enableDiscordPresetQuotes, additionalQuotes, enablePluginPresetQuotes } = settings.store;
 
             if (!enableDiscordPresetQuotes)
                 quotes.length = 0;
 
-
             if (enablePluginPresetQuotes)
                 quotes.push(...presetQuotes);
 
-            quotes.push(...additionalQuotes.split(additionalQuotesDelimiter).filter(Boolean));
+            quotes.push(...additionalQuotes);
 
             if (!quotes.length)
                 quotes.push(noQuotesQuote);
