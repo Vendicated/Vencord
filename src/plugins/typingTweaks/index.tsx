@@ -60,7 +60,7 @@ interface Props {
 
 function typingUserColor(guildId: string, userId: string) {
     if (!settings.store.showRoleColors) return;
-    if (Settings.plugins.customUserColors.enabled) return getCustomColorString(userId, true);
+    if (Settings.plugins.CustomUserColors.enabled) return getCustomColorString(userId, true);
     return GuildMemberStore.getMember(guildId, userId)?.colorString;
 }
 
