@@ -417,14 +417,15 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
     }
 
     exports = module.exports;
-    if (exports == null) {
-        return factoryReturn;
-    }
 
     if (typeof require === "function" && require.c) {
         if (_blacklistBadModules(require.c, exports, module.id)) {
             return factoryReturn;
         }
+    }
+
+    if (exports == null) {
+        return factoryReturn;
     }
 
     for (const callback of moduleListeners) {
