@@ -1,0 +1,16 @@
+.vc-customColors-modal-header {
+    place-content: center;
+    justify-content: space-between;
+}
+
+.vc-customColors-modal-header h1 {
+    margin: 0;
+}
+
+.vc-customColors-modal-content {
+    padding: 1em;
+}
+
+.vc-customColors-modal-footer {
+    gap: 16px;
+}

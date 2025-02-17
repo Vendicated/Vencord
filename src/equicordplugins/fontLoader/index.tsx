@@ -13,6 +13,7 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Card, Forms, React, TextInput } from "@webpack/common";
+
 interface GoogleFontMetadata {
     family: string;
     displayName: string;
@@ -27,7 +28,15 @@ interface GoogleFontMetadata {
         }>;
     }>;
 }
-const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome / 128.0.0.0 Safari / 537.36";
+
+const createGoogleFontUrl = (family: string, options = "") =>
+    `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}${options}&display=swap`;
+
+const loadFontStyle = (url: string) => {
+    document.head.insertAdjacentHTML("beforeend", `<link rel="stylesheet" href="${url}">`);
+    return document.createElement("style");
+};
+
 async function searchGoogleFonts(query: string) {
     try {
         const response = await fetch("https://fonts.google.com/$rpc/fonts.fe.catalog.actions.metadata.MetadataService/FontSearch", {
@@ -36,14 +45,12 @@ async function searchGoogleFonts(query: string) {
                 "content-type": "application/json+protobuf",
                 "x-user-agent": "grpc-web-javascript/0.1"
             },
-            // the nulls are optional filters
             body: JSON.stringify([[query, null, null, null, null, null, 1], [5], null, 16])
         });
 
         const data = await response.json();
         if (!data?.[1]) return [];
-        // god please help me
-        const fonts = data[1].map(([_, fontData]: [string, any[]]) => ({
+        return data[1].map(([_, fontData]: [string, any[]]) => ({
             family: fontData[0],
             displayName: fontData[1],
             authors: fontData[2],
@@ -54,81 +61,52 @@ async function searchGoogleFonts(query: string) {
                 }))
             }))
         }));
-        return fonts;
-        // LETS GO IT FUCKING WORKSSSSSSSSSSSS
     } catch (err) {
         console.error("Failed to fetch fonts:", err);
         return [];
     }
 }
 
-async function preloadFont(family: string) {
-    // https://developers.google.com/fonts/docs/css2
-    const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}&text=The quick brown fox jumps over the lazy dog&display=swap`;
-    const css = await fetch(url, {
-        headers: {
-            "User-Agent": userAgent
-        }
-    }).then(r => r.text());
+const preloadFont = (family: string) =>
+    loadFontStyle(createGoogleFontUrl(family, "&text=The quick brown fox jumps over the lazy dog"));
 
-    const style = document.createElement("style");
-    style.textContent = css;
-    document.head.appendChild(style);
-    return style;
-}
+let styleElement: HTMLStyleElement | null = null;
 
-async function applyFont(fontFamily: string) {
+const applyFont = async (fontFamily: string) => {
     if (!fontFamily) {
-        if (styleElement) {
-            styleElement.remove();
-            styleElement = null;
-        }
+        styleElement?.remove();
+        styleElement = null;
         return;
     }
 
     try {
-        const response = await fetch(
-            `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontFamily)}:wght@300;400;500;600;700&display=swap`,
-            {
-                headers: {
-                    "User-Agent": userAgent
-                }
-            }
-        );
-        const css = await response.text();
-
         if (!styleElement) {
             styleElement = document.createElement("style");
             document.head.appendChild(styleElement);
         }
 
+        loadFontStyle(createGoogleFontUrl(fontFamily, ":wght@300;400;500;600;700"));
         styleElement.textContent = `
-                ${css}
-                * {
-                    --font-primary: '${fontFamily}', sans-serif !important;
-                    --font-display: '${fontFamily}', sans-serif !important;
-                    --font-headline: '${fontFamily}', sans-serif !important;
-                    --font-code: '${fontFamily}', monospace !important;
-                }
-            `;
+            * {
+                --font-primary: '${fontFamily}', sans-serif !important;
+                --font-display: '${fontFamily}', sans-serif !important;
+                --font-headline: '${fontFamily}', sans-serif !important;
+                --font-code: '${fontFamily}', monospace !important;
+            }
+        `;
     } catch (err) {
         console.error("Failed to load font:", err);
     }
-}
+};
 
 function GoogleFontSearch({ onSelect }: { onSelect: (font: GoogleFontMetadata) => void; }) {
     const [query, setQuery] = React.useState("");
     const [results, setResults] = React.useState<GoogleFontMetadata[]>([]);
     const [loading, setLoading] = React.useState(false);
-
-
     const previewStyles = React.useRef<HTMLStyleElement[]>([]);
 
-
-    React.useEffect(() => {
-        return () => {
-            previewStyles.current.forEach(style => style.remove());
-        };
+    React.useEffect(() => () => {
+        previewStyles.current.forEach(style => style.remove());
     }, []);
 
     const debouncedSearch = debounce(async (value: string) => {
@@ -138,22 +116,18 @@ function GoogleFontSearch({ onSelect }: { onSelect: (font: GoogleFontMetadata) =
             setLoading(false);
             return;
         }
+
         const fonts = await searchGoogleFonts(value);
-
         previewStyles.current.forEach(style => style.remove());
-        previewStyles.current = [];
-
-        const styles = await Promise.all(fonts.map(f => preloadFont(f.family)));
-        previewStyles.current = styles;
-
+        previewStyles.current = await Promise.all(fonts.map(f => preloadFont(f.family)));
         setResults(fonts);
         setLoading(false);
     }, 300);
 
-    const handleSearch = React.useCallback((value: string) => {
-        setQuery(value);
-        debouncedSearch(value);
-    }, []);
+    const handleSearch = (e: string) => {
+        setQuery(e);
+        debouncedSearch(e);
+    };
 
     return (
         <Forms.FormSection>
@@ -192,8 +166,6 @@ function GoogleFontSearch({ onSelect }: { onSelect: (font: GoogleFontMetadata) =
         </Forms.FormSection>
     );
 }
-
-let styleElement: HTMLStyleElement | null = null;
 
 const settings = definePluginSettings({
     selectedFont: {

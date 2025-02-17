@@ -43,7 +43,7 @@
         {
             "resources": [
                 "dist/*",
-                "third-party/*"
+                "vendor/*"
             ],
             "matches": [
                 "*://*.discord.com/*"

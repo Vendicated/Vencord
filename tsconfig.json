@@ -21,39 +21,18 @@
         "jsx": "preserve",
         "baseUrl": "./src/",
         "paths": {
-            "@main/*": [
-                "./main/*"
-            ],
-            "@api/*": [
-                "./api/*"
-            ],
-            "@components/*": [
-                "./components/*"
-            ],
-            "@utils/*": [
-                "./utils/*"
-            ],
-            "@shared/*": [
-                "./shared/*"
-            ],
-            "@webpack/types": [
-                "./webpack/common/types"
-            ],
-            "@webpack/common": [
-                "./webpack/common"
-            ],
-            "@webpack": [
-                "./webpack/webpack"
-            ],
-            "@webpack/patch": [
-                "./webpack/patchWebpack"
-            ],
-            "@plugins": [
-                "./plugins"
-            ],
-            "@equicordplugins": [
-                "./equicordplugins"
-            ]
+            "@main/*": ["./main/*"],
+            "@api/*": ["./api/*"],
+            "@components/*": ["./components/*"],
+            "@utils/*": ["./utils/*"],
+            "@shared/*": ["./shared/*"],
+            "@webpack/types": ["./webpack/common/types"],
+            "@webpack/common": ["./webpack/common"],
+            "@webpack": ["./webpack/webpack"],
+            "@webpack/patcher": ["./webpack/patchWebpack"],
+            "@webpack/wreq.d": ["./webpack/wreq.d"],
+            "@plugins/*": ["./plugins/*"],
+            "@equicordplugins/*": ["./equicordplugins/*"]
         },
         "plugins": [
             // Transform paths in output .d.ts files (Include this line if you output declarations files)

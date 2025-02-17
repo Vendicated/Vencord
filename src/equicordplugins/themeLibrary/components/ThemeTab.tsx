@@ -275,7 +275,7 @@ function SubmitThemes() {
                 color: "var(--text-normal)"
             }}>
             <p> This tab was replaced in favour of the new website: </p>
-            <p><a href="https://discord-themes.com" target="_blank">discord-themes.com</a></p>
+            <p><a href="https://discord-themes.com" target="_blank" rel="noreferrer">discord-themes.com</a></p>
             <p style={{
                 fontSize: ".75em",
                 color: "var(--text-muted)"
