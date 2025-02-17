@@ -22,6 +22,7 @@ import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
 
 import { traceFunction } from "../debug/Tracer";
+import { Flux } from "./common";
 import { AnyModuleFactory, ModuleExports, WebpackRequire } from "./wreq";
 
 const logger = new Logger("Webpack");
@@ -97,10 +98,6 @@ export const moduleListeners = new Set<CallbackFn>();
 export const factoryListeners = new Set<FactoryListernFn>();
 
 export function _initWebpack(webpackRequire: WebpackRequire) {
-    if (webpackRequire.c == null) {
-        return;
-    }
-
     wreq = webpackRequire;
     cache = webpackRequire.c;
 
@@ -411,7 +408,7 @@ export function findByCodeLazy(...code: CodeFilter) {
  * Find a store by its displayName
  */
 export function findStore(name: StoreNameFilter) {
-    const res = find(filters.byStoreName(name), { isIndirect: true });
+    const res: any = Flux.Store.getAll().find(filters.byStoreName(name));
     if (!res)
         handleModuleNotFound("findStore", name);
     return res;

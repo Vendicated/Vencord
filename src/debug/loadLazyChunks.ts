@@ -20,8 +20,7 @@ export async function loadLazyChunks() {
         const invalidChunks = new Set<PropertyKey>();
         const deferredRequires = new Set<PropertyKey>();
 
-        let chunksSearchingResolve: (value: void) => void;
-        const chunksSearchingDone = new Promise<void>(r => chunksSearchingResolve = r);
+        const { promise: chunksSearchingDone, resolve: chunksSearchingResolve } = Promise.withResolvers<void>();
 
         // True if resolved, false otherwise
         const chunksSearchPromises = [] as Array<() => boolean>;
