@@ -58,9 +58,9 @@ export const { match, P }: Pick<typeof import("ts-pattern"), "match" | "P"> = ma
 export const lodash: typeof import("lodash") = findByPropsLazy("debounce", "cloneDeep");
 
 export const i18n = mapMangledModuleLazy('defaultLocale:"en-US"', {
+    t: filters.byProps(runtimeHashMessageKey("DISCORD")),
     intl: filters.byProps("string", "format"),
-    t: filters.byProps(runtimeHashMessageKey("DISCORD"))
-});
+}, true);
 
 export let SnowflakeUtils: t.SnowflakeUtils;
 waitFor(["fromTimestamp", "extractTimestamp"], m => SnowflakeUtils = m);
@@ -71,10 +71,15 @@ export let Alerts: t.Alerts;
 waitFor(["show", "close"], m => Alerts = m);
 
 const ToastType = {
-    MESSAGE: 0,
-    SUCCESS: 1,
-    FAILURE: 2,
-    CUSTOM: 3
+    MESSAGE: "message",
+    SUCCESS: "success",
+    FAILURE: "failure",
+    CUSTOM: "custom",
+    CLIP: "clip",
+    LINK: "link",
+    FORWARD: "forward",
+    BOOKMARK: "bookmark",
+    CLOCK: "clock"
 };
 const ToastPosition = {
     TOP: 0,
@@ -87,7 +92,7 @@ export interface ToastData {
     /**
      * Toasts.Type
      */
-    type: number,
+    type: string,
     options?: ToastOptions;
 }
 
@@ -110,7 +115,7 @@ export const Toasts = {
     ...{} as {
         show(data: ToastData): void;
         pop(): void;
-        create(message: string, type: number, options?: ToastOptions): ToastData;
+        create(message: string, type: string, options?: ToastOptions): ToastData;
     }
 };
 
