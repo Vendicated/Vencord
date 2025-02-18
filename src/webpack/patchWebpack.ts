@@ -12,7 +12,7 @@ import { canonicalizeReplacement } from "@utils/patches";
 import { Patch, PatchReplacement } from "@utils/types";
 
 import { traceFunctionWithResults } from "../debug/Tracer";
-import { _initWebpack, _shouldIgnoreModule, factoryListeners, findModuleId, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
+import { _blacklistBadModules, _initWebpack, factoryListeners, findModuleId, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
 import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, ModuleExports, PatchedModuleFactory, WebpackRequire } from "./wreq.d";
 
 export const patches = [] as Patch[];
@@ -190,6 +190,20 @@ define(Function.prototype, "m", {
             */
 
             define(this, "m", { value: proxiedModuleFactories });
+
+            // Overwrite Webpack's defineExports function to define the export descriptors configurable.
+            // This is needed so we can later blacklist specific exports from Webpack search by making them non-enumerable
+            this.d = function (exports, definition) {
+                for (const key in definition) {
+                    if (Object.hasOwn(definition, key) && !Object.hasOwn(exports, key)) {
+                        Object.defineProperty(exports, key, {
+                            enumerable: true,
+                            configurable: true,
+                            get: definition[key],
+                        });
+                    }
+                }
+            };
         };
     }
 });
@@ -403,25 +417,15 @@ function runFactoryWithWrap(patchedFactory: PatchedModuleFactory, thisArg: unkno
     }
 
     exports = module.exports;
-    if (exports == null) {
-        return factoryReturn;
-    }
 
-    if (typeof require === "function") {
-        const shouldIgnoreModule = _shouldIgnoreModule(exports);
-
-        if (shouldIgnoreModule) {
-            if (require.c != null) {
-                Object.defineProperty(require.c, module.id, {
-                    value: require.c[module.id],
-                    enumerable: false,
-                    configurable: true,
-                    writable: true
-                });
-            }
-
+    if (typeof require === "function" && require.c) {
+        if (_blacklistBadModules(require.c, exports, module.id)) {
             return factoryReturn;
         }
+    }
+
+    if (exports == null) {
+        return factoryReturn;
     }
 
     for (const callback of moduleListeners) {
