@@ -79,7 +79,7 @@ export interface CommandReturnValue {
 export interface Argument {
     type: ApplicationCommandOptionType;
     name: string;
-    value: string;
+    value: any;
     focused: undefined;
     options: Argument[];
 }
