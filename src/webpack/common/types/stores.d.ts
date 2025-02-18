@@ -227,6 +227,92 @@ export class ThemeStore extends FluxStore {
     systemTheme: null;
 }
 
+export interface ProfileBadge {
+    description: string;
+    icon: string;
+    id: string;
+    link?: string;
+}
+
+export interface Connection {
+    id: string;
+    name: string;
+    type: string;
+    verified: boolean;
+}
+
+export interface Application {
+    customInstallUrl: never | undefined;
+    flags: number;
+    id: string;
+    installParams: never | undefined;
+    integrationTypesConfig: Record<number, object>;
+    name: string;
+    popularApplicationCommands: never | undefined;
+    primarySkuId: undefined | never;
+    storefront_available: boolean;
+}
+
+export const enum PremiumType {
+    NONE,
+    NITRO_CLASSIC,
+    NITRO,
+    NITRO_BASIC
+}
+
+export interface BaseProfile {
+    accentColor: number;
+    badges: ProfileBadge[];
+    banner: string | null;
+    bio: string;
+    popoutAnimationParticleType: never;
+    profileEffectExpiresAt: never;
+    profileEffectId: string;
+    pronouns: string;
+    themeColors: number[] | null;
+    userId: string;
+}
+
+export interface UserProfile extends BaseProfile {
+    application: Application;
+    applicationRoleConnections: never[];
+    connectedAccounts: Connection[];
+    fetchError: never;
+    lastFetched: number;
+    legacyUsername: string;
+    premiumGuildSince: Data | null;
+    premiumSince: Date | null;
+    premiumType: PremiumType;
+}
+
+export interface GuildProfile extends BaseProfile {
+    guildId: string;
+}
+
+export interface MutualFriend {
+    key: string;
+    status: "offline" | "online" | "idle" | "dnd";
+}
+
+export interface MutualGuild {
+    nick: string | null;
+    guild: Guild;
+}
+
+export class UserProfileStore extends FluxStore {
+    isFetchingProfile(userId: string, guildId?: string);
+    /**
+     * Fetching mutual friends
+     */
+    isFetchingFriends(userId: string);
+    get isSubmitting(): boolean;
+    getUserProfile(userId: string): UserProfile | undefined;
+    getGuildMemberProfile(userId: string, guildId?: string): GuildProfile | null | undefined;
+    getMutualFriends(userId: string): MutualFriend[];
+    getMutualFriendsCount(userId: string): number | undefined;
+    getMutualGuilds(userId: string): MutualGuild[] | undefined;
+}
+
 export type useStateFromStores = <T>(
     stores: any[],
     mapper: () => T,

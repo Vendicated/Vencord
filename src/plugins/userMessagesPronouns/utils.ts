@@ -22,8 +22,8 @@ import { UserProfileStore, useStateFromStores } from "@webpack/common";
 import { PronounsFormat, settings } from "./settings";
 
 function useDiscordPronouns(id: string, useGlobalProfile: boolean = false): string | undefined {
-    const globalPronouns: string | undefined = useStateFromStores([UserProfileStore], () => UserProfileStore.getUserProfile(id)?.pronouns);
-    const guildPronouns: string | undefined = useStateFromStores([UserProfileStore], () => UserProfileStore.getGuildMemberProfile(id, getCurrentChannel()?.getGuildId())?.pronouns);
+    const globalPronouns = useStateFromStores([UserProfileStore], () => UserProfileStore.getUserProfile(id)?.pronouns);
+    const guildPronouns = useStateFromStores([UserProfileStore], () => UserProfileStore.getGuildMemberProfile(id, getCurrentChannel()?.getGuildId())?.pronouns);
 
     if (useGlobalProfile) return globalPronouns;
     return guildPronouns || globalPronouns;
