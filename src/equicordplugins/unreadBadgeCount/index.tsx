@@ -18,12 +18,13 @@ import { JSX } from "react";
 const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
 const JoinedThreadsStore = findStoreLazy("JoinedThreadsStore");
 
-function NumberBadge({ className, count, width }) {
+function NumberBadge({ className, count, width, padding }) {
     // To whoever used svgs here,
     // Please. svgs bad and buggy unless used as an icon
+    // + The css values are directly copied from discord's ping badge
     return <div
         className={className}
-        style={{ width: width }}
+        style={{ minWidth: width, paddingLeft: padding, paddingRight: padding }}
     >
         {count}
     </div>;
@@ -99,6 +100,12 @@ export default definePlugin({
 
         // Im not sure if the "dot" ever appends, hence why the css is almost left unmodified for these classes
         const className = `vc-unreadCountBadge${whiteDot ? "-dot" : ""}${channel.threadMetadata ? "-thread" : ""}`;
+
+        let paddingValue: Number = 0;
+        if (unreadCount >= 100) { paddingValue = 4; } else
+            if (unreadCount >= 10) { paddingValue = 2; } else
+                paddingValue = 0;
+
         return (
             <NumberBadge
                 className={"vc-unreadCountBadge " + className}
@@ -108,8 +115,9 @@ export default definePlugin({
                         : unreadCount
                 }
                 width={
-                    unreadCount > 10 ? 22 : 16
+                    unreadCount >= 10 ? 22 : 16
                 }
+                padding={paddingValue}
             />
         );
     }, { noop: true }),
