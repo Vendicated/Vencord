@@ -64,13 +64,8 @@ declare global {
     export var Vesktop: any;
     export var VesktopNative: any;
 
-    interface Window {
-        webpackChunkdiscord_app: {
-            push(chunk: any): any;
-            pop(): any;
-        };
+    interface Window extends Record<PropertyKey, any> {
         _: LoDashStatic;
-        [k: string]: any;
     }
 }
 
