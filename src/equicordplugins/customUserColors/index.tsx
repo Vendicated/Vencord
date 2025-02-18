@@ -111,7 +111,7 @@ export default definePlugin({
     colorIfServer(a: any): string | undefined {
         const roleColor = a.author?.colorString ?? "inherit";
 
-        if (a.channel.guild_id && !settings.store.colorInServers) return roleColor;
+        if (a?.channel?.guild_id && !settings.store.colorInServers) return roleColor;
 
         const color = getCustomColorString(a.message.author.id, true);
         return color ?? roleColor;
