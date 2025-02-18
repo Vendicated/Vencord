@@ -4,9 +4,8 @@
     color: var(--info-warning-text) !important;
     border: 1px solid var(--info-warning-foreground) !important;
     border-radius: 5px !important;
-    font-weight: 500;
+    font-weight: bold;
     padding: 6px 10px;
     text-align: center;
     margin-top: 10px;
-    font-style: bold;
 }

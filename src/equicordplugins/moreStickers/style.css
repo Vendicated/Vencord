@@ -106,7 +106,7 @@
 }
 
 .vc-more-stickers-category-scroller> :last-child {
-    position: "absolute";
+    position: absolute;
     pointer-events: none;
     min-height: 0;
     min-width: 1px;
