@@ -57,6 +57,7 @@ export let EmojiStore: t.EmojiStore;
 export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
+export let PopoutWindowStore: t.PopoutWindowStore;
 
 /**
  * React hook that returns stateful data for one or more stores
@@ -87,3 +88,4 @@ waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
 waitForStore("ThemeStore", m => ThemeStore = m);
+waitForStore("PopoutWindowStore", m => PopoutWindowStore = m);
