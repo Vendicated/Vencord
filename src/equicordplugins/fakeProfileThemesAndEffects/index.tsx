@@ -24,7 +24,7 @@ function replaceHelper(
         const beforeReplace = result;
         result = result.replace(
             canonicalizeMatch(searchRegExp),
-            canonicalizeReplace(replaceString, "Vencord.Plugins.plugins[\"FakeProfileThemesAndEffects\"]")
+            canonicalizeReplace(replaceString, 'Vencord.Plugins.plugins["FakeProfileThemesAndEffects"]')
         );
         if (beforeReplace === result)
             throw new Error("Replace had no effect: " + searchRegExp);
