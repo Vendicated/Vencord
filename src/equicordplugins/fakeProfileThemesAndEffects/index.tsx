@@ -58,7 +58,7 @@ export default definePlugin({
             find: '"UserProfileStore"',
             replacement: {
                 match: /([{}]getUserProfile\([^)]*\){return) ?([^}]+)/,
-                replace: "$1 $self.decodeAboutMeFPTEHook($2)"
+                replace: "$1 Vencord.Plugins.plugins[\"FakeProfileThemesAndEffects\"].decodeAboutMeFPTEHook($2)"
             }
         },
         // Patches ProfileCustomizationPreview
@@ -66,7 +66,7 @@ export default definePlugin({
             find: ".EDIT_PROFILE_BANNER})",
             replacement: {
                 match: /function \i\((\i)\){/,
-                replace: "$&$self.profilePreviewHook($1);"
+                replace: "$&Vencord.Plugins.plugins[\"FakeProfileThemesAndEffects\"].profilePreviewHook($1);"
             }
         },
         // Adds the FPTE Builder to the User Profile settings page
@@ -74,7 +74,7 @@ export default definePlugin({
             find: '"DefaultCustomizationSections"',
             replacement: {
                 match: /\.sectionsContainer,.*?children:\[/,
-                replace: "$&$self.addFPTEBuilder(),"
+                replace: "$&Vencord.Plugins.plugins[\"FakeProfileThemesAndEffects\"].addFPTEBuilder(),"
             }
         },
         // Adds the FPTE Builder to the Server Profiles settings page
@@ -82,7 +82,7 @@ export default definePlugin({
             find: '"guild should not be null"',
             replacement: {
                 match: /\.sectionsContainer,.*?children:\[(?=.+?[{,]guild:(\i))/,
-                replace: "$&$self.addFPTEBuilder($1),"
+                replace: "$&Vencord.Plugins.plugins[\"FakeProfileThemesAndEffects\"].addFPTEBuilder($1),"
             }
         },
         // ProfileEffectModal
@@ -93,12 +93,12 @@ export default definePlugin({
                 // Modal root
                 {
                     match: /(function (\i)\([^)]*\){(?:.(?!function |}$))*className:\i\.modal,(?:.(?!function |}$))*}).*(?=})/,
-                    replace: (match, func, funcName) => `${match}(()=>{$self.ProfileEffectModal=${funcName};`
+                    replace: (match, func, funcName) => `${match}(()=>{Vencord.Plugins.plugins["FakeProfileThemesAndEffects"].ProfileEffectModal=${funcName};`
                         + replaceHelper(func, [
                             // Required for the profile preview to show profile effects
                             [
                                 /(?<=[{,]purchases:.+?}=).+?(?=,\i=|,{\i:|;)/,
-                                "{isFetching:!1,categories:new Map,purchases:$self.usePurchases()}"
+                                "{isFetching:!1,categories:new Map,purchases:Vencord.Plugins.plugins[\"FakeProfileThemesAndEffects\"].usePurchases()}"
                             ]
                         ])
                         + "})()"
@@ -115,12 +115,12 @@ export default definePlugin({
                         // Replaces the profile effect list with the modified version
                         [
                             /(?<=\.jsxs?\)\()[^,]+(?=,{(?:(?:.(?!\.jsxs?\)))+,)?onSelect:)/,
-                            "$self.ProfileEffectSelection"
+                            "Vencord.Plugins.plugins[\"FakeProfileThemesAndEffects\"].ProfileEffectSelection"
                         ],
                         // Replaces the apply profile effect function with the modified version
                         [
                             /(?<=[{,]onApply:).*?\)\((\i).*?(?=,\i:|}\))/,
-                            "()=>$self.onApply($1)"
+                            "()=>Vencord.Plugins.plugins[\"FakeProfileThemesAndEffects\"].onApply($1)"
                         ],
                         // Required to show the apply button
                         [
@@ -141,13 +141,13 @@ export default definePlugin({
             find: ".presetEffectBackground",
             replacement: {
                 match: /function\(\i,\i,.*?=>(\i).+[,;}]\1=([^=].+?})(?=;|}$).*(?=}$)/,
-                replace: (match, _, func) => `${match};$self.ProfileEffectSelection=`
+                replace: (match, _, func) => `${match};Vencord.Plugins.plugins["FakeProfileThemesAndEffects"].ProfileEffectSelection=`
                     + replaceHelper(func, [
                         // Removes the "Exclusive to Nitro" and "Preview The Shop" sections
                         // Adds every profile effect to the "Your Decorations" section and removes the "Shop" button
                         [
                             /(?<=[ ,](\i)=).+?(?=(?:,\i=|,{\i:|;).+?:\1\.map\()/,
-                            "$self.useProfileEffectSections($&)"
+                            "Vencord.Plugins.plugins[\"FakeProfileThemesAndEffects\"].useProfileEffectSections($&)"
                         ]
                     ])
             }
