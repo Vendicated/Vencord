@@ -128,7 +128,7 @@ function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
     );
 }
 
-interface VoiceChannelIndicatorProps {
+export interface VoiceChannelIndicatorProps {
     userId: string;
     isActionButton?: boolean;
     shouldHighlight?: boolean;

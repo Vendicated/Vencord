@@ -43,5 +43,5 @@
         ],
         "outDir": "who-fucking-cares-dude"
     },
-    "include": ["src/**/*", "browser/**/*", "scripts/**/*", "eslint.config.mjs"],
+    "include": ["src/**/*", "browser/**/*", "scripts/**/*"],
 }
