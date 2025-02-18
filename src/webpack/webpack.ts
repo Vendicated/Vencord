@@ -504,7 +504,7 @@ function getAllPropertyNames(object: Record<PropertyKey, any>, includeNonEnumera
 
     const getKeys = includeNonEnumerable ? Object.getOwnPropertyNames : Object.keys;
     do {
-        getKeys(object).forEach(name => names.add(name));
+        getKeys(object).forEach(name => name !== "__esModule" && names.add(name));
         object = Object.getPrototypeOf(object);
     } while (object != null);
 
