@@ -122,3 +122,8 @@ export const MessageUpdater = $MessageUpdater;
  * An API allowing you to get an user setting
  */
 export const UserSettings = $UserSettings;
+
+/**
+ * Just used to identify if user is on Equicord as Vencord doesnt have this
+ */
+export const isEquicord = true;

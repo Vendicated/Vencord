@@ -30,8 +30,8 @@ import { chooseFile } from "@utils/web";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
-import { lastState as silentMessageEnabled } from "../silentMessageToggle";
 
+import { lastState as silentMessageEnabled } from "../silentMessageToggle";
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
 import { settings } from "./settings";
 import { cl } from "./utils";
