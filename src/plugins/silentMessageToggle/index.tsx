@@ -25,6 +25,8 @@ import { React, useEffect, useState } from "@webpack/common";
 
 let lastState = false;
 
+export { lastState };
+
 const settings = definePluginSettings({
     persistState: {
         type: OptionType.BOOLEAN,

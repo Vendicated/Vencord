@@ -21,7 +21,7 @@ import "./styles.css";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Microphone } from "@components/Icons";
 import { Link } from "@components/Link";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
@@ -30,6 +30,7 @@ import { chooseFile } from "@utils/web";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
 import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
+import { lastState as silentMessageEnabled } from "../silentMessageToggle";
 
 import { VoiceRecorderDesktop } from "./DesktopRecorder";
 import { settings } from "./settings";
@@ -68,7 +69,7 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
 export default definePlugin({
     name: "VoiceMessages",
     description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message",
-    authors: [Devs.Ven, Devs.Vap, Devs.Nickyux],
+    authors: [Devs.Ven, Devs.Vap, Devs.Nickyux, EquicordDevs.Z1xus],
     settings,
     contextMenus: {
         "channel-attach": ctxMenuPatch
@@ -99,7 +100,7 @@ function sendAudio(blob: Blob, meta: AudioMetadata) {
         RestAPI.post({
             url: Constants.Endpoints.MESSAGES(channelId),
             body: {
-                flags: 1 << 13,
+                flags: (1 << 13) | (silentMessageEnabled ? 4096 : 0),
                 channel_id: channelId,
                 content: "",
                 nonce: SnowflakeUtils.fromTimestamp(Date.now()),
