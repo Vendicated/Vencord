@@ -11,8 +11,8 @@ on:
                     - canary
                 default: both
     schedule:
-    #   # Every day at midnight
-       - cron: 0 0 * * *
+        #   # Every day at midnight
+        - cron: 0 0 * * *
 
 jobs:
     TestPlugins:
@@ -38,7 +38,7 @@ jobs:
 
             - name: Install dependencies
               run: |
-                  pnpm install --frozen-lockfile
+                  pnpm install --no-frozen-lockfile
 
             - name: Install Google Chrome
               id: setup-chrome
