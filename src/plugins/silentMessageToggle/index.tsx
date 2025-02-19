@@ -19,7 +19,7 @@
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
+import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { React, useEffect, useState } from "@webpack/common";
 
@@ -29,11 +29,15 @@ export { lastState };
 
 const settings = definePluginSettings({
     persistState: {
-        type: OptionType.BOOLEAN,
-        description: "Whether to persist the state of the silent message toggle when changing channels",
-        default: false,
-        onChange(newValue: boolean) {
-            if (newValue === false) lastState = false;
+        type: OptionType.SELECT,
+        description: "How to persist the silent message toggle state",
+        options: [
+            { label: "Don't persist (reset on channel change)", value: "none", default: true },
+            { label: "Persist between channels", value: "channels" },
+            { label: "Persist between channels and restarts", value: "restarts" }
+        ],
+        onChange(newValue: string) {
+            lastState = newValue !== "none" && lastState;
         }
     },
     autoDisable: {
@@ -44,10 +48,10 @@ const settings = definePluginSettings({
 });
 
 const SilentMessageToggle: ChatBarButtonFactory = ({ isMainChat }) => {
-    const [enabled, setEnabled] = useState(lastState);
+    const [enabled, setEnabled] = useState(settings.store.persistState === "restarts" || lastState);
 
     function setEnabledValue(value: boolean) {
-        if (settings.store.persistState) lastState = value;
+        if (settings.store.persistState !== "none") lastState = value;
         setEnabled(value);
     }
 
@@ -91,7 +95,7 @@ const SilentMessageToggle: ChatBarButtonFactory = ({ isMainChat }) => {
 
 export default definePlugin({
     name: "SilentMessageToggle",
-    authors: [Devs.Nuckyz, Devs.CatNoir],
+    authors: [Devs.Nuckyz, Devs.CatNoir, EquicordDevs.Z1xus],
     description: "Adds a button to the chat bar to toggle sending a silent message.",
     settings,
 
