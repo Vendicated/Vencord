@@ -22,7 +22,7 @@ import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { GuildMemberStore, IconUtils, Menu } from "@webpack/common";
+import { BuildIdentifiers, GuildMemberStore, IconUtils, Menu } from "@webpack/common";
 import type { Channel, Guild, User } from "discord-types/general";
 
 
@@ -193,10 +193,18 @@ export default definePlugin({
         // Avatar component used in User DMs "User Profile" popup in the right and Profiles Modal pfp
         {
             find: ".overlay:void 0,status:",
-            replacement: {
-                match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",.{0,100}className:\i,/,
-                replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},"
-            },
+            replacement: [
+                {
+                    match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",{...\2,/,
+                    replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
+                    shouldSkip: () => !BuildIdentifiers.spreadDisabled()
+                },
+                {
+                    match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",.{0,100}className:\i,/,
+                    replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
+                    shouldSkip: BuildIdentifiers.spreadDisabled
+                }
+            ],
             all: true
         },
         // Banners
