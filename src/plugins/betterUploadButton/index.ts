@@ -27,8 +27,8 @@ export default definePlugin({
         {
             find: '"ChannelAttachButton"',
             replacement: {
-                match: /\.attachButtonInner,"aria-label":.{0,50},onDoubleClick:(.+?:void 0),.{0,30}?\.\.\.(\i),/,
-                replace: "$&onClick:$1,onContextMenu:$2.onClick,",
+                match: /\.attachButtonInner,"aria-label":.{0,50},onDoubleClick:(.+?:void 0),.{0,100}\},(\i)\).{0,100}children:\i/,
+                replace: "$&,onClick:$1,onContextMenu:$2.onClick,",
             },
         },
     ],
