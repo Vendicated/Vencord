@@ -27,7 +27,6 @@ import { openPluginModal } from "@components/PluginSettings/PluginModal";
 import { AddonCard } from "@components/VencordSettings/AddonCard";
 import { QuickAction, QuickActionCard } from "@components/VencordSettings/quickActions";
 import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
-import { isPluginEnabled } from "@plugins/index";
 import { openInviteModal } from "@utils/discord";
 import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
@@ -96,7 +95,7 @@ interface UserCSSCardProps {
 
 function UserCSSThemeCard({ theme, enabled, onChange, onDelete, onSettingsReset }: UserCSSCardProps) {
     const missingPlugins = useMemo(() =>
-        theme.requiredPlugins?.filter(p => !isPluginEnabled(p)), [theme]);
+        theme.requiredPlugins?.filter(p => !Vencord.Plugins.isPluginEnabled(p)), [theme]);
 
     return (
         <AddonCard
