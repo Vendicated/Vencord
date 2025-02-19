@@ -133,7 +133,7 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
     }));
 }
 
-const PlatformIndicator = ({ user, small = false }: { user: User; small?: boolean; }) => {
+const PlatformIndicator = ({ user, wantMargin = true, small = false }: { user: User; wantMargin?: boolean; small?: boolean; }) => {
     if (!user || user.bot) return null;
 
     ensureOwnStatus(user);
@@ -155,7 +155,10 @@ const PlatformIndicator = ({ user, small = false }: { user: User; small?: boolea
     return (
         <span
             className="vc-platform-indicator"
-            style={{ gap: "2px" }}
+            style={{
+                marginLeft: wantMargin ? 4 : 0,
+                gap: 2
+            }}
         >
             {icons}
         </span>
