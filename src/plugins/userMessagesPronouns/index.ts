@@ -43,7 +43,7 @@ export default definePlugin({
             find: '="SYSTEM_TAG"',
             replacement: {
                 // Add next to username (compact mode)
-                match: /className:\i\(\)\(\i\.className(?:,\i\.clickable)?,\i\)}\),(?=\i)/g,
+                match: /className:\i\(\)\(\i\.className(?:,\i\.clickable)?,\i\)}\)\),(?=\i)/g,
                 replace: "$&$self.CompactPronounsChatComponentWrapper(arguments[0]),"
             }
         }
