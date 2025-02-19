@@ -13,6 +13,12 @@ export const enum RenderType {
     BACKGROUND,
 }
 
+export const enum BlockDisplayType {
+    LEFT,
+    RIGHT,
+    BOTH
+}
+
 export const settings = definePluginSettings({
     renderType: {
         type: OptionType.SELECT,
@@ -31,6 +37,33 @@ export const settings = definePluginSettings({
                 label: "Background color",
                 value: RenderType.BACKGROUND
             },
+        ]
+    },
+    enableShortHexCodes: {
+        type: OptionType.BOOLEAN,
+        description: "Enable 3 char hex-code like #39f",
+        default: true,
+        // Regex are created on the start, so without restart nothing would change
+        restartNeeded: true
+    },
+    blockView: {
+        type: OptionType.SELECT,
+        disabled: () => settings.store.renderType !== RenderType.BLOCK,
+        description: "Where to display colored block",
+        options: [
+            {
+                label: "Right side",
+                value: BlockDisplayType.RIGHT,
+                default: true
+            },
+            {
+                label: "Left side",
+                value: BlockDisplayType.LEFT
+            },
+            {
+                label: "Both sides",
+                value: BlockDisplayType.BOTH
+            }
         ]
     }
 });
@@ -59,5 +92,4 @@ export const regex = [
     { reg: /rgb\(\v\c\v\c\v\)/g, type: ColorType.RGB },
     { reg: /rgba\(\v\c\v\c\v(\c|\/?)\s*\f\)/g, type: ColorType.RGBA },
     { reg: /hsl\(\v°?\c\s*?\d+%?\s*?\c\s*?\d+%?\s*?\)/g, type: ColorType.HSL },
-    { reg: /#(?:[0-9a-fA-F]{3}){1,2}/g, type: ColorType.HEX }
 ].map(v => { v.reg = replaceRegexp(v.reg.source); return v; });

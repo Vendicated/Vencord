@@ -122,7 +122,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - SekaiStickers by MaiKokain
 - ServerSearch by camila314
 - ShowBadgesInChat by Inbestigator & KrystalSkull
-- Signature by KrystalSkull
+- Signature by Ven, Rini, ImBanana, KrystalSkull
 - SidebarChat by Joona
 - StatsfmRPC by Crxaw & vmohammad
 - Slap by Korbo
