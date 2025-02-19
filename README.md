@@ -110,7 +110,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - PolishWording (Grammar) by Samwich
 - PlatformSpoofer by Drag
 - PurgeMessages by bhop & nyx
-- QuestCompleter by HappyEnderman, SerStars, maintained by thororen
+- QuestCompleter by Amia
 - QuestionMarkReplacement by nyx
 - Quoter by Samwich
 - RemixMe by kvba

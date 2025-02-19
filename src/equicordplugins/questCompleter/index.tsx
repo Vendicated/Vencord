@@ -20,7 +20,7 @@ import "./style.css";
 
 import { showNotification } from "@api/Notifications";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs, EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import { classes } from "@utils/misc";
 import definePlugin from "@utils/types";
@@ -227,7 +227,7 @@ async function openCompleteQuestUI() {
 export default definePlugin({
     name: "QuestCompleter",
     description: "A plugin to complete quests without having the game installed.",
-    authors: [Devs.HappyEnderman, EquicordDevs.SerStars, EquicordDevs.thororen],
+    authors: [Devs.amia],
     settingsAboutComponent: () => <>
         <Forms.FormText className="quests-warning">
             Game Quests do not work on Equibop/Web Platforms. Only Video Quests do.
