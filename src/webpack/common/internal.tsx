@@ -31,15 +31,20 @@ export function waitForComponent<T extends React.ComponentType<any> = React.Comp
     waitFor(filter, (v: any) => {
         myValue = v;
         Object.assign(lazyComponent, v);
-        if ("toString" in v && typeof v.toString === "function" && Function.prototype.toString.call(v.toString).includes("{ [native code] }")) {
-            const str: string = v.toString();
-            if (typeof str !== "string")
-                void 0;
-            else if (str.startsWith("class")) {
-                Object.defineProperty(v, "displayName", { value: name });
-            } else if (str.startsWith("function")) {
-                Object.defineProperty(v, "name", { value: name });
+        try {
+            if ("toString" in v && typeof v.toString === "function") {
+                const str: string = v.toString();
+                if (typeof str !== "string")
+                    void 0;
+                else if (str.startsWith("class")) {
+                    Object.defineProperty(v, "displayName", { value: name });
+                } else if (str.startsWith("function")) {
+                    Object.defineProperty(v, "name", { value: name });
+                }
             }
+        }
+        catch (e) {
+            console.warn(e);
         }
     }, { isIndirect: true });
 
