@@ -79,7 +79,7 @@
         "typescript-transform-paths": "^3.5.3",
         "zip-local": "^0.3.5"
     },
-    "packageManager": "pnpm@9.1.0",
+    "packageManager": "pnpm@10.4.1",
     "pnpm": {
         "patchedDependencies": {
             "eslint@9.20.1": "patches/eslint@9.20.1.patch",
@@ -95,18 +95,14 @@
             "source-map-resolve": "*",
             "resolve-url": "*",
             "source-map-url": "*",
-            "urix": "*"
-        }
-    },
-    "webExt": {
-        "artifactsDir": "./dist",
-        "build": {
-            "overwriteDest": true
+            "urix": "*",
+            "q": "*"
         },
-        "sourceDir": "./dist/firefox-unpacked"
+        "onlyBuiltDependencies": [
+            "esbuild"
+        ]
     },
     "engines": {
-        "node": ">=18",
-        "pnpm": ">=9"
+        "node": ">=18"
     }
 }
