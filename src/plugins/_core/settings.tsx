@@ -65,6 +65,7 @@ export default definePlugin({
                     replace: (_, sectionTypes, commaOrSemi, elements, element) => `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`
                 },
                 {
+                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
                     match: /({(?=.+?function (\i).{0,160}(\i)=\i\.useMemo.{0,140}return \i\.useMemo\(\(\)=>\i\(\3).+?(?:function\(\){return |\(\)=>))\2/,
                     replace: (_, rest, settingsHook) => `${rest}$self.wrapSettingsHook(${settingsHook})`
                 }
@@ -156,6 +157,9 @@ export default definePlugin({
                 belowNitro: getIntlMessage("APP_SETTINGS"),
                 aboveActivity: getIntlMessage("ACTIVITY_SETTINGS")
             };
+
+            if (!names[settingsLocation] || names[settingsLocation].endsWith("_SETTINGS"))
+                return firstChild === "PREMIUM";
 
             return header === names[settingsLocation];
         } catch {

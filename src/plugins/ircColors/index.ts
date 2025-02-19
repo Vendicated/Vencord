@@ -23,11 +23,11 @@ import definePlugin, { OptionType } from "@utils/types";
 import { useMemo } from "@webpack/common";
 
 // Calculate a CSS color string based on the user ID
-function calculateNameColorForUser(id: string) {
+function calculateNameColorForUser(id?: string) {
     const { lightness } = settings.use(["lightness"]);
-    const idHash = useMemo(() => h64(id), [id]);
+    const idHash = useMemo(() => id ? h64(id) : null, [id]);
 
-    return `hsl(${idHash % 360n}, 100%, ${lightness}%)`;
+    return idHash && `hsl(${idHash % 360n}, 100%, ${lightness}%)`;
 }
 
 const settings = definePluginSettings({
@@ -41,13 +41,25 @@ const settings = definePluginSettings({
         restartNeeded: true,
         type: OptionType.BOOLEAN,
         default: true
+    },
+    applyColorOnlyToUsersWithoutColor: {
+        description: "Apply colors only to users who don't have a predefined color",
+        restartNeeded: false,
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    applyColorOnlyInDms: {
+        description: "Apply colors only in direct messages; do not apply colors in servers.",
+        restartNeeded: false,
+        type: OptionType.BOOLEAN,
+        default: false
     }
 });
 
 export default definePlugin({
     name: "IrcColors",
     description: "Makes username colors in chat unique, like in IRC clients",
-    authors: [Devs.Grzesiek11],
+    authors: [Devs.Grzesiek11, Devs.jamesbt365],
     settings,
 
     patches: [
@@ -70,16 +82,28 @@ export default definePlugin({
 
     calculateNameColorForMessageContext(context: any) {
         const id = context?.message?.author?.id;
-        if (id == null) {
-            return null;
+        const colorString = context?.author?.colorString;
+        const color = calculateNameColorForUser(id);
+
+        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+            return colorString;
         }
-        return calculateNameColorForUser(id);
+
+        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
+            ? color
+            : colorString;
     },
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
-        if (id == null) {
-            return null;
+        const colorString = context?.colorString;
+        const color = calculateNameColorForUser(id);
+
+        if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
+            return colorString;
         }
-        return calculateNameColorForUser(id);
+
+        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
+            ? color
+            : colorString;
     }
 });
