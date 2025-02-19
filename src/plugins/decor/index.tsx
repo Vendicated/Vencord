@@ -50,11 +50,11 @@ export default definePlugin({
             find: ".decorationGridItem,",
             replacement: [
                 {
-                    match: /(?<==)\i=>{let{children.{20,100}decorationGridItem/,
+                    match: /(?<==)\i=>{var{children.{20,200}decorationGridItem/,
                     replace: "$self.DecorationGridItem=$&"
                 },
                 {
-                    match: /(?<==)\i=>{let{user:\i,avatarDecoration/,
+                    match: /(?<==)\i=>{var{user:\i,avatarDecoration/,
                     replace: "$self.DecorationGridDecoration=$&"
                 },
                 // Remove NEW label from decor avatar decorations
