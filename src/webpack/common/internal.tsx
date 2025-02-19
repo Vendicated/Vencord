@@ -33,6 +33,7 @@ export function waitForComponent<T extends React.ComponentType<any> = React.Comp
         Object.assign(lazyComponent, v);
         try {
             if ("toString" in v && typeof v.toString === "function") {
+                if (v.toString !== Function.prototype.toString) throw new Error(name);
                 const str: string = v.toString();
                 if (typeof str !== "string")
                     void 0;
