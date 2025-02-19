@@ -18,6 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { BuildIdentifiers } from "@webpack/common";
 
 import StartupTimingPage from "./StartupTimingPage";
 
@@ -27,12 +28,22 @@ export default definePlugin({
     authors: [Devs.Megu],
     patches: [{
         find: "#{intl::ACTIVITY_SETTINGS}",
-        replacement: {
-            match: /(?<=}\)([,;])(\i\.settings)\.forEach.+?(\i)\.push.+\)\)\}\))(?=\)\})/,
-            replace: (_, commaOrSemi, settings, elements) => "" +
-                `${commaOrSemi}${settings}?.[0]==="CHANGELOG"` +
-                `&&${elements}.push({section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage})`
-        }
+        replacement: [
+            {
+                match: /(?<=}\)([,;])(\i\.settings)\.forEach.+?(\i)\.push.+}\)}\))/,
+                replace: (_, commaOrSemi, settings, elements) => "" +
+                    `${commaOrSemi}${settings}?.[0]==="CHANGELOG"` +
+                    `&&${elements}.push({section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage})`,
+                shouldSkip: () => !BuildIdentifiers.spreadDisabled()
+            },
+            {
+                match: /(?<=}\)([,;])(\i\.settings)\.forEach.+?(\i)\.push.+\)\)\}\))(?=\)\})/,
+                replace: (_, commaOrSemi, settings, elements) => "" +
+                    `${commaOrSemi}${settings}?.[0]==="CHANGELOG"` +
+                    `&&${elements}.push({section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage})`,
+                shouldSkip: BuildIdentifiers.spreadDisabled
+            },
+        ]
     }],
     StartupTimingPage
 });
