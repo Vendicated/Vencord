@@ -66,7 +66,7 @@ export default definePlugin({
         {
             find: "{isSidebarVisible:",
             replacement: {
-                match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
+                match: /(?<=var\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
                 replace: ":[$1?.startsWith('members')?$self.render():null,$2"
             },
             predicate: () => settings.store.memberList
