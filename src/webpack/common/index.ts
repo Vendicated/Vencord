@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+export * as BuildIdentifiers from "./buildIdentifiers";
 export * from "./classes";
 export * from "./components";
 export * from "./menu";
