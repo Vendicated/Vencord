@@ -147,6 +147,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Tyman",
         id: 487443883127472129n
     },
+    viciouscal: {
+        name: "viciouscal",
+        id: 883820228360929320n
+    },
     afn: {
         name: "afn",
         id: 420043923822608384n
