@@ -605,7 +605,9 @@ export default definePlugin({
         };
 
         const modifyChildren = (children: Array<ReactElement<any>>) => {
-            for (const [index, child] of children.entries()) children[index] = modifyChild(child);
+            if (children.length !== 0) {
+                for (const [index, child] of children.entries()) children[index] = modifyChild(child);
+            }
 
             children = this.clearEmptyArrayItems(children);
 
