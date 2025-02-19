@@ -16,8 +16,8 @@ export default definePlugin({
         {
             find: "SCALE_DOWN:",
             replacement: {
-                match: /(?<=0!==\i)&&(?=null!=\i)/,
-                replace: "||"
+                match: /(?<="IMAGE"===\i\?)\i(?=\?)/,
+                replace: "true"
             }
         }
     ]
