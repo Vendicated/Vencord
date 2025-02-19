@@ -194,7 +194,7 @@ export default definePlugin({
         {
             find: ".overlay:void 0,status:",
             replacement: {
-                match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",{...\2,/,
+                match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",.{0,100}className:\i,/,
                 replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},"
             },
             all: true
