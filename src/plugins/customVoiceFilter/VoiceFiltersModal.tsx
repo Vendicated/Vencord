@@ -77,6 +77,10 @@ function VoiceFiltersModal({ modalProps, close, accept }: VoiceFiltersModalProps
                         {voiceComponents.length > 0 ? voiceComponents : <Text style={{ fontStyle: "italic" }}>No voice filters found</Text>}
                     </Flex>
                     {client === "web" && <Text style={{ fontStyle: "italic" }}>⚠️ Voice filters are not available on web client or vesktop! Please use the desktop client to use custom voice filters.</Text>}
+                    {/* Temporary message about the experiment rollout */}
+                    <Text style={{ fontStyle: "italic" }}>
+                        ⚠️ Voice filters are currently in experimental rollout. So things may not work as expected. However, you can still create and download voicepacks.
+                    </Text>
                 </Flex>
             </ModalContent>
             <ModalFooter>
