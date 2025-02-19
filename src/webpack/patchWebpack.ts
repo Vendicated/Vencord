@@ -297,11 +297,6 @@ function updateExistingFactory(moduleFactories: AnyWebpackRequire["m"], moduleId
     }
 
     if (existingFactory != null) {
-        // Sanity check to make sure these factories are equal
-        if (String(newFactory) !== String(existingFactory)) {
-            return false;
-        }
-
         // If existingFactory exists in any of the Webpack instances we track, it's either wrapped in our proxy, or it has already been required.
         // In the case it is wrapped in our proxy, and the instance we are setting does not already have it, we need to make sure the instance contains our proxy too.
         if (moduleFactoriesWithFactory !== moduleFactories && existingFactory[SYM_IS_PROXIED_FACTORY]) {
@@ -563,8 +558,13 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                     continue;
                 }
 
+                const pluginsList = [...patchedBy];
+                if (!patchedBy.has(patch.plugin)) {
+                    pluginsList.push(patch.plugin);
+                }
+
                 code = newCode;
-                patchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${[...patchedBy, patch.plugin].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${String(moduleId)}`;
+                patchedSource = `// Webpack Module ${String(moduleId)} - Patched by ${pluginsList.join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${String(moduleId)}`;
                 patchedFactory = (0, eval)(patchedSource);
 
                 if (!patchedBy.has(patch.plugin)) {
