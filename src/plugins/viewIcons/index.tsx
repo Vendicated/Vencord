@@ -22,7 +22,7 @@ import { ImageIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { openImageModal } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { BuildIdentifiers, GuildMemberStore, IconUtils, Menu } from "@webpack/common";
+import { GuildMemberStore, IconUtils, Menu } from "@webpack/common";
 import type { Channel, Guild, User } from "discord-types/general";
 
 
@@ -197,12 +197,11 @@ export default definePlugin({
                 {
                     match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",{...\2,/,
                     replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
-                    shouldApply: BuildIdentifiers.spreadEnabled
+                    noWarn: true
                 },
                 {
                     match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",.{0,100}className:\i,/,
                     replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
-                    shouldApply: () => !BuildIdentifiers.spreadEnabled
                 }
             ],
             all: true

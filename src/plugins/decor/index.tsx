@@ -9,7 +9,7 @@ import "./ui/styles.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { BuildIdentifiers, UserStore } from "@webpack/common";
+import { UserStore } from "@webpack/common";
 
 import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
@@ -50,24 +50,22 @@ export default definePlugin({
             find: ".decorationGridItem,",
             replacement: [
                 {
-                    match: /(?<==)\i=>{var{children.{20,200}decorationGridItem/,
-                    replace: "$self.DecorationGridItem=$&",
-                    shouldApply: () => !BuildIdentifiers.spreadEnabled
-                },
-                {
-                    match: /(?<==)\i=>{var{user:\i,avatarDecoration/,
-                    replace: "$self.DecorationGridDecoration=$&",
-                    shouldApply: () => !BuildIdentifiers.spreadEnabled
-                },
-                {
                     match: /(?<==)\i=>{let{children.{20,200}decorationGridItem/,
                     replace: "$self.DecorationGridItem=$&",
-                    shouldApply: BuildIdentifiers.spreadEnabled
+                    noWarn: true
                 },
                 {
                     match: /(?<==)\i=>{let{user:\i,avatarDecoration/,
                     replace: "$self.DecorationGridDecoration=$&",
-                    shouldApply: BuildIdentifiers.spreadEnabled
+                    noWarn: true
+                },
+                {
+                    match: /(?<==)\i=>{var{children.{20,200}decorationGridItem/,
+                    replace: "$self.DecorationGridItem=$&",
+                },
+                {
+                    match: /(?<==)\i=>{var{user:\i,avatarDecoration/,
+                    replace: "$self.DecorationGridDecoration=$&",
                 },
                 // Remove NEW label from decor avatar decorations
                 {

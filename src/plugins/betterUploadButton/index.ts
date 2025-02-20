@@ -18,7 +18,6 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { BuildIdentifiers } from "@webpack/common";
 
 export default definePlugin({
     name: "BetterUploadButton",
@@ -31,12 +30,11 @@ export default definePlugin({
                 {
                     match: /\.attachButtonInner,"aria-label":.{0,50},onDoubleClick:(.+?:void 0),.{0,30}?\.\.\.(\i),/,
                     replace: "$&onClick:$1,onContextMenu:$2.onClick,",
-                    shouldApply: BuildIdentifiers.spreadEnabled,
+                    noWarn: true
                 },
                 {
                     match: /\.attachButtonInner,"aria-label":.{0,50},onDoubleClick:(.+?:void 0),.{0,100}\},(\i)\).{0,100}children:\i/,
                     replace: "$&,onClick:$1,onContextMenu:$2.onClick,",
-                    shouldApply: () => !BuildIdentifiers.spreadEnabled,
                 },
             ]
         },

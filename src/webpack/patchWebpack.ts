@@ -480,7 +480,6 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
         const shouldCheckBuildNumber = buildNumber !== -1;
 
         if (
-            patch.shouldApply?.() === false ||
             (shouldCheckBuildNumber &&
                 (patch.fromBuild != null && buildNumber < patch.fromBuild) ||
                 (patch.toBuild != null && buildNumber > patch.toBuild))
@@ -512,7 +511,6 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
         // We change all patch.replacement to array in plugins/index
         for (const replacement of patch.replacement as PatchReplacement[]) {
             if (
-                replacement.shouldApply?.() === false ||
                 (shouldCheckBuildNumber &&
                     (replacement.fromBuild != null && buildNumber < replacement.fromBuild) ||
                     (replacement.toBuild != null && buildNumber > replacement.toBuild))
@@ -536,7 +534,7 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                 }
 
                 if (newCode === code) {
-                    if (!patch.noWarn) {
+                    if (!(patch.noWarn || replacement.noWarn)) {
                         logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${String(moduleId)}): ${replacement.match}`);
                         if (IS_DEV) {
                             logger.debug("Function Source:\n", code);

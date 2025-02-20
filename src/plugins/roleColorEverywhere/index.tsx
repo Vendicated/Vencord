@@ -23,7 +23,7 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { BuildIdentifiers, ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
+import { ChannelStore, GuildMemberStore, GuildStore } from "@webpack/common";
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
 
@@ -86,12 +86,11 @@ export default definePlugin({
                 {
                     match: /onContextMenu:\i,color:\i,\.\.\.\i(?=,children:)(?<=user:(\i),channel:(\i).{0,500}?)/,
                     replace: "$&,color:$self.getColorInt($1?.id,$2?.id)",
-                    shouldApply: BuildIdentifiers.spreadEnabled
+                    noWarn: true
                 },
                 {
                     match: /(?<=onContextMenu:\i,color:)\i(?=\},\i\),\{children)(?<=user:(\i),channel:(\i).{0,500}?)/,
                     replace: "$self.getColorInt($1?.id,$2?.id)",
-                    shouldApply: () => !BuildIdentifiers.spreadEnabled
                 }
             ],
             predicate: () => settings.store.chatMentions

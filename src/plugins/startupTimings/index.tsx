@@ -18,7 +18,6 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { BuildIdentifiers } from "@webpack/common";
 
 import StartupTimingPage from "./StartupTimingPage";
 
@@ -34,14 +33,13 @@ export default definePlugin({
                 replace: (_, commaOrSemi, settings, elements) => "" +
                     `${commaOrSemi}${settings}?.[0]==="CHANGELOG"` +
                     `&&${elements}.push({section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage})`,
-                shouldApply: BuildIdentifiers.spreadEnabled
+                noWarn: true
             },
             {
                 match: /(?<=}\)([,;])(\i\.settings)\.forEach.+?(\i)\.push.+\)\)\}\))(?=\)\})/,
                 replace: (_, commaOrSemi, settings, elements) => "" +
                     `${commaOrSemi}${settings}?.[0]==="CHANGELOG"` +
                     `&&${elements}.push({section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage})`,
-                shouldApply: () => !BuildIdentifiers.spreadEnabled
             },
         ]
     }],

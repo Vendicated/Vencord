@@ -45,16 +45,13 @@ export interface PatchReplacement {
      * A function which returns whether this patch replacement should be applied.
      * This is ran before patches are registered, so if this returns false, the patch will never be registered.
      */
+    /** Do not warn if this replacement did no changes */
+    noWarn?: boolean;
     predicate?(): boolean;
     /** The minimum build number for this patch to be applied */
     fromBuild?: number;
     /** The maximum build number for this patch to be applied */
     toBuild?: number;
-    /**
-     * A function which returns whether this patch replacement should be applied.
-     * This differs from predicate because this is checked after patches are registered, when a module matches them.
-     */
-    shouldApply?(): boolean;
 }
 
 export interface Patch {
@@ -78,11 +75,6 @@ export interface Patch {
     fromBuild?: number;
     /** The maximum build number for this patch to be applied */
     toBuild?: number;
-    /**
-     * A function which returns whether this patch replacement should be applied.
-     * This differs from predicate because this is checked after patches are registered, when a module matches them.
-     */
-    shouldApply?(): boolean;
 }
 
 export interface PluginAuthor {
