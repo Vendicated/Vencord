@@ -5,6 +5,8 @@
  */
 
 // Imports
+import "./style.css";
+
 import { DataStore } from "@api/index";
 import { Devs } from "@utils/constants";
 import { proxyLazy } from "@utils/lazy";

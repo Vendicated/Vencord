@@ -1,0 +1,41 @@
+.vc-voice-filters-wiki {
+  max-width: var(--modal-width-large);
+}
+
+.vc-voice-filters-md {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding-inline: 1.2rem;
+}
+
+.vc-voice-filters-md-image {
+  width: 100%;
+  max-height: 20rem;
+  overflow: hidden;
+  display: flex;
+  margin-block: 0.5rem;
+
+  img {
+    width: 100%;
+    background: var(--background-tertiary);
+    border-radius: 0.5rem;
+    object-fit: contain;
+  }
+}
+
+.vc-voice-filters-card {
+  background: var(--background-secondary);
+  width: 100%;
+}
+
+.vc-voice-filters-modal-link {
+  border-radius: 3px;
+  padding: 0 2px;
+  font-weight: 500;
+  unicode-bidi: plaintext;
+  color: var(--mention-foreground);
+  background: var(--mention-background);
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
