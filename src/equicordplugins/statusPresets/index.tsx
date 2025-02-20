@@ -166,10 +166,9 @@ export default definePlugin({
         {
             find: "#{intl::STATUS_MENU_LABEL}",
             replacement: {
-                match: /"set-status-submenu-mobile-web".{150,165}void 0\}\)/,
+                match: /:void 0\}\)/,
                 replace: "$&,$self.render()"
-            },
-            all: true
+            }
         }
     ],
     render() {

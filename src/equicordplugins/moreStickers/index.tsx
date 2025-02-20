@@ -34,19 +34,19 @@ export default definePlugin({
         {
             find: "ChannelStickerPickerButton",
             replacement: [{
-                match: /(children:\(0,\i\.jsx\)\()([\w.]+?)(,{innerClassName.{10,30}\.stickerButton)/,
+                match: /(children:\(0,\i\.jsx\)\()(.{0,10})({innerClassName.{10,30}\.stickerButton)/,
                 replace: (_, head, button, tail) => {
                     const isMoreStickers = "arguments[0]?.stickersType";
                     return `${head}${isMoreStickers}?$self.stickerButton:${button}${tail}`;
                 }
             }, {
-                match: /(\i=)(\i\.useCallback\(\(\)=>\{\(0,\w+\.\w+\)\([\w.]*?\.STICKER,.*?);/,
+                match: /(\i=)(\i\.useCallback.{0,25}\.STICKER,.{0,10});/,
                 replace: (_, decl, cb) => {
                     const newCb = cb.replace(/(?<=\(\)=>\{\(.*?\)\().+?\.STICKER/, "\"stickers+\"");
                     return `${decl}arguments[0]?.stickersType?${newCb}:${cb};`;
                 }
             }, {
-                match: /(\i)=((\i)===\w+?\.\w+?\.STICKER)/,
+                match: /(\i)=((\i)===\i\.\i\.STICKER)/,
                 replace: (_, isActive, isStickerTab, currentTab) => {
                     const c = "arguments[0].stickersType";
                     return `${isActive}=${c}?(${currentTab}===${c}):(${isStickerTab})`;
@@ -64,7 +64,7 @@ export default definePlugin({
             }
         },
         {
-            find: "role:\"tablist\",\"aria-label\":",
+            find: "#{intl::EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL}",
             replacement: {
                 match: /role:"tablist",.*?,?"aria-label":.+?\),children:(\[.*?\)\]}\)}\):null,)(.*?closePopout:\w.*?:null)/s,
                 replace: m => {

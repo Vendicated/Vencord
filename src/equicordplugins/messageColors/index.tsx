@@ -43,7 +43,7 @@ export default definePlugin({
         // Changes text md rule regex, so it stops right before hsl( | rgb(
         // Without it discord will try to pass a string without those to color rule
         {
-            find: ".defaultRules.text,match:",
+            find: ".defaultRules.text)",
             group: true,
             replacement: {
                 // $)/)

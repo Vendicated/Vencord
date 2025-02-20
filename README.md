@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>152 additional plugins</summary>
+<summary>151 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -90,7 +90,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - MessageColors by Hen
 - MessageLinkTooltip by Kyuuhachi
 - MessageLoggerEnhanced by Aria
-- MessagePeek by HypedDomi
 - MessageTranslate by Samwich
 - ModalFade by Kyuuhachi
 - MoreStickers by Leko & Arjix

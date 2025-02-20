@@ -256,7 +256,7 @@ export default definePlugin({
         {
             find: "THREAD_STARTER_MESSAGE?null===",
             replacement: {
-                match: / deleted:\i\.deleted, editHistory:\i\.editHistory,/,
+                match: /deleted:\i\.deleted, editHistory:\i\.editHistory,/,
                 replace: "deleted:$self.getDeleted(...arguments), editHistory:$self.getEdited(...arguments),"
             }
         },
@@ -270,7 +270,7 @@ export default definePlugin({
         },
 
         {
-            find: ",guildId:void 0}),childrenMessageContent",
+            find: "childrenMessageContent:null",
             replacement: {
                 match: /(cozyMessage.{1,50},)childrenHeader:/,
                 replace: "$1childrenAccessories:arguments[0].childrenAccessories || null,childrenHeader:"

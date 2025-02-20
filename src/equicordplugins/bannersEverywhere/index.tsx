@@ -52,7 +52,7 @@ export default definePlugin({
             replacement:
             {
                 // We cant access the user id here, so we take the banner property we set earlier
-                match: /let{avatar:\i.*?focusProps:\i.*?=(\i).*?children:\[/,
+                match: /wrappedLayout.{0,10}children:\[/,
                 replace: "$&$1.banner,"
             }
         }
