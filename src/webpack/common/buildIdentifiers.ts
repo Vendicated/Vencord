@@ -10,7 +10,7 @@ import { findModuleFactory } from "@webpack";
 export const spreadEnabled = makeLazy(() => {
     const tooltipsFactory = findModuleFactory("tooltipTop,bottom:");
     if (tooltipsFactory == null) {
-        return true;
+        return false;
     }
 
     return String(tooltipsFactory).includes('="div",...');
