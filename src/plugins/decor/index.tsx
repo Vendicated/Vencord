@@ -52,22 +52,22 @@ export default definePlugin({
                 {
                     match: /(?<==)\i=>{var{children.{20,200}decorationGridItem/,
                     replace: "$self.DecorationGridItem=$&",
-                    shouldSkip: BuildIdentifiers.spreadDisabled
+                    shouldSkip: BuildIdentifiers.spreadEnabled
                 },
                 {
                     match: /(?<==)\i=>{var{user:\i,avatarDecoration/,
                     replace: "$self.DecorationGridDecoration=$&",
-                    shouldSkip: BuildIdentifiers.spreadDisabled
+                    shouldSkip: BuildIdentifiers.spreadEnabled
                 },
                 {
                     match: /(?<==)\i=>{let{children.{20,200}decorationGridItem/,
                     replace: "$self.DecorationGridItem=$&",
-                    shouldSkip: () => !BuildIdentifiers.spreadDisabled()
+                    shouldSkip: () => !BuildIdentifiers.spreadEnabled()
                 },
                 {
                     match: /(?<==)\i=>{let{user:\i,avatarDecoration/,
                     replace: "$self.DecorationGridDecoration=$&",
-                    shouldSkip: () => !BuildIdentifiers.spreadDisabled()
+                    shouldSkip: () => !BuildIdentifiers.spreadEnabled()
                 },
                 // Remove NEW label from decor avatar decorations
                 {

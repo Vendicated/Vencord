@@ -197,12 +197,12 @@ export default definePlugin({
                 {
                     match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",{...\2,/,
                     replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
-                    shouldSkip: () => !BuildIdentifiers.spreadDisabled()
+                    shouldSkip: () => !BuildIdentifiers.spreadEnabled()
                 },
                 {
                     match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",.{0,100}className:\i,/,
                     replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
-                    shouldSkip: BuildIdentifiers.spreadDisabled
+                    shouldSkip: BuildIdentifiers.spreadEnabled
                 }
             ],
             all: true

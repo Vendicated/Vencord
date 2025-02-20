@@ -70,12 +70,12 @@ export default definePlugin({
                 {
                     match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
                     replace: ":[$1?.startsWith('members')?$self.render():null,$2",
-                    shouldSkip: () => !BuildIdentifiers.spreadDisabled()
+                    shouldSkip: () => !BuildIdentifiers.spreadEnabled()
                 },
                 {
                     match: /(?<=var\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
                     replace: ":[$1?.startsWith('members')?$self.render():null,$2",
-                    shouldSkip: BuildIdentifiers.spreadDisabled
+                    shouldSkip: BuildIdentifiers.spreadEnabled
                 },
             ],
             predicate: () => settings.store.memberList
