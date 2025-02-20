@@ -298,7 +298,7 @@ function UserList(type: "friends" | "blocked" | "ignored", guild: Guild, ids: st
     useEffect(() => setCount(members.length), [members.length]);
 
     const sortedMembers = members
-        .map(id => UserStore.getUser(id))
+        .map(id => UserStore.getUser(id) as User & { globalName: string; })
         .sort(
             (a, b) => {
                 switch (settings.store.sorting) {
@@ -409,7 +409,7 @@ function MutualMembersTab({ guild, setCount }: RelationshipProps) {
         <ScrollerThin fade className={cl("scroller")}>
             {members
                 .map(member => {
-                    const user = UserStore.getUser(member.id);
+                    const user = UserStore.getUser(member.id) as User & { globalName: string; };
                     return { ...member, user };
                 })
                 .filter(Boolean)
