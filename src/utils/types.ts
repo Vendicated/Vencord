@@ -41,20 +41,12 @@ export interface PatchReplacement {
     match: string | RegExp;
     /** The replacement string or function which returns the string for the patch replacement */
     replace: string | ReplaceFn;
-    /**
-     * A function which returns whether this patch replacement should be applied.
-     * This is ran before patches are registered, so if this returns false, the patch will never be registered.
-     */
+    /** A function which returns whether this patch replacement should be applied */
     predicate?(): boolean;
     /** The minimum build number for this patch to be applied */
     fromBuild?: number;
     /** The maximum build number for this patch to be applied */
     toBuild?: number;
-    /**
-     * A function which returns whether this patch replacement should be skipped.
-     * This differs from predicate because this is checked after patches are registered, when a module matches them.
-     */
-    shouldSkip?(): boolean;
 }
 
 export interface Patch {
@@ -69,20 +61,12 @@ export interface Patch {
     noWarn?: boolean;
     /** Only apply this set of replacements if all of them succeed. Use this if your replacements depend on each other */
     group?: boolean;
-    /**
-     * A function which returns whether this patch replacement should be applied.
-     * This is ran before patches are registered, so if this returns false, the patch will never be registered.
-     */
+    /** A function which returns whether this patch should be applied */
     predicate?(): boolean;
     /** The minimum build number for this patch to be applied */
     fromBuild?: number;
     /** The maximum build number for this patch to be applied */
     toBuild?: number;
-    /**
-     * A function which returns whether this patch replacement should be skipped.
-     * This differs from predicate because this is checked after patches are registered, when a module matches them.
-     */
-    shouldSkip?(): boolean;
 }
 
 export interface PluginAuthor {

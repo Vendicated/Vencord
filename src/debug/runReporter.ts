@@ -45,11 +45,9 @@ async function runReporter() {
         }
 
         for (const patch of patches) {
-            if (patch.all || patch.shouldSkip?.()) {
-                continue;
+            if (!patch.all) {
+                new Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
             }
-
-            new Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
         }
 
         for (const [plugin, moduleId, match, totalTime] of patchTimings) {

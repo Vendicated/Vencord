@@ -488,13 +488,12 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
 
         // Eager patches cannot retrieve the build number because this code runs before the module for it is loaded
         const buildNumber = Settings.eagerPatches ? -1 : getBuildNumber();
-        const shouldCheckBuildNumber = buildNumber !== -1;
+        const shouldCheckBuildNumber = !Settings.eagerPatches && buildNumber !== -1;
 
         if (
-            patch.shouldSkip?.() ||
-            (shouldCheckBuildNumber &&
-                (patch.fromBuild != null && buildNumber < patch.fromBuild) ||
-                (patch.toBuild != null && buildNumber > patch.toBuild))
+            shouldCheckBuildNumber &&
+            (patch.fromBuild != null && buildNumber < patch.fromBuild) ||
+            (patch.toBuild != null && buildNumber > patch.toBuild)
         ) {
             continue;
         }
@@ -514,10 +513,9 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
         // We change all patch.replacement to array in plugins/index
         for (const replacement of patch.replacement as PatchReplacement[]) {
             if (
-                replacement.shouldSkip?.() ||
-                (shouldCheckBuildNumber &&
-                    (replacement.fromBuild != null && buildNumber < replacement.fromBuild) ||
-                    (replacement.toBuild != null && buildNumber > replacement.toBuild))
+                shouldCheckBuildNumber &&
+                (replacement.fromBuild != null && buildNumber < replacement.fromBuild) ||
+                (replacement.toBuild != null && buildNumber > replacement.toBuild)
             ) {
                 continue;
             }
