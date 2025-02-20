@@ -8,26 +8,40 @@ import { brailleMap } from "./braille_map";
 import { Devs } from "@utils/constants";
 const UploadStore = findByPropsLazy("getUpload");
 
-function convertToBlackOrWhite(color: number) {
+/**
+ * Maps a color to 0 or 1
+ *
+ * @param color Color to convert
+ * @returns 0 for black, 1 for white (depending on color theme)
+ */
+function mapToZeroOrOne(color: number) {
     if (color > 255) {
         return 1;
     }
     return 0;
 }
 
+/**
+ * Get the braille character for a 2x3 grid of pixels
+ *
+ * @param image JIMP image
+ * @param xOff x offset
+ * @param yOff y offset
+ * @returns Braille character
+ */
 function getBrailleCharacter(image: any, xOff: number, yOff: number) {
     let thing = [
         [
-            convertToBlackOrWhite(image.getPixelColor(0 + (xOff * 2), 0 + (yOff * 2))),
-            convertToBlackOrWhite(image.getPixelColor(1 + (xOff * 2), 0 + (yOff * 2)))
+            mapToZeroOrOne(image.getPixelColor(0 + (xOff * 2), 0 + (yOff * 2))),
+            mapToZeroOrOne(image.getPixelColor(1 + (xOff * 2), 0 + (yOff * 2)))
         ],
         [
-            convertToBlackOrWhite(image.getPixelColor(0 + (xOff * 2), 1 + (yOff * 2))),
-            convertToBlackOrWhite(image.getPixelColor(1 + (xOff * 2), 1 + (yOff * 2)))
+            mapToZeroOrOne(image.getPixelColor(0 + (xOff * 2), 1 + (yOff * 2))),
+            mapToZeroOrOne(image.getPixelColor(1 + (xOff * 2), 1 + (yOff * 2)))
         ],
         [
-            convertToBlackOrWhite(image.getPixelColor(0 + (xOff * 2), 2 + (yOff * 2))),
-            convertToBlackOrWhite(image.getPixelColor(1 + (xOff * 2), 2 + (yOff * 2)))
+            mapToZeroOrOne(image.getPixelColor(0 + (xOff * 2), 2 + (yOff * 2))),
+            mapToZeroOrOne(image.getPixelColor(1 + (xOff * 2), 2 + (yOff * 2)))
         ]
     ];
 
@@ -63,6 +77,8 @@ export default definePlugin({
             execute: async (opts, ctx) => {
                 let upload = UploadStore.getUpload(ctx.channel.id, opts.find(o => o.name === "image")!.name, DraftType.SlashCommand);
                 let rawImage: File | null = null;
+
+                // is the file an image?
                 if (upload) {
                     if (!upload.isImage) {
                         UploadManager.clearAll(ctx.channel.id, DraftType.SlashCommand);
@@ -75,6 +91,7 @@ export default definePlugin({
                     throw "No image provided";
                 }
 
+                // do processing
                 let imageData = await Jimp.read(await rawImage.arrayBuffer());
                 let image = imageData.greyscale().contrast(1);
                 let s = "```\n";
@@ -83,13 +100,14 @@ export default definePlugin({
                     image.resize({ w: parseInt(opts.find(o => o.name === "width")!.value) });
                 }
 
+                // write characters
                 for (let i = 0; i < image.height / 2; i++) {
                     for (let j = 0; j < image.width / 2; j++) {
                         s += getBrailleCharacter(image, j, i);
                     }
                     s += "\n";
                 }
-                UploadManager.clearAll(ctx.channel.id, DraftType.SlashCommand);
+
                 sendBotMessage(ctx.channel.id, {
                     content: s + "\n```"
                 });
