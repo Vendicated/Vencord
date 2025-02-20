@@ -19,6 +19,7 @@
 import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { BuildIdentifiers } from "@webpack/common";
 
 import { CompactPronounsChatComponentWrapper, PronounsChatComponentWrapper } from "./PronounsChatComponent";
 import { settings } from "./settings";
@@ -41,11 +42,20 @@ export default definePlugin({
         },
         {
             find: '="SYSTEM_TAG"',
-            replacement: {
-                // Add next to username (compact mode)
-                match: /className:\i\(\)\(\i\.className(?:,\i\.clickable)?,\i\)}\)\),(?=\i)/g,
-                replace: "$&$self.CompactPronounsChatComponentWrapper(arguments[0]),"
-            }
+            replacement: [
+                {
+                    // Add next to username (compact mode)
+                    match: /className:\i\(\)\(\i\.className(?:,\i\.clickable)?,\i\)}\),(?=\i)/g,
+                    replace: "$&$self.CompactPronounsChatComponentWrapper(arguments[0]),",
+                    shouldSkip: () => !BuildIdentifiers.spreadDisabled()
+                },
+                {
+                    // Add next to username (compact mode)
+                    match: /className:\i\(\)\(\i\.className(?:,\i\.clickable)?,\i\)}\)\),(?=\i)/g,
+                    replace: "$&$self.CompactPronounsChatComponentWrapper(arguments[0]),",
+                    shouldSkip: BuildIdentifiers.spreadDisabled
+                },
+            ]
         }
     ],
 
