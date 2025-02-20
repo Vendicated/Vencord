@@ -6,25 +6,53 @@
 
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { patches } from "plugins";
+import { getBuildNumber, patchTimings } from "@webpack/patcher";
 
+import { addPatch, patches } from "../plugins";
 import { loadLazyChunks } from "./loadLazyChunks";
 
-const ReporterLogger = new Logger("Reporter");
-
 async function runReporter() {
+    const ReporterLogger = new Logger("Reporter");
+
     try {
         ReporterLogger.log("Starting test...");
 
-        let loadLazyChunksResolve: (value: void | PromiseLike<void>) => void;
-        const loadLazyChunksDone = new Promise<void>(r => loadLazyChunksResolve = r);
+        const { promise: loadLazyChunksDone, resolve: loadLazyChunksResolve } = Promise.withResolvers<void>();
 
-        Webpack.beforeInitListeners.add(() => loadLazyChunks().then((loadLazyChunksResolve)));
+        // The main patch for starting the reporter chunk loading
+        addPatch({
+            find: '"Could not find app-mount"',
+            replacement: {
+                match: /(?<="use strict";)/,
+                replace: "Vencord.Webpack._initReporter();"
+            }
+        }, "Vencord Reporter");
+
+        // @ts-ignore
+        Vencord.Webpack._initReporter = function () {
+            // initReporter is called in the patched entry point of Discord
+            // setImmediate to only start searching for lazy chunks after Discord initialized the app
+            setTimeout(() => loadLazyChunks().then(loadLazyChunksResolve), 0);
+        };
+
         await loadLazyChunksDone;
+
+        if (IS_REPORTER && IS_WEB && !IS_VESKTOP) {
+            console.log("[REPORTER_META]", {
+                buildNumber: getBuildNumber(),
+                buildHash: window.GLOBAL_ENV.SENTRY_TAGS.buildId
+            });
+        }
 
         for (const patch of patches) {
             if (!patch.all) {
                 new Logger("WebpackInterceptor").warn(`Patch by ${patch.plugin} found no module (Module id is -): ${patch.find}`);
+            }
+        }
+
+        for (const [plugin, moduleId, match, totalTime] of patchTimings) {
+            if (totalTime > 5) {
+                new Logger("WebpackInterceptor").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
             }
         }
 
@@ -50,9 +78,9 @@ async function runReporter() {
                     result = await Webpack.extractAndLoadChunks(code, matcher);
                     if (result === false) result = null;
                 } else if (method === "mapMangledModule") {
-                    const [code, mapper] = args;
+                    const [code, mapper, includeBlacklistedExports] = args;
 
-                    result = Webpack.mapMangledModule(code, mapper);
+                    result = Webpack.mapMangledModule(code, mapper, includeBlacklistedExports);
                     if (Object.keys(result).length !== Object.keys(mapper).length) throw new Error("Webpack Find Fail");
                 } else {
                     // @ts-ignore
@@ -88,4 +116,6 @@ async function runReporter() {
     }
 }
 
-runReporter();
+// Run after the Vencord object has been created.
+// We need to add extra properties to it, and it is only created after all of Vencord code has ran
+setTimeout(runReporter, 0);
