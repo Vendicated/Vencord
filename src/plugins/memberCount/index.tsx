@@ -24,6 +24,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
+import { BuildIdentifiers } from "@webpack/common";
 import { FluxStore } from "@webpack/types";
 
 import { MemberCount } from "./MemberCount";
@@ -65,10 +66,18 @@ export default definePlugin({
     patches: [
         {
             find: "{isSidebarVisible:",
-            replacement: {
-                match: /(?<=var\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
-                replace: ":[$1?.startsWith('members')?$self.render():null,$2"
-            },
+            replacement: [
+                {
+                    match: /(?<=let\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
+                    replace: ":[$1?.startsWith('members')?$self.render():null,$2",
+                    shouldSkip: () => !BuildIdentifiers.spreadDisabled()
+                },
+                {
+                    match: /(?<=var\{className:(\i),.+?children):\[(\i\.useMemo[^}]+"aria-multiselectable")/,
+                    replace: ":[$1?.startsWith('members')?$self.render():null,$2",
+                    shouldSkip: BuildIdentifiers.spreadDisabled
+                },
+            ],
             predicate: () => settings.store.memberList
         },
         {
