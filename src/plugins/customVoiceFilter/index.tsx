@@ -304,8 +304,10 @@ export default definePlugin({
 
         useVoiceFiltersStore.subscribe(store => store.updateVoicesList());
 
-        const modulePath = await DiscordNative.fileManager.getModulePath();
-        useVoiceFiltersStore.getState().modulePath = modulePath;
+        if (getClient().client === "desktop") {
+            const modulePath = await DiscordNative.fileManager.getModulePath();
+            useVoiceFiltersStore.getState().modulePath = modulePath;
+        }
 
         // // ============ DEMO ============
         // const templaceVoicePackObject: IVoiceFilter = JSON.parse(templateVoicepack);
