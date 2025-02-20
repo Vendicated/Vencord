@@ -9,7 +9,7 @@ import "./ui/styles.css";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { UserStore } from "@webpack/common";
+import { BuildIdentifiers, UserStore } from "@webpack/common";
 
 import { CDN_URL, RAW_SKU_ID, SKU_ID } from "./lib/constants";
 import { useAuthorizationStore } from "./lib/stores/AuthorizationStore";
@@ -51,11 +51,23 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<==)\i=>{var{children.{20,200}decorationGridItem/,
-                    replace: "$self.DecorationGridItem=$&"
+                    replace: "$self.DecorationGridItem=$&",
+                    shouldSkip: BuildIdentifiers.spreadDisabled
                 },
                 {
                     match: /(?<==)\i=>{var{user:\i,avatarDecoration/,
-                    replace: "$self.DecorationGridDecoration=$&"
+                    replace: "$self.DecorationGridDecoration=$&",
+                    shouldSkip: BuildIdentifiers.spreadDisabled
+                },
+                {
+                    match: /(?<==)\i=>{let{children.{20,200}decorationGridItem/,
+                    replace: "$self.DecorationGridItem=$&",
+                    shouldSkip: () => !BuildIdentifiers.spreadDisabled()
+                },
+                {
+                    match: /(?<==)\i=>{let{user:\i,avatarDecoration/,
+                    replace: "$self.DecorationGridDecoration=$&",
+                    shouldSkip: () => !BuildIdentifiers.spreadDisabled()
                 },
                 // Remove NEW label from decor avatar decorations
                 {
