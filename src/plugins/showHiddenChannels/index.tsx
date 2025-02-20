@@ -485,7 +485,7 @@ export default definePlugin({
             }
         },
         {
-            find: '"displayName","NowPlayingViewStore"',
+            find: '"NowPlayingViewStore"',
             replacement: {
                 // Make active now voice states on hidden channels
                 match: /(getVoiceStateForUser.{0,150}?)&&\i\.\i\.canWithPartialContext.{0,20}VIEW_CHANNEL.+?}\)(?=\?)/,
