@@ -480,9 +480,9 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
         const shouldCheckBuildNumber = buildNumber !== -1;
 
         if (
-            (shouldCheckBuildNumber &&
-                (patch.fromBuild != null && buildNumber < patch.fromBuild) ||
-                (patch.toBuild != null && buildNumber > patch.toBuild))
+            shouldCheckBuildNumber &&
+            (patch.fromBuild != null && buildNumber < patch.fromBuild) ||
+            (patch.toBuild != null && buildNumber > patch.toBuild)
         ) {
             patches.splice(i--, 1);
             continue;
@@ -511,9 +511,9 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
         // We change all patch.replacement to array in plugins/index
         for (const replacement of patch.replacement as PatchReplacement[]) {
             if (
-                (shouldCheckBuildNumber &&
-                    (replacement.fromBuild != null && buildNumber < replacement.fromBuild) ||
-                    (replacement.toBuild != null && buildNumber > replacement.toBuild))
+                shouldCheckBuildNumber &&
+                (replacement.fromBuild != null && buildNumber < replacement.fromBuild) ||
+                (replacement.toBuild != null && buildNumber > replacement.toBuild)
             ) {
                 continue;
             }
