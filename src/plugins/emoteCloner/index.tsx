@@ -318,7 +318,7 @@ function isGifUrl(url: string) {
     return u.pathname.endsWith(".gif") || u.searchParams.get("animated") === "true";
 }
 
-function buildFakeSticker(sticker: any) {
+function buildFakeSticker(sticker: Partial<Sticker>) {
     return {
         id: sticker?.id,
         name: sticker?.name,
@@ -326,7 +326,7 @@ function buildFakeSticker(sticker: any) {
         // Discord has a character limit of at least 1 for tags (aka related emoji)
         tags: " ",
         description: "",
-        type: "2",
+        type: 2,
         available: true,
         guild_id: 0
     };
@@ -351,7 +351,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
                     isAnimated: isGifUrl(itemHref ?? itemSrc)
                 }));
             case "sticker":
-                const sticker = props.message.stickerItems.find(s => s.id === favoriteableId);
+                const sticker: Partial<Sticker> | undefined = props.message.stickerItems.find(s => s.id === favoriteableId);
                 if (sticker?.format_type === 3 /* LOTTIE */) return;
 
                 // Workaround for cases when it's not available
