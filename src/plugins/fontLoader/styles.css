@@ -1,0 +1,23 @@
+.vc-googlefonts-results {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.vc-googlefonts-card {
+    padding: 16px;
+    cursor: pointer !important;
+    background: var(--background-secondary);
+    border: 1px solid var(--background-tertiary);
+}
+
+.vc-googlefonts-card:hover {
+    background: var(--background-modifier-hover);
+    cursor: pointer !important;
+}
+
+.vc-googlefonts-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    cursor: pointer !important;
+}
