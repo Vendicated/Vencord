@@ -1,11 +1,17 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { ApplicationCommandInputType, ApplicationCommandOptionType, sendBotMessage } from "@api/Commands";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { DraftType, UploadManager } from "@webpack/common";
-
 import { Jimp } from "jimp";
+
 import { brailleMap } from "./braille_map";
-import { Devs } from "@utils/constants";
 const UploadStore = findByPropsLazy("getUpload");
 
 /**
@@ -55,6 +61,7 @@ export default definePlugin({
     description: "Converts an image to braille art",
     authors: [Devs.Cobble],
     dependencies: ["CommandsAPI"],
+    nexulien: true,
     commands: [
         {
             name: "brailleart",
