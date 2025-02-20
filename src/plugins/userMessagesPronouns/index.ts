@@ -47,13 +47,13 @@ export default definePlugin({
                     // Add next to username (compact mode)
                     match: /className:\i\(\)\(\i\.className(?:,\i\.clickable)?,\i\)}\),(?=\i)/g,
                     replace: "$&$self.CompactPronounsChatComponentWrapper(arguments[0]),",
-                    shouldSkip: () => !BuildIdentifiers.spreadEnabled()
+                    shouldApply: BuildIdentifiers.spreadEnabled
                 },
                 {
                     // Add next to username (compact mode)
                     match: /className:\i\(\)\(\i\.className(?:,\i\.clickable)?,\i\)}\)\),(?=\i)/g,
                     replace: "$&$self.CompactPronounsChatComponentWrapper(arguments[0]),",
-                    shouldSkip: BuildIdentifiers.spreadEnabled
+                    shouldApply: () => !BuildIdentifiers.spreadEnabled
                 },
             ]
         }

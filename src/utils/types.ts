@@ -51,10 +51,10 @@ export interface PatchReplacement {
     /** The maximum build number for this patch to be applied */
     toBuild?: number;
     /**
-     * A function which returns whether this patch replacement should be skipped.
+     * A function which returns whether this patch replacement should be applied.
      * This differs from predicate because this is checked after patches are registered, when a module matches them.
      */
-    shouldSkip?(): boolean;
+    shouldApply?(): boolean;
 }
 
 export interface Patch {
@@ -79,10 +79,10 @@ export interface Patch {
     /** The maximum build number for this patch to be applied */
     toBuild?: number;
     /**
-     * A function which returns whether this patch replacement should be skipped.
+     * A function which returns whether this patch replacement should be applied.
      * This differs from predicate because this is checked after patches are registered, when a module matches them.
      */
-    shouldSkip?(): boolean;
+    shouldApply?(): boolean;
 }
 
 export interface PluginAuthor {

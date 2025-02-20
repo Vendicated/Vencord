@@ -34,14 +34,14 @@ export default definePlugin({
                 replace: (_, commaOrSemi, settings, elements) => "" +
                     `${commaOrSemi}${settings}?.[0]==="CHANGELOG"` +
                     `&&${elements}.push({section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage})`,
-                shouldSkip: () => !BuildIdentifiers.spreadEnabled()
+                shouldApply: BuildIdentifiers.spreadEnabled
             },
             {
                 match: /(?<=}\)([,;])(\i\.settings)\.forEach.+?(\i)\.push.+\)\)\}\))(?=\)\})/,
                 replace: (_, commaOrSemi, settings, elements) => "" +
                     `${commaOrSemi}${settings}?.[0]==="CHANGELOG"` +
                     `&&${elements}.push({section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage})`,
-                shouldSkip: BuildIdentifiers.spreadEnabled
+                shouldApply: () => !BuildIdentifiers.spreadEnabled
             },
         ]
     }],
