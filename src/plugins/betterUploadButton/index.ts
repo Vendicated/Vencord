@@ -28,6 +28,7 @@ export default definePlugin({
             find: '"ChannelAttachButton"',
             replacement: [
                 {
+                    // FIXME(Bundler spread transform related): Remove old compatiblity once enough time has passed, if they don't revert
                     match: /\.attachButtonInner,"aria-label":.{0,50},onDoubleClick:(.+?:void 0),.{0,30}?\.\.\.(\i),/,
                     replace: "$&onClick:$1,onContextMenu:$2.onClick,",
                     noWarn: true
