@@ -30,7 +30,7 @@ function mapToZeroOrOne(color: number) {
  * @returns Braille character
  */
 function getBrailleCharacter(image: any, xOff: number, yOff: number) {
-    let thing = [
+    const thing = [
         [
             mapToZeroOrOne(image.getPixelColor(0 + (xOff * 2), 0 + (yOff * 2))),
             mapToZeroOrOne(image.getPixelColor(1 + (xOff * 2), 0 + (yOff * 2)))
@@ -75,7 +75,7 @@ export default definePlugin({
                 }
             ],
             execute: async (opts, ctx) => {
-                let upload = UploadStore.getUpload(ctx.channel.id, opts.find(o => o.name === "image")!.name, DraftType.SlashCommand);
+                const upload = UploadStore.getUpload(ctx.channel.id, opts.find(o => o.name === "image")!.name, DraftType.SlashCommand);
                 let rawImage: File | null = null;
 
                 // is the file an image?
@@ -92,8 +92,8 @@ export default definePlugin({
                 }
 
                 // do processing
-                let imageData = await Jimp.read(await rawImage.arrayBuffer());
-                let image = imageData.greyscale().contrast(1);
+                const imageData = await Jimp.read(await rawImage.arrayBuffer());
+                const image = imageData.greyscale().contrast(1);
                 let s = "```\n";
 
                 if (opts.find(o => o.name === "width")) {
