@@ -34,7 +34,7 @@ export default definePlugin({
         {
             find: "#{intl::FRIENDS_ALL_HEADER}",
             replacement: {
-                match: /toString\(\)\}\);case (\i\.\i)\.BLOCKED/,
+                match: /toString\(\)\}\);case (\i\.\i)\.PENDING/,
                 replace: 'toString()});case $1.IMPLICIT:return "Implicit — "+arguments[1];case $1.BLOCKED'
             },
         },
@@ -50,7 +50,7 @@ export default definePlugin({
         {
             find: "#{intl::FRIENDS_SECTION_ONLINE}",
             replacement: {
-                match: /,{id:(\i\.\i)\.BLOCKED,show:.+?className:(\i\.item)/,
+                match: /,{id:(\i\.\i)\.PENDING,show:.+?className:(\i\.item)/,
                 replace: (rest, relationShipTypes, className) => `,{id:${relationShipTypes}.IMPLICIT,show:true,className:${className},content:"Implicit"}${rest}`
             }
         },
@@ -58,7 +58,7 @@ export default definePlugin({
         {
             find: '"FriendsStore"',
             replacement: {
-                match: /(?<=case (\i\.\i)\.BLOCKED:return (\i)\.type===\i\.\i\.BLOCKED)/,
+                match: /(?<=case (\i\.\i)\.SUGGESTIONS:return \d+===(\i)\.type)/,
                 replace: ";case $1.IMPLICIT:return $2.type===5"
             },
         },
