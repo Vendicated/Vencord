@@ -471,7 +471,7 @@ export default definePlugin({
             // still broken btw
             find: "#{intl::ACTIVITY_REACTION_REPLY_TITLE}",
             replacement: {
-                match: /(?<=void 0:(\i\.type)\).{0,50})(?<=\(0,\i\.jsx\)\()(\i\.\i)(?=.{0,10},{activity:\i,user:\i,application:\i)/,
+                match: /(?<=void 0:(\i\.type)\).{0,50}\(0,\i\.jsx\)\()(\i\.\i)(?=.{0,10},{activity:\i,user:\i,application:\i)/,
                 replace: "$1==='BiteSizePopout'?$self.showAllActivitiesComponent:$2"
             },
             predicate: () => settings.store.userPopout
