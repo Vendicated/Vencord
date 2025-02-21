@@ -211,7 +211,8 @@ export default definePlugin({
         collapseDeleted: {
             type: OptionType.BOOLEAN,
             description: "Whether to collapse deleted messages, similar to blocked messages",
-            default: false
+            default: false,
+            restartNeeded: true,
         },
         logEdits: {
             type: OptionType.BOOLEAN,
@@ -441,15 +442,10 @@ export default definePlugin({
         {
             // Attachment renderer
             find: ".removeMosaicItemHoverButton",
-            group: true,
             replacement: [
                 {
-                    match: /(className:\i,item:\i),/,
-                    replace: "$1,item: deleted,"
-                },
-                {
-                    match: /\[\i\.obscured\]:.+?,/,
-                    replace: "$& 'messagelogger-deleted-attachment': deleted,"
+                    match: /\[\i\.obscured\]:.+?,(?<=item:(\i).+?)/,
+                    replace: '$&"messagelogger-deleted-attachment":$1.originalItem?.deleted,'
                 }
             ]
         },
@@ -500,7 +496,7 @@ export default definePlugin({
 
         {
             // Message context base menu
-            find: "useMessageMenu:",
+            find: ".MESSAGE,commandTargetId:",
             replacement: [
                 {
                     // Remove the first section if message is deleted
