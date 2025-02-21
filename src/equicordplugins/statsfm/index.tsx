@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { getUserSettingLazy } from "@api/UserSettings";
 import { EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
@@ -113,7 +114,7 @@ interface SFMR {
     item: Item;
 }
 
-
+const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
 const applicationId = "1325126169179197500";
 const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
@@ -156,6 +157,11 @@ const settings = definePluginSettings({
     },
     hideWithExternalRPC: {
         description: "Hides stats.fm presence if an external RPC is running",
+        type: OptionType.BOOLEAN,
+        default: false,
+    },
+    enableGameActivity: {
+        description: "Enable game activity for Stats.fm", // Credit to LastfmPresence for this setting
         type: OptionType.BOOLEAN,
         default: false,
     },
@@ -264,6 +270,11 @@ export default definePlugin({
             }
 
             const trackData = json.item.track;
+            if (settings.store.enableGameActivity && trackData) {
+                ShowCurrentGame.updateSetting(true);
+            } else if (settings.store.enableGameActivity) {
+                ShowCurrentGame.updateSetting(false);
+            }
             if (!trackData) return null;
             return {
                 name: trackData.name || "Unknown",
