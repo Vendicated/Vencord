@@ -12,8 +12,8 @@ import { canonicalizeReplacement } from "@utils/patches";
 import { Patch, PatchReplacement } from "@utils/types";
 
 import { traceFunctionWithResults } from "../debug/Tracer";
-import { _blacklistBadModules, _initWebpack, factoryListeners, findModuleId, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
-import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, ModuleExports, PatchedModuleFactory, WebpackRequire } from "./wreq.d";
+import { _blacklistBadModules, _initWebpack, factoryListeners, findModuleFactory, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
+import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, PatchedModuleFactory, WebpackRequire } from "./wreq.d";
 
 export const patches = [] as Patch[];
 
@@ -27,28 +27,26 @@ export const patchTimings = [] as Array<[plugin: string, moduleId: PropertyKey, 
 
 export const getBuildNumber = makeLazy(() => {
     try {
-        try {
-            if (wreq.m[128014]?.toString().includes("Trying to open a changelog for an invalid build number")) {
-                const hardcodedGetBuildNumber = wreq(128014).b as () => number;
-
-                if (typeof hardcodedGetBuildNumber === "function" && typeof hardcodedGetBuildNumber() === "number") {
-                    return hardcodedGetBuildNumber();
-                }
+        function matchBuildNumber(factoryStr: string) {
+            const buildNumberMatch = factoryStr.match(/.concat\("(\d+?)"\)/);
+            if (buildNumberMatch == null) {
+                return -1;
             }
-        } catch { }
 
-        const moduleId = findModuleId("Trying to open a changelog for an invalid build number");
-        if (moduleId == null) {
-            return -1;
+            return Number(buildNumberMatch[1]);
         }
 
-        const exports = Object.values<ModuleExports>(wreq(moduleId));
-        if (exports.length !== 1 || typeof exports[0] !== "function") {
-            return -1;
+        const hardcodedFactoryStr = String(wreq.m[128014]);
+        if (hardcodedFactoryStr.includes("Trying to open a changelog for an invalid build number")) {
+            const hardcodedBuildNumber = matchBuildNumber(hardcodedFactoryStr);
+
+            if (hardcodedBuildNumber !== -1) {
+                return hardcodedBuildNumber;
+            }
         }
 
-        const buildNumber = exports[0]();
-        return typeof buildNumber === "number" ? buildNumber : -1;
+        const moduleFactory = findModuleFactory("Trying to open a changelog for an invalid build number");
+        return matchBuildNumber(String(moduleFactory));
     } catch {
         return -1;
     }
@@ -122,12 +120,12 @@ define(Function.prototype, "m", {
                     return;
                 }
 
-                patchThisInstance();
-
                 if (wreq == null && this.c != null) {
                     logger.info("Main WebpackInstance found" + interpolateIfDefined` in ${fileName}` + ", initializing internal references to WebpackRequire");
                     _initWebpack(this as WebpackRequire);
                 }
+
+                patchThisInstance();
             }
         });
 
@@ -478,23 +476,23 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
     for (let i = 0; i < patches.length; i++) {
         const patch = patches[i];
 
-        const moduleMatches = typeof patch.find === "string"
-            ? code.includes(patch.find)
-            : (patch.find.global && (patch.find.lastIndex = 0), patch.find.test(code));
-
-        if (!moduleMatches) {
-            continue;
-        }
-
-        // Eager patches cannot retrieve the build number because this code runs before the module for it is loaded
-        const buildNumber = Settings.eagerPatches ? -1 : getBuildNumber();
-        const shouldCheckBuildNumber = !Settings.eagerPatches && buildNumber !== -1;
+        const buildNumber = getBuildNumber();
+        const shouldCheckBuildNumber = buildNumber !== -1;
 
         if (
             shouldCheckBuildNumber &&
             (patch.fromBuild != null && buildNumber < patch.fromBuild) ||
             (patch.toBuild != null && buildNumber > patch.toBuild)
         ) {
+            patches.splice(i--, 1);
+            continue;
+        }
+
+        const moduleMatches = typeof patch.find === "string"
+            ? code.includes(patch.find)
+            : (patch.find.global && (patch.find.lastIndex = 0), patch.find.test(code));
+
+        if (!moduleMatches) {
             continue;
         }
 
@@ -536,7 +534,7 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                 }
 
                 if (newCode === code) {
-                    if (!patch.noWarn) {
+                    if (!(patch.noWarn || replacement.noWarn)) {
                         logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${String(moduleId)}): ${replacement.match}`);
                         if (IS_DEV) {
                             logger.debug("Function Source:\n", code);
