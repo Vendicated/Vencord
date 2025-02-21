@@ -218,6 +218,7 @@ export default definePlugin({
                 },
                 {
                     // Make muted channels also appear as unread if hide unreads is false and the channel is hidden
+                    // FIXME(Bundler change related): Remove old compatiblity once enough time has passed
                     predicate: () => settings.store.channelStyle === ChannelStyle.MutedUnread || settings.store.channelStyle === ChannelStyle.Unread,
                     match: /(?<=\.LOCKED(?:;if\(|:))(?<={channel:(\i).+?)/,
                     replace: (_, channel) => `!$self.isHiddenChannel(${channel})&&`
@@ -235,7 +236,7 @@ export default definePlugin({
                 },
                 {
                     // Hide unreads
-                    match: /{channel:(\i),name:\i,.+?unread:(\i).+?;/,
+                    match: /\.subtitle,.+?;(?=return\(0,\i\.jsxs?\))(?<={channel:(\i),name:\i,.+?unread:(\i).+?)/,
                     replace: (m, channel, unread) => `${m}${unread}=$self.isHiddenChannel(${channel})?false:${unread};`
                 }
             ]
@@ -516,7 +517,7 @@ export default definePlugin({
             }
         },
         {
-            find: '="NowPlayingViewStore",',
+            find: '"NowPlayingViewStore"',
             replacement: {
                 // Make active now voice states on hidden channels
                 match: /(getVoiceStateForUser.{0,150}?)&&\i\.\i\.canWithPartialContext.{0,20}VIEW_CHANNEL.+?}\)(?=\?)/,

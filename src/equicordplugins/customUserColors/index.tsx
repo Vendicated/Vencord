@@ -11,7 +11,7 @@ import { get } from "@api/DataStore";
 import { definePluginSettings, migratePluginSettings, Settings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import { openModal } from "@utils/modal";
-import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { extractAndLoadChunksLazy } from "@webpack";
 import { Menu } from "@webpack/common";
 import { User } from "discord-types/general";
@@ -76,7 +76,6 @@ export default definePlugin({
     description: "Lets you add a custom color to any user, anywhere! Highly recommend to use with typingTweaks and roleColorEverywhere",
     authors: [EquicordDevs.mochienya],
     contextMenus: { "user-context": userContextMenuPatch },
-    reporterTestable: ReporterTestable.None,
     settings,
     requireSettingsMenu,
     getCustomColorString,
@@ -88,7 +87,8 @@ export default definePlugin({
             replacement: {
                 match: /style:"username"===.{0,25}void 0/,
                 replace: "style:{color:$self.colorIfServer(arguments[0])}"
-            }
+            },
+            noWarn: true,
         },
         {
             predicate: () => settings.store.dmList,
