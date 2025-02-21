@@ -61,7 +61,7 @@ const settings = definePluginSettings({
     reasons: {
         description: "Your custom reasons",
         type: OptionType.COMPONENT,
-        default: [],
+        default: [] as string[],
         component: ReasonsComponent,
     },
     isTextInputDefault: {
