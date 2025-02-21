@@ -32,6 +32,7 @@ export const enum IpcEvents {
     SET_SETTINGS = "VencordSetSettings",
     OPEN_EXTERNAL = "VencordOpenExternal",
     OPEN_QUICKCSS = "VencordOpenQuickCss",
+    SET_UPDATE_SOURCE = "VencordSetUpdateSource",
     GET_UPDATES = "VencordGetUpdates",
     GET_REPO = "VencordGetRepo",
     UPDATE = "VencordUpdate",
