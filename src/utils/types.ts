@@ -41,12 +41,12 @@ export interface PatchReplacement {
     match: string | RegExp;
     /** The replacement string or function which returns the string for the patch replacement */
     replace: string | ReplaceFn;
+    /** Do not warn if this replacement did no changes */
+    noWarn?: boolean;
     /**
      * A function which returns whether this patch replacement should be applied.
      * This is ran before patches are registered, so if this returns false, the patch will never be registered.
      */
-    /** Do not warn if this replacement did no changes */
-    noWarn?: boolean;
     predicate?(): boolean;
     /** The minimum build number for this patch to be applied */
     fromBuild?: number;
