@@ -78,7 +78,7 @@ export default definePlugin({
         {
             find: "#{intl::BAN_MULTIPLE_CONFIRM_TITLE}",
             replacement: [{
-                match: /\[(\{((?:name|value):\i\.intl\.string\(\i\.\i\.[A-Za-z0-9]+\),?){2}\},?){3}\]/,
+                match: /\[(\{((name|value):\i\.\i\.string\(\i\.\i\.\i\),?){2}\},?){3}\]/,
                 replace: "$self.getReasons()"
             },
             {
