@@ -205,7 +205,7 @@ export default definePlugin({
             replacement: [
                 // Make the channel appear as muted if it's hidden
                 {
-                    match: /{channel:(\i),name:\i,muted:(\i).+?;/,
+                    match: /\.subtitle,.+?;(?=return\(0,\i\.jsxs?\))(?<={channel:(\i),name:\i,muted:(\i).+?;)/,
                     replace: (m, channel, muted) => `${m}${muted}=$self.isHiddenChannel(${channel})?true:${muted};`
                 },
                 // Make voice channels also appear as muted if they are muted
