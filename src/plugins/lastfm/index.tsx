@@ -189,6 +189,11 @@ const settings = definePluginSettings({
         description: "show the Last.fm logo by the album cover",
         type: OptionType.BOOLEAN,
         default: true,
+    },
+    alwaysHideArt: {
+        description: "Disable downloading album art",
+        type: OptionType.BOOLEAN,
+        default: false,
     }
 });
 
@@ -271,7 +276,7 @@ export default definePlugin({
     },
 
     getLargeImage(track: TrackData): string | undefined {
-        if (track.imageUrl && !track.imageUrl.includes(placeholderId))
+        if (!settings.store.alwaysHideArt && track.imageUrl && !track.imageUrl.includes(placeholderId))
             return track.imageUrl;
 
         if (settings.store.missingArt === "placeholder")
