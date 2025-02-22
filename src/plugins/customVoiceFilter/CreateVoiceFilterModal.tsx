@@ -11,6 +11,7 @@ import { JSX } from "react";
 
 import { voices } from ".";
 import { openErrorModal } from "./ErrorModal";
+import { openHelpModal } from "./HelpModal";
 import { IVoiceFilter, useVoiceFiltersStore } from "./index";
 const requiredFields = ["name", "iconURL", "onnxFileUrl", "previewSoundURLs"] as const satisfies readonly (keyof IVoiceFilter)[];
 
@@ -102,8 +103,9 @@ function CreateVoiceFilterModal({ modalProps, close, defaultValue }: CreateVoice
             </ModalContent>
             <ModalFooter>
                 <Flex style={{ gap: "0.5rem" }} justify={Flex.Justify.END} align={Flex.Align.CENTER}>
-                    <Button color={Button.Colors.TRANSPARENT} onClick={close} >Cancel</Button>
+                    <Button color={Button.Colors.TRANSPARENT} onClick={openHelpModal}>How to create a voicepack?</Button>
                     <Button color={Button.Colors.GREEN} onClick={submit}>{voiceFilter.id ? "Save" : "Create"}</Button>
+                    <Button color={Button.Colors.TRANSPARENT} onClick={close} >Cancel</Button>
                 </Flex>
             </ModalFooter>
         </ModalRoot>

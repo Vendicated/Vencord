@@ -11,7 +11,6 @@ import { Button, Flex, Forms, Text, TextInput, Tooltip, useEffect, useState } fr
 import { JSX } from "react";
 
 import { openCreateVoiceModal } from "./CreateVoiceFilterModal";
-import { openHelpModal } from "./HelpModal";
 import { DownloadIcon, DownloadingIcon, PauseIcon, PlayIcon, RefreshIcon, TrashIcon } from "./Icons";
 import { downloadCustomVoiceModel, getClient, IVoiceFilter, useVoiceFiltersStore, VoiceFilterStyles } from "./index";
 import { openSettingsModal } from "./SettingsModal";
@@ -19,11 +18,6 @@ import { cl, useAudio } from "./utils";
 import { openWikiHomeModal } from "./WikiHomeModal";
 
 const Native = VencordNative.pluginHelpers.CustomVoiceFilters as PluginNative<typeof import("./native")>;
-
-function openModelFolder() {
-    const { modulePath } = useVoiceFiltersStore.getState();
-    const modelFolder = Native.openFolder(modulePath);
-}
 
 export function openVoiceFiltersModal(): string {
     const key = openModal(modalProps => (
@@ -47,7 +41,7 @@ interface VoiceFiltersModalProps {
 
 function VoiceFiltersModal({ modalProps, close, accept }: VoiceFiltersModalProps): JSX.Element {
     const [url, setUrl] = useState("");
-    const { downloadVoicepack, deleteAll, exportVoiceFilters, importVoiceFilters, voiceFilters } = useVoiceFiltersStore();
+    const { downloadVoicepack, exportVoiceFilters, importVoiceFilters, voiceFilters } = useVoiceFiltersStore();
     const { client } = getClient();
     const voiceComponents = Object.values(voiceFilters).map(voice =>
         <VoiceFilter {...voice} key={voice.id} />
@@ -64,20 +58,15 @@ function VoiceFiltersModal({ modalProps, close, accept }: VoiceFiltersModalProps
             <ModalContent className="vc-voice-filters-modal">
                 <Flex style={{ gap: "1rem" }} direction={Flex.Direction.VERTICAL}>
                     <Text>Download a voicepack from a url or paste a voicepack data here:</Text>
-                    <TextInput
-                        value={url}
-                        placeholder="( e.g. https://fox3000foxy.com/voicepacks/agents.json )"
-                        onChange={setUrl}
-                        onKeyDown={e => { if (e.key === "Enter") downloadVoicepack(url); }}
-                        style={{ width: "100%" }}
-                    />
-                    <Flex style={{ gap: "0.5rem" }}>
-                        <Button onClick={() => downloadVoicepack(url)}>Download</Button>
-                        <Button onClick={deleteAll} color={Button.Colors.RED}>Delete all</Button>
-                        <Button onClick={exportVoiceFilters} color={Button.Colors.TRANSPARENT}>Export</Button>
-                        <Button onClick={importVoiceFilters} color={Button.Colors.TRANSPARENT}>Import</Button>
-                        <Button onClick={() => downloadVoicepack("https://fox3000foxy.com/voicepacks/agents.json")} color={Button.Colors.TRANSPARENT}>Download Default</Button>
-                        <Button onClick={openModelFolder} color={Button.Colors.TRANSPARENT}>Open Model Folder</Button>
+                    <Flex style={{ display: "grid", gridTemplateColumns: "89% 10%", gap: "0.5rem" }}>
+                        <TextInput
+                            value={url}
+                            placeholder="( e.g. https://fox3000foxy.com/voicepacks/agents.json )"
+                            onChange={setUrl}
+                            onKeyDown={e => { if (e.key === "Enter") downloadVoicepack(url); }}
+                            style={{ width: "100%" }}
+                        />
+                        <Button onClick={() => downloadVoicepack(url || "https://fox3000foxy.com/voicepacks/agents.json")}>Download</Button>
                     </Flex>
 
                     <Text>Voice filters list:</Text>
@@ -94,7 +83,6 @@ function VoiceFiltersModal({ modalProps, close, accept }: VoiceFiltersModalProps
             <ModalFooter>
                 <Flex style={{ gap: "0.5rem" }} justify={Flex.Justify.END} align={Flex.Align.CENTER}>
                     <Button color={Button.Colors.TRANSPARENT} onClick={openSettingsModal}>Settings</Button>
-                    <Button color={Button.Colors.TRANSPARENT} onClick={openHelpModal}>Learn how to build your own voicepack</Button>
                     <Button color={Button.Colors.TRANSPARENT} onClick={() => openCreateVoiceModal()}>Create Voicepack</Button>
                     <Button color={Button.Colors.GREEN} onClick={openWikiHomeModal}>Wiki</Button>
                     <Button color={Button.Colors.RED} onClick={accept}>Close</Button>

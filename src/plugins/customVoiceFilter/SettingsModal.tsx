@@ -6,12 +6,13 @@
 
 import { Margins } from "@utils/margins";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { PluginNative } from "@utils/types";
 import { Button, Flex, Forms, Slider } from "@webpack/common";
 import { JSX } from "react";
 
-import plugin, { settings } from "./index";
+import plugin, { settings, useVoiceFiltersStore } from "./index";
 
-
+const Native = VencordNative.pluginHelpers.CustomVoiceFilters as PluginNative<typeof import("./native")>;
 export function openSettingsModal(): string {
     const key = openModal(modalProps => (
         <SettingsModal modalProps={modalProps} close={() => closeModal(key)} />
@@ -24,12 +25,16 @@ interface SettingsModalProps {
     close: () => void;
 }
 
+function openModelFolder() {
+    const { modulePath } = useVoiceFiltersStore.getState();
+    Native.openFolder(modulePath);
+}
 
 //  Create Voice Filter Modal
 function SettingsModal({ modalProps, close }: SettingsModalProps): JSX.Element {
     const settingsState = settings.use();
     const { settings: { def } } = plugin;
-
+    const { deleteAll, exportVoiceFilters, importVoiceFilters } = useVoiceFiltersStore();
     return (
         <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
             <ModalHeader>
@@ -65,6 +70,16 @@ function SettingsModal({ modalProps, close }: SettingsModalProps): JSX.Element {
                             onValueRender={value => `${value}Hz`}
                             stickToMarkers={true}
                         />
+                    </Forms.FormSection>
+                    <Forms.FormSection>
+                        <Forms.FormTitle>Voicepacks:</Forms.FormTitle>
+                        <Forms.FormText type="description">Here you can manage your voicepacks.</Forms.FormText>
+                        <Flex style={{ gap: "0.5rem" }}>
+                            <Button onClick={deleteAll} color={Button.Colors.RED}>Delete all voicepacks</Button>
+                            <Button onClick={openModelFolder} color={Button.Colors.TRANSPARENT}>Open Models Folder</Button>
+                            <Button onClick={exportVoiceFilters} color={Button.Colors.GREEN}>Export</Button>
+                            <Button onClick={importVoiceFilters} color={Button.Colors.GREEN}>Import</Button>
+                        </Flex>
                     </Forms.FormSection>
                 </Flex>
             </ModalContent>
