@@ -77,7 +77,14 @@ function CreateVoiceFilterModal({ modalProps, close, defaultValue }: CreateVoice
                     </Forms.FormSection>
                     <Forms.FormSection>
                         <Forms.FormTitle>Icon URL<span style={{ color: "var(--text-danger)" }}>*</span></Forms.FormTitle>
-                        <TextInput placeholder="https://example.com/voicepacks/model/icon.png" onChange={update} style={{ width: "100%" }} value={voiceFilter.iconURL} name="iconURL" required />
+                        <TextInput
+                            placeholder="https://example.com/voicepacks/model/icon.png"
+                            onChange={update}
+                            style={{ width: "100%" }}
+                            value={voiceFilter.iconURL}
+                            name="iconURL"
+                            required
+                        />
                     </Forms.FormSection>
                     <Forms.FormSection>
                         <Forms.FormTitle>Style Key</Forms.FormTitle>
@@ -93,11 +100,24 @@ function CreateVoiceFilterModal({ modalProps, close, defaultValue }: CreateVoice
                     </Forms.FormSection>
                     <Forms.FormSection>
                         <Forms.FormTitle>ONNX File URL<span style={{ color: "var(--text-danger)" }}>*</span></Forms.FormTitle>
-                        <TextInput placeholder="https://example.com/voicepacks/model/model.onnx" onChange={update} style={{ width: "100%" }} value={voiceFilter.onnxFileUrl} name="onnxFileUrl" required />
+                        <TextInput
+                            placeholder="https://example.com/voicepacks/model/model.onnx"
+                            onChange={update}
+                            style={{ width: "100%" }}
+                            value={voiceFilter.onnxFileUrl}
+                            name="onnxFileUrl"
+                            required
+                        />
                     </Forms.FormSection>
                     <Forms.FormSection>
                         <Forms.FormTitle>Preview Sound URL<span style={{ color: "var(--text-danger)" }}>*</span></Forms.FormTitle>
-                        <TextInput placeholder="https://example.com/voicepacks/model/preview.mp3" onChange={value => update(value ? [value] : undefined, "previewSoundURLs")} style={{ width: "100%" }} value={voiceFilter.previewSoundURLs?.[0] ?? ""} required />
+                        <TextInput
+                            placeholder="https://example.com/voicepacks/model/preview.mp3"
+                            onChange={update}
+                            style={{ width: "100%" }}
+                            value={voiceFilter.previewSoundURLs?.[0] ?? ""}
+                            required
+                        />
                     </Forms.FormSection>
                 </Flex>
             </ModalContent>
