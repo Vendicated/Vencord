@@ -49,7 +49,7 @@ const StickerPackMetadata = ({ meta, hoveredStickerPackId, setHoveredStickerPack
                 height: "96px",
                 width: "96px",
             }}></div>
-            <img src={meta.logo.image} width="96" {...noDrag} />
+            {meta.logo?.image ? <img src={meta.logo.image} width="96" {...noDrag} /> : null}
             <button
                 className={hoveredStickerPackId === meta.id ? "show" : ""}
                 onClick={async () => {
