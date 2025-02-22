@@ -8,10 +8,11 @@
 import "./style.css";
 
 import { DataStore } from "@api/index";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { proxyLazy } from "@utils/lazy";
 import { closeModal } from "@utils/modal";
-import definePlugin, { PluginNative } from "@utils/types";
+import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { filters, findAll, findByProps, findStore } from "@webpack";
 import { zustandCreate, zustandPersist } from "@webpack/common";
 
@@ -290,6 +291,21 @@ export const requiredFields = [
     "temporarilyAvailable"
 ] as const;
 
+export const settings = definePluginSettings({
+    pitch: {
+        type: OptionType.SLIDER,
+        markers: Array.from({ length: 25 }, (_, i) => i - 12),
+        default: 0,
+        description: "Pitch of the voice",
+    },
+    frequency: {
+        type: OptionType.SLIDER,
+        markers: Array.from({ length: 13 }, (_, i) => 4000 * i),
+        default: 24000,
+        description: "Frequency of the voice",
+    }
+});
+
 export default definePlugin({
     name: "CustomVoiceFilters",
     description: "Custom voice filters for your voice channels.",
@@ -297,6 +313,7 @@ export default definePlugin({
         Devs.fox3000foxy,
         Devs.davr1,
     ],
+    settings,
     renderChatBarButton: CustomVoiceFilterChatBarIcon,
     async start() {
         console.log("CustomVoiceFilters started");
