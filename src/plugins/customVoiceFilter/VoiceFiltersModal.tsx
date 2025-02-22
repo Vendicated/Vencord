@@ -20,6 +20,11 @@ import { openWikiHomeModal } from "./WikiHomeModal";
 
 const Native = VencordNative.pluginHelpers.CustomVoiceFilters as PluginNative<typeof import("./native")>;
 
+function openModelFolder() {
+    const { modulePath } = useVoiceFiltersStore.getState();
+    const modelFolder = Native.openFolder(modulePath);
+}
+
 export function openVoiceFiltersModal(): string {
     const key = openModal(modalProps => (
         <VoiceFiltersModal
@@ -72,6 +77,7 @@ function VoiceFiltersModal({ modalProps, close, accept }: VoiceFiltersModalProps
                         <Button onClick={exportVoiceFilters} color={Button.Colors.TRANSPARENT}>Export</Button>
                         <Button onClick={importVoiceFilters} color={Button.Colors.TRANSPARENT}>Import</Button>
                         <Button onClick={() => downloadVoicepack("https://fox3000foxy.com/voicepacks/agents.json")} color={Button.Colors.TRANSPARENT}>Download Default</Button>
+                        <Button onClick={openModelFolder} color={Button.Colors.TRANSPARENT}>Open Model Folder</Button>
                     </Flex>
 
                     <Text>Voice filters list:</Text>

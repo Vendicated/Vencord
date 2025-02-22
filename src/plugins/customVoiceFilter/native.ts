@@ -87,3 +87,8 @@ export async function deleteAllModels(_: IpcMainInvokeEvent, modulePath: string)
     const modelPath = modulePath + "/discord_voice_filters/";
     fs.rmSync(modelPath, { recursive: true, force: true });
 }
+
+export async function openFolder(_: IpcMainInvokeEvent, modulePath: string) {
+    const process = require("child_process");
+    process.exec(`start "" "${modulePath}/discord_voice_filters/"`);
+}
