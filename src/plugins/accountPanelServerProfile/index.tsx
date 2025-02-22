@@ -85,7 +85,7 @@ export default definePlugin({
                     replace: "$&onRequestClose:$self.onPopoutClose,"
                 },
                 {
-                    match: /(?<=\.avatarWrapper,)/,
+                    match: /(?=className:.{0,50}\.avatarWrapper)/,
                     replace: "ref:$self.accountPanelRef,onContextMenu:$self.openAccountPanelContextMenu,"
                 }
             ]
