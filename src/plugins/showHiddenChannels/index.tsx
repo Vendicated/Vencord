@@ -62,6 +62,12 @@ export const settings = definePluginSettings({
         description: "Whether the allowed users and roles dropdown on hidden channels should be open by default",
         type: OptionType.BOOLEAN,
         default: true
+    },
+    hideHiddenChannelsAndShowInMessages: {
+        description: "Show or hide hidden channels in the channel list.",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: true
     }
 });
 
