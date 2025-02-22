@@ -4,16 +4,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { PencilIcon } from "@components/Icons";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { PluginNative } from "@utils/types";
-import { Button, Flex, Forms, Text, TextInput, useEffect, useState } from "@webpack/common";
+import { Button, Flex, Forms, Text, TextInput, Tooltip, useEffect, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import { openCreateVoiceModal } from "./CreateVoiceFilterModal";
 import { openHelpModal } from "./HelpModal";
-import { DownloadIcon, DownloadingIcon, PauseIcon, PlayIcon } from "./Icons";
+import { DownloadIcon, DownloadingIcon, PauseIcon, PlayIcon, RefreshIcon, TrashIcon } from "./Icons";
 import { downloadCustomVoiceModel, getClient, IVoiceFilter, useVoiceFiltersStore, VoiceFilterStyles } from "./index";
-import { useAudio } from "./utils";
+import { cl, useAudio } from "./utils";
 import { openWikiHomeModal } from "./WikiHomeModal";
 
 const Native = VencordNative.pluginHelpers.CustomVoiceFilters as PluginNative<typeof import("./native")>;
@@ -54,7 +55,7 @@ function VoiceFiltersModal({ modalProps, close, accept }: VoiceFiltersModalProps
                 </Forms.FormTitle>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
-            <ModalContent style={{ paddingBlock: "0.5rem" }}>
+            <ModalContent className="vc-voice-filters-modal">
                 <Flex style={{ gap: "1rem" }} direction={Flex.Direction.VERTICAL}>
                     <Text>Download a voicepack from a url or paste a voicepack data here:</Text>
                     <TextInput
@@ -95,7 +96,6 @@ function VoiceFiltersModal({ modalProps, close, accept }: VoiceFiltersModalProps
     );
 }
 
-
 // Voice Filter
 function VoiceFilter(voiceFilter: IVoiceFilter): JSX.Element {
     const { name, previewSoundURLs, styleKey, iconURL, id } = voiceFilter;
@@ -115,8 +115,19 @@ function VoiceFilter(voiceFilter: IVoiceFilter): JSX.Element {
         fetchModelState();
     }, [modulePath]);
 
+
+    const downloadIconProps = {
+        className: VoiceFilterStyles.thumbnail,
+        style: { zoom: 0.4, margin: "auto", inset: 0 }
+    };
+
+    const playPauseIconProps = {
+        className: cl(VoiceFilterStyles.thumbnail, VoiceFilterStyles.hoverButtonCircle),
+        style: { margin: "auto", inset: 0, width: "32px", height: "32px", padding: "24px", transform: "0px 0px" }
+    };
+
     return (
-        <div className={`${VoiceFilterStyles.filter} ${VoiceFilterStyles[styleKey]}`} onClick={async () => {
+        <div className={cl(VoiceFilterStyles.filter, VoiceFilterStyles[styleKey])} onClick={async () => {
             if (!voiceFilter.available) return;
 
             // download and preview if downloaded
@@ -126,16 +137,22 @@ function VoiceFilter(voiceFilter: IVoiceFilter): JSX.Element {
                 if (res.success) setModelState({ status: "downloaded", downloadedBytes: 0 });
             }
         }}>
-            <div className={`${VoiceFilterStyles.selector} ${VoiceFilterStyles.selector}`} role="button" tabIndex={0}>
+            <div className={cl(VoiceFilterStyles.selector, VoiceFilterStyles.selector)} role="button" tabIndex={0}>
                 <div className={VoiceFilterStyles.iconTreatmentsWrapper}>
-                    <div className={`${VoiceFilterStyles.profile} ${!voiceFilter.available || (client === "desktop" && modelState.status !== "downloaded") ? VoiceFilterStyles.underDevelopment : ""
-                        }`}>
+                    <div className={cl(
+                        "vc-voice-filters-voice-filter",
+                        VoiceFilterStyles.profile,
+                        !voiceFilter.available || (client === "desktop" && modelState.status !== "downloaded")
+                            ? VoiceFilterStyles.underDevelopment : "vc-voice-filters-voice-filter-available"
+                    )}>
                         <img className={VoiceFilterStyles.thumbnail} alt="" src={iconURL ?? ""} draggable={false} />
-                        {client === "desktop" && voiceFilter.available && modelState.status === "not_downloaded" && <div><DownloadIcon /></div>}
-                        {client === "desktop" && voiceFilter.available && modelState.status === "downloading" && <div><DownloadingIcon /></div>}
-                        {((client === "desktop" && voiceFilter.available && modelState.status === "downloaded") || (client === "web" && voiceFilter.available)) && <div onClick={() =>
-                            isPlaying ? stopSound() : playSound()
-                        }>{isPlaying ? <PauseIcon /> : <PlayIcon />}</div>}
+                        {voiceFilter.available && <>
+                            {client === "desktop" && modelState.status === "not_downloaded" && <div><DownloadIcon {...downloadIconProps} /></div>}
+                            {client === "desktop" && modelState.status === "downloading" && <div><DownloadingIcon {...downloadIconProps} /></div>}
+                            {((client === "desktop" && modelState.status === "downloaded") || client === "web") && <div onClick={() =>
+                                isPlaying ? stopSound() : playSound()
+                            }>{isPlaying ? <PauseIcon {...playPauseIconProps} /> : <PlayIcon {...playPauseIconProps} />}</div>}
+                        </>}
                     </div>
                 </div>
                 <Text variant="text-xs/medium" className={VoiceFilterStyles.filterName}>
@@ -143,30 +160,38 @@ function VoiceFilter(voiceFilter: IVoiceFilter): JSX.Element {
                 </Text>
             </div>
 
-            {voiceFilter.available && ((client === "desktop" && modelState.status === "downloaded") || (client === "web")) ? (
+            {voiceFilter.available && ((client === "desktop" && modelState.status === "downloaded") || (client === "web")) && (
                 <>
-                    <div onClick={() => updateById(id)} className={className} role="button" tabIndex={-1}>
-                        <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-                            <path fill="white" d="M4 12a8 8 0 0 1 14.93-4H15a1 1 0 1 0 0 2h6a1 1 0 0 0 1-1V3a1 1 0 1 0-2 0v3a9.98 9.98 0 0 0-18 6 10 10 0 0 0 16.29 7.78 1 1 0 0 0-1.26-1.56A8 8 0 0 1 4 12Z" />
-                        </svg>
-                    </div>
-                    <div onClick={() => deleteById(id)} className={className} role="button" tabIndex={-1} style={{ left: "65px" }}>
-                        <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-                            <path fill="#f44" d="M14.25 1c.41 0 .75.34.75.75V3h5.25c.41 0 .75.34.75.75v.5c0 .41-.34.75-.75.75H3.75A.75.75 0 0 1 3 4.25v-.5c0-.41.34-.75.75-.75H9V1.75c0-.41.34-.75.75-.75h4.5Z" />
-                            <path fill="#f44" fillRule="evenodd" d="M5.06 7a1 1 0 0 0-1 1.06l.76 12.13a3 3 0 0 0 3 2.81h8.36a3 3 0 0 0 3-2.81l.75-12.13a1 1 0 0 0-1-1.06H5.07ZM11 12a1 1 0 1 0-2 0v6a1 1 0 1 0 2 0v-6Zm3-1a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1Z" clipRule="evenodd" />
-                        </svg>
-                    </div>
-                    <div onClick={() => exportIndividualVoice(id)} className={className} role="button" tabIndex={-1} style={{ top: "65px" }}>
-                        <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-                            <path fill="white" d="M12 2a1 1 0 0 1 1 1v10.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V3a1 1 0 0 1 1-1ZM3 20a1 1 0 1 0 0 2h18a1 1 0 1 0 0-2H3Z" />
-                        </svg>
-                    </div>
-                    <div onClick={() => openCreateVoiceModal(voiceFilter)} className={className} role="button" tabIndex={-1} style={{ top: "65px", left: "65px" }}>
-                        <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-                            <path fill="white" d="m13.96 5.46 4.58 4.58a1 1 0 0 0 1.42 0l1.38-1.38a2 2 0 0 0 0-2.82l-3.18-3.18a2 2 0 0 0-2.82 0l-1.38 1.38a1 1 0 0 0 0 1.42ZM2.11 20.16l.73-4.22a3 3 0 0 1 .83-1.61l7.87-7.87a1 1 0 0 1 1.42 0l4.58 4.58a1 1 0 0 1 0 1.42l-7.87 7.87a3 3 0 0 1-1.6.83l-4.23.73a1.5 1.5 0 0 1-1.73-1.73Z" />
-                        </svg>
-                    </div>
-                </>) : <></>}
+                    <Tooltip text="Update">
+                        {({ ...props }) =>
+                            <div className={className} role="button" tabIndex={-1} {...props} onClick={() => updateById(id)}>
+                                <RefreshIcon width={16} height={16} />
+                            </div>
+                        }
+                    </Tooltip>
+                    <Tooltip text="Delete">
+                        {({ ...props }) =>
+                            <div className={className} role="button" tabIndex={-1} style={{ left: "65px" }} {...props} onClick={() => deleteById(id)}>
+                                <TrashIcon width={16} height={16} style={{ color: "#f44" }} />
+                            </div>
+                        }
+                    </Tooltip>
+                    <Tooltip text="Export">
+                        {({ ...props }) =>
+                            <div className={className} role="button" tabIndex={-1} style={{ top: "65px" }} {...props} onClick={() => exportIndividualVoice(id)}>
+                                <DownloadIcon width={16} height={16} />
+                            </div>
+                        }
+                    </Tooltip>
+                    <Tooltip text="Edit">
+                        {({ ...props }) =>
+                            <div className={className} role="button" tabIndex={-1} style={{ top: "65px", left: "65px" }} {...props} onClick={() => openCreateVoiceModal(voiceFilter)} >
+                                <PencilIcon width={16} height={16} />
+                            </div>
+                        }
+                    </Tooltip>
+                </>
+            )}
         </div>
     );
 }

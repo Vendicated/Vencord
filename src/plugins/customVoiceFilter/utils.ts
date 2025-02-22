@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { classNameFactory } from "@api/Styles";
 import { useCallback, useEffect, useRef, useState } from "@webpack/common";
 
 export function downloadFile(name: string, data: string): void {
@@ -91,3 +92,5 @@ export function useAudio({ source, key = defaultKey }: UseAudioOptions = {}) {
 
     return { isPlaying, playSound, stopSound, preloadSound };
 }
+
+export const cl = classNameFactory();

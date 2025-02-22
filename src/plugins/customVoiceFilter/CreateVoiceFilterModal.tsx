@@ -57,7 +57,7 @@ function CreateVoiceFilterModal({ modalProps, close, defaultValue }: CreateVoice
     }, [voiceFilter]);
 
     const keyOptions: SelectOption[] = useMemo(() =>
-        [{ value: "", label: "(empty)" }, ...Object.keys(voices).map(name => ({ value: name, label: name }))],
+        [{ value: "", label: "(empty)" }, ...(voices ? Object.keys(voices).map(name => ({ value: name, label: name })) : [])],
         []);
 
     return (
@@ -68,7 +68,7 @@ function CreateVoiceFilterModal({ modalProps, close, defaultValue }: CreateVoice
                 </Forms.FormTitle>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
-            <ModalContent style={{ paddingBlock: "0.5rem" }}>
+            <ModalContent className="vc-voice-filters-modal">
                 <Flex style={{ gap: "1rem" }} direction={Flex.Direction.VERTICAL}>
                     <Forms.FormSection>
                         <Forms.FormTitle>Name<span style={{ color: "var(--text-danger)" }}>*</span></Forms.FormTitle>

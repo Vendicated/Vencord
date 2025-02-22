@@ -37,7 +37,7 @@ function ConfirmModal({ modalProps, message, accept, close }: ConfirmModalProps)
                 </Forms.FormTitle>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
-            <ModalContent style={{ paddingBlock: "0.5rem" }}>
+            <ModalContent className="vc-voice-filters-modal">
                 <Text>{message}</Text>
             </ModalContent>
             <ModalFooter>
