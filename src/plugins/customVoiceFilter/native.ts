@@ -23,9 +23,16 @@ interface IVoiceFilter {
     downloadUrl?: string;
 }
 
+interface IDownloadResponse {
+    success: boolean;
+    voiceFilter: IVoiceFilter;
+    path: string | null;
+    response: Response | null;
+}
+
 const fs = require("fs");
 
-export async function downloadCustomVoiceFilter(_: IpcMainInvokeEvent, modulePath: string, voiceFilter: IVoiceFilter): Promise<{ success: boolean, voiceFilter: IVoiceFilter, path: string | null, response: Response | null; }> {
+export async function downloadCustomVoiceFilter(_: IpcMainInvokeEvent, modulePath: string, voiceFilter: IVoiceFilter): Promise<IDownloadResponse> {
     if (!fs.existsSync(modulePath + "/discord_voice_filters")) {
         fs.mkdirSync(modulePath + "/discord_voice_filters");
     }
