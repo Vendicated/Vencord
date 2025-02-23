@@ -131,7 +131,7 @@ export default definePlugin({
                 element: BackupAndRestoreTab,
                 className: "vc-backup-restore"
             },
-            {
+            IS_DEV && {
                 section: "EquicordPatchHelper",
                 label: "Patch Helper",
                 searchableTitles: ["Patch Helper"],
