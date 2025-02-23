@@ -34,9 +34,9 @@ export default definePlugin({
 
     getVoiceBackgroundStyles({ className, participantUserId }: any) {
         if (!className.includes("tile_")) return;
+        if (!participantUserId) return;
 
         const user = UserStore.getUser(participantUserId);
-
         const avatarUrl = IconUtils.getUserAvatarURL(user, false, 1024);
 
         if (Settings.plugins.USRBG.enabled && Settings.plugins.USRBG.voiceBackground) {
