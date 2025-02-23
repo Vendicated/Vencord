@@ -77,14 +77,14 @@ const buildConfigs = [
         minify: true,
         format: "iife",
         outbase: "node_modules/monaco-editor/esm/",
-        outdir: "dist/vendor/monaco"
+        outdir: "dist/browser/monaco"
     },
     {
         entryPoints: ["browser/monaco.ts"],
         bundle: true,
         minify: true,
         format: "iife",
-        outfile: "dist/vendor/monaco/index.js",
+        outfile: "dist/browser/vendor/monaco/index.js",
         loader: {
             ".ttf": "file"
         }
@@ -96,7 +96,7 @@ const buildConfigs = [
     },
     {
         ...commonOptions,
-        outfile: "dist/extension.js",
+        outfile: "dist/browser/extension.js",
         define: {
             ...commonOptions.define,
             IS_EXTENSION: "true"
@@ -160,9 +160,9 @@ async function loadDir(dir, basePath = "") {
  */
 async function buildExtension(target, files) {
     const entries = {
-        "dist/Vencord.js": await readFile("dist/extension.js"),
-        "dist/Vencord.css": await readFile("dist/extension.css"),
-        ...await loadDir("dist/vendor/monaco", "dist/"),
+        "dist/Vencord.js": await readFile("dist/browser/extension.js"),
+        "dist/Vencord.css": await readFile("dist/browser/extension.css"),
+        ...await loadDir("dist/browser/vendor/monaco", "dist/browser/"),
         ...Object.fromEntries(await Promise.all(RnNoiseFiles.map(async file =>
             [`third-party/rnnoise/${file.replace(/^dist\//, "")}`, await readFile(`node_modules/@sapphi-red/web-noise-suppressor/${file}`)]
         ))),
