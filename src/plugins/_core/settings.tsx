@@ -21,7 +21,6 @@ import BackupAndRestoreTab from "@components/VencordSettings/BackupAndRestoreTab
 import CloudTab from "@components/VencordSettings/CloudTab";
 import PatchHelperTab from "@components/VencordSettings/PatchHelperTab";
 import PluginsTab from "@components/VencordSettings/PluginsTab";
-import ThemesTab from "@components/VencordSettings/ThemesTab";
 import UpdaterTab from "@components/VencordSettings/UpdaterTab";
 import VencordTab from "@components/VencordSettings/VencordTab";
 import { Devs } from "@utils/constants";
@@ -107,7 +106,7 @@ export default definePlugin({
                 section: "EquicordThemes",
                 label: "Themes",
                 searchableTitles: ["Themes"],
-                element: ThemesTab,
+                element: require("@components/ThemeSettings/ThemesTab").default,
                 className: "vc-themes"
             },
             !IS_UPDATER_DISABLED && {
