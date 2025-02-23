@@ -75,3 +75,7 @@
 .vc-voice-filters-voice-filter:not(.vc-voice-filters-voice-filter-available) img {
   filter: brightness(0.5);
 }
+
+.vc-voice-filters-modal-input {
+  flex: 1;
+}

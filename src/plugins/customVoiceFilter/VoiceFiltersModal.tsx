@@ -58,13 +58,13 @@ function VoiceFiltersModal({ modalProps, close, accept }: VoiceFiltersModalProps
             <ModalContent className="vc-voice-filters-modal">
                 <Flex style={{ gap: "1rem" }} direction={Flex.Direction.VERTICAL}>
                     <Text>Download a voicepack from a url or paste a voicepack data here:</Text>
-                    <Flex style={{ display: "grid", gridTemplateColumns: "89% 10%", gap: "0.5rem" }}>
+                    <Flex style={{ gap: "0.5rem" }} align={Flex.Align.CENTER}>
                         <TextInput
                             value={url}
                             placeholder="( e.g. https://fox3000foxy.com/voicepacks/agents.json )"
                             onChange={setUrl}
                             onKeyDown={e => { if (e.key === "Enter") downloadVoicepack(url); }}
-                            style={{ width: "100%" }}
+                            className="vc-voice-filters-modal-input"
                         />
                         <Button onClick={() => downloadVoicepack(url || "https://fox3000foxy.com/voicepacks/agents.json")}>Download</Button>
                     </Flex>
