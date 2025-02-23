@@ -17,14 +17,11 @@ export type Module = {
 /** exports can be anything, however initially it is always an empty object */
 export type ModuleFactory = (this: ModuleExports, module: Module, exports: ModuleExports, require: WebpackRequire) => void;
 
-export type WebpackQueues = unique symbol | "__webpack_queues__";
-export type WebpackExports = unique symbol | "__webpack_exports__";
-export type WebpackError = unique symbol | "__webpack_error__";
-
+/** Keys here can be symbols too, but we can't properly type them */
 export type AsyncModulePromise = Promise<ModuleExports> & {
-    [WebpackQueues]: (fnQueue: ((queue: any[]) => any)) => any;
-    [WebpackExports]: ModuleExports;
-    [WebpackError]?: any;
+    "__webpack_queues__": (fnQueue: ((queue: any[]) => any)) => any;
+    "__webpack_exports__": ModuleExports;
+    "__webpack_error__"?: any;
 };
 
 export type AsyncModuleBody = (
@@ -152,7 +149,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
      * }
      * // exports is now { exportName: someExportedValue } (but each value is actually a getter)
      */
-    d: (this: WebpackRequire, exports: AnyRecord, definiton: AnyRecord) => void;
+    d: (this: WebpackRequire, exports: Record<PropertyKey, any>, definiton: Record<PropertyKey, () => ModuleExports>) => void;
     /** The ensure chunk handlers, which are used to ensure the files of the chunks are loaded, or load if necessary */
     f: EnsureChunkHandlers;
     /**
