@@ -70,7 +70,7 @@ function VoiceFiltersModal({ modalProps, close, accept }: VoiceFiltersModalProps
                     </Flex>
 
                     <Text>Voice filters list:</Text>
-                    <Flex style={{ gap: "0.5rem" }} wrap={Flex.Wrap.WRAP}>
+                    <Flex style={{ gap: "1rem", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))" }} wrap={Flex.Wrap.WRAP}>
                         {voiceComponents.length > 0 ? voiceComponents : <Text style={{ fontStyle: "italic" }}>No voice filters found</Text>}
                     </Flex>
                     {client === "web" && <Text style={{ fontStyle: "italic" }}>⚠️ Voice filters are not available on web client or vesktop! Please use the desktop client to use custom voice filters.</Text>}
