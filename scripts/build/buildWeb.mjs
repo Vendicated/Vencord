@@ -77,7 +77,7 @@ const buildConfigs = [
         minify: true,
         format: "iife",
         outbase: "node_modules/monaco-editor/esm/",
-        outdir: "dist/browser/monaco"
+        outdir: "dist/browser/vendor/monaco"
     },
     {
         entryPoints: ["browser/monaco.ts"],
