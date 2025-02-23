@@ -9,10 +9,10 @@ import { findByCode, findByProps, findByPropsLazy } from "@webpack";
 import { Parser } from "@webpack/common";
 import { JSX } from "react";
 
-import { openCreateVoiceModal } from "./CreateVoiceFilterModal";
-import { openHelpModal } from "./HelpModal";
+import CreateVoiceFilterModal from "./CreateVoiceFilterModal";
+import HelpModal from "./HelpModal";
 import { cl } from "./utils";
-import { openVoiceFiltersModal } from "./VoiceFiltersModal";
+import VoiceFiltersModal from "./VoiceFiltersModal";
 
 interface MarkdownRules {
   allowDevLinks: boolean;
@@ -42,17 +42,17 @@ const MarkdownContainerClasses = findByPropsLazy("markup", "codeContainer");
 const modalLinkRegex = /^<vf:(help|createVoice|main)>/;
 const imageRegex = /^!\[((?:\[[^\]]*\]|[^[\]]|\](?=[^[]*\]))*)\]\(\s*((?:\([^)]*\)|[^\s\\]|\\.)*?)\)/;
 
-const actions: Record<string, { action: () => string, name: string; }> = {
+const actions: Record<string, { action: () => void, name: string; }> = {
   help: {
-    action: openHelpModal,
+    action: () => HelpModal.open(),
     name: "Help menu"
   },
   createVoice: {
-    action: () => openCreateVoiceModal(),
+    action: () => CreateVoiceFilterModal.open(),
     name: "Voice pack creator menu"
   },
   main: {
-    action: openVoiceFiltersModal,
+    action: () => VoiceFiltersModal.open(),
     name: "Main menu"
   },
 };
@@ -63,7 +63,7 @@ const parser: typeof Parser.parse = proxyLazy(() => {
 
   const customRules = {
     modalLink: {
-      order: DiscordRules.staticRouteLink,
+      order: DiscordRules.staticRouteLink.order,
       match: source => modalLinkRegex.exec(source),
       parse: ([, target]) => (actions[target]),
       react: ({ action, name }) => (

@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize } from "@utils/modal";
 import { Button, Card, Flex, Forms, Text, useState } from "@webpack/common";
 
 import { ChevronIcon } from "./Icons";
 import { Markdown } from "./Markdown";
-import { cl } from "./utils";
+import { cl, modal } from "./utils";
 
 interface Section {
     title: string;
@@ -49,13 +49,7 @@ Enjoy you now have a ONNX model file for your voicepack!`
     }
 ];
 
-interface WikiHomeModalProps {
-    modalProps: ModalProps;
-    close: () => void;
-    accept: () => void;
-}
-
-export function WikiHomeModal({ modalProps, close, accept }: WikiHomeModalProps) {
+export default modal(function WikiHomeModal({ modalProps, close }) {
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE} className="vc-voice-filters-wiki">
             <ModalHeader>
@@ -74,25 +68,11 @@ export function WikiHomeModal({ modalProps, close, accept }: WikiHomeModalProps)
                 </Flex>
             </ModalContent>
             <ModalFooter>
-                <Button onClick={close}>Close</Button>
+                <Button onClick={() => close()}>Close</Button>
             </ModalFooter>
         </ModalRoot>
     );
-}
-
-export function openWikiHomeModal(): string {
-    const key = openModal(modalProps => (
-        <WikiHomeModal
-            modalProps={modalProps}
-            close={() => closeModal(key)}
-            accept={() => {
-                // console.warn("accepted", url);
-                closeModal(key);
-            }}
-        />
-    ));
-    return key;
-}
+});
 
 interface CollapsibleCardProps {
     title: string;

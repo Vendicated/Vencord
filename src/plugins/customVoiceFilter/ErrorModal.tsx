@@ -4,30 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize } from "@utils/modal";
 import { Button, Forms, Text } from "@webpack/common";
-import { JSX } from "react";
 
-
-// Open Error Modal
-export function openErrorModal(message: string): string {
-    const key = openModal(modalProps => (
-        <ErrorModal
-            modalProps={modalProps}
-            message={message}
-            close={() => closeModal(key)}
-        />
-    ));
-    return key;
-}
+import { modal } from "./utils";
 
 interface ErrorModalProps {
-    modalProps: ModalProps;
     message: string;
-    close: () => void;
 }
 
-function ErrorModal({ modalProps, close, message }: ErrorModalProps): JSX.Element {
+export default modal<ErrorModalProps>(function ErrorModal({ modalProps, close, message }) {
     return (
         <ModalRoot {...modalProps} size={ModalSize.SMALL}>
             <ModalHeader separator={false}>
@@ -40,8 +26,8 @@ function ErrorModal({ modalProps, close, message }: ErrorModalProps): JSX.Elemen
                 <Text>{message}</Text>
             </ModalContent>
             <ModalFooter>
-                <Button onClick={close}>Close</Button>
+                <Button onClick={() => close()}>Close</Button>
             </ModalFooter>
         </ModalRoot>
     );
-}
+});

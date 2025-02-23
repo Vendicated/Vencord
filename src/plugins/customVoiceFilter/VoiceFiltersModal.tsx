@@ -5,43 +5,23 @@
  */
 
 import { PencilIcon } from "@components/Icons";
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize } from "@utils/modal";
 import { PluginNative } from "@utils/types";
 import { Button, Flex, Forms, Text, TextInput, Tooltip, useEffect, useState } from "@webpack/common";
 import { JSX } from "react";
 
-import { openCreateVoiceModal } from "./CreateVoiceFilterModal";
+import CreateVoiceFilterModal from "./CreateVoiceFilterModal";
 import { DownloadIcon, DownloadingIcon, PauseIcon, PlayIcon, RefreshIcon, TrashIcon } from "./Icons";
 import { downloadCustomVoiceModel, getClient, IVoiceFilter, useVoiceFiltersStore, VoiceFilterStyles } from "./index";
-import { openSettingsModal } from "./SettingsModal";
-import { cl, useAudio } from "./utils";
-import { openWikiHomeModal } from "./WikiHomeModal";
+import SettingsModal from "./SettingsModal";
+import { cl, modal, useAudio } from "./utils";
+import WikiHomeModal from "./WikiHomeModal";
 
 const Native = VencordNative.pluginHelpers.CustomVoiceFilters as PluginNative<typeof import("./native")>;
 
-export function openVoiceFiltersModal(): string {
-    const key = openModal(modalProps => (
-        <VoiceFiltersModal
-            modalProps={modalProps}
-            close={() => closeModal(key)}
-            accept={() => {
-                // console.warn("accepted", url);
-                closeModal(key);
-            }}
-        />
-    ));
-    return key;
-}
-
-interface VoiceFiltersModalProps {
-    modalProps: ModalProps;
-    close: () => void;
-    accept: () => void;
-}
-
-function VoiceFiltersModal({ modalProps, close, accept }: VoiceFiltersModalProps): JSX.Element {
+export default modal(function VoiceFiltersModal({ modalProps, close }) {
     const [url, setUrl] = useState("");
-    const { downloadVoicepack, exportVoiceFilters, importVoiceFilters, voiceFilters } = useVoiceFiltersStore();
+    const { downloadVoicepack, voiceFilters } = useVoiceFiltersStore();
     const { client } = getClient();
     const voiceComponents = Object.values(voiceFilters).map(voice =>
         <VoiceFilter {...voice} key={voice.id} />
@@ -82,15 +62,15 @@ function VoiceFiltersModal({ modalProps, close, accept }: VoiceFiltersModalProps
             </ModalContent>
             <ModalFooter>
                 <Flex style={{ gap: "0.5rem" }} justify={Flex.Justify.END} align={Flex.Align.CENTER}>
-                    <Button color={Button.Colors.TRANSPARENT} onClick={openSettingsModal}>Settings</Button>
-                    <Button color={Button.Colors.TRANSPARENT} onClick={() => openCreateVoiceModal()}>Create Voicepack</Button>
-                    <Button color={Button.Colors.GREEN} onClick={openWikiHomeModal}>Wiki</Button>
-                    <Button color={Button.Colors.RED} onClick={accept}>Close</Button>
+                    <Button color={Button.Colors.TRANSPARENT} onClick={() => SettingsModal.open()}>Settings</Button>
+                    <Button color={Button.Colors.TRANSPARENT} onClick={() => CreateVoiceFilterModal.open()}>Create Voicepack</Button>
+                    <Button color={Button.Colors.GREEN} onClick={() => WikiHomeModal.open()}>Wiki</Button>
+                    <Button color={Button.Colors.RED} onClick={() => close()}>Close</Button>
                 </Flex>
             </ModalFooter >
         </ModalRoot >
     );
-}
+});
 
 // Voice Filter
 function VoiceFilter(voiceFilter: IVoiceFilter): JSX.Element {
@@ -181,7 +161,7 @@ function VoiceFilter(voiceFilter: IVoiceFilter): JSX.Element {
                     </Tooltip>
                     <Tooltip text="Edit">
                         {({ ...props }) =>
-                            <div className={className} role="button" tabIndex={-1} style={{ top: "65px", left: "65px" }} {...props} onClick={() => openCreateVoiceModal(voiceFilter)} >
+                            <div className={className} role="button" tabIndex={-1} style={{ top: "65px", left: "65px" }} {...props} onClick={() => CreateVoiceFilterModal.open({ defaultValue: voiceFilter })} >
                                 <PencilIcon width={16} height={16} />
                             </div>
                         }

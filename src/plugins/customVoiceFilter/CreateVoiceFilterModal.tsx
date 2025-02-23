@@ -4,34 +4,23 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize } from "@utils/modal";
 import { Button, Flex, Forms, Select, TextInput, useCallback, useMemo, UserStore, useState } from "@webpack/common";
 import { SelectOption } from "@webpack/types";
-import { JSX } from "react";
 
 import { voices } from ".";
-import { openErrorModal } from "./ErrorModal";
-import { openHelpModal } from "./HelpModal";
+import ErrorModal from "./ErrorModal";
+import HelpModal from "./HelpModal";
 import { IVoiceFilter, useVoiceFiltersStore } from "./index";
+import { modal } from "./utils";
 const requiredFields = ["name", "iconURL", "onnxFileUrl", "previewSoundURLs"] as const satisfies readonly (keyof IVoiceFilter)[];
 
-
-export function openCreateVoiceModal(defaultValue?: Partial<IVoiceFilter>): string {
-    const key = openModal(modalProps => (
-        <CreateVoiceFilterModal modalProps={modalProps} close={() => closeModal(key)} defaultValue={defaultValue} />
-    ));
-    return key;
-}
-
 interface CreateVoiceFilterModalProps {
-    modalProps: ModalProps;
-    close: () => void;
     defaultValue?: Partial<IVoiceFilter>;
 }
 
-
 //  Create Voice Filter Modal
-function CreateVoiceFilterModal({ modalProps, close, defaultValue }: CreateVoiceFilterModalProps): JSX.Element {
+export default modal<CreateVoiceFilterModalProps, "cancel">(function CreateVoiceFilterModal({ modalProps, close, defaultValue }) {
     const currentUser = useMemo(() => UserStore.getCurrentUser(), []);
     const [voiceFilter, setVoiceFilter] = useState(() => (
         { author: currentUser.id, name: "", iconURL: "", styleKey: "", onnxFileUrl: "", ...defaultValue }
@@ -53,7 +42,7 @@ function CreateVoiceFilterModal({ modalProps, close, defaultValue }: CreateVoice
             } satisfies IVoiceFilter));
             close();
         } else {
-            openErrorModal("Please fill in all required fields");
+            ErrorModal.open({ message: "Please fill in all required fields" });
         }
     }, [voiceFilter]);
 
@@ -123,11 +112,11 @@ function CreateVoiceFilterModal({ modalProps, close, defaultValue }: CreateVoice
             </ModalContent>
             <ModalFooter>
                 <Flex style={{ gap: "0.5rem" }} justify={Flex.Justify.END} align={Flex.Align.CENTER}>
-                    <Button color={Button.Colors.TRANSPARENT} onClick={openHelpModal}>How to create a voicepack?</Button>
+                    <Button color={Button.Colors.TRANSPARENT} onClick={() => HelpModal.open()}>How to create a voicepack?</Button>
                     <Button color={Button.Colors.GREEN} onClick={submit}>{voiceFilter.id ? "Save" : "Create"}</Button>
-                    <Button color={Button.Colors.TRANSPARENT} onClick={close} >Cancel</Button>
+                    <Button color={Button.Colors.TRANSPARENT} onClick={() => close("cancel")} >Cancel</Button>
                 </Flex>
             </ModalFooter>
         </ModalRoot>
     );
-}
+});

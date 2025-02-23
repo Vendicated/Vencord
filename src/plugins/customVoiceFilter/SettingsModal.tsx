@@ -5,25 +5,14 @@
  */
 
 import { Margins } from "@utils/margins";
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize } from "@utils/modal";
 import { PluginNative } from "@utils/types";
 import { Button, Flex, Forms, Slider } from "@webpack/common";
-import { JSX } from "react";
 
 import plugin, { settings, useVoiceFiltersStore } from "./index";
+import { modal } from "./utils";
 
 const Native = VencordNative.pluginHelpers.CustomVoiceFilters as PluginNative<typeof import("./native")>;
-export function openSettingsModal(): string {
-    const key = openModal(modalProps => (
-        <SettingsModal modalProps={modalProps} close={() => closeModal(key)} />
-    ));
-    return key;
-}
-
-interface SettingsModalProps {
-    modalProps: ModalProps;
-    close: () => void;
-}
 
 function openModelFolder() {
     const { modulePath } = useVoiceFiltersStore.getState();
@@ -31,7 +20,7 @@ function openModelFolder() {
 }
 
 //  Create Voice Filter Modal
-function SettingsModal({ modalProps, close }: SettingsModalProps): JSX.Element {
+export default modal(function SettingsModal({ modalProps, close }) {
     const settingsState = settings.use();
     const { settings: { def } } = plugin;
     const { deleteAll, exportVoiceFilters, importVoiceFilters } = useVoiceFiltersStore();
@@ -85,9 +74,9 @@ function SettingsModal({ modalProps, close }: SettingsModalProps): JSX.Element {
             </ModalContent>
             <ModalFooter>
                 <Flex style={{ gap: "0.5rem" }} justify={Flex.Justify.END} align={Flex.Align.CENTER}>
-                    <Button color={Button.Colors.GREEN} onClick={close} >Save & Exit</Button>
+                    <Button color={Button.Colors.GREEN} onClick={() => close()} >Save & Exit</Button>
                 </Flex>
             </ModalFooter>
         </ModalRoot>
     );
-}
+});

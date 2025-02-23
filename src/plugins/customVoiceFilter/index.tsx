@@ -11,13 +11,12 @@ import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { proxyLazy } from "@utils/lazy";
-import { closeModal } from "@utils/modal";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { filters, findAll, findByProps, findStore } from "@webpack";
 import { zustandCreate, zustandPersist } from "@webpack/common";
 
-import { openConfirmModal } from "./ConfirmModal";
-import { openErrorModal } from "./ErrorModal";
+import ConfirmModal from "./ConfirmModal";
+import ErrorModal from "./ErrorModal";
 import { CustomVoiceFilterChatBarIcon } from "./Icons";
 import { downloadFile } from "./utils";
 export let voices: Record<string, IVoiceFilter> | null = null;
@@ -89,28 +88,34 @@ export const useVoiceFiltersStore: ZustandStore<CustomVoiceFilterStore> = proxyL
             set: (voiceFilters: IVoiceFilterMap) => set({ voiceFilters }),
             updateById: (id: string) => {
                 console.warn("updating voice filter:", id);
-                openConfirmModal("Are you sure you want to update this voicepack?", async key => {
-                    console.warn("accepted to update voice filter:", id);
-                    closeModal(key);
-                    const { downloadUrl } = get().voiceFilters[id];
-                    const hash = downloadUrl?.includes("?") ? "&" : "?";
-                    get().downloadVoicepack(downloadUrl + hash + "v=" + Date.now());
+
+                ConfirmModal.open({ message: "Are you sure you want to update this voicepack?" }, state => {
+                    if (state === "accept") {
+                        console.warn("accepted to update voice filter:", id);
+                        const { downloadUrl } = get().voiceFilters[id];
+                        const hash = downloadUrl?.includes("?") ? "&" : "?";
+                        get().downloadVoicepack(downloadUrl + hash + "v=" + Date.now());
+                    }
                 });
             },
             deleteById: (id: string) => {
                 console.warn("deleting voice filter:", id);
-                openConfirmModal("Are you sure you want to delete this voicepack?", async key => {
-                    console.warn("accepted to delete voice filter:", id);
-                    closeModal(key);
-                    const { voiceFilters } = get();
-                    delete voiceFilters[id];
-                    set({ voiceFilters });
+
+                ConfirmModal.open({ message: "Are you sure you want to delete this voicepack?" }, state => {
+                    if (state === "accept") {
+                        console.warn("accepted to delete voice filter:", id);
+                        const { voiceFilters } = get();
+                        delete voiceFilters[id];
+                        set({ voiceFilters });
+                    }
                 });
             },
             deleteAll: () => {
-                openConfirmModal("Are you sure you want to delete all voicepacks?", () => {
-                    set({ voiceFilters: {} });
-                    get().updateVoicesList();
+                ConfirmModal.open({ message: "Are you sure you want to delete all voicepacks?" }, state => {
+                    if (state === "accept") {
+                        set({ voiceFilters: {} });
+                        get().updateVoicesList();
+                    }
                 });
             },
             exportVoiceFilters: () => {
@@ -138,7 +143,7 @@ export const useVoiceFiltersStore: ZustandStore<CustomVoiceFilterStore> = proxyL
                             const data = JSON.parse(e.target?.result as string);
                             set({ voiceFilters: data });
                         } catch (error) {
-                            openErrorModal("Invalid voice filters file");
+                            ErrorModal.open({ message: "Invalid voice filters file" });
                         }
                     };
                     reader.readAsText(file);
@@ -194,7 +199,9 @@ export const useVoiceFiltersStore: ZustandStore<CustomVoiceFilterStore> = proxyL
                     set({ voiceFilters });
 
                 } catch (error) {
-                    openErrorModal(error instanceof Error ? error.message : "Failed to process voice pack");
+                    ErrorModal.open({
+                        message: error instanceof Error ? error.message : "Failed to process voice pack"
+                    });
                 }
             },
             // downloadVoiceModel: async (voiceFilter: IVoiceFilter) => {

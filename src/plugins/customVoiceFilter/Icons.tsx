@@ -7,7 +7,7 @@
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { JSX, SVGProps } from "react";
 
-import { openVoiceFiltersModal } from "./VoiceFiltersModal";
+import VoiceFiltersModal from "./VoiceFiltersModal";
 
 
 interface IconProps extends SVGProps<SVGSVGElement> { }
@@ -99,7 +99,7 @@ export const CustomVoiceFilterChatBarIcon: ChatBarButtonFactory = ({ isMainChat 
     return (
         <ChatBarButton
             tooltip="Open Custom Voice Filter Menu"
-            onClick={openVoiceFiltersModal}
+            onClick={() => VoiceFiltersModal.open()}
             buttonProps={{
                 "aria-haspopup": "dialog"
             }}

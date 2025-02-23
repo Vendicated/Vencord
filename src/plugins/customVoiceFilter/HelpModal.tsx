@@ -4,30 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize } from "@utils/modal";
 import { Button, Flex, Forms } from "@webpack/common";
-import { JSX } from "react";
 
 import { templateVoicepack, voices } from ".";
 import { Markdown } from "./Markdown";
-import { downloadFile } from "./utils";
+import { downloadFile, modal } from "./utils";
 
-export function openHelpModal(): string {
-    const key = openModal(modalProps => (
-        <HelpModal
-            modalProps={modalProps}
-            close={() => closeModal(key)}
-        />
-    ));
-    return key;
-}
-
-interface HelpModalProps {
-    modalProps: ModalProps;
-    close: () => void;
-}
-
-function HelpModal({ modalProps, close }: HelpModalProps): JSX.Element {
+export default modal(function HelpModal({ modalProps, close }) {
     const description = `To build your own voicepack, you need to have a voicepack file. You can download one from the template or look at this tutorial.
 
 The voicepack file is a json file that contains the voicepack data.
@@ -54,9 +38,9 @@ Once you have the voicepack file, you can use the <vf:main> to manage your voice
                     <Button onClick={() => downloadFile("voicepack-template.json", templateVoicepack)} color={Button.Colors.BRAND_NEW}>
                         Download template file
                     </Button>
-                    <Button onClick={close} color={Button.Colors.TRANSPARENT}>Close</Button>
+                    <Button onClick={() => close()} color={Button.Colors.TRANSPARENT}>Close</Button>
                 </Flex>
             </ModalFooter>
         </ModalRoot>
     );
-}
+});
