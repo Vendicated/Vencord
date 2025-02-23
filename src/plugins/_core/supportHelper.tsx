@@ -292,19 +292,19 @@ export default definePlugin({
         }
 
         if (props.channel.id === SUPPORT_CHANNEL_ID) {
-            if (props.message.content.includes("/vencord-debug") || props.message.content.includes("/vencord-plugins")) {
+            if (props.message.content.includes("/equicord-debug") || props.message.content.includes("/equicord-plugins")) {
                 buttons.push(
                     <Button
                         key="vc-dbg"
                         onClick={async () => sendMessage(props.channel.id, { content: await generateDebugInfoMessage() })}
                     >
-                        Run /vencord-debug
+                        Run /equicord-debug
                     </Button>,
                     <Button
                         key="vc-plg-list"
                         onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
                     >
-                        Run /vencord-plugins
+                        Run /equicord-plugins
                     </Button>
                 );
             }
