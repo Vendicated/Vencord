@@ -48,8 +48,8 @@ export default definePlugin({
         {
             find: ".COLLECTIBLES_SHOP_FULLSCREEN))",
             replacement: {
-                match: /(\?void 0:(\i)\.channelId.{0,300})\i\.Fragment,{/,
-                replace: "$1$self.render,{currentChannel:$2,"
+                match: /(\?void 0:(\i)\.channelId.{0,300}return)((.{0,15})"div",{.*?\])\}\)\}\}/,
+                replace: "$1$4$self.render,{currentChannel:$2,children:$3})})}}"
             }
         },
         // ctrl click to open in new tab in inbox unread
