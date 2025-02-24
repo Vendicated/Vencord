@@ -22,6 +22,36 @@ import { LazyComponent } from "@utils/react";
 import { FilterFn, filters, lazyWebpackSearchHistory, waitFor } from "../webpack";
 const SYM_FORWARD_REF = Symbol.for("react.forward_ref");
 const SYM_MEMO = Symbol.for("react.memo");
+export function setComponentName(maybeComponent: any, name: string): void {
+    try {
+        if (
+            typeof maybeComponent === "function" &&
+            "toString" in maybeComponent &&
+            typeof maybeComponent.toString === "function"
+        ) {
+            const str: string = (() => { }).toString.call(maybeComponent);
+            if (typeof str !== "string") void 0;
+            else if (str.startsWith("class")) {
+                Object.defineProperty(maybeComponent, "displayName", { value: name });
+            } else {
+                // because typeof v === "function" and v is not a class
+                // v must be a function or an arrow function
+                Object.defineProperty(maybeComponent, "name", { value: name });
+            }
+        } else if (
+            "$$typeof" in maybeComponent &&
+            typeof maybeComponent.$$typeof === "symbol" &&
+            (maybeComponent.$$typeof === SYM_FORWARD_REF || maybeComponent.$$typeof === SYM_MEMO)
+        ) {
+            Object.defineProperty(maybeComponent, "displayName", { value: name });
+        } else {
+            throw new Error("Unknown component type, not a function, class, memo or a forwardRef");
+        }
+
+    } catch (e) {
+        (IS_DEV ? console.warn : console.debug)(e, maybeComponent, name);
+    }
+}
 export function waitForComponent<T extends React.ComponentType<any> = React.ComponentType<any> & Record<string, any>>(name: string, filter: FilterFn | string | string[]): T {
     if (IS_REPORTER) lazyWebpackSearchHistory.push(["waitForComponent", Array.isArray(filter) ? filter : [filter]]);
 
@@ -32,35 +62,7 @@ export function waitForComponent<T extends React.ComponentType<any> = React.Comp
     waitFor(filter, (v: any) => {
         myValue = v;
         Object.assign(lazyComponent, v);
-        // TODO: extract into helper that assigns a name to a component
-        try {
-            if (
-                typeof v === "function" &&
-                "toString" in v &&
-                typeof v.toString === "function"
-            ) {
-                const str: string = (() => { }).toString.call(v);
-                if (typeof str !== "string") void 0;
-                else if (str.startsWith("class")) {
-                    Object.defineProperty(v, "displayName", { value: name });
-                } else {
-                    // because typeof v === "function" and v is not a class
-                    // v must be a function or an arrow function
-                    Object.defineProperty(v, "name", { value: name });
-                }
-            } else if (
-                "$$typeof" in v &&
-                typeof v.$$typeof === "symbol" &&
-                (v.$$typeof === SYM_FORWARD_REF || v.$$typeof === SYM_MEMO)
-            ) {
-                Object.defineProperty(v, "displayName", { value: name });
-            } else {
-                throw new Error("Unknown component type");
-            }
-        }
-        catch (e) {
-            console.warn(name, e, v);
-        }
+        setComponentName(v, name);
     }, { isIndirect: true });
 
     return lazyComponent;
