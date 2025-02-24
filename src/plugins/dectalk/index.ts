@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { SelectedChannelStore, UserStore } from "@webpack/common";
@@ -35,6 +36,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Play audio for all messages, regardless of content (will ignore code blocks)",
         default: false
+    },
+    volume: {
+        type: OptionType.SLIDER,
+        markers: makeRange(0, 1, 0.1),
+        description: "Volume of the DecTalk audio",
+        default: 1
     }
 });
 
@@ -54,6 +61,7 @@ async function getAudio(text) {
         const url = URL.createObjectURL(blob);
 
         const audio = new Audio(url);
+        audio.volume = settings.store.volume;
 
         audio.onended = () => {
             URL.revokeObjectURL(url);
