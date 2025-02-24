@@ -55,7 +55,18 @@ export default definePlugin({
                     + `onClick:(vcDoubleClickEvt)=>$self.shouldRunOnClick(vcDoubleClickEvt,${props})&&${onClick}()`,
             }
         },
-        // Active now sidebar
+        // Voice channels in the active now section
+        {
+            find: ',["embedded_background"]',
+            replacement: {
+                // There are two onClick events for this section, one for the server icon, and another for the channel name
+                // The server icon takes you to the voice channel, but doesnt join it. The channel name joins the voice channel
+                // replace the onClick handler for the channel name with the one for the server icon
+                // The last {0,1000} cannot be lazy as it needs to match the onClick handler for the icon, not the channel name
+                match: /(?=focusProps)(?<=onClick:.{0,100}selectVoiceChannel.{0,100}},.{0,100})(?<=onClick:(.{0,100}\i\.id\)),.{0,1000})/,
+                replace: "onClick:$1,"
+            }
+        }
     ],
 
     shouldRunOnClick(e: MouseEvent, { channelId }) {
