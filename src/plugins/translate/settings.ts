@@ -71,23 +71,23 @@ export const settings = definePluginSettings({
     },
     openaiCompatibleApiKey: {
         type: OptionType.STRING,
-        description: "OpenAI compatible API key",
+        description: "OpenAI compatible API key (e.g., sk-xxx, AIzaSyA-xxx)",
         default: "",
-        placeholder: "API key (e.g., sk-xxx)",
+        placeholder: "sk-1234567890",
         disabled: () => IS_WEB
     },
     openaiCompatibleBaseURL: {
         type: OptionType.STRING,
-        description: "Base URL for OpenAI compatible API",
+        description: "Base URL for OpenAI compatible API (e.g., https://api.openai.com/v1, https://generativelanguage.googleapis.com/v1beta/openai)",
         default: "",
-        placeholder: "Base URL (e.g., https://api.openai.com/v1)",
+        placeholder: "https://api.openai.com/v1",
         disabled: () => IS_WEB
     },
     openaiCompatibleModel: {
         type: OptionType.STRING,
-        description: "Model to use with the OpenAI compatible API",
+        description: "Model to use with the OpenAI compatible API (e.g., gpt-4o, gemini-2.0-flash)",
         default: "",
-        placeholder: "Enter model name (e.g., gpt-4o)",
+        placeholder: "gpt-4o",
         disabled: () => IS_WEB
     },
     autoTranslate: {
