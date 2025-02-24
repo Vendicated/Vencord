@@ -57,7 +57,8 @@ export const settings = definePluginSettings({
         options: [
             { label: "Google Translate", value: "google", default: true },
             { label: "DeepL Free", value: "deepl" },
-            { label: "DeepL Pro", value: "deepl-pro" }
+            { label: "DeepL Pro", value: "deepl-pro" },
+            { label: "OpenAI Compatible", value: "openai-compatible" },
         ] as const,
         onChange: resetLanguageDefaults
     },
@@ -66,6 +67,27 @@ export const settings = definePluginSettings({
         description: "DeepL API key",
         default: "",
         placeholder: "Get your API key from https://deepl.com/your-account",
+        disabled: () => IS_WEB
+    },
+    openaiCompatibleApiKey: {
+        type: OptionType.STRING,
+        description: "OpenAI compatible API key",
+        default: "",
+        placeholder: "API key (e.g., sk-xxx)",
+        disabled: () => IS_WEB
+    },
+    openaiCompatibleBaseURL: {
+        type: OptionType.STRING,
+        description: "Base URL for OpenAI compatible API",
+        default: "",
+        placeholder: "Base URL (e.g., https://api.openai.com/v1)",
+        disabled: () => IS_WEB
+    },
+    openaiCompatibleModel: {
+        type: OptionType.STRING,
+        description: "Model to use with the OpenAI compatible API",
+        default: "",
+        placeholder: "Enter model name (e.g., gpt-4o)",
         disabled: () => IS_WEB
     },
     autoTranslate: {
@@ -83,7 +105,7 @@ export const settings = definePluginSettings({
 }>();
 
 export function resetLanguageDefaults() {
-    if (IS_WEB || settings.store.service === "google") {
+    if (IS_WEB || settings.store.service === "google" || settings.store.service === "openai-compatible") {
         settings.store.receivedInput = "auto";
         settings.store.receivedOutput = "en";
         settings.store.sentInput = "auto";
