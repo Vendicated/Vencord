@@ -74,7 +74,7 @@ export default tseslint.config(
 
             // Style Rules
             "@stylistic/jsx-quotes": ["error", "prefer-double"],
-            "@stylistic/quotes": ["error", "double", { "avoidEscape": true }],
+            "@stylistic/quotes": ["error", "double", { "avoidEscape": true, allowTemplateLiterals: "avoidEscape" }],
             "@stylistic/no-mixed-spaces-and-tabs": "error",
             "@stylistic/arrow-parens": ["error", "as-needed"],
             "@stylistic/eol-last": ["error", "always"],
