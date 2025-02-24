@@ -24,21 +24,24 @@ export function LazyComponent<T extends object = any>(factory: () => React.Compo
     };
 
     LazyComponent.$$vencordInternal = get;
-    Object.defineProperty(LazyComponent, "name", {
-        enumerable: false,
-        get() {
-            const got = get();
-            let name;
-            if (Function.prototype.toString.call(got).startsWith("class")) {
-                name = got.displayName;
-            } else {
-                name = got.name;
+
+    try {
+        Object.defineProperty(LazyComponent, "name", {
+            enumerable: false,
+            get() {
+                const got = get();
+                let name: string | undefined;
+                if ((() => { }).toString.call(got).startsWith("class")) {
+                    name = got.displayName;
+                } else {
+                    name = got.name;
+                }
+                return `${name ? `${name}-` : ""}LazyComponent`;
             }
-            return `${name ? `${name}-` : ""}LazyComponent`;
-        }
-    });
-    // Object.defineProperty(LazyComponent, "displayName", {
-    //     value: "TEST123DisplayName",
-    // });
+        });
+    } catch (e) {
+        (IS_DEV ? console.warn : console.debug)("Failed to set name on LazyComponent", e);
+    }
+
     return LazyComponent as ComponentType<T>;
 }
