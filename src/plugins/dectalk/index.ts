@@ -4,15 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { showNotification } from "@api/Notifications/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType, PluginNative } from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { SelectedChannelStore, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
-
-
-const Native = VencordNative.pluginHelpers.DecTalk as PluginNative<typeof import("./native")>;
 
 interface IMessageCreate {
     type: "MESSAGE_CREATE";
@@ -25,31 +21,55 @@ interface IMessageCreate {
 const dectalkRegex = /```(?:dt|dectalk)\n([\s\S]*?)(?:\n)?```/g;
 
 const settings = definePluginSettings({
-    dictPath: {
-        type: OptionType.STRING,
-        description: "Path to DecTalk executable and dictionary",
-        default: "C:/dectalk/"
-    },
     userBlockList: {
         type: OptionType.STRING,
         description: "Comma-separated list of user IDs to block",
         default: ""
     },
-    maxCodeblocks: {
-        type: OptionType.NUMBER,
-        description: "Maximum number of codeblocks to play at once",
-        default: 5
-    },
     playUnfocused: {
         type: OptionType.BOOLEAN,
         description: "Play audio when window is not focused",
         default: false
+    },
+    playAllMessages: {
+        type: OptionType.BOOLEAN,
+        description: "Play audio for all messages, regardless of content (will ignore code blocks)",
+        default: false
     }
 });
 
+async function getAudio(text) {
+    try {
+        const response = await fetch("https://api.zoid.one/dectalk/generate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ text })
+        });
+
+        if (!response.ok) throw new Error("failed to fetch audio");
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        const audio = new Audio(url);
+
+        audio.onended = () => {
+            URL.revokeObjectURL(url);
+            audio.remove();
+            console.log("audio finished and deleted");
+        };
+
+        return audio;
+    } catch (err) {
+        console.error("error:", err);
+    }
+}
+
 export default definePlugin({
     name: "DecTalk",
-    description: "Adds a DecTalk reader to codeblocks! Used by setting the codeblock language to 'dectalk' or 'dt'.",
+    description: "Adds a DecTalk reader to Discord. Only reads messages in code blocks with the language set to 'dt' or 'dectalk' by default.",
     nexulien: true,
     authors: [Devs.Zoid],
 
@@ -64,35 +84,33 @@ export default definePlugin({
             if (settings.store.userBlockList.includes(message.author.id)) return;
             if (!settings.store.playUnfocused && !document.hasFocus()) return;
 
-            let count = 0;
-            for (const match of message.content.matchAll(dectalkRegex)) {
-                count++;
+            const audios: HTMLAudioElement[] = [];
+
+            if (settings.store.playAllMessages) {
+                const text = message.content
+                    .replace(/```[\s\S]*?```/g, "")
+                    .replace(/https?:\/\/\S+/g, "");
+                const audio = await getAudio(text);
+                if (audio) audios.push(audio);
+            } else {
+                for (const match of message.content.matchAll(dectalkRegex)) {
+                    const text = match[1];
+                    const audio = await getAudio(text);
+                    if (audio) audios.push(audio);
+                }
             }
 
-            if (count >= settings.store.maxCodeblocks + 1) {
-                if (message.author.id === getUserId()) showNotification({
-                    title: "DecTalk",
-                    body: "Too many codeblocks in one message!",
-                });
-                return;
-            }
+            if (audios.length > 0) {
+                await Promise.all(audios.map(audio => {
+                    document.body.appendChild(audio);
+                }));
 
-            for (const match of message.content.matchAll(dectalkRegex)) {
-                const sanitizedInput = sanitizeInput(match[1]);
-
-                Native.speak(sanitizedInput, settings.store.dictPath);
+                audios.forEach(audio => { audio.play(); });
+                audios.forEach(audio => audio.currentTime = 0);
             }
         }
     },
 });
-
-function sanitizeInput(input: string): string {
-    const sanitizedInput = input
-        .replace(/[\n\r]/g, " ")
-        .replace(/[&|;()$`\\'"]/g, "");
-
-    return sanitizedInput;
-}
 
 const getUserId = () => {
     const id = UserStore.getCurrentUser()?.id;
