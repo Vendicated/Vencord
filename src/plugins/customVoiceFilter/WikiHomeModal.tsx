@@ -51,6 +51,17 @@ Enjoy you now have a ONNX model file for your voicepack!`
     {
         title: "Where can i find the RVC models of vanilla voice filters?",
         content: "You can find them [here](https://drive.google.com/drive/folders/1aqt9T_6OrCb9Q0XRXqurQrmmLeWtiSOY?usp=sharing). Discord doesn't provide the models, so you need to use the ones in the folder."
+    },
+    {
+        title: "Can i manually download the demo voice models?",
+        content: `Yes, you can download the demo voice models
+They are accessible in differents versions:
+Zip RVC model: https://fox3000foxy.com/voices_models/[character_name].zip
+ONNX RVC model: https://fox3000foxy.com/voices_models/[character_name]_simple.onnx
+PTH RVC model: https://fox3000foxy.com/voices_models/raw/[character_name].pth
+Index file here: https://fox3000foxy.com/voices_models/raw/[character_name].index
+Where [character_name] is the name of the character you want to use.
+`
     }
 ];
 
