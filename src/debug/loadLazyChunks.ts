@@ -8,7 +8,7 @@ import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
 import * as Webpack from "@webpack";
 import { wreq } from "@webpack";
-import { AnyModuleFactory, ModuleFactory } from "webpack";
+import { AnyModuleFactory, ModuleFactory } from "@webpack/wreq.d";
 
 export async function loadLazyChunks() {
     const LazyChunkLoaderLogger = new Logger("LazyChunkLoader");
@@ -20,8 +20,7 @@ export async function loadLazyChunks() {
         const invalidChunks = new Set<PropertyKey>();
         const deferredRequires = new Set<PropertyKey>();
 
-        let chunksSearchingResolve: (value: void) => void;
-        const chunksSearchingDone = new Promise<void>(r => chunksSearchingResolve = r);
+        const { promise: chunksSearchingDone, resolve: chunksSearchingResolve } = Promise.withResolvers<void>();
 
         // True if resolved, false otherwise
         const chunksSearchPromises = [] as Array<() => boolean>;
@@ -69,7 +68,7 @@ export async function loadLazyChunks() {
 
                     const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
                         .then(r => r.text())
-                        .then(t => t.includes("importScripts("));
+                        .then(t => /importScripts\(|self\.postMessage/.test(t));
 
                     if (isWorkerAsset) {
                         invalidChunks.add(id);
@@ -140,8 +139,8 @@ export async function loadLazyChunks() {
         }
 
         Webpack.factoryListeners.add(factoryListener);
-        for (const factoryId in wreq.m) {
-            factoryListener(wreq.m[factoryId]);
+        for (const moduleId in wreq.m) {
+            factoryListener(wreq.m[moduleId]);
         }
 
         await chunksSearchingDone;
@@ -175,7 +174,7 @@ export async function loadLazyChunks() {
         await Promise.all(chunksLeft.map(async id => {
             const isWorkerAsset = await fetch(wreq.p + wreq.u(id))
                 .then(r => r.text())
-                .then(t => t.includes("importScripts("));
+                .then(t => /importScripts\(|self\.postMessage/.test(t));
 
             // Loads the chunk. Currently this only happens with the language packs which are loaded differently
             if (!isWorkerAsset) {

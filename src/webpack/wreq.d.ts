@@ -17,14 +17,11 @@ export type Module = {
 /** exports can be anything, however initially it is always an empty object */
 export type ModuleFactory = (this: ModuleExports, module: Module, exports: ModuleExports, require: WebpackRequire) => void;
 
-export type WebpackQueues = unique symbol | "__webpack_queues__";
-export type WebpackExports = unique symbol | "__webpack_exports__";
-export type WebpackError = unique symbol | "__webpack_error__";
-
+/** Keys here can be symbols too, but we can't properly type them */
 export type AsyncModulePromise = Promise<ModuleExports> & {
-    [WebpackQueues]: (fnQueue: ((queue: any[]) => any)) => any;
-    [WebpackExports]: ModuleExports;
-    [WebpackError]?: any;
+    "__webpack_queues__": (fnQueue: ((queue: any[]) => any)) => any;
+    "__webpack_exports__": ModuleExports;
+    "__webpack_error__"?: any;
 };
 
 export type AsyncModuleBody = (
@@ -33,27 +30,45 @@ export type AsyncModuleBody = (
     asyncResult: (error?: any) => void
 ) => Promise<void>;
 
-export type ChunkHandlers = {
+export type EnsureChunkHandlers = {
     /**
      * Ensures the js file for this chunk is loaded, or starts to load if it's not.
      * @param chunkId The chunk id
      * @param promises The promises array to add the loading promise to
      */
-    j: (this: ChunkHandlers, chunkId: PropertyKey, promises: Promise<void[]>) => void,
+    j: (this: EnsureChunkHandlers, chunkId: PropertyKey, promises: Promise<void[]>) => void;
     /**
      * Ensures the css file for this chunk is loaded, or starts to load if it's not.
      * @param chunkId The chunk id
      * @param promises The promises array to add the loading promise to. This array will likely contain the promise of the js file too
      */
-    css: (this: ChunkHandlers, chunkId: PropertyKey, promises: Promise<void[]>) => void,
+    css: (this: EnsureChunkHandlers, chunkId: PropertyKey, promises: Promise<void[]>) => void;
+    /**
+     * Trigger for prefetching next chunks. This is called after ensuring a chunk is loaded and internally looks up
+     * a map to see if the chunk that just loaded has next chunks to prefetch.
+     *
+     * Note that this does not add an extra promise to the promises array, and instead only executes the prefetching after
+     * calling Promise.all on the promises array.
+     * @param chunkId The chunk id
+     * @param promises The promises array of ensuring the chunk is loaded
+     */
+    prefetch: (this: EnsureChunkHandlers, chunkId: PropertyKey, promises: Promise<void[]>) => void;
+};
+
+export type PrefetchChunkHandlers = {
+    /**
+     * Prefetches the js file for this chunk.
+     * @param chunkId The chunk id
+     */
+    j: (this: PrefetchChunkHandlers, chunkId: PropertyKey) => void;
 };
 
 export type ScriptLoadDone = (event: Event) => void;
 
-// export type OnChunksLoaded = ((this: WebpackRequire, result: any, chunkIds: PropertyKey[] | undefined | null, callback: () => any, priority: number) => any) & {
-//     /** Check if a chunk has been loaded */
-//     j: (this: OnChunksLoaded, chunkId: PropertyKey) => boolean;
-// };
+export type OnChunksLoaded = ((this: WebpackRequire, result: any, chunkIds: PropertyKey[] | undefined | null, callback: () => any, priority: number) => any) & {
+    /** Check if a chunk has been loaded */
+    j: (this: OnChunksLoaded, chunkId: PropertyKey) => boolean;
+};
 
 export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
     /** The module factories, where all modules that have been loaded are stored (pre-loaded or loaded by lazy chunks) */
@@ -134,14 +149,21 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
      * }
      * // exports is now { exportName: someExportedValue } (but each value is actually a getter)
      */
-    d: (this: WebpackRequire, exports: AnyRecord, definiton: AnyRecord) => void;
-    /** The chunk handlers, which are used to ensure the files of the chunks are loaded, or load if necessary */
-    f: ChunkHandlers;
+    d: (this: WebpackRequire, exports: Record<PropertyKey, any>, definiton: Record<PropertyKey, () => ModuleExports>) => void;
+    /** The ensure chunk handlers, which are used to ensure the files of the chunks are loaded, or load if necessary */
+    f: EnsureChunkHandlers;
     /**
      * The ensure chunk function, it ensures a chunk is loaded, or loads if needed.
      * Internally it uses the handlers in {@link WebpackRequire.f} to load/ensure the chunk is loaded.
      */
     e: (this: WebpackRequire, chunkId: PropertyKey) => Promise<void[]>;
+    /** The prefetch chunk handlers, which are used to prefetch the files of the chunks */
+    F: PrefetchChunkHandlers;
+    /**
+     * The prefetch chunk function.
+     * Internally it uses the handlers in {@link WebpackRequire.F} to prefetch a chunk.
+     */
+    E: (this: WebpackRequire, chunkId: PropertyKey) => void;
     /** Get the filename for the css part of a chunk */
     k: (this: WebpackRequire, chunkId: PropertyKey) => string;
     /** Get the filename for the js part of a chunk */
@@ -162,18 +184,18 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
     r: (this: WebpackRequire, exports: ModuleExports) => void;
     /** Node.js module decorator. Decorates a module as a Node.js module */
     nmd: (this: WebpackRequire, module: Module) => any;
-    // /**
-    //  * Register deferred code which will be executed when the passed chunks are loaded.
-    //  *
-    //  * If chunkIds is defined, it defers the execution of the callback and returns undefined.
-    //  *
-    //  * If chunkIds is undefined, and no deferred code exists or can be executed, it returns the value of the result argument.
-    //  *
-    //  * If chunkIds is undefined, and some deferred code can already be executed, it returns the result of the callback function of the last deferred code.
-    //  *
-    //  * When (priority & 1) it will wait for all other handlers with lower priority to be executed before itself is executed.
-    //  */
-    // O: OnChunksLoaded;
+    /**
+     * Register deferred code which will be executed when the passed chunks are loaded.
+     *
+     * If chunkIds is defined, it defers the execution of the callback and returns undefined.
+     *
+     * If chunkIds is undefined, and no deferred code exists or can be executed, it returns the value of the result argument.
+     *
+     * If chunkIds is undefined, and some deferred code can already be executed, it returns the result of the callback function of the last deferred code.
+     *
+     * When (priority & 1) it will wait for all other handlers with lower priority to be executed before itself is executed.
+     */
+    O: OnChunksLoaded;
     /**
      * Instantiate a wasm instance with source using "wasmModuleHash", and importObject "importsObj", and then assign the exports of its instance to "exports".
      * @returns The exports argument, but now assigned with the exports of the wasm instance
@@ -185,6 +207,13 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
     j: string;
     /** Document baseURI or WebWorker location.href */
     b: string;
+
+    /* rspack only */
+
+    /** rspack version */
+    rv: (this: WebpackRequire) => string;
+    /** rspack unique id */
+    ruid: string;
 };
 
 // Utility section for Vencord
@@ -200,12 +229,10 @@ export type AnyModuleFactory = ((this: ModuleExports, module: Module, exports: M
     [SYM_PATCHED_BY]?: Set<string>;
 };
 
-export type WrappedModuleFactory = AnyModuleFactory & {
+export type PatchedModuleFactory = AnyModuleFactory & {
     [SYM_ORIGINAL_FACTORY]: AnyModuleFactory;
     [SYM_PATCHED_SOURCE]?: string;
     [SYM_PATCHED_BY]?: Set<string>;
 };
 
-export type MaybeWrappedModuleFactory = AnyModuleFactory | WrappedModuleFactory;
-
-export type WrappedModuleFactories = Record<PropertyKey, WrappedModuleFactory>;
+export type MaybePatchedModuleFactory = PatchedModuleFactory | AnyModuleFactory;
