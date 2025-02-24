@@ -76,7 +76,7 @@ export const settings = definePluginSettings({
         placeholder: "sk-1234567890",
         disabled: () => IS_WEB
     },
-    openaiCompatibleBaseURL: {
+    openaiCompatibleBaseUrl: {
         type: OptionType.STRING,
         description: "Base URL for OpenAI compatible API (e.g., https://api.openai.com/v1, https://generativelanguage.googleapis.com/v1beta/openai)",
         default: "",
