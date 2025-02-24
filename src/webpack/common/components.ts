@@ -19,7 +19,7 @@
 import { LazyComponent } from "@utils/lazyReact";
 import { filters, mapMangledModuleLazy, waitFor } from "@webpack";
 
-import { waitForComponent } from "./internal";
+import { waitForComponent, wrapComponentName } from "./internal";
 import * as t from "./types/components";
 
 
@@ -47,8 +47,8 @@ const Tooltips = mapMangledModuleLazy(".tooltipTop,bottom:", {
     TooltipContainer: t.TooltipContainer;
 };
 
-export const Tooltip = LazyComponent(() => Tooltips.Tooltip);
-export const TooltipContainer = LazyComponent(() => Tooltips.TooltipContainer);
+export const Tooltip = LazyComponent(() => wrapComponentName(Tooltips.Tooltip, "Tooltips.Tooltip"));
+export const TooltipContainer = LazyComponent(() => wrapComponentName(Tooltips.TooltipContainer, "Tooltips.TooltipContainer"));
 
 export const TextInput = waitForComponent<t.TextInput>("TextInput", filters.componentByCode(".error]:this.hasError()"));
 export const TextArea = waitForComponent<t.TextArea>("TextArea", filters.componentByCode("this.getPaddingRight()},id:"));
@@ -69,9 +69,9 @@ export let scrollerClasses: Record<string, string>;
 waitFor(filters.byCode('="ltr",orientation:', "customTheme:", "forwardRef"), m => createScroller = m);
 waitFor(["thin", "auto", "customTheme"], m => scrollerClasses = m);
 
-export const ScrollerNone = LazyComponent(() => createScroller(scrollerClasses.none, scrollerClasses.fade, scrollerClasses.customTheme));
-export const ScrollerThin = LazyComponent(() => createScroller(scrollerClasses.thin, scrollerClasses.fade, scrollerClasses.customTheme));
-export const ScrollerAuto = LazyComponent(() => createScroller(scrollerClasses.auto, scrollerClasses.fade, scrollerClasses.customTheme));
+export const ScrollerNone = LazyComponent(() => wrapComponentName(createScroller(scrollerClasses.none, scrollerClasses.fade, scrollerClasses.customTheme), "ScrollerNone"));
+export const ScrollerThin = LazyComponent(() => wrapComponentName(createScroller(scrollerClasses.thin, scrollerClasses.fade, scrollerClasses.customTheme), "ScrollerThin"));
+export const ScrollerAuto = LazyComponent(() => wrapComponentName(createScroller(scrollerClasses.auto, scrollerClasses.fade, scrollerClasses.customTheme), "ScrollerAuto"));
 
 const { FocusLock_ } = mapMangledModuleLazy("attachTo:null!==", {
     FocusLock_: filters.componentByCode(".containerRef")
@@ -79,7 +79,7 @@ const { FocusLock_ } = mapMangledModuleLazy("attachTo:null!==", {
     FocusLock_: t.FocusLock;
 };
 
-export const FocusLock = LazyComponent(() => FocusLock_);
+export const FocusLock = LazyComponent(() => wrapComponentName(FocusLock_, "FocusLock"));
 
 export let useToken: t.useToken;
 waitFor(m => {

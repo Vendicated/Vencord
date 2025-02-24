@@ -22,6 +22,15 @@ import { LazyComponent } from "@utils/react";
 import { FilterFn, filters, lazyWebpackSearchHistory, waitFor } from "../webpack";
 const SYM_FORWARD_REF = Symbol.for("react.forward_ref");
 const SYM_MEMO = Symbol.for("react.memo");
+/**
+ * calls {@link setComponentName} on the given component
+ * @returns maybeComponent
+ */
+export function wrapComponentName<T>(maybeComponent: T, name?: string): T {
+    // dont set if name is falsy
+    if (name) setComponentName(maybeComponent, name);
+    return maybeComponent;
+}
 export function setComponentName(maybeComponent: any, name: string): void {
     try {
         if (

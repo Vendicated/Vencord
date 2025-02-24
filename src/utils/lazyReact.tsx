@@ -29,14 +29,14 @@ export function LazyComponent<T extends object = any>(factory: () => React.Compo
         Object.defineProperty(LazyComponent, "name", {
             enumerable: false,
             get() {
-                const got = get();
-                let name: string | undefined;
-                if ((() => { }).toString.call(got).startsWith("class")) {
-                    name = got.displayName;
-                } else {
-                    name = got.name;
+                try {
+                    const got = get();
+                    const name: string | undefined = "displayName" in got ? got.displayName : got.name;
+                    return `${name ? `${name}-` : ""}LazyComponent`;
+                } catch (e) {
+                    (IS_DEV ? console.warn : console.debug)("Failed to get name from LazyComponent", e);
+                    return "LazyComponent";
                 }
-                return `${name ? `${name}-` : ""}LazyComponent`;
             }
         });
     } catch (e) {
