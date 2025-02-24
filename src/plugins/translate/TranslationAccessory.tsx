@@ -16,15 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classes } from "@utils/misc";
-import { findByPropsLazy } from "@webpack";
 import { Parser, useEffect, useState } from "@webpack/common";
 import { Message } from "discord-types/general";
 
 import { TranslateIcon } from "./TranslateIcon";
 import { cl, TranslationValue } from "./utils";
-
-const MessageClasses = findByPropsLazy("markup");
 
 const TranslationSetters = new Map<string, (v: TranslationValue) => void>();
 
@@ -58,7 +54,7 @@ export function TranslationAccessory({ message }: { message: Message; }) {
     if (!translation) return null;
 
     return (
-        <span className={classes(cl("accessory"), MessageClasses?.markup)}>
+        <span className={cl("accessory")}>
             <TranslateIcon width={16} height={16} className={cl("accessory-icon")} />
             {Parser.parse(translation.text)}
             <br />
