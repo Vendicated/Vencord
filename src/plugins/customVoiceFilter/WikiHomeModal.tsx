@@ -29,10 +29,11 @@ const sections: Section[] = [
     },
     {
         title: "How does it work?",
-        content: `Discord actually uses a Python project named [Retrieval-based Voice Conversion](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion) to convert your voice into the voice model you picked.
-This voice cloning technology allows an audio input to be converted into a different voice, with a high degree of accuracy.
-Actually, Discord uses ONNX files to run the model, for a better performance and less CPU usage.
-![img](https://fox3000foxy.com/voicepacks/assets/working.png)`
+        content: `Discord actually uses a technology of clownfish voice changing, to change the voice of the user by adjusting the frequency of the audio via some filters.
+This plugin uses a Python project named [Retrieval-based Voice Conversion](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion) to convert your voice into the voice model you picked. This voice cloning technology allows an audio input to be converted into a different voice, with a high degree of accuracy.
+The system operates using PTH files, but ONNX files can also be used, which enhance performance and reduce CPU/GPU usage during voice conversion.
+![img](https://fox3000foxy.com/voicepacks/assets/working.png)
+Basically, this plugin will use an RVC relay to work, like a forket version of the w-okada software, but interactible via an API.`
     },
     {
         title: "How to create an ONNX from an existing RVC model?",
@@ -46,6 +47,10 @@ Enjoy you now have a ONNX model file for your voicepack!`
     {
         title: "How to train my own voice model?",
         content: "Refers to [this video](https://www.youtube.com/watch?v=tnfqIQ11Qek&ab_channel=AISearch) and convert it to ONNX."
+    },
+    {
+        title: "Where can i find the RVC models of vanilla voice filters?",
+        content: "You can find them [here](https://drive.google.com/drive/folders/1aqt9T_6OrCb9Q0XRXqurQrmmLeWtiSOY?usp=sharing). Discord doesn't provide the models, so you need to use the ones in the folder."
     }
 ];
 

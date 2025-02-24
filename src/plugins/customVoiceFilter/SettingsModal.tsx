@@ -9,7 +9,7 @@ import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, Mo
 import { PluginNative } from "@utils/types";
 import { Button, Flex, Forms, Slider } from "@webpack/common";
 
-import plugin, { settings, useVoiceFiltersStore } from "./index";
+import plugin, { getClient, settings, useVoiceFiltersStore } from "./index";
 import { modal } from "./utils";
 
 const Native = VencordNative.pluginHelpers.CustomVoiceFilters as PluginNative<typeof import("./native")>;
@@ -24,6 +24,7 @@ export default modal(function SettingsModal({ modalProps, close }) {
     const settingsState = settings.use();
     const { settings: { def } } = plugin;
     const { deleteAll, exportVoiceFilters, importVoiceFilters } = useVoiceFiltersStore();
+    const { client } = getClient();
     return (
         <ModalRoot {...modalProps} size={ModalSize.MEDIUM}>
             <ModalHeader>
@@ -65,7 +66,7 @@ export default modal(function SettingsModal({ modalProps, close }) {
                         <Forms.FormText type="description">Here you can manage your voicepacks.</Forms.FormText>
                         <Flex style={{ gap: "0.5rem" }}>
                             <Button onClick={deleteAll} color={Button.Colors.RED}>Delete all voicepacks</Button>
-                            <Button onClick={openModelFolder} color={Button.Colors.TRANSPARENT}>Open Models Folder</Button>
+                            {client === "desktop" && <Button onClick={openModelFolder} color={Button.Colors.TRANSPARENT}>Open Models Folder</Button>}
                             <Button onClick={exportVoiceFilters} color={Button.Colors.GREEN}>Export</Button>
                             <Button onClick={importVoiceFilters} color={Button.Colors.GREEN}>Import</Button>
                         </Flex>
