@@ -69,7 +69,7 @@ export default definePlugin({
 
     goToChannel(props: { id?: string; } | undefined) {
         const { id } = props ?? {};
-        if (!id) return console.warn("No channel id found");
+        if (!id) return console.error("No channel id found");
         ChannelRouter.transitionToChannel(id);
     },
 
