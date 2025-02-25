@@ -18,7 +18,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { ChannelStore, SelectedChannelStore } from "@webpack/common";
+import { ChannelRouter, ChannelStore, SelectedChannelStore } from "@webpack/common";
 
 const timers = {} as Record<string, {
     timeout?: NodeJS.Timeout;
@@ -61,13 +61,16 @@ export default definePlugin({
             replacement: {
                 // There are two onClick events for this section, one for the server icon, and another for the channel name
                 // The server icon takes you to the voice channel, but doesnt join it. The channel name joins the voice channel
-                // replace the onClick handler for the channel name with the one for the server icon
-                // The last {0,1000} cannot be lazy as it needs to match the onClick handler for the icon, not the channel name
-                match: /(?=focusProps)(?<=onClick:.{0,100}selectVoiceChannel.{0,100}},.{0,100})(?<=onClick:(.{0,100}\i\.id\)),.{0,1000})/,
-                replace: "onClick:$1,"
+                match: /(?=children)(?<=selectVoiceChannel.{0,100})/,
+                replace: "onClick:$self.goToChannel(argumments[0]),"
             }
         }
     ],
+
+    goToChannel({ channel: { id } = {} }: { channel?: { id?: string; }; }) {
+        if (!id) return console.warn("No guild id found");
+        ChannelRouter.transitionToChannel(id);
+    },
 
     shouldRunOnClick(e: MouseEvent, { channelId }) {
         const channel = ChannelStore.getChannel(channelId);
