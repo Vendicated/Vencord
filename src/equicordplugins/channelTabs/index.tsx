@@ -99,9 +99,7 @@ export default definePlugin({
                 <ErrorBoundary>
                     <ChannelsTabsContainer {...currentChannel} />
                 </ErrorBoundary>
-                <div style={{ display: "flex" }}>
-                    {children}
-                </div>
+                {children}
             </>
         );
     },
