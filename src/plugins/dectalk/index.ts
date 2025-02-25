@@ -97,7 +97,9 @@ export default definePlugin({
             if (settings.store.playAllMessages) {
                 const text = message.content
                     .replace(/```[\s\S]*?```/g, "")
-                    .replace(/https?:\/\/\S+/g, "");
+                    .replace(/https?:\/\/\S+/g, "")
+                    .replace(/<[^>]*>/g, "")
+                    .replace(/:[^:\s]*(?:::[^:\s]*)*:/g, "");
                 const audio = await getAudio(text);
                 if (audio) audios.push(audio);
             } else {
