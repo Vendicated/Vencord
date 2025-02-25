@@ -24,6 +24,15 @@ const NoopLogger = {
 
 const logAllow = new Set();
 
+const consoleLevels = {
+    debug: 3,
+    info: 2,
+    log: 2,
+    trace: 2,
+    warn: 1,
+    error: 0
+};
+
 const settings = definePluginSettings({
     disableLoggers: {
         type: OptionType.BOOLEAN,
@@ -45,6 +54,33 @@ const settings = definePluginSettings({
             logAllow.clear();
             newVal.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
         }
+    },
+    allowLevel: {
+        type: OptionType.SELECT,
+        options: [
+            {
+                label: "Debug",
+                value: consoleLevels.debug
+            },
+            {
+                label: "Info/Log/Trace",
+                value: consoleLevels.log
+            },
+            {
+                label: "Warn",
+                value: consoleLevels.warn
+            },
+            {
+                label: "Error",
+                value: consoleLevels.error,
+                default: true
+            },
+            {
+                label: "Never",
+                value: -1
+            }
+        ],
+        description: 'Always allow loggers at or above this level. Set to "never" to disable filtering by log level'
     }
 });
 
@@ -61,8 +97,10 @@ export default definePlugin({
     },
 
     NoopLogger: () => NoopLogger,
-    shouldLog(logger: string) {
-        return logAllow.has(logger);
+    shouldLog(logger: string, level: string) {
+        if (logAllow.has(logger) || (level in consoleLevels && consoleLevels[level] <= settings.store.allowLevel)) {
+            return true;
+        }
     },
 
     patches: [
@@ -142,7 +180,7 @@ export default definePlugin({
             predicate: () => settings.store.disableLoggers,
             replacement: {
                 match: /(?<=&&)(?=console)/,
-                replace: "$self.shouldLog(arguments[0])&&"
+                replace: "$self.shouldLog(arguments[0],arguments[1])&&"
             }
         },
         {
