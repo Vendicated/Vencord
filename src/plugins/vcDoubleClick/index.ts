@@ -61,14 +61,15 @@ export default definePlugin({
             replacement: {
                 // There are two onClick events for this section, one for the server icon, and another for the channel name
                 // The server icon takes you to the voice channel, but doesnt join it. The channel name joins the voice channel
-                match: /(?=children)(?<=selectVoiceChannel.{0,100})/,
-                replace: "onClick:$self.goToChannel(argumments[0]),"
+                match: /(?=children)(?<=selectVoiceChannel\((\i)\.id\).{0,100})/,
+                replace: "onClick:$self.goToChannel.bind(null,$1),"
             }
         }
     ],
 
-    goToChannel({ channel: { id } = {} }: { channel?: { id?: string; }; }) {
-        if (!id) return console.warn("No guild id found");
+    goToChannel(props: { id?: string; } | undefined) {
+        const { id } = props ?? {};
+        if (!id) return console.warn("No channel id found");
         ChannelRouter.transitionToChannel(id);
     },
 
