@@ -104,7 +104,7 @@ const settings = definePluginSettings({
             log: false,
             trace: false,
             warn: false,
-            error: false
+            error: true
         } as AllowLevels,
     }
 });
