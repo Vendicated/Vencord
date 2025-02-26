@@ -6,7 +6,7 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { findByCodeLazy } from "@webpack";
 import { FluxDispatcher, RestAPI } from "@webpack/common";
 import { Message, User } from "discord-types/general";
 import { Channel } from "discord-types/general/index.js";
@@ -29,7 +29,7 @@ interface Reply {
 const fetching = new Map<string, string>();
 let ReplyStore: any;
 
-const { createMessageRecord } = findByPropsLazy("createMessageRecord");
+const createMessageRecord = findByCodeLazy(".createFromServer(", ".isBlockedForMessage", "messageReference:");
 
 export default definePlugin({
     name: "ValidReply",
@@ -37,9 +37,9 @@ export default definePlugin({
     authors: [Devs.newwares],
     patches: [
         {
-            find: "Messages.REPLY_QUOTE_MESSAGE_NOT_LOADED",
+            find: "#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}",
             replacement: {
-                match: /Messages\.REPLY_QUOTE_MESSAGE_NOT_LOADED/,
+                match: /#{intl::REPLY_QUOTE_MESSAGE_NOT_LOADED}\)/,
                 replace: "$&,onMouseEnter:()=>$self.fetchReply(arguments[0])"
             }
         },

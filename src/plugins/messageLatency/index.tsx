@@ -9,7 +9,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin, { OptionType } from "@utils/types";
-import { findExportedComponentLazy } from "@webpack";
+import { findComponentByCodeLazy } from "@webpack";
 import { SnowflakeUtils, Tooltip } from "@webpack/common";
 import { Message } from "discord-types/general";
 
@@ -26,7 +26,7 @@ interface Diff {
 }
 
 const DISCORD_KT_DELAY = 1471228928;
-const HiddenVisually = findExportedComponentLazy("HiddenVisually");
+const HiddenVisually = findComponentByCodeLazy(".hiddenVisually]:");
 
 export default definePlugin({
     name: "MessageLatency",
@@ -97,6 +97,9 @@ export default definePlugin({
         // Message wasn't received through gateway
         if (!isNonNullish(nonce)) return null;
 
+        // Bots basically never send a nonce, and if someone does do it then it's usually not a snowflake
+        if (message.bot) return null;
+
         let isDiscordKotlin = false;
         let delta = SnowflakeUtils.extractTimestamp(id) - SnowflakeUtils.extractTimestamp(nonce); // milliseconds
         if (!showMillis) {
@@ -159,7 +162,7 @@ export default definePlugin({
                     </>
                 }
             </Tooltip>;
-        });
+        }, { noop: true });
     },
 
     Icon({ delta, fill, props }: {

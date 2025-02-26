@@ -17,7 +17,6 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { User } from "discord-types/general";
 import { ComponentType, HTMLProps } from "react";
 
 import Plugins from "~plugins";
@@ -45,6 +44,11 @@ export interface ProfileBadge {
     position?: BadgePosition;
     /** The badge name to display, Discord uses this. Required for component badges */
     key?: string;
+
+    /**
+     * Allows dynamically returning multiple badges
+     */
+    getBadges?(userInfo: BadgeUserArgs): ProfileBadge[];
 }
 
 const Badges = new Set<ProfileBadge>();
@@ -53,7 +57,7 @@ const Badges = new Set<ProfileBadge>();
  * Register a new badge with the Badges API
  * @param badge The badge to register
  */
-export function addBadge(badge: ProfileBadge) {
+export function addProfileBadge(badge: ProfileBadge) {
     badge.component &&= ErrorBoundary.wrap(badge.component, { noop: true });
     Badges.add(badge);
 }
@@ -62,7 +66,7 @@ export function addBadge(badge: ProfileBadge) {
  * Unregister a badge from the Badges API
  * @param badge The badge to remove
  */
-export function removeBadge(badge: ProfileBadge) {
+export function removeProfileBadge(badge: ProfileBadge) {
     return Badges.delete(badge);
 }
 
@@ -74,35 +78,25 @@ export function _getBadges(args: BadgeUserArgs) {
     const badges = [] as ProfileBadge[];
     for (const badge of Badges) {
         if (!badge.shouldShow || badge.shouldShow(args)) {
+            const b = badge.getBadges
+                ? badge.getBadges(args).map(b => {
+                    b.component &&= ErrorBoundary.wrap(b.component, { noop: true });
+                    return b;
+                })
+                : [{ ...badge, ...args }];
+
             badge.position === BadgePosition.START
-                ? badges.unshift({ ...badge, ...args })
-                : badges.push({ ...badge, ...args });
+                ? badges.unshift(...b)
+                : badges.push(...b);
         }
     }
-    const donorBadges = (Plugins.BadgeAPI as unknown as typeof import("../plugins/_api/badges").default).getDonorBadges(args.user.id);
+    const donorBadges = (Plugins.BadgeAPI as unknown as typeof import("../plugins/_api/badges").default).getDonorBadges(args.userId);
     if (donorBadges) badges.unshift(...donorBadges);
 
     return badges;
 }
 
 export interface BadgeUserArgs {
-    user: User;
+    userId: string;
     guildId: string;
-}
-
-interface ConnectedAccount {
-    type: string;
-    id: string;
-    name: string;
-    verified: boolean;
-}
-
-interface Profile {
-    connectedAccounts: ConnectedAccount[];
-    premiumType: number;
-    premiumSince: string;
-    premiumGuildSince?: any;
-    lastFetched: number;
-    profileFetchFailed: boolean;
-    application?: any;
 }

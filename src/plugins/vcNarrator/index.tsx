@@ -22,9 +22,10 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
-import definePlugin, { OptionType, PluginOptionsItem } from "@utils/types";
+import definePlugin, { OptionType, PluginOptionsItem, ReporterTestable } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore } from "@webpack/common";
+import { ReactElement } from "react";
 
 interface VoiceState {
     userId: string;
@@ -155,6 +156,7 @@ export default definePlugin({
     name: "VcNarrator",
     description: "Announces when users join, leave, or move voice channels via narrator",
     authors: [Devs.Ven],
+    reporterTestable: ReporterTestable.None,
 
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
@@ -288,7 +290,7 @@ export default definePlugin({
                 description: "Undeafen Message (only self for now)",
                 default: "{{USER}} undeafened"
             }
-        };
+        } satisfies Record<string, PluginOptionsItem>;
     },
 
     settingsAboutComponent({ tempSettings: s }) {
@@ -302,7 +304,7 @@ export default definePlugin({
             [],
         );
 
-        let errorComponent: React.ReactElement | null = null;
+        let errorComponent: ReactElement<any> | null = null;
         if (!hasVoices) {
             let error = "No narrator voices found. ";
             error += navigator.platform?.toLowerCase().includes("linux")

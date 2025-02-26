@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { DraftType } from "@webpack/common";
 import { Channel, Guild, Role } from "discord-types/general";
 
 import { FluxDispatcher, FluxEvents } from "./utils";
@@ -39,10 +38,37 @@ export class FluxStore {
     syncWith: GenericFunction;
     waitFor: GenericFunction;
     __getLocalVars(): Record<string, any>;
+
+    static getAll(): FluxStore[];
+}
+
+export class FluxEmitter {
+    constructor();
+
+    changeSentinel: number;
+    changedStores: Set<FluxStore>;
+    isBatchEmitting: boolean;
+    isDispatching: boolean;
+    isPaused: boolean;
+    pauseTimer: NodeJS.Timeout | null;
+    reactChangedStores: Set<FluxStore>;
+
+    batched(batch: (...args: any[]) => void): void;
+    destroy(): void;
+    emit(): void;
+    emitNonReactOnce(): void;
+    emitReactOnce(): void;
+    getChangeSentinel(): number;
+    getIsPaused(): boolean;
+    injectBatchEmitChanges(batch: (...args: any[]) => void): void;
+    markChanged(store: FluxStore): void;
+    pause(): void;
+    resume(): void;
 }
 
 export interface Flux {
     Store: typeof FluxStore;
+    Emitter: FluxEmitter;
 }
 
 export class WindowStore extends FluxStore {
@@ -63,7 +89,7 @@ export interface CustomEmoji {
     originalName?: string;
     require_colons: boolean;
     roles: string[];
-    type: "GUILD_EMOJI";
+    type: 1;
 }
 
 export interface UnicodeEmoji {
@@ -75,7 +101,7 @@ export interface UnicodeEmoji {
     };
     index: number;
     surrogates: string;
-    type: "UNICODE";
+    type: 0;
     uniqueName: string;
     useSpriteSheet: boolean;
     get allNamesString(): string;
@@ -193,8 +219,16 @@ export class GuildStore extends FluxStore {
     getAllGuildRoles(): Record<string, Record<string, Role>>;
 }
 
+export class ThemeStore extends FluxStore {
+    theme: "light" | "dark" | "darker" | "midnight";
+    darkSidebar: boolean;
+    isSystemThemeAvailable: boolean;
+    systemPrefersColorScheme: "light" | "dark";
+    systemTheme: null;
+}
+
 export type useStateFromStores = <T>(
-    stores: t.FluxStore[],
+    stores: any[],
     mapper: () => T,
     dependencies?: any,
     isEqual?: (old: T, newer: T) => boolean

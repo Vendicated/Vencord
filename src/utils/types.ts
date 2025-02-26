@@ -16,9 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { ProfileBadge } from "@api/Badges";
+import { ChatBarButtonFactory } from "@api/ChatButtons";
 import { Command } from "@api/Commands";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { MemberListDecoratorFactory } from "@api/MemberListDecorators";
+import { MessageAccessoryFactory } from "@api/MessageAccessories";
+import { MessageDecorationFactory } from "@api/MessageDecorations";
+import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
+import { MessagePopoverButtonFactory } from "@api/MessagePopover";
 import { FluxEvents } from "@webpack/types";
+import { JSX } from "react";
 import { Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
@@ -33,8 +41,17 @@ export interface PatchReplacement {
     match: string | RegExp;
     /** The replacement string or function which returns the string for the patch replacement */
     replace: string | ReplaceFn;
-    /** A function which returns whether this patch replacement should be applied */
+    /** Do not warn if this replacement did no changes */
+    noWarn?: boolean;
+    /**
+     * A function which returns whether this patch replacement should be applied.
+     * This is ran before patches are registered, so if this returns false, the patch will never be registered.
+     */
     predicate?(): boolean;
+    /** The minimum build number for this patch to be applied */
+    fromBuild?: number;
+    /** The maximum build number for this patch to be applied */
+    toBuild?: number;
 }
 
 export interface Patch {
@@ -49,8 +66,15 @@ export interface Patch {
     noWarn?: boolean;
     /** Only apply this set of replacements if all of them succeed. Use this if your replacements depend on each other */
     group?: boolean;
-    /** A function which returns whether this patch should be applied */
+    /**
+     * A function which returns whether this patch replacement should be applied.
+     * This is ran before patches are registered, so if this returns false, the patch will never be registered.
+     */
     predicate?(): boolean;
+    /** The minimum build number for this patch to be applied */
+    fromBuild?: number;
+    /** The maximum build number for this patch to be applied */
+    toBuild?: number;
 }
 
 export interface PluginAuthor {
@@ -72,19 +96,23 @@ export interface PluginDef {
     stop?(): void;
     patches?: Omit<Patch, "plugin">[];
     /**
-     * List of commands. If you specify these, you must add CommandsAPI to dependencies
+     * List of commands that your plugin wants to register
      */
     commands?: Command[];
     /**
      * A list of other plugins that your plugin depends on.
      * These will automatically be enabled and loaded before your plugin
-     * Common examples are CommandsAPI, MessageEventsAPI...
+     * Generally these will be API plugins
      */
     dependencies?: string[],
     /**
      * Whether this plugin is required and forcefully enabled
      */
     required?: boolean;
+    /**
+     * Whether this plugin should be hidden from the user
+     */
+    hidden?: boolean;
     /**
      * Whether this plugin should be enabled by default, but can be disabled
      */
@@ -94,6 +122,10 @@ export interface PluginDef {
      * @default StartAt.WebpackReady
      */
     startAt?: StartAt,
+    /**
+     * Which parts of the plugin can be tested by the reporter. Defaults to all parts
+     */
+    reporterTestable?: number;
     /**
      * Optionally provide settings that the user can configure in the Plugins tab of settings.
      * @deprecated Use `settings` instead
@@ -120,7 +152,7 @@ export interface PluginDef {
      * Allows you to subscribe to Flux events
      */
     flux?: {
-        [E in FluxEvents]?: (event: any) => void;
+        [E in FluxEvents]?: (event: any) => void | Promise<void>;
     };
     /**
      * Allows you to manipulate context menus
@@ -133,6 +165,25 @@ export interface PluginDef {
     toolboxActions?: Record<string, () => void>;
 
     tags?: string[];
+
+    /**
+     * Managed style to automatically enable and disable when the plugin is enabled or disabled
+     */
+    managedStyle?: string;
+
+    userProfileBadge?: ProfileBadge;
+
+    onMessageClick?: MessageClickListener;
+    onBeforeMessageSend?: MessageSendListener;
+    onBeforeMessageEdit?: MessageEditListener;
+
+    renderMessagePopoverButton?: MessagePopoverButtonFactory;
+    renderMessageAccessory?: MessageAccessoryFactory;
+    renderMessageDecoration?: MessageDecorationFactory;
+
+    renderMemberListDecorator?: MemberListDecoratorFactory;
+
+    renderChatBarButton?: ChatBarButtonFactory;
 }
 
 export const enum StartAt {
@@ -144,6 +195,13 @@ export const enum StartAt {
     WebpackReady = "WebpackReady"
 }
 
+export const enum ReporterTestable {
+    None = 1 << 1,
+    Start = 1 << 2,
+    Patches = 1 << 3,
+    FluxEvents = 1 << 4
+}
+
 export const enum OptionType {
     STRING,
     NUMBER,
@@ -152,6 +210,7 @@ export const enum OptionType {
     SELECT,
     SLIDER,
     COMPONENT,
+    CUSTOM
 }
 
 export type SettingsDefinition = Record<string, PluginSettingDef>;
@@ -160,15 +219,16 @@ export type SettingsChecks<D extends SettingsDefinition> = {
     (IsDisabled<DefinedSettings<D>> & IsValid<PluginSettingType<D[K]>, DefinedSettings<D>>);
 };
 
-export type PluginSettingDef = (
-    | PluginSettingStringDef
-    | PluginSettingNumberDef
-    | PluginSettingBooleanDef
-    | PluginSettingSelectDef
-    | PluginSettingSliderDef
-    | PluginSettingComponentDef
-    | PluginSettingBigIntDef
-) & PluginSettingCommon;
+export type PluginSettingDef =
+    (PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">) |
+    (PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">) | ((
+        | PluginSettingStringDef
+        | PluginSettingNumberDef
+        | PluginSettingBooleanDef
+        | PluginSettingSelectDef
+        | PluginSettingSliderDef
+        | PluginSettingBigIntDef
+    ) & PluginSettingCommon);
 
 export interface PluginSettingCommon {
     description: string;
@@ -188,12 +248,14 @@ export interface PluginSettingCommon {
      */
     target?: "WEB" | "DESKTOP" | "BOTH";
 }
+
 interface IsDisabled<D = unknown> {
     /**
      * Checks if this setting should be disabled
      */
     disabled?(this: D): boolean;
 }
+
 interface IsValid<T, D = unknown> {
     /**
      * Prevents the user from saving settings if this is false or a string
@@ -222,10 +284,16 @@ export interface PluginSettingSelectDef {
     type: OptionType.SELECT;
     options: readonly PluginSettingSelectOption[];
 }
+
 export interface PluginSettingSelectOption {
     label: string;
     value: string | number | boolean;
     default?: boolean;
+}
+
+export interface PluginSettingCustomDef {
+    type: OptionType.CUSTOM;
+    default?: any;
 }
 
 export interface PluginSettingSliderDef {
@@ -276,8 +344,10 @@ type PluginSettingType<O extends PluginSettingDef> = O extends PluginSettingStri
     O extends PluginSettingBooleanDef ? boolean :
     O extends PluginSettingSelectDef ? O["options"][number]["value"] :
     O extends PluginSettingSliderDef ? number :
-    O extends PluginSettingComponentDef ? any :
+    O extends PluginSettingComponentDef ? O extends { default: infer Default; } ? Default : any :
+    O extends PluginSettingCustomDef ? O extends { default: infer Default; } ? Default : any :
     never;
+
 type PluginSettingDefaultType<O extends PluginSettingDef> = O extends PluginSettingSelectDef ? (
     O["options"] extends { default?: boolean; }[] ? O["options"][number]["value"] : undefined
 ) : O extends { default: infer T; } ? T : undefined;
@@ -294,6 +364,8 @@ export interface DefinedSettings<
 > {
     /** Shorthand for `Vencord.Settings.plugins.PluginName`, but with typings */
     store: SettingsStore<Def> & PrivateSettings;
+    /** Shorthand for `Vencord.PlainSettings.plugins.PluginName`, but with typings */
+    plain: SettingsStore<Def> & PrivateSettings;
     /**
      * React hook for getting the settings for this plugin
      * @param filter optional filter to avoid rerenders for irrelevent settings
@@ -327,13 +399,15 @@ export type PluginOptionsItem =
     | PluginOptionBoolean
     | PluginOptionSelect
     | PluginOptionSlider
-    | PluginOptionComponent;
+    | PluginOptionComponent
+    | PluginOptionCustom;
 export type PluginOptionString = PluginSettingStringDef & PluginSettingCommon & IsDisabled & IsValid<string>;
 export type PluginOptionNumber = (PluginSettingNumberDef | PluginSettingBigIntDef) & PluginSettingCommon & IsDisabled & IsValid<number | BigInt>;
 export type PluginOptionBoolean = PluginSettingBooleanDef & PluginSettingCommon & IsDisabled & IsValid<boolean>;
 export type PluginOptionSelect = PluginSettingSelectDef & PluginSettingCommon & IsDisabled & IsValid<PluginSettingSelectOption>;
 export type PluginOptionSlider = PluginSettingSliderDef & PluginSettingCommon & IsDisabled & IsValid<number>;
-export type PluginOptionComponent = PluginSettingComponentDef & PluginSettingCommon;
+export type PluginOptionComponent = PluginSettingComponentDef & Omit<PluginSettingCommon, "description" | "placeholder">;
+export type PluginOptionCustom = PluginSettingCustomDef & Pick<PluginSettingCommon, "onChange">;
 
 export type PluginNative<PluginExports extends Record<string, (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any>> = {
     [key in keyof PluginExports]:

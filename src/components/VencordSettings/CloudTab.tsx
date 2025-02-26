@@ -19,6 +19,7 @@
 import { showNotification } from "@api/Notifications";
 import { Settings, useSettings } from "@api/Settings";
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { Grid } from "@components/Grid";
 import { Link } from "@components/Link";
 import { authorizeCloud, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
@@ -85,7 +86,9 @@ function SettingsSyncSection() {
                     size={Button.Sizes.SMALL}
                     disabled={!sectionEnabled}
                     onClick={() => putCloudSettings(true)}
-                >Sync to Cloud</Button>
+                >
+                    Sync to Cloud
+                </Button>
                 <Tooltip text="This will overwrite your local settings with the ones on the cloud. Use wisely!">
                     {({ onMouseLeave, onMouseEnter }) => (
                         <Button
@@ -95,7 +98,9 @@ function SettingsSyncSection() {
                             color={Button.Colors.RED}
                             disabled={!sectionEnabled}
                             onClick={() => getCloudSettings(true, true)}
-                        >Sync from Cloud</Button>
+                        >
+                            Sync from Cloud
+                        </Button>
                     )}
                 </Tooltip>
                 <Button
@@ -103,7 +108,9 @@ function SettingsSyncSection() {
                     color={Button.Colors.RED}
                     disabled={!sectionEnabled}
                     onClick={() => deleteCloudSettings()}
-                >Delete Cloud Settings</Button>
+                >
+                    Delete Cloud Settings
+                </Button>
             </div>
         </Forms.FormSection>
     );
@@ -124,7 +131,12 @@ function CloudTab() {
                 <Switch
                     key="backend"
                     value={settings.cloud.authenticated}
-                    onChange={v => { v && authorizeCloud(); if (!v) settings.cloud.authenticated = v; }}
+                    onChange={v => {
+                        if (v)
+                            authorizeCloud();
+                        else
+                            settings.cloud.authenticated = v;
+                    }}
                     note="This will request authorization if you have not yet set up cloud integrations."
                 >
                     Enable Cloud Integrations
@@ -136,23 +148,43 @@ function CloudTab() {
                 <CheckedTextInput
                     key="backendUrl"
                     value={settings.cloud.url}
-                    onChange={v => { settings.cloud.url = v; settings.cloud.authenticated = false; deauthorizeCloud(); }}
+                    onChange={async v => {
+                        settings.cloud.url = v;
+                        settings.cloud.authenticated = false;
+                        deauthorizeCloud();
+                    }}
                     validate={validateUrl}
                 />
-                <Button
-                    className={Margins.top8}
-                    size={Button.Sizes.MEDIUM}
-                    color={Button.Colors.RED}
-                    disabled={!settings.cloud.authenticated}
-                    onClick={() => Alerts.show({
-                        title: "Are you sure?",
-                        body: "Once your data is erased, we cannot recover it. There's no going back!",
-                        onConfirm: eraseAllData,
-                        confirmText: "Erase it!",
-                        confirmColor: "vc-cloud-erase-data-danger-btn",
-                        cancelText: "Nevermind"
-                    })}
-                >Erase All Data</Button>
+
+                <Grid columns={2} gap="1em" className={Margins.top8}>
+                    <Button
+                        size={Button.Sizes.MEDIUM}
+                        disabled={!settings.cloud.authenticated}
+                        onClick={async () => {
+                            await deauthorizeCloud();
+                            settings.cloud.authenticated = false;
+                            await authorizeCloud();
+                        }}
+                    >
+                        Reauthorise
+                    </Button>
+                    <Button
+                        size={Button.Sizes.MEDIUM}
+                        color={Button.Colors.RED}
+                        disabled={!settings.cloud.authenticated}
+                        onClick={() => Alerts.show({
+                            title: "Are you sure?",
+                            body: "Once your data is erased, we cannot recover it. There's no going back!",
+                            onConfirm: eraseAllData,
+                            confirmText: "Erase it!",
+                            confirmColor: "vc-cloud-erase-data-danger-btn",
+                            cancelText: "Nevermind"
+                        })}
+                    >
+                        Erase All Data
+                    </Button>
+                </Grid>
+
                 <Forms.FormDivider className={Margins.top16} />
             </Forms.FormSection >
             <SettingsSyncSection />

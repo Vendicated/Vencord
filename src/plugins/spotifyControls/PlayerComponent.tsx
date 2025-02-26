@@ -18,6 +18,8 @@
 
 import "./spotifyStyles.css";
 
+import { Settings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
 import { Flex } from "@components/Flex";
 import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { debounce } from "@shared/debounce";
@@ -27,7 +29,7 @@ import { ContextMenuApi, FluxDispatcher, Forms, Menu, React, useEffect, useState
 
 import { SpotifyStore, Track } from "./SpotifyStore";
 
-const cl = (className: string) => `vc-spotify-${className}`;
+const cl = classNameFactory("vc-spotify-");
 
 function msToHuman(ms: number) {
     const minutes = ms / 1000 / 60;
@@ -39,7 +41,7 @@ function msToHuman(ms: number) {
 function Svg(path: string, label: string) {
     return () => (
         <svg
-            className={classes(cl("button-icon"), cl(label))}
+            className={cl("button-icon", label)}
             height="24"
             width="24"
             viewBox="0 0 24 24"
@@ -125,12 +127,14 @@ function Controls() {
     return (
         <Flex className={cl("button-row")} style={{ gap: 0 }}>
             <Button
-                className={classes(cl("button"), cl(shuffle ? "shuffle-on" : "shuffle-off"))}
+                className={classes(cl("button"), cl("shuffle"), cl(shuffle ? "shuffle-on" : "shuffle-off"))}
                 onClick={() => SpotifyStore.setShuffle(!shuffle)}
             >
                 <Shuffle />
             </Button>
-            <Button onClick={() => SpotifyStore.prev()}>
+            <Button onClick={() => {
+                Settings.plugins.SpotifyControls.previousButtonRestartsTrack && SpotifyStore.position > 3000 ? SpotifyStore.seek(0) : SpotifyStore.prev();
+            }}>
                 <SkipPrev />
             </Button>
             <Button onClick={() => SpotifyStore.setPlaying(!isPlaying)}>
@@ -140,7 +144,7 @@ function Controls() {
                 <SkipNext />
             </Button>
             <Button
-                className={classes(cl("button"), cl(repeatClassName))}
+                className={classes(cl("button"), cl("repeat"), cl(repeatClassName))}
                 onClick={() => SpotifyStore.setRepeat(nextRepeat)}
                 style={{ position: "relative" }}
             >
@@ -165,7 +169,6 @@ function SeekBar() {
 
     const [position, setPosition] = useState(storePosition);
 
-    // eslint-disable-next-line consistent-return
     useEffect(() => {
         if (isPlaying && !isSettingPosition) {
             setPosition(SpotifyStore.position);
@@ -230,7 +233,7 @@ function AlbumContextMenu({ track }: { track: Track; }) {
                 id="view-cover"
                 label="View Album Cover"
                 // trolley
-                action={() => openImageModal(track.album.image.url)}
+                action={() => openImageModal(track.album.image)}
                 icon={ImageIcon}
             />
             <Menu.MenuControlItem
@@ -283,11 +286,12 @@ function Info({ track }: { track: Track; }) {
         </>
     );
 
-    if (coverExpanded && img) return (
-        <div id={cl("album-expanded-wrapper")}>
-            {i}
-        </div>
-    );
+    if (coverExpanded && img)
+        return (
+            <div id={cl("album-expanded-wrapper")}>
+                {i}
+            </div>
+        );
 
     return (
         <div id={cl("info-wrapper")}>
@@ -358,7 +362,7 @@ export function Player() {
     const [shouldHide, setShouldHide] = useState(false);
 
     // Hide player after 5 minutes of inactivity
-    // eslint-disable-next-line consistent-return
+
     React.useEffect(() => {
         setShouldHide(false);
         if (!isPlaying) {

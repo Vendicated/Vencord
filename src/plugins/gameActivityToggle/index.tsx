@@ -17,16 +17,17 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
+import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { StatusSettingsStores } from "@webpack/common";
 
-import style from "./style.css?managed";
+import managedStyle from "./style.css?managed";
 
-const Button = findComponentByCodeLazy("Button.Sizes.NONE,disabled:");
+const Button = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
+
+const ShowCurrentGame = getUserSettingLazy<boolean>("status", "showCurrentGame")!;
 
 function makeIcon(showCurrentGame?: boolean) {
     const { oldIcon } = settings.use(["oldIcon"]);
@@ -60,7 +61,7 @@ function makeIcon(showCurrentGame?: boolean) {
 }
 
 function GameActivityToggleButton() {
-    const showCurrentGame = StatusSettingsStores.ShowCurrentGame.useSetting();
+    const showCurrentGame = ShowCurrentGame.useSetting();
 
     return (
         <Button
@@ -68,7 +69,7 @@ function GameActivityToggleButton() {
             icon={makeIcon(showCurrentGame)}
             role="switch"
             aria-checked={!showCurrentGame}
-            onClick={() => StatusSettingsStores.ShowCurrentGame.updateSetting(old => !old)}
+            onClick={() => ShowCurrentGame.updateSetting(old => !old)}
         />
     );
 }
@@ -85,11 +86,14 @@ export default definePlugin({
     name: "GameActivityToggle",
     description: "Adds a button next to the mic and deafen button to toggle game activity.",
     authors: [Devs.Nuckyz, Devs.RuukuLada],
+    dependencies: ["UserSettingsAPI"],
     settings,
+
+    managedStyle,
 
     patches: [
         {
-            find: ".Messages.ACCOUNT_SPEAKING_WHILE_MUTED",
+            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
             replacement: {
                 match: /this\.renderNameZone\(\).+?children:\[/,
                 replace: "$&$self.GameActivityToggleButton(),"
@@ -99,11 +103,4 @@ export default definePlugin({
 
     GameActivityToggleButton: ErrorBoundary.wrap(GameActivityToggleButton, { noop: true }),
 
-    start() {
-        enableStyle(style);
-    },
-
-    stop() {
-        disableStyle(style);
-    }
 });

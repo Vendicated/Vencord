@@ -17,22 +17,36 @@
 */
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
-import { Settings, useSettings } from "@api/Settings";
+import { useSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import DonateButton from "@components/DonateButton";
-import { ErrorCard } from "@components/ErrorCard";
+import { openContributorModal } from "@components/PluginSettings/ContributorModal";
+import { openPluginModal } from "@components/PluginSettings/PluginModal";
+import { gitRemote } from "@shared/vencordUserAgent";
+import { DONOR_ROLE_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import { identity } from "@utils/misc";
+import { identity, isPluginDev } from "@utils/misc";
 import { relaunch, showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { Button, Card, Forms, React, Select, Slider, Switch } from "@webpack/common";
+import { Button, Forms, GuildMemberStore, React, Select, Switch, UserStore } from "@webpack/common";
 
+import BadgeAPI from "../../plugins/_api/badges";
+import { Flex, FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "..";
+import { openNotificationSettingsModal } from "./NotificationSettings";
+import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
+import { SpecialCard } from "./SpecialCard";
 
 const cl = classNameFactory("vc-settings-");
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1039992459209490513.png";
+
+const VENNIE_DONATOR_IMAGE = "https://cdn.discordapp.com/emojis/1238120638020063377.png";
+const COZY_CONTRIB_IMAGE = "https://cdn.discordapp.com/emojis/1026533070955872337.png";
+
+const DONOR_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070116305436712.png?size=2048";
+const CONTRIB_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070166481895484.png?size=2048";
 
 type KeysOfType<Object, Type> = {
     [K in keyof Object]: Object[K] extends Type ? K : never;
@@ -49,6 +63,8 @@ function VencordSettings() {
     const isWindows = navigator.platform.toLowerCase().startsWith("win");
     const isMac = navigator.platform.toLowerCase().startsWith("mac");
     const needsVibrancySettings = IS_DISCORD_DESKTOP && isMac;
+
+    const user = UserStore.getCurrentUser();
 
     const Switches: Array<false | {
         key: KeysOfType<typeof settings, boolean>;
@@ -78,7 +94,7 @@ function VencordSettings() {
             !IS_WEB && {
                 key: "transparent",
                 title: "Enable window transparency.",
-                note: "You need a theme that supports transparency or this will do nothing. Will stop the window from being resizable. Requires a full restart"
+                note: "You need a theme that supports transparency or this will do nothing. WILL STOP THE WINDOW FROM BEING RESIZABLE!! Requires a full restart"
             },
             !IS_WEB && isWindows && {
                 key: "winCtrlQ",
@@ -94,47 +110,92 @@ function VencordSettings() {
 
     return (
         <SettingsTab title="Vencord Settings">
-            <DonateCard image={donateImage} />
+            {isDonor(user?.id)
+                ? (
+                    <SpecialCard
+                        title="Donations"
+                        subtitle="Thank you for donating!"
+                        description="All Vencord users can see your badge! You can change it at any time by messaging @vending.machine."
+                        cardImage={VENNIE_DONATOR_IMAGE}
+                        backgroundImage={DONOR_BACKGROUND_IMAGE}
+                        backgroundColor="#ED87A9"
+                    >
+                        <DonateButtonComponent />
+                    </SpecialCard>
+                )
+                : (
+                    <SpecialCard
+                        title="Support the Project"
+                        description="Please consider supporting the development of Vencord by donating!"
+                        cardImage={donateImage}
+                        backgroundImage={DONOR_BACKGROUND_IMAGE}
+                        backgroundColor="#c3a3ce"
+                    >
+                        <DonateButtonComponent />
+                    </SpecialCard>
+                )
+            }
+            {isPluginDev(user?.id) && (
+                <SpecialCard
+                    title="Contributions"
+                    subtitle="Thank you for contributing!"
+                    description="Since you've contributed to Vencord you now have a cool new badge!"
+                    cardImage={COZY_CONTRIB_IMAGE}
+                    backgroundImage={CONTRIB_BACKGROUND_IMAGE}
+                    backgroundColor="#EDCC87"
+                    buttonTitle="See what you've contributed to"
+                    buttonOnClick={() => openContributorModal(user)}
+                />
+            )}
+
             <Forms.FormSection title="Quick Actions">
-                <Card className={cl("quick-actions-card")}>
-                    <React.Fragment>
-                        {!IS_WEB && (
-                            <Button
-                                onClick={relaunch}
-                                size={Button.Sizes.SMALL}>
-                                Restart Client
-                            </Button>
-                        )}
-                        <Button
-                            onClick={() => VencordNative.quickCss.openEditor()}
-                            size={Button.Sizes.SMALL}
-                            disabled={settingsDir === "Loading..."}>
-                            Open QuickCSS File
-                        </Button>
-                        {!IS_WEB && (
-                            <Button
-                                onClick={() => showItemInFolder(settingsDir)}
-                                size={Button.Sizes.SMALL}
-                                disabled={settingsDirPending}>
-                                Open Settings Folder
-                            </Button>
-                        )}
-                        <Button
-                            onClick={() => VencordNative.native.openExternal("https://github.com/Vendicated/Vencord")}
-                            size={Button.Sizes.SMALL}
-                            disabled={settingsDirPending}>
-                            Open in GitHub
-                        </Button>
-                    </React.Fragment>
-                </Card>
+                <QuickActionCard>
+                    <QuickAction
+                        Icon={LogIcon}
+                        text="Notification Log"
+                        action={openNotificationLogModal}
+                    />
+                    <QuickAction
+                        Icon={PaintbrushIcon}
+                        text="Edit QuickCSS"
+                        action={() => VencordNative.quickCss.openEditor()}
+                    />
+                    {!IS_WEB && (
+                        <QuickAction
+                            Icon={RestartIcon}
+                            text="Relaunch Discord"
+                            action={relaunch}
+                        />
+                    )}
+                    {!IS_WEB && (
+                        <QuickAction
+                            Icon={FolderIcon}
+                            text="Open Settings Folder"
+                            action={() => showItemInFolder(settingsDir)}
+                        />
+                    )}
+                    <QuickAction
+                        Icon={GithubIcon}
+                        text="View Source Code"
+                        action={() => VencordNative.native.openExternal("https://github.com/" + gitRemote)}
+                    />
+                </QuickActionCard>
             </Forms.FormSection>
 
             <Forms.FormDivider />
 
             <Forms.FormSection className={Margins.top16} title="Settings" tag="h5">
-                <Forms.FormText className={Margins.bottom20}>
-                    Hint: You can change the position of this settings section in the settings of the "Settings" plugin!
+                <Forms.FormText className={Margins.bottom20} style={{ color: "var(--text-muted)" }}>
+                    Hint: You can change the position of this settings section in the
+                    {" "}<Button
+                        look={Button.Looks.BLANK}
+                        style={{ color: "var(--text-link)", display: "inline-block" }}
+                        onClick={() => openPluginModal(Vencord.Plugins.plugins.Settings)}
+                    >
+                        settings of the Settings plugin
+                    </Button>!
                 </Forms.FormText>
+
                 {Switches.map(s => s && (
                     <Switch
                         key={s.key}
@@ -212,119 +273,33 @@ function VencordSettings() {
                     serialize={identity} />
             </>}
 
-            {typeof Notification !== "undefined" && <NotificationSection settings={settings.notifications} />}
+            <Forms.FormSection className={Margins.top16} title="Vencord Notifications" tag="h5">
+                <Flex>
+                    <Button onClick={openNotificationSettingsModal}>
+                        Notification Settings
+                    </Button>
+                    <Button onClick={openNotificationLogModal}>
+                        View Notification Log
+                    </Button>
+                </Flex>
+            </Forms.FormSection>
         </SettingsTab>
     );
 }
 
-function NotificationSection({ settings }: { settings: typeof Settings["notifications"]; }) {
+function DonateButtonComponent() {
     return (
-        <>
-            <Forms.FormTitle tag="h5">Notification Style</Forms.FormTitle>
-            {settings.useNative !== "never" && Notification?.permission === "denied" && (
-                <ErrorCard style={{ padding: "1em" }} className={Margins.bottom8}>
-                    <Forms.FormTitle tag="h5">Desktop Notification Permission denied</Forms.FormTitle>
-                    <Forms.FormText>You have denied Notification Permissions. Thus, Desktop notifications will not work!</Forms.FormText>
-                </ErrorCard>
-            )}
-            <Forms.FormText className={Margins.bottom8}>
-                Some plugins may show you notifications. These come in two styles:
-                <ul>
-                    <li><strong>Vencord Notifications</strong>: These are in-app notifications</li>
-                    <li><strong>Desktop Notifications</strong>: Native Desktop notifications (like when you get a ping)</li>
-                </ul>
-            </Forms.FormText>
-            <Select
-                placeholder="Notification Style"
-                options={[
-                    { label: "Only use Desktop notifications when Discord is not focused", value: "not-focused", default: true },
-                    { label: "Always use Desktop notifications", value: "always" },
-                    { label: "Always use Vencord notifications", value: "never" },
-                ] satisfies Array<{ value: typeof settings["useNative"]; } & Record<string, any>>}
-                closeOnSelect={true}
-                select={v => settings.useNative = v}
-                isSelected={v => v === settings.useNative}
-                serialize={identity}
-            />
-
-            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Position</Forms.FormTitle>
-            <Select
-                isDisabled={settings.useNative === "always"}
-                placeholder="Notification Position"
-                options={[
-                    { label: "Bottom Right", value: "bottom-right", default: true },
-                    { label: "Top Right", value: "top-right" },
-                ] satisfies Array<{ value: typeof settings["position"]; } & Record<string, any>>}
-                select={v => settings.position = v}
-                isSelected={v => v === settings.position}
-                serialize={identity}
-            />
-
-            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Timeout</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom16}>Set to 0s to never automatically time out</Forms.FormText>
-            <Slider
-                disabled={settings.useNative === "always"}
-                markers={[0, 1000, 2500, 5000, 10_000, 20_000]}
-                minValue={0}
-                maxValue={20_000}
-                initialValue={settings.timeout}
-                onValueChange={v => settings.timeout = v}
-                onValueRender={v => (v / 1000).toFixed(2) + "s"}
-                onMarkerRender={v => (v / 1000) + "s"}
-                stickToMarkers={false}
-            />
-
-            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Log Limit</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom16}>
-                The amount of notifications to save in the log until old ones are removed.
-                Set to <code>0</code> to disable Notification log and <code>∞</code> to never automatically remove old Notifications
-            </Forms.FormText>
-            <Slider
-                markers={[0, 25, 50, 75, 100, 200]}
-                minValue={0}
-                maxValue={200}
-                stickToMarkers={true}
-                initialValue={settings.logLimit}
-                onValueChange={v => settings.logLimit = v}
-                onValueRender={v => v === 200 ? "∞" : v}
-                onMarkerRender={v => v === 200 ? "∞" : v}
-            />
-
-            <Button
-                onClick={openNotificationLogModal}
-                disabled={settings.logLimit === 0}
-            >
-                Open Notification Log
-            </Button>
-        </>
+        <DonateButton
+            look={Button.Looks.FILLED}
+            color={Button.Colors.WHITE}
+            style={{ marginTop: "1em" }}
+        />
     );
 }
 
-interface DonateCardProps {
-    image: string;
-}
-
-function DonateCard({ image }: DonateCardProps) {
-    return (
-        <Card className={cl("card", "donate")}>
-            <div>
-                <Forms.FormTitle tag="h5">Support the Project</Forms.FormTitle>
-                <Forms.FormText>Please consider supporting the development of Vencord by donating!</Forms.FormText>
-                <DonateButton style={{ transform: "translateX(-1em)" }} />
-            </div>
-            <img
-                role="presentation"
-                src={image}
-                alt=""
-                height={128}
-                style={{
-                    imageRendering: image === SHIGGY_DONATE_IMAGE ? "pixelated" : void 0,
-                    marginLeft: "auto",
-                    transform: image === DEFAULT_DONATE_IMAGE ? "rotate(10deg)" : void 0
-                }}
-            />
-        </Card>
-    );
+function isDonor(userId: string): boolean {
+    const donorBadges = BadgeAPI.getDonorBadges(userId);
+    return GuildMemberStore.getMember(VENCORD_GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID) || !!donorBadges;
 }
 
 export default wrapTab(VencordSettings, "Vencord Settings");

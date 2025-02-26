@@ -9,7 +9,7 @@ import { Link } from "@components/Link";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { filters, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
 import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
 import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
@@ -19,7 +19,10 @@ import { AvatarDecorationModalPreview } from "../components";
 
 const FileUpload = findComponentByCodeLazy("fileUploadInput,");
 
-const { default: HelpMessage, HelpMessageTypes } = findByPropsLazy("HelpMessageTypes");
+const { HelpMessage, HelpMessageTypes } = mapMangledModuleLazy('POSITIVE=3]="POSITIVE', {
+    HelpMessageTypes: filters.byProps("POSITIVE", "WARNING", "INFO"),
+    HelpMessage: filters.byCode(".iconDiv")
+});
 
 function useObjectURL(object: Blob | MediaSource | null) {
     const [url, setUrl] = useState<string | null>(null);
@@ -116,8 +119,8 @@ function CreateDecorationModal(props: ModalProps) {
                         />
                     </div>
                 </div>
-                <Forms.FormText type="description" className={Margins.bottom16}>
-                    <br />You can receive updates on your decoration's review by joining <Link
+                <HelpMessage messageType={HelpMessageTypes.INFO} className={Margins.bottom8}>
+                    To receive updates on your decoration's review, join <Link
                         href={`https://discord.gg/${INVITE_KEY}`}
                         onClick={async e => {
                             e.preventDefault();
@@ -135,8 +138,8 @@ function CreateDecorationModal(props: ModalProps) {
                         }}
                     >
                         Decor's Discord server
-                    </Link>.
-                </Forms.FormText>
+                    </Link> and allow direct messages.
+                </HelpMessage>
             </ErrorBoundary>
         </ModalContent>
         <ModalFooter className={cl("modal-footer")}>

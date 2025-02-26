@@ -19,10 +19,19 @@
 import { DataStore, Notices } from "@api/index";
 import { showNotification } from "@api/Notifications";
 import { getUniqueUsername, openUserProfile } from "@utils/discord";
+import { findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore, RelationshipStore, UserStore, UserUtils } from "@webpack/common";
+import { FluxStore } from "@webpack/types";
 
 import settings from "./settings";
 import { ChannelType, RelationshipType, SimpleGroupChannel, SimpleGuild } from "./types";
+
+export const GuildAvailabilityStore = findStoreLazy("GuildAvailabilityStore") as FluxStore & {
+    totalGuilds: number;
+    totalUnavailableGuilds: number;
+    unavailableGuilds: string[];
+    isUnavailable(guildId: string): boolean;
+};
 
 const guilds = new Map<string, SimpleGuild>();
 const groups = new Map<string, SimpleGroupChannel>();
@@ -41,6 +50,8 @@ async function runMigrations() {
 
 export async function syncAndRunChecks() {
     await runMigrations();
+    if (UserStore.getCurrentUser() == null) return;
+
     const [oldGuilds, oldGroups, oldFriends] = await DataStore.getMany([
         guildsKey(),
         groupsKey(),
@@ -59,7 +70,7 @@ export async function syncAndRunChecks() {
 
         if (settings.store.servers && oldGuilds?.size) {
             for (const [id, guild] of oldGuilds) {
-                if (!guilds.has(id))
+                if (!guilds.has(id) && !GuildAvailabilityStore.isUnavailable(id))
                     notify(`You are no longer in the server ${guild.name}.`, guild.iconURL);
             }
         }

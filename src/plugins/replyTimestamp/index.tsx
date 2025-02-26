@@ -10,12 +10,10 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { Timestamp } from "@webpack/common";
+import { DateUtils, Timestamp } from "@webpack/common";
 import type { Message } from "discord-types/general";
 import type { HTMLAttributes } from "react";
 
-const { getMessageTimestampId } = findByPropsLazy("getMessageTimestampId");
-const { calendarFormat, dateFormat, isSameDay } = findByPropsLazy("calendarFormat", "dateFormat", "isSameDay", "accessibilityLabelCalendarFormat");
 const MessageClasses = findByPropsLazy("separator", "latin24CompactTimeStamp");
 
 function Sep(props: HTMLAttributes<HTMLElement>) {
@@ -42,16 +40,15 @@ function ReplyTimestamp({
     const baseTimestamp = baseMessage.timestamp as any;
     return (
         <Timestamp
-            id={getMessageTimestampId(referencedMessage.message)}
             className="vc-reply-timestamp"
-            compact={isSameDay(refTimestamp, baseTimestamp)}
+            compact={DateUtils.isSameDay(refTimestamp, baseTimestamp)}
             timestamp={refTimestamp}
             isInline={false}
         >
             <Sep>[</Sep>
-            {isSameDay(refTimestamp, baseTimestamp)
-                ? dateFormat(refTimestamp, "LT")
-                : calendarFormat(refTimestamp)
+            {DateUtils.isSameDay(refTimestamp, baseTimestamp)
+                ? DateUtils.dateFormat(refTimestamp, "LT")
+                : DateUtils.calendarFormat(refTimestamp)
             }
             <Sep>]</Sep>
         </Timestamp>
@@ -65,10 +62,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: "renderSingleLineMessage:function()",
+            find: "#{intl::REPLY_QUOTE_MESSAGE_BLOCKED}",
             replacement: {
-                match: /(?<="aria-label":\i,children:\[)(?=\i,\i,\i\])/,
-                replace: "$self.ReplyTimestamp(arguments[0]),"
+                match: /\.onClickReply,.+?}\),(?=\i,\i,\i\])/,
+                replace: "$&$self.ReplyTimestamp(arguments[0]),"
             }
         }
     ],

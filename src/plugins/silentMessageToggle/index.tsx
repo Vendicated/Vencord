@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
-import { addPreSendListener, removePreSendListener, SendListener } from "@api/MessageEvents";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
+import { addMessagePreSendListener, MessageSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -41,7 +41,7 @@ const settings = definePluginSettings({
     }
 });
 
-const SilentMessageToggle: ChatBarButton = ({ isMainChat }) => {
+const SilentMessageToggle: ChatBarButtonFactory = ({ isMainChat }) => {
     const [enabled, setEnabled] = useState(lastState);
 
     function setEnabledValue(value: boolean) {
@@ -50,15 +50,15 @@ const SilentMessageToggle: ChatBarButton = ({ isMainChat }) => {
     }
 
     useEffect(() => {
-        const listener: SendListener = (_, message) => {
+        const listener: MessageSendListener = (_, message) => {
             if (enabled) {
                 if (settings.store.autoDisable) setEnabledValue(false);
                 if (!message.content.startsWith("@silent ")) message.content = "@silent " + message.content;
             }
         };
 
-        addPreSendListener(listener);
-        return () => void removePreSendListener(listener);
+        addMessagePreSendListener(listener);
+        return () => void removeMessagePreSendListener(listener);
     }, [enabled]);
 
     if (!isMainChat) return null;
@@ -74,11 +74,11 @@ const SilentMessageToggle: ChatBarButton = ({ isMainChat }) => {
                 viewBox="0 0 24 24"
                 style={{ scale: "1.2" }}
             >
-                <path fill="currentColor" mask="url(#_)" d="M18 10.7101C15.1085 9.84957 13 7.17102 13 4c0-.30736.0198-.6101.0582-.907C12.7147 3.03189 12.3611 3 12 3 8.686 3 6 5.686 6 9v5c0 1.657-1.344 3-3 3v1h18v-1c-1.656 0-3-1.343-3-3v-3.2899ZM8.55493 19c.693 1.19 1.96897 2 3.44497 2s2.752-.81 3.445-2H8.55493ZM18.2624 5.50209 21 2.5V1h-4.9651v1.49791h2.4411L16 5.61088V7h5V5.50209h-2.7376Z" />
+                <path fill="currentColor" mask="url(#vc-silent-msg-mask)" d="M18 10.7101C15.1085 9.84957 13 7.17102 13 4c0-.30736.0198-.6101.0582-.907C12.7147 3.03189 12.3611 3 12 3 8.686 3 6 5.686 6 9v5c0 1.657-1.344 3-3 3v1h18v-1c-1.656 0-3-1.343-3-3v-3.2899ZM8.55493 19c.693 1.19 1.96897 2 3.44497 2s2.752-.81 3.445-2H8.55493ZM18.2624 5.50209 21 2.5V1h-4.9651v1.49791h2.4411L16 5.61088V7h5V5.50209h-2.7376Z" />
                 {!enabled && <>
-                    <mask id="_">
+                    <mask id="vc-silent-msg-mask">
                         <path fill="#fff" d="M0 0h24v24H0Z" />
-                        <path stroke="#000" stroke-width="5.99068" d="M0 24 24 0" />
+                        <path stroke="#000" strokeWidth="5.99068" d="M0 24 24 0" />
                     </mask>
                     <path fill="var(--status-danger)" d="m21.178 1.70703 1.414 1.414L4.12103 21.593l-1.414-1.415L21.178 1.70703Z" />
                 </>}
@@ -91,9 +91,7 @@ export default definePlugin({
     name: "SilentMessageToggle",
     authors: [Devs.Nuckyz, Devs.CatNoir],
     description: "Adds a button to the chat bar to toggle sending a silent message.",
-    dependencies: ["MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
 
-    start: () => addChatBarButton("SilentMessageToggle", SilentMessageToggle),
-    stop: () => removeChatBarButton("SilentMessageToggle")
+    renderChatBarButton: SilentMessageToggle,
 });

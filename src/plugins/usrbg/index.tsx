@@ -17,20 +17,17 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
-import { enableStyle } from "@api/Styles";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-import style from "./index.css?managed";
-
 const API_URL = "https://usrbg.is-hardly.online/users";
 
 interface UsrbgApiReturn {
-    endpoint: string
-    bucket: string
-    prefix: string
-    users: Record<string, string>
+    endpoint: string;
+    bucket: string;
+    prefix: string;
+    users: Record<string, string>;
 }
 
 const settings = definePluginSettings({
@@ -57,21 +54,12 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ".NITRO_BANNER,",
-            replacement: [
-                {
-                    match: /(\i)\.premiumType/,
-                    replace: "$self.premiumHook($1)||$&"
-                },
-                {
-                    match: /(?<=function \i\((\i)\)\{)(?=var.{30,50},bannerSrc:)/,
-                    replace: "$1.bannerSrc=$self.useBannerHook($1);"
-                },
-                {
-                    match: /\?\(0,\i\.jsx\)\(\i,{type:\i,shown/,
-                    replace: "&&$self.shouldShowBadge(arguments[0])$&"
-                }
-            ]
+            find: '.banner)==null?"COMPLETE"',
+            replacement: {
+                match: /(?<=void 0:)\i.getPreviewBanner\(\i,\i,\i\)/,
+                replace: "$self.patchBannerUrl(arguments[0])||$&"
+
+            }
         },
         {
             find: "\"data-selenium-video-tile\":",
@@ -79,7 +67,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<=function\((\i),\i\)\{)(?=let.{20,40},style:)/,
-                    replace: "$1.style=$self.voiceBackgroundHook($1);"
+                    replace: "$1.style=$self.getVoiceBackgroundStyles($1);"
                 }
             ]
         }
@@ -93,7 +81,7 @@ export default definePlugin({
         );
     },
 
-    voiceBackgroundHook({ className, participantUserId }: any) {
+    getVoiceBackgroundStyles({ className, participantUserId }: any) {
         if (className.includes("tile_")) {
             if (this.userHasBackground(participantUserId)) {
                 return {
@@ -106,24 +94,16 @@ export default definePlugin({
         }
     },
 
-    useBannerHook({ displayProfile, user }: any) {
+    patchBannerUrl({ displayProfile }: any) {
         if (displayProfile?.banner && settings.store.nitroFirst) return;
-        if (this.userHasBackground(user.id)) return this.getImageUrl(user.id);
-    },
-
-    premiumHook({ userId }: any) {
-        if (this.userHasBackground(userId)) return 2;
-    },
-
-    shouldShowBadge({ displayProfile, user }: any) {
-        return displayProfile?.banner && (!this.userHasBackground(user.id) || settings.store.nitroFirst);
+        if (this.userHasBackground(displayProfile?.userId)) return this.getImageUrl(displayProfile?.userId);
     },
 
     userHasBackground(userId: string) {
         return !!this.data?.users[userId];
     },
 
-    getImageUrl(userId: string): string|null {
+    getImageUrl(userId: string): string | null {
         if (!this.userHasBackground(userId)) return null;
 
         // We can assert that data exists because userHasBackground returned true
@@ -132,8 +112,6 @@ export default definePlugin({
     },
 
     async start() {
-        enableStyle(style);
-
         const res = await fetch(API_URL);
         if (res.ok) {
             this.data = await res.json();

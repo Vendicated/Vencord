@@ -22,7 +22,15 @@
             "run_at": "document_start",
             "matches": ["*://*.discord.com/*"],
             "js": ["content.js"],
-            "all_frames": true
+            "all_frames": true,
+            "world": "ISOLATED"
+        },
+        {
+            "run_at": "document_start",
+            "matches": ["*://*.discord.com/*"],
+            "js": ["dist/Vencord.js"],
+            "all_frames": true,
+            "world": "MAIN"
         }
     ],
 
@@ -35,7 +43,7 @@
     "browser_specific_settings": {
         "gecko": {
             "id": "vencord-firefox@vendicated.dev",
-            "strict_min_version": "91.0"
+            "strict_min_version": "128.0"
         }
     }
 }

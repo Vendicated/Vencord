@@ -34,9 +34,10 @@ declare global {
      */
     export var IS_WEB: boolean;
     export var IS_EXTENSION: boolean;
-    export var IS_DEV: boolean;
     export var IS_STANDALONE: boolean;
     export var IS_UPDATER_DISABLED: boolean;
+    export var IS_DEV: boolean;
+    export var IS_REPORTER: boolean;
     export var IS_DISCORD_DESKTOP: boolean;
     export var IS_VESKTOP: boolean;
     export var VERSION: string;
@@ -63,13 +64,8 @@ declare global {
     export var Vesktop: any;
     export var VesktopNative: any;
 
-    interface Window {
-        webpackChunkdiscord_app: {
-            push(chunk: any): any;
-            pop(): any;
-        };
+    interface Window extends Record<PropertyKey, any> {
         _: LoDashStatic;
-        [k: string]: any;
     }
 }
 

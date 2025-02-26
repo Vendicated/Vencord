@@ -32,7 +32,7 @@ jobs:
               run: pnpm install --frozen-lockfile
 
             - name: Build web
-              run: pnpm buildWeb --standalone
+              run: pnpm buildWebStandalone
 
             - name: Build
               run: pnpm build --standalone
@@ -42,7 +42,7 @@ jobs:
 
             - name: Clean up obsolete files
               run: |
-                  rm -rf dist/*-unpacked dist/monaco Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
+                  rm -rf dist/*-unpacked dist/vendor Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
 
             - name: Get some values needed for the release
               id: release_values

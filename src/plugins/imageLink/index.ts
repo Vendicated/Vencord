@@ -16,7 +16,8 @@ export default definePlugin({
         {
             find: "unknownUserMentionPlaceholder:",
             replacement: {
-                match: /\(0,\i\.isEmbedInline\)\(\i\)/,
+                // SimpleEmbedTypes.has(embed.type) && isEmbedInline(embed)
+                match: /\i\.has\(\i\.type\)&&\(0,\i\.\i\)\(\i\)/,
                 replace: "false",
             }
         }

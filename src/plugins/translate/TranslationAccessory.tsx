@@ -19,7 +19,6 @@
 import { Parser, useEffect, useState } from "@webpack/common";
 import { Message } from "discord-types/general";
 
-import { Languages } from "./languages";
 import { TranslateIcon } from "./TranslateIcon";
 import { cl, TranslationValue } from "./utils";
 
@@ -56,10 +55,10 @@ export function TranslationAccessory({ message }: { message: Message; }) {
 
     return (
         <span className={cl("accessory")}>
-            <TranslateIcon width={16} height={16} />
+            <TranslateIcon width={16} height={16} className={cl("accessory-icon")} />
             {Parser.parse(translation.text)}
             {" "}
-            (translated from {Languages[translation.src] ?? translation.src} - <Dismiss onDismiss={() => setTranslation(undefined)} />)
+            (translated from {translation.sourceLanguage} - <Dismiss onDismiss={() => setTranslation(undefined)} />)
         </span>
     );
 }

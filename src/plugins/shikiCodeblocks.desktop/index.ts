@@ -20,9 +20,8 @@ import "./shiki.css";
 
 import { enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
-
-import previewExampleText from "~fileContent/previewExample.tsx";
+import definePlugin, { ReporterTestable } from "@utils/types";
+import previewExampleText from "file://previewExample.tsx";
 
 import { shiki } from "./api/shiki";
 import { createHighlighter } from "./components/Highlighter";
@@ -35,6 +34,9 @@ export default definePlugin({
     name: "ShikiCodeblocks",
     description: "Brings vscode-style codeblocks into Discord, powered by Shiki",
     authors: [Devs.Vap],
+    reporterTestable: ReporterTestable.Patches,
+    settings,
+
     patches: [
         {
             find: "codeBlock:{react(",
@@ -44,7 +46,7 @@ export default definePlugin({
             }
         },
         {
-            find: ".PREVIEW_NUM_LINES",
+            find: "#{intl::PREVIEW_NUM_LINES}",
             replacement: {
                 match: /(?<=function \i\((\i)\)\{)(?=let\{text:\i,language:)/,
                 replace: "return $self.renderHighlighter({lang:$1.language,content:$1.text});"
@@ -67,7 +69,6 @@ export default definePlugin({
         isPreview: true,
         tempSettings,
     }),
-    settings,
 
     // exports
     shiki,

@@ -19,8 +19,8 @@
 /// <reference path="../src/modules.d.ts" />
 /// <reference path="../src/globals.d.ts" />
 
-import monacoHtmlLocal from "~fileContent/monacoWin.html";
-import monacoHtmlCdn from "~fileContent/../src/main/monacoWin.html";
+import monacoHtmlLocal from "file://monacoWin.html?minify";
+import monacoHtmlCdn from "file://../src/main/monacoWin.html?minify";
 import * as DataStore from "../src/api/DataStore";
 import { debounce } from "../src/utils";
 import { EXTENSION_BASE_URL } from "../src/utils/web-metadata";
