@@ -86,7 +86,11 @@ async function generateDebugInfoMessage() {
             `v${VERSION} • [${gitHash}](<https://github.com/Equicord/Equicord/commit/${gitHash}>)` +
             `${SettingsPlugin.additionalInfo} - ${Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${client}`,
-        Platform: window.navigator.platform
+        Platform: typeof DiscordNative !== "undefined" ?
+            `${DiscordNative.process.platform === "darwin" ?
+                (DiscordNative.process.arch === "arm64" ? "MacSilicon" : "MacIntel") :
+                (DiscordNative.process.platform === "win32" && DiscordNative.process.arch === "x64" ? "Windows" : DiscordNative.process.platform)}` :
+            window.navigator.platform
     };
 
     if (IS_DISCORD_DESKTOP) {

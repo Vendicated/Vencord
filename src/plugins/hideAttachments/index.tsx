@@ -63,7 +63,7 @@ export default definePlugin({
 
         if (!msg.attachments.length && !msg.embeds.length && !msg.stickerItems.length && !hasAttachmentsInShapshots) return null;
 
-        const isHidden = hiddenMessages?.has(msg.id) ?? false;
+        const isHidden = hiddenMessages?.has(msg.id) || false;
 
         return {
             label: isHidden ? "Show Media" : "Hide Media",
@@ -93,7 +93,8 @@ export default definePlugin({
     },
 
     shouldHide(messageId: string) {
-        return hiddenMessages?.has(messageId) ?? false;
+        return hiddenMessages?.has(messageId) || false;
+
     },
 
     async toggleHide(channelId: string, messageId: string) {

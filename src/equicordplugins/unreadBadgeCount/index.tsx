@@ -105,6 +105,10 @@ export default definePlugin({
         if (unreadCount >= 100) { paddingValue = 4; } else
             if (unreadCount >= 10) { paddingValue = 2; } else
                 paddingValue = 0;
+        let widthValue = 16;
+        if (unreadCount >= 100) { widthValue = 30; } else
+            if (unreadCount >= 10) { widthValue = 22; } else
+                widthValue = 16;
 
         return (
             <NumberBadge
@@ -114,9 +118,7 @@ export default definePlugin({
                         ? "+99"
                         : unreadCount
                 }
-                width={
-                    unreadCount >= 10 ? 22 : 16
-                }
+                width={widthValue}
                 padding={paddingValue}
             />
         );
