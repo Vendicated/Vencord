@@ -173,6 +173,15 @@ export default definePlugin({
         } catch (err) {
             CrashHandlerLogger.debug("Failed to pop all layers.", err);
         }
+        try {
+            FluxDispatcher.dispatch({
+                type: "DEV_TOOLS_SETTINGS_UPDATE",
+                settings: { displayTools: false, lastOpenTabId: "analytics" }
+            });
+        } catch (err) {
+            CrashHandlerLogger.debug("Failed to close DevTools.", err);
+        }
+
         if (settings.store.attemptToNavigateToHome) {
             try {
                 NavigationRouter.transitionToGuild("@me");
@@ -180,7 +189,6 @@ export default definePlugin({
                 CrashHandlerLogger.debug("Failed to navigate to home", err);
             }
         }
-
 
         // Set isRecovering to false before setting the state to allow us to handle the next crash error correcty, in case it happens
         setImmediate(() => isRecovering = false);
