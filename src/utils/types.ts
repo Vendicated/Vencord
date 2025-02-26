@@ -26,7 +26,7 @@ import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
 import { MessagePopoverButtonFactory } from "@api/MessagePopover";
 import { FluxEvents } from "@webpack/types";
-import { JSX } from "react";
+import { ReactNode } from "react";
 import { Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
@@ -334,7 +334,8 @@ export interface IPluginOptionComponentProps {
 
 export interface PluginSettingComponentDef {
     type: OptionType.COMPONENT;
-    component: (props: IPluginOptionComponentProps) => JSX.Element;
+    component: (props: IPluginOptionComponentProps) => ReactNode | Promise<ReactNode>;
+    default?: any;
 }
 
 /** Maps a `PluginSettingDef` to its value type */

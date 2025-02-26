@@ -5,8 +5,11 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { ErrorBoundary, Flex } from "@components/index";
 import { Devs } from "@utils/constants";
+import { Margins } from "@utils/margins";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
+import { Checkbox, Forms, Text } from "@webpack/common";
 
 const Noop = () => { };
 const NoopLogger = {
@@ -24,14 +27,51 @@ const NoopLogger = {
 
 const logAllow = new Set();
 
-const consoleLevels = {
-    debug: 3,
-    info: 2,
-    log: 2,
-    trace: 2,
-    warn: 1,
-    error: 0
-};
+interface AllowLevels {
+    debug: boolean;
+    info: boolean;
+    log: boolean;
+    trace: boolean;
+    warn: boolean;
+    error: boolean;
+}
+
+interface AllowLevelSettingProps {
+    settingKey: keyof AllowLevels;
+}
+
+function AllowLevelSetting({ settingKey }: AllowLevelSettingProps) {
+    const { allowLevel } = settings.use(["allowLevel"]);
+    const value = allowLevel[settingKey];
+
+    function onChange(_: any, newValue: boolean) {
+        settings.store.allowLevel[settingKey] = newValue;
+    }
+
+    return (
+        <Checkbox
+            value={value}
+            onChange={onChange}
+            size={20}
+        >
+            <Text variant="text-sm/normal">{settingKey[0].toUpperCase() + settingKey.slice(1)}</Text>
+        </Checkbox>
+    );
+}
+
+const AllowLevelSettings = ErrorBoundary.wrap(() => {
+    return (
+        <Forms.FormSection>
+            <Forms.FormTitle tag="h3">Filter List</Forms.FormTitle>
+            <Forms.FormText className={Margins.bottom8} type={Forms.FormText.Types.DESCRIPTION}>Always allow loggers of these types</Forms.FormText>
+            <Flex flexDirection="row">
+                {Object.keys(settings.store.allowLevel).map(key => (
+                    <AllowLevelSetting key={key} settingKey={key as keyof AllowLevels} />
+                ))}
+            </Flex>
+        </Forms.FormSection>
+    );
+});
 
 const settings = definePluginSettings({
     disableLoggers: {
@@ -56,31 +96,16 @@ const settings = definePluginSettings({
         }
     },
     allowLevel: {
-        type: OptionType.SELECT,
-        options: [
-            {
-                label: "Debug",
-                value: consoleLevels.debug
-            },
-            {
-                label: "Info/Log/Trace",
-                value: consoleLevels.log
-            },
-            {
-                label: "Warn",
-                value: consoleLevels.warn
-            },
-            {
-                label: "Error",
-                value: consoleLevels.error,
-                default: true
-            },
-            {
-                label: "Never",
-                value: -1
-            }
-        ],
-        description: 'Always allow loggers at or above this level. Set to "never" to disable filtering by log level'
+        type: OptionType.COMPONENT,
+        component: AllowLevelSettings,
+        default: {
+            debug: false,
+            info: false,
+            log: false,
+            trace: false,
+            warn: false,
+            error: false
+        } as AllowLevels,
     }
 });
 
@@ -97,10 +122,13 @@ export default definePlugin({
     },
 
     NoopLogger: () => NoopLogger,
-    shouldLog(logger: string, level: string) {
-        if (logAllow.has(logger) || (level in consoleLevels && consoleLevels[level] <= settings.store.allowLevel)) {
+
+    shouldLog(logger: string, level: keyof AllowLevels) {
+        if (logAllow.has(logger) || settings.store.allowLevel[level] === true) {
             return true;
         }
+
+        return false;
     },
 
     patches: [
