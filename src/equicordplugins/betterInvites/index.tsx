@@ -44,7 +44,7 @@ export default definePlugin({
                     replace: ",($1||((!$1)&&arguments[0].invite.expires_at)) && $2$self.RenderTip($1, $3, arguments[0].invite.expires_at)"
                 },
                 {
-                    match: /(\.jsx\)\(\i.\i.Info,{.+onClick:\i\?.{0,5}:null)/,
+                    match: /(\.jsx\)\(\i.\i.Info,{.+onClick:\i)/,
                     replace: "$& || $self.Lurkable(arguments[0].invite.guild.id, arguments[0].invite.guild.features)"
                 },
                 {
@@ -73,4 +73,3 @@ export default definePlugin({
     },
     startAt: StartAt.WebpackReady
 });
-
