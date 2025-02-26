@@ -104,8 +104,9 @@ const settings = definePluginSettings({
             log: false,
             trace: false,
             warn: false,
-            error: true
-        } as AllowLevels,
+            error: true,
+            // Warn for type errors, but dont take the narrowest type
+        } satisfies AllowLevels as AllowLevels,
     }
 });
 
