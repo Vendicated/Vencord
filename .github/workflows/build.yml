@@ -58,6 +58,12 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   RELEASE_TAG: ${{ env.release_tag }}
 
+            - name: Update source code options of DevBuild release
+              if: github.repository == 'Vendicated/Vencord'
+              run: |
+                  git tag -f devbuild
+                  git push -f origin devbuild
+
             - name: Upload DevBuild to builds repo
               if: github.repository == 'Vendicated/Vencord'
               run: |
