@@ -32,7 +32,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, { messag
     const { deleted, id, channel_id } = message;
     if (deleted || message.state !== "SENT") return;
 
-    const isHidden = hiddenMessages?.has(id) ?? false;
+    const isHidden = hiddenMessages?.has(id) || false;
     if (isHidden) {
         return children.push(
             <Menu.MenuItem
@@ -98,7 +98,7 @@ const buildCss = () => {
 };
 
 export const revealMessage = (id: string) => {
-    const isHidden = hiddenMessages?.has(id) ?? false;
+    const isHidden = hiddenMessages?.has(id) || false;
     if (isHidden) {
         hiddenMessages.delete(id);
         buildCss();
@@ -149,7 +149,7 @@ export default definePlugin({
         }
 
         addMessageAccessory("vc-hide-message", ({ message }) => {
-            const isHidden = hiddenMessages?.has(message.id) ?? false;
+            const isHidden = hiddenMessages?.has(message.id) || false;
             if (isHidden && settings.store.showNotice) return <HideMessageAccessory id={message.id} />;
             return null;
         });

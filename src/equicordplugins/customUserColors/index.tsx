@@ -109,11 +109,11 @@ export default definePlugin({
     },
 
     colorIfServer(a: any): string | undefined {
-        const roleColor = a.author?.colorString ?? "inherit";
+        const roleColor = a.author?.colorString;
 
         if (a?.channel?.guild_id && !settings.store.colorInServers) return roleColor;
 
         const color = getCustomColorString(a.message.author.id, true);
-        return color ?? roleColor;
+        return color ?? roleColor ?? undefined;
     }
 });

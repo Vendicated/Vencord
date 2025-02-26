@@ -211,7 +211,7 @@ const settings = definePluginSettings({
     muteMessage: {
         type: OptionType.STRING,
         description: "Mute Message (only self for now)",
-        default: "{{DISPLAY_NAME}} Muted",
+        default: "{{DISPLAY_NAME}} muted",
     },
     unmuteMessage: {
         type: OptionType.STRING,
