@@ -202,6 +202,10 @@ export const enum ReporterTestable {
     FluxEvents = 1 << 4
 }
 
+export function defineDefault<T = any>(value: T) {
+    return value;
+}
+
 export const enum OptionType {
     STRING,
     NUMBER,

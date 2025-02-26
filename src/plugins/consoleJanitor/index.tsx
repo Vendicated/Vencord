@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { ErrorBoundary, Flex } from "@components/index";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
-import definePlugin, { OptionType, StartAt } from "@utils/types";
+import definePlugin, { defineDefault, OptionType, StartAt } from "@utils/types";
 import { Checkbox, Forms, Text } from "@webpack/common";
 
 const Noop = () => { };
@@ -98,15 +98,14 @@ const settings = definePluginSettings({
     allowLevel: {
         type: OptionType.COMPONENT,
         component: AllowLevelSettings,
-        default: {
+        default: defineDefault<AllowLevels>({
             debug: false,
             info: false,
             log: false,
             trace: false,
             warn: false,
-            error: true,
-            // Warn for type errors, but dont take the narrowest type
-        } satisfies AllowLevels as AllowLevels,
+            error: true
+        })
     }
 });
 
@@ -199,7 +198,7 @@ export default definePlugin({
                 replace: ""
             }
         },
-        // Patches discords generic logger function
+        // Patches Discord generic logger function
         {
             find: "Σ:",
             predicate: () => settings.store.disableLoggers,
