@@ -125,11 +125,7 @@ export default definePlugin({
     NoopLogger: () => NoopLogger,
 
     shouldLog(logger: string, level: keyof AllowLevels) {
-        if (logAllow.has(logger) || settings.store.allowLevel[level] === true) {
-            return true;
-        }
-
-        return false;
+        return logAllow.has(logger) || settings.store.allowLevel[level] === true;
     },
 
     patches: [
