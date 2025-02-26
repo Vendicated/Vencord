@@ -60,8 +60,8 @@ interface Props {
 
 function typingUserColor(guildId: string, userId: string) {
     if (!settings.store.showRoleColors) return;
-    if (Settings.plugins.CustomUserColors.enabled) return getCustomColorString(userId, true);
-    return GuildMemberStore.getMember(guildId, userId)?.colorString;
+    const customColor = Settings.plugins.CustomUserColors.enabled ? getCustomColorString(userId, true) : null;
+    return customColor ?? GuildMemberStore.getMember(guildId, userId)?.colorString;
 }
 
 const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
