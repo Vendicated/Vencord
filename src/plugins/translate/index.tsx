@@ -22,20 +22,11 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, Menu } from "@webpack/common";
-import { Message } from "discord-types/general";
 
 import { settings } from "./settings";
 import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
-
-interface IMessageCreate {
-    type: "MESSAGE_CREATE";
-    optimistic: boolean;
-    isPushNotification: boolean;
-    channelId: string;
-    message: Message;
-}
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => {
     if (!message.content) return;
