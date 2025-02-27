@@ -77,11 +77,6 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show a tooltip on the ChatBar button whenever a message is automatically translated",
         default: true
-    },
-    disableOnSameLanguage: {
-        type: OptionType.BOOLEAN,
-        description: "Disable auto translate if the current language doesnt change",
-        default: true
     }
 }).withPrivateSettings<{
     showAutoTranslateAlert: boolean;
