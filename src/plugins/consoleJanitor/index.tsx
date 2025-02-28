@@ -28,12 +28,12 @@ const NoopLogger = {
 const logAllow = new Set();
 
 interface AllowLevels {
-    debug: boolean;
-    info: boolean;
-    log: boolean;
-    trace: boolean;
-    warn: boolean;
     error: boolean;
+    warn: boolean;
+    trace: boolean;
+    log: boolean;
+    info: boolean;
+    debug: boolean;
 }
 
 interface AllowLevelSettingProps {
@@ -95,12 +95,12 @@ const settings = definePluginSettings({
         type: OptionType.COMPONENT,
         component: AllowLevelSettings,
         default: defineDefault<AllowLevels>({
-            debug: false,
-            info: false,
-            log: false,
-            trace: false,
+            error: true,
             warn: false,
-            error: true
+            trace: false,
+            log: false,
+            info: false,
+            debug: false
         })
     }
 });
