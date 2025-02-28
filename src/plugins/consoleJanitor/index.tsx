@@ -44,14 +44,10 @@ function AllowLevelSetting({ settingKey }: AllowLevelSettingProps) {
     const { allowLevel } = settings.use(["allowLevel"]);
     const value = allowLevel[settingKey];
 
-    function onChange(_: any, newValue: boolean) {
-        settings.store.allowLevel[settingKey] = newValue;
-    }
-
     return (
         <Checkbox
             value={value}
-            onChange={onChange}
+            onChange={(_, newValue) => settings.store.allowLevel[settingKey] = newValue}
             size={20}
         >
             <Text variant="text-sm/normal">{settingKey[0].toUpperCase() + settingKey.slice(1)}</Text>
