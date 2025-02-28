@@ -165,8 +165,35 @@ export default definePlugin({
         {
             find: ".contain,SCALE_DOWN:",
             replacement: {
-                match: /\.slide,\i\),/g,
-                replace: `$&id:"${ELEMENT_ID}",`
+                match: /imageClassName:/,
+                replace: `id:"${ELEMENT_ID}",$&`
+            }
+        },
+
+        {
+            find: ".dimensionlessImage,",
+            replacement: [
+                {
+                    match: /className:\i\.media,/,
+                    replace: `id:"${ELEMENT_ID}",$&`
+                },
+                {
+                    // This patch needs to be above the next one as it uses the zoomed class as an anchor
+                    match: /\.zoomed]:.+?,(?=children:)/,
+                    replace: "$&onClick:()=>{},"
+                },
+                {
+                    match: /className:\i\(\)\(\i\.wrapper,.+?}\),/,
+                    replace: ""
+                },
+            ]
+        },
+        // Make media viewer options not hide when zoomed in with the default Discord feature
+        {
+            find: '="FOCUS_SENSITIVE",',
+            replacement: {
+                match: /(?<=\.hidden]:)\i/,
+                replace: "false"
             }
         },
 
