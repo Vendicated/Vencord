@@ -333,7 +333,7 @@ export default definePlugin({
                 </Forms.FormText>
                 <Forms.FormText>
                     The special placeholders <code>{"{{USER}}"}</code>, <code>{"{{DISPLAY_NAME}}"}</code>, <code>{"{{NICKNAME}}"}</code>, <code>{"{{FRIEND_NICKNAME}}"}</code> and <code>{"{{CHANNEL}}"}</code>{" "}
-                    will be replaced with the user's name (nothing if it's yourself), the user's display name, the user's nickname on current server and the channel's name respectively
+                    will be replaced with the user's name (nothing if it's yourself), the user's display name, the user's nickname on current server, your custom defined friend nickname, and the channel's name respectively
                 </Forms.FormText>
                 {hasEnglishVoices && (
                     <>
