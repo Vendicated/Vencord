@@ -20,6 +20,7 @@ import { makeLazy, proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
+import { FluxStore } from "@webpack/types";
 
 import { traceFunction } from "../debug/Tracer";
 import { Flux } from "./common";
@@ -36,6 +37,8 @@ export const onceReady = new Promise<void>(r => _resolveReady = r);
 
 export let wreq: WebpackRequire;
 export let cache: WebpackRequire["c"];
+
+export const fluxStores: Record<string, FluxStore> = {};
 
 export type FilterFn = (mod: any) => boolean;
 
@@ -428,9 +431,24 @@ export function findByCodeLazy(...code: CodeFilter) {
  * Find a store by its displayName
  */
 export function findStore(name: StoreNameFilter) {
-    const res = Flux.Store.getAll
-        ? Flux.Store.getAll().find(filters.byStoreName(name))
-        : find(filters.byStoreName(name), { isIndirect: true });
+    let res = fluxStores[name] as any;
+    if (res == null) {
+        for (const store of Flux.Store.getAll?.() ?? []) {
+            const storeName = store.getName();
+
+            if (storeName === name) {
+                res = store;
+            }
+
+            if (fluxStores[storeName] == null) {
+                fluxStores[storeName] = store;
+            }
+        }
+
+        if (res == null) {
+            res = find(filters.byStoreName(name), { isIndirect: true });
+        }
+    }
 
     if (!res)
         handleModuleNotFound("findStore", name);
