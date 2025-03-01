@@ -24,7 +24,7 @@ export default definePlugin({
         {
             find: "#{intl::FORUM_POST_AUTHOR_A11Y_LABEL}",
             replacement: {
-                match: /(?<=\}=(\i),\{(user:\i,author:\i)\}=.{0,400}?\(\i\.Fragment,{children:)\i(?=}\),)/,
+                match: /(?<=\}=(\i),\{(user:\i,author:\i)\}=.{0,400}?\i:void 0\)\()\i/,
                 replace: "$self.wrapForumAuthor({...$1,$2},$&)"
             }
         },

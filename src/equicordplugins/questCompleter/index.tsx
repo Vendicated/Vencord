@@ -237,8 +237,8 @@ export default definePlugin({
         {
             find: "\"invite-button\"",
             replacement: {
-                match: /(\i\.Fragment,{children:)(\i\i)/,
-                replace: "$1[$self.renderQuestButton(),...$2]"
+                match: /\i&&(\i\i\.push).{0,50}"current-speaker"/,
+                replace: "$1($self.renderQuestButton()),$&"
             }
         },
         {
