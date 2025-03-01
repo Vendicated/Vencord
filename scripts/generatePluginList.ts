@@ -38,6 +38,7 @@ interface PluginData {
     hasPatches: boolean;
     hasCommands: boolean;
     required: boolean;
+    nexulien: boolean;
     enabledByDefault: boolean;
     target: "discordDesktop" | "vencordDesktop" | "desktop" | "web" | "dev";
     filePath: string;
@@ -111,6 +112,7 @@ async function parseFile(fileName: string) {
             hasCommands: false,
             enabledByDefault: false,
             required: false,
+            nexulien: false,
             tags: [] as string[]
         } as PluginData;
 
@@ -155,6 +157,8 @@ async function parseFile(fileName: string) {
                 case "required":
                 case "enabledByDefault":
                     data[key] = value.kind === SyntaxKind.TrueKeyword;
+                case "nexulien":
+                    data.nexulien = true;
                     break;
             }
         }
