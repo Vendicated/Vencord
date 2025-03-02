@@ -102,7 +102,7 @@ const settings = definePluginSettings({
     avatarClick: {
         description: "Toggle clicking avatars in reactions",
         type: OptionType.BOOLEAN,
-        default: true,
+        default: false,
         restartNeeded: true
     }
 });
