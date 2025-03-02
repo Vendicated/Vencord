@@ -96,6 +96,6 @@
 
 .vc-shiki-root .vc-shiki-table-cell:last-child {
     padding-left: 8px;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
     width: 100%;
 }
