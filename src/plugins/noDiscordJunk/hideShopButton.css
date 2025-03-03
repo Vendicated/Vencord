@@ -1,0 +1,3 @@
+a[data-list-item-id$="___shop"] {
+    display: none !important;
+}

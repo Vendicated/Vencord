@@ -1,0 +1,13 @@
+[class^="channel"] > div > [href="/store"], /* Nitro Button above DM List */
+[class^="channelTextArea"] [class^="buttons"] > button, /* Hide Gift Button */
+[class^="upsellVisible"], /* Hide Banner Nitro Upsell Header */
+[class^="premiumIconWrapper"], /* Hide Nitro Icon on Banners */
+[class^="characterCount"] [class*="upsell"], /* "Send longer Messages with Discord Nitro!" */
+[class^="emojiSection"] [class*="shinyButton"], /* "Get Nitro" button in Emoji/Sticker modal" */
+[class*="tryItOutSection"], /*try nitro banner section on profile editor*/
+[class*="bannerNitroUpsell"], /* "Unlock Banner" in profile editor*/
+[class^="imageUploaderHint"], /* Hide nitro button from the text area */
+.channelTextArea_a7d72e .buttons_d0696b .container_efde15
+{
+    display: none !important;
+}

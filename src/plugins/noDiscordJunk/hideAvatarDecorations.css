@@ -1,0 +1,3 @@
+*[class^="avatarDecoration_"] {
+    display: none !important;
+}

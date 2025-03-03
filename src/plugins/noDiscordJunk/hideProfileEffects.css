@@ -1,0 +1,3 @@
+*[class^="profileEffects_"] {
+    display: none !important;
+}
