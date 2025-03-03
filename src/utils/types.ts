@@ -26,7 +26,7 @@ import { MessageDecorationFactory } from "@api/MessageDecorations";
 import { MessageClickListener, MessageEditListener, MessageSendListener } from "@api/MessageEvents";
 import { MessagePopoverButtonFactory } from "@api/MessagePopover";
 import { FluxEvents } from "@webpack/types";
-import { JSX } from "react";
+import { ReactNode } from "react";
 import { Promisable } from "type-fest";
 
 // exists to export default definePlugin({...})
@@ -41,7 +41,12 @@ export interface PatchReplacement {
     match: string | RegExp;
     /** The replacement string or function which returns the string for the patch replacement */
     replace: string | ReplaceFn;
-    /** A function which returns whether this patch replacement should be applied */
+    /** Do not warn if this replacement did no changes */
+    noWarn?: boolean;
+    /**
+     * A function which returns whether this patch replacement should be applied.
+     * This is ran before patches are registered, so if this returns false, the patch will never be registered.
+     */
     predicate?(): boolean;
     /** The minimum build number for this patch to be applied */
     fromBuild?: number;
@@ -61,7 +66,10 @@ export interface Patch {
     noWarn?: boolean;
     /** Only apply this set of replacements if all of them succeed. Use this if your replacements depend on each other */
     group?: boolean;
-    /** A function which returns whether this patch should be applied */
+    /**
+     * A function which returns whether this patch replacement should be applied.
+     * This is ran before patches are registered, so if this returns false, the patch will never be registered.
+     */
     predicate?(): boolean;
     /** The minimum build number for this patch to be applied */
     fromBuild?: number;
@@ -192,6 +200,10 @@ export const enum ReporterTestable {
     Start = 1 << 2,
     Patches = 1 << 3,
     FluxEvents = 1 << 4
+}
+
+export function defineDefault<T = any>(value: T) {
+    return value;
 }
 
 export const enum OptionType {
@@ -326,7 +338,8 @@ export interface IPluginOptionComponentProps {
 
 export interface PluginSettingComponentDef {
     type: OptionType.COMPONENT;
-    component: (props: IPluginOptionComponentProps) => JSX.Element;
+    component: (props: IPluginOptionComponentProps) => ReactNode | Promise<ReactNode>;
+    default?: any;
 }
 
 /** Maps a `PluginSettingDef` to its value type */
