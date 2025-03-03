@@ -185,6 +185,7 @@ MacOS
 - [GUI](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl.MacOS.zip)
 
 Linux
+- [GUI](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl-x11)
 - [CLI](https://github.com/Equicord/Equilotl/releases/latest/download/EquilotlCli-Linux)
 - [AUR](https://aur.archlinux.org/packages?O=0&K=equicord)
 ```shell
