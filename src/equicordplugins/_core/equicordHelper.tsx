@@ -16,13 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "@equicordplugins/_misc/styles.css";
+
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Forms } from "@webpack/common";
 
 export default definePlugin({
     name: "EquicordHelper",
     description: "Fixes some misc issues with discord",
     authors: [EquicordDevs.thororen, EquicordDevs.nyx],
+    settingsAboutComponent: () => <>
+        <Forms.FormText className="plugin-warning">
+            This Plugin is used for fixing misc issues with discord such as some crashes
+        </Forms.FormText>
+    </>,
     required: true,
     patches: [
         {

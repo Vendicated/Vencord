@@ -53,6 +53,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - FakeProfileThemesAndEffects by ryan
 - FindReply by newwares
 - FixFileExtensions by thororen
+- FollowVoiceUser by TheArmagan
 - FrequentQuickSwitcher by Samwich
 - FriendshipRanks by Samwich
 - FullVcPfp by mochie

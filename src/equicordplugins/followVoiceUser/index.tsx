@@ -4,12 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "@equicordplugins/_misc/styles.css";
+
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
-import { Menu, React } from "@webpack/common";
+import { Forms, Menu, React } from "@webpack/common";
 import { VoiceState } from "@webpack/types";
 import { Channel, User } from "discord-types/general";
 
@@ -79,7 +81,7 @@ export default definePlugin({
     authors: [EquicordDevs.TheArmagan],
     settings,
     settingsAboutComponent: () => <>
-        <Forms.FormText className="followvoiceuser-warning">
+        <Forms.FormText className="plugin-warning">
             This Plugin is used to follow a Friend/Friends into voice chat(s).
         </Forms.FormText>
     </>,

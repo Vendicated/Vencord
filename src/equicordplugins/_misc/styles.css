@@ -1,4 +1,4 @@
-.quests-warning{
+.plugin-warning {
     font-size: 16px !important;
     background-color: var(--info-warning-background) !important;
     color: var(--info-warning-text) !important;
