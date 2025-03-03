@@ -18,7 +18,7 @@
 
 import "./style.css";
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
@@ -125,13 +125,8 @@ const RenderStatusMenuItem = ({ status, update, disabled }: { status: DiscordSta
 
 
 const StatusSubMenuComponent = () => {
-    let premiumType;
-    if (Settings.plugins.NoNitroUpsell?.enabled) {
-        // @ts-ignore
-        premiumType = UserStore?.getCurrentUser()?._realPremiumType ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
-    } else {
-        premiumType = UserStore?.getCurrentUser()?.premiumType ?? 0;
-    }
+    // @ts-ignore
+    const premiumType = UserStore?.getCurrentUser()?._realPremiumType ?? UserStore?.getCurrentUser()?.premiumType ?? 0;
     const update = useForceUpdater();
     return <Menu.Menu navId="sp-custom-status-submenu" onClose={() => { }}>
         {Object.entries((settings.store.StatusPresets as { [k: string]: DiscordStatus | undefined; })).map(([index, status]) => status != null ? <Menu.MenuItem
