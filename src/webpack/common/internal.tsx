@@ -27,26 +27,19 @@ const SYM_MEMO = Symbol.for("react.memo");
  * @returns maybeComponent
  */
 export function wrapComponentName<T>(maybeComponent: T, name?: string): T {
-    // dont set if name is falsy
     if (name) setComponentName(maybeComponent, name);
     return maybeComponent;
 }
 export function setComponentName(maybeComponent: any, name: string): void {
     try {
-        if (
-            typeof maybeComponent === "function" &&
-            "toString" in maybeComponent &&
-            typeof maybeComponent.toString === "function"
-        ) {
-            const str: string = (() => { }).toString.call(maybeComponent);
-            if (typeof str !== "string") void 0;
-            else if (str.startsWith("class")) {
+        if (typeof maybeComponent === "function") {
+            // classes
+            // arrow functions dont have a prototype
+            if ("isReactComponent" in (maybeComponent.prototype ?? {}))
                 Object.defineProperty(maybeComponent, "displayName", { value: name });
-            } else {
-                // because typeof v === "function" and v is not a class
-                // v must be a function or an arrow function
+            // functional components, normal and arrow
+            else
                 Object.defineProperty(maybeComponent, "name", { value: name });
-            }
         } else if (
             "$$typeof" in maybeComponent &&
             typeof maybeComponent.$$typeof === "symbol" &&
