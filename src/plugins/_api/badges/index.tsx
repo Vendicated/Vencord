@@ -70,7 +70,7 @@ export default definePlugin({
             }
         },
         {
-            find: 'action:"PRESS_BADGE"',
+            find: "#{intl::PROFILE_USER_BADGES}",
             replacement: [
                 {
                     match: /(alt:" ","aria-hidden":!0,src:)(.{0,20}(\i)\.icon\))/,
