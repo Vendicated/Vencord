@@ -65,12 +65,12 @@ export default definePlugin({
         {
             find: ".FULL_SIZE]:26",
             replacement: {
-                match: /(?<=(\i)=\(0,\i\.\i\)\(\i\);)return 0===\i.length\?/,
+                match: /(?<=(\i)=\(0,\i\.\i\)\(\i\).{0,200};)return 0===\i.length\?/,
                 replace: "$1.unshift(...$self.getBadges(arguments[0].displayProfile));$&"
             }
         },
         {
-            find: ".description,delay:",
+            find: 'action:"PRESS_BADGE"',
             replacement: [
                 {
                     match: /(alt:" ","aria-hidden":!0,src:)(.{0,20}(\i)\.icon\))/,
