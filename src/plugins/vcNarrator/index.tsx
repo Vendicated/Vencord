@@ -61,7 +61,6 @@ getVoices().then(resolvedVoices => {
     }));
     // @ts-ignore
     settings.def.voice.options.push(...voiceList);
-    console.log(voiceList);
 });
 
 const settings = definePluginSettings({
