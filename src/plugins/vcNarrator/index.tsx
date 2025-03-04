@@ -39,25 +39,36 @@ interface VoiceState {
 
 const VoiceStateStore = findByPropsLazy("getVoiceStatesForChannel", "getCurrentClientVoiceChannelId");
 
+function getVoices(): Promise<SpeechSynthesisVoice[]> {
+    return new Promise(resolve => {
+        let voices: SpeechSynthesisVoice[] = window.speechSynthesis.getVoices();
+        if (voices.length) {
+            resolve(voices);
+            return;
+        }
+
+        window.speechSynthesis.onvoiceschanged = () => {
+            voices = window.speechSynthesis.getVoices();
+            resolve(voices);
+        };
+    });
+}
+getVoices().then(resolvedVoices => {
+    const voiceList = resolvedVoices.map(v => ({
+        label: v.name,
+        value: v.voiceURI,
+        default: v.default
+    }));
+    // @ts-ignore
+    settings.def.voice.options.push(...voiceList);
+    console.log(voiceList);
+});
+
 const settings = definePluginSettings({
     voice: {
         type: OptionType.SELECT,
         description: "Narrator Voice",
-        options: [
-            {
-                label: "Microsoft David - English (United States)",
-                value: "Microsoft David - English (United States)",
-                default: true
-            },
-            {
-                label: "Microsoft Mark - English (United States)",
-                value: "Microsoft Mark - English (United States)"
-            },
-            {
-                label: "Microsoft Zira - English (United States)",
-                value: "Microsoft Zira - English (United States)"
-            }
-        ],
+        options: [],
     },
     volume: {
         type: OptionType.SLIDER,
@@ -245,6 +256,7 @@ export default definePlugin({
     },
 
     start() {
+        console.log(settings.store.voice);
         if (typeof speechSynthesis === "undefined" || speechSynthesis.getVoices().length === 0) {
             new Logger("VcNarrator").warn(
                 "SpeechSynthesis not supported or no Narrator voices found. Thus, this plugin will not work. Check my Settings for more info"
