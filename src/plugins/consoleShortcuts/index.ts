@@ -153,13 +153,7 @@ function makeShortcuts() {
         openModal: { getter: () => ModalAPI.openModal },
         openModalLazy: { getter: () => ModalAPI.openModalLazy },
 
-        Stores: {
-            getter: () => Object.fromEntries(
-                Common.Flux.Store.getAll()
-                    .map(store => [store.getName(), store] as const)
-                    .filter(([name]) => name.length > 1)
-            )
-        }
+        Stores: Webpack.fluxStores
     };
 }
 
