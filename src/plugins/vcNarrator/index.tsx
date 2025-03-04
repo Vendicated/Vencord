@@ -146,6 +146,7 @@ function speak(text: string) {
         new Logger("VcNarrator").error(`Voice "${settings.store.voice}" not found. Resetting to default.`);
         voice = speechSynthesis.getVoices().find(v => v.default);
         if (!voice) return; // This should never happen
+        // @ts-ignore
         settings.store.voice = voice.voiceURI;
     }
     speech.voice = voice!;
