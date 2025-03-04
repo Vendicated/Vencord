@@ -175,31 +175,21 @@ export default definePlugin({
             <div
                 style={{ marginLeft: "0.5em", transform: "scale(0.9)" }}
             >
-                {settings.store.avatarClick ? (
-                    <div onClick={handleClickAvatar} onKeyPress={handleClickAvatar}>
-                        <UserSummaryItem
-                            users={users}
-                            guildId={ChannelStore.getChannel(message.channel_id)?.guild_id}
-                            renderIcon={false}
-                            max={5}
-                            showDefaultAvatarsForNullUsers
-                            showUserPopout
-                            renderMoreUsers={makeRenderMoreUsers(users)}
-                        />
-                    </div>
-                ) : (
-                    <div>
-                        <UserSummaryItem
-                            users={users}
-                            guildId={ChannelStore.getChannel(message.channel_id)?.guild_id}
-                            renderIcon={false}
-                            max={5}
-                            showDefaultAvatarsForNullUsers
-                            showUserPopout
-                            renderMoreUsers={makeRenderMoreUsers(users)}
-                        />
-                    </div>
-                )}
+                <div
+                    onClick={handleClickAvatar}
+                    onKeyDown={handleClickAvatar}
+                    style={settings.store.avatarClick ? {} : { pointerEvents: "none" }}
+                >
+                    <UserSummaryItem
+                        users={users}
+                        guildId={ChannelStore.getChannel(message.channel_id)?.guild_id}
+                        renderIcon={false}
+                        max={5}
+                        showDefaultAvatarsForNullUsers
+                        showUserPopout
+                        renderMoreUsers={makeRenderMoreUsers(users)}
+                    />
+                </div>
             </div>
         );
     },

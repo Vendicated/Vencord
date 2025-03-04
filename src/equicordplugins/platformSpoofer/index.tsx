@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./style.css";
+import "@equicordplugins/_misc/styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
@@ -43,7 +43,7 @@ export default definePlugin({
     description: "Spoof what platform or device you're on",
     authors: [EquicordDevs.Drag],
     settingsAboutComponent: () => <>
-        <Forms.FormText className="platform-warning">
+        <Forms.FormText className="plugin-warning">
             We can't guarantee this plugin won't get you warned or banned.
         </Forms.FormText>
     </>,

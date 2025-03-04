@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./style.css";
+import "@equicordplugins/_misc/styles.css";
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs, EquicordDevs } from "@utils/constants";
@@ -48,7 +48,7 @@ export default definePlugin({
     description: "Purges messages from a channel",
     authors: [EquicordDevs.bhop, Devs.nyx],
     settingsAboutComponent: () => <>
-        <Forms.FormText className="purge-warning">
+        <Forms.FormText className="plugin-warning">
             We can't guarantee this plugin won't get you warned or banned.
         </Forms.FormText>
     </>,

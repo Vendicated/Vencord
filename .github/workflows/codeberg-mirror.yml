@@ -11,12 +11,38 @@ on:
 jobs:
     codeberg:
         name: Sync Codeberg and Github
-        runs-on: ubuntu-latest
+
+        runs-on: self-hosted
         steps:
             - uses: actions/checkout@v3
-              with:
-                  fetch-depth: 0
-            - uses: pixta-dev/repository-mirroring-action@674e65a7d483ca28dafaacba0d07351bdcc8bd75 # v1.1.1
-              with:
-                  target_repo_url: "git@codeberg.org:thororen/Equicord.git"
+
+            - name: Set up SSH private key
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "${{ env.ssh_private_key }}" > ~/.ssh/id_rsa
+                  chmod 600 ~/.ssh/id_rsa
+              env:
                   ssh_private_key: ${{ secrets.CODEBERG }}
+
+            - name: Add SSH known host
+              run: |
+                  mkdir -p ~/.ssh
+                  ssh-keyscan -t rsa codeberg.org >> ~/.ssh/known_hosts
+
+            - name: Set up SSH username
+              run: |
+                  export GIT_SSH_COMMAND="ssh -v -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -l git"
+
+            - name: Add remote mirror and push
+              run: |
+                  if git remote get-url mirror > /dev/null 2>&1; then
+                    git remote remove mirror
+                  fi
+                  git remote add mirror "${{ env.target_repo_url}}"
+                  git fetch --unshallow
+                  git push --tags --force --prune mirror "refs/remotes/origin/*:refs/heads/*"
+              env:
+                  target_repo_url: "git@codeberg.org:thororen/Equicord.git"
+
+            - name: Clean up
+              run: git remote remove mirror

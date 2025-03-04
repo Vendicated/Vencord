@@ -53,6 +53,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - FakeProfileThemesAndEffects by ryan
 - FindReply by newwares
 - FixFileExtensions by thororen
+- FollowVoiceUser by TheArmagan
 - FrequentQuickSwitcher by Samwich
 - FriendshipRanks by Samwich
 - FullVcPfp by mochie
@@ -185,6 +186,8 @@ MacOS
 - [GUI](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl.MacOS.zip)
 
 Linux
+- [GUI-X11](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl-x11)
+- [GUI-Wayland](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl-wayland)
 - [CLI](https://github.com/Equicord/Equilotl/releases/latest/download/EquilotlCli-Linux)
 - [AUR](https://aur.archlinux.org/packages?O=0&K=equicord)
 ```shell
@@ -215,7 +218,7 @@ cd Equicord
 Install dependencies:
 
 ```shell
-pnpm install --frozen-lockfile
+pnpm install --no-frozen-lockfile
 ```
 
 Build Equicord:
