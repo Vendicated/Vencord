@@ -18,7 +18,6 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
 import { makeRange } from "@components/PluginSettings/components";
 import { debounce } from "@shared/debounce";
 import { Devs } from "@utils/constants";
@@ -29,7 +28,7 @@ import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
 import { ELEMENT_ID } from "./constants";
-import styles from "./styles.css?managed";
+import managedStyle from "./styles.css?managed";
 
 export const settings = definePluginSettings({
     saveZoomValues: {
@@ -160,12 +159,41 @@ export default definePlugin({
     authors: [Devs.Aria],
     tags: ["ImageUtilities"],
 
+    managedStyle,
+
     patches: [
         {
             find: ".contain,SCALE_DOWN:",
             replacement: {
-                match: /\.slide,\i\),/g,
-                replace: `$&id:"${ELEMENT_ID}",`
+                match: /imageClassName:/,
+                replace: `id:"${ELEMENT_ID}",$&`
+            }
+        },
+
+        {
+            find: ".dimensionlessImage,",
+            replacement: [
+                {
+                    match: /className:\i\.media,/,
+                    replace: `id:"${ELEMENT_ID}",$&`
+                },
+                {
+                    // This patch needs to be above the next one as it uses the zoomed class as an anchor
+                    match: /\.zoomed]:.+?,(?=children:)/,
+                    replace: "$&onClick:()=>{},"
+                },
+                {
+                    match: /className:\i\(\)\(\i\.wrapper,.+?}\),/,
+                    replace: ""
+                },
+            ]
+        },
+        // Make media viewer options not hide when zoomed in with the default Discord feature
+        {
+            find: '="FOCUS_SENSITIVE",',
+            replacement: {
+                match: /(?<=\.hidden]:)\i/,
+                replace: "false"
             }
         },
 
@@ -252,14 +280,12 @@ export default definePlugin({
     },
 
     start() {
-        enableStyle(styles);
         this.element = document.createElement("div");
         this.element.classList.add("MagnifierContainer");
         document.body.appendChild(this.element);
     },
 
     stop() {
-        disableStyle(styles);
         // so componenetWillUnMount gets called if Magnifier component is still alive
         this.root && this.root.unmount();
         this.element?.remove();
