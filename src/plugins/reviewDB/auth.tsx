@@ -5,6 +5,7 @@
  */
 
 import { DataStore } from "@api/index";
+import { ErrorBoundary } from "@components/index";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import { OAuth2AuthorizeModal, showToast, Toasts, UserStore } from "@webpack/common";
@@ -42,7 +43,7 @@ export async function updateAuth(newAuth: ReviewDBAuth) {
 }
 
 export function authorize(callback?: any) {
-    openModal(props =>
+    openModal(ErrorBoundary.wrap(props =>
         <OAuth2AuthorizeModal
             {...props}
             scopes={["identify"]}
@@ -74,5 +75,5 @@ export function authorize(callback?: any) {
                 }
             }}
         />
-    );
+    ));
 }

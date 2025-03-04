@@ -5,6 +5,7 @@
  */
 
 import { DataStore } from "@api/index";
+import { ErrorBoundary } from "@components/index";
 import { proxyLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
@@ -51,7 +52,7 @@ export const useAuthorizationStore = proxyLazy(() => zustandCreate(
                 init();
             },
             async authorize() {
-                return new Promise((resolve, reject) => openModal(props =>
+                return new Promise((resolve, reject) => openModal(ErrorBoundary.wrap(props =>
                     <OAuth2AuthorizeModal
                         {...props}
                         scopes={["identify"]}
@@ -87,7 +88,7 @@ export const useAuthorizationStore = proxyLazy(() => zustandCreate(
                         reject(new Error("Authorization cancelled"));
                     },
                 }
-                ));
+                )));
             },
             isAuthorized: () => !!get().token,
         } as AuthorizationState),

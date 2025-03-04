@@ -19,6 +19,7 @@
 import * as DataStore from "@api/DataStore";
 import { showNotification } from "@api/Notifications";
 import { Settings } from "@api/Settings";
+import { ErrorBoundary } from "@components/index";
 import { OAuth2AuthorizeModal, UserStore } from "@webpack/common";
 
 import { Logger } from "./Logger";
@@ -90,7 +91,7 @@ export async function authorizeCloud() {
         return;
     }
 
-    openModal((props: any) => <OAuth2AuthorizeModal
+    openModal(ErrorBoundary.wrap(props => <OAuth2AuthorizeModal
         {...props}
         scopes={["identify"]}
         responseType="code"
@@ -134,7 +135,7 @@ export async function authorizeCloud() {
             }
         }
         }
-    />);
+    />));
 }
 
 export async function getCloudAuth() {
