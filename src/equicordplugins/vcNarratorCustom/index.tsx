@@ -10,7 +10,6 @@ import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
 import definePlugin, {
     OptionType,
-    PluginOptionsItem,
 } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import {
@@ -232,10 +231,9 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "VcNarratorCustom",
-    description:
-        "Announces when users join, leave, or move voice channels via narrator. TikTok TTS version; speechSynthesis is pretty boring. Ported from https://github.com/Loukious/Vencord",
+    description: "Announces when users join, leave, or move voice channels via narrator. TikTok TTS version; speechSynthesis is pretty boring. Ported from https://github.com/Loukious/Vencord",
     authors: [Devs.Ven, Devs.Nyako, EquicordDevs.Loukios, EquicordDevs.examplegit],
-
+    settings,
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
             const myGuildId = SelectedGuildStore.getGuildId();
@@ -297,13 +295,10 @@ export default definePlugin({
         },
     },
 
-    optionsCache: null as Record<string, PluginOptionsItem> | null,
-    settings,
-
     settingsAboutComponent({ tempSettings: s }) {
         const types = useMemo(
             () =>
-                Object.keys(settings.store)
+                Object.keys(settings.store!)
                     .filter(k => k.endsWith("Message"))
                     .map(k => k.slice(0, -7)),
             []

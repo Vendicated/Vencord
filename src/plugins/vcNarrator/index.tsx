@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Settings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { wordsToTitle } from "@utils/text";
-import definePlugin, { OptionType, PluginOptionsItem, ReporterTestable } from "@utils/types";
+import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Button, ChannelStore, Forms, GuildMemberStore, SelectedChannelStore, SelectedGuildStore, useMemo, UserStore } from "@webpack/common";
 import { ReactElement } from "react";
@@ -39,29 +39,112 @@ interface VoiceState {
 
 const VoiceStateStore = findByPropsLazy("getVoiceStatesForChannel", "getCurrentClientVoiceChannelId");
 
+const settings = definePluginSettings({
+    voice: {
+        type: OptionType.SELECT,
+        description: "Narrator Voice",
+        options: [
+            {
+                label: "Microsoft David - English (United States)",
+                value: "Microsoft David - English (United States)",
+                default: true
+            },
+            {
+                label: "Microsoft Mark - English (United States)",
+                value: "Microsoft Mark - English (United States)"
+            },
+            {
+                label: "Microsoft Zira - English (United States)",
+                value: "Microsoft Zira - English (United States)"
+            }
+        ],
+    },
+    volume: {
+        type: OptionType.SLIDER,
+        description: "Narrator Volume",
+        default: 1,
+        markers: [0, 0.25, 0.5, 0.75, 1],
+        stickToMarkers: false
+    },
+    rate: {
+        type: OptionType.SLIDER,
+        description: "Narrator Speed",
+        default: 1,
+        markers: [0.1, 0.5, 1, 2, 5, 10],
+        stickToMarkers: false
+    },
+    sayOwnName: {
+        description: "Say own name",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    latinOnly: {
+        description: "Strip non latin characters from names before saying them",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    joinMessage: {
+        type: OptionType.STRING,
+        description: "Join Message",
+        default: "{{USER}} joined"
+    },
+    leaveMessage: {
+        type: OptionType.STRING,
+        description: "Leave Message",
+        default: "{{USER}} left"
+    },
+    moveMessage: {
+        type: OptionType.STRING,
+        description: "Move Message",
+        default: "{{USER}} moved to {{CHANNEL}}"
+    },
+    muteMessage: {
+        type: OptionType.STRING,
+        description: "Mute Message (only self for now)",
+        default: "{{USER}} muted"
+    },
+    unmuteMessage: {
+        type: OptionType.STRING,
+        description: "Unmute Message (only self for now)",
+        default: "{{USER}} unmuted"
+    },
+    deafenMessage: {
+        type: OptionType.STRING,
+        description: "Deafen Message (only self for now)",
+        default: "{{USER}} deafened"
+    },
+    undeafenMessage: {
+        type: OptionType.STRING,
+        description: "Undeafen Message (only self for now)",
+        default: "{{USER}} undeafened"
+    }
+});
+
 // Mute/Deaf for other people than you is commented out, because otherwise someone can spam it and it will be annoying
 // Filtering out events is not as simple as just dropping duplicates, as otherwise mute, unmute, mute would
 // not say the second mute, which would lead you to believe they're unmuted
 
-function speak(text: string, settings: any = Settings.plugins.VcNarrator) {
+function speak(text: string) {
     if (!text) return;
 
+    const set = settings.store;
+
     const speech = new SpeechSynthesisUtterance(text);
-    let voice = speechSynthesis.getVoices().find(v => v.voiceURI === settings.voice);
+    let voice = speechSynthesis.getVoices().find(v => v.voiceURI === settings.store.voice);
     if (!voice) {
-        new Logger("VcNarrator").error(`Voice "${settings.voice}" not found. Resetting to default.`);
+        new Logger("VcNarrator").error(`Voice "${settings.store.voice}" not found. Resetting to default.`);
         voice = speechSynthesis.getVoices().find(v => v.default);
-        settings.voice = voice?.voiceURI;
         if (!voice) return; // This should never happen
+        settings.store.voice = voice.voiceURI;
     }
     speech.voice = voice!;
-    speech.volume = settings.volume;
-    speech.rate = settings.rate;
+    speech.volume = settings.store.volume;
+    speech.rate = settings.store.rate;
     speechSynthesis.speak(speech);
 }
 
 function clean(str: string) {
-    const replacer = Settings.plugins.VcNarrator.latinOnly
+    const replacer = settings.store.latinOnly
         ? /[^\p{Script=Latin}\p{Number}\p{Punctuation}\s]/gu
         : /[^\p{Letter}\p{Number}\p{Punctuation}\s]/gu;
 
@@ -79,13 +162,6 @@ function formatText(str: string, user: string, channel: string, displayName: str
         .replaceAll("{{NICKNAME}}", clean(nickname) || (nickname ? "Someone" : ""));
 }
 
-/*
-let StatusMap = {} as Record<string, {
-    mute: boolean;
-    deaf: boolean;
-}>;
-*/
-
 // For every user, channelId and oldChannelId will differ when moving channel.
 // Only for the local user, channelId and oldChannelId will be the same when moving channel,
 // for some ungodly reason
@@ -101,55 +177,15 @@ function getTypeAndChannelId({ channelId, oldChannelId }: VoiceState, isMe: bool
         if (channelId) return [oldChannelId ? "move" : "join", channelId];
         if (oldChannelId) return ["leave", oldChannelId];
     }
-    /*
-    if (channelId) {
-        if (deaf || selfDeaf) return ["deafen", channelId];
-        if (mute || selfMute) return ["mute", channelId];
-        const oldStatus = StatusMap[userId];
-        if (oldStatus.deaf) return ["undeafen", channelId];
-        if (oldStatus.mute) return ["unmute", channelId];
-    }
-    */
     return ["", ""];
 }
 
-/*
-function updateStatuses(type: string, { deaf, mute, selfDeaf, selfMute, userId, channelId }: VoiceState, isMe: boolean) {
-    if (isMe && (type === "join" || type === "move")) {
-        StatusMap = {};
-        const states = VoiceStateStore.getVoiceStatesForChannel(channelId!) as Record<string, VoiceState>;
-        for (const userId in states) {
-            const s = states[userId];
-            StatusMap[userId] = {
-                mute: s.mute || s.selfMute,
-                deaf: s.deaf || s.selfDeaf
-            };
-        }
-        return;
-    }
-
-    if (type === "leave" || (type === "move" && channelId !== SelectedChannelStore.getVoiceChannelId())) {
-        if (isMe)
-            StatusMap = {};
-        else
-            delete StatusMap[userId];
-
-        return;
-    }
-
-    StatusMap[userId] = {
-        deaf: deaf || selfDeaf,
-        mute: mute || selfMute
-    };
-}
-*/
-
 function playSample(tempSettings: any, type: string) {
-    const settings = Object.assign({}, Settings.plugins.VcNarrator, tempSettings);
+    const settingsobj = Object.assign({}, settings.store, tempSettings);
     const currentUser = UserStore.getCurrentUser();
     const myGuildId = SelectedGuildStore.getGuildId();
 
-    speak(formatText(settings[type + "Message"], currentUser.username, "general", (currentUser as any).globalName ?? currentUser.username, GuildMemberStore.getNick(myGuildId, currentUser.id) ?? currentUser.username), settings);
+    speak(formatText(settingsobj[type + "Message"], currentUser.username, "general", (currentUser as any).globalName ?? currentUser.username, GuildMemberStore.getNick(myGuildId, currentUser.id) ?? currentUser.username));
 }
 
 export default definePlugin({
@@ -157,7 +193,7 @@ export default definePlugin({
     description: "Announces when users join, leave, or move voice channels via narrator",
     authors: [Devs.Ven],
     reporterTestable: ReporterTestable.None,
-
+    settings,
     flux: {
         VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
             const myGuildId = SelectedGuildStore.getGuildId();
@@ -177,8 +213,8 @@ export default definePlugin({
                 const [type, id] = getTypeAndChannelId(state, isMe);
                 if (!type) continue;
 
-                const template = Settings.plugins.VcNarrator[type + "Message"];
-                const user = isMe && !Settings.plugins.VcNarrator.sayOwnName ? "" : UserStore.getUser(userId).username;
+                const template = settings.store[type + "Message"];
+                const user = isMe && !settings.store.sayOwnName ? "" : UserStore.getUser(userId).username;
                 const displayName = user && ((UserStore.getUser(userId) as any).globalName ?? user);
                 const nickname = user && (GuildMemberStore.getNick(myGuildId, userId) ?? user);
                 const channel = ChannelStore.getChannel(id).name;
@@ -215,82 +251,6 @@ export default definePlugin({
             );
             return;
         }
-
-    },
-
-    optionsCache: null as Record<string, PluginOptionsItem> | null,
-
-    get options() {
-        return this.optionsCache ??= {
-            voice: {
-                type: OptionType.SELECT,
-                description: "Narrator Voice",
-                options: window.speechSynthesis?.getVoices().map(v => ({
-                    label: v.name,
-                    value: v.voiceURI,
-                    default: v.default
-                })) ?? []
-            },
-            volume: {
-                type: OptionType.SLIDER,
-                description: "Narrator Volume",
-                default: 1,
-                markers: [0, 0.25, 0.5, 0.75, 1],
-                stickToMarkers: false
-            },
-            rate: {
-                type: OptionType.SLIDER,
-                description: "Narrator Speed",
-                default: 1,
-                markers: [0.1, 0.5, 1, 2, 5, 10],
-                stickToMarkers: false
-            },
-            sayOwnName: {
-                description: "Say own name",
-                type: OptionType.BOOLEAN,
-                default: false
-            },
-            latinOnly: {
-                description: "Strip non latin characters from names before saying them",
-                type: OptionType.BOOLEAN,
-                default: false
-            },
-            joinMessage: {
-                type: OptionType.STRING,
-                description: "Join Message",
-                default: "{{USER}} joined"
-            },
-            leaveMessage: {
-                type: OptionType.STRING,
-                description: "Leave Message",
-                default: "{{USER}} left"
-            },
-            moveMessage: {
-                type: OptionType.STRING,
-                description: "Move Message",
-                default: "{{USER}} moved to {{CHANNEL}}"
-            },
-            muteMessage: {
-                type: OptionType.STRING,
-                description: "Mute Message (only self for now)",
-                default: "{{USER}} muted"
-            },
-            unmuteMessage: {
-                type: OptionType.STRING,
-                description: "Unmute Message (only self for now)",
-                default: "{{USER}} unmuted"
-            },
-            deafenMessage: {
-                type: OptionType.STRING,
-                description: "Deafen Message (only self for now)",
-                default: "{{USER}} deafened"
-            },
-            undeafenMessage: {
-                type: OptionType.STRING,
-                description: "Undeafen Message (only self for now)",
-                default: "{{USER}} undeafened"
-            }
-        } satisfies Record<string, PluginOptionsItem>;
     },
 
     settingsAboutComponent({ tempSettings: s }) {
@@ -300,7 +260,7 @@ export default definePlugin({
         }, []);
 
         const types = useMemo(
-            () => Object.keys(Vencord.Plugins.plugins.VcNarrator.options!).filter(k => k.endsWith("Message")).map(k => k.slice(0, -7)),
+            () => Object.keys(settings.store!).filter(k => k.endsWith("Message")).map(k => k.slice(0, -7)),
             [],
         );
 
