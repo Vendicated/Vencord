@@ -83,12 +83,12 @@ export const useAuthorizationStore = proxyLazy(() => zustandCreate(
                                 }
                             }
                         }}
-                    />, {
+                    />), {
                     onCloseCallback() {
                         reject(new Error("Authorization cancelled"));
                     },
                 }
-                )));
+                ));
             },
             isAuthorized: () => !!get().token,
         } as AuthorizationState),
