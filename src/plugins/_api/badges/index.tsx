@@ -65,8 +65,8 @@ export default definePlugin({
         {
             find: ".FULL_SIZE]:26",
             replacement: {
-                match: /(?<=(\i)=\(0,\i\.\i\)\(\i\).{0,200};)return 0===\i.length\?/,
-                replace: "$1.unshift(...$self.getBadges(arguments[0].displayProfile));$&"
+                match: /(?=;return 0===(\i)\.length\?)(?<=(\i)\.useMemo.+?)/,
+                replace: ";$1=$2.useMemo(()=>[...$self.getBadges(arguments[0].displayProfile),...$1],[$1])"
             }
         },
         {
