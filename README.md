@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>153 additional plugins</summary>
+<summary>151 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -22,7 +22,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - BetterActivities by D3SOX, Arjix, AutumnVN
 - BetterAudioPlayer by Creations
 - BetterBanReasons by Inbestigator
-- BetterGodMode by TheArmagan
 - BetterInvites by iamme
 - BetterQuickReact by Ven & Sqaaakoi
 - BetterUserArea by Samwich
@@ -64,7 +63,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - GifRoulette by Samwich
 - Glide by Samwich
 - GlobalBadges by HypedDomi & Hosted by Wolfie
-- GodMode by Tolgchu
 - GoogleThat by Samwich
 - HideChatButtons by iamme
 - HideMessage by Hanzy
