@@ -165,10 +165,13 @@ export interface ApplicationAssetUtils {
     /**
      * converts an asset string into an image url
      * @param applicationId the application id if fetching an application asset
-     * @param asset {@link getAssetFromImageURL}
+     * @param asset asset id if fetching an application asset, otherwise something like what {@link getAssetFromImageURL} returns
      * @param size if width and height are not needed, the largest is used. If omitted, no size is used
      */
     getAssetImage(applicationId: string | undefined, assetId: string, size?: number | [width: number, height: number]): undefined | string;
+    /**
+     * @returns assets or undefined
+     */
     getAssets(applicationId: string): Promise<undefined | object>;
 }
 
