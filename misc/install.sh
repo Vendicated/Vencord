@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 # Configuration
 INSTALLER_PATH="$HOME/.equilotl"
@@ -17,6 +16,7 @@ NC='\033[0m' # No Color
 # Debug logging
 debug_log() {
     if $DEBUG; then
+        set -euo pipefail
         local timestamp
         timestamp=$(date +"%Y-%m-%d %T")
         echo -e "[$timestamp] $1" | tee -a "$LOG_FILE"
