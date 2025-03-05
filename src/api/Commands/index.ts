@@ -45,7 +45,7 @@ export let OptionalMessageOption: Option = OptPlaceholder;
 export let RequiredMessageOption: Option = ReqPlaceholder;
 
 // Discords command list has random gaps for some reason, which can cause issues while rendering the commands
-// add this offset to every command too keep them unique
+// add this offset to every added command to keep them unique
 let commandIdOffset: number;
 
 export const _init = function (cmds: Command[]) {
