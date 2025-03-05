@@ -142,7 +142,6 @@ export const UploadHandler = {
     promptToUpload: findByCodeLazy("#{intl::ATTACHMENT_TOO_MANY_ERROR_TITLE}") as (files: File[], channel: Channel, draftType: Number) => void
 };
 
-// Also has getAssetFromImageURL, getAssetIds, getAssetImage, getAssets
 export const ApplicationAssetUtils: t.ApplicationAssetUtils = mapMangledModuleLazy("getAssetImage: size must === [", {
     fetchAssetIds: filters.byCode('.startsWith("http:")', ".dispatch({"),
     getAssetFromImageURL: filters.byCode("].serialize(", ',":"'),
