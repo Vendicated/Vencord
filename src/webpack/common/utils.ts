@@ -143,7 +143,7 @@ export const UploadHandler = {
 };
 
 // Also has getAssetFromImageURL, getAssetIds, getAssetImage, getAssets
-export const ApplicationAssetUtils = mapMangledModuleLazy('.startsWith("http:")', {
+export const ApplicationAssetUtils: t.ApplicationAssetUtils = mapMangledModuleLazy('.startsWith("http:")', {
     fetchAssetIds: filters.byCode('.startsWith("http:")')
 });
 

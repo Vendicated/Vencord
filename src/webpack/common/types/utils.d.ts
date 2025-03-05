@@ -156,6 +156,10 @@ export interface Clipboard {
     SUPPORTS_COPY: boolean;
 }
 
+export interface ApplicationAssetUtils {
+    fetchAssetIds(applicationId: string, e: string[]): Promise<string[]>;
+}
+
 export interface NavigationRouter {
     back(): void;
     forward(): void;
