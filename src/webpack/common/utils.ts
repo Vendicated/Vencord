@@ -143,8 +143,12 @@ export const UploadHandler = {
 };
 
 // Also has getAssetFromImageURL, getAssetIds, getAssetImage, getAssets
-export const ApplicationAssetUtils: t.ApplicationAssetUtils = mapMangledModuleLazy('.startsWith("http:")', {
-    fetchAssetIds: filters.byCode('.startsWith("http:")')
+export const ApplicationAssetUtils: t.ApplicationAssetUtils = mapMangledModuleLazy("getAssetImage: size must === [", {
+    fetchAssetIds: filters.byCode('.startsWith("http:")', ".dispatch({"),
+    getAssetFromImageURL: filters.byCode("].serialize(", ',":"'),
+    getAssetImage: filters.byCode("getAssetImage: size must === ["),
+    getAssets: filters.byCode(".assets")
+
 });
 
 export const Clipboard: t.Clipboard = mapMangledModuleLazy('queryCommandEnabled("copy")', {
