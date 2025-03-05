@@ -147,7 +147,6 @@ export const ApplicationAssetUtils: t.ApplicationAssetUtils = mapMangledModuleLa
     getAssetFromImageURL: filters.byCode("].serialize(", ',":"'),
     getAssetImage: filters.byCode("getAssetImage: size must === ["),
     getAssets: filters.byCode(".assets")
-
 });
 
 export const Clipboard: t.Clipboard = mapMangledModuleLazy('queryCommandEnabled("copy")', {
