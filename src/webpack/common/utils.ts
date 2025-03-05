@@ -142,9 +142,10 @@ export const UploadHandler = {
     promptToUpload: findByCodeLazy("#{intl::ATTACHMENT_TOO_MANY_ERROR_TITLE}") as (files: File[], channel: Channel, draftType: Number) => void
 };
 
-export const ApplicationAssetUtils = findByPropsLazy("fetchAssetIds", "getAssetImage") as {
-    fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
-};
+// Also has getAssetFromImageURL, getAssetIds, getAssetImage, getAssets
+export const ApplicationAssetUtils = mapMangledModuleLazy('.startsWith("http:")', {
+    fetchAssetIds: filters.byCode('.startsWith("http:")')
+});
 
 export const Clipboard: t.Clipboard = mapMangledModuleLazy('queryCommandEnabled("copy")', {
     copy: filters.byCode(".copy("),
