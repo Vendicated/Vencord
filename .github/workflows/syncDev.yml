@@ -1,4 +1,7 @@
 name: Sync Vencord Dev
+concurrency:
+    group: ${{ github.ref }}
+    cancel-in-progress: true
 
 env:
     WORKFLOW_TOKEN: ${{ secrets.ETOKEN }}
