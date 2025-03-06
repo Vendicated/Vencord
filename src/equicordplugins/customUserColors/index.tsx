@@ -92,16 +92,30 @@ export default definePlugin({
         },
         {
             predicate: () => settings.store.dmList,
-            find: "!1,wrapContent",
+            find: "PrivateChannel.renderAvatar",
             replacement: {
-                match: /(nameAndDecorators,)/,
-                replace: "$1style:{color:$self.colorDMList(arguments[0])},"
+                match: /(highlighted:\i,)/,
+                replace: "$1style:{color:`${$self.colorDMList(arguments[0])}`},"
             },
+        },
+        {
+            predicate: () => settings.store.dmList,
+            find: "!1,wrapContent",
+            replacement: [
+                {
+                    match: /(innerClassName:\i)(\}=\i)/,
+                    replace: "$1,style$2"
+                },
+                {
+                    match: /(nameAndDecorators,)/,
+                    replace: "$1style,"
+                },
+            ],
         },
     ],
 
     colorDMList(a: any): string | undefined {
-        const userId = a?.subText?.props?.user?.id;
+        const userId = a?.user?.id;
         if (!userId) return;
         const colorString = getCustomColorString(userId, true);
         if (colorString) return colorString;
