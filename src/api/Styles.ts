@@ -158,7 +158,11 @@ export const setStyleVariables = (style: Style | string, variables: Style["varia
  * @see {@link setStyleVariables} for more info on style classnames
  */
 export function updateStyleInDocument(style: Style, doc: Document) {
-    const parent = doc.documentElement;
+    const parent = doc.documentElement.querySelector("vencord-styles") ?? doc.documentElement.appendChild((() => {
+        const container = doc.createElement("vencord-styles");
+        container.style.display = "none";
+        return container;
+    })());
     let styleElement = [...parent.querySelectorAll<HTMLStyleElement>("style[data-vencord-name]")].find(e => e.dataset.vencordName === style.name);
     if (style.enabled) {
         if (!styleElement) {
