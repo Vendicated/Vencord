@@ -29,7 +29,7 @@ export let colors: Record<string, string> = {};
 const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}(\i\.\i\("?.+?"?\).*?).then\(\i\.bind\(\i,"?(.+?)"?\)\).{0,50}"UserSettings"/);
 
 const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: { user: User; }) => {
-    if (user?.username == null) return;
+    if (user?.id == null) return;
 
     const setCustomColorItem = (
         <Menu.MenuItem
@@ -37,7 +37,7 @@ const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: {
             id="set-color"
             action={async () => {
                 await requireSettingsMenu();
-                openModal(modalProps => <SetColorModal username={user.username} modalProps={modalProps} />);
+                openModal(modalProps => <SetColorModal userId={user.id} modalProps={modalProps} />);
             }}
         />
     );
@@ -46,14 +46,14 @@ const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: {
 
 };
 
-export function getCustomColorString(username: string, withHash?: boolean): string | undefined {
-    if (!colors[username] || !Settings.plugins.CustomUserColors.enabled)
+export function getCustomColorString(userId: string, withHash?: boolean): string | undefined {
+    if (!colors[userId] || !Settings.plugins.CustomUserColors.enabled)
         return;
 
     if (withHash)
-        return `#${colors[username]}`;
+        return `#${colors[userId]}`;
 
-    return colors[username];
+    return colors[userId];
 }
 
 const settings = definePluginSettings({
@@ -94,20 +94,16 @@ export default definePlugin({
             predicate: () => settings.store.dmList,
             find: "!1,wrapContent",
             replacement: {
-                match: /(?<=\}=(\i).*?nameAndDecorators,)/,
-                replace: "style:{color:$self.colorDMList($1)},"
+                match: /(nameAndDecorators,)/,
+                replace: "$1style:{color:$self.colorDMList(arguments[0])},"
             },
         },
     ],
 
     colorDMList(a: any): string | undefined {
-        const username =
-            typeof a?.name?.props?.children === "string"
-                ? a.name.props.children
-                : a?.name?.props?.children?.props?.children?.[0]
-                ?? null;
-        if (!username) return;
-        const colorString = getCustomColorString(username, true);
+        const userId = a?.subText?.props?.user?.id;
+        if (!userId) return;
+        const colorString = getCustomColorString(userId, true);
         if (colorString) return colorString;
         return "inherit";
     },
@@ -117,7 +113,7 @@ export default definePlugin({
 
         if (a?.channel?.guild_id && !settings.store.colorInServers) return roleColor;
 
-        const color = getCustomColorString(a.message.author.username, true);
+        const color = getCustomColorString(a.message.author.id, true);
         return color ?? roleColor ?? undefined;
     }
 });
