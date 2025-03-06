@@ -158,7 +158,7 @@ export interface Clipboard {
 
 export interface ApplicationAssets {
     lastUpdated: number;
-    assets: Record<string, { id: string; name: string; type: number; } & any>;
+    assets: Record<string, { id: string; name: string; type: number; } & Record<string, any>>;
 }
 
 export interface ApplicationAssetUtils {
