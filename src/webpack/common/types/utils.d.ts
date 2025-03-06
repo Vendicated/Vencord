@@ -156,6 +156,11 @@ export interface Clipboard {
     SUPPORTS_COPY: boolean;
 }
 
+export interface ApplicationAssets {
+    lastUpdated: number;
+    assets: Record<string, object>;
+}
+
 export interface ApplicationAssetUtils {
     fetchAssetIds(applicationId: string, e: string[]): Promise<string[]>;
     /**
@@ -172,7 +177,7 @@ export interface ApplicationAssetUtils {
     /**
      * @returns assets or undefined
      */
-    getAssets(applicationId: string): Promise<undefined | object>;
+    getAssets(applicationId: string): Promise<undefined | ApplicationAssets>;
 }
 
 export interface NavigationRouter {
