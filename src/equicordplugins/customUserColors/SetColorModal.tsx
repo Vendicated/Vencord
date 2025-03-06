@@ -23,8 +23,8 @@ const ColorPicker = findComponentByCodeLazy<ColorPickerProps>("#{intl::USER_SETT
 
 const cl = classNameFactory("vc-customColors-");
 
-export function SetColorModal({ userId, modalProps }: { userId: string, modalProps: ModalProps; }) {
-    const initialColor = parseInt(colors[userId], 16) || 372735;
+export function SetColorModal({ username, modalProps }: { username: string, modalProps: ModalProps; }) {
+    const initialColor = parseInt(colors[username], 16) || 372735;
     // color picker default to current color set for user (if null it's 0x05afff :3 )
 
     const [colorPickerColor, setColorPickerColor] = useState(initialColor);
@@ -41,13 +41,13 @@ export function SetColorModal({ userId, modalProps }: { userId: string, modalPro
     }
 
     async function saveUserColor() {
-        colors[userId] = colorPickerColor.toString(16).padStart(6, "0");
+        colors[username] = colorPickerColor.toString(16).padStart(6, "0");
         await set(DATASTORE_KEY, colors);
         modalProps.onClose();
     }
 
     async function deleteUserColor() {
-        delete colors[userId];
+        delete colors[username];
         await set(DATASTORE_KEY, colors);
         modalProps.onClose();
     }
