@@ -31,9 +31,11 @@ export function openHistoryModal(message: any) {
 }
 
 export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; message: any; }) {
-    const [currentTab, setCurrentTab] = useState(message.editHistory.length);
-    const timestamps = [message.firstEditTimestamp, ...message.editHistory.map(m => m.timestamp)];
-    const contents = [...message.editHistory.map(m => m.content), message.content];
+    const filteredEditHistory = message.editHistory.filter(edit => edit.attachmentsEdited === false);
+
+    const [currentTab, setCurrentTab] = useState(filteredEditHistory.length);
+    const timestamps = [message.firstEditTimestamp, ...filteredEditHistory.map(m => m.timestamp)];
+    const contents = [...filteredEditHistory.map(m => m.content), message.content];
 
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE}>
