@@ -24,7 +24,7 @@ import { Margins } from "@utils/margins";
 import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Constants, EmojiStore, FluxDispatcher, Forms, getGuildMaxEmojiSlots, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const StickersStore = findStoreLazy("StickersStore");
@@ -125,7 +125,7 @@ function getGuildCandidates(data: Data) {
 
         const { isAnimated } = data as Emoji;
 
-        const emojiSlots = g.getMaxEmojiSlots();
+        const emojiSlots = getGuildMaxEmojiSlots(g);
         const { emojis } = EmojiStore.getGuilds()[g.id];
 
         let count = 0;
