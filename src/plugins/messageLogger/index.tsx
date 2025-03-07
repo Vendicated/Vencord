@@ -58,12 +58,14 @@ const REMOVE_HISTORY_ID = "ml-remove-history";
 const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
 const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
     const { message } = props;
-    const { deleted, editHistory, id, channel_id } = message;
+    const { deleted, editHistory, attachments, id, channel_id } = message;
 
-    if (!deleted && !editHistory?.length) return;
+    const hasDeletedAttachments = attachments.some(a => a.deleted);
+
+    if (!deleted && !hasDeletedAttachments && !editHistory?.length) return;
 
     toggle: {
-        if (!deleted) break toggle;
+        if (!deleted && !hasDeletedAttachments) break toggle;
 
         const domElement = document.getElementById(`chat-messages-${channel_id}-${id}`);
         if (!domElement) break toggle;
@@ -73,7 +75,17 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
                 id={TOGGLE_DELETE_STYLE_ID}
                 key={TOGGLE_DELETE_STYLE_ID}
                 label="Toggle Deleted Highlight"
-                action={() => domElement.classList.toggle("messagelogger-deleted")}
+                action={() => {
+                    // TODO: find a better way of doing this, even though the performance impact is negligible
+                    const hasClass = domElement.classList.toggle("messagelogger-highlight-bypass");
+                    for (const descendant of domElement.querySelectorAll("*")) {
+                        if (hasClass) {
+                            descendant.classList.add("messagelogger-highlight-bypass");
+                        } else {
+                            descendant.classList.remove("messagelogger-highlight-bypass");
+                        }
+                    }
+                }}
             />
         ));
     }
@@ -94,6 +106,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
                     });
                 } else {
                     message.editHistory = [];
+                    message.attachments = message.attachments.filter(a => !a.deleted);
                 }
             }}
         />
@@ -121,7 +134,8 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
                         });
                     else
                         updateMessage(channel.id, msg.id, {
-                            editHistory: []
+                            editHistory: [],
+                            attachments: msg.attachments.filter((a: any) => !a.deleted)
                         });
                 });
             }}
