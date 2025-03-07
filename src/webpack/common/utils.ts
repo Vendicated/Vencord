@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type { Channel, Guild } from "discord-types/general";
+import type { Channel } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
 import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "../webpack";
@@ -141,8 +141,6 @@ export const UploadManager = findByPropsLazy("clearAll", "addFile");
 export const UploadHandler = {
     promptToUpload: findByCodeLazy("#{intl::ATTACHMENT_TOO_MANY_ERROR_TITLE}") as (files: File[], channel: Channel, draftType: Number) => void
 };
-
-export const getGuildMaxEmojiSlots: (g: Guild) => number = findByCodeLazy(".additionalEmojiSlots");
 
 export const ApplicationAssetUtils = mapMangledModuleLazy("getAssetImage: size must === [", {
     fetchAssetIds: filters.byCode('.startsWith("http:")', ".dispatch({"),
