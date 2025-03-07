@@ -375,13 +375,11 @@ export default definePlugin({
                         "   $3.message.edited_timestamp && ($3.message.content !== m.content || $3.message.attachments.length != m.attachments.length) ? (() => {" +
                         "       if (m.attachments && m.attachments.length > 0) {" +
                         "           const newAttachmentIds = new Set($3.message.attachments.map(a => a.id));" +
-                        "           const deletedAttachments = m.attachments.filter(a => !newAttachmentIds.has(a.id))" +
-                        "               .map(a => ({...a, deleted: true}));" +
-                        "           if (deletedAttachments.length > 0) {" +
-                        "               const combinedAttachments = [...$3.message.attachments, ...deletedAttachments];" +
-                        "               $3.message.attachments = combinedAttachments;" +
-                        "               $4 = $4.update(m.id, m => m.set('attachments', combinedAttachments));" +
-                        "           }" +
+                        "           const updatedAttachments = m.attachments.map(a =>" +
+                        "               newAttachmentIds.has(a.id) ? a : { ...a, deleted: true }" +
+                        "           );" +
+                        "           $3.message.attachments = updatedAttachments;" +
+                        "           $4 = $4.update(m.id, m => m.set('attachments', updatedAttachments));" +
                         "       }" +
                         "       return m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($3.message, m)]);" +
                         "   })() :" +
