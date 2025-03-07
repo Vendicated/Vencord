@@ -102,25 +102,26 @@ function setActivity(activity: Activity | null) {
 
 const settings = definePluginSettings({
     username: {
-        description: "last.fm username",
+        description: "Last.fm username",
         type: OptionType.STRING,
     },
     apiKey: {
-        description: "last.fm api key",
+        displayName: "API Key",
+        description: "Last.fm api key",
         type: OptionType.STRING,
     },
     shareUsername: {
-        description: "show link to last.fm profile",
+        description: "Show link to last.fm profile",
         type: OptionType.BOOLEAN,
         default: false,
     },
     shareSong: {
-        description: "show link to song on last.fm",
+        description: "Show link to song on last.fm",
         type: OptionType.BOOLEAN,
         default: true,
     },
     hideWithSpotify: {
-        description: "hide last.fm presence if spotify is running",
+        description: "Hide last.fm presence if spotify is running",
         type: OptionType.BOOLEAN,
         default: true,
     },
@@ -130,7 +131,7 @@ const settings = definePluginSettings({
         default: false,
     },
     statusName: {
-        description: "custom status text",
+        description: "Custom status text",
         type: OptionType.STRING,
         default: "some music",
     },
@@ -166,7 +167,7 @@ const settings = definePluginSettings({
         ],
     },
     useListeningStatus: {
-        description: 'show "Listening to" status instead of "Playing"',
+        description: 'Show "Listening to" status instead of "Playing"',
         type: OptionType.BOOLEAN,
         default: false,
     },
@@ -186,7 +187,8 @@ const settings = definePluginSettings({
         ],
     },
     showLastFmLogo: {
-        description: "show the Last.fm logo by the album cover",
+        displayName: "Show Last.fm Logo",
+        description: "Show the Last.fm logo by the album cover",
         type: OptionType.BOOLEAN,
         default: true,
     }
