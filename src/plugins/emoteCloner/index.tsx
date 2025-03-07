@@ -25,10 +25,13 @@ import { ModalContent, ModalHeader, ModalRoot, openModalLazy } from "@utils/moda
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { Constants, EmojiStore, FluxDispatcher, Forms, GuildStore, Menu, PermissionsBits, PermissionStore, React, RestAPI, Toasts, Tooltip, UserStore } from "@webpack/common";
+import { Guild } from "discord-types/general";
 import { Promisable } from "type-fest";
 
 const StickersStore = findStoreLazy("StickersStore");
 const uploadEmoji = findByCodeLazy(".GUILD_EMOJIS(", "EMOJI_UPLOAD_START");
+
+const getGuildMaxEmojiSlots = findByCodeLazy(".additionalEmojiSlots") as (guild: Guild) => number;
 
 interface Sticker {
     t: "Sticker";
@@ -125,7 +128,7 @@ function getGuildCandidates(data: Data) {
 
         const { isAnimated } = data as Emoji;
 
-        const emojiSlots = g.getMaxEmojiSlots();
+        const emojiSlots = getGuildMaxEmojiSlots(g);
         const { emojis } = EmojiStore.getGuilds()[g.id];
 
         let count = 0;
