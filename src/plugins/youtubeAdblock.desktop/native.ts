@@ -13,8 +13,8 @@ app.on("browser-window-created", (_, win) => {
         frame?.once("dom-ready", () => {
             if (!RendererSettings.store.plugins?.YoutubeAdblock?.enabled) return;
 
-            if (frame.url.includes("youtube.com/embed/") || (frame.url.includes("discordsays") && frame.url.includes("youtube.com"))) {
-                frame.executeJavaScript(adguard);
+            if (frame?.url.includes("youtube.com/embed/") || (frame?.url.includes("discordsays") && frame?.url.includes("youtube.com"))) {
+                frame?.executeJavaScript(adguard);
             }
         });
     });
