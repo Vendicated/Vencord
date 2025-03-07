@@ -1,0 +1,20 @@
+
+.vc-parameters-configurator-modal-header {
+    place-content: center space-between;
+}
+
+.vc-parameters-configurator-modal-title {
+    margin: 0;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.vc-parameters-configurator-modal-text-input {
+    min-width: 25vw;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.vc-parameters-configurator-modal-close-button {
+    padding: 0;
+}
