@@ -158,30 +158,6 @@ export interface Clipboard {
     SUPPORTS_COPY: boolean;
 }
 
-export interface ApplicationAssets {
-    lastUpdated: number;
-    assets: Record<string, { id: string; name: string; type: number; } & Record<string, any>>;
-}
-
-export interface ApplicationAssetUtils {
-    fetchAssetIds(applicationId: string, e: string[]): Promise<string[]>;
-    /**
-     * mp === media proxy
-     */
-    getAssetFromImageURL(type: "mp" | "youtube" | "spotify" | "twitch", url: string): string;
-    /**
-     * converts an asset string into an image url
-     * @param applicationId the application id if fetching an application asset
-     * @param asset asset id if fetching an application asset, otherwise something like what {@link getAssetFromImageURL} returns
-     * @param size if width and height are not needed, the largest is used. If omitted, no size is used
-     */
-    getAssetImage(applicationId: string | undefined, assetId: string, size?: number | [width: number, height: number]): undefined | string;
-    /**
-     * @returns assets or undefined
-     */
-    getAssets(applicationId: string): Promise<undefined | ApplicationAssets>;
-}
-
 export interface NavigationRouter {
     back(): void;
     forward(): void;
