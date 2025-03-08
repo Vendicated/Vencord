@@ -28,12 +28,13 @@ function setCss() {
         .vc-nsfw-img [class^=wrapperPaused] {
             filter: blur(${Settings.plugins.BlurNSFW.blurAmount}px);
             transition: filter 0.2s;
-
-            &:hover {
-                filter: blur(0);
-            }
         }
-        `;
+
+        .vc-nsfw-img [class^=imageContainer]:hover,
+        .vc-nsfw-img [class^=wrapperPaused]:hover {
+            filter: blur(0);
+        }
+    `;
 }
 
 export default definePlugin({
