@@ -4,14 +4,32 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
-const randmeow = ["meow", "mrrp", "mreow", "nya", "miau", ":3", "miaou", "mia", "mew", "mrow", "myah", "myaa", "mrrrr", "myuuu", "myaaow", "mrowr", "IM A CAT LMAO"];
+const randmeow = ["meow", "mrrp", "mreow", "nya", "miau", ":3", "miaou", "mia", "mew", "mrow", "myah", "myaa", "mrrrr", "myuuu", "myaaow", "mrowr"];
+
+export const settings = definePluginSettings({
+    rawrX3: {
+        type: OptionType.BOOLEAN,
+        description: "Adds a very rare chance to paste the first 3 words from 'I turned a bad copypasta into a bad rap",
+        restartNeeded: false,
+        default: false
+    }
+});
 
 async function handleButtonClick() {
-    var selectedmeow = randmeow[Math.floor(Math.random() * randmeow.length)];
+    if (Math.random() <= 1 / 100) {
+        var selectedmeow = "IM A CAT LMAO";
+    } else {
+        if (Math.random() <= 1 / 1000) {
+            var selectedmeow = "woof.";
+        } else if (Math.random() <= 1 / 2 && settings.use(["rawrX3"])) {
+            var selectedmeow = "rawr x3 nuzzles >w<";
+        } else { var selectedmeow = randmeow[Math.floor(Math.random() * randmeow.length)]; }
+    }
     sendMessage(getCurrentChannel().id, { content: selectedmeow });
 }
 
@@ -26,8 +44,9 @@ const ChatBarIcon: ChatBarButtonFactory = () => {
 export default definePlugin({
     name: "Meow",
     description: "Adds a chatbar button to meow in chat, with a random meow!",
-    authors:
-        [Devs.Samwich, Devs.Ast],
+    authors: [Devs.Samwich, Devs.Ast],
+    settings,
+
     start: () => addChatBarButton("Meow", ChatBarIcon),
     stop: () => removeChatBarButton("Meow")
 });
