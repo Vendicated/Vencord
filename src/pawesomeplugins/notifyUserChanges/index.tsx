@@ -13,7 +13,7 @@ import { Menu, React, SelectedChannelStore, UserStore } from "@webpack/common";
 import { PresenceUpdate, VoiceState } from "@webpack/types";
 import type { Channel, User } from "discord-types/general";
 
-import { PlatformIndicator } from "../platformIndicators";
+import { PlatformIndicator } from "../../plugins/platformIndicators";
 import { NotificationsOffIcon } from "./components/NotificationsOffIcon";
 import { NotificationsOnIcon } from "./components/NotificationsOnIcon";
 

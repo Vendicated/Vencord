@@ -50,11 +50,9 @@ const plugin = definePlugin({
     ]
 });
 
+export default plugin;
 
 plugin.replacedUserPanelComponent = replacedUserPanelComponent.bind(plugin);
-
-
-export default plugin;
 
 export const DeafenIcon = (props: React.ComponentProps<"svg">) => {
     const isFakeD = fakeD;

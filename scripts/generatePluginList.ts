@@ -200,7 +200,7 @@ async function getEntryPoint(dir: string, dirent: Dirent) {
 
 function isPluginFile({ name }: { name: string; }) {
 
-    const skipNames = ["betterMicrophone.desktop", "philsPluginLibrary", "betterScreenshare.desktop"];
+    const skipNames = ["philsPluginLibrary"];
 
     if (name === "index.ts" || skipNames.includes(name)) {
         return false;
@@ -214,7 +214,7 @@ function isPluginFile({ name }: { name: string; }) {
     const plugins = [] as PluginData[];
     const readmes = {} as Record<string, string>;
 
-    await Promise.all(["src/plugins", "src/plugins/_core"].flatMap(dir =>
+    await Promise.all(["src/plugins", "src/pawesomeplugins", "src/plugins/_core"].flatMap(dir =>
         readdirSync(dir, { withFileTypes: true })
             .filter(isPluginFile)
             .map(async dirent => {
