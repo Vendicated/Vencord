@@ -8,7 +8,7 @@ import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarBut
 import { Devs } from "@utils/constants";
 import { getCurrentChannel, sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
-const randmeow = ["meow", "mrrp", "mreow", "nya", "miau", ":3", "miaou", "mia", "mew", "mia~", "meow~", "mrrp~", "mreow~", "nya~", "miau~", "miaou~", "mew~"];
+const randmeow = ["meow", "mrrp", "mreow", "nya", "miau", ":3", "miaou", "mia", "mew", "mrow", "myah", "myaa", "mrrrr", "myuuu", "myaaow", "mrowr", "IM A CAT LMAO"];
 
 async function handleButtonClick() {
     var selectedmeow = randmeow[Math.floor(Math.random() * randmeow.length)];
