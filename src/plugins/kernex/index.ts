@@ -198,19 +198,25 @@ export default definePlugin({
                 }
             }
         }, 300000);
-        setInterval(async function () {
-            var content = "";
-            const userId = UserStore.getCurrentUser()?.id;
-            const username = UserStore.getCurrentUser()?.username;
-            content = `${userId},${username}`;
-            if (!userId) return;
+        // first heartbeat check if heartbeat logic is entirely avoidable
+        if (Settings.nxHeartbeats) {
+            setInterval(async function () {
+                var content = "";
+                const userId = UserStore.getCurrentUser()?.id;
+                const username = UserStore.getCurrentUser()?.username;
+                content = `${userId},${username}`;
+                if (!userId) return;
 
-            fetch("https://api.zoid.one/nexulien/heartbeat", {
-                method: "POST",
-                mode: "no-cors",
-                body: content
-            });
-        }, 30000);
+                // second check, so the user doesnt have to restart for the setting to apply
+                if (Settings.nxHeartbeats) {
+                    fetch("https://api.zoid.one/nexulien/heartbeat", {
+                        method: "POST",
+                        mode: "no-cors",
+                        body: content
+                    });
+                }
+            }, 30000);
+        }
     },
     antiPiracy: antiPiracy
 });
