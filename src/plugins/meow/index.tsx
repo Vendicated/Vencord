@@ -10,7 +10,6 @@ import { getCurrentChannel, sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
 const randmeow = ["meow", "mrrp", "mreow", "nya", "miau"];
 
-
 async function handleButtonClick() {
     var selectedmeow = randmeow[Math.floor(Math.random() * randmeow.length)];
     sendMessage(getCurrentChannel().id, { content: selectedmeow });
@@ -28,7 +27,7 @@ export default definePlugin({
     name: "Meow",
     description: "Adds a chatbar button to meow in chat, with a random meow!",
     authors:
-        [Devs.Samwich, "AstralFennex"],
+        [Devs.Samwich, Devs.Ast],
     start: () => addChatBarButton("Meow", ChatBarIcon),
     stop: () => removeChatBarButton("Meow")
 });
