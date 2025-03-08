@@ -80,6 +80,11 @@ function VencordSettings() {
                 title: "Enable React Developer Tools",
                 note: "Requires a full restart"
             },
+            {
+                key: "nxHeartbeats",
+                title: "Send Nexulien API Heartbeats",
+                note: "Sends heartbeats to our API for statistics, and also gives you a neat badge! Disable this to remove yourself from the statistics. It might take 1 to 2 days for your badge to be removed."
+            },
             !IS_WEB && (!IS_DISCORD_DESKTOP || !isWindows ? {
                 key: "frameless",
                 title: "Disable the window frame",
