@@ -19,8 +19,10 @@
 import "./fixDiscordBadgePadding.css";
 
 import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
+import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { Heart } from "@components/Heart";
 import { Link } from "@components/Link";
 import { openContributorModal } from "@components/PluginSettings/ContributorModal";
 import { Devs } from "@utils/constants";
@@ -42,18 +44,24 @@ const ContributorBadge: ProfileBadge = {
     onClick: (_, { userId }) => openContributorModal(UserStore.getUser(userId))
 };
 
+
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
+let NexulienBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
 let ActiveUserBadges = { users: [] as Array<{ name: string, user: string; }> };
 
 async function loadBadges(noCache = false) {
     DonorBadges = {};
+    NexulienBadges = {};
     ActiveUserBadges = { users: [] };
 
     const init = {} as RequestInit;
     if (noCache)
         init.cache = "no-cache";
 
-    DonorBadges = await fetch("https://raw.githubusercontent.com/Nexulien/assets/main/badges.json", init)
+    NexulienBadges = await fetch("https://raw.githubusercontent.com/Nexulien/assets/main/badges.json", init)
+        .then(r => r.json());
+
+    DonorBadges = await fetch("https://badges.vencord.dev/badges.json", init)
         .then(r => r.json());
 
     ActiveUserBadges = await fetch("https://api.zoid.one/nexulien/users", init)
@@ -130,6 +138,75 @@ export default definePlugin({
 
 
     getDonorBadges(userId: string) {
+        return DonorBadges[userId]?.map(badge => ({
+            image: badge.badge,
+            description: badge.tooltip,
+            position: BadgePosition.START,
+            props: {
+                style: {
+                    borderRadius: "50%",
+                    transform: "scale(0.9)" // The image is a bit too big compared to default badges
+                }
+            },
+            onClick() {
+                const modalKey = openModal(props => (
+                    <ErrorBoundary noop onError={() => {
+                        closeModal(modalKey);
+                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
+                    }}>
+                        <ModalRoot {...props}>
+                            <ModalHeader>
+                                <Flex style={{ width: "100%", justifyContent: "center" }}>
+                                    <Forms.FormTitle
+                                        tag="h2"
+                                        style={{
+                                            width: "100%",
+                                            textAlign: "center",
+                                            margin: 0
+                                        }}
+                                    >
+                                        <Heart />
+                                        Vencord Donor
+                                    </Forms.FormTitle>
+                                </Flex>
+                            </ModalHeader>
+                            <ModalContent>
+                                <Flex>
+                                    <img
+                                        role="presentation"
+                                        src="https://cdn.discordapp.com/emojis/1026533070955872337.png"
+                                        alt=""
+                                        style={{ margin: "auto" }}
+                                    />
+                                    <img
+                                        role="presentation"
+                                        src="https://cdn.discordapp.com/emojis/1026533090627174460.png"
+                                        alt=""
+                                        style={{ margin: "auto" }}
+                                    />
+                                </Flex>
+                                <div style={{ padding: "1em" }}>
+                                    <Forms.FormText>
+                                        This Badge is a special perk for Vencord Donors
+                                    </Forms.FormText>
+                                    <Forms.FormText className={Margins.top20}>
+                                        Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
+                                    </Forms.FormText>
+                                </div>
+                            </ModalContent>
+                            <ModalFooter>
+                                <Flex style={{ width: "100%", justifyContent: "center" }}>
+                                    <DonateButton />
+                                </Flex>
+                            </ModalFooter>
+                        </ModalRoot>
+                    </ErrorBoundary>
+                ));
+            },
+        }));
+    },
+
+    getNexulienBadges(userId: string) {
         return DonorBadges[userId]?.map(badge => ({
             image: badge.badge,
             description: badge.tooltip,
