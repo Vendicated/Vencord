@@ -25,7 +25,7 @@ import { Readable } from "stream";
 import { finished } from "stream/promises";
 import { fileURLToPath } from "url";
 
-const BASE_URL = "https://github.com/Vencord/Installer/releases/latest/download/";
+const BASE_URL = "https://github.com/Nexulien/Installer/releases/latest/download/";
 const INSTALLER_PATH_DARWIN = "VencordInstaller.app/Contents/MacOS/VencordInstaller";
 
 const BASE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -35,11 +35,11 @@ const ETAG_FILE = join(FILE_DIR, "etag.txt");
 function getFilename() {
     switch (process.platform) {
         case "win32":
-            return "VencordInstallerCli.exe";
-        case "darwin":
-            return "VencordInstaller.MacOS.zip";
-        case "linux":
-            return "VencordInstallerCli-linux";
+            return "NexulienInstallerCli.exe";
+        // case "darwin":
+        //     return "VencordInstaller.MacOS.zip";
+        // case "linux":
+        //     return "VencordInstallerCli-linux";
         default:
             throw new Error("Unsupported platform: " + process.platform);
     }
@@ -53,7 +53,7 @@ async function ensureBinary() {
 
     const downloadName = join(FILE_DIR, filename);
     const outputFile = process.platform === "darwin"
-        ? join(FILE_DIR, "VencordInstaller")
+        ? join(FILE_DIR, "NexulienInstaller")
         : downloadName;
 
     const etag = existsSync(outputFile) && existsSync(ETAG_FILE)
@@ -62,7 +62,7 @@ async function ensureBinary() {
 
     const res = await fetch(BASE_URL + filename, {
         headers: {
-            "User-Agent": "Vencord (https://github.com/Vendicated/Vencord)",
+            "User-Agent": "Nexulien (https://github.com/Nexulien/Nexulien)",
             "If-None-Match": etag
         }
     });
@@ -96,7 +96,7 @@ async function ensureBinary() {
                 execSync(cmd);
             } catch { }
         };
-        logAndRun(`sudo spctl --add '${outputFile}' --label "Vencord Installer"`);
+        logAndRun(`sudo spctl --add '${outputFile}' --label "Nexulien Installer"`);
         logAndRun(`sudo xattr -d com.apple.quarantine '${outputFile}'`);
     } else {
         // WHY DOES NODE FETCH RETURN A WEB STREAM OH MY GOD
