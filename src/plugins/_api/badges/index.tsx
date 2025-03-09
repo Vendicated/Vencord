@@ -207,7 +207,7 @@ export default definePlugin({
     },
 
     getNexulienBadges(userId: string) {
-        return DonorBadges[userId]?.map(badge => ({
+        return NexulienBadges[userId]?.map(badge => ({
             image: badge.badge,
             description: badge.tooltip,
             position: BadgePosition.START,
