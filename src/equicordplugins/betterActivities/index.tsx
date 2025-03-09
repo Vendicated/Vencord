@@ -123,17 +123,6 @@ const ActivityTooltip = ({ activity, application, user }: Readonly<{ activity: A
     );
 };
 
-function getActivityApplication(activity: Activity | null) {
-    if (!activity) return undefined;
-    const { application_id } = activity;
-    if (!application_id) return undefined;
-    let application = ApplicationStore.getApplication(application_id);
-    if (!application && fetchedApplications.has(application_id)) {
-        application = fetchedApplications.get(application_id) ?? null;
-    }
-    return application ?? undefined;
-}
-
 function getApplicationIcons(activities: Activity[], preferSmall = false) {
     const applicationIcons: ApplicationIcon[] = [];
     const applications = activities.filter(activity => activity.application_id || activity.platform);

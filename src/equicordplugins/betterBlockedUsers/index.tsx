@@ -22,13 +22,17 @@ export default definePlugin({
             find: '"],{numberOfBlockedUsers:',
             replacement: [
                 {
-                    match: /(function \S+\((\S{1,3})\).{0,100}className:_\.header,children:\[.{0,500}numberOfIgnoredUsers:\S{1,3}}\)}\)]}\))/,
-                    replace: "$1,$2.listType==='blocked'?$self.renderSearchInput():null"
+                    match: /(?<=\}=(\i).*?\]\}\))/,
+                    replace: ",$1.listType==='blocked'?$self.renderSearchInput():null"
                 },
                 {
-                    match: /(function \S+\((\S{1,3})\).{0,100},\[\S{1,3},\S{1,3}]=(\S{1,3})\.useState\(\d\);)(.{0,200}children:)(\S{1,3})(\.slice\(\d,\S{1,3})/,
-                    replace: "$1let [searchResults,setSearchResults]=$3.useState([]);$self.setUpdateFunc($2,setSearchResults);$4(searchResults.length?searchResults:$5)$6"
-                }
+                    match: /(?<=\}=(\i).{0,10}(\i).useState\(.{0,1}\);)/,
+                    replace: "let [searchResults,setSearchResults]=$2.useState([]);$self.setUpdateFunc($1,setSearchResults);"
+                },
+                {
+                    match: /(usersList,children:)(\i)/,
+                    replace: "$1(searchResults.length?searchResults:$2)"
+                },
             ]
         }
     ],
