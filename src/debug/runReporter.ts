@@ -6,9 +6,9 @@
 
 import { Logger } from "@utils/Logger";
 import * as Webpack from "@webpack";
-import { addPatch, patches } from "plugins";
-import { getBuildNumber } from "webpack/patchWebpack";
+import { getBuildNumber, patchTimings } from "@webpack/patcher";
 
+import { addPatch, patches } from "../plugins";
 import { loadLazyChunks } from "./loadLazyChunks";
 
 async function runReporter() {
@@ -17,8 +17,7 @@ async function runReporter() {
     try {
         ReporterLogger.log("Starting test...");
 
-        let loadLazyChunksResolve: (value: void) => void;
-        const loadLazyChunksDone = new Promise<void>(r => loadLazyChunksResolve = r);
+        const { promise: loadLazyChunksDone, resolve: loadLazyChunksResolve } = Promise.withResolvers<void>();
 
         // The main patch for starting the reporter chunk loading
         addPatch({
@@ -51,7 +50,7 @@ async function runReporter() {
             }
         }
 
-        for (const [plugin, moduleId, match, totalTime] of Vencord.WebpackPatcher.patchTimings) {
+        for (const [plugin, moduleId, match, totalTime] of patchTimings) {
             if (totalTime > 5) {
                 new Logger("WebpackInterceptor").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
             }
@@ -79,9 +78,9 @@ async function runReporter() {
                     result = await Webpack.extractAndLoadChunks(code, matcher);
                     if (result === false) result = null;
                 } else if (method === "mapMangledModule") {
-                    const [code, mapper] = args;
+                    const [code, mapper, includeBlacklistedExports] = args;
 
-                    result = Webpack.mapMangledModule(code, mapper);
+                    result = Webpack.mapMangledModule(code, mapper, includeBlacklistedExports);
                     if (Object.keys(result).length !== Object.keys(mapper).length) throw new Error("Webpack Find Fail");
                 } else {
                     // @ts-ignore
