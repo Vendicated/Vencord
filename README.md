@@ -34,6 +34,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - CharacterCounter by Creations & Panniku
 - CleanChannelName by AutumnVN
 - ClientSideBlock by Samwich
+- ClipsEnhancements by niko
 - CommandPalette by Ethan
 - CopyUserMention by Cortex & castdrian
 - CustomSounds by TheKodeToad & SpikeHD
