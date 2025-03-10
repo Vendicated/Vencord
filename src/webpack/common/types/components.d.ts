@@ -534,3 +534,40 @@ export type Icon = ComponentType<JSX.IntrinsicElements["svg"] & {
     colorClass?: string;
 } & Record<string, any>>;
 
+type Checkbox = ComponentType<PropsWithChildren<{
+    disabled?: boolean;
+    readOnly?: boolean;
+    value?: boolean;
+    align?: string;
+    className?: string;
+    innerClassName?: string;
+    size?: number;
+    reverse?: boolean;
+    displayOnly?: boolean;
+    type?: string;
+    onClick?(): void;
+}>> & Record<string, any>;
+
+
+type SearchBar = ComponentType<PropsWithChildren<{
+    query: string;
+    autoFocus?: boolean;
+    onClear?: () => void;
+    className?: string;
+    placeholder?: string;
+    iconClassName?: string;
+    onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
+    onKeyUp?: (event: KeyboardEvent<HTMLInputElement>) => void;
+    onKeyPress?: (event: KeyboardEvent<HTMLInputElement>) => void;
+    isLoading?: boolean;
+    size?: string;
+    disabled?: boolean;
+    onChange?: (value: string) => void;
+    onBlur?: () => void;
+    onFocus?: () => void;
+    autoComplete?: string;
+    inputProps?: HTMLProps<HTMLInputElement>;
+    hideSearchIcon?: boolean;
+    "aria-label"?: string;
+}>> & Record<string, any>;
+
