@@ -1,6 +1,6 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -15,9 +15,8 @@ import { SelectOption } from "@webpack/types";
 
 interface Activity {
     name: string;
-    application_id: string;
+    application_id?: string;
     type: number;
-    assets: any;
 }
 
 const settings = definePluginSettings({
@@ -105,7 +104,7 @@ export default definePlugin({
         }
 
         const activities: Activity[] = PresenceStore.getActivities(UserStore.getCurrentUser().id);
-        const validActivities = activities.filter(activity => activity.type === 0 && activity.assets !== null);
+        const validActivities = activities.filter(activity => activity.type === 0 && activity.application_id !== null);
 
         const splitName = activityName.split(" ");
 
