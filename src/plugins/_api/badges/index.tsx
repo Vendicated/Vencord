@@ -190,7 +190,7 @@ export default definePlugin({
                                                 {badge.tooltip}
                                             </Forms.FormTitle>
                                             <Forms.FormText>
-                                                This Badge was given to this person as a special perk for Vencord Donors.
+                                                This Badge was given to this user as a special perk for Vencord Donors.
                                             </Forms.FormText>
                                         </div>
                                     </div>
