@@ -1,0 +1,17 @@
+.nx-updater-changes {
+    background-color: var(--background-tertiary);
+    padding: 8px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    border-radius: 8px;
+    margin-top: 16px;
+}
+
+.nx-updater-controls {
+    margin-bottom: 1em;
+    padding: 24px;
+    background-color: var(--background-secondary) !important;
+    box-shadow: var(--elevation-low) !important;
+    border-radius: 12px !important;
+    border: none !important;
+}

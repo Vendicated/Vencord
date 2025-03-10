@@ -17,7 +17,7 @@ import { findByPropsLazy } from "@webpack";
 import { Alerts, Card, Text } from "@webpack/common";
 import type { ComponentType, PropsWithChildren, ReactNode } from "react";
 
-const cl = classNameFactory("vc-settings-quickActions-");
+const cl = classNameFactory("nx-settings-quickActions-");
 const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
 
 export interface QuickActionProps {
@@ -53,7 +53,7 @@ export function QuickActionContainer({ title, children }: PropsWithChildren<Quic
                             title: "Information",
                             body: (
                                 <>
-                                    <img height="64px" width="64px" src="https://cdn.discordapp.com/emojis/1348781960453161011.gif"></img>
+                                    <img height="64px" width="64px" src="https://cdn.discordapp.com/emojis/1348781960453161011.gif" draggable="false"></img>
                                     <p>No one's around to help.</p>
                                 </>
                             ),

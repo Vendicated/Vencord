@@ -1,4 +1,4 @@
-.vc-settings-quickActions-container {
+.nx-settings-quickActions-container {
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
@@ -12,7 +12,7 @@
     border: none !important;
 }
 
-.vc-settings-quickActions-title {
+.nx-settings-quickActions-title {
     margin-bottom: 16px;
     color: var(--text-normal);
     display: flex;
@@ -21,13 +21,13 @@
     line-height: 2; /* i hate this i hate this i hate this i hate this */
 }
 
-.vc-settings-quickActions-containerButtons {
+.nx-settings-quickActions-containerButtons {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 0.5em;
 }
 
-.vc-settings-quickActions-button {
+.nx-settings-quickActions-button {
     all: unset;
     background-color: var(--button-secondary-background);
     color: var(--white-500);
@@ -40,23 +40,23 @@
     transition-duration: 0.1s;
 }
 
-.vc-settings-quickActions-button:hover {
+.nx-settings-quickActions-button:hover {
     background-color: var(--button-secondary-background-hover);
     transition-duration: 0.1s;
 }
 
-.vc-settings-quickActions-button:focus-visible {
+.nx-settings-quickActions-button:focus-visible {
     outline: 2px solid var(--focus-primary);
     outline-offset: 2px;
     transition-duration: 0s;
 }
 
-.vc-settings-quickActions-img {
+.nx-settings-quickActions-img {
     width: 24px;
     height: 24px;
 }
 
-.vc-settings-quickActions-info-button {
+.nx-settings-quickActions-info-button {
     height: 24px;
     width: 24px;
     padding: 0;
@@ -65,11 +65,11 @@
     color: var(--interactive-normal);
 }
 
-.vc-settings-quickActions-info-button:hover {
+.nx-settings-quickActions-info-button:hover {
     color: var(--text-muted);
 }
 
-.vc-settings-quickActions-info-button:focus-visible {
+.nx-settings-quickActions-info-button:focus-visible {
     border-radius: 100%;
     outline: 2px solid var(--focus-primary);
     outline-offset: -2px;

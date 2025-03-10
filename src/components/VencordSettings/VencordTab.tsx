@@ -1,20 +1,8 @@
 /*
-* Vencord, a modification for Discord's desktop app
-* Copyright (c) 2022 Vendicated and contributors
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import "./headerCard.css";
 
@@ -37,7 +25,7 @@ import { QuickAction, QuickActionContainer } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
 import { SpecialCard } from "./SpecialCard";
 
-const cl = classNameFactory("vc-settings-");
+const cl = classNameFactory("nx-settings-");
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1258290490961559633.png";
 const SHIGGY_DONATE_IMAGE = "https://media.discordapp.net/stickers/1258484151670018220.gif";
@@ -288,7 +276,7 @@ function HeaderCard({ image }: HeaderCardProps) {
                     </svg>
                 </span>
                 <span>...the best (worst) discord client mod.</span>
-                <span>Nexulien doesn't need donations! Please go support <a href="https://github.com/sponsors/Vendicated" target="_blank">Vendicated</a> instead!</span>
+                <span>Nexulien doesn't need donations! Please go support <a href="https://github.com/sponsors/Vendicated" target="_blank" rel="noreferrer">Vendicated</a> instead!</span>
                 <div className={cl("buttonRow")}>
                     <button
                         onClick={() => window.open("https://github.com/Nexulien")}
