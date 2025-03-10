@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>151 additional plugins</summary>
+<summary>155 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -55,6 +55,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - FixFileExtensions by thororen
 - FollowVoiceUser by TheArmagan
 - FrequentQuickSwitcher by Samwich
+- FriendCodes by HypedDomi
 - FriendshipRanks by Samwich
 - FullVcPfp by mochie
 - FriendTags by Samwich
@@ -71,6 +72,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - HomeTyping by Samwich
 - HopOn by ImLvna
 - Husk by nin0dev
+- IconViewer by iamme
 - Identity by Samwich
 - IgnoreCalls by TheArmagan
 - IgnoreTerms by D3SOX
@@ -126,6 +128,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - StatsfmRPC by Crxaw & vmohammad
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo, maintained by thororen
+- SpotifyLyrics by Joona
 - StatusPresets by iamme
 - SteamStatusSync by niko
 - StickerBlocker by Samwich
@@ -145,6 +148,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - UwUifier by echo
 - VCSupport by thororen
 - VCNarratorCustom by Loukios, ported by example-git
+- VCPanelSettings by nin0dev
 - VencordRPC by AutumnVN
 - VideoSpeed by Samwich
 - ViewRawVariant (ViewRaw2) by Kyuuhachi

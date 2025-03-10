@@ -1,0 +1,34 @@
+.vc-friend-codes-card {
+    padding: 20px;
+    margin-bottom: var(--custom-margin-margin-small);
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 5px;
+    border-color: var(--background-tertiary);
+    background-color: var(--background-secondary);
+}
+
+.vc-friend-codes-card-title span {
+    color: var(--header-secondary);
+    font-family: var(--font-primary);
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.vc-friend-codes-info-header {
+    margin-top: 16px;
+    margin-bottom: 8px;
+    color: var(--header-secondary);
+    text-transform: uppercase;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: .02em;
+    font-family: var(--font-display);
+    font-weight: 600;
+}
+
+.vc-friend-codes-text {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
