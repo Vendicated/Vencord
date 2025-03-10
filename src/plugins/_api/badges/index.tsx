@@ -17,6 +17,7 @@
 */
 
 import "./fixDiscordBadgePadding.css";
+import "./badgeModal.css";
 
 import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import DonateButton from "@components/DonateButton";
@@ -33,6 +34,9 @@ import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModa
 import definePlugin from "@utils/types";
 import { Forms, Toasts, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
+
+import { NxSpark } from "./NxSpark";
+
 
 const CONTRIBUTOR_BADGE = "https://github.com/Nexulien/assets/blob/main/badges/contributor.png?raw=true";
 
@@ -138,72 +142,75 @@ export default definePlugin({
 
 
     getDonorBadges(userId: string) {
-        return DonorBadges[userId]?.map(badge => ({
-            image: badge.badge,
-            description: badge.tooltip,
-            position: BadgePosition.START,
-            props: {
-                style: {
-                    borderRadius: "50%",
-                    transform: "scale(0.9)" // The image is a bit too big compared to default badges
-                }
-            },
-            onClick() {
-                const modalKey = openModal(props => (
-                    <ErrorBoundary noop onError={() => {
-                        closeModal(modalKey);
-                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
-                    }}>
-                        <ModalRoot {...props}>
-                            <ModalHeader>
-                                <Flex style={{ width: "100%", justifyContent: "center" }}>
-                                    <Forms.FormTitle
-                                        tag="h2"
-                                        style={{
-                                            width: "100%",
-                                            textAlign: "center",
-                                            margin: 0
-                                        }}
-                                    >
-                                        <Heart />
-                                        Vencord Donor
-                                    </Forms.FormTitle>
-                                </Flex>
-                            </ModalHeader>
-                            <ModalContent>
-                                <Flex>
-                                    <img
-                                        role="presentation"
-                                        src="https://cdn.discordapp.com/emojis/1026533070955872337.png"
-                                        alt=""
-                                        style={{ margin: "auto" }}
-                                    />
-                                    <img
-                                        role="presentation"
-                                        src="https://cdn.discordapp.com/emojis/1026533090627174460.png"
-                                        alt=""
-                                        style={{ margin: "auto" }}
-                                    />
-                                </Flex>
-                                <div style={{ padding: "1em" }}>
-                                    <Forms.FormText>
-                                        This Badge is a special perk for Vencord Donors
-                                    </Forms.FormText>
-                                    <Forms.FormText className={Margins.top20}>
-                                        Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
-                                    </Forms.FormText>
-                                </div>
-                            </ModalContent>
-                            <ModalFooter>
-                                <Flex style={{ width: "100%", justifyContent: "center" }}>
-                                    <DonateButton />
-                                </Flex>
-                            </ModalFooter>
-                        </ModalRoot>
-                    </ErrorBoundary>
-                ));
-            },
-        }));
+        if (userId !== "343383572805058560") {
+            return DonorBadges[userId]?.map(badge => ({
+                image: badge.badge,
+                description: badge.tooltip,
+                position: BadgePosition.START,
+                props: {
+                    style: {
+                        borderRadius: "50%",
+                        transform: "scale(0.9)" // The image is a bit too big compared to default badges
+                    }
+                },
+                onClick() {
+                    const modalKey = openModal(props => (
+                        <ErrorBoundary noop onError={() => {
+                            closeModal(modalKey);
+                            VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
+                        }}>
+                            <ModalRoot {...props}>
+                                <ModalHeader>
+                                    <Flex style={{ width: "100%", justifyContent: "center" }}>
+                                        <Forms.FormTitle
+                                            tag="h2"
+                                            style={{
+                                                width: "100%",
+                                                textAlign: "center",
+                                                margin: 0
+                                            }}
+                                        >
+                                            <Heart />
+                                            Vencord Donor
+                                        </Forms.FormTitle>
+                                    </Flex>
+                                </ModalHeader>
+                                <ModalContent className={Margins.bottom16}>
+                                    <div className="nx-badge-modal-header">
+                                        <span className="nx-badge-modal-badge yucky-vencord">
+                                            <img src={badge.badge} draggable="false"></img>
+                                        </span>
+                                        <div>
+                                            <Forms.FormTitle
+                                                tag="h1"
+                                                style={{
+                                                    margin: 0
+                                                }}
+                                            >
+                                                {badge.tooltip}
+                                            </Forms.FormTitle>
+                                            <Forms.FormText>
+                                                This Badge was given to this user as a special perk for Vencord Donors.
+                                            </Forms.FormText>
+                                        </div>
+                                    </div>
+                                    <div className="nx-badge-modal-description">
+                                        <Forms.FormText>
+                                            Please consider supporting the development of Vencord by becoming a donor. It would mean a lot to them!
+                                        </Forms.FormText>
+                                    </div>
+                                </ModalContent>
+                                <ModalFooter>
+                                    <Flex style={{ width: "100%", justifyContent: "center" }}>
+                                        <DonateButton />
+                                    </Flex>
+                                </ModalFooter>
+                            </ModalRoot>
+                        </ErrorBoundary>
+                    ));
+                },
+            }));
+        }
     },
 
     getNexulienBadges(userId: string) {
@@ -238,27 +245,28 @@ export default definePlugin({
                                     </Forms.FormTitle>
                                 </Flex>
                             </ModalHeader>
-                            <ModalContent>
-                                <Flex>
-                                    <img
-                                        role="presentation"
-                                        src="https://cdn.discordapp.com/emojis/1258290490004996177.png"
-                                        alt=""
-                                        style={{ margin: "auto" }}
-                                    />
-                                    <img
-                                        role="presentation"
-                                        src="https://cdn.discordapp.com/emojis/1258290490961559633.png"
-                                        alt=""
-                                        style={{ margin: "auto" }}
-                                    />
-                                </Flex>
-                                <div style={{ padding: "1em" }}>
+                            <ModalContent className={Margins.bottom16}>
+                                <div className="nx-badge-modal-header">
+                                    <span className="nx-badge-modal-badge">
+                                        <img src={badge.badge} draggable="false"></img>
+                                    </span>
+                                    <div>
+                                        <Forms.FormTitle
+                                            tag="h1"
+                                            style={{
+                                                margin: 0
+                                            }}
+                                        >
+                                            {badge.tooltip} <NxSpark />
+                                        </Forms.FormTitle>
+                                        <Forms.FormText>
+                                            This Badge was granted to this user by the owner of Nexulien.
+                                        </Forms.FormText>
+                                    </div>
+                                </div>
+                                <div className="nx-badge-modal-description">
                                     <Forms.FormText>
-                                        This Badge is granted to a user by the owner of Nexulien.
-                                    </Forms.FormText>
-                                    <Forms.FormText className={Margins.top20}>
-                                        Currently the only way to get one is by asking @thezoidmaster, or getting a PR accepted on the assets repo.
+                                        Currently the only way to get one is by asking @thezoidmaster, or getting a PR accepted in the assets repo.
                                     </Forms.FormText>
                                 </div>
                             </ModalContent>

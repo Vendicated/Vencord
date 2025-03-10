@@ -50,16 +50,14 @@ export function QuickActionContainer({ title, children }: PropsWithChildren<Quic
                     role="switch"
                     onClick={() => {
                         Alerts.show({
-                            title: "Very Important Button",
+                            title: "Information",
                             body: (
                                 <>
-                                    <p>this corner looked empty so we put an info button here</p>
-                                    <img src="https://media.discordapp.net/stickers/1258484151670018220.gif"></img>
-                                    <h6><i>Jae & Zoid were here</i></h6>
+                                    <img height="64px" width="64px" src="https://cdn.discordapp.com/emojis/1348781960453161011.gif"></img>
+                                    <p>No one's around to help.</p>
                                 </>
                             ),
-                            confirmText: "Okiiiii :3",
-                            cancelText: "Shut Up",
+                            confirmText: "(≧∀≦)ゞ",
                             onConfirm: () => console.log("sigma or sugma?")
                         });
                     }}

@@ -1,0 +1,51 @@
+.nx-badge-modal-header {
+    display: flex;
+    flex-direction: row;
+    margin: 16px;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.nx-badge-modal-badge {
+    display: flex;
+    background: linear-gradient(135deg, #70e, #0f9);
+    border-radius: 50%;
+    height: 96px;
+    width: 96px;
+    min-width: 96px;
+    align-items: center;
+    justify-content: center;
+}
+
+.nx-badge-modal-badge::after {
+    position: absolute;
+    content: "";
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background-color: var(--modal-background);;
+    z-index: 1;
+}
+
+.nx-badge-modal-badge > img {
+    display: block;
+    height: 64px;
+    z-index: 2;
+}
+
+.nx-badge-modal-header > div {
+    display: flex;
+    flex-direction: column;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.nx-badge-modal-description {
+    padding: 16px;
+    background-color: var(--modal-footer-background);
+    border-radius: 8px;
+}
+
+.nx-badge-modal-badge.yucky-vencord {
+    background: none;
+}
