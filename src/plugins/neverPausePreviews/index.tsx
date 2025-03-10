@@ -28,7 +28,7 @@ export default definePlugin({
     authors: [Devs.viciouscal],
     settingsAboutComponent: () => <>
         <Forms.FormText className="plugin-warning">
-            This plugin will cause discord to use more resources than normal
+            من الاخير البلوقن بيحرق كرتك انبته..
         </Forms.FormText>
     </>,
     patches: [
