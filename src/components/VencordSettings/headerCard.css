@@ -10,7 +10,7 @@
         U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-.vc-settings-header {
+.nx-settings-header {
     display: flex;
     flex-direction: row;
     gap: 64px;
@@ -27,35 +27,35 @@
     padding-bottom: 0;
 }
 
-.vc-settings-logo-container {
+.nx-settings-logo-container {
     width: 100%;
     height: 20%;
 }
 
-.vc-settings-logo {
+.nx-settings-logo {
     width: auto;
     height: 100%;
     object-fit: contain;
 }
 
-.vc-settings-mascot {
+.nx-settings-mascot {
     /* scuffed but hey it works */
     transform: scale(1.5) translate(-16px) translateY(-32px);
 }
 
-.vc-settings-header > div {
+.nx-settings-header > div {
     display: flex;
     flex-direction: column;
     gap: 1em;
 }
 
-.vc-settings-buttonRow {
+.nx-settings-buttonRow {
     display: flex;
     flex-direction: row;
     gap: 0.5em;
 }
 
-.vc-settings-buttonRow > button {
+.nx-settings-buttonRow > button {
     all: unset;
     background-color: var(--brand-500);
     color: var(--white-500);
@@ -69,12 +69,12 @@
     transition-duration: 0.1s;
 }
 
-.vc-settings-buttonRow > button:hover {
+.nx-settings-buttonRow > button:hover {
     background-color: var(--brand-600);
     transition-duration: 0.1s;
 }
 
-.vc-settings-buttonRow > button:focus-visible {
+.nx-settings-buttonRow > button:focus-visible {
     outline: 2px solid var(--focus-primary);
     outline-offset: 2px;
     transition-duration: 0s;
