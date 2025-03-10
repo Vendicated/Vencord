@@ -126,7 +126,7 @@ function Updatable(props: CommonProps) {
                 </Forms.FormText>
             )}
 
-            <Flex className={classes(Margins.bottom8, Margins.top8)}>
+            <Flex className={isOutdated && classes(Margins.bottom8, Margins.top8) || Margins.top8}>
                 {isOutdated && <Button
                     size={Button.Sizes.SMALL}
                     disabled={isUpdating || isChecking}
