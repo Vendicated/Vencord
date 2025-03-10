@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./updater.css";
+
 import { useSettings } from "@api/Settings";
 import { ErrorCard } from "@components/ErrorCard";
 import { Flex } from "@components/Flex";
@@ -26,7 +28,7 @@ import { ModalCloseButton, ModalContent, ModalProps, ModalRoot, ModalSize, openM
 import { relaunch } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { changes, checkForUpdates, getRepo, isNewer, update, updateError, UpdateLogger } from "@utils/updater";
-import { Alerts, Button, Card, Forms, Parser, React, Switch, Toasts } from "@webpack/common";
+import { Alerts, Button, Forms, Parser, React, Switch, Toasts } from "@webpack/common";
 
 import gitHash from "~git-hash";
 
@@ -85,7 +87,7 @@ function HashLink({ repo, hash, disabled = false }: { repo: string, hash: string
 
 function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof changes; }) {
     return (
-        <Card style={{ padding: "0 0.5em" }}>
+        <div className="nx-updater-changes" style={{ padding: "0 0.5em" }}>
             {updates.map(({ hash, author, message }) => (
                 <div key={hash} style={{
                     marginTop: "0.5em",
@@ -98,7 +100,7 @@ function Changes({ updates, repo, repoPending }: CommonProps & { updates: typeof
                     }}>{message} - {author}</span>
                 </div>
             ))}
-        </Card>
+        </div>
     );
 }
 
@@ -110,7 +112,7 @@ function Updatable(props: CommonProps) {
     const isOutdated = (updates?.length ?? 0) > 0;
 
     return (
-        <>
+        <div className="nx-updater-controls">
             {!updates && updateError ? (
                 <>
                     <Forms.FormText>Failed to check updates. Check the console for more info</Forms.FormText>
@@ -174,7 +176,7 @@ function Updatable(props: CommonProps) {
             </Flex>
 
             {isOutdated && <Changes updates={updates} {...props} />}
-        </>
+        </div>
     );
 }
 
