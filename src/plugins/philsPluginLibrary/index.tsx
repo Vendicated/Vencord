@@ -19,7 +19,7 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-import { fakeD } from "../fakeDeafen";
+
 import { replacedUserPanelComponent } from "./patches";
 
 const plugin = definePlugin({
