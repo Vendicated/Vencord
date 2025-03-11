@@ -11,7 +11,7 @@
 
 ## Features
 
-- Heavily polished menu redesigns
+- Heavily polished menu redesigns with a focus on UX
 - Extra API Functions (ex.: Dev-build only commands)
 - Everything from Vencord ([read more](https://github.com/Vendicated/Vencord/?tab=readme-ov-file#features))
 - More Plugins
