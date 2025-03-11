@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+// equicord we love you :3
+
 import { Logger } from "@utils/Logger";
 import { makeCodeblock } from "@utils/text";
 

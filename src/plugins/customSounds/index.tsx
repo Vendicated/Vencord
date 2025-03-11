@@ -155,7 +155,7 @@ export default definePlugin({
     name: "CustomSounds",
     description: "Customize Discord's sounds.",
     authors: [Devs.ScattrdBlade, Devs.TheKodeToad],
-    nexulien: true,
+    nexulienBundled: true,
     patches: [
         // sound class
         {

@@ -143,7 +143,7 @@ export default definePlugin({
     name: "Animalese",
     description: "Plays animalese (they yap a lot) on message sent",
     authors: [Devs.ryanamay],
-    nexulien: true,
+    nexulienBundled: true,
     settings,
 
     start() {
