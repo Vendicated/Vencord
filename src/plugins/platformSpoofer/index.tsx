@@ -42,6 +42,8 @@ export default definePlugin({
     name: "PlatformSpoofer",
     description: "Spoof what platform or device you're on",
     authors: [Devs.viciouscal],
+        settingsAboutComponent: () => <>
+    <Forms.FormText classNam="plugin-warning">Yousef. is not responsible for u violation of the laws (: </Forms.FormText>
     settings: settings,
     patches: [
         {
