@@ -114,6 +114,10 @@ export interface PluginDef {
      */
     nexulien?: boolean;
     /**
+     * Whether this plugin is bundled with Nexulien or not
+     */
+    nexulienBundled?: boolean;
+    /**
      * Whether this plugin should be hidden from the user
      */
     hidden?: boolean;

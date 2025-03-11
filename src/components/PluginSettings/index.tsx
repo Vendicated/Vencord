@@ -171,7 +171,8 @@ const enum SearchStatus {
     ENABLED,
     DISABLED,
     NEW,
-    NEXULIEN
+    NEXULIEN,
+    NEXULIEN_BUNDLED
 }
 
 function ExcludedPluginsList({ search }: { search: string; }) {
@@ -259,6 +260,7 @@ export default function PluginSettings() {
         if (!enabled && status === SearchStatus.ENABLED) return false;
         if (status === SearchStatus.NEW && !newPlugins?.includes(plugin.name)) return false;
         if (!plugin.nexulien && status === SearchStatus.NEXULIEN) return false;
+        if (!plugin.nexulienBundled && status === SearchStatus.NEXULIEN_BUNDLED) return false;
         if (!search.length) return true;
 
         return (
@@ -346,7 +348,8 @@ export default function PluginSettings() {
                             { label: "Show Enabled", value: SearchStatus.ENABLED },
                             { label: "Show Disabled", value: SearchStatus.DISABLED },
                             { label: "Show New", value: SearchStatus.NEW },
-                            { label: "Nexulien-Exclusives", value: SearchStatus.NEXULIEN }
+                            { label: "Nexulien-Exclusives", value: SearchStatus.NEXULIEN },
+                            { label: "Nexulien-Bundled", value: SearchStatus.NEXULIEN_BUNDLED }
                         ]}
                         serialize={String}
                         select={onStatusChange}
