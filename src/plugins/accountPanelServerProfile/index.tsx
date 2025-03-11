@@ -73,7 +73,7 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    match: /(?<=\.AVATAR_SIZE\).{0,100})(?=return)/,
+                    match: /(?<=\.AVATAR_SIZE\).{0,100};)(?=return)/,
                     replace: "$self.useAccountPanelRef();"
                 },
                 {
@@ -85,7 +85,7 @@ export default definePlugin({
                     replace: "$&onRequestClose:$self.onPopoutClose,"
                 },
                 {
-                    match: /(?=className:.{0,50}\.avatarWrapper)/,
+                    match: /(?<=#{intl::SET_STATUS}\),)/,
                     replace: "ref:$self.accountPanelRef,onContextMenu:$self.openAccountPanelContextMenu,"
                 }
             ]
