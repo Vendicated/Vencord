@@ -7,8 +7,9 @@
 import "./styles.css";
 
 import { EquicordDevs } from "@utils/constants";
+import { getIntlMessage, openUserProfile } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { React, RelationshipStore, TextInput, UserStore } from "@webpack/common";
+import { Button, React, RelationshipStore, TextInput, UserStore } from "@webpack/common";
 
 let lastSearch = "";
 let updateFunc = (v: any) => { };
@@ -24,6 +25,10 @@ export default definePlugin({
                 {
                     match: /(?<=\}=(\i).*?\]\}\))/,
                     replace: ",$1.listType==='blocked'?$self.renderSearchInput():null"
+                },
+                {
+                    match: /(?<=userId:(\i).*?\}\)\]\}\),)(\(.*?\)\}\))/,
+                    replace: "$self.renderUser($1,$2),",
                 },
                 {
                     match: /(?<=\}=(\i).{0,10}(\i).useState\(.{0,1}\);)/,
@@ -55,6 +60,16 @@ export default definePlugin({
                 updateFunc(searchResults);
             }} value={value}
         ></TextInput>;
+    },
+    renderUser(userId: string, rest: any) {
+        return (
+            <div style={{ display: "flex", gap: "8px" }}>
+                <Button color={Button.Colors.PRIMARY} onClick={() => openUserProfile(userId)}>
+                    {getIntlMessage("SHOW_USER_PROFILE")}
+                </Button>
+                {rest}
+            </div>
+        );
     },
     getSearchResults() {
         return !!lastSearch;
