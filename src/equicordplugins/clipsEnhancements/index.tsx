@@ -53,9 +53,7 @@ export default definePlugin({
     name: "ClipsEnhancements",
     description: "Add more Clip FPS and duration options, plus RPC tagging!",
     authors: [Devs.niko],
-
     settings,
-
     patches: [
         {
             find: "clips_recording_settings",
