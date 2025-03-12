@@ -125,14 +125,18 @@ function getGuildCandidates(data: Data) {
 
         const { isAnimated } = data as Emoji;
 
-        const emojiSlots = g.getMaxEmojiSlots();
+        // Get max emoji slots based on premium tier
+        const maxEmojis = g.premiumTier === 3 ? 250 :
+                         g.premiumTier === 2 ? 150 :
+                         g.premiumTier === 1 ? 100 : 50;
+        
         const { emojis } = EmojiStore.getGuilds()[g.id];
 
         let count = 0;
         for (const emoji of emojis)
             if (emoji.animated === isAnimated && !emoji.managed)
                 count++;
-        return count < emojiSlots;
+        return count < maxEmojis;
     }).sort((a, b) => a.name.localeCompare(b.name));
 }
 
