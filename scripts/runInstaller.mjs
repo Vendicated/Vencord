@@ -158,8 +158,16 @@ const args = parseArgs({
     },
 });
 
+let argsArray = [
+    ...Object.entries(args.values).flatMap(([key, value]) => [
+        `--${key}`,
+        value,
+    ]),
+    ...args.positionals,
+].filter((x) => x !== true);
+
 try {
-    execFileSync(installerBin, args.positionals, {
+    execFileSync(installerBin, argsArray, {
         stdio: "inherit",
         env: {
             ...process.env,
