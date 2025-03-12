@@ -19,13 +19,13 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-
+import { fakeD } from "../fakeDeafen";
 import { replacedUserPanelComponent } from "./patches";
 
 const plugin = definePlugin({
     name: "PhilsPluginLibrary",
     description: "A library for phil's plugins",
-    authors: [Devs.viciouscal],
+    authors: [Devs.philhk],
     patches: [
         {
             find: '"--custom-app-panels-height",',
