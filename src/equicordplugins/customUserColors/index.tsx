@@ -103,12 +103,12 @@ export default definePlugin({
             find: "!1,wrapContent",
             replacement: [
                 {
-                    match: /(innerClassName:\i)(\}=\i)/,
-                    replace: "$1,style$2"
+                    match: /(\}=\i)/,
+                    replace: ",style$1"
                 },
                 {
-                    match: /(nameAndDecorators,)/,
-                    replace: "$1style,"
+                    match: /(?<=nameAndDecorators,)/,
+                    replace: "style:style||{},"
                 },
             ],
         },
