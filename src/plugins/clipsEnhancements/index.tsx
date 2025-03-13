@@ -104,13 +104,17 @@ export default definePlugin({
         }
 
         const activities: Activity[] = PresenceStore.getActivities(UserStore.getCurrentUser().id);
-        const validActivities = activities.filter(activity => activity.type === 0 && activity.application_id !== null);
+        const validActivities = activities.filter(activity => activity.type === 0 && activity.application_id != null);
 
         const splitName = activityName.split(" ");
 
         // Try to match activity by it's start and end
         const matchedActivities = validActivities.filter(activity => activity.name.endsWith(splitName.at(-1)!) || activity.name.startsWith(splitName.at(0)!));
 
-        return (matchedActivities ?? (settings.store.richPresenceTagging === "whenMatched" ? null : validActivities))[0]?.application_id;
+        if (settings.store.richPresenceTagging === "whenMatched" && matchedActivities.length === 0) {
+            return null;
+        }
+
+        return ((matchedActivities)[0] ?? validActivities[0])?.application_id;
     }
 });
