@@ -6,7 +6,7 @@
 
 import "./style.css";
 
-import { addContextMenuPatch, findGroupChildrenByChildId, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { DataStore } from "@api/index";
 import { definePluginSettings } from "@api/Settings";
 import { Flex } from "@components/Flex";
@@ -317,14 +317,13 @@ export default definePlugin({
         },
     ],
     settings,
+    contextMenus: {
+        "message": addCollectionContextMenuPatch
+    },
     start() {
         refreshCacheCollection();
-        addContextMenuPatch("message", addCollectionContextMenuPatch);
         GIF_COLLECTION_PREFIX = settings.store.collectionPrefix;
         GIF_ITEM_PREFIX = settings.store.itemPrefix;
-    },
-    stop() {
-        removeContextMenuPatch("message", addCollectionContextMenuPatch);
     },
     get collections() {
         refreshCacheCollection();

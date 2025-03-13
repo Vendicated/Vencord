@@ -67,7 +67,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - GlobalBadges by HypedDomi & Hosted by Wolfie
 - GoogleThat by Samwich
 - HideChatButtons by iamme
-- HideMessage by Hanzy
 - HideServers by bepvte
 - HolyNotes by Wolfie
 - HomeTyping by Samwich
@@ -115,6 +114,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - QuestCompleter by Amia
 - QuestionMarkReplacement by nyx
 - Quoter by Samwich
+- Remix by MrDiamond
 - RemixMe by kvba
 - RepeatMessage by Tolgchu
 - ReplyPingControl by ant0n & MrDiamond

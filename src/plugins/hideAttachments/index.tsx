@@ -93,7 +93,7 @@ export default definePlugin({
     },
 
     shouldHide(messageId: string) {
-        return hiddenMessages?.has(messageId) || false;
+        return hiddenMessages.has(messageId) || false;
 
     },
 
