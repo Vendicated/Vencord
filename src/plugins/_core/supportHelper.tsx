@@ -129,8 +129,8 @@ function generatePluginList() {
         content += `**Enabled UserPlugins (${enabledUserPlugins.length}):**\n${makeCodeblock(enabledUserPlugins.join(", "))}`;
     }
 
-    if (enabledPlugins.length > 75) {
-        content = "We don't support users with more than 75 plugins enabled. Please disable some and try again.";
+    if (enabledPlugins.length > 100) {
+        content = "We don't support users with more than 100 plugins enabled. Please disable some and try again.";
     }
 
     return content;
