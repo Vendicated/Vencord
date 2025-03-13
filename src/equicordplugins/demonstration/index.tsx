@@ -147,6 +147,5 @@ export default definePlugin({
     },
     stop() {
         document.removeEventListener("keydown", handleKeydown);
-    },
-
+    }
 });
