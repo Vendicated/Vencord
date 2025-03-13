@@ -63,7 +63,7 @@ function makeShortcuts() {
                     default:
                         const uniqueMatches = [...new Set(matches)];
                         if (uniqueMatches.length > 1)
-                            console.warn(`Warning: This filter matches ${matches.length} modules. Make it more specific!\n`, uniqueMatches);
+                            console.warn(`Warning: This filter matches ${uniqueMatches.length} exports. Make it more specific!\n`, uniqueMatches);
 
                         return matches[0];
                 }
@@ -82,6 +82,8 @@ function makeShortcuts() {
         wp: Webpack,
         wpc: { getter: () => Webpack.cache },
         wreq: { getter: () => Webpack.wreq },
+        wpPatcher: { getter: () => Vencord.WebpackPatcher },
+        wpInstances: { getter: () => Vencord.WebpackPatcher.allWebpackInstances },
         wpsearch: search,
         wpex: extract,
         wpexs: (code: string) => extract(findModuleId(code)!),
@@ -151,13 +153,7 @@ function makeShortcuts() {
         openModal: { getter: () => ModalAPI.openModal },
         openModalLazy: { getter: () => ModalAPI.openModalLazy },
 
-        Stores: {
-            getter: () => Object.fromEntries(
-                Common.Flux.Store.getAll()
-                    .map(store => [store.getName(), store] as const)
-                    .filter(([name]) => name.length > 1)
-            )
-        }
+        Stores: Webpack.fluxStores
     };
 }
 
@@ -165,11 +161,38 @@ function loadAndCacheShortcut(key: string, val: any, forceLoad: boolean) {
     const currentVal = val.getter();
     if (!currentVal || val.preload === false) return currentVal;
 
-    const value = currentVal[SYM_LAZY_GET]
-        ? forceLoad ? currentVal[SYM_LAZY_GET]() : currentVal[SYM_LAZY_CACHED]
-        : currentVal;
+    function unwrapProxy(value: any) {
+        if (value[SYM_LAZY_GET]) {
+            forceLoad ? currentVal[SYM_LAZY_GET]() : currentVal[SYM_LAZY_CACHED];
+        } else if (value.$$vencordInternal) {
+            return forceLoad ? value.$$vencordInternal() : value;
+        }
 
-    if (value) define(window.shortcutList, key, { value });
+        return value;
+    }
+
+    const value = unwrapProxy(currentVal);
+    if (typeof value === "object" && value !== null) {
+        const descriptors = Object.getOwnPropertyDescriptors(value);
+
+        for (const propKey in descriptors) {
+            if (value[propKey] == null) continue;
+
+            const descriptor = descriptors[propKey];
+            if (descriptor.writable === true || descriptor.set != null) {
+                const currentValue = value[propKey];
+                const newValue = unwrapProxy(currentValue);
+                if (newValue != null && currentValue !== newValue) {
+                    value[propKey] = newValue;
+                }
+            }
+        }
+    }
+
+    if (value != null) {
+        define(window.shortcutList, key, { value });
+        define(window, key, { value });
+    }
 
     return value;
 }
@@ -178,6 +201,16 @@ export default definePlugin({
     name: "ConsoleShortcuts",
     description: "Adds shorter Aliases for many things on the window. Run `shortcutList` for a list.",
     authors: [Devs.Ven],
+
+    patches: [
+        {
+            find: 'this,"_changeCallbacks",',
+            replacement: {
+                match: /\i\(this,"_changeCallbacks",/,
+                replace: "Reflect.defineProperty(this,Symbol.toStringTag,{value:this.getName(),configurable:!0,writable:!0,enumerable:!1}),$&"
+            }
+        }
+    ],
 
     startAt: StartAt.Init,
     start() {

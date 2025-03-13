@@ -37,6 +37,7 @@ import { Constructor } from "type-fest";
 import { PluginMeta } from "~plugins";
 
 import {
+    ISettingCustomElementProps,
     ISettingElementProps,
     SettingBooleanComponent,
     SettingCustomComponent,
@@ -74,14 +75,15 @@ function makeDummyUser(user: { username: string; id?: string; avatar?: string; }
     return newUser;
 }
 
-const Components: Record<OptionType, React.ComponentType<ISettingElementProps<any>>> = {
+const Components: Record<OptionType, React.ComponentType<ISettingElementProps<any> | ISettingCustomElementProps<any>>> = {
     [OptionType.STRING]: SettingTextComponent,
     [OptionType.NUMBER]: SettingNumericComponent,
     [OptionType.BIGINT]: SettingNumericComponent,
     [OptionType.BOOLEAN]: SettingBooleanComponent,
     [OptionType.SELECT]: SettingSelectComponent,
     [OptionType.SLIDER]: SettingSliderComponent,
-    [OptionType.COMPONENT]: SettingCustomComponent
+    [OptionType.COMPONENT]: SettingCustomComponent,
+    [OptionType.CUSTOM]: () => null,
 };
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
@@ -129,7 +131,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         for (const [key, value] of Object.entries(tempSettings)) {
             const option = plugin.options[key];
             pluginSettings[key] = value;
-            option?.onChange?.(value);
+
+            if (option.type === OptionType.CUSTOM) continue;
             if (option?.restartNeeded) restartNeeded = true;
         }
         if (restartNeeded) onRestartNeeded();
@@ -141,7 +144,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             return <Forms.FormText>There are no settings for this plugin.</Forms.FormText>;
         } else {
             const options = Object.entries(plugin.options).map(([key, setting]) => {
-                if (setting.hidden) return null;
+                if (setting.type === OptionType.CUSTOM || setting.hidden) return null;
 
                 function onChange(newValue: any) {
                     setTempSettings(s => ({ ...s, [key]: newValue }));
