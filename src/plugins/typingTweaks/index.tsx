@@ -72,15 +72,15 @@ const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
                 openUserProfile(user.id);
             }}
             style={{
-                display: "grid",
-                gridAutoFlow: "column",
+                display: "flex",
+                alignItems: "center",
                 gap: "4px",
                 color: typingUserColor(guildId, user.id),
                 cursor: "pointer"
             }}
         >
             {settings.store.showAvatars && (
-                <div style={{ marginTop: "4px" }}>
+                <div>
                     <Avatar
                         size="SIZE_16"
                         src={user.getAvatarURL(guildId, 128)} />
