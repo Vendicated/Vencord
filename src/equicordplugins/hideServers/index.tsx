@@ -77,8 +77,8 @@ export default definePlugin({
             find: '("guildsnav")',
             replacement: [
                 {
-                    match: /(?<=#{intl::SERVERS}\),children:)(\i)(\)?\.map\(\i\))/g,
-                    replace: "$self.useFilteredGuilds($1)$2",
+                    match: /(?<=#{intl::SERVERS}\),children:)(\i)/g,
+                    replace: "$self.useFilteredGuilds($1)",
                 },
                 // despite my best efforts, the above doesnt trigger a rerender
                 {
@@ -113,6 +113,7 @@ export default definePlugin({
     useFilteredGuilds(guilds: guildsNode[]): guildsNode[] {
         const hiddenGuilds = useStateFromStores([HiddenServersStore], () => HiddenServersStore.hiddenGuilds, undefined, (old, newer) => old.size === newer.size);
         return guilds.flatMap(guild => {
+            if (!(hiddenGuilds instanceof Set)) return [guild];
             if (hiddenGuilds.has(guild.id.toString())) {
                 return [];
             }

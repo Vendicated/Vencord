@@ -43,7 +43,7 @@ function VencordPopout(onClose: () => void) {
                 >
                     {Object.entries(plugin.toolboxActions).map(([text, action]) => {
                         const key = `vc-toolbox-${plugin.name}-${text}`;
-                    
+
                         if (plugin.name === "Demonstration") {
                             const [demonstrationToggled, setToggled] = useState(false);
 
@@ -54,9 +54,9 @@ function VencordPopout(onClose: () => void) {
                                     checked={!!demonstrationToggled}
                                     label={text}
                                     action={
-                                        () => { 
-                                            action(); 
-                                            setToggled(!demonstrationToggled); 
+                                        () => {
+                                            action();
+                                            setToggled(!demonstrationToggled);
                                         }
                                     }
                                 />
