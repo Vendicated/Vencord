@@ -13,7 +13,7 @@ import definePlugin from "@utils/types";
 import { Tooltip, useEffect, useState } from "@webpack/common";
 import { RefObject } from "react";
 
-import LoopIcon from "./components/LoopIcon"; // The LoopIcon component you provided
+import LoopIcon from "./components/LoopIcon";
 
 const cl = classNameFactory("vc-media-loop-");
 
