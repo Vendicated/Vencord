@@ -213,6 +213,8 @@ export type Checkbox = ComponentType<PropsWithChildren<{
     value: boolean;
     onChange(event: PointerEvent, value: boolean): void;
 
+    className?: string;
+    innerClassName?: string;
     align?: "center" | "top";
     disabled?: boolean;
     displayOnly?: boolean;
@@ -533,21 +535,6 @@ export type Icon = ComponentType<JSX.IntrinsicElements["svg"] & {
     size?: string;
     colorClass?: string;
 } & Record<string, any>>;
-
-type Checkbox = ComponentType<PropsWithChildren<{
-    disabled?: boolean;
-    readOnly?: boolean;
-    value?: boolean;
-    align?: string;
-    className?: string;
-    innerClassName?: string;
-    size?: number;
-    reverse?: boolean;
-    displayOnly?: boolean;
-    type?: string;
-    onClick?(): void;
-}>> & Record<string, any>;
-
 
 type SearchBar = ComponentType<PropsWithChildren<{
     query: string;

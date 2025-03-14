@@ -216,7 +216,6 @@ export default ErrorBoundary.wrap(function SearchModal({ modalProps, onSubmit, i
         return (
             <Clickable
                 className={cl("destination-row")}
-                onClick={e => { onPressDestination?.(destination); }}
                 aria-selected={isSelected}
                 {...interactionProps}
                 {...rest}
@@ -242,6 +241,7 @@ export default ErrorBoundary.wrap(function SearchModal({ modalProps, onSubmit, i
                     displayOnly={true} // todo try using false
                     size={24}
                     value={isSelected}
+                    onChange={e => onPressDestination?.(destination)}
                     className={cl("checkbox")}
                 />
             </Clickable>
