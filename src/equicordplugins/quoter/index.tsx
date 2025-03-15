@@ -195,7 +195,7 @@ function registerStyleChange(style) {
 }
 
 async function setIsUserCustomCapable() {
-    const allowList: string[] = await fetch("https://raw.githubusercontent.com/Equicord/Equibored/main/misc/quoterusers.json").then(e => e.json());
+    const allowList: string[] = await fetch("https://equicord.fyi/quoter").then(e => e.json()); // Override for memes - IF THIS IS ABUSED WILL WE TAKEN AWAY
     isUserCustomCapable = allowList.includes(UserStore.getCurrentUser().id);
 }
 
@@ -225,7 +225,7 @@ function QuoteModal(props: ModalProps) {
                 <ModalCloseButton onClick={props.onClose} />
             </ModalHeader>
             <ModalContent scrollbarType="none">
-                <img src={""} id={"quoterPreview"} style={{ borderRadius: "20px", width: "100%" }}></img>
+                <img alt="" src="" id={"quoterPreview"} style={{ borderRadius: "20px", width: "100%" }}></img>
                 <br></br><br></br>
                 {isUserCustomCapable &&
                     (
