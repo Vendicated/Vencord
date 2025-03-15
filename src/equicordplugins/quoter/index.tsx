@@ -195,7 +195,7 @@ function registerStyleChange(style) {
 }
 
 async function setIsUserCustomCapable() {
-    const allowList: string[] = await fetch("https://equicord.fyi/quoter").then(e => e.json()); // Override for memes - IF THIS IS ABUSED WILL WE TAKEN AWAY
+    const allowList: string[] = await fetch("https://equicord.org/quoter").then(e => e.json()); // Override for memes - IF THIS IS ABUSED WILL WE TAKEN AWAY
     isUserCustomCapable = allowList.includes(UserStore.getCurrentUser().id);
 }
 

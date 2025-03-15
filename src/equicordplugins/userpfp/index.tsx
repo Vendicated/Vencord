@@ -34,7 +34,7 @@ const settings = definePluginSettings({
             },
             {
                 label: "UserPFP Backup DB",
-                value: "https://userpfp.equicord.fyi/data.json"
+                value: "https://userpfp.equicord.org/data.json"
             }
         ]
     }
