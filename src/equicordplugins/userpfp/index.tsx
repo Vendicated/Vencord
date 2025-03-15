@@ -13,7 +13,7 @@ import { User } from "discord-types/general";
 let data = {
     avatars: {} as Record<string, string>,
 };
-
+const API_URL = "https://userpfp.github.io/UserPFP/source/data.json";
 const settings = definePluginSettings({
     preferNitro: {
         description: "Which avatar to use if both default animated (Nitro) pfp and UserPFP avatars are present",
@@ -22,21 +22,6 @@ const settings = definePluginSettings({
             { label: "UserPFP", value: false },
             { label: "Nitro", value: true, default: true },
         ],
-    },
-    databaseToUse: {
-        type: OptionType.SELECT,
-        description: "Which Database url to use to load avatars, KNOW WHAT YOUR DOING",
-        options: [
-            {
-                label: "UserPFP Main DB",
-                value: "https://userpfp.github.io/UserPFP/source/data.json",
-                default: true
-            },
-            {
-                label: "UserPFP Backup DB",
-                value: "https://userpfp.equicord.org/data.json"
-            }
-        ]
     }
 });
 
@@ -74,7 +59,7 @@ export default definePlugin({
         return data.avatars[user.id] ?? original(user, animated, size);
     },
     async start() {
-        await fetch(settings.store.databaseToUse)
+        await fetch(API_URL)
             .then(async res => {
                 if (res.ok) this.data = data = await res.json();
             })

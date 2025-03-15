@@ -48,8 +48,6 @@ function EquicordSettings() {
     });
     const settings = useSettings();
 
-    const discordInvite = "bFp57wxCkv";
-    const vcDiscordInvite = "https://discord.gg/KGgvd6jPFu";
     const donateImage = React.useMemo(
         () => (Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE),
         [],

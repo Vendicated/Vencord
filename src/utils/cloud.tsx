@@ -25,7 +25,15 @@ import { Logger } from "./Logger";
 import { openModal } from "./modal";
 
 export const cloudLogger = new Logger("Cloud", "#39b7e0");
-export const getCloudUrl = () => new URL(Settings.cloud.url);
+export const cloudUrl = () => {
+    if (Settings.cloud.url.includes("https://equicord.thororen.com") || Settings.cloud.url.includes("https://cloud.equicord.fyi")) {
+        Settings.cloud.url = "https://cloud.equicord.org";
+        Settings.cloud.authenticated = false;
+        deauthorizeCloud();
+    }
+    return Settings.cloud.url;
+};
+export const getCloudUrl = () => new URL(cloudUrl());
 
 const cloudUrlOrigin = () => getCloudUrl().origin;
 const getUserId = () => {
