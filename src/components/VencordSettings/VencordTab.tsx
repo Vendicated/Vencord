@@ -120,14 +120,14 @@ function EquicordSettings() {
 
     return (
         <SettingsTab title="Equicord Settings">
-            {(isDonor(user?.id) || isVCDonor(user?.id)) ? (
+            {(isEquicordDonor(user?.id) || isVencordDonor(user?.id)) ? (
                 <SpecialCard
                     title="Donations"
                     subtitle="Thank you for donating!"
                     description={
-                        isDonor(user?.id) && isVCDonor(user?.id)
+                        isEquicordDonor(user?.id) && isVencordDonor(user?.id)
                             ? "All Vencord users can see your Vencord donor badge, and Equicord users can see your Equicord donor badge. To change your Vencord donor badge, contact @vending.machine. For your Equicord donor badge, make a ticket in Equicord's server."
-                            : isVCDonor(user?.id)
+                            : isVencordDonor(user?.id)
                                 ? "All Vencord users can see your badge! You can change it at any time by messaging @vending.machine."
                                 : "All Equicord users can see your badge! You can change it at any time by making a ticket in Equicord's server."
                     }
@@ -345,13 +345,13 @@ function DonateButtonComponent() {
     );
 }
 
-function isVCDonor(userId: string): boolean {
+function isVencordDonor(userId: string): boolean {
     const donorBadges = BadgeAPI.getDonorBadges(userId);
     return GuildMemberStore.getMember(VC_GUILD_ID, userId)?.roles.includes(VC_DONOR_ROLE_ID) || !!donorBadges;
 }
 
-function isDonor(userId: string): boolean {
-    const donorBadges = BadgeAPI.getDonorBadges(userId);
+export function isEquicordDonor(userId: string): boolean {
+    const donorBadges = BadgeAPI.getEquicordDonorBadges(userId);
     return GuildMemberStore.getMember(GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID) || !!donorBadges;
 }
 
