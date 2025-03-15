@@ -24,6 +24,7 @@ import { dirname, join } from "path";
 import { Readable } from "stream";
 import { finished } from "stream/promises";
 import { fileURLToPath } from "url";
+import { parseArgs } from "util";
 
 const BASE_URL = "https://github.com/Vencord/Installer/releases/latest/download/";
 const INSTALLER_PATH_DARWIN = "VencordInstaller.app/Contents/MacOS/VencordInstaller";
@@ -118,8 +119,55 @@ const installerBin = await ensureBinary();
 
 console.log("Now running Installer...");
 
+const args = parseArgs({
+    strict: false,
+    options: {
+        branch: {
+            type: "string",
+        },
+        debug: {
+            type: "boolean",
+        },
+        help: {
+            type: "boolean",
+        },
+        install: {
+            type: "boolean",
+        },
+        "install-openasar": {
+            type: "boolean",
+        },
+        location: {
+            type: "string",
+        },
+        repair: {
+            type: "boolean",
+        },
+        uninstall: {
+            type: "boolean",
+        },
+        "uninstall-openasar": {
+            type: "boolean",
+        },
+        "update-self": {
+            type: "boolean",
+        },
+        version: {
+            type: "boolean",
+        },
+    },
+});
+
+let argsArray = [
+    ...Object.entries(args.values).flatMap(([key, value]) => [
+        `--${key}`,
+        value,
+    ]),
+    ...args.positionals,
+].filter((x) => x !== true);
+
 try {
-    execFileSync(installerBin, {
+    execFileSync(installerBin, argsArray, {
         stdio: "inherit",
         env: {
             ...process.env,
