@@ -1,8 +1,25 @@
-.messagelogger-deleted {
+.messagelogger-deleted:not(.messagelogger-highlight-bypass) {
     --text-normal: var(--status-danger, #f04747);
     --interactive-normal: var(--status-danger, #f04747);
     --text-muted: var(--status-danger, #f04747);
     --embed-title: var(--red-460, #be3535);
     --text-link: var(--red-460, #be3535);
     --header-primary: var(--red-460, #be3535);
+}
+
+.messagelogger-deleted-attachment-overlay::after {
+    transition: 150ms opacity ease-in-out;
+    position: absolute;
+    pointer-events: none;
+    content: "";
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #ff2919;
+    opacity: 0;
+}
+
+.messagelogger-deleted-attachment-overlay:not(.messagelogger-highlight-bypass)::after {
+    opacity: 0.2;
 }
