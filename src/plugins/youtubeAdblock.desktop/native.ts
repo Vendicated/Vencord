@@ -5,17 +5,18 @@
  */
 
 import { RendererSettings } from "@main/settings";
-import { app } from "electron";
-import adguard from "file://adguard.js?minify";
+import { app, webFrameMain } from "electron";
+import adguard from "file://adblock-runtime.ts?minify";
 
 app.on("browser-window-created", (_, win) => {
-    win.webContents.on("frame-created", (_, { frame }) => {
-        frame?.once("dom-ready", () => {
-            if (!RendererSettings.store.plugins?.YoutubeAdblock?.enabled) return;
+    win.webContents.on("did-frame-navigate", (_event, _url, _httpResponseCose, _httpStatusText, _isMainFrame, frameProcessid, frameRoutingId) => {
+        if (!RendererSettings.store.plugins?.YoutubeAdblock?.enabled) return;
 
-            if (frame.url.includes("youtube.com/embed/") || (frame.url.includes("discordsays") && frame.url.includes("youtube.com"))) {
-                frame.executeJavaScript(adguard);
-            }
-        });
+        const frame = webFrameMain.fromId(frameProcessid, frameRoutingId);
+        if (!frame) return;
+
+        if (frame.url.includes("youtube.com/embed/") || (frame.url.includes("discordsays") && frame.url.includes("youtube.com"))) {
+            frame.executeJavaScript(adguard);
+        }
     });
 });
