@@ -20,7 +20,7 @@ import { showNotification } from "@api/Notifications";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByCode, findByProps, findStoreLazy } from "@webpack";
-import { ChannelStore, FluxDispatcher, GuildChannelStore, RestAPI, Text, UserStore } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, GuildChannelStore, RestAPI, showToast, Text, UserStore } from "@webpack/common";
 
 import { IconWithTooltip, QuestIcon } from "./components/Icons";
 
@@ -29,6 +29,11 @@ import { IconWithTooltip, QuestIcon } from "./components/Icons";
 const ApplicationStreamingStore = findStoreLazy("ApplicationStreamingStore");
 const questAssetsBaseUrl = "https://cdn.discordapp.com/quests/";
 
+
+function getQuestById(questId: string) {
+    const QuestsStore = findByProps("getQuest");
+    return QuestsStore.quests.get(questId);
+}
 
 function getLeftQuests() {
     const QuestsStore = findByProps("getQuest");
@@ -56,7 +61,7 @@ function encodeStreamKey(e): string {
 
 // let quest, interval, applicationId, applicationName, secondsNeeded, secondsDone, taskName;
 const isApp = navigator.userAgent.includes("Electron/");
-let shouldDisable = true;
+const shouldDisable = true;
 let questRunning = false;
 let ImagesConfig = {};
 
@@ -71,11 +76,17 @@ export default definePlugin({
                 match: /\)\),\(0,(\w{1,3})\.(\w{1,3})\)\((\w{1,3})\.(\w{1,3}),{value:(\w{1,3}),children:(\w{1,3})}\)\}\}/,
                 replace: ")),$6.unshift($self.getComp()),(0,$1.$2)($3.$4,{value:$5,children:$6})}}"
             }
+        },
+        {
+            find: "id:\"share-link\"",
+            replacement: {
+                match: /\(0,(\w{1,3})\.(\w{1,3})\)\((\w{1,3})\.(\w{1,3}),\{id:"share-link"[^}]+}\)/,
+                replace: '$&, (0,$1.$2)($3.$4, { id: "Auto-complete", label: "Auto Complete", action: () => { $self.openCompleteQuest(e.quest.id); } })'
+            }
         }
     ],
     getComp() {
-        shouldDisable = !this.renderQuestButton();
-        return <IconWithTooltip text="Complete Quest" isDisabled={shouldDisable} icon={<QuestIcon />} onClick={this.openCompleteQuest} />;
+        return <IconWithTooltip text="Complete Quest" isDisabled={shouldDisable} icon={<QuestIcon />} onClick={this.openCompleteQuest.bind(this)} />;
     },
     settingsAboutComponent() {
 
@@ -97,40 +108,77 @@ export default definePlugin({
         const currentUserId: string = UserStore.getCurrentUser().id;
         window.currentUserId = currentUserId; // this is here because discord will lag if we get the current user id every time
     },
-    renderQuestButton() {
-        const currentStream = ApplicationStreamingStore.getCurrentUserActiveStream();
 
-        const quest = getLeftQuests();
+    openCompleteQuest(questId?: string) {
+        const quest = questId ? getQuestById(questId) : getLeftQuests();
         if (!quest) {
-            return false;
+            showToast("No active quest found!");
+            return;
         }
 
-        const taskName = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY"].find(x => quest.config.taskConfig.tasks[x] != null);
-
-
-        if (!currentStream && taskName === "STREAM_ON_DESKTOP") {
-            return false;
+        if (!quest || !quest.userStatus?.enrolledAt) {
+            showToast("You need to start playing the video first, then pause it or accept the quest!");
+            return;
         }
 
-        if (currentStream && !ApplicationStreamingStore.getViewerIds(encodeStreamKey(currentStream)).length && taskName === "STREAM_ON_DESKTOP") {
-            return false;
+        // Check if quest is already completed
+        if (quest.userStatus?.completedAt) {
+            showToast("This quest is already completed!");
+            return;
         }
 
-        return true;
-    },
+        // Check if quest is expired
+        if (new Date(quest.config.expiresAt).getTime() < Date.now()) {
+            showToast("This quest has expired!");
+            return;
+        }
 
-    openCompleteQuest() {
-        // check if user is sharing screen and there is someone that is watching the stream
+        // Get current stream status once
+        const currentStream = ApplicationStreamingStore.getCurrentUserActiveStream();
+        const taskName = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY"].find(
+            x => quest.config.taskConfig.tasks[x] != null
+        );
+
+        // Precondition checks
+        try {
+            if (taskName === "STREAM_ON_DESKTOP") {
+                if (!currentStream) {
+                    showToast("You need to be streaming to complete this quest!");
+                    return;
+                }
+
+                const viewerIds = ApplicationStreamingStore.getViewerIds(encodeStreamKey(currentStream));
+                if (!viewerIds?.length) {
+                    showToast("You need at least one viewer in your stream!");
+                    return;
+                }
+            }
+
+            if (taskName === "PLAY_ON_DESKTOP" && !isApp) {
+                showToast("Desktop app required for gameplay quests!");
+                return;
+            }
+
+
+        } catch (error) {
+            if (error instanceof Error) {
+                showToast(error.message);
+            } else {
+                showToast("An unknown error occurred while starting the quest completer.");
+            }
+            return;
+        }
+
         if (questRunning) {
             showNotification({
                 title: "Quest Completer",
-                body: "Stopping the current quest completion.",
+                body: "Stopping current completion",
                 ...ImagesConfig
             });
             questRunning = false;
             return;
         }
-        const quest = getLeftQuests();
+
         ImagesConfig = {
             icon: `${questAssetsBaseUrl}${quest.id}/dark/${quest.config.assets.logotype}`,
             image: `${questAssetsBaseUrl}${quest.id}/${quest.config.assets.hero}`
@@ -138,7 +186,6 @@ export default definePlugin({
         const pid = Math.floor(Math.random() * 30000) + 1000;
         const applicationId = quest.config.application.id;
         const applicationName = quest.config.application.name;
-        const taskName = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY"].find(x => quest.config.taskConfig.tasks[x] != null);
         const secondsNeeded = taskName ? quest.config.taskConfig.tasks[taskName].target : 0;
         const secondsDone = taskName ? quest.userStatus?.progress?.[taskName]?.value ?? 0 : 0;
         const questsHeartbeat = findByCode("QUESTS_HEARTBEAT");
