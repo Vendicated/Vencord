@@ -75,7 +75,6 @@ interface UnspecificRowProps {
     rowMode: string,
     disabled: boolean,
     isSelected: boolean,
-    onPressDestination: (destination: DestinationItem) => void,
     "aria-posinset": number,
     "aria-setsize": number,
 }
@@ -177,7 +176,6 @@ export default ErrorBoundary.wrap(function SearchModal({ modalProps, onSubmit, i
         ...rest
     }: UserIconProps) {
 
-        // FIXME
         const avatarSrc = user.getAvatarURL(void 0, 32, animate);
 
         return (
@@ -204,22 +202,21 @@ export default ErrorBoundary.wrap(function SearchModal({ modalProps, onSubmit, i
             subLabel,
             isSelected,
             disabled,
-            onPressDestination,
             ...rest
         } = props;
-
-        console.log("rerendering row");
 
         const interactionProps = {
             role: "listitem",
             "data-list-item-id": `NO_LIST___${destination.id}`,
             tabIndex: -1,
         };
-        return (
-            <Clickable
+
+        const callback = useCallback(() => setSelectedCallback(destination), [destination, setSelectedCallback]);
+
+        return <Clickable
                 className={cl("destination-row")}
                 aria-selected={isSelected}
-                onClick={e => onPressDestination?.(destination)}
+                onClick={callback}
                 {...interactionProps}
                 {...rest}
             >
@@ -246,8 +243,7 @@ export default ErrorBoundary.wrap(function SearchModal({ modalProps, onSubmit, i
                     value={isSelected}
                     className={cl("checkbox")}
                 />
-            </Clickable>
-        );
+            </Clickable>;
     };
 
     function generateUserItem(user: User, otherProps: UnspecificRowProps) {
@@ -556,7 +552,7 @@ export default ErrorBoundary.wrap(function SearchModal({ modalProps, onSubmit, i
 
     const { results, updateSearchText } = generateResults();
 
-    function ModalScroller({ rowData, handleToggleDestination, paddingBottom, paddingTop }: { rowData: Result[], handleToggleDestination: (destination: DestinationItem) => void, paddingBottom?: number, paddingTop?: number; }) {
+    function ModalScroller({ rowData, paddingBottom, paddingTop }: { rowData: Result[], paddingBottom?: number, paddingTop?: number; }) {
 
         const sectionCount: number[] = useMemo(() => [rowData.length], [rowData.length]);
 
@@ -581,7 +577,6 @@ export default ErrorBoundary.wrap(function SearchModal({ modalProps, onSubmit, i
                 rowMode: "toggle",
                 disabled: false,
                 isSelected: selected.some(e => e.type === destination.type && e.id === destination.id),
-                onPressDestination: handleToggleDestination,
                 "aria-posinset": row + 1,
                 "aria-setsize": results.length
             };
@@ -662,7 +657,6 @@ export default ErrorBoundary.wrap(function SearchModal({ modalProps, onSubmit, i
                     paddingBottom={16}
                     paddingTop={16}
                     rowData={results}
-                    handleToggleDestination={setSelectedCallback}
                 /> : <ModalContent className={cl("no-results")}>
                     <div className={cl("no-results-container")}>
                         <svg
