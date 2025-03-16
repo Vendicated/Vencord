@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ChatBarButton } from "@api/ChatButtons";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { classNameFactory } from "@api/Styles";
 import { classes } from "@utils/misc";
 
@@ -26,7 +26,7 @@ export function UwuIcon({ height = 24, width = 24, className, enabled }: { heigh
     );
 }
 
-export const UwuChatBarIcon: ChatBarButton = ({ }) => {
+export const UwuChatBarIcon: ChatBarButtonFactory = ({ }) => {
     const { autoUwu } = settings.use(["autoUwu"]);
 
     const toggle = () => {
