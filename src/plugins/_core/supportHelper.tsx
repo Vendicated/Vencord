@@ -130,7 +130,20 @@ function generatePluginList() {
     }
 
     if (enabledPlugins.length > 100 && !(isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id))) {
-        content = "We don't support users with more than 100 plugins enabled. Please disable some and try again.";
+        return Alerts.show({
+            title: "You are attempting to get support!",
+            body: <div>
+                <style>
+                    {'[class*="backdrop_"][style*="backdrop-filter"]{backdrop-filter:blur(16px) brightness(0.25) !important;}'}
+                </style>
+                <img src="https://media.tenor.com/QtGqjwBpRzwAAAAi/wumpus-dancing.gif" />
+                <Forms.FormText>Before you ask for help,</Forms.FormText>
+                <Forms.FormText>We do not handle support for users who use 100+ plugins</Forms.FormText>
+                <Forms.FormText>issue could be plugin confliction</Forms.FormText>
+                <Forms.FormText>try removing some plugins and see if it fixes!</Forms.FormText>
+            </div>,
+            cancelText: "Okay continue"
+        });
     }
 
     return content;
@@ -174,7 +187,10 @@ export default definePlugin({
             description: "Send Equicord plugin list",
             // @ts-ignore
             predicate: ctx => isPluginDev(UserStore.getCurrentUser()?.id) || isEquicordPluginDev(UserStore.getCurrentUser()?.id) || GUILD_ID === ctx?.guild?.id,
-            execute: () => ({ content: generatePluginList() })
+            execute: () => {
+                const pluginList = generatePluginList();
+                return { content: typeof pluginList === "string" ? pluginList : "Unable to generate plugin list." };
+            }
         }
     ],
 
@@ -199,7 +215,7 @@ export default definePlugin({
                     </div>,
                     confirmText: "Go to Equicord Support",
                     cancelText: "Okay continue",
-                    onConfirm: () => VencordNative.native.openExternal("https://discord.gg/npnv52UQwY"),
+                    onConfirm: () => VencordNative.native.openExternal("https://discord.gg/equicord"),
                 });
             }
 
@@ -234,7 +250,7 @@ export default definePlugin({
                     body: <div>
                         <Forms.FormText>You are using an externally updated Equicord version, the ability to help you here may be limited.</Forms.FormText>
                         <Forms.FormText className={Margins.top8}>
-                            Please join the <Link href="https://discord.gg/5Xh2W87egW">Equicord Server</Link> for support,
+                            Please join the <Link href="https://discord.gg/equicord">Equicord Server</Link> for support,
                             or if this issue persists on Vencord, continue on.
                         </Forms.FormText>
                     </div>
@@ -306,7 +322,12 @@ export default definePlugin({
                     </Button>,
                     <Button
                         key="vc-plg-list"
-                        onClick={async () => sendMessage(props.channel.id, { content: generatePluginList() })}
+                        onClick={async () => {
+                            const pluginList = generatePluginList();
+                            if (typeof pluginList === "string") {
+                                sendMessage(props.channel.id, { content: pluginList });
+                            }
+                        }}
                     >
                         Run /equicord-plugins
                     </Button>
