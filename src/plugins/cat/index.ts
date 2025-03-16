@@ -50,11 +50,16 @@ function generateMrrpString(min: number, max: number, isUpperCase: boolean = fal
     return mrrps.join(' ');
 }
 function processString(input: string): string {
-    return input.replaceAll(/\b\w+\b/g, (word) => {
-        const isUpperCase = word === word.toUpperCase(); // Detect case of the word
-        return generateRandomString(Math.ceil(word.length / 4), isUpperCase); // Replace with a random string
+    return input.replace(/(?:https?:\/\/\S+|\[.*?\]\(https?:\/\/.*?\)|<a?:\w+:\d+>)|(\b\w+\b)/g, (match, word) => {
+        if (word) {
+            const isUpperCase = word === word.toUpperCase();
+            return generateRandomString(Math.ceil(word.length / 4), isUpperCase);
+        }
+        return match; // Keep URLs, Markdown links, and Discord emojis unchanged
     });
 }
+
+
 export default definePlugin({
     name: "Cat",
     description: "BECOME CAT",
