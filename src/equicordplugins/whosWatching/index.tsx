@@ -118,39 +118,37 @@ export default definePlugin({
         return (
             <>
                 <div {...props}>{props.children}</div>
-                <div className={classes(cl("spectators_panel"), Margins.top8)}>
+                <div className={classes(cl("spectators_panel"), Margins.top8)} style={{ marginLeft: 8 }}>
                     <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
                         {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
                     </Forms.FormTitle>
-                    <div style={{ marginLeft: 8 }}>
-                        {users.length ?
-                            <>
-                                <UserSummaryItem
-                                    users={users}
-                                    count={userIds.length}
-                                    renderIcon={false}
-                                    max={12}
-                                    showDefaultAvatarsForNullUsers
-                                    renderMoreUsers={renderMoreUsers}
-                                    renderUser={(user: User, index: number) => (
-                                        <Clickable
-                                            key={index}
-                                            className={AvatarStyles.clickableAvatar}
-                                            onClick={() => openUserProfile(user.id)}
-                                        >
-                                            <img
-                                                className={AvatarStyles.avatar}
-                                                src={user.getAvatarURL(void 0, 80, true)}
-                                                alt={user.username}
-                                                title={user.username}
-                                            />
-                                        </Clickable>
-                                    )}
-                                />
-                            </>
-                            : <Forms.FormText>No spectators</Forms.FormText>
-                        }
-                    </div>
+                    {users.length ?
+                        <>
+                            <UserSummaryItem
+                                users={users}
+                                count={userIds.length}
+                                renderIcon={false}
+                                max={12}
+                                showDefaultAvatarsForNullUsers
+                                renderMoreUsers={renderMoreUsers}
+                                renderUser={(user: User, index: number) => (
+                                    <Clickable
+                                        key={index}
+                                        className={AvatarStyles.clickableAvatar}
+                                        onClick={() => openUserProfile(user.id)}
+                                    >
+                                        <img
+                                            className={AvatarStyles.avatar}
+                                            src={user.getAvatarURL(void 0, 80, true)}
+                                            alt={user.username}
+                                            title={user.username}
+                                        />
+                                    </Clickable>
+                                )}
+                            />
+                        </>
+                        : <Forms.FormText>No spectators</Forms.FormText>
+                    }
                 </div>
             </>
         );
