@@ -1,5 +1,29 @@
 import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
+import { CatIcon } from "./caticon";
+import { definePluginSettings } from "@api/Settings";
+import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
+
+
+export const settings = definePluginSettings({
+    // spaceChance: {
+    //     type: OptionType.SLIDER,
+    //     markers: makeRange(0, 1, 0.1),
+    //     default: 0.1,
+    //     description: "Chance to insert spaces into words",
+    // },
+    // replaceChance: {
+    //     type: OptionType.SLIDER,
+    //     markers: makeRange(0, 1, 0.1),
+    //     default: 0.4,
+    //     description: "chance for nearby key replacements",
+    // },
+    cat: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "jfkasdflafhuel"
+    }
+});
 
 function generateRandomString(length: number, isUpperCase = false) {
     const patterns = [
@@ -36,10 +60,15 @@ export default definePlugin({
     description: "BECOME CAT",
     authors: [{ name: "Tally", id: 1014588310036951120n }],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
+    settings,
 
     start() {
+
+        addChatBarButton("vc-cat", CatIcon);
+
+
         this.preSend = addMessagePreSendListener(async (_, message) => {
-            if (!message.content) return;
+            if (!message.content || !settings.store.cat) return;
 
             message.content = processString(message.content);
         });
@@ -47,5 +76,6 @@ export default definePlugin({
 
     stop() {
         removeMessagePreSendListener(this.preSend);
+        removeChatBarButton("vc-cat");
     },
 });
