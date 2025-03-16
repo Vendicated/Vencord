@@ -984,10 +984,6 @@ export const EquicordDevs = Object.freeze({
         name: "vappstar",
         id: 747192967311261748n
     },
-    ExoDev: {
-        name: "ExoDev",
-        id: 1325655837003223137n
-    },
     voidbbg: {
         name: "voidbbg",
         id: 117126234588184582n
@@ -1019,6 +1015,10 @@ export const EquicordDevs = Object.freeze({
     seth: {
         name: "S€th",
         id: 1273447359417942128n
+    },
+    SteelTech: {
+        name: "SteelTech",
+        id: 1344190786476183643n
     },
 } satisfies Record<string, Dev>);
 

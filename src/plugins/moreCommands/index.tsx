@@ -17,7 +17,7 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage } from "@api/Commands";
-import { Devs, EquicordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 
@@ -32,7 +32,7 @@ function mock(input: string): string {
 export default definePlugin({
     name: "MoreCommands",
     description: "Echo, Lenny, Mock, and More",
-    authors: [Devs.Arjix, Devs.echo, Devs.Samu, EquicordDevs.ExoDev],
+    authors: [Devs.Arjix, Devs.echo, Devs.Samu],
     commands: [
         {
             name: "echo",
