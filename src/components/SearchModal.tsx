@@ -208,6 +208,8 @@ export default ErrorBoundary.wrap(function SearchModal({ modalProps, onSubmit, i
             ...rest
         } = props;
 
+        console.log("rerendering row");
+
         const interactionProps = {
             role: "listitem",
             "data-list-item-id": `NO_LIST___${destination.id}`,
@@ -217,6 +219,7 @@ export default ErrorBoundary.wrap(function SearchModal({ modalProps, onSubmit, i
             <Clickable
                 className={cl("destination-row")}
                 aria-selected={isSelected}
+                onClick={e => onPressDestination?.(destination)}
                 {...interactionProps}
                 {...rest}
             >
@@ -238,10 +241,9 @@ export default ErrorBoundary.wrap(function SearchModal({ modalProps, onSubmit, i
                 </div>
                 <Checkbox
                     type={Checkbox.Types.INVERTED}
-                    displayOnly={true} // todo try using false
+                    displayOnly={true}
                     size={24}
                     value={isSelected}
-                    onChange={e => onPressDestination?.(destination)}
                     className={cl("checkbox")}
                 />
             </Clickable>
