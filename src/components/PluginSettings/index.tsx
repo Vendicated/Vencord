@@ -276,7 +276,7 @@ export default function PluginSettings() {
         if (!search.length) return true;
 
         return (
-            plugin.name.toLowerCase().includes(search) ||
+            plugin.name.toLowerCase().includes(search.replace(/\s+/g, "")) ||
             plugin.description.toLowerCase().includes(search) ||
             plugin.tags?.some(t => t.toLowerCase().includes(search))
         );
