@@ -53,7 +53,9 @@ const settings = definePluginSettings({
 const patchContextMenu: NavContextMenuPatchCallback = (children, { channel }) => {
     if (!channel) return;
 
-    const group = findGroupChildrenByChildId("mute", children, true) ?? children;
+    const group = findGroupChildrenByChildId("mute-channel", children);
+    if(!group) return;
+
     const isExcluded = excluded.has(channel.id);
     group.unshift(
         <Menu.MenuItem
