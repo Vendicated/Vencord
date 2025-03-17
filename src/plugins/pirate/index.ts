@@ -376,7 +376,7 @@ function processString(input: string): string {
 export default definePlugin({
     name: "Pirate",
     description: "sail the seven seas",
-    authors: [Devs.Tally],
+    authors: [{ name: "Tally", id: 1014588310036951120n }],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
 

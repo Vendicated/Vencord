@@ -3,7 +3,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { CatIcon } from "./caticon";
 import { definePluginSettings } from "@api/Settings";
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
-import { Devs } from "@utils/constants";
 
 
 export const settings = definePluginSettings({
@@ -64,7 +63,7 @@ function processString(input: string): string {
 export default definePlugin({
     name: "Cat",
     description: "BECOME CAT",
-    authors: [Devs.Tally],
+    authors: [{ name: "Tally", id: 1014588310036951120n }],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
 

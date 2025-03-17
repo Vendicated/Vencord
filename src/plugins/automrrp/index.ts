@@ -1,5 +1,4 @@
 import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
-import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 function generateRandomString(length: number, isUpperCase = false) {
@@ -30,7 +29,7 @@ function generateMrrpString(min: number, max: number, isUpperCase: boolean = fal
 export default definePlugin({
     name: "Auto Mrrp",
     description: "Uwuifies your messages on send!",
-    authors: [Devs.Tally],
+    authors: [{ name: "Tally", id: 1014588310036951120n }],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
 
     start() {
