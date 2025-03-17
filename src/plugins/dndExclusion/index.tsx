@@ -97,11 +97,12 @@ export default definePlugin({
     }],
     settings,
     ShouldNotify(event: ShouldNotifyEvent, focused: boolean) {
+        const isExcluded = excluded.has(event.channelId);
+        if(!isExcluded) return false;
         const currentChannel = getCurrentChannel();
         if(currentChannel && currentChannel.id === event.channelId && focused) return false;
         const user = UserStore.getCurrentUser();
-        if(event.message.author.id === user.id) return false;
-        return excluded.has(event.channelId);
+        return event.message.author.id !== user.id;
     },
     start() {
         getExcluded().then(()=>{
