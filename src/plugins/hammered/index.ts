@@ -12,6 +12,7 @@ import { makeRange } from "@components/PluginSettings/components";
 import definePlugin, { OptionType } from "@utils/types";
 
 import { UwuChatBarIcon } from "./hammeredicon";
+import { Devs } from "@utils/constants";
 // import { random } from "./hammerer";
 
 export const settings = definePluginSettings({
@@ -36,7 +37,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "Hammered",
     description: "makes you sound drunk af!",
-    authors: [{ name: "Tally", id: 1014588310036951120n }],
+    authors: [Devs.Tally],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
 
