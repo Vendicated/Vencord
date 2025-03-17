@@ -53,9 +53,9 @@ const settings = definePluginSettings({
 const patchContextMenu: NavContextMenuPatchCallback = (children, { channel }) => {
     if (!channel) return;
 
-    const group = findGroupChildrenByChildId("mark-channel-read", children) ?? children;
+    const group = findGroupChildrenByChildId("mute", children, true) ?? children;
     const isExcluded = excluded.has(channel.id);
-    group.push(
+    group.unshift(
         <Menu.MenuItem
             id={"mutate-dnd-exclusion"}
             label={isExcluded ? "Remove DND exclusion" : "Exclude from DND"}
