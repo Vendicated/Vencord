@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>157 additional plugins</summary>
+<summary>159 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -64,6 +64,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - GensokyoRadioRPC by RyanCaoDev & Prince527
 - GifCollections by Aria & Creations
 - GifRoulette by Samwich
+- GitHubRepos by talhakf
 - Glide by Samwich
 - GlobalBadges by HypedDomi & Hosted by Wolfie
 - GoogleThat by Samwich
@@ -115,6 +116,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - QuestCompleter by Amia
 - QuestionMarkReplacement by nyx
 - Quoter by Samwich
+- RandomVoice by omaw
 - Remix by MrDiamond
 - RemixMe by kvba
 - RepeatMessage by Tolgchu
