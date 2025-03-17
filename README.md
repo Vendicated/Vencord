@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>159 additional plugins</summary>
+<summary>160 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -51,6 +51,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - EmojiDumper by Cortex, Samwich, Woosh
 - Encryptcord by Inbestigator
 - EquicordCSS by thororen, Panniku, Dablulite, Coolesding, MiniDiscordThemes, LuckFire, gold_me
+- Equissant by SomeAspy & thororen
 - ExportContacts by dat_insanity
 - FakeProfileThemesAndEffects by ryan
 - FindReply by newwares
