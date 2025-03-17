@@ -7,11 +7,12 @@
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
+import { PaintbrushIcon } from "@components/Icons";
 import { EquicordDevs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import { closeModal, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { extractAndLoadChunksLazy, findByPropsLazy, findStoreLazy } from "@webpack";
+import { extractAndLoadChunksLazy, findLazy, findStoreLazy } from "@webpack";
 import { FluxDispatcher, Menu, MessageActions, RestAPI, showToast, SnowflakeUtils, Toasts } from "@webpack/common";
 
 import RemixModal from "./RemixModal";
@@ -20,7 +21,7 @@ import css from "./styles.css?managed";
 const requireCreateStickerModal = extractAndLoadChunksLazy(["stickerInspected]:"]);
 const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}(\i\.\i\("?.+?"?\).*?).then\(\i\.bind\(\i,"?(.+?)"?\)\).{0,50}"UserSettings"/);
 
-const CloudUtils = findByPropsLazy("CloudUpload");
+const CloudUpload = findLazy(m => m.prototype?.trackUploadFinished);
 const PendingReplyStore = findStoreLazy("PendingReplyStore");
 
 
@@ -54,6 +55,7 @@ const MessageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     group.splice(index + 1, 0, <Menu.MenuItem
         id="vc-remix"
         label="Remix"
+        icon={PaintbrushIcon}
         action={() => {
             const key = openModal(modalProps =>
                 <RemixModal modalProps={modalProps} close={() => closeModal(key)} url={url} />
@@ -67,7 +69,7 @@ export function sendRemix(blob: Blob) {
     const reply = PendingReplyStore.getPendingReply(currentChannelId);
     if (reply) FluxDispatcher.dispatch({ type: "DELETE_PENDING_REPLY", currentChannelId });
 
-    const upload = new CloudUtils.CloudUpload({
+    const upload = new CloudUpload({
         file: new File([blob], "remix.png", { type: "image/png" }),
         isClip: false,
         isThumbnail: false,
