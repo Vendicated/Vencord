@@ -1026,7 +1026,7 @@ export const EquicordDevs = Object.freeze({
     },
     omaw: {
         name: "omaw",
-        id: 1234916234789650463n
+        id: 1155026301791514655n
     },
 } satisfies Record<string, Dev>);
 
