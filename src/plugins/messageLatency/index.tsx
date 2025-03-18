@@ -63,11 +63,11 @@ export default definePlugin({
 
     stringDelta(delta: number, showMillis: boolean) {
         const diff: Diff = {
-            days: Math.round(delta / (60 * 60 * 24 * 1000)),
-            hours: Math.round((delta / (60 * 60 * 1000)) % 24),
-            minutes: Math.round((delta / (60 * 1000)) % 60),
-            seconds: Math.round(delta / 1000 % 60),
-            milliseconds: Math.round(delta % 1000)
+            days: Math.floor(delta / (60 * 60 * 24 * 1000)),
+            hours: Math.floor((delta / (60 * 60 * 1000)) % 24),
+            minutes: Math.floor((delta / (60 * 1000)) % 60),
+            seconds: Math.floor(delta / 1000 % 60),
+            milliseconds: Math.floor(delta % 1000)
         };
 
         const str = (k: DiffKey) => diff[k] > 0 ? `${diff[k]} ${diff[k] > 1 ? k : k.substring(0, k.length - 1)}` : null;
