@@ -9,6 +9,7 @@ import { get, set } from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, Menu, React, UserStore, useState } from "@webpack/common";
 import { MessageJSON } from "discord-types/general";
@@ -108,7 +109,7 @@ export default definePlugin({
     },
     start() {
         getExcluded().then(()=>{
-            console.log("DndExclusion started");
+            new Logger("DndExclusion", "#f43f5e").info("Plugin initialised");
         });
     },
     contextMenus: {
