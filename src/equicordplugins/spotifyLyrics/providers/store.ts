@@ -104,9 +104,8 @@ export const SpotifyLrcStore = proxyLazyWebpack(() => {
             }
 
             if (provider === Provider.Translated || provider === Provider.Romanized) {
-                if (!currentInfo?.useLyric) {
-                    showNotif("No lyrics", `No lyrics to ${provider === Provider.Translated ? "translate" : "romanize"}`);
-                    return;
+                if (!currentInfo?.useLyric || !currentInfo.lyricsVersions[currentInfo.useLyric]) {
+                    return null;
                 }
 
                 const fetcher = provider === Provider.Translated ? translateLyrics : romanizeLyrics;
@@ -148,5 +147,3 @@ export const SpotifyLrcStore = proxyLazyWebpack(() => {
     });
     return store;
 });
-
-
