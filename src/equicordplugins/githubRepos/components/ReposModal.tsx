@@ -1,8 +1,15 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot } from "@utils/modal";
 import { Button, Forms, React } from "@webpack/common";
+
+import { getLanguageColor } from "../colors";
 import { GitHubRepo } from "../types";
-import { getLanguageColor } from "../utils/colors";
-import { Star } from "./icons/Star";
+import { Star } from "./Star";
 
 interface ReposModalProps {
     repos: GitHubRepo[];
@@ -91,4 +98,4 @@ export function ReposModal({ repos, username, rootProps }: ReposModalProps) {
             </ModalFooter>
         </ModalRoot>
     );
-} 
+}

@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 export function getLanguageColor(language: string): string {
     const colors: Record<string, string> = {
         "JavaScript": "#f1e05a",
@@ -58,4 +64,4 @@ export function getLanguageColor(language: string): string {
     };
 
     return colors[language] || "#858585";
-} 
+}

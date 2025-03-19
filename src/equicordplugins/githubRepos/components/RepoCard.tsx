@@ -1,8 +1,15 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { Flex } from "@components/Flex";
 import { React } from "@webpack/common";
+
+import { getLanguageColor } from "../colors";
 import { RepoCardProps } from "../types";
-import { getLanguageColor } from "../utils/colors";
-import { Star } from "./icons/Star";
+import { Star } from "./Star";
 
 export function RepoCard({ repo, theme, showStars, showLanguage }: RepoCardProps) {
     const handleClick = () => window.open(repo.html_url, "_blank");
@@ -48,4 +55,4 @@ export function RepoCard({ repo, theme, showStars, showLanguage }: RepoCardProps
             {renderLanguage()}
         </div>
     );
-} 
+}

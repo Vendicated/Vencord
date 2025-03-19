@@ -8,9 +8,9 @@ import { Flex } from "@components/Flex";
 import { openModal } from "@utils/modal";
 import { React, useEffect, UserProfileStore, useState } from "@webpack/common";
 
-import { fetchReposByUserId, fetchReposByUsername, fetchUserInfo, GitHubUserInfo } from "../services/githubApi";
+import { settings } from "..";
+import { fetchReposByUserId, fetchReposByUsername, fetchUserInfo, GitHubUserInfo } from "../githubApi";
 import { GitHubRepo } from "../types";
-import { settings } from "../utils/settings";
 import { RepoCard } from "./RepoCard";
 import { ReposModal } from "./ReposModal";
 

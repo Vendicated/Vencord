@@ -1,5 +1,12 @@
-import { GitHubRepo } from "../types";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { Logger } from "@utils/Logger";
+
+import { GitHubRepo } from "./types";
 
 const logger = new Logger("GitHubRepos");
 
@@ -55,4 +62,4 @@ export async function fetchReposByUsername(username: string, perPage: number = 3
 
 function sortReposByStars(repos: GitHubRepo[]): GitHubRepo[] {
     return repos.sort((a, b) => b.stargazers_count - a.stargazers_count);
-} 
+}

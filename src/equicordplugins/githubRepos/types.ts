@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 export interface GitHubRepo {
     id: number;
     name: string;
@@ -19,4 +25,4 @@ export interface RepoCardProps {
     theme: string;
     showStars: boolean;
     showLanguage: boolean;
-} 
+}

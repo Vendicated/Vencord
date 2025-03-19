@@ -6,16 +6,35 @@
 
 import "./styles.css";
 
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { React } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { GitHubReposComponent } from "./components/GitHubReposComponent";
-import { settings } from "./utils/settings";
+
+export const settings = definePluginSettings({
+    showStars: {
+        type: OptionType.BOOLEAN,
+        description: "Show repository stars",
+        default: true
+    },
+    showLanguage: {
+        type: OptionType.BOOLEAN,
+        description: "Show repository language",
+        default: true
+    },
+    showInMiniProfile: {
+        type: OptionType.BOOLEAN,
+        description: "Only show a button in the mini profile",
+        default: true
+    },
+});
+
 
 const getProfileThemeProps = findByCodeLazy(".getPreviewThemeColors", "primaryColor:");
 
@@ -58,8 +77,8 @@ export default definePlugin({
         {
             find: "action:\"PRESS_APP_CONNECTION\"",
             replacement: {
-                match: /(?<=user:(\i).{0,15}displayProfile:(\i).*?#{intl::USER_PROFILE_MEMBER_SINCE}.{0,90}\}\)\}\))/,
-                replace: "$&,$self.ProfilePopoutComponent({ user: $1, displayProfile: $2 }),"
+                match: /(?<=user:(\i).{0,15}displayProfile:(\i).*?CONNECTIONS.{0,100}\}\)\}\))/,
+                replace: ",$self.ProfilePopoutComponent({ user: $1, displayProfile: $2 })"
             }
         }
     ],
