@@ -15,10 +15,10 @@ export default definePlugin({
     authors: [EquicordDevs.thororen],
     patches: [
         {
-            find: ".hasAvatarForGuild(null==",
+            find: '"UserProfilePopout"',
             replacement: {
-                match: /(?<=user:(\i).*?===\i\.id.*?)return/,
-                replace: "return $self.openUserProfile($1) ||"
+                match: /(?<=user:(\i).*?"PRESS_VIEW_PROFILE".{0,50})return/,
+                replace: "return $self.openUserProfile($1);"
             }
         }
     ],
