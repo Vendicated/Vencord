@@ -63,7 +63,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::BLOCKED_MESSAGES_HIDE}",
+            find: "#{intl::BLOCKED_MESSAGE_COUNT}}",
             replacement: [
                 {
                     match: /let\{[^}]*collapsedReason[^}]*\}/,
