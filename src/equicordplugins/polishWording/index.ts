@@ -11,7 +11,6 @@ import {
 } from "@api/MessageEvents";
 import {
     definePluginSettings,
-    migratePluginSettings,
     Settings,
 } from "@api/Settings";
 import { Devs } from "@utils/constants";
@@ -20,8 +19,6 @@ import definePlugin, { OptionType } from "@utils/types";
 const presendObject: MessageSendListener = (channelId, msg) => {
     msg.content = textProcessing(msg.content);
 };
-
-migratePluginSettings("PolishWording", "Grammar");
 
 const settings = definePluginSettings({
     blockedWords: {

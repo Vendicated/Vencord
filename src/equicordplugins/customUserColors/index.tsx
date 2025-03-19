@@ -8,7 +8,7 @@ import "./styles.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { get } from "@api/DataStore";
-import { definePluginSettings, migratePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
@@ -69,8 +69,6 @@ const settings = definePluginSettings({
     }
 });
 
-
-migratePluginSettings("CustomUserColors", "customUserColors");
 export default definePlugin({
     name: "CustomUserColors",
     description: "Lets you add a custom color to any user, anywhere! Highly recommend to use with typingTweaks and roleColorEverywhere",

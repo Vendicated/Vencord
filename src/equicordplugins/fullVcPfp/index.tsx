@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { migratePluginSettings, Settings } from "@api/Settings";
+import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
@@ -17,7 +17,6 @@ interface iUSRBG extends Plugin {
     getImageUrl(userId: string): string | null;
 }
 
-migratePluginSettings("FullVCPFP", "fullVcPfp");
 export default definePlugin({
     name: "FullVCPFP",
     description: "Makes avatars take up the entire vc tile",

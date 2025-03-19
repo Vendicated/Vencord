@@ -5,12 +5,10 @@
  */
 
 import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
-import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, GuildMemberStore, SelectedChannelStore, SelectedGuildStore } from "@webpack/common";
 
-migratePluginSettings("AtSomeone", "atSomeone");
 export default definePlugin({
     name: "AtSomeone",
     authors: [Devs.Joona],

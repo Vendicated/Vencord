@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>160 additional plugins</summary>
+<summary>164 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -22,12 +22,13 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - BetterActivities by D3SOX, Arjix, AutumnVN
 - BetterAudioPlayer by Creations
 - BetterBanReasons by Inbestigator
+- BetterBlockedUsers by TheArmagan
 - BetterInvites by iamme
+- BetterPlusReacts by Joona
 - BetterQuickReact by Ven & Sqaaakoi
 - BetterUserArea by Samwich
-- BetterPlusReacts by Joona
 - BlockKeywords by catcraft
-- BlockKrsip by D3SOX
+- BlockKrisp by D3SOX
 - BypassStatus by Inbestigator & thororen
 - ChannelBadges by Creations
 - ChannelTabs by TheSun, TheKodeToad, keifufu, Nickyux
@@ -39,6 +40,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - CopyUserMention by Cortex & castdrian
 - CustomSounds by TheKodeToad & SpikeHD
 - CustomTimestamps by Rini & nvhrr
+- CustomUserColors by mochienya
 - CuteAnimeBoys by ShadyGoat
 - CuteNekos by echo
 - CutePats by thororen
@@ -51,17 +53,20 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - EmojiDumper by Cortex, Samwich, Woosh
 - Encryptcord by Inbestigator
 - EquicordCSS by thororen, Panniku, Dablulite, Coolesding, MiniDiscordThemes, LuckFire, gold_me
+- EquicordHelper by thororen & nyx
 - Equissant by SomeAspy & thororen
 - ExportContacts by dat_insanity
 - FakeProfileThemesAndEffects by ryan
 - FindReply by newwares
 - FixFileExtensions by thororen
 - FollowVoiceUser by TheArmagan
+- FontLoader by vmohammad
+- Freaky by nyx
 - FrequentQuickSwitcher by Samwich
 - FriendCodes by HypedDomi
 - FriendshipRanks by Samwich
-- FullVcPfp by mochie
 - FriendTags by Samwich
+- FullVcPfp by mochie
 - GensokyoRadioRPC by RyanCaoDev & Prince527
 - GifCollections by Aria & Creations
 - GifRoulette by Samwich
@@ -111,8 +116,8 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - NotificationTitle by Kyuuhachi
 - OnePingPerDM by ProffDea
 - PinIcon by iamme
-- PolishWording (Grammar) by Samwich
 - PlatformSpoofer by Drag
+- PolishWording by Samwich
 - PurgeMessages by bhop & nyx
 - QuestCompleter by Amia
 - QuestionMarkReplacement by nyx
@@ -128,12 +133,12 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - SekaiStickers by MaiKokain
 - ServerSearch by camila314
 - ShowBadgesInChat by Inbestigator & KrystalSkull
-- Signature by Ven, Rini, ImBanana, KrystalSkull
 - SidebarChat by Joona
-- StatsfmRPC by Crxaw & vmohammad
+- Signature by Ven, Rini, ImBanana, KrystalSkull
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo, maintained by thororen
 - SpotifyLyrics by Joona
+- StatsfmRPC by Crxaw & vmohammad
 - StatusPresets by iamme
 - SteamStatusSync by niko
 - StickerBlocker by Samwich
@@ -143,7 +148,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ThemeLibrary by Fafa
 - Timezones by Aria
 - Title by Kyuuhachi
-- toggleVideoBind by mochie
+- ToggleVideoBind by mochie
 - TosuRPC by AutumnVN
 - Translate+ by Prince527 & Ven
 - UnitConverter by sadan
@@ -151,12 +156,12 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - UnreadCountBadge by Joona
 - UserPFP by nexpid & thororen
 - UwUifier by echo
-- VCSupport by thororen
 - VCNarratorCustom by Loukios, ported by example-git
 - VCPanelSettings by nin0dev
+- VCSupport by thororen
 - VencordRPC by AutumnVN
 - VideoSpeed by Samwich
-- ViewRawVariant (ViewRaw2) by Kyuuhachi
+- ViewRawVariant by Kyuuhachi
 - VoiceChatUtilities by D3SOX
 - VoiceJoinMessages by Sqaaakoi & maintained by thororen
 - WebpackTarball by Kyuuhachi

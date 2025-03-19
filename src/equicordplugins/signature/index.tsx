@@ -8,7 +8,7 @@ import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarBut
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/MessageEvents";
-import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, React } from "@webpack/common";
@@ -92,8 +92,6 @@ const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
         />
     );
 };
-
-migratePluginSettings("Signature", "SentVia");
 
 export default definePlugin({
     name: "Signature",

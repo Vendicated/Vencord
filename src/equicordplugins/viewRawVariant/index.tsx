@@ -5,7 +5,6 @@
  */
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { migratePluginSettings } from "@api/Settings";
 import { CodeBlock } from "@components/CodeBlock";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
@@ -23,8 +22,6 @@ import {
 import definePlugin from "@utils/types";
 import { Forms, Menu, Text } from "@webpack/common";
 import { Message } from "discord-types/general";
-
-migratePluginSettings("ViewRawVariant", "ViewRaw2");
 
 type CustomMessage = Message & {
     editHistory?: any;
@@ -130,8 +127,7 @@ function makeContextCallback(
 
 export default definePlugin({
     name: "ViewRawVariant",
-    description:
-        "Copy/View raw content of any message, channel, or guild, but show in the right click menu.",
+    description: "Copy/View raw content of any message, channel, or guild, but show in the right click menu.",
     authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna, Devs.Kyuuhachi],
     contextMenus: {
         "guild-context": makeContextCallback("guild", val =>
