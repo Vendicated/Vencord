@@ -588,6 +588,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "samsam",
         id: 836452332387565589n,
     },
+    Tuples: {
+        name: "Tuples",
+        id: 970452152919150592n,
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly
