@@ -11,5 +11,10 @@ export const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Show repository language",
         default: true
-    }
-}); 
+    },
+    showInMiniProfile: {
+        type: OptionType.BOOLEAN,
+        description: "Only show a button in the mini profile",
+        default: true
+    },
+});
