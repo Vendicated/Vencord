@@ -73,8 +73,9 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    match: /(?<=\.AVATAR_SIZE\).{0,600};)(?=return null==)/,
-                    replace: "$self.useAccountPanelRef();"
+                    // it also appears as `renderNameTag: this.foo`, ensure theres a comma or closing brace to avoid matching that
+                    match: /let{.{0,200}renderNameTag:\i(?=,|\})/,
+                    replace: "$self.useAccountPanelRef();$&"
                 },
                 {
                     match: /(\.AVATAR,children:.+?renderPopout:(\i)=>){(.+?)}(?=,position)(?<=currentUser:(\i).+?)/,
