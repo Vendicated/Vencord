@@ -38,10 +38,11 @@ export const Forms = {
 export const Card = waitForComponent<t.Card>("Card", filters.componentByCode(".editable),", ".outline:"));
 export const Button = waitForComponent<t.Button>("Button", filters.componentByCode("#{intl::A11Y_LOADING_STARTED}))),!1"));
 export const Switch = waitForComponent<t.Switch>("Switch", filters.componentByCode(".labelRow,ref:", ".disabledText"));
+export const Checkbox = waitForComponent<t.Checkbox>("Checkbox", filters.componentByCode(".checkboxWrapperDisabled:"));
 
 const Tooltips = mapMangledModuleLazy(".tooltipTop,bottom:", {
     Tooltip: filters.componentByCode("this.renderTooltip()]"),
-    TooltipContainer: filters.componentByCode('="div",')
+    TooltipContainer: filters.componentByCode('="div"')
 }) as {
     Tooltip: t.Tooltip,
     TooltipContainer: t.TooltipContainer;
@@ -94,7 +95,7 @@ waitFor(m => {
 export const MaskedLink = waitForComponent<t.MaskedLink>("MaskedLink", filters.componentByCode("MASKED_LINK)"));
 export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.componentByCode("#{intl::MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL}"));
 export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
-export const OAuth2AuthorizeModal = waitForComponent("OAuth2AuthorizeModal", filters.componentByCode(".authorize),children:", ".contentBackground"));
+export const OAuth2AuthorizeModal = waitForComponent("OAuth2AuthorizeModal", filters.componentByCode(".authorize,children:", ".contentBackground"));
 
 export const Animations = mapMangledModuleLazy(".assign({colorNames:", {
     Transition: filters.componentByCode('["items","children"]', ",null,"),

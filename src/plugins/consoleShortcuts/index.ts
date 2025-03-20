@@ -82,6 +82,8 @@ function makeShortcuts() {
         wp: Webpack,
         wpc: { getter: () => Webpack.cache },
         wreq: { getter: () => Webpack.wreq },
+        wpPatcher: { getter: () => Vencord.WebpackPatcher },
+        wpInstances: { getter: () => Vencord.WebpackPatcher.allWebpackInstances },
         wpsearch: search,
         wpex: extract,
         wpexs: (code: string) => extract(findModuleId(code)!),
@@ -151,13 +153,7 @@ function makeShortcuts() {
         openModal: { getter: () => ModalAPI.openModal },
         openModalLazy: { getter: () => ModalAPI.openModalLazy },
 
-        Stores: {
-            getter: () => Object.fromEntries(
-                Common.Flux.Store.getAll()
-                    .map(store => [store.getName(), store] as const)
-                    .filter(([name]) => name.length > 1)
-            )
-        }
+        Stores: Webpack.fluxStores
     };
 }
 
