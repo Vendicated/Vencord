@@ -73,7 +73,7 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    match: /(?<=\.AVATAR_SIZE\).{0,100};)(?=return)/,
+                    match: /(?<=\.AVATAR_SIZE\).{0,600};)(?=return null==)/,
                     replace: "$self.useAccountPanelRef();"
                 },
                 {
