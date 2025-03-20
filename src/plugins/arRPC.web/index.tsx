@@ -17,9 +17,10 @@
 */
 
 import { popNotice, showNotice } from "@api/Notices";
+import { definePluginSettings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
-import definePlugin, { ReporterTestable } from "@utils/types";
+import definePlugin, { OptionType, ReporterTestable } from "@utils/types";
 import { findByCodeLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms, Toasts } from "@webpack/common";
 
@@ -37,6 +38,16 @@ async function lookupApp(applicationId: string): Promise<string> {
 }
 
 let ws: WebSocket;
+
+const settings = definePluginSettings({
+    serverPort: {
+        description: "The port on which the arRPC server is running",
+        type: OptionType.NUMBER,
+        default: 1337,
+        restartNeeded: true,
+    }
+});
+
 export default definePlugin({
     name: "WebRichPresence (arRPC)",
     description: "Client plugin for arRPC to enable RPC on Discord Web (experimental)",
@@ -51,6 +62,7 @@ export default definePlugin({
             </Forms.FormText>
         </>
     ),
+    settings,
 
     async handleEvent(e: MessageEvent<any>) {
         const data = JSON.parse(e.data);
@@ -77,7 +89,7 @@ export default definePlugin({
         if ("legcord" in window) return;
 
         if (ws) ws.close();
-        ws = new WebSocket("ws://127.0.0.1:1337"); // try to open WebSocket
+        ws = new WebSocket("ws://127.0.0.1:" + settings.store.serverPort); // try to open WebSocket
 
         ws.onmessage = this.handleEvent;
 
