@@ -52,7 +52,7 @@ export default definePlugin({
             find: ".animatedBannerHoverLayer,onMouseEnter:",
             replacement: {
                 match: /(?<=guildBanner:\i,animate:)\i(?=,isRefreshEnabled:)/,
-                replace: "animate:!0"
+                replace: "!0"
             }
         }
     ]
