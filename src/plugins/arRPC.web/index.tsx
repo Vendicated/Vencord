@@ -78,7 +78,7 @@ async function connect() {
     }
 
     Toasts.show({ // show toast on success
-        message: "Connected to arRPC h",
+        message: "Connected to arRPC",
         type: Toasts.Type.SUCCESS,
         id: Toasts.genId(),
         options: {
