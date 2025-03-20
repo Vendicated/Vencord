@@ -89,7 +89,7 @@ export default definePlugin({
         if ("legcord" in window) return;
 
         if (ws) ws.close();
-        ws = new WebSocket("ws://127.0.0.1:" + settings.store.serverPort); // try to open WebSocket
+        ws = new WebSocket(`ws://127.0.0.1:${settings.store.serverPort}`); // try to open WebSocket
 
         ws.onmessage = this.handleEvent;
 
