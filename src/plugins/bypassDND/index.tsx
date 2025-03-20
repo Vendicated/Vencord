@@ -6,48 +6,79 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { getCurrentChannel } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { Menu, UserStore } from "@webpack/common";
-import { Message } from "discord-types/general";
+import { Button, ChannelStore, Forms, GuildStore, Menu, NavigationRouter } from "@webpack/common";
+import { Channel, User } from "discord-types/general";
 import { ReactNode } from "react";
 
+type BypassedItem = `g:${string}` | `c:${string}`;
+
 const settings = definePluginSettings({
+    stats: {
+        type: OptionType.COMPONENT,
+        component: () => {
+            const list = getList();
+            const channels = list.filter(x => x.startsWith("c:"));
+            const guilds = list.filter(x => x.startsWith("g:"));
+            return (
+                <>
+                    <Forms.FormSection>
+                        <Forms.FormTitle tag="h5">Allowed channels</Forms.FormTitle>
+                        {channels.map(c => {
+                            const channel = ChannelStore.getChannel(c.slice(2));
+                            if (!channel.guild_id) {
+                                const recipient = channel.rawRecipients[0] as unknown as { display_name: string; };
+                                return <Button look={Button.Looks.LINK} color={Button.Colors.TRANSPARENT} size={Button.Sizes.SMALL} onClick={_ => NavigationRouter.transitionTo(`/channels/@me/${channel.id}`)} key={c}>#{!channel.name.length ? recipient.display_name : channel.name}</Button>;
+                            }
+                            const guild = GuildStore.getGuild(channel.guild_id);
+                            return <Button look={Button.Looks.LINK} color={Button.Colors.TRANSPARENT} size={Button.Sizes.SMALL} onClick={_ => NavigationRouter.transitionTo(`/channels/${channel.guild_id}/${channel.id}`)} key={c}>#{channel.name} - {guild.name}</Button>;
+                        })}
+                        {channels.length === 0 && <Forms.FormText>No channels allowed to bypass yet.</Forms.FormText>}
+                    </Forms.FormSection>
+                    <Forms.FormDivider />
+                    <Forms.FormSection>
+                        <Forms.FormTitle tag="h5">Allowed guilds</Forms.FormTitle>
+                        {guilds.map(g => {
+                            const guild = GuildStore.getGuild(g.slice(2));
+                            return <Button look={Button.Looks.LINK} color={Button.Colors.TRANSPARENT} size={Button.Sizes.SMALL} onClick={_ => NavigationRouter.transitionToGuild(guild.id)} key={g}>{guild.name}</Button>;
+                        })}
+                        {guilds.length === 0 && <Forms.FormText>No guilds allowed to bypass yet.</Forms.FormText>}
+                    </Forms.FormSection>
+                </>
+            );
+        }
+    },
     bypasseds: {
         type: OptionType.STRING,
-        description: "Bypassed users, channels and guilds",
+        description: "List of allowed channels and guilds",
         default: "[]",
         hidden: true
     }
 });
 
-function getList(): string[] {
+function getList(): BypassedItem[] {
     return JSON.parse(settings.store.bypasseds);
 }
 
-function setList(value: string[]) {
+function setList(value: BypassedItem[]) {
     settings.store.bypasseds = JSON.stringify(value);
 }
 
 export default definePlugin({
     name: "BypassDND",
-    description: "Get notifications from specific sources even in do not disturb mode. Right-click on channels/guilds to set them to bypass do not disturb mode.",
+    description: "Get notifications from specific sources when in do not disturb mode. Right-click on channels/guilds to allow them to bypass do not disturb mode.",
     authors: [Devs.Inbestigator, Devs.rosemary],
     patches: [{
-        find: ".getNotifyMessagesInSelectedChannel()&&",
+        find: ".allowAllMessages(",
         replacement: {
-            match: /MESSAGE_CREATE:function\((\i)\).+?\(0,\i\.\i\)\(\i,\i,!(\i)\)/,
-            replace: "$&||$self.shouldNotify($1,$2)"
+            match: /(\i,\i,(\i).+?)\i.ignoreStatus/,
+            replace: "$1$self.shouldNotify($2)"
         }
     }],
     settings,
-    shouldNotify(event: { channelId: string; guildId: string; message: Message; }, focused: boolean) {
+    shouldNotify(channel: Channel) {
         const list = getList();
-        if (!list.includes(event.channelId) && !list.includes(event.guildId)) return false;
-        const currentChannel = getCurrentChannel();
-        if (currentChannel && currentChannel.id === event.channelId && focused) return false;
-        const user = UserStore.getCurrentUser();
-        return event.message.author.id !== user.id;
+        return (list.includes(`c:${channel.id}`) || list.includes(`g:${channel.guild_id}`) || list.includes(`c:${channel.parent_id}`));
     },
     contextMenus: {
         "guild-context": patchContext,
@@ -58,25 +89,32 @@ export default definePlugin({
     }
 });
 
-function patchContext(children: ReactNode[], props: { channel: { id: string; }; } | { guild: { id: string; }; }) {
+function patchContext(children: ReactNode[], props: { channel: { id: string; }; guildId?: string; user?: User; } | { guild: { id: string; }; }) {
+    // Escape user context when in a guild channel
+    if ("guildId" in props && "user" in props) return;
     const id = "channel" in props ? props.channel.id : "guild" in props ? props.guild.id : undefined;
     if (!id) return;
-    const list = getList();
-    const isEnabled = list.includes(id);
+    let list = getList();
+    const isEnabled = list.some(x => x.endsWith(`:${id}`));
 
     children.push(
         <Menu.MenuItem
             id="toggle-dnd-bypass"
             label={`${isEnabled ? "Remove" : "Add"} DND Bypass`}
-            icon={() => Icon(isEnabled)}
+            icon={() => <Icon enabled={isEnabled} />}
             action={() => {
-                setList(isEnabled ? list.filter(id => id !== id) : [...list, id]);
+                if (isEnabled) {
+                    list = list.filter(x => !x.endsWith(`:${id}`));
+                } else {
+                    list.push(`${("channel" in props) ? "c" : "g"}:${id}`);
+                }
+                setList(list);
             }}
         />
     );
 }
 
-function Icon(enabled: boolean) {
+function Icon({ enabled }: { enabled: boolean; }) {
     return (
         <svg width="18" height="18">
             <circle cx="9" cy="9" r="8" fill={enabled ? "currentColor" : "var(--status-danger)"} />
