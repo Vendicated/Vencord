@@ -113,7 +113,7 @@ export default definePlugin({
     ),
     settings,
 
-    handleEvent: handleEvent,
+    handleEvent,
     start: connect,
 
     stop() {
