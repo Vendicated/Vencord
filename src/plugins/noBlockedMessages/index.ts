@@ -57,7 +57,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::BLOCKED_MESSAGES_HIDE}",
+            find: ".__invalid_blocked",
             replacement: [
                 {
                     match: /let\{[^}]*collapsedReason[^}]*\}/,
