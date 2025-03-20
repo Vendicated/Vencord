@@ -39,12 +39,61 @@ async function lookupApp(applicationId: string): Promise<string> {
 
 let ws: WebSocket;
 
+async function handleEvent(e: MessageEvent<any>) {
+    const data = JSON.parse(e.data);
+
+    const { activity } = data;
+    const assets = activity?.assets;
+
+    if (assets?.large_image) assets.large_image = await lookupAsset(activity.application_id, assets.large_image);
+    if (assets?.small_image) assets.small_image = await lookupAsset(activity.application_id, assets.small_image);
+
+    if (activity) {
+        const appId = activity.application_id;
+        apps[appId] ||= await lookupApp(appId);
+
+        const app = apps[appId];
+        activity.name ||= app.name;
+    }
+
+    FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", ...data });
+}
+
+async function connect() {
+    // Legcord comes with its own arRPC implementation, so this plugin just confuses users
+    if ("legcord" in window) return;
+
+    if (ws) ws.close();
+    ws = new WebSocket(`ws://127.0.0.1:${settings.store.serverPort}`); // try to open WebSocket
+
+    ws.onmessage = handleEvent;
+
+    const connectionSuccessful = await new Promise(res => setTimeout(() => res(ws.readyState === WebSocket.OPEN), 1000)); // check if open after 1s
+    if (!connectionSuccessful) {
+        showNotice("Failed to connect to arRPC, is it running?", "Retry", () => { // show notice about failure to connect, with retry/ignore
+            popNotice();
+            connect();
+        });
+        return;
+    }
+
+    Toasts.show({ // show toast on success
+        message: "Connected to arRPC h",
+        type: Toasts.Type.SUCCESS,
+        id: Toasts.genId(),
+        options: {
+            duration: 1000,
+            position: Toasts.Position.BOTTOM
+        }
+    });
+}
+
 const settings = definePluginSettings({
     serverPort: {
         description: "The port on which the arRPC server is running",
         type: OptionType.NUMBER,
         default: 1337,
-        restartNeeded: true,
+        onChange: connect
     }
 });
 
@@ -64,54 +113,8 @@ export default definePlugin({
     ),
     settings,
 
-    async handleEvent(e: MessageEvent<any>) {
-        const data = JSON.parse(e.data);
-
-        const { activity } = data;
-        const assets = activity?.assets;
-
-        if (assets?.large_image) assets.large_image = await lookupAsset(activity.application_id, assets.large_image);
-        if (assets?.small_image) assets.small_image = await lookupAsset(activity.application_id, assets.small_image);
-
-        if (activity) {
-            const appId = activity.application_id;
-            apps[appId] ||= await lookupApp(appId);
-
-            const app = apps[appId];
-            activity.name ||= app.name;
-        }
-
-        FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", ...data });
-    },
-
-    async start() {
-        // Legcord comes with its own arRPC implementation, so this plugin just confuses users
-        if ("legcord" in window) return;
-
-        if (ws) ws.close();
-        ws = new WebSocket(`ws://127.0.0.1:${settings.store.serverPort}`); // try to open WebSocket
-
-        ws.onmessage = this.handleEvent;
-
-        const connectionSuccessful = await new Promise(res => setTimeout(() => res(ws.readyState === WebSocket.OPEN), 1000)); // check if open after 1s
-        if (!connectionSuccessful) {
-            showNotice("Failed to connect to arRPC, is it running?", "Retry", () => { // show notice about failure to connect, with retry/ignore
-                popNotice();
-                this.start();
-            });
-            return;
-        }
-
-        Toasts.show({ // show toast on success
-            message: "Connected to arRPC",
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId(),
-            options: {
-                duration: 1000,
-                position: Toasts.Position.BOTTOM
-            }
-        });
-    },
+    handleEvent: handleEvent,
+    start: connect,
 
     stop() {
         FluxDispatcher.dispatch({ type: "LOCAL_ACTIVITY_UPDATE", activity: null }); // clear status
