@@ -200,7 +200,7 @@ export default definePlugin({
         find: "#{intl::MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL}",
         replacement: [
             {
-                match: /(\i)\?\(0,\i\.\i\)\((\i),"LT"\):\(0,\i\.\i\)\(\i\)/,
+                match: /(\i)\?\(0,\i\.\i\)\((\i),"LT"\):\(0,\i\.\i\)\(\i,!0\)/,
                 replace: "$self.renderTimestamp($2,$1?'compact':'cozy')",
             },
             {
