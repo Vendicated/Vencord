@@ -99,7 +99,7 @@ export default definePlugin({
         },
         // Current user area, at bottom of channels/dm list
         {
-            find: "renderAvatarWithPopout(){",
+            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
             replacement: [
                 // Use Decor avatar decoration hook
                 {
