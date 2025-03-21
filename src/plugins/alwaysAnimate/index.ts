@@ -44,15 +44,15 @@ export default definePlugin({
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
                 match: /(\.CUSTOM_STATUS.+?animate:)\i/,
-                replace: (_, rest) => `${rest}!0`
+                replace: "$1!0"
             }
         },
         {
             // Guild Banner
             find: ".animatedBannerHoverLayer,onMouseEnter:",
             replacement: {
-                match: /(?<=guildBanner:\i,animate:)\i(?=}\))/,
-                replace: "!0"
+                match: /(\.headerContent.+?guildBanner:\i,animate:)\i/,
+                replace: "$1!0"
             }
         }
     ]
