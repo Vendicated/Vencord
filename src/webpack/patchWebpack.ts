@@ -10,6 +10,7 @@ import { Logger } from "@utils/Logger";
 import { interpolateIfDefined } from "@utils/misc";
 import { canonicalizeReplacement } from "@utils/patches";
 import { Patch, PatchReplacement } from "@utils/types";
+import { reporterData } from "debug/reporterData";
 
 import { traceFunctionWithResults } from "../debug/Tracer";
 import { _blacklistBadModules, _initWebpack, factoryListeners, findModuleFactory, moduleListeners, waitForSubscriptions, wreq } from "./webpack";
@@ -539,6 +540,12 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                         if (IS_DEV) {
                             logger.debug("Function Source:\n", code);
                         }
+                        if (IS_COMPANION_TEST) {
+                            reporterData.failedPatches.hadNoEffect.push({
+                                ...patch,
+                                id: String(moduleId)
+                            });
+                        }
                     }
 
                     if (patch.group) {
@@ -550,6 +557,12 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                             patchedBy.delete(patch.plugin);
                         }
 
+                        if (IS_COMPANION_TEST) {
+                            reporterData.failedPatches.undoingPatchGroup.push({
+                                ...patch,
+                                id: String(moduleId)
+                            });
+                        }
                         break;
                     }
 
@@ -572,6 +585,16 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
             } catch (err) {
                 logger.error(`Patch by ${patch.plugin} errored (Module id is ${String(moduleId)}): ${replacement.match}\n`, err);
 
+                if (IS_COMPANION_TEST) {
+                    // FIXME: how to handle these now that a comment is added for us
+                    reporterData.failedPatches.erroredPatch.push({
+                        ...patch,
+                        id: String(moduleId),
+                        oldModule: lastCode,
+                        newModule: code
+                    });
+                }
+
                 if (IS_DEV) {
                     diffErroredPatch(code, lastCode, lastCode.match(replacement.match)!);
                 }
@@ -584,6 +607,12 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                     logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
                     code = previousCode;
                     patchedFactory = previousFactory;
+                    if (IS_COMPANION_TEST) {
+                        reporterData.failedPatches.undoingPatchGroup.push({
+                            ...patch,
+                            id: String(moduleId)
+                        });
+                    }
                     break;
                 }
 
