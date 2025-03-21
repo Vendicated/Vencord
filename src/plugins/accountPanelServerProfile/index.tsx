@@ -73,8 +73,7 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    // it also appears as `renderNameTag: this.foo`, ensure theres a comma or closing brace to avoid matching that
-                    match: /let{.{0,200}renderNameTag:\i(?=,|\})/,
+                    match: /let{speaking:\i/,
                     replace: "$self.useAccountPanelRef();$&"
                 },
                 {
