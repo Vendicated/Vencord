@@ -280,7 +280,8 @@ export const fileUrlPlugin = {
                     const res = await esbuild.build({
                         entryPoints: [path],
                         write: false,
-                        minify: true
+                        minify: true,
+                        bundle: true
                     });
                     content = res.outputFiles[0].text;
                 } else {
