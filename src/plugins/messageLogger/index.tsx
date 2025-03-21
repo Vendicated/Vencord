@@ -38,7 +38,7 @@ import { openHistoryModal } from "./HistoryModal";
 
 interface MLMessage extends Message {
     deleted?: boolean;
-    editHistory?: { timestamp: Date; content: string; }[];
+    editHistory?: { timestamp: Date; content: string; attachmentsEdited: boolean; }[];
     firstEditTimestamp?: Date;
 }
 
@@ -58,12 +58,14 @@ const REMOVE_HISTORY_ID = "ml-remove-history";
 const TOGGLE_DELETE_STYLE_ID = "ml-toggle-style";
 const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) => {
     const { message } = props;
-    const { deleted, editHistory, id, channel_id } = message;
+    const { deleted, editHistory, attachments, id, channel_id } = message;
 
-    if (!deleted && !editHistory?.length) return;
+    const hasDeletedAttachments = attachments.some(a => a.deleted);
+
+    if (!deleted && !hasDeletedAttachments && !editHistory?.length) return;
 
     toggle: {
-        if (!deleted) break toggle;
+        if (!deleted && !hasDeletedAttachments) break toggle;
 
         const domElement = document.getElementById(`chat-messages-${channel_id}-${id}`);
         if (!domElement) break toggle;
@@ -73,7 +75,17 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
                 id={TOGGLE_DELETE_STYLE_ID}
                 key={TOGGLE_DELETE_STYLE_ID}
                 label="Toggle Deleted Highlight"
-                action={() => domElement.classList.toggle("messagelogger-deleted")}
+                action={() => {
+                    // TODO: find a better way of doing this, even though the performance impact is negligible
+                    const hasClass = domElement.classList.toggle("messagelogger-highlight-bypass");
+                    for (const descendant of domElement.querySelectorAll("*")) {
+                        if (hasClass) {
+                            descendant.classList.add("messagelogger-highlight-bypass");
+                        } else {
+                            descendant.classList.remove("messagelogger-highlight-bypass");
+                        }
+                    }
+                }}
             />
         ));
     }
@@ -94,6 +106,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
                     });
                 } else {
                     message.editHistory = [];
+                    message.attachments = message.attachments.filter(a => !a.deleted);
                 }
             }}
         />
@@ -121,7 +134,8 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
                         });
                     else
                         updateMessage(channel.id, msg.id, {
-                            editHistory: []
+                            editHistory: [],
+                            attachments: msg.attachments.filter((a: any) => !a.deleted)
                         });
                 });
             }}
@@ -144,7 +158,7 @@ export function parseEditContent(content: string, message: Message) {
 export default definePlugin({
     name: "MessageLogger",
     description: "Temporarily logs deleted and edited messages.",
-    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi],
+    authors: [Devs.rushii, Devs.Ven, Devs.AutumnVN, Devs.Nickyux, Devs.Kyuuhachi, Devs.xNasuni],
     dependencies: ["MessageUpdaterAPI"],
 
     contextMenus: {
@@ -169,7 +183,7 @@ export default definePlugin({
 
         return Settings.plugins.MessageLogger.inlineEdits && (
             <>
-                {message.editHistory?.map((edit, idx) => (
+                {message.editHistory?.map((edit, idx) => !edit.attachmentsEdited && (
                     <div key={idx} className="messagelogger-edited">
                         {parseEditContent(edit.content, message)}
                         <Timestamp
@@ -188,7 +202,8 @@ export default definePlugin({
     makeEdit(newMessage: any, oldMessage: any): any {
         return {
             timestamp: new Date(newMessage.edited_timestamp),
-            content: oldMessage.content
+            content: oldMessage.content,
+            attachmentsEdited: (oldMessage.attachments?.filter(a => !a.deleted)?.length || 0) !== (newMessage.attachments?.filter(a => !a.deleted)?.length || 0)
         };
     },
 
@@ -366,16 +381,25 @@ export default definePlugin({
                         "}"
                 },
                 {
-                    // Add current cached content + new edit time to cached message's editHistory
-                    match: /(function (\i)\((\i)\).+?)\.update\((\i)(?=.*MESSAGE_UPDATE:\2)/,
-                    replace: "$1" +
-                        ".update($4,m =>" +
+                    // Add current cached content + new edit time to cached message's editHistory + deleted attachments
+                    match: /(function (\i)\((\i)\).+?)(\i)\.update\((\i)(?=.*MESSAGE_UPDATE:\2)/,
+                    replace: "$1$4" +
+                        ".update($5,m =>" +
                         "   (($3.message.flags & 64) === 64 || $self.shouldIgnore($3.message, true)) ? m :" +
-                        "   $3.message.edited_timestamp && $3.message.content !== m.content ?" +
-                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($3.message, m)]) :" +
-                        "       m" +
+                        "   $3.message.edited_timestamp && ($3.message.content !== m.content || $3.message.attachments.length != m.attachments.length) ? (() => {" +
+                        "       if (m.attachments && m.attachments.length > 0) {" +
+                        "           const newAttachmentIds = new Set($3.message.attachments.map(a => a.id));" +
+                        "           const updatedAttachments = m.attachments.map(a =>" +
+                        "               newAttachmentIds.has(a.id) ? a : { ...a, deleted: true }" +
+                        "           );" +
+                        "           $3.message.attachments = updatedAttachments;" +
+                        "           $4 = $4.update(m.id, m => m.set('attachments', updatedAttachments));" +
+                        "       }" +
+                        "       return m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($3.message, m)]);" +
+                        "   })() :" +
+                        "   m" +
                         ")" +
-                        ".update($4"
+                        ".update($5"
                 },
                 {
                     // fix up key (edit last message) attempting to edit a deleted message
@@ -409,7 +433,6 @@ export default definePlugin({
                     replace:
                         "Object.assign($&,{ deleted:$1.deleted, editHistory:$1.editHistory, firstEditTimestamp:$1.firstEditTimestamp })"
                 },
-
                 {
                     // Construct new edited message and add editHistory & deleted (ref above)
                     // Pass in custom data to attachment parser to mark attachments deleted as well
@@ -433,7 +456,7 @@ export default definePlugin({
                     // Preserve deleted attribute on attachments
                     match: /(\((\i)\){return null==\2\.attachments.+?)spoiler:/,
                     replace:
-                        "$1deleted: arguments[0]?.deleted," +
+                        "$1deleted: arguments[0]?.deleted || arguments[0]?.attachments.find(v => v.id === e.id)?.deleted," +
                         "spoiler:"
                 }
             ]
@@ -445,7 +468,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /\[\i\.obscured\]:.+?,(?<=item:(\i).+?)/,
-                    replace: '$&"messagelogger-deleted-attachment":$1.originalItem?.deleted,'
+                    replace: '$&"messagelogger-deleted-attachment":$1.originalItem?.deleted,"messagelogger-deleted-attachment-overlay":$1.originalItem?.deleted,'
                 }
             ]
         },

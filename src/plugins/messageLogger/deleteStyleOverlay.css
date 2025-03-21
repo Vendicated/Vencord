@@ -1,3 +1,24 @@
 .messagelogger-deleted {
+    transition: 150ms background-color ease-in-out;
+}
+
+.messagelogger-deleted:not(.messagelogger-highlight-bypass) {
     background-color: hsla(var(--red-430-hsl, 0 85% 61%) / 15%) !important;
+}
+
+.messagelogger-deleted-attachment-overlay::after {
+    transition: 150ms opacity ease-in-out;
+    position: absolute;
+    pointer-events: none;
+    content: "";
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #ff2919;
+    opacity: 0;
+}
+
+.messagelogger-deleted-attachment-overlay:not(.messagelogger-highlight-bypass)::after {
+    opacity: 0.2;
 }
