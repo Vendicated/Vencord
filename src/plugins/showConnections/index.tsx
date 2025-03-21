@@ -22,11 +22,14 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { CopyIcon, LinkIcon } from "@components/Icons";
+import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
+import { openUserProfile } from "@utils/discord";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Tooltip, UserProfileStore } from "@webpack/common";
+import { Clickable, Tooltip, UserProfileStore } from "@webpack/common";
+import { Connection } from "@webpack/types";
 import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
@@ -57,15 +60,16 @@ const settings = definePluginSettings({
             { label: "Cozy", value: Spacing.COZY }, // US Spelling :/
             { label: "Roomy", value: Spacing.ROOMY }
         ]
+    },
+    maxNumberOfConnections: {
+        type: OptionType.SLIDER,
+        description: "Max number of connections to show",
+        markers: makeRange(6, 48, 7),
+        default: 13,
+        stickToMarkers: false,
+        onlyInts: true,
     }
 });
-
-interface Connection {
-    type: string;
-    id: string;
-    name: string;
-    verified: boolean;
-}
 
 interface ConnectionPlatform {
     getPlatformUserUrl(connection: Connection): string;
@@ -88,17 +92,47 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     if (!profile)
         return null;
 
-    const connections: Connection[] = profile.connectedAccounts;
-    if (!connections?.length)
+    const { connectedAccounts } = profile;
+    if (!connectedAccounts?.length)
         return null;
 
+    const connections = connectedAccounts.map(connection => <CompactConnectionComponent connection={connection} theme={theme} key={connection.id} />);
+
+    if (connectedAccounts.length > settings.store.maxNumberOfConnections) {
+        connections.length = settings.store.maxNumberOfConnections;
+        connections.push(<ConnectionsMoreIcon
+            key="more-connections"
+            onClick={() => openUserProfile(id, {
+                section: "USER_INFO",
+                subsection: "CONNECTIONS"
+            })}
+        />);
+    }
     return (
         <Flex style={{
             gap: getSpacingPx(settings.store.iconSpacing),
             flexWrap: "wrap"
         }}>
-            {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} key={connection.id} />)}
+            {connections}
         </Flex>
+    );
+}
+
+function ConnectionsMoreIcon({ onClick }: { onClick: () => void; }) {
+    return (
+        <Tooltip text="View all Connections">
+            {props => (
+                <Clickable
+                    {...props}
+                    onClick={onClick}
+                >
+                    {/* discords icon refuses to work with a custom width/height for some reason */}
+                    <svg width={settings.store.iconSize} height={settings.store.iconSize} viewBox="0 0 24 24">
+                        <path fill="var(--interactive-normal)" fillRule="evenodd" d="M4 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm10-2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm8 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z" clipRule="evenodd"></path>
+                    </svg>
+                </Clickable>
+            )}
+        </Tooltip>
     );
 }
 
@@ -164,7 +198,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
 export default definePlugin({
     name: "ShowConnections",
     description: "Show connected accounts in user popouts",
-    authors: [Devs.TheKodeToad],
+    authors: [Devs.TheKodeToad, Devs.sadan],
     settings,
 
     patches: [
