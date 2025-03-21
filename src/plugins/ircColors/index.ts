@@ -85,8 +85,7 @@ export default definePlugin({
         const colorString = context?.author?.colorString;
         const color = calculateNameColorForUser(userId);
 
-        // color preview in role settings
-        // channel.id is undefined in the role menu
+        // Color preview in role settings
         if (context?.message?.channel_id === "1337" && userId === "313337")
             return colorString;
 
