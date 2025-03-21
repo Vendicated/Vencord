@@ -163,7 +163,7 @@ export default definePlugin({
                 urls: [url]
             }
         });
-        // The endpoint returns the color as a number, but discord expects a string
+        // The endpoint returns the color as a number, but Discord expects a string
         body.embeds[0].color = this.colorCodeFromNumber(body.embeds[0].color);
         return await body.embeds[0];
     },
