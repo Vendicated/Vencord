@@ -471,7 +471,7 @@ export default definePlugin({
             find: '"UserProfilePopoutBody"',
             replacement: {
                 match: /(?<=user:(\i).*?\i\.id\)\}\)\),(\i).*?)\(0,\i\.jsx\).{0,100}\i\.activity\}\)/,
-                replace: ",$self.showAllActivitiesComponent({ activity: U, user: $1 })"
+                replace: ",$self.showAllActivitiesComponent({ activity: $2, user: $1 })"
             },
             predicate: () => settings.store.userPopout
         },
