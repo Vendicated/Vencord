@@ -298,18 +298,11 @@ export default definePlugin({
 
     patches: [
         {
-            find: "activity_status_cleanup",
-            replacement: {
-                match: /activityStatusCleanupEnabled:!0/,
-                replace: "activityStatusCleanupEnabled:!1",
-            }
-        },
-        {
             // Patch activity icons
             find: '"activity-status-web"',
             replacement: {
-                match: /(?<=hasQuest:\i\}=(\i).*?)\(null==\i?\?void 0:\i.some\(\i\.\i\)\)/,
-                replace: "$self.patchActivityList($1),false"
+                match: /(?<=}=(\i).*?{}\))\]/,
+                replace: ",$self.patchActivityList($1)]"
             },
             predicate: () => settings.store.memberList,
         }
