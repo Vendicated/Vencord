@@ -18,8 +18,7 @@
 
 import "./styles.css";
 
-import { addChatBarButton, ChatBarButton, removeChatBarButton } from "@api/ChatButtons";
-import { addPreSendListener, removePreSendListener } from "@api/MessageEvents";
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
@@ -69,15 +68,16 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
     return (
         <ModalRoot {...rootProps}>
             <ModalHeader className={cl("modal-header")}>
-                <Forms.FormTitle tag="h2">
+                <Forms.FormTitle tag="h2" className={cl("modal-title")}>
                     Timestamp Picker
                 </Forms.FormTitle>
 
-                <ModalCloseButton onClick={close} />
+                <ModalCloseButton onClick={close} className={cl("modal-close-button")} />
             </ModalHeader>
 
             <ModalContent className={cl("modal-content")}>
                 <input
+                    className={cl("date-picker")}
                     type="datetime-local"
                     value={value}
                     onChange={e => setValue(e.currentTarget.value)}
@@ -87,23 +87,25 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
                 />
 
                 <Forms.FormTitle>Timestamp Format</Forms.FormTitle>
-                <Select
-                    options={
-                        Formats.map(m => ({
-                            label: m,
-                            value: m
-                        }))
-                    }
-                    isSelected={v => v === format}
-                    select={v => setFormat(v)}
-                    serialize={v => v}
-                    renderOptionLabel={o => (
-                        <div className={cl("format-label")}>
-                            {Parser.parse(formatTimestamp(time, o.value))}
-                        </div>
-                    )}
-                    renderOptionValue={() => rendered}
-                />
+                <div className={cl("format-select")}>
+                    <Select
+                        options={
+                            Formats.map(m => ({
+                                label: m,
+                                value: m
+                            }))
+                        }
+                        isSelected={v => v === format}
+                        select={v => setFormat(v)}
+                        serialize={v => v}
+                        renderOptionLabel={o => (
+                            <div className={cl("format-label")}>
+                                {Parser.parse(formatTimestamp(time, o.value))}
+                            </div>
+                        )}
+                        renderOptionValue={() => rendered}
+                    />
+                </div>
 
                 <Forms.FormTitle className={Margins.bottom8}>Preview</Forms.FormTitle>
                 <Forms.FormText className={cl("preview-text")}>
@@ -123,7 +125,7 @@ function PickerModal({ rootProps, close }: { rootProps: ModalProps, close(): voi
     );
 }
 
-const ChatBarIcon: ChatBarButton = ({ isMainChat }) => {
+const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
     if (!isMainChat) return null;
 
     return (
@@ -160,22 +162,14 @@ export default definePlugin({
     name: "SendTimestamps",
     description: "Send timestamps easily via chat box button & text shortcuts. Read the extended description!",
     authors: [Devs.Ven, Devs.Tyler, Devs.Grzesiek11],
-    dependencies: ["MessageEventsAPI", "ChatInputButtonAPI"],
-
     settings,
 
-    start() {
-        addChatBarButton("SendTimestamps", ChatBarIcon);
-        this.listener = addPreSendListener((_, msg) => {
-            if (settings.store.replaceMessageContents) {
-                msg.content = msg.content.replace(/`\d{1,2}:\d{2} ?(?:AM|PM)?`/gi, parseTime);
-            }
-        });
-    },
+    renderChatBarButton: ChatBarIcon,
 
-    stop() {
-        removeChatBarButton("SendTimestamps");
-        removePreSendListener(this.listener);
+    onBeforeMessageSend(_, msg) {
+        if (settings.store.replaceMessageContents) {
+            msg.content = msg.content.replace(/`\d{1,2}:\d{2} ?(?:AM|PM)?`/gi, parseTime);
+        }
     },
 
     settingsAboutComponent() {

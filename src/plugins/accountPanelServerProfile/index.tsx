@@ -23,7 +23,7 @@ const UserProfile = findComponentByCodeLazy("UserProfilePopoutWrapper: user cann
 const styles = findByPropsLazy("accountProfilePopoutWrapper");
 
 let openAlternatePopout = false;
-let accountPanelRef: React.MutableRefObject<Record<PropertyKey, any> | null> = { current: null };
+let accountPanelRef: React.RefObject<Record<PropertyKey, any> | null> = { current: null };
 
 const AccountPanelContextMenu = ErrorBoundary.wrap(() => {
     const { prioritizeServerProfile } = settings.use(["prioritizeServerProfile"]);
@@ -73,8 +73,8 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    match: /(?<=\.AVATAR_SIZE\);)/,
-                    replace: "$self.useAccountPanelRef();"
+                    match: /let{speaking:\i/,
+                    replace: "$self.useAccountPanelRef();$&"
                 },
                 {
                     match: /(\.AVATAR,children:.+?renderPopout:(\i)=>){(.+?)}(?=,position)(?<=currentUser:(\i).+?)/,
@@ -85,7 +85,7 @@ export default definePlugin({
                     replace: "$&onRequestClose:$self.onPopoutClose,"
                 },
                 {
-                    match: /(?<=\.avatarWrapper,)/,
+                    match: /(?<=#{intl::SET_STATUS}\),)/,
                     replace: "ref:$self.accountPanelRef,onContextMenu:$self.openAccountPanelContextMenu,"
                 }
             ]

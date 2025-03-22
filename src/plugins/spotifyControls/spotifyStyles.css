@@ -30,20 +30,15 @@
     background-color: var(--background-modifier-selected);
 }
 
-.vc-spotify-button svg {
+.vc-spotify-button-icon {
     height: 24px;
     width: 24px;
 }
 
-[class*="vc-spotify-shuffle"] > svg,
-[class*="vc-spotify-repeat"] > svg {
+.vc-spotify-shuffle .vc-spotify-button-icon,
+.vc-spotify-repeat .vc-spotify-button-icon {
     width: 22px;
     height: 22px;
-}
-
-.vc-spotify-button svg path {
-    width: 100%;
-    height: 100%;
 }
 
 /* .vc-spotify-button:hover {
@@ -87,12 +82,19 @@
     gap: 0.5em;
 }
 
-#vc-spotify-info-wrapper img {
+#vc-spotify-album-image {
     height: 90%;
     object-fit: contain;
+    border-radius: 3px;
+    transition: filter 0.2s;
 }
 
-#vc-spotify-album-expanded-wrapper img {
+#vc-spotify-album-image:hover {
+    filter: brightness(1.2);
+    cursor: pointer;
+}
+
+#vc-spotify-album-expanded-wrapper #vc-spotify-album-image {
     width: 100%;
     object-fit: contain;
 }
@@ -134,16 +136,6 @@
 #vc-spotify-album-title[role="link"]:hover,
 #vc-spotify-song-title[role="link"]:hover {
     text-decoration: underline;
-    cursor: pointer;
-}
-
-#vc-spotify-album-image {
-    border-radius: 3px;
-    transition: filter 0.2s;
-}
-
-#vc-spotify-album-image:hover {
-    filter: brightness(1.2);
     cursor: pointer;
 }
 
