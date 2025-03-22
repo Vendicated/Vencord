@@ -31,6 +31,7 @@ export const commands = {} as Record<string, Command>;
 // hack for plugins being evaluated before we can grab these from webpack
 const OptPlaceholder = Symbol("OptionalMessageOption") as any as Option;
 const ReqPlaceholder = Symbol("RequiredMessageOption") as any as Option;
+
 /**
  * Optional message option named "message" you can use in commands.
  * Used in "tableflip" or "shrug"
@@ -44,11 +45,16 @@ export let OptionalMessageOption: Option = OptPlaceholder;
  */
 export let RequiredMessageOption: Option = ReqPlaceholder;
 
+// Discord's command list has random gaps for some reason, which can cause issues while rendering the commands
+// Add this offset to every added command to keep them unique
+let commandIdOffset: number;
+
 export const _init = function (cmds: Command[]) {
     try {
         BUILT_IN = cmds;
         OptionalMessageOption = cmds.find(c => (c.untranslatedName || c.displayName) === "shrug")!.options![0];
         RequiredMessageOption = cmds.find(c => (c.untranslatedName || c.displayName) === "me")!.options![0];
+        commandIdOffset = Math.abs(BUILT_IN.map(x => Number(x.id)).sort((x, y) => x - y)[0]) - BUILT_IN.length;
     } catch (e) {
         new Logger("CommandsAPI").error("Failed to load CommandsApi", e, " - cmds is", cmds);
     }
@@ -142,7 +148,7 @@ export function registerCommand<C extends Command>(command: C, plugin: string) {
     command.isVencordCommand = true;
     command.untranslatedName ??= command.name;
     command.untranslatedDescription ??= command.description;
-    command.id ??= `-${BUILT_IN.length + 1}`;
+    command.id ??= `-${BUILT_IN.length + commandIdOffset + 1}`;
     command.applicationId ??= "-1"; // BUILT_IN;
     command.type ??= ApplicationCommandType.CHAT_INPUT;
     command.inputType ??= ApplicationCommandInputType.BUILT_IN_TEXT;
