@@ -12,10 +12,11 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { React, Tooltip, UserStore } from "@webpack/common";
+import { PresenceStore, React, Tooltip, useEffect, useMemo, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { User } from "discord-types/general";
 import { JSX } from "react";
 
+import { Caret } from "./components/Caret";
 import { SpotifyIcon } from "./components/SpotifyIcon";
 import { TwitchIcon } from "./components/TwitchIcon";
 import { Activity, ActivityListIcon, Application, ApplicationIcon, IconCSSProperties } from "./types";
@@ -64,6 +65,12 @@ const settings = definePluginSettings({
                 paddingBottom: 5
             }} />
         ),
+    },
+    userPopout: {
+        type: OptionType.BOOLEAN,
+        description: "Show all activities in the profile popout/sidebar",
+        default: true,
+        restartNeeded: true,
     },
     allActivitiesStyle: {
         type: OptionType.SELECT,
@@ -122,6 +129,17 @@ const ActivityTooltip = ({ activity, application, user }: Readonly<{ activity: A
         </ErrorBoundary>
     );
 };
+
+function getActivityApplication(activity: Activity | null) {
+    if (!activity) return undefined;
+    const { application_id } = activity;
+    if (!application_id) return undefined;
+    let application = ApplicationStore.getApplication(application_id);
+    if (!application && fetchedApplications.has(application_id)) {
+        application = fetchedApplications.get(application_id) ?? null;
+    }
+    return application ?? undefined;
+}
 
 function getApplicationIcons(activities: Activity[], preferSmall = false) {
     const applicationIcons: ApplicationIcon[] = [];
@@ -296,15 +314,166 @@ export default definePlugin({
         return null;
     },
 
+    showAllActivitiesComponent({ activity, user, ...props }: Readonly<{ activity: Activity; user: User; application: Application; type: string; }>) {
+        const currentUser = UserStore.getCurrentUser();
+        if (!currentUser) return null;
+
+        const [currentActivity, setCurrentActivity] = useState<Activity | null>(
+            activity?.type !== 4 ? activity! : null
+        );
+
+        const activities = useStateFromStores<Activity[]>(
+            [PresenceStore], () => PresenceStore.getActivities(user.id).filter((activity: Activity) => activity.type !== 4)
+        ) ?? [];
+
+        useEffect(() => {
+            if (!activities.length) {
+                setCurrentActivity(null);
+                return;
+            }
+
+            if (!currentActivity || !activities.includes(currentActivity))
+                setCurrentActivity(activities[0]);
+        }, [activities]);
+
+        // we use these for other activities, it would be better to somehow get the corresponding activity props
+        const generalProps = useMemo(() => Object.keys(props).reduce((acc, key) => {
+            // exclude activity specific props to prevent copying them to all activities (e.g. buttons)
+            if (key !== "renderActions" && key !== "application") acc[key] = props[key];
+            return acc;
+        }, {}), [props]);
+
+        if (!activities.length) return null;
+
+        if (settings.store.allActivitiesStyle === "carousel") {
+            return (
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                    {activity && currentActivity?.id === activity.id ? (
+                        <ActivityView
+                            activity={currentActivity}
+                            user={user}
+                            currentUser={currentUser}
+                            {...props}
+                        />
+                    ) : (
+                        <ActivityView
+                            activity={currentActivity}
+                            user={user}
+                            // fetch optional application
+                            application={getActivityApplication(currentActivity!)}
+                            currentUser={currentUser}
+                            {...generalProps}
+                        />
+                    )}
+                    {activities.length > 1 &&
+                        <div
+                            className={cl("controls")}
+                            style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            <Tooltip text="Left" tooltipClassName={cl("controls-tooltip")}>{({
+                                onMouseEnter,
+                                onMouseLeave
+                            }) => {
+                                return <span
+                                    onMouseEnter={onMouseEnter}
+                                    onMouseLeave={onMouseLeave}
+                                    onClick={() => {
+                                        const index = activities.indexOf(currentActivity!);
+                                        if (index - 1 >= 0)
+                                            setCurrentActivity(activities[index - 1]);
+                                    }}
+                                >
+                                    <Caret
+                                        disabled={activities.indexOf(currentActivity!) < 1}
+                                        direction="left" />
+                                </span>;
+                            }}</Tooltip>
+
+                            <div className="carousel">
+                                {activities.map((activity, index) => (
+                                    <div
+                                        key={"dot--" + index}
+                                        onClick={() => setCurrentActivity(activity)}
+                                        className={`dot ${currentActivity === activity ? "selected" : ""}`} />
+                                ))}
+                            </div>
+
+                            <Tooltip text="Right" tooltipClassName={cl("controls-tooltip")}>{({
+                                onMouseEnter,
+                                onMouseLeave
+                            }) => {
+                                return <span
+                                    onMouseEnter={onMouseEnter}
+                                    onMouseLeave={onMouseLeave}
+                                    onClick={() => {
+                                        const index = activities.indexOf(currentActivity!);
+                                        if (index + 1 < activities.length)
+                                            setCurrentActivity(activities[index + 1]);
+                                    }}
+                                >
+                                    <Caret
+                                        disabled={activities.indexOf(currentActivity!) >= activities.length - 1}
+                                        direction="right" />
+                                </span>;
+                            }}</Tooltip>
+                        </div>
+                    }
+                </div>
+            );
+        } else {
+            return (
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "5px",
+                    }}
+                >
+                    {activities.map((activity, index) =>
+                        index === 0 ? (
+                            <ActivityView
+                                key={index}
+                                activity={activity}
+                                user={user}
+                                currentUser={currentUser}
+                                {...props}
+                            />) : (
+                            <ActivityView
+                                key={index}
+                                activity={activity}
+                                user={user}
+                                application={getActivityApplication(activity)}
+                                currentUser={currentUser}
+                                {...generalProps}
+                            />
+                        ))}
+                </div>
+            );
+        }
+    },
+
     patches: [
         {
             // Patch activity icons
             find: '"activity-status-web"',
             replacement: {
-                match: /(?<=}=(\i).*?{}\))\]/,
+                match: /(?<=hideTooltip:.{0,4}}=(\i).*?{}\))\]/,
                 replace: ",$self.patchActivityList($1)]"
             },
             predicate: () => settings.store.memberList,
-        }
+        },
+        {
+            // Show all activities in the user popout/sidebar
+            find: '"UserProfilePopoutBody"',
+            replacement: {
+                match: /(?<=user:(\i).*?\i\.id\)\}\)\),(\i).*?)\(0,\i\.jsx\).{0,100}\i\.activity\}\)/,
+                replace: ",$self.showAllActivitiesComponent({ activity: U, user: $1 })"
+            },
+            predicate: () => settings.store.userPopout
+        },
     ],
 });
