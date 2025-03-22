@@ -14,7 +14,7 @@ app.on("browser-window-created", (_, win) => {
                 const settings = RendererSettings.store.plugins?.FixSpotifyEmbeds;
                 if (!settings?.enabled) return;
 
-                frame.executeJavaScript(`
+                frame?.executeJavaScript(`
                     const original = Audio.prototype.play;
                     Audio.prototype.play = function() {
                         this.volume = ${(settings.volume / 100) || 0.1};

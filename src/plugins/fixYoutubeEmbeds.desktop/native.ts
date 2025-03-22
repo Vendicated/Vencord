@@ -14,7 +14,7 @@ app.on("browser-window-created", (_, win) => {
                 const settings = RendererSettings.store.plugins?.FixYoutubeEmbeds;
                 if (!settings?.enabled) return;
 
-                frame.executeJavaScript(`
+                frame?.executeJavaScript(`
                 new MutationObserver(() => {
                     if(
                         document.querySelector('div.ytp-error-content-wrap-subreason a[href*="www.youtube.com/watch?v="]')
