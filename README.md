@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>164 additional plugins</summary>
+<summary>163 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -20,7 +20,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Anammox by Kyuuhachi
 - AtSomeone by Joona
 - BannersEverywhere by ImLvna & AutumnVN
-- BetterActivities by D3SOX, Arjix, AutumnVN
 - BetterAudioPlayer by Creations
 - BetterBanReasons by Inbestigator
 - BetterBlockedUsers by TheArmagan
