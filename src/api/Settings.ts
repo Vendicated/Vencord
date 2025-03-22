@@ -36,6 +36,9 @@ export interface Settings {
     enabledThemes: string[];
     enableReactDevtools: boolean;
     themeLinks: string[];
+    onlineThemeOverrides: {
+        [rawLink: string]: string;
+    };
     frameless: boolean;
     transparent: boolean;
     winCtrlQ: boolean;
@@ -84,6 +87,7 @@ const DefaultSettings: Settings = {
     themeLinks: [],
     eagerPatches: IS_REPORTER,
     enabledThemes: [],
+    onlineThemeOverrides: {},
     enableReactDevtools: false,
     frameless: false,
     transparent: false,

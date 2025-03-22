@@ -28,7 +28,7 @@ import { Margins } from "@utils/margins";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
 import { findLazy } from "@webpack";
-import { Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
+import { Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
 import Plugins from "~plugins";
@@ -36,6 +36,7 @@ import Plugins from "~plugins";
 import { AddonCard } from "./AddonCard";
 import { QuickAction, QuickActionCard } from "./quickActions";
 import { SettingsTab, wrapTab } from "./shared";
+import { openThemeOverrideModal } from "./ThemeOverrideModal";
 
 type FileInput = ComponentType<{
     ref: Ref<HTMLInputElement>;
@@ -48,15 +49,19 @@ const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue &
 
 const cl = classNameFactory("vc-settings-theme-");
 
-function Validator({ link }: { link: string; }) {
-    const [res, err, pending] = useAwaiter(() => fetch(link).then(res => {
+async function fetchOnlineThemes(link: string) {
+    return fetch(link).then(res => {
         if (res.status > 300) throw `${res.status} ${res.statusText}`;
         const contentType = res.headers.get("Content-Type");
         if (!contentType?.startsWith("text/css") && !contentType?.startsWith("text/plain"))
             throw "Not a CSS file. Remember to use the raw link!";
 
-        return "Okay!";
-    }));
+        return res.text();
+    });
+}
+
+function Validator({ link, rawLink }: { link: string; rawLink: string; }) {
+    const [res, err, pending] = useAwaiter(() => fetchOnlineThemes(link));
 
     const text = pending
         ? "Checking..."
@@ -64,9 +69,20 @@ function Validator({ link }: { link: string; }) {
             ? `Error: ${err instanceof Error ? err.message : String(err)}`
             : "Valid!";
 
-    return <Forms.FormText style={{
-        color: pending ? "var(--text-muted)" : err ? "var(--text-danger)" : "var(--text-positive)"
-    }}>{text}</Forms.FormText>;
+    return (
+        <>
+            <Forms.FormText style={{
+                color: pending ? "var(--text-muted)" : err ? "var(--text-danger)" : "var(--text-positive)"
+            }}>{text}</Forms.FormText>
+            {!err && !pending && res && (
+                <>
+                    <Button className={Margins.top8} onClick={() => openThemeOverrideModal(res, rawLink)}>
+                        CSS Override
+                    </Button>
+                </>
+            )}
+        </>
+    );
 }
 
 function Validators({ themeLinks }: { themeLinks: string[]; }) {
@@ -96,7 +112,7 @@ function Validators({ themeLinks }: { themeLinks: string[]; }) {
                         }}>
                             {label}
                         </Forms.FormTitle>
-                        <Validator link={link} />
+                        <Validator link={link} rawLink={rawLink} />
                     </Card>;
                 })}
             </div>
@@ -296,6 +312,9 @@ function ThemesTab() {
                 .map(s => s.trim())
                 .filter(Boolean)
         )];
+        settings.onlineThemeOverrides = Object.fromEntries(
+            Object.entries(settings.onlineThemeOverrides).filter(([key]) => settings.themeLinks.includes(key))
+        );
     }
 
     function renderOnlineThemes() {
