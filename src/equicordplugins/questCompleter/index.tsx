@@ -23,13 +23,15 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import { classes } from "@utils/misc";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, findExportedComponentLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, RestAPI, Tooltip, UserStore } from "@webpack/common";
+import { Button, FluxDispatcher, Forms, NavigationRouter, RestAPI, Tooltip, UserStore } from "@webpack/common";
 const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
 const isApp = navigator.userAgent.includes("Electron/");
 
 import "./style.css";
+
+import { definePluginSettings } from "@api/Settings";
 
 function ToolBarQuestsIcon() {
     return (
@@ -73,7 +75,10 @@ async function openCompleteQuestUI() {
     if (!quest) {
         showNotification({
             title: "Quest Completer",
-            body: "No Quests To Complete",
+            body: "No Quests To Complete. Click to navigate to the quests tab",
+            onClick() {
+                NavigationRouter.transitionTo("/discovery/quests");
+            },
         });
     } else {
         const pid = Math.floor(Math.random() * 30000) + 1000;
@@ -227,6 +232,15 @@ async function openCompleteQuestUI() {
     }
 }
 
+const settings = definePluginSettings({
+    clickableQuestDiscovery: {
+        type: OptionType.BOOLEAN,
+        description: "Makes the quest button in discovery clickable",
+        restartNeeded: true,
+        default: false
+    }
+});
+
 export default definePlugin({
     name: "QuestCompleter",
     description: "A plugin to complete quests without having the game installed.",
@@ -236,6 +250,7 @@ export default definePlugin({
             Game Quests do not work on Equibop/Web Platforms. Only Video Quests do.
         </Forms.FormText>
     </>,
+    settings,
     patches: [
         {
             find: "\"invite-button\"",
@@ -247,9 +262,17 @@ export default definePlugin({
         {
             find: "toolbar:function",
             replacement: {
-                match: /(function \i\(\i\){)(.{1,200}toolbar.{1,300}mobileToolbar)/,
+                match: /(function \i\(\i\){)(.{1,500}toolbar.{1,500}mobileToolbar)/,
                 replace: "$1$self.toolbarAction(arguments[0]);$2"
             }
+        },
+        {
+            find: "M7.5 21.7a8.95 8.95 0 0 1 9 0 1 1 0 0 0 1-1.73c",
+            replacement: {
+                match: /(?<=className:\i\}\))/,
+                replace: ",onClick:$self.openCompleteQuestUI()"
+            },
+            predicate: () => settings.store.clickableQuestDiscovery
         }
     ],
     renderQuestButton() {
@@ -268,6 +291,7 @@ export default definePlugin({
             </Tooltip>
         );
     },
+    openCompleteQuestUI,
     toolbarAction(e) {
         if (Array.isArray(e.toolbar))
             return e.toolbar.push(
