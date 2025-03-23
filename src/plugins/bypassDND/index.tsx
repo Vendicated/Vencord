@@ -4,12 +4,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./styles.css";
+
 import { definePluginSettings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Forms, GuildStore, Menu, UserStore, useState } from "@webpack/common";
+import { Button, ChannelStore, Forms, GuildStore, Menu, Parser, UserStore, useState } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
-import { ReactNode, } from "react";
+import { JSX, ReactNode, } from "react";
+
+const cl = classNameFactory("vc-bdnd-");
 
 type BypassedItem = `g:${string}` | `c:${string}`;
 
@@ -26,38 +31,39 @@ const settings = definePluginSettings({
                 <>
                     <Forms.FormSection>
                         <Forms.FormTitle tag="h3">Allowed channels</Forms.FormTitle>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                        <div className={cl("list-container")}>
                             {(isChannelExtended ? channels : channels.slice(0, 5)).map(c => {
                                 const channel = ChannelStore.getChannel(c.slice(2));
                                 if (!channel) {
                                     setList(getList().filter(x => x !== c));
                                     return null;
                                 }
-                                const guild = channel.guild_id ? GuildStore.getGuild(channel.guild_id) : { id: "@me" };
-                                const recipients = (channel.rawRecipients ?? []).slice(0, 3).map(r => r.username).join(", @");
+                                const guildId = channel.guild_id ? channel.guild_id : "@me";
                                 return (
-                                    <BypassListItem key={c} name={`${channel.name.length ? "#" + channel.name : "@" + recipients}${"name" in guild ? ` › ${guild.name}` : ""}`} id={c} />
+                                    <BypassListItem key={c} id={c}>
+                                        {Parser.parse(`https://discord.com/channels/${guildId}/${channel.id}`)}
+                                    </BypassListItem>
                                 );
                             })}
                         </div>
-                        {channels.length > 5 && <Button style={{ marginTop: "4px" }} look={Button.Looks.LINK} color={Button.Colors.TRANSPARENT} size={Button.Sizes.TINY} onClick={_ => setIsChannelExtended(!isChannelExtended)}>Show {isChannelExtended ? "less" : "more"}</Button>}
-                        {channels.length === 0 && <Forms.FormText style={{ color: "var(--text-muted)" }}>No channels are allowed to bypass yet.</Forms.FormText>}
+                        <ListOverflowUnderFlow length={channels.length} setIsExtended={setIsChannelExtended} isExtended={isChannelExtended} type="channel" />
                     </Forms.FormSection>
                     <Forms.FormDivider />
                     <Forms.FormSection>
                         <Forms.FormTitle tag="h3">Allowed guilds</Forms.FormTitle>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                        <div className={cl("list-container")}>
                             {(isGuildExtended ? guilds : guilds.slice(0, 5)).map(g => {
                                 const guild = GuildStore.getGuild(g.slice(2));
                                 if (!guild) {
                                     setList(getList().filter(x => x !== g));
                                     return null;
                                 }
-                                return <BypassListItem key={g} name={guild.name} id={g} />;
+                                const mention = Parser.parse(`https://discord.com/channels/${guild.id}/0`);
+                                (mention[0] as JSX.Element).props.children = [(mention[0] as JSX.Element).props.children[0]];
+                                return <BypassListItem key={g} id={g} >{mention}</BypassListItem>;
                             })}
                         </div>
-                        {guilds.length > 5 && <Button style={{ marginTop: "4px" }} look={Button.Looks.LINK} color={Button.Colors.TRANSPARENT} size={Button.Sizes.TINY} onClick={_ => setIsGuildExtended(!isGuildExtended)}>Show {isGuildExtended ? "less" : "more"}</Button>}
-                        {guilds.length === 0 && <Forms.FormText style={{ color: "var(--text-muted)" }}>No guilds are allowed to bypass yet.</Forms.FormText>}
+                        <ListOverflowUnderFlow length={guilds.length} setIsExtended={setIsGuildExtended} isExtended={isGuildExtended} type="guild" />
                     </Forms.FormSection>
                 </>
             );
@@ -132,17 +138,25 @@ function patchContext(children: ReactNode[], props: { channel: { id: string; }; 
 function Icon({ enabled }: { enabled: boolean; }) {
     return (
         <svg width="18" height="18">
-            <circle cx="9" cy="9" r="8" fill={enabled ? "currentColor" : "var(--status-danger)"} />
+            <circle cx="9" cy="9" r="8" fill={enabled ? "currentColor" : "status-danger"} />
             <circle cx="9" cy="9" r="3.75" fill={enabled ? "black" : "white"} />
         </svg>
     );
 }
 
-function BypassListItem({ name, id }: { name: string; id: string; }) {
-    const [isHovering, setIsHovering] = useState(false);
+function BypassListItem({ children, id }: { children: ReactNode; id: string; }) {
     return (
-        <Button onMouseOver={_ => setIsHovering(true)} onMouseOut={_ => setIsHovering(false)} color={isHovering ? Button.Colors.RED : Button.Colors.TRANSPARENT} size={Button.Sizes.TINY} onClick={_ => setList(getList().filter(x => x !== id))}>
-            {name}
-        </Button>
+        {
+            ...children![0], props: { ...children![0].props, className: `${children![0].props.className} ${cl("list-item")}`, onClick: () => setList(getList().filter(x => x !== id)) }
+        }
+    );
+}
+
+function ListOverflowUnderFlow({ length, setIsExtended, isExtended, type }: { length: number; setIsExtended: (val: boolean) => void; isExtended: boolean; type: string; }) {
+    return (
+        <>
+            {length > 5 && <Button style={{ marginTop: "4px" }} look={Button.Looks.LINK} color={Button.Colors.TRANSPARENT} size={Button.Sizes.TINY} onClick={_ => setIsExtended(!isExtended)}>Show {isExtended ? "less" : "more"}</Button>}
+            {length === 0 && <Forms.FormText style={{ color: "var(--text-muted)" }}>No {type}s are allowed to bypass yet.</Forms.FormText>}
+        </>
     );
 }
