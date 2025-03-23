@@ -32,10 +32,7 @@ type Spinner = ComponentType<Omit<HTMLAttributes<HTMLDivElement>, "children"> & 
 };
 
 // https://github.com/Kyuuhachi/VencordPlugins/blob/main/MessageLinkTooltip/index.tsx#L11-L33
-export const { Spinner } = proxyLazy(() => Forms as any as {
-    Spinner: Spinner,
-    SpinnerTypes: typeof SpinnerTypes;
-});
+export const Spinner = findComponentByCodeLazy('"pulsingEllipsis"') as Spinner;
 
 export const QrCodeIcon = findComponentByCodeLazy("0v3ZM20");
 
