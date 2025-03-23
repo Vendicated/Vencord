@@ -11,7 +11,7 @@ import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, ChannelStore, Forms, GuildStore, Menu, Parser, UserStore, useState } from "@webpack/common";
-import { Channel, User } from "discord-types/general";
+import { Channel, Guild, User } from "discord-types/general";
 import { JSX, ReactNode, } from "react";
 
 const cl = classNameFactory("vc-bdnd-");
@@ -99,7 +99,7 @@ export default definePlugin({
     settings,
     shouldNotify(channel: Channel) {
         const list = getList();
-        return (list.includes(`c:${channel.id}`) || list.includes(`g:${channel.guild_id}`) || list.includes(`c:${channel.parent_id}`));
+        return (list.includes(`c:${channel.id}`) || list.includes(`g:${channel.guild_id}`));
     },
     contextMenus: {
         "guild-context": patchContext,
@@ -110,9 +110,9 @@ export default definePlugin({
     }
 });
 
-function patchContext(children: ReactNode[], props: { channel: { id: string; }; guildId?: string; user?: User; } | { guild: { id: string; }; }) {
+function patchContext(children: ReactNode[], props: { channel: Channel; guildId?: string; user?: User; } | { guild: Guild; }) {
     // Escape user context when in a guild channel
-    if ("guildId" in props && "user" in props || "user" in props && props.user?.id === UserStore.getCurrentUser().id) return;
+    if ("guildId" in props && "user" in props || "user" in props && props.user?.id === UserStore.getCurrentUser().id || "channel" in props && props.channel.type === 4) return;
     const id = "channel" in props ? props.channel.id : "guild" in props ? props.guild.id : undefined;
     if (!id) return;
     let list = getList();
@@ -138,7 +138,7 @@ function patchContext(children: ReactNode[], props: { channel: { id: string; }; 
 function Icon({ enabled }: { enabled: boolean; }) {
     return (
         <svg width="18" height="18">
-            <circle cx="9" cy="9" r="8" fill={enabled ? "currentColor" : "status-danger"} />
+            <circle cx="9" cy="9" r="8" fill={enabled ? "currentColor" : "var(--status-danger)"} />
             <circle cx="9" cy="9" r="3.75" fill={enabled ? "black" : "white"} />
         </svg>
     );
