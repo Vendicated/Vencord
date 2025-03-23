@@ -7,9 +7,9 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, ChannelStore, Forms, GuildStore, Menu, NavigationRouter } from "@webpack/common";
+import { Button, ChannelStore, Forms, GuildStore, Menu, UserStore, useState } from "@webpack/common";
 import { Channel, User } from "discord-types/general";
-import { ReactNode } from "react";
+import { ReactNode, } from "react";
 
 type BypassedItem = `g:${string}` | `c:${string}`;
 
@@ -17,32 +17,39 @@ const settings = definePluginSettings({
     stats: {
         type: OptionType.COMPONENT,
         component: () => {
+            const [isGuildExtended, setIsGuildExtended] = useState(false);
+            const [isChannelExtended, setIsChannelExtended] = useState(false);
             const list = getList();
             const channels = list.filter(x => x.startsWith("c:"));
             const guilds = list.filter(x => x.startsWith("g:"));
             return (
                 <>
                     <Forms.FormSection>
-                        <Forms.FormTitle tag="h5">Allowed channels</Forms.FormTitle>
-                        {channels.map(c => {
-                            const channel = ChannelStore.getChannel(c.slice(2));
-                            if (!channel.guild_id) {
-                                const recipient = channel.rawRecipients[0] as unknown as { display_name: string; };
-                                return <Button look={Button.Looks.LINK} color={Button.Colors.TRANSPARENT} size={Button.Sizes.SMALL} onClick={_ => NavigationRouter.transitionTo(`/channels/@me/${channel.id}`)} key={c}>#{!channel.name.length ? recipient.display_name : channel.name}</Button>;
-                            }
-                            const guild = GuildStore.getGuild(channel.guild_id);
-                            return <Button look={Button.Looks.LINK} color={Button.Colors.TRANSPARENT} size={Button.Sizes.SMALL} onClick={_ => NavigationRouter.transitionTo(`/channels/${channel.guild_id}/${channel.id}`)} key={c}>#{channel.name} - {guild.name}</Button>;
-                        })}
-                        {channels.length === 0 && <Forms.FormText>No channels allowed to bypass yet.</Forms.FormText>}
+                        <Forms.FormTitle tag="h3">Allowed channels</Forms.FormTitle>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                            {(isChannelExtended ? channels : channels.slice(0, 5)).map(c => {
+                                const channel = ChannelStore.getChannel(c.slice(2));
+                                const guild = channel.guild_id ? GuildStore.getGuild(channel.guild_id) : { id: "@me" };
+                                const recipient = channel.rawRecipients ? channel.rawRecipients[0] as typeof channel.rawRecipients[0] & { global_name: string; } : { global_name: "Unknown" };
+                                return (
+                                    <BypassListItem key={c} name={`${channel.name.length ? channel.name : recipient.global_name}${"name" in guild ? ` › ${guild.name}` : ""}`} id={c} />
+                                );
+                            })}
+                        </div>
+                        {channels.length > 5 && <Button style={{ marginTop: "4px" }} look={Button.Looks.LINK} color={Button.Colors.TRANSPARENT} size={Button.Sizes.TINY} onClick={_ => setIsChannelExtended(!isChannelExtended)}>Show {isChannelExtended ? "less" : "more"}</Button>}
+                        {channels.length === 0 && <Forms.FormText style={{ color: "var(--text-muted)" }}>No channels are allowed to bypass yet.</Forms.FormText>}
                     </Forms.FormSection>
                     <Forms.FormDivider />
                     <Forms.FormSection>
-                        <Forms.FormTitle tag="h5">Allowed guilds</Forms.FormTitle>
-                        {guilds.map(g => {
-                            const guild = GuildStore.getGuild(g.slice(2));
-                            return <Button look={Button.Looks.LINK} color={Button.Colors.TRANSPARENT} size={Button.Sizes.SMALL} onClick={_ => NavigationRouter.transitionToGuild(guild.id)} key={g}>{guild.name}</Button>;
-                        })}
-                        {guilds.length === 0 && <Forms.FormText>No guilds allowed to bypass yet.</Forms.FormText>}
+                        <Forms.FormTitle tag="h3">Allowed guilds</Forms.FormTitle>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                            {(isGuildExtended ? guilds : guilds.slice(0, 5)).map(g => {
+                                const guild = GuildStore.getGuild(g.slice(2));
+                                return <BypassListItem key={g} name={guild.name} id={g} />;
+                            })}
+                        </div>
+                        {guilds.length > 5 && <Button style={{ marginTop: "4px" }} look={Button.Looks.LINK} color={Button.Colors.TRANSPARENT} size={Button.Sizes.TINY} onClick={_ => setIsGuildExtended(!isGuildExtended)}>Show {isGuildExtended ? "less" : "more"}</Button>}
+                        {guilds.length === 0 && <Forms.FormText style={{ color: "var(--text-muted)" }}>No guilds are allowed to bypass yet.</Forms.FormText>}
                     </Forms.FormSection>
                 </>
             );
@@ -91,7 +98,7 @@ export default definePlugin({
 
 function patchContext(children: ReactNode[], props: { channel: { id: string; }; guildId?: string; user?: User; } | { guild: { id: string; }; }) {
     // Escape user context when in a guild channel
-    if ("guildId" in props && "user" in props) return;
+    if ("guildId" in props && "user" in props || "user" in props && props.user?.id === UserStore.getCurrentUser().id) return;
     const id = "channel" in props ? props.channel.id : "guild" in props ? props.guild.id : undefined;
     if (!id) return;
     let list = getList();
@@ -120,5 +127,14 @@ function Icon({ enabled }: { enabled: boolean; }) {
             <circle cx="9" cy="9" r="8" fill={enabled ? "currentColor" : "var(--status-danger)"} />
             <circle cx="9" cy="9" r="3.75" fill={enabled ? "black" : "white"} />
         </svg>
+    );
+}
+
+function BypassListItem({ name, id }: { name: string; id: string; }) {
+    const [isHovering, setIsHovering] = useState(false);
+    return (
+        <Button onMouseOver={_ => setIsHovering(true)} onMouseOut={_ => setIsHovering(false)} color={isHovering ? Button.Colors.RED : Button.Colors.TRANSPARENT} size={Button.Sizes.TINY} onClick={_ => setList(getList().filter(x => x !== id))}>
+            {name}
+        </Button>
     );
 }
