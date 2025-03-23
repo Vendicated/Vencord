@@ -12,7 +12,7 @@ import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Button, Forms, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "webpack/common";
+import { Button, Forms, showToast, TextInput, Toasts, Tooltip, useEffect, useState } from "@webpack/common";
 
 const enum ActivitiesTypes {
     Game,
@@ -260,14 +260,7 @@ export default definePlugin({
                 replace: (m, props, nowPlaying) => `${m}$self.renderToggleGameActivityButton(${props},${nowPlaying}),`
             }
         },
-        // Discord has 2 different components for activities. Currently, the last is the one being used
-        {
-            find: ".activityTitleText,variant",
-            replacement: {
-                match: /\.activityTitleText.+?children:(\i)\.name.*?}\),/,
-                replace: (m, props) => `${m}$self.renderToggleActivityButton(${props}),`
-            },
-        },
+        // Activities from the apps launcher in the bottom right of the chat bar
         {
             find: ".promotedLabelWrapperNonBanner,children",
             replacement: {
