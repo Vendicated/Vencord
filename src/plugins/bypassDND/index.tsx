@@ -29,10 +29,14 @@ const settings = definePluginSettings({
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                             {(isChannelExtended ? channels : channels.slice(0, 5)).map(c => {
                                 const channel = ChannelStore.getChannel(c.slice(2));
+                                if (!channel) {
+                                    setList(getList().filter(x => x !== c));
+                                    return null;
+                                }
                                 const guild = channel.guild_id ? GuildStore.getGuild(channel.guild_id) : { id: "@me" };
-                                const recipient = channel.rawRecipients ? channel.rawRecipients[0] as typeof channel.rawRecipients[0] & { global_name: string; } : { global_name: "Unknown" };
+                                const recipients = (channel.rawRecipients ?? []).slice(0, 3).map(r => r.username).join(", @");
                                 return (
-                                    <BypassListItem key={c} name={`${channel.name.length ? channel.name : recipient.global_name}${"name" in guild ? ` › ${guild.name}` : ""}`} id={c} />
+                                    <BypassListItem key={c} name={`${channel.name.length ? "#" + channel.name : "@" + recipients}${"name" in guild ? ` › ${guild.name}` : ""}`} id={c} />
                                 );
                             })}
                         </div>
@@ -45,6 +49,10 @@ const settings = definePluginSettings({
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                             {(isGuildExtended ? guilds : guilds.slice(0, 5)).map(g => {
                                 const guild = GuildStore.getGuild(g.slice(2));
+                                if (!guild) {
+                                    setList(getList().filter(x => x !== g));
+                                    return null;
+                                }
                                 return <BypassListItem key={g} name={guild.name} id={g} />;
                             })}
                         </div>
