@@ -1,7 +1,7 @@
 import definePlugin from "@utils/types";
 import { Devs } from "@utils/constants";
 import { findByProps } from "@webpack";
-import { Button, Forms, Text, TextInput } from "@webpack/common";
+import { Button, Forms, Text, TextInput, RelationshipStore, UserStore } from "@webpack/common";
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 import { useState, useEffect } from "@webpack/common";
@@ -13,7 +13,6 @@ interface FilterRule {
     enabled: boolean;
 }
 
-// Define settings outside the plugin
 const settings = definePluginSettings({
     rules: {
         type: OptionType.COMPONENT,
@@ -138,10 +137,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "MessageFilter",
     description: "Filter messages based on regex patterns or words in any order",
-    authors: [{
-        name: "sapphicwaters",
-        id: 110177014949888000n
-    }],
+    authors: [Devs.sapphicwaters],
     settings,
     dependencies: ["MessageDecorationsAPI"],
 
@@ -166,18 +162,11 @@ export default definePlugin({
         }
     ],
 
-    start() {
-        // Plugin initialization
-    },
-
-    stop() {
-        // Cleanup
-    },
-
     shouldIgnoreMessage(message) {
         try {
-            // Skip if message is from a friend
-            if (message.author?.id && findByProps("isFriend")?.isFriend(message.author.id)) return false;
+            if (message.author?.id) {
+                if (RelationshipStore.isFriend(message.author.id) || message.author.id === UserStore.getCurrentUser()?.id) return false;
+            }
 
             const rules = Array.isArray(Settings.plugins.messageFilter?.rules) ?
                 Settings.plugins.messageFilter.rules.filter(rule => rule.enabled) : [];
@@ -218,8 +207,10 @@ export default definePlugin({
             const message = props.message;
             if (!message) return false;
 
-            // Skip if message is from a friend
-            if (message.author?.id && findByProps("isFriend")?.isFriend(message.author.id)) return false;
+            // Skip if message is from a friend or the current user
+            if (message.author?.id) {
+                if (RelationshipStore.isFriend(message.author.id) || message.author.id === UserStore.getCurrentUser()?.id) return false;
+            }
 
             const rules = Array.isArray(Settings.plugins.messageFilter?.rules) ?
                 Settings.plugins.messageFilter.rules.filter(rule => rule.enabled) : [];
@@ -229,7 +220,7 @@ export default definePlugin({
                     if (rule.type === "hide") {
                         const regex = new RegExp(rule.pattern, "i");
                         if (regex.test(message.content)) {
-                            return true; // Hide the message
+                            return true;
                         }
                     } else if (rule.type === "anyOrder") {
                         const words = rule.pattern.split(/\s+/).filter(w => w.length > 0);
@@ -241,7 +232,7 @@ export default definePlugin({
                         );
 
                         if (allWordsPresent) {
-                            return true; // Hide the message
+                            return true;
                         }
                     }
                 } catch (e) {
