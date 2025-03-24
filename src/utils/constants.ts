@@ -621,7 +621,7 @@ export const EquicordDevs = Object.freeze({
     },
     Cortex: {
         name: "Cortex",
-        id: 913205935319691335n
+        id: 400111022901559298n
     },
     KrystalSkull: {
         name: "krystalskullofficial",
