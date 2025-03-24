@@ -77,6 +77,22 @@ const settings = definePluginSettings({
                             Add rules to filter messages. Friends' messages are always shown.
                         </Forms.FormText>
 
+                        <Forms.FormText style={{ marginTop: "5px", color: "var(--text-muted)" }}>
+                            <strong>Examples:</strong>
+                            <div style={{ marginTop: "10px" }}>
+                                <strong>Regex Patterns:</strong>
+                                <ul style={{ marginTop: "5px", marginLeft: "20px" }}>
+                                    <li><code>word1|word2</code> - Message contains either word</li>
+                                    <li><code>word1.*word2</code> - Matches both words in sequence</li>
+                                    <li><code>\bword\b</code> - Message contains word only</li>
+                                </ul>
+                                <strong style={{ display: "block", marginTop: "10px" }}>Words in Any Order:</strong>
+                                <ul style={{ marginTop: "5px", marginLeft: "20px" }}>
+                                    <li><code>word1 word2</code> - Hides message if both words appear in any order</li>
+                                </ul>
+                            </div>
+                        </Forms.FormText>
+
                         {Array.isArray(rules) && rules.map((rule, index) => (
                             <div key={index} className="vc-message-filter-rule" style={{ marginBottom: "10px" }}>
                                 <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -102,23 +118,6 @@ const settings = definePluginSettings({
                                         Delete
                                     </Button>
                                 </div>
-                                <Forms.FormText style={{ marginTop: "5px", color: "var(--text-muted)" }}>
-                                    Examples:
-                                    <ul style={{ marginTop: "5px", marginLeft: "20px" }}>
-                                        {rule.type === "hide" ? (
-                                            <>
-                                                <li><code>word1|word2</code> - Matches either word</li>
-                                                <li><code>word1.*word2</code> - Matches both words in sequence</li>
-                                                <li><code>\bword\b</code> - Matches whole word only</li>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <li><code>word1 word2</code> - Hides message if both words appear in any order</li>
-                                                <li><code>word1 word2 word3</code> - Hides message if all three words appear in any order</li>
-                                            </>
-                                        )}
-                                    </ul>
-                                </Forms.FormText>
                             </div>
                         ))}
 
