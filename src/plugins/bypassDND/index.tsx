@@ -19,7 +19,7 @@ const cl = classNameFactory("vc-bdnd-");
 type BypassedItem = `g:${string}` | `c:${string}`;
 
 const settings = definePluginSettings({
-    stats: {
+    bypasseds: {
         type: OptionType.COMPONENT,
         component: () => {
             const [isGuildExtended, setIsGuildExtended] = useState(false);
@@ -67,22 +67,17 @@ const settings = definePluginSettings({
                     </Forms.FormSection>
                 </>
             );
-        }
+        },
+        default: [] as BypassedItem[]
     },
-    bypasseds: {
-        type: OptionType.STRING,
-        description: "List of allowed channels and guilds",
-        default: "[]",
-        hidden: true
-    }
 });
 
-function getList(): BypassedItem[] {
-    return JSON.parse(settings.store.bypasseds);
+function getList() {
+    return settings.store.bypasseds;
 }
 
 function setList(value: BypassedItem[]) {
-    settings.store.bypasseds = JSON.stringify(value);
+    settings.store.bypasseds = value;
 }
 
 export default definePlugin({
