@@ -178,7 +178,7 @@ export default definePlugin({
     shouldIgnoreMessage(message) {
         try {
             // Skip if message is from a friend
-            if (message.author.isFriend) return false;
+            if (message.author?.id && findByProps("isFriend")?.isFriend(message.author.id)) return false;
 
             const rules = Array.isArray(Settings.plugins.messageFilter?.rules) ?
                 Settings.plugins.messageFilter.rules.filter(rule => rule.enabled) : [];
@@ -220,7 +220,7 @@ export default definePlugin({
             if (!message) return false;
 
             // Skip if message is from a friend
-            if (message.author.isFriend) return false;
+            if (message.author?.id && findByProps("isFriend")?.isFriend(message.author.id)) return false;
 
             const rules = Array.isArray(Settings.plugins.messageFilter?.rules) ?
                 Settings.plugins.messageFilter.rules.filter(rule => rule.enabled) : [];
