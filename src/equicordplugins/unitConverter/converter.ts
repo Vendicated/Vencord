@@ -31,12 +31,6 @@ const regexes: regexes = {
                 return `${c}°C`;
             },
         },
-        // feetMark: {
-        //     regex: /(\d+(?:\.\d+))(')(?!(\d+(?:\.\d+)?(''|")|'))/g,
-        //     convert(...groups) {
-        //     },
-        // },
-        // leaving this one in because it is commonly used for something like 5'9'' for a persons height
         feetInchesMark: {
             regex: /(\d+)(') ?(\d+(?:\.\d+)?)("|'')?/g,
             convert(...groups) {
@@ -45,11 +39,6 @@ const regexes: regexes = {
                 return `${ftin.toFixed(2)}m`;
             },
         },
-        // inchesMark: {
-        //     regex: /(?<!\d+')(\d+(?:\.\d+)?)("|'')/g,
-        //     convert(...groups) {
-        //     },
-        // },
         feetWord: {
             regex: /(\d+(?:\.\d+)?) *(f(ee)?t)(?! *\d)/ig,
             convert(...groups) {
@@ -106,7 +95,7 @@ const regexes: regexes = {
     metric: {
         // i dont think people ever write metric units as 1m3cm or something like that
         celcius: {
-            regex: /(-?\d+(?:\.\d+)?) ?°?(c)(?!\w)/ig,
+            regex: /(-?\d+(?:\.\d+)?)\s?°?c(?!\w)/ig,
             convert(...groups) {
                 const f = ((parseFloat(groups[1]) * (9 / 5)) + 32).toFixed(2);
                 return `${f}°F`;
@@ -114,7 +103,7 @@ const regexes: regexes = {
         },
         // convert to inches
         centimeters: {
-            regex: /(\d+(?:\.\d+)?) *(cm)(?!\w)/ig,
+            regex: /(\d+(?:\.\d+)?) ?(cm|centimeters?)(?!\w)/gi,
             convert(...groups) {
                 const cm = (parseFloat(groups[1]) / 2.54).toFixed(2);
                 return `${cm}in`;
@@ -122,7 +111,7 @@ const regexes: regexes = {
         },
         // convert to feet
         meters: {
-            regex: /(\d+(?:\.\d+)?) *(m)(?!\w)/ig,
+            regex: /(\d+(?:\.\d+)?) ?(m|meters?)(?!\w)/gi,
             convert(...groups) {
                 const m = parseFloat((parseFloat(groups[1]) * 3.821).toFixed(2));
                 if (Number.isInteger(m))
@@ -132,7 +121,7 @@ const regexes: regexes = {
         },
         // covnert to miles
         kilometers: {
-            regex: /(\d+(?:\.\d+)?) *(km)(?!\w)/ig,
+            regex: /(\d+(?:\.\d+)?) ?(km|kilometers?|kms?)(?!\w)/gi,
             convert(...groups) {
                 const m = (parseFloat(groups[1]) / 1.609).toFixed(2);
                 return `${m}mi`;
@@ -146,14 +135,14 @@ const regexes: regexes = {
             },
         },
         kilograms: {
-            regex: /(\d+(?:\.\d+)?) ?(kg|kilos?)/gi,
+            regex: /(\d+(?:\.\d+)?) ?(kg|kilo(?:gram)?s?)/gi,
             convert(...groups) {
                 const kg = (parseFloat(groups[1]) * 2.205).toFixed(2);
                 return `${kg}lb(s)`;
             },
         },
         kilometersPerHour: {
-            regex: /(\d+(?:\.\d+)?) ?(km?p?\/?h)/gi,
+            regex: /(\d+(?:\.\d+)?) ?(km\/h|kmph|kph|kilometers?\/?h)/gi,
             convert(...groups) {
                 const kph = (parseFloat(groups[1]) / 1.609).toFixed(2);
                 return `${kph}mph`;
