@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { makeRange } from "@components/PluginSettings/components";
 import { debounce } from "@shared/debounce";
@@ -12,6 +13,8 @@ import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, ContextMenuApi, GuildStore, Menu, NavigationRouter, PermissionStore, React, SelectedChannelStore, Toasts, UserStore } from "@webpack/common";
+
+import style from "./styles.css?managed";
 
 const ChatVoiceIcon = findComponentByCodeLazy("22H12Zm2-5.26c0");
 const Button = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
@@ -148,6 +151,12 @@ export default definePlugin({
             }
         }
     ],
+    start() {
+        enableStyle(style);
+    },
+    stop() {
+        disableStyle(style);
+    },
     settings,
     randomVoice: ErrorBoundary.wrap(randomVoice, { noop: true }),
 });

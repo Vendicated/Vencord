@@ -1,0 +1,8 @@
+[class^="buttons__"] {
+    width: 150px;
+    margin-left: -15px;
+}
+
+[class^="micButtonParent__"] {
+    width: 16px;
+}
