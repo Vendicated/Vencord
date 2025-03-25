@@ -9,8 +9,7 @@ import { Flex } from "@components/Flex";
 import { Margins } from "@utils/margins";
 import { classes, copyWithToast } from "@utils/misc";
 import { closeModal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { LazyComponent } from "@utils/react";
-import { filters, find } from "@webpack";
+import { findComponentByCodeLazy } from "@webpack";
 import { Button, Clickable, Forms, Text, Tooltip, useEffect, UserUtils, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -21,10 +20,7 @@ import { LogIcon } from "./Icons";
 import { openMoreUsersModal } from "./MoreUsersModal";
 import { openUserModal } from "./UserModal";
 
-const HeaderBarIcon = LazyComponent(() => {
-    const filter = filters.byCode(".HEADER_BAR_BADGE");
-    return find(m => m.Icon && filter(m.Icon)).Icon;
-});
+const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
 export async function openSoundBoardLog(): Promise<void> {
 
