@@ -26,7 +26,7 @@ import { EquicordDevs } from "@utils/constants";
 import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { findByProps, findExportedComponentLazy } from "@webpack";
+import { findByProps, findComponentByCodeLazy } from "@webpack";
 import { ChannelStore, Menu } from "@webpack/common";
 import { Message } from "discord-types/general";
 
@@ -35,7 +35,7 @@ import { NoteModal } from "./components/modals/Notebook";
 import noteHandler, { noteHandlerCache } from "./NoteHandler";
 import { DataStoreToCache, HolyNoteStore } from "./utils";
 
-const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
+const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
 const messageContextMenuPatch: NavContextMenuPatchCallback = async (children, { message }: { message: Message; }) => {
     children.push(
