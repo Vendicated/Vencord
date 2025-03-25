@@ -23,7 +23,7 @@ const DYNAMIC_PACK_SET_METAS_KEY = "MoreStickers:DynamicPackSetMetas";
 function stickerPackToMeta(sp: StickerPack): StickerPackMeta {
     return {
         id: sp.id,
-        title: sp.title,
+        title: sp.title = sp.title === "null" ? sp.id.match(/\d+/)?.[0] ?? sp.id : sp.title,
         author: sp.author,
         logo: sp.logo,
         dynamic: sp.dynamic,
@@ -48,8 +48,10 @@ export async function saveStickerPack(sp: StickerPack, packsKey: string = PACKS_
                 let packs = (await DataStore.get(packsKey) ?? null) as (StickerPackMeta[] | null);
                 if (packs?.some(p => p.id === sp.id)) {
                     packs = packs.map(p => p.id === sp.id ? meta : p);
+                } else {
+                    packs = packs === null ? [meta] : [...packs, meta];
                 }
-                await DataStore.set(packsKey, packs === null ? [meta] : packs);
+                await DataStore.set(packsKey, packs);
             } finally {
                 unlock();
             }
