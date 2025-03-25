@@ -11,7 +11,7 @@
     box-sizing: border-box;
 }
 
-:where(.visual-refresh) .vc-addon-card {
+.visual-refresh .vc-addon-card {
     background-color: var(--button-secondary-background);
     border: 1px solid var(--border-subtle);
 }
@@ -26,7 +26,7 @@
     box-shadow: var(--elevation-high);
 }
 
-:where(.visual-refresh) .vc-addon-card:hover {
+.visual-refresh .vc-addon-card:hover {
     background-color: var(--button-secondary-background-hover);
 }
 

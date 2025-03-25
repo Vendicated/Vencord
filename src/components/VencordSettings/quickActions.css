@@ -25,7 +25,7 @@
     box-sizing: border-box;
 }
 
-:where(.visual-refresh) .vc-settings-quickActions-pill {
+.visual-refresh .vc-settings-quickActions-pill {
     background: var(--button-secondary-background);
 }
 
@@ -35,7 +35,7 @@
     box-shadow: var(--elevation-high);
 }
 
-:where(.visual-refresh) .vc-settings-quickActions-pill:hover {
+.visual-refresh .vc-settings-quickActions-pill:hover {
     background: var(--button-secondary-background-hover);
 }
 
