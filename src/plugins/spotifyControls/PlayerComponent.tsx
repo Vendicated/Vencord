@@ -308,7 +308,6 @@ function Info({ track }: { track: Track; }) {
                 </Forms.FormText>
                 {track.artists.some(a => a.name) && (
                     <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
-                        by&nbsp;
                         {track.artists.map((a, i) => (
                             <React.Fragment key={a.name}>
                                 <span
@@ -326,7 +325,6 @@ function Info({ track }: { track: Track; }) {
                 )}
                 {track.album.name && (
                     <Forms.FormText variant="text-sm/normal" className={cl("ellipoverflow")}>
-                        on&nbsp;
                         <span
                             id={cl("album-title")}
                             className={cl("album")}
