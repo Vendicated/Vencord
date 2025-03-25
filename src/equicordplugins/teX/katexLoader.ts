@@ -7,8 +7,8 @@
 import { makeLazy } from "@utils/lazy";
 import { useEffect, useState } from "@webpack/common";
 
-const SCRIPT_URL = "https://unpkg.com/katex@0.16.9/dist/katex.mjs";
-const STYLE_URL = "https://unpkg.com/katex@0.16.9/dist/katex.min.css";
+const SCRIPT_URL = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.mjs";
+const STYLE_URL = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css";
 
 let theKatex: undefined | any = undefined;
 export const loadKatex = makeLazy(async () => {
