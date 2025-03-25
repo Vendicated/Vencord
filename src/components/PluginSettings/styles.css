@@ -81,3 +81,7 @@
 .vc-plugins-info-icon:not(:hover, :focus) {
     color: var(--text-muted);
 }
+
+.user-summary-item svg:last-child>foreignObject {
+    mask: none !important;
+}
