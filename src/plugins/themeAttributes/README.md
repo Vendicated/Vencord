@@ -27,3 +27,9 @@ This allows themes to more easily theme those elements or even do things that ot
 `--avatar-url-<resolution>` contains a URL for the users avatar with the size attribute adjusted for the resolutions `128, 256, 512, 1024, 2048, 4096`.
 
 ![image](https://github.com/Vendicated/Vencord/assets/26598490/192ddac0-c827-472f-9933-fa99ff36f723)
+
+## CSS Classes
+
+Discord sets some classes on the `html` element to indicate app state. ThemeAttributes adds a few more classes to this list for certain features that cannot be reliably detected using other selectors
+
+- `streamer-mode` is added when Streamer Mode is enabled, as the Notice bar for this can be dismissed
