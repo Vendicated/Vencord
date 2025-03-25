@@ -238,3 +238,20 @@
     margin-left: auto;
     margin-right: 4.5px !important;
 }
+
+.visual-refresh .button-danger-background {
+    font-size: 16px;
+    background-color: rgb(240 71 71 / 10%) !important;
+    color: rgb(240 71 71) !important;
+    border: 1px solid rgb(240 71 71 / 60%) !important;
+    border-radius: 4px;
+    font-weight: 500;
+    padding: 6px 10px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.visual-refresh .button-danger-background:hover {
+  background-color:  var(--status-danger-background) !important;
+  color: var(--status-danger-text) !important;
+}
