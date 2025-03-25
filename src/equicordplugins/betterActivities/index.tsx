@@ -242,8 +242,10 @@ export default definePlugin({
 
     settings,
 
-    patchActivityList: ({ activities, user }: { activities: Activity[], user: User; }): JSX.Element | null => {
+    patchActivityList: ({ activities, user, hideTooltip }: { activities: Activity[], user: User, hideTooltip: boolean; }): JSX.Element | null => {
         const icons: ActivityListIcon[] = [];
+
+        if (user.bot || hideTooltip) return null;
 
         const applicationIcons = getApplicationIcons(activities);
         if (applicationIcons.length) {
@@ -383,8 +385,11 @@ export default definePlugin({
                                     onMouseLeave={onMouseLeave}
                                     onClick={() => {
                                         const index = activities.indexOf(currentActivity!);
-                                        if (index - 1 >= 0)
+                                        if (index - 1 >= 0) {
                                             setCurrentActivity(activities[index - 1]);
+                                        } else {
+                                            setCurrentActivity(activities[activities.length - 1]);
+                                        }
                                     }}
                                 >
                                     <Caret
@@ -411,8 +416,11 @@ export default definePlugin({
                                     onMouseLeave={onMouseLeave}
                                     onClick={() => {
                                         const index = activities.indexOf(currentActivity!);
-                                        if (index + 1 < activities.length)
+                                        if (index + 1 < activities.length) {
                                             setCurrentActivity(activities[index + 1]);
+                                        } else {
+                                            setCurrentActivity(activities[0]);
+                                        }
                                     }}
                                 >
                                     <Caret
@@ -470,7 +478,7 @@ export default definePlugin({
             // Show all activities in the user popout/sidebar
             find: '"UserProfilePopoutBody"',
             replacement: {
-                match: /(?<=user:(\i).*?\i\.id\)\}\)\),(\i).*?)\(0,\i\.jsx\).{0,100}\i\.activity\}\)/,
+                match: /(?<=(\i)\.id\)\}\)\),(\i).*?)\(0,.{0,100}\i\.activity\}\)/,
                 replace: ",$self.showAllActivitiesComponent({ activity: $2, user: $1 })"
             },
             predicate: () => settings.store.userPopout
