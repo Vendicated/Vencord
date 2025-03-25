@@ -25,10 +25,18 @@
     box-sizing: border-box;
 }
 
+:where(.visual-refresh) .vc-settings-quickActions-pill {
+    background: var(--button-secondary-background);
+}
+
 .vc-settings-quickActions-pill:hover {
     background: var(--background-secondary-alt);
     transform: translateY(-1px);
     box-shadow: var(--elevation-high);
+}
+
+:where(.visual-refresh) .vc-settings-quickActions-pill:hover {
+    background: var(--button-secondary-background-hover);
 }
 
 .vc-settings-quickActions-pill:focus-visible {
