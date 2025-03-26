@@ -1,16 +1,9 @@
 #vc-spotify-player {
     padding: 0.375rem 0.5rem;
     border-bottom: 1px solid var(--background-modifier-accent);
+    background: var(--bg-overlay-floating, var(--background-base-low));
 
     --vc-spotify-green: #1db954; /* so custom themes can easily change it */
-}
-
-.theme-light #vc-spotify-player {
-    background: var(--bg-overlay-3, var(--background-secondary-alt));
-}
-
-.theme-dark #vc-spotify-player {
-    background: var(--bg-overlay-1, var(--background-secondary-alt));
 }
 
 .vc-spotify-button {
@@ -27,7 +20,7 @@
 
 .vc-spotify-button:hover {
     color: var(--interactive-hover);
-    background-color: var(--background-modifier-selected);
+    background-color: var(--vc-spotify-button-hover-bg, var(--background-modifier-selected));
 }
 
 .vc-spotify-button-icon {
@@ -51,7 +44,7 @@
 .vc-spotify-shuffle-on:hover,
 .vc-spotify-repeat-context:hover,
 .vc-spotify-repeat-track:hover {
-    color: var(--vc-spotify-green);
+    color: var(--vc-spotify-button-active-color, var(--vc-spotify-green));
 }
 
 .vc-spotify-tooltip-text {
@@ -109,7 +102,7 @@
 }
 
 #vc-spotify-song-title {
-    color: var(--header-primary);
+    color: var(--vc-spotify-text-normal, var(--header-primary));
     font-size: 14px;
     font-weight: 600;
 }
@@ -125,11 +118,11 @@
 .vc-spotify-album {
     font-size: 12px;
     text-decoration: none;
-    color: var(--header-secondary);
+    color: var(--vc-spotify-text-muted, var(--header-secondary));
 }
 
 .vc-spotify-comma {
-    color: var(--header-secondary);
+    color: var(--vc-spotify-text-muted, var(--header-secondary));
 }
 
 .vc-spotify-artist[role="link"]:hover,
@@ -155,6 +148,11 @@
 
 #vc-spotify-progress-bar > [class^="slider"] [class^="bar-"] {
     height: 4px !important;
+    background-color: var(--vc-spotify-slider-bg, var(--background-tertiary)) !important;
+}
+
+#vc-spotify-progress-bar > [class^="slider"] [class^="barFill"] {
+    background-color: var(--vc-spotify-slider-fill, var(--vc-spotify-green)) !important;
 }
 
 #vc-spotify-progress-bar > [class^="slider"] [class^="grabber"] {
