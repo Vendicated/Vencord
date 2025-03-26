@@ -203,6 +203,7 @@ export default definePlugin({
         {
             find: "APPLICATION_LIBRARY,render:",
             predicate: () => settings.store.sidebar,
+            group: true,
             replacement: [
                 {
                     // Render the Better Folders sidebar
