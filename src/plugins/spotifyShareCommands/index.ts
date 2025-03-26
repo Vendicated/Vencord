@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -81,18 +81,27 @@ export default definePlugin({
             name: "track",
             description: "Send your current Spotify track to chat",
             inputType: ApplicationCommandInputType.BUILT_IN,
-            options: [],
+            options: [
+                {
+                    name: "message",
+                    description: "Appends the Spotify link to your message",
+                    type: ApplicationCommandOptionType.STRING,
+                    required: false
+                }
+            ],
             execute: (_, ctx) => {
                 const track: Track | null = Spotify.getTrack();
+                const message = _.find(option => option.name === "message")?.value;
                 if (track === null) {
                     sendBotMessage(ctx.channel.id, {
                         content: "You're not listening to any music."
                     });
                     return;
                 }
+                const trackUrl = `https://open.spotify.com/track/${track.id}`;
                 // Note: Due to how Discord handles commands, we need to manually create and send the message
                 sendMessage(ctx.channel.id, {
-                    content: `https://open.spotify.com/track/${track.id}`
+                    content: message ? `${message} ${trackUrl}` : trackUrl
                 });
             }
         },
@@ -100,17 +109,26 @@ export default definePlugin({
             name: "album",
             description: "Send your current Spotify album to chat",
             inputType: ApplicationCommandInputType.BUILT_IN,
-            options: [],
+            options: [
+                {
+                    name: "message",
+                    description: "Appends the Spotify link to your message",
+                    type: ApplicationCommandOptionType.STRING,
+                    required: false
+                }
+            ],
             execute: (_, ctx) => {
                 const track: Track | null = Spotify.getTrack();
+                const message = _.find(option => option.name === "message")?.value;
                 if (track === null) {
                     sendBotMessage(ctx.channel.id, {
                         content: "You're not listening to any music."
                     });
                     return;
                 }
+                const albumUrl = `https://open.spotify.com/album/${track.album.id}`;
                 sendMessage(ctx.channel.id, {
-                    content: `https://open.spotify.com/album/${track.album.id}`
+                    content: message ? `${message} ${albumUrl}` : albumUrl
                 });
             }
         },
@@ -118,9 +136,17 @@ export default definePlugin({
             name: "artist",
             description: "Send your current Spotify artist to chat",
             inputType: ApplicationCommandInputType.BUILT_IN,
-            options: [],
-            execute: (_, ctx) => {
+            options: [
+                {
+                    name: "message",
+                    description: "Appends the Spotify link to your message",
+                    type: ApplicationCommandOptionType.STRING,
+                    required: false
+                }
+            ],
+            execute: (options, ctx) => {
                 const track: Track | null = Spotify.getTrack();
+                const message = options.find(option => option.name === "message")?.value;
                 if (track === null) {
                     sendBotMessage(ctx.channel.id, {
                         content: "You're not listening to any music."
@@ -128,7 +154,9 @@ export default definePlugin({
                     return;
                 }
                 sendMessage(ctx.channel.id, {
-                    content: track.artists[0].external_urls.spotify
+                    content: message ?
+                        `${message} ${track.artists[0].external_urls.spotify}`
+                        : track.artists[0].external_urls.spotify
                 });
             }
         }
