@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>163 additional plugins</summary>
+<summary>162 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -27,7 +27,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - BetterInvites by iamme
 - BetterPlusReacts by Joona
 - BetterQuickReact by Ven & Sqaaakoi
-- BetterUserArea by Samwich
 - BlockKeywords by catcraft
 - BlockKrisp by D3SOX
 - BypassStatus by Inbestigator & thororen
