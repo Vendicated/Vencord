@@ -263,8 +263,8 @@ export const Settings = () => {
                                 let errorMessage = "";
                                 if (isLineEmojiPackHtml(addStickerHtml)) {
                                     try {
-                                        const lineSP = getLineSPFromHtml(addStickerHtml);
-                                        const stickerPack = convertLineSP(lineSP);
+                                        const lineEP = getLineEPFromHtml(addStickerHtml);
+                                        const stickerPack = convertLineEP(lineEP);
                                         await saveStickerPack(stickerPack);
                                     } catch (e: any) {
                                         console.error(e);
@@ -272,8 +272,8 @@ export const Settings = () => {
                                     }
                                 } else if (isLineStickerPackHtml(addStickerHtml)) {
                                     try {
-                                        const lineEP = getLineEPFromHtml(addStickerHtml);
-                                        const stickerPack = convertLineEP(lineEP);
+                                        const lineSP = getLineSPFromHtml(addStickerHtml);
+                                        const stickerPack = convertLineSP(lineSP);
                                         await saveStickerPack(stickerPack);
                                     } catch (e: any) {
                                         console.error(e);
