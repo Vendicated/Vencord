@@ -21,6 +21,9 @@ import "./styles.css";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Microphone } from "@components/Icons";
 import { Link } from "@components/Link";
+import { loadFFmpeg } from "@equicordplugins/moreStickers/utils";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile } from "@ffmpeg/util";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
@@ -28,7 +31,7 @@ import { useAwaiter } from "@utils/react";
 import definePlugin from "@utils/types";
 import { chooseFile } from "@utils/web";
 import { findByPropsLazy, findLazy, findStoreLazy } from "@webpack";
-import { Button, Card, Constants, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
+import { Button, Card, Constants, Flex, FluxDispatcher, Forms, lodash, Menu, MessageActions, PermissionsBits, PermissionStore, React, RestAPI, SelectedChannelStore, showToast, SnowflakeUtils, Toasts, useEffect, useState } from "@webpack/common";
 import { ComponentType } from "react";
 
 import { lastState as silentMessageEnabled } from "../silentMessageToggle";
@@ -182,6 +185,17 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
         !blob.type.startsWith("audio/ogg")
         || blob.type.includes("codecs") && !blob.type.includes("opus")
     );
+    const ffmpegLoaded = React.useState(false);
+    const ffmpeg = React.useState<FFmpeg>(new FFmpeg());
+
+    React.useEffect(() => {
+        if (ffmpegLoaded[0]) return;
+
+        loadFFmpeg(ffmpeg[0], () => {
+            ffmpegLoaded[1](true);
+        });
+    }, []);
+
 
     return (
         <ModalRoot {...modalProps}>
@@ -226,12 +240,13 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                         <Forms.FormText className={Margins.top8}>
                             To fix it, first convert it to OggOpus, for example using the <Link href="https://convertio.co/mp3-opus/">convertio web converter</Link>
                         </Forms.FormText>
+
                     </Card>
                 )}
 
             </ModalContent>
 
-            <ModalFooter>
+            <ModalFooter justify={Flex.Justify.BETWEEN} direction={Flex.Direction.HORIZONTAL_REVERSE} align={Flex.Align.STRETCH} wrap={Flex.Wrap.NO_WRAP} separator>
                 <Button
                     disabled={!blob}
                     onClick={() => {
@@ -242,7 +257,28 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                 >
                     Send
                 </Button>
+                {isUnsupportedFormat && <Button
+                    disabled={!blob}
+                    onClick={async () => {
+                        setBlob(undefined); // so the button disables while converting
+                        const ffmpegInstance = ffmpeg[0];
+                        const blobUrl = URL.createObjectURL(blob!);
+                        const filename = "voice-message-converted.ogg";
+
+                        ffmpegInstance.writeFile(filename, await fetchFile(blobUrl));
+                        ffmpegInstance.exec(["-i", filename, "-c:a", "libopus", "-b:a", "128k", "-vbr", "on", filename]);
+
+                        const data = await ffmpegInstance.readFile(filename);
+                        const convertedBlob = new Blob([data], { type: "audio/ogg; codecs=opus" });
+
+                        setBlob(convertedBlob);
+                        setBlobUrl(convertedBlob);
+                    }}
+                >
+                    Convert to OggOpus
+                </Button>}
             </ModalFooter>
+
         </ModalRoot>
     );
 }
