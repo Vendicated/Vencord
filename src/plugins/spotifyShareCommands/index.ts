@@ -89,9 +89,9 @@ export default definePlugin({
                     required: false
                 }
             ],
-            execute: (_, ctx) => {
+            execute: (options, ctx) => {
                 const track: Track | null = Spotify.getTrack();
-                const message = _.find(option => option.name === "message")?.value;
+                const message = options.find(option => option.name === "message")?.value;
                 if (track === null) {
                     sendBotMessage(ctx.channel.id, {
                         content: "You're not listening to any music."
@@ -117,9 +117,9 @@ export default definePlugin({
                     required: false
                 }
             ],
-            execute: (_, ctx) => {
+            execute: (options, ctx) => {
                 const track: Track | null = Spotify.getTrack();
-                const message = _.find(option => option.name === "message")?.value;
+                const message = options.find(option => option.name === "message")?.value;
                 if (track === null) {
                     sendBotMessage(ctx.channel.id, {
                         content: "You're not listening to any music."
