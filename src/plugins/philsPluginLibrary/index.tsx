@@ -19,20 +19,12 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-import { replacedUserPanelComponent } from "./patches";
 
 const plugin = definePlugin({
     name: "PhilsPluginLibrary",
     description: "A library for phil's plugins",
     authors: [Devs.philhk],
     patches: [
-        {
-            find: '"--custom-app-panels-height",',
-            replacement: {
-                match: /{}\)}\),/,
-                replace: "{})}),$self.replacedUserPanelComponent(),"
-            }
-        },
         {
             find: "Unknown frame rate",
             replacement: [
@@ -48,9 +40,6 @@ const plugin = definePlugin({
         }
     ]
 });
-
-
-plugin.replacedUserPanelComponent = replacedUserPanelComponent.bind(plugin);
 
 
 export default plugin;
