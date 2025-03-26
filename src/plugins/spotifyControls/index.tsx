@@ -100,7 +100,7 @@ export default definePlugin({
                     fallback={() => (
                         <div className="vc-spotify-fallback">
                             <p>Failed to render Spotify Modal :(</p>
-                            <p >Check the console for errors</p>
+                            <p>Check the console for errors</p>
                         </div>
                     )}
                 >
