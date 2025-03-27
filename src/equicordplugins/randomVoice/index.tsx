@@ -705,10 +705,9 @@ function getChannels() {
 
 function JoinVc(channelID) {
     const channel = ChannelStore.getChannel(channelID);
-
+    const channel_link = `/channels/${channel.guild_id}/${channel.id}`;
     ChannelActions.selectVoiceChannel(channelID);
-
-    if (settings.store.autoNavigate) NavigationRouter.transitionTo(channel.guild_id, channel.id);
+    if (settings.store.autoNavigate) NavigationRouter.transitionTo(channel_link);
     if (settings.store.autoCamera && PermissionStore.can(STREAM, channel)) autoCamera();
     if (settings.store.autoCamera && PermissionStore.can(STREAM, channel)) autoCamera();
     if (settings.store.selfMute && !MediaEngineStore.isSelfMute() && SelectedChannelStore.getVoiceChannelId()) toggleSelfMute();
