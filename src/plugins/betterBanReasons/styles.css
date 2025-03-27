@@ -3,9 +3,15 @@
     padding: 0;
     padding-bottom: 0.5rem;
     gap: 0.5rem;
-    grid-template-columns: 6fr 1fr;
+    grid-template-columns: 1fr auto;
 }
 
 .vc-bbr-remove-button {
-    height: 100%;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+}
+
+.vc-bbr-remove-button svg {
+    width: 21px;
+    height: 21px;
 }

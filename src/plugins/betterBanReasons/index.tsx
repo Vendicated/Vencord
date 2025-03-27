@@ -8,6 +8,7 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { DeleteIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -16,41 +17,37 @@ import { Button, Forms, TextInput } from "@webpack/common";
 const cl = classNameFactory("vc-bbr-");
 
 function ReasonsComponent() {
-    const { reasons } = settings.use(["reasons"]);
+    const { reasons } = settings.store;
 
     return (
         <Forms.FormSection title="Reasons">
-            {reasons.map((reason: string, index: number) => (
+            {reasons.map((r, i) => (
                 <div
-                    key={index}
+                    key={i}
                     className={cl("reason-wrapper")}
                 >
                     <TextInput
-                        type="text"
-                        value={reason}
+                        value={r}
                         onChange={v => {
-                            reasons[index] = v;
-                            settings.store.reasons = [...reasons];
+                            reasons[i] = v;
+                            settings.store.reasons = reasons;
                         }}
                         placeholder="Reason"
                     />
                     <Button
-                        color={Button.Colors.RED}
                         className={cl("remove-button")}
+                        color={Button.Colors.TRANSPARENT}
                         onClick={() => {
-                            reasons.splice(index, 1);
-                            settings.store.reasons = [...reasons];
+                            reasons.splice(i, 1);
+                            settings.store.reasons = reasons;
                         }}
+                        size={Button.Sizes.NONE}
                     >
-                        Remove
+                        <DeleteIcon />
                     </Button>
                 </div>
             ))}
-            <Button
-                onClick={() => {
-                    settings.store.reasons = [...reasons, ""];
-                }}
-            >
+            <Button onClick={() => settings.store.reasons.push("")} size={Button.Sizes.SMALL}>
                 Add new
             </Button>
         </Forms.FormSection>
