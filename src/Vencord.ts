@@ -48,6 +48,23 @@ if (IS_REPORTER) {
 }
 
 async function syncSettings() {
+    // Check if cloud auth exists for current user before attempting sync
+    const hasCloudAuth = await dsGet("Vencord_cloudSecret");
+    if (!hasCloudAuth) {
+        if (Settings.cloud.authenticated) {
+            // User switched to an account that isn't connected to cloud
+            showNotification({
+                title: "Cloud Settings",
+                body: "Cloud sync was disabled because this account isn't connected to the Vencloud App. You can enable it again by connecting this account in Cloud Settings. (note: it will store your preferences separately)",
+                color: "var(--yellow-360)",
+                onClick: () => SettingsRouter.open("VencordCloud")
+            });
+            // Disable cloud sync globally
+            Settings.cloud.authenticated = false;
+        }
+        return;
+    }
+
     // pre-check for local shared settings
     if (
         Settings.cloud.authenticated &&
