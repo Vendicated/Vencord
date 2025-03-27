@@ -6,11 +6,10 @@
 
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { FluxDispatcher } from "@webpack/common";
-import { FluxEvents } from "@webpack/types";
+import { FluxDispatcher as Flux } from "@webpack/common";
 
-const defaultOptions = {
-    type: "EXPERIMENT_OVERRIDE_BUCKET" as FluxEvents,
+const options = {
+    type: "EXPERIMENT_OVERRIDE_BUCKET" as const,
     experimentId: "2024-05_desktop_visual_refresh",
 };
 
@@ -20,10 +19,6 @@ export default definePlugin({
     authors: [Devs.Inbestigator],
     dependencies: ["Experiments"],
     tags: ["Experiments"],
-    start() {
-        FluxDispatcher.dispatch({ ...defaultOptions, experimentBucket: -1 });
-    },
-    stop() {
-        FluxDispatcher.dispatch({ ...defaultOptions, experimentBucket: null });
-    },
+    start: () => Flux.dispatch({ ...options, experimentBucket: -1 }),
+    stop: () => Flux.dispatch({ ...options, experimentBucket: null }),
 });
