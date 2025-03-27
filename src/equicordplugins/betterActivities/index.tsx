@@ -349,117 +349,121 @@ export default definePlugin({
 
         if (settings.store.allActivitiesStyle === "carousel") {
             return (
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                    {activity && currentActivity?.id === activity.id ? (
-                        <ActivityView
-                            activity={currentActivity}
-                            user={user}
-                            currentUser={currentUser}
-                            {...props}
-                        />
-                    ) : (
-                        <ActivityView
-                            activity={currentActivity}
-                            user={user}
-                            // fetch optional application
-                            application={getActivityApplication(currentActivity!)}
-                            currentUser={currentUser}
-                            {...generalProps}
-                        />
-                    )}
-                    {activities.length > 1 &&
-                        <div
-                            className={cl("controls")}
-                            style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            <Tooltip text="Left" tooltipClassName={cl("controls-tooltip")}>{({
-                                onMouseEnter,
-                                onMouseLeave
-                            }) => {
-                                return <span
-                                    onMouseEnter={onMouseEnter}
-                                    onMouseLeave={onMouseLeave}
-                                    onClick={() => {
-                                        const index = activities.indexOf(currentActivity!);
-                                        if (index - 1 >= 0) {
-                                            setCurrentActivity(activities[index - 1]);
-                                        } else {
-                                            setCurrentActivity(activities[activities.length - 1]);
-                                        }
-                                    }}
-                                >
-                                    <Caret
-                                        disabled={activities.indexOf(currentActivity!) < 1}
-                                        direction="left" />
-                                </span>;
-                            }}</Tooltip>
-
-                            <div className="carousel">
-                                {activities.map((activity, index) => (
-                                    <div
-                                        key={"dot--" + index}
-                                        onClick={() => setCurrentActivity(activity)}
-                                        className={`dot ${currentActivity === activity ? "selected" : ""}`} />
-                                ))}
-                            </div>
-
-                            <Tooltip text="Right" tooltipClassName={cl("controls-tooltip")}>{({
-                                onMouseEnter,
-                                onMouseLeave
-                            }) => {
-                                return <span
-                                    onMouseEnter={onMouseEnter}
-                                    onMouseLeave={onMouseLeave}
-                                    onClick={() => {
-                                        const index = activities.indexOf(currentActivity!);
-                                        if (index + 1 < activities.length) {
-                                            setCurrentActivity(activities[index + 1]);
-                                        } else {
-                                            setCurrentActivity(activities[0]);
-                                        }
-                                    }}
-                                >
-                                    <Caret
-                                        disabled={activities.indexOf(currentActivity!) >= activities.length - 1}
-                                        direction="right" />
-                                </span>;
-                            }}</Tooltip>
-                        </div>
-                    }
-                </div>
-            );
-        } else {
-            return (
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "5px",
-                    }}
-                >
-                    {activities.map((activity, index) =>
-                        index === 0 ? (
+                <ErrorBoundary noop onError={() => { }}>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                        {activity && currentActivity?.id === activity.id ? (
                             <ActivityView
-                                key={index}
-                                activity={activity}
+                                activity={currentActivity}
                                 user={user}
                                 currentUser={currentUser}
                                 {...props}
-                            />) : (
+                            />
+                        ) : (
                             <ActivityView
-                                key={index}
-                                activity={activity}
+                                activity={currentActivity}
                                 user={user}
-                                application={getActivityApplication(activity)}
+                                // fetch optional application
+                                application={getActivityApplication(currentActivity!)}
                                 currentUser={currentUser}
                                 {...generalProps}
                             />
-                        ))}
-                </div>
+                        )}
+                        {activities.length > 1 &&
+                            <div
+                                className={cl("controls")}
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    justifyContent: "space-between",
+                                }}
+                            >
+                                <Tooltip text="Left" tooltipClassName={cl("controls-tooltip")}>{({
+                                    onMouseEnter,
+                                    onMouseLeave
+                                }) => {
+                                    return <span
+                                        onMouseEnter={onMouseEnter}
+                                        onMouseLeave={onMouseLeave}
+                                        onClick={() => {
+                                            const index = activities.indexOf(currentActivity!);
+                                            if (index - 1 >= 0) {
+                                                setCurrentActivity(activities[index - 1]);
+                                            } else {
+                                                setCurrentActivity(activities[activities.length - 1]);
+                                            }
+                                        }}
+                                    >
+                                        <Caret
+                                            disabled={activities.indexOf(currentActivity!) < 1}
+                                            direction="left" />
+                                    </span>;
+                                }}</Tooltip>
+
+                                <div className="carousel">
+                                    {activities.map((activity, index) => (
+                                        <div
+                                            key={"dot--" + index}
+                                            onClick={() => setCurrentActivity(activity)}
+                                            className={`dot ${currentActivity === activity ? "selected" : ""}`} />
+                                    ))}
+                                </div>
+
+                                <Tooltip text="Right" tooltipClassName={cl("controls-tooltip")}>{({
+                                    onMouseEnter,
+                                    onMouseLeave
+                                }) => {
+                                    return <span
+                                        onMouseEnter={onMouseEnter}
+                                        onMouseLeave={onMouseLeave}
+                                        onClick={() => {
+                                            const index = activities.indexOf(currentActivity!);
+                                            if (index + 1 < activities.length) {
+                                                setCurrentActivity(activities[index + 1]);
+                                            } else {
+                                                setCurrentActivity(activities[0]);
+                                            }
+                                        }}
+                                    >
+                                        <Caret
+                                            disabled={activities.indexOf(currentActivity!) >= activities.length - 1}
+                                            direction="right" />
+                                    </span>;
+                                }}</Tooltip>
+                            </div>
+                        }
+                    </div>
+                </ErrorBoundary>
+            );
+        } else {
+            return (
+                <ErrorBoundary noop onError={() => { }}>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "5px",
+                        }}
+                    >
+                        {activities.map((activity, index) =>
+                            index === 0 ? (
+                                <ActivityView
+                                    key={index}
+                                    activity={activity}
+                                    user={user}
+                                    currentUser={currentUser}
+                                    {...props}
+                                />) : (
+                                <ActivityView
+                                    key={index}
+                                    activity={activity}
+                                    user={user}
+                                    application={getActivityApplication(activity)}
+                                    currentUser={currentUser}
+                                    {...generalProps}
+                                />
+                            ))}
+                    </div>
+                </ErrorBoundary>
             );
         }
     },
@@ -479,7 +483,7 @@ export default definePlugin({
             find: '"UserProfilePopoutBody"',
             replacement: {
                 match: /(?<=(\i)\.id\)\}\)\),(\i).*?)\(0,.{0,100}\i\.activity\}\)/,
-                replace: ",$self.showAllActivitiesComponent({ activity: $2, user: $1 })"
+                replace: "$self.showAllActivitiesComponent({ activity: $2, user: $1 })"
             },
             predicate: () => settings.store.userPopout
         },
