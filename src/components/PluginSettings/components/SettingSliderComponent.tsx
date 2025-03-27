@@ -40,16 +40,23 @@ export function SettingSliderComponent({ option, pluginSettings, definedSettings
         onError(error !== null);
     }, [error]);
 
+    function getValue(value: number): number {
+        if (option.onlyInts) {
+            return Math.round(value);
+        }
+        return value;
+    }
+
     function handleChange(newValue: number): void {
-        const isValid = option.isValid?.call(definedSettings, newValue) ?? true;
+        const isValid = option.isValid?.call(definedSettings, getValue(newValue)) ?? true;
         if (typeof isValid === "string") setError(isValid);
         else if (!isValid) setError("Invalid input provided.");
         else {
             setError(null);
-            onChange(newValue);
+            onChange(getValue(newValue));
         }
     }
-
+    console.log("rendering");
     return (
         <Forms.FormSection>
             <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
@@ -61,7 +68,9 @@ export function SettingSliderComponent({ option, pluginSettings, definedSettings
                 maxValue={option.markers[option.markers.length - 1]}
                 initialValue={def}
                 onValueChange={handleChange}
-                onValueRender={(v: number) => String(v.toFixed(2))}
+                keyboardStep={option.onlyInts ? 1 : undefined}
+                onValueRender={(v: number) => String(option.onlyInts ? Math.round(v) : v.toFixed(2))}
+                onMarkerRender={(v: number) => option.markers.includes(v) ? String(getValue(v)) : null}
                 stickToMarkers={option.stickToMarkers ?? true}
                 {...option.componentProps}
             />
