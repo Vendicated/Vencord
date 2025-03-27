@@ -45,6 +45,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
     // Also display flex otherwise to fix scrolling
     const barStyle = {
         display: isFullscreen ? "none" : "flex",
+        gridArea: "sidebar"
     } as CSSProperties;
 
     if (!guilds || !settings.store.sidebarAnim) {
