@@ -58,7 +58,7 @@ check_for_updates() {
         echo -e "${YELLOW}Warning: Could not fetch last modified date from GitHub. Using existing installer.${NC}"
         return
     fi
-    
+
     local_modified=$(stat -c "%y" "$INSTALLER_PATH" | cut -d' ' -f1-2) || error "Failed to get local modified date"
 
     if [ "$local_modified" != "$latest_modified" ]; then
@@ -92,11 +92,11 @@ main() {
     debug_log "Starting installation process"
     check_root
     check_for_updates
-    
+
     local priv_cmd
     priv_cmd=$(find_privilege_cmd)
     debug_log "Using privilege command: $priv_cmd"
-    
+
     echo -e "${YELLOW}Running installer with $priv_cmd...${NC}"
     debug_log "Executing installer: $priv_cmd $INSTALLER_PATH"
     if ! "$priv_cmd" "$INSTALLER_PATH"; then
@@ -108,7 +108,7 @@ main() {
     echo -e "\n${GREEN}Installation completed successfully!${NC}"
     echo -e "\nCredits:"
     echo "Original script forked from Vencord"
-    echo "Modified by PhoenixAceVFX & Crxaw for Equicord Updater"
+    echo "Modified by PhoenixAceVFX for Equicord Updater"
     echo "Rewrite by PhoenixAceVFX"
 }
 

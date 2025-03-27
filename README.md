@@ -10,7 +10,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 
 ### Extra included plugins
 <details>
-<summary>162 additional plugins</summary>
+<summary>161 additional plugins</summary>
 
 ### All Platforms
 - AllCallTimers by MaxHerbold & D3SOX
@@ -136,7 +136,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo, maintained by thororen
 - SpotifyLyrics by Joona
-- StatsfmRPC by Crxaw & vmohammad
 - StatusPresets by iamme
 - SteamStatusSync by niko
 - StickerBlocker by Samwich
