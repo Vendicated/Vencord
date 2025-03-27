@@ -11,6 +11,11 @@
     box-sizing: border-box;
 }
 
+.visual-refresh .vc-addon-card {
+    background-color: var(--button-secondary-background);
+    border: 1px solid var(--border-subtle);
+}
+
 .vc-addon-card-disabled {
     opacity: 0.6;
 }
@@ -19,6 +24,10 @@
     background-color: var(--background-tertiary);
     transform: translateY(-1px);
     box-shadow: var(--elevation-high);
+}
+
+.visual-refresh .vc-addon-card:hover {
+    background-color: var(--button-secondary-background-hover);
 }
 
 .vc-addon-header {
