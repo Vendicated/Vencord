@@ -68,10 +68,10 @@
     }
 
     .vc-spotify-repeat-context, .vc-spotify-repeat-track, .vc-spotify-shuffle-on {
-        background-color: var(--vc-spotify-green-container);
+        background-color: var(--vc-spotify-green-90);
     }
 
     .vc-spotify-repeat-context:hover, .vc-spotify-repeat-track:hover, .vc-spotify-shuffle-on:hover {
-        background-color: var(--vc-spotify-green-container-hover);
+        background-color: var(--vc-spotify-green-80);
     }
 }
