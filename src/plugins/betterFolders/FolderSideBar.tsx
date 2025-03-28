@@ -66,7 +66,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
                 }).map(it => it.folderId);
                 folders.push(e);
                 return generateSidebar(guildsBarProps, folders, e as number);
-            });
+            }).reverse();
             break;
     }
 
