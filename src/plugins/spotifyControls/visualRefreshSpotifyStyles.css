@@ -8,6 +8,10 @@
         border-top-right-radius: 10px;
     }
 
+    .vc-spotify-artist, .vc-spotify-album {
+        color: var(--header-primary);
+    }
+
     .vc-spotify-song-info-prefix {
         display: none;
     }
@@ -65,10 +69,10 @@
     }
 
     .vc-spotify-repeat-context, .vc-spotify-repeat-track, .vc-spotify-shuffle-on {
-        background-color: #97d09f1f;
+        background-color: var(--vc-spotify-green-container);
     }
 
     .vc-spotify-repeat-context:hover, .vc-spotify-repeat-track:hover, .vc-spotify-shuffle-on:hover {
-        background-color: #97d09f3d;
+        background-color: var(--vc-spotify-green-container-hover);
     }
 }

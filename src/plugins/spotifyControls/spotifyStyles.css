@@ -3,6 +3,8 @@
     border-bottom: 1px solid var(--background-modifier-accent);
 
     --vc-spotify-green: var(--spotify, #1db954); /* so custom themes can easily change it */
+    --vc-spotify-green-container: color-mix(in hsl, var(--vc-spotify-green), transparent 90%);
+    --vc-spotify-green-container-hover: color-mix(in hsl, var(--vc-spotify-green), transparent 80%);
 }
 
 .theme-light #vc-spotify-player {
