@@ -23,6 +23,7 @@ export const DONOR_ROLE_ID = "1042507929485586532";
 export const CONTRIB_ROLE_ID = "1026534353167208489";
 export const REGULAR_ROLE_ID = "1026504932959977532";
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
+export const SUPPORT_CATEGORY_ID = "1108135649699180705";
 export const KNOWN_ISSUES_CHANNEL_ID = "1222936386626129920";
 
 export interface Dev {
@@ -579,6 +580,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     SomeAspy: {
         name: "SomeAspy",
         id: 516750892372852754n,
+    },
+    Wagyourtail: {
+        name: "Wagyourtail",
+        id: 100748674849579008n,
     },
     jamesbt365: {
         name: "jamesbt365",
