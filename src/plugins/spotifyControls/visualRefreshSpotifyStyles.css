@@ -8,15 +8,12 @@
         border-top-right-radius: 10px;
     }
 
-    .vc-spotify-artist, .vc-spotify-album {
-        color: var(--header-primary);
-    }
-
     .vc-spotify-song-info-prefix {
         display: none;
     }
 
     .vc-spotify-secondary-song-info {
+        color: var(--header-primary);
         font-size: 12px;
     }
 
