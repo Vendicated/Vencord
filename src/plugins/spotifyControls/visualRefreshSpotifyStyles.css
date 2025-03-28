@@ -33,7 +33,7 @@
     }
 
     #vc-spotify-progress-bar > [class^="slider"] [class^="bar"] {
-        height: 4px !important;
+        height: 3px !important;
         top: calc(12px - 4px / 2 + var(--bar-offset));
     }
 
@@ -49,12 +49,12 @@
         background-color: var(--interactive-active);
         width: 16px !important;
         height: 16px !important;
-        margin-top: calc(16px/-2 + var(--bar-offset)/2);
+        margin-top: calc(17px/-2 + var(--bar-offset)/2);
         margin-left: -0.5px;
     }
 
     .vc-spotify-progress-time {
-        margin-top: 10px;
+        margin-top: 8px;
         font-family: var(--font-code);
     }
 
