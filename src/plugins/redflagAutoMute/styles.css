@@ -1,0 +1,88 @@
+.redflag-settings {
+    padding: 16px;
+}
+
+.setting-item {
+    margin-bottom: 16px;
+}
+
+.setting-item label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.setting-item input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--background-modifier-accent);
+}
+
+.setting-item input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.stats {
+    margin-top: 20px;
+    padding: 16px;
+    background: var(--background-secondary);
+    border-radius: 4px;
+}
+
+.stats p {
+    margin: 4px 0;
+}
+
+.redflag-context-menu {
+    padding: 8px;
+    border-top: 1px solid var(--background-modifier-accent);
+}
+
+.redflag-button {
+    width: 100%;
+    padding: 8px;
+    margin: 4px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.redflag-button.colorDanger {
+    background: var(--red-500);
+    color: white;
+}
+
+.redflag-button.colorWarning {
+    background: var(--yellow-500);
+    color: black;
+}
+
+.redflag-button:hover {
+    filter: brightness(1.1);
+}
+
+/* Стили для кнопок в контекстном меню */
+#redflag-red-card {
+    color: white !important;
+    background-color: #ed4245 !important;
+}
+
+#redflag-yellow-card {
+    color: black !important;
+    background-color: #faa61a !important;
+}
+
+#redflag-remove {
+    color: white !important;
+    background-color: #5865f2 !important;
+}
+
+/* Эффект при наведении */
+#redflag-red-card:hover,
+#redflag-yellow-card:hover,
+#redflag-remove:hover {
+    filter: brightness(1.1);
+} 
