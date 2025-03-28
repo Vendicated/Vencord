@@ -12,11 +12,13 @@
         display: none;
     }
 
-    .vc-spotify-secondary-song-info {
+    .vc-spotify-artist, .vc-spotify-album {
         color: var(--header-primary);
-        font-size: 12px;
     }
 
+    .vc-spotify-secondary-song-info {
+        font-size: 12px;
+    }
 
     #vc-spotify-progress-bar {
         position: relative;
