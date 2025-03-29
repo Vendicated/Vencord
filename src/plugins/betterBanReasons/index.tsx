@@ -8,7 +8,7 @@ import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
-import { DeleteIcon } from "@components/Icons";
+import { DeleteIcon, PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -41,15 +41,18 @@ function ReasonsComponent() {
                             reasons.splice(i, 1);
                             settings.store.reasons = reasons;
                         }}
-                        size={Button.Sizes.NONE}
+                        look={Button.Looks.BLANK}
+                        size={Button.Sizes.MIN}
                     >
                         <DeleteIcon />
                     </Button>
                 </div>
             ))}
-            <Button onClick={() => settings.store.reasons.push("")} size={Button.Sizes.SMALL}>
-                Add new
-            </Button>
+            <div className={cl("reason-wrapper")}>
+                <Button onClick={() => settings.store.reasons.push("")} className={cl("add-button")} size={Button.Sizes.LARGE} color={Button.Colors.TRANSPARENT}>
+                    <PlusIcon /> Add another reason
+                </Button>
+            </div>
         </Forms.FormSection>
     );
 }
