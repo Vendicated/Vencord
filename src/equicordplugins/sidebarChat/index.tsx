@@ -8,7 +8,7 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { filters, findByPropsLazy, findComponentByCodeLazy, mapMangledModuleLazy } from "@webpack";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import {
     ChannelRouter,
     ChannelStore,
@@ -27,10 +27,8 @@ import { Channel, User } from "discord-types/general";
 import { SidebarStore } from "./store";
 
 
-const { HeaderBar, HeaderBarIcon } = mapMangledModuleLazy(".themedMobile]:", {
-    HeaderBarIcon: filters.byCode('size:"custom",'),
-    HeaderBar: filters.byCode(".themedMobile]:"),
-});
+const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
+const HeaderBar = findComponentByCodeLazy(".themedMobile]:");
 const Chat = findComponentByCodeLazy("filterAfterTimestamp:", "chatInputType");
 const Resize = findComponentByCodeLazy("sidebarType:", "homeSidebarWidth");
 const ChannelHeader = findComponentByCodeLazy("#{intl::HUB_DIRECTORY_CHANNEL_TITLE}");
