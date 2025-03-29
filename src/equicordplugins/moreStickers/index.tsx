@@ -103,12 +103,11 @@ export default definePlugin({
                 onClick={onClick}
                 style={{ backgroundColor: "transparent" }}
             >
-                {
-                /* Icon taken from: https://github.com/Pitu/Magane/blob/0ebb09acf9901933ebebe19fbd473ec08cf917b3/src/Button.svelte#L29 */}
+                {/* Icon taken from: https://github.com/Pitu/Magane/blob/0ebb09acf9901933ebebe19fbd473ec08cf917b3/src/Button.svelte#L29 */}
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
+                    width="20"
+                    height="20"
                     preserveAspectRatio="xMidYMid meet"
                     viewBox="0 0 24 24"
                     className={cl("icon", { "icon-active": isActive })}

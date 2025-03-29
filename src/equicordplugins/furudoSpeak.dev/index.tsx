@@ -125,7 +125,7 @@ const FurudoSpeakChatToggle: ChatBarButtonFactory = ({ isMainChat }) => {
             tooltip={isEnabled ? "Disable FurudoSpeak" : "Enable FurudoSpeak"}
             onClick={toggle}
         >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" version="1.1" style={{ scale: "1.2" }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" version="1.1" style={{ scale: "1.2" }}>
                 <path fill="currentColor" mask="url(#furudo-speak-msg-mask)" d="M 6.599 3.208 C 5.211 5.326, 4.758 10.131, 4.944 20.750 L 5.001 24 12.001 24 C 19.805 24, 20.702 22.979, 17.014 18.290 C 15.921 16.901, 15.302 15.320, 15.639 14.776 C 16.018 14.161, 16.534 14.247, 17 15 C 18.724 17.789, 20.480 9.573, 18.950 5.880 C 17.777 3.047, 17.133 2.678, 11.316 1.510 C 8.686 0.981, 7.864 1.277, 6.599 3.208 M 12 10.500 C 12 10.775, 12.225 11, 12.500 11 C 12.775 11, 13 10.775, 13 10.500 C 13 10.225, 12.775 10, 12.500 10 C 12.225 10, 12 10.225, 12 10.500 M 16 10.500 C 16 10.775, 16.225 11, 16.500 11 C 16.775 11, 17 10.775, 17 10.500 C 17 10.225, 16.775 10, 16.500 10 C 16.225 10, 16 10.225, 16 10.500 M 9 14 C 9 14.733, 9.300 15.033, 9.667 14.667 C 10.033 14.300, 10.033 13.700, 9.667 13.333 C 9.300 12.967, 9 13.267, 9 14" transform="translate(2, 3)" />
                 {isEnabled && (
                     <>
