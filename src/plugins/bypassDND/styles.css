@@ -10,5 +10,5 @@
 }
 
 .vc-bdnd-list-item:hover {
-    background-color: var(--status-danger);
+    background-color: var(--button-danger-background-hover);
 }

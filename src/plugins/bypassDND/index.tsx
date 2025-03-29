@@ -29,8 +29,7 @@ const settings = definePluginSettings({
             const guilds = list.filter(x => x.startsWith("g:"));
             return (
                 <>
-                    <Forms.FormSection>
-                        <Forms.FormTitle tag="h3">Allowed channels</Forms.FormTitle>
+                    <Forms.FormSection title="Allowed channels">
                         <div className={cl("list-container")}>
                             {(isChannelExtended ? channels : channels.slice(0, 5)).map(c => {
                                 const channel = ChannelStore.getChannel(c.slice(2));
@@ -48,9 +47,7 @@ const settings = definePluginSettings({
                         </div>
                         <ListOverflowUnderFlow length={channels.length} setIsExtended={setIsChannelExtended} isExtended={isChannelExtended} type="channel" />
                     </Forms.FormSection>
-                    <Forms.FormDivider />
-                    <Forms.FormSection>
-                        <Forms.FormTitle tag="h3">Allowed guilds</Forms.FormTitle>
+                    <Forms.FormSection title="Allowed guilds">
                         <div className={cl("list-container")}>
                             {(isGuildExtended ? guilds : guilds.slice(0, 5)).map(g => {
                                 const guild = GuildStore.getGuild(g.slice(2));
