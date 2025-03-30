@@ -2,7 +2,7 @@
 
 Vencord is a community project and welcomes any kind of contribution from anyone!
 
-We have development documentation for new contributors, which can be found at <https://docs.vencord.dev>.
+We have development documentation for new contributors, which can be found at <https://docs.equicord.org>.
 
 All contributions should be made in accordance with our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
@@ -17,9 +17,10 @@ Pull requests can be made either to the `main` or the `dev` branch. However, unl
 Writing a plugin is the primary way to contribute.
 
 Before starting your plugin:
+- Be in our discord
 - Check existing pull requests to see if someone is already working on a similar plugin
-- Check our [plugin requests tracker](https://github.com/Vencord/plugin-requests/issues) to see if there is an existing request, or if the same idea has been rejected
-- If there isn't an existing request, [open one](https://github.com/Vencord/plugin-requests/issues/new?assignees=&labels=&projects=&template=request.yml) yourself
+- Check our [plugin requests tracker](https://discord.com/channels/1173279886065029291/1173334591302553631) to see if there is an existing request, or if the same idea has been rejected
+- If there isn't an existing request, [open one](https://discord.com/channels/1173279886065029291/1173334591302553631) yourself.
   and include that you'd like to work on this yourself. Then wait for feedback to see if the idea even has any chance of being accepted. Or maybe others have some ideas to improve it!
 - Familarise yourself with our plugin rules below to ensure your plugin is not banned
 
