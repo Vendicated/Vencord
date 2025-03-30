@@ -254,8 +254,8 @@ export default definePlugin({
             find: "M7.5 21.7a8.95 8.95 0 0 1 9 0 1 1 0 0 0 1-1.73c",
             replacement: {
                 match: /(?<=className:\i\}\))/,
-                replace: ",onClick:$self.openCompleteQuestUI()"
-            },
+                replace: ",onClick:()=>$self.openCompleteQuestUI()"
+            },            
             predicate: () => settings.store.clickableQuestDiscovery
         }
     ],
