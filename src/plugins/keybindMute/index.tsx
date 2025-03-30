@@ -31,8 +31,8 @@ export default definePlugin({
                 replace: (_, rest) => {
                     const keybinds = [
                         "{value:A.kg4.SET_MUTED,label:R.NW.string(R.t['Fx/4wc'])}",
-                        "{value:A.kg4.SET_DEAFENED,label:R.NW.string(R.t['QbFzMz'])}",
-                        "{value:A.kg4.SET_UNMUTED,label:R.NW.string(R.t['wjcRFR'])}",
+                        "{value:A.kg4.SET_DEAFENED,label:R.NW.string(R.t['wjcRFR'])}",
+                        "{value:A.kg4.SET_UNMUTED,label:R.NW.string(R.t['QbFzMz'])}",
                         "{value:A.kg4.SET_UNDEAFENED,label:R.NW.string(R.t['XiejaG'])}"
                     ].join(",");
 
