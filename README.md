@@ -2,17 +2,19 @@
 
 [![Equibop](https://img.shields.io/badge/Equibop-grey?style=flat)](https://github.com/Equicord/Equibop)
 [![Tests](https://github.com/Equicord/Equicord/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/Equicord/Equicord/actions/workflows/test.yml)
-[![Discord](https://img.shields.io/discord/1207691698386501634.svg?color=768AD4&label=Discord&logo=discord&logoColor=white)](https://discord.gg/5Xh2W87egW)
+[![Discord](https://img.shields.io/discord/1173279886065029291.svg?color=768AD4&label=Discord&logo=discord&logoColor=white)](https://discord.gg/5Xh2W87egW)
 
 Equicord is a fork of [Vencord](https://github.com/Vendicated/Vencord), with over 300+ plugins.
 
 You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, changes, chat or even support.<br><br></br>
 
 ### Extra included plugins
+
 <details>
 <summary>161 additional plugins</summary>
 
 ### All Platforms
+
 - AllCallTimers by MaxHerbold & D3SOX
 - AltKrispSwitch by newwares
 - AlwaysExpandProfile by thororen
@@ -170,43 +172,52 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - YoutubeDescription by arHSM
 
 ### Web Only
+
 - None At This Time
 
 ### Vesktop & Equibop Only
+
 - ScreenRecorder by AutumnVN
 
 ### Discord Desktop Only
+
 - MediaDownloader by Colorman
 - StatusWhilePlaying by thororen
 
 ### Equicord Devbuilds Only
+
 - FurudoSpeak by example-git
 - Shakespearean by vmohammad
 - VoiceChannelLog by Sqaaakoi & maintained by thororen
 
 </details>
 
-
 ## Installing / Uninstalling
 
 Windows
+
 - [GUI](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl.exe)
 - [CLI](https://github.com/Equicord/Equilotl/releases/latest/download/EquilotlCli.exe)
 
 MacOS
+
 - [GUI](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl.MacOS.zip)
 
 Linux
+
 - [GUI-X11](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl-x11)
 - [GUI-Wayland](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl-wayland)
 - [CLI](https://github.com/Equicord/Equilotl/releases/latest/download/EquilotlCli-Linux)
 - [AUR](https://aur.archlinux.org/packages?O=0&K=equicord)
+
 ```shell
 sh -c "$(curl -sS https://raw.githubusercontent.com/Equicord/Equicord/refs/heads/main/misc/install.sh)"
 ```
+
 ## Installing Equicord Devbuild
 
 ### Dependencies
+
 [Git](https://git-scm.com/download) and [Node.JS LTS](https://nodejs.dev/en/) are required.
 
 Install `pnpm`:
@@ -237,6 +248,7 @@ Build Equicord:
 ```shell
 pnpm build
 ```
+
 Inject Equicord into your client:
 
 ```shell
