@@ -79,19 +79,29 @@ function setList(value: BypassedItem[]) {
 
 export default definePlugin({
     name: "BypassDND",
-    description: "Get notifications from specific sources when in do not disturb mode. Right-click on channels/guilds to allow them to bypass do not disturb mode.",
+    description: "Receive notifications and calls from specific channels when in do not disturb mode. Right-click on channels/guilds to allow them to bypass DND mode.",
     authors: [Devs.Inbestigator, Devs.rosemary],
     patches: [{
-        find: ".allowAllMessages(",
+        find: ".allowAllMessages",
+        replacement: [{
+            match: /\i,\i,(\i).+?\i.ignoreStatus/,
+            replace: "$&&&!$self.shouldNotify($1.id)"
+        }, {
+            match: /\(\i,(\i)\).+?.getStatus\(\)===\i\.\i\.DND/,
+            replace: "$&&&!$self.shouldNotify($1)"
+        }]
+    }, {
+        find: "getIncomingCallChannelIds()",
         replacement: {
-            match: /(\i,\i,(\i).+?)\i.ignoreStatus/,
-            replace: "$1$self.shouldNotify($2)"
+            match: /!\i&&(\i).size>0/,
+            replace: "$&||Array.from($1).some($self.shouldNotify)"
         }
     }],
     settings,
-    shouldNotify(channel: Channel) {
+    shouldNotify(id: string) {
         const list = getList();
-        return (list.includes(`c:${channel.id}`) || list.includes(`g:${channel.guild_id}`));
+        const channel = ChannelStore.getChannel(id);
+        return list.includes(`c:${id}`) || (channel && list.includes(`g:${channel.guild_id}`));
     },
     contextMenus: {
         "guild-context": patchContext,
