@@ -26,7 +26,7 @@ import { traceFunction } from "../debug/Tracer";
 import { Flux } from "./common";
 import { AnyModuleFactory, AnyWebpackRequire, ModuleExports, WebpackRequire } from "./wreq";
 
-export const logger = new Logger("Webpack");
+const logger = new Logger("Webpack");
 
 export let _resolveReady: () => void;
 /**
