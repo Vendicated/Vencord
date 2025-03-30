@@ -27,11 +27,6 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Show seconds in message timestamps",
             default: true
-        },
-        formats: {
-            type: OptionType.STRING,
-            description: "Timestamp format",
-            default: "HH:mm:ss"
         }
     }),
 
@@ -56,10 +51,18 @@ export default definePlugin({
     },
 
     renderTimestamp(date: Date, type: "cozy" | "compact" | "tooltip") {
+        // if showSeconds is false, return default Discord formats
+        if (!this.settings.store.showSeconds) {
+            if (type === "tooltip") {
+                return moment(date).format("LLLL");
+            }
+            return moment(date).format("LT");
+        }
+
         const forceUpdater = useForceUpdater();
         const formatTemplate = type === "tooltip"
             ? timeFormats.tooltip
-            : (this.settings.store.formats || timeFormats.default);
+            : timeFormats.default;
 
         useEffect(() => {
             if (formatTemplate.includes("calendar") || formatTemplate.includes("relative")) {
