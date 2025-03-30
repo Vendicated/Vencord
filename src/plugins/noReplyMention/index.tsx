@@ -82,7 +82,7 @@ export default definePlugin({
         const isUserListed = settings.store.userList.includes(message.author.id);
         const isUserExempt = settings.store.shouldPingListedUsers ? isUserListed : !isUserListed;
 
-        const isServerListed = settings.store.userList.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
+        const isServerListed = settings.store.serverList.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
         const isServerExempt = settings.store.shouldPingListedServers ? isServerListed : !isServerListed;
 
         const isExpemt = isUserExempt || isServerExempt;
