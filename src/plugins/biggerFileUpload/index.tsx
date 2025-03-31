@@ -16,7 +16,7 @@ import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Button, DraftType, Forms, Menu, PermissionsBits, PermissionStore, React, Select, SelectedChannelStore, showToast, Switch, TextInput, Toasts, UploadManager, useEffect, useState } from "@webpack/common";
 
-const Native = VencordNative.pluginHelpers.BigFileUpload as PluginNative<typeof import("./native")>;
+const Native = VencordNative.pluginHelpers.BiggerFileUpload as PluginNative<typeof import("./native")>;
 
 const UploadStore = findByPropsLazy("getUploads");
 const OptionClasses = findByPropsLazy("optionName", "optionIcon", "optionLabel");
