@@ -1,6 +1,6 @@
 /*
  * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
+ * Copyright (c) 2025 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,13 +22,20 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "NSFWGateBypass",
     description: "Allows you to access NSFW channels without setting/verifying your age",
-    authors: [Devs.Commandtechno],
+    authors: [Devs.Commandtechno, Devs.dotle31],
     patches: [
         {
             find: ".nsfwAllowed=null",
             replacement: {
                 match: /(?<=\.nsfwAllowed=)null!==.+?(?=[,;])/,
                 replace: "!0",
+            },
+        },
+        {
+            find: ".ageVerificationStatus=1",
+            replacement: {
+                match: /(?<=\.ageVerificationStatus=)(1|2)(?=[,;])/,
+                replace: "3",
             },
         },
     ],
