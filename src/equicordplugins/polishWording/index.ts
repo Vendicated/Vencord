@@ -30,16 +30,11 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "PolishWording",
-    description:
-        "Tweaks your messages to make them look nicer and have better grammar",
+    description: "Tweaks your messages to make them look nicer and have better grammar",
     authors: [Devs.Samwich],
     dependencies: ["MessageEventsAPI"],
-    start() {
-        addMessagePreSendListener(presendObject);
-    },
-    stop() {
-        removeMessagePreSendListener(presendObject);
-    },
+    start: () => addMessagePreSendListener(presendObject),
+    stop: () => removeMessagePreSendListener(presendObject),
     settings,
 });
 
