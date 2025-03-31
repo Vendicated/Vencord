@@ -153,7 +153,15 @@ function makeShortcuts() {
         openModal: { getter: () => ModalAPI.openModal },
         openModalLazy: { getter: () => ModalAPI.openModalLazy },
 
-        Stores: Webpack.fluxStores
+        Stores: Webpack.fluxStores,
+
+        setExperiment: (id: string, bucket: number) => {
+            Common.FluxDispatcher.dispatch({
+                type: "EXPERIMENT_OVERRIDE_BUCKET",
+                experimentId: id,
+                experimentBucket: bucket,
+            });
+        },
     };
 }
 

@@ -26,6 +26,8 @@ import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/com
 import { User } from "discord-types/general";
 import { PropsWithChildren } from "react";
 
+import managedStyle from "./styles.css?managed";
+
 const settings = definePluginSettings({
     showAvatars: {
         type: OptionType.BOOLEAN,
@@ -67,24 +69,19 @@ function typingUserColor(guildId: string, userId: string) {
 const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
     return (
         <strong
+            className="vc-typing-user"
             role="button"
             onClick={() => {
                 openUserProfile(user.id);
             }}
             style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
                 color: typingUserColor(guildId, user.id),
-                cursor: "pointer"
             }}
         >
             {settings.store.showAvatars && (
-                <div>
-                    <Avatar
-                        size="SIZE_16"
-                        src={user.getAvatarURL(guildId, 128)} />
-                </div>
+                <Avatar
+                    size="SIZE_16"
+                    src={user.getAvatarURL(guildId, 128)} />
             )}
             {GuildMemberStore.getNick(guildId!, user.id)
                 || (!guildId && RelationshipStore.getNickname(user.id))
@@ -100,7 +97,7 @@ export default definePlugin({
     description: "Show avatars and role colours in the typing indicator",
     authors: [Devs.zt],
     settings,
-
+    managedStyle,
     patches: [
         {
             find: "#{intl::THREE_USERS_TYPING}",
@@ -108,7 +105,7 @@ export default definePlugin({
                 {
                     // Style the indicator and add function call to modify the children before rendering
                     match: /(?<=children:\[(\i)\.length>0.{0,200}?"aria-atomic":!0,children:)\i(?<=guildId:(\i).+?)/,
-                    replace: "$self.renderTypingUsers({ users: $1, guildId: $2, children: $& }),style:$self.TYPING_TEXT_STYLE"
+                    replace: "$self.renderTypingUsers({ users: $1, guildId: $2, children: $& })"
                 },
                 {
                     // Changes the indicator to keep the user object when creating the list of typing users
@@ -124,12 +121,6 @@ export default definePlugin({
             ]
         }
     ],
-
-    TYPING_TEXT_STYLE: {
-        display: "grid",
-        gridAutoFlow: "column",
-        gridGap: "0.25em"
-    },
 
     buildSeveralUsers,
 

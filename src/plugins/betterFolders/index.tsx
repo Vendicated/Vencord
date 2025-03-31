@@ -104,10 +104,14 @@ export const settings = definePluginSettings({
     }
 });
 
+let cssMade = false;
+
+const cssElementId = "VC-BetterFolders";
+
 export default definePlugin({
     name: "BetterFolders",
     description: "Shows server folders on dedicated sidebar and adds folder related improvements",
-    authors: [Devs.juby, Devs.AutumnVN, Devs.Nuckyz],
+    authors: [Devs.juby, Devs.AutumnVN, Devs.Nuckyz, Devs.sadan],
 
     settings,
 
@@ -213,11 +217,18 @@ export default definePlugin({
         {
             find: "#{intl::DISCODO_DISABLED}",
             predicate: () => settings.store.closeAllHomeButton,
-            replacement: {
-                // Close all folders when clicking the home button
-                match: /(?<=onClick:\(\)=>{)(?=.{0,300}"discodo")/,
-                replace: "$self.closeFolders();"
-            }
+            group: true,
+            replacement: [
+                {
+                    // Render the Better Folders sidebar
+                    match: /(?<=[[,])((?:!?\i&&)+)\(.{0,50}({className:\i\.guilds,themeOverride:\i})\)/g,
+                    replace: (_, conditions, props) => `${_},${conditions}$self.FolderSideBar({...${props}})`
+                },
+                {
+                    match: /(?<=className:)(\i\.base)(?=,)/,
+                    replace: "($self.makePatchedBaseCSS($1))"
+                }
+            ]
         }
     ],
 
@@ -263,6 +274,47 @@ export default definePlugin({
         LOGOUT() {
             closeFolders();
         }
+    },
+
+    gridStyle: "vc-BetterFolders-sidebar-grid",
+    makePatchedBaseCSS(className: string) {
+        done: try {
+            if (cssMade) break done;
+            const rule = [...document.styleSheets]
+                .flatMap(x => [...x.cssRules])
+                // cant do includes because they have a `not ((grid-template-columns`
+                // dumb type inference
+                .filter((x): x is CSSSupportsRule => x instanceof CSSSupportsRule && x.conditionText.startsWith("(grid-template-columns"))
+                .flatMap(x => [...x.cssRules])
+                .filter(x => x instanceof CSSStyleRule)
+                .find(x => x.selectorText.endsWith(`.${className}`));
+            if (!rule) {
+                console.error("Failed to find css rule for betterFolders");
+                break done;
+            }
+            const areas = rule.style.gridTemplateAreas
+                .split('" "')
+                .map(x => x.replace(/"/g, "").split(" "));
+            areas[0].splice(1, 0, areas[0][0]);
+            areas[1].splice(1, 0, "sidebar");
+            areas[2].splice(1, 0, "sidebar");
+            const css = `
+            .visual-refresh .${this.gridStyle} {
+                grid-template-areas: ${areas.map(x => `"${x.join(" ")}"`).join(" ")};
+                grid-template-columns: ${rule.style.gridTemplateColumns.replace(/(?<=guildsEnd\])/, " min-content [sidebarEnd]")};
+            }
+            `;
+            const element = document.createElement("style");
+            element.id = cssElementId;
+            element.textContent = css;
+            document.getElementById(cssElementId)?.remove();
+            document.head.appendChild(element);
+            cssMade = true;
+        } catch (e) {
+            console.error(e);
+            return className;
+        }
+        return `${className} ${this.gridStyle}`;
     },
 
     getGuildTree(isBetterFolders: boolean, originalTree: any, expandedFolderIds?: Set<any>) {

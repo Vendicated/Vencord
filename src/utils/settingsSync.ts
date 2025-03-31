@@ -19,7 +19,7 @@
 import { DataStore } from "@api/index";
 import { showNotification } from "@api/Notifications";
 import { PlainSettings, Settings } from "@api/Settings";
-import { moment, Toasts } from "@webpack/common";
+import { moment, SettingsRouter, Toasts } from "@webpack/common";
 import { deflateSync, inflateSync } from "fflate";
 
 import { getCloudAuth, getCloudUrl } from "./cloud";
@@ -171,6 +171,19 @@ export async function getCloudSettings(shouldNotify = true, force = false) {
                 "If-None-Match": Settings.cloud.settingsSyncVersion.toString()
             },
         });
+
+        if (res.status === 401) {
+            // User switched to an account that isn't connected to cloud
+            showNotification({
+                title: "Cloud Settings",
+                body: "Cloud sync was disabled because this account isn't connected to the Vencloud App. You can enable it again by connecting this account in Cloud Settings. (note: it will store your preferences separately)",
+                color: "var(--yellow-360)",
+                onClick: () => SettingsRouter.open("VencordCloud")
+            });
+            // Disable cloud sync globally
+            Settings.cloud.authenticated = false;
+            return false;
+        }
 
         if (res.status === 404) {
             cloudSettingsLogger.info("No settings on the cloud");
