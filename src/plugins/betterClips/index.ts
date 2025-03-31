@@ -33,6 +33,12 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
+    },
+    moreClipDurations: {
+        description: "Adds more clip durations.",
+        type: OptionType.BOOLEAN,
+        default: true,
+        restartNeeded: true
     }
 });
 
@@ -57,6 +63,22 @@ export default definePlugin({
             replacement: {
                 match: /isVoiceRecordingAllowedForUser\(\w+\){/,
                 replace: "$&return true;"
+            }
+        },
+        {
+            predicate: () => settings.store.moreClipDurations,
+            find: "MINUTES_2=",
+            replacement: {
+                match: /((\i)\[(\i)\.MINUTES_2=2\*(\i)\.(\i)\.(\i)\.MINUTE\]="MINUTES_2",)/,
+                replace: "$&$2[$3.MINUTES_3=3*$4.$5.$6.MINUTE]=\"MINUTES_3\",$2[$3.MINUTES_5=5*$4.$5.$6.MINUTE]=\"MINUTES_5\","
+            }
+        },
+        {
+            predicate: () => settings.store.moreClipDurations,
+            find: "count:2})",
+            replacement: {
+                match: /\{value:(\i)\.(\i)\.MINUTES_2,label:(\i)\.(\i)\.formatToPlainString\((\i)\.(\i)\.(\w+),\{count:2\}\)\}/,
+                replace: "$&,{value:$1.$2.MINUTES_3,label:$3.$4.formatToPlainString($5.$6.$7,{count:3})},{value:$1.$2.MINUTES_5,label:$3.$4.formatToPlainString($5.$6.$7,{count:5})}"
             }
         }
     ],
