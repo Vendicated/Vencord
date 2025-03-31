@@ -13,8 +13,45 @@ import { useEffect } from "@webpack/common";
 import { useForceUpdater } from "@utils/react";
 
 const timeFormats = {
-    default: "HH:mm:ss",
-    tooltip: "LLLL:ss"
+    cozyFormat: {
+        default: "[calendar]"
+    },
+    compactFormat: {
+        default: "LT:ss"
+    },
+    tooltipFormat: {
+        default: "LLLL:ss • [relative]"
+    },
+    sameDayFormat: {
+        default: "HH:mm:ss"
+    },
+    lastDayFormat: {
+        default: "[yesterday] HH:mm:ss"
+    },
+    lastWeekFormat: {
+        default: "ddd DD/MM/YYYY HH:mm:ss"
+    },
+    sameElseFormat: {
+        default: "ddd DD/MM/YYYY HH:mm:ss"
+    }
+};
+
+const format = (date: Date, formatTemplate: string): string => {
+    const mmt = moment(date);
+
+    const sameDayFormat = timeFormats.sameDayFormat.default;
+    const lastDayFormat = timeFormats.lastDayFormat.default;
+    const lastWeekFormat = timeFormats.lastWeekFormat.default;
+    const sameElseFormat = timeFormats.sameElseFormat.default;
+
+    return mmt.format(formatTemplate)
+        .replace("calendar", () => mmt.calendar(null, {
+            sameDay: sameDayFormat,
+            lastDay: lastDayFormat,
+            lastWeek: lastWeekFormat,
+            sameElse: sameElseFormat
+        }))
+        .replace("relative", () => mmt.fromNow());
 };
 
 export default definePlugin({
@@ -51,18 +88,34 @@ export default definePlugin({
     },
 
     renderTimestamp(date: Date, type: "cozy" | "compact" | "tooltip") {
-        // if showSeconds is false, return default Discord formats
-        if (!this.settings.store.showSeconds) {
-            if (type === "tooltip") {
-                return moment(date).format("LLLL");
-            }
-            return moment(date).format("LT");
-        }
-
         const forceUpdater = useForceUpdater();
-        const formatTemplate = type === "tooltip"
-            ? timeFormats.tooltip
-            : timeFormats.default;
+        let formatTemplate: string;
+
+        if (!this.settings.store.showSeconds) {
+            switch (type) {
+                case "cozy":
+                    formatTemplate = "[calendar]";
+                    break;
+                case "compact":
+                    formatTemplate = "LT";
+                    break;
+                case "tooltip":
+                    formatTemplate = "LLLL";
+                    break;
+            }
+        } else {
+            switch (type) {
+                case "cozy":
+                    formatTemplate = timeFormats.cozyFormat.default;
+                    break;
+                case "compact":
+                    formatTemplate = timeFormats.compactFormat.default;
+                    break;
+                case "tooltip":
+                    formatTemplate = timeFormats.tooltipFormat.default;
+                    break;
+            }
+        }
 
         useEffect(() => {
             if (formatTemplate.includes("calendar") || formatTemplate.includes("relative")) {
@@ -71,6 +124,6 @@ export default definePlugin({
             }
         }, []);
 
-        return moment(date).format(formatTemplate);
+        return format(date, formatTemplate);
     }
 }); 
