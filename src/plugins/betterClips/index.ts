@@ -45,7 +45,7 @@ export default definePlugin({
     patches: [
         {
             predicate: () => settings.store.clipAllStreams,
-            find: "isViewerClippingAllowedForUser",
+            find: "}isViewerClippingAllowedForUser",
             replacement: {
                 match: /isViewerClippingAllowedForUser\(\w+\){/,
                 replace: "$&return true;"
@@ -53,7 +53,7 @@ export default definePlugin({
         },
         {
             predicate: () => settings.store.clipAllParticipants,
-            find: "isVoiceRecordingAllowedForUser",
+            find: "}isVoiceRecordingAllowedForUser",
             replacement: {
                 match: /isVoiceRecordingAllowedForUser\(\w+\){/,
                 replace: "$&return true;"
