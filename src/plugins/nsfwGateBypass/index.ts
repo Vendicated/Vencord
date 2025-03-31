@@ -32,9 +32,9 @@ export default definePlugin({
             },
         },
         {
-            find: ".ageVerificationStatus=1",
+            find: ".ageVerificationStatus=null",
             replacement: {
-                match: /(?<=\.ageVerificationStatus=)(1|2)(?=[,;])/,
+                match: /(?<=\.ageVerificationStatus=)null!==.+?(?=[,;])/,
                 replace: "3",
             },
         },
