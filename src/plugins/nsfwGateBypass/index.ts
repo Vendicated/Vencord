@@ -31,5 +31,12 @@ export default definePlugin({
                 replace: "!0",
             },
         },
+        {
+            find: ".ageVerificationStatus=null",
+            replacement: {
+                match: /(?<=\.ageVerificationStatus=)null!==.+?(?=[,;])/,
+                replace: "3",
+            },
+        },
     ],
 });
