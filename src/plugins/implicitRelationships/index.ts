@@ -133,6 +133,7 @@ export default definePlugin({
         nonFriendAffinities.forEach(id => {
             relationships[id] = 5;
         });
+        RelationshipStore.emitChange();
 
         const toRequest = nonFriendAffinities.filter(id => !UserStore.getUser(id));
         const allGuildIds = Object.keys(GuildStore.getGuilds());
