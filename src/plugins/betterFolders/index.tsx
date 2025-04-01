@@ -208,15 +208,6 @@ export default definePlugin({
         {
             find: "APPLICATION_LIBRARY,render:",
             predicate: () => settings.store.sidebar,
-            replacement: {
-                // Render the Better Folders sidebar
-                match: /(container.{0,50}({className:\i\.guilds,themeOverride:\i})\))/,
-                replace: "$1,$self.FolderSideBar({...$2})"
-            }
-        },
-        {
-            find: "#{intl::DISCODO_DISABLED}",
-            predicate: () => settings.store.closeAllHomeButton,
             group: true,
             replacement: [
                 {
@@ -229,6 +220,15 @@ export default definePlugin({
                     replace: "($self.makePatchedBaseCSS($1))"
                 }
             ]
+        },
+        {
+            find: "#{intl::DISCODO_DISABLED}",
+            predicate: () => settings.store.closeAllHomeButton,
+            replacement: {
+                // Close all folders when clicking the home button
+                match: /(?<=onClick:\(\)=>{)(?=.{0,300}"discodo")/,
+                replace: "$self.closeFolders();"
+            }
         }
     ],
 
