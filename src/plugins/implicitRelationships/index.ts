@@ -161,6 +161,7 @@ export default definePlugin({
                 type: "GUILD_MEMBERS_REQUEST",
                 guildIds: allGuildIds,
                 userIds: toRequest.slice(i, i + 100),
+                presences: true,
                 nonce: sentNonce,
             });
         }
