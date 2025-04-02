@@ -65,12 +65,12 @@
     background: var(--background-modifier-accent);
 }
 
-.vc-bactivities-controls .carousell {
+.vc-bactivities-controls .carousel {
     display: flex;
     align-items: center;
 }
 
-.vc-bactivities-controls .carousell .dot {
+.vc-bactivities-controls .carousel .dot {
     margin: 0 4px;
     width: 10px;
     cursor: pointer;
@@ -81,11 +81,11 @@
     opacity: 0.6;
 }
 
-.vc-bactivities-controls .carousell .dot:hover:not(.selected) {
+.vc-bactivities-controls .carousel .dot:hover:not(.selected) {
     opacity: 1;
 }
 
-.vc-bactivities-controls .carousell .dot.selected {
+.vc-bactivities-controls .carousel .dot.selected {
     opacity: 1;
     background: var(--dot-color, var(--brand-500));
 }
