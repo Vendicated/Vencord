@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -91,7 +91,7 @@ export default definePlugin({
             ],
             execute: (options, ctx) => {
                 const track: Track | null = Spotify.getTrack();
-                const message = options.find(option => option.name === "message")?.value;
+                const message = findOption(options, "message");
                 if (track === null) {
                     sendBotMessage(ctx.channel.id, {
                         content: "You're not listening to any music."
@@ -119,7 +119,7 @@ export default definePlugin({
             ],
             execute: (options, ctx) => {
                 const track: Track | null = Spotify.getTrack();
-                const message = options.find(option => option.name === "message")?.value;
+                const message = findOption(options, "message");
                 if (track === null) {
                     sendBotMessage(ctx.channel.id, {
                         content: "You're not listening to any music."
@@ -146,7 +146,7 @@ export default definePlugin({
             ],
             execute: (options, ctx) => {
                 const track: Track | null = Spotify.getTrack();
-                const message = options.find(option => option.name === "message")?.value;
+                const message = findOption(options, "message");
                 if (track === null) {
                     sendBotMessage(ctx.channel.id, {
                         content: "You're not listening to any music."
