@@ -8,10 +8,10 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { PresenceStore, React, useEffect, useMemo, UserStore, useState, useStateFromStores } from "@webpack/common";
 import { JSX } from "react";
 
+import { CarouselControls } from "../components/CarouselControls";
 import { settings } from "../settings";
 import { Activity, AllActivitiesProps } from "../types";
 import { ActivityView, getActivityApplication } from "../utils";
-import { CarouselControls } from "./CarouselControls";
 
 export function showAllActivitiesComponent({ activity, user, ...props }: Readonly<AllActivitiesProps>): JSX.Element | null {
     const currentUser = UserStore.getCurrentUser();

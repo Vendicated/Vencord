@@ -10,8 +10,8 @@ import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-import { patchActivityList } from "./components/ActivityList";
-import { showAllActivitiesComponent } from "./components/AllActivities";
+import { patchActivityList } from "./patch-helpers/activityList";
+import { showAllActivitiesComponent } from "./patch-helpers/popout";
 import { settings } from "./settings";
 
 migratePluginSettings("BetterActivities", "MemberListActivities");
