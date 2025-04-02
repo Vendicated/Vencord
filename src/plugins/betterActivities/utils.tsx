@@ -26,19 +26,6 @@ export const ActivityView = findComponentByCodeLazy<ActivityViewProps>('location
 
 export const cl = classNameFactory("vc-bactivities-");
 
-function getImageUrl(image: string, applicationId: string): string | null {
-    const src = image.startsWith("mp:")
-        ? `https://media.discordapp.net/${image.replace(/mp:/, "")}`
-        : `https://cdn.discordapp.com/app-assets/${applicationId}/${image}.png`;
-
-    // Skip GIFs if rendering is disabled
-    if (src.endsWith(".gif") && !settings.store.renderGifs) {
-        return null;
-    }
-
-    return src;
-}
-
 export function getActivityApplication(activity: Activity | null) {
     if (!activity) return undefined;
     const { application_id } = activity;
@@ -64,8 +51,16 @@ export function getApplicationIcons(activities: Activity[], preferSmall = false)
             const largeText = large_text ?? "Large Text";
 
             const addImage = (image: string, alt: string) => {
-                const src = getImageUrl(image, activity.application_id!);
-                if (src) {
+                if (image.startsWith("mp:")) {
+                    const discordMediaLink = `https://media.discordapp.net/${image.replace(/mp:/, "")}`;
+                    if (settings.store.renderGifs || !discordMediaLink.endsWith(".gif")) {
+                        applicationIcons.push({
+                            image: { src: discordMediaLink, alt },
+                            activity
+                        });
+                    }
+                } else {
+                    const src = `https://cdn.discordapp.com/app-assets/${application_id}/${image}.png`;
                     applicationIcons.push({
                         image: { src, alt },
                         activity
