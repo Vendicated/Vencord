@@ -6,10 +6,9 @@
 
 import { classNameFactory } from "@api/Styles";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { User } from "discord-types/general";
 
 import { settings } from "./settings";
-import { Activity, Application, ApplicationIcon } from "./types";
+import { Activity, ActivityViewProps, Application, ApplicationIcon } from "./types";
 
 const ApplicationStore: {
     getApplication: (id: string) => Application | null;
@@ -23,12 +22,7 @@ const fetchedApplications = new Map<string, Application | null>();
 
 const xboxUrl = "https://discord.com/assets/9a15d086141be29d9fcd.png"; // TODO: replace with "renderXboxImage"?
 
-export const ActivityView = findComponentByCodeLazy<{
-    activity: Activity | null;
-    user: User;
-    application?: Application;
-    currentUser: User;
-}>('location:"UserProfileActivityCard",');
+export const ActivityView = findComponentByCodeLazy<ActivityViewProps>('location:"UserProfileActivityCard",');
 
 export const cl = classNameFactory("vc-bactivities-");
 
@@ -56,7 +50,7 @@ export function getActivityApplication(activity: Activity | null) {
     return application ?? undefined;
 }
 
-export function getApplicationIcons(activities: Activity[], preferSmall = false) {
+export function getApplicationIcons(activities: Activity[], preferSmall = false): ApplicationIcon[] {
     const applicationIcons: ApplicationIcon[] = [];
     const applications = activities.filter(activity => activity.application_id || activity.platform);
 

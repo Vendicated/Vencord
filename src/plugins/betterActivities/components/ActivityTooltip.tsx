@@ -6,16 +6,9 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { UserStore } from "@webpack/common";
-import { User } from "discord-types/general";
 
-import { Activity, Application } from "../types";
+import { ActivityTooltipProps } from "../types";
 import { ActivityView, cl } from "../utils";
-
-interface ActivityTooltipProps {
-    activity: Activity;
-    application?: Application;
-    user: User;
-}
 
 export function ActivityTooltip({ activity, application, user }: Readonly<ActivityTooltipProps>) {
     const currentUser = UserStore.getCurrentUser();

@@ -6,15 +6,9 @@
 
 import { React, Tooltip } from "@webpack/common";
 
-import { Activity } from "../types";
+import { CarouselControlsProps } from "../types";
 import { cl } from "../utils";
 import { Caret } from "./Caret";
-
-interface CarouselControlsProps {
-    activities: Activity[];
-    currentActivity: Activity;
-    onActivityChange: (activity: Activity) => void;
-}
 
 export function CarouselControls({ activities, currentActivity, onActivityChange }: CarouselControlsProps) {
     const currentIndex = activities.indexOf(currentActivity);

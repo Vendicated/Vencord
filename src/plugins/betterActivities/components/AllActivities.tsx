@@ -6,21 +6,12 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { PresenceStore, React, useEffect, useMemo, UserStore, useState, useStateFromStores } from "@webpack/common";
-import { User } from "discord-types/general";
 import { JSX } from "react";
 
 import { settings } from "../settings";
-import { Activity, Application } from "../types";
+import { Activity, AllActivitiesProps } from "../types";
 import { ActivityView, getActivityApplication } from "../utils";
 import { CarouselControls } from "./CarouselControls";
-
-interface AllActivitiesProps {
-    activity: Activity;
-    user: User;
-    application: Application;
-    type: string;
-    [key: string]: any;
-}
 
 export function showAllActivitiesComponent({ activity, user, ...props }: Readonly<AllActivitiesProps>): JSX.Element | null {
     const currentUser = UserStore.getCurrentUser();
