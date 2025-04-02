@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { Link } from "@components/Link";
 import { openUpdaterModal } from "@components/VencordSettings/UpdaterTab";
-import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, EQUIBOP_CONTRIB_ROLE_ID, EQUICORD_TEAM, GUILD_ID, SUPPORT_CHANNEL_ID, SUPPORT_CHANNEL_IDS, VC_CONTRIB_ROLE_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID, VC_KNOWN_ISSUES_CHANNEL_ID, VC_REGULAR_ROLE_ID, VC_SUPPORT_CHANNEL_ID, VENBOT_USER_ID, VENCORD_CONTRIB_ROLE_ID } from "@utils/constants";
+import { CONTRIB_ROLE_ID, Devs, DONOR_ROLE_ID, EQUCORD_HELPERS, EQUIBOP_CONTRIB_ROLE_ID, EQUICORD_TEAM, GUILD_ID, SUPPORT_CHANNEL_ID, VC_CONTRIB_ROLE_ID, VC_DONOR_ROLE_ID, VC_GUILD_ID, VC_REGULAR_ROLE_ID, VC_SUPPORT_CHANNEL_ID, VENCORD_CONTRIB_ROLE_ID } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
@@ -32,7 +32,7 @@ import { onlyOnce } from "@utils/onlyOnce";
 import { makeCodeblock } from "@utils/text";
 import definePlugin from "@utils/types";
 import { checkForUpdates, isOutdated, update } from "@utils/updater";
-import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
+import { Alerts, Button, Card, ChannelStore, Forms, GuildMemberStore, Parser, PermissionsBits, PermissionStore, RelationshipStore, showToast, Text, Toasts, UserStore } from "@webpack/common";
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
@@ -196,7 +196,8 @@ export default definePlugin({
 
     flux: {
         async CHANNEL_SELECT({ channelId }) {
-            if (!SUPPORT_CHANNEL_IDS.includes(channelId)) return;
+            const isSupportChannel = channelId === SUPPORT_CHANNEL_ID;
+            if (!isSupportChannel) return;
 
             const selfId = UserStore.getCurrentUser()?.id;
             if (!selfId || isPluginDev(selfId) || isEquicordPluginDev(selfId)) return;
@@ -281,11 +282,12 @@ export default definePlugin({
     renderMessageAccessory(props) {
         const buttons = [] as JSX.Element[];
 
+        const equicordSupport = GuildMemberStore.getMember(GUILD_ID, props.message.author.id)?.roles?.includes(EQUCORD_HELPERS);
+
         const shouldAddUpdateButton =
             !IS_UPDATER_DISABLED
             && (
-                (props.channel.id === VC_KNOWN_ISSUES_CHANNEL_ID) ||
-                (props.channel.id === VC_SUPPORT_CHANNEL_ID && props.message.author.id === VENBOT_USER_ID)
+                (props.channel.id === SUPPORT_CHANNEL_ID && equicordSupport)
             )
             && props.message.content?.includes("update");
 
@@ -311,7 +313,7 @@ export default definePlugin({
             );
         }
 
-        if (props.channel.id === SUPPORT_CHANNEL_ID) {
+        if (props.channel.id === SUPPORT_CHANNEL_ID && PermissionStore.can(PermissionsBits.SEND_MESSAGES, props.channel)) {
             if (props.message.content.includes("/equicord-debug") || props.message.content.includes("/equicord-plugins")) {
                 buttons.push(
                     <Button
@@ -334,7 +336,7 @@ export default definePlugin({
                 );
             }
 
-            if (props.message.author.id === VENBOT_USER_ID) {
+            if (equicordSupport) {
                 const match = CodeBlockRe.exec(props.message.content || props.message.embeds[0]?.rawDescription || "");
                 if (match) {
                     buttons.push(
