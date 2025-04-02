@@ -1,0 +1,138 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { classNameFactory } from "@api/Styles";
+import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
+import { User } from "discord-types/general";
+
+import { settings } from "./settings";
+import { Activity, Application, ApplicationIcon } from "./types";
+
+const ApplicationStore: {
+    getApplication: (id: string) => Application | null;
+} = findStoreLazy("ApplicationStore");
+
+const { fetchApplication }: {
+    fetchApplication: (id: string) => Promise<Application | null>;
+} = findByPropsLazy("fetchApplication");
+
+const fetchedApplications = new Map<string, Application | null>();
+
+const xboxUrl = "https://discord.com/assets/9a15d086141be29d9fcd.png"; // TODO: replace with "renderXboxImage"?
+
+export const ActivityView = findComponentByCodeLazy<{
+    activity: Activity | null;
+    user: User;
+    application?: Application;
+    currentUser: User;
+}>('location:"UserProfileActivityCard",');
+
+export const cl = classNameFactory("vc-bactivities-");
+
+function getImageUrl(image: string, applicationId: string): string | null {
+    const src = image.startsWith("mp:")
+        ? `https://media.discordapp.net/${image.replace(/mp:/, "")}`
+        : `https://cdn.discordapp.com/app-assets/${applicationId}/${image}.png`;
+
+    // Skip GIFs if rendering is disabled
+    if (src.endsWith(".gif") && !settings.store.renderGifs) {
+        return null;
+    }
+
+    return src;
+}
+
+export function getActivityApplication(activity: Activity | null) {
+    if (!activity) return undefined;
+    const { application_id } = activity;
+    if (!application_id) return undefined;
+    let application = ApplicationStore.getApplication(application_id);
+    if (!application && fetchedApplications.has(application_id)) {
+        application = fetchedApplications.get(application_id) ?? null;
+    }
+    return application ?? undefined;
+}
+
+export function getApplicationIcons(activities: Activity[], preferSmall = false) {
+    const applicationIcons: ApplicationIcon[] = [];
+    const applications = activities.filter(activity => activity.application_id || activity.platform);
+
+    for (const activity of applications) {
+        const { assets, application_id, platform } = activity;
+        if (!application_id && !platform) continue;
+
+        if (assets) {
+            const { small_image, small_text, large_image, large_text } = assets;
+            const smallText = small_text ?? "Small Text";
+            const largeText = large_text ?? "Large Text";
+
+            const addImage = (image: string, alt: string) => {
+                const src = getImageUrl(image, activity.application_id!);
+                if (src) {
+                    applicationIcons.push({
+                        image: { src, alt },
+                        activity
+                    });
+                }
+            };
+
+            if (preferSmall) {
+                if (small_image) {
+                    addImage(small_image, smallText);
+                } else if (large_image) {
+                    addImage(large_image, largeText);
+                }
+            } else {
+                if (large_image) {
+                    addImage(large_image, largeText);
+                } else if (small_image) {
+                    addImage(small_image, smallText);
+                }
+            }
+        } else if (application_id) {
+            let application = ApplicationStore.getApplication(application_id);
+            if (!application) {
+                if (fetchedApplications.has(application_id)) {
+                    application = fetchedApplications.get(application_id) as Application | null;
+                } else {
+                    fetchedApplications.set(application_id, null);
+                    fetchApplication(application_id).then(app => {
+                        fetchedApplications.set(application_id, app);
+                    }).catch(console.error);
+                }
+            }
+
+            if (application) {
+                if (application.icon) {
+                    const src = `https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`;
+                    applicationIcons.push({
+                        image: { src, alt: application.name },
+                        activity,
+                        application
+                    });
+                } else if (platform === "xbox") {
+                    applicationIcons.push({
+                        image: { src: xboxUrl, alt: "Xbox" },
+                        activity,
+                        application
+                    });
+                }
+            } else if (platform === "xbox") {
+                applicationIcons.push({
+                    image: { src: xboxUrl, alt: "Xbox" },
+                    activity
+                });
+            }
+        } else if (platform === "xbox") {
+            applicationIcons.push({
+                image: { src: xboxUrl, alt: "Xbox" },
+                activity
+            });
+        }
+    }
+
+    return applicationIcons;
+}
