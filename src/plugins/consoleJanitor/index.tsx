@@ -5,8 +5,11 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { ErrorBoundary, Flex } from "@components/index";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType, StartAt } from "@utils/types";
+import { Margins } from "@utils/margins";
+import definePlugin, { defineDefault, OptionType, StartAt } from "@utils/types";
+import { Checkbox, Forms, Text } from "@webpack/common";
 
 const Noop = () => { };
 const NoopLogger = {
@@ -23,6 +26,48 @@ const NoopLogger = {
 };
 
 const logAllow = new Set();
+
+interface AllowLevels {
+    error: boolean;
+    warn: boolean;
+    trace: boolean;
+    log: boolean;
+    info: boolean;
+    debug: boolean;
+}
+
+interface AllowLevelSettingProps {
+    settingKey: keyof AllowLevels;
+}
+
+function AllowLevelSetting({ settingKey }: AllowLevelSettingProps) {
+    const { allowLevel } = settings.use(["allowLevel"]);
+    const value = allowLevel[settingKey];
+
+    return (
+        <Checkbox
+            value={value}
+            onChange={(_, newValue) => settings.store.allowLevel[settingKey] = newValue}
+            size={20}
+        >
+            <Text variant="text-sm/normal">{settingKey[0].toUpperCase() + settingKey.slice(1)}</Text>
+        </Checkbox>
+    );
+}
+
+const AllowLevelSettings = ErrorBoundary.wrap(() => {
+    return (
+        <Forms.FormSection>
+            <Forms.FormTitle tag="h3">Filter List</Forms.FormTitle>
+            <Forms.FormText className={Margins.bottom8} type={Forms.FormText.Types.DESCRIPTION}>Always allow loggers of these types</Forms.FormText>
+            <Flex flexDirection="row">
+                {Object.keys(settings.store.allowLevel).map(key => (
+                    <AllowLevelSetting key={key} settingKey={key as keyof AllowLevels} />
+                ))}
+            </Flex>
+        </Forms.FormSection>
+    );
+});
 
 const settings = definePluginSettings({
     disableLoggers: {
@@ -45,6 +90,18 @@ const settings = definePluginSettings({
             logAllow.clear();
             newVal.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
         }
+    },
+    allowLevel: {
+        type: OptionType.COMPONENT,
+        component: AllowLevelSettings,
+        default: defineDefault<AllowLevels>({
+            error: true,
+            warn: false,
+            trace: false,
+            log: false,
+            info: false,
+            debug: false
+        })
     }
 });
 
@@ -61,8 +118,9 @@ export default definePlugin({
     },
 
     NoopLogger: () => NoopLogger,
-    shouldLog(logger: string) {
-        return logAllow.has(logger);
+
+    shouldLog(logger: string, level: keyof AllowLevels) {
+        return logAllow.has(logger) || settings.store.allowLevel[level] === true;
     },
 
     patches: [
@@ -136,13 +194,13 @@ export default definePlugin({
                 replace: ""
             }
         },
-        // Patches discords generic logger function
+        // Patches Discord generic logger function
         {
             find: "Σ:",
             predicate: () => settings.store.disableLoggers,
             replacement: {
                 match: /(?<=&&)(?=console)/,
-                replace: "$self.shouldLog(arguments[0])&&"
+                replace: "$self.shouldLog(arguments[0],arguments[1])&&"
             }
         },
         {
