@@ -81,9 +81,9 @@ export default definePlugin({
     patches: [
         {
             // this also affects name headers in chats outside of servers
-            find: ".USERNAME),{",
+            find: '"BaseUsername"',
             replacement: {
-                match: /style:"username"===.{0,25}void 0/,
+                match: /style:\i.{0,100}void 0:void 0/,
                 replace: "style:{color:$self.colorIfServer(arguments[0])}"
             },
             noWarn: true,
