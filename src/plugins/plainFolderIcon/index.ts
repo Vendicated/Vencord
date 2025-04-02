@@ -25,9 +25,19 @@ export default definePlugin({
     authors: [Devs.botato],
     patches: [{
         find: ".expandedFolderIconWrapper",
-        replacement: [{
-            match: /\(\w\|\|\w\)&&(\(.{0,40}\(.{1,3}\.animated)/,
-            replace: "$1",
-        }]
+        replacement: [
+            // there are two elements, the first one is the plain folder icon
+            // the second is the four guild preview icons
+            // always show this one (the plain icons)
+            {
+                match: /\(\i\|\|\i\)&&(\(.{0,40}\(\i\.animated)/,
+                replace: "$1",
+            },
+            // and never show this one (the guild preview icons)
+            {
+                match: /\(\i\|\|!\i\)&&(\(.{0,40}\(\i\.animated)/,
+                replace: "false&&$1",
+            }
+        ]
     }]
 });
