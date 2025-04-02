@@ -33,7 +33,7 @@ export default definePlugin({
             find: '"Message Username"',
             replacement: {
                 match: /#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?renderPopout:.+?(?=\])/,
-                replace: "$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"
+                replace: "$&,...Vencord.Api.MessageDecorations.__addMessageDecorationsToMessage(arguments[0])"
             }
         }
     ]
