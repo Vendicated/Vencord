@@ -247,7 +247,7 @@ export default function PluginSettings() {
 
     const [searchValue, setSearchValue] = React.useState({ value: "", status: SearchStatus.ALL });
 
-    const search = searchValue.value.toLowerCase();
+    const search = searchValue.value.toLowerCase().replace(/\s+/g, "");
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
     const onStatusChange = (status: SearchStatus) => setSearchValue(prev => ({ ...prev, status }));
 
@@ -260,9 +260,9 @@ export default function PluginSettings() {
         if (!search.length) return true;
 
         return (
-            plugin.name.toLowerCase().includes(search.replace(/\s+/g, "")) ||
-            plugin.description.toLowerCase().includes(search) ||
-            plugin.tags?.some(t => t.toLowerCase().includes(search))
+            plugin.name.toLowerCase().replace(/\s+/g, "").includes(search) ||
+            plugin.description.toLowerCase().replace(/\s+/g, "").includes(search) ||
+            plugin.tags?.some(t => t.toLowerCase().replace(/\s+/g, "").includes(search))
         );
     };
 
