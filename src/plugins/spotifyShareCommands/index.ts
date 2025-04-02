@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
+import { ApplicationCommandInputType, findOption, OptionalMessageOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -81,14 +81,7 @@ export default definePlugin({
             name: "track",
             description: "Send your current Spotify track to chat",
             inputType: ApplicationCommandInputType.BUILT_IN,
-            options: [
-                {
-                    name: "message",
-                    description: "Appends the Spotify link to your message",
-                    type: ApplicationCommandOptionType.STRING,
-                    required: false
-                }
-            ],
+            options: [OptionalMessageOption],
             execute: (options, ctx) => {
                 const track: Track | null = Spotify.getTrack();
                 const message = findOption(options, "message");
@@ -109,14 +102,7 @@ export default definePlugin({
             name: "album",
             description: "Send your current Spotify album to chat",
             inputType: ApplicationCommandInputType.BUILT_IN,
-            options: [
-                {
-                    name: "message",
-                    description: "Appends the Spotify link to your message",
-                    type: ApplicationCommandOptionType.STRING,
-                    required: false
-                }
-            ],
+            options: [OptionalMessageOption],
             execute: (options, ctx) => {
                 const track: Track | null = Spotify.getTrack();
                 const message = findOption(options, "message");
@@ -136,14 +122,7 @@ export default definePlugin({
             name: "artist",
             description: "Send your current Spotify artist to chat",
             inputType: ApplicationCommandInputType.BUILT_IN,
-            options: [
-                {
-                    name: "message",
-                    description: "Appends the Spotify link to your message",
-                    type: ApplicationCommandOptionType.STRING,
-                    required: false
-                }
-            ],
+            options: [OptionalMessageOption],
             execute: (options, ctx) => {
                 const track: Track | null = Spotify.getTrack();
                 const message = findOption(options, "message");
