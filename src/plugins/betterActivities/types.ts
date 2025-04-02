@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { User } from "discord-types/general";
-import { CSSProperties, ImgHTMLAttributes } from "react";
+import { CSSProperties, ImgHTMLAttributes, JSX } from "react";
 
 export interface Timestamp {
     start?: number;
@@ -21,7 +20,7 @@ export interface Activity {
         animated: boolean;
         id: string;
         name: string;
-    }
+    };
     state?: string;
     flags?: number;
     sync_id?: string;
@@ -80,12 +79,4 @@ export interface ActivityListIcon {
 
 export interface IconCSSProperties extends CSSProperties {
     "--icon-size": string;
-}
-
-export interface ActivityViewProps {
-    activity: Activity | null;
-    user: User;
-    application?: Application;
-    renderActions?: () => JSX.Element;
-    type: string;
 }
