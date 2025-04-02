@@ -19,12 +19,8 @@
     border-radius: 50%;
 }
 
-[class*="tooltip_"]:has(.vc-bactivities-activity-tooltip) {
-    max-width: 280px;
-}
-
 .vc-bactivities-activity-tooltip {
-    margin: -5px;
+    padding: 1px;
 }
 
 .vc-bactivities-caret-left,
