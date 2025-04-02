@@ -36,6 +36,14 @@
     outline-offset: 2px;
 }
 
+.visual-refresh .vc-settings-quickActions-pill {
+    background: var(--button-secondary-background);
+}
+
+.visual-refresh .vc-settings-quickActions-pill:hover {
+    background: var(--button-secondary-background-hover);
+}
+
 .vc-settings-quickActions-img {
     width: 24px;
     height: 24px;
