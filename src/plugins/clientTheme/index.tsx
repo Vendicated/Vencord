@@ -7,14 +7,17 @@
 import "./clientTheme.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Button, Forms, useStateFromStores } from "@webpack/common";
+import { Button, Forms, ThemeStore, useStateFromStores } from "@webpack/common";
 
-const ColorPicker = findComponentByCodeLazy(".Messages.USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR", ".BACKGROUND_PRIMARY)");
+const cl = classNameFactory("vc-clientTheme-");
+
+const ColorPicker = findComponentByCodeLazy("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", ".BACKGROUND_PRIMARY)");
 
 const colorPresets = [
     "#1E1514", "#172019", "#13171B", "#1C1C28", "#402D2D",
@@ -30,13 +33,12 @@ function onPickColor(color: number) {
     updateColorVars(hexColor);
 }
 
-const saveClientTheme = findByCodeLazy('type:"UNSYNCED_USER_SETTINGS_UPDATE",settings:{useSystemTheme:"system"===');
+const saveClientTheme = findByCodeLazy('type:"UNSYNCED_USER_SETTINGS_UPDATE', '"system"===');
 
 function setTheme(theme: string) {
     saveClientTheme({ theme });
 }
 
-const ThemeStore = findStoreLazy("ThemeStore");
 const NitroThemeStore = findStoreLazy("ClientThemesBackgroundStore");
 
 function ThemeSettings() {
@@ -61,9 +63,9 @@ function ThemeSettings() {
     }
 
     return (
-        <div className="client-theme-settings">
-            <div className="client-theme-container">
-                <div className="client-theme-settings-labels">
+        <div className={cl("settings")}>
+            <div className={cl("container")}>
+                <div className={cl("settings-labels")}>
                     <Forms.FormTitle tag="h3">Theme Color</Forms.FormTitle>
                     <Forms.FormText>Add a color to your Discord client theme</Forms.FormText>
                 </div>
@@ -77,10 +79,10 @@ function ThemeSettings() {
             {(contrastWarning || nitroThemeEnabled) && (<>
                 <Forms.FormDivider className={classes(Margins.top8, Margins.bottom8)} />
                 <div className={`client-theme-contrast-warning ${contrastWarning ? (isLightTheme ? "theme-dark" : "theme-light") : ""}`}>
-                    <div className="client-theme-warning">
-                        <Forms.FormText>Warning, your theme won't look good:</Forms.FormText>
-                        {contrastWarning && <Forms.FormText>Selected color won't contrast well with text</Forms.FormText>}
-                        {nitroThemeEnabled && <Forms.FormText>Nitro themes aren't supported</Forms.FormText>}
+                    <div className={cl("warning")}>
+                        <Forms.FormText className={cl("warning-text")}>Warning, your theme won't look good:</Forms.FormText>
+                        {contrastWarning && <Forms.FormText className={cl("warning-text")}>Selected color won't contrast well with text</Forms.FormText>}
+                        {nitroThemeEnabled && <Forms.FormText className={cl("warning-text")}>Nitro themes aren't supported</Forms.FormText>}
                     </div>
                     {(contrastWarning && fixableContrast) && <Button onClick={() => setTheme(oppositeTheme)} color={Button.Colors.RED}>Switch to {oppositeTheme} mode</Button>}
                     {(nitroThemeEnabled) && <Button onClick={() => setTheme(theme)} color={Button.Colors.RED}>Disable Nitro Theme</Button>}
@@ -92,15 +94,12 @@ function ThemeSettings() {
 
 const settings = definePluginSettings({
     color: {
-        description: "Color your Discord client theme will be based around. Light mode isn't supported",
         type: OptionType.COMPONENT,
         default: "313338",
-        component: () => <ThemeSettings />
+        component: ThemeSettings
     },
     resetColor: {
-        description: "Reset Theme Color",
         type: OptionType.COMPONENT,
-        default: "313338",
         component: () => (
             <Button onClick={() => onPickColor(0x313338)}>
                 Reset Theme Color
@@ -111,7 +110,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "ClientTheme",
-    authors: [Devs.F53, Devs.Nuckyz],
+    authors: [Devs.Nuckyz],
     description: "Recreation of the old client theme experiment. Add a color to your Discord client theme",
     settings,
 
@@ -127,6 +126,7 @@ export default definePlugin({
     stop() {
         document.getElementById("clientThemeVars")?.remove();
         document.getElementById("clientThemeOffsets")?.remove();
+        document.getElementById("clientThemeLightModeFixes")?.remove();
     }
 });
 

@@ -93,8 +93,10 @@ export interface Command {
     isVencordCommand?: boolean;
 
     name: string;
+    untranslatedName?: string;
     displayName?: string;
     description: string;
+    untranslatedDescription?: string;
     displayDescription?: string;
 
     options?: Option[];

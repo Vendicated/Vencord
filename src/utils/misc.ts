@@ -24,7 +24,7 @@ import { DevsById } from "./constants";
  * Calls .join(" ") on the arguments
  * classes("one", "two") => "one two"
  */
-export function classes(...classes: Array<string | null | undefined>) {
+export function classes(...classes: Array<string | null | undefined | false>) {
     return classes.filter(Boolean).join(" ");
 }
 
@@ -98,6 +98,11 @@ export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);
 
 export function pluralise(amount: number, singular: string, plural = singular + "s") {
     return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`;
+}
+
+export function interpolateIfDefined(strings: TemplateStringsArray, ...args: any[]) {
+    if (args.some(arg => arg == null)) return "";
+    return String.raw({ raw: strings }, ...args);
 }
 
 export function tryOrElse<T>(func: () => T, fallback: T): T {

@@ -23,7 +23,7 @@ import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
+import { ChannelStore, Constants, FluxDispatcher, React, RestAPI, Tooltip, useEffect, useLayoutEffect } from "@webpack/common";
 import { CustomEmoji } from "@webpack/types";
 import { Message, ReactionEmoji, User } from "discord-types/general";
 
@@ -43,14 +43,23 @@ function fetchReactions(msg: Message, emoji: ReactionEmoji, type: number) {
         },
         oldFormErrors: true
     })
-        .then(res => FluxDispatcher.dispatch({
-            type: "MESSAGE_REACTION_ADD_USERS",
-            channelId: msg.channel_id,
-            messageId: msg.id,
-            users: res.body,
-            emoji,
-            reactionType: type
-        }))
+        .then(res => {
+            for (const user of res.body) {
+                FluxDispatcher.dispatch({
+                    type: "USER_UPDATE",
+                    user
+                });
+            }
+
+            FluxDispatcher.dispatch({
+                type: "MESSAGE_REACTION_ADD_USERS",
+                channelId: msg.channel_id,
+                messageId: msg.id,
+                users: res.body,
+                emoji,
+                reactionType: type
+            });
+        })
         .catch(console.error)
         .finally(() => sleep(250));
 }
@@ -84,7 +93,7 @@ function makeRenderMoreUsers(users: User[]) {
     };
 }
 
-function handleClickAvatar(event: React.MouseEvent<HTMLElement, MouseEvent>) {
+function handleClickAvatar(event: React.UIEvent<HTMLElement, Event>) {
     event.stopPropagation();
 }
 
@@ -100,11 +109,12 @@ export default definePlugin({
                 match: /(\i)\?null:\(0,\i\.jsx\)\(\i\.\i,{className:\i\.reactionCount,.*?}\),/,
                 replace: "$&$1?null:$self.renderUsers(this.props),"
             }
-        }, {
+        },
+        {
             find: '"MessageReactionsStore"',
             replacement: {
-                match: /(?<=CONNECTION_OPEN:function\(\){)(\i)={}/,
-                replace: "$&;$self.reactions=$1"
+                match: /function (\i)\(\){(\i)={}(?=.*CONNECTION_OPEN:\1)/,
+                replace: "$&;$self.reactions=$2;"
             }
         },
         {
@@ -124,18 +134,21 @@ export default definePlugin({
     renderUsers(props: RootObject) {
         return props.message.reactions.length > 10 ? null : (
             <ErrorBoundary noop>
-                <this._renderUsers {...props} />
+                <this.UsersComponent {...props} />
             </ErrorBoundary>
         );
     },
-    _renderUsers({ message, emoji, type }: RootObject) {
+
+    UsersComponent({ message, emoji, type }: RootObject) {
         const forceUpdate = useForceUpdater();
-        React.useLayoutEffect(() => { // bc need to prevent autoscrolling
+
+        useLayoutEffect(() => { // bc need to prevent autoscrolling
             if (Scroll?.scrollCounter > 0) {
                 Scroll.setAutomaticAnchor(null);
             }
         });
-        React.useEffect(() => {
+
+        useEffect(() => {
             const cb = (e: any) => {
                 if (e.messageId === message.id)
                     forceUpdate();
@@ -143,23 +156,16 @@ export default definePlugin({
             FluxDispatcher.subscribe("MESSAGE_REACTION_ADD_USERS", cb);
 
             return () => FluxDispatcher.unsubscribe("MESSAGE_REACTION_ADD_USERS", cb);
-        }, [message.id]);
+        }, [message.id, forceUpdate]);
 
         const reactions = getReactionsWithQueue(message, emoji, type);
         const users = Object.values(reactions).filter(Boolean) as User[];
-
-        for (const user of users) {
-            FluxDispatcher.dispatch({
-                type: "USER_UPDATE",
-                user
-            });
-        }
 
         return (
             <div
                 style={{ marginLeft: "0.5em", transform: "scale(0.9)" }}
             >
-                <div onClick={handleClickAvatar}>
+                <div onClick={handleClickAvatar} onKeyPress={handleClickAvatar}>
                     <UserSummaryItem
                         users={users}
                         guildId={ChannelStore.getChannel(message.channel_id)?.guild_id}

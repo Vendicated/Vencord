@@ -32,9 +32,9 @@ export default definePlugin({
     patches: [
         // Counts header
         {
-            find: ".FRIENDS_ALL_HEADER",
+            find: "#{intl::FRIENDS_ALL_HEADER}",
             replacement: {
-                match: /toString\(\)\}\);case (\i\.\i)\.BLOCKED/,
+                match: /toString\(\)\}\);case (\i\.\i)\.PENDING/,
                 replace: 'toString()});case $1.IMPLICIT:return "Implicit — "+arguments[1];case $1.BLOCKED'
             },
         },
@@ -48,17 +48,17 @@ export default definePlugin({
         },
         // Sections header
         {
-            find: ".FRIENDS_SECTION_ONLINE",
+            find: "#{intl::FRIENDS_SECTION_ONLINE}",
             replacement: {
-                match: /(\(0,\i\.jsx\)\(\i\.TabBar\.Item,\{id:\i\.\i)\.BLOCKED,className:([^\s]+?)\.item,children:\i\.\i\.Messages\.BLOCKED\}\)/,
-                replace: "$1.IMPLICIT,className:$2.item,children:\"Implicit\"}),$&"
-            },
+                match: /,{id:(\i\.\i)\.PENDING,show:.+?className:(\i\.item)/,
+                replace: (rest, relationShipTypes, className) => `,{id:${relationShipTypes}.IMPLICIT,show:true,className:${className},content:"Implicit"}${rest}`
+            }
         },
         // Sections content
         {
             find: '"FriendsStore"',
             replacement: {
-                match: /(?<=case (\i\.\i)\.BLOCKED:return (\i)\.type===\i\.\i\.BLOCKED)/,
+                match: /(?<=case (\i\.\i)\.SUGGESTIONS:return \d+===(\i)\.type)/,
                 replace: ";case $1.IMPLICIT:return $2.type===5"
             },
         },
@@ -117,7 +117,7 @@ export default definePlugin({
 
     wrapSort(comparator: Function, row: any) {
         return row.type === 5
-            ? -UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0
+            ? -(UserAffinitiesStore.getUserAffinity(row.user.id)?.affinity ?? 0)
             : comparator(row);
     },
 
