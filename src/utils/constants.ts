@@ -24,6 +24,7 @@ export const GUILD_ID = "1173279886065029291";
 export const DONOR_ROLE_ID = "1173316879083896912";
 export const CONTRIB_ROLE_ID = "1222677964760682556";
 export const EQUICORD_TEAM = "1173520023239786538";
+export const EQUCORD_HELPERS = "1326406112144265257";
 export const EQUIBOP_CONTRIB_ROLE_ID = "1287079931645263968";
 export const VENCORD_CONTRIB_ROLE_ID = "1173343399470964856";
 
@@ -34,6 +35,7 @@ export const VENBOT_USER_ID = "1017176847865352332";
 export const VC_DONOR_ROLE_ID = "1042507929485586532";
 export const VC_CONTRIB_ROLE_ID = "1026534353167208489";
 export const VC_REGULAR_ROLE_ID = "1026504932959977532";
+export const VC_SUPPORT_CATEGORY_ID = "1108135649699180705";
 export const VC_KNOWN_ISSUES_CHANNEL_ID = "1222936386626129920";
 
 export const GUILD_IDS = [GUILD_ID, VC_GUILD_ID];
@@ -807,6 +809,10 @@ export const EquicordDevs = Object.freeze({
         name: "Hen",
         id: 279266228151779329n
     },
+    Crxa: {
+        name: "Crxa",
+        id: 920290194886914069n
+    },
     vmohammad: {
         name: "vMohammad",
         id: 921098159348924457n
@@ -1020,9 +1026,17 @@ export const EquicordDevs = Object.freeze({
         name: "talhakf",
         id: 1140716160560676976n
     },
+    xijexo: {
+        name: "xijexo",
+        id: 1284113557201620995n
+    },
     omaw: {
         name: "omaw",
         id: 1155026301791514655n
+    },
+    WKoA: {
+        name: "WKoA",
+        id: 724416180097384498n
     },
 } satisfies Record<string, Dev>);
 

@@ -141,7 +141,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "RandomVoice",
     description: "Adds a Button near the Mute button to join a random voice call.",
-    authors: [EquicordDevs.omaw],
+    authors: [EquicordDevs.xijexo, EquicordDevs.omaw],
     patches: [
         {
             find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",

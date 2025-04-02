@@ -81,23 +81,22 @@ export default definePlugin({
     patches: [
         {
             // this also affects name headers in chats outside of servers
-            find: ".USERNAME),{",
+            find: '="SYSTEM_TAG"',
             replacement: {
-                match: /style:"username"===.{0,25}void 0/,
-                replace: "style:{color:$self.colorIfServer(arguments[0])}"
+                match: /(?<=\i.gradientClassName]\),style:.{0,80}:void 0,)/,
+                replace: "style:{color:$self.colorIfServer(arguments[0])},"
             },
-            noWarn: true,
+            predicate: () => !Settings.plugins.IrcColors.enabled
         },
         {
-            predicate: () => settings.store.dmList,
             find: "PrivateChannel.renderAvatar",
             replacement: {
                 match: /(highlighted:\i,)/,
                 replace: "$1style:{color:`${$self.colorDMList(arguments[0])}`},"
             },
+            predicate: () => settings.store.dmList,
         },
         {
-            predicate: () => settings.store.dmList,
             find: "!1,wrapContent",
             replacement: [
                 {
@@ -109,6 +108,7 @@ export default definePlugin({
                     replace: "style:style||{},"
                 },
             ],
+            predicate: () => settings.store.dmList,
         },
     ],
 

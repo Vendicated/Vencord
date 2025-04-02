@@ -122,7 +122,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - QuestCompleter by Amia
 - QuestionMarkReplacement by nyx
 - Quoter by Samwich
-- RandomVoice by omaw
+- RandomVoice by xijexo & omaw
 - Remix by MrDiamond
 - RemixMe by kvba
 - RepeatMessage by Tolgchu

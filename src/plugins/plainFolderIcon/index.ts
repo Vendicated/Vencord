@@ -30,12 +30,12 @@ export default definePlugin({
             // the second is the four guild preview icons
             // always show this one (the plain icons)
             {
-                match: /\(\w\|\|\w\)&&(\(.{0,40}\(.{1,3}\.animated)/,
+                match: /\(\i\|\|\i\)&&(\(.{0,40}\(\i\.animated)/,
                 replace: "$1",
             },
             // and never show this one (the guild preview icons)
             {
-                match: /\(\w\|\|!\w\)&&(\(.{0,40}\(.{1,3}\.animated)/,
+                match: /\(\i\|\|!\i\)&&(\(.{0,40}\(\i\.animated)/,
                 replace: "false&&$1",
             }
         ]
