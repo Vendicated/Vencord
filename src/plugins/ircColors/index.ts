@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, Settings } from "@api/Settings";
+import { getCustomColorString } from "@equicordplugins/customUserColors";
 import { hash as h64 } from "@intrnl/xxhash64";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -66,7 +67,7 @@ export default definePlugin({
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(?<=className:\i\.username,style:.{0,50}:void 0,)/,
+                match: /(?<=\i.gradientClassName]\),style:.{0,80}:void 0,)/,
                 replace: "style:{color:$self.calculateNameColorForMessageContext(arguments[0])},"
             }
         },
@@ -84,30 +85,36 @@ export default definePlugin({
         const userId: string | undefined = context?.message?.author?.id;
         const colorString = context?.author?.colorString;
         const color = calculateNameColorForUser(userId);
+        const customColor = userId && Settings.plugins.CustomUserColors.enabled ? getCustomColorString(userId, true) : null;
 
         // Color preview in role settings
         if (context?.message?.channel_id === "1337" && userId === "313337")
-            return colorString;
+            return customColor ?? colorString;
 
         if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
-            return colorString;
+            return customColor ?? colorString;
         }
 
-        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
-            ? color
-            : colorString;
+        if (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString) {
+            return customColor ?? color;
+        } else {
+            return customColor ?? colorString;
+        }
     },
     calculateNameColorForListContext(context: any) {
         const id = context?.user?.id;
         const colorString = context?.colorString;
         const color = calculateNameColorForUser(id);
+        const customColor = id && Settings.plugins.CustomUserColors.enabled ? getCustomColorString(id, true) : null;
 
         if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
-            return colorString;
+            return customColor ?? colorString;
         }
 
-        return (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString)
-            ? color
-            : colorString;
+        if (!settings.store.applyColorOnlyToUsersWithoutColor || !colorString) {
+            return customColor ?? color;
+        } else {
+            return customColor ?? colorString;
+        }
     }
 });
