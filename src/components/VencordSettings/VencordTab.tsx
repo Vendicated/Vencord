@@ -115,7 +115,7 @@ function VencordSettings() {
                     <SpecialCard
                         title="Donations"
                         subtitle="Thank you for donating!"
-                        description="If you have gotten a badge from donating, Vencord users are able to see it! You can change it at any time by messaging @vending.machine."
+                        description="You can manage your perks at any time by messaging @vending.machine."
                         cardImage={VENNIE_DONATOR_IMAGE}
                         backgroundImage={DONOR_BACKGROUND_IMAGE}
                         backgroundColor="#ED87A9"
