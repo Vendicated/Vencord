@@ -8,11 +8,15 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { FluxDispatcher, showToast } from "@webpack/common";
+import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { Button, FluxDispatcher, showToast } from "@webpack/common";
+import { ButtonProps } from "@webpack/types";
 import { User } from "discord-types/general";
 
 const RelationshipTypes = findByPropsLazy("FRIEND", "BLOCKED", "PENDING_OUTGOING");
+const ButtonComponent = findComponentByCodeLazy('submittingStartedLabel","submittingFinishedLabel"]);');
+
+const ChannelActions = findByPropsLazy("openPrivateChannel");
 
 const settings = definePluginSettings({
     hideBlockedWarning: {
@@ -21,6 +25,16 @@ const settings = definePluginSettings({
         description: "Skip the warning about blocked/ignored users when opening the profile through the blocklist.",
         restartNeeded: true,
     },
+    addDmsButton: {
+        default: true,
+        type: OptionType.BOOLEAN,
+        description: "Adds a 'View DMs' button to the users in the blocked list.",
+    },
+    unblockButtonDanger: {
+        default: false,
+        type: OptionType.BOOLEAN,
+        description: "Changes the 'Unblock' button to a red color to make it's 'danger' more obvious.",
+    }
 });
 
 export default definePlugin({
@@ -29,13 +43,20 @@ export default definePlugin({
     authors: [Devs.Elvyra],
     settings,
     patches: [
-        // Allow the user profile to be opened from the blocklist.
         {
             find: ".lastRow]",
-            replacement: {
-                match: /(?<=className:\i.userInfo,)(?=children:.{0,20}user:(\i))/,
-                replace: "style:{cursor:'pointer'},onClick:() => $self.openUserProfile($1),"
-            },
+            replacement: [
+                // Allow the user profile to be opened from the blocklist.
+                {
+                    match: /(?<=className:\i.userInfo,)(?=children:.{0,20}user:(\i))/,
+                    replace: "style:{cursor:'pointer'},onClick:() => $self.openUserProfile($1),"
+                },
+                // Add an extra message button into the blocklist for easy access to past DMs, in case those are needed.
+                {
+                    match: /(?<=children:null!=(\i).globalName\?\i.username:null.*?}\),).*?(\{color:.{0,75}?"8wXU9P"]\)})\)/,
+                    replace: "$self.generateButtons({user:$1, originalProps:$2})",
+                }
+            ],
         },
         // Allow opening DMs from the popout even if a user is blocked, so you can read the chat logs if needed.
         {
@@ -66,7 +87,7 @@ export default definePlugin({
         },
     ],
 
-    closeSettingsWindow: () => {
+    closeSettingsWindow(){
         Promise.resolve(FluxDispatcher.dispatch({ type: "LAYER_POP" })).catch(
             e => {
                 showToast("Failed to close settings window! Check the console for more info");
@@ -75,10 +96,33 @@ export default definePlugin({
         );
     },
 
-    openUserProfile: (user: User) => {
+    openUserProfile(user: User) {
         Promise.resolve(openUserProfile(user.id)).catch(e =>{
             showToast("Failed to open profile for user '" + user.username + "'! Check the console for more info");
             console.error(e);
         });
+    },
+
+    generateButtons(props: { user: User, originalProps: ButtonProps }) {
+        const { user, originalProps } = props;
+
+        if (settings.store.unblockButtonDanger) originalProps.color = Button.Colors.RED;
+
+        const originalButton = <ButtonComponent {...originalProps} />;
+
+        if (!settings.store.addDmsButton) return originalButton;
+
+        const dmButton = <ButtonComponent color={Button.Colors.BRAND_NEW} onClick={() => this.openDMChannel(user)}>Show DMs</ButtonComponent>;
+
+        return <div style={{ display: "flex", gap: "8px" }} className="vc-bbc-button-container">
+            {dmButton}
+            {originalButton}
+        </div>;
+    },
+
+    openDMChannel(user: User) {
+        ChannelActions.openPrivateChannel(user.id);
+        this.closeSettingsWindow();
+        return null;
     },
 });
