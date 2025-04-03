@@ -108,6 +108,8 @@ export default definePlugin({
 
         if (settings.store.unblockButtonDanger) originalProps.color = Button.Colors.RED;
 
+        // TODO add extra unblock confirmation after the click + setting.
+
         const originalButton = <ButtonComponent {...originalProps} />;
 
         if (!settings.store.addDmsButton) return originalButton;
