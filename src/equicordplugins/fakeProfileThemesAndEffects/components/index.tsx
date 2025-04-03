@@ -40,7 +40,7 @@ export const enum FeatureBorderType {
 }
 
 export const CustomizationSection: ComponentType<CustomizationSectionProps>
-    = findByCodeLazy(".customizationSectionBackground");
+    = findComponentByCodeLazy(".customizationSectionBackground");
 
 export const tokens: {
     unsafe_rawColors: Record<string, Parameters<useToken>[0]>;

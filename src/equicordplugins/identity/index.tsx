@@ -8,11 +8,11 @@ import { DataStore } from "@api/index";
 import { Flex } from "@components/Flex";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { PluginNative } from "@utils/types";
-import { findByCodeLazy } from "@webpack";
+import { findComponentByCodeLazy } from "@webpack";
 import { Alerts, Button, FluxDispatcher, Forms, Toasts, UserProfileStore, UserStore } from "@webpack/common";
 const native = VencordNative.pluginHelpers.Identity as PluginNative<typeof import("./native")>;
 
-const CustomizationSection = findByCodeLazy(".customizationSectionBackground");
+const CustomizationSection = findComponentByCodeLazy(".customizationSectionBackground");
 
 async function SetNewData() {
     const PersonData = JSON.parse(await native.RequestRandomUser());
