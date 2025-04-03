@@ -40,7 +40,7 @@ export default definePlugin({
             }
         },
         {
-            find: "onSpinnerStarted():null",
+            find: "emptyPreviewWrapper,children",
             replacement: {
                 match: /paused:\i([^=])/,
                 replace: "paused:false$1"
