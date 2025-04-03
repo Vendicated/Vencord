@@ -74,7 +74,7 @@ export const ScrollerNone = LazyComponent(() => createScroller(scrollerClasses.n
 export const ScrollerThin = LazyComponent(() => createScroller(scrollerClasses.thin, scrollerClasses.fade, scrollerClasses.customTheme));
 export const ScrollerAuto = LazyComponent(() => createScroller(scrollerClasses.auto, scrollerClasses.fade, scrollerClasses.customTheme));
 
-const { FocusLock_ } = mapMangledModuleLazy('document.getElementById("app-mount"))', {
+const { FocusLock_ } = mapMangledModuleLazy('attachTo:null!=', {
     FocusLock_: filters.componentByCode(".containerRef")
 }) as {
     FocusLock_: t.FocusLock;
