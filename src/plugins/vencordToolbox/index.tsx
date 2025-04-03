@@ -19,13 +19,13 @@
 import "./index.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
-import { Settings, useSettings } from "@api/Settings";
+import { definePluginSettings, Settings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { Menu, Popout, useState } from "@webpack/common";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
@@ -119,9 +119,11 @@ function VencordPopoutButton() {
     );
 }
 
-function ToolboxFragmentWrapper({ children }: { children: ReactNode[]; }) {
+function ToolboxFragmentWrapper({ children }: { children: Array<ReactElement<any> | boolean | null>; }) {
+    const searchPosition = (children.findIndex(element => !(typeof element === "boolean") && element?.props?.className?.startsWith("search")));
+
     children.splice(
-        children.length - 1, 0,
+        searchPosition ?? (children.length - 1), 0,
         <ErrorBoundary noop={true}>
             <VencordPopoutButton />
         </ErrorBoundary>
@@ -130,18 +132,41 @@ function ToolboxFragmentWrapper({ children }: { children: ReactNode[]; }) {
     return <>{children}</>;
 }
 
+const settings = definePluginSettings({
+    toolboxButtonPosition: {
+        type: OptionType.SELECT,
+        description: "Where the toolbox button appears",
+        options: [
+            { label: "Title Bar", value: "titleBar", default: true },
+            { label: "Channel Header", value: "channelHeader" }
+        ],
+        restartNeeded: true
+    }
+});
+
 export default definePlugin({
     name: "VencordToolbox",
-    description: "Adds a button next to the inbox button in the channel header that houses Vencord quick actions",
-    authors: [Devs.Ven, Devs.AutumnVN],
+    description: "Adds a button to the window decorations or channel header that houses Vencord quick actions",
+    authors: [Devs.Ven, Devs.AutumnVN, Devs.niko],
+
+    settings,
 
     patches: [
         {
             find: "toolbar:function",
             replacement: {
-                match: /(?<=toolbar:function.{0,100}\()\i.Fragment,/,
+                match: /(?<=toolbar:function.{0,100}\()\i\.Fragment,/,
                 replace: "$self.ToolboxFragmentWrapper,"
-            }
+            },
+            predicate: () => settings.store.toolboxButtonPosition === "channelHeader"
+        },
+        {
+            find: "AppTitleBar",
+            replacement: {
+                match: /(?<=trailing:.{0,70}\()\i\.Fragment,/,
+                replace: "$self.ToolboxFragmentWrapper,"
+            },
+            predicate: () => settings.store.toolboxButtonPosition === "titleBar"
         }
     ],
 
