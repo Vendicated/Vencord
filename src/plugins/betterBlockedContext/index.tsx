@@ -8,15 +8,17 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, FluxDispatcher, showToast } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { Button, FluxDispatcher, showToast, Text } from "@webpack/common";
 import { ButtonProps } from "@webpack/types";
 import { User } from "discord-types/general";
-
-const RelationshipTypes = findByPropsLazy("FRIEND", "BLOCKED", "PENDING_OUTGOING");
-const ButtonComponent = findComponentByCodeLazy('submittingStartedLabel","submittingFinishedLabel"]);');
+import { openModal } from "@utils/modal";
 
 const ChannelActions = findByPropsLazy("openPrivateChannel");
+const RelationshipTypes = findByPropsLazy("FRIEND", "BLOCKED", "PENDING_OUTGOING");
+
+const ButtonComponent = findComponentByCodeLazy('submittingStartedLabel","submittingFinishedLabel"]);');
+const ConfirmationModal = findByCodeLazy('"ConfirmModal")', "useLayoutEffect")
 
 const settings = definePluginSettings({
     hideBlockedWarning: {
@@ -34,6 +36,11 @@ const settings = definePluginSettings({
         default: false,
         type: OptionType.BOOLEAN,
         description: "Changes the 'Unblock' button to a red color to make it's 'danger' more obvious.",
+    },
+    showUnblockConfirmation: {
+        default: true,
+        type: OptionType.BOOLEAN,
+        description: "Show a confirmation dialog when clicking the 'Unblock' button.",
     }
 });
 
@@ -53,8 +60,8 @@ export default definePlugin({
                 },
                 // Add an extra message button into the blocklist for easy access to past DMs, in case those are needed.
                 {
-                    match: /(?<=children:null!=(\i).globalName\?\i.username:null.*?}\),).*?(\{color:.{0,75}?"8wXU9P"]\)})\)/,
-                    replace: "$self.generateButtons({user:$1, originalProps:$2})",
+                    match: /(?<=children:null!=(\i).globalName\?\i.username:null.*?}\),).*?(\{color:.{0,50}?children:\i.\i.string\((\i)\?.*?"8wXU9P"]\)})\)/,
+                    replace: "$self.generateButtons({user:$1, originalProps:$2, isBlocked:$3})",
                 }
             ],
         },
@@ -103,12 +110,41 @@ export default definePlugin({
         });
     },
 
-    generateButtons(props: { user: User, originalProps: ButtonProps }) {
-        const { user, originalProps } = props;
+    generateButtons(props: { user: User, originalProps: ButtonProps, isBlocked: boolean }) {
+        const { user, originalProps, isBlocked } = props;
 
         if (settings.store.unblockButtonDanger) originalProps.color = Button.Colors.RED;
 
         // TODO add extra unblock confirmation after the click + setting.
+
+        if (settings.store.showUnblockConfirmation) {
+            const originalOnClick = originalProps.onClick!;
+            originalProps.onClick = e => {
+                if (e.shiftKey) return originalOnClick(e);
+
+                openModal(m => <ConfirmationModal
+                    className="vc-bbc-confirmation-modal"
+                    {...m}
+                    header={(isBlocked ? "Unblock" : "Unignore") + ` ${user.username}?`}
+                    cancelText="Cancel"
+                    confirmText={isBlocked ? "Unblock" : "Unignore"}
+                    onConfirm={() => {
+                        originalOnClick(e);
+                    }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }} className="vc-bbc-confirmation-modal-text">
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                            <Text variant="text-md/semibold">{`Are you sure you want to ${isBlocked ? "unblock" : "unignore"} this user?`}</Text>
+                            {isBlocked ? <Text variant="text-md/normal">{`This will allow ${user.username} to see your profile and message you again.`}</Text> : null}
+                        </div>
+                        <Text variant="text-md/normal">{`You can always ${isBlocked ? "block" : "ignore"} them again later.`}</Text>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                            <Text variant="text-sm/medium" style={{ color: "var(--text-muted)" }}>{"If you just want to read the chat logs instead, you can just click on their profile."}</Text>
+                            <Text variant="text-sm/normal" style={{ color: "var(--text-muted)" }}>{"Alternatively, you can enable a button to show DMs in the blocklist through the plugin settings."}</Text>
+                        </div>
+                    </div>
+                </ConfirmationModal>);
+            };
+        }
 
         const originalButton = <ButtonComponent {...originalProps} />;
 
