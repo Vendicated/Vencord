@@ -27,7 +27,7 @@ export default definePlugin({
     settings,
     patches: [
         {
-            find: ".videoControls:",
+            find: /\.VIDEO\?\i\.videoControls:/,
             replacement: {
                 match: /children:\[this\.renderPlayIcon\(\),.{0,200}\.setDurationRef}\),/,
                 replace: "$&$self.SpeedButton(),"

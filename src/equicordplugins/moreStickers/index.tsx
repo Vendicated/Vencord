@@ -56,7 +56,7 @@ export default definePlugin({
         {
             find: ".gifts)",
             replacement: {
-                match: /,.{0,5}\(null===\(\w=\w\.stickers\)\|\|void 0.*?(\w)\.push\((\(0,\w\.jsx\))\((.+?),{disabled:\w,type:(\w)},"sticker"\)\)\)/,
+                match: /,.{0,5}\(null==\(\i=\i\.stickers\)\?void 0.*?(\i)\.push\((\(0,\w\.jsx\))\((.+?),{disabled:\i,type:(\i)},"sticker"\)\)\)/,
                 replace: (m, _, jsx, compo, type) => {
                     const c = "arguments[0].type";
                     return `${m},${c}?.submit?.button&&${_}.push(${jsx}(${compo},{disabled:!${c}?.submit?.button,type:${type},stickersType:"stickers+"},"stickers+"))`;

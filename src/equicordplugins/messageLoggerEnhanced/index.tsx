@@ -254,7 +254,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "THREAD_STARTER_MESSAGE?null===",
+            find: "THREAD_STARTER_MESSAGE?null==",
             replacement: {
                 match: /deleted:\i\.deleted, editHistory:\i\.editHistory,/,
                 replace: "deleted:$self.getDeleted(...arguments), editHistory:$self.getEdited(...arguments),"
