@@ -179,7 +179,7 @@ export default definePlugin({
             find: ".GUILD_APPLICATION_PREMIUM_SUBSCRIPTION||",
             replacement: [
                 {
-                    match: /let \i;let\{repliedAuthor:/,
+                    match: /let \i,\{repliedAuthor:/,
                     replace: "if(arguments[0] != null && arguments[0].referencedMessage.message != null) { if($self.shouldHideUser(arguments[0].referencedMessage.message.author.id, arguments[0].baseMessage.messageReference.channel_id)) { return $self.hiddenReplyComponent(); } }$&"
                 }
             ]
