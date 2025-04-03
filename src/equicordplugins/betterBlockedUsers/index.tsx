@@ -7,12 +7,19 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
+import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxDispatcher, React, RelationshipStore, TextInput, UserStore } from "@webpack/common";
+import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { Button, FluxDispatcher, React, RelationshipStore, Text, TextInput, UserStore } from "@webpack/common";
+import { ButtonProps } from "@webpack/types";
 import { User } from "discord-types/general";
 
 let lastSearch = "";
 let updateFunc = (v: any) => { };
+
+const ChannelActions = findByPropsLazy("openPrivateChannel");
+const ButtonComponent = findComponentByCodeLazy('submittingStartedLabel","submittingFinishedLabel"]);');
+const ConfirmationModal = findByCodeLazy('"ConfirmModal")', "useLayoutEffect");
 
 const settings = definePluginSettings({
     hideBlockedWarning: {
@@ -21,6 +28,21 @@ const settings = definePluginSettings({
         description: "Skip the warning about blocked/ignored users when opening the profile through the blocklist.",
         restartNeeded: true,
     },
+    addDmsButton: {
+        default: true,
+        type: OptionType.BOOLEAN,
+        description: "Adds a 'View DMs' button to the users in the blocked list.",
+    },
+    unblockButtonDanger: {
+        default: false,
+        type: OptionType.BOOLEAN,
+        description: "Changes the 'Unblock' button to a red color to make it's 'danger' more obvious.",
+    },
+    showUnblockConfirmation: {
+        default: true,
+        type: OptionType.BOOLEAN,
+        description: "Show a confirmation dialog when clicking the 'Unblock' button.",
+    }
 });
 
 export default definePlugin({
@@ -39,6 +61,10 @@ export default definePlugin({
                 {
                     match: /(?<=className:\i.userInfo,)(?=children:.{0,20}user:(\i))/,
                     replace: "style:{cursor:'pointer'},onClick:()=>$self.openUserProfile($1),"
+                },
+                {
+                    match: /(?<=children:null!=(\i).globalName\?\i.username:null.*?}\),).*?(\{color:.{0,50}?children:\i.\i.string\((\i)\?.*?"8wXU9P"]\)})\)/,
+                    replace: "$self.generateButtons({user:$1, originalProps:$2, isBlocked:$3})",
                 },
                 {
                     match: /(?<=\}=(\i).{0,10}(\i).useState\(.{0,1}\);)/,
@@ -105,10 +131,63 @@ export default definePlugin({
             return id === search || user?.username?.toLowerCase()?.includes(search) || user?.globalName?.toLowerCase()?.includes(search);
         }) as string[];
     },
-    closeSettingsWindow: () => {
+    closeSettingsWindow() {
         FluxDispatcher.dispatch({ type: "LAYER_POP" });
     },
-    openUserProfile: (user: User) => {
+    openUserProfile(user: User) {
         openUserProfile(user.id);
+    },
+    generateButtons(props: { user: User, originalProps: ButtonProps, isBlocked: boolean; }) {
+        const { user, originalProps, isBlocked } = props;
+
+        if (settings.store.unblockButtonDanger) originalProps.color = Button.Colors.RED;
+
+        // TODO add extra unblock confirmation after the click + setting.
+
+        if (settings.store.showUnblockConfirmation) {
+            const originalOnClick = originalProps.onClick!;
+            originalProps.onClick = e => {
+                if (e.shiftKey) return originalOnClick(e);
+
+                openModal(m => <ConfirmationModal
+                    className="vc-bbc-confirmation-modal"
+                    {...m}
+                    header={(isBlocked ? "Unblock" : "Unignore") + ` ${user.username}?`}
+                    cancelText="Cancel"
+                    confirmText={isBlocked ? "Unblock" : "Unignore"}
+                    onConfirm={() => {
+                        originalOnClick(e);
+                    }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }} className="vc-bbc-confirmation-modal-text">
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                            <Text variant="text-md/semibold">{`Are you sure you want to ${isBlocked ? "unblock" : "unignore"} this user?`}</Text>
+                            {isBlocked ? <Text variant="text-md/normal">{`This will allow ${user.username} to see your profile and message you again.`}</Text> : null}
+                        </div>
+                        <Text variant="text-md/normal">{`You can always ${isBlocked ? "block" : "ignore"} them again later.`}</Text>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                            <Text variant="text-sm/medium" style={{ color: "var(--text-muted)" }}>{"If you just want to read the chat logs instead, you can just click on their profile."}</Text>
+                            <Text variant="text-sm/normal" style={{ color: "var(--text-muted)" }}>{"Alternatively, you can enable a button to show DMs in the blocklist through the plugin settings."}</Text>
+                        </div>
+                    </div>
+                </ConfirmationModal>);
+            };
+        }
+
+        const originalButton = <ButtonComponent {...originalProps} />;
+
+        if (!settings.store.addDmsButton) return originalButton;
+
+        const dmButton = <ButtonComponent color={Button.Colors.BRAND_NEW} onClick={() => this.openDMChannel(user)}>Show DMs</ButtonComponent>;
+
+        return <div style={{ display: "flex", gap: "8px" }} className="vc-bbc-button-container">
+            {dmButton}
+            {originalButton}
+        </div>;
+    },
+
+    openDMChannel(user: User) {
+        ChannelActions.openPrivateChannel(user.id);
+        this.closeSettingsWindow();
+        return null;
     },
 });
