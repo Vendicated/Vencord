@@ -59,7 +59,7 @@ export default definePlugin({
         {
             find: ',["user"])',
             replacement: {
-                match: /(?<=\i,\i]=\i.useState\().*?]\);/,
+                match: /(?<=isIgnored:.*?,[\i,\i]=\i.useState\(\i\|\|\i\|\|\i).*?]\);/,
                 replace: "false);"
             },
             predicate: () => settings.store.hideBlockedWarning,
