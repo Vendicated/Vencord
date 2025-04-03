@@ -25,7 +25,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - BetterActivities by D3SOX, Arjix, AutumnVN
 - BetterAudioPlayer by Creations
 - BetterBanReasons by Inbestigator
-- BetterBlockedUsers by TheArmagan
+- BetterBlockedUsers by TheArmagan & Elvyra
 - BetterInvites by iamme
 - BetterPlusReacts by Joona
 - BetterQuickReact by Ven & Sqaaakoi
