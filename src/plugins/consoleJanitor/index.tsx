@@ -148,15 +148,15 @@ export default definePlugin({
         {
             find: "is not a valid locale.",
             replacement: {
-                match: /void \i\.error\(""\.concat\(\i," is not a valid locale."\)\)/,
-                replace: ""
+                match: /\i\.error\(""\.concat\(\i," is not a valid locale."\)\)/,
+                replace: '""'
             }
         },
         {
             find: '"AppCrashedFatalReport: getLastCrash not supported."',
             replacement: {
-                match: /void console\.log\("AppCrashedFatalReport: getLastCrash not supported\."\)/,
-                replace: ""
+                match: /console\.log\("AppCrashedFatalReport: getLastCrash not supported\."\)/,
+                replace: '""'
             }
         },
         {
