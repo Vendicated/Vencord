@@ -7,46 +7,52 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
+import { openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Button, FluxDispatcher, showToast, Text } from "@webpack/common";
+import { Button, FluxDispatcher, showToast, Text, UserStore } from "@webpack/common";
 import { ButtonProps } from "@webpack/types";
 import { User } from "discord-types/general";
-import { openModal } from "@utils/modal";
 
 const ChannelActions = findByPropsLazy("openPrivateChannel");
 const RelationshipTypes = findByPropsLazy("FRIEND", "BLOCKED", "PENDING_OUTGOING");
 
 const ButtonComponent = findComponentByCodeLazy('submittingStartedLabel","submittingFinishedLabel"]);');
-const ConfirmationModal = findByCodeLazy('"ConfirmModal")', "useLayoutEffect")
+const ConfirmationModal = findByCodeLazy('"ConfirmModal")', "useLayoutEffect");
 
 const settings = definePluginSettings({
-    hideBlockedWarning: {
-        default: true,
-        type: OptionType.BOOLEAN,
-        description: "Skip the warning about blocked/ignored users when opening the profile through the blocklist.",
-        restartNeeded: true,
-    },
     addDmsButton: {
         default: true,
         type: OptionType.BOOLEAN,
-        description: "Adds a 'View DMs' button to the users in the blocked list.",
+        description: "Adds a 'View DMs' button to the users in the blocked/ignored list.",
+    },
+    hideBlockedWarning: {
+        default: false,
+        type: OptionType.BOOLEAN,
+        description: "Skip the warning about blocked/ignored users when opening any profile anywhere on discord outside of the blocklist.",
+        restartNeeded: true,
+    },
+    showUnblockConfirmation: {
+        default: true,
+        type: OptionType.BOOLEAN,
+        description: "Show a warning before unblocking a user from the blocklist.",
+    },
+    showUnblockConfirmationEverywhere: {
+        default: false,
+        type: OptionType.BOOLEAN,
+        description: "Show a warning before unblocking a user anywhere on discord.",
+        restartNeeded: true,
     },
     unblockButtonDanger: {
         default: false,
         type: OptionType.BOOLEAN,
         description: "Changes the 'Unblock' button to a red color to make it's 'danger' more obvious.",
     },
-    showUnblockConfirmation: {
-        default: true,
-        type: OptionType.BOOLEAN,
-        description: "Show a confirmation dialog when clicking the 'Unblock' button.",
-    }
 });
 
 export default definePlugin({
     name: "BetterBlockedContext",
-    description: "Allows you to view a users profile by clicking on them in the blocked/ignored list.",
+    description: "Improves the way the blocked and ignored list behaves and improves the interactions with blocked user profiles.",
     authors: [Devs.Elvyra],
     settings,
     patches: [
@@ -82,16 +88,52 @@ export default definePlugin({
             ],
         },
         // Skip the warning about blocked/ignored users when opening the profile through the blocked menu.
-        // You will already know that you blocked the user, so it is unnecessary.
-        // However, if a user wants to see the warning, they can disable this setting.
+        // You will already know that you blocked the user, so it completely useless.
         {
             find: ',["user"])',
             replacement: {
                 match: /(?<=isIgnored:.*?,\[\i,\i]=\i.useState\()\i\|\|\i\|\|\i.*?]\);/,
                 replace: "false);"
             },
-            predicate: () => settings.store.hideBlockedWarning,
         },
+
+        // If the users wishes to, they can disable the warning in all other places as well.
+        ...[
+            "UserProfilePanelWrapper: currentUser cannot be undefined",
+            "UserProfilePopoutWrapper: currentUser cannot be undefined",
+        ].map(x => ({
+            find: x,
+            replacement: {
+                match: /(?<=isIgnored:.*?,\[\i,\i]=\i.useState\()\i\|\|\i\|\|\i\)(?:;\i.useEffect.*?]\))?/,
+                replace: "false)",
+            },
+            predicate: () => settings.store.hideBlockedWarning,
+        })),
+
+        {
+            find: ".BLOCKED:return",
+            replacement: {
+                match: /(?<=\i.BLOCKED:return.{0,65}onClick:\(\)=>\{)(\i.\i.unblockUser\((\i).+?}\))/,
+                replace: "$self.openConfirmationModal(()=>{$1}, $2);",
+            },
+            predicate: () => settings.store.showUnblockConfirmationEverywhere,
+        },
+        {
+            find: ".XyHpKC),",
+            replacement: {
+                match: /(?<=.XyHpKC.+?Click=\(\)=>)(\{.+?(\i.getRecipientId\(\))\)})/,
+                replace: "$self.openConfirmationModal(()=>$1, $2)",
+            },
+            predicate: () => settings.store.showUnblockConfirmationEverywhere,
+        },
+        {
+            find: ".showUnblockSuccessToast",
+            replacement: {
+                match: /(?<=id:"block".{0,100}action:.*?\{)(.{0,25}unblockUser\((\i).{0,60}:void 0\)})/,
+                replace: "$self.openConfirmationModal(()=>{$1,$2)}",
+            },
+            predicate: () => settings.store.showUnblockConfirmationEverywhere,
+        }
     ],
 
     closeSettingsWindow(){
@@ -115,34 +157,12 @@ export default definePlugin({
 
         if (settings.store.unblockButtonDanger) originalProps.color = Button.Colors.RED;
 
-        // TODO add extra unblock confirmation after the click + setting.
-
-        if (settings.store.showUnblockConfirmation) {
+        if (settings.store.showUnblockConfirmation || settings.store.showUnblockConfirmationEverywhere) {
             const originalOnClick = originalProps.onClick!;
             originalProps.onClick = e => {
-                if (e.shiftKey) return originalOnClick(e);
+                if (e.shiftKey || !isBlocked) return originalOnClick(e);
+                this.openConfirmationModal(() => originalOnClick(e), user, true);
 
-                openModal(m => <ConfirmationModal
-                    className="vc-bbc-confirmation-modal"
-                    {...m}
-                    header={(isBlocked ? "Unblock" : "Unignore") + ` ${user.username}?`}
-                    cancelText="Cancel"
-                    confirmText={isBlocked ? "Unblock" : "Unignore"}
-                    onConfirm={() => {
-                        originalOnClick(e);
-                    }}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }} className="vc-bbc-confirmation-modal-text">
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                            <Text variant="text-md/semibold">{`Are you sure you want to ${isBlocked ? "unblock" : "unignore"} this user?`}</Text>
-                            {isBlocked ? <Text variant="text-md/normal">{`This will allow ${user.username} to see your profile and message you again.`}</Text> : null}
-                        </div>
-                        <Text variant="text-md/normal">{`You can always ${isBlocked ? "block" : "ignore"} them again later.`}</Text>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                            <Text variant="text-sm/medium" style={{ color: "var(--text-muted)" }}>{"If you just want to read the chat logs instead, you can just click on their profile."}</Text>
-                            <Text variant="text-sm/normal" style={{ color: "var(--text-muted)" }}>{"Alternatively, you can enable a button to show DMs in the blocklist through the plugin settings."}</Text>
-                        </div>
-                    </div>
-                </ConfirmationModal>);
             };
         }
 
@@ -162,5 +182,33 @@ export default definePlugin({
         ChannelActions.openPrivateChannel(user.id);
         this.closeSettingsWindow();
         return null;
+    },
+
+    openConfirmationModal(callback: () => any, user: User|string, isSettingsOrigin: boolean = false) {
+        if (typeof user === "string") {
+            user = UserStore.getUser(user);
+        }
+
+        return openModal(m => <ConfirmationModal
+            {...m}
+            className="vc-bbc-confirmation-modal"
+            header={`Unblock ${user?.username ?? "?"}?`}
+            cancelText="Cancel"
+            confirmText="Unblock"
+            onConfirm={() => {
+                callback();
+            }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }} className="vc-bbc-confirmation-modal-text">
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <Text variant="text-md/semibold">{`Are you sure you want to unblock ${user?.username ?? "this user"}?`}</Text>
+                    <Text variant="text-md/normal">{`This will allow ${user?.username ?? "them"} to see your profile and message you again.`}</Text>
+                </div>
+                <Text variant="text-md/normal">{"You can always block them again later."}</Text>
+                {isSettingsOrigin ? <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <Text variant="text-sm/medium" style={{ color: "var(--text-muted)" }}>{"If you just want to read the chat logs instead, you can just click on their profile."}</Text>
+                    <Text variant="text-sm/normal" style={{ color: "var(--text-muted)" }}>{"Alternatively, you can enable a button to jump to DMs in the blocklist through the plugin settings."}</Text>
+                </div> : <Text variant="text-sm/medium" style={{ color: "var(--text-muted)" }}>{"If you just want to read the chat logs, you can do this without unblocking them."}</Text>}
+            </div>
+        </ConfirmationModal>);
     },
 });
