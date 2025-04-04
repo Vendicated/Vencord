@@ -148,15 +148,15 @@ export default definePlugin({
         {
             find: "is not a valid locale.",
             replacement: {
-                match: /\i\.error\(""\.concat\(\i," is not a valid locale."\)\);/,
-                replace: ""
+                match: /\i\.error(?=\(""\.concat\(\i," is not a valid locale."\)\))/,
+                replace: "$self.NoopLogger"
             }
         },
         {
             find: '"AppCrashedFatalReport: getLastCrash not supported."',
             replacement: {
-                match: /console\.log\("AppCrashedFatalReport: getLastCrash not supported\."\);/,
-                replace: ""
+                match: /console\.log(?=\("AppCrashedFatalReport: getLastCrash not supported\."\))/,
+                replace: "$self.NoopLogger"
             }
         },
         {

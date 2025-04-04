@@ -49,7 +49,7 @@ export default definePlugin({
                     replace: "$self.handleOnline()"
                 },
                 {
-                    match: /(setInterval\(\i,\.25\*)\i\.\i/,
+                    match: /(setInterval\(\i,30\*)\i\.\i\.Millis\.SECOND/,
                     replace: "$1$self.getIntervalDelay()" // For web installs
                 }
             ]

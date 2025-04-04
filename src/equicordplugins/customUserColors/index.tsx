@@ -83,7 +83,7 @@ export default definePlugin({
             // this also affects name headers in chats outside of servers
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(?<=\i.gradientClassName]\),style:.{0,80}:void 0,)/,
+                match: /(?<=\i.gradientClassName]\),style:.{0,80}:void 0\}\)\(\),)/,
                 replace: "style:{color:$self.colorIfServer(arguments[0])},"
             },
             predicate: () => !Settings.plugins.IrcColors.enabled
