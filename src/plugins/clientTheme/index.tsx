@@ -130,15 +130,16 @@ export default definePlugin({
     }
 });
 
-const variableRegex = /(--primary-\d{3}-hsl):.*?(\S*)%;/g;
+const visualRefreshVariableRegex = /(--neutral-\d{1,3}-hsl):.*?(\S*)%;/g;
+const oldVariableRegex = /(--primary-\d{3}-hsl):.*?(\S*)%;/g;
 const lightVariableRegex = /^--primary-[1-5]\d{2}-hsl/g;
 const darkVariableRegex = /^--primary-[5-9]\d{2}-hsl/g;
 
 // generates variables per theme by:
 // - matching regex (so we can limit what variables are included in light/dark theme, otherwise text becomes unreadable)
 // - offset from specified center (light/dark theme get different offsets because light uses 100 for background-primary, while dark uses 600)
-function genThemeSpecificOffsets(variableLightness: Record<string, number>, regex: RegExp, centerVariable: string): string {
-    return Object.entries(variableLightness).filter(([key]) => key.search(regex) > -1)
+function genThemeSpecificOffsets(variableLightness: Record<string, number>, regex: RegExp | null, centerVariable: string): string {
+    return Object.entries(variableLightness).filter(([key]) => regex == null || key.search(regex) > -1)
         .map(([key, lightness]) => {
             const lightnessOffset = lightness - variableLightness[centerVariable];
             const plusOrMinus = lightnessOffset >= 0 ? "+" : "-";
@@ -147,25 +148,28 @@ function genThemeSpecificOffsets(variableLightness: Record<string, number>, rege
         .join("\n");
 }
 
-
 function generateColorOffsets(styles) {
-    const variableLightness = {} as Record<string, number>;
+    const oldVariableLightness = {} as Record<string, number>;
+    const visualRefreshVariableLightness = {} as Record<string, number>;
 
     // Get lightness values of --primary variables
-    let variableMatch = variableRegex.exec(styles);
-    while (variableMatch !== null) {
-        const [, variable, lightness] = variableMatch;
-        variableLightness[variable] = parseFloat(lightness);
-        variableMatch = variableRegex.exec(styles);
+    for (const [, variable, lightness] of styles.matchAll(oldVariableRegex)) {
+        oldVariableLightness[variable] = parseFloat(lightness);
+    }
+
+    for (const [, variable, lightness] of styles.matchAll(visualRefreshVariableRegex)) {
+        visualRefreshVariableLightness[variable] = parseFloat(lightness);
     }
 
     createStyleSheet("clientThemeOffsets", [
-        `.theme-light {\n ${genThemeSpecificOffsets(variableLightness, lightVariableRegex, "--primary-345-hsl")} \n}`,
-        `.theme-dark {\n ${genThemeSpecificOffsets(variableLightness, darkVariableRegex, "--primary-600-hsl")} \n}`,
+        `.theme-light {\n ${genThemeSpecificOffsets(oldVariableLightness, lightVariableRegex, "--primary-345-hsl")} \n}`,
+        `.theme-dark {\n ${genThemeSpecificOffsets(oldVariableLightness, darkVariableRegex, "--primary-600-hsl")} \n}`,
+        `.visual-refresh.theme-light {\n ${genThemeSpecificOffsets(visualRefreshVariableLightness, null, "--neutral-2-hsl")} \n}`,
+        `.visual-refresh.theme-dark {\n ${genThemeSpecificOffsets(visualRefreshVariableLightness, null, "--neutral-69-hsl")} \n}`,
     ].join("\n\n"));
 }
 
-function generateLightModeFixes(styles) {
+function generateLightModeFixes(styles: string) {
     const groupLightUsesW500Regex = /\.theme-light[^{]*\{[^}]*var\(--white-500\)[^}]*}/gm;
     // get light capturing groups that mention --white-500
     const relevantStyles = [...styles.matchAll(groupLightUsesW500Regex)].flat();
