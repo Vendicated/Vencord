@@ -80,12 +80,10 @@ async function initThemes() {
     themesStyle ??= createStyle("vencord-themes");
 
     const { enabledThemeLinks, enabledThemes } = Settings;
-
     const enabledlinks: string[] = [...enabledThemeLinks];
-    // "darker" and "midnight" both count as dark
     const activeTheme = ThemeStore.theme === "light" ? "light" : "dark";
 
-    const links = enabledlinks
+    const rawLinks = enabledlinks
         .map(rawLink => {
             const match = /^@(light|dark) (.*)/.exec(rawLink);
             if (!match) return rawLink;
@@ -93,18 +91,29 @@ async function initThemes() {
             const [, mode, link] = match;
             return mode === activeTheme ? link : null;
         })
-        .filter(link => link !== null);
+        .filter((link): link is string => link !== null);
 
-    if (IS_WEB) {
-        for (const theme of enabledThemes) {
-            const themeData = await VencordNative.themes.getThemeData(theme);
-            if (!themeData) continue;
-            const blob = new Blob([themeData], { type: "text/css" });
+    const links: string[] = [];
+
+    for (const url of rawLinks) {
+        try {
+            const res = await fetch(url);
+            const css = await res.text();
+            const patched = patchSidebar(css);
+            const blob = new Blob([patched], { type: "text/css" });
             links.push(URL.createObjectURL(blob));
+        } catch (e) {
+            console.warn(`Failed to fetch theme from ${url}`, e);
         }
-    } else {
-        const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}?v=${Date.now()}`);
-        links.push(...localThemes);
+    }
+
+    for (const theme of enabledThemes) {
+        const themeData = await VencordNative.themes.getThemeData(theme);
+        if (!themeData) continue;
+
+        const patchedTheme = patchSidebar(themeData);
+        const blob = new Blob([patchedTheme], { type: "text/css" });
+        links.push(URL.createObjectURL(blob));
     }
 
     themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
