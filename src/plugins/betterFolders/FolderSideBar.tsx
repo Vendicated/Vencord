@@ -46,7 +46,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
     const barStyle = {
         display: isFullscreen ? "none" : "flex",
         gridArea: "sidebar"
-    } as CSSProperties;
+    } satisfies CSSProperties;
 
     if (!guilds || !settings.store.sidebarAnim) {
         return visible
