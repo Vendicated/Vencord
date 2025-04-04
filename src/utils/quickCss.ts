@@ -44,27 +44,80 @@ export async function toggle(isEnabled: boolean) {
     if (!style) {
         if (isEnabled) {
             style = createStyle("vencord-custom-css");
+
             VencordNative.quickCss.addChangeListener(css => {
+                css = patchSidebar(css);
                 style.textContent = css;
-                // At the time of writing this, changing textContent resets the disabled state
                 style.disabled = !Settings.useQuickCss;
             });
-            style.textContent = await VencordNative.quickCss.get();
+
+            const css = await VencordNative.quickCss.get();
+            style.textContent = patchSidebar(css);
         }
-    } else
+    } else {
         style.disabled = !isEnabled;
+    }
+}
+
+function patchSidebar(css: string): string {
+    if (
+        css.includes("grid-template-columns") && Settings.plugins.BetterFolders.enabled ||
+        css.includes("grid-template-areas") && Settings.plugins.BetterFolders.enabled
+    ) {
+        css = css.replace(
+            /\btitleBar\b/,
+            "titleBar titleBar"
+        );
+        css = css.replace(
+            /\buserPanel\b/,
+            "userPanel userPanel"
+        );
+        css = css.replace(
+            /guildsList/g,
+            "guildsList sidebar"
+        );
+        css = css.replace(
+            /guildsEnd\]/g,
+            "guildsEnd] min-content [sidebarEnd]"
+        );
+    }
+    return css;
+}
+
+async function fetchAndPatchCSS(url: string): Promise<string> {
+    try {
+        const res = await fetch(url);
+        const css = await res.text();
+
+        const importLinks = extractImportLinks(css);
+        const patchedCSS = await Promise.all(importLinks.map(fetchAndPatchCSS));
+
+        const combinedCSS = patchedCSS.join("\n") + "\n" + patchSidebar(css);
+        return combinedCSS;
+    } catch (e) {
+        console.warn(`Failed to fetch and patch CSS from ${url}`, e);
+        return "";
+    }
+}
+
+function extractImportLinks(css: string): string[] {
+    const importRegex = /@import url\(([^)]+)\)/g;
+    const links: string[] = [];
+    let match;
+    while ((match = importRegex.exec(css)) !== null) {
+        links.push(match[1].trim().replace(/['"]/g, ""));
+    }
+    return links;
 }
 
 async function initThemes() {
     themesStyle ??= createStyle("vencord-themes");
 
     const { enabledThemeLinks, enabledThemes } = Settings;
-
     const enabledlinks: string[] = [...enabledThemeLinks];
-    // "darker" and "midnight" both count as dark
     const activeTheme = ThemeStore.theme === "light" ? "light" : "dark";
 
-    const links = enabledlinks
+    const rawLinks = enabledlinks
         .map(rawLink => {
             const match = /^@(light|dark) (.*)/.exec(rawLink);
             if (!match) return rawLink;
@@ -72,18 +125,25 @@ async function initThemes() {
             const [, mode, link] = match;
             return mode === activeTheme ? link : null;
         })
-        .filter(link => link !== null);
+        .filter((link): link is string => link !== null);
 
-    if (IS_WEB) {
-        for (const theme of enabledThemes) {
-            const themeData = await VencordNative.themes.getThemeData(theme);
-            if (!themeData) continue;
-            const blob = new Blob([themeData], { type: "text/css" });
+    const links: string[] = [];
+
+    for (const url of rawLinks) {
+        const css = await fetchAndPatchCSS(url);
+        if (css) {
+            const blob = new Blob([css], { type: "text/css" });
             links.push(URL.createObjectURL(blob));
         }
-    } else {
-        const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}?v=${Date.now()}`);
-        links.push(...localThemes);
+    }
+
+    for (const theme of enabledThemes) {
+        const themeData = await VencordNative.themes.getThemeData(theme);
+        if (!themeData) continue;
+
+        const patchedTheme = patchSidebar(themeData);
+        const blob = new Blob([patchedTheme], { type: "text/css" });
+        links.push(URL.createObjectURL(blob));
     }
 
     themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
