@@ -81,7 +81,7 @@ export default definePlugin({
                     replace: (_, rest, popoutProps, originalPopout, currentUser) => `${rest}$self.UserProfile({popoutProps:${popoutProps},currentUser:${currentUser},originalRenderPopout:()=>{${originalPopout}}})`
                 },
                 {
-                    match: /(\.AVATAR,children:.+?onRequestClose:\(\)=>\{)/,
+                    match: /\.AVATAR,children:.+?onRequestClose:\(\)=>\{/,
                     replace: "$&$self.onPopoutClose();"
                 },
                 {
