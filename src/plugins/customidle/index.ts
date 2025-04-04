@@ -52,10 +52,6 @@ export default definePlugin({
         }
     ],
 
-    getIntervalDelay() {
-        return Math.min(6e5, this.getIdleTimeout());
-    },
-
     handleOnline() {
         if (!settings.store.remainInIdle) {
             FluxDispatcher.dispatch({
