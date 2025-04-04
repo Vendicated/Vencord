@@ -50,7 +50,7 @@ export default definePlugin({
         {
             find: '?"@":""',
             replacement: {
-                match: /(?<=children:)\(\i\?"@":""\)\+\i(?=,|\})/,
+                match: /(?<=onContextMenu:\i,children:)\i\+\i/,
                 replace: "$self.renderUsername(arguments[0])"
             }
         },
