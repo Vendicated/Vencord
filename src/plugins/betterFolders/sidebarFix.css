@@ -1,0 +1,7 @@
+.visual-refresh .vc-BetterFolders-sidebar-grid {
+    grid-template-columns: [start] min-content [guildsEnd] min-content [sidebarEnd] min-content [channelsEnd] 1fr [end];
+    grid-template-areas:
+        "titleBar titleBar titleBar titleBar"
+        "guildsList sidebar notice notice"
+        "guildsList sidebar channelsList page";
+}
