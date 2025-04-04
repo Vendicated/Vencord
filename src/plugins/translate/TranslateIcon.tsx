@@ -87,7 +87,7 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
                 "aria-haspopup": "dialog"
             }}
         >
-            <TranslateIcon className={cl({ "auto-translate": autoTranslate, "chat-button": true })} />
+            <TranslateIcon height={20} width={20} className={cl({ "auto-translate": autoTranslate, "chat-button": true })} />
         </ChatBarButton>
     );
 
