@@ -210,9 +210,8 @@ export default definePlugin({
                     // and each has a bunch of conditions &&ed in front of it.
                     // Add the betterFolders sidebar to both, keeping the conditions Discord uses.
                     match: /(?<=[[,])((?:!?\i&&)+)\(.{0,50}({className:\i\.guilds,themeOverride:\i})\)/g,
-                    replace: (_, conditions, props) => `${_},${conditions}$self.FolderSideBar({...${props}})`
+                    replace: (m, conditions, props) => `${m},${conditions}$self.FolderSideBar(${props})`
                 },
-                // Add grid styles to fix aligment with other visual refresh elements
                 {
                     // Add grid styles to fix aligment with other visual refresh elements
                     match: /(?<=className:)(\i\.base)(?=,)/,
