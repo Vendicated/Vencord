@@ -69,8 +69,8 @@ const SilentMessageToggle: ChatBarButtonFactory = ({ isMainChat }) => {
             onClick={() => setEnabledValue(!enabled)}
         >
             <svg
-                width="24"
-                height="24"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
                 style={{ scale: "1.2" }}
             >

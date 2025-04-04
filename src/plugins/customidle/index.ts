@@ -47,18 +47,10 @@ export default definePlugin({
                 {
                     match: /\i\.\i\.dispatch\({type:"IDLE",idle:!1}\)/,
                     replace: "$self.handleOnline()"
-                },
-                {
-                    match: /(setInterval\(\i,\.25\*)\i\.\i/,
-                    replace: "$1$self.getIntervalDelay()" // For web installs
                 }
             ]
         }
     ],
-
-    getIntervalDelay() {
-        return Math.min(6e5, this.getIdleTimeout());
-    },
 
     handleOnline() {
         if (!settings.store.remainInIdle) {
