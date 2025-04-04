@@ -212,8 +212,7 @@ export default definePlugin({
                     match: /(?<=[[,])((?:!?\i&&)+)\(.{0,50}({className:\i\.guilds,themeOverride:\i})\)/g,
                     replace: (_, conditions, props) => `${_},${conditions}$self.FolderSideBar({...${props}})`
                 },
-                // Discord uses now uses a grid layout to handle the server bar, we need to update the styles
-                // NOTE: the names of the grid elements need to be hardcoded
+                // Add grid styles to fix aligment with other visual refresh elements
                 {
                     match: /(?<=className:)(\i\.base)(?=,)/,
                     replace: "`${$self.gridStyle} ${$1}`"
