@@ -19,7 +19,7 @@ import { AvatarDecorationModalPreview } from "../components";
 
 const FileUpload = findComponentByCodeLazy("fileUploadInput,");
 
-const { HelpMessage, HelpMessageTypes } = mapMangledModuleLazy('POSITIVE="POSITIVE', {
+const { HelpMessage, HelpMessageTypes } = mapMangledModuleLazy('POSITIVE="positive', {
     HelpMessageTypes: filters.byProps("POSITIVE", "WARNING", "INFO"),
     HelpMessage: filters.byCode(".iconDiv")
 });
