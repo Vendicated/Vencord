@@ -139,11 +139,12 @@ export default definePlugin({
     // This is the very outer layer of the entire ui, so we can't wrap this in an ErrorBoundary
     // without possibly also catching unrelated errors of children.
     //
-    // Thus, we sanity check webpack modules & do this really hacky try catch to hopefully prevent hard crashes if something goes wrong.
-    // try catch will only catch errors in the Layer function (hence why it's called as a plain function rather than a component), but
-    // not in children
+    // Thus, we sanity check webpack modules
     Layer(props: LayerProps) {
-        if (!FocusLock || !ComponentDispatch || !Classes) {
+        try {
+            // @ts-ignore
+            [FocusLock.$$vencordInternal(), ComponentDispatch, Classes].forEach(e => e.test);
+        } catch {
             new Logger("BetterSettings").error("Failed to find some components");
             return props.children;
         }
