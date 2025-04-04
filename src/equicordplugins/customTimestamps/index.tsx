@@ -71,7 +71,7 @@ export default definePlugin({
             find: "#{intl::MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL}",
             replacement: [
                 {
-                    match: /(?<=\i=\i\?)\(0,\i\.\i\)\((\i),"LT"\):\(0,\i\.\i\)\(\i,!0\)/,
+                    match: /(?<=\i=null!=\i\?).{0,25}\((\i),"LT"\):\(0,\i\.\i\)\(\i,!0\)/,
                     replace: '$self.format($1,"compactFormat","[calendar]"):$self.format($1,"cozyFormat","LT")',
                 },
                 {
