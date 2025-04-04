@@ -13,6 +13,7 @@ import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpa
 import { Button, FluxDispatcher, showToast, Text, UserStore } from "@webpack/common";
 import { ButtonProps } from "@webpack/types";
 import { User } from "discord-types/general";
+import { MouseEvent } from "react";
 
 const ChannelActions = findByPropsLazy("openPrivateChannel");
 const RelationshipTypes = findByPropsLazy("FRIEND", "BLOCKED", "PENDING_OUTGOING");
@@ -113,24 +114,24 @@ export default definePlugin({
         {
             find: ".BLOCKED:return",
             replacement: {
-                match: /(?<=\i.BLOCKED:return.{0,65}onClick:\(\)=>\{)(\i.\i.unblockUser\((\i).+?}\))/,
-                replace: "$self.openConfirmationModal(()=>{$1}, $2);",
+                match: /(?<=\i.BLOCKED:return.{0,65}onClick:)\(\)=>\{(\i.\i.unblockUser\((\i).+?}\))/,
+                replace: "(event) => {$self.openConfirmationModal(event,()=>{$1}, $2)",
             },
             predicate: () => settings.store.showUnblockConfirmationEverywhere,
         },
         {
             find: ".XyHpKC),",
             replacement: {
-                match: /(?<=.XyHpKC.+?Click=\(\)=>)(\{.+?(\i.getRecipientId\(\))\)})/,
-                replace: "$self.openConfirmationModal(()=>$1, $2)",
+                match: /(?<=.XyHpKC.+?Click=)\(\)=>(\{.+?(\i.getRecipientId\(\))\)})/,
+                replace: "event => $self.openConfirmationModal(event, ()=>$1, $2)",
             },
             predicate: () => settings.store.showUnblockConfirmationEverywhere,
         },
         {
             find: ".showUnblockSuccessToast",
             replacement: {
-                match: /(?<=id:"block".{0,100}action:.*?\{)(.{0,25}unblockUser\((\i).{0,60}:void 0\)})/,
-                replace: "$self.openConfirmationModal(()=>{$1,$2)}",
+                match: /(?<=id:"block".{0,100}action:\i\?)\(\)=>(\{.{0,25}unblockUser\((\i).{0,60}:void 0\)})/,
+                replace: "event => {$self.openConfirmationModal(event, ()=>$1,$2)}",
             },
             predicate: () => settings.store.showUnblockConfirmationEverywhere,
         }
@@ -160,8 +161,8 @@ export default definePlugin({
         if (settings.store.showUnblockConfirmation || settings.store.showUnblockConfirmationEverywhere) {
             const originalOnClick = originalProps.onClick!;
             originalProps.onClick = e => {
-                if (e.shiftKey || !isBlocked) return originalOnClick(e);
-                this.openConfirmationModal(() => originalOnClick(e), user, true);
+                if (!isBlocked) return originalOnClick(e);
+                this.openConfirmationModal(e, () => originalOnClick(e), user, true);
 
             };
         }
@@ -184,7 +185,9 @@ export default definePlugin({
         return null;
     },
 
-    openConfirmationModal(callback: () => any, user: User|string, isSettingsOrigin: boolean = false) {
+    openConfirmationModal(event: MouseEvent, callback: () => any, user: User|string, isSettingsOrigin: boolean = false) {
+        if (event.shiftKey) return callback();
+
         if (typeof user === "string") {
             user = UserStore.getUser(user);
         }
