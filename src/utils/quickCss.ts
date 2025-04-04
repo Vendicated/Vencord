@@ -44,15 +44,36 @@ export async function toggle(isEnabled: boolean) {
     if (!style) {
         if (isEnabled) {
             style = createStyle("vencord-custom-css");
+
             VencordNative.quickCss.addChangeListener(css => {
+                css = patchSidebar(css);
                 style.textContent = css;
-                // At the time of writing this, changing textContent resets the disabled state
                 style.disabled = !Settings.useQuickCss;
             });
-            style.textContent = await VencordNative.quickCss.get();
+
+            const css = await VencordNative.quickCss.get();
+            style.textContent = patchSidebar(css);
         }
-    } else
+    } else {
         style.disabled = !isEnabled;
+    }
+}
+
+function patchSidebar(css: string): string {
+    if (
+        css.includes("grid-template-columns") ||
+        css.includes("grid-template-areas")
+    ) {
+        css = css.replace(
+            /(["'])([^"']*?)guildsList\s+/g,
+            (_, quote, pre) => `${quote}${pre}guildsList sidebar `
+        );
+        css = css.replace(
+            /guildsEnd\]/g,
+            "guildsEnd] min-content [sidebarEnd]"
+        );
+    }
+    return css;
 }
 
 async function initThemes() {
