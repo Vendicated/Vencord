@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { ErrorBoundary } from "@components/index";
 import { Link } from "@components/Link";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
@@ -17,7 +18,7 @@ import DecorSection from "./ui/components/DecorSection";
 export const settings = definePluginSettings({
     changeDecoration: {
         type: OptionType.COMPONENT,
-        component() {
+        component: ErrorBoundary.wrap(function DecorSettingsComponent() {
             if (!Vencord.Plugins.plugins.Decor.started) return <Forms.FormText>
                 Enable Decor and restart your client to change your avatar decoration.
             </Forms.FormText>;
@@ -35,7 +36,7 @@ export const settings = definePluginSettings({
                     >Profiles</Link> page.
                 </Forms.FormText>
             </div>;
-        }
+        })
     },
     agreedToGuidelines: {
         type: OptionType.BOOLEAN,
