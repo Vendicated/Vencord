@@ -214,6 +214,7 @@ export default definePlugin({
                 },
                 // Add grid styles to fix aligment with other visual refresh elements
                 {
+                    // Add grid styles to fix aligment with other visual refresh elements
                     match: /(?<=className:)(\i\.base)(?=,)/,
                     replace: "`${$self.gridStyle} ${$1}`"
                 }
