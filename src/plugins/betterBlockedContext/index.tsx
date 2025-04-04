@@ -46,7 +46,7 @@ const settings = definePluginSettings({
     unblockButtonDanger: {
         default: false,
         type: OptionType.BOOLEAN,
-        description: "Changes the 'Unblock' button to a red color to make it's 'danger' more obvious.",
+        description: "Color the unblock button in the blocklist red instead of gray.",
     },
 });
 
@@ -166,15 +166,15 @@ export default definePlugin({
             };
         }
 
-        const originalButton = <ButtonComponent {...originalProps} />;
+        const unblockButton = <ButtonComponent {...originalProps} />;
 
-        if (!settings.store.addDmsButton) return originalButton;
+        if (!settings.store.addDmsButton) return unblockButton;
 
         const dmButton = <ButtonComponent color={Button.Colors.BRAND_NEW} onClick={() => this.openDMChannel(user)}>Show DMs</ButtonComponent>;
 
         return <div style={{ display: "flex", gap: "8px" }} className="vc-bbc-button-container">
             {dmButton}
-            {originalButton}
+            {unblockButton}
         </div>;
     },
 
