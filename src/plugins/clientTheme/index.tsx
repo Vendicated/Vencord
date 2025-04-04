@@ -149,23 +149,23 @@ function genThemeSpecificOffsets(variableLightness: Record<string, number>, rege
 }
 
 function generateColorOffsets(styles) {
-    const variableLightness = {} as Record<string, number>;
+    const oldVariableLightness = {} as Record<string, number>;
+    const visualRefreshVariableLightness = {} as Record<string, number>;
 
     // Get lightness values of --primary variables
     for (const [, variable, lightness] of styles.matchAll(oldVariableRegex)) {
-        variableLightness[variable] = parseFloat(lightness);
+        oldVariableLightness[variable] = parseFloat(lightness);
     }
 
     for (const [, variable, lightness] of styles.matchAll(visualRefreshVariableRegex)) {
-        variableLightness[variable] = parseFloat(lightness);
+        visualRefreshVariableLightness[variable] = parseFloat(lightness);
     }
 
     createStyleSheet("clientThemeOffsets", [
-        // you can determine the "center color" by looking at the variable used by `--background-primary`
-        `.theme-light {\n ${genThemeSpecificOffsets(variableLightness, lightVariableRegex, "--primary-345-hsl")} \n}`,
-        `.theme-dark {\n ${genThemeSpecificOffsets(variableLightness, darkVariableRegex, "--primary-600-hsl")} \n}`,
-        `.theme-light {\n ${genThemeSpecificOffsets(variableLightness, null, "--neutral-2-hsl")} \n}`,
-        `.theme-dark {\n ${genThemeSpecificOffsets(variableLightness, null, "--neutral-69-hsl")} \n}`,
+        `.theme-light {\n ${genThemeSpecificOffsets(oldVariableLightness, lightVariableRegex, "--primary-345-hsl")} \n}`,
+        `.theme-dark {\n ${genThemeSpecificOffsets(oldVariableLightness, darkVariableRegex, "--primary-600-hsl")} \n}`,
+        `.visual-refresh.theme-light {\n ${genThemeSpecificOffsets(visualRefreshVariableLightness, null, "--neutral-2-hsl")} \n}`,
+        `.visual-refresh.theme-dark {\n ${genThemeSpecificOffsets(visualRefreshVariableLightness, null, "--neutral-69-hsl")} \n}`,
     ].join("\n\n"));
 }
 
