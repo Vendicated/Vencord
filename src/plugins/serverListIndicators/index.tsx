@@ -74,10 +74,9 @@ function FriendsIndicator() {
                     </path>
                 </svg>
             }
-            <span id="vc-friendcount-text">{onlineFriendsCount}</span>
-            {!!settings.store.useCompact &&
-                <span id="vc-friendcount-text-compact">Friends</span>
-            }
+            <span id="vc-friendcount-text">{onlineFriendsCount}
+                {!!settings.store.useCompact && <span id="vc-friendcount-text-compact">Friends</span>}
+            </span>
         </div>
     );
 }
@@ -109,10 +108,9 @@ function ServersIndicator() {
                     </path>
                 </svg>
             }
-            <span id="vc-guildcount-text">{guildCount}</span>
-            {!!settings.store.useCompact &&
-                <span id="vc-guildcount-text-compact">Servers</span>
-            }
+            <span id="vc-guildcount-text">{guildCount}
+                {!!settings.store.useCompact && <span id="vc-guildcount-text-compact">Servers</span>}
+            </span>
         </div>
     );
 }
@@ -155,13 +153,11 @@ export default definePlugin({
                 text = `${onlineFriendsCount} Friends`;
                 break;
             case IndicatorType.SERVER:
-                text = `${onlineFriendsCount} Friends, ${guildCount} Servers`;
+                text = `${guildCount} Servers`;
                 break;
         }
 
-        let cl;
-        if (useCompact) cl = classNameFactory("vc-indicators-compact");
-        else cl = classNameFactory("vc-indicators");
+        const cl = useCompact ? classNameFactory("vc-indicators-compact") : classNameFactory("vc-indicators");
 
         return <ErrorBoundary noop>
             <div id={cl("-container")}>
