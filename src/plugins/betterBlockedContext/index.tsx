@@ -66,7 +66,7 @@ export default definePlugin({
                 },
                 // Add an extra message button into the blocklist for easy access to past DMs, in case those are needed.
                 {
-                    match: /(?<=children:null!=(\i).globalName\?\i.username:null.*?}\),).*?(\{color:.{0,50}?children:\i.\i.string\((\i)\?.*?"8wXU9P"]\)})\)/,
+                    match: /(?<=children:null!=(\i).globalName\?.+?}\),).*?(\{color:.{0,65}?string\((\i).+?"8wXU9P"]\)})\)/,
                     replace: "$self.generateButtons({user:$1, originalProps:$2, isBlocked:$3})",
                 }
             ],
