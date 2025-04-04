@@ -205,10 +205,10 @@ export default definePlugin({
             replacement: [
                 {
                     // Render the Better Folders sidebar
-                    // Discord has two different places where they render the sidebar
-                    // one is for visual refresh, one is not
-                    // each has a bunch of conditions &&ed in front of it
-                    // add the betterFolders sidebar to both, keeping the conditions discord uses
+                    // Discord has two different places where they render the sidebar.
+                    // One is for visual refresh, one is not,
+                    // and each has a bunch of conditions &&ed in front of it.
+                    // Add the betterFolders sidebar to both, keeping the conditions Discord uses.
                     match: /(?<=[[,])((?:!?\i&&)+)\(.{0,50}({className:\i\.guilds,themeOverride:\i})\)/g,
                     replace: (_, conditions, props) => `${_},${conditions}$self.FolderSideBar({...${props}})`
                 },
