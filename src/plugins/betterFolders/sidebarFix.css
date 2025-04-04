@@ -7,3 +7,7 @@
         "guildsList betterFoldersSidebar notice notice"
         "guildsList betterFoldersSidebar channelsList page";
 }
+
+.vc-betterFolders-fix-bottom-margin {
+    margin-bottom: 0 !important;
+}
