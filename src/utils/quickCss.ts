@@ -80,8 +80,6 @@ async function initThemes() {
             if (!themeData) continue;
             const blob = new Blob([themeData], { type: "text/css" });
             links.push(URL.createObjectURL(blob));
-        } catch (e) {
-            console.warn(`Failed to fetch theme from ${url}`, e);
         }
     } else {
         const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}?v=${Date.now()}`);
