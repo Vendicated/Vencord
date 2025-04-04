@@ -19,9 +19,24 @@ interface iUSRBG extends Plugin {
     getImageUrl(userId: string): string | null;
 }
 
+interface Nameplate {
+    imgAlt: string;
+    palette: {
+        darkBackground: string;
+        lightBackground: string;
+        name: string;
+    };
+    src: string;
+}
+
 const settings = definePluginSettings({
     animate: {
         description: "Animate banners",
+        type: OptionType.BOOLEAN,
+        default: false
+    },
+    preferNameplate: {
+        description: "prefer nameplate over banner",
         type: OptionType.BOOLEAN,
         default: false
     },
@@ -40,17 +55,21 @@ export default definePlugin({
     patches: [
         {
             find: "#{intl::GUILD_OWNER}),",
-            replacement:
-            {
-                // We add the banner as a property while we can still access the user id
-                match: /verified:(\i).isVerifiedBot.*?name:null.*?(?=avatar:)/,
-                replace: "$&banner:$self.memberListBannerHook($1),",
-            },
+            replacement: [
+                {
+                    // We add the banner as a property while we can still access the user id
+                    match: /(?<=nameplate:(\i).*?)verified:(\i).isVerifiedBot.*?name:null.*?(?=avatar:)/,
+                    replace: "$&banner:$self.memberListBannerHook($2, $1),",
+                },
+                {
+                    match: /(?<=\),nameplate:)(\i)/,
+                    replace: "$self.nameplate($1)"
+                }
+            ]
         },
         {
             find: "role:\"listitem\",innerRef",
-            replacement:
-            {
+            replacement: {
                 // We cant access the user id here, so we take the banner property we set earlier
                 match: /focusProps.\i\}=(\i).*?children:\[/,
                 replace: "$&$1.banner,"
@@ -70,9 +89,14 @@ export default definePlugin({
         DataStore.set(DATASTORE_KEY, this.data);
     },
 
-    memberListBannerHook(user: User) {
+    nameplate(nameplate: Nameplate | undefined) {
+        if (settings.store.preferNameplate) return nameplate;
+    },
+
+    memberListBannerHook(user: User, nameplate: Nameplate | undefined) {
         let url = this.getBanner(user.id);
         if (!url) return;
+        if (settings.store.preferNameplate && nameplate) return;
         if (!settings.store.animate) {
             // Discord Banners
             url = url.replace(".gif", ".png");
