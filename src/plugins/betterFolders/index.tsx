@@ -268,7 +268,7 @@ export default definePlugin({
         }
     },
 
-    gridStyle: "vc-BetterFolders-sidebar-grid",
+    gridStyle: "vc-betterFolders-sidebar-grid",
 
     getGuildTree(isBetterFolders: boolean, originalTree: any, expandedFolderIds?: Set<any>) {
         return useMemo(() => {
