@@ -191,7 +191,7 @@ export default definePlugin({
             const originalOnClick = originalProps.onClick!;
             originalProps.onClick = e => {
                 if (!isBlocked) return originalOnClick(e);
-                this.openConfirmationModal(e, () => originalOnClick(e), user, true);
+                this.openConfirmationModal(e as unknown as MouseEvent, () => originalOnClick(e), user, true);
             };
         }
 

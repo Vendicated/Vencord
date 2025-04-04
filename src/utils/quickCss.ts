@@ -65,8 +65,16 @@ function patchSidebar(css: string): string {
         css.includes("grid-template-areas") && Settings.plugins.BetterFolders.enabled
     ) {
         css = css.replace(
-            /(["'])([^"']*?)guildsList\s+/g,
-            (_, quote, pre) => `${quote}${pre}guildsList sidebar `
+            /\btitleBar\b/,
+            "titleBar titleBar"
+        );
+        css = css.replace(
+            /\buserPanel\b/,
+            "userPanel userPanel"
+        );
+        css = css.replace(
+            /guildsList/g,
+            "guildsList sidebar"
         );
         css = css.replace(
             /guildsEnd\]/g,
@@ -74,6 +82,32 @@ function patchSidebar(css: string): string {
         );
     }
     return css;
+}
+
+async function fetchAndPatchCSS(url: string): Promise<string> {
+    try {
+        const res = await fetch(url);
+        const css = await res.text();
+
+        const importLinks = extractImportLinks(css);
+        const patchedCSS = await Promise.all(importLinks.map(fetchAndPatchCSS));
+
+        const combinedCSS = patchedCSS.join("\n") + "\n" + patchSidebar(css);
+        return combinedCSS;
+    } catch (e) {
+        console.warn(`Failed to fetch and patch CSS from ${url}`, e);
+        return "";
+    }
+}
+
+function extractImportLinks(css: string): string[] {
+    const importRegex = /@import url\(([^)]+)\)/g;
+    const links: string[] = [];
+    let match;
+    while ((match = importRegex.exec(css)) !== null) {
+        links.push(match[1].trim().replace(/['"]/g, ""));
+    }
+    return links;
 }
 
 async function initThemes() {
@@ -96,11 +130,9 @@ async function initThemes() {
     const links: string[] = [];
 
     for (const url of rawLinks) {
-        try {
-            const res = await fetch(url);
-            const css = await res.text();
-            const patched = patchSidebar(css);
-            const blob = new Blob([patched], { type: "text/css" });
+        const css = await fetchAndPatchCSS(url);
+        if (css) {
+            const blob = new Blob([css], { type: "text/css" });
             links.push(URL.createObjectURL(blob));
         } catch (e) {
             console.warn(`Failed to fetch theme from ${url}`, e);
