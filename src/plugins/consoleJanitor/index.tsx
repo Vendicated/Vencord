@@ -117,6 +117,7 @@ export default definePlugin({
         this.settings.store.whitelistedLoggers?.split(";").map(x => x.trim()).forEach(logAllow.add.bind(logAllow));
     },
 
+    Noop,
     NoopLogger: () => NoopLogger,
 
     shouldLog(logger: string, level: keyof AllowLevels) {
@@ -149,14 +150,14 @@ export default definePlugin({
             find: "is not a valid locale.",
             replacement: {
                 match: /\i\.error(?=\(""\.concat\(\i," is not a valid locale."\)\))/,
-                replace: "$self.NoopLogger"
+                replace: "$self.Noop"
             }
         },
         {
             find: '"AppCrashedFatalReport: getLastCrash not supported."',
             replacement: {
                 match: /console\.log(?=\("AppCrashedFatalReport: getLastCrash not supported\."\))/,
-                replace: "$self.NoopLogger"
+                replace: "$self.Noop"
             }
         },
         {
