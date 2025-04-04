@@ -61,8 +61,8 @@ export async function toggle(isEnabled: boolean) {
 
 function patchSidebar(css: string): string {
     if (
-        css.includes("grid-template-columns") ||
-        css.includes("grid-template-areas")
+        css.includes("grid-template-columns") && Settings.plugins.BetterFolders.enabled ||
+        css.includes("grid-template-areas") && Settings.plugins.BetterFolders.enabled
     ) {
         css = css.replace(
             /(["'])([^"']*?)guildsList\s+/g,
