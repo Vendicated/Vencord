@@ -16,11 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { isLegacyNonAsarVencord } from "@main/patcher";
 import { get } from "@main/utils/simpleGet";
 import { IpcEvents } from "@shared/IpcEvents";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
-import { ipcMain } from "electron";
+import { app, dialog, ipcMain } from "electron";
 import { writeFile } from "fs/promises";
+import {
+    existsSync,
+    unlinkSync,
+    writeFileSync,
+} from "original-fs";
 import { join } from "path";
 
 import gitHash from "~git-hash";
@@ -86,6 +92,35 @@ async function applyUpdates() {
 
     return true;
 }
+
+async function migrateAsarToLegacy() {
+    try {
+        const isFlatpak = process.platform === "linux" && !!process.env.FLATPAK_ID;
+        if (isFlatpak) throw "Flatpak Discord can't automatically be migrated.";
+
+        const asarPath = join(__dirname, "../equicord.asar");
+        if (existsSync(asarPath)) {
+            unlinkSync(asarPath);
+        }
+
+        writeFileSync(__filename, "// Shim for legacy Equicord\n\nrequire(\"./index.js\");");
+
+        app.relaunch();
+        app.exit();
+    } catch (e) {
+        console.error("Failed to migrate to legacy", e);
+
+        app.whenReady().then(() => {
+            dialog.showErrorBox(
+                "Migration Error",
+                "Failed to migrate back to the legacy version. Please reinstall using the Equicord Installer."
+            );
+            app.exit(1);
+        });
+    }
+}
+
+if (!isLegacyNonAsarVencord) migrateAsarToLegacy();
 
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${gitRemote}`));
 ipcMain.handle(IpcEvents.GET_UPDATES, serializeErrors(calculateGitChanges));
