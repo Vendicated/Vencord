@@ -19,22 +19,16 @@
 import { get } from "@main/utils/simpleGet";
 import { IpcEvents } from "@shared/IpcEvents";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
-import { app, dialog, ipcMain } from "electron";
-import { writeFile } from "fs/promises";
-import {
-    existsSync,
-    unlinkSync,
-    writeFileSync,
-} from "original-fs";
-import { join } from "path";
+import { ipcMain } from "electron";
+import { writeFileSync as originalWriteFileSync } from "original-fs";
 
 import gitHash from "~git-hash";
 import gitRemote from "~git-remote";
 
-import { EQUICORD_FILES, serializeErrors } from "./common";
+import { ASAR_FILE, serializeErrors } from "./common";
 
 const API_BASE = `https://api.github.com/repos/${gitRemote}`;
-let PendingUpdates = [] as [string, string][];
+let PendingUpdate: string | null = null;
 
 async function githubGet(endpoint: string) {
     return get(API_BASE + endpoint, {
@@ -71,52 +65,21 @@ async function fetchUpdates() {
         return false;
 
 
-    data.assets.forEach(({ name, browser_download_url }) => {
-        if (EQUICORD_FILES.some(s => name.startsWith(s))) {
-            PendingUpdates.push([name, browser_download_url]);
-        }
-    });
+    const asset = data.assets.find(a => a.name === ASAR_FILE);
+    PendingUpdate = asset.browser_download_url;
 
     return true;
 }
 
 async function applyUpdates() {
-    await Promise.all(PendingUpdates.map(
-        async ([name, data]) => writeFile(
-            join(__dirname, name),
-            await get(data)
-        )
-    ));
-    PendingUpdates = [];
+    if (!PendingUpdate) return true;
+
+    const data = await get(PendingUpdate);
+    originalWriteFileSync(__dirname, data);
+
+    PendingUpdate = null;
 
     return true;
-}
-
-async function migrateAsarToLegacy() {
-    try {
-        const isFlatpak = process.platform === "linux" && !!process.env.FLATPAK_ID;
-        if (isFlatpak) throw "Flatpak Discord can't automatically be migrated.";
-
-        const asarPath = join(__dirname, "../equicord.asar");
-        if (existsSync(asarPath)) {
-            unlinkSync(asarPath);
-        }
-
-        writeFileSync(__filename, "// Shim for legacy Equicord\n\nrequire(\"./index.js\");");
-
-        app.relaunch();
-        app.exit();
-    } catch (e) {
-        console.error("Failed to migrate to legacy", e);
-
-        app.whenReady().then(() => {
-            dialog.showErrorBox(
-                "Migration Error",
-                "Failed to migrate back to the legacy version. Please reinstall using the Equicord Installer."
-            );
-            app.exit(1);
-        });
-    }
 }
 
 ipcMain.handle(IpcEvents.GET_REPO, serializeErrors(() => `https://github.com/${gitRemote}`));
