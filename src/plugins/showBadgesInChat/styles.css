@@ -1,4 +1,3 @@
-
 .vc-sbic-badge-settings {
     display: flex;
     gap: 0.25rem;
@@ -11,36 +10,36 @@
     transition: 0.2s;
     cursor: pointer;
     pointer-events: initial;
+    vertical-align: top;
 }
 
 .vc-sbic-image-container img {
-    width: 25px;
-    height: 25px;
+    width: calc(1.5rem + 4px);
+    height: calc(1.5rem + 4px);
 }
 
 .vc-sbic-image-container[data-is-enabled="false"] {
-    opacity: 0.5;
     scale: 0.95;
+    filter: grayscale(0.8);
 }
 
 .vc-sbic-settings-avatar {
-    width: 50px;
-    height: 50px;
+    width: 3.5rem;
+    height: 3.5rem;
     border-radius: 50%;
     margin-right: 12px;
-    filter: grayscale(100%);
+    filter: grayscale();
 }
 
 .vc-sbic-settings-username {
-    font-size: 22px;
-    color: white;
+    font-size: 1.5rem;
     opacity: 0.8;
-    margin-right: 5px;
+    margin-right: 0.25rem;
     font-weight: 450;
 }
 
 .vc-sbic-badge-row {
     display: inline-flex;
-    margin-top: 6px !important;
-    margin-left: -3px !important;
+    vertical-align: top;
+    height: calc(1rem + 4px);
 }

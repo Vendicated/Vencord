@@ -44,7 +44,6 @@ function ChatBadges({ author }: { author: User; }) {
         .filter(
             badge => (author.flags || author.publicFlags) & (1 << badge[0])
         )
-
         .map(badge => (
             <RoleIconComponent
                 key={author.id}
@@ -119,13 +118,13 @@ function ChatBadges({ author }: { author: User; }) {
 
 export default definePlugin({
     name: "ShowBadgesInChat",
-    authors: [Devs.Inbestigator, Devs.KrstlSkll],
+    authors: [Devs.Inbestigator, Devs.KrystalSkull],
     description: "Shows the message author's badges beside their name in chat.",
     dependencies: ["MessageDecorationsAPI"],
     settings,
     start: () => {
         addMessageDecoration("vc-show-badges-in-chat", props =>
-            props.message?.author ? (
+            props.message?.author && !props.compact ? (
                 <ChatBadges author={props.message.author} />
             ) : null
         );
