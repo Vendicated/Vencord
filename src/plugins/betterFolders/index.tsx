@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./sidebarFix.css";
+
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
@@ -104,7 +106,7 @@ export const settings = definePluginSettings({
     }
 });
 
-let cssMade = false;
+const cssMade = false;
 
 const cssElementId = "VC-BetterFolders";
 
@@ -202,6 +204,13 @@ export default definePlugin({
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
                     match: /(?<=\.expandedFolderBackground.+?}\),)(?=\i,)/,
                     replace: "!$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)?null:"
+                },
+                {
+                    // Discord adds a slight bottom margin of 4px when it's expanded
+                    // Which looks off when there's nothing open in the folder
+                    predicate: () => !settings.store.keepIcons,
+                    match: /(?=className:.{0,50}folderIcon)/,
+                    replace: "style:arguments[0]?.isBetterFolders?{}:{marginBottom:0},"
                 }
             ]
         },
@@ -212,12 +221,17 @@ export default definePlugin({
             replacement: [
                 {
                     // Render the Better Folders sidebar
+                    // Discord has two different places where they render the sidebar.
+                    // One is for visual refresh, one is not,
+                    // and each has a bunch of conditions &&ed in front of it.
+                    // Add the betterFolders sidebar to both, keeping the conditions Discord uses.
                     match: /(?<=[[,])((?:!?\i&&)+)\(.{0,50}({className:\i\.guilds,themeOverride:\i})\)/g,
-                    replace: (_, conditions, props) => `${_},${conditions}$self.FolderSideBar({...${props}})`
+                    replace: (m, conditions, props) => `${m},${conditions}$self.FolderSideBar(${props})`
                 },
                 {
+                    // Add grid styles to fix aligment with other visual refresh elements
                     match: /(?<=className:)(\i\.base)(?=,)/,
-                    replace: "($self.makePatchedBaseCSS($1))"
+                    replace: "`${$self.gridStyle} ${$1}`"
                 }
             ]
         },
@@ -276,46 +290,7 @@ export default definePlugin({
         }
     },
 
-    gridStyle: "vc-BetterFolders-sidebar-grid",
-    makePatchedBaseCSS(className: string) {
-        done: try {
-            if (cssMade) break done;
-            const rule = [...document.styleSheets]
-                .flatMap(x => [...x.cssRules])
-                // cant do includes because they have a `not ((grid-template-columns`
-                // dumb type inference
-                .filter((x): x is CSSSupportsRule => x instanceof CSSSupportsRule && x.conditionText.startsWith("(grid-template-columns"))
-                .flatMap(x => [...x.cssRules])
-                .filter(x => x instanceof CSSStyleRule)
-                .find(x => x.selectorText.endsWith(`.${className}`));
-            if (!rule) {
-                console.error("Failed to find css rule for betterFolders");
-                break done;
-            }
-            const areas = rule.style.gridTemplateAreas
-                .split('" "')
-                .map(x => x.replace(/"/g, "").split(" "));
-            areas[0].splice(1, 0, areas[0][0]);
-            areas[1].splice(1, 0, "sidebar");
-            areas[2].splice(1, 0, "sidebar");
-            const css = `
-            .visual-refresh .${this.gridStyle} {
-                grid-template-areas: ${areas.map(x => `"${x.join(" ")}"`).join(" ")};
-                grid-template-columns: ${rule.style.gridTemplateColumns.replace(/(?<=guildsEnd\])/, " min-content [sidebarEnd]")};
-            }
-            `;
-            const element = document.createElement("style");
-            element.id = cssElementId;
-            element.textContent = css;
-            document.getElementById(cssElementId)?.remove();
-            document.head.appendChild(element);
-            cssMade = true;
-        } catch (e) {
-            console.error(e);
-            return className;
-        }
-        return `${className} ${this.gridStyle}`;
-    },
+    gridStyle: "vc-betterFolders-sidebar-grid",
 
     getGuildTree(isBetterFolders: boolean, originalTree: any, expandedFolderIds?: Set<any>) {
         return useMemo(() => {

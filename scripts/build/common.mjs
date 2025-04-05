@@ -132,7 +132,7 @@ export const makeAllPackagesExternalPlugin = {
 };
 
 /**
- * @type {(kind: "web" | "discordDesktop" | "vencordDesktop" | "equicordDesktop") => import("esbuild").Plugin}
+ * @type {(kind: "web" | "discordDesktop" | "vesktop" | "equibop") => import("esbuild").Plugin}
  */
 export const globPlugins = kind => ({
     name: "glob-plugins",
@@ -171,8 +171,8 @@ export const globPlugins = kind => ({
                             (target === "web" && kind === "discordDesktop") ||
                             (target === "desktop" && kind === "web") ||
                             (target === "discordDesktop" && kind !== "discordDesktop") ||
-                            (target === "vencordDesktop" && kind !== "vencordDesktop" && kind !== "equicordDesktop") ||
-                            (target === "equicordDesktop" && kind !== "equicordDesktop" && kind !== "vencordDesktop");
+                            (target === "vesktop" && kind !== "vesktop" && kind !== "equibop") ||
+                            (target === "equibop" && kind !== "equibop" && kind !== "vesktop");
 
                         if (excluded) {
                             const name = await resolvePluginName(fullDir, file);
@@ -357,10 +357,6 @@ export const commonOpts = {
     jsxFactory: "VencordCreateElement",
     jsxFragment: "VencordFragment"
 };
-
-const escapedBuiltinModules = builtinModules
-    .map(m => m.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"))
-    .join("|");
 
 export const commonRendererPlugins = [
     banImportPlugin(/^react$/, "Cannot import from react. React and hooks should be imported from @webpack/common"),
