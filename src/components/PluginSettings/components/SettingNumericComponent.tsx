@@ -56,7 +56,7 @@ export function SettingNumericComponent({ option, pluginSettings, definedSetting
 
     return (
         <Forms.FormSection>
-            <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
+            <Forms.FormTitle>{option.displayName ?? wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom20} type="description">{option.description}</Forms.FormText>
             <TextInput
                 type="number"
