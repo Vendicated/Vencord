@@ -188,6 +188,7 @@ async function parseFile(fileName: string) {
                         }
                         throw fail("commands array contains invalid elements");
                     });
+                    break;
                 case "authors":
                     if (!isArrayLiteralExpression(value)) throw fail("authors is not an array literal");
                     data.authors = value.elements.map(e => {
