@@ -19,6 +19,7 @@
 
 // @ts-check
 
+import { createPackage } from "@electron/asar";
 import { readdir, writeFile } from "fs/promises";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
@@ -226,4 +227,9 @@ await Promise.all([
         name: "equicord",
         main: "main.js"
     }))
+]);
+
+await Promise.all([
+    createPackage("dist/desktop", "dist/desktop.asar"),
+    createPackage("dist/equibop", "dist/equibop.asar"),
 ]);
