@@ -20,6 +20,7 @@ import "./discord.css";
 
 import { MessageObject } from "@api/MessageEvents";
 import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
+import { OpenUserProfileModalProps } from "@webpack/types";
 import { Channel, Guild, Message, User } from "discord-types/general";
 import { Except } from "type-fest";
 
@@ -155,7 +156,7 @@ export function openImageModal(item: Except<MediaModalItem, "type">, mediaModalP
     });
 }
 
-export async function openUserProfile(id: string) {
+export async function openUserProfile(id: string, extraParams: Partial<OpenUserProfileModalProps> = {}) {
     const user = await UserUtils.getUser(id);
     if (!user) throw new Error("No such user: " + id);
 
@@ -167,7 +168,8 @@ export async function openUserProfile(id: string) {
         analyticsLocation: {
             page: guildId ? "Guild Channel" : "DM Channel",
             section: "Profile Popout"
-        }
+        },
+        ...extraParams
     });
 }
 
