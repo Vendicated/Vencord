@@ -228,8 +228,3 @@ await Promise.all([
         main: "main.js"
     }))
 ]);
-
-await Promise.all([
-    createPackage("dist/desktop", "dist/desktop.asar"),
-    createPackage("dist/equibop", "dist/equibop.asar"),
-]);

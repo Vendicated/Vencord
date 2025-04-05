@@ -43,9 +43,11 @@ if (IS_VESKTOP || !IS_VANILLA) {
             }
             switch (url) {
                 case "renderer.js.map":
+                case "equibopRenderer.js.map":
                 case "preload.js.map":
+                case "equibopPreload.js.map":
                 case "patcher.js.map":
-                case "main.js.map":
+                case "equibopMain.js.map":
                     cb(join(__dirname, url));
                     break;
                 default:
