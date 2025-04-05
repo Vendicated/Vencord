@@ -174,6 +174,11 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     function renderMoreUsers(_label: string, count: number) {
         const sliceCount = plugin.authors.length - count;
+
+        if (sliceCount <= 0) {
+            return null;
+        }
+
         const sliceStart = plugin.authors.length - sliceCount;
         const sliceEnd = sliceStart + plugin.authors.length - count;
 
@@ -243,6 +248,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                     <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0 }}>Authors</Forms.FormTitle>
                     <div style={{ width: "fit-content", marginBottom: 8 }}>
                         <UserSummaryItem
+                            className="user-summary-item"
                             users={authors}
                             count={plugin.authors.length}
                             guildId={undefined}
