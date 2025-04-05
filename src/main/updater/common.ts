@@ -16,7 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const ASAR_FILE = IS_VESKTOP ? "vesktop.asar" : IS_EQUIBOP ? "equibop.asar" : "desktop.asar";
+export const EQUICORD_FILES = [
+    IS_DISCORD_DESKTOP ? "patcher.js" : "equibopMain.js",
+    IS_DISCORD_DESKTOP ? "preload.js" : "equibopPreload.js",
+    IS_DISCORD_DESKTOP ? "renderer.js" : "equibopRenderer.js",
+    IS_DISCORD_DESKTOP ? "renderer.css" : "equibopRenderer.css",
+];
 
 export function serializeErrors(func: (...args: any[]) => any) {
     return async function () {

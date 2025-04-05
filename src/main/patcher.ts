@@ -29,8 +29,11 @@ console.log("[Equicord] Starting up...");
 // Our injector file at app/index.js
 const injectorPath = require.main!.filename;
 
+// special discord_arch_electron injection method
+const asarName = require.main!.path.endsWith("app.asar") ? "_app.asar" : "app.asar";
+
 // The original app.asar
-const asarPath = join(dirname(injectorPath), "..", "_app.asar");
+const asarPath = join(dirname(injectorPath), "..", asarName);
 
 const discordPkg = require(join(asarPath, "package.json"));
 require.main!.filename = join(asarPath, discordPkg.main);
