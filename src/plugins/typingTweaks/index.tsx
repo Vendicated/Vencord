@@ -26,7 +26,7 @@ import { Avatar, GuildMemberStore, React, RelationshipStore } from "@webpack/com
 import { User } from "discord-types/general";
 import { PropsWithChildren } from "react";
 
-import managedStyle from "./styles.css?managed";
+import managedStyle from "./style.css?managed";
 
 const settings = definePluginSettings({
     showAvatars: {
@@ -75,7 +75,7 @@ const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
                 openUserProfile(user.id);
             }}
             style={{
-                color: typingUserColor(guildId, user.id),
+                color: settings.store.showRoleColors ? GuildMemberStore.getMember(guildId, user.id)?.colorString : undefined,
             }}
         >
             {settings.store.showAvatars && (
@@ -97,7 +97,9 @@ export default definePlugin({
     description: "Show avatars and role colours in the typing indicator",
     authors: [Devs.zt],
     settings,
+
     managedStyle,
+
     patches: [
         {
             find: "#{intl::THREE_USERS_TYPING}",

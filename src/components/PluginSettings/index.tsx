@@ -192,11 +192,11 @@ function ExcludedPluginsList({ search }: { search: string; }) {
     const matchingExcludedPlugins = Object.entries(ExcludedPlugins)
         .filter(([name]) => name.toLowerCase().includes(search));
 
-    const ExcludedReasons: Record<"web" | "discordDesktop" | "vencordDesktop" | "equicordDesktop" | "desktop" | "dev", string> = {
+    const ExcludedReasons: Record<"web" | "discordDesktop" | "vesktop" | "equibop" | "desktop" | "dev", string> = {
         desktop: "Discord Desktop app or Vesktop",
         discordDesktop: "Discord Desktop app",
-        vencordDesktop: "Vesktop Equibop apps",
-        equicordDesktop: "Vesktop & Equibop apps",
+        vesktop: "Vesktop Equibop apps",
+        equibop: "Vesktop & Equibop apps",
         web: "Vesktop & Equibop apps as well as the Web version of Discord",
         dev: "Developer version of Equicord"
     };

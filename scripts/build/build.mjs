@@ -191,8 +191,8 @@ const buildConfigs = ([
         globalName: "Vencord",
         sourcemap,
         plugins: [
-            globPlugins("equicordDesktop"),
-            ...commonOpts.plugins
+            globPlugins("equibop"),
+            ...commonRendererPlugins
         ],
         define: {
             ...defines,

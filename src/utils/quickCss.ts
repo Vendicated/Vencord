@@ -98,7 +98,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     SettingsStore.addChangeListener("enabledThemeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
-    ThemeStore.addChangeListener(initThemes);
+
+    let currentTheme = ThemeStore.theme;
+    ThemeStore.addChangeListener(() => {
+        if (currentTheme === ThemeStore.theme) return;
+
+        currentTheme = ThemeStore.theme;
+        initThemes();
+    });
 
     if (!IS_WEB)
         VencordNative.quickCss.addThemeChangeListener(initThemes);
