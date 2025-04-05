@@ -195,6 +195,13 @@ export default definePlugin({
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
                     match: /(?<=\.expandedFolderBackground.+?}\),)(?=\i,)/,
                     replace: "!$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)?null:"
+                },
+                {
+                    // Discord adds a slight bottom margin of 4px when it's expanded
+                    // Which looks off when there's nothing open in the folder
+                    predicate: () => !settings.store.keepIcons,
+                    match: /(?=className:.{0,50}folderIcon)/,
+                    replace: "style:arguments[0]?.isBetterFolders?{}:{marginBottom:0},"
                 }
             ]
         },
