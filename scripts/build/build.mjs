@@ -19,7 +19,6 @@
 
 // @ts-check
 
-import { createPackage } from "@electron/asar";
 import { readdir, writeFile } from "fs/promises";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
