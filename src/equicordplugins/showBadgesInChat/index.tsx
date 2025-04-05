@@ -38,9 +38,12 @@ function CheckBadge({ badge, author }: { badge: string; author: User; }): JSX.El
 
     switch (badge) {
         case "EquicordDonor":
+            const equicordDonorBadges = badges.getEquicordDonorBadges(author.id)?.slice(0, 12);
+            if (!equicordDonorBadges || equicordDonorBadges.length === 0) return null;
+
             return (
                 <span style={{ order: settings.store.EquicordDonorPosition }}>
-                    {badges.getEquicordDonorBadges(author.id)?.map((badge: any) => (
+                    {equicordDonorBadges.map((badge: any) => (
                         <RoleIconComponent
                             key={author.id}
                             className={roleIconClassName}
