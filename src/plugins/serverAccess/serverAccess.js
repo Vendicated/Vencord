@@ -66,7 +66,7 @@ module.exports = class ServerAccessPlugin {
 module.exports.meta = {
     name: "ServerAccess",
     description: "Bypass server permission checks and gain admin access",
-    authors: [Devs.YourNameHere],
+    authors: [Devs.RlxChap2],
     dependencies: [],
     settings
 };
