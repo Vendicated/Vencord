@@ -210,7 +210,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
 
                 {lastMessageId &&
                     <Text variant="text-md/normal">
-                        Last {channel.isForumChannel() ? "post" : "message"} created:
+                        Last {channel.isForumChannel() ? "post created" : "message sent"}:
                         <Timestamp timestamp={new Date(SnowflakeUtils.extractTimestamp(lastMessageId))} />
                     </Text>
                 }
