@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./sidebarFix.css";
+
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
@@ -193,17 +195,36 @@ export default definePlugin({
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
                     match: /(?<=\.expandedFolderBackground.+?}\),)(?=\i,)/,
                     replace: "!$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)?null:"
+                },
+                {
+                    // Discord adds a slight bottom margin of 4px when it's expanded
+                    // Which looks off when there's nothing open in the folder
+                    predicate: () => !settings.store.keepIcons,
+                    match: /(?=className:.{0,50}folderIcon)/,
+                    replace: "style:arguments[0]?.isBetterFolders?{}:{marginBottom:0},"
                 }
             ]
         },
         {
             find: "APPLICATION_LIBRARY,render:",
             predicate: () => settings.store.sidebar,
-            replacement: {
-                // Render the Better Folders sidebar
-                match: /(container.{0,50}({className:\i\.guilds,themeOverride:\i})\))/,
-                replace: "$1,$self.FolderSideBar({...$2})"
-            }
+            group: true,
+            replacement: [
+                {
+                    // Render the Better Folders sidebar
+                    // Discord has two different places where they render the sidebar.
+                    // One is for visual refresh, one is not,
+                    // and each has a bunch of conditions &&ed in front of it.
+                    // Add the betterFolders sidebar to both, keeping the conditions Discord uses.
+                    match: /(?<=[[,])((?:!?\i&&)+)\(.{0,50}({className:\i\.guilds,themeOverride:\i})\)/g,
+                    replace: (m, conditions, props) => `${m},${conditions}$self.FolderSideBar(${props})`
+                },
+                {
+                    // Add grid styles to fix aligment with other visual refresh elements
+                    match: /(?<=className:)(\i\.base)(?=,)/,
+                    replace: "`${$self.gridStyle} ${$1}`"
+                }
+            ]
         },
         {
             find: "#{intl::DISCODO_DISABLED}",
@@ -256,6 +277,8 @@ export default definePlugin({
             closeFolders();
         }
     },
+
+    gridStyle: "vc-betterFolders-sidebar-grid",
 
     getGuildTree(isBetterFolders: boolean, originalTree: any, expandedFolderIds?: Set<any>) {
         return useMemo(() => {
