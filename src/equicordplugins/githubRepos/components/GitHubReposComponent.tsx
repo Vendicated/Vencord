@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Flex } from "@components/Flex";
+import { classNameFactory } from "@api/Styles";
 import { openModal } from "@utils/modal";
-import { React, useEffect, UserProfileStore, useState } from "@webpack/common";
+import { Button, React, Text, useEffect, UserProfileStore, useState } from "@webpack/common";
 
 import { settings } from "..";
 import { fetchReposByUserId, fetchReposByUsername, fetchUserInfo, GitHubUserInfo } from "../githubApi";
@@ -20,6 +20,8 @@ export function GitHubReposComponent({ id, theme }: { id: string, theme: string;
     const [error, setError] = useState<string | null>(null);
     const [userInfo, setUserInfo] = useState<GitHubUserInfo | null>(null);
     const [returnJustButton, setReturnJustButton] = useState(false);
+
+    const cl = classNameFactory("vc-github-repos-");
 
     const openReposModal = () => {
         if (!userInfo) return;
@@ -86,51 +88,60 @@ export function GitHubReposComponent({ id, theme }: { id: string, theme: string;
         fetchData();
     }, [id]);
 
-    if (loading) return <div className="vc-github-repos-loading">Loading repositories...</div>;
-    if (error) return <div className="vc-github-repos-error">Error: {error}</div>;
+    if (loading) return <Text variant="text-xs/semibold" className={cl("loading")} style={{ color: "var(--header-secondary)" }}>
+        Loading repositories...</Text>;
+
+    if (error) return <Text variant="text-xs/semibold" className={cl("error")} style={{ color: "var(--text-danger)" }}>
+        Error: {error}</Text>;
+
     if (!repos.length) return null;
 
     if (returnJustButton) {
         return (
-            <button
-                className="vc-github-button"
+            <Button
+                className={cl("button")}
+                size={Button.Sizes.SMALL}
+                look={Button.Looks.OUTLINED}
+                color={Button.Colors.TRANSPARENT}
                 onClick={openReposModal}
             >
                 Show GitHub Repositories
-            </button>
+            </Button>
         );
     }
 
-    const topRepos = repos.slice(0, 3);
+    const topRepos = repos.slice(0, 4);
 
     return (
-        <div className="vc-github-repos-container">
-            <div className="vc-github-repos-header">
+        <div className={cl("container")}>
+            <Text variant="text-xs/semibold" className={cl("header")} style={{ color: "var(--header-secondary)" }}>
                 GitHub Repositories
                 {userInfo && (
-                    <span className="vc-github-repos-count">
-                        {` (${topRepos.length}/${userInfo.totalRepos})`}
+                    <span className={cl("count")} style={{ color: "var(--text-muted)" }}>
+                        {` (Showing only top ${topRepos.length}/${userInfo.totalRepos})`}
                     </span>
                 )}
-            </div>
-            <Flex className="vc-github-repos-list" flexDirection="column">
+            </Text>
+            <div className={cl("list")}>
                 {topRepos.map(repo => (
                     <RepoCard
                         key={repo.id}
                         repo={repo}
-                        theme={theme}
                         showStars={settings.store.showStars}
                         showLanguage={settings.store.showLanguage}
-                    />
-                ))}
-            </Flex>
-            <div className="vc-github-repos-footer">
-                <button
-                    className="vc-github-repos-show-more"
+                    />))
+                }
+            </div>
+            <div className={cl("footer")}>
+                <Button
+                    className={cl("show-more")}
+                    size={Button.Sizes.SMALL}
+                    look={Button.Looks.OUTLINED}
+                    color={Button.Colors.TRANSPARENT}
                     onClick={openReposModal}
                 >
                     Show More
-                </button>
+                </Button>
             </div>
         </div>
     );

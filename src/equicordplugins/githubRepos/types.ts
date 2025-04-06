@@ -22,7 +22,6 @@ export interface IconProps {
 
 export interface RepoCardProps {
     repo: GitHubRepo;
-    theme: string;
     showStars: boolean;
     showLanguage: boolean;
 }

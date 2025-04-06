@@ -1,157 +1,55 @@
 .vc-github-repos-container {
-    margin-top: 16px;
-    padding: 16px;
-    border-radius: 8px;
-    border: 1px solid var(--background-modifier-accent);
-    background-color: transparent;
-    max-height: 500px;
     display: flex;
     flex-direction: column;
-}
-
-.vc-github-repos-header {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: var(--header-primary);
-    display: flex;
-    align-items: center;
-}
-
-.vc-github-repos-count {
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--text-muted);
-    margin-left: 4px;
+    gap: 8px;
 }
 
 .vc-github-repos-list {
-    gap: 8px;
-    overflow-y: auto;
-    max-height: 400px;
-    padding-right: 8px;
-    margin-right: -8px;
-    scrollbar-width: thin;
-    flex: 1;
+    display: grid;
+    grid-template-columns: 260px 260px;
+    grid-gap: 16px;
 }
 
-.vc-github-repos-list::-webkit-scrollbar {
-    width: 8px;
-}
-
-.vc-github-repos-list::-webkit-scrollbar-track {
-    background: var(--scrollbar-thin-track);
-    border-radius: 10px;
-}
-
-.vc-github-repos-list::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thin-thumb);
-    border-radius: 10px;
-}
-
-.vc-github-repos-list::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-thin-thumb-hover);
+/* stylelint-disable-next-line selector-class-pattern */
+.biteSize_c0bea0 .vc-github-repos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .vc-github-repos-footer {
-    margin-top: 12px;
-    text-align: center;
-    padding-top: 8px;
-    border-top: 1px solid var(--background-modifier-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+    padding-top: 12px;
+    border-top: 1px solid
+        var(--profile-body-divider-color, var(--background-modifier-accent));
 }
 
-.vc-github-repos-view-all {
-    color: var(--text-link);
-    font-size: 14px;
-    text-decoration: none;
-}
-
-.vc-github-repos-view-all:hover {
-    text-decoration: underline;
-}
-
-.vc-github-button,
+.vc-github-repos-button,
 .vc-github-repos-show-more {
-    background-color: transparent;
-    color: var(--text-normal);
-    border: 1px solid var(--background-modifier-accent);
-    border-radius: 3px;
-    padding: 6px 12px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.vc-github-button:hover,
-.vc-github-repos-show-more:hover {
-    background-color: var(--background-modifier-hover);
-    border-color: var(--background-modifier-selected);
-}
-
-.vc-github-repos-loading,
-.vc-github-repos-error {
-    color: var(--text-normal);
-    font-size: 14px;
-    margin: 8px 0;
-}
-
-.vc-github-repos-error {
-    color: var(--text-danger);
+    width: 100%;
+    border: 1px solid
+        var(--profile-body-divider-color, var(--background-modifier-accent)) !important;
 }
 
 .vc-github-repo-card {
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid var(--background-modifier-accent);
-    background-color: transparent;
-    cursor: pointer;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.vc-github-repo-card:hover {
-    background-color: var(--background-modifier-hover);
-    border-color: var(--background-modifier-selected);
+    padding: 8px;
+    border-radius: var(--radius-xs);
+    border: 1px solid
+        var(--profile-body-divider-color, var(--background-modifier-accent));
 }
 
 .vc-github-repo-header {
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-}
-
-.vc-github-repo-name {
-    font-weight: 600;
-    color: var(--header-primary);
     display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.vc-github-repo-fork-icon {
-    color: var(--text-muted);
+    justify-content: space-between;
 }
 
 .vc-github-repo-stars {
     display: flex;
     align-items: center;
     gap: 4px;
-    color: var(--text-muted);
-    font-size: 14px;
-}
-
-.vc-github-repo-star-icon {
-    color: var(--text-warning);
-}
-
-.vc-github-repo-description {
-    color: var(--text-normal);
-    font-size: 14px;
-    margin-bottom: 8px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
 }
 
 .vc-github-repo-language {
@@ -163,9 +61,9 @@
 }
 
 .vc-github-repo-language-color {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
+    width: var(--size-sm);
+    height: var(--size-sm);
+    border-radius: var(--radius-round);
     display: inline-block;
 }
 
