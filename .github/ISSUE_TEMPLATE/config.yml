@@ -1,8 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-  - name: Vencord Support Server
-    url: https://discord.gg/D9uwnFnqmd
-    about: If you need help regarding Vencord, please join our support server!
-  - name: Vencord Installer
-    url: https://github.com/Vencord/Installer
-    about: You can find the Vencord Installer here
