@@ -12,7 +12,7 @@ import { FluxDispatcher, Menu } from "@webpack/common";
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { channel, message }) => {
     const group = findGroupChildrenByChildId("delete", children) ?? findGroupChildrenByChildId("report", children);
-    if (!group || message.deleted === true) return;
+    if (!group || message.deleted) return;
 
     group.push((
         <Menu.MenuItem
