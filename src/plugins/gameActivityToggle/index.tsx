@@ -69,6 +69,7 @@ function GameActivityToggleButton() {
             icon={makeIcon(showCurrentGame)}
             role="switch"
             aria-checked={!showCurrentGame}
+            redGlow={!showCurrentGame}
             onClick={() => ShowCurrentGame.updateSetting(old => !old)}
         />
     );
@@ -95,7 +96,7 @@ export default definePlugin({
         {
             find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
             replacement: {
-                match: /this\.renderNameZone\(\).+?children:\[/,
+                match: /className:\i\.buttons,.{0,50}children:\[/,
                 replace: "$&$self.GameActivityToggleButton(),"
             }
         }
