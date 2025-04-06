@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 import FriendCodesPanel from "./FriendCodesPanel";
-import { Devs } from "@utils/constants";
 
 export default definePlugin({
     name: "FriendCodes",

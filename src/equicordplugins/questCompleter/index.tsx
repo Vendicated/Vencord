@@ -255,7 +255,7 @@ export default definePlugin({
             replacement: {
                 match: /(?<=className:\i\}\))/,
                 replace: ",onClick:()=>$self.openCompleteQuestUI()"
-            },            
+            },
             predicate: () => settings.store.clickableQuestDiscovery
         }
     ],

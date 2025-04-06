@@ -7,9 +7,7 @@
 import "./styles.css";
 
 import { classNameFactory } from "@api/Styles";
-import { proxyLazy } from "@utils/lazy";
 import { findComponentByCodeLazy } from "@webpack";
-import { Forms } from "@webpack/common";
 import { ComponentType, HTMLAttributes } from "react";
 
 export enum SpinnerTypes {

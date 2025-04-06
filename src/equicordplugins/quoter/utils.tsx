@@ -48,11 +48,11 @@ export async function fetchImageAsBlob(url: string): Promise<Blob> {
         if (!url) throw new Error("Invalid URL: URL is empty or undefined");
 
         const response = await fetch(url, {
-            mode: 'cors',
-            cache: 'no-cache',
-            credentials: 'same-origin',
+            mode: "cors",
+            cache: "no-cache",
+            credentials: "same-origin",
             headers: {
-                'Accept': 'image/*'
+                "Accept": "image/*"
             }
         });
 
@@ -72,7 +72,7 @@ export async function fetchImageAsBlob(url: string): Promise<Blob> {
                 0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
                 0x42, 0x60, 0x82
             ])
-        ], { type: 'image/png' });
+        ], { type: "image/png" });
     }
 }
 
