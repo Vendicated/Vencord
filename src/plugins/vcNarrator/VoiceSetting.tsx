@@ -65,6 +65,15 @@ function ComplexPicker({ voice, voices }: PickerProps) {
 
     const [selectedLanguage, setSelectedLanguage] = useState(() => getCurrentVoice()?.lang ?? languageNameMapping[0].name);
 
+    if (languageNameMapping.length === 1) {
+        return (
+            <SimplePicker
+                voice={voice}
+                voices={groupedVoices[languageNameMapping[0].name]}
+            />
+        );
+    }
+
     const voicesForLanguage = groupedVoices[selectedLanguage];
 
     const languageOptions = languageNameMapping.map(l => ({
