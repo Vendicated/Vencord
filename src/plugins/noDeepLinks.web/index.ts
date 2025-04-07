@@ -9,15 +9,17 @@ import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "DisableDeepLinks",
-    description: "Disables Discord stupid DeepLinks experiment which makes the app unusable",
+    description: "Disables Discord's stupid deep linking feature which tries to force you to use their Desktop App",
     authors: [Devs.Ven],
     required: true,
 
+    noop: () => { },
+
     patches: [{
-        find: "2025-03_desktop_deeplinks",
+        find: /\.openNativeAppModal\(.{0,50}?\.DEEP_LINK/,
         replacement: {
-            match: /config:{enabled:!0/,
-            replace: "config:{enabled:!1",
+            match: /\i\.\i\.openNativeAppModal/,
+            replace: "$self.noop",
         }
     }]
 });
