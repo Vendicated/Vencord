@@ -17,14 +17,13 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { useStateFromStores } from "@webpack/common";
+import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
+import { Animations, useStateFromStores } from "@webpack/common";
 import type { CSSProperties } from "react";
 
 import { ExpandedGuildFolderStore, settings } from ".";
 
 const ChannelRTCStore = findStoreLazy("ChannelRTCStore");
-const Animations = findByPropsLazy("a", "animated", "useTransition");
 const GuildsBar = findComponentByCodeLazy('("guildsnav")');
 
 export default ErrorBoundary.wrap(guildsBarProps => {
@@ -46,7 +45,8 @@ export default ErrorBoundary.wrap(guildsBarProps => {
     // Also display flex otherwise to fix scrolling
     const barStyle = {
         display: isFullscreen ? "none" : "flex",
-    } as CSSProperties;
+        gridArea: "betterFoldersSidebar"
+    } satisfies CSSProperties;
 
     if (!guilds || !settings.store.sidebarAnim) {
         return visible

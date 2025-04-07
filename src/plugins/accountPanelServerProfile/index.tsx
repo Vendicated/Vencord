@@ -73,19 +73,19 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    match: /(?<=\.AVATAR_SIZE\);)/,
-                    replace: "$self.useAccountPanelRef();"
+                    match: /let{speaking:\i/,
+                    replace: "$self.useAccountPanelRef();$&"
                 },
                 {
                     match: /(\.AVATAR,children:.+?renderPopout:(\i)=>){(.+?)}(?=,position)(?<=currentUser:(\i).+?)/,
                     replace: (_, rest, popoutProps, originalPopout, currentUser) => `${rest}$self.UserProfile({popoutProps:${popoutProps},currentUser:${currentUser},originalRenderPopout:()=>{${originalPopout}}})`
                 },
                 {
-                    match: /\.AVATAR,children:.+?(?=renderPopout:)/,
-                    replace: "$&onRequestClose:$self.onPopoutClose,"
+                    match: /\.AVATAR,children:.+?onRequestClose:\(\)=>\{/,
+                    replace: "$&$self.onPopoutClose();"
                 },
                 {
-                    match: /(?<=\.avatarWrapper,)/,
+                    match: /(?<=#{intl::SET_STATUS}\),)/,
                     replace: "ref:$self.accountPanelRef,onContextMenu:$self.openAccountPanelContextMenu,"
                 }
             ]

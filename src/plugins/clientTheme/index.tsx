@@ -7,12 +7,15 @@
 import "./clientTheme.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, Forms, ThemeStore, useStateFromStores } from "@webpack/common";
+
+const cl = classNameFactory("vc-clientTheme-");
 
 const ColorPicker = findComponentByCodeLazy("#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}", ".BACKGROUND_PRIMARY)");
 
@@ -60,9 +63,9 @@ function ThemeSettings() {
     }
 
     return (
-        <div className="client-theme-settings">
-            <div className="client-theme-container">
-                <div className="client-theme-settings-labels">
+        <div className={cl("settings")}>
+            <div className={cl("container")}>
+                <div className={cl("settings-labels")}>
                     <Forms.FormTitle tag="h3">Theme Color</Forms.FormTitle>
                     <Forms.FormText>Add a color to your Discord client theme</Forms.FormText>
                 </div>
@@ -76,10 +79,10 @@ function ThemeSettings() {
             {(contrastWarning || nitroThemeEnabled) && (<>
                 <Forms.FormDivider className={classes(Margins.top8, Margins.bottom8)} />
                 <div className={`client-theme-contrast-warning ${contrastWarning ? (isLightTheme ? "theme-dark" : "theme-light") : ""}`}>
-                    <div className="client-theme-warning">
-                        <Forms.FormText>Warning, your theme won't look good:</Forms.FormText>
-                        {contrastWarning && <Forms.FormText>Selected color won't contrast well with text</Forms.FormText>}
-                        {nitroThemeEnabled && <Forms.FormText>Nitro themes aren't supported</Forms.FormText>}
+                    <div className={cl("warning")}>
+                        <Forms.FormText className={cl("warning-text")}>Warning, your theme won't look good:</Forms.FormText>
+                        {contrastWarning && <Forms.FormText className={cl("warning-text")}>Selected color won't contrast well with text</Forms.FormText>}
+                        {nitroThemeEnabled && <Forms.FormText className={cl("warning-text")}>Nitro themes aren't supported</Forms.FormText>}
                     </div>
                     {(contrastWarning && fixableContrast) && <Button onClick={() => setTheme(oppositeTheme)} color={Button.Colors.RED}>Switch to {oppositeTheme} mode</Button>}
                     {(nitroThemeEnabled) && <Button onClick={() => setTheme(theme)} color={Button.Colors.RED}>Disable Nitro Theme</Button>}
@@ -91,15 +94,12 @@ function ThemeSettings() {
 
 const settings = definePluginSettings({
     color: {
-        description: "Color your Discord client theme will be based around. Light mode isn't supported",
         type: OptionType.COMPONENT,
         default: "313338",
-        component: () => <ThemeSettings />
+        component: ThemeSettings
     },
     resetColor: {
-        description: "Reset Theme Color",
         type: OptionType.COMPONENT,
-        default: "313338",
         component: () => (
             <Button onClick={() => onPickColor(0x313338)}>
                 Reset Theme Color
@@ -126,18 +126,20 @@ export default definePlugin({
     stop() {
         document.getElementById("clientThemeVars")?.remove();
         document.getElementById("clientThemeOffsets")?.remove();
+        document.getElementById("clientThemeLightModeFixes")?.remove();
     }
 });
 
-const variableRegex = /(--primary-\d{3}-hsl):.*?(\S*)%;/g;
+const visualRefreshVariableRegex = /(--neutral-\d{1,3}-hsl):.*?(\S*)%;/g;
+const oldVariableRegex = /(--primary-\d{3}-hsl):.*?(\S*)%;/g;
 const lightVariableRegex = /^--primary-[1-5]\d{2}-hsl/g;
 const darkVariableRegex = /^--primary-[5-9]\d{2}-hsl/g;
 
 // generates variables per theme by:
 // - matching regex (so we can limit what variables are included in light/dark theme, otherwise text becomes unreadable)
 // - offset from specified center (light/dark theme get different offsets because light uses 100 for background-primary, while dark uses 600)
-function genThemeSpecificOffsets(variableLightness: Record<string, number>, regex: RegExp, centerVariable: string): string {
-    return Object.entries(variableLightness).filter(([key]) => key.search(regex) > -1)
+function genThemeSpecificOffsets(variableLightness: Record<string, number>, regex: RegExp | null, centerVariable: string): string {
+    return Object.entries(variableLightness).filter(([key]) => regex == null || key.search(regex) > -1)
         .map(([key, lightness]) => {
             const lightnessOffset = lightness - variableLightness[centerVariable];
             const plusOrMinus = lightnessOffset >= 0 ? "+" : "-";
@@ -146,25 +148,28 @@ function genThemeSpecificOffsets(variableLightness: Record<string, number>, rege
         .join("\n");
 }
 
-
 function generateColorOffsets(styles) {
-    const variableLightness = {} as Record<string, number>;
+    const oldVariableLightness = {} as Record<string, number>;
+    const visualRefreshVariableLightness = {} as Record<string, number>;
 
     // Get lightness values of --primary variables
-    let variableMatch = variableRegex.exec(styles);
-    while (variableMatch !== null) {
-        const [, variable, lightness] = variableMatch;
-        variableLightness[variable] = parseFloat(lightness);
-        variableMatch = variableRegex.exec(styles);
+    for (const [, variable, lightness] of styles.matchAll(oldVariableRegex)) {
+        oldVariableLightness[variable] = parseFloat(lightness);
+    }
+
+    for (const [, variable, lightness] of styles.matchAll(visualRefreshVariableRegex)) {
+        visualRefreshVariableLightness[variable] = parseFloat(lightness);
     }
 
     createStyleSheet("clientThemeOffsets", [
-        `.theme-light {\n ${genThemeSpecificOffsets(variableLightness, lightVariableRegex, "--primary-345-hsl")} \n}`,
-        `.theme-dark {\n ${genThemeSpecificOffsets(variableLightness, darkVariableRegex, "--primary-600-hsl")} \n}`,
+        `.theme-light {\n ${genThemeSpecificOffsets(oldVariableLightness, lightVariableRegex, "--primary-345-hsl")} \n}`,
+        `.theme-dark {\n ${genThemeSpecificOffsets(oldVariableLightness, darkVariableRegex, "--primary-600-hsl")} \n}`,
+        `.visual-refresh.theme-light {\n ${genThemeSpecificOffsets(visualRefreshVariableLightness, null, "--neutral-2-hsl")} \n}`,
+        `.visual-refresh.theme-dark {\n ${genThemeSpecificOffsets(visualRefreshVariableLightness, null, "--neutral-69-hsl")} \n}`,
     ].join("\n\n"));
 }
 
-function generateLightModeFixes(styles) {
+function generateLightModeFixes(styles: string) {
     const groupLightUsesW500Regex = /\.theme-light[^{]*\{[^}]*var\(--white-500\)[^}]*}/gm;
     // get light capturing groups that mention --white-500
     const relevantStyles = [...styles.matchAll(groupLightUsesW500Regex)].flat();

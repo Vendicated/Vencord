@@ -16,27 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { getUserSettingLazy } from "@api/UserSettings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-const DisableStreamPreviews = getUserSettingLazy<boolean>("voiceAndVideo", "disableStreamPreviews")!;
+import managedStyle from "./style.css?managed";
 
-// @TODO: Delete this plugin in the future
 export default definePlugin({
-    name: "NoScreensharePreview",
-    description: "Disables screenshare previews from being sent.",
-    authors: [Devs.Nuckyz],
+    name: "MessageDecorationsAPI",
+    description: "API to add decorations to messages",
+    authors: [Devs.TheSun],
 
-    start() {
-        if (!DisableStreamPreviews.getSetting()) {
-            DisableStreamPreviews.updateSetting(true);
-        }
-    },
+    managedStyle,
 
-    stop() {
-        if (DisableStreamPreviews.getSetting()) {
-            DisableStreamPreviews.updateSetting(false);
+    patches: [
+        {
+            find: '"Message Username"',
+            replacement: {
+                match: /#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?renderPopout:.+?(?=\])/,
+                replace: "$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"
+            }
         }
-    }
+    ]
 });
