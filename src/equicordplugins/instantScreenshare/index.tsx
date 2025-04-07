@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findByProps } from "@webpack";
-import { ChannelStore, SelectedChannelStore, UserStore } from "@webpack/common";
+import { ChannelStore, PermissionsBits, PermissionStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { VoiceState } from "@webpack/types";
 
 const settings = definePluginSettings({
@@ -40,6 +40,8 @@ async function startStream() {
     const selected = SelectedChannelStore.getVoiceChannelId();
     if (!selected) return;
     const channel = ChannelStore.getChannel(selected);
+
+    if (!PermissionStore.can(PermissionsBits.STREAM, channel)) return;
 
     if (settings.store.streamType === "screen") {
         sources = await getDesktopSources(mediaEngine, ["screen"], null);
