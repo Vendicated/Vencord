@@ -88,6 +88,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ImagePreview by Creations
 - ImgToGif by zyqunix
 - InRole by nin0dev
+- InstantScreenshare by HAHALOSAH & thororen
 - IRememberYou by zoodogood
 - Jumpscare by Surgedevs
 - JumpToStart by Samwich
@@ -130,7 +131,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ReplyPingControl by ant0n & MrDiamond
 - RPCEditor by Nyako & nin0dev
 - RPCStats by Samwich
-- ScreenshareKeybind by HAHALOSAH
 - SearchFix by Jaxx
 - SekaiStickers by MaiKokain
 - ServerSearch by camila314

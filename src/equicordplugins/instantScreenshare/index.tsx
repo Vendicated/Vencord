@@ -4,20 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import { Devs, EquicordDevs } from "@utils/constants";
+import definePlugin from "@utils/types";
 import { findByCode, findByProps } from "@webpack";
 import { ChannelStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { VoiceState } from "@webpack/types";
-
-const settings = definePluginSettings({
-    instantScreenShare: {
-        description: "Instantly screenshare screen 1 when joining a voice channel",
-        type: OptionType.BOOLEAN,
-        default: false
-    }
-});
 
 let hasStreamed = false;
 
@@ -42,29 +33,11 @@ async function startStream() {
 }
 
 export default definePlugin({
-    name: "ScreenshareKeybind",
-    description: "Adds a keybind to instantly screenshare your first screen",
-    authors: [Devs.HAHALOSAH],
-    settings,
-    patches: [
-        {
-            find: "DISCONNECT_FROM_VOICE_CHANNEL]",
-            replacement: {
-                match: /\[\i\.\i\.DISCONNECT_FROM_VOICE_CHANNEL/,
-                replace: "SHARE_ENTIRE_SCREEN:{onTrigger:$self.trigger,keyEvents:{keyUp:!1,keyDown:!0}},$&"
-            },
-        },
-        {
-            find: "keybindActionTypes()",
-            replacement: {
-                match: /=\[(\{value:\i\.\i\.UNASSIGNED)/,
-                replace: "=[{value:'SHARE_ENTIRE_SCREEN',label:'Share Entire Screen'},$1"
-            }
-        }
-    ],
+    name: "InstantScreenshare",
+    description: "Instantly screenshare your first screen when joining a voice channel",
+    authors: [Devs.HAHALOSAH, EquicordDevs.thororen],
     flux: {
         async VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
-            if (!settings.store.instantScreenShare) return;
             const myId = UserStore.getCurrentUser().id;
             for (const state of voiceStates) {
                 const { userId, channelId } = state;
@@ -83,8 +56,5 @@ export default definePlugin({
             }
         }
     },
-    async trigger() {
-        await startStream();
-    }
 });
 
