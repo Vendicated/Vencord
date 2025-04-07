@@ -206,7 +206,6 @@ function ThemesTab() {
     }
 
     function renderLocalThemes() {
-
         return (
             <>
                 <Card className="vc-settings-card">
