@@ -34,7 +34,19 @@ const Resize = findComponentByCodeLazy("sidebarType:", "homeSidebarWidth");
 const ChannelHeader = findComponentByCodeLazy("#{intl::HUB_DIRECTORY_CHANNEL_TITLE}");
 const ChatInputTypes = findByPropsLazy("FORM", "NORMAL");
 const Sidebars = findByPropsLazy("ThreadSidebar", "MessageRequestSidebar");
-
+const SidebarIcon = () => {
+    return (
+        <svg
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+            width="18"
+            height="18"
+        >
+            <path d="M2.75 3.02A3 3 0 0 1 5 2h10a3 3 0 0 1 3 3v7.64c0 .44-.55.7-.95.55a3 3 0 0 0-3.17 4.93l.02.03a.5.5 0 0 1-.35.85h-.05a.5.5 0 0 0-.5.5 2.5 2.5 0 0 1-3.68 2.2l-5.8-3.09A3 3 0 0 1 2 16V5a3 3 0 0 1 .76-1.98Zm1.3 1.95A.04.04 0 0 0 4 5v11c0 .36.2.68.49.86l5.77 3.08a.5.5 0 0 0 .74-.44V8.02a.5.5 0 0 0-.32-.46l-6.63-2.6Z" />
+        </svg>
+    );
+};
 
 interface ContextMenuProps {
     channel: Channel;
@@ -43,7 +55,7 @@ interface ContextMenuProps {
 }
 
 const ArrowsLeftRightIcon = findComponentByCodeLazy("18.58V3a1");
-const XSmallIcon = findComponentByCodeLazy("13.42l5.3");
+const XSmallIcon = findComponentByCodeLazy("12l4.94-4.94a1.5")
 
 function MakeContextCallback(name: "user" | "channel"): NavContextMenuPatchCallback {
     return (children, { user, channel, guildId }: ContextMenuProps) => {
@@ -58,6 +70,7 @@ function MakeContextCallback(name: "user" | "channel"): NavContextMenuPatchCallb
             <Menu.MenuItem
                 id={`vc-sidebar-chat-${name}`}
                 label={"Open Sidebar Chat"}
+                icon={SidebarIcon}
                 action={() => {
                     FluxDispatcher.dispatch({
                         // @ts-ignore
@@ -122,7 +135,7 @@ export default definePlugin({
                         <>
                             <HeaderBarIcon
                                 icon={() => <ArrowsLeftRightIcon style={{ transform: "rotate(90deg)" }} />}
-                                tooltip="Switch channels"
+                                tooltip="Switch Channels"
                                 onClick={() => {
                                     const currentChannel = ChannelStore.getChannel(SelectedChannelStore.getChannelId());
                                     FluxDispatcher.dispatch({
@@ -136,7 +149,7 @@ export default definePlugin({
                                 }}
                             />
                             <HeaderBarIcon
-                                icon={XSmallIcon}
+                                icon={() => (<XSmallIcon style={{width: "24px",height: "24px"}} />)}
                                 tooltip="Close Sidebar Chat"
                                 onClick={() => {
                                     FluxDispatcher.dispatch({

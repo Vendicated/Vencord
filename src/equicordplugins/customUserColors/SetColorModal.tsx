@@ -63,7 +63,7 @@ export function SetColorModal({ userId, modalProps }: { userId: string, modalPro
             <ModalContent className={cl("modal-content")} onKeyDown={handleKey}>
                 <section className={Margins.bottom16}>
                     <Forms.FormTitle tag="h3">
-                        Pick a color
+                        Pick a Color
                     </Forms.FormTitle>
                     <ColorPicker
                         color={colorPickerColor}
