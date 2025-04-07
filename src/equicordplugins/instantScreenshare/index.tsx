@@ -41,7 +41,7 @@ async function startStream() {
     if (!selected) return;
     const channel = ChannelStore.getChannel(selected);
 
-    if (!PermissionStore.can(PermissionsBits.STREAM, channel)) return;
+    if (channel.type === 13 || !PermissionStore.can(PermissionsBits.STREAM, channel)) return;
 
     if (settings.store.streamType === "screen") {
         sources = await getDesktopSources(mediaEngine, ["screen"], null);
