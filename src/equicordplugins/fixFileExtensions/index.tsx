@@ -6,6 +6,8 @@
 
 import { Upload } from "@api/MessageEvents";
 import { Settings } from "@api/Settings";
+import { spoiler } from "@equicordplugins/spoilerMessages";
+import { tarExtMatcher } from "@plugins/anonymiseFileNames";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
 
@@ -34,7 +36,7 @@ export default definePlugin({
         // Taken from AnonymiseFileNames
         {
             find: "instantBatchUpload:",
-            predicate: () => !Settings.plugins.AnonymiseFileNames.enabled,
+            predicate: () => !Settings.plugins.AnonymiseFileNames.enabled && !Settings.plugins.SpoilerMessages,
             replacement: {
                 match: /uploadFiles:(\i),/,
                 replace:
@@ -44,7 +46,7 @@ export default definePlugin({
         // Also taken from AnonymiseFileNames
         {
             find: 'addFilesTo:"message.attachments"',
-            predicate: () => !Settings.plugins.AnonymiseFileNames.enabled,
+            predicate: () => !Settings.plugins.AnonymiseFileNames.enabled && !Settings.plugins.SpoilerMessages,
             replacement: {
                 match: /(\i.uploadFiles\((\i),)/,
                 replace: "$2.forEach(f=>f.filename=$self.fixExt(f)),$1",
@@ -53,10 +55,14 @@ export default definePlugin({
     ],
     fixExt(upload: ExtUpload) {
         const file = upload.filename;
-        const extIdx = file.lastIndexOf(".");
-        const fileName = extIdx !== -1 ? file.substring(0, extIdx) : "";
+        const tarMatch = tarExtMatcher.exec(file);
+        const extIdx = tarMatch?.index ?? file.lastIndexOf(".");
+        let fileName = extIdx !== -1 ? file.substring(0, extIdx) : "";
         const ext = extIdx !== -1 ? file.slice(extIdx) : "";
         const newExt = reverseExtensionMap[ext] || ext;
+        if (Settings.plugins.SpoilerMessages.enabled) {
+            fileName = spoiler(upload);
+        }
 
         return fileName + newExt;
     },

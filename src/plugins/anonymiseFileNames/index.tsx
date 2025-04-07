@@ -20,6 +20,7 @@ import { Upload } from "@api/MessageEvents";
 import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { reverseExtensionMap } from "@equicordplugins/fixFileExtensions";
+import { spoiler } from "@equicordplugins/spoilerMessages";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
@@ -35,7 +36,7 @@ const enum Methods {
     Timestamp,
 }
 
-const tarExtMatcher = /\.tar\.\w+$/;
+export const tarExtMatcher = /\.tar\.\w+$/;
 
 const settings = definePluginSettings({
     anonymiseByDefault: {
@@ -115,27 +116,39 @@ export default definePlugin({
     }, { noop: true }),
 
     anonymise(upload: AnonUpload) {
-
         const file = upload.filename;
         const tarMatch = tarExtMatcher.exec(file);
         const extIdx = tarMatch?.index ?? file.lastIndexOf(".");
-        const fileName = extIdx !== -1 ? file.substring(0, extIdx) : "";
+        let fileName = extIdx !== -1 ? file.substring(0, extIdx) : "";
         let ext = extIdx !== -1 ? file.slice(extIdx) : "";
         if (Settings.plugins.FixFileExtensions.enabled) {
             ext = reverseExtensionMap[ext] || ext;
+        }
+        if (Settings.plugins.SpoilerMessages.enabled) {
+            fileName = spoiler(upload);
         }
         if ((upload.anonymise ?? settings.store.anonymiseByDefault) === false) return fileName + ext;
 
         switch (settings.store.method) {
             case Methods.Random:
                 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-                return Array.from(
+                const returnedName = Array.from(
                     { length: settings.store.randomisedLength },
                     () => chars[Math.floor(Math.random() * chars.length)]
                 ).join("") + ext;
+                if (Settings.plugins.SpoilerMessages.enabled) {
+                    return "SPOILER_" + returnedName;
+                }
+                return returnedName;
             case Methods.Consistent:
+                if (Settings.plugins.SpoilerMessages.enabled) {
+                    return "SPOILER_" + settings.store.consistent + ext;
+                }
                 return settings.store.consistent + ext;
             case Methods.Timestamp:
+                if (Settings.plugins.SpoilerMessages.enabled) {
+                    return "SPOILER_" + Date.now() + ext;
+                }
                 return Date.now() + ext;
         }
     },
