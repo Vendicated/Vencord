@@ -141,7 +141,7 @@ async function createQuoteImage(avatarUrl: string, quoteOld: string, grayScale: 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const avatarBlob = await fetchImageAsBlob(avatarUrl);
-            const fadeBlob = await fetchImageAsBlob("https://cdn.nest.rip/uploads/4ec258ab-9446-497a-a9ef-0c7c70661ca1.png");
+            const fadeBlob = await fetchImageAsBlob("https://github.com/Equicord/Equibored/raw/main/misc/quoter.png");
 
             const avatar = new Image();
             const fade = new Image();
@@ -198,7 +198,6 @@ async function setIsUserCustomCapable() {
     const allowList: string[] = await fetch("https://equicord.org/quoter").then(e => e.json()); // Override for memes - IF THIS IS ABUSED WILL WE TAKEN AWAY
     isUserCustomCapable = allowList.includes(UserStore.getCurrentUser().id);
 }
-
 
 function QuoteModal(props: ModalProps) {
     setIsUserCustomCapable();
