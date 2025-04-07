@@ -190,8 +190,6 @@ function isTimestampDisabled() {
     return settings.store.timestampMode !== TimestampMode.CUSTOM;
 }
 
-// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 function onlineFriendCount(): number {
     let onlineFriends = 0;
     const relationships = RelationshipStore.getRelationships();
@@ -332,8 +330,6 @@ async function createActivity(): Promise<Activity | undefined> {
         details = "7:27 👈";
         state = "";
     }
-
-    // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     const activity: Activity = {
         application_id: appID || "0",

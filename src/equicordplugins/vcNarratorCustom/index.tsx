@@ -24,7 +24,6 @@ import {
     UserStore,
 } from "@webpack/common";
 
-// /
 // Create an in-memory cache (temporary, lost on restart)
 const ttsCache = new Map<string, string>();
 
@@ -68,7 +67,6 @@ async function setCachedVoiceInDB(cacheKey: string, blob: Blob): Promise<void> {
     });
 }
 
-// /
 interface VoiceState {
     userId: string;
     channelId?: string;
@@ -88,7 +86,6 @@ const VoiceStateStore = findByPropsLazy(
 // Filtering out events is not as simple as just dropping duplicates, as otherwise mute, unmute, mute would
 // not say the second mute, which would lead you to believe they're unmuted
 
-// /
 async function speak(text: string) {
     if (text.trim().length === 0) return;
 
@@ -169,7 +166,6 @@ async function speak(text: string) {
     audio.play();
 }
 
-// /
 function clean(str: string) {
     const replacer = settings.store.latinOnly
         ? /[^\p{Script=Latin}\p{Number}\p{Punctuation}\s]/gu

@@ -130,6 +130,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ReplyPingControl by ant0n & MrDiamond
 - RPCEditor by Nyako & nin0dev
 - RPCStats by Samwich
+- ScreenshareKeybind by HAHALOSAH
 - SearchFix by Jaxx
 - SekaiStickers by MaiKokain
 - ServerSearch by camila314
@@ -139,6 +140,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Slap by Korbo
 - SoundBoardLogger by Moxxie, fres, echo, maintained by thororen
 - SpotifyLyrics by Joona
+- StatsfmPresence by Crxa
 - StatusPresets by iamme
 - SteamStatusSync by niko
 - StickerBlocker by Samwich
