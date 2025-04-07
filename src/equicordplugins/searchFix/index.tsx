@@ -29,7 +29,7 @@ export default definePlugin({
             find: '"SearchStore",',
             replacement: {
                 match: /(\i)\.offset=null!=\((\i)=(\i)\.offset\)\?(\i):0/i,
-                replace: (_, v, v1, query, v3, v4) => `$self.main(${query}), ${v}.offset = null !== (${v1} = ${query}.offset) && void 0 !== ${v3} ? ${v4} : 0`
+                replace: "$self.main($3), $1.offset = null != ($2 = $3.offset) ? $4 : 0"
             }
         }
     ],
