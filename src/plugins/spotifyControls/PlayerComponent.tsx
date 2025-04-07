@@ -191,6 +191,7 @@ function SeekBar() {
                 {msToHuman(position)}
             </Forms.FormText>
             <Menu.MenuSliderControl
+                key={position}
                 minValue={0}
                 maxValue={duration}
                 value={position}

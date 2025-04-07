@@ -4,13 +4,34 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs, EquicordDevs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByCode, findByProps } from "@webpack";
 import { ChannelStore, SelectedChannelStore, UserStore } from "@webpack/common";
 import { VoiceState } from "@webpack/types";
 
-let hasStreamed = false;
+const settings = definePluginSettings({
+    streamType: {
+        description: "Stream screen or window",
+        type: OptionType.SELECT,
+        options: [
+            { label: "Screen", value: "screen" },
+            { label: "Window", value: "window" }
+        ],
+        default: "screen"
+    },
+    streamWindowKeyword: {
+        description: "Keyword to search for in window title",
+        type: OptionType.STRING,
+        default: "",
+        placeholder: "Enter keyword"
+    }
+});
+
+let hasStreamed;
+let sources;
+let source;
 
 async function startStream() {
     const startStream = findByCode('type:"STREAM_START"');
@@ -19,9 +40,18 @@ async function startStream() {
     const selected = SelectedChannelStore.getVoiceChannelId();
     if (!selected) return;
     const channel = ChannelStore.getChannel(selected);
-    const sources = await getDesktopSources(mediaEngine, ["screen"], null);
-    if (!sources || sources.length === 0) return;
-    const source = sources[0];
+
+    if (settings.store.streamType === "screen") {
+        sources = await getDesktopSources(mediaEngine, ["screen"], null);
+        source = sources[0];
+    } else if (settings.store.streamType === "window") {
+        const keyword = settings.store.streamWindowKeyword?.toLowerCase();
+        sources = await getDesktopSources(mediaEngine, ["window", "application"], null);
+        source = sources.find(s => s.name?.toLowerCase().includes(keyword));
+    }
+
+    if (!source) return;
+
     startStream(channel.guild_id, selected, {
         "pid": null,
         "sourceId": source.id,
@@ -34,8 +64,9 @@ async function startStream() {
 
 export default definePlugin({
     name: "InstantScreenshare",
-    description: "Instantly screenshare your first screen when joining a voice channel",
+    description: "Instantly screenshare when joining a voice channel",
     authors: [Devs.HAHALOSAH, EquicordDevs.thororen],
+    settings,
     flux: {
         async VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
             const myId = UserStore.getCurrentUser().id;
