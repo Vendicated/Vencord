@@ -56,12 +56,15 @@ export const CspPolicies: PolicyMap = {
 
     // Equicord
     "cdn.nest.rip": MediaSrc, // Nest CDN
+    "equicord.org": MediaSrc, // Equicord CDN
     "*.equicord.org": MediaSrc, // Equicord CDN
     "discord-themes.com": MediaAndCssSrc, // Discord Themes CDN
     "fonts.google.com": ConnectSrc,
     "lrclib.net": ConnectSrc, // Lrclib API
     "spotify-lyrics-api-pi.vercel.app": ConnectSrc, // Spotify Lyrics API
     "stats.fm": MediaSrc, // Stats.fm API
+    "discord.com": MediaScriptsAndCssSrc, // Discord
+    "*.discord.com": MediaScriptsAndCssSrc // Discord
 };
 
 const findHeader = (headers: PolicyMap, headerName: Lowercase<string>) => {
