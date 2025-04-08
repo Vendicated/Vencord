@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Upload } from "@api/MessageEvents";
 import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { reverseExtensionMap } from "@equicordplugins/fixFileExtensions";
-import { spoiler } from "@equicordplugins/spoilerMessages";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
@@ -65,6 +65,11 @@ const settings = definePluginSettings({
         default: "image",
         disabled: () => settings.store.method !== Methods.Consistent,
     },
+    spoilerMessages: {
+        description: "Spoiler messages",
+        type: OptionType.BOOLEAN,
+        default: false,
+    }
 });
 
 export default definePlugin({
@@ -119,15 +124,15 @@ export default definePlugin({
         const file = upload.filename;
         const tarMatch = tarExtMatcher.exec(file);
         const extIdx = tarMatch?.index ?? file.lastIndexOf(".");
-        let fileName = extIdx !== -1 ? file.substring(0, extIdx) : "";
+        const fileName = extIdx !== -1 ? file.substring(0, extIdx) : "";
         let ext = extIdx !== -1 ? file.slice(extIdx) : "";
+        const addSpoilerPrefix = (str: string) => settings.store.spoilerMessages ? "SPOILER_" + str : str;
+
         if (Settings.plugins.FixFileExtensions.enabled) {
             ext = reverseExtensionMap[ext] || ext;
         }
-        if (Settings.plugins.SpoilerMessages.enabled) {
-            fileName = spoiler(upload);
-        }
-        if ((upload.anonymise ?? settings.store.anonymiseByDefault) === false) return fileName + ext;
+
+        if ((upload.anonymise ?? settings.store.anonymiseByDefault) === false) return addSpoilerPrefix(fileName + ext);
 
         switch (settings.store.method) {
             case Methods.Random:
@@ -136,20 +141,31 @@ export default definePlugin({
                     { length: settings.store.randomisedLength },
                     () => chars[Math.floor(Math.random() * chars.length)]
                 ).join("") + ext;
-                if (Settings.plugins.SpoilerMessages.enabled) {
-                    return "SPOILER_" + returnedName;
-                }
-                return returnedName;
+                return addSpoilerPrefix(returnedName);
             case Methods.Consistent:
-                if (Settings.plugins.SpoilerMessages.enabled) {
-                    return "SPOILER_" + settings.store.consistent + ext;
-                }
-                return settings.store.consistent + ext;
+                return addSpoilerPrefix(settings.store.consistent + ext);
             case Methods.Timestamp:
-                if (Settings.plugins.SpoilerMessages.enabled) {
-                    return "SPOILER_" + Date.now() + ext;
-                }
-                return Date.now() + ext;
+                return addSpoilerPrefix(Date.now().toString() + ext);
         }
     },
+
+    commands: [{
+        name: "Spoiler",
+        description: "Toggle your spoiler",
+        inputType: ApplicationCommandInputType.BUILT_IN,
+        options: [
+            {
+                name: "value",
+                description: "Toggle your Spoiler (default is toggle)",
+                required: false,
+                type: ApplicationCommandOptionType.BOOLEAN,
+            },
+        ],
+        execute: async (args, ctx) => {
+            settings.store.spoilerMessages = !!findOption(args, "value", !settings.store.spoilerMessages);
+            sendBotMessage(ctx.channel.id, {
+                content: settings.store.spoilerMessages ? "Spoiler enabled!" : "Spoiler disabled!",
+            });
+        },
+    }],
 });

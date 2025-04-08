@@ -152,7 +152,7 @@ export default definePlugin({
         {
             find: "._areActivitiesExperimentallyHidden=(",
             replacement: {
-                match: /new Date\(\i\):null;/,
+                match: /BOOST_GEM_ICON\}\}\)\)\};/,
                 replace: "$&if($self.shouldHideUser(this.props.user.id, this.props.channel.id)) return null; "
             }
         },

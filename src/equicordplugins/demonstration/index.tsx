@@ -126,7 +126,6 @@ async function playSound(url: string) {
     audio.remove();
 }
 
-
 export default definePlugin({
     name: "Demonstration",
     description: "Plugin for taking theme screenshots - censors identifying images and text.",
