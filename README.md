@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>163 additional plugins</summary>
+<summary>153 additional plugins</summary>
 
 ### All Platforms
 
@@ -43,9 +43,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - CustomSounds by TheKodeToad & SpikeHD
 - CustomTimestamps by Rini & nvhrr
 - CustomUserColors by mochienya
-- CuteAnimeBoys by ShadyGoat
-- CuteNekos by echo
-- CutePats by thororen
 - DecodeBase64 by ThePirateStoner
 - Demonstration by Samwich
 - DisableAnimations by S€th
@@ -68,13 +65,10 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - FriendshipRanks by Samwich
 - FriendTags by Samwich
 - FullVcPfp by mochie
-- GensokyoRadioRPC by RyanCaoDev & Prince527
 - GifCollections by Aria & Creations
 - GifRoulette by Samwich
 - GitHubRepos by talhakf
-- Glide by Samwich
 - GlobalBadges by HypedDomi & Hosted by Wolfie
-- GoogleThat by Samwich
 - HideChatButtons by iamme
 - HideServers by bepvte
 - HolyNotes by Wolfie
@@ -82,7 +76,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - HopOn by ImLvna
 - Husk by nin0dev
 - IconViewer by iamme
-- Identity by Samwich
 - IgnoreCalls by TheArmagan
 - IgnoreTerms by D3SOX
 - ImagePreview by Creations
@@ -132,7 +125,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - RPCEditor by Nyako & nin0dev
 - RPCStats by Samwich
 - SearchFix by Jaxx
-- SekaiStickers by MaiKokain
 - ServerSearch by camila314
 - ShowBadgesInChat by Inbestigator & KrystalSkull
 - SidebarChat by Joona
@@ -151,8 +143,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - Timezones by Aria
 - Title by Kyuuhachi
 - ToggleVideoBind by mochie
-- TosuRPC by AutumnVN
-- Translate+ by Prince527 & Ven
 - UnitConverter by sadan
 - UnlimitedAccounts by thororen
 - UnreadCountBadge by Joona
