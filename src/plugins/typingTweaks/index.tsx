@@ -75,7 +75,7 @@ const TypingUser = ErrorBoundary.wrap(function ({ user, guildId }: Props) {
                 openUserProfile(user.id);
             }}
             style={{
-                color: settings.store.showRoleColors ? GuildMemberStore.getMember(guildId, user.id)?.colorString : undefined,
+                color: settings.store.showRoleColors ? typingUserColor(guildId, user.id) : undefined,
             }}
         >
             {settings.store.showAvatars && (
