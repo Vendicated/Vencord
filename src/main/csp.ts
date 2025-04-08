@@ -86,7 +86,7 @@ const patchCsp = (headers: Record<string, string[]>) => {
         const csp = parsePolicy(headers[header][0]);
 
         const pushDirective = (directive: string, ...values: string[]) => {
-            csp[directive] ??= [...csp["default-src"] ?? []];
+            csp[directive] ??= [...(csp["default-src"] ?? [])];
             csp[directive].push(...values);
         };
 
