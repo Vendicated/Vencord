@@ -22,13 +22,13 @@ import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/Co
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { ChannelStore, Menu } from "@webpack/common";
+import { MessageSnapshot } from "@webpack/types";
+import { Message } from "discord-types/general";
 
 import { settings } from "./settings";
 import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
-import { Message } from "discord-types/general";
-import { MessageSnapshot } from "@webpack/types";
 
 // discord-types is outdated.
 type ExtendedMessage = Message & {
@@ -62,7 +62,7 @@ function getMessageContent(message: ExtendedMessage) {
     // for something currently impossible.
     return message.content
         || message.messageSnapshots?.[0]?.message.content
-        || message.embeds?.find(embed => embed.type === 'auto_moderation_message')?.rawDescription || '';
+        || message.embeds?.find(embed => embed.type === "auto_moderation_message")?.rawDescription || "";
 }
 
 let tooltipTimeout: any;
