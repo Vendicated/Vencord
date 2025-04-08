@@ -27,9 +27,17 @@ import { settings } from "./settings";
 import { setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { translate } from "./utils";
+import { Message } from "discord-types/general";
+import { MessageSnapshot } from "@webpack/types";
 
-const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => {
-    if (!message.content) return;
+// discord-types is outdated.
+type ExtendedMessage = Message & {
+    messageSnapshots?: MessageSnapshot[];
+};
+
+const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { message: ExtendedMessage; }) => {
+    const content = getMessageContent(message);
+    if (!content) return;
 
     const group = findGroupChildrenByChildId("copy-text", children);
     if (!group) return;
@@ -40,12 +48,22 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }) => 
             label="Translate"
             icon={TranslateIcon}
             action={async () => {
-                const trans = await translate("received", message.content);
+                const trans = await translate("received", content);
                 handleTranslate(message.id, trans);
             }}
         />
     ));
 };
+
+
+function getMessageContent(message: ExtendedMessage) {
+    // Message snapshots is an array, which allows for nested snapshots, yet Discord does not do yet.
+    // no point collecting content or rewriting this to render in a certain way that makes sense
+    // for something currently impossible.
+    return message.content
+        || message.messageSnapshots?.[0]?.message.content
+        || message.embeds?.find(embed => embed.type === 'auto_moderation_message')?.rawDescription || '';
+}
 
 let tooltipTimeout: any;
 
@@ -64,8 +82,9 @@ export default definePlugin({
 
     renderChatBarButton: TranslateChatBarIcon,
 
-    renderMessagePopoverButton(message) {
-        if (!message.content) return null;
+    renderMessagePopoverButton(message: ExtendedMessage) {
+        const content = getMessageContent(message);
+        if (!content) return null;
 
         return {
             label: "Translate",
@@ -73,7 +92,7 @@ export default definePlugin({
             message,
             channel: ChannelStore.getChannel(message.channel_id),
             onClick: async () => {
-                const trans = await translate("received", message.content);
+                const trans = await translate("received", content);
                 handleTranslate(message.id, trans);
             }
         };
