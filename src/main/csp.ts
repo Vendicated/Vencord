@@ -49,6 +49,7 @@ export const CspPolicies: PolicyMap = {
     "sponsor.ajay.app": ConnectSrc, // Dearrow API
     "dearrow-thumb.ajay.app": MediaSrc, // Dearrow Thumbnail CDN
     "usrbg.is-hardly.online": MediaSrc, // USRBG API
+    "icons.duckduckgo.com": MediaSrc, // DuckDuckGo Favicon API (Reverse Image Search)
 };
 
 const findHeader = (headers: PolicyMap, headerName: Lowercase<string>) => {
