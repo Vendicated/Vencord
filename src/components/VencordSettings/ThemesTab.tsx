@@ -222,7 +222,7 @@ function ThemesTab() {
                 <Card className="vc-settings-card">
                     <Forms.FormTitle tag="h5">External Resources</Forms.FormTitle>
                     <Forms.FormText>For security reasons, loading resources (styles, fonts, images, ...) from most sites is blocked.</Forms.FormText>
-                    <Forms.FormText>Make sure all your assets are hosted on GitHub, GitLab, Codeberg, Imgur, Discord or Gogle Fonts.</Forms.FormText>
+                    <Forms.FormText>Make sure all your assets are hosted on GitHub, GitLab, Codeberg, Imgur, Discord or Google Fonts.</Forms.FormText>
                 </Card>
 
                 <Forms.FormSection title="Local Themes">
