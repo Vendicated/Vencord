@@ -59,7 +59,6 @@ export const CspPolicies: PolicyMap = {
     "*.equicord.org": MediaSrc, // Equicord CDN
     "discord-themes.com": MediaAndCssSrc, // Discord Themes CDN
     "fonts.google.com": ConnectSrc,
-    "store.line.me": MediaSrc, // Line Store
     "lrclib.net": ConnectSrc, // Lrclib API
     "spotify-lyrics-api-pi.vercel.app": ConnectSrc, // Spotify Lyrics API
     "stats.fm": MediaSrc, // Stats.fm API
