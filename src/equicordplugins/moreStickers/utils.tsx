@@ -14,10 +14,6 @@ import { FFmpegState } from "./types";
 export const cl = classNameFactory("vc-more-stickers-");
 export const clPicker = (className: string, ...args: any[]) => cl("picker-" + className, ...args);
 
-export function lineFetch(url: string | URL, init?: RequestInit | undefined) {
-    return fetch(url, init);
-}
-
 export class Mutex {
     current = Promise.resolve();
     lock() {

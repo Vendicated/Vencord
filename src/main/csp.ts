@@ -53,6 +53,16 @@ export const CspPolicies: PolicyMap = {
     "dearrow-thumb.ajay.app": MediaSrc, // Dearrow Thumbnail CDN
     "usrbg.is-hardly.online": MediaSrc, // USRBG API
     "icons.duckduckgo.com": MediaSrc, // DuckDuckGo Favicon API (Reverse Image Search)
+
+    // Equicord
+    "cdn.nest.rip": MediaSrc, // Nest CDN
+    "*.equicord.org": MediaSrc, // Equicord CDN
+    "discord-themes.com": MediaAndCssSrc, // Discord Themes CDN
+    "fonts.google.com": ConnectSrc,
+    "store.line.me": MediaSrc, // Line Store
+    "lrclib.net": ConnectSrc, // Lrclib API
+    "spotify-lyrics-api-pi.vercel.app": ConnectSrc, // Spotify Lyrics API
+    "stats.fm": MediaSrc, // Stats.fm API
 };
 
 const findHeader = (headers: PolicyMap, headerName: Lowercase<string>) => {

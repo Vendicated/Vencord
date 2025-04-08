@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>153 additional plugins</summary>
+<summary>152 additional plugins</summary>
 
 ### All Platforms
 
@@ -23,7 +23,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - AtSomeone by Joona
 - BannersEverywhere by ImLvna & AutumnVN
 - BetterActivities by D3SOX, Arjix, AutumnVN
-- BetterAudioPlayer by Creations
 - BetterBanReasons by Inbestigator
 - BetterBlockedUsers by TheArmagan & Elvyra
 - BetterInvites by iamme

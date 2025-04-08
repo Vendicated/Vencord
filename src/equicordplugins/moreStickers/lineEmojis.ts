@@ -5,7 +5,6 @@
  */
 
 import { LineEmoji, LineEmojiPack, Sticker, StickerPack } from "./types";
-import { lineFetch } from "./utils";
 
 export interface StickerCategory {
     title: string;
@@ -122,17 +121,4 @@ export function parseHtml(html: string): LineEmojiPack {
 
 export function isLineEmojiPackHtml(html: string): boolean {
     return html.includes("data-test=\"emoji-name-title\"");
-}
-
-/**
-  * Get stickers from LINE
-  *
-  * @param {string} id The id of the sticker pack.
-  * @return {Promise<LineEmojiPack>} The sticker pack.
-  */
-export async function getStickerPackById(id: string, region = "en"): Promise<LineEmojiPack> {
-    const res = await lineFetch(`https://store.line.me/emojishop/product/${id}/${region}`);
-    const html = await res.text();
-
-    return parseHtml(html);
 }

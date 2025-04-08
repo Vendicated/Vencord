@@ -5,7 +5,6 @@
  */
 
 import { LineSticker, LineStickerPack, Sticker, StickerPack } from "./types";
-import { lineFetch } from "./utils";
 
 export interface StickerCategory {
     title: string;
@@ -122,17 +121,4 @@ export function parseHtml(html: string): LineStickerPack {
 
 export function isLineStickerPackHtml(html: string): boolean {
     return html.includes("data-test=\"sticker-name-title\"");
-}
-
-/**
-  * Get stickers from LINE
-  *
-  * @param {string} id The id of the sticker pack.
-  * @return {Promise<LineStickerPack>} The sticker pack.
-  */
-export async function getStickerPackById(id: string, region = "en"): Promise<LineStickerPack> {
-    const res = await lineFetch(`https://store.line.me/stickershop/product/${id}/${region}`);
-    const html = await res.text();
-
-    return parseHtml(html);
 }
