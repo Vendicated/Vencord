@@ -77,7 +77,7 @@ export default definePlugin({
         },
         // change top right chat toolbar button from the help one to the dev one
         {
-            find: "toolbar:function",
+            find: "AppTitleBar",
             replacement: {
                 match: /hasBugReporterAccess:(\i)/,
                 replace: "_hasBugReporterAccess:$1=true"
