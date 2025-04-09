@@ -89,7 +89,7 @@ export default definePlugin({
             ],
         },
         // Skip the warning about blocked/ignored users when opening the profile through the blocked menu.
-        // You will already know that you blocked the user, so it completely useless.
+        // You will already know that you blocked the user, so it's completely useless.
         {
             find: ',["user"])',
             replacement: {
