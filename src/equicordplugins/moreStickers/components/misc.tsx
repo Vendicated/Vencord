@@ -5,12 +5,13 @@
  */
 
 import * as DataStore from "@api/DataStore";
+import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Flex } from "@components/Flex";
 import { Button, Forms, React, TabBar, Text, TextArea, Toasts } from "@webpack/common";
 import { JSX } from "react";
 
-import { convert as convertLineEP, isLineEmojiPackHtml, parseHtml as getLineEPFromHtml } from "../lineEmojis";
-import { convert as convertLineSP, isLineStickerPackHtml, parseHtml as getLineSPFromHtml } from "../lineStickers";
+import { convert as convertLineEP, getIdFromUrl as getLineEmojiPackIdFromUrl, getStickerPackById as getLineEmojiPackById, isLineEmojiPackHtml, parseHtml as getLineEPFromHtml } from "../lineEmojis";
+import { convert as convertLineSP, getIdFromUrl as getLineStickerPackIdFromUrl, getStickerPackById as getLineStickerPackById, isLineStickerPackHtml, parseHtml as getLineSPFromHtml } from "../lineStickers";
 import { isV1, migrate } from "../migrate-v1";
 import { deleteStickerPack, getStickerPack, getStickerPackMetas, saveStickerPack } from "../stickers";
 import { SettingsTabsKey, Sticker, StickerPack, StickerPackMeta } from "../types";
@@ -88,8 +89,9 @@ const StickerPackMetadata = ({ meta, hoveredStickerPackId, setHoveredStickerPack
 
 export const Settings = () => {
     const [stickerPackMetas, setstickerPackMetas] = React.useState<StickerPackMeta[]>([]);
+    const [addStickerUrl, setAddStickerUrl] = React.useState<string>("");
     const [addStickerHtml, setAddStickerHtml] = React.useState<string>("");
-    const [tab, setTab] = React.useState<SettingsTabsKey>(SettingsTabsKey.ADD_STICKER_PACK_HTML);
+    const [tab, setTab] = React.useState<SettingsTabsKey>(SettingsTabsKey.ADD_STICKER_PACK_URL);
     const [hoveredStickerPackId, setHoveredStickerPackId] = React.useState<string | null>(null);
     const [_isV1, setV1] = React.useState<boolean>(false);
 
@@ -121,6 +123,114 @@ export const Settings = () => {
                 }
             </TabBar>
 
+            {tab === SettingsTabsKey.ADD_STICKER_PACK_URL &&
+                <div className="section">
+                    <Forms.FormTitle tag="h5">Add Sticker Pack from URL</Forms.FormTitle>
+                    <Forms.FormText>
+                        <p>
+                            Currently LINE stickers/emojis supported only. <br />
+
+                            Get Telegram stickers with <a href="#" onClick={() => VencordNative.native.openExternal("https://github.com/lekoOwO/MoreStickersConverter")}> MoreStickersConverter</a>.
+                        </p>
+                    </Forms.FormText>
+                    <Flex flexDirection="row" style={{
+                        alignItems: "center",
+                        justifyContent: "center"
+                    }} >
+                        <span style={{
+                            flexGrow: 1
+                        }}>
+                            <CheckedTextInput
+                                value={addStickerUrl}
+                                onChange={setAddStickerUrl}
+                                validate={(v: string) => {
+                                    try {
+                                        getLineStickerPackIdFromUrl(v);
+                                        return true;
+                                    } catch (e: any) { }
+                                    try {
+                                        getLineEmojiPackIdFromUrl(v);
+                                        return true;
+                                    } catch (e: any) { }
+
+                                    return "Invalid URL";
+                                }}
+                                placeholder="Sticker Pack URL"
+                            />
+                        </span>
+                        <Button
+                            size={Button.Sizes.SMALL}
+                            onClick={async e => {
+                                e.preventDefault();
+
+                                let type: string = "";
+                                try {
+                                    getLineStickerPackIdFromUrl(addStickerUrl);
+                                    type = "LineStickerPack";
+                                } catch (e: any) { }
+
+                                try {
+                                    getLineEmojiPackIdFromUrl(addStickerUrl);
+                                    type = "LineEmojiPack";
+                                } catch (e: any) { }
+
+                                let errorMessage = "";
+                                switch (type) {
+                                    case "LineStickerPack": {
+                                        try {
+                                            const id = getLineStickerPackIdFromUrl(addStickerUrl);
+                                            const lineSP = await getLineStickerPackById(id);
+                                            const stickerPack = convertLineSP(lineSP);
+                                            await saveStickerPack(stickerPack);
+                                        } catch (e: any) {
+                                            console.error(e);
+                                            errorMessage = e.message;
+                                        }
+                                        break;
+                                    }
+                                    case "LineEmojiPack": {
+                                        try {
+                                            const id = getLineEmojiPackIdFromUrl(addStickerUrl);
+                                            const lineEP = await getLineEmojiPackById(id);
+                                            const stickerPack = convertLineEP(lineEP);
+                                            await saveStickerPack(stickerPack);
+
+                                        } catch (e: any) {
+                                            console.error(e);
+                                            errorMessage = e.message;
+                                        }
+                                        break;
+                                    }
+                                }
+
+                                setAddStickerUrl("");
+                                refreshStickerPackMetas();
+
+                                if (errorMessage) {
+                                    Toasts.show({
+                                        message: errorMessage,
+                                        type: Toasts.Type.FAILURE,
+                                        id: Toasts.genId(),
+                                        options: {
+                                            duration: 1000
+                                        }
+                                    });
+                                } else {
+                                    Toasts.show({
+                                        message: "Sticker Pack added",
+                                        type: Toasts.Type.SUCCESS,
+                                        id: Toasts.genId(),
+                                        options: {
+                                            duration: 1000
+                                        }
+                                    });
+                                }
+
+                            }}
+                        >Insert</Button>
+                    </Flex>
+                </div>
+            }
             {tab === SettingsTabsKey.ADD_STICKER_PACK_HTML &&
                 <div className="section">
                     <Forms.FormTitle tag="h5">Add Sticker Pack from HTML</Forms.FormTitle>

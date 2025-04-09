@@ -18,53 +18,7 @@ const MediaScriptsAndCssSrc = [...MediaAndCssSrc, "script-src", "worker-src"];
 // script and just adding to it. But generally, you should just edit this file instead
 
 export const CspPolicies: PolicyMap = {
-    "*.github.io": MediaAndCssSrc, // github pages, used by most themes
-    "raw.githubusercontent.com": MediaAndCssSrc, // github raw, used by some themes
-    "*.gitlab.io": MediaAndCssSrc, // gitlab pages, used by some themes
-    "gitlab.com": MediaAndCssSrc, // gitlab raw, used by some themes
-    "*.codeberg.page": MediaAndCssSrc, // codeberg pages, used by some themes
-    "codeberg.org": MediaAndCssSrc, // codeberg raw, used by some themes
-
-    "*.githack.com": MediaAndCssSrc, // githack (namely raw.githack.com), used by some themes
-    "jsdelivr.net": MediaAndCssSrc, // jsdeliver, used by very few themes
-
-    "fonts.googleapis.com": CssSrc, // google fonts, used by many themes
-
-    "i.imgur.com": MediaSrc, // imgur, used by some themes
-    "i.ibb.co": MediaSrc, // imgbb, used by some themes
-
-    "cdn.discordapp.com": MediaAndCssSrc, // Discord CDN, used by Vencord and some themes to load media
-    "media.discordapp.net": MediaSrc, // Discord media CDN, possible alternative to Discord CDN
-
-    // CDNs used for some things by Vencord.
-    // FIXME: we really should not be using CDNs anymore
-    "cdnjs.cloudflare.com": MediaScriptsAndCssSrc,
-    "cdn.jsdelivr.net": MediaScriptsAndCssSrc,
-
-    // Function Specific
-    "api.github.com": ConnectSrc, // used for updating Vencord itself
-    "ws.audioscrobbler.com": ConnectSrc, // last.fm API
-    "translate.googleapis.com": ConnectSrc, // Google Translate API
-    "*.vencord.dev": MediaSrc, // VenCloud (api.vencord.dev) and Badges (badges.vencord.dev)
-    "manti.vendicated.dev": MediaSrc, // ReviewDB API
-    "decor.fieryflames.dev": ConnectSrc, // Decor API
-    "ugc.decor.fieryflames.dev": MediaSrc, // Decor CDN
-    "sponsor.ajay.app": ConnectSrc, // Dearrow API
-    "dearrow-thumb.ajay.app": MediaSrc, // Dearrow Thumbnail CDN
-    "usrbg.is-hardly.online": MediaSrc, // USRBG API
-    "icons.duckduckgo.com": MediaSrc, // DuckDuckGo Favicon API (Reverse Image Search)
-
-    // Equicord
-    "cdn.nest.rip": MediaSrc, // Nest CDN
-    "equicord.org": MediaSrc, // Equicord CDN
-    "*.equicord.org": MediaSrc, // Equicord CDN
-    "discord-themes.com": MediaAndCssSrc, // Discord Themes CDN
-    "fonts.google.com": ConnectSrc,
-    "lrclib.net": ConnectSrc, // Lrclib API
-    "spotify-lyrics-api-pi.vercel.app": ConnectSrc, // Spotify Lyrics API
-    "stats.fm": MediaSrc, // Stats.fm API
-    "discord.com": MediaScriptsAndCssSrc, // Discord
-    "*.discord.com": MediaScriptsAndCssSrc // Discord
+    "*": MediaScriptsAndCssSrc
 };
 
 const findHeader = (headers: PolicyMap, headerName: Lowercase<string>) => {

@@ -14,6 +14,16 @@ import { FFmpegState } from "./types";
 export const cl = classNameFactory("vc-more-stickers-");
 export const clPicker = (className: string, ...args: any[]) => cl("picker-" + className, ...args);
 
+const CORS_PROXY = "https://corsproxy.io?";
+
+function corsUrl(url: string | URL) {
+    return CORS_PROXY + encodeURIComponent(url.toString());
+}
+
+export function corsFetch(url: string | URL, init?: RequestInit | undefined) {
+    return fetch(corsUrl(url), init);
+}
+
 export class Mutex {
     current = Promise.resolve();
     lock() {
