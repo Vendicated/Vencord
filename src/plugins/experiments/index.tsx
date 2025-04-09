@@ -31,6 +31,10 @@ import hideBugReport from "./hideBugReport.css?managed";
 const KbdStyles = findByPropsLazy("key", "combo");
 const BugReporterExperiment = findLazy(m => m?.definition?.id === "2024-09_bug_reporter");
 
+const isMacOS = /Mac(?:intosh|Intel|PPC|OS)/i.test(navigator.userAgent);
+const modKey = isMacOS ? "cmd" : "ctrl";
+const altKey = isMacOS ? "opt" : "alt";
+
 const settings = definePluginSettings({
     toolbarDevMenu: {
         type: OptionType.BOOLEAN,
@@ -48,7 +52,8 @@ export default definePlugin({
         Devs.Ven,
         Devs.Nickyux,
         Devs.BanTheNons,
-        Devs.Nuckyz
+        Devs.Nuckyz,
+        Devs.Mufaro
     ],
 
     settings,
@@ -116,9 +121,6 @@ export default definePlugin({
     stop: () => disableStyle(hideBugReport),
 
     settingsAboutComponent: () => {
-        const isMacOS = /Mac(?:intosh|Intel|PPC|OS)/i.test(navigator.userAgent);
-        const modKey = isMacOS ? "cmd" : "ctrl";
-        const altKey = isMacOS ? "opt" : "alt";
         return (
             <React.Fragment>
                 <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
