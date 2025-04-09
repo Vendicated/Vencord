@@ -76,7 +76,7 @@ export default definePlugin({
         {
             find: "UserProfileModalHeaderActionButtons",
             replacement:  [
-                // make the blocked modal be equal to the friends modal as the only difference is the message button.
+                // make the profile modal type "friend" so the message button is on it (if we keep it as "blocked", then you won't be able to get to DMs) 
                 {
                     match: /(?<=return \i)\|\|(\i)===.*?.FRIEND/,
                     replace: (_, type) => `?null:${type} === ${RelationshipTypes.FRIEND} || ${type} === ${RelationshipTypes.BLOCKED}`,
