@@ -49,6 +49,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Color the unblock button in the blocklist red instead of gray.",
     },
+    allowShiftUnblock: {
+        default: true,
+        type: OptionType.BOOLEAN,
+        description: "Unblock a user without confirmation prompting when holding shift.",
+    }
 });
 
 export default definePlugin({
@@ -76,7 +81,7 @@ export default definePlugin({
         {
             find: "UserProfileModalHeaderActionButtons",
             replacement:  [
-                // make the profile modal type "friend" so the message button is on it (if we keep it as "blocked", then you won't be able to get to DMs) 
+                // make the profile modal type "friend" so the message button is on it (if we keep it as "blocked", then you won't be able to get to DMs)
                 {
                     match: /(?<=return \i)\|\|(\i)===.*?.FRIEND/,
                     replace: (_, type) => `?null:${type} === ${RelationshipTypes.FRIEND} || ${type} === ${RelationshipTypes.BLOCKED}`,
@@ -180,13 +185,19 @@ export default definePlugin({
     },
 
     openDMChannel(user: User) {
-        ChannelActions.openPrivateChannel(user.id);
+        try {
+            ChannelActions.openPrivateChannel(user.id);
+        }
+        catch (e) {
+            showToast("Failed to open DMs for user '" + user.username + "'! Check the console for more info");
+            return console.error(e);
+        }
+        // only close the settings window if we actually opened a DM channel behind it.
         this.closeSettingsWindow();
-        return null;
     },
 
     openConfirmationModal(event: MouseEvent, callback: () => any, user: User|string, isSettingsOrigin: boolean = false) {
-        if (event.shiftKey) return callback();
+        if (event.shiftKey && settings.store.allowShiftUnblock) return callback();
 
         if (typeof user === "string") {
             user = UserStore.getUser(user);
@@ -195,7 +206,7 @@ export default definePlugin({
         return openModal(m => <ConfirmationModal
             {...m}
             className="vc-bbc-confirmation-modal"
-            header={`Unblock ${user?.username ?? "?"}?`}
+            header={`Unblock ${user?.username ?? "unknown user"}?`}
             cancelText="Cancel"
             confirmText="Unblock"
             onConfirm={() => {
