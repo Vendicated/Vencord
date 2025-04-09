@@ -19,36 +19,19 @@
 import "@equicordplugins/_misc/styles.css";
 
 import { showNotification } from "@api/Notifications";
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByProps, findComponentByCodeLazy } from "@webpack";
-import { Button, FluxDispatcher, Forms, NavigationRouter, RestAPI, Tooltip, UserStore } from "@webpack/common";
+import { Button, ChannelStore, FluxDispatcher, Forms, GuildChannelStore, NavigationRouter, RestAPI, Tooltip, UserStore } from "@webpack/common";
 
-const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
-const isApp = navigator.userAgent.includes("Electron/");
+const isApp = typeof DiscordNative !== "undefined";
 
 import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
 
-const ToolBarQuestsIcon = findComponentByCodeLazy("1 0 1 1.73Z");
-
-function ToolBarHeader() {
-    return (
-        <ErrorBoundary noop={true}>
-            <HeaderBarIcon
-                tooltip="Complete Quest"
-                position="bottom"
-                className="vc-quest-completer"
-                icon={ToolBarQuestsIcon}
-                onClick={openCompleteQuestUI}
-            >
-            </HeaderBarIcon>
-        </ErrorBoundary>
-    );
-}
+const QuestIcon = findComponentByCodeLazy("10.47a.76.76");
 
 async function openCompleteQuestUI() {
     const ApplicationStreamingStore = findByProps("getStreamerActiveStreamMetadata");
@@ -72,7 +55,7 @@ async function openCompleteQuestUI() {
 
         const applicationId = quest.config.application.id;
         const applicationName = quest.config.application.name;
-        const taskName = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP"].find(x => quest.config.taskConfig.tasks[x] != null);
+        const taskName = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY"].find(x => quest.config.taskConfig.tasks[x] != null);
         // @ts-ignore
         const secondsNeeded = quest.config.taskConfig.tasks[taskName].target;
         // @ts-ignore
@@ -118,8 +101,6 @@ async function openCompleteQuestUI() {
             RestAPI.get({ url: `/applications/public?application_ids=${applicationId}` }).then(res => {
                 const appData = res.body[0];
                 const exeName = appData.executables.find(x => x.os === "win32").name.replace(">", "");
-
-                const games = RunningGameStore.getRunningGames();
                 const fakeGame = {
                     cmdLine: `C:\\Program Files\\${appData.name}\\${exeName}`,
                     exeName,
@@ -133,8 +114,15 @@ async function openCompleteQuestUI() {
                     processName: appData.name,
                     start: Date.now(),
                 };
-                games.push(fakeGame);
-                FluxDispatcher.dispatch({ type: "RUNNING_GAMES_CHANGE", removed: [], added: [fakeGame], games: games });
+                const realGames = RunningGameStore.getRunningGames();
+                const fakeGames = [fakeGame];
+                const realGetRunningGames = RunningGameStore.getRunningGames;
+                const realGetGameForPID = RunningGameStore.getGameForPID;
+                RunningGameStore.getRunningGames = () => fakeGames;
+                RunningGameStore.getGameForPID = pid => fakeGames.find(x => x.pid === pid);
+                FluxDispatcher.dispatch({
+                    type: "RUNNING_GAMES_CHANGE", removed: realGames, added: [fakeGame], games: fakeGames
+                });
 
                 const fn = data => {
                     const progress = quest.config.configVersion === 1 ? data.userStatus.streamProgressSeconds : Math.floor(data.userStatus.progress.PLAY_ON_DESKTOP.value);
@@ -151,11 +139,9 @@ async function openCompleteQuestUI() {
                             icon: icon,
                         });
 
-                        const idx = games.indexOf(fakeGame);
-                        if (idx > -1) {
-                            games.splice(idx, 1);
-                            FluxDispatcher.dispatch({ type: "RUNNING_GAMES_CHANGE", removed: [fakeGame], added: [], games: [] });
-                        }
+                        RunningGameStore.getRunningGames = realGetRunningGames;
+                        RunningGameStore.getGameForPID = realGetGameForPID;
+                        FluxDispatcher.dispatch({ type: "RUNNING_GAMES_CHANGE", removed: [fakeGame], added: [], games: [] });
                         FluxDispatcher.unsubscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
                     }
                 };
@@ -211,6 +197,36 @@ async function openCompleteQuestUI() {
             };
             FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
             console.log(`Spoofed your stream to ${applicationName}.`);
+        } else if (taskName === "PLAY_ACTIVITY") {
+            const channelId = ChannelStore.getSortedPrivateChannels()[0]?.id ?? Object.values(GuildChannelStore.getAllGuilds() as any[]).find(x => x != null && x.VOCAL.length > 0).VOCAL[0].channel.id;
+            const streamKey = `call:${channelId}:1`;
+
+            const fn = async () => {
+
+                while (true) {
+                    const res = await RestAPI.post({ url: `/quests/${quest.id}/heartbeat`, body: { stream_key: streamKey, terminal: false } });
+                    const progress = res.body.progress.PLAY_ACTIVITY.value;
+                    showNotification({
+                        title: `${applicationName} - Quest Completer`,
+                        body: `Current progress: ${progress}/${secondsNeeded} seconds.`,
+                        icon: icon,
+                    });
+
+                    await new Promise(resolve => setTimeout(resolve, 20 * 1000));
+
+                    if (progress >= secondsNeeded) {
+                        await RestAPI.post({ url: `/quests/${quest.id}/heartbeat`, body: { stream_key: streamKey, terminal: true } });
+                        break;
+                    }
+                }
+
+                showNotification({
+                    title: `${applicationName} - Quest Completer`,
+                    body: "Quest Completed.",
+                    icon: icon,
+                });
+            };
+            fn();
         }
         return;
     }
@@ -244,10 +260,10 @@ export default definePlugin({
             }
         },
         {
-            find: "toolbar:function",
+            find: "AppTitleBar",
             replacement: {
-                match: /(function \i\(\i\){)(.{1,500}toolbar.{1,500}mobileToolbar)/,
-                replace: "$1$self.toolbarAction(arguments[0]);$2"
+                match: /(?<=trailing:.{0,70}\(\i\.Fragment,{children:\[.*?)\]/,
+                replace: ",$self.renderQuestButton()]"
             }
         },
         {
@@ -263,32 +279,17 @@ export default definePlugin({
         return (
             <Tooltip text="Complete Quest">
                 {tooltipProps => (
-                    <Button style={{ backgroundColor: "transparent" }}
+                    <Button style={{ backgroundColor: "transparent", border: "none" }}
                         {...tooltipProps}
-                        size={"25"}
+                        size={Button.Sizes.SMALL}
                         className={"vc-quest-completer-icon"}
                         onClick={openCompleteQuestUI}
                     >
-                        <ToolBarQuestsIcon />
+                        <QuestIcon width={20} height={20} size={Button.Sizes.SMALL} />
                     </Button>
                 )}
             </Tooltip>
         );
     },
     openCompleteQuestUI,
-    toolbarAction(e) {
-        if (Array.isArray(e.toolbar))
-            return e.toolbar.push(
-                <ErrorBoundary noop={true}>
-                    <ToolBarHeader />
-                </ErrorBoundary>
-            );
-
-        e.toolbar = [
-            <ErrorBoundary noop={true} key={"QuestCompleter"} >
-                <ToolBarHeader />
-            </ErrorBoundary>,
-            e.toolbar,
-        ];
-    }
 });
