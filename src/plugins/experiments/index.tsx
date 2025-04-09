@@ -116,7 +116,7 @@ export default definePlugin({
     stop: () => disableStyle(hideBugReport),
 
     settingsAboutComponent: () => {
-        const isMacOS = navigator.platform.includes("Mac");
+        const isMacOS = /Mac(?:intosh|Intel|PPC|OS)/i.test(navigator.userAgent);
         const modKey = isMacOS ? "cmd" : "ctrl";
         const altKey = isMacOS ? "opt" : "alt";
         return (
