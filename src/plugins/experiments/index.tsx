@@ -53,7 +53,6 @@ export default definePlugin({
         Devs.Nickyux,
         Devs.BanTheNons,
         Devs.Nuckyz,
-        Devs.Mufaro
     ],
 
     settings,
