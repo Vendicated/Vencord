@@ -5,3 +5,4 @@ git stash
 git checkout main
 git rebase upstream-dev
 git push --force origin main
+pnpm build --dev
