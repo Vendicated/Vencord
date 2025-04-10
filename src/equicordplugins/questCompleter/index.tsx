@@ -21,15 +21,13 @@ import "@equicordplugins/_misc/styles.css";
 import { showNotification } from "@api/Notifications";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { findByProps, findComponentByCodeLazy } from "@webpack";
 import { Button, ChannelStore, FluxDispatcher, Forms, GuildChannelStore, NavigationRouter, RestAPI, Tooltip, UserStore } from "@webpack/common";
 
 const isApp = typeof DiscordNative !== "undefined";
 
 import "./style.css";
-
-import { definePluginSettings } from "@api/Settings";
 
 const QuestIcon = findComponentByCodeLazy("10.47a.76.76");
 
@@ -232,15 +230,6 @@ async function openCompleteQuestUI() {
     }
 }
 
-const settings = definePluginSettings({
-    clickableQuestDiscovery: {
-        type: OptionType.BOOLEAN,
-        description: "Makes the quest button in discovery clickable",
-        restartNeeded: true,
-        default: false
-    }
-});
-
 export default definePlugin({
     name: "QuestCompleter",
     description: "A plugin to complete quests without having the game installed.",
@@ -250,29 +239,13 @@ export default definePlugin({
             Game Quests do not work on Equibop/Web Platforms. Only Video Quests do.
         </Forms.FormText>
     </>,
-    settings,
     patches: [
-        {
-            find: "\"invite-button\"",
-            replacement: {
-                match: /\i&&(\i\i\.push).{0,50}"current-speaker"/,
-                replace: "$1($self.renderQuestButton()),$&"
-            }
-        },
         {
             find: "AppTitleBar",
             replacement: {
                 match: /(?<=trailing:.{0,70}\(\i\.Fragment,{children:\[.*?)\]/,
                 replace: ",$self.renderQuestButton()]"
             }
-        },
-        {
-            find: "M7.5 21.7a8.95 8.95 0 0 1 9 0 1 1 0 0 0 1-1.73c",
-            replacement: {
-                match: /(?<=className:\i\}\))/,
-                replace: ",onClick:()=>$self.openCompleteQuestUI()"
-            },
-            predicate: () => settings.store.clickableQuestDiscovery
         }
     ],
     renderQuestButton() {
@@ -291,5 +264,4 @@ export default definePlugin({
             </Tooltip>
         );
     },
-    openCompleteQuestUI,
 });
