@@ -152,8 +152,8 @@ export default definePlugin({
         {
             find: "._areActivitiesExperimentallyHidden=(",
             replacement: {
-                match: /BOOST_GEM_ICON\}\}\)\)\};/,
-                replace: "$&if($self.shouldHideUser(this.props.user.id, this.props.channel.id)) return null; "
+                match: /(?<=user:(\i),guildId:\i,channel:(\i).*?)BOOST_GEM_ICON\}\}\)\)\};/,
+                replace: "$&if($self.shouldHideUser($1.id, $2.id)) return null; "
             }
         },
         // stop the role header from displaying if all users with that role are hidden (wip sorta)
