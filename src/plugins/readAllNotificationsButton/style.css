@@ -1,7 +1,6 @@
 .vc-ranb-button {
     color: var(--interactive-normal);
     padding: 0 0.5em;
-    margin-bottom: 0.5em;
     width: 100%;
     box-sizing: border-box;
 }
