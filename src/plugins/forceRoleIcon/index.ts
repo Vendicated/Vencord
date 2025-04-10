@@ -19,7 +19,6 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-
 export default definePlugin({
     name: "ForceRoleIcon",
     description: "Forces role icons to display next to messages in compact mode.",
