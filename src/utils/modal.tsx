@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, findModuleId, mapMangledModuleLazy, proxyLazyWebpack, wreq } from "@webpack";
+import { filters, findByCodeLazy, mapMangledModuleLazy } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 import { LazyComponent } from "./react";
@@ -138,16 +138,10 @@ export type MediaModalProps = {
     fit?: string;
     shouldRedactExplicitContent?: boolean;
     shouldHideMediaOptions?: boolean;
-    shouldAnimateCarousel?: boolean;
 };
 
-export const openMediaModal: (props: MediaModalProps) => void = proxyLazyWebpack(() => {
-    const mediaModalKeyModuleId = findModuleId('"Zoomed Media Modal"');
-    if (mediaModalKeyModuleId == null) return;
-
-    const openMediaModalModule = wreq(findModuleId(mediaModalKeyModuleId, "modalKey:") as any);
-    return Object.values<any>(openMediaModalModule).find(v => String(v).includes("modalKey:"));
-});
+// modal key: "Media Viewer Modal"
+export const openMediaModal: (props: MediaModalProps) => void = findByCodeLazy("hasMediaOptions", "shouldHideMediaOptions");
 
 interface ModalAPI {
     /**
