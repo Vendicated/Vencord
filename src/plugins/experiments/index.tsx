@@ -31,7 +31,7 @@ import hideBugReport from "./hideBugReport.css?managed";
 const KbdStyles = findByPropsLazy("key", "combo");
 const BugReporterExperiment = findLazy(m => m?.definition?.id === "2024-09_bug_reporter");
 
-const isMacOS = /Mac(?:intosh|Intel|PPC|OS)/i.test(navigator.userAgent);
+const isMacOS = navigator.platform.includes("Mac");
 const modKey = isMacOS ? "cmd" : "ctrl";
 const altKey = isMacOS ? "opt" : "alt";
 
