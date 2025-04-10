@@ -163,14 +163,6 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".contain,SCALE_DOWN:",
-            replacement: {
-                match: /imageClassName:/,
-                replace: `id:"${ELEMENT_ID}",$&`
-            }
-        },
-
-        {
             find: ".dimensionlessImage,",
             replacement: [
                 {

@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./discord.css";
-
 import { MessageObject } from "@api/MessageEvents";
 import { ChannelStore, ComponentDispatch, Constants, FluxDispatcher, GuildStore, i18n, IconUtils, InviteActions, MessageActions, PrivateChannelsStore, RestAPI, SelectedChannelStore, SelectedGuildStore, UserProfileActions, UserProfileStore, UserSettingsActionCreators, UserUtils } from "@webpack/common";
 import { Channel, Guild, Message, User } from "discord-types/general";
@@ -143,9 +141,6 @@ export function sendMessage(
  */
 export function openImageModal(item: Except<MediaModalItem, "type">, mediaModalProps?: Omit<MediaModalProps, "items">) {
     return openMediaModal({
-        className: "vc-image-modal",
-        fit: "vc-position-inherit",
-        shouldAnimateCarousel: true,
         items: [{
             type: "IMAGE",
             original: item.original ?? item.url,
