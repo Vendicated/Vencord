@@ -143,9 +143,6 @@ export function sendMessage(
  */
 export function openImageModal(item: Except<MediaModalItem, "type">, mediaModalProps?: Omit<MediaModalProps, "items">) {
     return openMediaModal({
-        className: "vc-image-modal",
-        fit: "vc-position-inherit",
-        shouldAnimateCarousel: true,
         items: [{
             type: "IMAGE",
             original: item.original ?? item.url,

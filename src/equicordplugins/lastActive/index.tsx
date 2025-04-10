@@ -7,24 +7,10 @@
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Menu, NavigationRouter, Toasts } from "@webpack/common";
-const MessageStore = findByPropsLazy("getMessages", "getMessage");
-const ChannelStore = findByPropsLazy("getChannel", "getDMFromUserId");
-const UserStore = findByPropsLazy("getUser", "getCurrentUser");
-const MessageActions = findByPropsLazy("fetchMessages", "searchMessages");
+import { Menu, MessageActions, MessageStore, NavigationRouter, Toasts, UserStore } from "@webpack/common";
 
 async function findLastMessageFromUser(channelId: string, userId: string) {
     try {
-
-        if (!MessageStore || !MessageActions) {
-            Toasts.show({
-                type: Toasts.Type.FAILURE,
-                message: "Required Discord modules not found.",
-                id: Toasts.genId()
-            });
-            return null;
-        }
         const messageCollection = MessageStore.getMessages(channelId);
         let messages = messageCollection?.toArray() || [];
         let userMessage = messages.filter(m => m?.author?.id === userId).pop();
@@ -77,23 +63,7 @@ async function jumpToLastActive(channel: any, targetUserId?: string) {
 
             userId = targetUserId;
         } else {
-            if (!UserStore?.getCurrentUser) {
-                Toasts.show({
-                    type: Toasts.Type.FAILURE,
-                    message: "Could not determine user. Try again later.",
-                    id: Toasts.genId()
-                });
-                return;
-            }
             const currentUser = UserStore.getCurrentUser();
-            if (!currentUser || !currentUser.id) {
-                Toasts.show({
-                    type: Toasts.Type.FAILURE,
-                    message: "Could not determine current user. Try again later.",
-                    id: Toasts.genId()
-                });
-                return;
-            }
             userId = currentUser.id;
         }
         const messageId = await findLastMessageFromUser(channelId, userId);

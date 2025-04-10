@@ -85,7 +85,7 @@ export default definePlugin({
             find: ".USER_MENTION)",
             replacement: [
                 {
-                    match: /(?<=onContextMenu:\i,color:)\i(?=\},\i\),\{children)(?<=user:(\i),channel:(\i).{0,500}?)/,
+                    match: /(?<=onContextMenu:\i,color:)\i(?=,onClick)(?<=user:(\i),channel:(\i).+?)/,
                     replace: "$self.getColorInt($1?.id,$2?.id)",
                 }
             ],
