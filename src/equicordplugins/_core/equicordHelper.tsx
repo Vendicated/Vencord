@@ -45,13 +45,6 @@ export default definePlugin({
                     replace: "return $1;"
                 }
             ]
-        },
-        {
-            find: '"Slate: Unable to find syntax characters"',
-            replacement: {
-                match: /((let )(\i)=\i\.indexOf\(\i,(\i)\)),/,
-                replace: "$1;if ($3 === -1) {return $4;}$2"
-            }
         }
     ]
 });

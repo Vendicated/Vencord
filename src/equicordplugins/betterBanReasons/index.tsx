@@ -4,53 +4,55 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./style.css";
+import "./styles.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { classNameFactory } from "@api/Styles";
+import { DeleteIcon, PlusIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button, Forms, TextInput } from "@webpack/common";
 
+const cl = classNameFactory("vc-bbr-");
+
 function ReasonsComponent() {
-    const { reasons } = settings.use(["reasons"]);
+    const { reasons } = settings.store;
 
     return (
         <Forms.FormSection title="Reasons">
-            {reasons.map((reason: string, index: number) => (
+            {reasons.map((r, i) => (
                 <div
-                    className="vc-bbr-reason-wrapper"
-                    key={index}
+                    key={i}
+                    className={cl("reason-wrapper")}
                 >
                     <TextInput
-                        type="text"
-                        key={index}
-                        value={reason}
+                        value={r}
                         onChange={v => {
-                            reasons[index] = v;
-                            settings.store.reasons = [...reasons];
+                            reasons[i] = v;
+                            settings.store.reasons = reasons;
                         }}
                         placeholder="Reason"
                     />
                     <Button
-                        color={Button.Colors.RED}
-                        className="vc-bbr-remove-button"
+                        className={cl("remove-button")}
+                        color={Button.Colors.TRANSPARENT}
                         onClick={() => {
-                            reasons.splice(index, 1);
-                            settings.store.reasons = [...reasons];
+                            reasons.splice(i, 1);
+                            settings.store.reasons = reasons;
                         }}
+                        look={Button.Looks.BLANK}
+                        size={Button.Sizes.MIN}
                     >
-                        Remove
+                        <DeleteIcon />
                     </Button>
                 </div>
             ))}
-            <Button
-                onClick={() => {
-                    settings.store.reasons = [...reasons, ""];
-                }}
-            >
-                Add new
-            </Button>
+            <div className={cl("reason-wrapper")}>
+                <Button onClick={() => settings.store.reasons.push("")} className={cl("add-button")} size={Button.Sizes.LARGE} color={Button.Colors.TRANSPARENT}>
+                    <PlusIcon /> Add another reason
+                </Button>
+            </div>
         </Forms.FormSection>
     );
 }
@@ -59,10 +61,10 @@ const settings = definePluginSettings({
     reasons: {
         description: "Your custom reasons",
         type: OptionType.COMPONENT,
-        default: [""],
+        default: [] as string[],
         component: ReasonsComponent,
     },
-    textInputDefault: {
+    isTextInputDefault: {
         type: OptionType.BOOLEAN,
         description: 'Shows a text input instead of a select menu by default. (Equivalent to clicking the "Other" option)'
     }
@@ -74,9 +76,9 @@ export default definePlugin({
     authors: [Devs.Inbestigator],
     patches: [
         {
-            find: "#{intl::BAN_MULTIPLE_CONFIRM_TITLE}",
+            find: "#{intl::BAN_REASON_OPTION_SPAM_ACCOUNT}",
             replacement: [{
-                match: /\[\{name:\i\.\i\.string\(\i\.\i#{intl::BAN_REASON_OPTION_SPAM_ACCOUNT}\).+?\}\]/,
+                match: /\[(\{((name|value):\i\.\i\.string\(\i\.\i\.\i\),?){2}\},?){3}\]/,
                 replace: "$self.getReasons()"
             },
             {
@@ -86,17 +88,16 @@ export default definePlugin({
         }
     ],
     getReasons() {
-        const reasons = settings.store.reasons.length
-            ? settings.store.reasons
+        const storedReasons = settings.store.reasons.filter((r: string) => r.trim());
+        const reasons: string[] = storedReasons.length
+            ? storedReasons
             : [
                 getIntlMessage("BAN_REASON_OPTION_SPAM_ACCOUNT"),
                 getIntlMessage("BAN_REASON_OPTION_HACKED_ACCOUNT"),
-                getIntlMessage("BAN_REASON_OPTION_BREAKING_RULES")
+                getIntlMessage("BAN_REASON_OPTION_BREAKING_RULES"),
             ];
         return reasons.map(s => ({ name: s, value: s }));
     },
-    getDefaultState() {
-        return settings.store.textInputDefault ? 1 : 0;
-    },
+    getDefaultState: () => settings.store.isTextInputDefault ? 1 : 0,
     settings,
 });
