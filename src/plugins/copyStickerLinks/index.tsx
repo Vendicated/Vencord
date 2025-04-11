@@ -36,7 +36,7 @@ interface Sticker {
 const StickerExt = [, "png", "png", "json", "gif"] as const;
 
 function getUrl(data: Sticker) {
-    if (data.format_type === 4 || data.format_type === 2)
+    if (data.format_type === 4)
         return `https:${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.gif?size=4096&lossless=true`;
 
     return `https://${window.GLOBAL_ENV.CDN_HOST}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
@@ -80,7 +80,6 @@ function buildMenuExpression(Sticker, fetchData: () => Promisable<Omit<Sticker, 
     return (
         <>
             <Menu.MenuSeparator></Menu.MenuSeparator>
-
             <Menu.MenuItem
                 id="copystickerurl"
                 key="copystickerurl"
@@ -93,7 +92,6 @@ function buildMenuExpression(Sticker, fetchData: () => Promisable<Omit<Sticker, 
                 }
                 }
             />
-
             <Menu.MenuItem
                 id="openstickerlink"
                 key="openstickerlink"
@@ -135,7 +133,6 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
         if (stickerCache) {
             children.push(buildMenuExpression("Sticker", () => stickerCache));
         }
-
     }
 };
 
