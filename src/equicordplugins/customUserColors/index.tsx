@@ -125,6 +125,13 @@ export default definePlugin({
             ],
             predicate: () => settings.store.dmList,
         },
+        {
+            find: '"Reply Chain Nudge")',
+            replacement: {
+                match: /(,color:)(\i),/,
+                replace: "$1$self.colorInReplyingTo(arguments[0]) ?? $2,",
+            },
+        },
     ],
 
     colorDMList(a: any): string | undefined {
@@ -142,5 +149,10 @@ export default definePlugin({
 
         const color = getCustomColorString(a.message.author.id, true);
         return color ?? roleColor ?? undefined;
-    }
+    },
+
+    colorInReplyingTo(a: any) {
+        const { id } = a.reply.message.author;
+        return getCustomColorString(id, true);
+    },
 });
