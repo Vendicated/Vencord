@@ -1,3 +1,12 @@
-.vc-quest-completer-icon:hover{
-    filter: brightness(10);
+.vc-quest-completer-icon{
+    bottom: -4px;
+    padding: 0;
+    width: var(--space-32);
+    min-width: 0;
+    height: var(--space-32);
+    color: var(--interactive-normal) !important;
+
+    &:hover{
+        filter: brightness(2);
+    }
 }
