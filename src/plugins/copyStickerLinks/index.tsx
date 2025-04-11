@@ -21,7 +21,7 @@ import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin from "@utils/types";
 import { findStoreLazy } from "@webpack";
-import { Constants, FluxDispatcher, Menu, React, RestAPI } from "@webpack/common";
+import { Menu, React } from "@webpack/common";
 import { Promisable } from "type-fest";
 
 const StickersStore = findStoreLazy("StickersStore");
@@ -40,22 +40,6 @@ function getUrl(data: Sticker) {
         return `https:${window.GLOBAL_ENV.MEDIA_PROXY_ENDPOINT}/stickers/${data.id}.gif?size=4096&lossless=true`;
 
     return `https://${window.GLOBAL_ENV.CDN_HOST}/stickers/${data.id}.${StickerExt[data.format_type]}?size=4096&lossless=true`;
-}
-
-async function fetchSticker(id: string) {
-    const cached = StickersStore.getStickerById(id);
-    if (cached) return cached;
-
-    const { body } = await RestAPI.get({
-        url: Constants.Endpoints.STICKER(id)
-    });
-
-    FluxDispatcher.dispatch({
-        type: "STICKER_FETCH_SUCCESS",
-        sticker: body
-    });
-
-    return body as Sticker;
 }
 
 function buildMenuItem(Sticker, fetchData: () => Promisable<Omit<Sticker, "t">>) {
@@ -100,7 +84,7 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
         if (sticker?.format_type === 3) return;
         switch (favoriteableType) {
             case "sticker":
-                return buildMenuItem("Sticker", () => fetchSticker(favoriteableId));
+                return buildMenuItem("Sticker", props.message.stickerItems.id);
         }
     })();
 
@@ -112,9 +96,9 @@ const expressionPickerPatch: NavContextMenuPatchCallback = (children, props: { t
     const { id } = props?.target?.dataset ?? {};
     if (!id) return;
 
-    if (!props.target.className?.includes("lottieCanvas")) {
-        children.push(buildMenuItem("Sticker", () => fetchSticker(id)));
-    }
+    //    if (!props.target.className?.includes("lottieCanvas")) {
+    //   children.push(buildMenuItem("Sticker", () => props.stickerItems.id));
+    //  }
 };
 
 export default definePlugin({
