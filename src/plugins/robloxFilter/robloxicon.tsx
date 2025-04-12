@@ -57,7 +57,7 @@ export function RobloxIcon({
         // </svg>
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Roblox_icon_-_2017.svg/512px-Roblox_icon_-_2017.svg.png?20230528063848" alt=""
             height={height}
-            width={width} className={classes(cl("icon"), className)} style={enabled ? { filter: "grayscale(1)" } : undefined} />
+            width={width} className={classes(cl("icon"), className)} style={!enabled ? { filter: "grayscale(1)" } : undefined} />
     );
 }
 
