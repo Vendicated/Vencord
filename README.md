@@ -212,7 +212,6 @@ MacOS
 Linux
 
 - [GUI-X11](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl-x11)
-- [GUI-Wayland](https://github.com/Equicord/Equilotl/releases/latest/download/Equilotl-wayland)
 - [CLI](https://github.com/Equicord/Equilotl/releases/latest/download/EquilotlCli-Linux)
 - [AUR](https://aur.archlinux.org/packages?O=0&K=equicord)
 
