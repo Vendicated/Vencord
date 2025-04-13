@@ -31,8 +31,8 @@ const settings = definePluginSettings({
 
     keepForwading: {
         type: OptionType.BOOLEAN,
-        description: "If enabled does not clear the forwarded message, allowing you to forward it to multiple channels without clicking on forward again",
-        default: false
+        description: "Disable keeping the forward after sending it",
+        default: true
     },
 });
 
@@ -189,7 +189,7 @@ export default definePlugin({
         const currentChannel = getCurrentChannel();
         if (!currentChannel) return;
 
-        if (!settings.store.keepForwading) {
+        if (settings.store.keepForwading) {
             this.settings.store.state.isForwarding = false;
             this.updateStates(false);
         }
