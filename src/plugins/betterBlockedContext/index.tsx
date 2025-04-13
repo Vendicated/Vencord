@@ -80,6 +80,7 @@ export default definePlugin({
         // Allow opening DMs from the popout even if a user is blocked, so you can read the chat logs if needed.
         {
             find: "UserProfileModalHeaderActionButtons",
+            group: true,
             replacement:  [
                 // make the profile modal type "friend" so the message button is on it (if we keep it as "blocked", then you won't be able to get to DMs)
                 {
