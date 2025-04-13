@@ -84,8 +84,8 @@ export default definePlugin({
             find: ".USER_MENTION)",
             replacement: [
                 {
-                    match: /(?<=onContextMenu:\i,color:)\i(?=,onClick)(?<=user:(\i),channel:(\i).+?)/,
-                    replace: "$self.getColorInt($1?.id,$2?.id)",
+                    match: /(?<=\i.getGuild\((\i)\).{0,100}userId:(\i).+?color:)\i/,
+                    replace: "$self.getColorInt($2?.id,$1?.id)",
                 }
             ],
             predicate: () => settings.store.chatMentions
