@@ -65,7 +65,7 @@ const timeFormats: Record<string, TimeFormat> = {
         offset: -1000 * 60 * 60 * 24 * 7,
     },
     olderDateFormat: {
-        name: "Older Date",
+        name: "Older date",
         description: "[calendar] format for older dates",
         default: "ddd DD.MM.YYYY HH:mm:ss",
         offset: -1000 * 60 * 60 * 24 * 31,
