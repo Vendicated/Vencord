@@ -173,8 +173,8 @@ function loadAndCacheShortcut(key: string, val: any, forceLoad: boolean) {
     function unwrapProxy(value: any) {
         if (value[SYM_LAZY_GET]) {
             forceLoad ? currentVal[SYM_LAZY_GET]() : currentVal[SYM_LAZY_CACHED];
-        } else if (value.$$vencordInternal) {
-            return forceLoad ? value.$$vencordInternal() : value;
+        } else if (value.$$vencordGetWrappedComponent) {
+            return forceLoad ? value.$$vencordGetWrappedComponent() : value;
         }
 
         return value;
