@@ -1,15 +1,10 @@
-name: Release
+name: NixOS Build
 on:
-    push:
-        tags:
-            - v*
-        branches:
-            - main
+    schedule:
+        - cron: 0 0 * * *
 env:
     FORCE_COLOR: true
     GITHUB_TOKEN: ${{ secrets.ETOKEN }}
-    REPO: Equicord/Equibored
-    USERNAME: GitHub-Actions
 
 permissions: write-all
 
@@ -66,20 +61,11 @@ jobs:
                   rm release/package.json
                   rm release/*.map
 
+            - name: Get current date
+              id: date
+              run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
             - name: Upload Equicord Stable
-              if: ${{ github.ref_name == 'main' }}
               run: |
-                  gh release upload latest --clobber dist/release/*
-
-            - name: Upload Plugins JSON to Equibored repo
-              run: |
-                  git config --global user.name "GitHub-Actions"
-                  git config --global user.email actions@github.com
-                  git clone https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git plugins
-                  cd plugins
-
-                  cp ../dist/release/*plugins.json .
-                  git add -A
-
-                  git commit -m "Plugins for https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
-                  git push --force https://$USERNAME:$GITHUB_TOKEN@github.com/$REPO.git
+                  gh release create ${{ steps.date.outputs.date }} --latest=false
+                  gh release upload ${{ steps.date.outputs.date }} --clobber dist/release/*
