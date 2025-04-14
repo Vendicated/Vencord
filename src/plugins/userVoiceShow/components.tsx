@@ -111,9 +111,37 @@ function VoiceChannelTooltip({ channel, isLocked }: VoiceChannelTooltipProps) {
                     <Text variant="text-sm/bold">{guild.name}</Text>
                 </div>
             )}
-            <div className={cl("name")}>
+           <div className={cl("name2")} style={{ display: 'flex', alignItems: 'center' }}>
                 {channelIcon}
-                <Text variant="text-sm/semibold">{channelName}</Text>
+                <Text variant="text-sm/semibold">
+                    {channelName}
+                </Text>
+                <div style={{ display: 'flex', alignItems: 'center', marginLeft: '10px' }}>
+                    <Text 
+                        style={{ 
+                            color: 'gray', 
+                            fontSize: '12px', 
+                            boxSizing: 'border-box', 
+                            padding: '0 6px 0 0', 
+                            backgroundColor: 'var(--background-tertiary)', 
+                            borderRadius: '0 8px 0 0',
+                        }}
+                    >
+                        {users.length < 10 ? `0${users.length}` : `${users.length}`}
+                    </Text>
+                    <Text 
+                        style={{ 
+                            color: 'gray', 
+                            fontSize: '12px', 
+                            boxSizing: 'border-box', 
+                            padding: '0 6px 0 0', 
+                            backgroundColor: 'var(--background-mod-strong)',
+                            borderRadius: '0 8px 0 0',
+                        }}
+                    >
+                        {channel.userLimit < 10 ? `0${channel.userLimit}` : `${channel.userLimit}`}
+                    </Text>
+                </div>
             </div>
             <div className={cl("vc-members")}>
                 {isLocked ? <LockedSpeakerIcon size={18} /> : <SpeakerIcon size={18} />}
