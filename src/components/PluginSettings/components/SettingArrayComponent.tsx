@@ -8,14 +8,11 @@ import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 // import SearchModal from "@components/SearchModal";
 import { Margins } from "@utils/margins";
-import { openModal } from "@utils/modal";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { OptionType, PluginOptionArray } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import {
-    Avatar,
     Button,
-    ChannelStore,
     Flex,
     Forms,
     GuildStore,
@@ -23,10 +20,10 @@ import {
     React,
     Text,
     TextInput,
-    useEffect,
+    useEffect, UserStore,
     useState,
 } from "@webpack/common";
-import { Channel, Guild } from "discord-types/general";
+import { Guild } from "discord-types/general";
 
 import { ISettingElementProps } from ".";
 import { DeleteIcon, PlusIcon } from "@components/Icons";
@@ -38,17 +35,9 @@ const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
 const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarURL");
 
 
-const CloseIcon = () => {
-    return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" width="18" height="18">
-        <path
-            d="M17.3 18.7a1 1 0 0 0 1.4-1.4L13.42 12l5.3-5.3a1 1 0 0 0-1.42-1.4L12 10.58l-5.3-5.3a1 1 0 0 0-1.4 1.42L10.58 12l-5.3 5.3a1 1 0 1 0 1.42 1.4L12 13.42l5.3 5.3Z" />
-    </svg>;
-};
-
-const CheckMarkIcon = () => {
-    return <svg width="24" height="24" viewBox="0 0 24 24">
-        <path fill="currentColor"
-            d="M21.7 5.3a1 1 0 0 1 0 1.4l-12 12a1 1 0 0 1-1.4 0l-6-6a1 1 0 1 1 1.4-1.4L9 16.58l11.3-11.3a1 1 0 0 1 1.4 0Z" />
+const QuestionMarkIcon = () => {
+    return <svg width="40" height="40" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+        <path d="M16 4C9.373 4 4 9.373 4 16s5.373 12 12 12 12-5.373 12-12S22.627 4 16 4zm0 20a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm2.25-7.5c-.69.69-1.5 1.125-1.5 2.25h-3c0-2.25 1.5-3 2.25-3.75.75-.75 1.5-1.5 1.5-2.25 0-1.5-1.125-2.25-2.25-2.25s-2.25.75-2.25 2.25h-3c0-3 2.25-5.25 5.25-5.25s5.25 2.25 5.25 5.25c0 1.5-.75 2.625-1.5 3.375z" />
     </svg>;
 };
 
@@ -160,36 +149,36 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
         const icon = guild?.icon == null ? undefined : IconUtils.getGuildIconURL({
             id: guild.id,
             icon: guild.icon,
-            size: 16,
+            size: 32,
         });
-        return icon != null && <img className={cl("guild-icon")} src={icon} alt="" />;
-
+        return icon != null ? <img className={cl("guild-icon")} src={icon} alt="" /> : QuestionMarkIcon();
     };
 
 
     function renderGuildView() {
-        return <></>;
-        // return items.map(item => GuildStore.getGuild(item) || item) todo remake
-        //     .map((guild, index) => (
-        //         <Flex
-        //             flexDirection="row"
-        //             key={index}
-        //             style={{
-        //                 gap: "1px",
-        //                 marginBottom: "8px"
-        //             }}
-        //         >
-        //             {typeof guild !== "string" ? (
-        //                 <div className={cl("name")} style={{ color: "var(--text-normal)" }}>
-        //                     <span style={{ display: "inline-flex", alignItems: "center" }}>
-        //                         {guildIcon(guild)}
-        //                         <Text variant="text-sm/semibold" style={{ marginLeft: "4px" }}>{guild.name}</Text>
-        //                     </span>
-        //                 </div>
-        //             ) : <Text variant="text-sm/semibold">{`Unknown Guild (${guild})`}</Text>}
-        //             {removeButton(typeof guild !== "string" ? guild.id : guild)}
-        //         </Flex>
-        //     ));
+        return items.map(item => GuildStore.getGuild(item) || item)
+            .map((guild, index) => (
+                <Flex
+                    flexDirection="row"
+                    key={index}
+                    style={{
+                        gap: "1px",
+                        marginBottom: "8px"
+                    }}
+                >
+                    <div className={cl("name")} style={{ color: "var(--text-normal)" }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                            {guildIcon(guild)}
+                            <TextInput
+                                value={guild?.name ?? `Unknown Guild (${guild})`}
+                                disabled={true}
+                            />
+
+                        </span>
+                    </div>
+                    {removeButton(typeof guild !== "string" ? guild.id : guild)}
+                </Flex>
+            ));
     }
 
     function renderChannelView() {
@@ -393,13 +382,53 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
                         onChange={v => setText(v)}
                         value={text}
                     />
-                    {option.type === OptionType.ARRAY || (!isNaN(Number(text)) && text !== "") ?
+                    {option.type !== OptionType.CHANNELS || (!isNaN(Number(text)) && text !== "") ?
+                        // For channels, there will be only search modals, due to the channel names duplicating being more likely.
+                        // However, in each guild section in the channel view users will find an extra text input
+                        // through which they can search specifically channels for those guilds
+                        // however, this requires the guild to be already added in the first place to be rendered.
                         <Button
                             size={Button.Sizes.MIN}
                             id={cl("add-button")}
                             // idk why discord is so fucked with button styles here but passing it as a prop doesn't work
                             style={{ background: "none", color: "var(--text-normal)" }}
-                            onClick={() => { setItems([...items, text]); setText(""); }}
+                            onClick={() => {
+                                if (option.type === OptionType.ARRAY && text !== "") {
+                                    setItems([...items, text]);
+                                    setText("");
+                                }
+                                else if (option.type === OptionType.GUILDS) {
+                                    const found = Object.values(GuildStore.getGuilds()).find(guild => {
+                                        if (guild.name.toLowerCase().includes(text.toLowerCase())) {
+                                            // this is not the best solution, however i think users can figure it out
+                                            // and usually you wouldn't input a completely generic text
+                                            setItems([...items, guild.id]);
+                                            setText("");
+                                            return true;
+                                        }
+                                    });
+                                    if (!found) {
+                                        setError("Guild not found"); // FIXME open search modal with this text
+                                    }
+                                } else if (option.type === OptionType.USERS) {
+                                    const found = Object.values(UserStore.getUsers()).find(user => {
+                                        if (
+                                            // since new usernames are unique, this works fine
+                                            // however the globalName check might be too broad(?)
+                                            user.username.toLowerCase() === text.toLowerCase()
+                                            // @ts-ignore outdated lib
+                                            || user.globalName?.toLowerCase().includes(text.toLowerCase())
+                                        ) {
+                                            setItems([...items, user.id]);
+                                            setText("");
+                                            return true;
+                                        }
+                                    });
+                                    if (!found) {
+                                        setError("User not found"); // FIXME open search modal with this text
+                                    }
+                                }
+                            }}
                             disabled={text === "" || error != null}
                             look={Button.Looks.BLANK}
                         >
