@@ -23,20 +23,13 @@ import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
-import {
-    addMessageClickListener,
-    addMessagePreEditListener,
-    addMessagePreSendListener,
-    removeMessageClickListener,
-    removeMessagePreEditListener,
-    removeMessagePreSendListener
-} from "@api/MessageEvents";
+import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendListener, removeMessageClickListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Logger } from "@utils/Logger";
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
-import { OptionType, Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
+import { Patch, Plugin, PluginDef, ReporterTestable, StartAt } from "@utils/types";
 import { FluxDispatcher } from "@webpack/common";
 import { patches } from "@webpack/patcher";
 import { FluxEvents } from "@webpack/types";

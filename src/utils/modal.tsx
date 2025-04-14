@@ -112,8 +112,7 @@ export const Modals: Modals = mapMangledModuleLazy(':"thin")', {
     ModalHeader: filters.componentByCode(",id:"),
     ModalContent: filters.componentByCode(".content,"),
     ModalFooter: filters.componentByCode(".footer,"),
-    ModalCloseButton: filters.componentByCode(".close]:"),
-    ModalListContent: filters.componentByCode(",scrollerRef:")
+    ModalCloseButton: filters.componentByCode(".close]:")
 });
 
 export const ModalRoot = LazyComponent(() => Modals.ModalRoot);

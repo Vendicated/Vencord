@@ -23,8 +23,7 @@ import type { Message } from "discord-types/general";
 
 const settings = definePluginSettings({
     userList: {
-        description:
-            "List of users to allow or exempt pings for",
+        description: "List of users to allow or exempt pings for",
         type: OptionType.USERS,
         oldStringSeparator: s => s.split(/[\s,]+/).filter(v => v !== "1234567890123445")
     },

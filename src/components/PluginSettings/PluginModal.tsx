@@ -45,7 +45,7 @@ import {
     SettingNumericComponent,
     SettingSelectComponent,
     SettingSliderComponent,
-    SettingTextComponent,
+    SettingTextComponent
 } from "./components";
 import { openContributorModal } from "./ContributorModal";
 import { GithubButton, WebsiteButton } from "./LinkIconButton";

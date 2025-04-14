@@ -211,6 +211,7 @@ export type CheckboxTypes = {
 
 export type Checkbox = ComponentType<PropsWithChildren<{
     value: boolean;
+    onChange(event: PointerEvent, value: boolean): void;
 
     /**
      * If displayOnly is true, the onChange event will not be triggered
