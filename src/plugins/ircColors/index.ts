@@ -66,8 +66,8 @@ export default definePlugin({
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(?<=className:\i\.username,style:.{0,50}:void 0,)/,
-                replace: "style:{color:$self.calculateNameColorForMessageContext(arguments[0])},"
+                match: /\i.gradientClassName]\),style:/,
+                replace: "$&{color:$self.calculateNameColorForMessageContext(arguments[0])},_style:"
             }
         },
         {
@@ -81,9 +81,13 @@ export default definePlugin({
     ],
 
     calculateNameColorForMessageContext(context: any) {
-        const id = context?.message?.author?.id;
+        const userId: string | undefined = context?.message?.author?.id;
         const colorString = context?.author?.colorString;
-        const color = calculateNameColorForUser(id);
+        const color = calculateNameColorForUser(userId);
+
+        // Color preview in role settings
+        if (context?.message?.channel_id === "1337" && userId === "313337")
+            return colorString;
 
         if (settings.store.applyColorOnlyInDms && !context?.channel?.isPrivate()) {
             return colorString;
