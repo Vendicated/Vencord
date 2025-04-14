@@ -1,0 +1,50 @@
+.vc-vmsg-modal {
+    padding: 1em;
+}
+
+.vc-vmsg-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5em;
+    margin-bottom: 1em;
+}
+
+.vc-vmsg-preview {
+    color: var(--text-normal);
+    border-radius: 24px;
+    background-color: var(--background-secondary);
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    height: 48px;
+}
+
+.vc-vmsg-preview-indicator {
+    background: var(--button-secondary-background);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    transition: background 0.2s ease-in-out;
+}
+
+.vc-vmsg-preview-recording .vc-vmsg-preview-indicator {
+    background: var(--status-danger);
+}
+
+.vc-vmsg-preview-time {
+    opacity: 0.8;
+    margin: 0 0.5em;
+    font-size: 80%;
+
+    /* monospace so different digits have same size */
+    font-family: var(--font-code);
+}
+
+.vc-vmsg-preview-label {
+    opacity: 0.5;
+    letter-spacing: 0.125em;
+    font-weight: 600;
+    flex: 1;
+    text-align: center;
+}

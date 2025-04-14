@@ -1,0 +1,34 @@
+.vc-clientTheme-settings {
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-clientTheme-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.vc-clientTheme-labels {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.vc-clientTheme-container [class^="swatch"] {
+    border: thin solid var(--background-modifier-accent) !important;
+}
+
+.vc-clientTheme-warning-text {
+    color: var(--text-danger);
+}
+
+.vc-clientTheme-contrast-warning {
+    background-color: var(--background-primary);
+    padding: 0.5rem;
+    border-radius: .5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}

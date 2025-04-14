@@ -1,0 +1,47 @@
+{
+    "compilerOptions": {
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "allowJs": true,
+        "lib": [
+            "DOM",
+            "DOM.Iterable",
+            "esnext",
+            "esnext.array",
+            "esnext.asynciterable",
+            "esnext.symbol"
+        ],
+        "module": "esnext",
+        "moduleResolution": "node",
+        "strict": true,
+        "noImplicitAny": false,
+        "target": "ESNEXT",
+        "jsx": "preserve",
+
+        "baseUrl": "./src/",
+        "paths": {
+            "@main/*": ["./main/*"],
+            "@api/*": ["./api/*"],
+            "@components/*": ["./components/*"],
+            "@utils/*": ["./utils/*"],
+            "@shared/*": ["./shared/*"],
+            "@webpack/types": ["./webpack/common/types"],
+            "@webpack/common": ["./webpack/common"],
+            "@webpack": ["./webpack/webpack"],
+            "@webpack/patcher": ["./webpack/patchWebpack"],
+            "@webpack/wreq.d": ["./webpack/wreq.d"],
+        },
+
+        "plugins": [
+            // Transform paths in output .d.ts files (Include this line if you output declarations files)
+            {
+                "transform": "typescript-transform-paths",
+                "afterDeclarations": true
+            }
+        ],
+        "outDir": "who-fucking-cares-dude"
+    },
+    "include": ["src/**/*", "browser/**/*", "scripts/**/*", "eslint.config.mjs"],
+}

@@ -1,0 +1,12 @@
+.vc-dearrow-toggle-off .vc-dearrow-icon {
+    filter: grayscale(1);
+}
+
+.vc-dearrow-toggle-on, .vc-dearrow-toggle-off {
+    all: unset;
+    display: inline;
+    cursor: pointer;
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+}

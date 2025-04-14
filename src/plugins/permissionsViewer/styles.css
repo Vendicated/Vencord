@@ -1,0 +1,168 @@
+/* User Permissions Component */
+
+.vc-permviewer-user-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.vc-permviewer-user-header-btns {
+    display: flex;
+    gap: 8px;
+}
+
+.vc-permviewer-user-header-btn {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/*  RolesAndUsersPermissions Component */
+
+.vc-permviewer-modal-content {
+    padding: 16px 4px 16px 16px;
+}
+
+.vc-permviewer-modal-title {
+    flex-grow: 1;
+}
+
+.vc-permviewer-modal-no-perms {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.vc-permviewer-modal-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    gap: 8px;
+}
+
+.vc-permviewer-modal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-right: 8px;
+    width: 200px;
+}
+
+.vc-permviewer-modal-list-item-btn {
+    cursor: pointer;
+}
+
+.vc-permviewer-modal-list-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.vc-permviewer-modal-list-item:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.vc-permviewer-modal-list-item-active {
+    background-color: var(--background-modifier-selected);
+}
+
+.vc-permviewer-modal-list-item-text {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.vc-permviewer-modal-role-circle {
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+}
+
+.vc-permviewer-modal-role-image {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.vc-permviewer-modal-user-img {
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+}
+
+.vc-permviewer-modal-divider {
+    width: 2px;
+    background-color: var(--background-modifier-active);
+}
+
+.vc-permviewer-modal-perms {
+    display: flex;
+    flex-direction: column;
+    padding-right: 8px;
+}
+
+.vc-permviewer-modal-perms-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 2px 10px 10px;
+    border-bottom: 2px solid var(--background-modifier-active);
+}
+
+.vc-permviewer-modal-perms-item:last-child {
+    border: 0;
+}
+
+.vc-permviewer-modal-perms-item-icon {
+    border: 1px solid var(--background-modifier-selected);
+    width: 24px;
+    height: 24px;
+}
+
+.vc-permviewer-modal-perms-item .vc-info-icon {
+    color: var(--interactive-muted);
+    margin-left: auto;
+    cursor: pointer;
+    transition: color ease-in 0.1s;
+}
+
+.vc-permviewer-modal-perms-item .vc-info-icon:hover {
+    color: var(--interactive-active);
+}
+
+/* copy pasted from discord cause impossible to webpack find */
+.vc-permviewer-role-button {
+    border-radius: var(--radius-xs);
+    background: var(--bg-mod-faint);
+    color: var(--interactive-normal);
+    border: 1px solid var(--border-faint);
+    /* stylelint-disable-next-line value-no-vendor-prefix */
+    width: -moz-fit-content;
+    width: fit-content;
+    height: 24px;
+    padding: 4px
+}
+
+.custom-profile-theme .vc-permviewer-role-button {
+    background: rgb(var(--bg-overlay-color)/var(--bg-overlay-opacity-6));
+    border-color: var(--profile-body-border-color)
+}
+
+.vc-permviewer-granted-by-container {
+    max-width: 300px;
+    width: auto;
+}
+
+.vc-permviewer-granted-by-content {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}

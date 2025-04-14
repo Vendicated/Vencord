@@ -1,0 +1,40 @@
+.vc-trans-modal-content {
+    padding: 1em;
+}
+
+.vc-trans-modal-header {
+    place-content: center space-between;
+}
+
+.vc-trans-modal-title {
+    margin: 0;
+}
+
+.vc-trans-accessory {
+    color: var(--text-muted);
+    margin-top: 0.5em;
+    font-style: italic;
+    font-weight: 400;
+}
+
+.vc-trans-accessory-icon {
+    margin-right: 0.25em;
+}
+
+.vc-trans-dismiss {
+    all: unset;
+    cursor: pointer;
+    color: var(--text-link);
+}
+
+.vc-trans-dismiss:is(:hover, :focus) {
+    text-decoration: underline;
+}
+
+.vc-trans-auto-translate {
+    color: var(--green-360);
+}
+
+.vc-trans-chat-button {
+    scale: 1.085;
+}

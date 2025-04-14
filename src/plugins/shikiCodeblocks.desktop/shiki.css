@@ -1,0 +1,101 @@
+.vc-shiki-container {
+    border: 4px;
+    background-color: var(--background-secondary);
+}
+
+.vc-shiki-root {
+    border-radius: 4px;
+}
+
+.vc-shiki-root .vc-shiki-code {
+    display: block;
+    overflow-x: auto;
+    padding: 0.5em;
+    position: relative;
+    font-size: 0.875rem;
+    line-height: 1.125rem;
+    text-indent: 0;
+    white-space: pre-wrap;
+    background: transparent;
+    border: none;
+}
+
+.vc-shiki-devicon {
+    margin-right: 8px;
+    user-select: none;
+}
+
+.vc-shiki-plain .vc-shiki-code {
+    padding-top: 8px;
+}
+
+.vc-shiki-btns {
+    font-size: 1em;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+}
+
+.vc-shiki-root:hover .vc-shiki-btns {
+    opacity: 1;
+}
+
+.vc-shiki-btn {
+    border-radius: 4px 4px 0 0;
+    padding: 4px 8px;
+    user-select: none;
+}
+
+.vc-shiki-btn ~ .vc-shiki-btn {
+    margin-left: 4px;
+}
+
+.vc-shiki-btn:last-child {
+    border-radius: 4px 0;
+}
+
+.vc-shiki-spinner-container {
+    align-items: center;
+    background-color: rgb(0 0 0 / 60%);
+    display: flex;
+    position: absolute;
+    justify-content: center;
+    inset: 0;
+}
+
+.vc-shiki-preview {
+    margin-bottom: 2em;
+}
+
+.vc-shiki-lang {
+    padding: 0 5px;
+    margin-bottom: 6px;
+    font-weight: bold;
+    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+}
+
+.vc-shiki-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.vc-shiki-table-row {
+    height: 19px;
+    width: 100%;
+}
+
+.vc-shiki-root .vc-shiki-table-cell:first-child {
+    border-right: 1px solid transparent;
+    padding-left: 5px;
+    padding-right: 8px;
+    user-select: none;
+}
+
+.vc-shiki-root .vc-shiki-table-cell:last-child {
+    padding-left: 8px;
+    overflow-wrap: anywhere;
+    width: 100%;
+}

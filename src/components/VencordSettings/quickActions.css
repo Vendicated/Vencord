@@ -1,0 +1,50 @@
+.vc-settings-quickActions-card {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5em;
+    padding: 0.5em;
+    margin-bottom: 1em;
+}
+
+@media (width <=1040px) {
+    .vc-settings-quickActions-card {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.vc-settings-quickActions-pill {
+    all: unset;
+    background: var(--background-secondary);
+    color: var(--header-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 8px 9px;
+    border-radius: 8px;
+    transition: 0.1s ease-out;
+    box-sizing: border-box;
+}
+
+.vc-settings-quickActions-pill:hover {
+    background: var(--background-secondary-alt);
+    transform: translateY(-1px);
+    box-shadow: var(--elevation-high);
+}
+
+.vc-settings-quickActions-pill:focus-visible {
+    outline: 2px solid var(--focus-primary);
+    outline-offset: 2px;
+}
+
+.visual-refresh .vc-settings-quickActions-pill {
+    background: var(--button-secondary-background);
+}
+
+.visual-refresh .vc-settings-quickActions-pill:hover {
+    background: var(--button-secondary-background-hover);
+}
+
+.vc-settings-quickActions-img {
+    width: 24px;
+    height: 24px;
+}

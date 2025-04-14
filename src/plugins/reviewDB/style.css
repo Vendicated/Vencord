@@ -1,0 +1,135 @@
+[class|="section"]:not([class|="lastSection"]) + .vc-rdb-view {
+    margin-top: 12px;
+}
+
+.vc-rdb-badge {
+    vertical-align: middle;
+    margin-left: 4px;
+}
+
+.vc-rdb-input {
+    margin-top: 6px;
+    margin-bottom: 12px;
+    resize: none;
+    overflow: hidden;
+    background: transparent;
+    border: 1px solid var(--profile-message-input-border-color);
+}
+
+.vc-rdb-modal-footer-wrapper {
+    width: 100%;
+    margin: 6px 16px;
+}
+
+.vc-rdb-placeholder {
+    margin-bottom: 4px;
+    font-weight: bold;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+.vc-rdb-input * {
+    font-size: 14px;
+}
+
+.vc-rdb-modal-footer {
+    padding: 0;
+}
+
+.vc-rdb-modal-footer .vc-rdb-input {
+    margin-bottom: 0;
+    background: var(--input-background);
+}
+
+.vc-rdb-modal-footer [class|="pageControlContainer"] {
+    margin-top: 0;
+}
+
+.vc-rdb-modal-header {
+    flex-grow: 1;
+}
+
+.vc-rdb-modal-reviews {
+    margin-top: 16px;
+}
+
+.vc-rdb-review {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    padding-right: 32px !important;
+}
+
+.vc-rdb-review:hover {
+    background: var(--background-message-hover) !important;
+    border-radius: 8px;
+}
+
+.vc-rdb-review-comment [class*="avatar"] {
+    vertical-align: text-top;
+}
+
+.vc-rdb-review-comment {
+    overflow-y: hidden;
+    margin-top: 1px;
+    margin-bottom: 8px;
+    color: var(--text-normal);
+    font-size: 15px;
+}
+
+.vc-rdb-blocked-badge {
+    cursor: pointer;
+}
+
+.vc-rdb-block-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vc-rdb-block-modal {
+    padding: 1em;
+    display: grid;
+    gap: 0.75em;
+}
+
+.vc-rdb-button-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* stylelint-disable-next-line media-feature-range-notation */
+@media (max-width: 600px) {
+    .vc-rdb-button-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.vc-rdb-block-modal-row {
+    display: flex;
+    height: 2em;
+    gap: 0.5em;
+    align-items: center;
+}
+
+.vc-rdb-block-modal-avatar {
+    border-radius: 50%;
+    height: 2em;
+    width: 2em;
+}
+
+.vc-rdb-block-modal-avatar::before {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-modifier-accent);
+}
+
+.vc-rdb-block-modal-username {
+    flex-grow: 1;
+}
+
+.vc-rdb-block-modal-unblock {
+    cursor: pointer;
+}

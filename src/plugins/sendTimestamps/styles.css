@@ -1,0 +1,39 @@
+.vc-st-date-picker {
+    background-color: var(--input-background);
+    color: var(--text-normal);
+    width: 95%;
+    padding: 8px 8px 8px 12px;
+    margin: 1em 0;
+    outline: none;
+    border: 1px solid var(--input-background);
+    border-radius: 4px;
+    font-weight: 500;
+    font-style: inherit;
+    font-size: 100%;
+}
+
+.vc-st-format-select {
+    margin-bottom: 1em;
+
+    --background-modifier-accent: transparent;
+}
+
+.vc-st-format-label {
+    --background-modifier-accent: transparent;
+}
+
+.vc-st-modal-header {
+    place-content: center space-between;
+}
+
+.vc-st-modal-title {
+    margin: 0;
+}
+
+.vc-st-modal-close-button {
+    padding: 0;
+}
+
+.vc-st-preview-text {
+    margin-bottom: 1em;
+}

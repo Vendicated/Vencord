@@ -1,0 +1,107 @@
+.vc-shc-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.65em;
+    margin: 0.5em 0;
+    min-height: 100%;
+}
+
+.vc-shc-logo {
+    width: 12em;
+    height: 12em;
+}
+
+.vc-shc-heading-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.vc-shc-heading-nsfw-icon {
+    color: var(--text-normal);
+}
+
+.vc-shc-topic-container {
+    color: var(--text-normal);
+    background: var(--bg-overlay-3, var(--background-secondary));
+    border-radius: 5px;
+    padding: 10px;
+    max-width: 70vw;
+}
+
+.vc-shc-default-emoji-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: var(--bg-overlay-3, var(--background-secondary));
+    border-radius: 8px;
+    padding: 0.75em;
+    margin-left: 0.75em;
+}
+
+.vc-shc-tags-container {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-overlay-3, var(--background-secondary));
+    border-radius: 5px;
+    padding: 0.75em;
+    gap: 0.75em;
+    max-width: 70vw;
+}
+
+.vc-shc-tags {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.35em;
+}
+
+.vc-shc-allowed-users-and-roles-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--bg-overlay-3, var(--background-secondary));
+    border-radius: 5px;
+    padding: 0.75em;
+    max-width: 70vw;
+}
+
+.vc-shc-allowed-users-and-roles-container-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.vc-shc-allowed-users-and-roles-container-toggle-btn {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: var(--text-normal);
+}
+
+.vc-shc-allowed-users-and-roles-container-permdetails-btn {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: var(--text-normal);
+}
+
+.vc-shc-allowed-users-and-roles-container > [class^="members"] {
+    margin-left: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.vc-shc-hidden-channel-icon {
+    cursor: not-allowed;
+    margin-left: 6px;
+    z-index: 0;
+}

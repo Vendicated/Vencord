@@ -1,0 +1,199 @@
+#vc-spotify-player {
+    padding: 0.375rem 0.5rem;
+    border-bottom: 1px solid var(--background-modifier-accent);
+
+    --vc-spotify-green: var(--spotify, #1db954); /* so custom themes can easily change it */
+    --vc-spotify-green-90: color-mix(in hsl, var(--vc-spotify-green), transparent 90%);
+    --vc-spotify-green-80: color-mix(in hsl, var(--vc-spotify-green), transparent 80%);
+}
+
+.theme-light #vc-spotify-player {
+    background: var(--bg-overlay-3, var(--background-secondary-alt));
+}
+
+.theme-dark #vc-spotify-player {
+    background: var(--bg-overlay-1, var(--background-secondary-alt));
+}
+
+.vc-spotify-button {
+    background: none;
+    color: var(--interactive-normal);
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.vc-spotify-button:hover {
+    color: var(--interactive-hover);
+    background-color: var(--background-modifier-selected);
+}
+
+.vc-spotify-button-icon {
+    height: 24px;
+    width: 24px;
+}
+
+.vc-spotify-shuffle .vc-spotify-button-icon,
+.vc-spotify-repeat .vc-spotify-button-icon {
+    width: 22px;
+    height: 22px;
+}
+
+/* .vc-spotify-button:hover {
+    filter: brightness(1.3);
+} */
+
+.vc-spotify-shuffle-on,
+.vc-spotify-repeat-context,
+.vc-spotify-repeat-track,
+.vc-spotify-shuffle-on:hover,
+.vc-spotify-repeat-context:hover,
+.vc-spotify-repeat-track:hover {
+    color: var(--vc-spotify-green);
+}
+
+.vc-spotify-tooltip-text {
+    overflow: hidden;
+    white-space: nowrap;
+    padding-right: 0.2em;
+    max-width: 100%;
+    margin: unset;
+}
+
+.vc-spotify-repeat-1 {
+    font-size: 70%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.vc-spotify-button-row {
+    justify-content: center;
+}
+
+#vc-spotify-info-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 3em;
+    gap: 0.5em;
+}
+
+#vc-spotify-album-image {
+    height: 90%;
+    object-fit: contain;
+    border-radius: 3px;
+    transition: filter 0.2s;
+}
+
+#vc-spotify-album-image:hover {
+    filter: brightness(1.2);
+    cursor: pointer;
+}
+
+#vc-spotify-album-expanded-wrapper #vc-spotify-album-image {
+    width: 100%;
+    object-fit: contain;
+}
+
+#vc-spotify-titles {
+    display: flex;
+    flex-direction: column;
+    padding: 0.2rem;
+    align-items: flex-start;
+    place-content: flex-start center;
+    overflow: hidden;
+}
+
+#vc-spotify-song-title {
+    color: var(--header-primary);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.vc-spotify-ellipoverflow {
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+    text-overflow: ellipsis;
+}
+
+.vc-spotify-artist,
+.vc-spotify-album {
+    font-size: 12px;
+    text-decoration: none;
+    color: var(--header-secondary);
+}
+
+.vc-spotify-comma {
+    color: var(--header-secondary);
+}
+
+.vc-spotify-artist[role="link"]:hover,
+#vc-spotify-album-title[role="link"]:hover,
+#vc-spotify-song-title[role="link"]:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#vc-spotify-progress-bar {
+    position: relative;
+    color: var(--text-normal);
+    width: 100%;
+    margin: 0.5em 0;
+    margin-bottom: 5px;
+}
+
+#vc-spotify-progress-bar > [class^="slider"] {
+    flex-grow: 1;
+    width: 100%;
+    padding: 0 !important;
+}
+
+#vc-spotify-progress-bar > [class^="slider"] [class^="bar-"] {
+    height: 4px !important;
+}
+
+#vc-spotify-progress-bar > [class^="slider"] [class^="grabber"] {
+    /* these importants are necessary, it applies a width and height through inline styles */
+    height: 10px !important;
+    width: 10px !important;
+    margin-top: 4px;
+    background-color: var(--interactive-normal);
+    border-color: var(--interactive-normal);
+    color: var(--interactive-normal);
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+
+#vc-spotify-progress-bar:hover > [class^="slider"] [class^="grabber"] {
+    opacity: 1;
+}
+
+#vc-spotify-progress-text {
+    margin: 0;
+}
+
+.vc-spotify-progress-time {
+    font-size: 12px;
+    top: 10px;
+    position: absolute;
+}
+
+.vc-spotify-time-left {
+    left: 0;
+}
+
+.vc-spotify-time-right {
+    right: 0;
+}
+
+.vc-spotify-fallback {
+    padding: 0.5em;
+    color: var(--text-normal);
+}

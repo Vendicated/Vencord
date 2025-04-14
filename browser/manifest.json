@@ -1,0 +1,53 @@
+{
+    "manifest_version": 3,
+    "minimum_chrome_version": "111",
+
+    "name": "Vencord Web",
+    "description": "The cutest Discord mod now in your browser",
+    "author": "Vendicated",
+    "homepage_url": "https://github.com/Vendicated/Vencord",
+    "icons": {
+        "128": "icon.png"
+    },
+
+    "host_permissions": [
+        "*://*.discord.com/*",
+        "https://raw.githubusercontent.com/*"
+    ],
+
+    "permissions": ["declarativeNetRequest"],
+
+    "content_scripts": [
+        {
+            "run_at": "document_start",
+            "matches": ["*://*.discord.com/*"],
+            "js": ["content.js"],
+            "all_frames": true,
+            "world": "ISOLATED"
+        },
+        {
+            "run_at": "document_start",
+            "matches": ["*://*.discord.com/*"],
+            "js": ["dist/Vencord.js"],
+            "all_frames": true,
+            "world": "MAIN"
+        }
+    ],
+
+    "web_accessible_resources": [
+        {
+            "resources": ["dist/*", "vendor/*"],
+            "matches": ["*://*.discord.com/*"]
+        }
+    ],
+
+    "declarative_net_request": {
+        "rule_resources": [
+            {
+                "id": "modifyResponseHeaders",
+                "enabled": true,
+                "path": "modifyResponseHeaders.json"
+            }
+        ]
+    }
+}
