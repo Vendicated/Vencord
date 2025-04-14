@@ -5,6 +5,7 @@
     border-radius: var(--radius-xs);
     margin: 10px 0;
 }
+
 .vc-cmt-preview-text {
     color: yellow;
     margin: 8px 0;
