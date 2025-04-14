@@ -6,11 +6,9 @@
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Devs } from "@utils/constants";
-import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, React } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
-import { canBlockReviewAuthor } from "../reviewDB/utils";
 
 function createContextMenuItem(name: string, value: Channel | User | Guild) {
     return (
