@@ -6,7 +6,7 @@
 
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import SearchModal from "@components/SearchModal";
+// import SearchModal from "@components/SearchModal";
 import { Margins } from "@utils/margins";
 import { openModal } from "@utils/modal";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
@@ -29,6 +29,7 @@ import {
 import { Channel, Guild } from "discord-types/general";
 
 import { ISettingElementProps } from ".";
+import { DeleteIcon, PlusIcon } from "@components/Icons";
 
 const cl = classNameFactory("vc-plugin-modal-");
 
@@ -88,7 +89,26 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
         return migrated;
     }
 
-    useEffect(() => {
+    const removeButton = (id: string) => {
+        return (
+            <Button
+                className={cl("remove-button")}
+                size={Button.Sizes.MIN}
+                onClick={() => removeItem(id)}
+                style={{ background: "none", color: "red" }}
+                look={Button.Looks.BLANK}
+            >
+                <DeleteIcon />
+            </Button>
+        );
+    };
+
+    const removeItem = (itemId: string) => {
+        const idx = items.indexOf(itemId);
+        setItems(items.filter((_, index) => index !== idx));
+    };
+
+    useEffect(() => { // TODO fix error-proofing everything with the new components
         if (text === "") {
             setError(null);
             return;
@@ -148,6 +168,7 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
 
 
     function renderGuildView() {
+        return <></>;
         // return items.map(item => GuildStore.getGuild(item) || item) todo remake
         //     .map((guild, index) => (
         //         <Flex
@@ -172,6 +193,7 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
     }
 
     function renderChannelView() {
+        return <></>;
 
         const getChannelSymbol = (type: number) => {
             switch (type) {
@@ -326,69 +348,75 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
 
     return (
         <Forms.FormSection>
-            hi
-             {// <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
-    //         <Forms.FormText className={Margins.bottom8} type="description">{option.description}</Forms.FormText>
-    //             {option.type === OptionType.ARRAY || option.type === OptionType.USERS ?
-    //                 items.map((item, index) => (
-    //                     <Flex
-    //                         flexDirection="row"
-    //                         key={index}
-    //                         style={{
-    //                             gap: "1px",
-    //                             marginBottom: "8px"
-    //                         }}
-    //                     >
-    //                         {option.type === OptionType.USERS ? (
-    //                             <UserMentionComponent
-    //                                 userId={item}
-    //                                 className="mention"
-    //                             />
-    //                         ) : (
-    //                             <span style={{ color: "var(--text-normal)" }}>{item}</span>
-    //                         )}
-    //                         {removeButton(item)}
-    //                     </Flex>
-    //                 )) : null // option.type === OptionType.CHANNELS ?
-                        // renderChannelView() : renderGuildView() */
-            //     }
-            //     <Flex
-            //         flexDirection="row"
-            //         style={{
-            //             gap: "3px"
-            //         }}
-            //     >
-            //         <TextInput
-            //             type="text"
-            //             placeholder={option.type === OptionType.ARRAY ? "Enter Text" : "Enter Text or ID"}
-            //             id={cl("input")}
-            //             onChange={v => setText(v)}
-            //             value={text}
-            //         />
-            //         {option.type === OptionType.ARRAY || (!isNaN(Number(text)) && text !== "") ?
-            //             <Button
-            //                 size={Button.Sizes.MIN}
-            //                 id={cl("add-button")}
-            //                 onClick={() => { setItems([...items, text]); setText(""); }}
-            //                 style={{ background: "none" }}
-            //                 disabled={text === "" || error != null}
-            //             >
-            //                 <CheckMarkIcon />
-            //             </Button> :
-            //             < Button
-            //                 id={cl("search-button")}
-            //                 size={Button.Sizes.MIN}
-            //                 onClick={() => openSearchModal(text)}
-            //                 style={
-            //                     { background: "none" }
-            //                 }
-            //             >
-            //                 <SearchIcon />
-            //             </Button>
-            //         }
-            //     </Flex>
-            // {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>} */}
-             }
+             <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
+             <Forms.FormText className={Margins.bottom8} type="description">{option.description}</Forms.FormText>
+                {option.type === OptionType.ARRAY || option.type === OptionType.USERS ?
+                    items.map((item, index) => (
+                        <Flex
+                            flexDirection="row"
+                            key={index}
+                            style={{
+                                gap: "1px",
+                                marginBottom: "8px"
+                            }}
+                        >
+                            {option.type === OptionType.USERS ? (
+                                <UserMentionComponent
+                                    userId={item}
+                                    className="mention"
+                                />
+                            ) : (
+                                <TextInput
+                                    value={item}
+                                    onChange={v => {
+                                        const idx = items.indexOf(item);
+                                        setItems(items.map((i, index) => index === idx ? v : i));
+                                    }}
+                                    placeholder="Enter Text"
+                                />
+                            )}
+                            {removeButton(item)}
+                        </Flex>
+                    )) : option.type === OptionType.CHANNELS ?
+                        renderChannelView() : renderGuildView()
+                }
+                <Flex
+                    flexDirection="row"
+                    style={{
+                        gap: "3px"
+                    }}
+                >
+                    <TextInput
+                        type="text"
+                        placeholder={option.type === OptionType.ARRAY ? "Enter Text" : "Enter Text or ID"}
+                        id={cl("input")}
+                        onChange={v => setText(v)}
+                        value={text}
+                    />
+                    {option.type === OptionType.ARRAY || (!isNaN(Number(text)) && text !== "") ?
+                        <Button
+                            size={Button.Sizes.MIN}
+                            id={cl("add-button")}
+                            // idk why discord is so fucked with button styles here but passing it as a prop doesn't work
+                            style={{ background: "none", color: "var(--text-normal)" }}
+                            onClick={() => { setItems([...items, text]); setText(""); }}
+                            disabled={text === "" || error != null}
+                            look={Button.Looks.BLANK}
+                        >
+                            <PlusIcon />
+                        </Button> :
+                        < Button
+                            id={cl("search-button")}
+                            size={Button.Sizes.MIN}
+                            style={{ background: "none", color: "var(--text-normal)" }}
+                            // FIXME onClick={() => openSearchModal(text)}
+                            look={Button.Looks.BLANK}
+                        >
+                            <SearchIcon />
+                        </Button>
+                    }
+                </Flex>
+            {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
         </Forms.FormSection>
     );
 });
