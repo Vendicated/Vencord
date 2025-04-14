@@ -80,11 +80,6 @@ interface Modals {
         scrollbarType?: unknown;
         [prop: string]: any;
     }>>;
-    ModalListContent: ComponentType<PropsWithChildren<{
-        className?: string;
-        scrollerRef?: Ref<HTMLElement>;
-        [prop: string]: any;
-    }>>;
     ModalFooter: ComponentType<PropsWithChildren<{
         /** Flex.Justify.START */
         justify?: string;
@@ -120,7 +115,6 @@ export const ModalHeader = LazyComponent(() => Modals.ModalHeader);
 export const ModalContent = LazyComponent(() => Modals.ModalContent);
 export const ModalFooter = LazyComponent(() => Modals.ModalFooter);
 export const ModalCloseButton = LazyComponent(() => Modals.ModalCloseButton);
-export const ModalListContent = LazyComponent(() => Modals.ModalListContent);
 
 export type MediaModalItem = {
     url: string;
