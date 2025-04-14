@@ -76,7 +76,7 @@ export default definePlugin({
     authors: [Devs.Inbestigator],
     patches: [
         {
-            find: "#{intl::BAN_MULTIPLE_CONFIRM_TITLE}",
+            find: "banReasonOtherClickable,",
             replacement: [{
                 match: /\[(\{((name|value):\i\.\i\.string\(\i\.\i\.\i\),?){2}\},?){3}\]/,
                 replace: "$self.getReasons()"
