@@ -197,19 +197,21 @@ export default definePlugin({
             find: "#{intl::MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL}",
             replacement: [
                 {
+                    // Timestamps on messages
                     match: /(\i)\?\(0,\i\.\i\)\((\i),"LT"\):\(0,\i\.\i\)\(\i,!0\)/,
                     replace: "$self.renderTimestamp($2,$1?'compact':'cozy')",
                 },
                 {
+                    // Tooltips when hovering over message timestamps
                     match: /(?<=text:)\(0,\i.\i\)\((\i),"LLLL"\)(?=,)/,
                     replace: "$self.renderTimestamp($1,'tooltip')",
                 },
             ]
         },
-        // Tooltip for timestamps (e.g. <t:1234567890>)
         {
             find: ".full,tooltipClassName:",
             replacement: {
+                // Tooltips for timestamp markdown (e.g. <t:1234567890>)
                 match: /text:(\i).full,/,
                 replace: "text: $self.renderTimestamp(new Date($1.timestamp*1000),'tooltip'),"
             }
