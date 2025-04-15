@@ -149,8 +149,8 @@ export const ApplicationAssetUtils = mapMangledModuleLazy("getAssetImage: size m
     getAssets: filters.byCode(".assets")
 });
 
-export const Clipboard: t.Clipboard = mapMangledModuleLazy('queryCommandEnabled("copy")', {
-    copy: filters.byCode(".copy("),
+export const Clipboard: t.Clipboard = mapMangledModuleLazy("await window.navigator.clipboard.writeText(", {
+    copy: filters.byCode(".writeText("),
     SUPPORTS_COPY: e => typeof e === "boolean"
 });
 
