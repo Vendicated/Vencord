@@ -44,7 +44,7 @@ export default definePlugin({
         },
         {
             // Show all activities in the user popout/sidebar
-            find: "hasAvatarForGuild(null",
+            find: '"UserProfilePopoutBody"',
             replacement: {
                 match: /(?<=(\i)\.id\)\}\)\),(\i).*?)\(0,.{0,100}\i\.id,onClose:\i\}\)/,
                 replace: "$self.showAllActivitiesComponent({ activity: $2, user: $1 })"
