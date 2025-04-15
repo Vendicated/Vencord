@@ -83,7 +83,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "UserProfileModalHeaderActionButtons",
+            find: "#{intl::OUTGOING_FRIEND_REQUEST}",
             replacement: [
                 {
                     match: /(?<=return \i)\|\|(\i)===.*?.FRIEND/,
