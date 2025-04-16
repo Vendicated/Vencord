@@ -31,6 +31,10 @@ import hideBugReport from "./hideBugReport.css?managed";
 const KbdStyles = findByPropsLazy("key", "combo");
 const BugReporterExperiment = findLazy(m => m?.definition?.id === "2024-09_bug_reporter");
 
+const isMacOS = navigator.platform.includes("Mac");
+const modKey = isMacOS ? "cmd" : "ctrl";
+const altKey = isMacOS ? "opt" : "alt";
+
 const settings = definePluginSettings({
     toolbarDevMenu: {
         type: OptionType.BOOLEAN,
@@ -48,7 +52,7 @@ export default definePlugin({
         Devs.Ven,
         Devs.Nickyux,
         Devs.BanTheNons,
-        Devs.Nuckyz
+        Devs.Nuckyz,
     ],
 
     settings,
@@ -77,7 +81,7 @@ export default definePlugin({
         },
         // change top right chat toolbar button from the help one to the dev one
         {
-            find: "toolbar:function",
+            find: "AppTitleBar",
             replacement: {
                 match: /hasBugReporterAccess:(\i)/,
                 replace: "_hasBugReporterAccess:$1=true"
@@ -100,16 +104,22 @@ export default definePlugin({
                 match: /\i\.isStaff\(\)/,
                 replace: "true"
             }
-        }
+        },
+
+        // enable experiment embed on sent experiment links
+        {
+            find: "dev://experiment/",
+            replacement: {
+                match: /\i\.isStaff\(\)/,
+                replace: "true"
+            }
+        },
     ],
 
     start: () => !BugReporterExperiment.getCurrentConfig().hasBugReporterAccess && enableStyle(hideBugReport),
     stop: () => disableStyle(hideBugReport),
 
     settingsAboutComponent: () => {
-        const isMacOS = navigator.platform.includes("Mac");
-        const modKey = isMacOS ? "cmd" : "ctrl";
-        const altKey = isMacOS ? "opt" : "alt";
         return (
             <React.Fragment>
                 <Forms.FormTitle tag="h3">More Information</Forms.FormTitle>
