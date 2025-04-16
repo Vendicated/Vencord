@@ -112,7 +112,7 @@ export default definePlugin({
             predicate: () => settings.store.dmList,
         },
         {
-            find: "!1,wrapContent",
+            find: '"AvatarWithText"',
             replacement: [
                 {
                     match: /(\}=\i)/,

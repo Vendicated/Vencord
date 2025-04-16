@@ -152,7 +152,7 @@ export default definePlugin({
         {
             find: "._areActivitiesExperimentallyHidden=(",
             replacement: {
-                match: /(?<=user:(\i),guildId:\i,channel:(\i).*?)BOOST_GEM_ICON\}\}\)\)\};/,
+                match: /(?<=user:(\i),guildId:\i,channel:(\i).*?)BOOST_GEM_ICON.{0,10}\);/,
                 replace: "$&if($self.shouldHideUser($1.id, $2.id)) return null; "
             }
         },

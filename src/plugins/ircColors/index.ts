@@ -74,8 +74,8 @@ export default definePlugin({
         {
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(typingIndicatorRef:.+?},)(\i=.+?)color:null!=.{0,50}?(?=,)/,
-                replace: (_, rest1, rest2) => `${rest1}ircColor=$self.calculateNameColorForListContext(arguments[0]),${rest2}color:ircColor`
+                match: /(?<=color:)null!=\i\?\i:void 0/,
+                replace: (_, rest1, rest2) => "$self.calculateNameColorForListContext(arguments[0])"
             },
             predicate: () => settings.store.memberListColors
         }
