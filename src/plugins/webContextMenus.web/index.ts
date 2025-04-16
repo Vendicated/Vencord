@@ -17,11 +17,12 @@
 */
 
 import { definePluginSettings } from "@api/Settings";
+import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
 import { filters, mapMangledModuleLazy } from "@webpack";
-import { Clipboard, ComponentDispatch } from "@webpack/common";
+import { ComponentDispatch } from "@webpack/common";
 
 const ctxMenuCallbacks = mapMangledModuleLazy('.tagName)==="TEXTAREA"||', {
     contextMenuCallbackWeb: filters.byCode('.tagName)==="INPUT"||'),
@@ -114,7 +115,7 @@ export default definePlugin({
                 // Fix silly Discord calling the non web support copy
                 {
                     match: /\i\.\i\.copy/,
-                    replace: "Vencord.Webpack.Common.Clipboard.copy"
+                    replace: "Vencord.Util.copyToClipboard"
                 }
             ]
         },
@@ -223,7 +224,7 @@ export default definePlugin({
                 },
                 {
                     match: /\i\.\i\.copy(?=\(\i)/,
-                    replace: "Vencord.Webpack.Common.Clipboard.copy"
+                    replace: "Vencord.Util.copyToClipboard"
                 }
             ],
             all: true,
@@ -288,7 +289,7 @@ export default definePlugin({
         const selection = document.getSelection();
         if (!selection) return;
 
-        Clipboard.copy(selection.toString());
+        copyToClipboard(selection.toString());
     },
 
     cut() {
