@@ -37,8 +37,8 @@ export default definePlugin({
                     replace: "$&vencordProps=$1,"
                 },
                 {
-                    match: /(?<=children:\[)(?=.{0,300},lostPermissionTooltipText:)/,
-                    replace: "(typeof vencordProps=='undefined'?null:Vencord.Api.MemberListDecorators.__getDecorators(vencordProps)),"
+                    match: /children:\[(?=.{0,300},lostPermissionTooltipText:)/,
+                    replace: "children:[(typeof vencordProps!=='undefined'&&Vencord.Api.MemberListDecorators.__getDecorators(vencordProps)),"
                 }
             ]
         },
