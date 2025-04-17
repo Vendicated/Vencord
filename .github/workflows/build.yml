@@ -34,8 +34,13 @@ jobs:
             # - name: Generate plugin list
             #   run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
 
-            - name: Upload dist folder as artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                  name: dist-folder
-                  path: dist/**
+            - name: Upload each file in dist as separate artifact
+              shell: bash
+              run: |
+                  for file in dist/*; do
+                    name=$(basename "$file")
+                    echo "Uploading $file as $name"
+                    gh run upload-artifact "$name" "$file"
+                  done
+              env:
+                  GH_TOKEN: ${{ github.token }}
