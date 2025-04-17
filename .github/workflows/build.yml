@@ -1,9 +1,15 @@
-name: Build
+name: Build DevBuild
 on:
     push:
-        tags:
-            - v*
-
+        branches:
+            - main
+        paths:
+            - .github/workflows/build.yml
+            - src/**
+            - browser/**
+            - scripts/build/**
+            - package.json
+            - pnpm-lock.yaml
 env:
     FORCE_COLOR: true
 
