@@ -5,9 +5,10 @@
  */
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { copyToClipboard } from "@utils/clipboard";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { Clipboard, Menu, Toasts, UserProfileStore } from "@webpack/common";
+import { Menu, Toasts, UserProfileStore } from "@webpack/common";
 
 function getProfileColors(userId) {
     try {
@@ -46,7 +47,7 @@ function copyProfileColors(userId) {
     const formattedColors = `Primary-color #${primaryColor}, Secondary-Color #${secondaryColor}`;
 
     try {
-        Clipboard.copy(formattedColors);
+        copyToClipboard(formattedColors);
         Toasts.show({
             type: Toasts.Type.SUCCESS,
             message: "Profile colors copied to clipboard!",

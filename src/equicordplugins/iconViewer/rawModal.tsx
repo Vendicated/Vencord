@@ -5,6 +5,7 @@
  */
 
 import { CodeBlock } from "@components/CodeBlock";
+import { copyToClipboard } from "@utils/clipboard";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import {
@@ -41,9 +42,7 @@ function ModalComponent(props: { func: Function; iconName: string; color: number
                 color={Button.Colors.PRIMARY}
                 className={"vc-iv-raw-modal-copy-button"}
                 onClick={() => {
-                    // silly typescript
-                    // @ts-ignore
-                    Clipboard.copy(String(func));
+                    copyToClipboard(String(func));
                     Toasts.show({
                         id: Toasts.genId(),
                         message: `Copied raw \`${iconName}\` to clipboard`,

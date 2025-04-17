@@ -8,8 +8,9 @@ import * as DataStore from "@api/DataStore";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import { OpenExternalIcon } from "@components/Icons";
+import { copyToClipboard } from "@utils/clipboard";
 import { OptionType } from "@utils/types";
-import { Button, Clipboard, Forms, Toasts } from "@webpack/common";
+import { Button, Forms, Toasts } from "@webpack/common";
 
 import { authorizeUser, deauthorizeUser } from "./auth";
 
@@ -39,7 +40,7 @@ export const settings = definePluginSettings({
                     }
                 });
 
-                Clipboard.copy(token);
+                copyToClipboard(token);
 
                 Toasts.show({
                     message: "Copied to Clipboard!",
