@@ -120,10 +120,9 @@ function VencordPopoutButton() {
 }
 
 function ToolboxFragmentWrapper({ children }: { children: Array<ReactElement<any> | boolean | null>; }) {
-    const searchPosition = (children.findIndex(element => !(typeof element === "boolean") && element?.props?.className?.startsWith("search")));
 
     children.splice(
-        searchPosition ?? (children.length - 1), 0,
+        children.length - 1, 0,
         <ErrorBoundary noop={true}>
             <VencordPopoutButton />
         </ErrorBoundary>
@@ -132,41 +131,18 @@ function ToolboxFragmentWrapper({ children }: { children: Array<ReactElement<any
     return <>{children}</>;
 }
 
-const settings = definePluginSettings({
-    toolboxButtonPosition: {
-        type: OptionType.SELECT,
-        description: "Where the toolbox button appears",
-        options: [
-            { label: "Title Bar", value: "titleBar", default: true },
-            { label: "Channel Header", value: "channelHeader" }
-        ],
-        restartNeeded: true
-    }
-});
-
 export default definePlugin({
     name: "VencordToolbox",
-    description: "Adds a button to the window decorations or channel header that houses Vencord quick actions",
+    description: "Adds a button to the window decorations that houses Vencord quick actions",
     authors: [Devs.Ven, Devs.AutumnVN, Devs.niko],
 
-    settings,
-
     patches: [
-        {
-            find: "toolbar:function",
-            replacement: {
-                match: /(?<=toolbar:function.{0,100}\()\i\.Fragment,/,
-                replace: "$self.ToolboxFragmentWrapper,"
-            },
-            predicate: () => settings.store.toolboxButtonPosition === "channelHeader"
-        },
         {
             find: "AppTitleBar",
             replacement: {
                 match: /(?<=trailing:.{0,70}\()\i\.Fragment,/,
                 replace: "$self.ToolboxFragmentWrapper,"
-            },
-            predicate: () => settings.store.toolboxButtonPosition === "titleBar"
+            }
         }
     ],
 
