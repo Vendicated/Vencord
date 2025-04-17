@@ -46,16 +46,22 @@ const timeFormats: Record<string, TimeFormat> = {
         default: "LLLL • [relative]",
         offset: 0,
     },
+    ariaLabelFormat: {
+        name: "Aria label",
+        description: "Time format to use on aria labels",
+        default: "LLLL",
+        offset: 0,
+    },
     sameDayFormat: {
         name: "Same day",
         description: "[calendar] format for today",
-        default: "HH:mm:ss",
+        default: "[Today at ] HH:mm:ss",
         offset: 0,
     },
     lastDayFormat: {
         name: "Last day",
         description: "[calendar] format for yesterday",
-        default: "[yesterday] HH:mm:ss",
+        default: "[Yesterday at ] HH:mm:ss",
         offset: -1000 * 60 * 60 * 24,
     },
     lastWeekFormat: {
@@ -135,25 +141,24 @@ const settings = definePluginSettings({
             };
 
             return Object.entries(timeFormats).map(([key, value]) => (
-                    <Forms.FormSection key={key}>
-                        {key === "sameDayFormat" && (
-                            <div className={Margins.bottom20}>
-                                <Forms.FormDivider style={{ marginBottom: "10px" }}/>
-                                <Forms.FormTitle tag="h1">Calendar formats</Forms.FormTitle>
-                                <Forms.FormText>
-                                    How to format the [calendar] value if used in the above timestamps.
-                                </Forms.FormText>
-                            </div>
-                        )}
-                        <TimeRow
-                            id={key}
-                            format={value}
-                            onChange={setNewValue}
-                            pluginSettings={settingsState}
-                        />
-                    </Forms.FormSection>
-                )
-            );
+                <Forms.FormSection key={key}>
+                    {key === "sameDayFormat" && (
+                        <div className={Margins.bottom20}>
+                            <Forms.FormDivider style={{ marginBottom: "10px" }}/>
+                            <Forms.FormTitle tag="h1">Calendar formats</Forms.FormTitle>
+                            <Forms.FormText>
+                                How to format the [calendar] value if used in the above timestamps.
+                            </Forms.FormText>
+                        </div>
+                    )}
+                    <TimeRow
+                        id={key}
+                        format={value}
+                        onChange={setNewValue}
+                        pluginSettings={settingsState}
+                    />
+                </Forms.FormSection>
+            ));
         }
     }
 }).withPrivateSettings<{
@@ -161,6 +166,7 @@ const settings = definePluginSettings({
         cozyFormat: string;
         compactFormat: string;
         tooltipFormat: string;
+        ariaLabelFormat: string;
         sameDayFormat: string;
         lastDayFormat: string;
         lastWeekFormat: string;
@@ -197,6 +203,11 @@ export default definePlugin({
             find: "#{intl::MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL}",
             replacement: [
                 {
+                    // Aria label on timestamps
+                    match: /\i.useMemo\(\(\)=>\(0,\i\.\i\)\((\i)\),\[\i]\),/,
+                    replace: "$self.renderTimestamp($1,'ariaLabel'),"
+                },
+                {
                     // Timestamps on messages
                     match: /\i\.useMemo\(\(\)=>null!=\i\?\(0,\i\.\i\)\(\i,\i\):(\i)\?\(0,\i\.\i\)\((\i),"LT"\):\(0,\i\.\i\)\(\i,!0\),\[\i,\i,\i]\)/,
                     replace: "$self.renderTimestamp($2,$1?'compact':'cozy')",
@@ -218,7 +229,7 @@ export default definePlugin({
         }
     ],
 
-    renderTimestamp: (date: Date, type: "cozy" | "compact" | "tooltip") => {
+    renderTimestamp: (date: Date, type: "cozy" | "compact" | "tooltip" | "ariaLabel") => {
         const forceUpdater = useForceUpdater();
         let formatTemplate: string;
 
@@ -231,6 +242,9 @@ export default definePlugin({
                 break;
             case "tooltip":
                 formatTemplate = settings.use(["formats"]).formats?.tooltipFormat || timeFormats.tooltipFormat.default;
+                break;
+            case "ariaLabel":
+                formatTemplate = settings.use(["formats"]).formats?.ariaLabelFormat || timeFormats.ariaLabelFormat.default;
         }
 
         useEffect(() => {
