@@ -39,7 +39,11 @@ jobs:
                   GH_TOKEN: ${{ github.token }}
               run: |
                   TAG_NAME=$(git describe --tags --abbrev=0)
-                  for file in dist/*; do
-                      echo "Uploading $file to release $TAG_NAME..."
-                      gh release upload "$TAG_NAME" "$file" --clobber
-                  done
+                    for file in dist/*; do
+                    if [ -f "$file" ]; then
+                        echo "Uploading $file to release $TAG_NAME..."
+                        gh release upload "$TAG_NAME" "$file" --clobber
+                    else
+                        echo "Skipping $file (not a file)"
+                    fi
+                    done
