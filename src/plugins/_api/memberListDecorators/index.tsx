@@ -35,9 +35,10 @@ export default definePlugin({
                 {
                     match: /let\{[^}]*lostPermissionTooltipText:\i[^}]*\}=(\i),/,
                     replace: "$&vencordProps=$1,"
-                }, {
-                    match: /#{intl::GUILD_OWNER}(?=.+?decorators:(\i)\(\)).+?\1=?\(\)=>.+?children:\[/,
-                    replace: "$&(typeof vencordProps=='undefined'?null:Vencord.Api.MemberListDecorators.__getDecorators(vencordProps)),"
+                },
+                {
+                    match: /children:\[(?=.{0,300},lostPermissionTooltipText:)/,
+                    replace: "children:[(typeof vencordProps!=='undefined'&&Vencord.Api.MemberListDecorators.__getDecorators(vencordProps)),"
                 }
             ]
         },

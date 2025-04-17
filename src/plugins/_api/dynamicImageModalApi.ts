@@ -14,9 +14,9 @@ export default definePlugin({
     description: "Allows you to omit either width or height when opening an image modal",
     patches: [
         {
-            find: "SCALE_DOWN:",
+            find: ".dimensionlessImage,",
             replacement: {
-                match: /(?<="IMAGE"===\i\?)\i(?=\?)/,
+                match: /(?<="IMAGE"===\i&&\(\i=)\i(?=\?)/,
                 replace: "true"
             }
         }

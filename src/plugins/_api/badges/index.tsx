@@ -65,15 +65,15 @@ export default definePlugin({
         {
             find: ".FULL_SIZE]:26",
             replacement: {
-                match: /(?<=(\i)=\(0,\i\.\i\)\(\i\);)return 0===\i.length\?/,
-                replace: "$1.unshift(...$self.getBadges(arguments[0].displayProfile));$&"
+                match: /(?=;return 0===(\i)\.length\?)(?<=(\i)\.useMemo.+?)/,
+                replace: ";$1=$2.useMemo(()=>[...$self.getBadges(arguments[0].displayProfile),...$1],[$1])"
             }
         },
         {
-            find: ".description,delay:",
+            find: "#{intl::PROFILE_USER_BADGES}",
             replacement: [
                 {
-                    match: /(alt:" ","aria-hidden":!0,src:)(.{0,20}(\i)\.icon\))/,
+                    match: /(alt:" ","aria-hidden":!0,src:)(.+?)(?=,)(?<=href:(\i)\.link.+?)/,
                     replace: (_, rest, originalSrc, badge) => `...${badge}.props,${rest}${badge}.image??(${originalSrc})`
                 },
                 {
