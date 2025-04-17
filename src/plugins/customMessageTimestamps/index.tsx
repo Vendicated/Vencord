@@ -198,12 +198,12 @@ export default definePlugin({
             replacement: [
                 {
                     // Timestamps on messages
-                    match: /(\i)\?\(0,\i\.\i\)\((\i),"LT"\):\(0,\i\.\i\)\(\i,!0\)/,
+                    match: /\i\.useMemo\(\(\)=>null!=\i\?\(0,\i\.\i\)\(\i,\i\):(\i)\?\(0,\i\.\i\)\((\i),"LT"\):\(0,\i\.\i\)\(\i,!0\),\[\i,\i,\i]\)/,
                     replace: "$self.renderTimestamp($2,$1?'compact':'cozy')",
                 },
                 {
                     // Tooltips when hovering over message timestamps
-                    match: /(?<=text:)\(0,\i.\i\)\((\i),"LLLL"\)(?=,)/,
+                    match: /(?<=text:)\(\)=>\(0,\i.\i\)\((\i),"LLLL"\)(?=,)/,
                     replace: "$self.renderTimestamp($1,'tooltip')",
                 },
             ]
