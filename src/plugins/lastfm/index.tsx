@@ -276,7 +276,7 @@ export default definePlugin({
     },
 
     getLargeImage(track: TrackData): string | undefined {
-        if (!settings.store.alwaysHideArt && track.imageUrl && !track.imageUrl.includes(placeholderId))
+        if (settings.store.showAlbumCover && track.imageUrl && !track.imageUrl.includes(placeholderId))
             return track.imageUrl;
 
         if (settings.store.missingArt === "placeholder")
