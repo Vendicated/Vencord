@@ -189,6 +189,11 @@ const settings = definePluginSettings({
         description: "show the Last.fm logo by the album cover",
         type: OptionType.BOOLEAN,
         default: true,
+    },
+    showAlbumCover: {
+        description: "Show album cover. Disabling this will display a placeholder. Useful if your Music has inappropriate art",
+        type: OptionType.BOOLEAN,
+        default: true,
     }
 });
 
@@ -271,7 +276,7 @@ export default definePlugin({
     },
 
     getLargeImage(track: TrackData): string | undefined {
-        if (track.imageUrl && !track.imageUrl.includes(placeholderId))
+        if (settings.store.showAlbumCover && track.imageUrl && !track.imageUrl.includes(placeholderId))
             return track.imageUrl;
 
         if (settings.store.missingArt === "placeholder")
