@@ -78,7 +78,7 @@ function toPirateSpeak(text: string): string {
         "boy": "lad",
         "girl": "lass",
         "man": "buccaneer",
-        "woman": "wench",
+        "woman": "lady",
         "captain": "Cap'n",
         "crew": "me hearties",
         "boss": "quartermaster",
