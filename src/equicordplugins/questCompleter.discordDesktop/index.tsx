@@ -17,17 +17,14 @@
 */
 
 import "@equicordplugins/_misc/styles.css";
+import "./style.css";
 
 import { showNotification } from "@api/Notifications";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { findByProps, findComponentByCodeLazy } from "@webpack";
-import { Button, ChannelStore, FluxDispatcher, Forms, GuildChannelStore, NavigationRouter, RestAPI, Tooltip, UserStore } from "@webpack/common";
-
-const isApp = typeof DiscordNative !== "undefined";
-
-import "./style.css";
+import { Button, ChannelStore, FluxDispatcher, GuildChannelStore, NavigationRouter, RestAPI, Tooltip, UserStore } from "@webpack/common";
 
 const QuestIcon = findComponentByCodeLazy("10.47a.76.76");
 
@@ -89,13 +86,6 @@ async function openCompleteQuestUI() {
             });
             console.log(`Spoofing video for ${applicationName}.`);
         } else if (taskName === "PLAY_ON_DESKTOP") {
-            if (!isApp) {
-                showNotification({
-                    title: `${applicationName} - Quest Completer`,
-                    body: `${applicationName}'s quest requires the desktop app.`,
-                    icon: icon,
-                });
-            }
             RestAPI.get({ url: `/applications/public?application_ids=${applicationId}` }).then(res => {
                 const appData = res.body[0];
                 const exeName = appData.executables.find(x => x.os === "win32").name.replace(">", "");
@@ -147,13 +137,6 @@ async function openCompleteQuestUI() {
                 console.log(`Spoofed your game to ${applicationName}.`);
             });
         } else if (taskName === "STREAM_ON_DESKTOP") {
-            if (!isApp) {
-                showNotification({
-                    title: `${applicationName} - Quest Completer`,
-                    body: `${applicationName}'s quest requires the desktop app.`,
-                    icon: icon,
-                });
-            }
             const stream = ApplicationStreamingStore.getAnyStreamForUser(UserStore.getCurrentUser()?.id);
             if (!stream) {
                 showNotification({
@@ -234,11 +217,6 @@ export default definePlugin({
     name: "QuestCompleter",
     description: "A plugin to complete quests without having the game installed.",
     authors: [Devs.amia],
-    settingsAboutComponent: () => <>
-        <Forms.FormText className="plugin-warning">
-            Game Quests do not work on Equibop/Web Platforms. Only Video Quests do.
-        </Forms.FormText>
-    </>,
     patches: [
         {
             find: "AppTitleBar",
