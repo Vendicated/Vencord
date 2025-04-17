@@ -190,10 +190,10 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: true,
     },
-    alwaysHideArt: {
-        description: "Disable downloading album art",
+    showAlbumCover: {
+        description: "Show album cover. Disabling this will display a placeholder. Useful if your Music has inappropriate art",
         type: OptionType.BOOLEAN,
-        default: false,
+        default: true,
     }
 });
 
