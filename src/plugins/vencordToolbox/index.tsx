@@ -19,10 +19,10 @@
 import "./index.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
-import { definePluginSettings, Settings, useSettings } from "@api/Settings";
+import { Settings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
 import { Menu, Popout, useState } from "@webpack/common";
 import type { ReactElement, ReactNode } from "react";
