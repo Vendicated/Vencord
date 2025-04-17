@@ -86,12 +86,12 @@ export default definePlugin({
         return [
             {
                 section: SectionTypes.HEADER,
-                label: "Vencord",
+                label: "Tallycord",
                 className: "vc-settings-header"
             },
             {
                 section: "VencordSettings",
-                label: "Vencord",
+                label: "Tallycord",
                 element: VencordTab,
                 className: "vc-settings"
             },
@@ -194,7 +194,7 @@ export default definePlugin({
     options: {
         settingsLocation: {
             type: OptionType.SELECT,
-            description: "Where to put the Vencord settings section",
+            description: "Where to put the Tallycord settings section",
             options: [
                 { label: "At the very top", value: "top" },
                 { label: "Above the Nitro section", value: "aboveNitro", default: true },

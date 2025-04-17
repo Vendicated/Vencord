@@ -12,6 +12,7 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import { UwuChatBarIcon } from "./uwuicon";
 import Uwuifier from "./uwuifier";
+import { Devs } from "@utils/constants";
 
 export const settings = definePluginSettings({
     faceChance: {
@@ -51,7 +52,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "Uwuify",
     description: "Uwuifies your messages on send!",
-    authors: [{ name: "Tally", id: 1014588310036951120n }],
+    authors: [Devs.tally],
     dependencies: ["MessageAccessoriesAPI", "MessagePopoverAPI", "MessageEventsAPI", "ChatInputButtonAPI"],
     settings,
 
