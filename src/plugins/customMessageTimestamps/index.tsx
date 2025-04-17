@@ -49,7 +49,7 @@ const timeFormats: Record<string, TimeFormat> = {
     ariaLabelFormat: {
         name: "Aria label",
         description: "Time format to use on aria labels",
-        default: "LLLL",
+        default: "[calendar]",
         offset: 0,
     },
     sameDayFormat: {
