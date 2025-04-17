@@ -20,7 +20,7 @@ on:
 
 jobs:
     TestPlugins:
-        if: github.repository == 'Vendicated/Vencord'
+        if: github.repository == 'Tally-gay/Tallycord'
         runs-on: ubuntu-latest
 
         steps:
