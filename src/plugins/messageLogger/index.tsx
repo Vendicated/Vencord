@@ -14,7 +14,7 @@ import { updateMessage } from "@api/MessageUpdater";
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
+import { Devs, SUPPORT_CATEGORY_ID, VC_SUPPORT_CATEGORY_ID, VENBOT_USER_ID } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
@@ -318,16 +318,9 @@ export default definePlugin({
                 ChannelStore.getChannel(message.channel_id)?.parent_id,
             ) ||
             (isEdit ? !logEdits : !logDeletes) ||
-            ignoreGuilds.includes(
-                ChannelStore.getChannel(message.channel_id)?.guild_id,
-            ) ||
-            // Ignore Venbot in the support channel
-            (message.channel_id === "1026515880080842772" &&
-                message.author?.id === "1017176847865352332") ||
-            // Ignore VOT on dev-playground
-            (message.channel_id === "1297239805972709521" &&
-                message.author?.id === "1199905841004937257")
-        );
+            ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
+            // Ignore Venbot in the support channels
+            (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === VC_SUPPORT_CATEGORY_ID));
     },
 
     EditMarker({ message, className, children, ...props }: any) {
