@@ -1,0 +1,12 @@
+.vc-cmt-info-card {
+    background-color: var(--info-help-background);
+    border: 1px solid var(--info-help-foreground);
+    padding: 8px;
+    border-radius: var(--radius-xs);
+    margin: 10px 0;
+}
+
+.vc-cmt-preview-text {
+    color: yellow;
+    margin: 8px 0;
+}
