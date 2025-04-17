@@ -4,9 +4,9 @@
 
 The cutest Discord client mod
 
-| ![image](https://github.com/Vendicated/Vencord/assets/45497981/706722b1-32de-4d99-bee9-93993b504334) |
-| :--------------------------------------------------------------------------------------------------: |
-|   A screenshot of vencord showcasing the [vencord-theme](https://github.com/synqat/vencord-theme)    |
+| ![image](https://github.com/Tally-gay/Tallycord/assets/45497981/706722b1-32de-4d99-bee9-93993b504334) |
+| :---------------------------------------------------------------------------------------------------: |
+|    A screenshot of vencord showcasing the [vencord-theme](https://github.com/synqat/vencord-theme)    |
 
 ## Features
 
@@ -21,7 +21,6 @@ The cutest Discord client mod
 -   Maintained very actively, broken plugins are usually fixed within 12 hours
 -   Settings sync: Keep your plugins and their settings synchronised between devices / apps (optional)
 
-
 ## Installing / Uninstalling
 
 Visit https://vencord.dev/download
@@ -35,16 +34,15 @@ https://discord.gg/D9uwnFnqmd
 |     **Thanks a lot to all Vencord [sponsors](https://github.com/sponsors/Vendicated)!!**     |
 | :------------------------------------------------------------------------------------------: |
 |   [![](https://meow.vendicated.dev/sponsors.png)](https://github.com/sponsors/Vendicated)    |
-| *generated using [github-sponsor-graph](https://github.com/Vendicated/github-sponsor-graph)* |
-
+| _generated using [github-sponsor-graph](https://github.com/Vendicated/github-sponsor-graph)_ |
 
 ## Star History
 
-<a href="https://star-history.com/#Vendicated/Vencord&Timeline">
+<a href="https://star-history.com/#Tally-gay/Tallycord&Timeline">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Vendicated/Vencord&type=Timeline&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Vendicated/Vencord&type=Timeline" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Vendicated/Vencord&type=Timeline" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Tally-gay/Tallycord&type=Timeline&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Tally-gay/Tallycord&type=Timeline" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Tally-gay/Tallycord&type=Timeline" />
   </picture>
 </a>
 

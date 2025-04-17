@@ -5,7 +5,7 @@ body:
     - type: markdown
       attributes:
           value: |
-              ![Are you a developer? No? This form is not for you!](https://github.com/Vendicated/Vencord/blob/main/.github/ISSUE_TEMPLATE/developer-banner.png?raw=true)
+              ![Are you a developer? No? This form is not for you!](https://github.com/Tally-gay/Tallycord/blob/main/.github/ISSUE_TEMPLATE/developer-banner.png?raw=true)
 
               GitHub Issues are for development, not support! Please use our [support server](https://vencord.dev/discord) unless you are a Vencord Developer.
 
