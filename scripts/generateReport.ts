@@ -315,11 +315,9 @@ page.on("console", async e => {
                         report.badWebpackFinds.push(otherMessage);
                         break;
                     case "Finished test":
+                        await browser.close();
                         await printReport();
-                        setTimeout(async () => {
-                            await browser.close();
-                            process.exit();
-                        }, 10000);
+                        process.exit();
                 }
         }
     }
