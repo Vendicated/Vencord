@@ -11,8 +11,16 @@
         display: flex;
         flex-direction: row;
         align-items: center;
+        justify-content: space-between;
         gap: 8px;
         padding: 8px 16px 4px;
+
+        & > div {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+        }
 
         .vc-inlineforward-close {
             color: var(--interactive-normal);
@@ -21,6 +29,14 @@
 
             &:hover {
                 color: var(--interactive-hover);
+            }
+        }
+
+        .vc-inlineforward-switch {
+            margin-bottom: 0;
+
+            & > div:nth-child(2) {
+                display: none;
             }
         }
     }

@@ -12,14 +12,14 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { lodash, MessageActions, Text } from "@webpack/common";
+import { lodash, MessageActions, React, Switch, Text } from "@webpack/common";
 
 const DiscordMessage = findComponentByCodeLazy("hideSimpleEmbedContent", "previewGuildId");
 
 type ForwardedMessageStore = {
     message: any;
     guild_id: string;
-    isForwarding: boolean;
+    keepForwarding: boolean;
 };
 
 const settings = definePluginSettings({
@@ -29,11 +29,11 @@ const settings = definePluginSettings({
         hidden: true,
     },
 
-    keepForwading: {
-        type: OptionType.BOOLEAN,
-        description: "Disable keeping the forward after sending it",
-        default: true
-    },
+    isForwarding: {
+        type: OptionType.CUSTOM,
+        default: false,
+        hidden: true
+    }
 });
 
 // stolen from the vencord notification log! thanks guys!
@@ -57,61 +57,62 @@ export default definePlugin({
     settings,
 
     patches: [
-        // patches the forward button action
         {
             find: "\"forward-modal\"",
             replacement: {
-                match: /"forward-modal";function \i\((\i)\){/,
-                replace: "$&$self.onForwardPressed($1);return null;"
+                // patches the forward button action
+                match: /(?<="forward-modal";function \i\((\i)\){)/,
+                replace: "$self.onForwardPressed($1);return null;"
             }
         },
 
-        // patches the upload area to include the message preview
         {
             find: "(\"ChannelAttachmentArea\");",
             replacement: [
-                // shows the upload area
+                // shows the upload area when forwarding
                 {
-                    match: /(\("ChannelAttachmentArea"\);return)(.*?)\?null/,
-                    replace: "$1 (!$self.isForwarding())&&($2)?null"
+                    match: /(?<=\("ChannelAttachmentArea"\);return)(.*?)\?null/,
+                    replace: "(!$self.isForwarding())&&($1)?null"
                 },
-                // add preview component
+                // add preview component above upload area
                 {
-                    match: /(\(0,\i\.jsx\)\("ul")(.*?)\}\)\)/,
-                    replace: "[$self.previewComponent(),$1$2}))]"
+                    match: /(\(0,\i\.jsx\)\("ul".*?)\}\)\)/,
+                    replace: "[$self.previewComponent(),$1}))]"
                 },
                 // insert a useState so we can update the compnent
                 {
-                    match: /(\i)\.useState.*"ChannelAttachmentArea"\);/,
-                    replace: "$&let[vcIf,setVcIf]=$1.useState(null);$self.updateAttachmentState=setVcIf;"
+                    match: /(?<=(\i)\.useState.*"ChannelAttachmentArea"\);)/,
+                    replace: "let[vcIf,setVcIf]=$1.useState(null);$self.updateAttachmentState=setVcIf;"
                 }
             ]
         },
 
-        // patches handleSendMessage so we can send the forwarded message before the real message (the client does it in roughly the same way)
         {
             find: "this,\"handleSendMessage\",async",
-            replacement: {
-                match: /"handleSendMessage",async \i=>{/,
-                replace: "$&if($self.isForwarding()) await $self.handleSendMessage();"
-            }
+            replacement: [
+                // patches handleSendMessage so we can send the forwarded message before the real message (the client does it in roughly the same way)
+                {
+                    match: /(?<="handleSendMessage",async \i=>{)/,
+                    replace: "if($self.isForwarding()) await $self.handleSendMessage();"
+                },
+            ]
         },
 
         {
             find: "handleAutocompleteVisibilityChange",
             replacement: [
-                // allow forwarding when input has no content
                 {
-                    match: /,\i=0===\i\.trim\(\)\.length/,
-                    replace: "$&&&!$self.isForwarding()"
+                    // allow forwarding when input has no content
+                    match: /(?<=,\i=0===\i\.trim\(\)\.length)/,
+                    replace: "&&!$self.isForwarding()"
                 },
-                // to update the component above
                 {
-                    match: /(\i)(\.useRef\(null\);)(null==\i||\i\(\i\.current\);)/,
-                    replace: "$1$2let[vcIf,setVcIf]=$1.useState(null);$self.updateSendButtonState=setVcIf;$3"
+                    // to update the component above
+                    match: /(?<=(\i)\.useRef\(null\);)(?=null==\i||\i\(\i\.current\);)/,
+                    replace: "let[vcIf,setVcIf]=$1.useState(null);$self.updateSendButtonState=setVcIf;",
                 }
             ]
-        }
+        },
     ],
 
     onForwardPressed(forwardInfo: any) {
@@ -128,46 +129,86 @@ export default definePlugin({
             state.message.content = state.message.content.length === 0 ?
                 "(attachment)"
                 : state.message.content + "\n\n(attachment)";
+        } else if (state.message.content === "") {
+            state.message.content = "(empty)";
         }
 
         if (currentChannel?.guild_id)
             state.guild_id = currentChannel.guild_id;
 
-        state.isForwarding = true;
+        settings.store.isForwarding = true;
         this.updateStates(true);
     },
 
     stopForwarding() {
-        settings.store.state.isForwarding = false;
+        settings.store.isForwarding = false;
         this.updateStates(false);
     },
 
     previewComponent() {
-        const hook = settings.use();
+        const { isForwarding } = settings.use(["isForwarding"]);
+
+        const KeepForwardingToggle = () => {
+            const { state } = settings.use(["state"]);
+
+            return <Switch
+                value={state.keepForwarding}
+                className="vc-inlineforward-switch"
+                onChange={() => state.keepForwarding = !state.keepForwarding}
+            />;
+        };
+
+        const ForwardingHeader = () => {
+            return <div className="vc-inlineforward-header">
+                <div>
+                    <CloseIcon onClick={this.stopForwarding.bind(this)} />
+
+                    <Text
+                        tag="h2"
+                        variant="eyebrow"
+                        style={{
+                            color: "var(--header-primary)",
+                            display: "inline"
+                        }}
+                    >Forwarding:</Text>
+                </div>
+
+                <div>
+                    <Text
+                        tag="h2"
+                        variant="eyebrow"
+                        style={{
+                            color: "var(--header-primary)",
+                            display: "inline"
+                        }}
+                    >Keep Forwading</Text>
+
+                    <KeepForwardingToggle />
+                </div>
+            </div>;
+        };
+
+        const Message = () => {
+            const state = settings.use(["state"]);
+
+            const msg = settings.plain.state.message;
+            const author = {
+                nick: state.state.message.author.globalName || state.state.message.author.username,
+                colorStrings: undefined
+            };
+
+            return <DiscordMessage
+                message={msg}
+                author={author}
+            />;
+        };
 
         const Inner = () => {
             return <div className="vc-inlineforward-container">
-                {hook.state.isForwarding ? <>
-                    <div className="vc-inlineforward-header">
-                        <CloseIcon onClick={this.stopForwarding.bind(this)} />
+                {isForwarding ? <>
+                    <ForwardingHeader />
 
-                        <Text
-                            tag="h2"
-                            variant="eyebrow"
-                            style={{
-                                color: "var(--header-primary)",
-                                display: "inline"
-                            }}
-                        >Forwarding:</Text>
-                    </div>
-
-                    <DiscordMessage
-                        message={settings.plain.state.message}
-                        author={{
-                            nick: hook.state.message.author.globalName || hook.state.message.author.username,
-                            colorStrings: undefined
-                        }}
-                    />
+                    <Message />
                 </> : null}
             </div>;
         };
@@ -175,7 +216,7 @@ export default definePlugin({
         return ErrorBoundary.wrap(Inner, { noop: true })({});
     },
 
-    isForwarding: () => settings.store.state.isForwarding,
+    isForwarding: () => settings.store.isForwarding,
 
     updateAttachmentState: null as any,
     updateSendButtonState: null as any,
@@ -189,8 +230,8 @@ export default definePlugin({
         const currentChannel = getCurrentChannel();
         if (!currentChannel) return;
 
-        if (settings.store.keepForwading) {
-            this.settings.store.state.isForwarding = false;
+        if (!settings.store.state.keepForwarding) {
+            this.settings.store.isForwarding = false;
             this.updateStates(false);
         }
 
