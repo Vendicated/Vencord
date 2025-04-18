@@ -1,25 +1,72 @@
-name: Auto Release on Main Push
+name: Build and Release
 
 on:
-    push:
-        branches:
-            - main
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+
+env:
+  FORCE_COLOR: true
 
 jobs:
-    release:
-        runs-on: ubuntu-latest
+  release-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
 
-        steps:
-            - name: Check out the code
-              uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v3
 
-            - name: Create Release
-              id: create_release
-              uses: actions/create-release@v1
-              with:
-                  tag_name: v${{ github.sha }}
-                  release_name: Release ${{ github.sha }}
-                  body: |
-                      Automatically generated release for commit ${{ github.sha }}.
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web
+        run: pnpm buildWebStandalone
+
+      - name: Build
+        run: pnpm build --standalone
+
+      - name: Determine tag name
+        id: get_tag
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "tag_name=v${GITHUB_SHA}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create release if pushing to main
+        if: github.ref == 'refs/heads/main'
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ steps.get_tag.outputs.tag_name }}
+          release_name: Release ${{ steps.get_tag.outputs.tag_name }}
+          body: |
+            Automatically generated release for commit ${{ github.sha }}.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload files to GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG_NAME=${{ steps.get_tag.outputs.tag_name }}
+          echo "Uploading assets to release: $TAG_NAME"
+          for file in dist/*; do
+            if [ -f "$file" ]; then
+              echo "Uploading $file..."
+              gh release upload "$TAG_NAME" "$file" --clobber
+            else
+              echo "Skipping $file (not a file)"
+            fi
+          done
