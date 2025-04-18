@@ -6,18 +6,18 @@
 
 import "./styles.css";
 
+import { ChannelStore } from "@webpack/common";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { Message, User } from "discord-types/general";
+import { Message } from "discord-types/general";
 
 interface UsernameProps {
     author: { nick: string; };
     message: Message;
     withMentionPrefix?: boolean;
     isRepliedMessage: boolean;
-    userOverride?: User;
 }
 
 const settings = definePluginSettings({
@@ -28,17 +28,26 @@ const settings = definePluginSettings({
             { label: "Username then nickname", value: "user-nick", default: true },
             { label: "Nickname then username", value: "nick-user" },
             { label: "Username only", value: "user" },
+            { label: "Vanilla (Nickname prioritized)", value: "nick" },
         ],
     },
-    displayNames: {
-        type: OptionType.BOOLEAN,
-        description: "Use display names in place of usernames",
-        default: false
-    },
+
     inReplies: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Also apply functionality to reply previews",
+    },
+
+    inDirectMessages: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Also apply functionality to direct messages",
+    },
+
+    inDirectGroups: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Also apply functionality to direct messages on groups",
     },
 });
 
@@ -57,28 +66,79 @@ export default definePlugin({
     ],
     settings,
 
-    renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
+    renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, withMentionPrefix }: UsernameProps) => {
         try {
-            const user = userOverride ?? message.author;
-            let { username } = user;
-            if (settings.store.displayNames)
-                username = (user as any).globalName || username;
+            // Discord by default will display the username unless the user has set an nickname
+            // The code will also do the same if certain settings are turned off
 
-            const { nick } = author;
-            const prefix = withMentionPrefix ? "@" : "";
+            // There is no way to get the nick from the message for some reason so this had to stay
+            const nickname: string = author.nick;
 
-            if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
-                return <>{prefix}{nick}</>;
+            const userObj = message.author;
+            const prefix: string = withMentionPrefix ? "@" : "";
+            const username: string = userObj.username;
+            const isRedundantDoubleUsername = (username.toLowerCase() === nickname.toLowerCase());
+            let display_name = nickname;
 
-            if (settings.store.mode === "user-nick")
-                return <>{prefix}{username} <span className="vc-smyn-suffix">{nick}</span></>;
+            switch (settings.store.mode) {
+                case "user-nick":
+                    if (!isRedundantDoubleUsername) {
+                        display_name = <>{prefix}{username} <span className="vc-smyn-suffix">{nickname}</span></>;
+                    }
 
-            if (settings.store.mode === "nick-user")
-                return <>{prefix}{nick} <span className="vc-smyn-suffix">{username}</span></>;
+                    break;
+                // the <span> makes the text gray
 
-            return <>{prefix}{username}</>;
-        } catch {
-            return <>{author?.nick}</>;
+                case "nick-user":
+                    if (!isRedundantDoubleUsername) {
+                        display_name = <>{prefix}{nickname} <span className="vc-smyn-suffix">{username}</span></>;
+                    }
+
+                    break;
+
+                case "user":
+                    display_name = <>{prefix}{username}</>;
+                    break;
+
+                case "vanilla":
+                    display_name = <>{prefix}{nickname}</>;
+                    break;
+            }
+
+            const current_channel = ChannelStore.getChannel(message.channel_id);
+            const isDM = (current_channel.guild_id === null);
+
+            if (isDM) {
+                const isGroupChat = (current_channel.recipients.length > 1);
+                const shouldDisplayDM = !isGroupChat && settings.store.inDirectMessages;
+                const shouldDisplayGroup = isGroupChat && settings.store.inDirectGroups;
+
+                if (shouldDisplayDM || shouldDisplayGroup) {
+                    if (isRepliedMessage) {
+                        if (settings.store.inReplies) return display_name;
+
+                        return nickname;
+                    }
+
+                    return display_name;
+                }
+
+                return nickname;
+            }
+
+            // Servers
+            if (isRepliedMessage) {
+                if (settings.store.inReplies) return display_name;
+
+                return nickname;
+            }
+
+            // Unless any of the functions above changed it, it will be the nickname
+            return display_name;
+
+        } catch (errorMsg) {
+            console.log(`ShowMeYourName ERROR: ${errorMsg}`);
+            return <>{message?.author.username}</>;
         }
     }, { noop: true }),
 });
