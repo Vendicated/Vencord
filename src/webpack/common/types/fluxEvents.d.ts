@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,13 +22,13 @@ function makeFluxEventList() {
     // without explicitly typing so that this function is also valid javascript
     const events = new Set(["MESSAGE_CREATE"]);
 
-    const { nodes } = Vencord.Webpack.Common.FluxDispatcher._actionHandlers._dependencyGraph;
+    const { nodes } = Tallycord.Webpack.Common.FluxDispatcher._actionHandlers._dependencyGraph;
     for (const nodeId in nodes) {
         for (const event in nodes[nodeId].actionHandler) {
             events.add(event);
         }
     }
-    for (const event in Vencord.Webpack.Common.FluxDispatcher._subscriptions) {
+    for (const event in Tallycord.Webpack.Common.FluxDispatcher._subscriptions) {
         events.add(event);
     }
 

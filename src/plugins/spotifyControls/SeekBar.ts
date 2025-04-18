@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Tallycord, a Discord client mod
  * Copyright (c) 2025 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -8,7 +8,7 @@ import { LazyComponent } from "@utils/lazyReact";
 import { Slider } from "@webpack/common";
 
 export const SeekBar = LazyComponent(() => {
-    const SliderClass = Slider.$$vencordGetWrappedComponent();
+    const SliderClass = Slider.$$tallycordGetWrappedComponent();
 
     // Discord's Slider does not update `state.value` when `props.initialValue` changes if state.value is not nullish.
     // We extend their class and override their `getDerivedStateFromProps` to update the value

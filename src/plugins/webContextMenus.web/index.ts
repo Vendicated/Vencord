@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -47,11 +47,11 @@ const settings = definePluginSettings({
         restartNeeded: true,
         // Web slate menu has proper spellcheck suggestions and image context menu is also pretty good,
         // so disable this by default. Tallytop just doesn't, so we force enable it there
-        hidden: IS_VESKTOP,
+        hidden: IS_TALLYTOP,
     }
 });
 
-const shouldAddBackMenus = () => IS_VESKTOP || settings.store.addBack;
+const shouldAddBackMenus = () => IS_TALLYTOP || settings.store.addBack;
 
 const MEDIA_PROXY_URL = "https://media.discordapp.net";
 const CDN_URL = "cdn.discordapp.com";
@@ -80,7 +80,7 @@ export default definePlugin({
     description: "Re-adds context menus missing in the web version of Discord: Links & Images (Copy/Open Link/Image), Text Area (Copy, Cut, Paste, SpellCheck)",
     authors: [Devs.Ven],
     enabledByDefault: true,
-    required: IS_VESKTOP,
+    required: IS_TALLYTOP,
 
     settings,
 
@@ -115,7 +115,7 @@ export default definePlugin({
                 // Fix silly Discord calling the non web support copy
                 {
                     match: /\i\.\i\.copy/,
-                    replace: "Vencord.Util.copyToClipboard"
+                    replace: "Tallycord.Util.copyToClipboard"
                 }
             ]
         },
@@ -224,7 +224,7 @@ export default definePlugin({
                 },
                 {
                     match: /\i\.\i\.copy(?=\(\i)/,
-                    replace: "Vencord.Util.copyToClipboard"
+                    replace: "Tallycord.Util.copyToClipboard"
                 }
             ],
             all: true,
@@ -261,7 +261,7 @@ export default definePlugin({
             });
         }
 
-        if (IS_VESKTOP && TallytopNative.clipboard) {
+        if (IS_TALLYTOP && TallytopNative.clipboard) {
             TallytopNative.clipboard.copyImage(await imageData.arrayBuffer(), url);
             return;
         } else {

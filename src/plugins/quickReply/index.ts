@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -142,7 +142,7 @@ function getNextMessage(isUp: boolean, isReply: boolean) {
         messages = messages.filter(m => m.author.id === meId);
     }
 
-    if (Vencord.Plugins.isPluginEnabled("NoBlockedMessages")) {
+    if (Tallycord.Plugins.isPluginEnabled("NoBlockedMessages")) {
         messages = messages.filter(m => !RelationshipStore.isBlocked(m.author.id));
     }
 

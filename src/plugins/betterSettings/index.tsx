@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Tallycord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -128,7 +128,7 @@ export default definePlugin({
                 },
                 {
                     match: /case \i\.\i\.DEVELOPER_OPTIONS:return \i;/,
-                    replace: "$&case 'VencordPlugins':return $self.PluginsSubmenu();"
+                    replace: "$&case 'TallycordPlugins':return $self.PluginsSubmenu();"
                 }
             ]
         },
@@ -142,7 +142,7 @@ export default definePlugin({
     // Thus, we sanity check webpack modules
     Layer(props: LayerProps) {
         try {
-            [FocusLock.$$vencordGetWrappedComponent(), ComponentDispatch, Classes].forEach(e => e.test);
+            [FocusLock.$$tallycordGetWrappedComponent(), ComponentDispatch, Classes].forEach(e => e.test);
         } catch {
             new Logger("BetterSettings").error("Failed to find some components");
             return props.children;

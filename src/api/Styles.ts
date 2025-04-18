@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,9 +18,9 @@
 
 import type { MapValue } from "type-fest/source/entry";
 
-export type Style = MapValue<typeof VencordStyles>;
+export type Style = MapValue<typeof TallycordStyles>;
 
-export const styleMap = window.VencordStyles ??= new Map();
+export const styleMap = window.TallycordStyles ??= new Map();
 
 export function requireStyle(name: string) {
     const style = styleMap.get(name);

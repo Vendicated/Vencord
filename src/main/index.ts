@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@ import { RendererSettings } from "./settings";
 import { IS_VANILLA, THEMES_DIR } from "./utils/constants";
 import { installExt } from "./utils/extensions";
 
-if (IS_VESKTOP || !IS_VANILLA) {
+if (IS_TALLYTOP || !IS_VANILLA) {
     app.whenReady().then(() => {
         // Source Maps! Maybe there's a better way but since the renderer is executed
         // from a string I don't think any other form of sourcemaps would work
@@ -58,8 +58,8 @@ if (IS_VESKTOP || !IS_VANILLA) {
         try {
             if (RendererSettings.store.enableReactDevtools)
                 installExt("fmkadmapgofadopljbjfkapdkoienihi")
-                    .then(() => console.info("[Vencord] Installed React Developer Tools"))
-                    .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
+                    .then(() => console.info("[Tallycord] Installed React Developer Tools"))
+                    .catch(err => console.error("[Tallycord] Failed to install React Developer Tools", err));
         } catch { }
 
 

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -108,13 +108,13 @@ const DefaultSettings: Settings = {
     }
 };
 
-const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;
+const settings = !IS_REPORTER ? TallycordNative.settings.get() : {} as Settings;
 mergeDefaults(settings, DefaultSettings);
 
 const saveSettingsOnFrequentAction = debounce(async () => {
     if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
         await putCloudSettings();
-        delete localStorage.Vencord_settingsDirty;
+        delete localStorage.Tallycord_settingsDirty;
     }
 }, 60_000);
 
@@ -161,9 +161,9 @@ export const SettingsStore = new SettingsStoreClass(settings, {
 if (!IS_REPORTER) {
     SettingsStore.addGlobalChangeListener((_, path) => {
         SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
-        localStorage.Vencord_settingsDirty = true;
+        localStorage.Tallycord_settingsDirty = true;
         saveSettingsOnFrequentAction();
-        VencordNative.settings.set(SettingsStore.plain, path);
+        TallycordNative.settings.set(SettingsStore.plain, path);
     });
 }
 

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,8 @@
 */
 
 declare global {
-    export var VencordNative: typeof import("./VencordNative").default;
-    export var Vencord: typeof import("./Vencord");
+    export var TallycordNative: typeof import("./TallycordNative").default;
+    export var Tallycord: typeof import("./Tallycord");
 }
 
 export { };

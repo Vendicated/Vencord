@@ -74,7 +74,7 @@ async function generateDebugInfoMessage() {
 
     const client = (() => {
         if (IS_DISCORD_DESKTOP) return `Discord Desktop v${DiscordNative.app.getVersion()}`;
-        if (IS_VESKTOP) return `Vesktop v${TallytopNative.app.getVersion()}`;
+        if (IS_TALLYTOP) return `Tallytop v${TallytopNative.app.getVersion()}`;
         if ("legcord" in window) return `Legcord v${window.legcord.version}`;
 
         // @ts-expect-error

@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Tallycord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -24,12 +24,12 @@ async function runReporter() {
             find: '"Could not find app-mount"',
             replacement: {
                 match: /(?<="use strict";)/,
-                replace: "Vencord.Webpack._initReporter();"
+                replace: "Tallycord.Webpack._initReporter();"
             }
-        }, "Vencord Reporter");
+        }, "Tallycord Reporter");
 
         // @ts-ignore
-        Vencord.Webpack._initReporter = function () {
+        Tallycord.Webpack._initReporter = function () {
             // initReporter is called in the patched entry point of Discord
             // setImmediate to only start searching for lazy chunks after Discord initialized the app
             setTimeout(() => loadLazyChunks().then(loadLazyChunksResolve), 0);
@@ -37,7 +37,7 @@ async function runReporter() {
 
         await loadLazyChunksDone;
 
-        if (IS_REPORTER && IS_WEB && !IS_VESKTOP) {
+        if (IS_REPORTER && IS_WEB && !IS_TALLYTOP) {
             console.log("[REPORTER_META]", {
                 buildNumber: getBuildNumber(),
                 buildHash: window.GLOBAL_ENV.SENTRY_TAGS.buildId
@@ -116,6 +116,6 @@ async function runReporter() {
     }
 }
 
-// Run after the Vencord object has been created.
-// We need to add extra properties to it, and it is only created after all of Vencord code has ran
+// Run after the Tallycord object has been created.
+// We need to add extra properties to it, and it is only created after all of Tallycord code has ran
 setTimeout(runReporter, 0);

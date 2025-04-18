@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@ export default definePlugin({
                 },
                 {
                     match: /children:\[(?=.{0,300},lostPermissionTooltipText:)/,
-                    replace: "children:[(typeof vencordProps!=='undefined'&&Vencord.Api.MemberListDecorators.__getDecorators(vencordProps)),"
+                    replace: "children:[(typeof vencordProps!=='undefined'&&Tallycord.Api.MemberListDecorators.__getDecorators(vencordProps)),"
                 }
             ]
         },
@@ -46,7 +46,7 @@ export default definePlugin({
             find: "PrivateChannel.renderAvatar",
             replacement: {
                 match: /decorators:(\i\.isSystemDM\(\))\?(.+?):null/,
-                replace: "decorators:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0]),$1?$2:null]"
+                replace: "decorators:[Tallycord.Api.MemberListDecorators.__getDecorators(arguments[0]),$1?$2:null]"
             }
         }
     ]

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -173,7 +173,7 @@ function initWs(isManual = false) {
 
                     try {
                         const matcher = canonicalizeMatch(parseNode(match));
-                        const replacement = canonicalizeReplace(parseNode(replace), 'Vencord.Plugins.plugins["PlaceHolderPluginName"]');
+                        const replacement = canonicalizeReplace(parseNode(replace), 'Tallycord.Plugins.plugins["PlaceHolderPluginName"]');
 
                         const newSource = src.replace(matcher, replacement as string);
 

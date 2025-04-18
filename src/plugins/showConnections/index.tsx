@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -139,8 +139,8 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
                         target="_blank"
                         rel="noreferrer"
                         onClick={e => {
-                            if (Vencord.Plugins.isPluginEnabled("OpenInApp")) {
-                                const OpenInApp = Vencord.Plugins.plugins.OpenInApp as any as typeof import("../openInApp").default;
+                            if (Tallycord.Plugins.isPluginEnabled("OpenInApp")) {
+                                const OpenInApp = Tallycord.Plugins.plugins.OpenInApp as any as typeof import("../openInApp").default;
                                 // handleLink will .preventDefault() if applicable
                                 OpenInApp.handleLink(e.currentTarget, e);
                             }

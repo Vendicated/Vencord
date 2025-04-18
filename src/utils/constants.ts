@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
+export const REACT_GLOBAL = "Tallycord.Webpack.Common.React";
 export const VENBOT_USER_ID = "1017176847865352332";
 export const VENCORD_GUILD_ID = "1015060230222131221";
 export const DONOR_ROLE_ID = "1042507929485586532";

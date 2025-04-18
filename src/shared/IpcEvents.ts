@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,29 +17,29 @@
 */
 
 export const enum IpcEvents {
-    QUICK_CSS_UPDATE = "VencordQuickCssUpdate",
-    THEME_UPDATE = "VencordThemeUpdate",
-    GET_QUICK_CSS = "VencordGetQuickCss",
-    SET_QUICK_CSS = "VencordSetQuickCss",
-    UPLOAD_THEME = "VencordUploadTheme",
-    DELETE_THEME = "VencordDeleteTheme",
-    GET_THEMES_DIR = "VencordGetThemesDir",
-    GET_THEMES_LIST = "VencordGetThemesList",
-    GET_THEME_DATA = "VencordGetThemeData",
-    GET_THEME_SYSTEM_VALUES = "VencordGetThemeSystemValues",
-    GET_SETTINGS_DIR = "VencordGetSettingsDir",
-    GET_SETTINGS = "VencordGetSettings",
-    SET_SETTINGS = "VencordSetSettings",
-    OPEN_EXTERNAL = "VencordOpenExternal",
-    OPEN_QUICKCSS = "VencordOpenQuickCss",
-    GET_UPDATES = "VencordGetUpdates",
-    GET_REPO = "VencordGetRepo",
-    UPDATE = "VencordUpdate",
-    BUILD = "VencordBuild",
-    OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
+    QUICK_CSS_UPDATE = "TallycordQuickCssUpdate",
+    THEME_UPDATE = "TallycordThemeUpdate",
+    GET_QUICK_CSS = "TallycordGetQuickCss",
+    SET_QUICK_CSS = "TallycordSetQuickCss",
+    UPLOAD_THEME = "TallycordUploadTheme",
+    DELETE_THEME = "TallycordDeleteTheme",
+    GET_THEMES_DIR = "TallycordGetThemesDir",
+    GET_THEMES_LIST = "TallycordGetThemesList",
+    GET_THEME_DATA = "TallycordGetThemeData",
+    GET_THEME_SYSTEM_VALUES = "TallycordGetThemeSystemValues",
+    GET_SETTINGS_DIR = "TallycordGetSettingsDir",
+    GET_SETTINGS = "TallycordGetSettings",
+    SET_SETTINGS = "TallycordSetSettings",
+    OPEN_EXTERNAL = "TallycordOpenExternal",
+    OPEN_QUICKCSS = "TallycordOpenQuickCss",
+    GET_UPDATES = "TallycordGetUpdates",
+    GET_REPO = "TallycordGetRepo",
+    UPDATE = "TallycordUpdate",
+    BUILD = "TallycordBuild",
+    OPEN_MONACO_EDITOR = "TallycordOpenMonacoEditor",
 
-    GET_PLUGIN_IPC_METHOD_MAP = "VencordGetPluginIpcMethodMap",
+    GET_PLUGIN_IPC_METHOD_MAP = "TallycordGetPluginIpcMethodMap",
 
-    OPEN_IN_APP__RESOLVE_REDIRECT = "VencordOIAResolveRedirect",
-    VOICE_MESSAGES_READ_RECORDING = "VencordVMReadRecording",
+    OPEN_IN_APP__RESOLVE_REDIRECT = "TallycordOIAResolveRedirect",
+    VOICE_MESSAGES_READ_RECORDING = "TallycordVMReadRecording",
 }

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -28,14 +28,14 @@ export default definePlugin({
             find: "#{intl::DISCODO_DISABLED}",
             replacement: {
                 match: /(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,75}?tutorialContainer.+?}\))(?=}function)/,
-                replace: "[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"
+                replace: "[$1].concat(Tallycord.Api.ServerList.renderAll(Tallycord.Api.ServerList.ServerListRenderPosition.Above))"
             }
         },
         {
             find: "#{intl::SERVERS}),children",
             replacement: {
                 match: /(?<=#{intl::SERVERS}\),children:)\i\.map\(\i\)/,
-                replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"
+                replace: "Tallycord.Api.ServerList.renderAll(Tallycord.Api.ServerList.ServerListRenderPosition.In).concat($&)"
             }
         }
     ]

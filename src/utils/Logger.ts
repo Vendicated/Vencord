@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -32,13 +32,13 @@ export class Logger {
     constructor(public name: string, public color: string = "white") { }
 
     private _log(level: "log" | "error" | "warn" | "info" | "debug", levelColor: string, args: any[], customFmt = "") {
-        if (IS_REPORTER && IS_WEB && !IS_VESKTOP) {
-            console[level]("[Vencord]", this.name + ":", ...args);
+        if (IS_REPORTER && IS_WEB && !IS_TALLYTOP) {
+            console[level]("[Tallycord]", this.name + ":", ...args);
             return;
         }
 
         console[level](
-            `%c Vencord %c %c ${this.name} ${customFmt}`,
+            `%c Tallycord %c %c ${this.name} ${customFmt}`,
             `background: ${levelColor}; color: black; font-weight: bold; border-radius: 5px;`,
             "",
             `background: ${this.color}; color: black; font-weight: bold; border-radius: 5px;`

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,10 +33,10 @@ import definePlugin from "@utils/types";
 import { Forms, Toasts, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-const CONTRIBUTOR_BADGE = "https://vencord.dev/assets/favicon.png";
+const CONTRIBUTOR_BADGE = "https://tallycord.dev/assets/favicon.png";
 
 const ContributorBadge: ProfileBadge = {
-    description: "Vencord Contributor",
+    description: "Tallycord Contributor",
     image: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
     shouldShow: ({ userId }) => isPluginDev(userId),
@@ -52,7 +52,7 @@ async function loadBadges(noCache = false) {
     if (noCache)
         init.cache = "no-cache";
 
-    DonorBadges = await fetch("https://badges.vencord.dev/badges.json", init)
+    DonorBadges = await fetch("https://badges.tallycordrd.dev/badges.json", init)
         .then(r => r.json());
 }
 
@@ -140,7 +140,7 @@ export default definePlugin({
                 const modalKey = openModal(props => (
                     <ErrorBoundary noop onError={() => {
                         closeModal(modalKey);
-                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
+                        TallycordNative.native.openExternal("https://github.com/sponsors/Vendicated");
                     }}>
                         <ModalRoot {...props}>
                             <ModalHeader>
@@ -154,7 +154,7 @@ export default definePlugin({
                                         }}
                                     >
                                         <Heart />
-                                        Vencord Donor
+                                        Tallycord Donor
                                     </Forms.FormTitle>
                                 </Flex>
                             </ModalHeader>
@@ -175,10 +175,10 @@ export default definePlugin({
                                 </Flex>
                                 <div style={{ padding: "1em" }}>
                                     <Forms.FormText>
-                                        This Badge is a special perk for Vencord Donors
+                                        This Badge is a special perk for Tallycord Donors
                                     </Forms.FormText>
                                     <Forms.FormText className={Margins.top20}>
-                                        Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
+                                        Please consider supporting the development of Tallycord by becoming a donor. It would mean a lot!!
                                     </Forms.FormText>
                                 </div>
                             </ModalContent>

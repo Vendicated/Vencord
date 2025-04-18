@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -77,7 +77,7 @@ export async function installExt(id: string) {
 
         const buf = await get(url, {
             headers: {
-                "User-Agent": `Electron ${process.versions.electron} ~ Vencord (https://github.com/Tally-gay/Tallycord)`
+                "User-Agent": `Electron ${process.versions.electron} ~ Tallycord (https://github.com/Tally-gay/Tallycord)`
             }
         });
 

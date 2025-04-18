@@ -224,7 +224,7 @@ export default definePlugin({
     get additionalInfo() {
         if (IS_DEV) return " (Dev)";
         if (IS_WEB) return " (Web)";
-        if (IS_VESKTOP) return ` (Tallytop v${TallytopNative.app.getVersion()})`;
+        if (IS_TALLYTOP) return ` (Tallytop v${TallytopNative.app.getVersion()})`;
         if (IS_STANDALONE) return " (Standalone)";
         return "";
     },

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -44,7 +44,7 @@ export function TranslationAccessory({ message }: { message: Message; }) {
 
     useEffect(() => {
         // Ignore MessageLinkEmbeds messages
-        if ((message as any).vencordEmbeddedBy) return;
+        if ((message as any).tallycordEmbeddedBy) return;
 
         TranslationSetters.set(message.id, setTranslation);
 

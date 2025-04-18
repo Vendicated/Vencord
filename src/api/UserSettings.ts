@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -57,7 +57,7 @@ export const UserSettings: Record<PropertyKey, UserSettingDefinition<any>> | und
  * @param name The name of the setting
  */
 export function getUserSetting<T = any>(group: string, name: string): UserSettingDefinition<T> | undefined {
-    if (!Vencord.Plugins.isPluginEnabled("UserSettingsAPI")) throw new Error("Cannot use UserSettingsAPI without setting as dependency.");
+    if (!Tallycord.Plugins.isPluginEnabled("UserSettingsAPI")) throw new Error("Cannot use UserSettingsAPI without setting as dependency.");
 
     for (const key in UserSettings) {
         const userSetting = UserSettings[key];

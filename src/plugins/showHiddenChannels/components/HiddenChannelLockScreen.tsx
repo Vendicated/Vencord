@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -274,7 +274,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 }
                 <div className={cl("allowed-users-and-roles-container")}>
                     <div className={cl("allowed-users-and-roles-container-title")}>
-                        {Vencord.Plugins.isPluginEnabled("PermissionsViewer") && (
+                        {Tallycord.Plugins.isPluginEnabled("PermissionsViewer") && (
                             <Tooltip text="Permission Details">
                                 {({ onMouseLeave, onMouseEnter }) => (
                                     <button

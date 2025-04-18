@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -57,8 +57,8 @@ export default definePlugin({
             replacement: {
                 // react.jsx)(AccountPanel, { ..., showTaglessAccountPanel: blah })
                 match: /(?<=\i\.jsxs?\)\()(\i),{(?=[^}]*?userTag:\i,hidePrivateData:)/,
-                // react.jsx(WrapperComponent, { VencordOriginal: AccountPanel, ...
-                replace: "$self.PanelWrapper,{VencordOriginal:$1,"
+                // react.jsx(WrapperComponent, { TallycordOriginal: AccountPanel, ...
+                replace: "$self.PanelWrapper,{TallycordOriginal:$1,"
             }
         },
         {
@@ -93,7 +93,7 @@ export default definePlugin({
 
     start: () => toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls),
 
-    PanelWrapper({ VencordOriginal, ...props }) {
+    PanelWrapper({ TallycordOriginal, ...props }) {
         return (
             <>
                 <ErrorBoundary
@@ -107,7 +107,7 @@ export default definePlugin({
                     <Player />
                 </ErrorBoundary>
 
-                <VencordOriginal {...props} />
+                <TallycordOriginal {...props} />
             </>
         );
     }

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ import { resetLanguageDefaults, settings } from "./settings";
 
 export const cl = classNameFactory("vc-trans-");
 
-const Native = VencordNative.pluginHelpers.Translate as PluginNative<typeof import("./native")>;
+const Native = TallycordNative.pluginHelpers.Translate as PluginNative<typeof import("./native")>;
 
 interface GoogleData {
     translation: string;

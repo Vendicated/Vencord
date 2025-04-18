@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Tallycord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -9,7 +9,7 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
-const Native = VencordNative.pluginHelpers.AppleMusicRichPresence as PluginNative<typeof import("./native")>;
+const Native = TallycordNative.pluginHelpers.AppleMusicRichPresence as PluginNative<typeof import("./native")>;
 
 interface ActivityAssets {
     large_image?: string;

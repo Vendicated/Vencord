@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -32,7 +32,7 @@ export function nextNotice() {
     currentNotice = noticesQueue.shift();
 
     if (currentNotice) {
-        NoticesModule.show(...currentNotice, "VencordNotice");
+        NoticesModule.show(...currentNotice, "TallycordNotice");
     }
 }
 

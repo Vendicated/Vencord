@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@ export default definePlugin({
                 match: /(?<=,channel:\i\}\)\.then\().+?(?=return \i\.content!==this\.props\.message\.content&&\i\((.+?)\))/,
                 replace: (match, args) => "" +
                     `async ${match}` +
-                    `if(await Vencord.Api.MessageEvents._handlePreEdit(${args}))` +
+                    `if(await Tallycord.Api.MessageEvents._handlePreEdit(${args}))` +
                     "return Promise.resolve({shouldClear:false,shouldRefocus:true});"
             }
         },
@@ -40,7 +40,7 @@ export default definePlugin({
                 // https://regex101.com/r/hBlXpl/1
                 match: /let (\i)=\i\.\i\.parse\((\i),.+?let (\i)=\i\.\i\.getSendMessageOptions\(\{.+?\}\);(?<=\)\(({.+?})\)\.then.+?)/,
                 replace: (m, parsedMessage, channel, replyOptions, extra) => m +
-                    `if(await Vencord.Api.MessageEvents._handlePreSend(${channel}.id,${parsedMessage},${extra},${replyOptions}))` +
+                    `if(await Tallycord.Api.MessageEvents._handlePreSend(${channel}.id,${parsedMessage},${extra},${replyOptions}))` +
                     "return{shouldClear:false,shouldRefocus:true};"
             }
         },
@@ -49,7 +49,7 @@ export default definePlugin({
             replacement: {
                 match: /let\{id:\i}=(\i),{id:\i}=(\i);return \i\.useCallback\((\i)=>\{/,
                 replace: (m, message, channel, event) =>
-                    `const vcMsg=${message},vcChan=${channel};${m}Vencord.Api.MessageEvents._handleClick(vcMsg,vcChan,${event});`
+                    `const vcMsg=${message},vcChan=${channel};${m}Tallycord.Api.MessageEvents._handleClick(vcMsg,vcChan,${event});`
             }
         }
     ]

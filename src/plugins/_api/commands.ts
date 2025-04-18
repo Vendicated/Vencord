@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ export default definePlugin({
 
                     // textCommands = builtInCommands.filter(...)
                     match: /(?<=\w=)(\w)(\.filter\(.{0,60}tenor)/,
-                    replace: "Vencord.Api.Commands._init($1)$2",
+                    replace: "Tallycord.Api.Commands._init($1)$2",
                 }
             ],
         },
@@ -45,7 +45,7 @@ export default definePlugin({
             replacement: {
                 // return [2, cmd.execute(args, ctx)]
                 match: /,(\i)\.execute\((\i),(\i)\)/,
-                replace: (_, cmd, args, ctx) => `,Vencord.Api.Commands._handleCommand(${cmd}, ${args}, ${ctx})`
+                replace: (_, cmd, args, ctx) => `,Tallycord.Api.Commands._handleCommand(${cmd}, ${args}, ${ctx})`
             }
         },
         // Show plugin name instead of "Built-In"

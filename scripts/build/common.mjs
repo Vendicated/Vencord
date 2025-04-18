@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -52,7 +52,7 @@ export const gitHash =
 
 export const banner = {
     js: `
-// Vencord ${gitHash}
+// Tallycord ${gitHash}
 // Standalone: ${IS_STANDALONE}
 // Platform: ${IS_STANDALONE === false ? process.platform : "Universal"}
 // Updater Disabled: ${IS_UPDATER_DISABLED}
@@ -410,8 +410,8 @@ export const commonOpts = {
     external: ["~plugins", "~git-hash", "~git-remote", "/assets/*"],
     inject: ["./scripts/build/inject/react.mjs"],
     jsx: "transform",
-    jsxFactory: "VencordCreateElement",
-    jsxFragment: "VencordFragment",
+    jsxFactory: "TallycordCreateElement",
+    jsxFragment: "TallycordFragment",
 };
 
 const escapedBuiltinModules = builtinModules

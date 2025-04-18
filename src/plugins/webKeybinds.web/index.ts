@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ export default definePlugin({
         if (hasCtrl) switch (e.key) {
             case "t":
             case "T":
-                if (!IS_VESKTOP) return;
+                if (!IS_TALLYTOP) return;
                 e.preventDefault();
                 if (e.shiftKey) {
                     if (SelectedGuildStore.getGuildId()) NavigationRouter.transitionToGuild("@me");
@@ -49,7 +49,7 @@ export default definePlugin({
                 }
                 break;
             case "Tab":
-                if (!IS_VESKTOP) return;
+                if (!IS_TALLYTOP) return;
                 const handler = e.shiftKey ? KeyBinds.SERVER_PREV : KeyBinds.SERVER_NEXT;
                 handler.action(e);
                 break;

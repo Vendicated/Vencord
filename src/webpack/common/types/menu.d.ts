@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -73,7 +73,7 @@ export interface Menu {
         renderValue?(value: number): string,
     }>;
     MenuSearchControl: RC<{
-        query: string
+        query: string;
         onChange(query: string): void;
         placeholder?: string;
     }>;

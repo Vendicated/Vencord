@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@ export default definePlugin({
             find: "#{intl::REMOVE_ATTACHMENT_BODY}",
             replacement: {
                 match: /(?<=.container\)?,children:)(\[.+?\])/,
-                replace: "Vencord.Api.MessageAccessories._modifyAccessories($1,this.props)",
+                replace: "Tallycord.Api.MessageAccessories._modifyAccessories($1,this.props)",
             },
         },
     ],

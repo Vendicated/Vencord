@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ export default function DonateButton({
             {...props}
             look={look}
             color={color}
-            onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
+            onClick={() => TallycordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
             innerClassName="vc-donate-button"
         >
             <Heart />

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -217,7 +217,7 @@ function computeWidthAndHeight(width: number, height: number) {
 function withEmbeddedBy(message: Message, embeddedBy: string[]) {
     return new Proxy(message, {
         get(_, prop) {
-            if (prop === "vencordEmbeddedBy") return embeddedBy;
+            if (prop === "tallycordEmbeddedBy") return embeddedBy;
             // @ts-ignore ts so bad
             return Reflect.get(...arguments);
         }
@@ -227,7 +227,7 @@ function withEmbeddedBy(message: Message, embeddedBy: string[]) {
 
 function MessageEmbedAccessory({ message }: { message: Message; }) {
     // @ts-ignore
-    const embeddedBy: string[] = message.vencordEmbeddedBy ?? [];
+    const embeddedBy: string[] = message.tallycordrdEmbeddedBy ?? [];
 
     const accessories = [] as (JSX.Element | null)[];
 

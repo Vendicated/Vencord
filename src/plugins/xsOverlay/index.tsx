@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Tallycord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -176,7 +176,7 @@ let socket: WebSocket;
 
 async function start() {
     if (socket) socket.close();
-    socket = new WebSocket(`ws://127.0.0.1:${settings.store.webSocketPort ?? 42070}/?client=Vencord`);
+    socket = new WebSocket(`ws://127.0.0.1:${settings.store.webSocketPort ?? 42070}/?client=Tallycord`);
     return new Promise((resolve, reject) => {
         socket.onopen = resolve;
         socket.onerror = reject;
@@ -184,7 +184,7 @@ async function start() {
     });
 }
 
-const Native = VencordNative.pluginHelpers.XSOverlay as PluginNative<typeof import("./native")>;
+const Native = TallycordNative.pluginHelpers.XSOverlay as PluginNative<typeof import("./native")>;
 
 export default definePlugin({
     name: "XSOverlay",
@@ -338,7 +338,7 @@ function sendMsgNotif(titleString: string, content: string, message: Message) {
                 content: content,
                 useBase64Icon: true,
                 icon: result,
-                sourceApp: "Vencord"
+                sourceApp: "Tallycord"
             };
 
             sendToOverlay(msgData);
@@ -357,7 +357,7 @@ function sendOtherNotif(content: string, titleString: string) {
         content: content,
         useBase64Icon: false,
         icon: "default",
-        sourceApp: "Vencord"
+        sourceApp: "Tallycord"
     };
     sendToOverlay(msgData);
 }
@@ -368,7 +368,7 @@ async function sendToOverlay(notif: NotificationObject) {
         return;
     }
     const apiObject: ApiObject = {
-        sender: "Vencord",
+        sender: "Tallycord",
         target: "xsoverlay",
         command: "SendNotification",
         jsonData: JSON.stringify(notif),

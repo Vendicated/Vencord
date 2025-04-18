@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -56,7 +56,7 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
         settings.store.autoTranslate = newState;
         if (newState && settings.store.showAutoTranslateAlert !== false)
             Alerts.show({
-                title: "Vencord Auto-Translate Enabled",
+                title: "Tallycord Auto-Translate Enabled",
                 body: <>
                     <Forms.FormText>
                         You just enabled Auto Translate! Any message <b>will automatically be translated</b> before being sent.

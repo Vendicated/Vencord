@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -66,7 +66,7 @@ export const filters = {
             return stringMatches(Function.prototype.toString.call(m), parsedCode);
         };
 
-        filter.$$vencordProps = [...code];
+        filter.$$tallycordProps = [...code];
         return filter;
     },
     byStoreName: (name: StoreNameFilter): FilterFn => m =>
@@ -88,7 +88,7 @@ export const filters = {
             return false;
         };
 
-        filter.$$vencordProps = [...code];
+        filter.$$tallycordrdrdProps = [...code];
         return filter;
     }
 };

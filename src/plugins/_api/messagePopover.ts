@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@ export default definePlugin({
             replacement: {
                 match: /(?<=:null),(.{0,40}togglePopout:.+?}\)),(.+?)\]}\):null,(?<=\((\i\.\i),{label:.+?:null,(\i&&!\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,
                 replace: (_, ReactButton, PotionButton, ButtonComponent, showReactButton, message) => "" +
-                    `]}):null,Vencord.Api.MessagePopover._buildPopoverElements(${ButtonComponent},${message}),${showReactButton}?${ReactButton}:null,${showReactButton}&&${PotionButton},`
+                    `]}):null,Tallycord.Api.MessagePopover._buildPopoverElements(${ButtonComponent},${message}),${showReactButton}?${ReactButton}:null,${showReactButton}&&${PotionButton},`
             }
         }
     ]

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@ import type { VoiceRecorder } from ".";
 import { settings } from "./settings";
 import { MediaEngineStore } from "./utils";
 
-const Native = VencordNative.pluginHelpers.VoiceMessages as PluginNative<typeof import("./native")>;
+const Native = TallycordNative.pluginHelpers.VoiceMessages as PluginNative<typeof import("./native")>;
 
 export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingChange }) => {
     const [recording, setRecording] = useState(false);

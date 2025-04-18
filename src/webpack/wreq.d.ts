@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Tallycord, a Discord client mod
  * Copyright (c) 2024 Vendicated, Nuckyz and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -216,7 +216,7 @@ export type WebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & {
     ruid: string;
 };
 
-// Utility section for Vencord
+// Utility section for Tallycord
 
 export type AnyWebpackRequire = ((moduleId: PropertyKey) => ModuleExports) & Partial<Omit<WebpackRequire, "m">> & {
     /** The module factories, where all modules that have been loaded are stored (pre-loaded or loaded by lazy chunks) */

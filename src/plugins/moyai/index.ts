@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -53,9 +53,9 @@ interface IVoiceChannelEffectSendEvent {
 
 const MOYAI = "🗿";
 const MOYAI_URL =
-    "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai.mp3";
+    "https://raw.githubusercontent.com/MeguminSama/TallycordPlugins/main/plugins/moyai/moyai.mp3";
 const MOYAI_URL_HD =
-    "https://raw.githubusercontent.com/MeguminSama/VencordPlugins/main/plugins/moyai/moyai_hd.wav";
+    "https://raw.githubusercontent.com/MeguminSama/TallycordPlugins/main/plugins/moyai/moyai_hd.wav";
 
 const settings = definePluginSettings({
     volume: {

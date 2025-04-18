@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Tallycord, a Discord client mod
  * Copyright (c) 2023 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -18,7 +18,7 @@ export const settings = definePluginSettings({
     changeDecoration: {
         type: OptionType.COMPONENT,
         component() {
-            if (!Vencord.Plugins.plugins.Decor.started) return <Forms.FormText>
+            if (!Tallycord.Plugins.plugins.Decor.started) return <Forms.FormText>
                 Enable Decor and restart your client to change your avatar decoration.
             </Forms.FormText>;
 

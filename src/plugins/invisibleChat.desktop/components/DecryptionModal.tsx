@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -54,7 +54,7 @@ export function DecModal(props: any) {
                         const toSend = decrypt(encryptedMessage, password, true);
                         if (!toSend || !props?.message) return;
                         // @ts-expect-error
-                        Vencord.Plugins.plugins.InvisibleChat.buildEmbed(props?.message, toSend);
+                        Tallycord.Plugins.plugins.InvisibleChat.buildEmbed(props?.message, toSend);
                         props.onClose();
                     }}>
                     Decrypt

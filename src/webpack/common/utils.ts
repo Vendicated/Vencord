@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ export let FluxDispatcher: t.FluxDispatcher;
 waitFor(["dispatch", "subscribe"], m => {
     FluxDispatcher = m;
     // Non import call to avoid circular dependency
-    Vencord.Plugins.subscribeAllPluginsFluxEvents(m);
+    Tallycord.Plugins.subscribeAllPluginsFluxEvents(m);
 
     const cb = () => {
         m.unsubscribe("CONNECTION_OPEN", cb);
