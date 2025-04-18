@@ -1,0 +1,36 @@
+name: Auto Release on Main Push
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Check out the code
+              uses: actions/checkout@v3
+
+            - name: Set up Git
+              uses: actions/setup-git@v2
+
+            - name: Create Release
+              id: create_release
+              uses: actions/create-release@v1
+              with:
+                  tag_name: v${{ github.sha }}
+                  release_name: Release ${{ github.sha }}
+                  body: |
+                      Automatically generated release for commit ${{ github.sha }}.
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload Release Assets
+              uses: actions/upload-release-asset@v1
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./path/to/your/asset.zip
+                  asset_name: your-asset.zip
+                  asset_content_type: application/zip
