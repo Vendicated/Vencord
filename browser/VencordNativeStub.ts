@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ import { debounce } from "../src/utils";
 import { EXTENSION_BASE_URL } from "../src/utils/web-metadata";
 import { getTheme, Theme } from "../src/utils/discord";
 import { getThemeInfo } from "../src/main/themes";
-import { Settings } from "../src/Vencord";
+import { Settings } from "../src/Tallycord";
 
 // Discord deletes this so need to store in variable
 const { localStorage } = window;
@@ -36,12 +36,12 @@ const cssListeners = new Set<(css: string) => void>();
 const NOOP = () => { };
 const NOOP_ASYNC = async () => { };
 
-const setCssDebounced = debounce((css: string) => VencordNative.quickCss.set(css));
+const setCssDebounced = debounce((css: string) => TallycordNative.quickCss.set(css));
 
-const themeStore = DataStore.createStore("VencordThemes", "VencordThemeData");
+const themeStore = DataStore.createStore("TallycordThemes", "TallycordThemeData");
 
 // probably should make this less cursed at some point
-window.VencordNative = {
+window.TallycordNative = {
     themes: {
         uploadTheme: (fileName: string, fileData: string) => DataStore.set(fileName, fileData, themeStore),
         deleteTheme: (fileName: string) => DataStore.del(fileName, themeStore),
@@ -66,9 +66,9 @@ window.VencordNative = {
     },
 
     quickCss: {
-        get: () => DataStore.get("VencordQuickCss").then(s => s ?? ""),
+        get: () => DataStore.get("TallycordQuickCss").then(s => s ?? ""),
         set: async (css: string) => {
-            await DataStore.set("VencordQuickCss", css);
+            await DataStore.set("TallycordQuickCss", css);
             cssListeners.forEach(l => l(css));
         },
         addChangeListener(cb) {
@@ -78,7 +78,7 @@ window.VencordNative = {
         openFile: NOOP_ASYNC,
         async openEditor() {
             const features = `popup,width=${Math.min(window.innerWidth, 1000)},height=${Math.min(window.innerHeight, 1000)}`;
-            const win = open("about:blank", "VencordQuickCss", features);
+            const win = open("about:blank", "TallycordQuickCss", features);
             if (!win) {
                 alert("Failed to open QuickCSS popup. Make sure to allow popups!");
                 return;
@@ -86,7 +86,7 @@ window.VencordNative = {
 
             win.baseUrl = EXTENSION_BASE_URL;
             win.setCss = setCssDebounced;
-            win.getCurrentCss = () => VencordNative.quickCss.get();
+            win.getCurrentCss = () => TallycordNative.quickCss.get();
             win.getTheme = () =>
                 getTheme() === Theme.Light
                     ? "vs-light"
@@ -99,13 +99,13 @@ window.VencordNative = {
     settings: {
         get: () => {
             try {
-                return JSON.parse(localStorage.getItem("VencordSettings") || "{}");
+                return JSON.parse(localStorage.getItem("TallycordSettings") || "{}");
             } catch (e) {
                 console.error("Failed to parse settings from localStorage: ", e);
                 return {};
             }
         },
-        set: async (s: Settings) => localStorage.setItem("VencordSettings", JSON.stringify(s)),
+        set: async (s: Settings) => localStorage.setItem("TallycordSettings", JSON.stringify(s)),
         getSettingsDir: async () => "LocalStorage"
     },
 

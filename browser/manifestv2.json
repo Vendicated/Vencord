@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "minimum_chrome_version": "91",
 
-    "name": "Vencord Web",
+    "name": "Tallycord Web",
     "description": "The cutest Discord mod now in your browser",
     "author": "Vendicated",
     "homepage_url": "https://github.com/Tally-gay/Tallycord",
@@ -28,7 +28,7 @@
         {
             "run_at": "document_start",
             "matches": ["*://*.discord.com/*"],
-            "js": ["dist/Vencord.js"],
+            "js": ["dist/Tallycord.js"],
             "all_frames": true,
             "world": "MAIN"
         }
@@ -38,7 +38,7 @@
         "scripts": ["background.js"]
     },
 
-    "web_accessible_resources": ["dist/Vencord.js", "dist/Vencord.css"],
+    "web_accessible_resources": ["dist/Tallycord.js", "dist/Tallycord.css"],
 
     "browser_specific_settings": {
         "gecko": {

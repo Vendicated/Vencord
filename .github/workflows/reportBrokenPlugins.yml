@@ -50,7 +50,7 @@ jobs:
               with:
                   chrome-version: stable
 
-            - name: Build Vencord Reporter Version
+            - name: Build Tallycord Reporter Version
               run: pnpm buildReporter
 
             - name: Run Reporter

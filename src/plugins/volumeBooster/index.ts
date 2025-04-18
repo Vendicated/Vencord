@@ -66,7 +66,7 @@ export default definePlugin({
                 replace: (_, higherMaxVolume, minorMaxVolume) => `${higherMaxVolume}*$self.settings.store.multiplier`
             }
         })),
-        // Patches needed for web/vesktop
+        // Patches needed for web/tallytop
         {
             find: "streamSourceNode",
             predicate: () => !IS_DISCORD_DESKTOP,

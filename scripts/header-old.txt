@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) {year} {author}
  *
  * This program is free software: you can redistribute it and/or modify

@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -43,9 +43,9 @@ declare global {
     export var VERSION: string;
     export var BUILD_TIMESTAMP: number;
 
-    export var VencordNative: typeof import("./VencordNative").default;
-    export var Vencord: typeof import("./Vencord");
-    export var VencordStyles: Map<string, {
+    export var TallycordNative: typeof import("./TallycordNative").default;
+    export var Tallycord: typeof import("./Tallycord");
+    export var TallycordStyles: Map<string, {
         name: string;
         source: string;
         classNames: Record<string, string>;
@@ -61,8 +61,8 @@ declare global {
      * If you really must use it, mark your plugin as Desktop App only by naming it Foo.desktop.ts(x)
      */
     export var DiscordNative: any;
-    export var Vesktop: any;
-    export var VesktopNative: any;
+    export var Tallytop: any;
+    export var TallytopNative: any;
 
     interface Window extends Record<PropertyKey, any> {
         _: LoDashStatic;

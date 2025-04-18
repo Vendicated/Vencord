@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -159,14 +159,14 @@ function ThemesTab() {
     const [currentTab, setCurrentTab] = useState(ThemeTab.LOCAL);
     const [themeText, setThemeText] = useState(settings.themeLinks.join("\n"));
     const [userThemes, setUserThemes] = useState<UserThemeHeader[] | null>(null);
-    const [themeDir, , themeDirPending] = useAwaiter(VencordNative.themes.getThemesDir);
+    const [themeDir, , themeDirPending] = useAwaiter(TallycordNative.themes.getThemesDir);
 
     useEffect(() => {
         refreshLocalThemes();
     }, []);
 
     async function refreshLocalThemes() {
-        const themes = await VencordNative.themes.getThemesList();
+        const themes = await TallycordNative.themes.getThemesList();
         setUserThemes(themes);
     }
 
@@ -193,7 +193,7 @@ function ThemesTab() {
             return new Promise<void>((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => {
-                    VencordNative.themes.uploadTheme(name, reader.result as string)
+                    TallycordNative.themes.uploadTheme(name, reader.result as string)
                         .then(resolve)
                         .catch(reject);
                 };
@@ -253,7 +253,7 @@ function ThemesTab() {
                             />
                             <QuickAction
                                 text="Edit QuickCSS"
-                                action={() => VencordNative.quickCss.openEditor()}
+                                action={() => TallycordNative.quickCss.openEditor()}
                                 Icon={PaintbrushIcon}
                             />
 
@@ -275,7 +275,7 @@ function ThemesTab() {
                                 onChange={enabled => onLocalThemeChange(theme.fileName, enabled)}
                                 onDelete={async () => {
                                     onLocalThemeChange(theme.fileName, false);
-                                    await VencordNative.themes.deleteTheme(theme.fileName);
+                                    await TallycordNative.themes.deleteTheme(theme.fileName);
                                     refreshLocalThemes();
                                 }}
                                 theme={theme}

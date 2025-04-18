@@ -46,7 +46,7 @@ const settings = definePluginSettings({
         default: false,
         restartNeeded: true,
         // Web slate menu has proper spellcheck suggestions and image context menu is also pretty good,
-        // so disable this by default. Vesktop just doesn't, so we force enable it there
+        // so disable this by default. Tallytop just doesn't, so we force enable it there
         hidden: IS_VESKTOP,
     }
 });
@@ -261,8 +261,8 @@ export default definePlugin({
             });
         }
 
-        if (IS_VESKTOP && VesktopNative.clipboard) {
-            VesktopNative.clipboard.copyImage(await imageData.arrayBuffer(), url);
+        if (IS_VESKTOP && TallytopNative.clipboard) {
+            TallytopNative.clipboard.copyImage(await imageData.arrayBuffer(), url);
             return;
         } else {
             navigator.clipboard.write([

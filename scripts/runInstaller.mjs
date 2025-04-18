@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2023 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -32,9 +32,9 @@ import { finished } from "stream/promises";
 import { fileURLToPath } from "url";
 
 const BASE_URL =
-    "https://github.com/Vencord/Installer/releases/latest/download/";
+    "https://github.com/Tallycord/Installer/releases/latest/download/";
 const INSTALLER_PATH_DARWIN =
-    "VencordInstaller.app/Contents/MacOS/VencordInstaller";
+    "TallycordInstaller.app/Contents/MacOS/TallycordInstaller";
 
 const BASE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
 const FILE_DIR = join(BASE_DIR, "dist", "Installer");
@@ -43,11 +43,11 @@ const ETAG_FILE = join(FILE_DIR, "etag.txt");
 function getFilename() {
     switch (process.platform) {
         case "win32":
-            return "VencordInstallerCli.exe";
+            return "TallycordInstallerCli.exe";
         case "darwin":
-            return "VencordInstaller.MacOS.zip";
+            return "TallycordInstaller.MacOS.zip";
         case "linux":
-            return "VencordInstallerCli-linux";
+            return "TallycordInstallerCli-linux";
         default:
             throw new Error("Unsupported platform: " + process.platform);
     }
@@ -62,7 +62,7 @@ async function ensureBinary() {
     const downloadName = join(FILE_DIR, filename);
     const outputFile =
         process.platform === "darwin"
-            ? join(FILE_DIR, "VencordInstaller")
+            ? join(FILE_DIR, "TallycordInstaller")
             : downloadName;
 
     const etag =
@@ -72,7 +72,7 @@ async function ensureBinary() {
 
     const res = await fetch(BASE_URL + filename, {
         headers: {
-            "User-Agent": "Vencord (https://github.com/Tally-gay/Tallycord)",
+            "User-Agent": "Tallycord (https://github.com/Tally-gay/Tallycord)",
             "If-None-Match": etag,
         },
     });
@@ -111,7 +111,7 @@ async function ensureBinary() {
             } catch {}
         };
         logAndRun(
-            `sudo spctl --add '${outputFile}' --label "Vencord Installer"`
+            `sudo spctl --add '${outputFile}' --label "Tallycord Installer"`
         );
         logAndRun(`sudo xattr -d com.apple.quarantine '${outputFile}'`);
     } else {

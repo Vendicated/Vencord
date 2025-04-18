@@ -1,5 +1,5 @@
 /*
- * Vencord, a Discord client mod
+ * Tallycord, a Discord client mod
  * Copyright (c) 2023 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -18,8 +18,8 @@ export default tseslint.config(
         files: ["src/**/*.{tsx,ts,mts,mjs,js,jsx}", "eslint.config.mjs"],
         settings: {
             react: {
-                version: "18"
-            }
+                version: "18",
+            },
         },
         ...react.configs.flat.recommended,
         rules: {
@@ -28,7 +28,7 @@ export default tseslint.config(
             "react/prop-types": "off",
             "react/display-name": "off",
             "react/no-unescaped-entities": "off",
-        }
+        },
     },
     {
         files: ["src/**/*.{tsx,ts,mts,mjs,js,jsx}", "eslint.config.mjs"],
@@ -38,7 +38,7 @@ export default tseslint.config(
             "@typescript-eslint": tseslint.plugin,
             "simple-import-sort": simpleImportSort,
             "unused-imports": unusedImports,
-            "path-alias": pathAlias
+            "path-alias": pathAlias,
         },
         settings: {
             "import/resolver": {
@@ -47,34 +47,36 @@ export default tseslint.config(
                     ["@webpack/common", "./src/webpack/common"],
                     ["@utils", "./src/utils"],
                     ["@api", "./src/api"],
-                    ["@components", "./src/components"]
-                ]
-            }
+                    ["@components", "./src/components"],
+                ],
+            },
         },
         languageOptions: {
             parser: tseslint.parser,
             parserOptions: {
                 project: ["./tsconfig.json"],
-                tsconfigRootDir: import.meta.dirname
-            }
+                tsconfigRootDir: import.meta.dirname,
+            },
         },
         rules: {
             /*
-             * Since it's only been a month and Vencord has already been stolen
+             * Since it's only been a month and Tallycord has already been stolen
              * by random skids who rebranded it to "AlphaCord" and erased all license
              * information
              */
             "simple-header/header": [
                 "error",
                 {
-                    "files": ["scripts/header-new.txt", "scripts/header-old.txt"],
-                    "templates": { "author": [".*", "Vendicated and contributors"] }
-                }
+                    files: ["scripts/header-new.txt", "scripts/header-old.txt"],
+                    templates: {
+                        author: [".*", "Vendicated and contributors"],
+                    },
+                },
             ],
 
             // Style Rules
             "@stylistic/jsx-quotes": ["error", "prefer-double"],
-            "@stylistic/quotes": ["error", "double", { "avoidEscape": true }],
+            "@stylistic/quotes": ["error", "double", { avoidEscape: true }],
             "@stylistic/no-mixed-spaces-and-tabs": "error",
             "@stylistic/arrow-parens": ["error", "as-needed"],
             "@stylistic/eol-last": ["error", "always"],
@@ -86,37 +88,44 @@ export default tseslint.config(
             "@stylistic/space-in-parens": ["error", "never"],
             "@stylistic/block-spacing": ["error", "always"],
             "@stylistic/object-curly-spacing": ["error", "always"],
-            "@stylistic/spaced-comment": ["error", "always", { "markers": ["!"] }],
+            "@stylistic/spaced-comment": [
+                "error",
+                "always",
+                { markers: ["!"] },
+            ],
             "@stylistic/no-extra-semi": "error",
 
             // TS Rules
             "@stylistic/func-call-spacing": ["error", "never"],
 
             // ESLint Rules
-            "yoda": "error",
-            "eqeqeq": ["error", "always", { "null": "ignore" }],
-            "prefer-destructuring": ["error", {
-                "VariableDeclarator": { "array": false, "object": true },
-                "AssignmentExpression": { "array": false, "object": false }
-            }],
+            yoda: "error",
+            eqeqeq: ["error", "always", { null: "ignore" }],
+            "prefer-destructuring": [
+                "error",
+                {
+                    VariableDeclarator: { array: false, object: true },
+                    AssignmentExpression: { array: false, object: false },
+                },
+            ],
             "operator-assignment": ["error", "always"],
             "no-useless-computed-key": "error",
-            "no-unneeded-ternary": ["error", { "defaultAssignment": false }],
+            "no-unneeded-ternary": ["error", { defaultAssignment: false }],
             "no-invalid-regexp": "error",
-            "no-constant-condition": ["error", { "checkLoops": false }],
+            "no-constant-condition": ["error", { checkLoops: false }],
             "no-duplicate-imports": "error",
             "@typescript-eslint/dot-notation": [
                 "error",
                 {
-                    "allowPrivateClassPropertyAccess": true,
-                    "allowProtectedClassPropertyAccess": true
-                }
+                    allowPrivateClassPropertyAccess: true,
+                    allowProtectedClassPropertyAccess: true,
+                },
             ],
             "no-useless-escape": [
                 "error",
                 {
-                    "extra": "i"
-                }
+                    extra: "i",
+                },
             ],
             "no-fallthrough": "error",
             "for-direction": "error",
@@ -141,7 +150,7 @@ export default tseslint.config(
             "simple-import-sort/imports": "error",
             "simple-import-sort/exports": "error",
             "unused-imports/no-unused-imports": "error",
-            "path-alias/no-relative": "error"
-        }
+            "path-alias/no-relative": "error",
+        },
     }
 );

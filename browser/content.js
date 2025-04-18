@@ -5,7 +5,7 @@ if (typeof browser === "undefined") {
 const style = document.createElement("link");
 style.type = "text/css";
 style.rel = "stylesheet";
-style.href = browser.runtime.getURL("dist/Vencord.css");
+style.href = browser.runtime.getURL("dist/Tallycord.css");
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -16,7 +16,7 @@ document.addEventListener(
             meta: {
                 EXTENSION_VERSION: browser.runtime.getManifest().version,
                 EXTENSION_BASE_URL: browser.runtime.getURL(""),
-            }
+            },
         });
     },
     { once: true }

@@ -518,8 +518,8 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                 continue;
             }
 
-            // TODO: remove once Vesktop has been updated to use addPatch
-            if (patch.plugin === "Vesktop") {
+            // TODO: remove once Tallytop has been updated to use addPatch
+            if (patch.plugin === "Tallytop") {
                 canonicalizeReplacement(replacement, "VCDP");
             }
 

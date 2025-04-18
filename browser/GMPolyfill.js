@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Tallycord, a modification for Discord's desktop app
  * Copyright (c) 2022 Vendicated and contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,18 +14,17 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
 function parseHeaders(headers) {
-    if (!headers)
-        return {};
+    if (!headers) return {};
     const result = {};
     const headersArr = headers.trim().split("\n");
     for (var i = 0; i < headersArr.length; i++) {
         var row = headersArr[i];
-        var index = row.indexOf(":")
-            , key = row.slice(0, index).trim().toLowerCase()
-            , value = row.slice(index + 1).trim();
+        var index = row.indexOf(":"),
+            key = row.slice(0, index).trim().toLowerCase(),
+            value = row.slice(index + 1).trim();
 
         if (result[key] === undefined) {
             result[key] = value;
@@ -42,7 +41,7 @@ function blobTo(to, blob) {
     if (to === "arrayBuffer" && blob.arrayBuffer) return blob.arrayBuffer();
     return new Promise((resolve, reject) => {
         var fileReader = new FileReader();
-        fileReader.onload = event => resolve(event.target.result);
+        fileReader.onload = (event) => resolve(event.target.result);
         if (to === "arrayBuffer") fileReader.readAsArrayBuffer(blob);
         else if (to === "text") fileReader.readAsText(blob, "utf-8");
         else reject("unknown to");
@@ -56,7 +55,7 @@ function GM_fetch(url, opt) {
         options.url = url;
         options.data = options.body;
         options.responseType = "blob";
-        options.onload = resp => {
+        options.onload = (resp) => {
             var blob = resp.response;
             resp.blob = () => Promise.resolve(blob);
             resp.arrayBuffer = () => blobTo("arrayBuffer", blob);
