@@ -26,6 +26,7 @@
 .vc-notification {
     display: flex;
     flex-direction: row;
+    background-color: var(--background-secondary-alt);
     padding: 1.25rem;
     gap: 1.25rem;
 }
