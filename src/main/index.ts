@@ -43,11 +43,11 @@ if (IS_TALLYTOP || !IS_VANILLA) {
             }
             switch (url) {
                 case "renderer.js.map":
-                case "vencordDesktopRenderer.js.map":
+                case "tallycordDesktopRenderer.js.map":
                 case "preload.js.map":
-                case "vencordDesktopPreload.js.map":
+                case "tallycordDesktopPreload.js.map":
                 case "patcher.js.map":
-                case "vencordDesktopMain.js.map":
+                case "tallycordDesktopMain.js.map":
                     cb(join(__dirname, url));
                     break;
                 default:

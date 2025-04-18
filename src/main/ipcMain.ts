@@ -131,7 +131,7 @@ ipcMain.handle(IpcEvents.OPEN_MONACO_EDITOR, async () => {
         autoHideMenuBar: true,
         darkTheme: true,
         webPreferences: {
-            preload: join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "vencordDesktopPreload.js"),
+            preload: join(__dirname, IS_DISCORD_DESKTOP ? "preload.js" : "tallycordDesktopPreload.js"),
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: false
