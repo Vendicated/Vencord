@@ -33,7 +33,7 @@ import definePlugin from "@utils/types";
 import { Forms, Toasts, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-const CONTRIBUTOR_BADGE = "https://tallycord.dev/assets/favicon.png";
+const CONTRIBUTOR_BADGE = "https://raw.githubusercontent.com/thenatally/Tallytop/refs/heads/main/static/icon.png";
 
 const ContributorBadge: ProfileBadge = {
     description: "Tallycord Contributor",
