@@ -25,7 +25,7 @@ export function LazyComponent<T extends object = any>(factory: () => ComponentTy
         return <Component {...props} />;
     };
 
-    LazyComponent.$$tallycordrdrdGetWrappedComponent = get;
+    LazyComponent.$$tallycordGetWrappedComponent = get;
 
     return LazyComponent;
 }

@@ -43,7 +43,7 @@ async function initSystemValues() {
 export async function toggle(isEnabled: boolean) {
     if (!style) {
         if (isEnabled) {
-            style = createStyle("tallycordrdrd-custom-css");
+            style = createStyle("tallycord-custom-css");
             TallycordNative.quickCss.addChangeListener(css => {
                 style.textContent = css;
                 // At the time of writing this, changing textContent resets the disabled state
@@ -56,7 +56,7 @@ export async function toggle(isEnabled: boolean) {
 }
 
 async function initThemes() {
-    themesStyle ??= createStyle("tallycordrdrd-themes");
+    themesStyle ??= createStyle("tallycord-themes");
 
     const { themeLinks, enabledThemes } = Settings;
 
@@ -81,7 +81,7 @@ async function initThemes() {
             links.push(URL.createObjectURL(blob));
         }
     } else {
-        const localThemes = enabledThemes.map(theme => `tallycordrdrd:///themes/${theme}?v=${Date.now()}`);
+        const localThemes = enabledThemes.map(theme => `tallycord:///themes/${theme}?v=${Date.now()}`);
         links.push(...localThemes);
     }
 

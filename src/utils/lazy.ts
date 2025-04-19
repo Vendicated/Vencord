@@ -36,7 +36,7 @@ const unconfigurable = ["arguments", "caller", "prototype"];
 const handler: ProxyHandler<any> = {};
 
 export const SYM_LAZY_GET = Symbol.for("tallycord.lazy.get");
-export const SYM_LAZY_CACHED = Symbol.for("tallycordrdrd.lazy.cached");
+export const SYM_LAZY_CACHED = Symbol.for("tallycord.lazy.cached");
 
 for (const method of [
     "apply",

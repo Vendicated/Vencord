@@ -88,7 +88,7 @@ export const filters = {
             return false;
         };
 
-        filter.$$tallycordrdrdProps = [...code];
+        filter.$$tallycordProps = [...code];
         return filter;
     }
 };
