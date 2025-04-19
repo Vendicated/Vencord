@@ -22,7 +22,7 @@ import { ButtonProps } from "@webpack/types";
 
 import { Heart } from "./Heart";
 
-export default function VCDonateButton({
+export function VCDonateButton({
     look = Button.Looks.LINK,
     color = Button.Colors.TRANSPARENT,
     ...props
