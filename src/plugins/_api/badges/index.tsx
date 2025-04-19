@@ -19,6 +19,7 @@
 import "./fixDiscordBadgePadding.css";
 
 import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
+import VCDonateButton from "@components/DonateButton";
 import DonateButton from "@components/DonateButton";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
@@ -213,7 +214,7 @@ export default definePlugin({
                             </ModalContent>
                             <ModalFooter>
                                 <Flex style={{ width: "100%", justifyContent: "center" }}>
-                                    <DonateButton />
+                                    <VCDonateButton />
                                 </Flex>
                             </ModalFooter>
                         </ModalRoot>
