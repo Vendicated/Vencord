@@ -29,7 +29,8 @@ export default definePlugin({
         {
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /,isOwner:(\i),/,
+                // The isOwner prop is used in more tha one component in this module. Make sure we patch the right one
+                match: /,isOwner:(\i),(?=[^}]+guildId)/,
                 replace: ",_isOwner:$1=$self.isGuildOwner(e),"
             }
         }
@@ -42,6 +43,7 @@ export default definePlugin({
         // guild id is in props twice, fallback if the first is undefined
         const guildId = props.guildId ?? props.channel?.guild_id;
         const userId = props.user.id;
+        console.log(props);
 
         return GuildStore.getGuild(guildId)?.ownerId === userId;
     },
