@@ -91,7 +91,8 @@ export default definePlugin({
             }
         },
         {
-            find: 'location:"UserProfilePanel"',
+            // location: "UserProfileSiebar"
+            find: ".PANEL,children:[",
             replacement: {
                 match: /{profileType:\i\.\i\.PANEL,children:\[/,
                 replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
