@@ -15,6 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
+import "./styles.css";
+
 import { addChatBarButton, ChatBarButton, ChatBarButtonFactory, removeChatBarButton } from "@api/ChatButtons";
 import { sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
@@ -22,7 +25,6 @@ import { localStorage } from "@utils/localStorage";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
 import { Button, Forms, SelectedChannelStore, TextInput, useState } from "@webpack/common";
-import "./styles.css";
 
 interface Reminder {
     message: string;
