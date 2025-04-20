@@ -51,7 +51,7 @@ const settings = definePluginSettings({
                     } else {
                         oneko.source = "https://raw.githubusercontent.com/coolesding/onekocord/refs/heads/main/skins/default.png";
                     }
-                    onekos.push();
+                    onekos.push(oneko);
                 }
             } else {
                 for (let index = onekos.length; index >= (settings.store.number || 0); index--) {
