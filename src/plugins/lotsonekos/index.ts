@@ -33,7 +33,9 @@ const skins = [
     "spirit",
     "tora",
     "valentine",
-];
+] as const;
+
+type skin = (typeof skins)[number];
 let enabled = false;
 const settings = definePluginSettings({
     number: {
@@ -43,7 +45,13 @@ const settings = definePluginSettings({
             if (!enabled) return;
             if ((settings.store.number || 0) > onekos.length) {
                 for (let index = onekos.length; index < (settings.store.number || 0); index++) {
-                    onekos.push(new Oneko());
+                    const oneko = new Oneko();
+                    if (settings.store.randomSkins) {
+                        oneko.source = `https://raw.githubusercontent.com/coolesding/onekocord/refs/heads/main/skins/${skins[Math.floor(Math.random() * skins.length)]}.png`;
+                    } else {
+                        oneko.source = "https://raw.githubusercontent.com/coolesding/onekocord/refs/heads/main/skins/default.png";
+                    }
+                    onekos.push();
                 }
             } else {
                 for (let index = onekos.length; index >= (settings.store.number || 0); index--) {
