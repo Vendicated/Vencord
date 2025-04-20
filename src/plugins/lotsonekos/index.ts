@@ -10,7 +10,13 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import Oneko from "./oneko";
 
-let onekos: Oneko[] = [];
+enum State {
+    Sleep, Wander, Mouse, Hyper, Chase
+}
+
+let cats: ({ oneko: Oneko, state: State; chasing?: number; })[] = [];
+let mouseX = 0;
+let mouseY = 0;
 let randomTargetInterval: NodeJS.Timeout | null = null;
 const skins = [
     "default",
@@ -43,19 +49,19 @@ const settings = definePluginSettings({
         description: "Number of onekos",
         onChange: () => {
             if (!enabled) return;
-            if ((settings.store.number || 0) > onekos.length) {
-                for (let index = onekos.length; index < (settings.store.number || 0); index++) {
+            if ((settings.store.number || 0) > cats.length) {
+                for (let index = cats.length; index < (settings.store.number || 0); index++) {
                     const oneko = new Oneko();
                     if (settings.store.randomSkins) {
                         oneko.source = `https://raw.githubusercontent.com/coolesding/onekocord/refs/heads/main/skins/${skins[Math.floor(Math.random() * skins.length)]}.png`;
                     } else {
                         oneko.source = "https://raw.githubusercontent.com/coolesding/onekocord/refs/heads/main/skins/default.png";
                     }
-                    onekos.push(oneko);
+                    cats.push({ oneko, state: State.Wander });
                 }
             } else {
-                for (let index = onekos.length; index >= (settings.store.number || 0); index--) {
-                    onekos.pop()?.element?.remove();
+                for (let index = cats.length; index >= (settings.store.number || 0); index--) {
+                    cats.pop()?.oneko.element?.remove();
                 }
             }
 
@@ -86,13 +92,13 @@ const settings = definePluginSettings({
             if (!enabled) return;
 
             if (settings.store.randomSkins) {
-                onekos.forEach(oneko => {
-                    oneko.source = `https://raw.githubusercontent.com/coolesding/onekocord/refs/heads/main/skins/${skins[Math.floor(Math.random() * skins.length)]}.png`;
+                cats.forEach(cat => {
+                    cat.oneko.source = `https://raw.githubusercontent.com/coolesding/onekocord/refs/heads/main/skins/${skins[Math.floor(Math.random() * skins.length)]}.png`;
                 });
             } else {
-                onekos.forEach(oneko => {
+                cats.forEach(cat => {
 
-                    oneko.source = "https://raw.githubusercontent.com/coolesding/onekocord/refs/heads/main/skins/default.png";
+                    cat.oneko.source = "https://raw.githubusercontent.com/coolesding/onekocord/refs/heads/main/skins/default.png";
                 });
 
             }
@@ -109,9 +115,9 @@ const getRandomPosition = () => {
 
 const assignRandomTargets = () => {
     if (!settings.store.followMouse) {
-        onekos.forEach(oneko => {
+        cats.forEach(cat => {
             const { x, y } = getRandomPosition();
-            oneko.setTarget(x, y);
+            cat.oneko.setTarget(x, y);
         });
     }
 };
@@ -122,7 +128,7 @@ const setupRandomTargets = () => {
         randomTargetInterval = null;
     }
 
-    if (!settings.store.followMouse && onekos.length > 0) {
+    if (!settings.store.followMouse && cats.length > 0) {
         assignRandomTargets();
 
         const minMs = (settings.store.minRandomInterval || 2) * 1000;
@@ -130,24 +136,85 @@ const setupRandomTargets = () => {
         const intervalMs = Math.max(500, minMs);
 
         randomTargetInterval = setInterval(() => {
-            onekos.forEach(oneko => {
-                if (Math.random() < 0.3) {
-                    const { x, y } = getRandomPosition();
-                    if (oneko.idleTime > 10)
-                        oneko.setTarget(x, y);
+            cats.forEach(cat => {
+                switch (cat.state) {
+                    case State.Wander: {
+                        if (Math.random() < 0.3) {
+                            const { x, y } = getRandomPosition();
+                            if (cat.oneko.idleTime > 10)
+                                cat.oneko.setTarget(x, y);
+
+                            if (Math.random() < 0.5)
+                                setRandomState(cat);
+                        }
+                    } break;
+                    case State.Hyper: {
+                        const { x, y } = getRandomPosition();
+                        if (cat.oneko.idleTime > 10) {
+                            cat.oneko.setTarget(x, y);
+                            if (Math.random() < 0.2)
+                                setRandomState(cat);
+                        }
+                    } break;
+                    case State.Chase: {
+                        if (cat.chasing === undefined) cat.chasing = Math.floor(Math.random() * cats.length);
+                        if (!cats[cat.chasing]) cat.chasing = Math.floor(Math.random() * cats.length);
+                        const { x, y } = cats[cat.chasing].oneko!;
+                        cat.oneko.setTarget(x, y);
+                        if (Math.random() < 0.1) {
+                            setRandomState(cat);
+                            cat.chasing = undefined;
+                        }
+
+                    } break;
+                    case State.Mouse: {
+                        cat.oneko.setTarget(mouseX, mouseY);
+                        if (Math.random() < 0.2)
+                            setRandomState(cat);
+                    } break;
+                    case State.Sleep: {
+                        if (Math.random() < 0.05)
+                            setRandomState(cat);
+                    } break;
                 }
+
             });
         }, intervalMs);
     }
 };
 
+function setRandomState(cat: typeof cats[number]) {
+    const states: State[] = [
+        State.Chase,
+        State.Hyper,
+        State.Mouse,
+        State.Wander, State.Chase,
+        State.Hyper,
+        State.Mouse,
+        State.Wander, State.Chase,
+        State.Hyper,
+        State.Mouse,
+        State.Wander, State.Chase,
+        State.Hyper,
+        State.Mouse,
+        State.Wander,
+        State.Sleep,
+    ];
+
+    cat.state = states[Math.floor(Math.random() * states.length)];
+}
+
 const mouseMoveEventListener = (e: MouseEvent) => {
     if (settings.store.followMouse) {
-        onekos.forEach(oneko => {
-            oneko.setTarget(e.clientX, e.clientY);
+        cats.forEach(cat => {
+            cat.oneko.setTarget(e.clientX, e.clientY);
         });
     }
+
+    [mouseX, mouseY] = [e.clientX, e.clientY];
 };
+
+
 
 export default definePlugin({
     name: "LotsOnekos",
@@ -157,19 +224,19 @@ export default definePlugin({
     start() {
         enabled = true;
         for (let index = 0; index < (settings.store.number || 0); index++) {
-            onekos.push(new Oneko());
+            cats.push({ oneko: new Oneko(), state: State.Wander });
         }
         document.addEventListener("mousemove", mouseMoveEventListener);
 
         setupRandomTargets();
         if (settings.store.randomSkins) {
-            onekos.forEach(oneko => {
-                oneko.source = `https://raw.githubusercontent.com/coolesding/onekocord/refs/heads/main/skins/${skins[Math.floor(Math.random() * skins.length)]}.png`;
+            cats.forEach(cat => {
+                cat.oneko.source = `https://raw.githubusercontent.com/coolesding/onekocord/refs/heads/main/skins/${skins[Math.floor(Math.random() * skins.length)]}.png`;
             });
         } else {
-            onekos.forEach(oneko => {
+            cats.forEach(cat => {
 
-                oneko.source = "https://raw.githubusercontent.com/coolesding/onekocord/refs/heads/main/skins/default.png";
+                cat.oneko.source = "https://raw.githubusercontent.com/coolesding/onekocord/refs/heads/main/skins/default.png";
             });
 
         }
@@ -177,8 +244,8 @@ export default definePlugin({
     },
     stop() {
         enabled = false;
-        onekos.forEach(oneko => oneko.element?.remove());
-        onekos = [];
+        cats.forEach(cat => cat.oneko.element?.remove());
+        cats = [];
         document.removeEventListener("mousemove", mouseMoveEventListener);
         window.removeEventListener("resize", assignRandomTargets);
 
