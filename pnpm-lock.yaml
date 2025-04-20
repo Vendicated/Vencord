@@ -31,9 +31,6 @@ importers:
       gifenc:
         specifier: github:mattdesl/gifenc#64842fca317b112a8590f8fef2bf3825da8f6fe3
         version: https://codeload.github.com/mattdesl/gifenc/tar.gz/64842fca317b112a8590f8fef2bf3825da8f6fe3
-      lots-o-nekos:
-        specifier: 2.0.3
-        version: 2.0.3
       monaco-editor:
         specifier: ^0.52.2
         version: 0.52.2
@@ -1720,9 +1717,6 @@ packages:
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
     hasBin: true
-
-  lots-o-nekos@2.0.3:
-    resolution: {integrity: sha512-jwoNiFdOYdkVq92kx7VlgPoZ8uBALAlWLqSLiqXD2xrPk012Ki5MKnvL6nYDhxhki80PGwZSwJ1TLgu/3SiUrA==}
 
   lower-case@2.0.2:
     resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==}
@@ -4182,8 +4176,6 @@ snapshots:
   loose-envify@1.4.0:
     dependencies:
       js-tokens: 4.0.0
-
-  lots-o-nekos@2.0.3: {}
 
   lower-case@2.0.2:
     dependencies:
