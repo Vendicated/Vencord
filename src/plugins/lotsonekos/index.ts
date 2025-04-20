@@ -43,23 +43,8 @@ function removeDevStyle() {
 }
 
 
-enum State {
-    Sleep, Wander, Mouse, Hyper, Chase
-}
-const states = {
-    [State.Chase]: "chase",
-    [State.Hyper]: "hyper",
-    [State.Mouse]: "mouse",
-    [State.Sleep]: "sleep",
-    [State.Wander]: "wander"
-};
-const stateNames = {
-    chase: State.Chase,
-    hyper: State.Hyper,
-    mouse: State.Mouse,
-    sleep: State.Sleep,
-    wander: State.Wander
-} as const;
+export type State = "sleep" | "wander" | "mouse" | "hyper" | "chase";
+export const allStates: State[] = ["sleep", "wander", "mouse", "hyper", "chase"];
 
 type Personality = "lazy" | "chaotic" | "friendly" | "grumpy";
 
@@ -68,16 +53,17 @@ const skins = [
     "gray", "jess", "kina", "lucy", "maia", "maria", "mike", "silversky",
     "snuupy", "spirit", "tora", "valentine"
 ] as const;
-type Skin = (typeof skins)[number];
+export type Skin = (typeof skins)[number];
 
-let cats: {
+
+let cats: Array<{
     oneko: Oneko;
     state: State;
     stateStart: number;
     personality: Personality;
     chasedCount: number;
     chasing?: number;
-}[] = [];
+}> = [];
 
 let mouseX = 0;
 let mouseY = 0;
@@ -86,28 +72,28 @@ let enabled = false;
 
 
 const stateMinTime: Record<State, number> = {
-    [State.Wander]: 5000,
-    [State.Hyper]: 3000,
-    [State.Chase]: 4000,
-    [State.Mouse]: 4000,
-    [State.Sleep]: 6000
+    wander: 50000,
+    hyper: 20000,
+    chase: 40000,
+    mouse: 40000,
+    sleep: 60000,
 };
 
 
 const baseWeights: Record<State, Partial<Record<State, number>>> = {
-    [State.Wander]: { [State.Hyper]: 0.2, [State.Sleep]: 0.1, [State.Mouse]: 0.05, [State.Chase]: 0.1 },
-    [State.Hyper]: { [State.Wander]: 0.4, [State.Sleep]: 0.1, [State.Mouse]: 0.05, [State.Chase]: 0.2 },
-    [State.Chase]: { [State.Wander]: 0.3, [State.Hyper]: 0.1, [State.Sleep]: 0.05, [State.Mouse]: 0.1 },
-    [State.Mouse]: { [State.Wander]: 0.3, [State.Hyper]: 0.1, [State.Sleep]: 0.05, [State.Chase]: 0.1 },
-    [State.Sleep]: { [State.Wander]: 0.5, [State.Mouse]: 0.05 }
+    wander: { hyper: 0.2, sleep: 0.1, mouse: 0.05, chase: 0.1 },
+    hyper: { wander: 0.4, sleep: 0.1, mouse: 0.05, chase: 0.2 },
+    chase: { wander: 0.3, hyper: 0.1, sleep: 0.05, mouse: 0.1 },
+    mouse: { wander: 0.3, hyper: 0.1, sleep: 0.05, chase: 0.1 },
+    sleep: { wander: 0.5, mouse: 0.05 },
 };
 
 
 const personalityModifiers: Record<Personality, Partial<Record<State, number>>> = {
-    lazy: { [State.Sleep]: 0.5, [State.Wander]: 0.3 },
-    chaotic: { [State.Hyper]: 0.4, [State.Chase]: 0.3, [State.Mouse]: 0.1 },
-    friendly: { [State.Wander]: 0.4, [State.Mouse]: 0.3 },
-    grumpy: { [State.Sleep]: 0.4, [State.Chase]: 0.2 }
+    lazy: { sleep: 0.5, wander: 0.3 },
+    chaotic: { hyper: 0.4, chase: 0.3, mouse: 0.1 },
+    friendly: { wander: 0.4, mouse: 0.3 },
+    grumpy: { sleep: 0.4, chase: 0.2 },
 };
 
 const getSkinURL = (skin: Skin) =>
@@ -131,7 +117,9 @@ const settings = definePluginSettings({
         onChange: () => {
             if (!enabled) return;
             cats.forEach(cat => {
-                cat.oneko.source = settings.store.randomSkins ? getSkinURL(randomSkin()) : getSkinURL("default");
+                cat.oneko.source = settings.store.randomSkins
+                    ? getSkinURL(randomSkin())
+                    : getSkinURL("default");
             });
         }
     },
@@ -146,7 +134,6 @@ const settings = definePluginSettings({
             }
         }
     }
-
 });
 
 function pickPersonality(): Personality {
@@ -160,10 +147,15 @@ function refreshCats() {
 
     while (cats.length < desired) {
         const oneko = new Oneko();
-        oneko.source = settings.store.randomSkins ? getSkinURL(randomSkin()) : getSkinURL("default");
+        oneko.source = settings.store.randomSkins
+            ? getSkinURL(randomSkin())
+            : getSkinURL("default");
+        const location = getRandomPosition();
+        oneko.x = location.x;
+        oneko.y = location.y;
         cats.push({
             oneko,
-            state: State.Wander,
+            state: Object.keys(stateMinTime)[Math.floor(Math.random() * Object.keys(stateMinTime).length)] as State,
             stateStart: Date.now(),
             personality: pickPersonality(),
             chasedCount: 0
@@ -173,6 +165,7 @@ function refreshCats() {
     while (cats.length > desired) {
         cats.pop()?.oneko.element?.remove();
     }
+
     setupRandomTargets();
 }
 
@@ -183,59 +176,97 @@ function getRandomPosition() {
 function setupRandomTargets() {
     if (randomTargetInterval) clearInterval(randomTargetInterval);
     if (!settings.store.followMouse && cats.length > 0) {
-        cats.forEach(c => c.oneko.setTarget(...(Object.values(getRandomPosition())) as [number, number]));
-        randomTargetInterval = setInterval(tick, 500);
+        cats.forEach(c => c.oneko.setTarget(...Object.values(getRandomPosition()) as [number, number]));
+        randomTargetInterval = setInterval(tick, 50);
     }
 }
 
 function tick() {
     const now = Date.now();
     cats.forEach(cat => {
-
         const timeSec = Math.floor((now - cat.stateStart) / 1000);
+
+
         cat.oneko.element?.setAttribute("title",
-            `😺 ${cat.personality} | ${states[cat.state]} (${timeSec}s)`);
+            `😺 ${cat.personality} | ${cat.state} (${timeSec}s)`);
 
         if (settings.store.devMode && cat.oneko.element) {
-            cat.oneko.element.setAttribute("data-dev", `${cat.personality} | ${states[cat.state]} (${timeSec}s)`);
+            cat.oneko.element.setAttribute("data-dev",
+                `${cat.personality} | ${cat.state} (${timeSec}s)`
+            );
         } else {
             cat.oneko.element?.removeAttribute("data-dev");
         }
 
-        if (cat.state === State.Wander && Math.random() < 0.3 && cat.oneko.idleTime > 10) {
-            const { x, y } = getRandomPosition(); cat.oneko.setTarget(x, y);
+
+        if (cat.state === "wander" && Math.random() < 0.3 && cat.oneko.idleTime > 10) {
+            const { x, y } = getRandomPosition();
+            cat.oneko.setTarget(x, y);
         }
-        if (cat.state === State.Hyper) {
+        if (cat.state === "hyper") {
             cat.oneko.speed = 20;
-            if (cat.oneko.idleTime > 10) cat.oneko.setTarget(...(Object.values(getRandomPosition())) as [number, number]);
+            if (cat.oneko.idleTime > 10) {
+                const { x, y } = getRandomPosition();
+                cat.oneko.setTarget(x, y);
+            }
         }
-        if (cat.state === State.Chase) {
-            if (cat.chasing === undefined || !cats[cat.chasing]) cat.chasing = Math.floor(Math.random() * cats.length);
+        if (cat.state === "chase") {
+            if (cat.chasing === undefined || !cats[cat.chasing]) {
+                cat.chasing = Math.floor(Math.random() * cats.length);
+            }
             const target = cats[cat.chasing];
             cat.oneko.setTarget(target.oneko.x, target.oneko.y);
             target.chasedCount++;
         }
-        if (cat.state === State.Mouse) {
+        if (cat.state === "mouse") {
             cat.oneko.setTarget(mouseX, mouseY);
         }
 
+        if (cat.state === "sleep") {
+            const { oneko } = cat;
+            oneko.targetX = oneko.x;
+            oneko.targetY = oneko.y;
+            oneko.idleAnimation = "sleeping";
+            if (oneko.idleAnimationFrame < 140)
+                oneko.idleAnimationFrame = 140;
+
+
+
+            if (Math.hypot(cat.oneko.x - mouseX, cat.oneko.y - mouseY) < 16) {
+                cat.state = "mouse";
+                oneko.setTarget(mouseX, mouseY);
+                oneko.idleAnimation = null;
+                cat.stateStart = Date.now();
+            }
+        }
+
+
 
         const dt = now - cat.stateStart;
-        if (dt >= stateMinTime[cat.state]) {
+
+
+        if (cat.oneko.idleTime > 10 && dt >= stateMinTime[cat.state]) {
             const weights: Partial<Record<State, number>> = { ...baseWeights[cat.state] };
 
-            for (const [s, w] of Object.entries(personalityModifiers[cat.personality])) {
-                weights[State[s as keyof typeof State]] = (weights[State[s as keyof typeof State]] || 0) + w!;
+
+            Object.entries(personalityModifiers[cat.personality]).forEach(([s, w]) => {
+                weights[s as State] = (weights[s as State] || 0) + (w || 0);
+            });
+
+
+            if (Math.hypot(cat.oneko.x - mouseX, cat.oneko.y - mouseY) < 100) {
+                weights.mouse = (weights.mouse || 0) + 0.5;
             }
 
-            if (Math.hypot(cat.oneko.x - mouseX, cat.oneko.y - mouseY) < 100)
-                weights[State.Mouse] = (weights[State.Mouse] || 0) + 0.2;
 
-            if (cats.some(c => c.state === State.Chase))
-                weights[State.Chase] = (weights[State.Chase] || 0) + 0.1;
+            if (cats.some(c => c.state === "chase")) {
+                weights.chase = (weights.chase || 0) + 0.1;
+            }
 
-            if (cat.chasedCount > 5)
-                weights[State.Sleep] = (weights[State.Sleep] || 0) + 0.3;
+
+            if (cat.chasedCount > 5) {
+                weights.sleep = (weights.sleep || 0) + 0.3;
+            }
 
 
             const entries = Object.entries(weights) as [string, number][];
@@ -244,17 +275,18 @@ function tick() {
             for (const [key, w] of entries) {
                 r -= w;
                 if (r <= 0) {
-                    console.log(key);
-                    cat.state = stateNames[key as keyof typeof State];
+                    cat.state = key as State;
                     break;
                 }
             }
+
 
             cat.stateStart = now;
             cat.chasing = undefined;
             cat.oneko.speed = 10;
             cat.chasedCount = 0;
         }
+
     });
 }
 
@@ -264,6 +296,7 @@ const mouseMoveEventListener = (e: MouseEvent) => {
         cats.forEach(cat => cat.oneko.setTarget(mouseX, mouseY));
     }
 };
+
 const assignRandomTargets = () => {
     if (!settings.store.followMouse) {
         cats.forEach(cat => {
@@ -282,7 +315,9 @@ export default definePlugin({
         enabled = true;
         refreshCats();
         document.addEventListener("mousemove", mouseMoveEventListener);
-        window.addEventListener("resize", () => cats.forEach(c => c.oneko.setTarget(...(Object.values(getRandomPosition())) as [number, number])));
+        window.addEventListener("resize", () => cats.forEach(c => c.oneko.setTarget(
+            ...Object.values(getRandomPosition()) as [number, number]
+        )));
         setupRandomTargets();
         if (settings.store.devMode) {
             injectDevStyle();

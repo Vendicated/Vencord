@@ -116,7 +116,7 @@ class Oneko extends EventTarget {
 
     /**
      * How long the Oneko has been idle for. Measured by how many times the Oneko's `element` has been updated.
-     * @type {number}
+     * @type {string | null}
      */
     idleAnimation;
 
