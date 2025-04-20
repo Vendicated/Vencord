@@ -53,6 +53,14 @@ const states = {
     [State.Sleep]: "sleep",
     [State.Wander]: "wander"
 };
+const stateNames = {
+    chase: State.Chase,
+    hyper: State.Hyper,
+    mouse: State.Mouse,
+    sleep: State.Sleep,
+    wander: State.Wander
+} as const;
+
 type Personality = "lazy" | "chaotic" | "friendly" | "grumpy";
 
 const skins = [
@@ -236,7 +244,8 @@ function tick() {
             for (const [key, w] of entries) {
                 r -= w;
                 if (r <= 0) {
-                    cat.state = State[key as keyof typeof State];
+                    console.log(key);
+                    cat.state = stateNames[key as keyof typeof State];
                     break;
                 }
             }
