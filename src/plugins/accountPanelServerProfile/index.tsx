@@ -120,7 +120,7 @@ export default definePlugin({
         }
 
         const currentChannel = getCurrentChannel();
-        if (currentChannel?.getGuildId() == null || !UserProfile) {
+        if (currentChannel?.getGuildId() == null || !UserProfile.$$vencordGetWrappedComponent()) {
             return originalRenderPopout();
         }
 
