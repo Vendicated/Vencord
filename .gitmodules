@@ -1,0 +1,39 @@
+[submodule "src/userplugins/bigFileUpload"]
+	path = src/userplugins/bigFileUpload
+	url = https://github.com/ScattrdBlade/bigFileUpload
+[submodule "src/userplugins/collapseChatButtons"]
+	path = src/userplugins/collapseChatButtons
+	url = https://github.com/coldcord/collapseChatButtons
+[submodule "src/userplugins/OfficialThemeBaseForce"]
+	path = src/userplugins/OfficialThemeBaseForce
+	url = https://github.com/surgedevs/OfficialThemeBaseForce
+[submodule "src/userplugins/plugin-unitConverter"]
+	path = src/userplugins/plugin-unitConverter
+	url = https://github.com/sadan4/plugin-unitConverter
+[submodule "src/userplugins/randomGary"]
+	path = src/userplugins/randomGary
+	url = https://github.com/Zach11111/randomGary
+[submodule "src/userplugins/userplugininstaller"]
+	path = src/userplugins/userplugininstaller
+	url = https://git.nin0.dev/userplugins/userplugininstaller
+[submodule "src/userplugins/vc-fullUserInChatbox"]
+	path = src/userplugins/vc-fullUserInChatbox
+	url = https://github.com/sadan4/vc-fullUserInChatbox
+[submodule "src/userplugins/vc-message-logger-enhanced"]
+	path = src/userplugins/vc-message-logger-enhanced
+	url = https://github.com/Syncxv/vc-message-logger-enhanced
+[submodule "src/userplugins/vc-newPluginsManager"]
+	path = src/userplugins/vc-newPluginsManager
+	url = https://github.com/Sqaaakoi/vc-newPluginsManager
+[submodule "src/userplugins/vc-sidebarchat"]
+	path = src/userplugins/vc-sidebarchat
+	url = https://github.com/Masterjoona/vc-sidebarchat
+[submodule "src/userplugins/vc-timezones"]
+	path = src/userplugins/vc-timezones
+	url = https://github.com/Syncxv/vc-timezones
+[submodule "src/userplugins/vencord-ExitSounds"]
+	path = src/userplugins/vencord-ExitSounds
+	url = https://github.com/hauntii/vencord-ExitSounds
+[submodule "src/userplugins/vencord-whos-watching"]
+	path = src/userplugins/vencord-whos-watching
+	url = https://github.com/fres621/vencord-whos-watching
