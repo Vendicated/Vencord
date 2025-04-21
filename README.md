@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>166 additional plugins</summary>
+<summary>167 additional plugins</summary>
 
 ### All Platforms
 
@@ -38,6 +38,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - CleanChannelName by AutumnVN
 - ClientSideBlock by Samwich
 - CommandPalette by Ethan
+- CopyStickerLinks by Byeoon
 - CopyUserMention by Cortex & castdrian
 - CustomSounds by TheKodeToad & SpikeHD
 - CustomTimestamps by Rini & nvhrr
