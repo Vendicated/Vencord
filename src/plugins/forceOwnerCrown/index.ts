@@ -43,7 +43,6 @@ export default definePlugin({
         // guild id is in props twice, fallback if the first is undefined
         const guildId = props.guildId ?? props.channel?.guild_id;
         const userId = props.user.id;
-        console.log(props);
 
         return GuildStore.getGuild(guildId)?.ownerId === userId;
     },
