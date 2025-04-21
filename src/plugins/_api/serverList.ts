@@ -32,11 +32,15 @@ export default definePlugin({
             }
         },
         {
-            find: "#{intl::SERVERS}),children",
+            find: "#{intl::SERVERS}),gap:\"xs\",children:",
             replacement: [
                 {
-                    match: /(?<=#{intl::SERVERS}\),children:)\i\.map\(\i\)/,
-                    replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"
+                    match: /(?<=#{intl::SERVERS}\),gap:"xs",children:)(\i\.map\(.{10,50}?)(}\))/,
+                    replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($1)$2"
+                },
+                {
+                    match: /children:.{0,2000}?\{\}\)\]/,
+                    replace: "$&.concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below))"
                 }
             ]
         }

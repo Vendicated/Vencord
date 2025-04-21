@@ -77,6 +77,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - GlobalBadges by HypedDomi & Hosted by Wolfie
 - GoogleThat by Samwich
 - HideChatButtons by iamme
+- HideServers by bepvte
 - HolyNotes by Wolfie
 - HomeTyping by Samwich
 - HopOn by ImLvna
