@@ -36,6 +36,7 @@ export default definePlugin({
                     match: /let\{[^}]*lostPermissionTooltipText:\i[^}]*\}=(\i),/,
                     replace: "$&vencordProps=$1,"
                 },
+                // The decorators component is now it's own function so we need to pass the props needed
                 {
                     match: /decorators:.{0,100}?(?=user:)/,
                     replace: "$&vencordProps:typeof vencordProps!=='undefined'?vencordProps:void 0,"
