@@ -114,9 +114,15 @@ export default definePlugin({
             predicate: () => settings.store.sidebar,
             replacement: [
                 // Create the isBetterFolders variable in the GuildsBar component
+                // Needed because we access this from a closure so we can't use arguments[0]
                 {
                     match: /let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i,)/,
                     replace: "$&,isBetterFolders"
+                },
+                // Discord extacts the folders component, we need to pass the isBetterFolders and betterFoldersExpandedIds variable to it
+                {
+                    match: /0,\i\.jsxs?[^0}]{0,100}guildDiscoveryButton:\i,/g,
+                    replace: "$&isBetterFolders:arguments[0]?.isBetterFolders,betterFoldersExpandedIds:arguments[0]?.betterFoldersExpandedIds,"
                 },
                 // If we are rendering the Better Folders sidebar, we filter out guilds that are not in folders and unexpanded folders
                 {
@@ -132,6 +138,12 @@ export default definePlugin({
                 {
                     match: /unreadMentionsIndicatorBottom,.+?}\)\]/,
                     replace: "$&.filter($self.makeGuildsBarTreeFilter(!!arguments[0]?.isBetterFolders))"
+                },
+                // Don't render the tiny separator line at the top of the Better Folders sidebar
+                // Only needed with the sidebar variant with the sticky top bar
+                {
+                    match: /(?=\(0,\i\.jsxs?\)[^0]+fullWidth:)/,
+                    replace: "!!arguments[0]?.isBetterFolders?null:"
                 },
                 // Export the isBetterFolders variable to the folders component
                 {
@@ -314,7 +326,12 @@ export default definePlugin({
     makeGuildsBarTreeFilter(isBetterFolders: boolean) {
         return child => {
             if (!isBetterFolders) return true;
-
+            if (child?.type === "ul") {
+                if (Array.isArray(child?.props?.children?.props?.children?.props?.children)) {
+                    child.props.children.props.children.props.children = child.props.children.props.children.props.children.filter(child => child?.props?.className?.includes("bottomSection") || "renderTreeNode" in (child?.props ?? {}));
+                }
+            }
+            return true;
             if (child?.props?.className?.includes("itemsContainer") && child.props.children != null) {
                 // Filter out everything but the scroller for the guild list
                 child.props.children = child.props.children.filter(child => child?.props?.onScroll != null);
