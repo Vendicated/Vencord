@@ -136,8 +136,14 @@ export default definePlugin({
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the scroller for the guild list from the GuildsBar Tree children
                 {
-                    match: /unreadMentionsIndicatorBottom,.+?}\)\]/,
+                    match: /lurkingGuildIds:\i\}\)\](?=\}\)\})/,
                     replace: "$&.filter($self.makeGuildsBarTreeFilter(!!arguments[0]?.isBetterFolders))"
+                },
+                // With one of the sidebar versions, there is a sticky top bar. Don't render it if we are rendering the Better Folders sidebar
+                {
+                    // [^0] to not match any other JSX call
+                    match: /(?=\(0,\i\.jsxs?\)[^0]+\.topSection)/,
+                    replace: "!!arguments[0]?.isBetterFolders?null:"
                 },
                 // Don't render the tiny separator line at the top of the Better Folders sidebar
                 // Only needed with the sidebar variant with the sticky top bar
@@ -326,19 +332,7 @@ export default definePlugin({
     makeGuildsBarTreeFilter(isBetterFolders: boolean) {
         return child => {
             if (!isBetterFolders) return true;
-            if (child?.type === "ul") {
-                if (Array.isArray(child?.props?.children?.props?.children?.props?.children)) {
-                    child.props.children.props.children.props.children = child.props.children.props.children.props.children.filter(child => child?.props?.className?.includes("bottomSection") || "renderTreeNode" in (child?.props ?? {}));
-                }
-            }
-            return true;
-            if (child?.props?.className?.includes("itemsContainer") && child.props.children != null) {
-                // Filter out everything but the scroller for the guild list
-                child.props.children = child.props.children.filter(child => child?.props?.onScroll != null);
-                return true;
-            }
-
-            return false;
+            return !!child?.props?.renderTreeNode;
         };
     },
 
