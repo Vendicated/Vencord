@@ -32,9 +32,9 @@ export default definePlugin({
             }
         },
         {
-            find: "#{intl::SERVERS}),children",
+            find: '#{intl::SERVERS}),gap:"xs",children',
             replacement: {
-                match: /(?<=#{intl::SERVERS}\),children:)\i\.map\(.{0,50}\.length\)/,
+                match: /(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,
                 replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"
             }
         }
