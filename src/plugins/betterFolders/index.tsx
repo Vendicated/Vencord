@@ -124,27 +124,42 @@ export default definePlugin({
             replacement: [
                 // Create the isBetterFolders variable in the GuildsBar component
                 {
-                    match: /let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i,)/,
+                    match: /let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i,)/g,
                     replace: "$&,isBetterFolders"
                 },
                 // If we are rendering the Better Folders sidebar, we filter out guilds that are not in folders and unexpanded folders
                 {
-                    match: /\[(\i)\]=(\(0,\i\.\i\).{0,40}getGuildsTree\(\).+?}\))(?=,)/,
+                    match: /\[(\i)\]=(\(0,\i\.\i\).{0,40}getGuildsTree\(\).+?}\))(?=,)/g,
                     replace: (_, originalTreeVar, rest) => `[betterFoldersOriginalTree]=${rest},${originalTreeVar}=$self.getGuildTree(!!arguments[0]?.isBetterFolders,betterFoldersOriginalTree,arguments[0]?.betterFoldersExpandedIds)`
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the servers and folders from the GuildsBar Guild List children
                 {
-                    match: /lastTargetNode:\i\[\i\.length-1\].+?}\)(?::null)?\](?=}\))/,
+                    match: /lastTargetNode:\i\[\i\.length-1\].+?}\)(?::null)?\](?=}\))/g,
                     replace: "$&.filter($self.makeGuildsBarGuildListFilter(!!arguments[0]?.isBetterFolders))"
                 },
                 // If we are rendering the Better Folders sidebar, we filter out everything but the scroller for the guild list from the GuildsBar Tree children
+                // As of now, this is just the unread indicator at the bottom
+                // Discord has two different sidebars controlled by an experiment
+                // only the second one needs this filter
                 {
-                    match: /unreadMentionsIndicatorBottom,.+?}\)\]/,
+                    match: /topSection.+?unreadMentionsIndicatorBottom,.+?}\)\]/,
                     replace: "$&.filter($self.makeGuildsBarTreeFilter(!!arguments[0]?.isBetterFolders))"
+                },
+                // With one of the sidebar versions, there is a sticky top bar. Don't render it if we are rendering the Better Folders sidebar
+                {
+                    // [^0] to not match any other JSX call
+                    match: /(?=\(0,\i\.jsxs?\)[^0]+\.topSection)/,
+                    replace: "!!arguments[0]?.isBetterFolders?null:"
+                },
+                // Don't render the tiny separator line at the top of the Better Folders sidebar
+                // Only needed with the sidebar variant with the sticky top bar
+                {
+                    match: /(?=\(0,\i\.jsxs?\)[^0]+fullWidth:)/,
+                    replace: "!!arguments[0]?.isBetterFolders?null:"
                 },
                 // Export the isBetterFolders variable to the folders component
                 {
-                    match: /switch\(\i\.type\){case \i\.\i\.FOLDER:.+?folderNode:\i,/,
+                    match: /switch\(\i\.type\){case \i\.\i\.FOLDER:.+?folderNode:\i,/g,
                     replace: '$&isBetterFolders:typeof isBetterFolders!=="undefined"?isBetterFolders:false,'
                 }
             ]
@@ -327,13 +342,7 @@ export default definePlugin({
         return child => {
             if (!isBetterFolders) return true;
 
-            if (child?.props?.className?.includes("itemsContainer") && child.props.children != null) {
-                // Filter out everything but the scroller for the guild list
-                child.props.children = child.props.children.filter(child => child?.props?.onScroll != null);
-                return true;
-            }
-
-            return false;
+            return child?.props?.className?.includes("itemsContainer") && child.props.children != null;
         };
     },
 

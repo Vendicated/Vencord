@@ -37,8 +37,12 @@ export default definePlugin({
                     replace: "$&vencordProps=$1,"
                 },
                 {
+                    match: /decorators:.{0,100}?(?=user:)/,
+                    replace: "$&vencordProps:typeof vencordProps!=='undefined'?vencordProps:void 0,"
+                },
+                {
                     match: /children:\[(?=.{0,300},lostPermissionTooltipText:)/,
-                    replace: "children:[(typeof vencordProps!=='undefined'&&Vencord.Api.MemberListDecorators.__getDecorators(vencordProps)),"
+                    replace: "children:[(arguments[0]?.vencordProps&&Vencord.Api.MemberListDecorators.__getDecorators(arguments[0].vencordProps)),"
                 }
             ]
         },
