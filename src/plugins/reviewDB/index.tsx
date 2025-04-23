@@ -80,14 +80,14 @@ export default definePlugin({
         {
             find: ".POPOUT,user:",
             replacement: {
-                match: /(children:\[)(.{0,50}shouldShowTooltip:)/,
+                match: /(children:\[)([^[]+shouldShowTooltip:)/,
                 replace: "$1$self.BiteSizeReviewsButton({user:arguments[0].user}),$2"
             }
         },
         {
             find: ".MODAL,user:",
             replacement: {
-                match: /(children:\[)(.{0,30}shouldShowTooltip:)/,
+                match: /(children:\[)([^[]+shouldShowTooltip:)/,
                 replace: "$1$self.BiteSizeReviewsButton({user:arguments[0].user}),$2"
             }
         },
@@ -95,7 +95,7 @@ export default definePlugin({
         {
             find: 'location:"UserProfileSiebar"',
             replacement: {
-                match: /(children:\[)(.{0,50}shouldShowTooltip:)/,
+                match: /(children:\[)([^[]+shouldShowTooltip:)/,
                 replace: "$1$self.BiteSizeReviewsButton({user:arguments[0].user}),$2"
             }
         }
