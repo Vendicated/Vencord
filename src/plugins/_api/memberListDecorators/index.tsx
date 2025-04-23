@@ -34,7 +34,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /children:\[(?=.{0,300},lostPermissionTooltipText:)/,
-                    replace: "children:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],true),"
+                    replace: "children:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'guild'),"
                 }
             ]
         },
@@ -42,7 +42,7 @@ export default definePlugin({
             find: "PrivateChannel.renderAvatar",
             replacement: {
                 match: /decorators:(\i\.isSystemDM\(\)\?.+?:null)/,
-                replace: "decorators:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],false),$1]"
+                replace: "decorators:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'dm'),$1]"
             }
         }
     ]

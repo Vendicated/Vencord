@@ -17,11 +17,15 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { User } from "discord-types/general/index.js";
+import { Channel, User } from "discord-types/general/index.js";
 import { JSX } from "react";
 
 interface DecoratorProps {
+    type: "guild" | "dm";
     user: User;
+    /** only present when this is a DM list item */
+    channel: Channel;
+    /** only present when this is a guild list item */
     isOwner: boolean;
 }
 
@@ -38,16 +42,16 @@ export function removeMemberListDecorator(identifier: string) {
     decoratorsFactories.delete(identifier);
 }
 
-export function __getDecorators(props: DecoratorProps, isInGuild: boolean): JSX.Element {
+export function __getDecorators(props: DecoratorProps, type: "guild" | "dm"): JSX.Element {
     const decorators = Array.from(
         decoratorsFactories.entries(),
         ([key, { render: Decorator, onlyIn }]) => {
-            if ((onlyIn === "guilds" && !isInGuild) || (onlyIn === "dms" && isInGuild))
+            if ((onlyIn === "guilds" && type !== "guild") || (onlyIn === "dms" && type !== "dm"))
                 return null;
 
             return (
                 <ErrorBoundary noop key={key} message={`Failed to render ${key} Member List Decorator`}>
-                    <Decorator {...props} />
+                    <Decorator {...props} type={type} />
                 </ErrorBoundary>
             );
         }
