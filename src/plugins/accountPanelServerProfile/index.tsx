@@ -19,7 +19,7 @@ interface UserProfileProps {
     originalRenderPopout: () => React.ReactNode;
 }
 
-const UserProfile = findComponentByCodeLazy(".BITE_SIZE,user:");
+const UserProfile = findComponentByCodeLazy(".POPOUT,user");
 
 let openAlternatePopout = false;
 let accountPanelRef: React.RefObject<Record<PropertyKey, any> | null> = { current: null };

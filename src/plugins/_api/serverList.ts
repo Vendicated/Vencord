@@ -32,14 +32,14 @@ export default definePlugin({
             }
         },
         {
-            find: "#{intl::SERVERS}),gap:\"xs\",children:",
+            find: ".setGuildsTree(",
             replacement: [
                 {
-                    match: /(?<=#{intl::SERVERS}\),gap:"xs",children:)(\i\.map\(.{10,50}?)(}\))/,
-                    replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($1)$2"
+                    match: /(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,
+                    replace: "Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"
                 },
                 {
-                    match: /children:.{0,2000}?\{\}\)\]/,
+                    match: /lastTargetNode.{0,50}\{\}\)\]/,
                     replace: "$&.concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below))"
                 }
             ]

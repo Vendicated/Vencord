@@ -29,9 +29,8 @@ export default definePlugin({
         {
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                // The isOwner prop is used in more tha one component in this module. Make sure we patch the right one
-                match: /,isOwner:(\i),(?=[^}]+guildId)/,
-                replace: ",_isOwner:$1=$self.isGuildOwner(e),"
+                match: /(?<=decorators:.{0,200}?isOwner:)\i/,
+                replace: "$self.isGuildOwner(arguments[0])"
             }
         }
     ],
