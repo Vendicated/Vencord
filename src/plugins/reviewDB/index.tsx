@@ -80,15 +80,15 @@ export default definePlugin({
         {
             find: ".POPOUT,user:",
             replacement: {
-                match: /(children:\[)(.{0,100}shouldShowTooltip:)/,
+                match: /(children:\[)(.{0,50}shouldShowTooltip:)/,
                 replace: "$1$self.BiteSizeReviewsButton({user:arguments[0].user}),$2"
             }
         },
         {
-            find: ".FULL_SIZE,user:",
+            find: ".MODAL,user:",
             replacement: {
-                match: /{profileType:\i\.\i\.FULL_SIZE,children:\[/,
-                replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
+                match: /(children:\[)(.{0,30}shouldShowTooltip:)/,
+                replace: "$1$self.BiteSizeReviewsButton({user:arguments[0].user}),$2"
             }
         },
         // places like the user profile on the right in dms
