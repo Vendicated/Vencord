@@ -66,8 +66,8 @@ export default definePlugin({
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /\i.gradientClassName]\),style:/,
-                replace: "$&{color:$self.calculateNameColorForMessageContext(arguments[0])},_style:"
+                match: /(style:)(.{0,500}textDecorationColor)/,
+                replace: "$1{color:$self.calculateNameColorForMessageContext(arguments[0])},_style:$2"
             }
         },
         {
