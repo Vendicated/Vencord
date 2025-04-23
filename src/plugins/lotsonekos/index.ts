@@ -420,84 +420,113 @@ function tick() {
     });
 }
 
+// ——— GLOBAL CACHES ———
+const CACHE_INTERVAL = 500; // ms
+let lastAvatarCache = 0;
+let lastMessageCache = 0;
+let avatarElements = [];
+let messageElements = [];
+let chatboxElement: Element | null = null;
+function refreshCaches() {
+    const now = performance.now();
+    if (now - lastAvatarCache > CACHE_INTERVAL) {
+        avatarElements = Array.from(
+            document.querySelectorAll(Selectors.classStartWith("avatar__"))
+        );
+        lastAvatarCache = now;
+    }
+    if (now - lastMessageCache > CACHE_INTERVAL) {
+        messageElements = Array.from(
+            document.querySelectorAll(
+                Selectors.children(
+                    Selectors.idStartWith("message-content-")
+                )("span")
+            )
+        );
+        // also cache the chatbox here (same selector each time)
+        chatboxElement = document.querySelector(
+            Selectors.children(
+                Selectors.children(Selectors.classStartWith("channelTextArea_"))(
+                    Selectors.classStartWith("textArea__")
+                )
+            )("span")
+        );
+        lastMessageCache = now;
+    }
+}
 
+function pickRandomVisible(list) {
+    if (!list.length) return null;
+    const visible = list.filter(isElementVisible);
+    if (!visible.length) return null;
+    return visible[Math.floor(Math.random() * visible.length)];
+}
 
 function handlePfpTargeting(cat) {
     cat.oneko.minDistance = 4;
+    refreshCaches();
 
-    if (!isValidTarget(cat.targetElement)) {
-        const avatarElements = document.querySelectorAll(Selectors.classStartWith("avatar__"));
-        cat.targetElement = selectRandomValidElement(avatarElements);
+    // only pick a new avatar if the old one dies or goes off-screen
+    if (!isElementVisible(cat.targetElement)) {
+        cat.targetElement = pickRandomVisible(avatarElements);
     }
 
     if (cat.targetElement) {
-        const rect = cat.targetElement.getBoundingClientRect();
+        const r = cat.targetElement.getBoundingClientRect();
         cat.oneko.setTarget(
-            rect.left + rect.width / 2,
-            rect.top + rect.height * 0.75
+            r.left + r.width / 2,
+            r.top + r.height * 0.75
         );
     }
 }
 
 
 function handleAnnoyTargeting(cat) {
-    const otherCats = cats.filter(c => c !== cat);
-    const otherCatTargets = otherCats.map(c => c.targetElement);
+    refreshCaches();
     cat.oneko.minDistance = 4;
 
-    const sameTargetCount = otherCatTargets.filter(target => target === cat.targetElement).length;
+    // build a single map of how many cats on each target
+    const targetCounts = new Map();
+    cats.forEach(c => {
+        const t = c.targetElement;
+        if (t) targetCounts.set(t, (targetCounts.get(t) || 0) + 1);
+    });
 
-    if (sameTargetCount >= 3 || !isValidTarget(cat.targetElement)) {
-
-        let newTarget;
+    const currentCount = targetCounts.get(cat.targetElement) || 0;
+    // only retarget if overcrowded or gone off-screen
+    if (currentCount >= 3 || !isElementVisible(cat.targetElement)) {
+        let newTarget: Element | null = null;
         let attempts = 0;
-        const maxAttempts = 5;
 
-        do {
-            if (Math.random() < 0.4) {
-                const chatbox = document.querySelector(
-                    Selectors.children(
-                        Selectors.children(Selectors.classStartWith("channelTextArea_"))(
-                            Selectors.classStartWith("textArea__")
-                        )
-                    )("span")
-                );
-
-                newTarget = isElementVisible(chatbox) ? chatbox : selectRandomMessage();
+        while (attempts < 5) {
+            // 40% chance to bug the chatbox if it’s visible
+            if (Math.random() < 0.4 && isElementVisible(chatboxElement)) {
+                newTarget = chatboxElement;
             } else {
-                newTarget = selectRandomMessage();
+                newTarget = pickRandomVisible(messageElements);
             }
 
-            const catsOnNewTarget = otherCats.filter(c => c.targetElement === newTarget).length;
-
-            if (catsOnNewTarget < 3 || attempts >= maxAttempts) {
-                cat.targetElement = newTarget;
+            // accept if under crowd threshold
+            if ((targetCounts.get(newTarget) || 0) < 3) {
                 break;
             }
-
             attempts++;
-        } while (attempts < maxAttempts);
+        }
+        cat.targetElement = newTarget;
     }
 
     if (cat.targetElement) {
-        const rect = cat.targetElement.getBoundingClientRect();
-        const horizontalOffset = (((cat.stateStart * cats.findIndex(c => c === cat)) % 94) + 2) / 100 * rect.width;
+        const r = cat.targetElement.getBoundingClientRect();
+        // spread them out horizontally by a small, pseudo-random offset
+        const idx = cats.indexOf(cat);
+        const offset = (((cat.stateStart + idx) % 94) + 2) / 100 * r.width;
         cat.oneko.setTarget(
-            rect.left + horizontalOffset,
-            rect.top + rect.height / 4
+            r.left + offset,
+            r.top + r.height / 4
         );
     }
 }
-function selectRandomMessage() {
-    const messages = document.querySelectorAll(
-        Selectors.children(Selectors.idStartWith("message-content-"))("span")
-    );
-    return selectRandomValidElement(messages);
-}
 
-function isValidTarget(element) {
-    return isElementVisible(element);
-}
 
 function isElementVisible(element) {
     if (!element) return false;
@@ -513,18 +542,6 @@ function isElementVisible(element) {
     );
 }
 
-function selectRandomValidElement(elements) {
-    if (!elements || elements.length === 0) return null;
-
-    const visibleElements = Array.from(elements).filter(isElementVisible);
-
-    if (visibleElements.length > 0) {
-        const randomIndex = Math.floor(Math.random() * visibleElements.length);
-        return visibleElements[randomIndex];
-    }
-
-    return null;
-}
 
 
 const mouseMoveEventListener = (e: MouseEvent) => {
