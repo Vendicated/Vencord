@@ -21,25 +21,14 @@ import { Channel, User } from "discord-types/general/index.js";
 import { JSX } from "react";
 
 interface DecoratorProps {
-    activities: any[];
-    channel: Channel;
-    /**
-     * Only for DM members
-     */
-    channelName?: string;
-    /**
-     * Only for server members
-     */
-    currentUser?: User;
-    guildId?: string;
-    isMobile: boolean;
-    isOwner?: boolean;
-    isTyping: boolean;
-    selected: boolean;
-    status: string;
+    type: "guild" | "dm";
     user: User;
-    [key: string]: any;
+    /** only present when this is a DM list item */
+    channel: Channel;
+    /** only present when this is a guild list item */
+    isOwner: boolean;
 }
+
 export type MemberListDecoratorFactory = (props: DecoratorProps) => JSX.Element | null;
 type OnlyIn = "guilds" | "dms";
 
@@ -53,18 +42,16 @@ export function removeMemberListDecorator(identifier: string) {
     decoratorsFactories.delete(identifier);
 }
 
-export function __getDecorators(props: DecoratorProps): JSX.Element {
-    const isInGuild = !!(props.guildId);
-
+export function __getDecorators(props: DecoratorProps, type: "guild" | "dm"): JSX.Element {
     const decorators = Array.from(
         decoratorsFactories.entries(),
         ([key, { render: Decorator, onlyIn }]) => {
-            if ((onlyIn === "guilds" && !isInGuild) || (onlyIn === "dms" && isInGuild))
+            if ((onlyIn === "guilds" && type !== "guild") || (onlyIn === "dms" && type !== "dm"))
                 return null;
 
             return (
                 <ErrorBoundary noop key={key} message={`Failed to render ${key} Member List Decorator`}>
-                    <Decorator {...props} />
+                    <Decorator {...props} type={type} />
                 </ErrorBoundary>
             );
         }
