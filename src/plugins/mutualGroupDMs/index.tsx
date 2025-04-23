@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./style.css";
+
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
@@ -95,6 +97,10 @@ export default definePlugin({
                 {
                     match: /\(0,\i\.jsx\)\(\i,\{items:\i,section:(\i)/,
                     replace: "$1==='MUTUAL_GDMS'?$self.renderMutualGDMs(arguments[0]):$&"
+                },
+                {
+                    match: /\i\.tabBar/,
+                    replace: "$& + ' vc-mutual-gdms-tab-bar'"
                 }
             ]
         },
