@@ -98,8 +98,10 @@ export default definePlugin({
                     match: /\(0,\i\.jsx\)\(\i,\{items:\i,section:(\i)/,
                     replace: "$1==='MUTUAL_GDMS'?$self.renderMutualGDMs(arguments[0]):$&"
                 },
+                // Discord adds spacing between each item which pushes our tab off screen.
+                // set the gap to zero to ensure ours stays on screen
                 {
-                    match: /\i\.tabBar/,
+                    match: /className:\i\.tabBar/,
                     replace: "$& + ' vc-mutual-gdms-tab-bar'"
                 }
             ]
