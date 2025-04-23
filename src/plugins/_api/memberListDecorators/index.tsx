@@ -33,25 +33,16 @@ export default definePlugin({
             find: ".lostPermission)",
             replacement: [
                 {
-                    match: /let\{[^}]*lostPermissionTooltipText:\i[^}]*\}=(\i),/,
-                    replace: "$&vencordProps=$1,"
-                },
-                // The decorators component is now it's own function so we need to pass the props needed
-                {
-                    match: /decorators:.{0,100}?(?=user:)/,
-                    replace: "$&vencordProps:typeof vencordProps!=='undefined'?vencordProps:void 0,"
-                },
-                {
                     match: /children:\[(?=.{0,300},lostPermissionTooltipText:)/,
-                    replace: "children:[(arguments[0]?.vencordProps&&Vencord.Api.MemberListDecorators.__getDecorators(arguments[0].vencordProps)),"
+                    replace: "children:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],true),"
                 }
             ]
         },
         {
             find: "PrivateChannel.renderAvatar",
             replacement: {
-                match: /decorators:(\i\.isSystemDM\(\))\?(.+?):null/,
-                replace: "decorators:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0]),$1?$2:null]"
+                match: /decorators:(\i\.isSystemDM\(\)\?.+?:null)/,
+                replace: "decorators:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],false),$1]"
             }
         }
     ]

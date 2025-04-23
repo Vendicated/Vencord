@@ -17,29 +17,14 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Channel, User } from "discord-types/general/index.js";
+import { User } from "discord-types/general/index.js";
 import { JSX } from "react";
 
 interface DecoratorProps {
-    activities: any[];
-    channel: Channel;
-    /**
-     * Only for DM members
-     */
-    channelName?: string;
-    /**
-     * Only for server members
-     */
-    currentUser?: User;
-    guildId?: string;
-    isMobile: boolean;
-    isOwner?: boolean;
-    isTyping: boolean;
-    selected: boolean;
-    status: string;
     user: User;
-    [key: string]: any;
+    isOwner: boolean;
 }
+
 export type MemberListDecoratorFactory = (props: DecoratorProps) => JSX.Element | null;
 type OnlyIn = "guilds" | "dms";
 
@@ -53,9 +38,7 @@ export function removeMemberListDecorator(identifier: string) {
     decoratorsFactories.delete(identifier);
 }
 
-export function __getDecorators(props: DecoratorProps): JSX.Element {
-    const isInGuild = !!(props.guildId);
-
+export function __getDecorators(props: DecoratorProps, isInGuild: boolean): JSX.Element {
     const decorators = Array.from(
         decoratorsFactories.entries(),
         ([key, { render: Decorator, onlyIn }]) => {
