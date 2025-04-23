@@ -134,6 +134,10 @@ class Oneko extends EventTarget {
     _lastFrameTimestamp;
 
     /**
+     * @type {number}
+     */
+    minDistance = 48;
+    /**
      * A keyed list of Events fired by the Oneko object.
      * @readonly
      */
@@ -311,6 +315,7 @@ class Oneko extends EventTarget {
         this.source =
             "https://raw.githubusercontent.com/raynecloudy/oneko_db/refs/heads/master/default.png";
         this.updateSpeed = 100;
+        this.minDistance = 48;
 
         this.element = document.createElement("div");
         this.element = document.body.appendChild(this.element);
@@ -461,7 +466,7 @@ class Oneko extends EventTarget {
         const diffY = this.y - this.targetY;
         const distance = Math.sqrt(diffX ** 2 + diffY ** 2);
 
-        if (distance < this.speed || distance < 48) {
+        if (distance < this.speed || distance < this.minDistance) {
             this._idle();
             return;
         }
