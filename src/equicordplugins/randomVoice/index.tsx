@@ -11,8 +11,8 @@ import { makeRange } from "@components/PluginSettings/components";
 import { debounce } from "@shared/debounce";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { ChannelStore, ContextMenuApi, GuildStore, Menu, NavigationRouter, PermissionStore, React, SelectedChannelStore, Toasts, UserStore } from "@webpack/common";
+import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy, findByCode, findByProps } from "@webpack";
+import { ChannelStore, ContextMenuApi, GuildStore, IconUtils, Menu, ChannelRouter, PermissionStore, React, SelectedChannelStore, PermissionsBits, Toasts, UserStore } from "@webpack/common";
 
 import style from "./styles.css?managed";
 
@@ -32,6 +32,7 @@ const valueOperation = [
 const CONNECT = 1n << 20n;
 const SPEAK = 1n << 21n;
 const STREAM = 1n << 9n;
+const VIDEO = 1 << 21;
 
 const settings = definePluginSettings({
     UserAmountOperation: {
@@ -85,6 +86,11 @@ const settings = definePluginSettings({
         description: "Automatically turns on camera",
         default: false,
     },
+    autoStream: { 
+        type: OptionType.BOOLEAN, 
+        description: "Automatically turns on stream",
+        default: false, 
+    },
     selfMute: {
         type: OptionType.BOOLEAN,
         description: "Automatically mutes your mic when joining voice-channel.",
@@ -94,6 +100,11 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Automatically deafems your mic when joining voice-channel.",
         default: false,
+    },
+    leaveEmpty: { 
+        type: OptionType.BOOLEAN,
+        description: "Finds a random-call, when the voice chat is empty.",
+        default: false, 
     },
     avoidStages: {
         type: OptionType.BOOLEAN,
@@ -137,11 +148,25 @@ const settings = definePluginSettings({
     },
 });
 
+interface VoiceState {
+    userId: string;
+    channelId?: string;
+    oldChannelId?: string;
+    deaf: boolean;
+    mute: boolean;
+    selfDeaf: boolean;
+    selfMute: boolean;
+    selfStream: boolean;
+    selfVideo: boolean;
+    sessionId: string;
+    suppress: boolean;
+    requestToSpeakTimestamp: string | null;
+}
 
 export default definePlugin({
     name: "RandomVoice",
     description: "Adds a Button near the Mute button to join a random voice call.",
-    authors: [EquicordDevs.xijexo, EquicordDevs.omaw],
+    authors: [EquicordDevs.xijexo, EquicordDevs.omaw, EquicordDevs.thororen],
     patches: [
         {
             find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
@@ -151,6 +176,22 @@ export default definePlugin({
             }
         }
     ],
+    flux: {
+        VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[] }) {
+            const currentUserId = UserStore.getCurrentUser().id;
+            const myChannelId = VoiceStateStore.getVoiceStateForUser(currentUserId)?.channelId;
+            if (!myChannelId || !settings.store.leaveEmpty) return;
+    
+            const voiceStatesMap = VoiceStateStore.getVoiceStates() as Record<string, VoiceState>;
+            const othersInChannel = Object.values(voiceStatesMap).filter(vs =>
+                vs.channelId === myChannelId && vs.userId !== currentUserId
+            );
+    
+            if (othersInChannel.length === 0) {
+                randomVoice()
+            }
+        },
+    },    
     start() {
         enableStyle(style);
     },
@@ -194,8 +235,7 @@ function ContextMenu() {
     });
 
     ServerList = Array.from(new Set(ServerList));
-    const Servers = ServerList.map(server => GuildStore.getGuild(server)).filter(guild => guild !== null);
-
+    const Servers = ServerList.map(server => GuildStore.getGuild(server)).filter(guild => guild && guild.id);
     const [servers, setServers] = React.useState(settings.store.Servers);
     const [SpacesLeftOperation, setSpacesLeftOperation] = React.useState(settings.store.spacesLeftOperation);
     const [userAmount, setuserAmount] = React.useState(settings.store.UserAmountOperation);
@@ -204,12 +244,13 @@ function ContextMenu() {
     const [stage, setStage] = React.useState(settings.store.avoidStages);
     const [afk, setAfk] = React.useState(settings.store.avoidAfk);
     const [camera, setCamera] = React.useState(settings.store.autoCamera);
+    const [stream, setStream] = React.useState(settings.store.autoStream);
+    const [empty, setEmpty] = React.useState(settings.store.leaveEmpty);
     const [muteself, setSelfMute] = React.useState(settings.store.selfMute);
     const [deafenself, setSelfDeafen] = React.useState(settings.store.selfDeafen);
     const [mute, setMute] = React.useState(settings.store.mute);
     const [deafen, setDeafen] = React.useState(settings.store.deafen);
     const [video, setVideo] = React.useState(settings.store.video);
-    const [stream, setStream] = React.useState(settings.store.stream);
     const [state, setState] = React.useState(settings.store.includeStates);
     const [notstate, avoidState] = React.useState(settings.store.avoidStates);
 
@@ -219,6 +260,8 @@ function ContextMenu() {
             onClose={() => { }}
             aria-label="Voice state modifier"
         >
+
+            
             <Menu.MenuItem
                 id="servers"
                 label="Select Servers"
@@ -318,7 +361,7 @@ function ContextMenu() {
                     <Menu.MenuCheckboxItem
                         key="video"
                         id="video"
-                        label="Video"
+                        label="Camera"
                         action={() => {
                             setVideo(!video);
                             settings.store.video = !video;
@@ -545,7 +588,7 @@ function ContextMenu() {
 
             <Menu.MenuSeparator />
             <Menu.MenuGroup
-                label="SETTINGS"
+                label="SELF SETTINGS"
             >
                 <Menu.MenuItem id="voiceOptions" label="Voice Options" action={() => { }} >
                     <>
@@ -577,6 +620,24 @@ function ContextMenu() {
                                 settings.store.autoCamera = !camera;
                             }}
                             checked={camera} />
+                        <Menu.MenuCheckboxItem
+                            key="autoStream"
+                            id="autoStream"
+                            label="Auto Stream"
+                            action={() => {
+                                setStream(!stream);
+                                settings.store.autoStream = !stream;
+                            }}
+                            checked={stream} />
+                        <Menu.MenuCheckboxItem
+                            key="leaveEmpty"
+                            id="leaveEmpty"
+                            label="Leave when Empty"
+                            action={() => {
+                                setEmpty(!empty);
+                                settings.store.leaveEmpty = !empty;
+                            }}
+                            checked={empty} />
                     </>
                 </Menu.MenuItem>
 
@@ -704,13 +765,33 @@ function getChannels() {
 
 function JoinVc(channelID) {
     const channel = ChannelStore.getChannel(channelID);
-    const channel_link = `/channels/${channel.guild_id}/${channel.id}`;
     ChannelActions.selectVoiceChannel(channelID);
-    if (settings.store.autoNavigate) NavigationRouter.transitionTo(channel_link);
-    if (settings.store.autoCamera && PermissionStore.can(STREAM, channel)) autoCamera();
-    if (settings.store.autoCamera && PermissionStore.can(STREAM, channel)) autoCamera();
+    if (settings.store.autoNavigate) ChannelRouter.transitionToChannel(channel.id);
+    if (settings.store.autoCamera && PermissionStore.can(VIDEO, channel)) autoCamera();
+    if (settings.store.autoStream && PermissionStore.can(STREAM, channel)) autoStream();
     if (settings.store.selfMute && !MediaEngineStore.isSelfMute() && SelectedChannelStore.getVoiceChannelId()) toggleSelfMute();
     if (settings.store.selfDeafen && !MediaEngineStore.isSelfDeaf() && SelectedChannelStore.getVoiceChannelId()) toggleSelfDeaf();
+}
+
+async function autoStream() {
+    const startStream = findByCode('type:"STREAM_START"');
+    const mediaEngine = findByProps("getMediaEngine").getMediaEngine();
+    const getDesktopSources = findByCode("desktop sources");
+    const selected = SelectedChannelStore.getVoiceChannelId();
+    if (!selected) return;
+    const channel = ChannelStore.getChannel(selected);
+    const sources = await getDesktopSources(mediaEngine, ["screen"], null);
+    if (!sources || sources.length === 0) return;
+    const source = sources[0];
+    if (channel.type === 13 || !PermissionStore.can(PermissionsBits.STREAM, channel)) return;
+    startStream(channel.guild_id, selected, {
+        "pid": null,
+        "sourceId": source.id,
+        "sourceName": source.name,
+        "audioSourceId": null,
+        "sound": true,
+        "previewDisabled": false
+    });
 }
 
 function autoCamera() {
