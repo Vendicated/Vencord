@@ -66,8 +66,8 @@ export default definePlugin({
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(style:)(.{0,500}textDecorationColor)/,
-                replace: "$1{color:$self.calculateNameColorForMessageContext(arguments[0])},_style:$2"
+                match: /(?<=\.username.{0,50}?)style:/,
+                replace: "style:{color:$self.calculateNameColorForMessageContext(arguments[0])},_style:"
             }
         },
         {
