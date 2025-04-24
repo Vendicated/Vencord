@@ -1,0 +1,1 @@
+Adds a button to the message bar. If you click it, it will load 100 more messages (Discord API limit) and sort them by reaction count. Pressing the button multiple times, will load more messages. It further displays how far back messages are loaded.
