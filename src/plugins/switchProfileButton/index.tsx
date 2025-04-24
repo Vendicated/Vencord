@@ -29,7 +29,7 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".FULL_SIZE,user:",
+            find: '"view-main-profile"',
             replacement: [
                 {
                     match: /(\(0,\i\.jsx\)\(.{0,30}viewProfileItem:)(.{0,850}?\}\))\}\)\]/,
