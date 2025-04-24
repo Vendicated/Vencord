@@ -5,104 +5,102 @@
  */
 
 import { Devs } from "@utils/constants";
-import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
 
-const { RelationshipStore } = findByPropsLazy("isBlocked", "isIgnored");
-const logger = new Logger("hideBlockedUsersInGuild");
 
 export default definePlugin({
     name: "hideBlockedUsersInGuild",
     description: "Hides blocked users from guild member lists",
     authors: [Devs.lunalu],
 
-    patches: [
-        // Target the MemberListItem component directly
-        {
-            find: "memberListItem",
-            replacement: [
-                {
-                    // Look for the render function of member items
-                    match: /function\s+\w+\s*\(\s*(\w+)\s*\)\s*{/,
-                    replace: "function $1($2) {\nif($self.shouldHideGuildMember($2))return null;"
-                }
-            ]
-        },
-        // Another approach - target the list component that processes members
-        {
-            find: "MemberListItem",
-            replacement: [
-                {
-                    match: /var\s+(\w+)\s*=\s*\w+\.members/,
-                    replace: "var $1 = $self.filterBlockedMembers($&)"
-                }
-            ]
-        },
-        // Target the section renderer that renders groups of members
-        {
-            find: "renderSection",
-            replacement: [
-                {
-                    match: /function\s+renderSection\s*\([^)]*\)\s*{/,
-                    replace: "$&\nconst originalItems = section.items;\nsection.items = $self.filterBlockedMembers(originalItems);"
-                }
-            ]
-        }
-    ],
+    userIdsToHide: ["324326139495448576"],
 
+    // Target the avatars in the DOM
     start() {
-        logger.info("Plugin started");
-    },
+        // Create and inject a style element
+        const style = document.createElement("style");
 
-    stop() {
-        logger.info("Plugin stopped");
-    },
-
-    shouldHideGuildMember(props: any): boolean {
-        try {
-            // For debugging
-            logger.info("Checking member:", props);
-
-            // Different components might have the user in different places
-            const userId = props?.user?.id || props?.member?.user?.id || props?.id;
-
-            if (!userId) return false;
-
-            return RelationshipStore.isBlocked(userId);
-        } catch (e) {
-            logger.error("Failed to check if guild member is blocked:", e);
-            return false;
-        }
-    },
-
-    filterBlockedMembers(members: any[]): any[] {
-        try {
-            if (!Array.isArray(members)) {
-                logger.info("Not an array:", members);
-                return members;
+        // Generate CSS rules for each user ID
+        const cssRules = this.userIdsToHide.map(userId => `
+            /* Hide avatars with this user ID */
+            div.avatarStack__44b0c img[src*="${userId}"],
+            img[src*="${userId}"] {
+                display: none !important;
             }
 
-            logger.info("Filtering array of", members.length, "members");
+            /* Hide the entire nameplate container when it contains this user ID */
+            div.childContainer__91a9d:has(img[src*="${userId}"]),
+            div.memberInner__5d473:has(img[src*="${userId}"]),
+            div.content__91a9d:has(img[src*="${userId}"]) {
+                display: none !important;
+            }
+        `).join("\n");
 
-            // Filter out any members whose user is blocked
-            return members.filter(member => {
-                if (!member) return true;
+        style.textContent = cssRules;
+        document.head.appendChild(style);
 
-                // Different components might have the user in different places
-                const userId = member?.user?.id || member?.member?.user?.id || member?.id;
+        // For elements that might be dynamically added later
+        this.observer = new MutationObserver(this.checkAndHideUsers.bind(this));
+        this.observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    },
 
-                if (!userId) return true;
+    // Function to check and hide users that match our criteria
+    checkAndHideUsers(mutations) {
+        for (const userId of this.userIdsToHide) {
+            // Find all images containing this user ID
+            const avatarImages = document.querySelectorAll(`img[src*="${userId}"]`);
 
-                const isBlocked = RelationshipStore.isBlocked(userId);
-                if (isBlocked) {
-                    logger.info("Filtering out blocked user:", userId);
+            avatarImages.forEach(img => {
+                // Find the parent container (climbing up to find the nameplate container)
+                let element = img;
+                while (element && !element.classList.contains('childContainer__91a9d')) {
+                    if (element.parentElement) {
+                        element = element.parentElement;
+                    } else {
+                        break;
+                    }
                 }
-                return !isBlocked;
+
+                // Hide the container if found
+                if (element) {
+                    element.style.display = 'none';
+                }
             });
-        } catch (e) {
-            logger.error("Failed to filter blocked members:", e);
-            return members;
+        }
+    },
+
+    // Clean up when plugin is disabled
+    stop() {
+        // Remove the style element
+        const styleElement = document.querySelector('style[data-plugin="HideUsers"]');
+        if (styleElement) styleElement.remove();
+
+        // Disconnect the observer
+        if (this.observer) {
+            this.observer.disconnect();
+            this.observer = null;
+        }
+    },
+
+    // Function to add a user ID to the hide list
+    addUserToHideList(userId) {
+        if (!this.userIdsToHide.includes(userId)) {
+            this.userIdsToHide.push(userId);
+            this.stop();
+            this.start();
+        }
+    },
+
+    // Function to remove a user ID from the hide list
+    removeUserFromHideList(userId) {
+        const index = this.userIdsToHide.indexOf(userId);
+        if (index !== -1) {
+            this.userIdsToHide.splice(index, 1);
+            this.stop();
+            this.start();
         }
     }
 });
