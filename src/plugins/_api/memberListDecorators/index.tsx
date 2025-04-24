@@ -16,27 +16,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { getUserSettingLazy } from "@api/UserSettings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
-const DisableStreamPreviews = getUserSettingLazy<boolean>("voiceAndVideo", "disableStreamPreviews")!;
+import managedStyle from "./style.css?managed";
 
-// @TODO: Delete this plugin in the future
 export default definePlugin({
-    name: "NoScreensharePreview",
-    description: "Disables screenshare previews from being sent.",
-    authors: [Devs.Nuckyz],
+    name: "MemberListDecoratorsAPI",
+    description: "API to add decorators to member list (both in servers and DMs)",
+    authors: [Devs.TheSun, Devs.Ven],
 
-    start() {
-        if (!DisableStreamPreviews.getSetting()) {
-            DisableStreamPreviews.updateSetting(true);
-        }
-    },
+    managedStyle,
 
-    stop() {
-        if (DisableStreamPreviews.getSetting()) {
-            DisableStreamPreviews.updateSetting(false);
+    patches: [
+        {
+            find: ".lostPermission)",
+            replacement: [
+                {
+                    match: /children:\[(?=.{0,300},lostPermissionTooltipText:)/,
+                    replace: "children:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'guild'),"
+                }
+            ]
+        },
+        {
+            find: "PrivateChannel.renderAvatar",
+            replacement: {
+                match: /decorators:(\i\.isSystemDM\(\)\?.+?:null)/,
+                replace: "decorators:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'dm'),$1]"
+            }
         }
-    }
+    ]
 });

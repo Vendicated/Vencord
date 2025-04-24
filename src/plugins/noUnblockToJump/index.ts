@@ -30,7 +30,7 @@ export default definePlugin({
             find: '.id,"Search Results"',
             replacement: [
                 {
-                    match: /if\(.{1,10}\)(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,
+                    match: /if\(.{1,40}\)(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,
                     replace: "if(false)$1"
                 },
                 {
@@ -55,7 +55,7 @@ export default definePlugin({
         },
         {
             // Clicking on replied messages to jump
-            find: "flash:!0,returnMessageId",
+            find: '("interactionUsernameProfile',
             replacement: [
                 {
                     match: /.\?(.{1,10}\.show\({.{1,50}#{intl::UNBLOCK_TO_JUMP_TITLE})/,

@@ -101,8 +101,8 @@ export default definePlugin({
             find: 'minimal:"contentColumnMinimal"',
             replacement: [
                 {
-                    match: /\(0,\i\.useTransition\)\((\i)/,
-                    replace: "(_cb=>_cb(void 0,$1))||$&"
+                    match: /(?=\(0,\i\.\i\)\((\i),\{from:\{position:"absolute")/,
+                    replace: "(_cb=>_cb(void 0,$1))||"
                 },
                 {
                     match: /\i\.animated\.div/,
@@ -114,7 +114,7 @@ export default definePlugin({
         { // Load menu TOC eagerly
             find: "#{intl::USER_SETTINGS_WITH_BUILD_OVERRIDE}",
             replacement: {
-                match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?null!=\i&&.{0,100}?(await Promise\.all[^};]*?\)\)).*?,(?=\1\(this)/,
+                match: /(\i)\(this,"handleOpenSettingsContextMenu",.{0,100}?null!=\i&&.{0,100}?(await [^};]*?\)\)).*?,(?=\1\(this)/,
                 replace: "$&(async ()=>$2)(),"
             },
             predicate: () => settings.store.eagerLoad
@@ -139,11 +139,11 @@ export default definePlugin({
     // This is the very outer layer of the entire ui, so we can't wrap this in an ErrorBoundary
     // without possibly also catching unrelated errors of children.
     //
-    // Thus, we sanity check webpack modules & do this really hacky try catch to hopefully prevent hard crashes if something goes wrong.
-    // try catch will only catch errors in the Layer function (hence why it's called as a plain function rather than a component), but
-    // not in children
+    // Thus, we sanity check webpack modules
     Layer(props: LayerProps) {
-        if (!FocusLock || !ComponentDispatch || !Classes) {
+        try {
+            [FocusLock.$$vencordGetWrappedComponent(), ComponentDispatch, Classes].forEach(e => e.test);
+        } catch {
             new Logger("BetterSettings").error("Failed to find some components");
             return props.children;
         }

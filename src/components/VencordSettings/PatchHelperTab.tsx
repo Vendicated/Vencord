@@ -18,12 +18,13 @@
 
 import { CodeBlock } from "@components/CodeBlock";
 import { debounce } from "@shared/debounce";
+import { copyToClipboard } from "@utils/clipboard";
 import { Margins } from "@utils/margins";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { makeCodeblock } from "@utils/text";
 import { Patch, ReplaceFn } from "@utils/types";
 import { search } from "@webpack";
-import { Button, Clipboard, Forms, Parser, React, Switch, TextArea, TextInput } from "@webpack/common";
+import { Button, Forms, Parser, React, Switch, TextArea, TextInput } from "@webpack/common";
 
 import { SettingsTab, wrapTab } from "./shared";
 
@@ -65,7 +66,7 @@ function ReplacementComponent({ module, match, replacement, setReplacementError 
         }
         const canonicalMatch = canonicalizeMatch(new RegExp(match));
         try {
-            const canonicalReplace = canonicalizeReplace(replacement, "YourPlugin");
+            const canonicalReplace = canonicalizeReplace(replacement, 'Vencord.Plugins.plugins["YourPlugin"]');
             var patched = src.replace(canonicalMatch, canonicalReplace as string);
             setReplacementError(void 0);
         } catch (e) {
@@ -381,8 +382,8 @@ function PatchHelper() {
                 <>
                     <Forms.FormTitle className={Margins.top20}>Code</Forms.FormTitle>
                     <CodeBlock lang="js" content={code} />
-                    <Button onClick={() => Clipboard.copy(code)}>Copy to Clipboard</Button>
-                    <Button className={Margins.top8} onClick={() => Clipboard.copy("```ts\n" + code + "\n```")}>Copy as Codeblock</Button>
+                    <Button onClick={() => copyToClipboard(code)}>Copy to Clipboard</Button>
+                    <Button className={Margins.top8} onClick={() => copyToClipboard("```ts\n" + code + "\n```")}>Copy as Codeblock</Button>
                 </>
             )}
         </SettingsTab>

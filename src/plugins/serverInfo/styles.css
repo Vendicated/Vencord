@@ -21,7 +21,7 @@
     margin: 0.5em;
 }
 
-.vc-gp-header img {
+.vc-gp-icon {
     width: 48px;
     height: 48px;
     cursor: pointer;
@@ -82,7 +82,7 @@
     gap: 0.2em;
 }
 
-.vc-gp-owner img {
+.vc-gp-owner-avatar {
     height: 20px;
     border-radius: 50%;
     cursor: pointer;
