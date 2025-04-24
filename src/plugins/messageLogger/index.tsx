@@ -23,7 +23,7 @@ import { updateMessage } from "@api/MessageUpdater";
 import { Settings } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
+import { Devs, SUPPORT_CATEGORY_ID, VENBOT_USER_ID } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { classes } from "@utils/misc";
@@ -169,8 +169,8 @@ export default definePlugin({
 
         return Settings.plugins.MessageLogger.inlineEdits && (
             <>
-                {message.editHistory?.map(edit => (
-                    <div className="messagelogger-edited">
+                {message.editHistory?.map((edit, idx) => (
+                    <div key={idx} className="messagelogger-edited">
                         {parseEditContent(edit.content, message)}
                         <Timestamp
                             timestamp={edit.timestamp}
@@ -211,7 +211,8 @@ export default definePlugin({
         collapseDeleted: {
             type: OptionType.BOOLEAN,
             description: "Whether to collapse deleted messages, similar to blocked messages",
-            default: false
+            default: false,
+            restartNeeded: true,
         },
         logEdits: {
             type: OptionType.BOOLEAN,
@@ -294,8 +295,8 @@ export default definePlugin({
             ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
             (isEdit ? !logEdits : !logDeletes) ||
             ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id) ||
-            // Ignore Venbot in the support channel
-            (message.channel_id === "1026515880080842772" && message.author?.id === "1017176847865352332");
+            // Ignore Venbot in the support channels
+            (message.author?.id === VENBOT_USER_ID && ChannelStore.getChannel(message.channel_id)?.parent_id === SUPPORT_CATEGORY_ID);
     },
 
     EditMarker({ message, className, children, ...props }: any) {
@@ -304,7 +305,7 @@ export default definePlugin({
                 {...props}
                 className={classes("messagelogger-edit-marker", className)}
                 onClick={() => openHistoryModal(message)}
-                aria-role="button"
+                role="button"
             >
                 {children}
             </span>
@@ -346,35 +347,35 @@ export default definePlugin({
             replacement: [
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE event
-                    match: /MESSAGE_DELETE:function\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?},/,
+                    match: /function (?=.+?MESSAGE_DELETE:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
                     replace:
-                        "MESSAGE_DELETE:function($1){" +
-                        "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = $self.handleDelete(cache, $1, false);" +
-                        "   $2commit(cache);" +
-                        "},"
+                        "function $1($2){" +
+                        "   var cache = $3getOrCreate($2.channelId);" +
+                        "   cache = $self.handleDelete(cache, $2, false);" +
+                        "   $3commit(cache);" +
+                        "}"
                 },
                 {
                     // Add deleted=true to all target messages in the MESSAGE_DELETE_BULK event
-                    match: /MESSAGE_DELETE_BULK:function\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?},/,
+                    match: /function (?=.+?MESSAGE_DELETE_BULK:(\i))\1\((\i)\){let.+?((?:\i\.){2})getOrCreate.+?}(?=function)/,
                     replace:
-                        "MESSAGE_DELETE_BULK:function($1){" +
-                        "   var cache = $2getOrCreate($1.channelId);" +
-                        "   cache = $self.handleDelete(cache, $1, true);" +
-                        "   $2commit(cache);" +
-                        "},"
+                        "function $1($2){" +
+                        "   var cache = $3getOrCreate($2.channelId);" +
+                        "   cache = $self.handleDelete(cache, $2, true);" +
+                        "   $3commit(cache);" +
+                        "}"
                 },
                 {
                     // Add current cached content + new edit time to cached message's editHistory
-                    match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
+                    match: /(function (\i)\((\i)\).+?)\.update\((\i)(?=.*MESSAGE_UPDATE:\2)/,
                     replace: "$1" +
-                        ".update($3,m =>" +
-                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :" +
-                        "   $2.message.edited_timestamp && $2.message.content !== m.content ?" +
-                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
+                        ".update($4,m =>" +
+                        "   (($3.message.flags & 64) === 64 || $self.shouldIgnore($3.message, true)) ? m :" +
+                        "   $3.message.edited_timestamp && $3.message.content !== m.content ?" +
+                        "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($3.message, m)]) :" +
                         "       m" +
                         ")" +
-                        ".update($3"
+                        ".update($4"
                 },
                 {
                     // fix up key (edit last message) attempting to edit a deleted message
@@ -400,7 +401,7 @@ export default definePlugin({
 
         {
             // Updated message transformer(?)
-            find: "THREAD_STARTER_MESSAGE?null===",
+            find: "THREAD_STARTER_MESSAGE?null==",
             replacement: [
                 {
                     // Pass through editHistory & deleted & original attachments to the "edited message" transformer
@@ -441,15 +442,10 @@ export default definePlugin({
         {
             // Attachment renderer
             find: ".removeMosaicItemHoverButton",
-            group: true,
             replacement: [
                 {
-                    match: /(className:\i,item:\i),/,
-                    replace: "$1,item: deleted,"
-                },
-                {
-                    match: /\[\i\.obscured\]:.+?,/,
-                    replace: "$& 'messagelogger-deleted-attachment': deleted,"
+                    match: /\[\i\.obscured\]:.+?,(?<=item:(\i).+?)/,
+                    replace: '$&"messagelogger-deleted-attachment":$1.originalItem?.deleted,'
                 }
             ]
         },
@@ -488,19 +484,19 @@ export default definePlugin({
             find: '"ReferencedMessageStore"',
             replacement: [
                 {
-                    match: /MESSAGE_DELETE:function\((\i)\).+?},/,
-                    replace: "MESSAGE_DELETE:function($1){},"
+                    match: /MESSAGE_DELETE:\i,/,
+                    replace: "MESSAGE_DELETE:()=>{},"
                 },
                 {
-                    match: /MESSAGE_DELETE_BULK:function\((\i)\).+?},/,
-                    replace: "MESSAGE_DELETE_BULK:function($1){},"
+                    match: /MESSAGE_DELETE_BULK:\i,/,
+                    replace: "MESSAGE_DELETE_BULK:()=>{},"
                 }
             ]
         },
 
         {
             // Message context base menu
-            find: "useMessageMenu:",
+            find: ".MESSAGE,commandTargetId:",
             replacement: [
                 {
                     // Remove the first section if message is deleted

@@ -19,16 +19,30 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
+import managedStyle from "./style.css?managed";
+
 export default definePlugin({
-    name: "NoScreensharePreview",
-    description: "Disables screenshare previews from being sent.",
-    authors: [Devs.Nuckyz],
+    name: "MemberListDecoratorsAPI",
+    description: "API to add decorators to member list (both in servers and DMs)",
+    authors: [Devs.TheSun, Devs.Ven],
+
+    managedStyle,
+
     patches: [
         {
-            find: '"ApplicationStreamPreviewUploadManager"',
+            find: ".lostPermission)",
+            replacement: [
+                {
+                    match: /children:\[(?=.{0,300},lostPermissionTooltipText:)/,
+                    replace: "children:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'guild'),"
+                }
+            ]
+        },
+        {
+            find: "PrivateChannel.renderAvatar",
             replacement: {
-                match: /await \i\.\i\.(makeChunkedRequest\(|post\(\{url:)\i\.\i\.STREAM_PREVIEW.+?\}\)/g,
-                replace: "0"
+                match: /decorators:(\i\.isSystemDM\(\)\?.+?:null)/,
+                replace: "decorators:[Vencord.Api.MemberListDecorators.__getDecorators(arguments[0],'dm'),$1]"
             }
         }
     ]

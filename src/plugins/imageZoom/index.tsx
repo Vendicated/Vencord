@@ -18,17 +18,17 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
-import { disableStyle, enableStyle } from "@api/Styles";
 import { makeRange } from "@components/PluginSettings/components";
 import { debounce } from "@shared/debounce";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, ReactDOM } from "@webpack/common";
+import { JSX } from "react";
 import type { Root } from "react-dom/client";
 
 import { Magnifier, MagnifierProps } from "./components/Magnifier";
 import { ELEMENT_ID } from "./constants";
-import styles from "./styles.css?managed";
+import managedStyle from "./styles.css?managed";
 
 export const settings = definePluginSettings({
     saveZoomValues: {
@@ -80,7 +80,12 @@ export const settings = definePluginSettings({
 });
 
 
-const imageContextMenuPatch: NavContextMenuPatchCallback = children => {
+const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    // Discord re-uses the image context menu for links to for the copy and open buttons
+    if ("href" in props) return;
+    // emojis in user statuses
+    if (props.target?.classList?.contains("emoji")) return;
+
     const { square, nearestNeighbour } = settings.use(["square", "nearestNeighbour"]);
 
     children.push(
@@ -154,12 +159,33 @@ export default definePlugin({
     authors: [Devs.Aria],
     tags: ["ImageUtilities"],
 
+    managedStyle,
+
     patches: [
         {
-            find: ".contain,SCALE_DOWN:",
+            find: ".dimensionlessImage,",
+            replacement: [
+                {
+                    match: /className:\i\.media,/,
+                    replace: `id:"${ELEMENT_ID}",$&`
+                },
+                {
+                    // This patch needs to be above the next one as it uses the zoomed class as an anchor
+                    match: /\.zoomed]:.+?,(?=children:)/,
+                    replace: "$&onClick:()=>{},"
+                },
+                {
+                    match: /className:\i\(\)\(\i\.wrapper,.+?}\),/,
+                    replace: ""
+                },
+            ]
+        },
+        // Make media viewer options not hide when zoomed in with the default Discord feature
+        {
+            find: '="FOCUS_SENSITIVE",',
             replacement: {
-                match: /\.slide,\i\),/g,
-                replace: `$&id:"${ELEMENT_ID}",`
+                match: /(?<=\.hidden]:)\i/,
+                replace: "false"
             }
         },
 
@@ -246,14 +272,12 @@ export default definePlugin({
     },
 
     start() {
-        enableStyle(styles);
         this.element = document.createElement("div");
         this.element.classList.add("MagnifierContainer");
         document.body.appendChild(this.element);
     },
 
     stop() {
-        disableStyle(styles);
         // so componenetWillUnMount gets called if Magnifier component is still alive
         this.root && this.root.unmount();
         this.element?.remove();
