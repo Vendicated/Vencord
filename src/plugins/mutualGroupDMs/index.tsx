@@ -32,7 +32,7 @@ const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
 const UserUtils = findByPropsLazy("getGlobalName");
 
 const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
-const ExpandableList = findComponentByCodeLazy('"PRESS_SECTION"');
+const ExpandableList = findComponentByCodeLazy('"PRESS_SECTION"', ".header");
 const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
 
 function getGroupDMName(channel: Channel) {
