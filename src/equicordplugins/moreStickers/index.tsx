@@ -35,54 +35,34 @@ export default definePlugin({
             find: "ChannelStickerPickerButton",
             replacement: [{
                 match: /(children:\(0,\i\.jsx\)\()(.{0,10})({innerClassName.{10,30}\.stickerButton)/,
-                replace: (_, head, button, tail) => {
-                    const isMoreStickers = "arguments[0]?.stickersType";
-                    return `${head}${isMoreStickers}?$self.stickerButton:${button}${tail}`;
-                }
+                replace: "$1arguments[0]?.stickersType?$self.stickerButton:$2$3"
             }, {
-                match: /(\i=)(\i\.useCallback.{0,25}\.STICKER,.{0,10});/,
-                replace: (_, decl, cb) => {
-                    const newCb = cb.replace(/(?<=\(\)=>\{\(.*?\)\().+?\.STICKER/, "\"stickers+\"");
-                    return `${decl}arguments[0]?.stickersType?${newCb}:${cb};`;
-                }
+                match: /(\i=)((\i\.useCallback\(\(\)=>\{\(.*?\)\().*?\.STICKER,(\i.{0,10}));/,
+                replace: '$1arguments[0]?.stickersType?$3"stickers+",$4:$2;'
             }, {
                 match: /(\i)=((\i)===\i\.\i\.STICKER)/,
-                replace: (_, isActive, isStickerTab, currentTab) => {
-                    const c = "arguments[0].stickersType";
-                    return `${isActive}=${c}?(${currentTab}===${c}):(${isStickerTab})`;
-                }
+                replace: "$1=arguments[0].stickersType?($3===arguments[0].stickersType):($2)"
             }]
         },
         {
             find: ".gifts)",
             replacement: {
-                match: /,.{0,5}\(null==\(\i=\i\.stickers\)\?void 0.*?(\i)\.push\((\(0,\w\.jsx\))\((.+?),{disabled:\i,type:(\i)},"sticker"\)\)\)/,
-                replace: (m, _, jsx, compo, type) => {
-                    const c = "arguments[0].type";
-                    return `${m},${c}?.submit?.button&&${_}.push(${jsx}(${compo},{disabled:!${c}?.submit?.button,type:${type},stickersType:"stickers+"},"stickers+"))`;
-                }
+                match: /(?<=,.{0,5}\(null==\(\i=\i\.stickers\)\?void 0.*?(\i)\.push\((\(0,\i\.jsx\))\((.+?),{disabled:\i,type:(\i)},"sticker"\)\)\))/,
+                replace: ",arguments[0].type?.submit?.button&&$1.push($2($3,{disabled:!arguments[0].type?.submit?.button,type:$4,stickersType:\"stickers+\"},\"stickers+\"))"
             }
         },
         {
             find: "#{intl::EXPRESSION_PICKER_CATEGORIES_A11Y_LABEL}",
-            replacement: {
-                match: /role:"tablist",.*?,?"aria-label":.+?\),children:(\[.*?\)\]}\)}\):null,)(.*?closePopout:\w.*?:null)/s,
-                replace: m => {
-                    const stickerTabRegex = /(\w+?)\?(\([^()]+?\))\((.{1,2}),{.{0,128},isActive:(.{1,2})===.{1,6}\.STICKER.{1,140},children:(.{1,5}\.string\(.+?\)).*?:null/s;
-                    const res = m.replace(stickerTabRegex, (_m, canUseStickers, jsx, tabHeaderComp, currentTab, stickerText) => {
-                        const isActive = `${currentTab}==="stickers+"`;
-                        return (
-                            `${_m},${canUseStickers}?` +
-                            `${jsx}(${tabHeaderComp},{id:"stickers+-picker-tab","aria-controls":"more-stickers-picker-tab-panel","aria-selected":${isActive},isActive:${isActive},autoFocus:true,viewType:"stickers+",children:${jsx}("div",{children:${stickerText}+"+"})})` +
-                            ":null"
-                        );
-                    });
-
-                    return res.replace(/:null,((.{1,200})===.{1,30}\.STICKER&&\w+\?(\([^()]{1,10}\)).{1,15}?(\{.*?,onSelectSticker:.*?\})\):null)/s, (_, _m, currentTab, jsx, props) => {
-                        return `:null,${currentTab}==="stickers+"?${jsx}($self.moreStickersComponent,${props}):null,${_m}`;
-                    });
+            replacement: [
+                {
+                    match: /(?<=null,(\i)\?(\(.*?\))\((\i),{.{0,128},isActive:(\i)===.{0,200},children:(\i\.intl\.string\(.*?\))\}\)\}\):null,)/s,
+                    replace: '$1?$2($3,{id:"stickers+-picker-tab","aria-controls":"more-stickers-picker-tab-panel","aria-selected":$4==="stickers+",isActive:$4==="stickers+",autoFocus:true,viewType:"stickers+",children:$5+"+"}):null,'
+                },
+                {
+                    match: /:null,((.{1,200})===.{1,30}\.STICKER&&\w+\?(\([^()]{1,10}\)).{1,15}?(\{.*?,onSelectSticker:.*?\})\):null)/,
+                    replace: ':null,$2==="stickers+"?$3($self.moreStickersComponent,$4):null,$1'
                 }
-            }
+            ]
         },
         {
             find: '==="remove_text"',
@@ -114,8 +94,8 @@ export default definePlugin({
                 >
                     <path d="M18.5 11c-4.136 0-7.5 3.364-7.5 7.5c0 .871.157 1.704.432 2.482l9.551-9.551A7.462 7.462 0 0 0 18.5 11z" />
                     <path d="M12 2C6.486 2 2 6.486 2 12c0 4.583 3.158 8.585 7.563 9.69A9.431 9.431 0 0 1 9 18.5C9 13.262 13.262 9 18.5 9c1.12 0 2.191.205 3.19.563C20.585 5.158 16.583 2 12 2z" />
-                </svg>
-            </button>
+                </svg >
+            </button >
         );
     },
     moreStickersComponent({
