@@ -9,7 +9,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { extractAndLoadChunksLazy, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { DefaultExtractAndLoadChunksRegex, extractAndLoadChunksLazy, findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { useEffect, useState } from "@webpack/common";
 import { User } from "discord-types/general";
 
@@ -18,7 +18,7 @@ const NoteEditor = findComponentByCodeLazy("#{intl::NOTE_PLACEHOLDER}");
 const Section = findComponentByCodeLazy("section", '"header-secondary"', "requestAnimationFrame");
 
 const classes = findByPropsLazy("note", "appsConnections");
-const requireClasses = extractAndLoadChunksLazy(['"USER_PROFILE_MODAL_KEY:".concat(']);
+const requireClasses = extractAndLoadChunksLazy(['"USER_PROFILE_MODAL_KEY:".concat('], new RegExp(":(?:await ?)?" + DefaultExtractAndLoadChunksRegex.source));
 
 const settings = definePluginSettings({
     hideWhenEmpty: {
