@@ -6,6 +6,7 @@
 
 import { popNotice, showNotice } from "@api/Notices";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { getIntlMessageFromHash } from "@utils/discord";
 import { canonicalizeMatch, canonicalizeReplace } from "@utils/patches";
 import { filters, findAll, search, wreq } from "@webpack";
 import { React, Toasts, useState } from "@webpack/common";
@@ -125,7 +126,7 @@ export function initWs(isManual = false) {
         function reply(error?: string) {
             const toSend = { nonce: d.nonce, ok: !error } as Record<string, unknown>;
             if (error) toSend.error = error;
-            logger.debug("Replying with:", toSend);
+            logger.debug(`Replying with:`, toSend);
             ws.send(JSON.stringify(toSend));
         }
         function replyData(data: OutgoingMessage) {
@@ -437,8 +438,20 @@ export function initWs(isManual = false) {
                     });
                 break;
             }
+            case "i18n": {
+                const { hashedKey } = d.data;
+                replyData({
+                    type: "i18n",
+                    ok: true,
+                    data: {
+                        value: getIntlMessageFromHash(hashedKey)
+                    }
+                });
+                break;
+            }
             default:
-                reply("Unknown Type " + (d as any).type);
+                // @ts-expect-error should be never
+                reply("Unknown Type " + d?.type);
                 break;
         }
     });

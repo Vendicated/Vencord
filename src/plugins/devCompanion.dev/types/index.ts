@@ -5,4 +5,3 @@
  */
 
 export * as Recieve from "./recieve";
-export * as Send from "./send";

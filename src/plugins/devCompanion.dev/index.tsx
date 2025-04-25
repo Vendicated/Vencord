@@ -61,9 +61,10 @@ export default definePlugin({
 
     start() {
         // if we're running the reporter, we need to initws in the reporter file to avoid a race condition
-        if (!IS_COMPANION_TEST)
-            initWs();
+        if (!IS_DEV) throw new Error("This plugin requires dev mode to run, please build with pnpm build --dev");
+        initWs();
     },
 
     stop: stopWs,
 });
+
