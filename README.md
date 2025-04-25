@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>168 additional plugins</summary>
+<summary>167 additional plugins</summary>
 
 ### All Platforms
 
@@ -118,7 +118,6 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - NoOnboarding by omaw & Glitch
 - NoRoleHeaders by Samwich
 - NotificationTitle by Kyuuhachi
-- OnePingPerDM by ProffDea
 - PingNotifications by smuki
 - PinIcon by iamme
 - PlatformSpoofer by Drag
