@@ -77,25 +77,25 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".BITE_SIZE,user:",
+            find: ".POPOUT,user:",
             replacement: {
-                match: /{profileType:\i\.\i\.BITE_SIZE,children:\[/,
-                replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
+                match: /(children:\[)([^[]+shouldShowTooltip:)/,
+                replace: "$1$self.BiteSizeReviewsButton({user:arguments[0].user}),$2"
             }
         },
         {
-            find: ".FULL_SIZE,user:",
+            find: ".MODAL,user:",
             replacement: {
-                match: /{profileType:\i\.\i\.FULL_SIZE,children:\[/,
-                replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
+                match: /(children:\[)([^[]+shouldShowTooltip:)/,
+                replace: "$1$self.BiteSizeReviewsButton({user:arguments[0].user}),$2"
             }
         },
         {
-            // location: "UserProfileSiebar"
-            find: ".PANEL,children:[",
+            // places like the user profile on the right in dms
+            find: 'location:"UserProfileSiebar"',
             replacement: {
-                match: /{profileType:\i\.\i\.PANEL,children:\[/,
-                replace: "$&$self.BiteSizeReviewsButton({user:arguments[0].user}),"
+                match: /(children:\[)([^[]+shouldShowTooltip:)/,
+                replace: "$1$self.BiteSizeReviewsButton({user:arguments[0].user}),$2"
             }
         }
     ],
