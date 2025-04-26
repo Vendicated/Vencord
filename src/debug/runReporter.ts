@@ -87,7 +87,7 @@ async function runReporter() {
                     result = Webpack[method](...args);
                 }
 
-                if (result == null || (result.$$vencordInternal != null && result.$$vencordInternal() == null)) throw new Error("Webpack Find Fail");
+                if (result == null || (result.$$vencordGetWrappedComponent != null && result.$$vencordGetWrappedComponent() == null)) throw new Error("Webpack Find Fail");
             } catch (e) {
                 let logMessage = searchType;
                 if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") {
