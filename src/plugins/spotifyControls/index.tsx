@@ -49,6 +49,11 @@ export default definePlugin({
             type: OptionType.BOOLEAN,
             description: "Restart currently playing track when pressing the previous button if playtime is >3s",
             default: true
+        },
+        showAlbumInfoOnExpand: {
+            type: OptionType.BOOLEAN,
+            description: "Show album info when expanding the album cover",
+            default: false
         }
     },
     patches: [
