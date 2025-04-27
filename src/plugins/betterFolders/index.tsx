@@ -151,6 +151,18 @@ export default definePlugin({
                     match: /(?=\(0,\i\.jsxs?\)[^0]+fullWidth:)/,
                     replace: "!!arguments[0]?.isBetterFolders?null:"
                 },
+                // On the other sidebar version, dms are rendered separately.
+                // We need to filter them out
+                {
+                    match: /fullWidth:!0.+?lurkingGuildIds.+?\]/,
+                    replace: "$&.filter($self.makeGuildsBarTreeFilter(!!arguments[0]?.isBetterFolders))"
+                },
+                // if you click the (NEW) button on the better folders sidebar
+                // it will end up in some infinite loop
+                {
+                    match: /unreadMentionsFixedFooter\].+?\]/,
+                    replace: "$&.filter($self.makeNewButtonFilter(!!arguments[0]?.isBetterFolders))"
+                },
                 // Export the isBetterFolders variable to the folders component
                 {
                     match: /switch\(\i\.type\){case \i\.\i\.FOLDER:.+?folderNode:\i,/,
@@ -333,6 +345,14 @@ export default definePlugin({
         return child => {
             if (!isBetterFolders) return true;
             return !!child?.props?.renderTreeNode;
+        };
+    },
+
+    makeNewButtonFilter(isBetterFolders: boolean) {
+        return child => {
+            if (!isBetterFolders) return true;
+
+            return !child?.props?.barClassName;
         };
     },
 
