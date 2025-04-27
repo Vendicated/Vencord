@@ -1,0 +1,146 @@
+:root {
+    /* Body */
+    --toastnotifications-background-color: var(--background-secondary-alt);
+    --toastnotifications-text-color: var(--text-normal);
+    --toastnotifications-border-radius: 6px;
+    --toastnotifications-width: 25vw;
+    --toastnotifications-padding: 1.25rem;
+
+    /* Title */
+    --toastnotifications-title-color: var(--header-primary);
+    --toastnotifications-title-font-size: 1rem;
+    --toastnotifications-title-font-weight: 600;
+    --toastnotifications-title-line-height: 1.25rem;
+
+    /* Close Button */
+    --toastnotifications-close-button-color: var(--interactive-normal);
+    --toastnotifications-close-button-hover-color: var(--interactive-hover);
+    --toastnotifications-close-button-opacity: 0.5;
+    --toastnotifications-close-button-hover-opacity: 1;
+
+    /* Message Author Image */
+    --toastnotifications-image-height: 4rem;
+    --toastnotifications-image-width: var(--toastnotifications-image-height);
+    --toastnotifications-image-border-radius: 6px;
+
+    /* Progress Bar */
+    --toastnotifications-progressbar-height: 0.25rem;
+
+    /* Position Offset - Global inherited offset by all positions */
+    --toastnotifications-position-offset: 1rem;
+}
+
+.toastnotifications-notification-root {
+    all: unset;
+    display: flex;
+    flex-direction: column;
+    color: var(--toastnotifications-text-color);
+    background-color: var(--toastnotifications-background-color);
+    border-radius: var(--toastnotifications-border-radius);
+    overflow: hidden;
+    cursor: pointer;
+    position: absolute;
+    z-index: 2147483647;
+    right: 1rem;
+    width: var(--toastnotifications-width);
+    min-height: 10vh;
+    bottom: calc(1rem + var(--notification-index) * 12vh);
+}
+
+.toastnotifications-notification {
+    display: flex;
+    flex-direction: row;
+    padding: var(--toastnotifications-padding);
+    gap: 1.25rem;
+}
+
+.toastnotifications-notification-content {
+    width: 100%;
+}
+
+.toastnotifications-notification-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.toastnotifications-notification-title {
+    color: var(--toastnotifications-title-color);
+    font-size: var(--toastnotifications-title-font-size);
+    font-weight: var(--toastnotifications-title-font-weight);
+    line-height: var(--toastnotifications-title-line-height);
+}
+
+.toastnotifications-notification-close-btn {
+    all: unset;
+    cursor: pointer;
+    color: var(--toastnotifications-close-button-color);
+    opacity: var(--toastnotifications-close-button-opacity);
+    transition: opacity 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.toastnotifications-notification-close-btn:hover {
+    color: var(--toastnotifications-close-button-hover-color);
+    opacity: var(--toastnotifications-close-button-hover-opacity);
+}
+
+.toastnotifications-notification-icon {
+    height: var(--toastnotifications-image-height);
+    width: var(--toastnotifications-image-width);
+    border-radius: var(--toastnotifications-image-border-radius);
+}
+
+.toastnotifications-notification-progressbar {
+    height: var(--toastnotifications-progressbar-height);
+    border-radius: 5px;
+    margin-top: auto;
+}
+
+.toastnotifications-notification-p {
+    margin: 0.5rem 0 0;
+    margin-bottom: 3px;
+    line-height: 140%;
+    word-break: break-all;
+}
+
+.toastnotifications-notification-footer {
+    margin: 0;
+    margin-top: 4px;
+    line-height: 140%;
+    font-size: 10px;
+}
+
+.toastnotifications-notification-img {
+    width: 75%;
+    border-radius: 3px;
+}
+
+/* Notification Positioning CSS */
+.toastnotifications-position-bottom-left {
+    bottom: var(--toastnotifications-position-offset);
+    left: var(--toastnotifications-position-offset);
+}
+
+.toastnotifications-position-top-left {
+    top: var(--toastnotifications-position-offset);
+    left: var(--toastnotifications-position-offset);
+}
+
+.toastnotifications-position-top-right {
+    top: var(--toastnotifications-position-offset);
+    right: var(--toastnotifications-position-offset);
+}
+
+.toastnotifications-position-bottom-right {
+    bottom: var(--toastnotifications-position-offset);
+    right: var(--toastnotifications-position-offset);
+}
+
+/* Rich Body classes */
+.toastnotifications-mention-class {
+    color: var(--mention-foreground);
+    background: var(--mention-background);
+    /* stylelint-disable-next-line value-no-vendor-prefix */
+    unicode-bidi: -moz-plaintext;
+    unicode-bidi: plaintext;
+    font-weight: 500;
+}

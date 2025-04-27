@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>167 additional plugins</summary>
+<summary>168 additional plugins</summary>
 
 ### All Platforms
 
@@ -152,6 +152,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - ThemeLibrary by Fafa
 - Timezones by Aria
 - Title by Kyuuhachi
+- ToastNotifications by Skully, Ethan, Buzzy
 - ToggleVideoBind by mochie
 - TosuRPC by AutumnVN
 - Translate+ by Prince527 & Ven
