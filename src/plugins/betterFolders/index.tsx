@@ -317,11 +317,21 @@ export default definePlugin({
         return child => {
             if (!isBetterFolders) return true;
 
-            if (child?.type === "ul" && child.props?.children != null) {
+            if (child?.type === "ul" && child.props?.children?.props?.children?.props?.children !== null) {
                 // Filter out everything but the guild list (removes the DM button & favorites button)
-                child.props.children.props.children.props.children = child.props.children.props.children.props.children.filter(child => child?.props?.renderTreeNode != null)[0];
-                // Assign properties of the sidebar somewhere where the other functions can read them
-                child.props.children.props.children.props.children.props = { ...child.props.children.props.children.props.children.props, isBetterFolders, betterFoldersExpandedIds };
+                child.props.children.props.children.props.children = child.props.children.props.children.props.children.filter(child => child?.props?.renderTreeNode != null || child?.props?.className != null && child.props.className.startsWith("bottomSection"))[0];
+                if (child.props.children.props.children.props.children.props.className != null && child.props.children.props.children.props.children.props.className.startsWith("bottomSection")) { // Discord experiment
+                    // The experiment splits the sidebar into two sections: a topSection (DMs and favorited channels), and a bottomSection
+                    // We want the bottom section, as that is where guilds, folders, etc are put
+                    child.props.children.props.children.props.children.props.children = child.props.children.props.children.props.children.props.children.filter(child => child?.props?.children != null)[0];
+                    // The bottomSection has some junk inside it, so we need to clean it out
+                    child.props.children.props.children.props.children.props.children.props.children = child.props.children.props.children.props.children.props.children.props.children.filter(child => child?.props?.renderTreeNode != null)[0];
+                    // Now we can assign the properties we want to the guilds list so that the other functions can read them
+                    child.props.children.props.children.props.children.props.children.props.children.props = { ...child.props.children.props.children.props.children.props.children.props.children.props, isBetterFolders, betterFoldersExpandedIds };
+                } else {
+                    // No experiment is enabled, so we just go straight to assigning properties to the guilds list
+                    child.props.children.props.children.props.children.props = { ...child.props.children.props.children.props.children.props, isBetterFolders, betterFoldersExpandedIds };
+                }
                 return true;
             }
 
