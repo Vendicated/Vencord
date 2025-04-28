@@ -48,7 +48,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
         gridArea: "betterFoldersSidebar"
     } satisfies CSSProperties;
 
-    if (!guilds || !settings.store.sidebarAnim) {
+    if (!guilds || !!!settings.store.sidebarAnimDuration) {
         return visible
             ? <div style={barStyle}>{Sidebar}</div>
             : null;
@@ -60,7 +60,7 @@ export default ErrorBoundary.wrap(guildsBarProps => {
             from={{ width: 0 }}
             enter={{ width: guilds.getBoundingClientRect().width }}
             leave={{ width: 0 }}
-            config={{ duration: 200 }}
+            config={{ duration: settings.store.sidebarAnimDuration }}
         >
             {(animationStyle, show) =>
                 show && (

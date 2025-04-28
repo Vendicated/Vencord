@@ -57,10 +57,12 @@ export const settings = definePluginSettings({
         restartNeeded: true,
         default: true
     },
-    sidebarAnim: {
-        type: OptionType.BOOLEAN,
-        description: "Animate opening the folder sidebar",
-        default: true
+    sidebarAnimDuration: {
+        type: OptionType.SLIDER,
+        description: "Duration of the folder sidebar's opening animation (milliseconds)",
+        markers: [0, 25, 50, 75, 100, 150, 200, 250, 300],
+        stickToMarkers: false,
+        default: 200
     },
     closeAllFolders: {
         type: OptionType.BOOLEAN,
@@ -104,7 +106,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "BetterFolders",
     description: "Shows server folders on dedicated sidebar and adds folder related improvements",
-    authors: [Devs.juby, Devs.AutumnVN, Devs.Nuckyz],
+    authors: [Devs.juby, Devs.AutumnVN, Devs.Nuckyz, Devs.alfuwu],
 
     settings,
 
@@ -131,7 +133,7 @@ export default definePlugin({
                 // If we are rendering the Better Folders sidebar, we filter out everything but the scroller for the guild list from the GuildsBar Tree children
                 {
                     match: /unreadMentionsIndicatorBottom,.+?}\)\]/,
-                    replace: "$&.filter($self.makeGuildsBarTreeFilter(!!arguments[0]?.isBetterFolders))"
+                    replace: "$&.filter($self.makeGuildsBarTreeFilter(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds))"
                 },
                 // Export the isBetterFolders variable to the folders component
                 {
@@ -311,13 +313,15 @@ export default definePlugin({
         };
     },
 
-    makeGuildsBarTreeFilter(isBetterFolders: boolean) {
+    makeGuildsBarTreeFilter(isBetterFolders: boolean, betterFoldersExpandedIds?: Set<any>) {
         return child => {
             if (!isBetterFolders) return true;
 
-            if (child?.props?.className?.includes("itemsContainer") && child.props.children != null) {
-                // Filter out everything but the scroller for the guild list
-                child.props.children = child.props.children.filter(child => child?.props?.onScroll != null);
+            if (child?.type === "ul" && child.props?.children != null) {
+                // Filter out everything but the guild list (removes the DM button & favorites button)
+                child.props.children.props.children.props.children = child.props.children.props.children.props.children.filter(child => child?.props?.renderTreeNode != null)[0];
+                // Assign properties of the sidebar somewhere where the other functions can read them
+                child.props.children.props.children.props.children.props = { ...child.props.children.props.children.props.children.props, isBetterFolders, betterFoldersExpandedIds };
                 return true;
             }
 
