@@ -10,9 +10,10 @@ import { sendMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "discord-types/general";
 
+// Taken From Signature :)
 const settings = definePluginSettings({
-    textHeader: {
-        description: "What header to preface text with",
+    forwardPreface: {
+        description: "What should forwarded from be prefaced with",
         type: OptionType.SELECT,
         options: [
             { label: ">", value: ">", default: true },
@@ -45,7 +46,7 @@ export default definePlugin({
     sendForward(channels: any, message: Message) {
         for (const c of channels) {
             sendMessage(c.id, {
-                content: `${message.content}\n${settings.store.textHeader} Forwarded from <#${message.channel_id}>`
+                content: `${message.content}\n${settings.store.forwardPreface} Forwarded from <#${message.channel_id}>`
             });
         }
     }
