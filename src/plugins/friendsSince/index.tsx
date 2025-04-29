@@ -32,7 +32,7 @@ export default definePlugin({
         },
         // User Profile Modal
         {
-            find: "action:\"PRESS_APP_CONNECTION\"",
+            find: "#{intl::CONNECTIONS}),scrollIntoView",
             replacement: {
                 match: /#{intl::USER_PROFILE_MEMBER_SINCE}\),.{0,100}userId:(\i\.id),.{0,100}}\)}\),/,
                 replace: "$&,$self.FriendsSinceComponent({userId:$1,isSidebar:false}),"

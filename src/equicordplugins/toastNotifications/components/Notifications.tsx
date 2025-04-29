@@ -27,11 +27,6 @@ let NotificationQueue: JSX.Element[] = [];
 let notificationID = 0;
 let RootContainer: Root;
 
-/**
- * getNotificationContainer()
- * Gets the root container for the notifications, creating it if it doesn't exist.
- * @returns {Root} The root DOM container.
- */
 function getNotificationContainer() {
     if (!RootContainer) {
         const container = document.createElement("div");

@@ -4,15 +4,28 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { Message } from "discord-types/general";
+
+const settings = definePluginSettings({
+    textHeader: {
+        description: "What header to preface text with",
+        type: OptionType.SELECT,
+        options: [
+            { label: ">", value: ">", default: true },
+            { label: "-#", value: "-#" }
+        ]
+    }
+});
 
 export default definePlugin({
     name: "ForwardAnywhere",
     description: "If a forward fails send it as a normal message also allows nsfw forwards",
     authors: [EquicordDevs.thororen],
+    settings,
     patches: [
         {
             find: "#{intl::MESSAGE_FORWARDING_NSFW_NOT_ALLOWED}",
@@ -32,7 +45,7 @@ export default definePlugin({
     sendForward(channels: any, message: Message) {
         for (const c of channels) {
             sendMessage(c.id, {
-                content: `${message.content}\n\n> Forwarded from <#${message.channel_id}>`
+                content: `${message.content}\n${settings.store.textHeader} Forwarded from <#${message.channel_id}>`
             });
         }
     }

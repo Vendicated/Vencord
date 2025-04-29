@@ -17,8 +17,7 @@
 */
 
 import { Settings, SettingsStore } from "@api/Settings";
-import { ThemeStore } from "@webpack/common";
-
+import { findByCodeLazy } from "@webpack";
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
@@ -62,6 +61,7 @@ async function initThemes() {
 
     const enabledlinks: string[] = [...enabledThemeLinks];
     // "darker" and "midnight" both count as dark
+    const ThemeStore = findByCodeLazy("ThemeStore");
     const activeTheme = ThemeStore.theme === "light" ? "light" : "dark";
 
     const links = enabledlinks
@@ -98,14 +98,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     SettingsStore.addChangeListener("enabledThemeLinks", initThemes);
     SettingsStore.addChangeListener("enabledThemes", initThemes);
-
-    let currentTheme = ThemeStore.theme;
-    ThemeStore.addChangeListener(() => {
-        if (currentTheme === ThemeStore.theme) return;
-
-        currentTheme = ThemeStore.theme;
-        initThemes();
-    });
 
     if (!IS_WEB)
         VencordNative.quickCss.addThemeChangeListener(initThemes);
