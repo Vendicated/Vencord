@@ -66,15 +66,15 @@ export default definePlugin({
         {
             find: '="SYSTEM_TAG"',
             replacement: {
-                match: /(?<=className:\i\.username,style:.{0,50}:void 0,)/,
-                replace: "style:{color:$self.calculateNameColorForMessageContext(arguments[0])},"
+                match: /(?<=\.username.{0,50}?)style:/,
+                replace: "style:{color:$self.calculateNameColorForMessageContext(arguments[0])},_style:"
             }
         },
         {
             find: "#{intl::GUILD_OWNER}),children:",
             replacement: {
-                match: /(typingIndicatorRef:.+?},)(\i=.+?)color:null!=.{0,50}?(?=,)/,
-                replace: (_, rest1, rest2) => `${rest1}ircColor=$self.calculateNameColorForListContext(arguments[0]),${rest2}color:ircColor`
+                match: /(?<=roleName:\i,)color:/,
+                replace: "color:$self.calculateNameColorForListContext(arguments[0]),originalColor:"
             },
             predicate: () => settings.store.memberListColors
         }

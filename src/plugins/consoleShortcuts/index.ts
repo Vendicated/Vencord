@@ -20,6 +20,7 @@ import { Devs } from "@utils/constants";
 import { getCurrentChannel, getCurrentGuild } from "@utils/discord";
 import { runtimeHashMessageKey } from "@utils/intlHash";
 import { SYM_LAZY_CACHED, SYM_LAZY_GET } from "@utils/lazy";
+import { sleep } from "@utils/misc";
 import { ModalAPI } from "@utils/modal";
 import { relaunch } from "@utils/native";
 import { canonicalizeMatch, canonicalizeReplace, canonicalizeReplacement } from "@utils/patches";
@@ -153,7 +154,16 @@ function makeShortcuts() {
         openModal: { getter: () => ModalAPI.openModal },
         openModalLazy: { getter: () => ModalAPI.openModalLazy },
 
-        Stores: Webpack.fluxStores
+        Stores: Webpack.fluxStores,
+
+        // e.g. "2024-05_desktop_visual_refresh", 0
+        setExperiment: (id: string, bucket: number) => {
+            Common.FluxDispatcher.dispatch({
+                type: "EXPERIMENT_OVERRIDE_BUCKET",
+                experimentId: id,
+                experimentBucket: bucket,
+            });
+        },
     };
 }
 
@@ -164,8 +174,8 @@ function loadAndCacheShortcut(key: string, val: any, forceLoad: boolean) {
     function unwrapProxy(value: any) {
         if (value[SYM_LAZY_GET]) {
             forceLoad ? currentVal[SYM_LAZY_GET]() : currentVal[SYM_LAZY_CACHED];
-        } else if (value.$$vencordInternal) {
-            return forceLoad ? value.$$vencordInternal() : value;
+        } else if (value.$$vencordGetWrappedComponent) {
+            return forceLoad ? value.$$vencordGetWrappedComponent() : value;
         }
 
         return value;
@@ -197,10 +207,13 @@ function loadAndCacheShortcut(key: string, val: any, forceLoad: boolean) {
     return value;
 }
 
+const webpackModulesProbablyLoaded = Webpack.onceReady.then(() => sleep(1000));
+
 export default definePlugin({
     name: "ConsoleShortcuts",
     description: "Adds shorter Aliases for many things on the window. Run `shortcutList` for a list.",
     authors: [Devs.Ven],
+    startAt: StartAt.Init,
 
     patches: [
         {
@@ -212,7 +225,7 @@ export default definePlugin({
         }
     ],
 
-    startAt: StartAt.Init,
+
     start() {
         const shortcuts = makeShortcuts();
         window.shortcutList = {};
@@ -233,18 +246,16 @@ export default definePlugin({
         }
 
         // unproxy loaded modules
-        Webpack.onceReady.then(() => {
-            setTimeout(() => this.eagerLoad(false), 1000);
+        this.eagerLoad(false);
 
-            if (!IS_WEB) {
-                const Native = VencordNative.pluginHelpers.ConsoleShortcuts as PluginNative<typeof import("./native")>;
-                Native.initDevtoolsOpenEagerLoad();
-            }
-        });
+        if (!IS_WEB) {
+            const Native = VencordNative.pluginHelpers.ConsoleShortcuts as PluginNative<typeof import("./native")>;
+            Native.initDevtoolsOpenEagerLoad();
+        }
     },
 
     async eagerLoad(forceLoad: boolean) {
-        await Webpack.onceReady;
+        await webpackModulesProbablyLoaded;
 
         const shortcuts = makeShortcuts();
 
