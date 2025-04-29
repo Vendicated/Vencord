@@ -11,7 +11,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 ### Extra included plugins
 
 <details>
-<summary>168 additional plugins</summary>
+<summary>169 additional plugins</summary>
 
 ### All Platforms
 
@@ -25,7 +25,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - BetterActivities by D3SOX, Arjix, AutumnVN
 - BetterAudioPlayer by Creations
 - BetterBanReasons by Inbestigator
-- BetterBlockedUsers by TheArmagan & Elvyra
+- BetterBlockedUsers by TheArmagan
 - BetterInvites by iamme
 - BetterPlusReacts by Joona
 - BetterQuickReact by Ven & Sqaaakoi
@@ -63,6 +63,7 @@ You can join our [discord server](https://discord.gg/5Xh2W87egW) for commits, ch
 - FixFileExtensions by thororen
 - FollowVoiceUser by TheArmagan
 - FontLoader by vmohammad
+- ForwardAnywhere by thororen
 - Freaky by nyx
 - FrequentQuickSwitcher by Samwich
 - FriendCodes by HypedDomi
