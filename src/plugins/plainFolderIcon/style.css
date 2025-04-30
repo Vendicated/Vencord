@@ -1,0 +1,11 @@
+.vc-plainFolderIcon-plain {
+    /* Without this, this are a bit laggier */
+    transition: none !important;
+
+    /* Don't show the mini guild icons */
+    transform: none;
+
+    /* The new icons are fully transparent
+      sane default for the users that already had this plugin enabled */
+    background-color: var(--background-surface-higher);
+}
