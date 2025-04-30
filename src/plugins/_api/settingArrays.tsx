@@ -10,7 +10,9 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Menu, React } from "@webpack/common";
 import { Channel, Guild, User } from "discord-types/general";
 
-function createContextMenuItem(name: string, value: Channel | User | Guild) {
+type ContextMenuType = Channel | User | Guild;
+
+function createContextMenuItem(name: string, value: ContextMenuType) {
     return (
         <Menu.MenuItem
             id="vc-plugin-settings"
@@ -22,7 +24,7 @@ function createContextMenuItem(name: string, value: Channel | User | Guild) {
 }
 
 
-function renderRegisteredPlugins(name: string, value: any) {
+function renderRegisteredPlugins(name: string, value: ContextMenuType) {
     const type = name === "Guild" ? OptionType.GUILDS : name === "User" ? OptionType.USERS : OptionType.CHANNELS;
     const plugins = registeredPlugins[type];
 
@@ -30,7 +32,7 @@ function renderRegisteredPlugins(name: string, value: any) {
     const [checkedItems, setCheckedItems] = React.useState<Record<string, boolean>>(
         Object.fromEntries(
             Object.keys(plugins).flatMap(plugin =>
-                plugins[plugin].map(setting => [`${plugin}-${setting}-${value.id}`, Vencord.Plugins.plugins[plugin].settings?.store[setting].includes(value.id)])
+                plugins[plugin].map(setting => [`${plugin}-${setting}-${value.id}`, Vencord.Plugins.plugins[plugin].settings!.store[setting].includes(value.id)])
             )
         )
     );
@@ -43,12 +45,12 @@ function renderRegisteredPlugins(name: string, value: any) {
         }));
 
         // settings must be defined otherwise the checkbox wouldn't exist in the first place
-        const s = Vencord.Plugins.plugins[plugin].settings!;
-        s.store[setting] = s.store[setting].includes(value.id)
-            ? s.store[setting].filter((id: string) => id !== value.id)
-            : [...s.store[setting], value.id];
+        const { store, def } = Vencord.Plugins.plugins[plugin].settings!;
+        store[setting] = store[setting].includes(value.id)
+            ? store[setting].filter((id: string) => id !== value.id)
+            : [...store[setting], value.id];
 
-        s.def[setting].onChange?.(s.store[setting]);
+        def[setting].onChange?.(store[setting]);
 
     };
     return Object.keys(plugins).map(plugin => (
@@ -62,7 +64,7 @@ function renderRegisteredPlugins(name: string, value: any) {
                     id={`vc-plugin-settings-${plugin}-${setting}`}
                     key={`vc-plugin-settings-${plugin}-${setting}`}
                     // @ts-ignore popoutText exists due to this being a list option type
-                    label={Vencord.Plugins.plugins[plugin].settings?.def[setting].popoutText ?? setting}
+                    label={Vencord.Plugins.plugins[plugin].settings.def[setting].popoutText ?? setting}
                     action={() => handleCheckboxClick(plugin, setting)}
                     checked={checkedItems[`${plugin}-${setting}-${value.id}`]}
                 />
@@ -73,11 +75,11 @@ function renderRegisteredPlugins(name: string, value: any) {
 
 
 
-// mutable in this context refers to the "mute/unmute" context menu items in discord, not the developer meaning of mutable
+// "mutable" in this context refers to the "mute/unmute" context menu items in discord.
 function MutableContextCallback(type: string): NavContextMenuPatchCallback {
     const muteType = type === "Guild" ? "guild" : "channel";
 
-    return (children, props: any) => {
+    return (children, props) => {
         let idx = -1;
 
         const container = findGroupChildrenByChildId(`mute-${muteType}`, children) || findGroupChildrenByChildId(`unmute-${muteType}`, children);
@@ -88,7 +90,7 @@ function MutableContextCallback(type: string): NavContextMenuPatchCallback {
         if (idx !== -1) {
             const newGroup = (
                 <Menu.MenuGroup>
-                    {createContextMenuItem(type, props[type.toLowerCase()])}
+                    {createContextMenuItem(type, props[muteType])}
                 </Menu.MenuGroup>
             );
             children.splice(idx + 1, 0, newGroup);
@@ -97,7 +99,7 @@ function MutableContextCallback(type: string): NavContextMenuPatchCallback {
 }
 
 
-const UserContext: NavContextMenuPatchCallback = (children, props: any) => {
+const UserContext: NavContextMenuPatchCallback = (children, props) => {
     const container = findGroupChildrenByChildId("close-dm", children);
     let idx = 0; // default to 0 for user profile, this will automatically add after "invite to server"
     if (container) {
