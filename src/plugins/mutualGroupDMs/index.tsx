@@ -32,8 +32,8 @@ const SelectedChannelActionCreators = findByPropsLazy("selectPrivateChannel");
 const UserUtils = findByPropsLazy("getGlobalName");
 
 const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
+const MutualsListClasses = findByPropsLazy("row", "icon", "name", "nick");
 const ExpandableList = findComponentByCodeLazy('"PRESS_SECTION"', ".header");
-const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
 
 function getGroupDMName(channel: Channel) {
     return channel.name ||
@@ -59,21 +59,22 @@ function renderClickableGDMs(mutualDms: Channel[], onClose: () => void) {
     return mutualDms.map(c => (
         <Clickable
             key={c.id}
-            className={ProfileListClasses.listRow}
             onClick={() => {
                 onClose();
                 SelectedChannelActionCreators.selectPrivateChannel(c.id);
             }}
         >
-            <Avatar
-                src={IconUtils.getChannelIconURL({ id: c.id, icon: c.icon, size: 32 })}
-                size="SIZE_40"
-                className={ProfileListClasses.listAvatar}
-            >
-            </Avatar>
-            <div className={ProfileListClasses.listRowContent}>
-                <div className={ProfileListClasses.listName}>{getGroupDMName(c)}</div>
-                <div className={GuildLabelClasses.guildNick}>{c.recipients.length + 1} Members</div>
+            <div className={MutualsListClasses.row}>
+                <Avatar
+                    src={IconUtils.getChannelIconURL({ id: c.id, icon: c.icon, size: 32 })}
+                    size="SIZE_40"
+                    className={MutualsListClasses.icon}
+                >
+                </Avatar>
+                <div className={MutualsListClasses.details}>
+                    <div className={MutualsListClasses.name}>{getGroupDMName(c)}</div>
+                    <div className={MutualsListClasses.nick}>{c.recipients.length + 1} Members</div>
+                </div>
             </div>
         </Clickable>
     ));
