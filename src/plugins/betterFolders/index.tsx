@@ -114,7 +114,7 @@ export default definePlugin({
             predicate: () => settings.store.sidebar,
             replacement: [
                 // Create the isBetterFolders variable in the GuildsBar component
-                // Needed because we access this from a closure so we can't use arguments[0]
+                // Needed because we access this from a non-arrow closure so we can't use arguments[0]
                 {
                     match: /let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i,)/,
                     replace: "$&,isBetterFolders"
