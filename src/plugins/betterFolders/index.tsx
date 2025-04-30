@@ -208,20 +208,20 @@ export default definePlugin({
                     match: /(?=,\{from:\{height)/,
                     replace: "&&$self.shouldShowTransition(arguments[0])"
                 },
-                // // If we are rendering the normal GuildsBar sidebar, we avoid rendering guilds from folders that are expanded
+                // If we are rendering the normal GuildsBar sidebar, we avoid rendering guilds from folders that are expanded
                 {
                     predicate: () => !settings.store.keepIcons,
                     match: /folderGroupBackground.*?,(?=\i\(\(\i,\i,\i\)=>{let{key.+?"ul")(?<=selected:\i,expanded:(\i),.+?)/,
                     replace: (m, isExpanded) => `${m}$self.shouldRenderContents(arguments[0],${isExpanded})?null:`
                 },
+                // Decide if we should render the expanded folder background if we are rendering the Better Folders sidebar
                 {
-                    // Decide if we should render the expanded folder background if we are rendering the Better Folders sidebar
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
                     match: /\.isExpanded].{0,110}children:\[/,
                     replace: "$&$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)&&"
                 },
+                // Decide if we should render the expanded folder icon if we are rendering the Better Folders sidebar
                 {
-                    // Decide if we should render the expanded folder icon if we are rendering the Better Folders sidebar
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
                     match: /(?<=\.folderGroupBackground.*?}\),)(?=\i,)/,
                     replace: "!$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)?null:"
