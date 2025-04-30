@@ -21,6 +21,7 @@ import { definePluginSettings } from "@api/Settings";
 import { makeRange } from "@components/PluginSettings/components";
 import { debounce } from "@shared/debounce";
 import { Devs } from "@utils/constants";
+import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 import { Menu, ReactDOM } from "@webpack/common";
 import { JSX } from "react";
@@ -237,12 +238,16 @@ export default definePlugin({
     },
 
     renderMagnifier(instance) {
-        if (instance.props.id === ELEMENT_ID) {
-            if (!this.currentMagnifierElement) {
-                this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
-                this.root = ReactDOM.createRoot(this.element!);
-                this.root.render(this.currentMagnifierElement);
+        try {
+            if (instance.props.id === ELEMENT_ID) {
+                if (!this.currentMagnifierElement) {
+                    this.currentMagnifierElement = <Magnifier size={settings.store.size} zoom={settings.store.zoom} instance={instance} />;
+                    this.root = ReactDOM.createRoot(this.element!);
+                    this.root.render(this.currentMagnifierElement);
+                }
             }
+        } catch (error) {
+            new Logger("ImageZoom").error("Failed to render magnifier:", error);
         }
     },
 
