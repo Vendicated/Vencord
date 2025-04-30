@@ -18,7 +18,7 @@ import { Guild, User } from "discord-types/general";
 import { settings } from ".";
 
 const IconClasses = findByPropsLazy("icon", "acronym", "childWrapper");
-const FriendRow = findComponentByCodeLazy(".listName,discriminatorClass");
+const FriendRow = findComponentByCodeLazy("discriminatorClass:", ".isMobileOnline", "getAvatarURL");
 
 const cl = classNameFactory("vc-gp-");
 
