@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { findByPropsLazy, waitFor } from "../webpack";
+import { findByPropsLazy, waitFor } from "@webpack";
 
 export let React: typeof import("react");
 export let useState: typeof React.useState;
