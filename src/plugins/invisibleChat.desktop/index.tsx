@@ -91,7 +91,6 @@ const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
     );
 };
 
-
 const settings = definePluginSettings({
     savedPasswords: {
         type: OptionType.ARRAY,
