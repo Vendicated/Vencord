@@ -5,6 +5,7 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { DeleteIcon, PlusIcon } from "@components/Icons";
 import { Margins } from "@utils/margins";
@@ -33,23 +34,10 @@ import { ISettingElementProps } from ".";
 
 const cl = classNameFactory("vc-plugin-modal-");
 
-const UserMentionComponent = findComponentByCodeLazy(".USER_MENTION)");
 const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
 const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarURL");
 
-const QuestionMarkIcon = () => {
-    return <svg width="40" height="40" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
-        <path d="M16 4C9.373 4 4 9.373 4 16s5.373 12 12 12 12-5.373 12-12S22.627 4 16 4zm0 20a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm2.25-7.5c-.69.69-1.5 1.125-1.5 2.25h-3c0-2.25 1.5-3 2.25-3.75.75-.75 1.5-1.5 1.5-2.25 0-1.5-1.125-2.25-2.25-2.25s-2.25.75-2.25 2.25h-3c0-3 2.25-5.25 5.25-5.25s5.25 2.25 5.25 5.25c0 1.5-.75 2.625-1.5 3.375z" />
-    </svg>;
-};
-
-const SearchIcon = () => {
-    return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-        strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="16" y1="16" x2="22" y2="22"></line>
-    </svg>;
-};
+const isDevModeEnabled = () => getUserSettingLazy("appearance", "developerMode")?.getSetting() === true;
 
 export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayComponent({
     option,
@@ -63,9 +51,8 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
     const [items, setItems] = useState<string[]>(ensureSettingsMigrated() || []);
     const [text, setText] = useState<string>("");
 
-    // FIXME dont use states to hide buttons globally, rather use separate defined in their respective components
-    //  -> ergo we will have a own text for each button component in the channel view, otherwise it's not nicely
-    //  manageable I believe.
+    const type = option.type === OptionType.GUILDS ? "guild" :
+        option.type === OptionType.USERS ? "user" : "channel";
 
     function ensureSettingsMigrated(): string[] | undefined {
         // in case the settings get manually overridden without a restart of Vencord itself this will prevent crashing
@@ -99,11 +86,10 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
     };
 
     const removeItem = (itemId: string) => {
-        const idx = items.indexOf(itemId);
-        setItems(items.filter((_, index) => index !== idx));
+        setItems(items.filter(item => item !== itemId));
     };
 
-    useEffect(() => { // TODO fix error-proofing everything with the new components
+    useEffect(() => {
         if (text === "") {
             setError(null);
             return;
@@ -114,13 +100,13 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
             return;
         }
 
-        if (option.type !== OptionType.ARRAY && !isNaN(Number(text)) && text !== "") {
-            if (text.length >= 18 && text.length <= 19) {
+        if (option.type !== OptionType.ARRAY && text !== "") {
+            if (text.length >= 18 && text.length <= 19 && !isNaN(Number(text))) {
                 setError(null);
             } else {
                 setError("Invalid ID");
             }
-        } else {
+        } else { // TODO test this
             const isValid = option.isValid?.call(definedSettings, text) ?? true;
             if (typeof isValid === "string") setError(isValid);
             else if (!isValid) setError("Invalid input provided.");
@@ -147,15 +133,16 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
         return icon != null ? <img className={cl("guild-icon")} src={icon} alt="" /> : null;
     };
 
-    const convertToSelectOption = (ids: Array<string>) => {
-        const vals = option.type === OptionType.GUILDS ? ids.map(item => {
+    const convertToSelectOption = (ids: Array<string>, type?: OptionType) => {
+        const optionType = type || option.type;
+        const vals = optionType === OptionType.GUILDS ? ids.map(item => {
             const guild = GuildStore.getGuild(item);
             if (!guild) return null;
             return {
                 label: guild.name,
                 value: guild.id,
             };
-        }) : OptionType.CHANNELS ? ids.map(item => {
+        }) : optionType === OptionType.CHANNELS ? ids.map(item => {
             const channel = ChannelStore.getChannel(item);
             if (!channel) return null;
             return {
@@ -166,53 +153,56 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
             const user = UserStore.getUser(item);
             if (!user) return null;
             return {
-                label: user.username,
+                // @ts-ignore outdated lib
+                label: user.globalName || user.username,
                 value: user.id,
             };
         });
         return vals.filter(Boolean) as SelectOption[];
     };
 
-    function renderSelect(icon: (arg: SelectOption) => React.JSX.Element | null, options: SelectOption[]) {
-        const type = option.type === OptionType.GUILDS ?
-            "guild" : OptionType.USERS ? "user" : "channel";
-
-        const [selected, setSelected] = useState<SelectOption[]>(() => convertToSelectOption(items));
-
+    function createSelect(icon: (arg: SelectOption) => React.JSX.Element | null, options: SelectOption[], props: Record<string, any> = {}) {
         return <SearchableSelect
+            value={convertToSelectOption(items)}
             className={cl(`${type}-select`)}
             options={options}
             multi={true}
-            value={selected}
             closeOnSelect={false}
             placeholder={`Search or select ${type}s...`}
             renderOptionPrefix={icon}
-            onChange={(selected: Array<SelectOption|string>) => {
+            onChange={(vals: Array<SelectOption|string>) => {
                 // the latest clicked element is only provided as ID, not as SelectOption.
-                const clicked = selected.filter(e => typeof e === "string");
-                const cleanSelected = selected.filter(e => typeof e !== "string");
+                const clicked = vals.filter(e => typeof e === "string");
                 if (!items.includes(clicked[0])) {
                     setItems([...items, ...clicked]);
-                    setSelected([...cleanSelected, ...convertToSelectOption(clicked)]);
                 } else {
                     setItems(items.filter(i => i !== clicked[0]));
-                    setSelected(cleanSelected.filter(o => o.value !== clicked[0]));
                 }
             }}
+            {...props}
         />;
     }
 
-    function renderGuildView() {
-        const renderGuildIcon = (e: SelectOption) => {
-            if (!e || e.value === "" || e.label === e.value) return null;
-            return guildIcon(GuildStore.getGuild(e.value));
-        };
+    const renderGuildIcon = (e: SelectOption) => {
+        if (!e || e.value === "" || e.label === e.value) return null;
+        return guildIcon(GuildStore.getGuild(e.value));
+    };
 
-        return renderSelect(renderGuildIcon, Object.values(GuildStore.getGuilds()).map(guild => ({
+    const renderDmIcon = (e: SelectOption) => {
+        if (!e || e.value === "" || e.label === e.value) return null;
+
+        const channel = ChannelStore.getChannel(e.value);
+
+        return channel.recipients.length >= 2 && channel.icon == null ?
+            <GroupDMAvatars recipients={channel.recipients} size="SIZE_32" /> : <Avatar src={getDMChannelIcon(channel)} size="SIZE_32" />;
+    };
+
+
+    function renderGuildView() {
+        return createSelect(renderGuildIcon, Object.values(GuildStore.getGuilds()).map(guild => ({
             label: guild.name,
             value: guild.id,
         })));
-
     }
 
     function renderChannelView() {
@@ -250,11 +240,27 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
             }
         };
 
+        const [guild, setGuild] = useState<string>();
+
+        const dmOption = { value: "DMs", label: "Direct Messages" };
+
+        const guildSelect = <SearchableSelect
+            className={cl("channels-select-guild-select")}
+            options={[
+                dmOption,
+                ...convertToSelectOption(Object.keys(GuildStore.getGuilds()), OptionType.GUILDS),
+            ]}
+            multi={false}
+            value={guild === "DMs" ? dmOption : !guild ? void 0 : convertToSelectOption([guild], OptionType.GUILDS)[0]}
+            closeOnSelect={true}
+            placeholder="Select a Server to pick channels from."
+            renderOptionPrefix={renderGuildIcon}
+            onChange={(v: string) => setGuild(v)}
+        />;
+
         const channels: Record<string, Channel[]> = {};
         const dmChannels: Channel[] = [];
-        const elements: React.JSX.Element[] = [];
 
-        // to not remove items while iterating
         const invalidChannels: string[] = [];
 
         for (const item of items) {
@@ -277,30 +283,79 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
             removeItem(channel);
         }
 
-        const userMention = (channel: Channel) => {
-            return <UserMentionComponent
-                userId={channel.recipients[0]}
-                className="mention"
-            />;
+        const renderChannelSymbol = (e: SelectOption) => {
+            if (!e || e.value === "" || e.label === e.value) return null;
+            const channel = ChannelStore.getChannel(e.value);
+            if (channel.isDM() || channel.isGroupDM()) return renderDmIcon(e);
+            return getChannelSymbol(channel.type);
         };
 
-        const gdmComponent = (channel: Channel) => {
-            return <span style={{ display: "inline-flex", alignItems: "center" }}>
-                {channel.recipients.length >= 2 && channel.icon == null ? (
-                    <GroupDMAvatars recipients={channel.recipients} size="SIZE_32" />
-                ) : (
-                    <Avatar src={getDMChannelIcon(channel)} size="SIZE_32" />
-                )}
-                <TextInput
-                    style={{ marginLeft: "4px" }}
-                    value={channel.name}
-                    disabled={true}
-                />
-            </span>;
+        const getSelectedValues = () => {
+            if (guild === "DMs") {
+                return dmChannels.map(channel => ({
+                    label: channel.name || UserStore.getUser(channel.recipients[0]).username,
+                    value: channel.id,
+                })) as SelectOption[];
+            }
+            if (!guild || !channels[guild!]) return [];
+            return channels[guild!].map(channel => ({
+                label: channel.name,
+                value: channel.id,
+            })) as SelectOption[];
         };
 
+        const getOptions = () => {
+            if (guild === "DMs") {
+                return ChannelStore.getSortedPrivateChannels().map(
+                    channel => ({
+                        label: channel.name || UserStore.getUser(channel.recipients[0]).username,
+                        value: channel.id,
+                    })
+                ) as SelectOption[];
+            }
+            if (!guild) return [];
+            // @ts-ignore outdated lib
+            return ChannelStore.getChannelIds(guild).map(channelId => {
+                const channel = ChannelStore.getChannel(channelId);
+                if (!channel) return;
+                return {
+                    label: channel.name,
+                    value: channel.id,
+                };
+            }) as SelectOption[];
+        };
 
-        return elements;
+        const channelsSelect = createSelect(
+            renderChannelSymbol, !guild ? [] : getOptions(), {
+                isDisabled: !guild,
+                placeholder: !guild ? "Select a server first!" : "Search or select channels...",
+                value: !guild ? [] : getSelectedValues(),
+            }
+        );
+
+        return <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
+            }}
+        >
+            {guildSelect}
+            {channelsSelect}
+        </div>;
+    }
+
+    function renderUserView() {
+        const renderUserIcon = (e: SelectOption) => {
+            if (!e || e.value === "" || e.label === e.value) return null;
+            return <Avatar src={UserStore.getUser(e.value).getAvatarURL()} size="SIZE_16" />;
+        };
+
+        return createSelect(renderUserIcon, Object.values(UserStore.getUsers()).map(user => ({
+            // @ts-ignore outdated lib
+            label: user.globalName || user.username,
+            value: user.id,
+        })));
     }
 
     return (
@@ -309,36 +364,30 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
              <Forms.FormText className={Margins.bottom8} type="description">{option.description}</Forms.FormText>
                 {
                     option.type === OptionType.GUILDS ? renderGuildView() :
-                        option.type === OptionType.CHANNELS ? renderChannelView() :
-                            items.map((item, index) => (
-                                <Flex
-                                    flexDirection="row"
-                                    key={index}
-                                    style={{
-                                        gap: "1px",
-                                        marginBottom: "8px"
+                    option.type === OptionType.USERS ? renderUserView() :
+                    option.type === OptionType.CHANNELS ? renderChannelView() :
+                        items.map((item, index) => (
+                            <Flex
+                                flexDirection="row"
+                                key={index}
+                                style={{
+                                    gap: "1px",
+                                    marginBottom: "8px"
+                                }}
+                            >
+                                <TextInput
+                                    value={item}
+                                    onChange={v => {
+                                        const idx = items.indexOf(item);
+                                        setItems(items.map((i, index) => index === idx ? v : i));
                                     }}
-                                >
-                                    {option.type === OptionType.USERS ? (
-                                        <UserMentionComponent
-                                            userId={item}
-                                            className="mention"
-                                        />
-                                    ) : (
-                                        <TextInput
-                                            value={item}
-                                            onChange={v => {
-                                                const idx = items.indexOf(item);
-                                                setItems(items.map((i, index) => index === idx ? v : i));
-                                            }}
-                                            placeholder="Enter Text"
-                                        />
-                                    )}
-                                    {removeButton(item)}
-                                </Flex>
-                            ))
+                                    placeholder="Enter Text"
+                                />
+                                {removeButton(item)}
+                            </Flex>
+                        ))
                 }
-                { option.type === OptionType.USERS || option.type === OptionType.ARRAY ?
+                {option.type === OptionType.ARRAY ?
                     <Flex
                         flexDirection="row"
                         style={{
@@ -347,8 +396,8 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
                     >
                         <TextInput
                             type="text"
-                            placeholder={option.type === OptionType.ARRAY ? "Enter Text" : "Enter username or user ID"}
-                            id={cl("input")}
+                            placeholder={"Enter Text"}
+                            id={cl("text-input")}
                             onChange={v => setText(v)}
                             value={text}
                         />
@@ -358,29 +407,43 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
                             // idk why discord is so fucked with button styles here but passing it as a prop doesn't work
                             style={{ background: "none", color: "var(--text-normal)" }}
                             onClick={() => {
-                                if (option.type === OptionType.ARRAY && text !== "") {
-                                    setItems([...items, text]);
-                                    setText("");
-                                } else {
-                                    const found = Object.values(UserStore.getUsers()).find(user => {
-                                        // @ts-ignore outdated lib
-                                        if (user.username === text || user.globalName === text) {
-                                            setItems([...items, user.id]);
-                                            setText("");
-                                            return true;
-                                        }
-                                    });
-                                    if (!found) {
-                                        setError("User not found");
-                                    }
-                                }
+                                setItems([...items, text]);
+                                setText("");
                             }}
                             disabled={text === "" || error != null}
                             look={Button.Looks.BLANK}
                         >
                             <PlusIcon />
                         </Button>
-                    </Flex> : null
+                    </Flex>
+                : !isDevModeEnabled() ? null :
+                    <Flex
+                        flexDirection="row"
+                        style={{
+                            gap: "3px"
+                        }}
+                    >
+                        <TextInput
+                            type="text"
+                            placeholder={`...or enter ${type}Id`}
+                            id={cl("id-input")}
+                            onChange={v => setText(v)}
+                            value={text}
+                        />
+                        <Button
+                            size={Button.Sizes.MIN}
+                            id={cl("add-button")}
+                            style={{ background: "none", color: "var(--text-normal)" }}
+                            onClick={() => {
+                                setItems([...items, text]);
+                                setText("");
+                            }}
+                            disabled={text === "" || error != null}
+                            look={Button.Looks.BLANK}
+                        >
+                            <PlusIcon />
+                        </Button>
+                </Flex>
                 }
             {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
         </Forms.FormSection>
