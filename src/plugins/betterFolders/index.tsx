@@ -119,7 +119,7 @@ export default definePlugin({
             predicate: () => settings.store.sidebar,
             replacement: [
                 // Create the isBetterFolders variable in the GuildsBar component
-                // Needed because we access this from a closure so we can't use arguments[0]
+                // Needed because we access this from a non-arrow closure so we can't use arguments[0]
                 {
                     match: /let{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i,)/,
                     replace: "$&,isBetterFolders"
@@ -156,6 +156,18 @@ export default definePlugin({
                     match: /(?=\(0,\i\.jsxs?\)[^0]+fullWidth:)/,
                     replace: "!!arguments[0]?.isBetterFolders?null:"
                 },
+                // On the other sidebar version, dms are rendered separately.
+                // We need to filter them out
+                {
+                    match: /fullWidth:!0.+?lurkingGuildIds.+?\]/,
+                    replace: "$&.filter($self.makeGuildsBarTreeFilter(!!arguments[0]?.isBetterFolders))"
+                },
+                // if you click the (NEW) button on the better folders sidebar
+                // it will end up in some infinite loop
+                {
+                    match: /unreadMentionsFixedFooter\].+?\]/,
+                    replace: "$&.filter($self.makeNewButtonFilter(!!arguments[0]?.isBetterFolders))"
+                },
                 // Export the isBetterFolders variable to the folders component
                 {
                     match: /switch\(\i\.type\){case \i\.\i\.FOLDER:.+?folderNode:\i,/,
@@ -184,7 +196,7 @@ export default definePlugin({
             ]
         },
         {
-            find: ".expandedFolderBackground,",
+            find: ".FOLDER_ITEM_ANIMATION_DURATION),",
             predicate: () => settings.store.sidebar,
             replacement: [
                 // We use arguments[0] to access the isBetterFolders variable in this nested folder component (the parent exports all the props so we don't have to patch it)
@@ -204,27 +216,20 @@ export default definePlugin({
                 // If we are rendering the normal GuildsBar sidebar, we avoid rendering guilds from folders that are expanded
                 {
                     predicate: () => !settings.store.keepIcons,
-                    match: /expandedFolderBackground,.+?,(?=\i\(\(\i,\i,\i\)=>{let{key.{0,45}ul)(?<=selected:\i,expanded:(\i),.+?)/,
+                    match: /folderGroupBackground.*?,(?=\i\(\(\i,\i,\i\)=>{let{key.+?"ul")(?<=selected:\i,expanded:(\i),.+?)/,
                     replace: (m, isExpanded) => `${m}$self.shouldRenderContents(arguments[0],${isExpanded})?null:`
                 },
+                // Decide if we should render the expanded folder background if we are rendering the Better Folders sidebar
                 {
-                    // Decide if we should render the expanded folder background if we are rendering the Better Folders sidebar
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
-                    match: /\.isExpanded\),.{0,30}children:\[/,
+                    match: /\.isExpanded].{0,110}children:\[/,
                     replace: "$&$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)&&"
                 },
+                // Decide if we should render the expanded folder icon if we are rendering the Better Folders sidebar
                 {
-                    // Decide if we should render the expanded folder icon if we are rendering the Better Folders sidebar
                     predicate: () => settings.store.showFolderIcon !== FolderIconDisplay.Always,
-                    match: /(?<=\.expandedFolderBackground.+?}\),)(?=\i,)/,
+                    match: /(?<=\.folderGroupBackground.*?}\),)(?=\i,)/,
                     replace: "!$self.shouldShowFolderIconAndBackground(!!arguments[0]?.isBetterFolders,arguments[0]?.betterFoldersExpandedIds)?null:"
-                },
-                {
-                    // Discord adds a slight bottom margin of 4px when it's expanded
-                    // Which looks off when there's nothing open in the folder
-                    predicate: () => !settings.store.keepIcons,
-                    match: /(?=className:.{0,50}folderIcon)/,
-                    replace: "style:arguments[0]?.isBetterFolders?{}:{marginBottom:0},"
                 }
             ]
         },
@@ -340,7 +345,6 @@ export default definePlugin({
     makeGuildsBarTreeFilter(isBetterFolders: boolean) {
         return child => {
             if (!isBetterFolders) return true;
-
             return !!child?.props?.renderTreeNode;
         };
     },
@@ -358,6 +362,14 @@ export default definePlugin({
             default:
                 return true;
         }
+    },
+
+    makeNewButtonFilter(isBetterFolders: boolean) {
+        return child => {
+            if (!isBetterFolders) return true;
+
+            return !child?.props?.barClassName;
+        };
     },
 
     shouldShowTransition(props: any) {

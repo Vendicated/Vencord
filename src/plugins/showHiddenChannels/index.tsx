@@ -357,7 +357,7 @@ export default definePlugin({
             ]
         },
         {
-            find: "overflowCountVariant",
+            find: ".SIZE_24,overflowCountVariant:",
             replacement: [
                 {
                     // Create a variable for the channel prop
