@@ -45,8 +45,25 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
         description: "Use friend names in place of usernames (overrides Display Names option if applicable)"
-    }
+    },
+    memberList: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show usernames in member list",
+    },
+    voiceChannelList: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show usernames in voice channel list",
+    },
 });
+
+function getUsername(user: any): string {
+    const friendName = RelationshipStore.getNickname(user.id);
+    if (settings.store.preferFriend && friendName) return friendName;
+    if (settings.store.displayNames) return user.globalName || user.username;
+    return user.username;
+}
 
 export default definePlugin({
     name: "ShowMeYourName",
@@ -61,18 +78,31 @@ export default definePlugin({
                 replace: "$self.renderUsername(arguments[0])"
             }
         },
+        {
+            find: "._areActivitiesExperimentallyHidden=(",
+            replacement: {
+                match: /(?<=user:(\i),currentUser:\i,nick:)\i/,
+                replace: "$self.getUsername($1)"
+            },
+            predicate: () => settings.store.memberList
+        },
+        {
+            find: ".usernameSpeaking]",
+            predicate: () => settings.store.voiceChannelList,
+            replacement: [
+                {
+                    match: /(?<=children:\[null!=\i\?)\i(?=:\i\.\i\.getName\((\i)\))/,
+                    replace: "$self.getUsername($1)"
+                },
+            ]
+        },
     ],
     settings,
-
+    getUsername,
     renderUsername: ErrorBoundary.wrap(({ author, message, isRepliedMessage, withMentionPrefix, userOverride }: UsernameProps) => {
         try {
             const user = userOverride ?? message.author;
-            const friendName = RelationshipStore.getNickname(user.id);
-            let { username } = user;
-            if (settings.store.displayNames)
-                username = (user as any).globalName || username;
-            if (settings.store.preferFriend)
-                username = friendName ?? username;
+            const username = getUsername(user);
 
             const { nick } = author;
             const prefix = withMentionPrefix ? "@" : "";

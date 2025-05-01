@@ -11,8 +11,8 @@ import { makeRange } from "@components/PluginSettings/components";
 import { debounce } from "@shared/debounce";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy, findByCode, findByProps } from "@webpack";
-import { ChannelStore, ContextMenuApi, GuildStore, IconUtils, Menu, ChannelRouter, PermissionStore, React, SelectedChannelStore, PermissionsBits, Toasts, UserStore } from "@webpack/common";
+import { findByCode, findByProps, findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
+import { ChannelRouter, ChannelStore, ContextMenuApi, GuildStore, Menu, PermissionsBits, PermissionStore, React, SelectedChannelStore, Toasts, UserStore } from "@webpack/common";
 
 import style from "./styles.css?managed";
 
@@ -86,10 +86,10 @@ const settings = definePluginSettings({
         description: "Automatically turns on camera",
         default: false,
     },
-    autoStream: { 
-        type: OptionType.BOOLEAN, 
+    autoStream: {
+        type: OptionType.BOOLEAN,
         description: "Automatically turns on stream",
-        default: false, 
+        default: false,
     },
     selfMute: {
         type: OptionType.BOOLEAN,
@@ -101,10 +101,10 @@ const settings = definePluginSettings({
         description: "Automatically deafems your mic when joining voice-channel.",
         default: false,
     },
-    leaveEmpty: { 
+    leaveEmpty: {
         type: OptionType.BOOLEAN,
         description: "Finds a random-call, when the voice chat is empty.",
-        default: false, 
+        default: false,
     },
     avoidStages: {
         type: OptionType.BOOLEAN,
@@ -177,21 +177,21 @@ export default definePlugin({
         }
     ],
     flux: {
-        VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[] }) {
+        VOICE_STATE_UPDATES({ voiceStates }: { voiceStates: VoiceState[]; }) {
             const currentUserId = UserStore.getCurrentUser().id;
             const myChannelId = VoiceStateStore.getVoiceStateForUser(currentUserId)?.channelId;
             if (!myChannelId || !settings.store.leaveEmpty) return;
-    
+
             const voiceStatesMap = VoiceStateStore.getVoiceStates() as Record<string, VoiceState>;
             const othersInChannel = Object.values(voiceStatesMap).filter(vs =>
                 vs.channelId === myChannelId && vs.userId !== currentUserId
             );
-    
+
             if (othersInChannel.length === 0) {
-                randomVoice()
+                randomVoice();
             }
         },
-    },    
+    },
     start() {
         enableStyle(style);
     },
@@ -261,7 +261,7 @@ function ContextMenu() {
             aria-label="Voice state modifier"
         >
 
-            
+
             <Menu.MenuItem
                 id="servers"
                 label="Select Servers"

@@ -82,10 +82,9 @@ export default definePlugin({
             }
         },
         {
-            predicate: () => settings.store.showPanel,
             find: "this.renderEmbeddedActivity()",
             replacement: {
-                match: /(?<=children.{0,50})"div"(?=.{0,500}this\.renderEmbeddedActivity\(\))/,
+                match: /(?<=render\(\).{0,500}children.{0,50})"div"(?=.{0,500}this\.renderEmbeddedActivity\(\))/,
                 replace: "$self.WrapperComponent"
             }
         }
@@ -118,7 +117,7 @@ export default definePlugin({
         return (
             <>
                 <div {...props}>{props.children}</div>
-                <div className={classes(cl("spectators_panel"), Margins.top8)} style={{ marginLeft: 8 }}>
+                <div className={classes(cl("spectators_panel"), Margins.top8)}>
                     <Forms.FormTitle tag="h3" style={{ marginTop: 8, marginBottom: 0, textTransform: "uppercase" }}>
                         {getIntlMessage("SPECTATORS", { numViewers: userIds.length })}
                     </Forms.FormTitle>
