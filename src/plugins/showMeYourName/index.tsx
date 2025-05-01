@@ -99,7 +99,7 @@ export default definePlugin({
             predicate: () => settings.store.voiceChannelList,
             replacement: [
                 {
-                    match: /(?<=children:\[null!=\i\?)\i(?=:\i\.\i\.getName\((\i)\))/,
+                    match: /(?<=children:\[)null!=\i\?\i:\i\.\i\.getName\((\i)\)/,
                     replace: "$self.getUsername($1)"
                 },
             ]
@@ -110,7 +110,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /\i\.\i\.getName\(\i,null==.{0,15},(\i)\)/g,
-                    replace: "$self.getUsername($1),"
+                    replace: "$self.getUsername($1)"
                 },
             ]
         },
