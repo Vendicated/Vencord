@@ -142,13 +142,6 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
                 label: guild.name,
                 value: guild.id,
             };
-        }) : optionType === OptionType.CHANNELS ? ids.map(item => {
-            const channel = ChannelStore.getChannel(item);
-            if (!channel) return null;
-            return {
-                label: channel.name,
-                value: channel.id,
-            };
         }) : ids.map(item => {
             const user = UserStore.getUser(item);
             if (!user) return null;
