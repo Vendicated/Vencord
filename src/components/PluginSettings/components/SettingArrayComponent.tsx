@@ -308,7 +308,7 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
             }
             if (!guild) return [];
             // @ts-ignore outdated lib
-            return ChannelStore.getChannelIds(guild).map(channelId => {
+            return ChannelStore.getChannelIds(guild).map((channelId: string) => {
                 const channel = ChannelStore.getChannel(channelId);
                 if (!channel) return;
                 return {
