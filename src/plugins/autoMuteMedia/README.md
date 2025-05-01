@@ -1,6 +1,6 @@
 # Auto Mute Media
 
-Videos are muted by default. Now you don't have to mute your volume before playing a video if you don't want to hear it's sound.
+Videos are muted by default. Now you don't have to mute your volume before playing a video if you don't want to hear its sound.
 
 ## Before
 
