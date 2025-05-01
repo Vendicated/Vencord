@@ -106,7 +106,7 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
             } else {
                 setError("Invalid ID");
             }
-        } else { // TODO test this
+        } else {
             const isValid = option.isValid?.call(definedSettings, text) ?? true;
             if (typeof isValid === "string") setError(isValid);
             else if (!isValid) setError("Invalid input provided.");
