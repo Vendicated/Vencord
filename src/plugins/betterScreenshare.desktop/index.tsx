@@ -19,28 +19,13 @@
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findComponentByCodeLazy } from "@webpack";
 
-import { Emitter, ScreenshareSettingsIcon } from "../philsPluginLibrary";
+import { addSettingsPanelButton, Emitter, removeSettingsPanelButton, ScreenshareSettingsIcon } from "../philsPluginLibrary";
 import { PluginInfo } from "./constants";
 import { openScreenshareModal } from "./modals";
 import { ScreenshareAudioPatcher, ScreensharePatcher } from "./patchers";
 import { GoLivePanelWrapper, replacedSubmitFunction } from "./patches";
 import { initScreenshareAudioStore, initScreenshareStore } from "./stores";
-
-const Button = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
-
-function screenshareSettingsButton() {
-
-    return (
-        <Button
-            tooltipText="Change screenshare settings"
-            icon={ScreenshareSettingsIcon}
-            role="button"
-            onClick={openScreenshareModal}
-        />
-    );
-}
 
 export default definePlugin({
     name: "BetterScreenshare",
@@ -61,13 +46,6 @@ export default definePlugin({
                 match: /\(.{0,10}(,{.{0,100}modalContent)/,
                 replace: "($self.GoLivePanelWrapper$1"
             }
-        },
-        {
-            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
-            replacement: {
-                match: /className:\i\.buttons,.{0,50}children:\[/,
-                replace: "$&$self.screenshareSettingsButton(),"
-            }
         }
     ],
     settings: definePluginSettings({
@@ -83,16 +61,23 @@ export default definePlugin({
         this.screensharePatcher = new ScreensharePatcher().patch();
         this.screenshareAudioPatcher = new ScreenshareAudioPatcher().patch();
 
+        addSettingsPanelButton({
+            name: PluginInfo.PLUGIN_NAME,
+            icon: ScreenshareSettingsIcon,
+            tooltipText: "Screenshare Settings",
+            onClick: openScreenshareModal
+        });
     },
     stop(): void {
         this.screensharePatcher?.unpatch();
         this.screenshareAudioPatcher?.unpatch();
         Emitter.removeAllListeners(PluginInfo.PLUGIN_NAME);
+
+        removeSettingsPanelButton(PluginInfo.PLUGIN_NAME);
     },
     toolboxActions: {
         "Open Screenshare Settings": openScreenshareModal
     },
     replacedSubmitFunction,
-    GoLivePanelWrapper,
-    screenshareSettingsButton
+    GoLivePanelWrapper
 });
