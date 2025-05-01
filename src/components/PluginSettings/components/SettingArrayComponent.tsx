@@ -6,7 +6,7 @@
 
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-// import SearchModal from "@components/SearchModal";
+import { DeleteIcon, PlusIcon } from "@components/Icons";
 import { Margins } from "@utils/margins";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { OptionType, PluginOptionArray } from "@utils/types";
@@ -18,22 +18,22 @@ import {
     GuildStore,
     IconUtils,
     React,
-    Text,
+    SearchableSelect,
     TextInput,
-    useEffect, UserStore,
+    useEffect,
+    UserStore,
     useState,
 } from "@webpack/common";
+import { SelectOption } from "@webpack/types";
 import { Guild } from "discord-types/general";
 
 import { ISettingElementProps } from ".";
-import { DeleteIcon, PlusIcon } from "@components/Icons";
 
 const cl = classNameFactory("vc-plugin-modal-");
 
 const UserMentionComponent = findComponentByCodeLazy(".USER_MENTION)");
 const getDMChannelIcon = findByCodeLazy(".getChannelIconURL({");
 const GroupDMAvatars = findComponentByCodeLazy(".AvatarSizeSpecs[", "getAvatarURL");
-
 
 const QuestionMarkIcon = () => {
     return <svg width="40" height="40" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
@@ -60,6 +60,10 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
     const [error, setError] = useState<string | null>(null);
     const [items, setItems] = useState<string[]>(ensureSettingsMigrated() || []);
     const [text, setText] = useState<string>("");
+
+    // FIXME dont use states to hide buttons globally, rather use separate defined in their respective components
+    //  -> ergo we will have a own text for each button component in the channel view, otherwise it's not nicely
+    //  manageable I believe.
 
     function ensureSettingsMigrated(): string[] | undefined {
         // in case the settings get manually overridden without a restart of Vencord itself this will prevent crashing
@@ -132,53 +136,56 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
         onError(error !== null);
     }, [error]);
 
-    /* function openSearchModal(val?: string) {
-        return openModal(modalProps => (
-            <SearchModal
-                modalProps={modalProps}
-                input={val}
-                subText={"All selected items will be added to " + wordsToTitle(wordsFromCamel(id))}
-                searchType={option.type === OptionType.USERS ? "USERS" : option.type === OptionType.CHANNELS ? "CHANNELS" : "GUILDS"}
-                onSubmit={values => setItems([...items, ...values.map(v => v.id)])}
-                excludeIds={items}
-            />
-        ));
-    } */
-
     const guildIcon = (guild: Guild) => {
         const icon = guild?.icon == null ? undefined : IconUtils.getGuildIconURL({
             id: guild.id,
             icon: guild.icon,
-            size: 32,
+            size: 16,
         });
-        return icon != null ? <img className={cl("guild-icon")} src={icon} alt="" /> : QuestionMarkIcon();
+        return icon != null ? <img className={cl("guild-icon")} src={icon} alt="" /> : null;
     };
 
-
     function renderGuildView() {
-        return items.map(item => GuildStore.getGuild(item) || item)
-            .map((guild, index) => (
-                <Flex
-                    flexDirection="row"
-                    key={index}
-                    style={{
-                        gap: "1px",
-                        marginBottom: "8px"
-                    }}
-                >
-                    <div className={cl("name")} style={{ color: "var(--text-normal)" }}>
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                            {guildIcon(guild)}
-                            <TextInput
-                                value={guild?.name ?? `Unknown Guild (${guild})`}
-                                disabled={true}
-                            />
+        const convertToSelectOption = (ids: Array<string>) => {
+            return ids.map(item => {
+                const guild = GuildStore.getGuild(item);
+                if (!guild) return null;
+                return {
+                    label: guild.name,
+                    value: guild.id,
+                };
+            }).filter(Boolean) as SelectOption[];
+        };
 
-                        </span>
-                    </div>
-                    {removeButton(typeof guild !== "string" ? guild.id : guild)}
-                </Flex>
-            ));
+        const [guilds, setGuilds] = useState<SelectOption[]>(() => convertToSelectOption(items));
+
+        const renderGuildIcon = (e: SelectOption) => {
+            if (!e || e.value === "" || e.label === e.value) return null;
+            return guildIcon(GuildStore.getGuild(e.value));
+        };
+
+        return <SearchableSelect
+            className={cl("guild-select")}
+            options={Object.values(GuildStore.getGuilds()).map(guild => ({
+                label: guild.name,
+                value: guild.id,
+            }))}
+            multi={true}
+            value={guilds}
+            closeOnSelect={false}
+            placeholder="Search or select guilds..."
+            renderOptionPrefix={renderGuildIcon}
+            onChange={(selected: Array<SelectOption|string>) => {
+                const clicked = selected.filter(e => typeof e === "string");
+                if (!items.includes(clicked[0])) {
+                    setItems([...items, ...clicked]);
+                    setGuilds([...guilds, ...convertToSelectOption(clicked)]);
+                } else {
+                    setItems(items.filter(i => i !== clicked[0]));
+                    setGuilds(guilds.filter(g => g.value !== clicked[0]));
+                }
+            }}
+        />;
     }
 
     function renderChannelView() {
@@ -218,7 +225,7 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
             }
         };
 
-        // const channels: Record<string, Channel[]> = {};  TODO remake
+        // const channels: Record<string, Channel[]> = {};
         // const dmChannels: Channel[] = [];
         // const elements: React.JSX.Element[] = [];
         //
@@ -255,46 +262,88 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
         // const gdmComponent = (channel: Channel) => {
         //     return <span style={{ display: "inline-flex", alignItems: "center" }}>
         //         {channel.recipients.length >= 2 && channel.icon == null ? (
-        //             <GroupDMAvatars recipients={channel.recipients} size="SIZE_16" />
+        //             <GroupDMAvatars recipients={channel.recipients} size="SIZE_32" />
         //         ) : (
-        //             <Avatar src={getDMChannelIcon(channel)} size="SIZE_16" />
+        //             <Avatar src={getDMChannelIcon(channel)} size="SIZE_32" />
         //         )}
-        //         <Text variant="text-sm/semibold" style={{ marginLeft: "4px" }}>{channel.name}</Text>
+        //         <TextInput
+        //             style={{ marginLeft: "4px" }}
+        //             value={channel.name}
+        //             disabled={true}
+        //         />
         //     </span>;
         // };
         //
         // let idx = -1;
         //
-        // if (dmChannels.length > 0) {
-        //     elements.push(
-        //         <details>
-        //             <summary style={{ color: "var(--text-normal)", marginBottom: "8px" }}>DMs</summary>
-        //             <div style={{ paddingLeft: "16px" }}>
-        //                 {dmChannels.map(channel => {
-        //                     idx += 1;
-        //                     return <Flex
-        //                         flexDirection="row"
-        //                         key={idx}
-        //                         style={{
-        //                             gap: "1px",
-        //                             marginBottom: "8px",
-        //                         }}
-        //                     >
-        //                         {channel.recipients.length === 1 ? userMention(channel) : gdmComponent(channel)}
-        //                         {removeButton(channel.id)}
-        //                     </Flex>;
-        //                 })}
-        //             </div>
-        //         </details >
-        //     );
-        // }
+        // elements.push(
+        //     <details>
+        //         <summary style={{ color: "var(--text-normal)", marginBottom: "8px" }}>DMs</summary>
+        //         <div style={{ paddingLeft: "16px" }}>
+        //             {dmChannels.length > 0 && dmChannels.map(channel => {
+        //                 idx += 1;
+        //                 return <Flex
+        //                     flexDirection="row"
+        //                     key={idx}
+        //                     style={{
+        //                         gap: "1px",
+        //                         marginBottom: "8px",
+        //                     }}
+        //                 >
+        //                     {channel.recipients.length === 1 ? userMention(channel) : gdmComponent(channel)}
+        //                     {removeButton(channel.id)}
+        //                 </Flex>;
+        //             })}
+        //             <Flex
+        //                 flexDirection="row"
+        //                 style={{
+        //                     gap: "3px",
+        //                     marginBottom: "8px",
+        //                 }}>
+        //                 <TextInput
+        //                     placeholder={"Enter DM name or ID"}
+        //                     value={text}
+        //                     onChange={v => setText(v)}
+        //                 />
+        //                 <Button
+        //                     size={Button.Sizes.MIN}
+        //                     id={cl("add-button")}
+        //                     style={{ background: "none", color: "var(--text-normal)" }}
+        //                     onClick={() => {
+        //                         if (!isNaN(Number(text)) && text !== "") {
+        //                             setItems([...items, text]);
+        //                             setText("");
+        //                         }
+        //                         else {
+        //                             const found = Object.values(ChannelStore.getSortedPrivateChannels()).find(ch => {
+        //                                 if (ch.recipients.length === 1) return false;
+        //                                 return ch.name.toLowerCase().includes(text.toLowerCase());
+        //                             });
+        //                             if (!found) {
+        //                                 setError("User not found"); // FIXME open search modal with this text
+        //                             } else {
+        //                                 setItems([...items, found.id]);
+        //                                 setText("");
+        //                             }
+        //                         }
+        //                     }}
+        //                     disabled={text === "" || error != null}
+        //                     look={Button.Looks.BLANK}
+        //                 >
+        //                     <PlusIcon />
+        //                 </Button>
+        //             </Flex>
+        //         </div>
+        //     </details >
+        // );
         //
         // const guilds: { name: string; guild: React.JSX.Element }[] = [];
         //
         // Object.keys(channels).forEach(guildId => {
         //     const guild = GuildStore.getGuild(guildId);
+        //     if (!guild) return;
         //     guilds.push(
-        //         { name: guild?.name ?? `Unknown Guild (${guildId})`, guild: (
+        //         { name: guild.name, guild: (
         //         <details>
         //             {!guild ? <summary style={{ color: "var(--text-normal)", marginBottom: "8px" }}>{`Unknown Guild (${guildId})`}</summary> : (
         //                 <summary style={{ color: "var(--text-normal)", marginBottom: "8px" }}>
@@ -339,54 +388,51 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
         <Forms.FormSection>
              <Forms.FormTitle>{wordsToTitle(wordsFromCamel(id))}</Forms.FormTitle>
              <Forms.FormText className={Margins.bottom8} type="description">{option.description}</Forms.FormText>
-                {option.type === OptionType.ARRAY || option.type === OptionType.USERS ?
-                    items.map((item, index) => (
-                        <Flex
-                            flexDirection="row"
-                            key={index}
-                            style={{
-                                gap: "1px",
-                                marginBottom: "8px"
-                            }}
-                        >
-                            {option.type === OptionType.USERS ? (
-                                <UserMentionComponent
-                                    userId={item}
-                                    className="mention"
-                                />
-                            ) : (
-                                <TextInput
-                                    value={item}
-                                    onChange={v => {
-                                        const idx = items.indexOf(item);
-                                        setItems(items.map((i, index) => index === idx ? v : i));
+                {
+                    option.type === OptionType.GUILDS ? renderGuildView() :
+                        option.type === OptionType.CHANNELS ? renderChannelView() :
+                            items.map((item, index) => (
+                                <Flex
+                                    flexDirection="row"
+                                    key={index}
+                                    style={{
+                                        gap: "1px",
+                                        marginBottom: "8px"
                                     }}
-                                    placeholder="Enter Text"
-                                />
-                            )}
-                            {removeButton(item)}
-                        </Flex>
-                    )) : option.type === OptionType.CHANNELS ?
-                        renderChannelView() : renderGuildView()
+                                >
+                                    {option.type === OptionType.USERS ? (
+                                        <UserMentionComponent
+                                            userId={item}
+                                            className="mention"
+                                        />
+                                    ) : (
+                                        <TextInput
+                                            value={item}
+                                            onChange={v => {
+                                                const idx = items.indexOf(item);
+                                                setItems(items.map((i, index) => index === idx ? v : i));
+                                            }}
+                                            placeholder="Enter Text"
+                                        />
+                                    )}
+                                    {removeButton(item)}
+                                </Flex>
+                            ))
                 }
-                <Flex
-                    flexDirection="row"
-                    style={{
-                        gap: "3px"
-                    }}
-                >
-                    <TextInput
-                        type="text"
-                        placeholder={option.type === OptionType.ARRAY ? "Enter Text" : "Enter Text or ID"}
-                        id={cl("input")}
-                        onChange={v => setText(v)}
-                        value={text}
-                    />
-                    {option.type !== OptionType.CHANNELS || (!isNaN(Number(text)) && text !== "") ?
-                        // For channels, there will be only search modals, due to the channel names duplicating being more likely.
-                        // However, in each guild section in the channel view users will find an extra text input
-                        // through which they can search specifically channels for those guilds
-                        // however, this requires the guild to be already added in the first place to be rendered.
+                { option.type === OptionType.USERS || option.type === OptionType.ARRAY ?
+                    <Flex
+                        flexDirection="row"
+                        style={{
+                            gap: "3px"
+                        }}
+                    >
+                        <TextInput
+                            type="text"
+                            placeholder={option.type === OptionType.ARRAY ? "Enter Text" : "Enter username or user ID"}
+                            id={cl("input")}
+                            onChange={v => setText(v)}
+                            value={text}
+                        />
                         <Button
                             size={Button.Sizes.MIN}
                             id={cl("add-button")}
@@ -396,36 +442,17 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
                                 if (option.type === OptionType.ARRAY && text !== "") {
                                     setItems([...items, text]);
                                     setText("");
-                                }
-                                else if (option.type === OptionType.GUILDS) {
-                                    const found = Object.values(GuildStore.getGuilds()).find(guild => {
-                                        if (guild.name.toLowerCase().includes(text.toLowerCase())) {
-                                            // this is not the best solution, however i think users can figure it out
-                                            // and usually you wouldn't input a completely generic text
-                                            setItems([...items, guild.id]);
-                                            setText("");
-                                            return true;
-                                        }
-                                    });
-                                    if (!found) {
-                                        setError("Guild not found"); // FIXME open search modal with this text
-                                    }
-                                } else if (option.type === OptionType.USERS) {
+                                } else {
                                     const found = Object.values(UserStore.getUsers()).find(user => {
-                                        if (
-                                            // since new usernames are unique, this works fine
-                                            // however the globalName check might be too broad(?)
-                                            user.username.toLowerCase() === text.toLowerCase()
-                                            // @ts-ignore outdated lib
-                                            || user.globalName?.toLowerCase().includes(text.toLowerCase())
-                                        ) {
+                                        // @ts-ignore outdated lib
+                                        if (user.username === text || user.globalName === text) {
                                             setItems([...items, user.id]);
                                             setText("");
                                             return true;
                                         }
                                     });
                                     if (!found) {
-                                        setError("User not found"); // FIXME open search modal with this text
+                                        setError("User not found");
                                     }
                                 }
                             }}
@@ -433,18 +460,9 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
                             look={Button.Looks.BLANK}
                         >
                             <PlusIcon />
-                        </Button> :
-                        < Button
-                            id={cl("search-button")}
-                            size={Button.Sizes.MIN}
-                            style={{ background: "none", color: "var(--text-normal)" }}
-                            // FIXME onClick={() => openSearchModal(text)}
-                            look={Button.Looks.BLANK}
-                        >
-                            <SearchIcon />
                         </Button>
-                    }
-                </Flex>
+                    </Flex> : null
+                }
             {error && <Forms.FormText style={{ color: "var(--text-danger)" }}>{error}</Forms.FormText>}
         </Forms.FormSection>
     );
