@@ -48,13 +48,18 @@ const settings = definePluginSettings({
     },
     memberList: {
         type: OptionType.BOOLEAN,
-        default: true,
+        default: false,
         description: "Show usernames in member list",
     },
     voiceChannelList: {
         type: OptionType.BOOLEAN,
-        default: true,
+        default: false,
         description: "Show usernames in voice channel list",
+    },
+    emojiReactions: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Show usernames in emoji reactions",
     },
 });
 
@@ -80,11 +85,11 @@ export default definePlugin({
         },
         {
             find: "._areActivitiesExperimentallyHidden=(",
+            predicate: () => settings.store.memberList,
             replacement: {
                 match: /(?<=user:(\i),currentUser:\i,nick:)\i/,
                 replace: "$self.getUsername($1)"
             },
-            predicate: () => settings.store.memberList
         },
         {
             find: ".usernameSpeaking]",
@@ -93,6 +98,16 @@ export default definePlugin({
                 {
                     match: /(?<=children:\[null!=\i\?)\i(?=:\i\.\i\.getName\((\i)\))/,
                     replace: "$self.getUsername($1)"
+                },
+            ]
+        },
+        {
+            find: "#{intl::REACTION_TOOLTIP_1}",
+            predicate: () => settings.store.emojiReactions,
+            replacement: [
+                {
+                    match: /\i\.\i\.getName\(\i,null==.{0,15},(\i)\)/g,
+                    replace: "$self.getUsername($1),"
                 },
             ]
         },
