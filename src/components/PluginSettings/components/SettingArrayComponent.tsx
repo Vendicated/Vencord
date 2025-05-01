@@ -12,7 +12,9 @@ import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { OptionType, PluginOptionArray } from "@utils/types";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
 import {
+    Avatar,
     Button,
+    ChannelStore,
     Flex,
     Forms,
     GuildStore,
@@ -25,7 +27,7 @@ import {
     useState,
 } from "@webpack/common";
 import { SelectOption } from "@webpack/types";
-import { Guild } from "discord-types/general";
+import { Channel, Guild } from "discord-types/general";
 
 import { ISettingElementProps } from ".";
 
@@ -145,52 +147,75 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
         return icon != null ? <img className={cl("guild-icon")} src={icon} alt="" /> : null;
     };
 
-    function renderGuildView() {
-        const convertToSelectOption = (ids: Array<string>) => {
-            return ids.map(item => {
-                const guild = GuildStore.getGuild(item);
-                if (!guild) return null;
-                return {
-                    label: guild.name,
-                    value: guild.id,
-                };
-            }).filter(Boolean) as SelectOption[];
-        };
-
-        const [guilds, setGuilds] = useState<SelectOption[]>(() => convertToSelectOption(items));
-
-        const renderGuildIcon = (e: SelectOption) => {
-            if (!e || e.value === "" || e.label === e.value) return null;
-            return guildIcon(GuildStore.getGuild(e.value));
-        };
-
-        return <SearchableSelect
-            className={cl("guild-select")}
-            options={Object.values(GuildStore.getGuilds()).map(guild => ({
+    const convertToSelectOption = (ids: Array<string>) => {
+        const vals = option.type === OptionType.GUILDS ? ids.map(item => {
+            const guild = GuildStore.getGuild(item);
+            if (!guild) return null;
+            return {
                 label: guild.name,
                 value: guild.id,
-            }))}
+            };
+        }) : OptionType.CHANNELS ? ids.map(item => {
+            const channel = ChannelStore.getChannel(item);
+            if (!channel) return null;
+            return {
+                label: channel.name,
+                value: channel.id,
+            };
+        }) : ids.map(item => {
+            const user = UserStore.getUser(item);
+            if (!user) return null;
+            return {
+                label: user.username,
+                value: user.id,
+            };
+        });
+        return vals.filter(Boolean) as SelectOption[];
+    };
+
+    function renderSelect(icon: (arg: SelectOption) => React.JSX.Element | null, options: SelectOption[]) {
+        const type = option.type === OptionType.GUILDS ?
+            "guild" : OptionType.USERS ? "user" : "channel";
+
+        const [selected, setSelected] = useState<SelectOption[]>(() => convertToSelectOption(items));
+
+        return <SearchableSelect
+            className={cl(`${type}-select`)}
+            options={options}
             multi={true}
-            value={guilds}
+            value={selected}
             closeOnSelect={false}
-            placeholder="Search or select guilds..."
-            renderOptionPrefix={renderGuildIcon}
+            placeholder={`Search or select ${type}s...`}
+            renderOptionPrefix={icon}
             onChange={(selected: Array<SelectOption|string>) => {
+                // the latest clicked element is only provided as ID, not as SelectOption.
                 const clicked = selected.filter(e => typeof e === "string");
+                const cleanSelected = selected.filter(e => typeof e !== "string");
                 if (!items.includes(clicked[0])) {
                     setItems([...items, ...clicked]);
-                    setGuilds([...guilds, ...convertToSelectOption(clicked)]);
+                    setSelected([...cleanSelected, ...convertToSelectOption(clicked)]);
                 } else {
                     setItems(items.filter(i => i !== clicked[0]));
-                    setGuilds(guilds.filter(g => g.value !== clicked[0]));
+                    setSelected(cleanSelected.filter(o => o.value !== clicked[0]));
                 }
             }}
         />;
     }
 
-    function renderChannelView() {
-        return <></>;
+    function renderGuildView() {
+        const renderGuildIcon = (e: SelectOption) => {
+            if (!e || e.value === "" || e.label === e.value) return null;
+            return guildIcon(GuildStore.getGuild(e.value));
+        };
 
+        return renderSelect(renderGuildIcon, Object.values(GuildStore.getGuilds()).map(guild => ({
+            label: guild.name,
+            value: guild.id,
+        })));
+
+    }
+
+    function renderChannelView() {
         const getChannelSymbol = (type: number) => {
             switch (type) {
                 case 2:
@@ -225,163 +250,57 @@ export const SettingArrayComponent = ErrorBoundary.wrap(function SettingArrayCom
             }
         };
 
-        // const channels: Record<string, Channel[]> = {};
-        // const dmChannels: Channel[] = [];
-        // const elements: React.JSX.Element[] = [];
-        //
-        // // to not remove items while iterating
-        // const invalidChannels: string[] = [];
-        //
-        // for (const item of items) {
-        //     const channel = ChannelStore.getChannel(item);
-        //     if (!channel) {
-        //         invalidChannels.push(item);
-        //         continue;
-        //     }
-        //     if (channel.isDM() || channel.isGroupDM()) {
-        //         dmChannels.push(channel);
-        //         continue;
-        //     }
-        //     if (!channels[channel.guild_id]) {
-        //         channels[channel.guild_id] = [];
-        //     }
-        //     channels[channel.guild_id].push(channel);
-        // }
-        //
-        // for (const channel of invalidChannels) {
-        //     removeItem(channel);
-        // }
-        //
-        // const userMention = (channel: Channel) => {
-        //     return <UserMentionComponent
-        //         userId={channel.recipients[0]}
-        //         className="mention"
-        //     />;
-        // };
-        //
-        // const gdmComponent = (channel: Channel) => {
-        //     return <span style={{ display: "inline-flex", alignItems: "center" }}>
-        //         {channel.recipients.length >= 2 && channel.icon == null ? (
-        //             <GroupDMAvatars recipients={channel.recipients} size="SIZE_32" />
-        //         ) : (
-        //             <Avatar src={getDMChannelIcon(channel)} size="SIZE_32" />
-        //         )}
-        //         <TextInput
-        //             style={{ marginLeft: "4px" }}
-        //             value={channel.name}
-        //             disabled={true}
-        //         />
-        //     </span>;
-        // };
-        //
-        // let idx = -1;
-        //
-        // elements.push(
-        //     <details>
-        //         <summary style={{ color: "var(--text-normal)", marginBottom: "8px" }}>DMs</summary>
-        //         <div style={{ paddingLeft: "16px" }}>
-        //             {dmChannels.length > 0 && dmChannels.map(channel => {
-        //                 idx += 1;
-        //                 return <Flex
-        //                     flexDirection="row"
-        //                     key={idx}
-        //                     style={{
-        //                         gap: "1px",
-        //                         marginBottom: "8px",
-        //                     }}
-        //                 >
-        //                     {channel.recipients.length === 1 ? userMention(channel) : gdmComponent(channel)}
-        //                     {removeButton(channel.id)}
-        //                 </Flex>;
-        //             })}
-        //             <Flex
-        //                 flexDirection="row"
-        //                 style={{
-        //                     gap: "3px",
-        //                     marginBottom: "8px",
-        //                 }}>
-        //                 <TextInput
-        //                     placeholder={"Enter DM name or ID"}
-        //                     value={text}
-        //                     onChange={v => setText(v)}
-        //                 />
-        //                 <Button
-        //                     size={Button.Sizes.MIN}
-        //                     id={cl("add-button")}
-        //                     style={{ background: "none", color: "var(--text-normal)" }}
-        //                     onClick={() => {
-        //                         if (!isNaN(Number(text)) && text !== "") {
-        //                             setItems([...items, text]);
-        //                             setText("");
-        //                         }
-        //                         else {
-        //                             const found = Object.values(ChannelStore.getSortedPrivateChannels()).find(ch => {
-        //                                 if (ch.recipients.length === 1) return false;
-        //                                 return ch.name.toLowerCase().includes(text.toLowerCase());
-        //                             });
-        //                             if (!found) {
-        //                                 setError("User not found"); // FIXME open search modal with this text
-        //                             } else {
-        //                                 setItems([...items, found.id]);
-        //                                 setText("");
-        //                             }
-        //                         }
-        //                     }}
-        //                     disabled={text === "" || error != null}
-        //                     look={Button.Looks.BLANK}
-        //                 >
-        //                     <PlusIcon />
-        //                 </Button>
-        //             </Flex>
-        //         </div>
-        //     </details >
-        // );
-        //
-        // const guilds: { name: string; guild: React.JSX.Element }[] = [];
-        //
-        // Object.keys(channels).forEach(guildId => {
-        //     const guild = GuildStore.getGuild(guildId);
-        //     if (!guild) return;
-        //     guilds.push(
-        //         { name: guild.name, guild: (
-        //         <details>
-        //             {!guild ? <summary style={{ color: "var(--text-normal)", marginBottom: "8px" }}>{`Unknown Guild (${guildId})`}</summary> : (
-        //                 <summary style={{ color: "var(--text-normal)", marginBottom: "8px" }}>
-        //                     <span style={{ display: "inline-flex", alignItems: "center" }}>
-        //                         {guildIcon(guild)}
-        //                         <Text variant="text-sm/semibold" style={{ marginLeft: "4px" }}>{guild.name}</Text>
-        //                     </span>
-        //                 </summary>
-        //             )}
-        //             <div style={{ paddingLeft: "16px", color: "var(--text-normal)" }}>
-        //                 {channels[guildId].map(channel => {
-        //                     idx += 1;
-        //                     return <Flex
-        //                         flexDirection="row"
-        //                         key={idx}
-        //                         style={{
-        //                             gap: "1px",
-        //                             marginBottom: "8px"
-        //                         }}>
-        //                         <span style={{ display: "inline-flex", alignItems: "center" }}>
-        //                             {getChannelSymbol(channel.type)}
-        //                             <Text variant="text-sm/semibold" style={{ marginLeft: "4px" }}>{channel.name}</Text>
-        //                             {removeButton(channel.id)}
-        //                         </span>
-        //                     </Flex>;
-        //                 })}
-        //             </div>
-        //         </details>) }
-        //     );
-        // });
-        //
-        // guilds.sort((a, b) => a.name.localeCompare(b.name));
-        //
-        // for (const guild of guilds) {
-        //     elements.push(guild.guild);
-        // }
-        //
-        // return elements;
+        const channels: Record<string, Channel[]> = {};
+        const dmChannels: Channel[] = [];
+        const elements: React.JSX.Element[] = [];
+
+        // to not remove items while iterating
+        const invalidChannels: string[] = [];
+
+        for (const item of items) {
+            const channel = ChannelStore.getChannel(item);
+            if (!channel) {
+                invalidChannels.push(item);
+                continue;
+            }
+            if (channel.isDM() || channel.isGroupDM()) {
+                dmChannels.push(channel);
+                continue;
+            }
+            if (!channels[channel.guild_id]) {
+                channels[channel.guild_id] = [];
+            }
+            channels[channel.guild_id].push(channel);
+        }
+
+        for (const channel of invalidChannels) {
+            removeItem(channel);
+        }
+
+        const userMention = (channel: Channel) => {
+            return <UserMentionComponent
+                userId={channel.recipients[0]}
+                className="mention"
+            />;
+        };
+
+        const gdmComponent = (channel: Channel) => {
+            return <span style={{ display: "inline-flex", alignItems: "center" }}>
+                {channel.recipients.length >= 2 && channel.icon == null ? (
+                    <GroupDMAvatars recipients={channel.recipients} size="SIZE_32" />
+                ) : (
+                    <Avatar src={getDMChannelIcon(channel)} size="SIZE_32" />
+                )}
+                <TextInput
+                    style={{ marginLeft: "4px" }}
+                    value={channel.name}
+                    disabled={true}
+                />
+            </span>;
+        };
+
+
+        return elements;
     }
 
     return (
