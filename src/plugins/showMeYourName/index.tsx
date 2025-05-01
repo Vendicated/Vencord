@@ -50,16 +50,19 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
         description: "Show usernames in member list",
+        restartNeeded: true
     },
     voiceChannelList: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Show usernames in voice channel list",
+        restartNeeded: true
     },
     emojiReactions: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Show usernames in emoji reactions",
+        restartNeeded: true
     },
 });
 
