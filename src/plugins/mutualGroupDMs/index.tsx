@@ -33,7 +33,7 @@ const UserUtils = findByPropsLazy("getGlobalName");
 
 const ProfileListClasses = findByPropsLazy("emptyIconFriends", "emptyIconGuilds");
 const ExpandableList = findComponentByCodeLazy('"PRESS_SECTION"', ".header");
-const GuildLabelClasses = findByPropsLazy("guildNick", "guildAvatarWithoutIcon");
+const GuildLabelClasses = findByPropsLazy("nick", "details", "noIcon");
 
 function getGroupDMName(channel: Channel) {
     return channel.name ||
@@ -59,7 +59,7 @@ function renderClickableGDMs(mutualDms: Channel[], onClose: () => void) {
     return mutualDms.map(c => (
         <Clickable
             key={c.id}
-            className={ProfileListClasses.listRow}
+            className={GuildLabelClasses.row}
             onClick={() => {
                 onClose();
                 SelectedChannelActionCreators.selectPrivateChannel(c.id);
@@ -68,12 +68,12 @@ function renderClickableGDMs(mutualDms: Channel[], onClose: () => void) {
             <Avatar
                 src={IconUtils.getChannelIconURL({ id: c.id, icon: c.icon, size: 32 })}
                 size="SIZE_40"
-                className={ProfileListClasses.listAvatar}
+                className={GuildLabelClasses.icon}
             >
             </Avatar>
-            <div className={ProfileListClasses.listRowContent}>
-                <div className={ProfileListClasses.listName}>{getGroupDMName(c)}</div>
-                <div className={GuildLabelClasses.guildNick}>{c.recipients.length + 1} Members</div>
+            <div className={GuildLabelClasses.details}>
+                <div className={GuildLabelClasses.name}>{getGroupDMName(c)}</div>
+                <div className={GuildLabelClasses.nick}>{c.recipients.length + 1} Members</div>
             </div>
         </Clickable>
     ));
