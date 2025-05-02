@@ -166,7 +166,7 @@ function CloudTab() {
                             await authorizeCloud();
                         }}
                     >
-                        Reauthorise
+                        Reauthorize
                     </Button>
                     <Button
                         size={Button.Sizes.MEDIUM}
