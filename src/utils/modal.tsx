@@ -77,7 +77,6 @@ interface Modals {
     ModalContent: ComponentType<PropsWithChildren<{
         className?: string;
         scrollerRef?: Ref<HTMLElement>;
-        scrollbarType?: unknown;
         [prop: string]: any;
     }>>;
     ModalFooter: ComponentType<PropsWithChildren<{
