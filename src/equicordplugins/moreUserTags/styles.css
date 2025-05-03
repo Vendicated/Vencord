@@ -1,0 +1,20 @@
+.vc-mut-message-tag {
+    /* Remove default margin from tags in messages */
+    margin-top: unset !important;
+
+    /* Align with Discord default tags in messages */
+    position: relative;
+    bottom: 0.01em;
+}
+
+.vc-mut-message-verified {
+    height: 1rem !important;
+}
+
+span[class*="botTagCozy"][data-moreTags-darkFg="true"]>svg>path {
+    fill: #000;
+}
+
+span[class*="botTagCozy"][data-moreTags-darkFg="false"]>svg>path {
+    fill: #fff;
+}

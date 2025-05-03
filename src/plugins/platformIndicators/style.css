@@ -2,6 +2,20 @@
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    vertical-align: top;
+    gap: 2px;
+}
+
+.vc-platform-indicator-profile {
+    background: rgb(var(--bg-overlay-color) / var(--bg-overlay-opacity-6));
+    border: 1px solid var(--border-faint);
+    border-radius: var(--radius-xs);
+    border-color: var(--profile-body-border-color);
+    margin: 0 1px;
+    padding: 0 1px;
+}
+
+.vc-platform-indicator-message {
     position: relative;
+    vertical-align: top;
+    top: 2px;
 }

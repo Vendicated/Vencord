@@ -125,7 +125,14 @@ export default ErrorBoundary.wrap(function NotificationComponent({
                         </button>
                     </div>
                     <div>
-                        {renderBody ? richBody ?? <p className="toastnotifications-notification-p">{body}</p> : null}
+                        {renderBody ? (
+                            richBody ?? (
+                                <p className="toastnotifications-notification-p">
+                                    {body.length > 500 ? body.slice(0, 500) + "..." : body}
+                                </p>
+                            )
+                        ) : null}
+
                         {PluginSettings.store.renderImages && image && <img className="toastnotifications-notification-img" src={image} alt="ToastNotification Image" />}
                         {footer && <p className="toastnotifications-notification-footer">{`${attachments} attachment${attachments > 1 ? "s" : ""} ${attachments > 1 ? "were" : "was"} sent.`}</p>}
                     </div>

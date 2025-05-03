@@ -25,6 +25,7 @@ import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccesso
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendListener, removeMessageClickListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
+import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Logger } from "@utils/Logger";
@@ -96,7 +97,7 @@ function isReporterTestable(p: Plugin, part: ReporterTestable) {
 
 const pluginKeysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
     "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
-    "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton"
+    "renderChatBarButton", "renderMemberListDecorator", "renderNicknameIcon", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton"
 ];
 
 const neededApiPlugins = new Set<string>();
@@ -128,6 +129,7 @@ for (const p of pluginsValues) if (isPluginEnabled(p.name)) {
     if (p.onBeforeMessageEdit || p.onBeforeMessageSend || p.onMessageClick) neededApiPlugins.add("MessageEventsAPI");
     if (p.renderChatBarButton) neededApiPlugins.add("ChatInputButtonAPI");
     if (p.renderMemberListDecorator) neededApiPlugins.add("MemberListDecoratorsAPI");
+    if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
     if (p.renderMessageAccessory) neededApiPlugins.add("MessageAccessoriesAPI");
     if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
     if (p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
@@ -261,7 +263,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
+        renderChatBarButton, renderMemberListDecorator, renderNicknameIcon, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
     } = p;
 
     if (p.start) {
@@ -313,6 +315,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
     if (renderChatBarButton) addChatBarButton(name, renderChatBarButton);
     if (renderMemberListDecorator) addMemberListDecorator(name, renderMemberListDecorator);
+    if (renderNicknameIcon) addNicknameIcon(name, renderNicknameIcon);
     if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
     if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
@@ -324,7 +327,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     const {
         name, commands, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
+        renderChatBarButton, renderMemberListDecorator, renderNicknameIcon, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
     } = p;
 
     if (p.stop) {
@@ -374,6 +377,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
 
     if (renderChatBarButton) removeChatBarButton(name);
     if (renderMemberListDecorator) removeMemberListDecorator(name);
+    if (renderNicknameIcon) removeNicknameIcon(name);
     if (renderMessageDecoration) removeMessageDecoration(name);
     if (renderMessageAccessory) removeMessageAccessory(name);
     if (renderMessagePopoverButton) removeMessagePopoverButton(name);
