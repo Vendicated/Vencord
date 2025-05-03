@@ -64,7 +64,6 @@ function filterTreeWithTargetNode(children: any, predicate: (node: any) => boole
         return filterTreeWithTargetNode(children.props?.children, predicate);
     }
 
-
     let childIsTargetChild = false;
     for (let i = 0; i < children.length; i++) {
         const shouldKeep = filterTreeWithTargetNode(children[i], predicate);
