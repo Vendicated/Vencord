@@ -325,7 +325,7 @@ export default definePlugin({
             ]
         },
         {
-            find: '})},"overflow"))',
+            find: '="interactive-normal",overflowCountClassName:',
             replacement: [
                 {
                     // Create a variable for the channel prop
@@ -334,18 +334,21 @@ export default definePlugin({
                 },
                 {
                     // Make Discord always render the plus button if the component is used inside the HiddenChannelLockScreen
-                    match: /\i>0(?=&&.{0,60}renderPopout)/,
+                    match: /\i>0(?=&&.{0,30}Math.min)/,
                     replace: m => `($self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)?true:${m})`
                 },
                 {
-                    // Prevent Discord from overwriting the last children with the plus button if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
-                    match: /(?<=\.value\(\),(\i)=.+?length-)1(?=\]=.{0,60}renderPopout)/,
+                    // Prevent Discord from overwriting the last children with the plus button
+                    // if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
+                    match: /(?<=\i\.length-)1(?=\]=.{0,60}renderPopout)(?<=(\i)=\i\.length-\i.+?)/,
                     replace: (_, amount) => `($self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)&&${amount}<=0?0:1)`
                 },
                 {
-                    // Show only the plus text without overflowed children amount if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
-                    match: /(?<="\+",)(\i)\+1/,
-                    replace: (m, amount) => `$self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)&&${amount}<=0?"":${m}`
+                    // Show only the plus text without overflowed children amount
+                    // if the overflow amount is <= 0 and the component is used inside the HiddenChannelLockScreen
+                    match: /(?<="\+"\.concat\()\i/,
+                    replace: overflowTextAmount => "" +
+                        `$self.isHiddenChannel(typeof shcChannel!=="undefined"?shcChannel:void 0,true)&&(${overflowTextAmount}-1)<=0?"":${overflowTextAmount}`
                 }
             ]
         },
