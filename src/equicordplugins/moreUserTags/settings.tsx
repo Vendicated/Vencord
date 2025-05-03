@@ -14,6 +14,7 @@ import { TagSettings } from "./types";
 
 function SettingsComponent() {
     const tagSettings = settings.store.tagSettings as TagSettings;
+    const { localTags } = Vencord.Plugins.plugins.MoreUserTags as any;
 
     return (
         <Flex flexDirection="column">
@@ -26,7 +27,7 @@ function SettingsComponent() {
                                     onMouseEnter={onMouseEnter}
                                     onMouseLeave={onMouseLeave}
                                 >
-                                    {t.displayName} Tag <Tag type={Tag.Types[t.name]} />
+                                    {t.displayName} Tag <Tag type={localTags[t.name]}></Tag>
                                 </div>
                             )}
                         </Tooltip>

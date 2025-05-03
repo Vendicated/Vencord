@@ -85,31 +85,26 @@ const settings = definePluginSettings({
                 maxLength = autoMaxLength();
         },
     },
-
     disableFileConversion: {
         type: OptionType.BOOLEAN,
         description: "If true, disables file conversion for large messages.",
         default: true,
     },
-
     sendDelay: {
         type: OptionType.SLIDER,
         description: "Delay between each chunk in seconds.",
         default: 1,
         markers: [1, 2, 3, 5, 10],
     },
-
     hardSplit: {
         type: OptionType.BOOLEAN,
         description: "If true, splits on the last character instead of the last space/newline.",
         default: false,
     },
-
     splitInSlowmode: {
         type: OptionType.BOOLEAN,
         description: "Should messages be split if the channel has slowmode enabled?",
     },
-
     slowmodeMax: {
         type: OptionType.NUMBER,
         description: "Maximum slowmode time if splitting in slowmode.",
@@ -127,8 +122,7 @@ export default definePlugin({
     settings,
 
     start() {
-        if (settings.store.maxLength === 0)
-            maxLength = autoMaxLength();
+        if (settings.store.maxLength === 0) maxLength = autoMaxLength();
         addMessagePreSendListener(listener);
     },
 
