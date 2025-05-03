@@ -213,9 +213,9 @@ function updateColorVars(color: string) {
     }`;
 }
 
-function createStyleSheet(id, content = "") {
+function createStyleSheet(id: string, content = "") {
     const style = document.createElement("style");
-    style.setAttribute("id", id);
+    style.id = id;
     style.textContent = content.split("\n").map(line => line.trim()).join("\n");
     document.body.appendChild(style);
     return style;
