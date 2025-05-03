@@ -203,7 +203,7 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
                         }}
                         width={`${box.width * zoom.current}px`}
                         height={`${box.height * zoom.current}px`}
-                        src={instance.props.src}
+                        src={instance.props.src + "?animated=true"}
                         alt=""
                     />
                 )}
